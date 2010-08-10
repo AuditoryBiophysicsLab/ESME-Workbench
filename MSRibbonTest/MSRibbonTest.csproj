@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ExpressionBlendVersion>4.0.20421.0</ExpressionBlendVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1cd6e800-1d60-405a-bf80-f9cae2e411e2}</ProjectGuid>
+    <ProjectGuid>{1CD6E800-1D60-405A-BF80-F9CAE2E411E2}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <DefaultClrNameSpace>MSRibbonTest</DefaultClrNameSpace>
@@ -144,6 +144,9 @@
     <Resource Include="Images\SmallIcons\System-Registry-icon.png" />
     <Resource Include="Images\SmallIcons\Text-Bubble-icon.png" />
     <Resource Include="Images\SmallIcons\web-V2-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Application.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

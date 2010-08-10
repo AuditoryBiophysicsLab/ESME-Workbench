@@ -13,7 +13,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ribbon:Ribbon x:Name="Ribbon">
+        <ribbon:Ribbon x:Name="Ribbon" SelectedIndex="2">
             <ribbon:Ribbon.ApplicationMenu>
                 <ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png">
                     <ribbon:RibbonApplicationMenuItem Header="Save Experiment"
@@ -38,44 +38,57 @@
                                                            ImageSource="Images\LargeIcons\about-icon.png"/>
                 </ribbon:RibbonApplicationMenu>
             </ribbon:Ribbon.ApplicationMenu>
+			<ribbon:RibbonTab Header="Scenario">
+				<ribbon:RibbonGroup Header="Utility">
+                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
+										 SmallImageSource="Images\SmallIcons\AddFile.png"
+                                         Label="Scenario Builder" />
+				</ribbon:RibbonGroup>
+			</ribbon:RibbonTab>
+			<ribbon:RibbonTab Header="Environment">
+				
+			</ribbon:RibbonTab>
             <ribbon:RibbonTab Header="Experiment">
                 <ribbon:RibbonGroup Header="Scenario">
                     <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
 										 SmallImageSource="Images\SmallIcons\AddFile.png"
-                                         Label="Load Scenario" />
+                                         Label="Load" />
                     <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\AddFile.png"
-                                         Label="Edit Scenario" />
+                                         Label="Edit" />
                     <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
-                                         Label="Run Scenario" />
+                                         Label="Run" />
                 </ribbon:RibbonGroup>
                 <ribbon:RibbonGroup Header="Display">
                     <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
                                          SmallImageSource="Images\SmallIcons\AddFile.png"
-                                         Label="Add Overlay" />
+                                         Label="Overlay" />
                     <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Layers-icon.png"
-                                         Label="Add Shapefile" />
+                                         Label="Shapefile" />
                     <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Layers-icon.png"
-                                         Label="Add Other GIS file" />
+                                         Label="Other GIS files" />
 				</ribbon:RibbonGroup>
                 <ribbon:RibbonGroup Header="Sounds">
                     <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\bullet-2-icon.png"
                                          SmallImageSource="Images\SmallIcons\bullet-2-icon.png"
-                                         Label="Add Analysis Point" />
+                                         Label="Analysis Point" />
                     <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Sound.png"
-                                         Label="Add Static Sound Source" />
+                                         Label="Fixed Source" />
                     <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
-                                         Label="Run Acoustic Simulator" />
+                                         Label="Run Simulator" />
 				</ribbon:RibbonGroup>
                 <ribbon:RibbonGroup Header="Animals">
                     <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\Dolphin.png"
                                          SmallImageSource="Images\SmallIcons\Dolphin.png"
-                                         Label="Add Animal Density Shapefile" />
+                                         Label="Population Densities" />
                     <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Dolphin.png"
-                                         Label="Add Individual Animal" />
+                                         Label="Single Animal" />
                     <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
-                                         Label="Run Animal Movement Simulator" />
+                                         Label="Run Simulator" />
 				</ribbon:RibbonGroup>
             </ribbon:RibbonTab>
+            <ribbon:RibbonTab Header="Animals"/>
+            <ribbon:RibbonTab Header="Utilities"/>
+            <ribbon:RibbonTab Header="Reports"/>
         </ribbon:Ribbon> 
         
     </Grid>
