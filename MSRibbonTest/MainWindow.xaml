@@ -1,0 +1,82 @@
+﻿<ribbon:RibbonWindow x:Class="MSRibbonTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ribbon="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
+		SnapsToDevicePixels="True"
+        Title="ESME WorkBench"
+		x:Name="MainView"
+		Width="1000" Height="600">
+
+	<Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ribbon:Ribbon x:Name="Ribbon">
+            <ribbon:Ribbon.ApplicationMenu>
+                <ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png">
+                    <ribbon:RibbonApplicationMenuItem Header="Save Experiment"
+													  CanAddToQuickAccessToolBarDirectly="True"
+													  Icon="Images\SmallIcons\save-icon.png"
+                                                      ImageSource="Images\LargeIcons\save-icon.png"/>
+                    <ribbon:RibbonApplicationMenuItem Header="Open Experiment"
+													  CanAddToQuickAccessToolBarDirectly="True"
+													  Icon="Images\SmallIcons\open-icon.png"
+                                                      ImageSource="Images\LargeIcons\open-icon.png"/>
+                    <ribbon:RibbonApplicationMenuItem Header="Close Experiment"
+													  CanAddToQuickAccessToolBarDirectly="True"
+													  Icon="Images\SmallIcons\close-icon.png"
+                                                      ImageSource="Images\LargeIcons\close-icon.png"/>
+                    <ribbon:RibbonApplicationMenuItem Header="New Experiment"
+													  CanAddToQuickAccessToolBarDirectly="True"
+													  Icon="Images\SmallIcons\new-icon.png"
+                                                      ImageSource="Images\LargeIcons\new-icon.png"/>
+                    <ribbon:RibbonApplicationSplitMenuItem Header="Info"
+													  	   CanAddToQuickAccessToolBarDirectly="True"
+													       Icon="Images\SmallIcons\about-icon.png"
+                                                           ImageSource="Images\LargeIcons\about-icon.png"/>
+                </ribbon:RibbonApplicationMenu>
+            </ribbon:Ribbon.ApplicationMenu>
+            <ribbon:RibbonTab Header="Experiment">
+                <ribbon:RibbonGroup Header="Scenario">
+                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
+										 SmallImageSource="Images\SmallIcons\AddFile.png"
+                                         Label="Load Scenario" />
+                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\AddFile.png"
+                                         Label="Edit Scenario" />
+                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
+                                         Label="Run Scenario" />
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup Header="Display">
+                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
+                                         SmallImageSource="Images\SmallIcons\AddFile.png"
+                                         Label="Add Overlay" />
+                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Layers-icon.png"
+                                         Label="Add Shapefile" />
+                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Layers-icon.png"
+                                         Label="Add Other GIS file" />
+				</ribbon:RibbonGroup>
+                <ribbon:RibbonGroup Header="Sounds">
+                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\bullet-2-icon.png"
+                                         SmallImageSource="Images\SmallIcons\bullet-2-icon.png"
+                                         Label="Add Analysis Point" />
+                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Sound.png"
+                                         Label="Add Static Sound Source" />
+                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
+                                         Label="Run Acoustic Simulator" />
+				</ribbon:RibbonGroup>
+                <ribbon:RibbonGroup Header="Animals">
+                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\Dolphin.png"
+                                         SmallImageSource="Images\SmallIcons\Dolphin.png"
+                                         Label="Add Animal Density Shapefile" />
+                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Dolphin.png"
+                                         Label="Add Individual Animal" />
+                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
+                                         Label="Run Animal Movement Simulator" />
+				</ribbon:RibbonGroup>
+            </ribbon:RibbonTab>
+        </ribbon:Ribbon> 
+        
+    </Grid>
+</ribbon:RibbonWindow>
