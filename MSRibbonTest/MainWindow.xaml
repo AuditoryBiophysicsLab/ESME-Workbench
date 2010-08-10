@@ -7,13 +7,8 @@
 		x:Name="MainView"
 		Width="1000" Height="600">
 
-	<Grid x:Name="LayoutRoot">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <ribbon:Ribbon x:Name="Ribbon" SelectedIndex="1">
+	<DockPanel LastChildFill="True">
+        <ribbon:Ribbon x:Name="Ribbon" SelectedIndex="0" DockPanel.Dock="Top">
             <ribbon:Ribbon.ApplicationMenu>
                 <ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png">
                     <ribbon:RibbonApplicationMenuItem Header="Save Experiment"
@@ -158,7 +153,11 @@
 				</ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
             <ribbon:RibbonTab Header="Reports"/>
-        </ribbon:Ribbon> 
-        
-    </Grid>
+        </ribbon:Ribbon>
+		<Image Width="Auto" Height="Auto" DockPanel.Dock="Bottom">
+			<Image.Source>
+				<BitmapImage UriSource="World Map.jpg" />
+			</Image.Source>
+		</Image>
+    </DockPanel>
 </ribbon:RibbonWindow>
