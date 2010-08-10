@@ -13,7 +13,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ribbon:Ribbon x:Name="Ribbon" SelectedIndex="2">
+        <ribbon:Ribbon x:Name="Ribbon" SelectedIndex="1">
             <ribbon:Ribbon.ApplicationMenu>
                 <ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png">
                     <ribbon:RibbonApplicationMenuItem Header="Save Experiment"
@@ -38,56 +38,125 @@
                                                            ImageSource="Images\LargeIcons\about-icon.png"/>
                 </ribbon:RibbonApplicationMenu>
             </ribbon:Ribbon.ApplicationMenu>
+			<ribbon:RibbonTab Header="Experiment">
+            	<ribbon:RibbonGroup Header="Scenario">
+            		<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
+            			SmallImageSource="Images\SmallIcons\AddFile.png"
+            			Label="Load" />
+            		<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\AddFile.png"
+            			Label="Edit" />
+            		<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
+										IsEnabled="False"
+            			Label="Run" />
+            	</ribbon:RibbonGroup>
+            	<ribbon:RibbonGroup Header="Display">
+            		<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
+            			SmallImageSource="Images\SmallIcons\AddFile.png"
+            			Label="Overlay" />
+            		<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Layers-icon.png"
+					LargeImageSource="Images\LargeIcons\Layers-icon.png"
+            			Label="Shapefile" />
+            		<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Layers-icon.png"
+            			Label="Other GIS files" />
+            	</ribbon:RibbonGroup>
+            	<ribbon:RibbonGroup Header="Sounds">
+            		<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\bullet-2-icon.png"
+            			SmallImageSource="Images\SmallIcons\bullet-2-icon.png"
+            			Label="Analysis Point" />
+            		<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Sound.png"
+            			Label="Fixed Source" />
+            		<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
+            			Label="Quick Look" 
+						ToolTip="Run the acoustic simulator to compute transmission loss field"/>
+            	</ribbon:RibbonGroup>
+            </ribbon:RibbonTab>
 			<ribbon:RibbonTab Header="Scenario">
-				<ribbon:RibbonGroup Header="Utility">
+				<ribbon:RibbonGroup Header="Scenario File">
+                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\open-icon.png"
+										 SmallImageSource="Images\SmallIcons\open-icon.png"
+                                         Label="Open" />
+                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\close-icon.png"
+										 SmallImageSource="Images\SmallIcons\close-icon.png"
+                                         Label="Close" />
                     <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
 										 SmallImageSource="Images\SmallIcons\AddFile.png"
-                                         Label="Scenario Builder" />
+                                         Label="Edit" />
 				</ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
 			<ribbon:RibbonTab Header="Environment">
-				
-			</ribbon:RibbonTab>
-            <ribbon:RibbonTab Header="Experiment">
-                <ribbon:RibbonGroup Header="Scenario">
+				<ribbon:RibbonGroup Header="Location">
+                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\open-icon.png"
+										 SmallImageSource="Images\SmallIcons\open-icon.png"
+                                         Label="Open" />
                     <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
 										 SmallImageSource="Images\SmallIcons\AddFile.png"
-                                         Label="Load" />
-                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\AddFile.png"
                                          Label="Edit" />
-                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
-                                         Label="Run" />
-                </ribbon:RibbonGroup>
-                <ribbon:RibbonGroup Header="Display">
-                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
-                                         SmallImageSource="Images\SmallIcons\AddFile.png"
-                                         Label="Overlay" />
-                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Layers-icon.png"
-                                         Label="Shapefile" />
-                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Layers-icon.png"
-                                         Label="Other GIS files" />
+				</ribbon:RibbonGroup>				
+				<ribbon:RibbonGroup Header="Layers">
+					<ribbon:RibbonComboBox Label="Select Layer" />
+                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\open-icon.png"
+                                         Label="Properties" />
+				</ribbon:RibbonGroup>				
+			</ribbon:RibbonTab>
+            <ribbon:RibbonTab Header="Animals">
+            	<ribbon:RibbonGroup Header="Species">
+            		<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\Dolphin.png"
+            			SmallImageSource="Images\SmallIcons\Dolphin.png"
+            			Label="Add Species" />
+					<ribbon:RibbonButton ToolTip="Previous" 
+										 SmallImageSource="Images\SmallIcons\Button-Previous-icon.png"/>
+					<ribbon:RibbonButton ToolTip="Next" 
+  										 SmallImageSource="Images\SmallIcons\Button-Next-icon.png"/>
+					<ribbon:RibbonButton ToolTip="Delete"
+  										 SmallImageSource="Images\SmallIcons\Button-Delete-icon.png"/>
+					<ribbon:RibbonButton ToolTip="Filter"
+  										 SmallImageSource="Images\SmallIcons\SmallIcon.png"/>
+            	</ribbon:RibbonGroup>
+            	<ribbon:RibbonGroup Header="Individual Animals">
+            		<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\Dolphin.png"
+            			SmallImageSource="Images\SmallIcons\Dolphin.png"
+            			Label="Add Animal" />
+					<ribbon:RibbonButton ToolTip="Previous" 
+										 SmallImageSource="Images\SmallIcons\Button-Previous-icon.png"/>
+					<ribbon:RibbonButton ToolTip="Next" 
+  										 SmallImageSource="Images\SmallIcons\Button-Next-icon.png"/>
+					<ribbon:RibbonButton ToolTip="Delete"
+  										 SmallImageSource="Images\SmallIcons\Button-Delete-icon.png"/>
+					<ribbon:RibbonButton ToolTip="Filter"
+  										 SmallImageSource="Images\SmallIcons\SmallIcon.png"/>
 				</ribbon:RibbonGroup>
-                <ribbon:RibbonGroup Header="Sounds">
-                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\bullet-2-icon.png"
-                                         SmallImageSource="Images\SmallIcons\bullet-2-icon.png"
-                                         Label="Analysis Point" />
-                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Sound.png"
-                                         Label="Fixed Source" />
-                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
-                                         Label="Run Simulator" />
+            	<ribbon:RibbonGroup Header="Simulator">
+            		<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
+						LargeImageSource="Images\LargeIcons\Button-Play-icon.png"
+            			Label="Run Simulator" />
 				</ribbon:RibbonGroup>
-                <ribbon:RibbonGroup Header="Animals">
-                    <ribbon:RibbonButton LargeImageSource="Images\LargeIcons\Dolphin.png"
-                                         SmallImageSource="Images\SmallIcons\Dolphin.png"
-                                         Label="Population Densities" />
-                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Dolphin.png"
-                                         Label="Single Animal" />
-                    <ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
-                                         Label="Run Simulator" />
+			</ribbon:RibbonTab>
+            <ribbon:RibbonTab Header="Acoustics">
+            	<ribbon:RibbonGroup Header="Simulator">
+            		<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
+						LargeImageSource="Images\LargeIcons\Button-Play-icon.png"
+            			Label="Run Simulator" 
+						ToolTip="Run the acoustic simulator to compute transmission loss field"/>
 				</ribbon:RibbonGroup>
-            </ribbon:RibbonTab>
-            <ribbon:RibbonTab Header="Animals"/>
-            <ribbon:RibbonTab Header="Utilities"/>
+				<ribbon:RibbonGroup Header="Analysis Points">
+					<ribbon:RibbonButton Label="Add" />
+					<ribbon:RibbonButton Label="Properties" />
+					<ribbon:RibbonButton Label="Previous" />
+					<ribbon:RibbonButton Label="Next" />
+					<ribbon:RibbonButton Label="Delete" />
+					<ribbon:RibbonButton Label="Filter" />
+				</ribbon:RibbonGroup>
+				<ribbon:RibbonGroup Header="Modes">
+					<ribbon:RibbonButton Label="Add" />
+					<ribbon:RibbonButton Label="Properties" />
+					<ribbon:RibbonButton Label="Previous" />
+					<ribbon:RibbonButton Label="Next " />
+					<ribbon:RibbonButton Label="Delete" />
+					<ribbon:RibbonButton Label="Vertical Plot" />
+					<ribbon:RibbonButton Label="Horizontal Plot" />
+					
+				</ribbon:RibbonGroup>
+			</ribbon:RibbonTab>
             <ribbon:RibbonTab Header="Reports"/>
         </ribbon:Ribbon> 
         
