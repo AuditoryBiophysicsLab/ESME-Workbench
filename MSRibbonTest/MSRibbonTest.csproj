@@ -74,9 +74,9 @@
     <None Include="Application.ico">
       <Visible>false</Visible>
     </None>
-    <None Include="World Map.jpg">
+    <Resource Include="World Map.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Resource>
     <Resource Include="Images\LargeIcons\about-icon.png" />
     <Resource Include="Images\LargeIcons\AddFile.png" />
     <Resource Include="Images\LargeIcons\AddShapeFile.png" />
