@@ -13,7 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Windows.Controls.Ribbon;
 
-namespace MSRibbonTest
+namespace ESMERibbonDemo
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
