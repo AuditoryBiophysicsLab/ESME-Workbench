@@ -1,26 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="03e8707c-d090-4d46-a624-f804052c838d" Name="Setup" Language="1033" Version="1.0.0.0" Manufacturer="Setup" UpgradeCode="86012809-ea2c-4952-90f1-df1f24f06fa1">
-		<Package InstallerVersion="200" Compressed="yes" />
-
+  <!-- Product Id="03e8707c-d090-4d46-a624-f804052c838d" Name="SetupMSRibbonTest" Language="1033" Version="1.0.0.0" Manufacturer="Setup" UpgradeCode="86012809-ea2c-4952-90f1-df1f24f06fa1" -->
+  <Product Id="03e8707c-d090-4d46-a624-f804052c838d" Name="ESME Ribbon Demo" Language="1033" Version="1.0.0.0" Manufacturer="Boston University" UpgradeCode="86012809-ea2c-4952-90f1-df1f24f06fa1">
+  <Package Id="*" InstallerVersion="200" Compressed="yes" Keywords="Installer" Description="ESME Ribbon Demo Installer" Manufacturer="Boston University" />
+  <!-- Note: There is no GUID for the Package in the default WiX Votive Project.  Maybe okay, but WIX Tutorial used Id="*" -->
+    
 		<Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
 
 		<Directory Id="TARGETDIR" Name="SourceDir">
 			<Directory Id="ProgramFilesFolder">
-				<Directory Id="INSTALLLOCATION" Name="Setup">
-					<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
-					<!-- <Component Id="ProductComponent" Guid="1aa35d46-b3c5-4a06-bc84-e1d9641c56fa"> -->
-						<!-- TODO: Insert files, registry keys, and other resources here. -->
-					<!-- </Component> -->
-				</Directory>
-			</Directory>
-		</Directory>
+        <!-- <Directory Id="ManufacturerFolder" Name="BostonUniversity"> -->
+          <Directory Id="INSTALLLOCATION" Name="ESME Ribbon Demo">
 
-		<Feature Id="ProductFeature" Title="Setup" Level="1">
+            <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+            <!-- <Component Id="ProductComponent" Guid="1aa35d46-b3c5-4a06-bc84-e1d9641c56fa"> -->
+            <!-- TODO: Insert files, registry keys, and other resources here. -->
+            <!-- </Component> -->
+
+            <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+					  <Component Id="ESMERibbonDemoEXEComponent" Guid="1aa35d46-b3c5-4a06-bc84-e1d9641c56fa">
+						  <!-- TODO: Insert files, registry keys, and other resources here. -->
+              <File Id="ESMERibbonDemoEXE" Name="ESMERibbonDemo.exe" Source="C:\Projects\ExpressionBlend\ESMERibbonDemo\ESMERibbonDemo\bin\Release\ESMERibbonDemo.exe" KeyPath="yes">
+                <Shortcut Id="startmenuESMERibbonDemo" Directory="ProgramMenuDir" Name="ESME Ribbon Demo" Advertise="yes" />
+                <Shortcut Id="DesktopESMERibbonDemo" Directory="DesktopFolder" Name="ESME Ribbon Demo" Advertise="yes" />
+                <!-- <Shortcut Id="startmenuMSRibbonTest" Directory="ProgramMenuDir" Name="MSRibbonTest" WorkingDirectory="C:\Projects\ExpressionBlend\MSRibbonTest\MSRibbonTest\bin\Debug" Advertise="yes" /> -->
+                <!-- <Shortcut Id="DesktopMSRibbonTest" Directory="DesktopFolder" Name="MSRibbonTest" WorkingDirectory="C:\Projects\ExpressionBlend\MSRibbonTest\MSRibbonTest\bin\Debug" Advertise="yes" /> -->
+                <!-- <Shortcut Id="startmenuMSRibbonTest" Directory="ProgramMenuDir" Name="MSRibbonTest" WorkingDirectory='INSTALLDIR' Advertise="yes" /> -->
+                <!-- <Shortcut Id="DesktopMSRibbonTest" Directory="DesktopFolder" Name="MSRibbonTest" WorkingDirectory='INSTALLDIR' Advertise="yes" /> -->
+              </File>
+            </Component>
+
+            <Component Id="MicrosoftWindowsShellDLLComponent" Guid="*">
+              <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ExpressionBlend\ESMERibbonDemo\ESMERibbonDemo\bin\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" />
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+            </Component>
+
+            <Component Id="MicrosoftWindowsShellXMLComponent" Guid="*">
+              <File Id="MicrosoftWindowsShellXML" Name="Microsoft.Windows.Shell.xml" Source="C:\Projects\ExpressionBlend\ESMERibbonDemo\ESMERibbonDemo\bin\Release\Microsoft.Windows.Shell.xml" KeyPath="yes" />
+              <!-- <File Id="MicrosoftWindowsShellXML" Name="Microsoft.Windows.Shell.xml" Source="Microsoft.Windows.Shell.xml" KeyPath="yes" /> -->
+            </Component>
+
+            <Component Id="RibbonControlsLibraryDLLComponent" Guid="*">
+              <File Id="RibbonControlsLibraryDLL" Name="RibbonControlsLibrary.dll" Source="C:\Projects\ExpressionBlend\ESMERibbonDemo\ESMERibbonDemo\bin\Release\RibbonControlsLibrary.dll" KeyPath="yes" />
+              <!-- <File Id="RibbonControlsLibraryDLL" Name="RibbonControlsLibrary.dll" Source="RibbonControlsLibrary.dll" KeyPath="yes" /> -->
+            </Component>
+
+            <Component Id="RibbonControlsLibraryXMLComponent" Guid="*">
+              <File Id="RibbonControlsLibraryXML" Name="RibbonControlsLibrary.xml" Source="C:\Projects\ExpressionBlend\ESMERibbonDemo\ESMERibbonDemo\bin\Release\RibbonControlsLibrary.xml" KeyPath="yes" />
+             <!--  <File Id="RibbonControlsLibraryXML" Name="RibbonControlsLibrary.xml" Source="RibbonControlsLibrary.xml" KeyPath="yes" /> -->
+            </Component>
+
+          </Directory>
+			  </Directory>
+      <!--  </Directory> -->     <!-- Close ManufacturerFolder Directory -->
+
+    <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="ESME Ribbon Demo">
+          <Component Id="ProgramMenuDir" Guid="*">
+            <RemoveFolder Id='ProgramMenuDir' On='uninstall' />
+            <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Type='string' Value='' KeyPath='yes' />
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="DesktopFolder" Name="Desktop" />
+
+    </Directory>
+
+
+    <Feature Id="ProductFeature" Title="ESME Ribbon Demo" Level="1">
 			<!-- TODO: Remove the comments around this ComponentRef element and the Component above in order to add resources to this installer. -->
 			<!-- <ComponentRef Id="ProductComponent" /> -->
-			
-			<!-- Note: The following ComponentGroupRef is required to pull in generated authoring from project references. -->
+
+      <ComponentRef Id="ESMERibbonDemoEXEComponent" />
+      <ComponentRef Id="MicrosoftWindowsShellDLLComponent" />
+      <ComponentRef Id="MicrosoftWindowsShellXMLComponent" />
+      <ComponentRef Id="RibbonControlsLibraryDLLComponent" />
+      <ComponentRef Id="RibbonControlsLibraryXMLComponent" />
+      <ComponentRef Id="ProgramMenuDir" />
+
+      <!-- TODO: Remove the comments around this ComponentRef element and the Component above in order to add resources to this installer. -->
+      <!-- <ComponentRef Id="ProductComponent" /> -->
+
+      <!-- Note: The following ComponentGroupRef is required to pull in generated authoring from project references. -->
 			<ComponentGroupRef Id="Product.Generated" />
 		</Feature>
 	</Product>
