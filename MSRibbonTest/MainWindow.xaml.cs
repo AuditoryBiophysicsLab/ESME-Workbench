@@ -3,11 +3,7 @@ using Microsoft.Windows.Controls.Ribbon;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
-<<<<<<< .mine
-namespace ESME.View
-=======
 namespace ESMERibbonDemo
->>>>>>> .r1384
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
@@ -21,6 +17,7 @@ namespace ESMERibbonDemo
 			// Insert code required on object creation below this point.
 		}
 
+#if false
  	    private void MapLoaded(object sender, RoutedEventArgs e)
 		{
 			Map1.MapUnit = GeographyUnit.DecimalDegree;
@@ -64,6 +61,6 @@ namespace ESMERibbonDemo
 
 			Map1.Refresh();
 		}
-	}
-
+#endif
+    }
 }

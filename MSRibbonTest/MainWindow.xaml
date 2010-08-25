@@ -1,13 +1,12 @@
-<<<<<<< .mine
-﻿<ribbon:RibbonWindow x:Class="ESME.View.MainWindow"
+﻿<ribbon:RibbonWindow x:Class="ESMERibbonDemo.MainWindow"
 					 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 					 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					 xmlns:ribbon="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
 					 xmlns:uc1="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition"
 					 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-					 xmlns:rvm="clr-namespace:ESME.View.ViewModels.Ribbon"
-					 xmlns:lvm="clr-namespace:ESME.View.ViewModels.Layers" 
-					 xmlns:mvm="clr-namespace:ESME.View.ViewModels.Main" 
+					 xmlns:rvm="clr-namespace:ESMERibbonDemo.ViewModels.Ribbon"
+					 xmlns:lvm="clr-namespace:ESMERibbonDemo.ViewModels.Layers" 
+					 xmlns:mvm="clr-namespace:ESMERibbonDemo.ViewModels.Main" 
 					 mef:ViewModelLocator.ViewModel="MainViewModel"
 					 SnapsToDevicePixels="True"
 					 Title="ESME WorkBench"
@@ -43,16 +42,6 @@
 				</Trigger>
 			</Style.Triggers>
 		</Style>
-=======
-﻿<ribbon:RibbonWindow x:Class="ESMERibbonDemo.MainWindow"
-		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-		xmlns:ribbon="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
-		SnapsToDevicePixels="True"
-		Title="ESME WorkBench"
-		x:Name="MainView"
-		Width="1000" Height="668">
->>>>>>> .r1384
 
 		<!-- RibbonGroup -->
 		<Style TargetType="{x:Type ribbon:RibbonGroup}"  BasedOn="{StaticResource RibbonControlStyle}">
