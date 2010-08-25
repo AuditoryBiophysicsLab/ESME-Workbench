@@ -1,4 +1,8 @@
+<<<<<<< .mine
+﻿<Application x:Class="ESME.View.App"
+=======
 ﻿<Application x:Class="ESMERibbonDemo.App"
+>>>>>>> .r1384
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
