@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Windows.Input;
 
-namespace ESME.View.ViewModels.Ribbon
+namespace ESMERibbonDemo.ViewModels.Ribbon
 {
     public class ControlData : INotifyPropertyChanged
     {

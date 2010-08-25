@@ -1,4 +1,4 @@
-﻿namespace ESME.View.ViewModels.Layers
+﻿namespace ESMERibbonDemo.ViewModels.Layers
 {
 #if false
     public class RadarRasterSource : GdiPlusRasterSource

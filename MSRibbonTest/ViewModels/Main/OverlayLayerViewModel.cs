@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Cinch;
+﻿using Cinch;
 
-namespace ESME.View.ViewModels.Layers
+namespace ESMERibbonDemo.ViewModels.Main
 {
     public class OverlayLayerViewModel : ViewModelBase
     {

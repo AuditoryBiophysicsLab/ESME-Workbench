@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Collections.ObjectModel;
 
-namespace ESME.View.ViewModels.Ribbon
+namespace ESMERibbonDemo.ViewModels.Ribbon
 {
     public class ContextualTabGroupData : INotifyPropertyChanged
     {

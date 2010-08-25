@@ -1,4 +1,4 @@
-﻿namespace ESME.View.ViewModels.Ribbon
+﻿namespace ESMERibbonDemo.ViewModels.Ribbon
 {
     public class ApplicationSplitMenuItemData : SplitMenuItemData
     {

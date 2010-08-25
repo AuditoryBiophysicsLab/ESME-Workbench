@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using Microsoft.Windows.Input;
 
-namespace ESME.View.ViewModels.Ribbon
+namespace ESMERibbonDemo.ViewModels.Ribbon
 {
     /// <summary>
     ///     This class allows delegating the commanding logic to methods passed as parameters,
@@ -49,6 +49,29 @@ namespace ESME.View.ViewModels.Ribbon
         #region Public Methods
 
         /// <summary>
+        ///     Property to enable or disable CommandManager's automatic requery on this command
+        /// </summary>
+        public bool IsAutomaticRequeryDisabled
+        {
+            get { return _isAutomaticRequeryDisabled; }
+            set
+            {
+                if (_isAutomaticRequeryDisabled != value)
+                {
+                    if (value)
+                    {
+                        CommandManagerHelper.RemoveHandlersFromRequerySuggested(_canExecuteChangedHandlers);
+                    }
+                    else
+                    {
+                        CommandManagerHelper.AddHandlersToRequerySuggested(_canExecuteChangedHandlers);
+                    }
+                    _isAutomaticRequeryDisabled = value;
+                }
+            }
+        }
+
+        /// <summary>
         ///     Method to determine if the command can be executed
         /// </summary>
         public bool CanExecute()
@@ -68,32 +91,6 @@ namespace ESME.View.ViewModels.Ribbon
             if (_executeMethod != null)
             {
                 _executeMethod();
-            }
-        }
-
-        /// <summary>
-        ///     Property to enable or disable CommandManager's automatic requery on this command
-        /// </summary>
-        public bool IsAutomaticRequeryDisabled
-        {
-            get
-            {
-                return _isAutomaticRequeryDisabled;
-            }
-            set
-            {
-                if (_isAutomaticRequeryDisabled != value)
-                {
-                    if (value)
-                    {
-                        CommandManagerHelper.RemoveHandlersFromRequerySuggested(_canExecuteChangedHandlers);
-                    }
-                    else
-                    {
-                        CommandManagerHelper.AddHandlersToRequerySuggested(_canExecuteChangedHandlers);
-                    }
-                    _isAutomaticRequeryDisabled = value;
-                }
             }
         }
 
@@ -154,22 +151,40 @@ namespace ESME.View.ViewModels.Ribbon
 
         #region Data
 
-        private readonly Action _executeMethod = null;
-        private readonly Func<bool> _canExecuteMethod = null;
-        private bool _isAutomaticRequeryDisabled = false;
+        private readonly Func<bool> _canExecuteMethod;
+        private readonly Action _executeMethod;
         private List<WeakReference> _canExecuteChangedHandlers;
+        private bool _isAutomaticRequeryDisabled;
 
         #endregion
     }
 
     public class PreviewDelegateCommand : DelegateCommand, IPreviewCommand
     {
-        public PreviewDelegateCommand(Action executeMethod, Func<bool> canExecuteMethod, Action previewMethod, Action cancelPreviewMethod)
+        private readonly Action _cancelPreview;
+        private readonly Action _preview;
+
+        public PreviewDelegateCommand(Action executeMethod, Func<bool> canExecuteMethod, Action previewMethod,
+                                      Action cancelPreviewMethod)
             : base(executeMethod, canExecuteMethod)
         {
             _preview = previewMethod;
             _cancelPreview = cancelPreviewMethod;
         }
+
+        #region IPreviewCommand Members
+
+        void IPreviewCommand.Preview(object parameter)
+        {
+            Preview();
+        }
+
+        void IPreviewCommand.CancelPreview()
+        {
+            CancelPreview();
+        }
+
+        #endregion
 
         /// <summary>
         ///     Preview of the command
@@ -192,19 +207,6 @@ namespace ESME.View.ViewModels.Ribbon
                 _cancelPreview();
             }
         }
-
-        void IPreviewCommand.Preview(object parameter)
-        {
-            Preview();
-        }
-
-        void IPreviewCommand.CancelPreview()
-        {
-            CancelPreview();
-        }
-
-        Action _preview;
-        Action _cancelPreview;
     }
 
     /// <summary>
@@ -252,6 +254,29 @@ namespace ESME.View.ViewModels.Ribbon
         #region Public Methods
 
         /// <summary>
+        ///     Property to enable or disable CommandManager's automatic requery on this command
+        /// </summary>
+        public bool IsAutomaticRequeryDisabled
+        {
+            get { return _isAutomaticRequeryDisabled; }
+            set
+            {
+                if (_isAutomaticRequeryDisabled != value)
+                {
+                    if (value)
+                    {
+                        CommandManagerHelper.RemoveHandlersFromRequerySuggested(_canExecuteChangedHandlers);
+                    }
+                    else
+                    {
+                        CommandManagerHelper.AddHandlersToRequerySuggested(_canExecuteChangedHandlers);
+                    }
+                    _isAutomaticRequeryDisabled = value;
+                }
+            }
+        }
+
+        /// <summary>
         ///     Method to determine if the command can be executed
         /// </summary>
         public bool CanExecute(T parameter)
@@ -290,32 +315,6 @@ namespace ESME.View.ViewModels.Ribbon
             CommandManagerHelper.CallWeakReferenceHandlers(_canExecuteChangedHandlers);
         }
 
-        /// <summary>
-        ///     Property to enable or disable CommandManager's automatic requery on this command
-        /// </summary>
-        public bool IsAutomaticRequeryDisabled
-        {
-            get
-            {
-                return _isAutomaticRequeryDisabled;
-            }
-            set
-            {
-                if (_isAutomaticRequeryDisabled != value)
-                {
-                    if (value)
-                    {
-                        CommandManagerHelper.RemoveHandlersFromRequerySuggested(_canExecuteChangedHandlers);
-                    }
-                    else
-                    {
-                        CommandManagerHelper.AddHandlersToRequerySuggested(_canExecuteChangedHandlers);
-                    }
-                    _isAutomaticRequeryDisabled = value;
-                }
-            }
-        }
-
         #endregion
 
         #region ICommand Members
@@ -349,38 +348,56 @@ namespace ESME.View.ViewModels.Ribbon
             // set yet, then return false if CanExecute delegate
             // exists, else return true
             if (parameter == null &&
-                typeof(T).IsValueType)
+                typeof (T).IsValueType)
             {
                 return true;
             }
-            return CanExecute((T)parameter);
+            return CanExecute((T) parameter);
         }
 
         void ICommand.Execute(object parameter)
         {
-            Execute((T)parameter);
+            Execute((T) parameter);
         }
 
         #endregion
 
         #region Data
 
-        private readonly Action<T> _executeMethod = null;
-        private readonly Func<T, bool> _canExecuteMethod = null;
-        private bool _isAutomaticRequeryDisabled = false;
+        private readonly Func<T, bool> _canExecuteMethod;
+        private readonly Action<T> _executeMethod;
         private List<WeakReference> _canExecuteChangedHandlers;
+        private bool _isAutomaticRequeryDisabled;
 
         #endregion
     }
 
     public class PreviewDelegateCommand<T> : DelegateCommand<T>, IPreviewCommand
     {
-        public PreviewDelegateCommand(Action<T> executeMethod, Func<T, bool> canExecuteMethod, Action<T> previewMethod, Action cancelPreviewMethod)
+        private readonly Action _cancelPreview;
+        private readonly Action<T> _preview;
+
+        public PreviewDelegateCommand(Action<T> executeMethod, Func<T, bool> canExecuteMethod, Action<T> previewMethod,
+                                      Action cancelPreviewMethod)
             : base(executeMethod, canExecuteMethod)
         {
             _preview = previewMethod;
             _cancelPreview = cancelPreviewMethod;
         }
+
+        #region IPreviewCommand Members
+
+        void IPreviewCommand.Preview(object parameter)
+        {
+            Preview((T) parameter);
+        }
+
+        void IPreviewCommand.CancelPreview()
+        {
+            CancelPreview();
+        }
+
+        #endregion
 
         /// <summary>
         ///     Preview of the command
@@ -403,19 +420,6 @@ namespace ESME.View.ViewModels.Ribbon
                 _cancelPreview();
             }
         }
-
-        void IPreviewCommand.Preview(object parameter)
-        {
-            Preview((T)parameter);
-        }
-
-        void IPreviewCommand.CancelPreview()
-        {
-            CancelPreview();
-        }
-
-        Action<T> _preview;
-        Action _cancelPreview;
     }
 
     /// <summary>
@@ -431,13 +435,13 @@ namespace ESME.View.ViewModels.Ribbon
                 // Take a snapshot of the handlers before we call out to them since the handlers
                 // could cause the array to me modified while we are reading it.
 
-                EventHandler[] callees = new EventHandler[handlers.Count];
+                var callees = new EventHandler[handlers.Count];
                 int count = 0;
 
                 for (int i = handlers.Count - 1; i >= 0; i--)
                 {
                     WeakReference reference = handlers[i];
-                    EventHandler handler = reference.Target as EventHandler;
+                    var handler = reference.Target as EventHandler;
                     if (handler == null)
                     {
                         // Clean up old handlers that have been collected
@@ -465,7 +469,7 @@ namespace ESME.View.ViewModels.Ribbon
             {
                 foreach (WeakReference handlerRef in handlers)
                 {
-                    EventHandler handler = handlerRef.Target as EventHandler;
+                    var handler = handlerRef.Target as EventHandler;
                     if (handler != null)
                     {
                         CommandManager.RequerySuggested += handler;
@@ -480,7 +484,7 @@ namespace ESME.View.ViewModels.Ribbon
             {
                 foreach (WeakReference handlerRef in handlers)
                 {
-                    EventHandler handler = handlerRef.Target as EventHandler;
+                    var handler = handlerRef.Target as EventHandler;
                     if (handler != null)
                     {
                         CommandManager.RequerySuggested -= handler;
@@ -494,7 +498,8 @@ namespace ESME.View.ViewModels.Ribbon
             AddWeakReferenceHandler(ref handlers, handler, -1);
         }
 
-        internal static void AddWeakReferenceHandler(ref List<WeakReference> handlers, EventHandler handler, int defaultListSize)
+        internal static void AddWeakReferenceHandler(ref List<WeakReference> handlers, EventHandler handler,
+                                                     int defaultListSize)
         {
             if (handlers == null)
             {
@@ -511,7 +516,7 @@ namespace ESME.View.ViewModels.Ribbon
                 for (int i = handlers.Count - 1; i >= 0; i--)
                 {
                     WeakReference reference = handlers[i];
-                    EventHandler existingHandler = reference.Target as EventHandler;
+                    var existingHandler = reference.Target as EventHandler;
                     if ((existingHandler == null) || (existingHandler == handler))
                     {
                         // Clean up old handlers that have been collected

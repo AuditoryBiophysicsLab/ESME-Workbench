@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace ESME.View.ViewModels.Ribbon
+namespace ESMERibbonDemo.ViewModels.Ribbon
 {
     public class ToggleButtonData : ControlData
     {
