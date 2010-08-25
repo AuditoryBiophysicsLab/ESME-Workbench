@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using Cinch;
 using System.Reflection;
 
-<<<<<<< .mine
-namespace ESME.View
-=======
 namespace ESMERibbonDemo
->>>>>>> .r1384
 {
     /// <summary>
     /// Interaction logic for App.xaml
