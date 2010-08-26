@@ -296,25 +296,13 @@
                         <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Overlay File (*.ovr)]}"/>
                         <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Scenario File (*.nemo)]}"/>
                     </ribbon:RibbonMenuButton>
-					<ribbon:RibbonSplitButton LargeImageSource="Images\LargeIcons\System-Map-icon.png"
-											  SmallImageSource="Images\SmallIcons\System-Map-icon.png"
-											  Label="Pan/Zoom Control">
-						<ribbon:RibbonMenuItem Header="Visibility">
-							<ribbon:RibbonMenuItem Header="Visible"
-												   Command="{Binding PanZoomVisibleCommand}"
-												   IsChecked="{Binding PanZoomVisibleCommand.IsChecked}"/>
-							<ribbon:RibbonMenuItem Header="Hidden"
-												   IsChecked="False" />
-						</ribbon:RibbonMenuItem>
-						<ribbon:RibbonMenuItem Header="Top Left"
-											   IsChecked="True" />
-						<ribbon:RibbonMenuItem Header="Top Right"
-											   IsChecked="False" />
-						<ribbon:RibbonMenuItem Header="Bottom Left"
-											   IsChecked="False" />
-						<ribbon:RibbonMenuItem Header="Bottom Right"
-											   IsChecked="False" />
-					</ribbon:RibbonSplitButton>
+                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Pan/Zoom Control]}">
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Visible]}"/>
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Upper Left]}"/>
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Upper Right]}"/>
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Lower Left]}"/>
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Lower Right]}"/>
+                    </ribbon:RibbonMenuButton>
 				</ribbon:RibbonGroup>
 				<ribbon:RibbonGroup Header="Sounds">
 					<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\bullet-2-icon.png"

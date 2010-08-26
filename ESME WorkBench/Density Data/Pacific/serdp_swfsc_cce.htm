@@ -1,0 +1,1029 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <title>Predictive Models of Cetacean Densities in the California Current Ecosystem</title>
+  <link rel="schema.dc" href="http://purl.org/metadata/dublin_core"/>
+  <meta name="dc.title" content="Predictive Models of Cetacean Densities in the California Current Ecosystem "/>
+  <meta name="dc.creator" content="NOAA Southwest Fisheries Science Center "/>
+  <meta name="dc.subject" content="REQUIRED: Common-use word or phrase used to describe the subject of the data set. "/>
+  <meta name="dc.description" content="We use data from 16 ship-based cetacean and ecosystem assessment surveys to develop habitat models to predict density for 15 cetacean species in the ETP and for 12 cetacean species in the California Current Ecosystem (CCE). All data were collected by NOAA&rsquo;s Southwest Fisheries Science Center (SWFSC) from 1986-2006 using accepted, peer-reviewed survey methods. Data include over 17,000 sightings of cetacean groups on transects covering over 400,000 km. The expected number of groups seen per transect segment and the expected size of groups were modeled separately as functions of habitat variables. Model predictions were then used in standard line-transect formulae to estimate density for each transect segment for each survey year. Predicted densities for each year were smoothed with geospatial methods to obtain a continuous grid of density estimates for the surveyed area. These annual grids were then averaged to obtain a composite grid that represents our best estimates of cetacean density over the past 20 years in the ETP and the past 15 years in the CCE. Many methodological choices were required for every aspect of this modeling. In completing this project, we explored as many of these choices as possible and used the choices that resulted in the best predictive models. To evaluate predictive power, we used cross-validation (leaving out one survey year and predicting densities for that year with models built using only the other years). Data from the two most recent surveys (2005 in the CCE and 2006 in the ETP) were used for this model validation step. We explored three modeling approaches to predict cetacean densities from habitat variables: Generalized Linear Models (GLMs) with polynomials, Generalized Additive Models (GAMs) with nonparametric smoothing functions, and Regression Trees. Within the category of GAMs, we tested and compared several software implementations. In summary, we found that Regression Trees could not deal effectively with the large number of transect segments containing zero sightings. GLMs and GAMs both performed well and differences between the models built using these methods were typically small. Different GAM implementations also gave similar, but not identical results. We chose the GAM framework to build our best-and-final models. In some cases, only the linear terms were selected, making them equivalent to GLMs. We explored the effects of two aspects of sampling scale (resolution and extent) on our cetacean density models. To explore the effect of resolution, we sampled transect segments on scales ranging from 2 to 120 km. We found that differences in segment lengths within this range had virtually no effect on our models in the ETP, but that scale affected the models for some species in the CCE where habitats are more geographically variable. For our best-and-final models, we accommodated this regional scale difference by using a longer segment length in the ETP (10 km) than in the CCE (5 km). To explore the effect of extent, we constructed models using data from the ETP and CCE separately and for the two ecosystems combined. We found that the best predictive models were based on data from only one ecosystem; therefore, all our best-and-final models are specific to either the CCE or the ETP. We explored five methods of interpolating oceanographic measurements to obtain continuous grids of our in situ oceanographic habitat variables. Cross-validation of the interpolations gave similar results for all methods. Ordinary kriging was chosen as our preferred method because it is widely used and because, qualitatively, it did not produce unrealistic &ldquo;bull&rsquo;s eyes&rdquo; in the continuous grids. We explored the use of CCE oceanographic habitat data from two available sources: in situ measurements collected during cetacean surveys and remotely sensed measurements from satellites. Only sea surface temperature (SST) and measures of its variance were available from remotely sensed sources, whereas the in situ measurements also included sea surface salinity, surface chlorophyll and vertical properties of the water-column. We conducted a comparison of the predictive ability of models built using in situ, remotely sensed, or combined data and found that the combined models typically resulted in the best density predictions for a novel year of data. In our best-and-final CCE models we therefore used the combination of in situ and remotely sensed data that gave the best predictive power. In some years, in situ data also included net tows and acoustic backscatter. We explored whether indices of &ldquo;mid-trophic&rdquo; species abundance derived from these sources improved the predictive power of our models. The plankton and small nekton (mid-trophic level species) sampled by these methods are likely to include cetacean prey and were therefore expected to be closely correlated with cetacean abundance. We tested the predictive power of models built with 1) only physical oceanographic and chlorophyll data, 2) only net-tow indices, 3) only acoustic backscatter indices, or 4) the optimal combination of all three in situ data sources. We found that models for some species were improved by using mid-trophic measures of their habitat, but the improvement was marginal in most cases. Although the results look promising, our best-and-final models do not include indices of mid-trophic species abundance because acoustic backscatter was measured on too few surveys. We explored the effect of seasonality on our models using aerial survey data collected in February and March of 1991 and 1992. Due to logistic constraints, our ship survey data are limited to summer and fall seasons, corresponding to the &ldquo;warm-season&rdquo; for cetaceans in the CCE. Although some data in winter and spring (the &ldquo;cold-season&rdquo;) are available from aerial surveys in California, these data are too sparse to develop habitat models. We therefore tested whether models built from data collected during multiple warm seasons could be use to predict density patterns in the cold season. We used the 1991-92 aerial surveys to test these predictions. Although the warm-season models were able to predict cold-season density patterns for some species, they could not do so reliably, because some of the cold-season habitat variables were outside the range of values used to build the models. Furthermore, the two available years of cold-season data did not include a full range of inter-annual variation in winter oceanographic conditions. An additional complication is that some cetaceans found in the CCE during the warm season are migratory and nearly absent in the cold season. For these reasons, our best-and-final models based on warm-season data in the CCE should not be used to predict cetacean densities for the cold season. Our best-and-final models for the CCE and the ETP have been incorporated into a web-based GIS software system developed by Duke University&rsquo;s SERDP Team in close collaboration with our SWFSC SERDP Team. The web site (&lt;http://serdp.env.duke.edu/&gt;) is currently hosted at Duke University but needs to be transitioned to a permanent home. The software, called the Spatial Decision Support System (SDSS), allows the user to view our model outputs as color-coded maps of cetacean density as well as maps that depict the precision of the models (expressed as point-wise standard errors and log-normal 90% confidence intervals). The user can pan and zoom to their area of interest. To obtain quantitative information about cetacean densities, including the coefficients of variation, the user can define a specific operational area either by 1) choosing one from a pull-down menu, 2) uploading a shape file defining that area, or 3) interactively choosing perimeter points. Density estimates for a user-selected area are produced along with estimates of their uncertainty. Although our models include most of the species found in the CCE and the ETP, sample sizes were too small to model density for rarely seen species. Additionally, we could not develop models for the cold season in the CCE or for areas around the Hawaiian Islands due to data limitations. To provide the best available density estimates for these data-limited cases, we have included stratified estimates of density from traditional line-transect analyses in the SDSS where available: cold-season estimates from aerial surveys off California, estimates from ship surveys in the US EEZ around Hawaii, and estimates for rarely seen species found in the CCE and the ETP. "/>
+  <meta name="dc.publisher" content="REQUIRED: The organization responsible for the metadata information."/>
+  <meta name="dc.contributor" content="Barlow, Jay, Megan C. Ferguson, Elizabeth A. Becker, Jessica V. Redfern, Karin A. Forney, Ignacio L. Vilchis, Paul C. Fiedler, Tim Gerrodette, Lisa T. Ballance. 2009. Final Technical Report: PREDICTIVE MODELING OF CETACEAN DENSITIES IN THE EASTERN PACIFIC OCEAN (SI-1391). Prepared for the U.S. Department of Defense, Strategic Environmental Research and Development Program By the U.S. Department of Commerce, NOAA Fisheries, Southwest Fisheries Science Center. "/>
+  <meta name="dc.date" content="May, 2009"/>
+  <meta name="dc.type" content="data.vector digital data"/>
+  <meta name="dc.identifier" content="http://seamap.env.duke.edu"/>
+  <meta name="dc.source" content="Downloadable Data"/>
+  <meta name="dc.lang" content="en"/>
+  <meta name="dc.coverage.x.min" scheme="DD" content="-131.000000"/>
+  <meta name="dc.coverage.x.max" scheme="DD" content="-117.128600"/>
+  <meta name="dc.coverage.y.min" scheme="DD" content="30.050000"/>
+  <meta name="dc.coverage.y.max" scheme="DD" content="48.506100"/>
+  <meta name="dc.rights" content="Access constraints: REQUIRED: Restrictions and legal prerequisites for accessing the data set.; Use constraints: REQUIRED: Restrictions and legal prerequisites for using the data set after access is granted."/>
+  <meta name="generated-from" content="c:\docume~1\bbest\locals~1\temp\1\export0.xml"/>
+</head>
+<body>
+<h1>Predictive Models of Cetacean Densities in the California Current Ecosystem</h1>
+Metadata also available as<p>
+<h1>Metadata:</h1>
+<ul>
+<li><a href="#1">Identification_Information</a></li>
+<li><a href="#2">Spatial_Data_Organization_Information</a></li>
+<li><a href="#3">Spatial_Reference_Information</a></li>
+<li><a href="#4">Entity_and_Attribute_Information</a></li>
+<li><a href="#5">Distribution_Information</a></li>
+<li><a href="#6">Metadata_Reference_Information</a></li>
+</ul>
+<a name="1">
+</a>
+<hr/>
+<dl>
+<dt><em>Identification_Information:</em>  
+<dd>
+<dl>
+<dt><em>Citation:</em>  
+<dd>
+<dl>
+<dt><em>Citation_Information:</em>  
+<dd>
+<dl>
+<dt><em>Originator:</em>  NOAA Southwest Fisheries Science Center</dt>
+<dt><em>Publication_Date:</em>  May, 2009</dt>
+<dt><em>Title:</em>  
+<dd>
+
+Predictive Models of Cetacean Densities in the California Current Ecosystem
+
+</dd>
+<dt><em>Geospatial_Data_Presentation_Form:</em>  vector digital data</dt>
+<dt><em>Online_Linkage:</em>  <a href="http://seamap.env.duke.edu">&lt;http://seamap.env.duke.edu&gt;</a></dt>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><em>Description:</em>  
+<dd>
+<dl>
+<dt><em>Abstract:</em>  
+<dd>
+
+We use data from 16 ship-based cetacean and ecosystem assessment surveys to develop habitat models to predict density for 15 cetacean species in the ETP and for 12 cetacean species in the California Current Ecosystem (CCE). All data were collected by NOAA&rsquo;s Southwest Fisheries Science Center (SWFSC) from 1986-2006 using accepted, peer-reviewed survey methods. Data include over 17,000 sightings of cetacean groups on transects covering over 400,000 km. The expected number of groups seen per transect segment and the expected size of groups were modeled separately as functions of habitat variables. Model predictions were then used in standard line-transect formulae to estimate density for each transect segment for each survey year. Predicted densities for each year were smoothed with geospatial methods to obtain a continuous grid of density estimates for the surveyed area. These annual grids were then averaged to obtain a composite grid that represents our best estimates of cetacean density over the past 20 years in the ETP and the past 15 years in the CCE. Many methodological choices were required for every aspect of this modeling. In completing this project, we explored as many of these choices as possible and used the choices that resulted in the best predictive models. To evaluate predictive power, we used cross-validation (leaving out one survey year and predicting densities for that year with models built using only the other years). Data from the two most recent surveys (2005 in the CCE and 2006 in the ETP) were used for this model validation step.
+We explored three modeling approaches to predict cetacean densities from habitat variables: Generalized Linear Models (GLMs) with polynomials, Generalized Additive Models (GAMs) with nonparametric smoothing functions, and Regression Trees. Within the category of GAMs, we tested and compared several software implementations. In summary, we found that Regression Trees could not deal effectively with the large number of transect segments containing zero sightings. GLMs and GAMs both performed well and differences between the models built using these methods were typically small. Different GAM implementations also gave similar, but not identical results. We chose the GAM framework to build our best-and-final models. In some cases, only the linear terms were selected, making them equivalent to GLMs.
+We explored the effects of two aspects of sampling scale (resolution and extent) on our cetacean density models. To explore the effect of resolution, we sampled transect segments on scales ranging from 2 to 120 km. We found that differences in segment lengths within this range had virtually no effect on our models in the ETP, but that scale affected the models for some species in the CCE where habitats are more geographically variable. For our best-and-final models, we accommodated this regional scale difference by using a longer segment length in the ETP (10 km) than in the CCE (5 km). To explore the effect of extent, we constructed models using data from the ETP and CCE separately and for the two ecosystems combined. We found that the best predictive models were based on data from only one ecosystem; therefore, all our best-and-final models are specific to either the CCE or the ETP.
+We explored five methods of interpolating oceanographic measurements to obtain continuous grids of our in situ oceanographic habitat variables. Cross-validation of the interpolations gave similar results for all methods. Ordinary kriging was chosen as our preferred method because it is widely used and because, qualitatively, it did not produce unrealistic &ldquo;bull&rsquo;s eyes&rdquo; in the continuous grids.
+We explored the use of CCE oceanographic habitat data from two available sources: in situ measurements collected during cetacean surveys and remotely sensed measurements from satellites. Only sea surface temperature (SST) and measures of its variance were available from remotely sensed sources, whereas the in situ measurements also included sea surface salinity, surface chlorophyll and vertical properties of the water-column. We conducted a comparison of the predictive ability of models built using in situ, remotely sensed, or combined data and found that the combined models typically resulted in the best density predictions for a novel year of data. In our best-and-final CCE models we therefore used the combination of in situ and remotely sensed data that gave the best predictive power.
+In some years, in situ data also included net tows and acoustic backscatter. We explored whether indices of &ldquo;mid-trophic&rdquo; species abundance derived from these sources improved the predictive power of our models. The plankton and small nekton (mid-trophic level species) sampled by these methods are likely to include cetacean prey and were therefore expected to be closely correlated with cetacean abundance. We tested the predictive power of models built with 1) only physical oceanographic and chlorophyll data, 2) only net-tow indices, 3) only acoustic backscatter indices, or 4) the optimal combination of all three in situ data sources. We found that models for some species were improved by using mid-trophic measures of their habitat, but the improvement was marginal in most cases. Although the results look promising, our best-and-final models do not include indices of mid-trophic species abundance because acoustic backscatter was measured on too few surveys.
+We explored the effect of seasonality on our models using aerial survey data collected in February and March of 1991 and 1992. Due to logistic constraints, our ship survey data are limited to summer and fall seasons, corresponding to the &ldquo;warm-season&rdquo; for cetaceans in the CCE. Although some data in winter and spring (the &ldquo;cold-season&rdquo;) are available from aerial surveys in California, these data are too sparse to develop habitat models. We therefore tested whether models built from data collected during multiple warm seasons could be use to predict density patterns in the cold season. We used the 1991-92 aerial surveys to test these predictions. Although the warm-season models were able to predict cold-season density patterns for some species, they could not do so reliably, because some of the cold-season habitat variables were outside the range of values used to build the models. Furthermore, the two available years of cold-season data did not include a full range of inter-annual variation in winter oceanographic conditions. An additional complication is that some cetaceans found in the CCE during the warm season are migratory and nearly absent in the cold season. For these reasons, our best-and-final models based on warm-season data in the CCE should not be used to predict cetacean densities for the cold season.
+Our best-and-final models for the CCE and the ETP have been incorporated into a web-based GIS software system developed by Duke University&rsquo;s SERDP Team in close collaboration with our SWFSC SERDP Team. The web site (&lt;<a href="http://serdp.env.duke.edu/">http://serdp.env.duke.edu/</a>&gt;) is currently hosted at Duke University but needs to be transitioned to a permanent home. The software, called the Spatial Decision Support System (SDSS), allows the user to view our model outputs as color-coded maps of cetacean density as well as maps that depict the precision of the models (expressed as point-wise standard errors and log-normal 90% confidence intervals). The user can pan and zoom to their area of interest. To obtain quantitative information about cetacean densities, including the coefficients of variation, the user can define a specific operational area either by 1) choosing one from a pull-down menu, 2) uploading a shape file defining that area, or 3) interactively choosing perimeter points. Density estimates for a user-selected area are produced along with estimates of their uncertainty.
+Although our models include most of the species found in the CCE and the ETP, sample sizes were too small to model density for rarely seen species. Additionally, we could not develop models for the cold season in the CCE or for areas around the Hawaiian Islands due to data limitations. To provide the best available density estimates for these data-limited cases, we have included stratified estimates of density from traditional line-transect analyses in the SDSS where available: cold-season estimates from aerial surveys off California, estimates from ship surveys in the US EEZ around Hawaii, and estimates for rarely seen species found in the CCE and the ETP.
+
+</dd>
+<dt><em>Purpose:</em>  
+<dd>
+
+The Navy and other users of the marine environment conduct many activities that can potentially harm marine mammals. Consequently, these entities are required to complete Environmental Assessments and Environmental Impact Statements to determine the likely impact of their activities. Specifically, those documents require an estimate of the number of animals that might be harmed or disturbed. A key element of this estimation is knowledge of cetacean (whale, dolphin, and porpoise) densities in specific areas where those activities will occur.
+Cetacean densities are typically estimated by line-transect surveys. Within United States Exclusive Economic Zone (US EEZ) waters and in the Eastern Tropical Pacific (ETP), most cetacean surveys have been conducted by the US National Marine Fisheries Service as part of their stock assessment research and typically result in estimates of cetacean densities in very large geographic strata (e.g., the entire US West Coast). Although estimates are sometimes available for smaller strata (e.g., the waters off southern California), these areas are still much larger than the operational areas where impacts may occur (e.g., the Navy&rsquo;s Southern California Offshore Range (SCORE) off San Clemente Island). Stratification methods cannot provide accurate density estimates for small areas because sample size (i.e., the number of cetacean sightings) becomes limiting as areas become smaller. Recently, habitat modeling has been developed as a method to estimate cetacean densities. These models allow predictions of cetacean densities on a finer spatial scale than traditional line-transect analyses because cetacean densities are estimated as a continuous function of habitat variables (i.e., sea surface temperature, seafloor depth, distance from shore, prey density, etc.). Cetacean densities can then be predicted wherever these habitat variables can be measured or estimated, within the area that was modeled.
+The transition of our research to operational use by the Navy was facilitated throughout our project through a series of workshops conducted with potential Navy users. These workshops ensured that the SDSS would meet Navy user needs. The on-line SDSS web site will ensure continued availability of the density estimates from our models and will be available for use by Navy planners within a month of the completion of this report. The SDSS will, however, be just the first step in the transition to general usage. Although Duke University is willing to host the web site in the short term, a permanent site is needed with base-funded, long-term support. Because the models and software have utility to a much greater user community than just the Navy or other branches of the military, the software might be best maintained by NOAA. In addition to maintenance of the web site, the models themselves need to be maintained to incorporate new survey data. Furthermore, there is a need to expand the models to include more areas (e.g., Hawaii), different seasons (e.g., the cold-season in the CCE), migration patterns (e.g., baleen whales), and additional species (e.g., pinnipeds). Recent advances in processing and integrating remotely sensed data, ocean circulation models, buoy data, ship reports, and animal tagging data may offer new approaches to improving models in the future. There is also a need to obtain buy-in from the regulatory agencies (primarily NOAA) for the use of these models as the &ldquo;best available&rdquo; estimates of cetacean density in environmental compliance documents. This buy-in can best be achieved by educating the staff in NOAA Headquarters and Regional Offices on the use of, and scientific justification for, model-based estimates. The maintenance and improvement of our SDSS for cetaceans might be best achieved by a long-term partnership between Navy and NOAA.
+
+</dd>
+<dt><em>Supplemental_Information:</em>  
+<dd>
+
+This report was prepared under contract to the Department of Defense Strategic Environmental Research and Development Program (SERDP). The publication of this report does not indicate endorsement by the Department of Defense, nor should the contents be construed as reflecting the official policy or position of the Department of Defense. Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise, does not necessarily constitute or imply its endorsement, recommendation, or favoring by the Department of Defense.
+
+</dd>
+</dl>
+</dd>
+<dt><em>Time_Period_of_Content:</em>  
+<dd>
+<dl>
+<dt><em>Time_Period_Information:</em>  
+<dd>
+<dl>
+<dt><em>Single_Date/Time:</em>  
+<dd>
+<dl>
+<dt><em>Calendar_Date:</em>  May, 2009</dt>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><em>Currentness_Reference:</em>  publication date</dt>
+</dl>
+</dd>
+<dt><em>Status:</em>  
+<dd>
+<dl>
+<dt><em>Progress:</em>  Complete</dt>
+<dt><em>Maintenance_and_Update_Frequency:</em>  None planned</dt>
+</dl>
+</dd>
+<dt><em>Spatial_Domain:</em>  
+<dd>
+<dl>
+<dt><em>Bounding_Coordinates:</em>  
+<dd>
+<dl>
+<dt><em>West_Bounding_Coordinate:</em>  -131.000000</dt>
+<dt><em>East_Bounding_Coordinate:</em>  -117.128600</dt>
+<dt><em>North_Bounding_Coordinate:</em>  48.506100</dt>
+<dt><em>South_Bounding_Coordinate:</em>  30.050000</dt>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><em>Keywords:</em>  
+<dd>
+<dl>
+<dt><em>Theme:</em>  
+<dd>
+<dl>
+<dt><em>Theme_Keyword_Thesaurus:</em>  
+<dd>
+
+REQUIRED: Reference to a formally registered thesaurus or a similar authoritative source of theme keywords.
+
+</dd>
+<dt><em>Theme_Keyword:</em>  
+<dd>
+
+REQUIRED: Common-use word or phrase used to describe the subject of the data set.
+
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><em>Access_Constraints:</em>  
+<dd>
+
+REQUIRED: Restrictions and legal prerequisites for accessing the data set.
+
+</dd>
+<dt><em>Use_Constraints:</em>  
+<dd>
+
+REQUIRED: Restrictions and legal prerequisites for using the data set after access is granted.
+
+</dd>
+<dt><em>Data_Set_Credit:</em>  
+<dd>
+
+Barlow, Jay, Megan C. Ferguson, Elizabeth A. Becker, Jessica V. Redfern, Karin A. Forney, Ignacio L. Vilchis, Paul C. Fiedler, Tim Gerrodette, Lisa T. Ballance. 2009. Final Technical Report: PREDICTIVE MODELING OF CETACEAN DENSITIES IN THE EASTERN PACIFIC OCEAN (SI-1391). Prepared for the U.S. Department of Defense, Strategic Environmental Research and Development Program By the U.S. Department of Commerce, NOAA Fisheries, Southwest Fisheries Science Center.
+
+</dd>
+<dt><em>Native_Data_Set_Environment:</em>  
+<dd>
+
+Microsoft Windows 2000 Version 5.2 (Build 3790) Service Pack 2; ESRI ArcCatalog 9.3.1.3000
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+<a name="2">
+</a>
+<hr/>
+<dl>
+<dt><em>Spatial_Data_Organization_Information:</em>  
+<dd>
+<dl>
+<dt><em>Direct_Spatial_Reference_Method:</em>  Vector</dt>
+<dt><em>Point_and_Vector_Object_Information:</em>  
+<dd>
+<dl>
+<dt><em>SDTS_Terms_Description:</em>  
+<dd>
+<dl>
+<dt><em>SDTS_Point_and_Vector_Object_Type:</em>  G-polygon</dt>
+<dt><em>Point_and_Vector_Object_Count:</em>  1892</dt>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+
+<a name="3">
+</a>
+<hr/>
+<dl>
+<dt><em>Spatial_Reference_Information:</em>  
+<dd>
+<dl>
+<dt><em>Horizontal_Coordinate_System_Definition:</em>  
+<dd>
+<dl>
+<dt><em>Geographic:</em>  
+<dd>
+<dl>
+<dt><em>Latitude_Resolution:</em>  0.000000</dt>
+<dt><em>Longitude_Resolution:</em>  0.000000</dt>
+<dt><em>Geographic_Coordinate_Units:</em>  Decimal degrees</dt>
+</dl>
+</dd>
+<dt><em>Geodetic_Model:</em>  
+<dd>
+<dl>
+<dt><em>Horizontal_Datum_Name:</em>  D_WGS_1984</dt>
+<dt><em>Ellipsoid_Name:</em>  WGS_1984</dt>
+<dt><em>Semi-major_Axis:</em>  6378137.000000</dt>
+<dt><em>Denominator_of_Flattening_Ratio:</em>  298.257224</dt>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+
+<a name="4">
+</a>
+<hr/>
+<dl>
+<dt><em>Entity_and_Attribute_Information:</em>  
+<dd>
+<dl>
+<dt><em>Detailed_Description:</em>  
+<dd>
+<dl>
+<dt><em>Entity_Type:</em>  
+<dd>
+<dl>
+<dt><em>Entity_Type_Label:</em>  serdp_swfsc_cce</dt>
+<dt><em>Entity_Type_Definition:</em>  
+<dd>
+
+Cetacean Densities (Animals per Square Kilomoter) in the California California Ecosystem (CCE)
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  FID</dt>
+<dt><em>Attribute_Definition:</em>  Internal feature number.</dt>
+<dt><em>Attribute_Definition_Source:</em>  ESRI</dt>
+<dt><em>Attribute_Domain_Values:</em>  
+<dd>
+<dl>
+<dt><em>Unrepresentable_Domain:</em>  
+<dd>
+
+Sequential unique whole numbers that are automatically generated.
+
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Shape</dt>
+<dt><em>Attribute_Definition:</em>  Feature geometry.</dt>
+<dt><em>Attribute_Definition_Source:</em>  ESRI</dt>
+<dt><em>Attribute_Domain_Values:</em>  
+<dd>
+<dl>
+<dt><em>Unrepresentable_Domain:</em>  Coordinates defining the features.</dt>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  gid</dt>
+<dt><em>Attribute_Definition:</em>  grid cell ID from original SURFER file</dt>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  cid</dt>
+<dt><em>Attribute_Definition:</em>  cell ID used by Duke SDSS</dt>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bmu_i_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+blue whale (Balaenoptera musculus) in summer using in-situ model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bmu_i_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+blue whale (Balaenoptera musculus) in summer using in-situ model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bmu_i_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+blue whale (Balaenoptera musculus) in summer using in-situ model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bmu_i_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+blue whale (Balaenoptera musculus) in summer using in-situ model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bph_r_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+fin whale (Balaenoptera physalus) in summer using remotely-sensed model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bph_r_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+fin whale (Balaenoptera physalus) in summer using remotely-sensed model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bph_r_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+fin whale (Balaenoptera physalus) in summer using remotely-sensed model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bph_r_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+fin whale (Balaenoptera physalus) in summer using remotely-sensed model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bba_r_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Guild: Berardius (Berardius) in summer using remotely-sensed model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bba_r_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Guild: Berardius (Berardius) in summer using remotely-sensed model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bba_r_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Guild: Berardius (Berardius) in summer using remotely-sensed model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Bba_r_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Guild: Berardius (Berardius) in summer using remotely-sensed model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Dde_i_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+short-beaked common dolphin (Delphinus delphis) in summer using in-situ model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Dde_i_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+short-beaked common dolphin (Delphinus delphis) in summer using in-situ model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Dde_i_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+short-beaked common dolphin (Delphinus delphis) in summer using in-situ model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Dde_i_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+short-beaked common dolphin (Delphinus delphis) in summer using in-situ model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Ggr_r_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Risso's dolphin (Grampus griseus) in summer using remotely-sensed model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Ggr_r_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Risso's dolphin (Grampus griseus) in summer using remotely-sensed model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Ggr_r_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Risso's dolphin (Grampus griseus) in summer using remotely-sensed model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Ggr_r_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Risso's dolphin (Grampus griseus) in summer using remotely-sensed model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Lob_i_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Pacific white-sided dolphin (Lagenorhynchus obliquidens) in summer using in-situ model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Lob_i_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Pacific white-sided dolphin (Lagenorhynchus obliquidens) in summer using in-situ model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Lob_i_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Pacific white-sided dolphin (Lagenorhynchus obliquidens) in summer using in-situ model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Lob_i_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Pacific white-sided dolphin (Lagenorhynchus obliquidens) in summer using in-situ model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Lbo_i_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+northern right whale dolphin (Lissodelphis borealis) in summer using in-situ model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Lbo_i_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+northern right whale dolphin (Lissodelphis borealis) in summer using in-situ model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Lbo_i_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+northern right whale dolphin (Lissodelphis borealis) in summer using in-situ model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Lbo_i_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+northern right whale dolphin (Lissodelphis borealis) in summer using in-situ model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Mno_r_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+humpback whale (Megaptera novaeangliae) in summer using remotely-sensed model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Mno_r_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+humpback whale (Megaptera novaeangliae) in summer using remotely-sensed model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Mno_r_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+humpback whale (Megaptera novaeangliae) in summer using remotely-sensed model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Mno_r_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+humpback whale (Megaptera novaeangliae) in summer using remotely-sensed model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Pda_i_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Dall's porpoise (Phocoenoides dalli) in summer using in-situ model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Pda_i_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Dall's porpoise (Phocoenoides dalli) in summer using in-situ model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Pda_i_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Dall's porpoise (Phocoenoides dalli) in summer using in-situ model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Pda_i_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Dall's porpoise (Phocoenoides dalli) in summer using in-situ model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Pma_i_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+sperm whale (Physeter macrocephalus) in summer using in-situ model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Pma_i_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+sperm whale (Physeter macrocephalus) in summer using in-situ model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Pma_i_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+sperm whale (Physeter macrocephalus) in summer using in-situ model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Pma_i_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+sperm whale (Physeter macrocephalus) in summer using in-situ model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Sco_r_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+striped dolphin (Stenella coeruleoalba) in summer using remotely-sensed model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Sco_r_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+striped dolphin (Stenella coeruleoalba) in summer using remotely-sensed model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Sco_r_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+striped dolphin (Stenella coeruleoalba) in summer using remotely-sensed model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Sco_r_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+striped dolphin (Stenella coeruleoalba) in summer using remotely-sensed model - standard error
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Zsm_r_u_h</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Guild: small beaked whale (Ziphius and Mesoplodon) in summer using remotely-sensed model - high 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Zsm_r_u_l</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Guild: small beaked whale (Ziphius and Mesoplodon) in summer using remotely-sensed model - low 90% CI
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Zsm_r_u_d</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Guild: small beaked whale (Ziphius and Mesoplodon) in summer using remotely-sensed model - average density
+
+</dd>
+</dl>
+</dd>
+<dt><em>Attribute:</em>  
+<dd>
+<dl>
+<dt><em>Attribute_Label:</em>  Zsm_r_u_e</dt>
+<dt><em>Attribute_Definition:</em>  
+<dd>
+
+Guild: small beaked whale (Ziphius and Mesoplodon) in summer using remotely-sensed model - standard error
+
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><em>Overview_Description:</em>  
+<dd>
+<dl>
+<dt><em>Entity_and_Attribute_Overview:</em>  
+<dd>
+
+Since fieldnames of shapefiles are limited to 10 characters, the following name scheme was used:
+<br/>
+  species_model_season_output
+<br/>
+species:
+  Bba = Guild: Berardius (Berardius)
+  Bmu = blue whale (Balaenoptera musculus)
+  Bph = fin whale (Balaenoptera physalus)
+  Dde = short-beaked common dolphin (Delphinus delphis)
+  Ggr = Risso's dolphin (Grampus griseus)
+  Lbo = northern right whale dolphin (Lissodelphis borealis)
+  Lob = Pacific white-sided dolphin (Lagenorhynchus obliquidens)
+  Mno = humpback whale (Megaptera novaeangliae)
+  Pda = Dall's porpoise (Phocoenoides dalli)
+  Pma = sperm whale (Physeter macrocephalus)
+  Sco = striped dolphin (Stenella coeruleoalba)
+  Zsm = Guild: small beaked whale (Ziphius and Mesoplodon)
+<br/>
+model:
+  i = in-situ
+  r = remote-sensed
+<br/>
+season:
+  u = summer
+<br/>
+output type:
+  h = high 90% CI density
+  l = low 90% CI density
+  d = average density
+  e = standard error of density
+
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+
+<a name="5">
+</a>
+<hr/>
+<dl>
+<dt><em>Distribution_Information:</em>  
+<dd>
+<dl>
+<dt><em>Resource_Description:</em>  Downloadable Data</dt>
+<dt><em>Standard_Order_Process:</em>  
+<dd>
+<dl>
+<dt><em>Digital_Form:</em>  
+<dd>
+<dl>
+<dt><em>Digital_Transfer_Information:</em>  
+<dd>
+<dl>
+<dt><em>Transfer_Size:</em>  0.258</dt>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+
+<a name="6">
+</a>
+<hr/>
+<dl>
+<dt><em>Metadata_Reference_Information:</em>  
+<dd>
+<dl>
+<dt><em>Metadata_Date:</em>  20091204</dt>
+<dt><em>Metadata_Contact:</em>  
+<dd>
+<dl>
+<dt><em>Contact_Information:</em>  
+<dd>
+<dl>
+<dt><em>Contact_Organization_Primary:</em>  
+<dd>
+<dl>
+<dt><em>Contact_Organization:</em>  
+<dd>
+
+REQUIRED: The organization responsible for the metadata information.
+
+</dd>
+<dt><em>Contact_Person:</em>  REQUIRED: The person responsible for the metadata information.</dt>
+</dl>
+</dd>
+<dt><em>Contact_Address:</em>  
+<dd>
+<dl>
+<dt><em>Address_Type:</em>  
+<dd>
+
+REQUIRED: The mailing and/or physical address for the organization or individual.
+
+</dd>
+<dt><em>City:</em>  REQUIRED: The city of the address.</dt>
+<dt><em>State_or_Province:</em>  REQUIRED: The state or province of the address.</dt>
+<dt><em>Postal_Code:</em>  REQUIRED: The ZIP or other postal code of the address.</dt>
+</dl>
+</dd>
+<dt><em>Contact_Voice_Telephone:</em>  
+<dd>
+
+REQUIRED: The telephone number by which individuals can speak to the organization or individual.
+
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><em>Metadata_Standard_Name:</em>  FGDC Content Standards for Digital Geospatial Metadata</dt>
+<dt><em>Metadata_Standard_Version:</em>  FGDC-STD-001-1998</dt>
+<dt><em>Metadata_Time_Convention:</em>  local time</dt>
+<dt><em>Metadata_Extensions:</em>  
+<dd>
+<dl>
+<dt><em>Online_Linkage:</em>  <a href="http://www.esri.com/metadata/esriprof80.html">&lt;http://www.esri.com/metadata/esriprof80.html&gt;</a></dt>
+<dt><em>Profile_Name:</em>  ESRI Metadata Profile</dt>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+
+<hr/>
+Generated by <a href="http://geology.usgs.gov/tools/metadata/tools/doc/mp.html"><tt>mp</tt></a> version 2.9.6 on Fri Dec 04 02:18:09 2009<br/>
+
+</body>
+</html>

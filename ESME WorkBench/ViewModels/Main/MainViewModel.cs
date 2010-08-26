@@ -314,9 +314,80 @@ namespace ESMERibbonDemo.ViewModels.Main
                                     MenuItems =
                                         new MenuItemList
                                         {
-                                            new MenuItemDataViewModel {Label = "ESRI Shapefile (*.shp)", SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), ToolTipTitle = "Add Content to the map", ToolTipDescription = "Add an ESRI Shapefile to the map", Command = AddShapefileCommand,},
-                                            new MenuItemDataViewModel {Label = "NUWC Overlay File (*.ovr)", SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), ToolTipTitle = "Add Content to the map", ToolTipDescription = "Add a NUWC Overlay file to the map", Command = AddOverlayFileCommand,},
-                                            new MenuItemDataViewModel {Label = "NUWC Scenario File (*.nemo)", SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), ToolTipTitle = "Add Content to the map", ToolTipDescription = "Add a NUWC Scenario file to the map", Command = AddScenarioFileCommand,},
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "ESRI Shapefile (*.shp)", 
+                                                SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), 
+                                                LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), 
+                                                ToolTipTitle = "Add Content to the map", 
+                                                ToolTipDescription = "Add an ESRI Shapefile to the map", 
+                                                Command = AddShapefileCommand,
+                                            },
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "NUWC Overlay File (*.ovr)", 
+                                                SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), 
+                                                LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), 
+                                                ToolTipTitle = "Add Content to the map", 
+                                                ToolTipDescription = "Add a NUWC Overlay file to the map", 
+                                                Command = AddOverlayFileCommand,
+                                            },
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "NUWC Scenario File (*.nemo)", 
+                                                SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), 
+                                                LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), 
+                                                ToolTipTitle = "Add Content to the map", 
+                                                ToolTipDescription = "Add a NUWC Scenario file to the map", 
+                                                Command = AddScenarioFileCommand,
+                                            },
+                                        },
+                                },
+                                new MenuButtonDataViewModel
+                                {
+                                    Label = "Pan/Zoom Control",
+                                    SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
+                                    LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
+                                    ToolTipTitle = "Pan/Zoom Control",
+                                    ToolTipDescription = "Change the visibility and position of the pan/zoom control",
+                                    MenuItems =
+                                        new MenuItemList
+                                        {
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "Visible", 
+                                                ToolTipTitle = "Pan/Zoom Control", 
+                                                ToolTipDescription = "Change the visibility of the pan/zoom control", 
+                                                //Command = AddShapefileCommand,
+                                            },
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "Upper Left", 
+                                                ToolTipTitle = "Pan/Zoom Control", 
+                                                ToolTipDescription = "Move the pan/zoom control to the upper left corner of the map display", 
+                                                //Command = AddOverlayFileCommand,
+                                            },
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "Upper Right", 
+                                                ToolTipTitle = "Pan/Zoom Control", 
+                                                ToolTipDescription = "Move the pan/zoom control to the upper right corner of the map display", 
+                                                //Command = AddOverlayFileCommand,
+                                            },
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "Lower Left", 
+                                                ToolTipTitle = "Pan/Zoom Control", 
+                                                ToolTipDescription = "Move the pan/zoom control to the lower left corner of the map display", 
+                                                //Command = AddOverlayFileCommand,
+                                            },
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "Lower Right", 
+                                                ToolTipTitle = "Pan/Zoom Control", 
+                                                ToolTipDescription = "Move the pan/zoom control to the lower right corner of the map display", 
+                                                //Command = AddOverlayFileCommand,
+                                            },
                                         },
                                 },
                             },
