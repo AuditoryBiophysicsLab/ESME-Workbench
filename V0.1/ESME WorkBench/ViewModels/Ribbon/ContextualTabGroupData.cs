@@ -52,18 +52,18 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         }
         private bool _isVisible;
         
-        public ObservableCollection<TabData> TabDataCollection
+        public ObservableCollection<TabDataViewModel> TabDataCollection
         {
             get
             {
                 if (_tabDataCollection == null)
                 {
-                    _tabDataCollection = new ObservableCollection<TabData>();
+                    _tabDataCollection = new ObservableCollection<TabDataViewModel>();
                 }
                 return _tabDataCollection;
             }
         }
-        private ObservableCollection<TabData> _tabDataCollection;
+        private ObservableCollection<TabDataViewModel> _tabDataCollection;
 
         #region INotifyPropertyChanged Members
 

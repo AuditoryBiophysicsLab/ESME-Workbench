@@ -5,11 +5,12 @@ using ESMERibbonDemo.ViewModels.Main;
 
 namespace ESMERibbonDemo.ViewModels.Ribbon
 {
+#if false
     public static class RibbonControlModel
     {
         #region Scenario Group
 
-        public static ControlData Scenario
+        public static ControlDataViewModel Scenario
         {
             get
             {
@@ -19,7 +20,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        _dataCollection[str] = new GroupData(str)
+                        _dataCollection[str] = new GroupDataViewModel(str)
                                                    {
                                                        SmallImage =
                                                            new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative),
@@ -33,7 +34,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData LoadScenario
+        public static ControlDataViewModel LoadScenario
         {
             get
             {
@@ -43,7 +44,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        var buttonData = new ButtonData
+                        var buttonData = new ButtonDataViewModel
                                              {
                                                  Label = str,
                                                  SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative),
@@ -61,7 +62,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData EditScenario
+        public static ControlDataViewModel EditScenario
         {
             get
             {
@@ -71,7 +72,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        var buttonData = new ButtonData
+                        var buttonData = new ButtonDataViewModel
                                              {
                                                  Label = str,
                                                  SmallImage =
@@ -96,7 +97,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
         #region Map Group
 
-        public static ControlData Map
+        public static ControlDataViewModel Map
         {
             get
             {
@@ -106,7 +107,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        _dataCollection[str] = new GroupData(str)
+                        _dataCollection[str] = new GroupDataViewModel(str)
                                                    {
                                                        SmallImage =
                                                            new Uri("Images/SmallIcons/System-Globe-icon.png",
@@ -122,7 +123,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData BaseMap
+        public static ControlDataViewModel BaseMap
         {
             get
             {
@@ -132,7 +133,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        _dataCollection[str] = new MenuButtonData
+                        _dataCollection[str] = new MenuButtonDataViewModel
                                                    {
                                                        Label = str,
                                                        SmallImage =
@@ -152,7 +153,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData BaseMapNasa
+        public static ControlDataViewModel BaseMapNasa
         {
             get
             {
@@ -162,7 +163,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        _dataCollection[str] = new MenuItemData
+                        _dataCollection[str] = new MenuItemDataViewModel
                                                    {
                                                        Label = str,
                                                        SmallImage =
@@ -182,7 +183,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData BaseMapOther
+        public static ControlDataViewModel BaseMapOther
         {
             get
             {
@@ -192,7 +193,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        _dataCollection[str] = new MenuItemData
+                        _dataCollection[str] = new MenuItemDataViewModel
                                                    {
                                                        Label = str,
                                                        SmallImage =
@@ -213,7 +214,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData AddContent
+        public static ControlDataViewModel AddContent
         {
             get
             {
@@ -223,7 +224,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        _dataCollection[str] = new MenuButtonData
+                        _dataCollection[str] = new MenuButtonDataViewModel
                                                    {
                                                        Label = str,
                                                        SmallImage =
@@ -241,7 +242,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData AddShapefile
+        public static ControlDataViewModel AddShapefile
         {
             get
             {
@@ -251,7 +252,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        _dataCollection[str] = new MenuItemData
+                        _dataCollection[str] = new MenuItemDataViewModel
                                                    {
                                                        Label = str,
                                                        SmallImage =
@@ -269,7 +270,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData AddOverlayFile
+        public static ControlDataViewModel AddOverlayFile
         {
             get
             {
@@ -279,7 +280,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        _dataCollection[str] = new MenuItemData
+                        _dataCollection[str] = new MenuItemDataViewModel
                                                    {
                                                        Label = str,
                                                        SmallImage =
@@ -297,7 +298,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData AddScenarioFile
+        public static ControlDataViewModel AddScenarioFile
         {
             get
             {
@@ -307,7 +308,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        _dataCollection[str] = new MenuItemData
+                        _dataCollection[str] = new MenuItemDataViewModel
                                                    {
                                                        Label = str,
                                                        SmallImage =
@@ -325,7 +326,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             }
         }
 
-        public static ControlData PanZoomControl
+        public static ControlDataViewModel PanZoomControl
         {
             get
             {
@@ -335,7 +336,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
                     if (!_dataCollection.ContainsKey(str))
                     {
-                        var buttonData = new ButtonData
+                        var buttonData = new ButtonDataViewModel
                                              {
                                                  Label = str,
                                                  SmallImage =
@@ -371,9 +372,10 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
         private const string HelpFooterTitle = "Press F1 for more help.";
         private static readonly object _lockObject = new object();
-        private static readonly Dictionary<string, ControlData> _dataCollection = new Dictionary<string, ControlData>();
+        private static readonly Dictionary<string, ControlDataViewModel> _dataCollection = new Dictionary<string, ControlDataViewModel>();
         public static MainViewModel MainViewModel { get; set; }
 
         #endregion Data
     }
+#endif
 }

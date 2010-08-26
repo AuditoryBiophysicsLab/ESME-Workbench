@@ -1,6 +1,6 @@
 ﻿namespace ESMERibbonDemo.ViewModels.Ribbon
 {
-    public class ApplicationMenuItemData : MenuItemData
+    public class ComboBoxDataViewModel : MenuButtonDataViewModel
     {
     }
 }

@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace ESMERibbonDemo.ViewModels.Ribbon
 {
-    public class GalleryCategoryData<T> : ControlData
+    public class GalleryCategoryDataViewModel<T> : ControlDataViewModel
     {
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public ObservableCollection<T> GalleryItemDataCollection
