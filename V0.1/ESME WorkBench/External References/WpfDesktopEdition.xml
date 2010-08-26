@@ -4,6 +4,27 @@
         <name>WpfDesktopEdition</name>
     </assembly>
     <members>
+        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.LockLayerMode">
+            <summary>
+            This enum represents the lock mode while drawing layers.
+            </summary>
+        </member>
+        <member name="F:ThinkGeo.MapSuite.WpfDesktopEdition.LockLayerMode.Default">
+            <summary>
+            This value indicates the layers will be locked while drawing.
+            </summary>
+        </member>
+        <member name="F:ThinkGeo.MapSuite.WpfDesktopEdition.LockLayerMode.Lock">
+            <summary>
+            This value indicates the layers will be locked while drawing.
+            </summary>
+        </member>
+        <member name="F:ThinkGeo.MapSuite.WpfDesktopEdition.LockLayerMode.DoNotLock">
+            <summary>
+            This value indicates the layers will be cloned before drawing; 
+            and use the cloned layer to draw without locking.
+            </summary>
+        </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.ExceptionMessage">
             <summary>
               A strongly-typed resource class, for looking up localized strings, etc.
@@ -287,7 +308,7 @@
             <remarks>
             This method is the concrete wrapper for the abstract method DrawExceptionCore. 
             </remarks>
-            <param name="canvas">This parameter is the canvas object to draw on.</param>
+            <param name="geoCanvas">This parameter is the canvas object to draw on.</param>
             <param name="exception">This parameter is the real exception in during drawing process.</param>
         </member>
         <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.Tile.DrawExceptionCore(ThinkGeo.MapSuite.Core.GeoCanvas,System.Exception)">
@@ -367,19 +388,9 @@
             This property gets the image source for displaying a tile. 
             </summary>
         </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.Tile.TileImage">
-            <summary>
-            Gets or sets an image control in tile as content.
-            </summary>
-        </member>
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.Tile.TargetExtent">
             <summary>
             Gets or sets an extent that uses for drawing.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.Tile.DrawingUnit">
-            <summary>
-            Gets or sets a geography unit that uses for drawing.
             </summary>
         </member>
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.Tile.RowIndex">
@@ -648,46 +659,6 @@
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.FeatureRotatingEditInteractiveOverlayEventArgs.Cancel">
             <summary>
             Gets or sets the action to be canceled or not.
-            </summary>
-        </member>
-        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.UriTile">
-            <summary>
-            This class represents a tile's image source is coming from an web uri.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.UriTile.#ctor">
-            <summary>
-            Constructor of UriTile class.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.UriTile.DrawCore(ThinkGeo.MapSuite.Core.GeoCanvas)">
-            <summary>
-            This method requests image from the provided uri, and sets the image as source to the tile.
-            </summary>
-            <param name="geoCanvas">The parameter is the canvas object to draw on.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.UriTile.CloneDeepCore">
-            <summary>
-            This method deeply clone this tile.
-            </summary>
-            <returns>A deep copy of this tile.</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.UriTile.Dispose(System.Boolean)">
-            <summary>
-            This method disposes unmanaged resource.
-            </summary>
-            <remarks>When overriding, consider dispose the background threading.</remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.UriTile.ImageFormat">
-            <summary>
-            Gets or sets the image format for drawing the tile image.
-            The default value is Png.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.UriTile.JpegQuality">
-            <summary>
-            Gets or sets the image quality when using Jpeg format. 
-            It is from 1 to 100; the default value is 100.
             </summary>
         </member>
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.UriTile.Uri">
@@ -1075,6 +1046,11 @@
             Gets or sets the previous exent of the overlay.
             </summary>
         </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.Overlay.DrawingExceptionMode">
+            <summary>
+            This property gets and sets the DrawingExceptionMode used when an exception occurs during drawing.
+            </summary>
+        </member>
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.Overlay.IsVisible">
             <summary>
             Gets or sets if this overlay is visible.
@@ -1234,6 +1210,11 @@
             otherwise this property has no effects. Its default value is 80.
             </summary>
         </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TileOverlay.TileBuffer">
+            <summary>
+            This property gets and sets the number of extra rows and colums of tiles on each side which will surround the minimum grid tiles to cover the map.
+            </summary>
+        </member>
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TileOverlay.DrawingCanvas">
             <summary>
             Gets current drawing canvas which holds actual tile controls.
@@ -1371,73 +1352,6 @@
             <summary>
             Gets a shortcut of PanZoomBar object.
             </summary>
-        </member>
-        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.TileType">
-            <summary>
-            This enum represents the tile type in the tile overlay.
-            </summary>
-        </member>
-        <member name="F:ThinkGeo.MapSuite.WpfDesktopEdition.TileType.SingleTile">
-            <summary>
-            This value indicates the tile overlay is formed by one single tile.
-            </summary>
-        </member>
-        <member name="F:ThinkGeo.MapSuite.WpfDesktopEdition.TileType.MultipleTile">
-            <summary>
-            This value indicates the tile overlay is formed by multiple tiles.
-            </summary>
-        </member>
-        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.DrawingVisualLayerTile">
-            <summary>
-            This class renders map with DrawingVisual class in WPF. 
-            </summary>
-            <remarks>
-            The difference from GdiPlusLayerTile is:
-            
-            1. DrawingVisualLayerTile doesn't support asynchronizely rendering while GdiPlusLayerTile does;
-            2. DrawingVisualLayerTile doesn't support cache images while GdiPlusLayerTile does;
-            3. DrawingVisualLayerTile responses faster in synchronise mode than GdiPlusLayerTile.
-            </remarks>
-        </member>
-        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.LayerTile">
-            <summary>
-            This class represends a tile which maintains layers for drawing.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.LayerTile.#ctor">
-            <summary>
-            Constructor of LayerTile class.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.LayerTile.#ctor(System.Collections.Generic.IEnumerable{ThinkGeo.MapSuite.Core.Layer})">
-            <summary>
-            Constructor of LayerTile class.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.LayerTile.DrawingLayers">
-            <summary>
-            This property gets a collection that are ready for drawing.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.DrawingVisualLayerTile.#ctor">
-            <summary>
-            Constructor of DrawingVisualLayerTile class.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.DrawingVisualLayerTile.DrawCore(ThinkGeo.MapSuite.Core.GeoCanvas)">
-            <summary>
-            This method draws the tile on the canvas object.
-            </summary>
-            <remarks>
-            When overriding this method, 
-            draws all the layers and set IsOpened to true when the drawing process is completed.</remarks>
-            <param name="geoCanvas"></param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.DrawingVisualLayerTile.CloneDeepCore">
-            <summary>
-            This method deeply copy this tile object.
-            </summary>
-            <returns>A deep copy of this tile object.</returns>
         </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.Popup">
             <summary>
@@ -2542,13 +2456,6 @@
             <param name="targetExtent">This parameter specifies the extent for drawing this overlay.</param>
             <param name="refreshType">This parameter specifies whether this overlay need to be clear and refresh or not.</param>
         </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.BackgroundOverlay.CancelCore">
-            <summary>
-            This method overrides the CancelCore logic of the Overlay class.
-            It cancels the existing drawing process. 
-            Call it when delete this overlay.
-            </summary>
-        </member>
         <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.BackgroundOverlay.SaveStateCore">
             <summary>
             This method saves overlay state to a byte array.
@@ -2945,56 +2852,6 @@
             The default value is None.
             </remarks>
         </member>
-        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTile">
-            <summary>
-            This class renders map with Gdi+. 
-            </summary>
-            <remarks>
-            The difference from DrawingVisualLayerTile is:
-            
-            1. GdiPlusLayerTile supports asynchronizely rendering while DrawingVisualLayerTile does not;
-            2. GdiPlusLayerTile supports cache images while DrawingVisualLayerTile does not;
-            3. DrawingVisualLayerTile responses faster in synchronise mode than GdiPlusLayerTile.
-            </remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTile.#ctor">
-            <summary>
-            Constructor of GdiPlusLayerTile class.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTile.DrawCore(ThinkGeo.MapSuite.Core.GeoCanvas)">
-            <summary>
-            This method draws the tile on the canvas object.
-            </summary>
-            <remarks>
-            When overriding this method, 
-            draws all the maintaining layers and set IsOpened to true when the drawing process is completed.</remarks>
-            <param name="geoCanvas"></param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTile.Dispose(System.Boolean)">
-            <summary>
-            This method disposes unmanaged resource.
-            </summary>
-            <remarks>When overriding, consider dispose the background threading.</remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTile.CloneDeepCore">
-            <summary>
-            This method deeply clone this tile.
-            </summary>
-            <returns>A deep copy of this tile.</returns>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTile.ImageFormat">
-            <summary>
-            Gets or sets the image format for drawing the tile image.
-            The default value is Png.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTile.JpegQuality">
-            <summary>
-            Gets or sets the image quality when using Jpeg format. 
-            It is from 1 to 100; the default value is 100.
-            </summary>
-        </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.MapMouseDownInteractiveOverlayEventArgs">
             <summary>
                 Provides data for the <see cref="E:ThinkGeo.MapSuite.WpfDesktopEdition.InteractiveOverlay.MapMouseDown">MapMouseDown</see>
@@ -3145,6 +3002,21 @@
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.ControlPointSelectedEditInteractiveOverlayEventArgs.SelectedFeature">
             <summary>
             Gets or sets the selected feature.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.LayerTile.#ctor">
+            <summary>
+            Constructor of LayerTile class.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.LayerTile.#ctor(System.Collections.Generic.IEnumerable{ThinkGeo.MapSuite.Core.Layer})">
+            <summary>
+            Constructor of LayerTile class.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.LayerTile.DrawingLayers">
+            <summary>
+            This property gets a collection that are ready for drawing.
             </summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.PopupOverlay">
@@ -3398,94 +3270,19 @@
             Gets or sets the Feature resized.
             </summary>
         </member>
-        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.UriTileArguments">
+        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.TileType">
             <summary>
-            This class represends the event arguments for drawing uri tiles.
+            This enum represents the tile type in the tile overlay.
             </summary>
         </member>
-        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments">
+        <member name="F:ThinkGeo.MapSuite.WpfDesktopEdition.TileType.SingleTile">
             <summary>
-            This class represents the event arguments for drawing tiles.
+            This value indicates the tile overlay is formed by one single tile.
             </summary>
         </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments.#ctor">
+        <member name="F:ThinkGeo.MapSuite.WpfDesktopEdition.TileType.MultipleTile">
             <summary>
-            Constructor of DrawTileEventArgs class.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments.#ctor(ThinkGeo.MapSuite.Core.GeoCanvas,System.Int32,System.Int32,ThinkGeo.MapSuite.Core.GeographyUnit,ThinkGeo.MapSuite.Core.RectangleShape,ThinkGeo.MapSuite.Core.TileImageFormat,System.Int32)">
-            <summary>
-            Constructor of DrawTileEventArgs class.
-            </summary>
-            <param name="geoCanvas">This parameter is the canvas to draw on.</param>
-            <param name="tileWidth">This parameter indicates the width of the tile.</param>
-            <param name="tileHeight">This parameter indicates the height of the tile.</param>
-            <param name="mapUnit">This parameter is the geography unit for drawing the tile.</param>
-            <param name="targetExtent">This parameter indicates the extent for drawing the tile.</param>
-            <param name="imageFormat">This parameter indicates the image format for saving the tile.</param>
-            <param name="jpegQuality">This parameter indicates the jpeg quality for saving the tile.</param>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments.TileWidth">
-            <summary>
-            Gets or sets the width of the tile. The default value is 256.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments.TileHeight">
-            <summary>
-            Gets or sets the height of the tile. The default value is 256.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments.JpegQuality">
-            <summary>
-            Gets or sets the Jpeg quality of the tile. The default value is 100.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments.MapUnit">
-            <summary>
-            Gets or sets the geography unit for drawing the tile. The default value is DecimalDegree.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments.TargetExtent">
-            <summary>
-            Gets or sets the extent for drawing the tile. The default value is null.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments.ImageFormat">
-            <summary>
-            Gets or sets the image format for saving the tile image. The default value is Png.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TileArguments.GeoCanvas">
-            <summary>
-            Gets or sets the canvas object to draw on.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.UriTileArguments.#ctor">
-            <summary>
-            Constructor of the UriTileArguments class.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.UriTileArguments.#ctor(ThinkGeo.MapSuite.Core.GeoCanvas,System.Int32,System.Int32,ThinkGeo.MapSuite.Core.GeographyUnit,ThinkGeo.MapSuite.Core.RectangleShape,ThinkGeo.MapSuite.Core.TileImageFormat,System.Int32,System.Uri)">
-            <summary>
-            Constructor of the UriTileArguments class.
-            </summary>
-            <param name="geoCanvas">This parameter is the canvas object to draw on.</param>
-            <param name="tileWidth">This parameter is the width of the tile.</param>
-            <param name="tileHeight">This parameter is the height of the tile.</param>
-            <param name="mapUnit">This parameter is the geography unit for drawing the tile.</param>
-            <param name="targetExtent">This parameter is the image format for saving the tile.</param>
-            <param name="imageFormat">This parameter indicates the image format for saving the tile.</param>
-            <param name="jpegQuality">This parameter is the Jpeg quality for saving the tile when ImageFormat is Jpeg.</param>
-            <param name="uri">This parameter is the requesting uri for the tile image.</param>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.UriTileArguments.Uri">
-            <summary>
-            Gets or sets the Uri for drawing the tiles.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.UriTileArguments.WebProxy">
-            <summary>
-            This property gets or sets the proxy used for requesting a Web Response.
+            This value indicates the tile overlay is formed by multiple tiles.
             </summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.MapMouseClickInteractiveOverlayEventArgs">
@@ -3608,13 +3405,6 @@
             Thid method pans the image of this overlay to the specified extent.
             </summary>
             <param name="targetExtent">A RectangleShape value indicating the world extent that to pan to.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.AdornmentOverlay.CancelCore">
-            <summary>
-            This method overrides the CancelCore logic of the Overlay class.
-            It cancels the existing drawing process. 
-            Call it when delete this overlay.
-            </summary>
         </member>
         <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.AdornmentOverlay.SaveStateCore">
             <summary>
@@ -3809,6 +3599,178 @@
             This property gets and sets whether this operation needs to be canceled.
             </summary>
         </member>
+        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay">
+            <summary>
+            Represents an overlay object that gets map images from the WMS server you
+            specify.
+            </summary>
+            <remarks>
+            	<para>The <strong>TiledWmsOverlay</strong> gets images from one or more WMS servers that
+                you specify. Usually, you add a WMS server URI to the <strong>ServerUris</strong>
+                collection and the <strong>TiledWmsOverlay</strong> will make a request to that WMS server
+                to get its tile images.</para>
+            	<para>You can also add multiple WMS server URIs to the ServerUris collection. The
+                TiledWmsOverlay will randomly send requests to those WMS servers in a concurrent fashion.
+                This means that the tile images can come from different WMS servers, thus greatly
+                enhancing performance. <strong>Do not</strong> add URIs of differently-configured
+                WMS servers to the ServerUris collection.</para>
+            </remarks>
+        </member>
+        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay">
+            <summary>
+            Represents an overlay object that gets map images from the WMS server you
+            specify.
+            </summary>
+            <remarks>
+            	<para>The <strong>WmsOverlay</strong> gets images from one or more WMS servers that
+                you specify. Usually, you add a WMS server URI to the <strong>ServerUris</strong>
+                collection and the <strong>WmsOverlay</strong> will make a request to that WMS server
+                to get its tile images.</para>
+            	<para>You can also add multiple WMS server URIs to the ServerUris collection. The
+                WmsOverlay will randomly send requests to those WMS servers in a concurrent fashion.
+                This means that the tile images can come from different WMS servers, thus greatly
+                enhancing performance. <strong>Do not</strong> add URIs of differently-configured
+                WMS servers to the ServerUris collection.</para>
+            </remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.#ctor">
+            <summary>
+            Constructore of WmsOverlay class.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.#ctor(System.Collections.Generic.IEnumerable{System.Uri})">
+            <summary>
+            Constructore of WmsOverlay class.
+            </summary>
+            <param name="serverUris">This parameter indicates a collection of uris for the Wms server.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.GetTileCore">
+            <summary>
+            This method gets a specific tile object to form an overlay.
+            </summary>
+            <returns>A Tile object to form an overlay.</returns>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.DrawTileCore(ThinkGeo.MapSuite.WpfDesktopEdition.Tile,ThinkGeo.MapSuite.Core.RectangleShape)">
+            <summary>
+            This method redraws a tile by an extent and geography unit.
+            </summary>
+            <param name="tile">A tile which needs to be redrawn.</param>
+            <param name="targetExtent">An extent to be redrawn.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.SaveStateCore">
+            <summary>
+            This method saves overlay state to a byte array.
+            </summary>
+            <returns>A byte array indicates current overlay state.</returns>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.LoadStateCore(System.Byte[])">
+            <summary>
+            This method restore the overlay state back from the specified state.
+            </summary>
+            <param name="state">This parameter indicates the state for restore the overlay.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.GetRequestUri(System.Uri,ThinkGeo.MapSuite.Core.RectangleShape)">
+            <summary>
+            This method merge uri from passed server uri and target world extent.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.GetRequestUriCore(System.Uri,ThinkGeo.MapSuite.Core.RectangleShape)">
+            <summary>
+            This method merge uri from passed server uri and target world extent.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.InitThreadLockObject">
+            <summary>
+            Initialize thread lock object;
+            for if the request count is to big to the server at once,
+            the server will send a 503 error back.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.Parameters">
+            <summary>
+            Gets a dictionary whose items will be passed to the WMS server as
+            parameters.
+            </summary>
+            <example>
+            	<para>As an example, if the WMS address is "wmsserverurl.axd?id=1&amp;type=image/png":</para>
+            	<para><font color="maroon">wmsLayer.Parameters.Add("id", "1");<br/>
+                wmsLayer.Parameters.Add("type", "image/png");</font></para>
+            </example>
+            <value>A dictionary whose items will be passed to the WMS server as parameters.</value>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.ServerUris">
+            <summary>Gets a collection of URIs that specifies the locations of the WMS servers.</summary>
+            <value>A collection of URIs that specifies the locations of the WMS servers.</value>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.WebProxy">
+            <summary>
+            This property gets or sets the proxy used for requesting a Web Response.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.Projection">
+            <summary>
+            Gets or sets a string that will be sent to the WMS server to get the images in
+            the specific projection.
+            </summary>
+            <value>A string that represents the projection that the images use.</value>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay.#ctor">
+            <summary>
+            Constructore of TiledWmsOverlay class.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay.#ctor(System.Collections.Generic.IEnumerable{System.Uri})">
+            <summary>
+            Constructore of TiledWmsOverlay class.
+            </summary>
+            <param name="serverUris">This parameter indicates a collection of uris for the Wms server.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay.#ctor(System.Collections.Generic.IEnumerable{System.Uri},System.Net.WebProxy)">
+            <summary>
+            Constructore of TiledWmsOverlay class.
+            </summary>
+            <param name="serverUris">This parameter indicates a collection of uris for the Wms server.</param>
+            <param name="webProxy">The proxy used for requesting a Web Response</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay.#ctor(System.Collections.Generic.IEnumerable{System.Uri},System.String,System.String)">
+            <summary>
+            Constructore of TiledWmsOverlay class.
+            </summary>
+            <param name="serverUris">This parameter indicates a collection of uris for the Wms server.</param>
+            <param name="clientId">The clientId for the WMS Server.</param>
+            <param name="privateKey">The privateKey for the WMS Server.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay.#ctor(System.Collections.Generic.IEnumerable{System.Uri},System.Net.WebProxy,System.String,System.String)">
+            <summary>
+            Constructore of TiledWmsOverlay class.
+            </summary>
+            <param name="serverUris">This parameter indicates a collection of uris for the Wms server.</param>
+            <param name="webProxy">Proxy to use for the WMS Server.</param>
+            <param name="clientId">The clientId for the WMS Server.</param>
+            <param name="privateKey">The privateKey for the WMS Server.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay.GetRequestUriCore(System.Uri,ThinkGeo.MapSuite.Core.RectangleShape)">
+            <summary>
+            This method merge uri from passed server uri and target world extent.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay.InitThreadLockObject">
+            <summary>
+            Initialize thread lock object;
+            for if the request count is to big to the server at once,
+            the server will send a 503 error back.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay.ClientId">
+            <summary>
+            Gets or sets a value that is your Client Id.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TiledWmsOverlay.PrivateKey">
+            <summary>
+            Gets or sets a value that is unique to your client ID, please keep your key secure.
+            </summary>
+        </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.InteractionArguments">
             <summary>
             This class encapsulates the information and simple method for interative actions.
@@ -3965,6 +3927,18 @@
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.FeatureSourceMarkerOverlay.ZoomLevelSet">
             <summary>Gets the ZoomLevelSet object that controls the markers' generation.</summary>
             <value>A ZoomLevelSet object that controls the markers' generation.</value>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.OpenStreetMapOverlay.SaveStateCore">
+            <summary>
+            This method saves overlay state to a byte array.
+            </summary>
+            <returns>A byte array indicates current overlay state.</returns>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.OpenStreetMapOverlay.LoadStateCore(System.Byte[])">
+            <summary>
+            This method restore the overlay state back from the specified state.
+            </summary>
+            <param name="state">This parameter indicates the state for restore the overlay.</param>
         </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.MarkerZoomLevel">
             <summary>
@@ -4282,18 +4256,6 @@
             </summary>
             <param name="state">This parameter indicates the state for restore the overlay.</param>
         </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.LayerOverlay.LoadStates(System.Byte[])">
-            <summary>
-            Loads states from the provided states.
-            </summary>
-            <param name="states">A byte array indicates the overlay states which is created from the SaveStates method.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.LayerOverlay.LoadStatesCore(System.Byte[])">
-            <summary>
-            Loads states from the provided states.
-            </summary>
-            <param name="states">A byte array indicates the overlay states which is created from the SaveStates method.</param>
-        </member>
         <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.LayerOverlay.GetTileCore">
             <summary>
             This method gets a specific tile object to form an overlay.
@@ -4338,6 +4300,11 @@
             <strong>Draw</strong> method. The Draw method loops through all layers to filter
             out features and draw on the image with the specified styles. 
             </remarks>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.LayerOverlay.LockLayerMode">
+            <summary>
+            This property gets and sets the lock mode while drawing layers.
+            </summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.ExtentInteractiveOverlay">
             <summary>
@@ -4684,9 +4651,9 @@
             <returns>Interaction results of this method.</returns>
             <param name="interactionArguments">This parameter is the interaction auguments for the method.</param>
         </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.ExtentInteractiveOverlay.MouseLeaveCore(ThinkGeo.MapSuite.WpfDesktopEdition.InteractionArguments)">
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.ExtentInteractiveOverlay.MouseEnterCore(ThinkGeo.MapSuite.WpfDesktopEdition.InteractionArguments)">
             <summary>
-            Overrides MouseLeaveCore method in its base class InteractiveOverlay.
+            This overrides the MouseEnter logic in its base class InterativeOverlay.
             </summary>
             <param name="interactionArguments"></param>
             <returns></returns>
@@ -4953,6 +4920,27 @@
             Constructor of WorldMapKitWmsWpfOverlay class.
             </summary>
         </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WorldMapKitWmsWpfOverlay.#ctor(System.Net.WebProxy)">
+            <summary>
+            Constructor of WorldMapKitWmsWpfOverlay class.
+            </summary>
+            <param name="webProxy">The proxy used for requesting a Web Response</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WorldMapKitWmsWpfOverlay.#ctor(System.String,System.String)">
+            <summary>
+            Constructor of WorldMapKitWmsWpfOverlay class.
+            </summary>
+            <param name="clientId">The clientId for the WMS Server.</param>
+            <param name="privateKey">The privateKey for the WMS Server.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WorldMapKitWmsWpfOverlay.#ctor(System.Net.WebProxy,System.String,System.String)">
+            <summary>
+            Constructor of WorldMapKitWmsWpfOverlay class.
+            </summary>
+            <param name="webProxy">Proxy to use for the WMS Server.</param>
+            <param name="clientId">The clientId for the WMS Server.</param>
+            <param name="privateKey">The privateKey for the WMS Server.</param>
+        </member>
         <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WorldMapKitWmsWpfOverlay.GetTileCore">
             <summary>
             This method overrides GetTile method. 
@@ -5015,98 +5003,20 @@
             All overlay adding to the map must keep the same unit or else the map won't display properly.
             </remarks>
         </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WorldMapKitWmsWpfOverlay.ClientId">
+            <summary>
+            Gets or sets a value that is your Client Id.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WorldMapKitWmsWpfOverlay.PrivateKey">
+            <summary>
+            Gets or sets a value that is unique to your client ID, please keep your key secure.
+            </summary>
+        </member>
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WorldMapKitWmsWpfOverlay.WebProxy">
             <summary>
             This property gets or sets the proxy used for requesting a Web Response.
             </summary>
-        </member>
-        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay">
-            <summary>
-            Represents an overlay object that gets map images from the WMS server you
-            specify.
-            </summary>
-            <remarks>
-            	<para>The <strong>WmsOverlay</strong> gets images from one or more WMS servers that
-                you specify. Usually, you add a WMS server URI to the <strong>ServerUris</strong>
-                collection and the <strong>WmsOverlay</strong> will make a request to that WMS server
-                to get its tile images.</para>
-            	<para>You can also add multiple WMS server URIs to the ServerUris collection. The
-                WmsOverlay will randomly send requests to those WMS servers in a concurrent fashion.
-                This means that the tile images can come from different WMS servers, thus greatly
-                enhancing performance. <strong>Do not</strong> add URIs of differently-configured
-                WMS servers to the ServerUris collection.</para>
-            </remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.#ctor">
-            <summary>
-            Constructore of WmsOverlay class.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.#ctor(System.Collections.Generic.IEnumerable{System.Uri})">
-            <summary>
-            Constructore of WmsOverlay class.
-            </summary>
-            <param name="serverUris">This parameter indicates a collection of uris for the Wms server.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.GetTileCore">
-            <summary>
-            This method gets a specific tile object to form an overlay.
-            </summary>
-            <returns>A Tile object to form an overlay.</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.DrawTileCore(ThinkGeo.MapSuite.WpfDesktopEdition.Tile,ThinkGeo.MapSuite.Core.RectangleShape)">
-            <summary>
-            This method redraws a tile by an extent and geography unit.
-            </summary>
-            <param name="tile">A tile which needs to be redrawn.</param>
-            <param name="targetExtent">An extent to be redrawn.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.SaveStateCore">
-            <summary>
-            This method saves overlay state to a byte array.
-            </summary>
-            <returns>A byte array indicates current overlay state.</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.LoadStateCore(System.Byte[])">
-            <summary>
-            This method restore the overlay state back from the specified state.
-            </summary>
-            <param name="state">This parameter indicates the state for restore the overlay.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.InitThreadLockObject">
-            <summary>
-            Initialize thread lock object;
-            for if the request count is to big to the server at once,
-            the server will send a 503 error back.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.Parameters">
-            <summary>
-            Gets a dictionary whose items will be passed to the WMS server as
-            parameters.
-            </summary>
-            <example>
-            	<para>As an example, if the WMS address is "wmsserverurl.axd?id=1&amp;type=image/png":</para>
-            	<para><font color="maroon">wmsLayer.Parameters.Add("id", "1");<br/>
-                wmsLayer.Parameters.Add("type", "image/png");</font></para>
-            </example>
-            <value>A dictionary whose items will be passed to the WMS server as parameters.</value>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.ServerUris">
-            <summary>Gets a collection of URIs that specifies the locations of the WMS servers.</summary>
-            <value>A collection of URIs that specifies the locations of the WMS servers.</value>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.WebProxy">
-            <summary>
-            This property gets or sets the proxy used for requesting a Web Response.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.WmsOverlay.Projection">
-            <summary>
-            Gets or sets a string that will be sent to the WMS server to get the images in
-            the specific projection.
-            </summary>
-            <value>A string that represents the projection that the images use.</value>
         </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.RenderMode">
             <summary>This enumeration represents the drawing mode for rendering map.</summary>
@@ -5489,34 +5399,6 @@
         <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.TrackEndingTrackInteractiveOverlayEventArgs.Cancel">
             <summary>
             Gets or sets the action to be canceled or not.
-            </summary>
-        </member>
-        <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTileArguments">
-            <summary>
-            This class represents the event arguments for drawing the GdiPlusLayerTile.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTileArguments.#ctor">
-            <summary>
-            Constructor of GdiPlusLayerTileArguments class.
-            </summary>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTileArguments.#ctor(ThinkGeo.MapSuite.Core.GeoCanvas,System.Int32,System.Int32,ThinkGeo.MapSuite.Core.GeographyUnit,ThinkGeo.MapSuite.Core.RectangleShape,ThinkGeo.MapSuite.Core.TileImageFormat,System.Int32,System.Collections.Generic.IEnumerable{ThinkGeo.MapSuite.Core.Layer})">
-            <summary>
-            Constructor of GdiPlusLayerTileArguments class.
-            </summary>
-            <param name="geoCanvas">This parameter is the canvas object to draw on.</param>
-            <param name="tileWidth">This parameter is the width of the tile.</param>
-            <param name="tileHeight">This parameter is the height of the tile.</param>
-            <param name="mapUnit">This parameter is the geography unit for drawing the tile.</param>
-            <param name="targetExtent">This parameter is the image format for saving the tile.</param>
-            <param name="imageFormat">This parameter indicates the image format for saving the tile.</param>
-            <param name="jpegQuality">This parameter is the Jpeg quality for saving the tile when ImageFormat is Jpeg.</param>
-            <param name="layers">This parameter is the layer collection for drawing the tile.</param>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.WpfDesktopEdition.GdiPlusLayerTileArguments.Layers">
-            <summary>
-            This property gets a collection of layer for drawing the tile.
             </summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.WpfDesktopEdition.EditInteractiveOverlay">

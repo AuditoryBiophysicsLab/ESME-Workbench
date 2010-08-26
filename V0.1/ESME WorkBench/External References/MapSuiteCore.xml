@@ -15052,6 +15052,22 @@
             </summary>
             <returns> string containing page contents </returns>
         </member>
+        <member name="T:ThinkGeo.MapSuite.Core.SendingRequestWmsRasterSourceEventArgs">
+            <summary>
+            The event args containing the event data used by SecuredTiledWmsRasterSource.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.SendingRequestWmsRasterSourceEventArgs.#ctor(System.Uri)">
+            <summary>
+            Create an instance of SendingRequestWmsRasterSourceEventArgs
+            </summary>
+            <param name="requestUri"></param>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.SendingRequestWmsRasterSourceEventArgs.RequestUri">
+            <summary>
+            The request uri
+            </summary>
+        </member>
         <member name="T:ThinkGeo.MapSuite.Core.OverwriteMode">
             <summary>
             This enumeration represents whether a file should be overwrite or not if the file
@@ -15420,6 +15436,9 @@
         </member>
         <member name="F:ThinkGeo.MapSuite.Core.WellKnownType.Multipolygon">
             <summary>A MultiPolygon is a object composed of one or more Polygon elements.</summary>
+        </member>
+        <member name="F:ThinkGeo.MapSuite.Core.WellKnownType.GeometryCollection">
+            <summary>A GeometryCollection is a object composed of one or more Shape elements.</summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.Core.DrawingLineCap">
             <summary>
@@ -16023,6 +16042,90 @@
         <member name="F:ThinkGeo.MapSuite.Core.WorldMapKitProjection.SphericalMercator">
             <summary>
             SphericalMercator, for example, the Google Maps use EPSG:900913 is spherical mercator.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.OpenStreetMapLayer.OpenCore">
+            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a Layer which has already been opened, it will throw an InvalidOperationException.</exception>
+            <summary>This method opens the Layer so that it is initialized and ready to use.</summary>
+            <remarks>
+            This abstract method is called from the concrete public method Open. The
+            open method plays an important role, as it is responsible for initializing the Layer.
+            Most methods on the Layer will throw an exception if the state of the Layer is not
+            opened. When the map draws each layer, the layer will be opened as one of its first steps;
+            then, after it is finished drawing with that layer, it will close it. In this way, we
+            are sure to release all resources used by the Layer.<br/>
+            <br/>
+            When implementing the abstract method, consider opening the FeatureSource or
+            RasterSource. You will get a chance to close these in the Close method of the
+            Layer.
+            </remarks>
+            <returns>None</returns>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.OpenStreetMapLayer.CloseCore">
+            <summary>
+            This method closes the Layer and releases any resources it was
+            using.
+            </summary>
+            <returns>None</returns>
+            <remarks>
+            This abstract method is called from the concrete public method Close. The close
+            method plays an important role in the life cycle of the Layer. It may be called after
+            drawing to release any memory and other resources that were allocated since the Open
+            method was called.<br/>
+            	<br/>
+            If you override this method, it is recommended that you take the following things
+            into account: This method may be called multiple times, so we suggest you write the method so
+            that that a call to a closed Layer is ignored and does not generate an error.
+            We also suggest that in the Close you free all resources that have been opened.
+            Remember that the object will not be destroyed, but will be re-opened possibly in the
+            near future.
+            </remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.OpenStreetMapLayer.DrawCore(ThinkGeo.MapSuite.Core.GeoCanvas,System.Collections.ObjectModel.Collection{ThinkGeo.MapSuite.Core.SimpleCandidate})">
+            <summary>This method draws the Layer.</summary>
+            <remarks>
+            This method is the concrete wrapper for the abstract method DrawCore. This
+                method draws the representation of the layer based on the extent you provided.<br/>
+            	<br/>
+            When implementing this abstract method, consider each feature and its column data
+            values. You can use the full power of the GeoCanvas to do the drawing. If you need
+            column data for a feature, be sure to override the GetRequiredColumnNamesCore and add
+            the columns you need to the collection. In many of the styles, we add properties that
+            allow the user to specify which field they need; then, in the GetRequiredColumnNamesCore,
+            we read that property and add it to the collection.
+            </remarks>
+            <returns>None</returns>
+            <param name="canvas">This parameter is the canvas object or a GeoImage to draw on.</param>
+            <param name="labelsInAllLayers">
+            This parameter represents the labels used for collision detection and duplication
+            checking.
+            </param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.OpenStreetMapLayer.FetchImageInThread(System.Object)">
+            <summary>
+            Fetch the image from GoogleMaps service in other thread.
+            </summary>
+            <param name="obj">Represents an object that encapsulates the parameters which will pass in the thread.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.OpenStreetMapLayer.GetPictureFormat">
+            <summary>
+            Get picture format string which will use for request url.
+            </summary>
+            <returns>Get picture format string which will use for request url.</returns>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.OpenStreetMapLayer.TimeoutInSeconds">
+            <summary>
+            Gets or sets a value represents the request timeout from the OpenStreetMap server.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.OpenStreetMapLayer.CacheDirectory">
+            <summary>
+            Gets or sets a value represents the directory for image cache.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.OpenStreetMapLayer.WebProxy">
+            <summary>
+            This property gets or sets the proxy used for requesting a Web Response.
             </summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.Core.GraticuleAdornmentLayer">
@@ -21048,6 +21151,16 @@
             <param name="canvasWidth">This parameter represents the width of the image you want to draw.</param>
             <param name="canvasHeight">This parameter represents the height of the image you want to draw.</param>
         </member>
+        <member name="P:ThinkGeo.MapSuite.Core.WorldMapKitWmsRasterSource.ClientId">
+            <summary>
+            Gets or sets a value that is unique to your client ID, please keep your key secure.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.WorldMapKitWmsRasterSource.PrivateKey">
+            <summary>
+            Gets or sets a value that is unique to your client ID, please keep your key secure.
+            </summary>
+        </member>
         <member name="P:ThinkGeo.MapSuite.Core.WorldMapKitWmsRasterSource.ActiveLayerNames">
             <summary>
             This property allows the active layers requested from the client to be shown on the map.
@@ -21110,6 +21223,22 @@
             <summary> 
             AccessConstraints element. 
             </summary> 
+        </member>
+        <member name="T:ThinkGeo.MapSuite.Core.SentRequestWmsRasterSourceEventArgs">
+            <summary>
+            The event args containing the event data used by SecuredTiledWmsRasterSource.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.SentRequestWmsRasterSourceEventArgs.#ctor(System.Net.HttpWebResponse)">
+            <summary>
+            Create an instance of SentRequestWmsRasterSourceEventArgs
+            </summary>
+            <param name="response"></param>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.SentRequestWmsRasterSourceEventArgs.HttpWebResponse">
+            <summary>
+            Gets or sets a value indicating the response from Server.
+            </summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.Core.ExecutingSqlStatementMsSql2008FeatureSourceEventArgs">
             <summary>
@@ -21470,343 +21599,6 @@
         <member name="P:ThinkGeo.MapSuite.Core.PointStyles.Capital3">
             <summary> Get the commonly-used <strong>PointStyle</strong> to render a capital.</summary>
         </member>
-        <member name="T:ThinkGeo.MapSuite.Core.OracleFeatureLayer">
-            <summary>This class represents a Layer backed by Oracle Spatial.</summary>
-            <remarks>None</remarks>
-        </member>
-        <member name="T:ThinkGeo.MapSuite.Core.FeatureLayer">
-            <summary>This class represents a layer that is comprised of feature data.</summary>
-            <remarks>
-            This abstract class is the basis for all feature-based layers in the system. Its
-            methods and properties deal with feature data manipulation. Some of the classes that
-            currently inherit from this are ShapeFileFeatureLayer, OracleFeatureLayer and so on.<br/>
-            	<br/>
-            When creating your own FeatureLayer, you need only to set a FeatureSource and create a
-            useful constructor; the class will take care of the rest. There are no required
-            abstract members. It may be helpful for you to add additional properties specific to
-            your FeatureSource.
-            </remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.#ctor">
-            <summary>This is a constructor for this class.</summary>
-            <returns>None</returns>
-            <remarks>This is a constructor for this class.</remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.OnDrawingFeatures(ThinkGeo.MapSuite.Core.DrawingFeaturesEventArgs)">
-            <summary>This method raises the DrawingFeatures event.</summary>
-            <returns>None</returns>
-            <remarks>
-            	<list type="bullet">
-            		<item>You can call this method from a derived class to enable it to raise the
-                    event. This may be useful if you plan to extend the FeatureLayer and you need
-                    access to the event.<br/>
-            			<br/>
-                    This event is meant to allow you to add or remove the features to be drawn.</item>
-            	</list>
-            </remarks>
-            <param name="e">This parameter represents the event arguments for the event.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.SetupTools">
-            <remarks>
-            	<para>This method is the concrete wrapper for the abstract method SetupToolsCore.
-                The SetupTools method allows you to create the QueryTool, EditTools and other tools
-                you may need on your object. We created this method so that if you want to extend
-                one of the tool classes, you can override the SetupToolsCore and create any class you
-                want.<br/>
-            		<br/>
-                As this is a concrete public method that wraps a Core method, we reserve the right
-                to add events and other logic to pre- or post-process data returned by the Core version
-                of the method. In this way, we leave our framework open on our end, but also allow you
-                the developer to extend our logic to suit your needs. If you have questions about this,
-                please contact our support team as we would be happy to work with you on extending our
-                framework.</para>
-            </remarks>
-            <summary>This method sets up the EditTools and QueryTools objects.</summary>
-            <returns>None</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.SetupToolsCore">
-            <remarks>
-            <para>This method is the concrete wrapper for the abstract method SetupTools.
-            The SetupTools method allows you to create the QueryTool, EditTools and other tools
-            you may need on your object. We created this method so that if you want to extend
-            one of the tool classes, you can override the SetupToolsCore and create any class you
-            want.</para>
-            </remarks>
-            <summary>This method sets up the EditTools and QueryTools objects.</summary>
-            <returns>None</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.OpenCore">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a FeatureLayer which has already been opened, it will throw an InvalidOperationException.</exception>
-            <summary>
-            This method opens the FeatureLayer so that it is initialized and ready to
-            use.
-            </summary>
-            <remarks>
-            This abstract method is called from the concrete public method Open. The Open
-            method plays an important role, as it is responsible for initializing the FeatureLayer.
-            Most methods on the FeatureLayer will throw an exception if the state of the FeatureLayer
-            is not opened. When the map draws each FeatureLayer, it will open the layer as one of its first
-            steps, then after it is finished drawing with that FeatureLayer it will close it. In
-            this way we are sure to release all resources used by the FeatureLayer.
-            </remarks>
-            <returns>None</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.CloseCore">
-            <summary>
-            This method closes the FeatureSource and releases any resources it was
-            using.
-            </summary>
-            <returns>None</returns>
-            <remarks>
-            This protected virtual method is called from the concrete public method Close.
-            The close method plays an important role in the life cycle of the FeatureLayer. It may
-            be called after drawing to release any memory and other resources that were allocated
-            since the Open method was called.<br/>
-            	<br/>
-            If you override this method, it is recommended that you take the following things
-            into account: This method may be called multiple times, so we suggest you write the method so
-            that that a call to a closed FeatureLayer is ignored and does not generate an error.
-            We also suggest that in the Close you free all resources that have been opened.
-            Remember that the object will not be destroyed, but will be re-opened possibly in the
-            near future.
-            </remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.GetBoundingBoxCore">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a FeatureLayer which has not been opened, it will throw an InvalidOperationException.</exception>
-            <summary>This method returns the bounding box of the FeatureLayer.</summary>
-            <returns>This method returns the bounding box of the FeatureLayer.</returns>
-            <remarks>
-            This method is called from the concrete public method GetBoundingBox. It returns
-            the bounding box of the FeatureLayer.
-            </remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.DrawCore(ThinkGeo.MapSuite.Core.GeoCanvas,System.Collections.ObjectModel.Collection{ThinkGeo.MapSuite.Core.SimpleCandidate})">
-            <summary>
-            This method will draw the FeatureLayer source based on the parameters
-            provided.
-            </summary>
-            <returns>None</returns>
-            <remarks>
-            The DrawCore will be called when the layer is being drawn. It will check if the InternalFeatures are
-            within the extent and whether it is within a defined zoom level. If these parameters
-            are met, then it will apply the styles of the proper zoom level to the InternalFeatures for
-            drawing. Lastly, it will draw InternalFeatures on the GeoImage or native image passed in to the
-            method.
-            </remarks>
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a FeatureLayer is not opened, it will throw an InvalidOperationException.</exception>
-            <exception cref="T:System.ArgumentNullException" caption="ArgumentNullException">If you pass a null as the labeledInLayers, we will throw an ArgumentNullException.</exception>
-            <exception cref="T:System.ArgumentNullException" caption="ArgumentNullException">If you pass a null as the worldExtent, we will throw an ArgumentNullException.</exception>
-            <exception cref="T:System.ArgumentNullException" caption="ArgumentNullException">If you pass a null as the image, we will throw an ArgumentNullException.</exception>
-            <param name="canvas">
-            This parameter is the GeoCanvas used to Draw the layer.
-            </param>
-            <param name="labelsInAllLayers">This parameter is not used for ImageLayers.</param>
-        </member>
-        <member name="E:ThinkGeo.MapSuite.Core.FeatureLayer.DrawingFeatures">
-            <summary>This event is raised when features are about to be drawn in the layer.</summary>
-            <remarks>
-            This event is raised when features are about to be drawn in the layer. In the event
-            arguments, there is a collection of features to be drawn. You can easily add or remove
-            items from this collection so that extra items will draw or not draw.
-            </remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.EditTools">
-            <summary>
-            This property gets the EditTools that allow you to easily edit InternalFeatures in the
-            Feature Layer.
-            </summary>
-            <value>
-            This property gets the EditTools that allow you to easily edit InternalFeatures in the
-            Feature Layer.
-            </value>
-            <remarks>
-            The EditTools are supplied as an easily accessible wrapper for the editing
-            methods of the FeatureSource.
-            </remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.FeatureIdsToExclude">
-            <summary>
-            A collection of strings representing record id of features not to get in the Layer. 
-            </summary>
-            <remarks>
-            This string collection is a handy place to specify what records not to get from the source. 
-            Suppose you have a shape file of roads and you want to hide the roads within a particular 
-            rectangle, simply execute GetFeaturesInsideBoundingBox() and add the id of the return 
-            features to the collection and forget about them. Since you can set this by Layer it 
-            makes is easy to determine what to and what not to. 
-            </remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.QueryTools">
-            <summary>
-            This property gets the QueryTools that allow you to easily query Features from the
-            Feature Layer.
-            </summary>
-            <value>
-            This property gets the QueryTools that allow you to easily query Features from the
-            Feature Layer.
-            </value>
-            <remarks>
-            This property gets the QueryTools that allow you to easily query Features from the
-            Feature Layer. The QueryTools are supplied as an easily accessible wrapper for the
-            query methods of the FeatureSource.
-            </remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.FeatureSource">
-            <summary>This property gets the FeatureSource for the FeatureLayer.</summary>
-            <value>This property gets the FeatureSource for the FeatureLayer.</value>
-            <remarks>
-            The FeatureSource is the provider of data to the FeatureLayer. There are different
-            FeatureSource classes to match the various ways that feature data is stored. It is
-            important that, when you inherit from the FeatureLayer, in the constructor you set
-            the FeatureSource you want to use.
-            </remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.DrawingQuality">
-            <summary>
-            This property gets and sets the general drawing quality for the FeatureLayer's
-            canvas.
-            </summary>
-            <value>
-            This property gets the general drawing quality for the FeatureLayer's
-            canvas.
-            </value>
-            <remarks>
-            The DrawingQuality enumeration allows you to control, in a macro sense, the drawing
-            quality that will be used in the GeoCanvas. Each GeoCanvas, which is responsible for
-            drawing of the features, may have its own specialized drawing quality properties. What the
-            DrawingQuality enumeration does is define some general guidelines for each GeoCanvas.
-            For example, if you set the DrawingQuality to HighSpeed, then inside of the
-            GdiPlusGeoCanvas there is a profile for HighSpeed. This profile sets specific
-            properties, such as the smoothing mode and composing drawing mode of the
-            GdiPlusGeoCanvas. As each GeoCanvas may have different drawing quality properties, this
-            offers a general way to control drawing quality and speed.<br/>
-            	<br/>
-            If you need complete control over how a specific GeoCanvas will draw, then you can
-            set the DrawingQuality to Custom. This will tell the specific GeoCanvas to use the
-            properties on its own object instead of one of the pre-defined profiles. If one of the
-            profiles -- such as HighSpeed or HighQuality -- is set, then the specific GeoCanvas ignores its
-            own properties for drawing quality.
-            </remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.ZoomLevelSet">
-            <summary>
-            This property gets and sets the ZoomLevelSet, which contains the specific zoom
-            levels for the FeatureLayer.
-            </summary>
-            <value>
-            This property gets the ZoomLevelSet, which contains the specific zoom levels for
-            the FeatureLayer.
-            </value>
-            <remarks>
-            The ZoomLevelSet is a class that contains all of the ZoomLevels for the
-            FeatureLayer. Each ZoomLevel contains the styles that are used to determine how to draw the
-            InternalFeatures.
-            </remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.DrawingMarginPercentage">
-            <summary>
-            This property gets and sets the extra drawing margin as a percentage around the
-            map that draw to ensure that labeling is correct.
-            </summary>
-            <value>
-            This property gets the extra drawing margin as a percentage around the map that
-            draws to ensure that labeling is correct.
-            </value>
-            <remarks>
-            This extra margin that we draw exists so that labels match up if they are partially
-            cut off.
-            </remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.IsOpenCore">
-            <summary>
-            This property returns true if the FeatureLayer is open and false if it is
-            not.
-            </summary>
-            <value>
-            This property returns true if the FeatureLayer is open and false if it is
-            not.
-            </value>
-            <remarks>
-            Various methods on the FeatureLayer require that it be in an open state. If one of
-            those methods is called when the state is not open, then the method will throw an
-            exception. To enter the open state, you must call the FeatureLayer Open method. The
-            method will raise an exception if the current FeatureLayer is already open.
-            </remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureLayer.#ctor">
-            <summary>This is the constructor for the class.</summary>
-            <overloads>This is the default constructor, but it is not typically used.</overloads>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureLayer.#ctor(System.String,System.String,System.String)">
-            <summary>This is the constructor for the class.</summary>
-            <overloads>
-            This constructor allows you to pass in all of the data to create the
-            Layer.
-            </overloads>
-            <returns>None</returns>
-            <remarks>None</remarks>
-            <param name="connectionString">This parameter represents the connection string that will be used to connect to the server.</param>
-            <param name="tableName">This parameter represents the table name being accessed.</param>
-            <param name="featureIdColumn">
-            This parameter represents the name of the column that holds the unique feature
-            Id.
-            </param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureLayer.GetFirstGeometryType">
-            <summary>
-            Get The shape type from the first record.
-            </summary>
-            <returns>The shape type of the first record.</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureLayer.ExecuteNonQuery(System.String)">
-            <summary>This method executes a query that does not return a SQL result.</summary>
-            <returns>None</returns>
-            <remarks>This methods executes a query that has no results.</remarks>
-            <param name="sqlStatement">This parameter represents the SQL statement that will be executed.</param>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureLayer.CommandTimeout">
-            <summary>
-            This property gets and sets the amount of time that can elapse before the command will
-            timeout and abort.
-            </summary>
-            <decimalDegreesValue>
-            This property gets the amount of time that can elapse before the command will timeout and
-            abort.
-            </decimalDegreesValue>
-            <remarks>You can use this to set a time limit for the query before it times out.</remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureLayer.ConnectionString">
-            <summary>
-            This property gets and sets the connection string that will be used to connect to the
-            server.
-            </summary>
-            <decimalDegreesValue>This property gets the connection string that will be used to connect to the server.</decimalDegreesValue>
-            <remarks>None</remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureLayer.TableName">
-            <summary>This property gets or sets the table name the database will use.</summary>
-            <decimalDegreesValue>This property gets the table name the database will use.</decimalDegreesValue>
-            <remarks>None</remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureLayer.FeatureIdColumn">
-            <summary>
-            This property gets or sets the name of the column that holds the unique feature
-            Id.
-            </summary>
-            <decimalDegreesValue>
-            This property gets the name of the column that holds the unique feature
-            Id.
-            </decimalDegreesValue>
-            <remarks>None</remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureLayer.HasBoundingBox">
-            <summary>
-            This property checks to see if a Layer has a BoundingBox or not. If it has no
-            BoundingBox, it will throw an exception when you call the GetBoundingBox() and
-            GetFullExtent() APIs. In OracleFeatureLayer, we override this API and mark it as true.
-            </summary>
-            <remarks>The default implementation in the base class returns false.</remarks>
-        </member>
         <member name="T:ThinkGeo.MapSuite.Core.ShapeFileReadWriteMode">
             <summary>This enumeration represent read only or read-write nature of a Shape File.</summary>
             <remarks>None</remarks>
@@ -22108,6 +21900,265 @@
             <summary>This property gets and sets the SqlStatementType of the SqlStatement that will be excuted.</summary>
             <remarks>None</remarks>
         </member>
+        <member name="T:ThinkGeo.MapSuite.Core.FeatureLayer">
+            <summary>This class represents a layer that is comprised of feature data.</summary>
+            <remarks>
+            This abstract class is the basis for all feature-based layers in the system. Its
+            methods and properties deal with feature data manipulation. Some of the classes that
+            currently inherit from this are ShapeFileFeatureLayer, OracleFeatureLayer and so on.<br/>
+            	<br/>
+            When creating your own FeatureLayer, you need only to set a FeatureSource and create a
+            useful constructor; the class will take care of the rest. There are no required
+            abstract members. It may be helpful for you to add additional properties specific to
+            your FeatureSource.
+            </remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.#ctor">
+            <summary>This is a constructor for this class.</summary>
+            <returns>None</returns>
+            <remarks>This is a constructor for this class.</remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.OnDrawingFeatures(ThinkGeo.MapSuite.Core.DrawingFeaturesEventArgs)">
+            <summary>This method raises the DrawingFeatures event.</summary>
+            <returns>None</returns>
+            <remarks>
+            	<list type="bullet">
+            		<item>You can call this method from a derived class to enable it to raise the
+                    event. This may be useful if you plan to extend the FeatureLayer and you need
+                    access to the event.<br/>
+            			<br/>
+                    This event is meant to allow you to add or remove the features to be drawn.</item>
+            	</list>
+            </remarks>
+            <param name="e">This parameter represents the event arguments for the event.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.SetupTools">
+            <remarks>
+            	<para>This method is the concrete wrapper for the abstract method SetupToolsCore.
+                The SetupTools method allows you to create the QueryTool, EditTools and other tools
+                you may need on your object. We created this method so that if you want to extend
+                one of the tool classes, you can override the SetupToolsCore and create any class you
+                want.<br/>
+            		<br/>
+                As this is a concrete public method that wraps a Core method, we reserve the right
+                to add events and other logic to pre- or post-process data returned by the Core version
+                of the method. In this way, we leave our framework open on our end, but also allow you
+                the developer to extend our logic to suit your needs. If you have questions about this,
+                please contact our support team as we would be happy to work with you on extending our
+                framework.</para>
+            </remarks>
+            <summary>This method sets up the EditTools and QueryTools objects.</summary>
+            <returns>None</returns>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.SetupToolsCore">
+            <remarks>
+            <para>This method is the concrete wrapper for the abstract method SetupTools.
+            The SetupTools method allows you to create the QueryTool, EditTools and other tools
+            you may need on your object. We created this method so that if you want to extend
+            one of the tool classes, you can override the SetupToolsCore and create any class you
+            want.</para>
+            </remarks>
+            <summary>This method sets up the EditTools and QueryTools objects.</summary>
+            <returns>None</returns>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.OpenCore">
+            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a FeatureLayer which has already been opened, it will throw an InvalidOperationException.</exception>
+            <summary>
+            This method opens the FeatureLayer so that it is initialized and ready to
+            use.
+            </summary>
+            <remarks>
+            This abstract method is called from the concrete public method Open. The Open
+            method plays an important role, as it is responsible for initializing the FeatureLayer.
+            Most methods on the FeatureLayer will throw an exception if the state of the FeatureLayer
+            is not opened. When the map draws each FeatureLayer, it will open the layer as one of its first
+            steps, then after it is finished drawing with that FeatureLayer it will close it. In
+            this way we are sure to release all resources used by the FeatureLayer.
+            </remarks>
+            <returns>None</returns>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.CloseCore">
+            <summary>
+            This method closes the FeatureSource and releases any resources it was
+            using.
+            </summary>
+            <returns>None</returns>
+            <remarks>
+            This protected virtual method is called from the concrete public method Close.
+            The close method plays an important role in the life cycle of the FeatureLayer. It may
+            be called after drawing to release any memory and other resources that were allocated
+            since the Open method was called.<br/>
+            	<br/>
+            If you override this method, it is recommended that you take the following things
+            into account: This method may be called multiple times, so we suggest you write the method so
+            that that a call to a closed FeatureLayer is ignored and does not generate an error.
+            We also suggest that in the Close you free all resources that have been opened.
+            Remember that the object will not be destroyed, but will be re-opened possibly in the
+            near future.
+            </remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.GetBoundingBoxCore">
+            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a FeatureLayer which has not been opened, it will throw an InvalidOperationException.</exception>
+            <summary>This method returns the bounding box of the FeatureLayer.</summary>
+            <returns>This method returns the bounding box of the FeatureLayer.</returns>
+            <remarks>
+            This method is called from the concrete public method GetBoundingBox. It returns
+            the bounding box of the FeatureLayer.
+            </remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.FeatureLayer.DrawCore(ThinkGeo.MapSuite.Core.GeoCanvas,System.Collections.ObjectModel.Collection{ThinkGeo.MapSuite.Core.SimpleCandidate})">
+            <summary>
+            This method will draw the FeatureLayer source based on the parameters
+            provided.
+            </summary>
+            <returns>None</returns>
+            <remarks>
+            The DrawCore will be called when the layer is being drawn. It will check if the InternalFeatures are
+            within the extent and whether it is within a defined zoom level. If these parameters
+            are met, then it will apply the styles of the proper zoom level to the InternalFeatures for
+            drawing. Lastly, it will draw InternalFeatures on the GeoImage or native image passed in to the
+            method.
+            </remarks>
+            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a FeatureLayer is not opened, it will throw an InvalidOperationException.</exception>
+            <exception cref="T:System.ArgumentNullException" caption="ArgumentNullException">If you pass a null as the labeledInLayers, we will throw an ArgumentNullException.</exception>
+            <exception cref="T:System.ArgumentNullException" caption="ArgumentNullException">If you pass a null as the worldExtent, we will throw an ArgumentNullException.</exception>
+            <exception cref="T:System.ArgumentNullException" caption="ArgumentNullException">If you pass a null as the image, we will throw an ArgumentNullException.</exception>
+            <param name="canvas">
+            This parameter is the GeoCanvas used to Draw the layer.
+            </param>
+            <param name="labelsInAllLayers">This parameter is not used for ImageLayers.</param>
+        </member>
+        <member name="E:ThinkGeo.MapSuite.Core.FeatureLayer.DrawingFeatures">
+            <summary>This event is raised when features are about to be drawn in the layer.</summary>
+            <remarks>
+            This event is raised when features are about to be drawn in the layer. In the event
+            arguments, there is a collection of features to be drawn. You can easily add or remove
+            items from this collection so that extra items will draw or not draw.
+            </remarks>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.EditTools">
+            <summary>
+            This property gets the EditTools that allow you to easily edit InternalFeatures in the
+            Feature Layer.
+            </summary>
+            <value>
+            This property gets the EditTools that allow you to easily edit InternalFeatures in the
+            Feature Layer.
+            </value>
+            <remarks>
+            The EditTools are supplied as an easily accessible wrapper for the editing
+            methods of the FeatureSource.
+            </remarks>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.FeatureIdsToExclude">
+            <summary>
+            A collection of strings representing record id of features not to get in the Layer. 
+            </summary>
+            <remarks>
+            This string collection is a handy place to specify what records not to get from the source. 
+            Suppose you have a shape file of roads and you want to hide the roads within a particular 
+            rectangle, simply execute GetFeaturesInsideBoundingBox() and add the id of the return 
+            features to the collection and forget about them. Since you can set this by Layer it 
+            makes is easy to determine what to and what not to. 
+            </remarks>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.QueryTools">
+            <summary>
+            This property gets the QueryTools that allow you to easily query Features from the
+            Feature Layer.
+            </summary>
+            <value>
+            This property gets the QueryTools that allow you to easily query Features from the
+            Feature Layer.
+            </value>
+            <remarks>
+            This property gets the QueryTools that allow you to easily query Features from the
+            Feature Layer. The QueryTools are supplied as an easily accessible wrapper for the
+            query methods of the FeatureSource.
+            </remarks>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.FeatureSource">
+            <summary>This property gets the FeatureSource for the FeatureLayer.</summary>
+            <value>This property gets the FeatureSource for the FeatureLayer.</value>
+            <remarks>
+            The FeatureSource is the provider of data to the FeatureLayer. There are different
+            FeatureSource classes to match the various ways that feature data is stored. It is
+            important that, when you inherit from the FeatureLayer, in the constructor you set
+            the FeatureSource you want to use.
+            </remarks>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.DrawingQuality">
+            <summary>
+            This property gets and sets the general drawing quality for the FeatureLayer's
+            canvas.
+            </summary>
+            <value>
+            This property gets the general drawing quality for the FeatureLayer's
+            canvas.
+            </value>
+            <remarks>
+            The DrawingQuality enumeration allows you to control, in a macro sense, the drawing
+            quality that will be used in the GeoCanvas. Each GeoCanvas, which is responsible for
+            drawing of the features, may have its own specialized drawing quality properties. What the
+            DrawingQuality enumeration does is define some general guidelines for each GeoCanvas.
+            For example, if you set the DrawingQuality to HighSpeed, then inside of the
+            GdiPlusGeoCanvas there is a profile for HighSpeed. This profile sets specific
+            properties, such as the smoothing mode and composing drawing mode of the
+            GdiPlusGeoCanvas. As each GeoCanvas may have different drawing quality properties, this
+            offers a general way to control drawing quality and speed.<br/>
+            	<br/>
+            If you need complete control over how a specific GeoCanvas will draw, then you can
+            set the DrawingQuality to Custom. This will tell the specific GeoCanvas to use the
+            properties on its own object instead of one of the pre-defined profiles. If one of the
+            profiles -- such as HighSpeed or HighQuality -- is set, then the specific GeoCanvas ignores its
+            own properties for drawing quality.
+            </remarks>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.ZoomLevelSet">
+            <summary>
+            This property gets and sets the ZoomLevelSet, which contains the specific zoom
+            levels for the FeatureLayer.
+            </summary>
+            <value>
+            This property gets the ZoomLevelSet, which contains the specific zoom levels for
+            the FeatureLayer.
+            </value>
+            <remarks>
+            The ZoomLevelSet is a class that contains all of the ZoomLevels for the
+            FeatureLayer. Each ZoomLevel contains the styles that are used to determine how to draw the
+            InternalFeatures.
+            </remarks>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.DrawingMarginPercentage">
+            <summary>
+            This property gets and sets the extra drawing margin as a percentage around the
+            map that draw to ensure that labeling is correct.
+            </summary>
+            <value>
+            This property gets the extra drawing margin as a percentage around the map that
+            draws to ensure that labeling is correct.
+            </value>
+            <remarks>
+            This extra margin that we draw exists so that labels match up if they are partially
+            cut off.
+            </remarks>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.FeatureLayer.IsOpenCore">
+            <summary>
+            This property returns true if the FeatureLayer is open and false if it is
+            not.
+            </summary>
+            <value>
+            This property returns true if the FeatureLayer is open and false if it is
+            not.
+            </value>
+            <remarks>
+            Various methods on the FeatureLayer require that it be in an open state. If one of
+            those methods is called when the state is not open, then the method will throw an
+            exception. To enter the open state, you must call the FeatureLayer Open method. The
+            method will raise an exception if the current FeatureLayer is already open.
+            </remarks>
+        </member>
         <member name="T:ThinkGeo.MapSuite.Core.CustomColumnFetchEventArgs">
             <summary>This class represents the parameters passed in through the CustomFieldFetch event.</summary>
             <remarks>
@@ -22402,6 +22453,33 @@
             This variable is in 16-bit decimalDegreesValue.
             </summary>
         </member>
+        <member name="M:ThinkGeo.MapSuite.Core.GeometryCollectionShape.#ctor">
+            <overloads>This overload creates the GeometryCollectionShape without any shapes.</overloads>
+            <summary>This constructor creates the GeometryCollectionShape.</summary>
+            <remarks>None</remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.GeometryCollectionShape.#ctor(System.Collections.Generic.IEnumerable{ThinkGeo.MapSuite.Core.BaseShape})">
+            <exception cref="T:System.ArgumentException" caption="ArgumentException">If you pass in any baseShapes which are invalid, we will throw an ArgumentException.</exception>
+            <exception cref="T:System.ArgumentNullException" caption="ArgumentNullException">If you pass a null as the baseShapes, we will throw an ArgumentNullException.</exception>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.GeometryCollectionShape.#ctor(System.String)">
+            <exception cref="T:System.ArgumentException" caption="ArgumentException">Passing invalid well-known text in the wellKnownText parameter will throw an ArgumentException.</exception>
+            <exception cref="T:System.ArgumentNullException" caption="ArgumentNullException">Passing a null as the wellKnownText parameter will throw an ArgumentNullException.</exception>
+            <summary>This constructor creates the GeometryCollectionShape.</summary>
+            <overloads>This constructor allows you to build the shape from well-known text.</overloads>
+            <returns>None</returns>
+            <remarks>None</remarks>
+            <param name="wellKnownText">This parameter is the well-known text used to build the shape.</param>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.GeometryCollectionShape.#ctor(System.Byte[])">
+            <exception cref="T:System.ArgumentException" caption="ArgumentException">Passing invalid well-known binary in the bytes parameter will throw an ArgumentException.</exception>
+            <exception cref="T:System.ArgumentNullException" caption="ArgumentNullException">Passing a null as the bytes parameter will throw an ArgumentNullException.</exception>
+            <returns>None</returns>
+            <remarks>None</remarks>
+            <summary>This constructor creates the GeometryCollectionShape.</summary>
+            <overloads>This constructor allows you to build the shape from well-known binary.</overloads>
+            <param name="wellKnownBinary">This parameter is the well-known binary used to build the shape.</param>
+        </member>
         <member name="T:ThinkGeo.MapSuite.Core.YahooMapsPictureFormat">
             <summary>This enumeration specifies the picture formats when getting images back to client from Yahoo Maps.</summary>
         </member>
@@ -22687,6 +22765,21 @@
                 </para>
             </remarks>
         </member>
+        <member name="E:ThinkGeo.MapSuite.Core.WmsRasterSource.SendingRequest">
+            <summary>
+            This event is called before sending the reqeust for raster image.
+            </summary>
+            <remarks>
+            This event is called before sending the reqeust for raster image.<br/>
+            It is typical that user want to get the url of reqeust and modify it according to their requirements. 
+            For example, user could create a signiture for it, and verify it on the server side.
+            </remarks>
+        </member>
+        <member name="E:ThinkGeo.MapSuite.Core.WmsRasterSource.SentRequest">
+            <summary>
+            This event is called after sent the request for raster image and the HttpWebResponse has come back.
+            </summary>
+        </member>
         <member name="P:ThinkGeo.MapSuite.Core.WmsRasterSource.ActiveLayerNames">
             <summary>
             This property allows the active layers requested from the client to be shown on the map.
@@ -22832,9 +22925,39 @@
             <param name="canvasWidth">This parameter represents the width of the image you want to draw.</param>
             <param name="canvasHeight">This parameter represents the height of the image you want to draw.</param>
         </member>
+        <member name="E:ThinkGeo.MapSuite.Core.TiledWmsRasterSource.SendingTile">
+            <summary>
+            This event is called before sending the reqeust for tile image.
+            </summary>
+            <remarks>
+            This event is called before sending the reqeust for tile image.<br/>
+            It is typical that user want to get the url of reqeust and modify it according to their requirements. 
+            For example, user could create a signiture for it, and verify it on the server side.
+            </remarks>
+        </member>
+        <member name="E:ThinkGeo.MapSuite.Core.TiledWmsRasterSource.SentTile">
+            <summary>
+            This event is called after sent the request for the tile image and the HttpWebResponse has come back.
+            </summary>
+        </member>
         <member name="P:ThinkGeo.MapSuite.Core.TiledWmsRasterSource.ServerUri">
             <summary>
             This property specifies the URI of the Tiled WMS server.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.TiledWmsRasterSource.ClientId">
+            <summary>
+            Gets or sets a value that is unique to your client ID, please keep your key secure.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.TiledWmsRasterSource.PrivateKey">
+            <summary>
+            Gets or sets a value that is unique to your client ID, please keep your key secure.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.TiledWmsRasterSource.Proxy">
+            <summary>
+            This property gets or sets the proxy used for requesting a Web Response.
             </summary>
         </member>
         <member name="P:ThinkGeo.MapSuite.Core.TiledWmsRasterSource.ActiveLayerNames">
@@ -26098,6 +26221,22 @@
         <member name="P:ThinkGeo.MapSuite.Core.WfsFeatureLayer.WebProxy">
             <summary>
             This property gets or sets the proxy used for requesting a Web Response.
+            </summary>
+        </member>
+        <member name="T:ThinkGeo.MapSuite.Core.SentTiledWmsLayerEventArgs">
+            <summary>
+            The event args containing the event data used by SecuredTiledWmsRasterSource.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.SentTiledWmsLayerEventArgs.#ctor(System.Net.HttpWebResponse)">
+            <summary>
+            Create an instance of SentTiledWmsLayerEventArgs
+            </summary>
+            <param name="response"></param>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.SentTiledWmsLayerEventArgs.HttpWebResponse">
+            <summary>
+            Gets or sets a value indicating the response from Server.
             </summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.Core.MapShape">
@@ -36525,9 +36664,52 @@
             <returns>None</returns>
             <remarks>None</remarks>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:ThinkGeo.MapSuite.Core.TiledWmsLayer.#ctor(System.String)" -->
-        <!-- Badly formed XML comment ignored for member "M:ThinkGeo.MapSuite.Core.TiledWmsLayer.#ctor(System.Uri)" -->
-        <!-- Badly formed XML comment ignored for member "M:ThinkGeo.MapSuite.Core.TiledWmsLayer.#ctor(System.Uri,System.Net.WebProxy)" -->
+        <member name="M:ThinkGeo.MapSuite.Core.TiledWmsLayer.#ctor(System.String)">
+            <summary>
+            This is the constructor the for the class.
+            </summary>
+            <param name="serverUri">URI of the Tiled WMS server.</param>
+            <remarks>This constructor initializes a new layer, then downloads and parses the service description.
+            </remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.TiledWmsLayer.#ctor(System.Uri)">
+            <summary>
+            This is the constructor the for the class.
+            </summary>
+            <param name="serverUri">URI of the Tiled WMS server.</param>
+            <remarks>This constructor initializes a new layer, then downloads and parses the service description.
+            </remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.TiledWmsLayer.#ctor(System.Uri,System.Net.WebProxy)">
+            <summary>
+            This is the constructor the for the class.
+            </summary>
+            <param name="serverUri">URI of the Tiled WMS server.</param>
+            <param name="webProxy">Proxy to use for the current Tiled WMS layer.</param>
+            <remarks>This constructor initializes a new layer, then downloads and parses the service description.
+            </remarks>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.TiledWmsLayer.#ctor(System.Uri,System.String,System.String)">
+            <summary>
+            This is the constructor the for the class.
+            </summary>
+            <param name="serverUri">URI of the Tiled WMS server.</param>
+            <param name="clientId">The clientId for the WMS Server.</param>
+            <param name="privateKey">The privateKey for the WMS Server.</param>
+            <remarks>This constructor initializes a new layer and assgin a client id and a private key.
+            </remarks>  
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.TiledWmsLayer.#ctor(System.Uri,System.Net.WebProxy,System.String,System.String)">
+            <summary>
+            This is the constructor the for the class.
+            </summary>
+            <param name="serverUri">URI of the Tiled WMS server.</param>
+            <param name="webProxy">Proxy to use for the current Tiled WMS layer.</param>
+            <param name="clientId">The clientId for the WMS Server.</param>
+            <param name="privateKey">The privateKey for the WMS Server.</param>
+            <remarks>This constructor initializes a new layer and assgin a license key.
+            </remarks>      
+        </member>
         <member name="M:ThinkGeo.MapSuite.Core.TiledWmsLayer.ClearCache">
             <summary>
             This method clears the tile cache of client.
@@ -36659,9 +36841,24 @@
             <param name="canvas">The target canvas to draw the layer.</param>
             <param name="e">The exception thrown when layer.Draw().</param>
         </member>
+        <member name="P:ThinkGeo.MapSuite.Core.TiledWmsLayer.ClientId">
+            <summary>
+            Gets or sets a value that is your Client Id.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.TiledWmsLayer.PrivateKey">
+            <summary>
+            Gets or sets a value that is unique to your client ID, please keep your key secure.
+            </summary>
+        </member>
         <member name="P:ThinkGeo.MapSuite.Core.TiledWmsLayer.ServerUri">
             <summary>
-            Gets or sets a uri of WMS Server.
+            Gets or sets a server uri of Tiled WMS Server.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.TiledWmsLayer.WebProxy">
+            <summary>
+            This property gets or sets the proxy used for requesting a Web Response.
             </summary>
         </member>
         <member name="P:ThinkGeo.MapSuite.Core.TiledWmsLayer.OutputFormat">
@@ -36677,14 +36874,9 @@
             This property gets or sets the projected or geographic coordinate reference system to be used.
             </summary>
         </member>
-        <member name="P:ThinkGeo.MapSuite.Core.TiledWmsLayer.WebProxy">
-            <summary>
-            This property gets or sets the proxy used for requesting a Web Response.
-            </summary>
-        </member>
         <member name="P:ThinkGeo.MapSuite.Core.TiledWmsLayer.TileCache">
             <summary>
-            Gets or sets a BitmapTileCache represents which tile cache will be use.
+            Gets or sets a BitmapTileCache represents which tile cache will be used.
             </summary>
         </member>
         <member name="P:ThinkGeo.MapSuite.Core.TiledWmsLayer.UpperScale">
@@ -44093,6 +44285,11 @@
               Looks up a localized string similar to The map unit you are using is not compatable with the GoogleLayer .  Make sure you are using Meters and that your projection is 90013 to ensure compatability..
             </summary>
         </member>
+        <member name="P:ThinkGeo.MapSuite.Core.ExceptionDescription.GeographicUnitNotValidWithOpenStreetMap">
+            <summary>
+              Looks up a localized string similar to The map unit you are using is not compatable with the OpenStreetMap .  Make sure you are using Meters to ensure compatability with OpenStreetMap service..
+            </summary>
+        </member>
         <member name="P:ThinkGeo.MapSuite.Core.ExceptionDescription.GeoImageIsNotValid">
             <summary>
               Looks up a localized string similar to The input GeoImage object is not a valid GeoImage type..
@@ -44371,6 +44568,11 @@
         <member name="P:ThinkGeo.MapSuite.Core.ExceptionDescription.ShapeFileBoundingBoxIsValid">
             <summary>
               Looks up a localized string similar to The shape file bounding box is invalid..
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.ExceptionDescription.ShapefileFeatureSourceIdNotFromZero">
+            <summary>
+              Looks up a localized string similar to The Shapefile Id is one based, zero is an invalid Id..
             </summary>
         </member>
         <member name="P:ThinkGeo.MapSuite.Core.ExceptionDescription.ShapeFileNameIsInvalid">
@@ -47252,469 +47454,6 @@
             <value>This parameter returns the height of the rectangle.</value>
             <remarks>None</remarks>
         </member>
-        <member name="T:ThinkGeo.MapSuite.Core.OracleFeatureSource">
-            <summary>This class represents a FeatureSource backed by Oracle Spatial.</summary>
-            <remarks>None</remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.#ctor">
-            <summary>This is the constructor for the class.</summary>
-            <overloads>This is the default constructor but it is not typically used.</overloads>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.#ctor(System.String,System.String,System.String)">
-            <summary>This is the constructor for the class.</summary>
-            <overloads>
-            This constructor allows you to pass in all of the data to create the
-            FeatureSource.
-            </overloads>
-            <returns>None</returns>
-            <remarks>None</remarks>
-            <param name="connectionString">This parameter represents the connection string to connect to the server.</param>
-            <param name="tableName">This parameter represents the table name being accessed.</param>
-            <param name="featureIdColumn">
-            This parameter represents the name of the column that holds the unique feature
-            Id.
-            </param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.OnExecutingSqlStatement(ThinkGeo.MapSuite.Core.ExecutingSqlStatementOracleFeatureSourceEventArgs)">
-            <summary>This method allows you to raise the ExecutingSqlStatement event.</summary>
-            <returns>None</returns>
-            <remarks>
-            This method allows you to raise the ExecutingSqlStatement event. Normally events are not
-            accessible to derived classes so we exposed a way to raise the event is necessary
-            through this protected method.
-            </remarks>
-            <param name="e">
-            This parameter represents the event arguments you want to raise the ExecutingSqlStatement
-            event with.
-            </param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.GetFirstGeometryType">
-            <summary>
-            Get The shape type from the first record.
-            </summary>
-            <returns>The shape type of the first record.</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.ExecuteNonQueryCore(System.String)">
-            <summary>Executes a SQL statement against a connection object.</summary>
-            <returns>The number of rows affected.</returns>
-            <remarks>
-            	You can use ExecuteNonQuery to perform catalog
-                operations (for example, querying the structure of a database or creating database
-                objects such as tables), or to change the data in a database by executing UPDATE,
-                INSERT, or DELETE statements.
-            	Although ExecuteNonQuery does not return any
-                rows, any output parameters or return values mapped to parameters are populated
-                with data.
-            	For UPDATE, INSERT, and DELETE statements, the return value is the number of
-                rows affected by the command.
-            </remarks>
-            <param name="sqlStatement">The sqlStatement to be excuted.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.ExecuteQueryCore(System.String)">
-            <summary>
-            Executes the query and returns the result returned by the query.
-            </summary>
-            <returns>The result set in the format of dataTable.</returns>
-            <remarks>
-            Use the ExcuteScalar method to retrieve a single value from the database. This
-            reaquires less code than use the ExcuteQuery method and performing the operations
-            necessary to generate the single value using the data.
-            </remarks>
-            <param name="sqlStatement">The sqlStatement to be excuted.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.ExecuteScalarCore(System.String)">
-            <summary>
-            Executes the query and returns the first column of the first row in the result
-            set returned by the query. All other columns and rows are ignored.
-            </summary>
-            <returns>The first column of the first row in the result set.</returns>
-            <remarks>
-            Use the ExcuteScalar method to retrieve a single value from the database. This
-            reaquires less code than use the ExcuteQuery method and performing the operations
-            necessary to generate the single value using the data.
-            </remarks>
-            <param name="sqlStatement">The sqlStatement to be excuted.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.OpenCore">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a feature source which has already been opened it will throw an InvalidOperationException.</exception>
-            <summary>
-            This method opens the FeatureSource so that it is initialized and ready to
-            use.
-            </summary>
-            <remarks>
-            This protected virtual method is called from the concreate public method Open.
-            The open method play an important role as it is responsible for initializing the
-            FeatureSource. Most methods on the FeatureSource will throw an exception if the state
-            of the FeatureSource is not opened. When the map draws each layer it will open the
-            FeatureSource as one of its first steps, then after it is finished drawing with that
-            layer it will close it. In this way we are sure to release all resources used by the
-            FeatureSource.<br/>
-            	<br/>
-            When implementing this abstract method consider opening files for file based source,
-            connecting to databases in the database based sources and so on. You will get a chance
-            to close these in the Close method of the FeatureSource.
-            </remarks>
-            <returns>None</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.CloseCore">
-            <summary>
-            This method opens the FeatureSource so that it is initialized and ready to
-            use.
-            </summary>
-            <returns>None</returns>
-            <remarks>
-            This protected virtual method is called from the concreate public method Close.
-            The close method plays an important role in the life cycle of the FeatureSource. It may
-            be called after drawing to release any memory and other resources that were allocated
-            since the Open method was called.<br/>
-            	<br/>
-            It is recommended that if you override this method that you take the following things
-            into account. This method may be called multiple times so we suggest you write the so
-            that that a call to a closed FeatureSource is ignored and does not generate an error.
-            We also suggest that in the close you free all resources that have been opened.
-            Remember that the object will not be destroyed but will be re-opened possibly in the
-            near future.
-            </remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.GetCountCore">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">If the operation is done under source closed state it will throw a InvalidOperationException.</exception>
-            <summary>
-            This method returns the count of the number of records in this
-            FeatureSource.
-            </summary>
-            <returns>
-            This method returns the count of the number of records in this
-            FeatureSource.
-            </returns>
-            <remarks>
-            	<para>This protected virtual method is called from the concreate public method
-                GetCount. It does not take into account any transaction activity as this is the
-                responsibility of the concreate public method GetCount. In this way as a developer
-                if you choose to override this method you do not have to consider transaction at
-                all.<br/>
-            		<br/>
-                The default implementation of GetCountCore uses the GetAllRecordsCore method to
-                calculate how many records there are in the FeatureSource. We strongly recommend
-                that you provide your own implementation for this method that will be more
-                efficient<br/>
-            		<br/>
-                If you do not override this method the means it gets the count is by calling the
-                GetAllFeatureCore method and counting each feature. This is a very inefficient way
-                to get the count in most data sources. It is highly recommended that you override
-                this method and replace it with a highly optimized version. For example in a
-                ShapeFile the record count is in the main header of the file. Similarly if you are
-                using Oracle Spatial you can execute a simple query to get the count of all of the
-                record without returning them. In these ways you can greatly improve the
-                performance of this method.</para>
-            </remarks>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.GetFeaturesInsideBoundingBoxCore(ThinkGeo.MapSuite.Core.RectangleShape,System.Collections.Generic.IEnumerable{System.String})">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a feature source which has not been opened it will throw an InvalidOperationException.</exception>
-            <summary>
-            This method returns all of the InternalFeatures of this FeatureSource inside of the
-            specified bounding box.
-            </summary>
-            <returns>
-            The return decimalDegreesValue is a collection of all of the InternalFeatures that are inside of the
-            bounding box.
-            </returns>
-            <remarks>
-            This method returns all of the InternalFeatures of this FeatureSource inside of the
-            specified bounding box. If you are overriding this method you will not need to consider
-            anything about transactions as this is handled by the concreate version of this
-            method.<br/>
-            	<br/>
-            The default implementation of GetFeaturesInsideBoundingBoxCore uses the
-            GetAllRecordsCore method to determine which InternalFeatures are inside of the bounding box. We
-            strongly recommend that you provide your own implementation for this method that will
-            be more efficient. It is especially important for this method as many other default
-            virtual methods use this for their calculations. We highly recommend when you override
-            this method that you use any spatial indexes you have at your disposal to make this
-            method as fast as possible.
-            </remarks>
-            <param name="boundingBox">
-            This parameter represents the bounding box you with to find InternalFeatures inside
-            of.
-            </param>
-            <param name="returningColumnNames">
-            This parameter allows you to select the field names of the column data you wish
-            to return with each Feature.
-            </param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.GetFeaturesOutsideBoundingBoxCore(ThinkGeo.MapSuite.Core.RectangleShape,System.Collections.Generic.IEnumerable{System.String})">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a feature source which has not been opened it will throw an InvalidOperationException.</exception>
-            <returns>
-            This method returns all of the InternalFeatures of this FeatureSource outside of the
-            specified bounding box.
-            </returns>
-            <summary>
-            This method returns all of the InternalFeatures of this FeatureSource outside of the
-            specified bounding box.
-            </summary>
-            <remarks>
-            This method returns all of the InternalFeatures of this FeatureSource outside of the
-            specified bounding box. If you are in a transaction and that transaction is live then
-            it will also take that into consideration.<br/>
-            	<br/>
-            	<br/>
-            The default implementation of GetFeaturesOutsideBoundingBoxCore uses the
-            GetAllRecordsCore method to determine which InternalFeatures are outside of the bounding box.
-            We strongly recommend that you provide your own implementation for this method that
-            will be more efficient
-            </remarks>
-            <param name="boundingBox">
-            This parameter represents the bounding box you with to find InternalFeatures outside
-            of.
-            </param>
-            <param name="returningColumnNames">
-            This parameter allows you to select the field names of the column data you wish
-            to return with each Feature.
-            </param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.CommitTransactionCore(ThinkGeo.MapSuite.Core.TransactionBuffer)">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a feature source which is not in transaction it will throw an InvalidOperationException.</exception>
-            <summary>
-            This method will commit the existing transaction to its underlying source of
-            data.
-            </summary>
-            <remarks>
-            	<para>This method will commit the existing transaction to its underlying source of
-                data. It will pass back the results of how the commit went to include any error
-                received. If you are implementing your own FeatureSource then this is one of the
-                crucial methods you must create. It should be fairly straight forward that you will
-                loop through the transaction buffer and add, edit or delete the InternalFeatures in your
-                underlying data source. Remember to build and pass back the TransactionResult class
-                so that users of your FeatureSource can respond to failures you may encounter
-                committing the InternalFeatures. We will handle the end of the transaction and also the
-                cleanup of the transaction buffer. Your task will be to commit the records and
-                produce a TransactionResult return.</para>
-            	<para>The Transaction System</para>
-            	<para>The transaction system of a FeatureSource sits on top of the inherited
-                implementation of any specific source such as Oracle Spatial or Shape files. In
-                this way it functions the same way for every FeatureSource. You start by calling
-                the BeginTransaction. This allocates a collection of in memory change buffers that
-                are used to store changes until you commit the transaction. So for example when you
-                call the Add, Delete or Update method the changes to the feature are stored in
-                memory only. If for any reason you choose to abandon the transaction you can call
-                RollbackTransaction at any time and the in memory buffer will be deleted and the
-                changes will be lost. When you are ready to commit the transaction you call the
-                CommitTransaction and the collections of changes are then passed to the
-                CommitTransactionCore method and the implementer of the specific FeatureSource is
-                responsible for integrating your changes into the underlying FeatureSource. By
-                default the IsLiveTransaction property is set to false which means that until you
-                commit the changes the FeatureSource API will not reflect any changes that are in
-                the temporary editing buffer.</para>
-            	<para>In the case where the IsLiveTransaction is set to true then things function
-                slightly differently. The live transaction concept means that all of the
-                modification you perform during a transaction are live from the standpoint of the
-                querying methods on the object.</para>
-            	<para>To setup an example imagine that you have a FeatureSource that has 10 records
-                in it. Next you begin a transaction and then call GetAllFeatures, the result would
-                be 10 records. After that you call a delete on one of the records and call the
-                GetAllFeatures again, this time you only get nine records. You receive nine records
-                even though the transaction has not yet been committed. In the same sense you could
-                have added a new record or modified an existing one and those changes are
-                considered live though not committed.</para>
-            	<para>In the case where you modify records such as expanding the size of a polygon
-                those changes as well are reflected. So for example you expand a polygon by
-                doubling its size and then do a spatial query that would not normally return the
-                smaller record but would return the larger records, in this case the larger record
-                is returned. You can set this property to be false as well in which case all of the
-                spatial related methods would ignore anything that is currently in the transaction
-                buffer waiting to be committed. In this case only after committing the transaction
-                would the FeatureSource reflect the changes.</para>
-            </remarks>
-            <returns>
-            The return decimalDegreesValue of this method is a TransactionResult class which gives you the
-            status of the transaction you just committed. It includes how many of the updates,
-            adds, and deletes were successful and any error that were encountered during the
-            committing of the transaction.
-            </returns>
-            <param name="transactions">
-            This parameter encapsulates all of the adds, edits and deleted that make up the
-            transaction. You will use this data to write the changes to your underlying data
-            source.
-            </param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.GetAllFeaturesCore(System.Collections.Generic.IEnumerable{System.String})">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a feature source which has not been opened it will throw an InvalidOperationException.</exception>
-            <summary>This method returns all of the InternalFeatures in the FeatureSource.</summary>
-            <returns>
-            The return decimalDegreesValue is a collection of all of the InternalFeatures in the
-            FeatureSource.
-            </returns>
-            <remarks>
-            This method returns all of the InternalFeatures in the FeatureSource. You will not need
-            to consider anything about pending transactions as this will be handled in the non Core
-            version of the method.<br/>
-            	<br/>
-            The main purpose of this method is to be the anchor of all of our default virtual
-            implementations within this class. We wanted as the framework developers to provide you
-            the user with as much default virtual implementation as possible. To do this we needed
-            a way to get access to all of the features. For example, we want to create a default
-            implementation for finding all of the InternalFeatures in a bounding box. Because this is an
-            abstract class we do not know the specifics of the underlying data or how its spatial
-            indexes work. What we do know is that if we get all the records then we can brute force
-            the answer. In this way if you inherited form this class and only implemented this one
-            method we can provide default implementations for virtually every other API.<br/>
-            	<br/>
-            While this is nice for you the developer if you decide to create your own FeatureSource
-            it comes with a price. The price is that it is very inefficient. In the case we just
-            discussed about finding all of the InternalFeatures in a bounding box we would not want to look
-            at every record to fulfil this method. Instead we would want to override the
-            GetFeaturesInsideBoundingBoxCore and implement specific code that would be fast. For
-            example in Oracle Spatial there is a specific SQL statement to do this operation very
-            quickly. The same holds true with other specific FeatureSource examples.<br/>
-            	<br/>
-            Most default implementations in the FeatureSource call the
-            GetFeaturesInsideBoundingBoxCore which by default calls the GetAllFeaturesCore. It is
-            our advice that if you create your own FeatureSource that you ALWAYS override the
-            GetFeatureInsideBoundingBox. It will ensure that nearly every other API will operate
-            efficiently. Please see the specific API to determine what method it uses.
-            </remarks>
-            <param name="returningColumnNames">
-            This parameter allows you to select the field names of the column data you wish
-            to return with each Feature.
-            </param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.GetColumnsCore">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a feature source which has not been opened it will throw an InvalidOperationException.</exception>
-            <summary>This method returns the columns available for the FeatureSource.</summary>
-            <remarks>
-            As this is the abstract core version of the Columns method it is intended to
-            be overridden in inherited version of the class. When overriding you will be
-            responsible for getting a list of all of the columns supported by the FeatureSource. In
-            this way the FeatureSource will know what columns are available and will remove any
-            extra columns when making calls to other core methods. For example if you have a
-            FeatureSource that has three columns of information and the user calls a method and
-            requests four columns of information, something they can do with custom fields, we will
-            first compare what they are asking for to the results of the GetColumnsCore. In this
-            way we can strip out custom columns before calling other Core methods which are only
-            responsible for returning data in the FeatureSource. For more information on custom
-            fields you can see the documentation on the OnCustomFieldsFetch.
-            </remarks>
-            <returns>This method returns the columns available for the FeatureSource.</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.GetBoundingBoxCore">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">If the operation is done under source closed state it will throw a InvalidOperationException.</exception>
-            <remarks>
-            	<para>This protected virtual method is called from the concreate public method
-                GetBoundingBox. It does not take into account any transaction activity as this is
-                the responsibility of the concreate public method GetBoundingBox. In this way as a
-                developer if you choose to override this method you do not have to consider
-                transaction at all.<br/>
-            		<br/>
-                The default implementation of GetBoundingBoxCore uses the GetAllRecordsCore method
-                to calculate the bounding box of the FeatureSource. We strongly recommend that you
-                provide your own implementation for this method that will be more efficient<br/>
-            		<br/>
-                If you do not override this method the means it gets the BoundingBox is by calling
-                the GetAllFeatureCore method and deriving it from each feature. This is a very
-                inefficient way to get the BoundingBox in most data sources. It is highly
-                recommended that you override this method and replace it with a highly optimized
-                version. For example in a ShapeFile the BoundingBox is in the main header of the
-                file. Similarly if you are using Oracle Spatial you can execute a simple query to
-                get the BoundingBox of all of the record without returning them. In these ways you
-                can greatly improve the performance of this method.</para>
-            </remarks>
-            <summary>
-            This method returns the bounding box which encompasses all of the features in the
-            FeatureSource.
-            </summary>
-            <returns>
-            This method returns the bounding box which encompasses all of the features in the
-            FeatureSource.
-            </returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.Core.OracleFeatureSource.GetFeaturesByIdsCore(System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String})">
-            <exception cref="T:System.InvalidOperationException" caption="InvalidOperationException">In the event you attempt to call this method on a feature source which has not been opened it will throw an InvalidOperationException.</exception>
-            <summary>This method returns a collection of InternalFeatures by providing a group of Ids.</summary>
-            <returns>This method returns a collection of InternalFeatures by providing a group of Ids.</returns>
-            <remarks>
-            This method returns a collection of InternalFeatures by providing a group of Ids. The
-            internal implementation calls the GetAllFeaturesCore. Because of this if you want an
-            efficient version of this method then we high suggest you override the
-            GetFeaturesByIdsCore method and provide a fast way to find a group of InternalFeatures by their
-            Id.
-            </remarks>
-            <param name="ids">
-            This parameter represents the group of Ids which uniquely identified the InternalFeatures
-            in the FeatureSource.
-            </param>
-            <param name="returningColumnNames">
-            This parameter allows you to select the field names of the column data you wish
-            to return with each Feature.
-            </param>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureSource.CanExecuteSqlQueryCore">
-            <summary>
-            This property specifies the FeatureSource can excute sql query or not.
-            If it is false, then it will throw exception when called the APIs:ExecuteScalar,ExecuteNonQuery,ExecuteQuery
-            This orverides will make it true.
-            </summary>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureSource.CommandTimeout">
-            <summary>
-            This property gets and sets the time we will wait for a command to finish before
-            we abort it.
-            </summary>
-            <decimalDegreesValue>
-            This property gets the time we will wait for a command to finish before we abort
-            it.
-            </decimalDegreesValue>
-            <remarks>
-            This property gets and sets the time we will wait for a command to finish before
-            we abort it. You can set this property to limit the amount of time you want to wait for
-            a command to finish processing.
-            </remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureSource.ConnectionString">
-            <summary>
-            This property gets and sets the connection string used to connect to the
-            server.
-            </summary>
-            <decimalDegreesValue>This property gets the connection string used to connect to the server.</decimalDegreesValue>
-            <remarks>None</remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureSource.TableName">
-            <summary>This property gets or sets the table name the database will use.</summary>
-            <decimalDegreesValue>This property gets the table name the database will use.</decimalDegreesValue>
-            <remarks>None</remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureSource.FeatureIdColumn">
-            <summary>
-            This property gets or sets the name of the column that holds the unique feature
-            Id.
-            </summary>
-            <decimalDegreesValue>
-            This property gets the name of the column that holds the unique feature
-            Id.
-            </decimalDegreesValue>
-            <remarks>None</remarks>
-        </member>
-        <member name="P:ThinkGeo.MapSuite.Core.OracleFeatureSource.IsEditable">
-            <summary>This property returns if the FeatureSource allows edits or is read only.</summary>
-            <decimalDegreesValue>
-            This property returns if the FeatureSource allows edits or is read only. The
-            property returns true if the FeatureSource allows edits and false if the FeatureSource
-            is read only.
-            </decimalDegreesValue>
-            <remarks>
-            	<para>This property is useful to check if a specific FeatureSource accepts editing.
-                If you call the BeginTransaction and this property is false then an exception will
-                be raised.<br/>
-            		<br/>
-                For developers who are creating or extending a FeatureSource it is expected that
-                you override this virtual method if the new FeatureSource you are creating allows
-                edits. By default the decimalDegreesValue if false meaning that if you want to allow edits you
-                must override this method and return true.</para>
-            </remarks>
-        </member>
-        <member name="E:ThinkGeo.MapSuite.Core.OracleFeatureSource.ExecutingSqlStatement">
-            <summary>
-            This event will be fired every time the sql statement is excuted.
-            </summary>
-        </member>
         <member name="T:ThinkGeo.MapSuite.Core.DbfColumnType">
             <summary>This enumeration represents the column type in the DBF.</summary>
             <remarks>None</remarks>
@@ -47978,6 +47717,15 @@
             </summary>
             <remarks>The constructor initilizes the properties. UpperThreshold is set to double.MaxValue, LowerThreshold is set to double.MinValue.</remarks>
         </member>
+        <member name="M:ThinkGeo.MapSuite.Core.WorldMapKitLayer.#ctor(System.String,System.String)">
+            <summary>
+            This is the constructor the for the class.
+            </summary>
+            <param name="clientId">The clientId for the WorldMapKit Server.</param>
+            <param name="privateKey">The privateKey for the WorldMapKit Server.</param>
+            <remarks>This constructor initializes a new layer and assgin a license key.
+            </remarks>
+        </member>
         <member name="M:ThinkGeo.MapSuite.Core.WorldMapKitLayer.ClearCache">
             <summary>
             This method clears the tile cache.
@@ -48121,6 +47869,16 @@
             <param name="canvas">The target canvas to draw the layer.</param>
             <param name="e">The exception thrown when layer.Draw().</param>
         </member>
+        <member name="P:ThinkGeo.MapSuite.Core.WorldMapKitLayer.ClientId">
+            <summary>
+            Gets or sets a value that is your Client Id.
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.WorldMapKitLayer.PrivateKey">
+            <summary>
+            Gets or sets a value that is unique to your client ID, please keep your key secure.
+            </summary>
+        </member>
         <member name="P:ThinkGeo.MapSuite.Core.WorldMapKitLayer.Projection">
             <summary>
             Gets or sets a WorldMapKitProjection represents which projection will be use.
@@ -48194,6 +47952,22 @@
         <member name="P:ThinkGeo.MapSuite.Core.TileMatrixSet.Crs">
             <summary>
             Gets or sets the Crs(Coorindate reference system) for the TileMatrixSet.
+            </summary>
+        </member>
+        <member name="T:ThinkGeo.MapSuite.Core.SendingTiledWmsLayerEventArgs">
+            <summary>
+            The event args containing the event data used by SecuredTiledWmsRasterSource.
+            </summary>
+        </member>
+        <member name="M:ThinkGeo.MapSuite.Core.SendingTiledWmsLayerEventArgs.#ctor(System.Uri)">
+            <summary>
+            Create an instance of SendingTiledWmsLayerEventArgs
+            </summary>
+            <param name="requestUri"></param>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.SendingTiledWmsLayerEventArgs.RequestUri">
+            <summary>
+            The request uri
             </summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.Core.MultipleFeatureLayer">
