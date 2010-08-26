@@ -4,9 +4,7 @@
 					 xmlns:ribbon="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
 					 xmlns:uc1="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition"
 					 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-					 xmlns:rvm="clr-namespace:ESMERibbonDemo.ViewModels.Ribbon"
 					 xmlns:lvm="clr-namespace:ESMERibbonDemo.ViewModels.Layers" 
-					 xmlns:mvm="clr-namespace:ESMERibbonDemo.ViewModels.Main" 
 					 mef:ViewModelLocator.ViewModel="MainViewModel"
 					 SnapsToDevicePixels="True"
 					 Title="ESME WorkBench"
@@ -256,9 +254,9 @@
 
 	</ribbon:RibbonWindow.Resources>
 	<DockPanel LastChildFill="True">
-		<ribbon:Ribbon x:Name="Ribbon" SelectedIndex="0" DockPanel.Dock="Top">
+		<ribbon:Ribbon x:Name="Ribbon" SelectedIndex="3" DockPanel.Dock="Top">
 			<ribbon:Ribbon.ApplicationMenu>
-				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png">
+				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png" Label="Hi">
 					<ribbon:RibbonApplicationMenuItem Header="Save Experiment"
 													  CanAddToQuickAccessToolBarDirectly="True"
 													  Icon="Images\SmallIcons\save-icon.png"
@@ -304,46 +302,34 @@
                         <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Lower Right]}"/>
                     </ribbon:RibbonMenuButton>
 				</ribbon:RibbonGroup>
-				<ribbon:RibbonGroup Header="Sounds">
-					<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\bullet-2-icon.png"
-						SmallImageSource="Images\SmallIcons\bullet-2-icon.png"
-						Label="Analysis Point" />
-					<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Sound.png"
-						Label="Fixed Source" />
-					<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
-						Label="Quick Look" 
-						ToolTip="Run the acoustic simulator to compute transmission loss field"/>
+                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Sounds]}">
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Analysis Point]}"/>
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Fixed Source]}"/>
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Quick Look]}"/>
 				</ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
-			<ribbon:RibbonTab Header="Scenario">
-				<ribbon:RibbonGroup Header="Scenario File">
-					<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\open-icon.png"
-										 SmallImageSource="Images\SmallIcons\open-icon.png"
-										 Label="Open" />
-					<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\close-icon.png"
-										 SmallImageSource="Images\SmallIcons\close-icon.png"
-										 Label="Close" />
-					<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
-										 SmallImageSource="Images\SmallIcons\AddFile.png"
-										 Label="Edit" />
-				</ribbon:RibbonGroup>
+            <ribbon:RibbonTab DataContext="{Binding Path=Tabs[Scenario]}" Header="Scenario">
+                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario File]}">
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Open]}"/>
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Close]}"/>
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}"/>
+                </ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
-			<ribbon:RibbonTab Header="Environment">
-				<ribbon:RibbonGroup Header="Location">
-					<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\open-icon.png"
-										 SmallImageSource="Images\SmallIcons\open-icon.png"
-										 Label="Open" />
-					<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\AddFile.png"
-										 SmallImageSource="Images\SmallIcons\AddFile.png"
-										 Label="Edit" />
-				</ribbon:RibbonGroup>
-				<ribbon:RibbonGroup Header="Layers">
-					<ribbon:RibbonComboBox Label="Select Layer" />
-					<ribbon:RibbonButton SmallImageSource="Images\SmallIcons\open-icon.png"
-										 Label="Properties" />
-				</ribbon:RibbonGroup>
-			</ribbon:RibbonTab>
-			<ribbon:RibbonTab Header="Animals">
+            <ribbon:RibbonTab DataContext="{Binding Path=Tabs[Environment]}" Header="Environment">
+                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Location]}">
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Open]}"/>
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Close]}"/>
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}"/>
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Layers]}">
+                    <ribbon:RibbonComboBox DataContext="{Binding Path=Controls[0]}"/>
+                    <ribbon:RibbonComboBox DataContext="{Binding Path=Controls[1]}"/>
+                    <ribbon:RibbonComboBox DataContext="{Binding Path=Controls[2]}"/>
+                    <ribbon:RibbonComboBox DataContext="{Binding Path=Controls[3]}"/>
+                </ribbon:RibbonGroup>
+            </ribbon:RibbonTab>
+			<!--
+            <ribbon:RibbonTab Header="Animals">
 				<ribbon:RibbonGroup Header="Species">
 					<ribbon:RibbonButton LargeImageSource="Images\LargeIcons\Dolphin.png"
 						SmallImageSource="Images\SmallIcons\Dolphin.png"
@@ -403,6 +389,7 @@
 				</ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
 			<ribbon:RibbonTab Header="Reports"/>
+            -->
 		</ribbon:Ribbon>
 		<Grid>
 			<Grid.ColumnDefinitions>
