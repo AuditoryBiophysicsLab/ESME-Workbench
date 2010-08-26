@@ -154,6 +154,32 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         private static readonly PropertyChangedEventArgs KeyTipChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.KeyTip);
         private string _keyTip;
 
+        public bool IsEnabled
+        {
+            get { return _isEnabled; }
+            set
+            {
+                if (_isEnabled == value) return;
+                _isEnabled = value;
+                NotifyPropertyChanged(IsEnabledChangedEventArgs);
+            }
+        }
+        private static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.IsEnabled);
+        bool _isEnabled;
+
+        public bool IsEditable
+        {
+            get { return _isEditable; }
+            set
+            {
+                if (_isEditable == value) return;
+                _isEditable = value;
+                NotifyPropertyChanged(IsEditableChangedEventArgs);
+            }
+        }
+        private static readonly PropertyChangedEventArgs IsEditableChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.IsEditable);
+        bool _isEditable;
+
         string IHasName.Name
         {
             get { return Label; }
