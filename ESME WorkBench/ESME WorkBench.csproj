@@ -89,6 +89,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModels\IHasName.cs" />
     <Compile Include="ViewModels\Layers\LayersViewModel.cs" />
     <Compile Include="ViewModels\Layers\LayerViewModel.cs" />
     <Compile Include="ViewModels\Main\GraticuleAdornmentLayer.cs" />
@@ -97,29 +98,29 @@
     <Compile Include="ViewModels\Main\OverlayLayerViewModel.cs" />
     <Compile Include="ViewModels\Main\RadarRasterSource.cs" />
     <Compile Include="ViewModels\Main\RotatingAdornmentLayer.cs" />
-    <Compile Include="ViewModels\Ribbon\ApplicationMenuItemData.cs" />
-    <Compile Include="ViewModels\Ribbon\ApplicationSplitMenuItemData.cs" />
-    <Compile Include="ViewModels\Ribbon\ButtonData.cs" />
-    <Compile Include="ViewModels\Ribbon\CheckBoxData.cs" />
-    <Compile Include="ViewModels\Ribbon\ComboBoxData.cs" />
+    <Compile Include="ViewModels\Ribbon\ApplicationMenuItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\ApplicationSplitMenuItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\ButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\CheckBoxDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\ComboBoxDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\ContextualTabGroupData.cs" />
-    <Compile Include="ViewModels\Ribbon\ControlData.cs" />
+    <Compile Include="ViewModels\Ribbon\ControlDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\DelegateCommand.cs" />
-    <Compile Include="ViewModels\Ribbon\GalleryCategoryData.cs" />
-    <Compile Include="ViewModels\Ribbon\GalleryData.cs" />
-    <Compile Include="ViewModels\Ribbon\GalleryItemData.cs" />
-    <Compile Include="ViewModels\Ribbon\GroupData.cs" />
-    <Compile Include="ViewModels\Ribbon\MenuButtonData.cs" />
-    <Compile Include="ViewModels\Ribbon\MenuItemData.cs" />
-    <Compile Include="ViewModels\Ribbon\RadioButtonData.cs" />
+    <Compile Include="ViewModels\Ribbon\GalleryCategoryDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\GalleryDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\GalleryItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\GroupDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\MenuButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\MenuItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\RadioButtonDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\RibbonControlModel.cs" />
     <Compile Include="ViewModels\Ribbon\RibbonViewModel.cs" />
-    <Compile Include="ViewModels\Ribbon\SeparatorData.cs" />
-    <Compile Include="ViewModels\Ribbon\SplitButtonData.cs" />
-    <Compile Include="ViewModels\Ribbon\SplitMenuItemData.cs" />
-    <Compile Include="ViewModels\Ribbon\TabData.cs" />
-    <Compile Include="ViewModels\Ribbon\TextBoxData.cs" />
-    <Compile Include="ViewModels\Ribbon\ToggleButtonData.cs" />
+    <Compile Include="ViewModels\Ribbon\SeparatorDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\SplitButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\SplitMenuItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\TabDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\TextBoxDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\ToggleButtonDataViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -2,19 +2,19 @@
 
 namespace ESMERibbonDemo.ViewModels.Ribbon
 {
-    public class TabList : List<TabData>
+    public class NamedList<T> : List<T> where T : IHasName
     {
-        public TabData this[string name]
+        public T this[string name]
         {
-            get { return Find(x => x.Header == name); }
+            get { return Find(x => x.Name == name); }
         }
     }
 
-    public class ControlList : List<ControlData>
-    {
-        public ControlData this[string name]
-        {
-            get { return Find(x => x.Label == name); }
-        }
-    }
+    public class ControlList : NamedList<ControlDataViewModel> {}
+
+    public class TabList : NamedList<TabDataViewModel> {}
+
+    public class MenuItemList : NamedList<MenuItemDataViewModel> {}
+
+    public class GroupList : NamedList<GroupDataViewModel> {}
 }

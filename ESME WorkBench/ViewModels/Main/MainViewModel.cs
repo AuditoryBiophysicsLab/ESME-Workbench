@@ -23,24 +23,21 @@ namespace ESMERibbonDemo.ViewModels.Main
     {
         #region Data
 
-        private readonly IMessageBoxService _messageBoxService;
-        private readonly IOpenFileService _openFileService;
-        private readonly IViewAwareStatus _viewAwareStatusService;
-        private LayerOverlay _layerOverlay;
-        private WpfMap _map;
-        private bool _showContextMenu;
+        readonly IMessageBoxService _messageBoxService;
+        readonly IOpenFileService _openFileService;
+        readonly IViewAwareStatus _viewAwareStatusService;
+        LayerOverlay _layerOverlay;
+        WpfMap _map;
+        //private bool _showContextMenu;
 
         #endregion
 
         public TabList Tabs { get; private set; }
-        public ControlList Groups { get; private set; }
-        public ControlList Controls { get; private set; }
 
         #region Ctor
 
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService,
-                             IOpenFileService openFileService)
+        public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService)
         {
             _viewAwareStatusService = viewAwareStatusService;
             _viewAwareStatusService.ViewLoaded += ViewAwareStatusServiceViewLoaded;
@@ -53,8 +50,8 @@ namespace ESMERibbonDemo.ViewModels.Main
 
             CreateRibbonBindings();
         }
-        
-        private void ViewAwareStatusServiceViewLoaded()
+
+        void ViewAwareStatusServiceViewLoaded()
         {
             if (Designer.IsInDesignMode)
                 return;
@@ -86,7 +83,6 @@ namespace ESMERibbonDemo.ViewModels.Main
             //proj.InternalProjectionParameters = ManagedProj4Projection.GetEpsgParameters(4326);
             //proj.ExternalProjectionParameters = "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs";
 
-
             _layerOverlay.Layers.Add("WorldLayer", worldLayer);
             //_layerOverlay.Layers.Add("OffsetWorldLayer", offsetWorldLayer);
             _map.Overlays.Add("Layers", _layerOverlay);
@@ -101,13 +97,11 @@ namespace ESMERibbonDemo.ViewModels.Main
             _map.Refresh();
             //String imagePath = ConfigurationManager.AppSettings["YourImagePath"].ToString();
 
-
             //var workspace1 = new WorkspaceData(@"/CinchV2DemoWPF;component/Images/imageIcon.png",
             //    "ImageLoaderView", imagePath, "Image View", true);
 
             //var workspace2 = new WorkspaceData(@"/CinchV2DemoWPF;component/Images/About.png",
             //        "AboutView", null, "About Cinch V2", true);
-
 
             //Views.Add(workspace1);
             //Views.Add(workspace2);
@@ -124,7 +118,7 @@ namespace ESMERibbonDemo.ViewModels.Main
 
         public SimpleCommand<Object, Object> AddScenarioFileCommand { get; private set; }
 
-        private void ExecuteAddShapefileCommand(Object args)
+        void ExecuteAddShapefileCommand(Object args)
         {
             string projection = null;
             _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
@@ -134,28 +128,21 @@ namespace ESMERibbonDemo.ViewModels.Main
             if (File.Exists(projectionFile))
             {
                 using (var sr = new StreamReader(projectionFile))
-                {
                     projection = sr.ReadToEnd();
-                }
             }
             var newLayer = new ShapeFileFeatureLayer(_openFileService.FileName);
             newLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyles.County1;
             newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             newLayer.RequireIndex = false;
             if (projection != null)
-                newLayer.FeatureSource.Projection = new ManagedProj4Projection
-                                                        {
-                                                            InternalProjectionParameters = projection,
-                                                            ExternalProjectionParameters =
-                                                                ManagedProj4Projection.GetEpsgParameters(4326),
-                                                        };
+                newLayer.FeatureSource.Projection = new ManagedProj4Projection {InternalProjectionParameters = projection, ExternalProjectionParameters = ManagedProj4Projection.GetEpsgParameters(4326),};
 
             _layerOverlay.Layers.Add(_openFileService.FileName, newLayer);
             _layerOverlay.Refresh();
             _map.Refresh();
         }
 
-        private void ExecuteAddOverlayFileCommand(Object args)
+        void ExecuteAddOverlayFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
             bool? result = _openFileService.ShowDialog(null);
@@ -166,7 +153,7 @@ namespace ESMERibbonDemo.ViewModels.Main
             _map.Refresh();
         }
 
-        private void ExecuteAddScenarioFileCommand(Object args)
+        void ExecuteAddScenarioFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
             bool? result = _openFileService.ShowDialog(null);
@@ -174,8 +161,7 @@ namespace ESMERibbonDemo.ViewModels.Main
             NemoFile nemoFile;
             try
             {
-                nemoFile = new NemoFile(_openFileService.FileName,
-                                        @"C:\Users\Dave Anderson\Desktop\Scenario Builder 1.5.508\Sim Areas");
+                nemoFile = new NemoFile(_openFileService.FileName, @"C:\Users\Dave Anderson\Desktop\Scenario Builder 1.5.508\Sim Areas");
             }
             catch (Exception ex)
             {
@@ -193,22 +179,21 @@ namespace ESMERibbonDemo.ViewModels.Main
                 AddShape("Platform " + platformCount + ": " + platform.Name + " start", behavior.CourseStart);
                 AddShape("Platform " + platformCount + ": " + platform.Name + " end", behavior.CourseEnd);
                 foreach (NemoTrackdef trackdef in platform.Trackdefs)
+                {
                     foreach (OverlayShape shape in trackdef.OverlayFile.Shapes)
                         AddShape("Platform " + platformCount + ": " + platform.Name + " operational area", shape);
+                }
                 platformCount++;
             }
             _map.Refresh();
         }
 
-        private void AddShape(string layerName, OverlayShape shape)
+        void AddShape(string layerName, OverlayShape shape)
         {
             var newLayer = new InMemoryFeatureLayer();
-            newLayer.InternalFeatures.Add(layerName,
-                                          new Feature(BaseShape.CreateShapeFromWellKnownData(shape.WellKnownText)));
-            newLayer.ZoomLevelSet.ZoomLevel01.DefaultLineStyle.OuterPen =
-                new GeoPen(GeoColor.FromArgb(shape.Color.A, shape.Color.R, shape.Color.G, shape.Color.B), shape.Width);
-            newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolPen =
-                new GeoPen(GeoColor.FromArgb(shape.Color.A, shape.Color.R, shape.Color.G, shape.Color.B), shape.Width);
+            newLayer.InternalFeatures.Add(layerName, new Feature(BaseShape.CreateShapeFromWellKnownData(shape.WellKnownText)));
+            newLayer.ZoomLevelSet.ZoomLevel01.DefaultLineStyle.OuterPen = new GeoPen(GeoColor.FromArgb(shape.Color.A, shape.Color.R, shape.Color.G, shape.Color.B), shape.Width);
+            newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolPen = new GeoPen(GeoColor.FromArgb(shape.Color.A, shape.Color.R, shape.Color.G, shape.Color.B), shape.Width);
             newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolSize = shape.Width;
             newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolType = PointSymbolType.Circle;
             newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
@@ -221,7 +206,7 @@ namespace ESMERibbonDemo.ViewModels.Main
 
         void IDesignTimeAware.DesignTimeInitialization()
         {
-            throw new NotImplementedException();
+            CreateRibbonBindings();
         }
 
         #endregion
@@ -230,7 +215,7 @@ namespace ESMERibbonDemo.ViewModels.Main
 
         //Function for getting the extent based on a collection of layers.
         //It gets the overall extent of all the layers.
-        private RectangleShape GetFullExtent(IEnumerable<Layer> layers)
+        RectangleShape GetFullExtent(IEnumerable<Layer> layers)
         {
             var rectangleShapes = new Collection<BaseShape>();
 
@@ -246,110 +231,106 @@ namespace ESMERibbonDemo.ViewModels.Main
 
         #region Create ribbon tabs, groups, and controls
 
-        private void CreateRibbonBindings()
+        void CreateRibbonBindings()
         {
             Tabs = new TabList
-                       {
-                           new TabData("Experiment"),
-                           new TabData("Scenario"),
-                           new TabData("Environment"),
-                           new TabData("Animals"),
-                           new TabData("Acoustics"),
-                           new TabData("Reports"),
-                       };
-            Groups = new ControlList
-                         {
-                             new GroupData("Scenario"),
-                             new GroupData("Map"),
-                         };
-            Controls = new ControlList
-                           {
-                               new ButtonData
-                                   {
-                                       Label = "Load",
-                                       SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative),
-                                       LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative),
-                                       ToolTipTitle = "Load Scenario File (Ctrl+L)",
-                                       ToolTipDescription = "Load a scenario file into the simulation.",
-                                       //Command = ApplicationCommands.Cut,
-                                       KeyTip = "L",
-                                   },
-                               new ButtonData
-                                   {
-                                       Label = "Edit",
-                                       SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative),
-                                       LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative),
-                                       ToolTipTitle = "Edit Scenario File (Ctrl+E)",
-                                       ToolTipDescription = "Edit the scenario file with the Scenario Builder.",
-                                       //Command = ApplicationCommands.Cut,
-                                       KeyTip = "E",
-                                   },
-                               new MenuButtonData
-                                   {
-                                       Label = "Base Map",
-                                       SmallImage =
-                                           new Uri("Images/SmallIcons/System-Globe-icon.png", UriKind.Relative),
-                                       LargeImage =
-                                           new Uri("Images/LargeIcons/System-Globe-icon.png", UriKind.Relative),
-                                       ToolTipTitle = "Base Map settings",
-                                       ToolTipDescription = "Select the base map image",
-                                       //Command = ApplicationCommands.Paste,
-                                   },
-                               new MenuItemData
-                                   {
-                                       Label = "NASA 1 minute topographic map",
-                                       SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
-                                       LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
-                                       ToolTipTitle = "Base Map Settings",
-                                       ToolTipDescription = "Use this as the base map image",
-                                       //Command = ApplicationCommands.Paste,
-                                   },
-                               new MenuItemData
-                                   {
-                                       Label = "Custom base map",
-                                       SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
-                                       LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
-                                       ToolTipTitle = "Base Map Settings",
-                                       ToolTipDescription =
-                                           "Choose your own base map image\nNote that this map must must be full global coverage\nleft edge 180W, right edge 180E, top 90N, bottom 90S, Mercator projection",
-                                       //Command = ApplicationCommands.Paste,
-                                   },
-                               new MenuButtonData
-                                   {
-                                       Label = "Add Content",
-                                       SmallImage = new Uri("Images/SmallIcons/Plus.png", UriKind.Relative),
-                                       LargeImage = new Uri("Images/LargeIcons/Plus.png", UriKind.Relative),
-                                       ToolTipTitle = "Add Content to the map",
-                                       ToolTipDescription = "Select the type of content you wish to add to the map",
-                                   },
-                               new MenuItemData
-                                   {
-                                       Label = "ESRI Shapefile (*.shp)",
-                                       SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative),
-                                       LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative),
-                                       ToolTipTitle = "Add Content to the map",
-                                       ToolTipDescription = "Add an ESRI Shapefile to the map",
-                                       Command = AddShapefileCommand,
-                                   },
-                               new MenuItemData
-                                   {
-                                       Label = "NUWC Overlay File (*.ovr)",
-                                       SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative),
-                                       LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative),
-                                       ToolTipTitle = "Add Content to the map",
-                                       ToolTipDescription = "Add a NUWC Overlay file to the map",
-                                       Command = AddOverlayFileCommand,
-                                   },
-                               new MenuItemData
-                                   {
-                                       Label = "NUWC Scenario File (*.nemo)",
-                                       SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative),
-                                       LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative),
-                                       ToolTipTitle = "Add Content to the map",
-                                       ToolTipDescription = "Add a NUWC Scenario file to the map",
-                                       Command = AddScenarioFileCommand,
-                                   },
-                           };
+            {
+                #region Experiment Tab
+                new TabDataViewModel
+                {
+                    Header = "Experiment",
+                    Groups = new GroupList
+                    {
+                        new GroupDataViewModel
+                        {
+                            Label = "Scenario",
+                            Controls = new ControlList
+                            {
+                                new ButtonDataViewModel
+                                {
+                                    Label = "Load",
+                                    SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative),
+                                    LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative),
+                                    ToolTipTitle = "Load Scenario File (Ctrl+L)",
+                                    ToolTipDescription = "Load a scenario file into the simulation.",
+                                    //Command = ApplicationCommands.Cut,
+                                    KeyTip = "L",
+                                },
+                                new ButtonDataViewModel
+                                {
+                                    Label = "Edit",
+                                    SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative),
+                                    LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative),
+                                    ToolTipTitle = "Edit Scenario File (Ctrl+E)",
+                                    ToolTipDescription = "Edit the scenario file with the Scenario Builder.",
+                                    //Command = ApplicationCommands.Cut,
+                                    KeyTip = "E",
+                                },
+                            },
+                        },
+                        new GroupDataViewModel
+                        {
+                            Label = "Map",
+                            Controls = new ControlList
+                            {
+                                new MenuButtonDataViewModel
+                                {
+                                    Label = "Base Map",
+                                    SmallImage = new Uri("Images/SmallIcons/System-Globe-icon.png", UriKind.Relative),
+                                    LargeImage = new Uri("Images/LargeIcons/System-Globe-icon.png", UriKind.Relative),
+                                    ToolTipTitle = "Base Map settings",
+                                    ToolTipDescription = "Select the base map image",
+                                    //Command = ApplicationCommands.Paste,
+                                    MenuItems =
+                                        new MenuItemList
+                                        {
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "NASA 1 minute topographic map",
+                                                SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
+                                                LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
+                                                ToolTipTitle = "Base Map Settings",
+                                                ToolTipDescription = "Use this as the base map image",
+                                                //Command = ApplicationCommands.Paste,
+                                            },
+                                            new MenuItemDataViewModel
+                                            {
+                                                Label = "Custom base map",
+                                                SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
+                                                LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
+                                                ToolTipTitle = "Base Map Settings",
+                                                ToolTipDescription = "Choose your own base map image\nNote that this map must must be full global coverage\nleft edge 180W, right edge 180E, top 90N, bottom 90S, Mercator projection",
+                                                //Command = ApplicationCommands.Paste,
+                                            },
+                                        },
+                                },
+                                new MenuButtonDataViewModel
+                                {
+                                    Label = "Add Content",
+                                    SmallImage = new Uri("Images/SmallIcons/Plus.png", UriKind.Relative),
+                                    LargeImage = new Uri("Images/LargeIcons/Plus.png", UriKind.Relative),
+                                    ToolTipTitle = "Add Content to the map",
+                                    ToolTipDescription = "Select the type of content you wish to add to the map",
+                                    MenuItems =
+                                        new MenuItemList
+                                        {
+                                            new MenuItemDataViewModel {Label = "ESRI Shapefile (*.shp)", SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), ToolTipTitle = "Add Content to the map", ToolTipDescription = "Add an ESRI Shapefile to the map", Command = AddShapefileCommand,},
+                                            new MenuItemDataViewModel {Label = "NUWC Overlay File (*.ovr)", SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), ToolTipTitle = "Add Content to the map", ToolTipDescription = "Add a NUWC Overlay file to the map", Command = AddOverlayFileCommand,},
+                                            new MenuItemDataViewModel {Label = "NUWC Scenario File (*.nemo)", SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), ToolTipTitle = "Add Content to the map", ToolTipDescription = "Add a NUWC Scenario file to the map", Command = AddScenarioFileCommand,},
+                                        },
+                                },
+                            },
+                        },
+                    },
+                },
+
+                #endregion
+                new TabDataViewModel {Header = "Scenario",},
+                new TabDataViewModel {Header = "Environment",},
+                new TabDataViewModel {Header = "Animals",},
+                new TabDataViewModel {Header = "Acoustics",},
+                new TabDataViewModel {Header = "Reports",},
+            };
         }
 
         #endregion

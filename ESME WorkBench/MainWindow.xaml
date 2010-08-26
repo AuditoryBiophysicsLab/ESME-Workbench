@@ -281,23 +281,21 @@
 														   ImageSource="Images\LargeIcons\about-icon.png"/>
 				</ribbon:RibbonApplicationMenu>
 			</ribbon:Ribbon.ApplicationMenu>
-			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Experiment]}" KeyTip="E">
+			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Experiment]}" KeyTip="E" Header="Experiment">
 				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario]}">
                     <ribbon:RibbonButton DataContext="{Binding Path=Controls[Load]}"/>
                     <ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}"/>
 				</ribbon:RibbonGroup>
                 <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Map]}">
-                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Groups[Base Map]}">
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=Groups[NASA 1 minute topographic map]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=Groups[Custom base map]}"/>
+                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Base Map]}">
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NASA 1 minute topographic map]}"/>
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Custom base map]}"/>
 					</ribbon:RibbonMenuButton>
-                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Groups[Add Content]}">
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=Groups[ESRI Shapefile (*.shp)]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=Groups[NUWC Overlay File (*.ovr)]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=Groups[NUWC Scenario File (*.nemo)]}"/>
+                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Add Content]}">
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[ESRI Shapefile (*.shp)]}"/>
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Overlay File (*.ovr)]}"/>
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Scenario File (*.nemo)]}"/>
                     </ribbon:RibbonMenuButton>
-					<ribbon:RibbonComboBox Text="Pan/Zoom Position">
-					</ribbon:RibbonComboBox>
 					<ribbon:RibbonSplitButton LargeImageSource="Images\LargeIcons\System-Map-icon.png"
 											  SmallImageSource="Images\SmallIcons\System-Map-icon.png"
 											  Label="Pan/Zoom Control">

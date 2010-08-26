@@ -1,7 +1,6 @@
 ﻿namespace ESMERibbonDemo.ViewModels.Ribbon
 {
-    public class ButtonData : ControlData
+    public class GalleryItemDataViewModel : ControlDataViewModel
     {
     }
-
 }
