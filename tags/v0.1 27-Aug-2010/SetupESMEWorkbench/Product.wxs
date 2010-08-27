@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="e2cd0cb3-21ee-4e5a-a7c2-dccd4e641b64" Name="ESME Workbench" Language="1033" Version="0.1.0.0" Manufacturer="Boston University" UpgradeCode="f82eae19-b38d-47f9-bed7-33454e612509">
+		<Package Id="*" InstallerVersion="200" Compressed="yes" Keywords="Installer" Description="ESME WorkBench v0.1" Manufacturer="Boston University" />
+
+		<Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
+
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLLOCATION" Name="ESME Workbench">
+          <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+          <Component Id="ESMEWorkBenchEXEComponent" Guid="de2c6c9d-6e47-43fa-9326-53326891ed41">
+            <!-- TODO: Insert files, registry keys, and other resources here. -->
+            <!-- <File Id="ESMEWorkBenchEXE" Name="ESMEWorkBench.exe" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\Release\ESMEWorkBench.exe" KeyPath="yes"> -->
+            <File Id="ESMEWorkBenchEXE" Name="ESMEWorkBench.exe" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\ESMEWorkBench.exe" KeyPath="yes">
+              <Shortcut Id="startmenuESMEWorkBench" Directory="ProgramMenuDir" Name="ESME WorkBench" WorkingDirectory="INSTALLLOCATION" Advertise="yes"  />
+              <Shortcut Id="DesktopESMEWorkBench" Directory="DesktopFolder" Name="ESME WorkBench" WorkingDirectory="INSTALLLOCATION" Advertise="yes" />
+            </File>
+            <File Id="ESMEWorkBenchExeConfig" Name="ESMEWorkBench.exe.config" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\ESMEWorkBench.exe.config" />
+            <File Id="ESMEWorkBenchVhostExeManifest" Name="ESMEWorkBench.vshost.exe.manifest" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\ESMEWorkBench.vshost.exe.manifest" />
+            <File Id="ESMEDLL" Name="ESME.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\ESME.dll" />
+            <File Id="HRCDLL" Name="HRC.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\HRC.dll" />
+
+            <!-- <Component Id="ThinkGEOComponent" Guid="*"> -->
+            <File Id="MapSuiteCoreDLL" Name="MapSuiteCore.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\MapSuiteCore.dll" />
+            <File Id="MapSuiteCoreXML" Name="MapSuiteCore.xml" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\MapSuiteCore.xml" />
+            <File Id="NetTopologySuiteDLL" Name="NetTopologySuite.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\NetTopologySuite.dll" />
+            <File Id="GeoAPIDLL" Name="GeoAPI.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\GeoAPI.dll" />
+                    
+            <!-- <Component Id="WpfComponent" Guid="*"> -->
+            <File Id="WpfDesktopEditionDLL" Name="WpfDesktopEdition.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\WpfDesktopEdition.dll" />
+            <File Id="WpfDesktopEditionXML" Name="WpfDesktopEdition.xml" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\MapSuiteCore.xml" />
+            <File Id="CinchWPFDLL" Name="Cinch.WPF.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Cinch.WPF.dll" />
+            <File Id="MEFedMVVMWPFDLL" Name="MEFedMVVM.WPF.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\MEFedMVVM.WPF.dll" />
+            <!-- <Component Id="MicrosoftExpressionInteractionsComponent" Guid="*"> -->
+            <File Id="Microsoft.Expression.InteractionsDLL" Name="Microsoft.Expression.Interactions.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Microsoft.Expression.Interactions.dll" />
+            <File Id="Microsoft.Expression.InteractionsXML" Name="Microsoft.Expression.Interactions.xml" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Microsoft.Expression.Interactions.xml" />
+            <!-- <Component Id="SystemWindowsInteractivityComponent" Guid="*"> -->
+            <File Id="SystemWindowsInteractivityDLL" Name="System.Windows.Interactivity.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\System.Windows.Interactivity.dll" />
+            <File Id="SystemWindowsInteractivityXML" Name="System.Windows.Interactivity.xml" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\System.Windows.Interactivity.xml" />
+
+          </Component>
+
+          <Directory Id="GISDataFolder" Name="Sample GIS Data">
+            
+            <Component Id="Countries02SHXComponent" Guid="*">
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02SHX" Name="Countries02.shx" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.shx" KeyPath="yes" />
+            </Component>
+
+            <Component Id="Countries02DBFComponent" Guid="*">
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02DBF" Name="Countries02.dbf" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.dbf" KeyPath="yes" />
+            </Component>
+
+            <Component Id="Countries02IDSComponent" Guid="*">
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02IDS" Name="Countries02.ids" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.ids" KeyPath="yes" />
+            </Component>
+
+            <Component Id="Countries02IDXComponent" Guid="*">
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02IDX" Name="Countries02.idx" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.idx" KeyPath="yes" />
+            </Component>
+
+            <Component Id="Countries02SHPComponent" Guid="*">
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02SHP" Name="Countries02.shp" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.shp" />
+            </Component>
+
+            <!-- <File Id="Countries02SHX" Name="Countries02.shx" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.shx" />
+            <File Id="Countries02DBF" Name="Countries02.dbf" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.dbf" />
+            <File Id="Countries02IDS" Name="Countries02.ids" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.ids" />
+            <File Id="Countries02IDX" Name="Countries02.idx" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.idx" />
+            <File Id="Countries02SHP" Name="Countries02.shp" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Countries02.shp" /> -->
+            
+          </Directory>
+
+
+
+          <Component Id="MicrosoftWindowsShellDLLComponent" Guid="*">
+            <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Microsoft.Windows.Shell.dll" KeyPath="yes" />
+            <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+          </Component>
+
+          <Component Id="MicrosoftWindowsShellXMLComponent" Guid="*">
+            <File Id="MicrosoftWindowsShellXML" Name="Microsoft.Windows.Shell.xml" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\Microsoft.Windows.Shell.xml" KeyPath="yes" />
+            <!-- <File Id="MicrosoftWindowsShellXML" Name="Microsoft.Windows.Shell.xml" Source="Microsoft.Windows.Shell.xml" KeyPath="yes" /> -->
+          </Component>
+
+          <Component Id="RibbonControlsLibraryDLLComponent" Guid="*">
+            <File Id="RibbonControlsLibraryDLL" Name="RibbonControlsLibrary.dll" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\RibbonControlsLibrary.dll" KeyPath="yes" />
+            <!-- <File Id="RibbonControlsLibraryDLL" Name="RibbonControlsLibrary.dll" Source="RibbonControlsLibrary.dll" KeyPath="yes" /> -->
+          </Component>
+
+          <Component Id="RibbonControlsLibraryXMLComponent" Guid="*">
+            <File Id="RibbonControlsLibraryXML" Name="RibbonControlsLibrary.xml" Source="C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\RibbonControlsLibrary.xml" KeyPath="yes" />
+            <!--  <File Id="RibbonControlsLibraryXML" Name="RibbonControlsLibrary.xml" Source="RibbonControlsLibrary.xml" KeyPath="yes" /> -->
+          </Component>
+
+        </Directory>
+			</Directory>
+
+
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="ESME WorkBench">
+          <Component Id="ProgramMenuDir" Guid="*">
+            <RemoveFolder Id='ProgramMenuDir' On='uninstall' />
+            <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Type='string' Value='' KeyPath='yes' />
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="DesktopFolder" Name="Desktop" />
+
+
+    </Directory>
+
+		<Feature Id="ProductFeature" Title="ESME Workbench" Level="1">
+			<!-- TODO: Remove the comments around this ComponentRef element and the Component above in order to add resources to this installer. -->
+			<!-- <ComponentRef Id="ProductComponent" /> -->
+
+      <ComponentRef Id="ESMEWorkBenchEXEComponent" />
+      <!-- <ComponentRef Id="ThinkGEOComponent" />
+      <ComponentRef Id="WpfComponent" />
+      <ComponentRef Id="MicrosoftExpressionInteractionsComponent" />
+      <ComponentRef Id="SystemWindowsInteractivityComponent" /> -->
+      <ComponentRef Id="Countries02SHXComponent" />
+      <ComponentRef Id="Countries02DBFComponent" />
+      <ComponentRef Id="Countries02IDSComponent" />
+      <ComponentRef Id="Countries02IDXComponent" />
+      <ComponentRef Id="Countries02SHPComponent" />
+      <ComponentRef Id="MicrosoftWindowsShellDLLComponent" />
+      <ComponentRef Id="MicrosoftWindowsShellXMLComponent" />
+      <ComponentRef Id="RibbonControlsLibraryDLLComponent" />
+      <ComponentRef Id="RibbonControlsLibraryXMLComponent" />
+      <ComponentRef Id="ProgramMenuDir" />
+
+
+      <!-- Note: The following ComponentGroupRef is required to pull in generated authoring from project references. -->
+			<ComponentGroupRef Id="Product.Generated" />
+		</Feature>
+	</Product>
+</Wix>
