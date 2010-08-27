@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME WorkBench", "ESME WorkBench\ESME WorkBench.csproj", "{1CD6E800-1D60-405A-BF80-F9CAE2E411E2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{939BCFE6-6EB1-4C69-AE35-267863882AAF}"
+	ProjectSection(SolutionItems) = preProject
+		ESME WorkBench v0.1.5.0.ReSharper = ESME WorkBench v0.1.5.0.ReSharper
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True

@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.IO;
+using System.Reflection;
 using System.Windows;
 using Cinch;
 using ESME.Overlay;
-using ESMERibbonDemo;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Ribbon;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
-using System.IO;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    [ExportViewModel("MainViewModel")]
+    [ExportViewModel("MainViewModel", false)]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class MainViewModel : ViewModelBase, IDesignTimeAware
     {
@@ -31,7 +32,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        public TabList Tabs { get; private set; }
+        static readonly PropertyChangedEventArgs RibbonViewModelChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RibbonViewModel);
+        RibbonViewModel _ribbonViewModel;
 
         #region Ctor
 
@@ -55,6 +57,9 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region public ObservableCollection<LayerViewModel> Layers { get; set; }
 
+        static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.Layers);
+        ObservableCollection<LayerViewModel> _layers;
+
         public ObservableCollection<LayerViewModel> Layers
         {
             get { return _layers; }
@@ -66,10 +71,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(LayersChangedEventArgs);
             }
         }
-        static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.Layers);
-        ObservableCollection<LayerViewModel> _layers;
 
-        void ShapeLayersCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        void ShapeLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
 #if false
             if (e.NewItems != null)
@@ -110,7 +113,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _map.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Top;
             _layerOverlay = new LayerOverlay {TileType = TileType.SingleTile};
 
-            var appPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var worldLayer = new ShapeFileFeatureLayer(Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"));
             worldLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyles.Country1;
             worldLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
@@ -143,17 +146,16 @@ namespace ESMEWorkBench.ViewModels.Main
         void ExecuteAddShapefileCommand(Object args)
         {
             _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
-            var result = _openFileService.ShowDialog(null);
+            bool? result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             var overlayLayer = new ShapefileLayerViewModel(_map, _openFileService.FileName);
             _layers.Add(overlayLayer);
         }
 
-
         void ExecuteAddOverlayFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
-            var result = _openFileService.ShowDialog(null);
+            bool? result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             var overlayLayer = new OverlayFileLayerViewModel(_map, _openFileService.FileName);
             _layers.Add(overlayLayer);
@@ -162,7 +164,7 @@ namespace ESMEWorkBench.ViewModels.Main
         void ExecuteAddScenarioFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-            var result = _openFileService.ShowDialog(null);
+            bool? result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             //NemoFile nemoFile;
             try
@@ -184,7 +186,7 @@ namespace ESMEWorkBench.ViewModels.Main
             ViewAwareStatusServiceViewLoaded();
         }
 
-        static bool CanExecuteDisabledCommand(Object args) 
+        static bool CanExecuteDisabledCommand(Object args)
         {
             return false;
         }
@@ -205,6 +207,18 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        public RibbonViewModel RibbonViewModel
+        {
+            get { return _ribbonViewModel; }
+
+            private set
+            {
+                if (_ribbonViewModel == value) return;
+                _ribbonViewModel = value;
+                NotifyPropertyChanged(RibbonViewModelChangedEventArgs);
+            }
+        }
+
         #region IDesignTimeAware Members
 
         void IDesignTimeAware.DesignTimeInitialization()
@@ -222,7 +236,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             var rectangleShapes = new Collection<BaseShape>();
 
-            foreach (var layer in layers)
+            foreach (Layer layer in layers)
             {
                 layer.Open();
                 if (layer.HasBoundingBox) rectangleShapes.Add(layer.GetBoundingBox());
@@ -236,353 +250,234 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void CreateRibbonBindings()
         {
-            Tabs = new TabList
+            RibbonViewModel = new RibbonViewModel
             {
-                #region Experiment Tab
-                new TabDataViewModel
+                ApplicationMenuItems = new ApplicationMenuItemList
                 {
-                    Header = "Experiment",
-                    Groups = new GroupList
+                    new ApplicationMenuItemDataViewModel
                     {
-                        new GroupDataViewModel
-                        {
-                            Label = "Scenario",
-                            Controls = new ControlList
+                        
+                    },
+                },
+                Tabs = new TabList
+                {
+                    #region Experiment Tab
+                    new TabDataViewModel
+                    {
+                        Header = "Experiment",
+                        Groups =
+                            new GroupList
                             {
-                                new ButtonDataViewModel
+                                new GroupDataViewModel
                                 {
-                                    Label = "Load",
-                                    LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative),
-                                    ToolTipTitle = "Load Scenario File (Ctrl+L)",
-                                    ToolTipDescription = "Load a scenario file into the simulation.",
-                                    Command = DisabledCommand,
-                                    KeyTip = "L",
-                                },
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Edit",
-                                    LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Edit Scenario File (Ctrl+E)",
-                                    ToolTipDescription = "Edit the scenario file with the Scenario Builder.",
-                                    Command = DisabledCommand,
-                                    KeyTip = "E",
-                                },
-                            },
-                        },
-                        new GroupDataViewModel
-                        {
-                            Label = "Map",
-                            Controls = new ControlList
-                            {
-                                new MenuButtonDataViewModel
-                                {
-                                    Label = "Base Map",
-                                    LargeImage = new Uri("Images/LargeIcons/System-Globe-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/System-Globe-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Base Map settings",
-                                    ToolTipDescription = "Select the base map image",
-                                    MenuItems =
-                                        new MenuItemList
+                                    Label = "Scenario",
+                                    Controls =
+                                        new ControlList
                                         {
-                                            new MenuItemDataViewModel
+                                            new ButtonDataViewModel {Label = "Load", LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative), ToolTipTitle = "Load Scenario File (Ctrl+L)", ToolTipDescription = "Load a scenario file into the simulation.", Command = DisabledCommand, KeyTip = "L",},
+                                            new ButtonDataViewModel {Label = "Edit", LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative), ToolTipTitle = "Edit Scenario File (Ctrl+E)", ToolTipDescription = "Edit the scenario file with the Scenario Builder.", Command = DisabledCommand, KeyTip = "E",},
+                                        },
+                                },
+                                new GroupDataViewModel
+                                {
+                                    Label = "Map",
+                                    Controls =
+                                        new ControlList
+                                        {
+                                            new MenuButtonDataViewModel
                                             {
-                                                Label = "NASA 1 minute topographic map",
-                                                LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
-                                                SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
-                                                ToolTipTitle = "Base Map Settings",
-                                                ToolTipDescription = "Use this as the base map image",
-                                                Command = DisabledCommand,
+                                                Label = "Base Map",
+                                                LargeImage = new Uri("Images/LargeIcons/System-Globe-icon.png", UriKind.Relative),
+                                                SmallImage = new Uri("Images/SmallIcons/System-Globe-icon.png", UriKind.Relative),
+                                                ToolTipTitle = "Base Map settings",
+                                                ToolTipDescription = "Select the base map image",
+                                                MenuItems =
+                                                    new MenuItemList
+                                                    {
+                                                        new MenuItemDataViewModel {Label = "NASA 1 minute topographic map", LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative), ToolTipTitle = "Base Map Settings", ToolTipDescription = "Use this as the base map image", Command = DisabledCommand,},
+                                                        new MenuItemDataViewModel
+                                                        {
+                                                            Label = "Custom base map",
+                                                            LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
+                                                            SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
+                                                            ToolTipTitle = "Base Map Settings",
+                                                            ToolTipDescription = "Choose your own base map image\nNote that this map must must be full global coverage\nleft edge 180W, right edge 180E, top 90N, bottom 90S, Mercator projection",
+                                                            Command = DisabledCommand,
+                                                        },
+                                                    },
                                             },
-                                            new MenuItemDataViewModel
+                                            new MenuButtonDataViewModel
                                             {
-                                                Label = "Custom base map",
+                                                Label = "Layers",
+                                                LargeImage = new Uri("Images/LargeIcons/Plus.png", UriKind.Relative),
+                                                //SmallImage = new Uri("Images/SmallIcons/Plus.png", UriKind.Relative),
+                                                ToolTipTitle = "Add Content to the map",
+                                                ToolTipDescription = "Select the type of content you wish to add to the map",
+                                                MenuItems =
+                                                    new MenuItemList
+                                                    {
+                                                        new MenuItemDataViewModel {Label = "ESRI Shapefile (*.shp)", LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), ToolTipTitle = "Add Content to the map", ToolTipDescription = "Add an ESRI Shapefile to the map", Command = AddShapefileCommand,},
+                                                        new MenuItemDataViewModel {Label = "NUWC Overlay File (*.ovr)", LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), ToolTipTitle = "Add Content to the map", ToolTipDescription = "Add a NUWC Overlay file to the map", Command = AddOverlayFileCommand,},
+                                                        new MenuItemDataViewModel
+                                                        {
+                                                            Label = "NUWC Scenario File (*.nemo)",
+                                                            LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative),
+                                                            SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative),
+                                                            ToolTipTitle = "Add Content to the map",
+                                                            ToolTipDescription = "Add a NUWC Scenario file to the map",
+                                                            //Command = AddScenarioFileCommand,
+                                                            Command = DisabledCommand,
+                                                        },
+                                                        new MenuItemDataViewModel
+                                                        {
+                                                            Label = "Clear all layers",
+                                                            LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative),
+                                                            SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative),
+                                                            ToolTipTitle = "Clear layers",
+                                                            ToolTipDescription = "Reset the map to the empty state",
+                                                            //Command = AddScenarioFileCommand,
+                                                            Command = ClearAllLayersCommand,
+                                                        },
+                                                    },
+                                            },
+                                            new MenuButtonDataViewModel
+                                            {
+                                                Label = "Pan/Zoom Control",
                                                 LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
                                                 SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
-                                                ToolTipTitle = "Base Map Settings",
-                                                ToolTipDescription = "Choose your own base map image\nNote that this map must must be full global coverage\nleft edge 180W, right edge 180E, top 90N, bottom 90S, Mercator projection",
-                                                Command = DisabledCommand,
+                                                ToolTipTitle = "Pan/Zoom Control",
+                                                ToolTipDescription = "Change the visibility and position of the pan/zoom control",
+                                                MenuItems =
+                                                    new MenuItemList
+                                                    {
+                                                        new MenuItemDataViewModel {Label = "Visible", ToolTipTitle = "Pan/Zoom Control", ToolTipDescription = "Change the visibility of the pan/zoom control", Command = DisabledCommand,},
+                                                        new MenuItemDataViewModel {Label = "Upper Left", ToolTipTitle = "Pan/Zoom Control", ToolTipDescription = "Move the pan/zoom control to the upper left corner of the map display", Command = DisabledCommand,},
+                                                        new MenuItemDataViewModel {Label = "Upper Right", ToolTipTitle = "Pan/Zoom Control", ToolTipDescription = "Move the pan/zoom control to the upper right corner of the map display", Command = DisabledCommand,},
+                                                        new MenuItemDataViewModel {Label = "Lower Left", ToolTipTitle = "Pan/Zoom Control", ToolTipDescription = "Move the pan/zoom control to the lower left corner of the map display", Command = DisabledCommand,},
+                                                        new MenuItemDataViewModel {Label = "Lower Right", ToolTipTitle = "Pan/Zoom Control", ToolTipDescription = "Move the pan/zoom control to the lower right corner of the map display", Command = DisabledCommand,},
+                                                    },
                                             },
                                         },
                                 },
-                                new MenuButtonDataViewModel
+                                new GroupDataViewModel
+                                {
+                                    Label = "Sounds",
+                                    Controls =
+                                        new ControlList
+                                        {
+                                            new ButtonDataViewModel {Label = "Analysis Point", LargeImage = new Uri("Images/LargeIcons/bullet-2-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/bullet-2-icon.png", UriKind.Relative), ToolTipTitle = "Analysis Point", ToolTipDescription = "Add a new analysis point to the experiment (not functional)", Command = DisabledCommand,},
+                                            new ButtonDataViewModel {Label = "Fixed Source", LargeImage = new Uri("Images/LargeIcons/Sound.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/Sound.png", UriKind.Relative), ToolTipTitle = "Fixed Source", ToolTipDescription = "Add a new fixed sound source to the experiment (not functional)", Command = DisabledCommand,},
+                                            new ButtonDataViewModel {Label = "Quick Look", LargeImage = new Uri("Images/LargeIcons/Button-Play-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/Button-Play-icon.png", UriKind.Relative), ToolTipTitle = "Quick Look", ToolTipDescription = "Add a new quick look point to the experiment (not functional)", Command = DisabledCommand,},
+                                        },
+                                },
+                            },
+                    },
+
+                    #endregion
+                    #region Scenario Tab
+                    new TabDataViewModel
+                    {
+                        Header = "Scenario",
+                        Groups =
+                            new GroupList
+                            {
+                                new GroupDataViewModel
+                                {
+                                    Label = "Scenario File",
+                                    Controls =
+                                        new ControlList
+                                        {
+                                            new ButtonDataViewModel {Label = "Open", LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative), ToolTipTitle = "Open scenario file", ToolTipDescription = "Open a scenario file (not functional)", Command = DisabledCommand,},
+                                            new ButtonDataViewModel {Label = "Close", LargeImage = new Uri("Images/LargeIcons/close-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/close-icon.png", UriKind.Relative), ToolTipTitle = "Close scenario file", ToolTipDescription = "Close the current scenario file (not functional)", Command = DisabledCommand,},
+                                            new ButtonDataViewModel {Label = "Edit", LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative), ToolTipTitle = "Edit scenario file", ToolTipDescription = "Launch the scenario editor (not functional)", Command = DisabledCommand,},
+                                        },
+                                },
+                            },
+                    },
+
+                    #endregion
+                    #region Environment Tab
+                    new TabDataViewModel
+                    {
+                        Header = "Environment",
+                        Groups =
+                            new GroupList
+                            {
+                                new GroupDataViewModel
+                                {
+                                    Label = "Location",
+                                    Controls =
+                                        new ControlList
+                                        {
+                                            new ButtonDataViewModel {Label = "Open", LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative), ToolTipTitle = "Open environment file", ToolTipDescription = "Open an environment file (not functional)", Command = DisabledCommand,},
+                                            new ButtonDataViewModel {Label = "Close", LargeImage = new Uri("Images/LargeIcons/close-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/close-icon.png", UriKind.Relative), ToolTipTitle = "Close environment file", ToolTipDescription = "Close the current environment file (not functional)", Command = DisabledCommand,},
+                                            new ButtonDataViewModel {Label = "Edit", LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative), ToolTipTitle = "Edit environment file", ToolTipDescription = "Launch the environment builder (not functional)", Command = DisabledCommand,},
+                                        },
+                                },
+                                new GroupDataViewModel
                                 {
                                     Label = "Layers",
-                                    LargeImage = new Uri("Images/LargeIcons/Plus.png", UriKind.Relative),
-                                    //SmallImage = new Uri("Images/SmallIcons/Plus.png", UriKind.Relative),
-                                    ToolTipTitle = "Add Content to the map",
-                                    ToolTipDescription = "Select the type of content you wish to add to the map",
-                                    MenuItems = new MenuItemList
+                                    Controls = new ControlList
                                     {
-                                        new MenuItemDataViewModel
+                                        new ComboBoxDataViewModel
                                         {
-                                            Label = "ESRI Shapefile (*.shp)", 
-                                            LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), 
-                                            SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), 
-                                            ToolTipTitle = "Add Content to the map", 
-                                            ToolTipDescription = "Add an ESRI Shapefile to the map", 
-                                            Command = AddShapefileCommand,
+                                            Label = "Wind",
+                                            //LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
+                                            SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
+                                            ToolTipTitle = "Wind data layer",
+                                            ToolTipDescription = "Select a source for wind data (not functional)",
+                                            IsEnabled = false,
+                                            IsEditable = false,
                                         },
-                                        new MenuItemDataViewModel
+                                        new ComboBoxDataViewModel
                                         {
-                                            Label = "NUWC Overlay File (*.ovr)", 
-                                            LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), 
-                                            SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), 
-                                            ToolTipTitle = "Add Content to the map", 
-                                            ToolTipDescription = "Add a NUWC Overlay file to the map", 
-                                            Command = AddOverlayFileCommand,
+                                            Label = "Sound Speed",
+                                            //LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
+                                            SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
+                                            ToolTipTitle = "Sound speed layer",
+                                            ToolTipDescription = "Select a source for sound speed data (not functional)",
+                                            IsEnabled = false,
+                                            IsEditable = false,
                                         },
-                                        new MenuItemDataViewModel
+                                        new ComboBoxDataViewModel
                                         {
-                                            Label = "NUWC Scenario File (*.nemo)", 
-                                            LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), 
-                                            SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), 
-                                            ToolTipTitle = "Add Content to the map", 
-                                            ToolTipDescription = "Add a NUWC Scenario file to the map", 
-                                            //Command = AddScenarioFileCommand,
-                                            Command = DisabledCommand,
+                                            Label = "Sediment",
+                                            //LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
+                                            SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
+                                            ToolTipTitle = "Sediment data layer",
+                                            ToolTipDescription = "Select a source for sediment data (not functional)",
+                                            IsEnabled = false,
+                                            IsEditable = false,
                                         },
-                                        new MenuItemDataViewModel
+                                        new ComboBoxDataViewModel
                                         {
-                                            Label = "Clear all layers", 
-                                            LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), 
-                                            SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), 
-                                            ToolTipTitle = "Clear layers", 
-                                            ToolTipDescription = "Reset the map to the empty state", 
-                                            //Command = AddScenarioFileCommand,
-                                            Command = ClearAllLayersCommand,
-                                        },
-                                    },
-                                },
-                                new MenuButtonDataViewModel
-                                {
-                                    Label = "Pan/Zoom Control",
-                                    LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Pan/Zoom Control",
-                                    ToolTipDescription = "Change the visibility and position of the pan/zoom control",
-                                    MenuItems = new MenuItemList
-                                    {
-                                        new MenuItemDataViewModel
-                                        {
-                                            Label = "Visible",
-                                            ToolTipTitle = "Pan/Zoom Control",
-                                            ToolTipDescription = "Change the visibility of the pan/zoom control",
-                                            Command = DisabledCommand,
-                                        },
-                                        new MenuItemDataViewModel
-                                        {
-                                            Label = "Upper Left",
-                                            ToolTipTitle = "Pan/Zoom Control",
-                                            ToolTipDescription = "Move the pan/zoom control to the upper left corner of the map display",
-                                            Command = DisabledCommand,
-                                        },
-                                        new MenuItemDataViewModel
-                                        {
-                                            Label = "Upper Right",
-                                            ToolTipTitle = "Pan/Zoom Control",
-                                            ToolTipDescription = "Move the pan/zoom control to the upper right corner of the map display",
-                                            Command = DisabledCommand,
-                                        },
-                                        new MenuItemDataViewModel
-                                        {
-                                            Label = "Lower Left",
-                                            ToolTipTitle = "Pan/Zoom Control",
-                                            ToolTipDescription = "Move the pan/zoom control to the lower left corner of the map display",
-                                            Command = DisabledCommand,
-                                        },
-                                        new MenuItemDataViewModel
-                                        {
-                                            Label = "Lower Right",
-                                            ToolTipTitle = "Pan/Zoom Control",
-                                            ToolTipDescription = "Move the pan/zoom control to the lower right corner of the map display",
-                                            Command = DisabledCommand,
+                                            Label = "Bathymetry",
+                                            //LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
+                                            SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
+                                            ToolTipTitle = "Bathymetry data layer",
+                                            ToolTipDescription = "Select a source for bathymetry data (not functional)",
+                                            IsEnabled = false,
+                                            IsEditable = false,
                                         },
                                     },
                                 },
                             },
-                        },
-                        new GroupDataViewModel
-                        {
-                            Label = "Sounds",
-                            Controls = new ControlList
-                            {
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Analysis Point",
-                                    LargeImage = new Uri("Images/LargeIcons/bullet-2-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/bullet-2-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Analysis Point",
-                                    ToolTipDescription = "Add a new analysis point to the experiment (not functional)",
-                                    Command = DisabledCommand,
-                                },
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Fixed Source",
-                                    LargeImage = new Uri("Images/LargeIcons/Sound.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/Sound.png", UriKind.Relative),
-                                    ToolTipTitle = "Fixed Source",
-                                    ToolTipDescription = "Add a new fixed sound source to the experiment (not functional)",
-                                    Command = DisabledCommand,
-                                },
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Quick Look",
-                                    LargeImage = new Uri("Images/LargeIcons/Button-Play-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/Button-Play-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Quick Look",
-                                    ToolTipDescription = "Add a new quick look point to the experiment (not functional)",
-                                    Command = DisabledCommand,
-                                },
-                            },
-                        },
+                    },
 
-                    },
+                    #endregion
+                    #region Animals Tab
+                    new TabDataViewModel {Header = "Animals",},
+
+                    #endregion
+                    #region Acoustics Tab
+                    new TabDataViewModel {Header = "Acoustics",},
+
+                    #endregion
+                    #region Reports Tab
+                    new TabDataViewModel {Header = "Reports",},
+
+                    #endregion
                 },
-                #endregion
-                #region Scenario Tab
-                new TabDataViewModel
-                {
-                    Header = "Scenario",
-                    Groups = new GroupList
-                    {
-                        new GroupDataViewModel
-                        {
-                            Label = "Scenario File",
-                            Controls = new ControlList
-                            {
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Open",
-                                    LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Open scenario file",
-                                    ToolTipDescription = "Open a scenario file (not functional)",
-                                    Command = DisabledCommand,
-                                },
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Close",
-                                    LargeImage = new Uri("Images/LargeIcons/close-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/close-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Close scenario file",
-                                    ToolTipDescription = "Close the current scenario file (not functional)",
-                                    Command = DisabledCommand,
-                                },
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Edit",
-                                    LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative),
-                                    ToolTipTitle = "Edit scenario file",
-                                    ToolTipDescription = "Launch the scenario editor (not functional)",
-                                    Command = DisabledCommand,
-                                },
-                            },
-                        },
-                    },
-                },
-                #endregion
-                #region Environment Tab
-                new TabDataViewModel
-                {
-                    Header = "Environment",
-                    Groups = new GroupList
-                    {
-                        new GroupDataViewModel
-                        {
-                            Label = "Location",
-                            Controls = new ControlList
-                            {
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Open",
-                                    LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Open environment file",
-                                    ToolTipDescription = "Open an environment file (not functional)",
-                                    Command = DisabledCommand,
-                                },
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Close",
-                                    LargeImage = new Uri("Images/LargeIcons/close-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/close-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Close environment file",
-                                    ToolTipDescription = "Close the current environment file (not functional)",
-                                    Command = DisabledCommand,
-                                },
-                                new ButtonDataViewModel
-                                {
-                                    Label = "Edit",
-                                    LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative),
-                                    ToolTipTitle = "Edit environment file",
-                                    ToolTipDescription = "Launch the environment builder (not functional)",
-                                    Command = DisabledCommand,
-                                },
-                            },
-                        },
-                        new GroupDataViewModel
-                        {
-                            Label = "Layers",
-                            Controls = new ControlList
-                            {
-                                new ComboBoxDataViewModel
-                                {
-                                    Label = "Wind",
-                                    //LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Wind data layer",
-                                    ToolTipDescription = "Select a source for wind data (not functional)",
-                                    IsEnabled = false,
-                                    IsEditable = false,
-                                },
-                                new ComboBoxDataViewModel
-                                {
-                                    Label = "Sound Speed",
-                                    //LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Sound speed layer",
-                                    ToolTipDescription = "Select a source for sound speed data (not functional)",
-                                    IsEnabled = false,
-                                    IsEditable = false,
-                                },
-                                new ComboBoxDataViewModel
-                                {
-                                    Label = "Sediment",
-                                    //LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Sediment data layer",
-                                    ToolTipDescription = "Select a source for sediment data (not functional)",
-                                    IsEnabled = false,
-                                    IsEditable = false,
-                                },
-                                new ComboBoxDataViewModel
-                                {
-                                    Label = "Bathymetry",
-                                    //LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Bathymetry data layer",
-                                    ToolTipDescription = "Select a source for bathymetry data (not functional)",
-                                    IsEnabled = false,
-                                    IsEditable = false,
-                                },
-                            },
-                        },
-                    },
-                },
-                #endregion
-                #region Animals Tab
-                new TabDataViewModel {Header = "Animals",},
-                #endregion
-                #region Acoustics Tab
-                new TabDataViewModel {Header = "Acoustics",},
-                #endregion
-                #region Reports Tab
-                new TabDataViewModel {Header = "Reports",},
-                #endregion
             };
         }
 

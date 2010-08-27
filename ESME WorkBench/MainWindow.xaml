@@ -261,9 +261,8 @@
 	</ribbon:RibbonWindow.Resources>
 	<DockPanel LastChildFill="True">
 		<ribbon:Ribbon x:Name="Ribbon" SelectedIndex="3" DockPanel.Dock="Top">
-            <!--
 			<ribbon:Ribbon.ApplicationMenu>
-				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png" Label="Hi">
+				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png" LargeImageSource="Images\LargeIcons\Dolphin.png">
 					<ribbon:RibbonApplicationMenuItem Header="Save Experiment"
 													  CanAddToQuickAccessToolBarDirectly="True"
 													  Icon="Images\SmallIcons\save-icon.png"
@@ -286,7 +285,6 @@
 														   ImageSource="Images\LargeIcons\about-icon.png"/>
 				</ribbon:RibbonApplicationMenu>
 			</ribbon:Ribbon.ApplicationMenu>
-            -->
 			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Experiment]}" KeyTip="E" Header="Experiment">
 				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario]}">
                     <ribbon:RibbonButton DataContext="{Binding Path=Controls[Load]}"/>
@@ -401,18 +399,13 @@
             -->
 		</ribbon:Ribbon>
 		<Grid>
-            <!--
 			<Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
                                   MinWidth="100" />
 				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition Width="*" MinWidth="500"/>
 			</Grid.ColumnDefinitions>
-            <DockPanel LastChildFill="True" Visibility="Hidden">
-                <TextBlock Text="Layers" 
-                            DockPanel.Dock="Top"
-                            HorizontalAlignment="Center" />
-                <Border Width="1" DockPanel.Dock="Top" BorderBrush="Black" />
+            <GroupBox Grid.Column="0" Header="Layers">
                 <TreeView Name="LayersView" ItemsSource="{Binding Layers}">
                     <TreeView.Resources>
                         <DataTemplate DataType="x:Type layers:LayerViewModel">
@@ -420,7 +413,7 @@
                         </DataTemplate>
                     </TreeView.Resources>
                 </TreeView>
-            </DockPanel>
+            </GroupBox>
             <GridSplitter Name="GridSplitter" 
 						  Grid.Column="1"
 						  Width="2"
@@ -430,7 +423,6 @@
 						  VerticalAlignment="Stretch"
 						  ResizeBehavior="BasedOnAlignment"
 						  ResizeDirection="Columns"/>
-            -->
             <uc1:WpfMap Name="Map1" Grid.Column="2" />
 		</Grid>
 	</DockPanel>
