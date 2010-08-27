@@ -297,10 +297,11 @@
                         <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NASA 1 minute topographic map]}"/>
                         <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Custom base map]}"/>
 					</ribbon:RibbonMenuButton>
-                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Add Content]}">
+                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Layers]}">
                         <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[ESRI Shapefile (*.shp)]}"/>
                         <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Overlay File (*.ovr)]}"/>
                         <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Scenario File (*.nemo)]}"/>
+                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Clear all layers]}"/>
                     </ribbon:RibbonMenuButton>
                     <ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Pan/Zoom Control]}">
                         <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Visible]}"/>
