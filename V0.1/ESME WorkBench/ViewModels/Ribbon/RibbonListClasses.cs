@@ -18,4 +18,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
     public class MenuItemList : NamedList<MenuItemDataViewModel> {}
 
     public class GroupList : NamedList<GroupDataViewModel> {}
+
+    public class ApplicationMenuItemList : NamedList<ApplicationMenuItemDataViewModel> { }
+
 }
