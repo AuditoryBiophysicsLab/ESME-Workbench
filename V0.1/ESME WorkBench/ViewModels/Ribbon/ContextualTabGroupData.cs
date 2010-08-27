@@ -1,27 +1,23 @@
-﻿using System.ComponentModel;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     public class ContextualTabGroupData : INotifyPropertyChanged
     {
-        public ContextualTabGroupData()
-            : this(null)
-        {
-        }
+        string _header;
+        bool _isVisible;
+        ObservableCollection<TabDataViewModel> _tabDataCollection;
+        public ContextualTabGroupData() : this(null) {}
 
         public ContextualTabGroupData(string header)
         {
             Header = header;
         }
 
-
         public string Header
         {
-            get
-            {
-                return _header;
-            }
+            get { return _header; }
 
             set
             {
@@ -32,14 +28,10 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 }
             }
         }
-        private string _header;
 
         public bool IsVisible
         {
-            get
-            {
-                return _isVisible;
-            }
+            get { return _isVisible; }
 
             set
             {
@@ -50,33 +42,27 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 }
             }
         }
-        private bool _isVisible;
-        
+
         public ObservableCollection<TabDataViewModel> TabDataCollection
         {
             get
             {
                 if (_tabDataCollection == null)
-                {
                     _tabDataCollection = new ObservableCollection<TabDataViewModel>();
-                }
                 return _tabDataCollection;
             }
         }
-        private ObservableCollection<TabDataViewModel> _tabDataCollection;
 
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(PropertyChangedEventArgs e)
+        #endregion
+
+        void OnPropertyChanged(PropertyChangedEventArgs e)
         {
             if (PropertyChanged != null)
-            {
                 PropertyChanged(this, e);
-            }
         }
-
-        #endregion
     }
 }

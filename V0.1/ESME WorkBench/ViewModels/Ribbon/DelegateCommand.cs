@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using Microsoft.Windows.Input;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     /// <summary>
     ///     This class allows delegating the commanding logic to methods passed as parameters,
@@ -16,18 +16,12 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         /// <summary>
         ///     Constructor
         /// </summary>
-        public DelegateCommand(Action executeMethod)
-            : this(executeMethod, null, false)
-        {
-        }
+        public DelegateCommand(Action executeMethod) : this(executeMethod, null, false) {}
 
         /// <summary>
         ///     Constructor
         /// </summary>
-        public DelegateCommand(Action executeMethod, Func<bool> canExecuteMethod)
-            : this(executeMethod, canExecuteMethod, false)
-        {
-        }
+        public DelegateCommand(Action executeMethod, Func<bool> canExecuteMethod) : this(executeMethod, canExecuteMethod, false) {}
 
         /// <summary>
         ///     Constructor
@@ -35,9 +29,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public DelegateCommand(Action executeMethod, Func<bool> canExecuteMethod, bool isAutomaticRequeryDisabled)
         {
             if (executeMethod == null)
-            {
                 throw new ArgumentNullException("executeMethod");
-            }
 
             _executeMethod = executeMethod;
             _canExecuteMethod = canExecuteMethod;
@@ -59,13 +51,9 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 if (_isAutomaticRequeryDisabled != value)
                 {
                     if (value)
-                    {
                         CommandManagerHelper.RemoveHandlersFromRequerySuggested(_canExecuteChangedHandlers);
-                    }
                     else
-                    {
                         CommandManagerHelper.AddHandlersToRequerySuggested(_canExecuteChangedHandlers);
-                    }
                     _isAutomaticRequeryDisabled = value;
                 }
             }
@@ -77,9 +65,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public bool CanExecute()
         {
             if (_canExecuteMethod != null)
-            {
                 return _canExecuteMethod();
-            }
             return true;
         }
 
@@ -89,9 +75,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public void Execute()
         {
             if (_executeMethod != null)
-            {
                 _executeMethod();
-            }
         }
 
         /// <summary>
@@ -122,17 +106,13 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             add
             {
                 if (!_isAutomaticRequeryDisabled)
-                {
                     CommandManager.RequerySuggested += value;
-                }
                 CommandManagerHelper.AddWeakReferenceHandler(ref _canExecuteChangedHandlers, value, 2);
             }
             remove
             {
                 if (!_isAutomaticRequeryDisabled)
-                {
                     CommandManager.RequerySuggested -= value;
-                }
                 CommandManagerHelper.RemoveWeakReferenceHandler(_canExecuteChangedHandlers, value);
             }
         }
@@ -151,22 +131,20 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
         #region Data
 
-        private readonly Func<bool> _canExecuteMethod;
-        private readonly Action _executeMethod;
-        private List<WeakReference> _canExecuteChangedHandlers;
-        private bool _isAutomaticRequeryDisabled;
+        readonly Func<bool> _canExecuteMethod;
+        readonly Action _executeMethod;
+        List<WeakReference> _canExecuteChangedHandlers;
+        bool _isAutomaticRequeryDisabled;
 
         #endregion
     }
 
     public class PreviewDelegateCommand : DelegateCommand, IPreviewCommand
     {
-        private readonly Action _cancelPreview;
-        private readonly Action _preview;
+        readonly Action _cancelPreview;
+        readonly Action _preview;
 
-        public PreviewDelegateCommand(Action executeMethod, Func<bool> canExecuteMethod, Action previewMethod,
-                                      Action cancelPreviewMethod)
-            : base(executeMethod, canExecuteMethod)
+        public PreviewDelegateCommand(Action executeMethod, Func<bool> canExecuteMethod, Action previewMethod, Action cancelPreviewMethod) : base(executeMethod, canExecuteMethod)
         {
             _preview = previewMethod;
             _cancelPreview = cancelPreviewMethod;
@@ -192,9 +170,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public void Preview()
         {
             if (_preview != null)
-            {
                 _preview();
-            }
         }
 
         /// <summary>
@@ -203,9 +179,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public void CancelPreview()
         {
             if (_cancelPreview != null)
-            {
                 _cancelPreview();
-            }
         }
     }
 
@@ -221,18 +195,12 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         /// <summary>
         ///     Constructor
         /// </summary>
-        public DelegateCommand(Action<T> executeMethod)
-            : this(executeMethod, null, false)
-        {
-        }
+        public DelegateCommand(Action<T> executeMethod) : this(executeMethod, null, false) {}
 
         /// <summary>
         ///     Constructor
         /// </summary>
-        public DelegateCommand(Action<T> executeMethod, Func<T, bool> canExecuteMethod)
-            : this(executeMethod, canExecuteMethod, false)
-        {
-        }
+        public DelegateCommand(Action<T> executeMethod, Func<T, bool> canExecuteMethod) : this(executeMethod, canExecuteMethod, false) {}
 
         /// <summary>
         ///     Constructor
@@ -240,9 +208,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public DelegateCommand(Action<T> executeMethod, Func<T, bool> canExecuteMethod, bool isAutomaticRequeryDisabled)
         {
             if (executeMethod == null)
-            {
                 throw new ArgumentNullException("executeMethod");
-            }
 
             _executeMethod = executeMethod;
             _canExecuteMethod = canExecuteMethod;
@@ -264,13 +230,9 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 if (_isAutomaticRequeryDisabled != value)
                 {
                     if (value)
-                    {
                         CommandManagerHelper.RemoveHandlersFromRequerySuggested(_canExecuteChangedHandlers);
-                    }
                     else
-                    {
                         CommandManagerHelper.AddHandlersToRequerySuggested(_canExecuteChangedHandlers);
-                    }
                     _isAutomaticRequeryDisabled = value;
                 }
             }
@@ -282,9 +244,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public bool CanExecute(T parameter)
         {
             if (_canExecuteMethod != null)
-            {
                 return _canExecuteMethod(parameter);
-            }
             return true;
         }
 
@@ -294,9 +254,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public void Execute(T parameter)
         {
             if (_executeMethod != null)
-            {
                 _executeMethod(parameter);
-            }
         }
 
         /// <summary>
@@ -327,17 +285,13 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             add
             {
                 if (!_isAutomaticRequeryDisabled)
-                {
                     CommandManager.RequerySuggested += value;
-                }
                 CommandManagerHelper.AddWeakReferenceHandler(ref _canExecuteChangedHandlers, value, 2);
             }
             remove
             {
                 if (!_isAutomaticRequeryDisabled)
-                {
                     CommandManager.RequerySuggested -= value;
-                }
                 CommandManagerHelper.RemoveWeakReferenceHandler(_canExecuteChangedHandlers, value);
             }
         }
@@ -347,11 +301,8 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             // if T is of value type and the parameter is not
             // set yet, then return false if CanExecute delegate
             // exists, else return true
-            if (parameter == null &&
-                typeof (T).IsValueType)
-            {
+            if (parameter == null && typeof(T).IsValueType)
                 return true;
-            }
             return CanExecute((T) parameter);
         }
 
@@ -364,22 +315,20 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
 
         #region Data
 
-        private readonly Func<T, bool> _canExecuteMethod;
-        private readonly Action<T> _executeMethod;
-        private List<WeakReference> _canExecuteChangedHandlers;
-        private bool _isAutomaticRequeryDisabled;
+        readonly Func<T, bool> _canExecuteMethod;
+        readonly Action<T> _executeMethod;
+        List<WeakReference> _canExecuteChangedHandlers;
+        bool _isAutomaticRequeryDisabled;
 
         #endregion
     }
 
     public class PreviewDelegateCommand<T> : DelegateCommand<T>, IPreviewCommand
     {
-        private readonly Action _cancelPreview;
-        private readonly Action<T> _preview;
+        readonly Action _cancelPreview;
+        readonly Action<T> _preview;
 
-        public PreviewDelegateCommand(Action<T> executeMethod, Func<T, bool> canExecuteMethod, Action<T> previewMethod,
-                                      Action cancelPreviewMethod)
-            : base(executeMethod, canExecuteMethod)
+        public PreviewDelegateCommand(Action<T> executeMethod, Func<T, bool> canExecuteMethod, Action<T> previewMethod, Action cancelPreviewMethod) : base(executeMethod, canExecuteMethod)
         {
             _preview = previewMethod;
             _cancelPreview = cancelPreviewMethod;
@@ -405,9 +354,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public void Preview(T parameter)
         {
             if (_preview != null)
-            {
                 _preview(parameter);
-            }
         }
 
         /// <summary>
@@ -416,9 +363,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
         public void CancelPreview()
         {
             if (_cancelPreview != null)
-            {
                 _cancelPreview();
-            }
         }
     }
 
@@ -426,7 +371,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
     ///     This class contains methods for the CommandManager that help avoid memory leaks by
     ///     using weak references.
     /// </summary>
-    internal class CommandManagerHelper
+    class CommandManagerHelper
     {
         internal static void CallWeakReferenceHandlers(List<WeakReference> handlers)
         {
@@ -471,9 +416,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 {
                     var handler = handlerRef.Target as EventHandler;
                     if (handler != null)
-                    {
                         CommandManager.RequerySuggested += handler;
-                    }
                 }
             }
         }
@@ -486,9 +429,7 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 {
                     var handler = handlerRef.Target as EventHandler;
                     if (handler != null)
-                    {
                         CommandManager.RequerySuggested -= handler;
-                    }
                 }
             }
         }
@@ -498,13 +439,10 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
             AddWeakReferenceHandler(ref handlers, handler, -1);
         }
 
-        internal static void AddWeakReferenceHandler(ref List<WeakReference> handlers, EventHandler handler,
-                                                     int defaultListSize)
+        internal static void AddWeakReferenceHandler(ref List<WeakReference> handlers, EventHandler handler, int defaultListSize)
         {
             if (handlers == null)
-            {
                 handlers = (defaultListSize > 0 ? new List<WeakReference>(defaultListSize) : new List<WeakReference>());
-            }
 
             handlers.Add(new WeakReference(handler));
         }

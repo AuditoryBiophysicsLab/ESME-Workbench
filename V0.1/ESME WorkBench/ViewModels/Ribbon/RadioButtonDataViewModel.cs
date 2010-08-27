@@ -3,12 +3,15 @@ using System.ComponentModel.Composition;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("RadioButtonDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class RadioButtonDataViewModel : ControlDataViewModel
     {
+        static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<RadioButtonDataViewModel>(x => x.IsChecked);
+        bool _isChecked;
+
         public bool IsChecked
         {
             get { return _isChecked; }
@@ -19,7 +22,5 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(IsCheckedChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<RadioButtonDataViewModel>(x => x.IsChecked);
-        private bool _isChecked;
     }
 }

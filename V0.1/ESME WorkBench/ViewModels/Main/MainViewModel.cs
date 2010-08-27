@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
-using System.IO;
 using System.Windows;
 using Cinch;
-using ESME.NEMO;
 using ESME.Overlay;
-using ESME.Platform;
-using ESMERibbonDemo.ViewModels.Ribbon;
+using ESMERibbonDemo;
+using ESMEWorkBench.ViewModels.Layers;
+using ESMEWorkBench.ViewModels.Ribbon;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
-namespace ESMERibbonDemo.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     [ExportViewModel("MainViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
@@ -27,6 +26,7 @@ namespace ESMERibbonDemo.ViewModels.Main
         readonly IViewAwareStatus _viewAwareStatusService;
         LayerOverlay _layerOverlay;
         WpfMap _map;
+        ObservableCollection<LayerViewModel> _layers = new ObservableCollection<LayerViewModel>();
 
         #endregion
 
@@ -93,11 +93,14 @@ namespace ESMERibbonDemo.ViewModels.Main
 
         void ExecuteAddShapefileCommand(Object args)
         {
-            string projection = null;
             _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
-            bool? result = _openFileService.ShowDialog(null);
+            var result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
-            string projectionFile = Path.Combine(Path.GetDirectoryName(_openFileService.FileName), "projection.txt");
+            var overlayLayer = new ShapefileLayerViewModel(_map, _openFileService.FileName);
+            _layers.Add(overlayLayer);
+#if false
+            string projection = null;
+            var projectionFile = Path.Combine(Path.GetDirectoryName(_openFileService.FileName), "projection.txt");
             if (File.Exists(projectionFile))
             {
                 using (var sr = new StreamReader(projectionFile))
@@ -108,22 +111,22 @@ namespace ESMERibbonDemo.ViewModels.Main
             newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             newLayer.RequireIndex = false;
             if (projection != null)
-                newLayer.FeatureSource.Projection = new ManagedProj4Projection {InternalProjectionParameters = projection, ExternalProjectionParameters = ManagedProj4Projection.GetEpsgParameters(4326),};
+                newLayer.FeatureSource.Projection = new ManagedProj4Projection { InternalProjectionParameters = projection, ExternalProjectionParameters = ManagedProj4Projection.GetEpsgParameters(4326), };
 
             _layerOverlay.Layers.Add(_openFileService.FileName, newLayer);
             _layerOverlay.Refresh();
             _map.Refresh();
+#endif
         }
+
 
         void ExecuteAddOverlayFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
-            bool? result = _openFileService.ShowDialog(null);
+            var result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
-            var overlayFile = new OverlayFile(_openFileService.FileName);
-            foreach (OverlayShape shape in overlayFile.Shapes)
-                AddShape(_openFileService.FileName, shape);
-            _map.Refresh();
+            var overlayLayer = new OverlayFileLayerViewModel(_map, _openFileService.FileName);
+            _layers.Add(overlayLayer);
         }
 
         void ExecuteAddScenarioFileCommand(Object args)
@@ -131,16 +134,19 @@ namespace ESMERibbonDemo.ViewModels.Main
             _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
             var result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
-            NemoFile nemoFile;
+            //NemoFile nemoFile;
             try
             {
-                nemoFile = new NemoFile(_openFileService.FileName, @"C:\Users\Dave Anderson\Desktop\Scenario Builder 1.5.508\Sim Areas");
+                var overlayLayer = new ScenarioFileLayerViewModel(_map, _openFileService.FileName, @"C:\Users\Dave Anderson\Desktop\Scenario Builder 1.5.508\Sim Areas");
+                _layers.Add(overlayLayer);
+                //nemoFile = new NemoFile(_openFileService.FileName, @"C:\Users\Dave Anderson\Desktop\Scenario Builder 1.5.508\Sim Areas");
             }
             catch (Exception ex)
             {
                 _messageBoxService.ShowError("Error opening scenario file: " + ex.Message);
                 return;
             }
+#if false
             var shapeCount = 0;
             foreach (var shape in nemoFile.Scenario.OverlayFile.Shapes)
                 AddShape("Overlay: " + nemoFile.Scenario.OverlayFile.FileName + "." + shapeCount++, shape);
@@ -159,14 +165,15 @@ namespace ESMERibbonDemo.ViewModels.Main
                 platformCount++;
             }
             _map.Refresh();
+#endif
         }
 
-        bool CanExecuteDisabledCommand(Object args) 
+        static bool CanExecuteDisabledCommand(Object args) 
         {
             return false;
         }
 
-        void ExecuteDisabledCommand(Object args) {}
+        static void ExecuteDisabledCommand(Object args) {}
 
         void AddShape(string layerName, OverlayShape shape)
         {
@@ -199,7 +206,7 @@ namespace ESMERibbonDemo.ViewModels.Main
         {
             var rectangleShapes = new Collection<BaseShape>();
 
-            foreach (Layer layer in layers)
+            foreach (var layer in layers)
             {
                 layer.Open();
                 if (layer.HasBoundingBox) rectangleShapes.Add(layer.GetBoundingBox());

@@ -1,7 +1,7 @@
 ﻿using System;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMERibbonDemo.ViewModels.Layers
+namespace ESMEWorkBench.ViewModels.Main
 {
     //This class, inheriting from Projection, applies the very simple projection of offsetting all the points
     //360 degrees to the left.

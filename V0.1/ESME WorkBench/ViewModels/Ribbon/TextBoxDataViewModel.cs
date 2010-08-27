@@ -1,15 +1,17 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.Composition;
-using System.Windows.Controls;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("TextBoxDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class TextBoxDataViewModel : ControlDataViewModel
     {
+        static readonly PropertyChangedEventArgs TextChangedEventArgs = ObservableHelper.CreateArgs<TextBoxDataViewModel>(x => x.Text);
+        string _text;
+
         public string Text
         {
             get { return _text; }
@@ -20,7 +22,5 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(TextChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs TextChangedEventArgs = ObservableHelper.CreateArgs<TextBoxDataViewModel>(x => x.Text);
-        private string _text;
     }
 }

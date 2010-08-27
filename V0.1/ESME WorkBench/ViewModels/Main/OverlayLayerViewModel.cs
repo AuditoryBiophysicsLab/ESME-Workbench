@@ -1,6 +1,6 @@
 ﻿using Cinch;
 
-namespace ESMERibbonDemo.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     public class OverlayLayerViewModel : ViewModelBase
     {

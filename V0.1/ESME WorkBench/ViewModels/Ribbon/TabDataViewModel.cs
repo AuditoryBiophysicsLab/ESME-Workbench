@@ -1,15 +1,30 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.Composition;
 using Cinch;
+using ESMERibbonDemo.ViewModels;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("TabDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class TabDataViewModel : ViewModelBase, IHasName
     {
+        static readonly PropertyChangedEventArgs HeaderChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.Header);
+
+        static readonly PropertyChangedEventArgs ContextualTabGroupHeaderChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.ContextualTabGroupHeader);
+
+        static readonly PropertyChangedEventArgs IsSelectedChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.IsSelected);
+
+        static readonly PropertyChangedEventArgs GroupsChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.Groups);
+
+        static readonly PropertyChangedEventArgs ControlsChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.Controls);
+        string _contextualTabGroupHeader;
+        ControlList _controls;
+        GroupList _groups;
+        string _header;
+        bool _isSelected;
+
         public string Header
         {
             get { return _header; }
@@ -20,8 +35,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(HeaderChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs HeaderChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.Header);
-        private string _header;
 
         public string ContextualTabGroupHeader
         {
@@ -33,8 +46,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(ContextualTabGroupHeaderChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs ContextualTabGroupHeaderChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.ContextualTabGroupHeader);
-        private string _contextualTabGroupHeader;
 
         public bool IsSelected
         {
@@ -46,8 +57,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(IsSelectedChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs IsSelectedChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.IsSelected);
-        private bool _isSelected;
 
         public GroupList Groups
         {
@@ -59,15 +68,10 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(GroupsChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs GroupsChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.Groups);
-        private GroupList _groups;
 
         public ControlList Controls
         {
-            get
-            {
-                return _controls;
-            }
+            get { return _controls; }
 
             set
             {
@@ -76,13 +80,15 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(ControlsChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs ControlsChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.Controls);
-        private ControlList _controls;
+
+        #region IHasName Members
 
         string IHasName.Name
         {
             get { return Header; }
             set { Header = value; }
         }
+
+        #endregion
     }
 }

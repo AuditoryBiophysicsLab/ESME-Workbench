@@ -1,6 +1,4 @@
-﻿namespace ESMERibbonDemo.ViewModels.Ribbon
+﻿namespace ESMEWorkBench.ViewModels.Ribbon
 {
-    public class SeparatorDataViewModel : ControlDataViewModel
-    {
-    }
+    public class SeparatorDataViewModel : ControlDataViewModel {}
 }

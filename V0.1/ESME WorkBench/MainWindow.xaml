@@ -1,13 +1,11 @@
-﻿<ribbon:RibbonWindow x:Class="ESMERibbonDemo.MainWindow"
+﻿<ribbon:RibbonWindow x:Class="ESMEWorkBench.MainWindow"
 					 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 					 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					 xmlns:ribbon="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
 					 xmlns:uc1="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition"
-					 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-					 xmlns:lvm="clr-namespace:ESMERibbonDemo.ViewModels.Layers" 
-					 mef:ViewModelLocator.ViewModel="MainViewModel"
-                     xmlns:p="clr-namespace:ESMERibbonDemo.Properties" 
-                     xmlns:erd="clr-namespace:ESMERibbonDemo"
+					 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" mef:ViewModelLocator.ViewModel="MainViewModel"
+                     xmlns:p="clr-namespace:ESMEWorkBench.Properties" 
+                     xmlns:erd="clr-namespace:ESMEWorkBench"
                      SnapsToDevicePixels="True"
 					 Title="ESME WorkBench"
 					 x:Name="MainView"
@@ -407,10 +405,6 @@
 			</Grid.ColumnDefinitions>
 			<TreeView Name="LayersView" Grid.Column="0">
 				<TreeView.Resources>
-					<HierarchicalDataTemplate DataType="{x:Type lvm:LayersViewModel}" 
-											  ItemsSource="{Binding Layers}">
-						<TextBlock Text="{Binding LayerName}" />
-					</HierarchicalDataTemplate>
 				</TreeView.Resources>
 				
 			</TreeView>

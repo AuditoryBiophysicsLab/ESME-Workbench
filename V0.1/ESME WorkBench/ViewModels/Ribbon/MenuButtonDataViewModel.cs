@@ -3,12 +3,21 @@ using System.ComponentModel.Composition;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("MenuButtonDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class MenuButtonDataViewModel : ControlDataViewModel
     {
+        static readonly PropertyChangedEventArgs IsVerticallyResizableChangedEventArgs = ObservableHelper.CreateArgs<MenuButtonDataViewModel>(x => x.IsVerticallyResizable);
+
+        static readonly PropertyChangedEventArgs IsHorizontallyResizableChangedEventArgs = ObservableHelper.CreateArgs<MenuButtonDataViewModel>(x => x.IsHorizontallyResizable);
+
+        static readonly PropertyChangedEventArgs MenuItemsChangedEventArgs = ObservableHelper.CreateArgs<MenuButtonDataViewModel>(x => x.MenuItems);
+        bool _isHorizontallyResizable;
+        bool _isVerticallyResizable;
+        MenuItemList _menuItems;
+
         public bool IsVerticallyResizable
         {
             get { return _isVerticallyResizable; }
@@ -19,8 +28,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(IsVerticallyResizableChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs IsVerticallyResizableChangedEventArgs = ObservableHelper.CreateArgs<MenuButtonDataViewModel>(x => x.IsVerticallyResizable);
-        private bool _isVerticallyResizable;
 
         public bool IsHorizontallyResizable
         {
@@ -32,8 +39,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(IsHorizontallyResizableChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs IsHorizontallyResizableChangedEventArgs = ObservableHelper.CreateArgs<MenuButtonDataViewModel>(x => x.IsHorizontallyResizable);
-        private bool _isHorizontallyResizable;
 
         public MenuItemList MenuItems
         {
@@ -45,7 +50,5 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(MenuItemsChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs MenuItemsChangedEventArgs = ObservableHelper.CreateArgs<MenuButtonDataViewModel>(x => x.MenuItems);
-        private MenuItemList _menuItems;
     }
 }
