@@ -5,7 +5,8 @@
 					 xmlns:uc1="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition"
 					 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" mef:ViewModelLocator.ViewModel="MainViewModel"
                      xmlns:p="clr-namespace:ESMEWorkBench.Properties" 
-                     xmlns:erd="clr-namespace:ESMEWorkBench"
+                     xmlns:app="clr-namespace:ESMEWorkBench"
+                     xmlns:layers="clr-namespace:ESMEWorkBench.ViewModels.Layers"
                      SnapsToDevicePixels="True"
 					 Title="ESME WorkBench"
 					 x:Name="MainView"
@@ -15,7 +16,7 @@
                      Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
                      >
 	<ribbon:RibbonWindow.Resources>
-        <erd:GridLengthConverter x:Key="gridLengthConverter"/>
+        <app:GridLengthConverter x:Key="gridLengthConverter"/>
 		<!-- RibbonControl -->
 		<Style x:Key="RibbonControlStyle">
 			<Setter Property="ribbon:RibbonControlService.Label" Value="{Binding Label}" />
@@ -260,6 +261,7 @@
 	</ribbon:RibbonWindow.Resources>
 	<DockPanel LastChildFill="True">
 		<ribbon:Ribbon x:Name="Ribbon" SelectedIndex="3" DockPanel.Dock="Top">
+            <!--
 			<ribbon:Ribbon.ApplicationMenu>
 				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png" Label="Hi">
 					<ribbon:RibbonApplicationMenuItem Header="Save Experiment"
@@ -284,6 +286,7 @@
 														   ImageSource="Images\LargeIcons\about-icon.png"/>
 				</ribbon:RibbonApplicationMenu>
 			</ribbon:Ribbon.ApplicationMenu>
+            -->
 			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Experiment]}" KeyTip="E" Header="Experiment">
 				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario]}">
                     <ribbon:RibbonButton DataContext="{Binding Path=Controls[Load]}"/>
@@ -397,26 +400,37 @@
             -->
 		</ribbon:Ribbon>
 		<Grid>
+            <!--
 			<Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
                                   MinWidth="100" />
 				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition Width="*" MinWidth="500"/>
 			</Grid.ColumnDefinitions>
-			<TreeView Name="LayersView" Grid.Column="0">
-				<TreeView.Resources>
-				</TreeView.Resources>
-				
-			</TreeView>
-			<GridSplitter Name="GridSplitter" 
+            <DockPanel LastChildFill="True" Visibility="Hidden">
+                <TextBlock Text="Layers" 
+                            DockPanel.Dock="Top"
+                            HorizontalAlignment="Center" />
+                <Border Width="1" DockPanel.Dock="Top" BorderBrush="Black" />
+                <TreeView Name="LayersView" ItemsSource="{Binding Layers}">
+                    <TreeView.Resources>
+                        <DataTemplate DataType="x:Type layers:LayerViewModel">
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </TreeView.Resources>
+                </TreeView>
+            </DockPanel>
+            <GridSplitter Name="GridSplitter" 
 						  Grid.Column="1"
 						  Width="2"
+                          Background="Black"
 						  HorizontalAlignment="Center"
-						  Margin="0,5,0,5"
+						  Margin="5,0,5,0"
 						  VerticalAlignment="Stretch"
 						  ResizeBehavior="BasedOnAlignment"
 						  ResizeDirection="Columns"/>
-			<uc1:WpfMap Name="Map1" Grid.Column="2" />
+            -->
+            <uc1:WpfMap Name="Map1" Grid.Column="2" />
 		</Grid>
 	</DockPanel>
 </ribbon:RibbonWindow>

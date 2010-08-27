@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Windows;
 using Cinch;
@@ -12,6 +13,7 @@ using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
+using System.IO;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -26,7 +28,6 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IViewAwareStatus _viewAwareStatusService;
         LayerOverlay _layerOverlay;
         WpfMap _map;
-        ObservableCollection<LayerViewModel> _layers = new ObservableCollection<LayerViewModel>();
 
         #endregion
 
@@ -48,7 +49,31 @@ namespace ESMEWorkBench.ViewModels.Main
             DisabledCommand = new SimpleCommand<object, object>(CanExecuteDisabledCommand, ExecuteDisabledCommand);
 
             CreateRibbonBindings();
+            Layers = new ObservableCollection<LayerViewModel>();
         }
+
+        #region public ObservableCollection<LayerViewModel> Layers { get; set; }
+
+        public ObservableCollection<LayerViewModel> Layers
+        {
+            get { return _layers; }
+            set
+            {
+                if (_layers == value) return;
+                _layers = value;
+                _layers.CollectionChanged += ShapeLayersCollectionChanged;
+                NotifyPropertyChanged(LayersChangedEventArgs);
+            }
+        }
+        static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.Layers);
+        ObservableCollection<LayerViewModel> _layers;
+
+        void ShapeLayersCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(LayersChangedEventArgs);
+        }
+
+        #endregion
 
         void ViewAwareStatusServiceViewLoaded()
         {
@@ -64,7 +89,8 @@ namespace ESMEWorkBench.ViewModels.Main
             _map.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Top;
             _layerOverlay = new LayerOverlay {TileType = TileType.SingleTile};
 
-            var worldLayer = new ShapeFileFeatureLayer(@"Sample GIS Data\Countries02.shp");
+            var appPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            var worldLayer = new ShapeFileFeatureLayer(Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"));
             worldLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyles.Country1;
             worldLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
 
@@ -98,25 +124,6 @@ namespace ESMEWorkBench.ViewModels.Main
             if (!result.HasValue || !result.Value) return;
             var overlayLayer = new ShapefileLayerViewModel(_map, _openFileService.FileName);
             _layers.Add(overlayLayer);
-#if false
-            string projection = null;
-            var projectionFile = Path.Combine(Path.GetDirectoryName(_openFileService.FileName), "projection.txt");
-            if (File.Exists(projectionFile))
-            {
-                using (var sr = new StreamReader(projectionFile))
-                    projection = sr.ReadToEnd();
-            }
-            var newLayer = new ShapeFileFeatureLayer(_openFileService.FileName);
-            newLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyles.County1;
-            newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
-            newLayer.RequireIndex = false;
-            if (projection != null)
-                newLayer.FeatureSource.Projection = new ManagedProj4Projection { InternalProjectionParameters = projection, ExternalProjectionParameters = ManagedProj4Projection.GetEpsgParameters(4326), };
-
-            _layerOverlay.Layers.Add(_openFileService.FileName, newLayer);
-            _layerOverlay.Refresh();
-            _map.Refresh();
-#endif
         }
 
 
