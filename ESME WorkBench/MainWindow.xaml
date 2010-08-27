@@ -6,11 +6,18 @@
 					 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
 					 xmlns:lvm="clr-namespace:ESMERibbonDemo.ViewModels.Layers" 
 					 mef:ViewModelLocator.ViewModel="MainViewModel"
-					 SnapsToDevicePixels="True"
+                     xmlns:p="clr-namespace:ESMERibbonDemo.Properties" 
+                     xmlns:erd="clr-namespace:ESMERibbonDemo"
+                     SnapsToDevicePixels="True"
 					 Title="ESME WorkBench"
 					 x:Name="MainView"
-					 Width="1000" Height="668">
+                     Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
+                     Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
+                     Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
+                     Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
+                     >
 	<ribbon:RibbonWindow.Resources>
+        <erd:GridLengthConverter x:Key="gridLengthConverter"/>
 		<!-- RibbonControl -->
 		<Style x:Key="RibbonControlStyle">
 			<Setter Property="ribbon:RibbonControlService.Label" Value="{Binding Label}" />
@@ -393,7 +400,8 @@
 		</ribbon:Ribbon>
 		<Grid>
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*" MinWidth="100" />
+                <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
+                                  MinWidth="100" />
 				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition Width="*" MinWidth="500"/>
 			</Grid.ColumnDefinitions>

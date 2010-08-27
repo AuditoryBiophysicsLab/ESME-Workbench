@@ -20,5 +20,10 @@ namespace ESMERibbonDemo
             InitializeComponent();
         }
         #endregion
+
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            ESMERibbonDemo.Properties.Settings.Default.Save();
+        }
     }
 }

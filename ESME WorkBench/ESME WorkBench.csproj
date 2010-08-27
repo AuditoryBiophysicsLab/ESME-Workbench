@@ -89,6 +89,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\IHasName.cs" />
     <Compile Include="ViewModels\Layers\LayersViewModel.cs" />
     <Compile Include="ViewModels\Layers\LayerViewModel.cs" />
@@ -139,6 +145,10 @@
     </Compile>
     <AppDesigner Include="Properties\" />
     <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Application.ico">
       <Visible>false</Visible>
     </None>
