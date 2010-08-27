@@ -3,12 +3,15 @@ using System.ComponentModel.Composition;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("CheckBoxDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class CheckBoxDataViewModel : ControlDataViewModel
     {
+        static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<CheckBoxDataViewModel>(x => x.IsChecked);
+        bool _isChecked;
+
         public bool IsChecked
         {
             get { return _isChecked; }
@@ -19,7 +22,5 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(IsCheckedChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<CheckBoxDataViewModel>(x => x.IsChecked);
-        private bool _isChecked;
     }
 }

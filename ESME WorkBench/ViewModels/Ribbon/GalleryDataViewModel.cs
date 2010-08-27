@@ -1,42 +1,43 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("GalleryDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class GalleryDataViewModel<T> : ControlDataViewModel
     {
+        static readonly PropertyChangedEventArgs SelectedItemChangedEventArgs = ObservableHelper.CreateArgs<GalleryDataViewModel<T>>(x => x.SelectedItem);
+
+        static readonly PropertyChangedEventArgs CanUserFilterChangedEventArgs = ObservableHelper.CreateArgs<GalleryDataViewModel<T>>(x => x.CanUserFilter);
+        bool _canUserFilter;
+        ObservableCollection<GalleryCategoryDataViewModel<T>> _controlDataCollection;
+        T _selectedItem;
+
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public ObservableCollection<GalleryCategoryDataViewModel<T>> CategoryDataCollection
         {
             get
             {
                 if (_controlDataCollection == null)
-                {
                     _controlDataCollection = new ObservableCollection<GalleryCategoryDataViewModel<T>>();
-                }
                 return _controlDataCollection;
             }
         }
-        private ObservableCollection<GalleryCategoryDataViewModel<T>> _controlDataCollection;
 
         public T SelectedItem
         {
             get { return _selectedItem; }
             set
             {
-                if (Object.Equals(value, _selectedItem)) return;
+                if (Equals(value, _selectedItem)) return;
                 _selectedItem = value;
                 NotifyPropertyChanged(SelectedItemChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs SelectedItemChangedEventArgs = ObservableHelper.CreateArgs<GalleryDataViewModel<T>>(x => x.SelectedItem);
-        T _selectedItem;
 
         public bool CanUserFilter
         {
@@ -48,7 +49,5 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(CanUserFilterChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs CanUserFilterChangedEventArgs = ObservableHelper.CreateArgs<GalleryDataViewModel<T>>(x => x.CanUserFilter);
-        private bool _canUserFilter;
     }
 }

@@ -1,9 +1,6 @@
-﻿using System.Windows;
-using Microsoft.Windows.Controls.Ribbon;
-using ThinkGeo.MapSuite.Core;
-using ThinkGeo.MapSuite.WpfDesktopEdition;
+﻿using Microsoft.Windows.Controls.Ribbon;
 
-namespace ESMERibbonDemo
+namespace ESMEWorkBench
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
@@ -18,14 +15,14 @@ namespace ESMERibbonDemo
 		}
 
 #if false
- 	    private void MapLoaded(object sender, RoutedEventArgs e)
+		private void MapLoaded(object sender, RoutedEventArgs e)
 		{
 			Map1.MapUnit = GeographyUnit.DecimalDegree;
-		    Map1.MapTools.PanZoomBar.HorizontalAlignment = HorizontalAlignment.Right;
-		    Map1.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Bottom;
+			Map1.MapTools.PanZoomBar.HorizontalAlignment = HorizontalAlignment.Right;
+			Map1.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Bottom;
 
 			var worldLayer = new ShapeFileFeatureLayer(@"Sample GIS Data\Countries02.shp");
-		    worldLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyles.Country1;
+			worldLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyles.Country1;
 			worldLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
 
 
@@ -62,5 +59,5 @@ namespace ESMERibbonDemo
 			Map1.Refresh();
 		}
 #endif
-    }
+	}
 }

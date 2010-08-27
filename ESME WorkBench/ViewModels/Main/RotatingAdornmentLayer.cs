@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMERibbonDemo.ViewModels.Layers
+namespace ESMEWorkBench.ViewModels.Main
 {
     class RotatingAdornmentLayer : AdornmentLayer
     {

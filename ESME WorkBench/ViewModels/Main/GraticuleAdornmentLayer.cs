@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMERibbonDemo.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Main
 {
     //this class inherits from AdornmentLayer. 
     internal class MyGraticuleAdornmentLayer : AdornmentLayer

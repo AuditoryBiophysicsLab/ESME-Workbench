@@ -9,8 +9,8 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <DefaultClrNameSpace>ESMERibbonDemo</DefaultClrNameSpace>
-    <RootNamespace>ESMERibbonDemo</RootNamespace>
-    <AssemblyName>ESMERibbonDemo</AssemblyName>
+    <RootNamespace>ESMEWorkBench</RootNamespace>
+    <AssemblyName>ESME WorkBench</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -96,7 +96,6 @@
     </Compile>
     <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\IHasName.cs" />
-    <Compile Include="ViewModels\Layers\LayersViewModel.cs" />
     <Compile Include="ViewModels\Layers\LayerViewModel.cs" />
     <Compile Include="ViewModels\Main\GraticuleAdornmentLayer.cs" />
     <Compile Include="ViewModels\Main\MainViewModel.cs" />
@@ -165,21 +164,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Sample GIS Data\Countries02.shx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Sample GIS Data\WorldCapitals.dbf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Sample GIS Data\WorldCapitals.ids">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Sample GIS Data\WorldCapitals.idx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Sample GIS Data\WorldCapitals.shp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Sample GIS Data\WorldCapitals.shx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Resource Include="Images\LargeIcons\about-icon.png" />

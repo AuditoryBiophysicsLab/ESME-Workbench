@@ -3,14 +3,54 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 using Cinch;
+using ESMERibbonDemo.ViewModels;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("ControlDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ControlDataViewModel : ViewModelBase, IHasName
     {
+        static readonly PropertyChangedEventArgs LabelChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.Label);
+
+        static readonly PropertyChangedEventArgs LargeImageChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.LargeImage);
+
+        static readonly PropertyChangedEventArgs SmallImageChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.SmallImage);
+
+        static readonly PropertyChangedEventArgs ToolTipTitleChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipTitle);
+
+        static readonly PropertyChangedEventArgs ToolTipDescriptionChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipDescription);
+
+        static readonly PropertyChangedEventArgs ToolTipImageChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipImage);
+
+        static readonly PropertyChangedEventArgs ToolTipFooterTitleChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipFooterTitle);
+
+        static readonly PropertyChangedEventArgs ToolTipFooterDescriptionChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipFooterDescription);
+
+        static readonly PropertyChangedEventArgs ToolTipFooterImageChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipFooterImage);
+
+        static readonly PropertyChangedEventArgs CommandChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.Command);
+
+        static readonly PropertyChangedEventArgs KeyTipChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.KeyTip);
+
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.IsEnabled);
+
+        static readonly PropertyChangedEventArgs IsEditableChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.IsEditable);
+        ICommand _command;
+        bool _isEditable;
+        bool _isEnabled;
+        string _keyTip;
+        string _label;
+        Uri _largeImage;
+        Uri _smallImage;
+        string _toolTipDescription;
+        string _toolTipFooterDescription;
+        Uri _toolTipFooterImage;
+        string _toolTipFooterTitle;
+        Uri _toolTipImage;
+        string _toolTipTitle;
+
         public string Label
         {
             get { return _label; }
@@ -21,8 +61,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(LabelChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs LabelChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.Label);
-        private string _label;
 
         public Uri LargeImage
         {
@@ -34,8 +72,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(LargeImageChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs LargeImageChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.LargeImage);
-        private Uri _largeImage;
 
         public Uri SmallImage
         {
@@ -47,8 +83,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(SmallImageChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs SmallImageChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.SmallImage);
-        private Uri _smallImage;
 
         public string ToolTipTitle
         {
@@ -60,8 +94,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(ToolTipTitleChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs ToolTipTitleChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipTitle);
-        private string _toolTipTitle;
 
         public string ToolTipDescription
         {
@@ -73,8 +105,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(ToolTipDescriptionChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs ToolTipDescriptionChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipDescription);
-        private string _toolTipDescription;
 
         public Uri ToolTipImage
         {
@@ -86,8 +116,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(ToolTipImageChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs ToolTipImageChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipImage);
-        private Uri _toolTipImage;
 
         public string ToolTipFooterTitle
         {
@@ -99,8 +127,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(ToolTipFooterTitleChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs ToolTipFooterTitleChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipFooterTitle);
-        private string _toolTipFooterTitle;
 
         public string ToolTipFooterDescription
         {
@@ -112,8 +138,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(ToolTipFooterDescriptionChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs ToolTipFooterDescriptionChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipFooterDescription);
-        private string _toolTipFooterDescription;
 
         public Uri ToolTipFooterImage
         {
@@ -125,8 +149,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(ToolTipFooterImageChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs ToolTipFooterImageChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.ToolTipFooterImage);
-        private Uri _toolTipFooterImage;
 
         public ICommand Command
         {
@@ -138,8 +160,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(CommandChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs CommandChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.Command);
-        private ICommand _command;
 
         public string KeyTip
         {
@@ -151,8 +171,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(KeyTipChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs KeyTipChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.KeyTip);
-        private string _keyTip;
 
         public bool IsEnabled
         {
@@ -164,8 +182,6 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(IsEnabledChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.IsEnabled);
-        bool _isEnabled;
 
         public bool IsEditable
         {
@@ -177,13 +193,15 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(IsEditableChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs IsEditableChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.IsEditable);
-        bool _isEditable;
+
+        #region IHasName Members
 
         string IHasName.Name
         {
             get { return Label; }
             set { Label = value; }
         }
+
+        #endregion
     }
 }

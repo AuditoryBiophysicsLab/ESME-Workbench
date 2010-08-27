@@ -3,18 +3,18 @@ using System.ComponentModel.Composition;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMERibbonDemo.ViewModels.Ribbon
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("ToggleButtonDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ToggleButtonDataViewModel : ControlDataViewModel
     {
+        static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<ToggleButtonDataViewModel>(x => x.IsChecked);
+        bool _isChecked;
+
         public bool IsChecked
         {
-            get
-            {
-                return _isChecked;
-            }
+            get { return _isChecked; }
 
             set
             {
@@ -23,7 +23,5 @@ namespace ESMERibbonDemo.ViewModels.Ribbon
                 NotifyPropertyChanged(IsCheckedChangedEventArgs);
             }
         }
-        private static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<ToggleButtonDataViewModel>(x => x.IsChecked);
-        private bool _isChecked;
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Cinch;
 using System.Reflection;
 
-namespace ESMERibbonDemo
+namespace ESMEWorkBench
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -23,7 +23,7 @@ namespace ESMERibbonDemo
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            ESMERibbonDemo.Properties.Settings.Default.Save();
+            ESMEWorkBench.Properties.Settings.Default.Save();
         }
     }
 }

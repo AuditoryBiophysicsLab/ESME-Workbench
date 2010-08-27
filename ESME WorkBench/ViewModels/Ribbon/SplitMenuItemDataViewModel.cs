@@ -1,6 +1,4 @@
-﻿namespace ESMERibbonDemo.ViewModels.Ribbon
+﻿namespace ESMEWorkBench.ViewModels.Ribbon
 {
-    public class SplitMenuItemDataViewModel : MenuItemDataViewModel
-    {
-    }
+    public class SplitMenuItemDataViewModel : MenuItemDataViewModel {}
 }
