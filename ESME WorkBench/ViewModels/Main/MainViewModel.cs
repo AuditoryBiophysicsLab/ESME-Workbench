@@ -46,6 +46,7 @@ namespace ESMEWorkBench.ViewModels.Main
             AddShapefileCommand = new SimpleCommand<object, object>(ExecuteAddShapefileCommand);
             AddOverlayFileCommand = new SimpleCommand<object, object>(ExecuteAddOverlayFileCommand);
             AddScenarioFileCommand = new SimpleCommand<object, object>(ExecuteAddScenarioFileCommand);
+            ClearAllLayersCommand = new SimpleCommand<object, object>(ExecuteClearAllLayersCommand);
             DisabledCommand = new SimpleCommand<object, object>(CanExecuteDisabledCommand, ExecuteDisabledCommand);
 
             CreateRibbonBindings();
@@ -70,6 +71,26 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void ShapeLayersCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+#if false
+            if (e.NewItems != null)
+            {
+                foreach (var item in e.NewItems)
+                {
+                    var newLayer = (LayerViewModel)item;
+                    LayerOverlay.Layers.Add(newLayer);
+                }
+                //LayerOverlay.Refresh();
+            }
+            if (e.OldItems != null)
+            {
+                foreach (var item in e.OldItems)
+                {
+                    var oldLayer = (InMemoryFeatureLayer)item;
+                    LayerOverlay.Layers.Remove(oldLayer);
+                }
+                //LayerOverlay.Refresh();
+            }
+#endif
             NotifyPropertyChanged(LayersChangedEventArgs);
         }
 
@@ -115,6 +136,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<Object, Object> AddScenarioFileCommand { get; private set; }
 
+        public SimpleCommand<Object, Object> ClearAllLayersCommand { get; private set; }
+
         public SimpleCommand<Object, Object> DisabledCommand { get; private set; }
 
         void ExecuteAddShapefileCommand(Object args)
@@ -153,26 +176,12 @@ namespace ESMEWorkBench.ViewModels.Main
                 _messageBoxService.ShowError("Error opening scenario file: " + ex.Message);
                 return;
             }
-#if false
-            var shapeCount = 0;
-            foreach (var shape in nemoFile.Scenario.OverlayFile.Shapes)
-                AddShape("Overlay: " + nemoFile.Scenario.OverlayFile.FileName + "." + shapeCount++, shape);
-            int platformCount = 0;
-            foreach (var platform in nemoFile.Scenario.Platforms)
-            {
-                var behavior = new BehaviorModel(platform);
-                AddShape("Platform " + platformCount + ": " + platform.Name + " course track", behavior.CourseOverlay);
-                AddShape("Platform " + platformCount + ": " + platform.Name + " start", behavior.CourseStart);
-                AddShape("Platform " + platformCount + ": " + platform.Name + " end", behavior.CourseEnd);
-                foreach (var trackdef in platform.Trackdefs)
-                {
-                    foreach (var shape in trackdef.OverlayFile.Shapes)
-                        AddShape("Platform " + platformCount + ": " + platform.Name + " operational area", shape);
-                }
-                platformCount++;
-            }
-            _map.Refresh();
-#endif
+        }
+
+        void ExecuteClearAllLayersCommand(Object args)
+        {
+            Layers.Clear();
+            ViewAwareStatusServiceViewLoaded();
         }
 
         static bool CanExecuteDisabledCommand(Object args) 
@@ -299,7 +308,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                 },
                                 new MenuButtonDataViewModel
                                 {
-                                    Label = "Add Content",
+                                    Label = "Layers",
                                     LargeImage = new Uri("Images/LargeIcons/Plus.png", UriKind.Relative),
                                     //SmallImage = new Uri("Images/SmallIcons/Plus.png", UriKind.Relative),
                                     ToolTipTitle = "Add Content to the map",
@@ -331,7 +340,18 @@ namespace ESMEWorkBench.ViewModels.Main
                                             SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), 
                                             ToolTipTitle = "Add Content to the map", 
                                             ToolTipDescription = "Add a NUWC Scenario file to the map", 
-                                            Command = AddScenarioFileCommand,
+                                            //Command = AddScenarioFileCommand,
+                                            Command = DisabledCommand,
+                                        },
+                                        new MenuItemDataViewModel
+                                        {
+                                            Label = "Clear all layers", 
+                                            LargeImage = new Uri("Images/LargeIcons/Layers-icon.png", UriKind.Relative), 
+                                            SmallImage = new Uri("Images/SmallIcons/Layers-icon.png", UriKind.Relative), 
+                                            ToolTipTitle = "Clear layers", 
+                                            ToolTipDescription = "Reset the map to the empty state", 
+                                            //Command = AddScenarioFileCommand,
+                                            Command = ClearAllLayersCommand,
                                         },
                                     },
                                 },
