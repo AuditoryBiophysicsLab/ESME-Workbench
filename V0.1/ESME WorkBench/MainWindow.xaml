@@ -3,7 +3,8 @@
 					 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					 xmlns:ribbon="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
 					 xmlns:uc1="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition"
-					 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" mef:ViewModelLocator.ViewModel="MainViewModel"
+					 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" 
+                     mef:ViewModelLocator.ViewModel="MainViewModel"
                      xmlns:p="clr-namespace:ESMEWorkBench.Properties" 
                      xmlns:app="clr-namespace:ESMEWorkBench"
                      xmlns:layers="clr-namespace:ESMEWorkBench.ViewModels.Layers"
@@ -260,30 +261,46 @@
 
 	</ribbon:RibbonWindow.Resources>
 	<DockPanel LastChildFill="True">
-		<ribbon:Ribbon x:Name="Ribbon" SelectedIndex="3" DockPanel.Dock="Top">
+		<ribbon:Ribbon x:Name="Ribbon" 
+                       DockPanel.Dock="Top" 
+                       DataContext="{Binding Path=RibbonViewModel}">
 			<ribbon:Ribbon.ApplicationMenu>
-				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png" LargeImageSource="Images\LargeIcons\Dolphin.png">
-					<ribbon:RibbonApplicationMenuItem Header="Save Experiment"
-													  CanAddToQuickAccessToolBarDirectly="True"
-													  Icon="Images\SmallIcons\save-icon.png"
-													  ImageSource="Images\LargeIcons\save-icon.png"/>
-					<ribbon:RibbonApplicationMenuItem Header="Open Experiment"
-													  CanAddToQuickAccessToolBarDirectly="True"
-													  Icon="Images\SmallIcons\open-icon.png"
-													  ImageSource="Images\LargeIcons\open-icon.png"/>
-					<ribbon:RibbonApplicationMenuItem Header="Close Experiment"
-													  CanAddToQuickAccessToolBarDirectly="True"
-													  Icon="Images\SmallIcons\close-icon.png"
-													  ImageSource="Images\LargeIcons\close-icon.png"/>
-					<ribbon:RibbonApplicationMenuItem Header="New Experiment"
-													  CanAddToQuickAccessToolBarDirectly="True"
-													  Icon="Images\SmallIcons\new-icon.png"
-													  ImageSource="Images\LargeIcons\new-icon.png"/>
-					<ribbon:RibbonApplicationSplitMenuItem Header="Info"
-														   CanAddToQuickAccessToolBarDirectly="True"
-														   Icon="Images\SmallIcons\about-icon.png"
-														   ImageSource="Images\LargeIcons\about-icon.png"/>
-				</ribbon:RibbonApplicationMenu>
+				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png" 
+                                              LargeImageSource="Images\LargeIcons\Dolphin.png"
+                                              DataContext="{Binding Path=ApplicationMenuItems}">
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Save Experiment]}"/>
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Open Experiment]}"/>
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Close Experiment]}"/>
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[New Experiment]}"/>
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Info]}"/>
+                    <ribbon:RibbonSeparator />
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Options]}"/>
+                    <ribbon:RibbonApplicationMenu.FooterPaneContent>
+                        <DockPanel LastChildFill="False">
+                            <ribbon:RibbonButton Command="ApplicationCommands.Close"
+                                     Label="Exit"
+                                     ToolTipTitle="Exit" 
+                                     SmallImageSource="Images\SmallIcons\Button-Close-icon.png"
+                                     KeyTip="X"
+                                     DockPanel.Dock="Right"
+                                     Margin="2" />
+                        </DockPanel>
+                    </ribbon:RibbonApplicationMenu.FooterPaneContent>
+                    <ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
+                        <ribbon:RibbonGallery CanUserFilter="False"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ribbon:RibbonGalleryCategory Header="Recent Experiments" 
+                                              Background="Transparent" 
+                                              ItemsSource="{Binding RecentExperiments}">
+                                <ribbon:RibbonGalleryCategory.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" IsItemsHost="True"/>
+                                    </ItemsPanelTemplate>
+                                </ribbon:RibbonGalleryCategory.ItemsPanel>
+                            </ribbon:RibbonGalleryCategory>
+                        </ribbon:RibbonGallery>
+                    </ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
+                </ribbon:RibbonApplicationMenu>
 			</ribbon:Ribbon.ApplicationMenu>
 			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Experiment]}" KeyTip="E" Header="Experiment">
 				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario]}">

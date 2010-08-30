@@ -102,7 +102,14 @@
     <Compile Include="ViewModels\Main\OffsetProjection.cs" />
     <Compile Include="ViewModels\Main\OverlayLayerViewModel.cs" />
     <Compile Include="ViewModels\Main\RadarRasterSource.cs" />
+    <Compile Include="ViewModels\Main\RecentFiles.cs" />
     <Compile Include="ViewModels\Main\RotatingAdornmentLayer.cs" />
+    <Compile Include="ViewModels\RecentFileList\ApplicationAttributes.cs" />
+    <Compile Include="ViewModels\RecentFileList\IPersist.cs" />
+    <Compile Include="ViewModels\RecentFileList\RecentFile.cs" />
+    <Compile Include="ViewModels\RecentFileList\RecentFileList.cs" />
+    <Compile Include="ViewModels\RecentFileList\RegistryPersister.cs" />
+    <Compile Include="ViewModels\RecentFileList\XmlPersister.cs" />
     <Compile Include="ViewModels\Ribbon\ApplicationMenuItemDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\ApplicationSplitMenuItemDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\ButtonDataViewModel.cs" />
