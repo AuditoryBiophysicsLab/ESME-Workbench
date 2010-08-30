@@ -11,14 +11,13 @@ namespace ESMEWorkBench.ViewModels.Ribbon
         }
     }
 
-    public class ControlList : NamedList<ControlDataViewModel> {}
+    public class ControlList : NamedList<ControlDataViewModel> { }
 
-    public class TabList : NamedList<TabDataViewModel> {}
+    public class TabList : NamedList<TabDataViewModel> { }
 
-    public class MenuItemList : NamedList<MenuItemDataViewModel> {}
+    public class MenuItemList : NamedList<MenuItemDataViewModel> { }
 
-    public class GroupList : NamedList<GroupDataViewModel> {}
+    public class GroupList : NamedList<GroupDataViewModel> { }
 
     public class ApplicationMenuItemList : NamedList<ApplicationMenuItemDataViewModel> { }
-
 }

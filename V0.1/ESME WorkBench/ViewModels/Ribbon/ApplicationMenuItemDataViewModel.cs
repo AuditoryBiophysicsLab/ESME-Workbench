@@ -1,4 +1,9 @@
-﻿namespace ESMEWorkBench.ViewModels.Ribbon
+﻿using ESMEWorkBench.ViewModels.RecentFiles;
+
+namespace ESMEWorkBench.ViewModels.Ribbon
 {
-    public class ApplicationMenuItemDataViewModel : MenuItemDataViewModel {}
+    public class ApplicationMenuItemDataViewModel : MenuItemDataViewModel
+    {
+        public RecentFileList RecentFiles { get; set; }        
+    }
 }

@@ -11,6 +11,7 @@ using Cinch;
 using ESME.Overlay;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Ribbon;
+using ESMEWorkBench.ViewModels.RecentFiles;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
@@ -52,6 +53,7 @@ namespace ESMEWorkBench.ViewModels.Main
             DisabledCommand = new SimpleCommand<object, object>(CanExecuteDisabledCommand, ExecuteDisabledCommand);
 
             CreateRibbonBindings();
+            //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");
             Layers = new ObservableCollection<LayerViewModel>();
         }
 
@@ -256,6 +258,11 @@ namespace ESMEWorkBench.ViewModels.Main
                 {
                     new ApplicationMenuItemDataViewModel
                     {
+                        RecentFiles = new RecentFileList
+                        {
+                            MaxNumberOfFiles = 9,
+                            Persister = new RegistryPersister(),
+                        },
                         MenuItems =
                             new MenuItemList
                             {
