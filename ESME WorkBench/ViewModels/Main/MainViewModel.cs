@@ -256,7 +256,64 @@ namespace ESMEWorkBench.ViewModels.Main
                 {
                     new ApplicationMenuItemDataViewModel
                     {
-                        
+                        MenuItems =
+                            new MenuItemList
+                            {
+                                new MenuItemDataViewModel
+                                {
+                                    Label = "Save Experiment", 
+                                    LargeImage = new Uri("Images/LargeIcons/save-icon.png", UriKind.Relative), 
+                                    SmallImage = new Uri("Images/SmallIcons/save-icon.png", UriKind.Relative), 
+                                    ToolTipTitle = "Save Experiment", 
+                                    ToolTipDescription = "Save the current experiment",
+                                    Command = DisabledCommand,
+                                },
+                                new MenuItemDataViewModel
+                                {
+                                    Label = "Open Experiment", 
+                                    LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
+                                    SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative), 
+                                    ToolTipTitle = "Open Experiment", 
+                                    ToolTipDescription = "Open a previously saved experiment from an experiment file",
+                                    Command = DisabledCommand,
+                                },
+                                new MenuItemDataViewModel
+                                {
+                                    Label = "Close Experiment",
+                                    LargeImage = new Uri("Images/LargeIcons/close-icon.png", UriKind.Relative),
+                                    SmallImage = new Uri("Images/SmallIcons/close-icon.png", UriKind.Relative),
+                                    ToolTipTitle = "Close Experiment",
+                                    ToolTipDescription = "Close the current experiment",
+                                    Command = DisabledCommand,
+                                },
+                                new MenuItemDataViewModel
+                                {
+                                    Label = "New Experiment",
+                                    LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative),
+                                    SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative),
+                                    ToolTipTitle = "New Experiment",
+                                    ToolTipDescription = "Create a new experiment",
+                                    Command = DisabledCommand,
+                                },
+                                new MenuItemDataViewModel
+                                {
+                                    Label = "Info",
+                                    LargeImage = new Uri("Images/LargeIcons/about-icon.png", UriKind.Relative),
+                                    SmallImage = new Uri("Images/SmallIcons/about-icon.png", UriKind.Relative),
+                                    ToolTipTitle = "Info",
+                                    ToolTipDescription = "Experiment information",
+                                    Command = DisabledCommand,
+                                },
+                                new MenuItemDataViewModel
+                                {
+                                    Label = "Options",
+                                    LargeImage = new Uri("Images/LargeIcons/Options.png", UriKind.Relative),
+                                    SmallImage = new Uri("Images/SmallIcons/Options.png", UriKind.Relative),
+                                    ToolTipTitle = "Options",
+                                    ToolTipDescription = "Edit application options and settings",
+                                    Command = DisabledCommand,
+                                },
+                            },
                     },
                 },
                 Tabs = new TabList
@@ -274,8 +331,23 @@ namespace ESMEWorkBench.ViewModels.Main
                                     Controls =
                                         new ControlList
                                         {
-                                            new ButtonDataViewModel {Label = "Load", LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative), ToolTipTitle = "Load Scenario File (Ctrl+L)", ToolTipDescription = "Load a scenario file into the simulation.", Command = DisabledCommand, KeyTip = "L",},
-                                            new ButtonDataViewModel {Label = "Edit", LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative), ToolTipTitle = "Edit Scenario File (Ctrl+E)", ToolTipDescription = "Edit the scenario file with the Scenario Builder.", Command = DisabledCommand, KeyTip = "E",},
+                                            new ButtonDataViewModel {Label = "Load", 
+                                                LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative), 
+                                                SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative), 
+                                                ToolTipTitle = "Load Scenario File (Ctrl+L)", 
+                                                ToolTipDescription = "Load a scenario file into the simulation.", 
+                                                Command = DisabledCommand, 
+                                                KeyTip = "L",},
+                                            new ButtonDataViewModel
+                                            {
+                                                Label = "Edit", 
+                                                LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative), 
+                                                SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative), 
+                                                ToolTipTitle = "Edit Scenario File (Ctrl+E)", 
+                                                ToolTipDescription = "Edit the scenario file with the Scenario Builder.", 
+                                                Command = DisabledCommand, 
+                                                KeyTip = "E",
+                                            },
                                         },
                                 },
                                 new GroupDataViewModel
