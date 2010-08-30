@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace ESMEWorkBench.ViewModels.RecentFileList
+namespace ESMEWorkBench.ViewModels.RecentFiles
 {
     static class ApplicationAttributes
     {

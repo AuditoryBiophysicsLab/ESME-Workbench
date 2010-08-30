@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ESMEWorkBench.ViewModels.RecentFileList
+namespace ESMEWorkBench.ViewModels.RecentFiles
 {
     public interface IPersist
     {

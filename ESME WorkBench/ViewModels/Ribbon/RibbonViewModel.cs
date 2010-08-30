@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.Composition;
+﻿using System.ComponentModel.Composition;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.Ribbon
@@ -9,7 +8,6 @@ namespace ESMEWorkBench.ViewModels.Ribbon
     public class RibbonViewModel
     {
         public ApplicationMenuItemList ApplicationMenuItems { get; set; }
-        public IEnumerable<string> RecentExperiments { get; private set; }
         public TabList Tabs { get; set; }
     }
 }

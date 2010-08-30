@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using ESMEWorkBench.ViewModels.Ribbon;
 
-namespace ESMEWorkBench.ViewModels.RecentFileList
+namespace ESMEWorkBench.ViewModels.RecentFiles
 {
-    class RecentFile : GalleryItemDataViewModel
+    public class RecentFile : GalleryItemDataViewModel
     {
         public RecentFile(string filepath)
         {

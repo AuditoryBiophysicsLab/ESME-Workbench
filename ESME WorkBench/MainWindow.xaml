@@ -291,7 +291,7 @@
                                   ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <ribbon:RibbonGalleryCategory Header="Recent Experiments" 
                                               Background="Transparent" 
-                                              ItemsSource="{Binding RecentExperiments}">
+                                              ItemsSource="{Binding Path=RecentFiles}">
                                 <ribbon:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical" IsItemsHost="True"/>
