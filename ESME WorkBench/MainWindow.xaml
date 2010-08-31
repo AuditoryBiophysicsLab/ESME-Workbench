@@ -8,6 +8,7 @@
                      xmlns:p="clr-namespace:ESMEWorkBench.Properties" 
                      xmlns:app="clr-namespace:ESMEWorkBench"
                      xmlns:layers="clr-namespace:ESMEWorkBench.ViewModels.Layers"
+                     xmlns:mru="clr-namespace:ESMEWorkBench.ViewModels.RecentFiles"
                      SnapsToDevicePixels="True"
 					 Title="ESME WorkBench"
 					 x:Name="MainView"
@@ -35,6 +36,12 @@
                                   Margin="2,0" />
             </StackPanel>
         </HierarchicalDataTemplate>
+        
+        <DataTemplate x:Key="MRUTemplate" DataType="mru:RecentFile">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="{Binding Label}" />
+            </StackPanel>
+        </DataTemplate>
 
         <app:GridLengthConverter x:Key="gridLengthConverter"/>
 		<!-- RibbonControl -->
@@ -307,20 +314,15 @@
                     </ribbon:RibbonApplicationMenu.FooterPaneContent>
                     <ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
                         <ribbon:RibbonGallery CanUserFilter="False"
-                                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                              ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <ribbon:RibbonGalleryCategory Header="Recent Experiments" 
                                                           Background="Transparent" 
-                                                          DataContext="{Binding Path=RecentFiles}"
-                                                          ItemsSource="{Binding Path=Label}">
-                                <!--
+                                                          ItemsSource="{Binding Path=RecentFiles}">
                                 <ribbon:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" IsItemsHost="True">
-                                            <ribbon:RibbonGalleryItem Content="{Binding}" />
-                                        </StackPanel>
+                                        <StackPanel Orientation="Vertical" IsItemsHost="True" />
                                     </ItemsPanelTemplate>
                                 </ribbon:RibbonGalleryCategory.ItemsPanel>
-                                -->
                             </ribbon:RibbonGalleryCategory>
                         </ribbon:RibbonGallery>
                     </ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>

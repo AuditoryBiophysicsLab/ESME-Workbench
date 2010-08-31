@@ -20,12 +20,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public ObservableCollection<GalleryCategoryDataViewModel<T>> CategoryDataCollection
         {
-            get
-            {
-                if (_controlDataCollection == null)
-                    _controlDataCollection = new ObservableCollection<GalleryCategoryDataViewModel<T>>();
-                return _controlDataCollection;
-            }
+            get { return _controlDataCollection ?? (_controlDataCollection = new ObservableCollection<GalleryCategoryDataViewModel<T>>()); }
         }
 
         public T SelectedItem
