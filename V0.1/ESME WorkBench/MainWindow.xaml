@@ -17,10 +17,25 @@
                      Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
                      >
 	<ribbon:RibbonWindow.Resources>
-        <HierarchicalDataTemplate DataType="{x:Type layers:LayerViewModel}" 
-                                  ItemsSource="{Binding Path=Layers}">
-            <TextBlock Text="{Binding Path=LayerName}" />
+        <Style x:Key="LayersViewItemStyle" TargetType="TreeViewItem">
+            <Setter Property="IsExpanded" Value="True" />
+            <Setter Property="IsSelected" Value="{Binding IsInitiallySelected, Mode=OneTime}" />
+            <Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
+            <Setter Property="layers:VirtualToggleButton.IsVirtualToggleButton" Value="True" />
+            <Setter Property="layers:VirtualToggleButton.IsChecked" Value="{Binding IsChecked}" />
+        </Style>
+        <HierarchicalDataTemplate x:Key="CheckBoxItemTemplate" 
+                                      ItemsSource="{Binding Children, Mode=OneTime}">
+            <StackPanel Orientation="Horizontal">
+                <!-- These elements are bound to a FooViewModel object. -->
+                <CheckBox Focusable="False" 
+                              IsChecked="{Binding IsChecked}" 
+                              VerticalAlignment="Center" />
+                <ContentPresenter Content="{Binding LayerName, Mode=OneTime}" 
+                                  Margin="2,0" />
+            </StackPanel>
         </HierarchicalDataTemplate>
+
         <app:GridLengthConverter x:Key="gridLengthConverter"/>
 		<!-- RibbonControl -->
 		<Style x:Key="RibbonControlStyle">
@@ -294,13 +309,18 @@
                         <ribbon:RibbonGallery CanUserFilter="False"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <ribbon:RibbonGalleryCategory Header="Recent Experiments" 
-                                              Background="Transparent" 
-                                              ItemsSource="{Binding Path=RecentFiles}">
+                                                          Background="Transparent" 
+                                                          DataContext="{Binding Path=RecentFiles}"
+                                                          ItemsSource="{Binding Path=Label}">
+                                <!--
                                 <ribbon:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Vertical" IsItemsHost="True"/>
+                                        <StackPanel Orientation="Horizontal" IsItemsHost="True">
+                                            <ribbon:RibbonGalleryItem Content="{Binding}" />
+                                        </StackPanel>
                                     </ItemsPanelTemplate>
                                 </ribbon:RibbonGalleryCategory.ItemsPanel>
+                                -->
                             </ribbon:RibbonGalleryCategory>
                         </ribbon:RibbonGallery>
                     </ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
@@ -427,9 +447,10 @@
 				<ColumnDefinition Width="*" MinWidth="500"/>
 			</Grid.ColumnDefinitions>
             <GroupBox Grid.Column="0" Header="Layers">
-                <TreeView>
-                    <TreeViewItem ItemsSource="{Binding Source=Layers}" />
-                </TreeView>
+                <TreeView ItemContainerStyle="{StaticResource LayersViewItemStyle}"
+                          DataContext="{Binding Path=Layers}"
+                          ItemsSource="{Binding}"
+                          ItemTemplate="{StaticResource CheckBoxItemTemplate}" />
             </GroupBox>
             <GridSplitter Name="GridSplitter" 
 						  Grid.Column="1"

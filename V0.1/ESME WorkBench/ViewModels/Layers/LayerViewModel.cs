@@ -20,11 +20,37 @@ namespace ESMEWorkBench.ViewModels.Layers
             LayerName = name;
             FileName = fileName;
             WpfMap = wpfMap;
+            Children = new LayersCollection();
+            Children.CollectionChanged += Children_CollectionChanged;
+            IsInitiallySelected = true;
+            IsChecked = true;
         }
 
-        #region public string Name { get; set; }
+        void Children_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            //throw new System.NotImplementedException();
+        }
 
-        public virtual string LayerName
+        void Initialize()
+        {
+            foreach (var child in Children)
+            {
+                child._parent = this;
+                child.Initialize();
+            }
+        }
+        LayerViewModel _parent;
+
+        public void MoveUp() { WpfMap.Overlays.MoveUp(Overlay); }
+        public void MoveDown() { WpfMap.Overlays.MoveDown(Overlay); }
+        public void MoveToTop() { WpfMap.Overlays.MoveToTop(Overlay); }
+        public void MoveToBottom() { WpfMap.Overlays.MoveToBottom(Overlay); }
+        public void MoveTo(int toIndex) { WpfMap.Overlays.MoveTo(Overlay, toIndex); }
+        public int Index { get { return WpfMap.Overlays.IndexOf(Overlay); } }
+
+        #region public string LayerName { get; set; }
+
+        public string LayerName
         {
             get { return _layerName; }
             set
@@ -41,7 +67,7 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #region public string FileName { get; set; }
 
-        public virtual string FileName
+        public string FileName
         {
             get { return _fileName; }
             set
@@ -56,9 +82,64 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
 
+        #region public bool? IsChecked { get; set; }
+
+        public bool? IsChecked
+        {
+            get { return _isChecked; }
+            set { SetIsChecked(value, true, true); }
+        }
+
+        static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.IsChecked);
+        bool? _isChecked = false;
+
+        void SetIsChecked(bool? value, bool updateChildren, bool updateParent)
+        {
+            if (value == _isChecked)
+                return;
+
+            _isChecked = value;
+
+            if (updateChildren && _isChecked.HasValue)
+                foreach (var child in Children)
+                    child.SetIsChecked(_isChecked, true, false);
+
+            if (updateParent && _parent != null)
+                _parent.VerifyCheckState();
+
+            if (Overlay != null)
+            {
+                if ((_isChecked == null) || (!_isChecked.Value))
+                    Overlay.IsVisible = false;
+                else if (_isChecked.Value)
+                    Overlay.IsVisible = true;
+            }
+
+            NotifyPropertyChanged(IsCheckedChangedEventArgs);
+        }
+
+        void VerifyCheckState()
+        {
+            bool? state = null;
+            for (var i = 0; i < Children.Count; ++i)
+            {
+                var current = Children[i].IsChecked;
+                if (i == 0)
+                    state = current;
+                else if (state != current)
+                {
+                    state = null;
+                    break;
+                }
+            }
+            SetIsChecked(state, false, true);
+        }
+
+        #endregion
+
         #region public LayersCollection Children { get; set; }
 
-        public virtual LayersCollection Children
+        public LayersCollection Children
         {
             get { return _children; }
             set
@@ -79,14 +160,16 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
 
-        public virtual WpfMap WpfMap { get; set; }
+        public bool IsInitiallySelected { get; private set; }
 
-        public virtual LayerOverlay LayerOverlay { get; set; }
+        public WpfMap WpfMap { get; set; }
+
+        public Overlay Overlay { get; set; }
     }
 
     public abstract class LayerViewModel<T> : LayerViewModel where T : Layer
     {
-        protected LayerViewModel(string name, string fileName, WpfMap wpfMap) : base(name, fileName, wpfMap) {}
+        protected LayerViewModel(string name, string fileName, WpfMap wpfMap) : base(name, fileName, wpfMap) { }
 
         #region public T LayerData { get; set; }
 
@@ -117,7 +200,7 @@ namespace ESMEWorkBench.ViewModels.Layers
         public ShapeLayerViewModel(string name, OverlayShape shape, WpfMap wpfMap)
             : base(name, null, wpfMap)
         {
-            
+
         }
 
         #region public Color Color { get; set; }
@@ -162,13 +245,13 @@ namespace ESMEWorkBench.ViewModels.Layers
         public ScenarioFileLayerViewModel(WpfMap wpfMap, string nemoFileName, string nemoScenarioDirectory)
             : base(Path.GetFileNameWithoutExtension(nemoFileName), nemoFileName, wpfMap)
         {
-            LayerOverlay = new LayerOverlay { TileType = TileType.SingleTile };
-            WpfMap.Overlays.Add(LayerOverlay);
+            Overlay = new LayerOverlay { TileType = TileType.SingleTile };
+            WpfMap.Overlays.Add(Overlay);
 
             var nemoFile = new NemoFile(nemoFileName, nemoScenarioDirectory);
 
             Children = new LayersCollection();
-            var overlayLayer = new OverlayShapesLayerViewModel(WpfMap, LayerOverlay, Path.GetFileNameWithoutExtension(nemoFile.Scenario.OverlayFile.FileName));
+            var overlayLayer = new OverlayShapesLayerViewModel(WpfMap, Overlay, Path.GetFileNameWithoutExtension(nemoFile.Scenario.OverlayFile.FileName));
             foreach (var shape in nemoFile.Scenario.OverlayFile.Shapes)
                 overlayLayer.OverlayShapes.Add(shape);
             Children.Add(overlayLayer);
@@ -177,14 +260,14 @@ namespace ESMEWorkBench.ViewModels.Layers
             foreach (var platform in nemoFile.Scenario.Platforms)
             {
                 var behavior = new BehaviorModel(platform);
-                var platformLayer = new OverlayShapesLayerViewModel(WpfMap, LayerOverlay, "Platform " + platformCount + ": " + platform.Name + " course");
+                var platformLayer = new OverlayShapesLayerViewModel(WpfMap, Overlay, "Platform " + platformCount + ": " + platform.Name + " course");
                 platformLayer.OverlayShapes.Add(behavior.CourseOverlay);
                 platformLayer.OverlayShapes.Add(behavior.CourseStart);
                 platformLayer.OverlayShapes.Add(behavior.CourseEnd);
                 Children.Add(platformLayer);
                 foreach (var trackdef in platform.Trackdefs)
                 {
-                    var opAreaLayer = new OverlayShapesLayerViewModel(WpfMap, LayerOverlay, "Platform " + platformCount + ": " + platform.Name + " operational area");
+                    var opAreaLayer = new OverlayShapesLayerViewModel(WpfMap, Overlay, "Platform " + platformCount + ": " + platform.Name + " operational area");
                     foreach (var shape in trackdef.OverlayFile.Shapes)
                         opAreaLayer.OverlayShapes.Add(shape);
                     Children.Add(opAreaLayer);
@@ -201,8 +284,8 @@ namespace ESMEWorkBench.ViewModels.Layers
         public ShapefileLayerViewModel(WpfMap wpfMap, string shapefileFileName)
             : base(Path.GetFileNameWithoutExtension(shapefileFileName), shapefileFileName, wpfMap)
         {
-            LayerOverlay = new LayerOverlay { TileType = TileType.SingleTile };
-            WpfMap.Overlays.Add(LayerOverlay);
+            Overlay = new LayerOverlay { TileType = TileType.SingleTile };
+            WpfMap.Overlays.Add(Overlay);
 
             string projection = null;
             var projectionFile = Path.Combine(Path.GetDirectoryName(shapefileFileName), "projection.txt");
@@ -217,8 +300,18 @@ namespace ESMEWorkBench.ViewModels.Layers
             newLayer.RequireIndex = false;
             if (projection != null)
                 newLayer.FeatureSource.Projection = new ManagedProj4Projection { InternalProjectionParameters = projection, ExternalProjectionParameters = ManagedProj4Projection.GetEpsgParameters(4326), };
-            LayerOverlay.Layers.Add(newLayer);
+            ((LayerOverlay)Overlay).Layers.Add(newLayer);
             WpfMap.Refresh();
+        }
+    }
+
+    public class AdornmentLayerViewModel : LayerViewModel
+    {
+        public AdornmentLayerViewModel(WpfMap wpfMap, string name, AdornmentLayer adornmentLayer)
+            : base(name, null, wpfMap)
+        {
+            Overlay = wpfMap.AdornmentOverlay;
+            wpfMap.AdornmentOverlay.Layers.Add(adornmentLayer);
         }
     }
 
@@ -234,13 +327,13 @@ namespace ESMEWorkBench.ViewModels.Layers
                 OverlayShapes.Add(shape);
         }
 
-        public OverlayShapesLayerViewModel(WpfMap wpfMap, LayerOverlay layerOverlay, string name)
+        public OverlayShapesLayerViewModel(WpfMap wpfMap, Overlay layerOverlay, string name)
             : base(name, null, wpfMap)
         {
             OverlayShapes = new ObservableCollection<OverlayShape>();
             ShapeLayers = new ObservableCollection<InMemoryFeatureLayer>();
             if (layerOverlay != null)
-                LayerOverlay = layerOverlay;
+                Overlay = layerOverlay;
         }
 
         #region public ObservableCollection<InMemoryFeatureLayer> ShapeLayers { get; set; }
@@ -265,7 +358,7 @@ namespace ESMEWorkBench.ViewModels.Layers
                 foreach (var item in e.NewItems)
                 {
                     var newLayer = (InMemoryFeatureLayer)item;
-                    LayerOverlay.Layers.Add(newLayer);
+                    ((LayerOverlay)Overlay).Layers.Add(newLayer);
                 }
                 //LayerOverlay.Refresh();
             }
@@ -274,7 +367,7 @@ namespace ESMEWorkBench.ViewModels.Layers
                 foreach (var item in e.OldItems)
                 {
                     var oldLayer = (InMemoryFeatureLayer)item;
-                    LayerOverlay.Layers.Remove(oldLayer);
+                    ((LayerOverlay)Overlay).Layers.Remove(oldLayer);
                 }
                 //LayerOverlay.Refresh();
             }
@@ -324,8 +417,8 @@ namespace ESMEWorkBench.ViewModels.Layers
         public OverlayFileLayerViewModel(WpfMap wpfMap, string overlayFileName)
             : base(wpfMap, null, Path.GetFileNameWithoutExtension(overlayFileName))
         {
-            LayerOverlay = new LayerOverlay { TileType = TileType.SingleTile };
-            WpfMap.Overlays.Add(LayerOverlay);
+            Overlay = new LayerOverlay { TileType = TileType.SingleTile };
+            WpfMap.Overlays.Add(Overlay);
 
             var overlayFile = new OverlayFile(overlayFileName);
             foreach (var s in overlayFile.Shapes)

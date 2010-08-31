@@ -28,7 +28,6 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IMessageBoxService _messageBoxService;
         readonly IOpenFileService _openFileService;
         readonly IViewAwareStatus _viewAwareStatusService;
-        LayerOverlay _layerOverlay;
         WpfMap _map;
 
         #endregion
@@ -113,9 +112,15 @@ namespace ESMEWorkBench.ViewModels.Main
             _map.MapUnit = GeographyUnit.DecimalDegree;
             _map.MapTools.PanZoomBar.HorizontalAlignment = HorizontalAlignment.Left;
             _map.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Top;
+
+            var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            _layers.Add(new ShapefileLayerViewModel(_map, Path.Combine(appPath, @"Sample GIS Data\Countries02.shp")));
+            _layers.Add(new AdornmentLayerViewModel(_map, "Grid", new MyGraticuleAdornmentLayer()));
+
+#if false
             _layerOverlay = new LayerOverlay {TileType = TileType.SingleTile};
 
-            string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var worldLayer = new ShapeFileFeatureLayer(Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"));
             worldLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyles.Country1;
             worldLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
@@ -127,6 +132,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var graticuleAdornmentLayer = new MyGraticuleAdornmentLayer();
 
             _map.AdornmentOverlay.Layers.Add(graticuleAdornmentLayer);
+#endif
 
             _map.Refresh();
         }
@@ -148,7 +154,7 @@ namespace ESMEWorkBench.ViewModels.Main
         void ExecuteAddShapefileCommand(Object args)
         {
             _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
-            bool? result = _openFileService.ShowDialog(null);
+            var result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             var overlayLayer = new ShapefileLayerViewModel(_map, _openFileService.FileName);
             _layers.Add(overlayLayer);
@@ -157,7 +163,7 @@ namespace ESMEWorkBench.ViewModels.Main
         void ExecuteAddOverlayFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
-            bool? result = _openFileService.ShowDialog(null);
+            var result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             var overlayLayer = new OverlayFileLayerViewModel(_map, _openFileService.FileName);
             _layers.Add(overlayLayer);
@@ -166,7 +172,7 @@ namespace ESMEWorkBench.ViewModels.Main
         void ExecuteAddScenarioFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-            bool? result = _openFileService.ShowDialog(null);
+            var result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             //NemoFile nemoFile;
             try
@@ -195,6 +201,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         static void ExecuteDisabledCommand(Object args) {}
 
+#if false
         void AddShape(string layerName, OverlayShape shape)
         {
             var newLayer = new InMemoryFeatureLayer();
@@ -206,6 +213,7 @@ namespace ESMEWorkBench.ViewModels.Main
             newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             _layerOverlay.Layers.Add(newLayer);
         }
+#endif
 
         #endregion
 
