@@ -10,12 +10,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class GalleryDataViewModel<T> : ControlDataViewModel
     {
-        static readonly PropertyChangedEventArgs SelectedItemChangedEventArgs = ObservableHelper.CreateArgs<GalleryDataViewModel<T>>(x => x.SelectedItem);
-
-        static readonly PropertyChangedEventArgs CanUserFilterChangedEventArgs = ObservableHelper.CreateArgs<GalleryDataViewModel<T>>(x => x.CanUserFilter);
-        bool _canUserFilter;
         ObservableCollection<GalleryCategoryDataViewModel<T>> _controlDataCollection;
-        T _selectedItem;
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public ObservableCollection<GalleryCategoryDataViewModel<T>> CategoryDataCollection
@@ -33,6 +28,9 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                 NotifyPropertyChanged(SelectedItemChangedEventArgs);
             }
         }
+        T _selectedItem;
+        static readonly PropertyChangedEventArgs SelectedItemChangedEventArgs = ObservableHelper.CreateArgs<GalleryDataViewModel<T>>(x => x.SelectedItem);
+
 
         public bool CanUserFilter
         {
@@ -44,5 +42,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                 NotifyPropertyChanged(CanUserFilterChangedEventArgs);
             }
         }
+        bool _canUserFilter;
+        static readonly PropertyChangedEventArgs CanUserFilterChangedEventArgs = ObservableHelper.CreateArgs<GalleryDataViewModel<T>>(x => x.CanUserFilter);
     }
 }
