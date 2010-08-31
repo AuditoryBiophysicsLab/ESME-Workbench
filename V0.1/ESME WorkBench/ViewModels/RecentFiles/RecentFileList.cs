@@ -1,13 +1,21 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using ESMEWorkBench.ViewModels.Ribbon;
 
 namespace ESMEWorkBench.ViewModels.RecentFiles
 {
-    public class RecentFileList : List<RecentFile>
+    public class RecentFileList : GalleryDataViewModel<RecentFile>
     {
         IPersist _persister;
 
         public int MaxNumberOfFiles { get; set; }
+
+        public RecentFileList()
+        {
+            CategoryDataCollection.Add(new GalleryCategoryDataViewModel<RecentFile>());
+            CanUserFilter = false;
+        }
 
         public IPersist Persister
         {
@@ -16,7 +24,8 @@ namespace ESMEWorkBench.ViewModels.RecentFiles
             {
                 if (_persister == value) return;
                 _persister = value;
-                AddRange(_persister.RecentFiles(MaxNumberOfFiles).Select(x => new RecentFile(x)));
+                foreach (var file in _persister.RecentFiles(MaxNumberOfFiles))
+                    CategoryDataCollection[0].GalleryItemDataCollection.Add(new RecentFile(file));
             }
         }
 

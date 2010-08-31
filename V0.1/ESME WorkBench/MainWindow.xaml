@@ -313,11 +313,11 @@
                         </DockPanel>
                     </ribbon:RibbonApplicationMenu.FooterPaneContent>
                     <ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
-                        <ribbon:RibbonGallery CanUserFilter="False"
+                        <ribbon:RibbonGallery DataContext="{Binding Path=RecentFiles}"
                                               ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <ribbon:RibbonGalleryCategory Header="Recent Experiments" 
                                                           Background="Transparent" 
-                                                          ItemsSource="{Binding Path=RecentFiles}">
+                                                          ItemsSource="{Binding CategoryDataCollection[0]}">
                                 <ribbon:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical" IsItemsHost="True" />
