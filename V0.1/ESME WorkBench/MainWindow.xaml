@@ -17,6 +17,10 @@
                      Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
                      >
 	<ribbon:RibbonWindow.Resources>
+        <HierarchicalDataTemplate DataType="{x:Type layers:LayerViewModel}" 
+                                  ItemsSource="{Binding Path=Layers}">
+            <TextBlock Text="{Binding Path=LayerName}" />
+        </HierarchicalDataTemplate>
         <app:GridLengthConverter x:Key="gridLengthConverter"/>
 		<!-- RibbonControl -->
 		<Style x:Key="RibbonControlStyle">
@@ -423,12 +427,8 @@
 				<ColumnDefinition Width="*" MinWidth="500"/>
 			</Grid.ColumnDefinitions>
             <GroupBox Grid.Column="0" Header="Layers">
-                <TreeView Name="LayersView" ItemsSource="{Binding Layers}">
-                    <TreeView.Resources>
-                        <DataTemplate DataType="x:Type layers:LayerViewModel">
-                            <TextBlock Text="{Binding Name}" />
-                        </DataTemplate>
-                    </TreeView.Resources>
+                <TreeView>
+                    <TreeViewItem ItemsSource="{Binding Source=Layers}" />
                 </TreeView>
             </GroupBox>
             <GridSplitter Name="GridSplitter" 

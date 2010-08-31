@@ -17,31 +17,31 @@ namespace ESMEWorkBench.ViewModels.Layers
     {
         protected LayerViewModel(string name, string fileName, WpfMap wpfMap)
         {
-            Name = name;
+            LayerName = name;
             FileName = fileName;
             WpfMap = wpfMap;
         }
 
         #region public string Name { get; set; }
 
-        public string Name
+        public virtual string LayerName
         {
-            get { return _name; }
+            get { return _layerName; }
             set
             {
-                if (_name == value) return;
-                _name = value;
+                if (_layerName == value) return;
+                _layerName = value;
                 NotifyPropertyChanged(NameChangedEventArgs);
             }
         }
-        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.Name);
-        string _name;
+        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.LayerName);
+        string _layerName;
 
         #endregion
 
         #region public string FileName { get; set; }
 
-        public string FileName
+        public virtual string FileName
         {
             get { return _fileName; }
             set
@@ -58,7 +58,7 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #region public LayersCollection Children { get; set; }
 
-        public LayersCollection Children
+        public virtual LayersCollection Children
         {
             get { return _children; }
             set
@@ -79,9 +79,9 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
 
-        public WpfMap WpfMap { get; set; }
+        public virtual WpfMap WpfMap { get; set; }
 
-        public LayerOverlay LayerOverlay { get; set; }
+        public virtual LayerOverlay LayerOverlay { get; set; }
     }
 
     public abstract class LayerViewModel<T> : LayerViewModel where T : Layer
@@ -109,7 +109,7 @@ namespace ESMEWorkBench.ViewModels.Layers
 
     public class LayersCollection : ObservableCollection<LayerViewModel>
     {
-        public LayerViewModel this[string name] { get { return this.FirstOrDefault(cur => cur.Name == name); } }
+        public LayerViewModel this[string name] { get { return this.FirstOrDefault(cur => cur.LayerName == name); } }
     }
 
     public class ShapeLayerViewModel : LayerViewModel<InMemoryFeatureLayer>
