@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -19,13 +20,9 @@ namespace ESMEWorkBench.ViewModels.Main
             _graticuleDensity = 10;
             //The color of the lines
             _graticuleColor = GeoColor.FromArgb(255, GeoColor.StandardColors.LightBlue);
-            //Sets all the intervals in degree to be displayed.
-            SetDefaultIntervals();
-        }
 
-        //The intervals need to be added from the smallest to the largest.
-        private void SetDefaultIntervals()
-        {
+            //Sets all the intervals in degree to be displayed.
+            //The intervals need to be added from the smallest to the largest.
             _intervals.Add(0.0005);
             _intervals.Add(0.001);
             _intervals.Add(0.002);
@@ -45,26 +42,24 @@ namespace ESMEWorkBench.ViewModels.Main
             _intervals.Add(50);
         }
 
-
         protected override void DrawCore(GeoCanvas canvas, Collection<SimpleCandidate> labelsInAllLayers)
         {
-            RectangleShape currentExtent = canvas.CurrentWorldExtent;
-            double currentMinX = currentExtent.UpperLeftPoint.X;
-            double currentMaxX = currentExtent.UpperRightPoint.X;
-            double currentMaxY = currentExtent.UpperLeftPoint.Y;
-            double currentMinY = currentExtent.LowerLeftPoint.Y;
+            var currentExtent = canvas.CurrentWorldExtent;
+            var currentMinX = currentExtent.UpperLeftPoint.X;
+            var currentMaxX = currentExtent.UpperRightPoint.X;
+            var currentMaxY = currentExtent.UpperLeftPoint.Y;
+            var currentMinY = currentExtent.LowerLeftPoint.Y;
 
             //Gets the increment according to the current extent of the map and the graticule density set 
             //by the GrsaticuleDensity property
-            double increment;
-            increment = GetIncrement(currentExtent.Width, _graticuleDensity);
+            var increment = GetIncrement(currentExtent.Width, _graticuleDensity);
 
             //Collections of GraticuleLabel for labeling the different lines.
             var meridianGraticuleLabels = new Collection<GraticuleLabel>();
             var parallelGraticuleLabels = new Collection<GraticuleLabel>();
 
             //Loop for displaying the meridians (lines of common longitude).
-            double x = 0;
+            double x;
             for (x = CeilingNumber(currentExtent.UpperLeftPoint.X, increment);
                  x <= currentExtent.UpperRightPoint.X;
                  x += increment)
@@ -75,7 +70,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 canvas.DrawLine(lineShapeMeridian, new GeoPen(_graticuleColor, 0.5F), DrawingLevel.LevelFour);
 
                 //Gets the label and screen position of each meridian.
-                ScreenPointF meridianLabelPosition = ExtentHelper.ToScreenCoordinate(canvas.CurrentWorldExtent, x,
+                var meridianLabelPosition = ExtentHelper.ToScreenCoordinate(canvas.CurrentWorldExtent, x,
                                                                                      currentMaxY, canvas.Width,
                                                                                      canvas.Height);
                 meridianGraticuleLabels.Add(new GraticuleLabel(FormatLatLong(x, LineType.Meridian, increment),
@@ -83,7 +78,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
 
             //Loop for displaying the parallels (lines of common latitude).
-            double y = 0;
+            double y;
             for (y = CeilingNumber(currentExtent.LowerLeftPoint.Y, increment);
                  y <= currentExtent.UpperRightPoint.Y;
                  y += increment)
@@ -103,23 +98,21 @@ namespace ESMEWorkBench.ViewModels.Main
 
 
             //Loop for displaying the label for the meridians.
-            foreach (GraticuleLabel meridianGraticuleLabel in meridianGraticuleLabels)
+            foreach (var meridianGraticuleLabel in meridianGraticuleLabels)
             {
-                var locations = new Collection<ScreenPointF>();
-                locations.Add(new ScreenPointF(meridianGraticuleLabel.location.X, meridianGraticuleLabel.location.Y + 6));
+                var locations = new Collection<ScreenPointF> {new ScreenPointF(meridianGraticuleLabel.Location.X, meridianGraticuleLabel.Location.Y + 6)};
 
-                canvas.DrawText(meridianGraticuleLabel.label, new GeoFont("Arial", 10),
+                canvas.DrawText(meridianGraticuleLabel.Label, new GeoFont("Arial", 10),
                                 new GeoSolidBrush(GeoColor.StandardColors.Navy),
                                 new GeoPen(GeoColor.StandardColors.White, 2), locations, DrawingLevel.LevelFour, 8, 0, 0);
             }
 
             //Loop for displaying the label for the parallels.
-            foreach (GraticuleLabel parallelGraticuleLabel in parallelGraticuleLabels)
+            foreach (var parallelGraticuleLabel in parallelGraticuleLabels)
             {
-                var locations = new Collection<ScreenPointF>();
-                locations.Add(new ScreenPointF(parallelGraticuleLabel.location.X, parallelGraticuleLabel.location.Y));
+                var locations = new Collection<ScreenPointF> {new ScreenPointF(parallelGraticuleLabel.Location.X, parallelGraticuleLabel.Location.Y)};
 
-                canvas.DrawText(parallelGraticuleLabel.label, new GeoFont("Arial", 10),
+                canvas.DrawText(parallelGraticuleLabel.Label, new GeoFont("Arial", 10),
                                 new GeoSolidBrush(GeoColor.StandardColors.Navy),
                                 new GeoPen(GeoColor.StandardColors.White, 2), locations, DrawingLevel.LevelFour, 8, 0,
                                 90);
@@ -128,9 +121,9 @@ namespace ESMEWorkBench.ViewModels.Main
 
         //Formats the decimal degree value into Degree Minute and Seconds according to the increment. It also looks
         //if the longitude is East or West and the latitude North or South.
-        private string FormatLatLong(double value, LineType lineType, double increment)
+        private static string FormatLatLong(double value, LineType lineType, double increment)
         {
-            string result = "";
+            string result;
             try
             {
                 if (increment >= 1)
@@ -168,44 +161,31 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 result = "N/A";
             }
-            finally
-            {
-            }
 
             return result;
         }
 
         //Function used for determining the degree value to use according to the interval.
-        private double CeilingNumber(double Number, double Interval)
+        private static double CeilingNumber(double number, double interval)
         {
-            double result = 0;
-            double IEEERemainder = Math.IEEERemainder(Number, Interval);
-            if (IEEERemainder > 0)
-                result = (Number - IEEERemainder) + Interval;
-            else if (IEEERemainder < 0)
-                result = Number + Math.Abs(IEEERemainder);
+            double result;
+            var ieeeRemainder = Math.IEEERemainder(number, interval);
+            if (ieeeRemainder > 0)
+                result = (number - ieeeRemainder) + interval;
+            else if (ieeeRemainder < 0)
+                result = number + Math.Abs(ieeeRemainder);
             else
-                result = Number;
+                result = number;
             return result;
         }
 
         //Gets the increment to used according to the with of the current extent and the graticule density.
-        private double GetIncrement(double CurrentExtentWidth, double Divisor)
+        private double GetIncrement(double currentExtentWidth, double divisor)
         {
-            double result = 0;
-            double rawInterval = CurrentExtentWidth/Divisor;
+            var rawInterval = currentExtentWidth/divisor;
 
-            int i = 0;
-            foreach (double interval in _intervals)
-            {
-                if (rawInterval < _intervals[i])
-                {
-                    result = _intervals[i];
-                    break;
-                }
-                i++;
-            }
-            if (result == 0) result = _intervals[_intervals.Count - 1];
+            var result = _intervals.FirstOrDefault(interval => rawInterval < interval);
+            if (result == 0.0) result = _intervals[_intervals.Count - 1];
             return result;
         }
 
@@ -213,13 +193,13 @@ namespace ESMEWorkBench.ViewModels.Main
 
         private struct GraticuleLabel
         {
-            public readonly string label;
-            public ScreenPointF location;
+            public readonly string Label;
+            public ScreenPointF Location;
 
-            public GraticuleLabel(string Label, ScreenPointF Location)
+            public GraticuleLabel(string label, ScreenPointF location)
             {
-                label = Label;
-                location = Location;
+                Label = label;
+                Location = location;
             }
         }
 
