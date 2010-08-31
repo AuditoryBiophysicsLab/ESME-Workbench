@@ -1,28 +1,28 @@
 ﻿using System.Collections.ObjectModel;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Layers
 {
     class RotatingAdornmentLayer : AdornmentLayer
     {
-        GeoImage imageToDraw = null;
-        float rotateAngle;
+        GeoImage _imageToDraw;
+        float _rotateAngle;
 
         public RotatingAdornmentLayer(GeoImage imageToDraw)
         {
-            this.imageToDraw = imageToDraw;
+            _imageToDraw = imageToDraw;
         }
 
         public GeoImage ImageToDraw
         {
-            get { return imageToDraw; }
-            set { imageToDraw = value; }
+            get { return _imageToDraw; }
+            set { _imageToDraw = value; }
         }
 
         public float RotateAngle
         {
-            get { return rotateAngle; }
-            set { rotateAngle = value; }
+            get { return _rotateAngle; }
+            set { _rotateAngle = value; }
         }
 
         protected override void DrawCore(GeoCanvas canvas, Collection<SimpleCandidate> labelsInAllLayers)
@@ -30,7 +30,7 @@ namespace ESMEWorkBench.ViewModels.Main
             //Draws an unscaled image on the GeoCanvas with the rotateAngle according to RotateAngle property of RotatingAdornmentLayer
             //Here we draw at screen location 40, 40 but we could add a new Location property to give the user the flexibility
             //to adjust for the location of the image.
-            canvas.DrawScreenImageWithoutScaling(imageToDraw, 40, 40, DrawingLevel.LevelOne, 0, 0, rotateAngle);
+            canvas.DrawScreenImageWithoutScaling(_imageToDraw, 40, 40, DrawingLevel.LevelOne, 0, 0, _rotateAngle);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Cinch;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESMEWorkBench.ViewModels.Layers
 {
     public class OverlayLayerViewModel : ViewModelBase
     {
