@@ -1,4 +1,5 @@
-﻿using Microsoft.Windows.Controls.Ribbon;
+﻿using System.Windows;
+using Microsoft.Windows.Controls.Ribbon;
 
 namespace ESMEWorkBench
 {
@@ -13,6 +14,11 @@ namespace ESMEWorkBench
 
 			// Insert code required on object creation below this point.
 		}
+
+        private void MainView_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateLayout();
+        }
 
 #if false
 		private void MapLoaded(object sender, RoutedEventArgs e)
