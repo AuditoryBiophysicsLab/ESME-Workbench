@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -22,7 +23,6 @@ namespace ESMEWorkBench.ViewModels.Layers
             WpfMap = wpfMap;
             Children = new LayersCollection();
             Children.CollectionChanged += Children_CollectionChanged;
-            IsInitiallySelected = true;
             IsChecked = true;
         }
 
@@ -79,6 +79,24 @@ namespace ESMEWorkBench.ViewModels.Layers
         }
         static readonly PropertyChangedEventArgs FileNameChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.FileName);
         string _fileName;
+
+        #endregion
+
+        #region public bool IsSelected { get; set; }
+
+        public bool IsSelected
+        {
+            get { return _isSelected; }
+            set
+            {
+                if (_isSelected == value) return;
+                _isSelected = value;
+                //Console.WriteLine("{0} IsSelected={1}", LayerName, _isSelected);
+                NotifyPropertyChanged(IsSelectedChangedEventArgs);
+            }
+        }
+        static readonly PropertyChangedEventArgs IsSelectedChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.IsSelected);
+        bool _isSelected;
 
         #endregion
 
@@ -159,8 +177,6 @@ namespace ESMEWorkBench.ViewModels.Layers
         }
 
         #endregion
-
-        public bool IsInitiallySelected { get; private set; }
 
         public WpfMap WpfMap { get; set; }
 

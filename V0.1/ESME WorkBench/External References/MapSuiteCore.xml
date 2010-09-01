@@ -16820,6 +16820,11 @@
             property.
             </remarks>
         </member>
+        <member name="P:ThinkGeo.MapSuite.Core.Projection.CanReproject">
+            <summary>
+            This property indicates whether this projection should be used.
+            </summary>
+        </member>
         <member name="M:ThinkGeo.MapSuite.Core.Proj4Projection.#ctor">
             <summary>
             This is the default constructor for this class.
@@ -23312,6 +23317,11 @@
             <summary>
             Gets or sets the Proj4 text parameter for the to projection. This parameter
             typically look like "+proj=utm +zone=33 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs".
+            </summary>
+        </member>
+        <member name="P:ThinkGeo.MapSuite.Core.ManagedProj4Projection.CanReproject">
+            <summary>
+            This property indicates whether this projection should be used.
             </summary>
         </member>
         <member name="T:ThinkGeo.MapSuite.Core.Tile">

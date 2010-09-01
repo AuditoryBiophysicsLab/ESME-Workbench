@@ -4,9 +4,12 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using Cinch;
 using ESME.Overlay;
 using ESMEWorkBench.ViewModels.Layers;
@@ -29,7 +32,7 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IOpenFileService _openFileService;
         readonly IViewAwareStatus _viewAwareStatusService;
         WpfMap _map;
-
+        bool _layerIsSelected = false;
         #endregion
 
         static readonly PropertyChangedEventArgs RibbonViewModelChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RibbonViewModel);
@@ -50,6 +53,7 @@ namespace ESMEWorkBench.ViewModels.Main
             AddScenarioFileCommand = new SimpleCommand<object, object>(ExecuteAddScenarioFileCommand);
             ClearAllLayersCommand = new SimpleCommand<object, object>(ExecuteClearAllLayersCommand);
             DisabledCommand = new SimpleCommand<object, object>(CanExecuteDisabledCommand, ExecuteDisabledCommand);
+            TreeViewSelectionChangedCommand = new SimpleCommand<Object, EventToCommandArgs>(ExecuteTreeViewSelectionChangedCommand);
 
             CreateRibbonBindings();
             //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");
@@ -75,27 +79,30 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void ShapeLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-#if false
             if (e.NewItems != null)
             {
                 foreach (var item in e.NewItems)
                 {
                     var newLayer = (LayerViewModel)item;
-                    LayerOverlay.Layers.Add(newLayer);
+                    newLayer.PropertyChanged += Layer_PropertyChanged;
                 }
-                //LayerOverlay.Refresh();
             }
             if (e.OldItems != null)
             {
                 foreach (var item in e.OldItems)
                 {
-                    var oldLayer = (InMemoryFeatureLayer)item;
-                    LayerOverlay.Layers.Remove(oldLayer);
+                    var oldLayer = (LayerViewModel)item;
+                    oldLayer.PropertyChanged -= Layer_PropertyChanged;
                 }
-                //LayerOverlay.Refresh();
             }
-#endif
             NotifyPropertyChanged(LayersChangedEventArgs);
+        }
+
+        void Layer_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != "IsSelected") return;
+            var src = (LayerViewModel) sender;
+            _layerIsSelected = src.IsSelected;
         }
 
         #endregion
@@ -151,6 +158,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<Object, Object> DisabledCommand { get; private set; }
 
+        public SimpleCommand<Object, EventToCommandArgs> TreeViewSelectionChangedCommand { get; private set; }
+
         void ExecuteAddShapefileCommand(Object args)
         {
             _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
@@ -192,6 +201,19 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             Layers.Clear();
             ViewAwareStatusServiceViewLoaded();
+        }
+
+        private void ExecuteTreeViewSelectionChangedCommand(EventToCommandArgs args)
+        {
+            var commandRan = args.CommandRan;
+            var o = args.CommandParameter;
+            var ea = args.EventArgs;
+            var realArgs = (RoutedPropertyChangedEventArgs<Object>) ea;
+            var sender = args.Sender;
+            if (realArgs.NewValue != null)
+            {
+                var item = (LayerViewModel)(((TreeViewItem) realArgs.NewValue).DataContext);
+            }
         }
 
         static bool CanExecuteDisabledCommand(Object args)

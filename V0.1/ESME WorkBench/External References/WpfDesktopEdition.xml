@@ -285,7 +285,7 @@
             This method draws the image for tile.
             </summary>
             <remarks>
-            This method is the concrete wrapper for the abstract method DrawCore.
+            This method is the concrete wrapper for the virtual method DrawCore.
             This method draws the representation for the overlay based on the extent you provided.
             </remarks>
             <param name="geoCanvas">This parameter is the canvas object to draw on.</param>
@@ -317,25 +317,6 @@
             </summary>
             <param name="canvas">This parameter is the canvas object to draw on.</param>
             <param name="exception">This parameter is the real exception in during drawing process.</param>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.Tile.CloneDeep">
-            <summary>
-            This method deeply clones a tile object.
-            </summary>
-            <remarks>
-            This method is a concrete wrapper for the abstract method CloneDeepCore.
-            </remarks>
-            <returns>A copy of current tile object.</returns>
-        </member>
-        <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.Tile.CloneDeepCore">
-            <summary>
-            This method deeply clones a tile object.
-            </summary>
-            <remarks>
-            When implementing this abstract method, consider cloning all its properties
-            including TileImage and its ImageSource.
-            </remarks>
-            <returns>A copy of current tile object.</returns>
         </member>
         <member name="M:ThinkGeo.MapSuite.WpfDesktopEdition.Tile.OnOpened(System.EventArgs)">
             <summary>

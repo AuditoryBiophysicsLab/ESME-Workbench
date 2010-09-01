@@ -19,7 +19,7 @@
 	<ribbon:RibbonWindow.Resources>
         <Style x:Key="LayersViewItemStyle" TargetType="TreeViewItem">
             <Setter Property="IsExpanded" Value="True" />
-            <Setter Property="IsSelected" Value="{Binding IsInitiallySelected, Mode=OneTime}" />
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
             <Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
             <Setter Property="layers:VirtualToggleButton.IsVirtualToggleButton" Value="True" />
             <Setter Property="layers:VirtualToggleButton.IsChecked" Value="{Binding IsChecked}" />
@@ -451,11 +451,10 @@
                 <TreeView ItemContainerStyle="{StaticResource LayersViewItemStyle}"
                           DataContext="{Binding Path=Layers}"
                           ItemsSource="{Binding}"
-                          SelectedItem=""
                           ItemTemplate="{StaticResource CheckBoxItemTemplate}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectedItemChanged">
-                            <cinch:EventToCommandTrigger Command="{Binding}"/>
+                            <cinch:EventToCommandTrigger Command="{Binding TreeViewSelectionChangedCommand}"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </TreeView>
