@@ -63,7 +63,9 @@
     <Reference Include="ESME, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86" />
     <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL" />
     <Reference Include="HRC, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86" />
-    <Reference Include="MapSuiteCore, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="MapSuiteCore, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=x86" />
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="NetTopologySuite, Version=1.7.3.31740, Culture=neutral, PublicKeyToken=f580a05016ebada1, processorArchitecture=MSIL" />
