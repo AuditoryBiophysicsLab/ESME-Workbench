@@ -13,10 +13,7 @@
 					 Title="ESME WorkBench"
 					 x:Name="MainView"
                      Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
-                     Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
-                     Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
-                     Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
-                     >
+                     Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="500" d:DesignWidth="800" SizeToContent="WidthAndHeight">
 	<ribbon:RibbonWindow.Resources>
         <Style x:Key="LayersViewItemStyle" TargetType="TreeViewItem">
             <Setter Property="IsExpanded" Value="True" />
