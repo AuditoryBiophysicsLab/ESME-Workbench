@@ -273,32 +273,7 @@
     <None Include="External References\WpfDesktopEdition.dll" />
     <None Include="External References\WpfDesktopEdition.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Images\.svn\prop-base\" />
-    <Folder Include="Images\.svn\props\" />
-    <Folder Include="Images\.svn\text-base\" />
-    <Folder Include="Images\.svn\tmp\prop-base\" />
-    <Folder Include="Images\.svn\tmp\props\" />
-    <Folder Include="Images\.svn\tmp\text-base\" />
-    <Folder Include="Images\LargeIcons\.svn\prop-base\" />
-    <Folder Include="Images\LargeIcons\.svn\props\" />
-    <Folder Include="Images\LargeIcons\.svn\text-base\" />
-    <Folder Include="Images\LargeIcons\.svn\tmp\prop-base\" />
-    <Folder Include="Images\LargeIcons\.svn\tmp\props\" />
-    <Folder Include="Images\LargeIcons\.svn\tmp\text-base\" />
-    <Folder Include="Images\SmallIcons\.svn\prop-base\" />
-    <Folder Include="Images\SmallIcons\.svn\props\" />
-    <Folder Include="Images\SmallIcons\.svn\text-base\" />
-    <Folder Include="Images\SmallIcons\.svn\tmp\prop-base\" />
-    <Folder Include="Images\SmallIcons\.svn\tmp\props\" />
-    <Folder Include="Images\SmallIcons\.svn\tmp\text-base\" />
-    <Folder Include="Properties\.svn\prop-base\" />
-    <Folder Include="Properties\.svn\props\" />
-    <Folder Include="Properties\.svn\text-base\" />
-    <Folder Include="Properties\.svn\tmp\prop-base\" />
-    <Folder Include="Properties\.svn\tmp\props\" />
-    <Folder Include="Properties\.svn\tmp\text-base\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="External References\GeoAPI.dll" />
   </ItemGroup>

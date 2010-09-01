@@ -9,6 +9,8 @@
                      xmlns:app="clr-namespace:ESMEWorkBench"
                      xmlns:layers="clr-namespace:ESMEWorkBench.ViewModels.Layers"
                      xmlns:mru="clr-namespace:ESMEWorkBench.ViewModels.RecentFiles"
+                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                     xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
                      SnapsToDevicePixels="True"
 					 Title="ESME WorkBench"
 					 x:Name="MainView"
@@ -449,7 +451,14 @@
                 <TreeView ItemContainerStyle="{StaticResource LayersViewItemStyle}"
                           DataContext="{Binding Path=Layers}"
                           ItemsSource="{Binding}"
-                          ItemTemplate="{StaticResource CheckBoxItemTemplate}" />
+                          SelectedItem=""
+                          ItemTemplate="{StaticResource CheckBoxItemTemplate}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectedItemChanged">
+                            <cinch:EventToCommandTrigger Command="{Binding}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TreeView>
             </GroupBox>
             <GridSplitter Name="GridSplitter" 
 						  Grid.Column="1"
