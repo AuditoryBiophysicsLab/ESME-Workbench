@@ -4,17 +4,15 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
-using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Cinch;
-using ESME.Overlay;
 using ESMEWorkBench.ViewModels.Layers;
-using ESMEWorkBench.ViewModels.Ribbon;
 using ESMEWorkBench.ViewModels.RecentFiles;
+using ESMEWorkBench.ViewModels.Ribbon;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
@@ -22,8 +20,7 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    [ExportViewModel("MainViewModel", false)]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
+    [ExportViewModel("MainViewModel")]
     public class MainViewModel : ViewModelBase, IDesignTimeAware
     {
         #region Data
@@ -31,8 +28,9 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IMessageBoxService _messageBoxService;
         readonly IOpenFileService _openFileService;
         readonly IViewAwareStatus _viewAwareStatusService;
+
         WpfMap _map;
-        bool _layerIsSelected = false;
+
         #endregion
 
         static readonly PropertyChangedEventArgs RibbonViewModelChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RibbonViewModel);
@@ -57,54 +55,22 @@ namespace ESMEWorkBench.ViewModels.Main
 
             CreateRibbonBindings();
             //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");
-            Layers = new ObservableCollection<LayerViewModel>();
         }
 
-        #region public ObservableCollection<LayerViewModel> Layers { get; set; }
-
-        static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.Layers);
-        ObservableCollection<LayerViewModel> _layers;
-
-        public ObservableCollection<LayerViewModel> Layers
+        #region public LayerDisplayViewModel LayerDisplayViewModel { get; set; }
+        public LayerDisplayViewModel LayerDisplayViewModel
         {
-            get { return _layers; }
+            get { return _layerDisplayViewModel; }
             set
             {
-                if (_layers == value) return;
-                _layers = value;
-                _layers.CollectionChanged += ShapeLayersCollectionChanged;
+                if (_layerDisplayViewModel == value) return;
+                _layerDisplayViewModel = value;
                 NotifyPropertyChanged(LayersChangedEventArgs);
             }
         }
 
-        void ShapeLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.NewItems != null)
-            {
-                foreach (var item in e.NewItems)
-                {
-                    var newLayer = (LayerViewModel)item;
-                    newLayer.PropertyChanged += Layer_PropertyChanged;
-                }
-            }
-            if (e.OldItems != null)
-            {
-                foreach (var item in e.OldItems)
-                {
-                    var oldLayer = (LayerViewModel)item;
-                    oldLayer.PropertyChanged -= Layer_PropertyChanged;
-                }
-            }
-            NotifyPropertyChanged(LayersChangedEventArgs);
-        }
-
-        void Layer_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName != "IsSelected") return;
-            var src = (LayerViewModel) sender;
-            _layerIsSelected = src.IsSelected;
-        }
-
+        LayerDisplayViewModel _layerDisplayViewModel;
+        static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.LayerDisplayViewModel);
         #endregion
 
         void ViewAwareStatusServiceViewLoaded()
@@ -122,8 +88,10 @@ namespace ESMEWorkBench.ViewModels.Main
 
             var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            _layers.Add(new ShapefileLayerViewModel(_map, Path.Combine(appPath, @"Sample GIS Data\Countries02.shp")));
-            _layers.Add(new AdornmentLayerViewModel(_map, "Grid", new MyGraticuleAdornmentLayer()));
+            LayerDisplayViewModel = new LayerDisplayViewModel(_map);
+
+            LayerDisplayViewModel.Layers.Add(new ShapefileLayerViewModel(_map, Path.Combine(appPath, @"Sample GIS Data\Countries02.shp")));
+            LayerDisplayViewModel.Layers.Add(new AdornmentLayerViewModel(_map, "Grid", new MyGraticuleAdornmentLayer()));
 
 #if false
             _layerOverlay = new LayerOverlay {TileType = TileType.SingleTile};
@@ -163,31 +131,31 @@ namespace ESMEWorkBench.ViewModels.Main
         void ExecuteAddShapefileCommand(Object args)
         {
             _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
-            var result = _openFileService.ShowDialog(null);
+            bool? result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             var overlayLayer = new ShapefileLayerViewModel(_map, _openFileService.FileName);
-            _layers.Add(overlayLayer);
+            _layerDisplayViewModel.Layers.Add(overlayLayer);
         }
 
         void ExecuteAddOverlayFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
-            var result = _openFileService.ShowDialog(null);
+            bool? result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             var overlayLayer = new OverlayFileLayerViewModel(_map, _openFileService.FileName);
-            _layers.Add(overlayLayer);
+            _layerDisplayViewModel.Layers.Add(overlayLayer);
         }
 
         void ExecuteAddScenarioFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-            var result = _openFileService.ShowDialog(null);
+            bool? result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             //NemoFile nemoFile;
             try
             {
                 var overlayLayer = new ScenarioFileLayerViewModel(_map, _openFileService.FileName, @"C:\Users\Dave Anderson\Desktop\Scenario Builder 1.5.508\Sim Areas");
-                _layers.Add(overlayLayer);
+                _layerDisplayViewModel.Layers.Add(overlayLayer);
                 //nemoFile = new NemoFile(_openFileService.FileName, @"C:\Users\Dave Anderson\Desktop\Scenario Builder 1.5.508\Sim Areas");
             }
             catch (Exception ex)
@@ -199,20 +167,20 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void ExecuteClearAllLayersCommand(Object args)
         {
-            Layers.Clear();
+            _layerDisplayViewModel.Layers.Clear();
             ViewAwareStatusServiceViewLoaded();
         }
 
-        private void ExecuteTreeViewSelectionChangedCommand(EventToCommandArgs args)
+        void ExecuteTreeViewSelectionChangedCommand(EventToCommandArgs args)
         {
-            var commandRan = args.CommandRan;
-            var o = args.CommandParameter;
-            var ea = args.EventArgs;
+            ICommand commandRan = args.CommandRan;
+            object o = args.CommandParameter;
+            EventArgs ea = args.EventArgs;
             var realArgs = (RoutedPropertyChangedEventArgs<Object>) ea;
-            var sender = args.Sender;
+            object sender = args.Sender;
             if (realArgs.NewValue != null)
             {
-                var item = (LayerViewModel)(((TreeViewItem) realArgs.NewValue).DataContext);
+                var item = (LayerViewModel) (((TreeViewItem) realArgs.NewValue).DataContext);
             }
         }
 
@@ -284,75 +252,24 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             RibbonViewModel = new RibbonViewModel
             {
-                ApplicationMenuItems = new ApplicationMenuItemList
-                {
-                    new ApplicationMenuItemDataViewModel
+                ApplicationMenuItems =
+                    new ApplicationMenuItemList
                     {
-                        RecentFiles = new RecentFileList
+                        new ApplicationMenuItemDataViewModel
                         {
-                            MaxNumberOfFiles = 9,
-                            Persister = new RegistryPersister(),
+                            RecentFiles = new RecentFileList {MaxNumberOfFiles = 9, Persister = new RegistryPersister(),},
+                            MenuItems =
+                                new MenuItemList
+                                {
+                                    new MenuItemDataViewModel {Label = "Save Experiment", LargeImage = new Uri("Images/LargeIcons/save-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/save-icon.png", UriKind.Relative), ToolTipTitle = "Save Experiment", ToolTipDescription = "Save the current experiment", Command = DisabledCommand,},
+                                    new MenuItemDataViewModel {Label = "Open Experiment", LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative), ToolTipTitle = "Open Experiment", ToolTipDescription = "Open a previously saved experiment from an experiment file", Command = DisabledCommand,},
+                                    new MenuItemDataViewModel {Label = "Close Experiment", LargeImage = new Uri("Images/LargeIcons/close-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/close-icon.png", UriKind.Relative), ToolTipTitle = "Close Experiment", ToolTipDescription = "Close the current experiment", Command = DisabledCommand,},
+                                    new MenuItemDataViewModel {Label = "New Experiment", LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative), ToolTipTitle = "New Experiment", ToolTipDescription = "Create a new experiment", Command = DisabledCommand,},
+                                    new MenuItemDataViewModel {Label = "Info", LargeImage = new Uri("Images/LargeIcons/about-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/about-icon.png", UriKind.Relative), ToolTipTitle = "Info", ToolTipDescription = "Experiment information", Command = DisabledCommand,},
+                                    new MenuItemDataViewModel {Label = "Options", LargeImage = new Uri("Images/LargeIcons/Options.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/Options.png", UriKind.Relative), ToolTipTitle = "Options", ToolTipDescription = "Edit application options and settings", Command = DisabledCommand,},
+                                },
                         },
-                        MenuItems =
-                            new MenuItemList
-                            {
-                                new MenuItemDataViewModel
-                                {
-                                    Label = "Save Experiment", 
-                                    LargeImage = new Uri("Images/LargeIcons/save-icon.png", UriKind.Relative), 
-                                    SmallImage = new Uri("Images/SmallIcons/save-icon.png", UriKind.Relative), 
-                                    ToolTipTitle = "Save Experiment", 
-                                    ToolTipDescription = "Save the current experiment",
-                                    Command = DisabledCommand,
-                                },
-                                new MenuItemDataViewModel
-                                {
-                                    Label = "Open Experiment", 
-                                    LargeImage = new Uri("Images/LargeIcons/open-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative), 
-                                    ToolTipTitle = "Open Experiment", 
-                                    ToolTipDescription = "Open a previously saved experiment from an experiment file",
-                                    Command = DisabledCommand,
-                                },
-                                new MenuItemDataViewModel
-                                {
-                                    Label = "Close Experiment",
-                                    LargeImage = new Uri("Images/LargeIcons/close-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/close-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Close Experiment",
-                                    ToolTipDescription = "Close the current experiment",
-                                    Command = DisabledCommand,
-                                },
-                                new MenuItemDataViewModel
-                                {
-                                    Label = "New Experiment",
-                                    LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "New Experiment",
-                                    ToolTipDescription = "Create a new experiment",
-                                    Command = DisabledCommand,
-                                },
-                                new MenuItemDataViewModel
-                                {
-                                    Label = "Info",
-                                    LargeImage = new Uri("Images/LargeIcons/about-icon.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/about-icon.png", UriKind.Relative),
-                                    ToolTipTitle = "Info",
-                                    ToolTipDescription = "Experiment information",
-                                    Command = DisabledCommand,
-                                },
-                                new MenuItemDataViewModel
-                                {
-                                    Label = "Options",
-                                    LargeImage = new Uri("Images/LargeIcons/Options.png", UriKind.Relative),
-                                    SmallImage = new Uri("Images/SmallIcons/Options.png", UriKind.Relative),
-                                    ToolTipTitle = "Options",
-                                    ToolTipDescription = "Edit application options and settings",
-                                    Command = DisabledCommand,
-                                },
-                            },
                     },
-                },
                 Tabs = new TabList
                 {
                     #region Experiment Tab
@@ -368,23 +285,8 @@ namespace ESMEWorkBench.ViewModels.Main
                                     Controls =
                                         new ControlList
                                         {
-                                            new ButtonDataViewModel {Label = "Load", 
-                                                LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative), 
-                                                SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative), 
-                                                ToolTipTitle = "Load Scenario File (Ctrl+L)", 
-                                                ToolTipDescription = "Load a scenario file into the simulation.", 
-                                                Command = DisabledCommand, 
-                                                KeyTip = "L",},
-                                            new ButtonDataViewModel
-                                            {
-                                                Label = "Edit", 
-                                                LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative), 
-                                                SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative), 
-                                                ToolTipTitle = "Edit Scenario File (Ctrl+E)", 
-                                                ToolTipDescription = "Edit the scenario file with the Scenario Builder.", 
-                                                Command = DisabledCommand, 
-                                                KeyTip = "E",
-                                            },
+                                            new ButtonDataViewModel {Label = "Load", LargeImage = new Uri("Images/LargeIcons/AddFile.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/AddFile.png", UriKind.Relative), ToolTipTitle = "Load Scenario File (Ctrl+L)", ToolTipDescription = "Load a scenario file into the simulation.", Command = DisabledCommand, KeyTip = "L",},
+                                            new ButtonDataViewModel {Label = "Edit", LargeImage = new Uri("Images/LargeIcons/new-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/new-icon.png", UriKind.Relative), ToolTipTitle = "Edit Scenario File (Ctrl+E)", ToolTipDescription = "Edit the scenario file with the Scenario Builder.", Command = DisabledCommand, KeyTip = "E",},
                                         },
                                 },
                                 new GroupDataViewModel
@@ -405,14 +307,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                     {
                                                         new MenuItemDataViewModel {Label = "NASA 1 minute topographic map", LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative), ToolTipTitle = "Base Map Settings", ToolTipDescription = "Use this as the base map image", Command = DisabledCommand,},
                                                         new MenuItemDataViewModel
-                                                        {
-                                                            Label = "Custom base map",
-                                                            LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative),
-                                                            SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative),
-                                                            ToolTipTitle = "Base Map Settings",
-                                                            ToolTipDescription = "Choose your own base map image\nNote that this map must must be full global coverage\nleft edge 180W, right edge 180E, top 90N, bottom 90S, Mercator projection",
-                                                            Command = DisabledCommand,
-                                                        },
+                                                        {Label = "Custom base map", LargeImage = new Uri("Images/LargeIcons/System-Map-icon.png", UriKind.Relative), SmallImage = new Uri("Images/SmallIcons/System-Map-icon.png", UriKind.Relative), ToolTipTitle = "Base Map Settings", ToolTipDescription = "Choose your own base map image\nNote that this map must must be full global coverage\nleft edge 180W, right edge 180E, top 90N, bottom 90S, Mercator projection", Command = DisabledCommand,},
                                                     },
                                             },
                                             new MenuButtonDataViewModel
