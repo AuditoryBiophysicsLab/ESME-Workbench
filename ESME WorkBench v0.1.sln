@@ -13,10 +13,6 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SetupESMEWorkbench", "Setup
 		{1CD6E800-1D60-405A-BF80-F9CAE2E411E2} = {1CD6E800-1D60-405A-BF80-F9CAE2E411E2}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MEFedMVVM.WPF", "..\..\External Tools\MEFedMVVM\MEFedMVVMDemo\MEFedMVVM.WPF\MEFedMVVM.WPF.csproj", "{1909F45C-9C63-40B7-87A9-C68E78E8D501}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinch.WPF", "..\..\External Tools\Cinch\cinch\V2 (VS2010 WPF and SL)\CinchV2.WPF\Cinch.WPF.csproj", "{673879AD-29C1-42B8-9A79-3750418696AB}"
-EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -52,26 +48,6 @@ Global
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|Mixed Platforms.Build.0 = Release|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|x86.ActiveCfg = Release|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|x86.Build.0 = Release|x86
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{1909F45C-9C63-40B7-87A9-C68E78E8D501}.Release|x86.ActiveCfg = Release|Any CPU
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Debug|x86.ActiveCfg = Debug|x86
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Debug|x86.Build.0 = Debug|x86
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Release|Any CPU.ActiveCfg = Release|x86
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Release|Mixed Platforms.Build.0 = Release|x86
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Release|x86.ActiveCfg = Release|x86
-		{673879AD-29C1-42B8-9A79-3750418696AB}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
