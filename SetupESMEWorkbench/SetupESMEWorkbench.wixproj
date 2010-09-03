@@ -6,10 +6,10 @@
     <ProductVersion>3.5</ProductVersion>
     <ProjectGuid>{68a96070-b68e-41c3-8b29-a4d21100cca4}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>SetupESMEWorkBench</OutputName>
+    <OutputName>ESME WorkBench Setup</OutputName>
     <OutputType>Package</OutputType>
-    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.5\Wix2010.targets</WixTargetsPath>
-    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.5\Wix2010.targets</WixTargetsPath>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix2010.targets</WixTargetsPath>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix2010.targets</WixTargetsPath>
     <IncludeSearchPaths>C:\Projects\ESME Deliverables\ESME WorkBench v0.0.1\;C:\Program Files\Windows Installer XML v3.5\bin\</IncludeSearchPaths>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
