@@ -1,48 +1,50 @@
-﻿<ribbon:RibbonWindow x:Class="ESMEWorkBench.MainWindow"
-					 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-					 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-					 xmlns:ribbon="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
-					 xmlns:uc1="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition"
-					 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" 
-                     mef:ViewModelLocator.ViewModel="MainViewModel"
+﻿<ribbon:RibbonWindow x:Class="ESMEWorkBench.MainWindow" 
+                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                     xmlns:ribbon="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary" 
+                     xmlns:uc1="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition" 
+                     xmlns:mef="http:\\www.codeplex.com\MEFedMVVM" 
                      xmlns:p="clr-namespace:ESMEWorkBench.Properties" 
-                     xmlns:app="clr-namespace:ESMEWorkBench"
-                     xmlns:layers="clr-namespace:ESMEWorkBench.ViewModels.Layers"
-                     xmlns:mru="clr-namespace:ESMEWorkBench.ViewModels.RecentFiles"
-                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-                     xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
-                     SnapsToDevicePixels="True"
-					 Title="ESME WorkBench"
-					 x:Name="MainView"
-                     Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
-                     Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" d:DesignHeight="500" d:DesignWidth="800" SizeToContent="WidthAndHeight">
+                     xmlns:app="clr-namespace:ESMEWorkBench" 
+                     xmlns:layers="clr-namespace:ESMEWorkBench.ViewModels.Layers" 
+                     xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" 
+                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                     xmlns:mru="clr-namespace:ESMEWorkBench.ViewModels.RecentFiles" 
+                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
+                     mef:ViewModelLocator.ViewModel="MainViewModel" 
+                     SnapsToDevicePixels="True" 
+                     Title="ESME WorkBench" 
+                     x:Name="MainView" 
+                     Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}" 
+                     Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}" 
+                     Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}" 
+                     Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}" 
+                     mc:Ignorable="d" 
+                     >
 	<ribbon:RibbonWindow.Resources>
-        <Style x:Key="LayersViewItemStyle" TargetType="TreeViewItem">
-            <Setter Property="IsExpanded" Value="True" />
-            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-            <Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
-            <Setter Property="layers:VirtualToggleButton.IsVirtualToggleButton" Value="True" />
-            <Setter Property="layers:VirtualToggleButton.IsChecked" Value="{Binding IsChecked}" />
-        </Style>
-        <HierarchicalDataTemplate x:Key="CheckBoxItemTemplate" 
-                                      ItemsSource="{Binding Children, Mode=OneTime}">
-            <StackPanel Orientation="Horizontal">
-                <!-- These elements are bound to a FooViewModel object. -->
-                <CheckBox Focusable="False" 
-                              IsChecked="{Binding IsChecked}" 
-                              VerticalAlignment="Center" />
-                <ContentPresenter Content="{Binding LayerName, Mode=OneTime}" 
-                                  Margin="2,0" />
-            </StackPanel>
-        </HierarchicalDataTemplate>
-        
-        <DataTemplate x:Key="MRUTemplate" DataType="mru:RecentFile">
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="{Binding Label}" />
-            </StackPanel>
-        </DataTemplate>
+		<Style x:Key="LayersViewItemStyle" TargetType="TreeViewItem">
+			<Setter Property="IsExpanded" Value="True" />
+			<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+			<Setter Property="KeyboardNavigation.AcceptsReturn" Value="True" />
+			<Setter Property="layers:VirtualToggleButton.IsVirtualToggleButton" Value="True" />
+			<Setter Property="layers:VirtualToggleButton.IsChecked" Value="{Binding IsChecked}" />
+		</Style>
+		<HierarchicalDataTemplate x:Key="CheckBoxItemTemplate" ItemsSource="{Binding Children, Mode=OneTime}">
+			<StackPanel Orientation="Horizontal">
+				<!-- These elements are bound to a FooViewModel object. -->
+				<CheckBox Focusable="False" IsChecked="{Binding IsChecked}" VerticalAlignment="Center" />
+				<ContentPresenter Content="{Binding LayerName, Mode=OneTime}" Margin="2,0" />
+			</StackPanel>
+		</HierarchicalDataTemplate>
 
-        <app:GridLengthConverter x:Key="gridLengthConverter"/>
+		<DataTemplate x:Key="MRUTemplate" DataType="mru:RecentFile">
+			<StackPanel Orientation="Vertical">
+				<TextBlock Text="{Binding Label}" />
+			</StackPanel>
+		</DataTemplate>
+
+		<app:GridLengthConverter x:Key="gridLengthConverter" />
 		<!-- RibbonControl -->
 		<Style x:Key="RibbonControlStyle">
 			<Setter Property="ribbon:RibbonControlService.Label" Value="{Binding Label}" />
@@ -74,7 +76,7 @@
 		</Style>
 
 		<!-- RibbonGroup -->
-		<Style TargetType="{x:Type ribbon:RibbonGroup}"  BasedOn="{StaticResource RibbonControlStyle}">
+		<Style TargetType="{x:Type ribbon:RibbonGroup}" BasedOn="{StaticResource RibbonControlStyle}">
 			<Setter Property="QuickAccessToolBarId" Value="{Binding Label}" />
 			<Setter Property="Header" Value="{Binding Label}" />
 		</Style>
@@ -145,7 +147,7 @@
 
 		<!-- RibbonGallery FilterItemContainerStyle -->
 		<Style TargetType="{x:Type ribbon:RibbonMenuItem}" x:Key="FilterMenuItemStyle">
-			<Setter Property="Header" Value="{Binding Label}"/>
+			<Setter Property="Header" Value="{Binding Label}" />
 		</Style>
 
 		<!-- RibbonGallery -->
@@ -286,97 +288,84 @@
 
 	</ribbon:RibbonWindow.Resources>
 	<DockPanel LastChildFill="True">
-		<ribbon:Ribbon x:Name="Ribbon" 
-                       DockPanel.Dock="Top" 
-                       DataContext="{Binding Path=RibbonViewModel}">
+		<ribbon:Ribbon x:Name="Ribbon" DockPanel.Dock="Top" DataContext="{Binding Path=RibbonViewModel}">
 			<ribbon:Ribbon.ApplicationMenu>
-				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png" 
-                                              LargeImageSource="Images\LargeIcons\Dolphin.png"
-                                              DataContext="{Binding Path=ApplicationMenuItems}">
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Save Experiment]}"/>
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Open Experiment]}"/>
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Close Experiment]}"/>
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[New Experiment]}"/>
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Info]}"/>
-                    <ribbon:RibbonSeparator />
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Options]}"/>
-                    <ribbon:RibbonApplicationMenu.FooterPaneContent>
-                        <DockPanel LastChildFill="False">
-                            <ribbon:RibbonButton Command="ApplicationCommands.Close"
-                                     Label="Exit"
-                                     ToolTipTitle="Exit" 
-                                     SmallImageSource="Images\SmallIcons\Button-Close-icon.png"
-                                     KeyTip="X"
-                                     DockPanel.Dock="Right"
-                                     Margin="2" />
-                        </DockPanel>
-                    </ribbon:RibbonApplicationMenu.FooterPaneContent>
-                    <ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
-                        <ribbon:RibbonGallery DataContext="{Binding Path=RecentFiles}"
-                                              ScrollViewer.VerticalScrollBarVisibility="Auto">
-                            <ribbon:RibbonGalleryCategory Header="Recent Experiments" 
-                                                          Background="Transparent" 
-                                                          ItemsSource="{Binding CategoryDataCollection[0]}">
-                                <ribbon:RibbonGalleryCategory.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Vertical" IsItemsHost="True" />
-                                    </ItemsPanelTemplate>
-                                </ribbon:RibbonGalleryCategory.ItemsPanel>
-                            </ribbon:RibbonGalleryCategory>
-                        </ribbon:RibbonGallery>
-                    </ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
-                </ribbon:RibbonApplicationMenu>
+				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png" LargeImageSource="Images\LargeIcons\Dolphin.png" DataContext="{Binding Path=ApplicationMenuItems}">
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Save Experiment]}" />
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Open Experiment]}" />
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Close Experiment]}" />
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[New Experiment]}" />
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Info]}" />
+					<ribbon:RibbonSeparator />
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Options]}" />
+					<ribbon:RibbonApplicationMenu.FooterPaneContent>
+						<DockPanel LastChildFill="False">
+							<ribbon:RibbonButton Command="ApplicationCommands.Close" Label="Exit" ToolTipTitle="Exit" SmallImageSource="Images\SmallIcons\Button-Close-icon.png" KeyTip="X" DockPanel.Dock="Right" Margin="2" />
+						</DockPanel>
+					</ribbon:RibbonApplicationMenu.FooterPaneContent>
+					<ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
+						<ribbon:RibbonGallery DataContext="{Binding Path=RecentFiles}" ScrollViewer.VerticalScrollBarVisibility="Auto">
+							<ribbon:RibbonGalleryCategory Header="Recent Experiments" Background="Transparent" ItemsSource="{Binding CategoryDataCollection[0]}">
+								<ribbon:RibbonGalleryCategory.ItemsPanel>
+									<ItemsPanelTemplate>
+										<StackPanel Orientation="Vertical" IsItemsHost="True" />
+									</ItemsPanelTemplate>
+								</ribbon:RibbonGalleryCategory.ItemsPanel>
+							</ribbon:RibbonGalleryCategory>
+						</ribbon:RibbonGallery>
+					</ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
+				</ribbon:RibbonApplicationMenu>
 			</ribbon:Ribbon.ApplicationMenu>
 			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Experiment]}" KeyTip="E" Header="Experiment">
 				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario]}">
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Load]}"/>
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}"/>
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Load]}" />
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}" />
 				</ribbon:RibbonGroup>
-                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Map]}">
-                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Base Map]}">
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NASA 1 minute topographic map]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Custom base map]}"/>
+				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Map]}">
+					<ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Base Map]}">
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NASA 1 minute topographic map]}" />
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Custom base map]}" />
 					</ribbon:RibbonMenuButton>
-                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Layers]}">
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[ESRI Shapefile (*.shp)]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Overlay File (*.ovr)]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Scenario File (*.nemo)]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Clear all layers]}"/>
-                    </ribbon:RibbonMenuButton>
-                    <ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Pan/Zoom Control]}">
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Visible]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Upper Left]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Upper Right]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Lower Left]}"/>
-                        <ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Lower Right]}"/>
-                    </ribbon:RibbonMenuButton>
+					<ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Layers]}">
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[ESRI Shapefile (*.shp)]}" />
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Overlay File (*.ovr)]}" />
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Scenario File (*.nemo)]}" />
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Clear all layers]}" />
+					</ribbon:RibbonMenuButton>
+					<ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Pan/Zoom Control]}">
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Visible]}" />
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Upper Left]}" />
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Upper Right]}" />
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Lower Left]}" />
+						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Lower Right]}" />
+					</ribbon:RibbonMenuButton>
 				</ribbon:RibbonGroup>
-                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Sounds]}">
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Analysis Point]}"/>
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Fixed Source]}"/>
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Quick Look]}"/>
+				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Sounds]}">
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Analysis Point]}" />
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Fixed Source]}" />
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Quick Look]}" />
 				</ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
-            <ribbon:RibbonTab DataContext="{Binding Path=Tabs[Scenario]}" Header="Scenario">
-                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario File]}">
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Open]}"/>
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Close]}"/>
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}"/>
-                </ribbon:RibbonGroup>
+			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Scenario]}" Header="Scenario">
+				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario File]}">
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Open]}" />
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Close]}" />
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}" />
+				</ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
-            <ribbon:RibbonTab DataContext="{Binding Path=Tabs[Environment]}" Header="Environment">
-                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Location]}">
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Open]}"/>
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Close]}"/>
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}"/>
-                </ribbon:RibbonGroup>
-                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Layers]}">
-                    <ribbon:RibbonComboBox DataContext="{Binding Path=Controls[0]}"/>
-                    <ribbon:RibbonComboBox DataContext="{Binding Path=Controls[1]}"/>
-                    <ribbon:RibbonComboBox DataContext="{Binding Path=Controls[2]}"/>
-                    <ribbon:RibbonComboBox DataContext="{Binding Path=Controls[3]}"/>
-                </ribbon:RibbonGroup>
-            </ribbon:RibbonTab>
+			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Environment]}" Header="Environment">
+				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Location]}">
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Open]}" />
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Close]}" />
+					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}" />
+				</ribbon:RibbonGroup>
+				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Layers]}">
+					<ribbon:RibbonComboBox DataContext="{Binding Path=Controls[0]}" />
+					<ribbon:RibbonComboBox DataContext="{Binding Path=Controls[1]}" />
+					<ribbon:RibbonComboBox DataContext="{Binding Path=Controls[2]}" />
+					<ribbon:RibbonComboBox DataContext="{Binding Path=Controls[3]}" />
+				</ribbon:RibbonGroup>
+			</ribbon:RibbonTab>
 			<!--
             <ribbon:RibbonTab Header="Animals">
 				<ribbon:RibbonGroup Header="Species">
@@ -442,33 +431,34 @@
 		</ribbon:Ribbon>
 		<Grid>
 			<Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
-                                  MinWidth="100" />
-				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition Width="*" MinWidth="500"/>
+				<ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}" MinWidth="100" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" MinWidth="500" />
 			</Grid.ColumnDefinitions>
-            <GroupBox Grid.Column="0" Header="Layers">
-                <TreeView ItemContainerStyle="{StaticResource LayersViewItemStyle}"
-                          DataContext="{Binding Path=Layers}"
-                          ItemsSource="{Binding}"
-                          ItemTemplate="{StaticResource CheckBoxItemTemplate}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="SelectedItemChanged">
-                            <cinch:EventToCommandTrigger Command="{Binding TreeViewSelectionChangedCommand}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </TreeView>
-            </GroupBox>
-            <GridSplitter Name="GridSplitter" 
-						  Grid.Column="1"
-						  Width="2"
-                          Background="Black"
-						  HorizontalAlignment="Center"
-						  Margin="5,0,5,0"
-						  VerticalAlignment="Stretch"
-						  ResizeBehavior="BasedOnAlignment"
-						  ResizeDirection="Columns"/>
-            <uc1:WpfMap Name="Map1" Grid.Column="2" />
+			<GroupBox DataContext="{Binding Path=LayerDisplayViewModel}" 
+                      Grid.Column="0" 
+                      Header="Layers">
+				<DockPanel LastChildFill="True">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                DockPanel.Dock="Bottom">
+                        <Button Command="{Binding MoveLayerUpCommand}">
+                            <Path Fill="Black" Data="M 0 6 L 12 6 L 6 0 Z"/>                            
+                        </Button>
+                        <Button Command="{Binding MoveLayerDownCommand}">
+                            <Path Fill="Black" Data="M 0 0 L 6 6 L 12 0 Z"/>
+                        </Button>
+                    </StackPanel>
+					<TreeView DockPanel.Dock="Top"
+                              ItemContainerStyle="{StaticResource LayersViewItemStyle}" 
+                              DataContext="{Binding Path=Layers}" 
+                              ItemsSource="{Binding}" 
+                              ItemTemplate="{StaticResource CheckBoxItemTemplate}">
+					</TreeView>
+				</DockPanel>
+			</GroupBox>
+			<GridSplitter Name="GridSplitter" Grid.Column="1" Width="2" Background="Black" HorizontalAlignment="Center" Margin="5,0,5,0" VerticalAlignment="Stretch" ResizeBehavior="BasedOnAlignment" ResizeDirection="Columns" />
+			<uc1:WpfMap Name="Map1" Grid.Column="2" />
 		</Grid>
 	</DockPanel>
 </ribbon:RibbonWindow>

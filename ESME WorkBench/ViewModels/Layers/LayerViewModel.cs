@@ -41,12 +41,12 @@ namespace ESMEWorkBench.ViewModels.Layers
         }
         LayerViewModel _parent;
 
-        public void MoveUp() { WpfMap.Overlays.MoveUp(Overlay); }
-        public void MoveDown() { WpfMap.Overlays.MoveDown(Overlay); }
-        public void MoveToTop() { WpfMap.Overlays.MoveToTop(Overlay); }
-        public void MoveToBottom() { WpfMap.Overlays.MoveToBottom(Overlay); }
-        public void MoveTo(int toIndex) { WpfMap.Overlays.MoveTo(Overlay, toIndex); }
-        public int Index { get { return WpfMap.Overlays.IndexOf(Overlay); } }
+        public virtual void MoveUp() { WpfMap.Overlays.MoveUp(Overlay); }
+        public virtual void MoveDown() { WpfMap.Overlays.MoveDown(Overlay); }
+        public virtual void MoveToTop() { WpfMap.Overlays.MoveToTop(Overlay); }
+        public virtual void MoveToBottom() { WpfMap.Overlays.MoveToBottom(Overlay); }
+        public virtual void MoveTo(int toIndex) { WpfMap.Overlays.MoveTo(Overlay, toIndex); }
+        public virtual int Index { get { return WpfMap.Overlays.IndexOf(Overlay); } }
 
         #region public string LayerName { get; set; }
 
@@ -329,6 +329,11 @@ namespace ESMEWorkBench.ViewModels.Layers
             Overlay = wpfMap.AdornmentOverlay;
             wpfMap.AdornmentOverlay.Layers.Add(adornmentLayer);
         }
+        public override void MoveUp() {}
+        public override void MoveDown() {}
+        public override void MoveToTop() {}
+        public override void MoveToBottom() {}
+        public override void MoveTo(int toIndex) {}
     }
 
     public class OverlayShapesLayerViewModel : LayerViewModel
