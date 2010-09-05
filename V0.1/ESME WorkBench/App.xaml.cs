@@ -54,30 +54,27 @@ namespace ESMEWorkBench
             }
             catch (Exception e)
             {
-                if (IsAdministrator)
+                using (var sw = new StreamWriter(Logfile, true))
                 {
-                    using (var sw = new StreamWriter(Logfile, true))
+                    sw.WriteLine("{0} CinchBootStrapper threw an exception:\n{1}", DateTime.Now, e.Message);
+                    var inner = e.InnerException;
+                    while (inner != null)
                     {
-                        sw.WriteLine("{0} CinchBootStrapper threw an exception:\n{1}", DateTime.Now, e.Message);
-                        Exception inner = e.InnerException;
-                        while (inner != null)
+                        sw.WriteLine("\n  Inner exception:\n{0}", inner.Message);
+                        if (inner is ReflectionTypeLoadException)
                         {
-                            sw.WriteLine("\n  Inner exception:\n{0}", inner.Message);
-                            if (inner is ReflectionTypeLoadException)
+                            var rtl = inner as ReflectionTypeLoadException;
+                            foreach (var exception in rtl.LoaderExceptions)
                             {
-                                var rtl = inner as ReflectionTypeLoadException;
-                                foreach (Exception exception in rtl.LoaderExceptions)
-                                {
-                                    sw.WriteLine("\n    Loader Exception: {0}", exception.Message);
-                                    if (exception.InnerException != null)
-                                        sw.WriteLine("\n      Inner Exception: {0}", exception.InnerException.Message);
-                                }
+                                sw.WriteLine("\n    Loader Exception: {0}", exception.Message);
+                                if (exception.InnerException != null)
+                                    sw.WriteLine("\n      Inner Exception: {0}", exception.InnerException.Message);
                             }
-                            inner = inner.InnerException;
                         }
+                        inner = inner.InnerException;
                     }
                 }
-                //throw;
+                throw;
             }
             InitializeComponent();
         }
@@ -88,8 +85,7 @@ namespace ESMEWorkBench
         {
             get
             {
-                return true;
-                WindowsIdentity wi = WindowsIdentity.GetCurrent();
+                var wi = WindowsIdentity.GetCurrent();
                 if (wi == null) return false;
                 var wp = new WindowsPrincipal(wi);
                 return wp.IsInRole(WindowsBuiltInRole.Administrator);
