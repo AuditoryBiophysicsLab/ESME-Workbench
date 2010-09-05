@@ -5,23 +5,6 @@
     <Sharing>SOLUTION</Sharing>
     <CSharp>
       <FormatSettings>
-        <ANONYMOUS_METHOD_DECLARATION_BRACES>NEXT_LINE</ANONYMOUS_METHOD_DECLARATION_BRACES>
-        <CASE_BLOCK_BRACES>NEXT_LINE</CASE_BLOCK_BRACES>
-        <EMPTY_BLOCK_STYLE>TOGETHER_SAME_LINE</EMPTY_BLOCK_STYLE>
-        <EXPLICIT_INTERNAL_MODIFIER>False</EXPLICIT_INTERNAL_MODIFIER>
-        <EXPLICIT_PRIVATE_MODIFIER>False</EXPLICIT_PRIVATE_MODIFIER>
-        <FORCE_FIXED_BRACES_STYLE>ALWAYS_ADD</FORCE_FIXED_BRACES_STYLE>
-        <FORCE_FOR_BRACES_STYLE>ONLY_FOR_MULTILINE</FORCE_FOR_BRACES_STYLE>
-        <FORCE_FOREACH_BRACES_STYLE>ONLY_FOR_MULTILINE</FORCE_FOREACH_BRACES_STYLE>
-        <FORCE_IFELSE_BRACES_STYLE>ONLY_FOR_MULTILINE</FORCE_IFELSE_BRACES_STYLE>
-        <FORCE_USING_BRACES_STYLE>ONLY_FOR_MULTILINE</FORCE_USING_BRACES_STYLE>
-        <FORCE_WHILE_BRACES_STYLE>ONLY_FOR_MULTILINE</FORCE_WHILE_BRACES_STYLE>
-        <INDENT_ANONYMOUS_METHOD_BLOCK>False</INDENT_ANONYMOUS_METHOD_BLOCK>
-        <INDENT_EMBRACED_INITIALIZER_BLOCK>False</INDENT_EMBRACED_INITIALIZER_BLOCK>
-        <INITIALIZER_BRACES>NEXT_LINE</INITIALIZER_BRACES>
-        <KEEP_BLANK_LINES_IN_CODE>1</KEEP_BLANK_LINES_IN_CODE>
-        <KEEP_BLANK_LINES_IN_DECLARATIONS>1</KEEP_BLANK_LINES_IN_DECLARATIONS>
-        <KEEP_USER_LINEBREAKS>False</KEEP_USER_LINEBREAKS>
         <MODIFIERS_ORDER IsNull="False">
           <Item>public</Item>
           <Item>protected</Item>
@@ -38,13 +21,6 @@
           <Item>unsafe</Item>
           <Item>volatile</Item>
         </MODIFIERS_ORDER>
-        <SPACE_AROUND_MULTIPLICATIVE_OP>True</SPACE_AROUND_MULTIPLICATIVE_OP>
-        <SPACE_BEFORE_SIZEOF_PARENTHESES>False</SPACE_BEFORE_SIZEOF_PARENTHESES>
-        <SPACE_BEFORE_TYPEOF_PARENTHESES>False</SPACE_BEFORE_TYPEOF_PARENTHESES>
-        <STICK_COMMENT>False</STICK_COMMENT>
-        <WRAP_BEFORE_DECLARATION_LPAR>True</WRAP_BEFORE_DECLARATION_LPAR>
-        <WRAP_LIMIT>500</WRAP_LIMIT>
-        <WRAP_PARAMETERS_STYLE>CHOP_IF_LONG</WRAP_PARAMETERS_STYLE>
       </FormatSettings>
       <UsingsSettings />
       <Naming2>
@@ -64,11 +40,7 @@
       <Naming2 />
     </Web>
     <Xaml>
-      <Naming2>
-        <UserRule Name="XAML_FIELD" Inspect="True" Prefix="_" Suffix="" Style="aaBb" />
-        <UserRule Name="NAMESPACE_ALIAS" Inspect="True" Prefix="" Suffix="" Style="AaBb" />
-        <UserRule Name="XAML_RESOURCE" Inspect="True" Prefix="" Suffix="" Style="AaBb" />
-      </Naming2>
+      <Naming2 />
     </Xaml>
     <XML>
       <FormatSettings />
@@ -77,10 +49,10 @@
     <Naming2>
       <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
       <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>
-      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="MethodPropertyEvent" />
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="TypesAndNamespaces" />
       <PredefinedRule Inspect="True" Prefix="I" Suffix="" Style="AaBb" ElementKind="Interfaces" />
       <PredefinedRule Inspect="True" Prefix="T" Suffix="" Style="AaBb" ElementKind="TypeParameters" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="MethodPropertyEvent" />
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="Locals" />
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="LocalConstants" />
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="Parameters" />
@@ -93,6 +65,7 @@
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PrivateStaticReadonly" />
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="EnumMember" />
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="Other" />
+      <Abbreviation Text="EP" />
     </Naming2>
   </CodeStyleSettings>
 </Configuration>
