@@ -65,6 +65,11 @@
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PrivateStaticReadonly" />
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="EnumMember" />
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="Other" />
+      <Abbreviation Text="OS" />
+      <Abbreviation Text="MOS" />
+      <Abbreviation Text="NT" />
+      <Abbreviation Text="XP" />
+      <Abbreviation Text="ID" />
       <Abbreviation Text="EP" />
     </Naming2>
   </CodeStyleSettings>
