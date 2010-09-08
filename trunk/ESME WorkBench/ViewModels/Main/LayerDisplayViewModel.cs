@@ -58,7 +58,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public void SetViewFullExtent()
         {
-            _wpfMap.CurrentExtent = ExtentHelper.GetDrawingExtent(new RectangleShape(-180, 90, 180, -90), (float)_wpfMap.Width, (float)_wpfMap.Height);
+            _wpfMap.CurrentExtent = ExtentHelper.GetDrawingExtent(new RectangleShape(-180, 90, 180, -90), (float)_wpfMap.ActualWidth, (float)_wpfMap.ActualHeight);
         }
 
         public SimpleCommand<Object, Object> MoveLayerUpCommand { get; private set; }
