@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows.Media;
+using System.Drawing;
 using Cinch;
 using ESME.Platform;
 using ThinkGeo.MapSuite.Core;
@@ -270,6 +270,7 @@ namespace ESMEWorkBench.ViewModels.Layers
             var overlayLayer = new OverlayShapesLayerViewModel(WpfMap, Overlay, Path.GetFileNameWithoutExtension(nemoFile.Scenario.OverlayFile.FileName));
             foreach (var shape in nemoFile.Scenario.OverlayFile.Shapes)
                 overlayLayer.OverlayShapes.Add(shape);
+            overlayLayer.CommitShapes();
             Children.Add(overlayLayer);
 
             var platformCount = 0;
@@ -280,12 +281,14 @@ namespace ESMEWorkBench.ViewModels.Layers
                 platformLayer.OverlayShapes.Add(behavior.CourseOverlay);
                 platformLayer.OverlayShapes.Add(behavior.CourseStart);
                 platformLayer.OverlayShapes.Add(behavior.CourseEnd);
+                platformLayer.CommitShapes();
                 Children.Add(platformLayer);
                 foreach (var trackdef in platform.Trackdefs)
                 {
                     var opAreaLayer = new OverlayShapesLayerViewModel(WpfMap, Overlay, "Platform " + platformCount + ": " + platform.Name + " operational area");
                     foreach (var shape in trackdef.OverlayFile.Shapes)
                         opAreaLayer.OverlayShapes.Add(shape);
+                    opAreaLayer.CommitShapes();
                     Children.Add(opAreaLayer);
                 }
                 platformCount++;
@@ -346,6 +349,7 @@ namespace ESMEWorkBench.ViewModels.Layers
 
             foreach (var shape in shapes)
                 OverlayShapes.Add(shape);
+            CommitShapes();
         }
 
         public OverlayShapesLayerViewModel(WpfMap wpfMap, Overlay layerOverlay, string name)
@@ -379,6 +383,11 @@ namespace ESMEWorkBench.ViewModels.Layers
                 foreach (var item in e.NewItems)
                 {
                     var newLayer = (InMemoryFeatureLayer)item;
+                    newLayer.ZoomLevelSet.ZoomLevel01.DefaultLineStyle.OuterPen = new GeoPen(GeoColor.FromArgb(_color.A, _color.R, _color.G, _color.B), _width);
+                    newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolPen = new GeoPen(GeoColor.FromArgb(_color.A, _color.R, _color.G, _color.B), _width);
+                    newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolSize = _width;
+                    newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolType = PointSymbolType.Circle;
+                    newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
                     ((LayerOverlay)Overlay).Layers.Add(newLayer);
                 }
                 //LayerOverlay.Refresh();
@@ -418,19 +427,33 @@ namespace ESMEWorkBench.ViewModels.Layers
             foreach (var item in e.NewItems)
             {
                 var shape = (OverlayShape)item;
-                var newLayer = new InMemoryFeatureLayer();
-                newLayer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(shape.WellKnownText)));
-                newLayer.ZoomLevelSet.ZoomLevel01.DefaultLineStyle.OuterPen = new GeoPen(GeoColor.FromArgb(shape.Color.A, shape.Color.R, shape.Color.G, shape.Color.B), shape.Width);
-                newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolPen = new GeoPen(GeoColor.FromArgb(shape.Color.A, shape.Color.R, shape.Color.G, shape.Color.B), shape.Width);
-                newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolSize = shape.Width;
-                newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolType = PointSymbolType.Circle;
-                newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
-                ShapeLayers.Add(newLayer);
+                if (_newLayer != null)
+                {
+                    if ((shape.Color != _color) || (shape.Width != _width))
+                        CommitShapes();
+                }
+                if (_newLayer == null)
+                {
+                    _newLayer = new InMemoryFeatureLayer();
+                    _color = shape.Color;
+                    _width = shape.Width;
+                }
+                _newLayer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(shape.WellKnownText)));
             }
             NotifyPropertyChanged(OverlayShapesChangedEventArgs);
         }
 
         #endregion
+
+        public void CommitShapes()
+        {
+            ShapeLayers.Add(_newLayer);
+            _newLayer = null;
+        }
+
+        private Color _color;
+        private float _width;
+        private InMemoryFeatureLayer _newLayer;
     }
 
     public class OverlayFileLayerViewModel : OverlayShapesLayerViewModel
@@ -444,6 +467,7 @@ namespace ESMEWorkBench.ViewModels.Layers
             var overlayFile = new OverlayFile(overlayFileName);
             foreach (var s in overlayFile.Shapes)
                 OverlayShapes.Add(s);
+            CommitShapes();
         }
     }
 }
