@@ -92,7 +92,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
             LayerDisplayViewModel.Layers.Add(new ShapefileLayerViewModel(_map, Path.Combine(appPath, @"Sample GIS Data\Countries02.shp")));
             LayerDisplayViewModel.Layers.Add(new AdornmentLayerViewModel(_map, "Grid", new MyGraticuleAdornmentLayer()));
-
+            LayerDisplayViewModel.SetViewFullExtent();
 #if false
             _layerOverlay = new LayerOverlay {TileType = TileType.SingleTile};
 
