@@ -7,6 +7,7 @@ using System.Linq;
 using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
 using MEFedMVVM.ViewModelLocator;
+using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -39,6 +40,25 @@ namespace ESMEWorkBench.ViewModels.Main
                 _layers.CollectionChanged += ShapeLayersCollectionChanged;
                 NotifyPropertyChanged(LayersChangedEventArgs);
             }
+        }
+
+        //Function for getting the extent based on a collection of layers.
+        //It gets the overall extent of all the layers.
+        private RectangleShape GetFullExtent(GeoCollection<Layer> Layers)
+        {
+            Collection<BaseShape> rectangleShapes = new Collection<BaseShape>();
+
+            foreach (Layer layer in Layers)
+            {
+                layer.Open();
+                if (layer.HasBoundingBox == true) rectangleShapes.Add(layer.GetBoundingBox());
+            }
+            return ExtentHelper.GetBoundingBoxOfItems(rectangleShapes);
+        }
+
+        public void SetViewFullExtent()
+        {
+            _wpfMap.CurrentExtent = ExtentHelper.GetDrawingExtent(new RectangleShape(-180, 90, 180, -90), (float)_wpfMap.Width, (float)_wpfMap.Height);
         }
 
         public SimpleCommand<Object, Object> MoveLayerUpCommand { get; private set; }
