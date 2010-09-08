@@ -107,6 +107,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var graticuleAdornmentLayer = new MyGraticuleAdornmentLayer();
 
             _map.AdornmentOverlay.Layers.Add(graticuleAdornmentLayer);
+            RectangleShape(-180, 90, 180, -90);
 #endif
 
             _map.Refresh();
