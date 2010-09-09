@@ -109,6 +109,7 @@
     <Compile Include="ViewModels\Layers\RadarRasterSource.cs" />
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\VirtualToggleButton.cs" />
+    <Compile Include="ViewModels\Main\MapViewModel.cs" />
     <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
     <Compile Include="ViewModels\RecentFiles\IPersist.cs" />
     <Compile Include="ViewModels\RecentFiles\RecentFile.cs" />

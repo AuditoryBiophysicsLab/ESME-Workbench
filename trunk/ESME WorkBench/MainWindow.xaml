@@ -11,7 +11,6 @@
                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                      xmlns:mru="clr-namespace:ESMEWorkBench.ViewModels.RecentFiles" 
-                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
                      mef:ViewModelLocator.ViewModel="MainViewModel" 
                      SnapsToDevicePixels="True" 
                      Title="ESME WorkBench" 
@@ -326,26 +325,18 @@
 					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Load]}" />
 					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}" />
 				</ribbon:RibbonGroup>
-				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Map]}">
-					<ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Base Map]}">
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NASA 1 minute topographic map]}" />
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Custom base map]}" />
-					</ribbon:RibbonMenuButton>
-					<ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Layers]}">
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[ESRI Shapefile (*.shp)]}" />
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Overlay File (*.ovr)]}" />
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[NUWC Scenario File (*.nemo)]}" />
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Clear all layers]}" />
-					</ribbon:RibbonMenuButton>
-					<ribbon:RibbonMenuButton DataContext="{Binding Path=Controls[Pan/Zoom Control]}">
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Visible]}" />
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Upper Left]}" />
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Upper Right]}" />
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Lower Left]}" />
-						<ribbon:RibbonMenuItem DataContext="{Binding Path=MenuItems[Lower Right]}" />
-					</ribbon:RibbonMenuButton>
-				</ribbon:RibbonGroup>
-				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Sounds]}">
+				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Data]}">
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Reset]}" />
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Shapefile]}" />
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Overlay]}" />
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Scenario]}" />
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Show]}">
+                    <ribbon:RibbonCheckBox DataContext="{Binding Path=Controls[Base Map]}" CommandParameter="{Binding}" />
+                    <ribbon:RibbonCheckBox DataContext="{Binding Path=Controls[Grid Overlay]}" CommandParameter="{Binding}" />
+                    <ribbon:RibbonCheckBox DataContext="{Binding Path=Controls[Pan/Zoom]}" CommandParameter="{Binding}" />
+                </ribbon:RibbonGroup>
+                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Sounds]}">
 					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Analysis Point]}" />
 					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Fixed Source]}" />
 					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Quick Look]}" />
@@ -469,7 +460,7 @@
 				</DockPanel>
 			</GroupBox>
 			<GridSplitter Name="GridSplitter" Grid.Column="1" Width="2" Background="Black" HorizontalAlignment="Center" Margin="5,0,5,0" VerticalAlignment="Stretch" ResizeBehavior="BasedOnAlignment" ResizeDirection="Columns" />
-			<uc1:WpfMap Name="Map1" Grid.Column="2" />
+			<uc1:WpfMap Name="Map1" Grid.Column="2" DataContext="{Binding Path=MapViewModel}"/>
 		</Grid>
 	</DockPanel>
 </ribbon:RibbonWindow>
