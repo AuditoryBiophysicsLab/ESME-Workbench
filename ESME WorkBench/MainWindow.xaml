@@ -438,7 +438,7 @@
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Right"
                                 DockPanel.Dock="Bottom">
-                        <Button FontFamily="Marlett" Command="{Binding MoveLayerToBottomCommand}" ToolTip="Move selected layer to bottom">
+                        <Button FontFamily="Marlett" Command="{Binding MoveLayerToTopCommand}" ToolTip="Move selected layer to top">
                             <TextBlock Text="7">
                                 <TextBlock.LayoutTransform>
                                     <TransformGroup>
@@ -447,9 +447,9 @@
                                 </TextBlock.LayoutTransform>
                             </TextBlock>
                         </Button>
-                        <Button FontFamily="Marlett" Content="5" Command="{Binding MoveLayerDownCommand}" ToolTip="Move selected layer down" />
-                        <Button FontFamily="Marlett" Content="6" Command="{Binding MoveLayerUpCommand}" ToolTip="Move selected layer up" />
-                        <Button FontFamily="Marlett" Content="7" Command="{Binding MoveLayerToTopCommand}" ToolTip="Move selected layer to top" />
+                        <Button FontFamily="Marlett" Content="5" Command="{Binding MoveLayerUpCommand}" ToolTip="Move selected layer up" />
+                        <Button FontFamily="Marlett" Content="6" Command="{Binding MoveLayerDownCommand}" ToolTip="Move selected layer down" />
+                        <Button FontFamily="Marlett" Content="7" Command="{Binding MoveLayerToBottomCommand}" ToolTip="Move selected layer to bottom" />
                     </StackPanel>
 					<TreeView DockPanel.Dock="Top"
                               ItemContainerStyle="{StaticResource LayersViewItemStyle}" 
