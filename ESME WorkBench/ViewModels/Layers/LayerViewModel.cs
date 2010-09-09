@@ -16,7 +16,7 @@ using System.IO;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
-    public abstract class LayerViewModel : ViewModelBase, IComparable<LayerViewModel>
+    public abstract class LayerViewModel : ViewModelBase
     {
         protected LayerViewModel(string name, string fileName, MapViewModel mapViewModel)
         {
@@ -26,24 +26,7 @@ namespace ESMEWorkBench.ViewModels.Layers
             Children = new LayersCollection();
             Children.CollectionChanged += Children_CollectionChanged;
             IsChecked = true;
-
-            MoveLayerToTopCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerToTopCommand);
-            MoveLayerUpCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerUpCommand);
-            MoveLayerDownCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerDownCommand);
-            MoveLayerToBottomCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerToBottomCommand);
         }
-
-        public SimpleCommand<Object, Object> MoveLayerToTopCommand { get; private set; }
-        public SimpleCommand<Object, Object> MoveLayerUpCommand { get; private set; }
-        public SimpleCommand<Object, Object> MoveLayerDownCommand { get; private set; }
-        public SimpleCommand<Object, Object> MoveLayerToBottomCommand { get; private set; }
-        public void ExecuteMoveLayerUpCommand(Object args) { Index--; }
-        public void ExecuteMoveLayerDownCommand(Object args) { Index++; }
-        public void ExecuteMoveLayerToTopCommand(Object args) { Index = 1; }
-        public void ExecuteMoveLayerToBottomCommand(Object args) { Index = MapViewModel.Overlays.Count - 1; }
-        public bool CanMoveLayerUpCommand(Object args) { return (Index > 1); }
-        public bool CanMoveLayerDownCommand(Object args) { return (Index < (MapViewModel.Overlays.Count - 1)); }
-
 
         void Children_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -63,33 +46,6 @@ namespace ESMEWorkBench.ViewModels.Layers
             }
         }
         LayerViewModel _parent;
-
-#if false
-        public virtual void MoveUp() { WpfMap.Overlays.MoveUp(Overlay); }
-        public virtual void MoveDown() { WpfMap.Overlays.MoveDown(Overlay); }
-        public virtual void MoveToTop() { WpfMap.Overlays.MoveToTop(Overlay); }
-        public virtual void MoveToBottom() { WpfMap.Overlays.MoveToBottom(Overlay); }
-        public virtual void MoveTo(int toIndex) { WpfMap.Overlays.MoveTo(Overlay, toIndex); }
-#endif
-        #region public virtual int Index { get; set; }
-
-        public virtual int Index
-        {
-            get { return MapViewModel.Overlays.IndexOf(Overlay); }
-            set
-            {
-                if (value == Index) return;
-                if (value < 1) return;
-                OldIndex = Index;
-                NewIndex = value;
-                MapViewModel.Overlays.MoveTo(Overlay, value);
-                NotifyPropertyChanged(IndexChangedEventArgs);
-            }
-        }
-        static readonly PropertyChangedEventArgs IndexChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.Index);
-        public int OldIndex { get; private set; }
-        public int NewIndex { get; private set; }
-        #endregion
 
         #region public string LayerName { get; set; }
 
@@ -230,11 +186,6 @@ namespace ESMEWorkBench.ViewModels.Layers
         public MapViewModel MapViewModel { get; private set; }
 
         public Overlay Overlay { get; set; }
-
-        int IComparable<LayerViewModel>.CompareTo(LayerViewModel other)
-        {
-            return Index.CompareTo(other.Index);
-        }
     }
 
     public abstract class LayerViewModel<T> : LayerViewModel where T : Layer
