@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="e2cd0cb3-21ee-4e5a-a7c2-dccd4e641b64" Name="ESME Workbench" Language="1033" Version="0.1.0.0" Manufacturer="Boston University" UpgradeCode="f82eae19-b38d-47f9-bed7-33454e612509">
-    <Package Id="*" InstallerVersion="200" Compressed="yes" Keywords="Installer" Description="ESME WorkBench v0.1" Manufacturer="Boston University" />
+  <Product Id="e2cd0cb3-21ee-4e5a-a7c2-dccd4e641b64" 
+           Name="ESME Workbench" 
+           Language="1033" 
+           Version="0.1.1.0" 
+           Manufacturer="Boston University" 
+           UpgradeCode="f82eae19-b38d-47f9-bed7-33454e612509">
+    <Package Id="*" 
+             InstallerVersion="200" 
+             Compressed="yes" 
+             Keywords="Installer" 
+             Description="ESME WorkBench" 
+             Manufacturer="Boston University" />
+    
+    <UIRef Id="WixUI_ErrorProgressText" />
+    <InstallExecuteSequence>
+      <RemoveExistingProducts Before="InstallInitialize" />
+    </InstallExecuteSequence>
 
     <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
 
@@ -12,76 +27,76 @@
           <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
           <Component Id="ESMEWorkBenchEXEComponent" Guid="de2c6c9d-6e47-43fa-9326-53326891ed41">
             <!-- TODO: Insert files, registry keys, and other resources here. -->
-            <!-- <File Id="ESMEWorkBenchEXE" Name="ESME WorkBench.exe" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\Release\ESME WorkBench.exe" KeyPath="yes"> -->
-            <File Id="ESMEWorkBenchEXE" Name="ESME WorkBench.exe" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\ESME WorkBench.exe" KeyPath="yes">
+            <!-- <File Id="ESMEWorkBenchEXE" Name="ESME WorkBench.exe" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\Release\ESME WorkBench.exe" KeyPath="yes"> -->
+            <File Id="ESMEWorkBenchEXE" Name="ESME WorkBench.exe" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\ESME WorkBench.exe" KeyPath="yes">
               <Shortcut Id="startmenuESMEWorkBench" Directory="ProgramMenuDir" Name="ESME WorkBench" WorkingDirectory="INSTALLLOCATION" Advertise="yes" />
               <Shortcut Id="DesktopESMEWorkBench" Directory="DesktopFolder" Name="ESME WorkBench" WorkingDirectory="INSTALLLOCATION" Advertise="yes" />
             </File>
-            <File Id="ESMEWorkBenchExeConfig" Name="ESME WorkBench.exe.config" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\ESME WorkBench.exe.config" />
-            <File Id="ESMEDLL" Name="ESME.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\ESME.dll" />
-            <File Id="HRCDLL" Name="HRC.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\HRC.dll" />
+            <File Id="ESMEWorkBenchExeConfig" Name="ESME WorkBench.exe.config" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\ESME WorkBench.exe.config" />
+            <File Id="ESMEDLL" Name="ESME.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\ESME.dll" />
+            <File Id="HRCDLL" Name="HRC.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\HRC.dll" />
 
             <!-- <Component Id="ThinkGEOComponent" Guid="*"> -->
-            <File Id="MapSuiteCoreDLL" Name="MapSuiteCore.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\MapSuiteCore.dll" />
-            <File Id="NetTopologySuiteDLL" Name="NetTopologySuite.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\NetTopologySuite.dll" />
-            <File Id="GeoAPIDLL" Name="GeoAPI.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\GeoAPI.dll" />
+            <File Id="MapSuiteCoreDLL" Name="MapSuiteCore.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\MapSuiteCore.dll" />
+            <File Id="NetTopologySuiteDLL" Name="NetTopologySuite.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\NetTopologySuite.dll" />
+            <File Id="GeoAPIDLL" Name="GeoAPI.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\GeoAPI.dll" />
 
-            <File Id="DevartDataLinqDLL" Name="Devart.Data.Linq.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Devart.Data.Linq.dll" />
+            <File Id="DevartDataLinqDLL" Name="Devart.Data.Linq.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Devart.Data.Linq.dll" />
 
             <!-- <Component Id="WpfComponent" Guid="*"> -->
-            <File Id="WpfDesktopEditionDLL" Name="WpfDesktopEdition.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\WpfDesktopEdition.dll" />
-            <File Id="CinchWPFDLL" Name="Cinch.WPF.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Cinch.WPF.dll" />
-            <File Id="MEFedMVVMWPFDLL" Name="MEFedMVVM.WPF.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\MEFedMVVM.WPF.dll" />
+            <File Id="WpfDesktopEditionDLL" Name="WpfDesktopEdition.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\WpfDesktopEdition.dll" />
+            <File Id="CinchWPFDLL" Name="Cinch.WPF.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Cinch.WPF.dll" />
+            <File Id="MEFedMVVMWPFDLL" Name="MEFedMVVM.WPF.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\MEFedMVVM.WPF.dll" />
             <!-- <Component Id="MicrosoftExpressionInteractionsComponent" Guid="*"> -->
-            <File Id="Microsoft.Expression.InteractionsDLL" Name="Microsoft.Expression.Interactions.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Microsoft.Expression.Interactions.dll" />
+            <File Id="Microsoft.Expression.InteractionsDLL" Name="Microsoft.Expression.Interactions.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Microsoft.Expression.Interactions.dll" />
             <!-- <Component Id="SystemWindowsInteractivityComponent" Guid="*"> -->
-            <File Id="SystemWindowsInteractivityDLL" Name="System.Windows.Interactivity.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\System.Windows.Interactivity.dll" />
+            <File Id="SystemWindowsInteractivityDLL" Name="System.Windows.Interactivity.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\System.Windows.Interactivity.dll" />
 
           </Component>
 
           <Directory Id="GISDataFolder" Name="Sample GIS Data">
 
             <Component Id="Countries02SHXComponent" Guid="*">
-              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
-              <File Id="Countries02SHX" Name="Countries02.shx" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.shx" KeyPath="yes" />
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02SHX" Name="Countries02.shx" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.shx" KeyPath="yes" />
             </Component>
 
             <Component Id="Countries02DBFComponent" Guid="*">
-              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
-              <File Id="Countries02DBF" Name="Countries02.dbf" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.dbf" KeyPath="yes" />
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02DBF" Name="Countries02.dbf" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.dbf" KeyPath="yes" />
             </Component>
 
             <Component Id="Countries02IDSComponent" Guid="*">
-              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
-              <File Id="Countries02IDS" Name="Countries02.ids" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.ids" KeyPath="yes" />
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02IDS" Name="Countries02.ids" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.ids" KeyPath="yes" />
             </Component>
 
             <Component Id="Countries02IDXComponent" Guid="*">
-              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
-              <File Id="Countries02IDX" Name="Countries02.idx" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.idx" KeyPath="yes" />
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02IDX" Name="Countries02.idx" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.idx" KeyPath="yes" />
             </Component>
 
             <Component Id="Countries02SHPComponent" Guid="*">
-              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
-              <File Id="Countries02SHP" Name="Countries02.shp" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.shp" />
+              <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
+              <File Id="Countries02SHP" Name="Countries02.shp" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Sample GIS Data\Countries02.shp" />
             </Component>
 
-            <!-- <File Id="Countries02SHX" Name="Countries02.shx" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Countries02.shx" />
-            <File Id="Countries02DBF" Name="Countries02.dbf" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Countries02.dbf" />
-            <File Id="Countries02IDS" Name="Countries02.ids" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Countries02.ids" />
-            <File Id="Countries02IDX" Name="Countries02.idx" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Countries02.idx" />
-            <File Id="Countries02SHP" Name="Countries02.shp" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Countries02.shp" /> -->
+            <!-- <File Id="Countries02SHX" Name="Countries02.shx" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Countries02.shx" />
+            <File Id="Countries02DBF" Name="Countries02.dbf" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Countries02.dbf" />
+            <File Id="Countries02IDS" Name="Countries02.ids" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Countries02.ids" />
+            <File Id="Countries02IDX" Name="Countries02.idx" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Countries02.idx" />
+            <File Id="Countries02SHP" Name="Countries02.shp" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Countries02.shp" /> -->
             
           </Directory>
 
 
           <Component Id="MicrosoftWindowsShellDLLComponent" Guid="*">
-            <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" />
+            <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\Microsoft.Windows.Shell.dll" KeyPath="yes" />
             <!-- <File Id="MicrosoftWindowsShellDLL" Name="Microsoft.Windows.Shell.dll" Source="Microsoft.Windows.Shell.dll" KeyPath="yes" /> -->
           </Component>
 
           <Component Id="RibbonControlsLibraryDLLComponent" Guid="*">
-            <File Id="RibbonControlsLibraryDLL" Name="RibbonControlsLibrary.dll" Source="C:\Projects\ESME Deliverables\V0.1\ESME WorkBench\bin\x86\Release\RibbonControlsLibrary.dll" KeyPath="yes" />
+            <File Id="RibbonControlsLibraryDLL" Name="RibbonControlsLibrary.dll" Source="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release\RibbonControlsLibrary.dll" KeyPath="yes" />
             <!-- <File Id="RibbonControlsLibraryDLL" Name="RibbonControlsLibrary.dll" Source="RibbonControlsLibrary.dll" KeyPath="yes" /> -->
           </Component>
 

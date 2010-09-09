@@ -22,8 +22,6 @@ namespace ESME.Overlay
             LineStyle curStyle = LineStyle.Solid;
             var reader = new LineReader();
             var tokenizer = new Tokenizer();
-            string curCrap;
-
 
             reader.CommentIndicators = "#";
             reader.FileName = overlayFileName;
@@ -97,7 +95,7 @@ namespace ESME.Overlay
                                 curColor = Color.Cyan;
                                 break;
                             case OverlayKeywords.Origin:
-                                curCrap = tokenizer.NextToken().Value as string;
+                                tokenizer.DiscardToEndOfLine();
                                 break;
                             case OverlayKeywords.Solid:
                                 curStyle = LineStyle.Solid;
@@ -112,7 +110,7 @@ namespace ESME.Overlay
                                 curStyle = LineStyle.Dot;
                                 break;
                             case OverlayKeywords.Point:
-                                curCrap = tokenizer.NextToken().Value as string;
+                                tokenizer.DiscardNext();
                                 break;
                             default:
                                 throw new FormatException("OverlayParser: Unknown token at line " + curToken.LineNumber +

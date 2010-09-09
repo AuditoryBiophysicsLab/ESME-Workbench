@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -85,14 +86,15 @@ namespace ESMEWorkBench.ViewModels.Main
             _map.MapUnit = GeographyUnit.DecimalDegree;
             _map.MapTools.PanZoomBar.HorizontalAlignment = HorizontalAlignment.Left;
             _map.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Top;
+            _map.MapTools.Logo.IsEnabled = false;
 
             var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             LayerDisplayViewModel = new LayerDisplayViewModel(_map);
 
-            LayerDisplayViewModel.Layers.Add(new ShapefileLayerViewModel(_map, Path.Combine(appPath, @"Sample GIS Data\Countries02.shp")));
-            LayerDisplayViewModel.Layers.Add(new AdornmentLayerViewModel(_map, "Grid", new MyGraticuleAdornmentLayer()));
-            LayerDisplayViewModel.SetViewFullExtent();
+            LayerDisplayViewModel.Layers.Add(new ShapefileLayerViewModel(_map, Path.Combine(appPath, @"Sample GIS Data\Countries02.shp")){IsBaseMapLayer = true});
+            LayerDisplayViewModel.Layers.Add(new AdornmentLayerViewModel(_map, "Grid", new MyGraticuleAdornmentLayer()){IsAdornmentLayer = true});
+
 #if false
             _layerOverlay = new LayerOverlay {TileType = TileType.SingleTile};
 
@@ -109,8 +111,8 @@ namespace ESMEWorkBench.ViewModels.Main
             _map.AdornmentOverlay.Layers.Add(graticuleAdornmentLayer);
             RectangleShape(-180, 90, 180, -90);
 #endif
-
-            _map.Refresh();
+            _map.ZoomToScale(_map.ZoomLevelScales[3]);
+            //_map.CurrentExtent = _map.MaxExtent;
         }
 
         #endregion
@@ -132,7 +134,7 @@ namespace ESMEWorkBench.ViewModels.Main
         void ExecuteAddShapefileCommand(Object args)
         {
             _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
-            bool? result = _openFileService.ShowDialog(null);
+            var result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             var overlayLayer = new ShapefileLayerViewModel(_map, _openFileService.FileName);
             _layerDisplayViewModel.Layers.Add(overlayLayer);
@@ -141,16 +143,23 @@ namespace ESMEWorkBench.ViewModels.Main
         void ExecuteAddOverlayFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
-            bool? result = _openFileService.ShowDialog(null);
+            var result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
-            var overlayLayer = new OverlayFileLayerViewModel(_map, _openFileService.FileName);
-            _layerDisplayViewModel.Layers.Add(overlayLayer);
+            try
+            {
+                var overlayLayer = new OverlayFileLayerViewModel(_map, _openFileService.FileName);
+                _layerDisplayViewModel.Layers.Add(overlayLayer);
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError(string.Format("Error opening Overlay File {0}:\n{1}", _openFileService.FileName, e.Message));
+            }
         }
 
         void ExecuteAddScenarioFileCommand(Object args)
         {
             _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-            bool? result = _openFileService.ShowDialog(null);
+            var result = _openFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             //NemoFile nemoFile;
             try
@@ -168,8 +177,9 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void ExecuteClearAllLayersCommand(Object args)
         {
-            _layerDisplayViewModel.Layers.Clear();
+            _layerDisplayViewModel.Clear();
             ViewAwareStatusServiceViewLoaded();
+            _map.Refresh();
         }
 
         void ExecuteTreeViewSelectionChangedCommand(EventToCommandArgs args)

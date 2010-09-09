@@ -31,7 +31,7 @@ namespace ESME.TransmissionLoss
         {
             return new FieldData(Filename, false);
         }
-
+#if false
         public FieldData(Field Field)
         {
             this.Latitude_degrees = Field.Latitude_degrees;
@@ -47,6 +47,7 @@ namespace ESME.TransmissionLoss
             this.Ranges_meters = Field.Ranges_meters;
             this.Filename = Path.Combine(Field.DataDirectoryPath, Field.BinaryFileName);
         }
+#endif
 
         public FieldData(string Filename, bool LoadHeadersOnly)
         {

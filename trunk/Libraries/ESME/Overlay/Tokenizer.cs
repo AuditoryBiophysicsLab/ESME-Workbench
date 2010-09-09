@@ -57,6 +57,19 @@ namespace ESME.Overlay
         {
             return _tokens.Count != 0 ? _tokens.Peek() : null;
         }
+
+        public void DiscardNext()
+        {
+            if (_tokens.Count > 0)
+                _tokens.Dequeue();
+        }
+
+        public void DiscardToEndOfLine()
+        {
+            var curLineNumber = _tokens.Peek().LineNumber;
+            while ((_tokens.Count > 0) && (_tokens.Peek().LineNumber == curLineNumber))
+                _tokens.Dequeue();
+        }
     }
 
     internal class Token
