@@ -74,6 +74,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public GeoCollection<Overlay> Overlays { get { return _map.Overlays; } }
         public AdornmentOverlay AdornmentOverlay { get { return _map.AdornmentOverlay; } }
+        public void Refresh() {_map.Refresh();}
 
         private void ExecuteToggleBaseMapDisplayCommand(Object args)
         {
@@ -101,5 +102,20 @@ namespace ESMEWorkBench.ViewModels.Main
             GridOverlayViewModel = null;
             ViewAwareStatusServiceViewLoaded();
         }
+#if false
+        //Function for getting the extent based on a collection of layers.
+        //It gets the overall extent of all the layers.
+        private RectangleShape GetFullExtent(IEnumerable<Layer> layers)
+        {
+            var rectangleShapes = new Collection<BaseShape>();
+
+            foreach (var layer in layers)
+            {
+                layer.Open();
+                if (layer.HasBoundingBox) rectangleShapes.Add(layer.GetBoundingBox());
+            }
+            return ExtentHelper.GetBoundingBoxOfItems(rectangleShapes);
+        }
+#endif
     }
 }

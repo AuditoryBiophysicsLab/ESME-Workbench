@@ -453,7 +453,7 @@
                     </StackPanel>
 					<TreeView DockPanel.Dock="Top"
                               ItemContainerStyle="{StaticResource LayersViewItemStyle}" 
-                              DataContext="{Binding Path=SortedLayers}" 
+                              DataContext="{Binding Path=Layers}" 
                               ItemsSource="{Binding}" 
                               ItemTemplate="{StaticResource CheckBoxItemTemplate}">
 					</TreeView>

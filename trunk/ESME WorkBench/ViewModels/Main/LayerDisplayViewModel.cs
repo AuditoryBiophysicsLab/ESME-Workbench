@@ -19,31 +19,18 @@ namespace ESMEWorkBench.ViewModels.Main
         static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<LayerDisplayViewModel>(x => x.Layers);
         ObservableCollection<LayerViewModel> _layers;
         LayerViewModel _selectedLayer;
+        int _selectedIndex;
+        readonly MapViewModel _mapViewModel;
 
-        public LayerDisplayViewModel()
+        public LayerDisplayViewModel(MapViewModel mapViewModel)
         {
             MoveLayerToTopCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerToTopCommand);
             MoveLayerUpCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerUpCommand);
             MoveLayerDownCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerDownCommand);
             MoveLayerToBottomCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerToBottomCommand);
             Layers = new ObservableCollection<LayerViewModel>();
-            SortedLayers = new List<LayerViewModel>();
+            _mapViewModel = mapViewModel;
         }
-
-        #region public List<LayerViewModel> SortedLayers { get; set; }
-        public List<LayerViewModel> SortedLayers
-        {
-            get { return _sortedLayers; }
-            set
-            {
-                if (_sortedLayers == value) return;
-                _sortedLayers = value;
-                NotifyPropertyChanged(SortedLayersChangedEventArgs);
-            }
-        }
-        private List<LayerViewModel> _sortedLayers;
-        static readonly PropertyChangedEventArgs SortedLayersChangedEventArgs = ObservableHelper.CreateArgs<LayerDisplayViewModel>(x => x.SortedLayers);
-        #endregion
 
         #region public ObservableCollection<LayerViewModel> Layers { get; set; }
         public ObservableCollection<LayerViewModel> Layers
@@ -65,7 +52,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 layer.Remove();
                 layer.PropertyChanged -= Layer_PropertyChanged;
             }
-            SortedLayers.Clear();
             Layers.Clear();
         }
 
@@ -90,18 +76,14 @@ namespace ESMEWorkBench.ViewModels.Main
                 foreach (var newLayer in e.NewItems.Cast<LayerViewModel>())
                 {
                     newLayer.PropertyChanged += Layer_PropertyChanged;
-                    SortedLayers.Add(newLayer);
-                    SortedLayers.Sort();
-                    NotifyPropertyChanged(SortedLayersChangedEventArgs);
+                    _mapViewModel.Refresh();
                 }
             if (e.OldItems != null)
                 foreach (var oldLayer in e.OldItems.Cast<LayerViewModel>())
                 {
                     oldLayer.PropertyChanged -= Layer_PropertyChanged;
                     oldLayer.Remove();
-                    SortedLayers.Remove(oldLayer);
-                    SortedLayers.Sort();
-                    NotifyPropertyChanged(SortedLayersChangedEventArgs);
+                    _mapViewModel.Refresh();
                 }
             NotifyPropertyChanged(LayersChangedEventArgs);
         }
@@ -116,62 +98,54 @@ namespace ESMEWorkBench.ViewModels.Main
                     if (src.IsSelected)
                         _selectedLayer = src;
                     break;
-                case "Index":
-                    Layers.Move(src.Index, src.NewIndex);
-                    SortedLayers.Sort();
-                    NotifyPropertyChanged(SortedLayersChangedEventArgs);
-                    break;
                 default:
                     return;
             }
         }
         #endregion
-        //Function for getting the extent based on a collection of layers.
-        //It gets the overall extent of all the layers.
-        private RectangleShape GetFullExtent(IEnumerable<Layer> layers)
-        {
-            var rectangleShapes = new Collection<BaseShape>();
-
-            foreach (var layer in layers)
-            {
-                layer.Open();
-                if (layer.HasBoundingBox) rectangleShapes.Add(layer.GetBoundingBox());
-            }
-            return ExtentHelper.GetBoundingBoxOfItems(rectangleShapes);
-        }
-
 
         void ExecuteMoveLayerUpCommand(Object args)
         {
-            _selectedLayer.ExecuteMoveLayerUpCommand(args);
+            _mapViewModel.Overlays.MoveTo(_selectedIndex + 1, _selectedIndex);
+            Layers.Move(_selectedIndex, _selectedIndex - 1);
+            _mapViewModel.Refresh();
         }
 
         void ExecuteMoveLayerDownCommand(Object args)
         {
-            _selectedLayer.ExecuteMoveLayerDownCommand(args);
+            _mapViewModel.Overlays.MoveTo(_selectedIndex + 1, _selectedIndex + 2);
+            Layers.Move(_selectedIndex, _selectedIndex + 1);
+            _mapViewModel.Refresh();
         }
 
         void ExecuteMoveLayerToTopCommand(Object args)
         {
-            _selectedLayer.ExecuteMoveLayerToTopCommand(args);
+            _mapViewModel.Overlays.MoveTo(_selectedIndex + 1, 1);
+            Layers.Move(_selectedIndex, 0);
+            _mapViewModel.Refresh();
         }
 
         void ExecuteMoveLayerToBottomCommand(Object args)
         {
-            _selectedLayer.ExecuteMoveLayerToBottomCommand(args);
+            _mapViewModel.Overlays.MoveTo(_selectedIndex + 1, _mapViewModel.Overlays.Count - 1);
+            Layers.Move(_selectedIndex, Layers.Count - 1);
+            _mapViewModel.Refresh();
         }
 
         bool CanMoveLayerUpCommand(Object args)
         {
             if (_selectedLayer == null)
                 return false;
-            return _selectedLayer.CanMoveLayerUpCommand(args);
+            _selectedIndex = Layers.IndexOf(_selectedLayer);
+            return _selectedIndex > 0;
         }
+
         bool CanMoveLayerDownCommand(Object args)
         {
             if (_selectedLayer == null)
                 return false;
-            return _selectedLayer.CanMoveLayerDownCommand(args);
+            _selectedIndex = Layers.IndexOf(_selectedLayer);
+            return _selectedIndex < (Layers.Count - 1);
         }
     }
 }

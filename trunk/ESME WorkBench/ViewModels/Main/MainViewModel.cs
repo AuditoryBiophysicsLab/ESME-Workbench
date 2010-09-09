@@ -47,6 +47,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _openFileService = openFileService;
 
             MapViewModel = new MapViewModel(_viewAwareStatusService, _messageBoxService);
+            LayerDisplayViewModel = new LayerDisplayViewModel(MapViewModel);
 
             AddShapefileCommand = new SimpleCommand<object, object>(ExecuteAddShapefileCommand);
             AddOverlayFileCommand = new SimpleCommand<object, object>(ExecuteAddOverlayFileCommand);
