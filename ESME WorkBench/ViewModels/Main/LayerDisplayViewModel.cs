@@ -9,7 +9,6 @@ using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
-using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -20,15 +19,13 @@ namespace ESMEWorkBench.ViewModels.Main
         static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<LayerDisplayViewModel>(x => x.Layers);
         ObservableCollection<LayerViewModel> _layers;
         LayerViewModel _selectedLayer;
-        readonly WpfMap _wpfMap;
 
-        public LayerDisplayViewModel(WpfMap wpfMap)
+        public LayerDisplayViewModel()
         {
-            _wpfMap = wpfMap;
-            MoveLayerToTopCommand = new SimpleCommand<object, object>(CanMoveLayerCommand, ExecuteMoveLayerToTopCommand);
-            MoveLayerUpCommand = new SimpleCommand<object, object>(CanMoveLayerCommand, ExecuteMoveLayerUpCommand);
-            MoveLayerDownCommand = new SimpleCommand<object, object>(CanMoveLayerCommand, ExecuteMoveLayerDownCommand);
-            MoveLayerToBottomCommand = new SimpleCommand<object, object>(CanMoveLayerCommand, ExecuteMoveLayerToBottomCommand);
+            MoveLayerToTopCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerToTopCommand);
+            MoveLayerUpCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerUpCommand);
+            MoveLayerDownCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerDownCommand);
+            MoveLayerToBottomCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerToBottomCommand);
             Layers = new ObservableCollection<LayerViewModel>();
             SortedLayers = new List<LayerViewModel>();
         }
@@ -146,31 +143,35 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void ExecuteMoveLayerUpCommand(Object args)
         {
-            _selectedLayer.MoveUp();
-            _wpfMap.Refresh();
+            _selectedLayer.ExecuteMoveLayerUpCommand(args);
         }
 
         void ExecuteMoveLayerDownCommand(Object args)
         {
-            _selectedLayer.MoveDown();
-            _wpfMap.Refresh();
+            _selectedLayer.ExecuteMoveLayerDownCommand(args);
         }
 
         void ExecuteMoveLayerToTopCommand(Object args)
         {
-            _selectedLayer.MoveToTop();
-            _wpfMap.Refresh();
+            _selectedLayer.ExecuteMoveLayerToTopCommand(args);
         }
 
         void ExecuteMoveLayerToBottomCommand(Object args)
         {
-            _selectedLayer.MoveToBottom();
-            _wpfMap.Refresh();
+            _selectedLayer.ExecuteMoveLayerToBottomCommand(args);
         }
 
-        bool CanMoveLayerCommand(Object args)
+        bool CanMoveLayerUpCommand(Object args)
         {
-            return _selectedLayer != null;
+            if (_selectedLayer == null)
+                return false;
+            return _selectedLayer.CanMoveLayerUpCommand(args);
+        }
+        bool CanMoveLayerDownCommand(Object args)
+        {
+            if (_selectedLayer == null)
+                return false;
+            return _selectedLayer.CanMoveLayerDownCommand(args);
         }
     }
 }

@@ -32,12 +32,15 @@ namespace ESMEWorkBench.ViewModels.Ribbon
 
         static readonly PropertyChangedEventArgs CommandChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.Command);
 
+        static readonly PropertyChangedEventArgs CommandParameterChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.CommandParameter);
+
         static readonly PropertyChangedEventArgs KeyTipChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.KeyTip);
 
         static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.IsEnabled);
 
         static readonly PropertyChangedEventArgs IsEditableChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.IsEditable);
         ICommand _command;
+        object _commandParameter;
         bool _isEditable;
         bool _isEnabled;
         string _keyTip;
@@ -158,6 +161,17 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                 if (_command == value) return;
                 _command = value;
                 NotifyPropertyChanged(CommandChangedEventArgs);
+            }
+        }
+
+        public object CommandParameter
+        {
+            get { return _commandParameter; }
+            set
+            {
+                if (_commandParameter == value) return;
+                _commandParameter = value;
+                NotifyPropertyChanged(CommandParameterChangedEventArgs);
             }
         }
 
