@@ -13,11 +13,13 @@ namespace ESMEWorkBench.ViewModels.Layers
             Location = AdornmentLocation.LowerRight;
         }
 
-        public Bitmap Bitmap { get; private set; }
+        public Bitmap Bitmap { get; set; }
 
         protected override void DrawCore(GeoCanvas canvas, Collection<SimpleCandidate> labelsInAllLayers)
         {
             if (!IsVisible) return;
+            if (Bitmap == null) return;
+
             var screenPointF = GetDrawingLocation(canvas, Bitmap.Width, Bitmap.Height);
 
             // If the canvas happens to be using GDI+ then we can do an optimization and skip

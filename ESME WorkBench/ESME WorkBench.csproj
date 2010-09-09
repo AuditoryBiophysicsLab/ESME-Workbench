@@ -60,7 +60,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="ESME, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86" />
     <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL" />
     <Reference Include="HRC, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86" />
     <Reference Include="MapSuiteCore, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -256,7 +255,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="External References\Cinch.WPF.dll" />
-    <None Include="External References\ESME.dll" />
     <None Include="External References\HRC.dll" />
     <None Include="External References\MapSuiteCore.dll" />
     <None Include="External References\MEFedMVVM.WPF.dll" />
@@ -272,6 +270,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="External References\GeoAPI.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\ESME\ESME.csproj">
+      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
+      <Name>ESME</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

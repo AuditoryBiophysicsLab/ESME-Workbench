@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Drawing;
@@ -14,7 +15,7 @@ using System.IO;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
-    public abstract class LayerViewModel : ViewModelBase
+    public abstract class LayerViewModel : ViewModelBase, IComparable<LayerViewModel>
     {
         protected LayerViewModel(string name, string fileName, WpfMap wpfMap)
         {
@@ -26,9 +27,13 @@ namespace ESMEWorkBench.ViewModels.Layers
             IsChecked = true;
         }
 
-        void Children_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        void Children_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            //throw new System.NotImplementedException();
+            if (e.OldItems != null)
+                foreach (var oldLayer in e.OldItems.Cast<LayerViewModel>())
+                {
+                    oldLayer.Remove();
+                }
         }
 
         void Initialize()
@@ -41,12 +46,40 @@ namespace ESMEWorkBench.ViewModels.Layers
         }
         LayerViewModel _parent;
 
+#if false
         public virtual void MoveUp() { WpfMap.Overlays.MoveUp(Overlay); }
         public virtual void MoveDown() { WpfMap.Overlays.MoveDown(Overlay); }
         public virtual void MoveToTop() { WpfMap.Overlays.MoveToTop(Overlay); }
         public virtual void MoveToBottom() { WpfMap.Overlays.MoveToBottom(Overlay); }
         public virtual void MoveTo(int toIndex) { WpfMap.Overlays.MoveTo(Overlay, toIndex); }
-        public virtual int Index { get { return WpfMap.Overlays.IndexOf(Overlay); } }
+#endif
+        public virtual void MoveUp() { Index--; }
+        public virtual void MoveDown() { Index++; }
+        public virtual void MoveToTop() { Index = 1; }
+        public virtual void MoveToBottom() { Index = WpfMap.Overlays.Count - 1; }
+
+        public virtual bool IsBaseMapLayer { get; set; }
+        public virtual bool IsAdornmentLayer { get; set; }
+
+        #region public virtual int Index { get; set; }
+
+        public virtual int Index
+        {
+            get { return WpfMap.Overlays.IndexOf(Overlay); }
+            set
+            {
+                if (value == Index) return;
+                if (value < 1) return;
+                OldIndex = Index;
+                NewIndex = value;
+                WpfMap.Overlays.MoveTo(Overlay, value);
+                NotifyPropertyChanged(IndexChangedEventArgs);
+            }
+        }
+        static readonly PropertyChangedEventArgs IndexChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.Index);
+        public int OldIndex { get; private set; }
+        public int NewIndex { get; private set; }
+        #endregion
 
         #region public string LayerName { get; set; }
 
@@ -178,9 +211,30 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
 
+        public void Remove()
+        {
+            WpfMap.Overlays.Remove(Overlay);
+            WpfMap.Refresh();
+        }
+
         public WpfMap WpfMap { get; set; }
 
         public Overlay Overlay { get; set; }
+
+        int IComparable<LayerViewModel>.CompareTo(LayerViewModel other)
+        {
+            if (IsBaseMapLayer)
+                return other.IsBaseMapLayer ? Index.CompareTo(other.Index) : -1;
+            if (other.IsBaseMapLayer)
+                return 1;
+
+            if (IsAdornmentLayer)
+                return other.IsAdornmentLayer ? Index.CompareTo(other.Index) : 1;
+            if (other.IsAdornmentLayer)
+                return 1;
+
+            return Index.CompareTo(other.Index);
+        }
     }
 
     public abstract class LayerViewModel<T> : LayerViewModel where T : Layer
@@ -336,7 +390,6 @@ namespace ESMEWorkBench.ViewModels.Layers
         public override void MoveDown() {}
         public override void MoveToTop() {}
         public override void MoveToBottom() {}
-        public override void MoveTo(int toIndex) {}
     }
 
     public class OverlayShapesLayerViewModel : LayerViewModel
@@ -407,7 +460,7 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
 
-        #region public ObservableCollection<InMemoryFeatureLayer> OverlayShapes { get; set; }
+        #region public ObservableCollection<OverlayShape> OverlayShapes { get; set; }
 
         public ObservableCollection<OverlayShape> OverlayShapes
         {

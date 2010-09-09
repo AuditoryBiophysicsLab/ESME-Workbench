@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ESME</RootNamespace>
     <AssemblyName>ESME</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -72,20 +72,15 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="3MBSLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Workbench\3MBSLib.dll</HintPath>
+    <Reference Include="3MBSLib">
+      <HintPath>..\..\..\..\ESME\Workbench\mmmbs\3MBSLib.dll</HintPath>
     </Reference>
-    <Reference Include="3MBSWrapperClass, Version=1.0.2923.22848, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Workbench\3MBSWrapperClass.dll</HintPath>
+    <Reference Include="3MBSWrapperClass">
+      <HintPath>..\..\..\..\ESME\Workbench\mmmbs\3MBSWrapperClass.dll</HintPath>
     </Reference>
     <Reference Include="Accessibility" />
-    <Reference Include="Devart.Data.Linq, Version=1.0.28.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="Devart.Data.MySql.Linq, Version=1.0.28.0, Culture=neutral, PublicKeyToken=09af7300eec23701, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="HRC">
+      <HintPath>..\..\ESME WorkBench\External References\HRC.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
@@ -103,6 +98,7 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -155,23 +151,9 @@
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\FieldData.cs" />
     <Compile Include="TransmissionLoss\RadialData.cs" />
-    <Compile Include="TransmissionLoss\TLDatabaseContext.cs">
-      <DependentUpon>TLDatabaseContext.lqml</DependentUpon>
-    </Compile>
-    <Compile Include="TransmissionLoss\TLDatabaseContext.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TLDatabaseContext.lqml</DependentUpon>
-    </Compile>
     <Compile Include="TransmissionLoss\TLProcess.cs">
       <SubType>Component</SubType>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HRC\HRC.csproj">
-      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
-      <Name>HRC</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TransmissionLoss\Resources\CreateTLDatabase.sql" />
@@ -188,46 +170,9 @@
     <EmbeddedResource Include="Schema\SoundSource.xsd" />
     <EmbeddedResource Include="Schema\TransmissionLossField.xsd" />
     <EmbeddedResource Include="Schema\BellhopRunfile.xsd" />
-    <None Include="Simulation\SimulationDataContext.edps">
-      <DependentUpon>SimulationDataContext.lqml</DependentUpon>
-    </None>
-    <None Include="Simulation\SimulationDataContext.lqml">
-      <Generator>DevartLinqToSqlGenerator</Generator>
-      <LastGenOutput>SimulationDataContext.Designer.cs</LastGenOutput>
-    </None>
-    <None Include="Simulation\SimulationDataContext.lqml.view">
-      <DependentUpon>SimulationDataContext.lqml</DependentUpon>
-    </None>
-    <None Include="TransmissionLoss\TLDatabaseContext.edps">
-      <DependentUpon>TLDatabaseContext.lqml</DependentUpon>
-    </None>
-    <None Include="TransmissionLoss\TLDatabaseContext.lqml">
-      <Generator>DevartLinqToSqlGenerator</Generator>
-      <LastGenOutput>TLDatabaseContext.Designer.cs</LastGenOutput>
-    </None>
-    <None Include="TransmissionLoss\TLDatabaseContext.lqml.view">
-      <DependentUpon>TLDatabaseContext.lqml</DependentUpon>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnimatLocationFile\AnimatLocationFile.cs" />
-    <Compile Include="CoreMVVM\Commands\CommandBehaviorBase.cs" />
-    <Compile Include="CoreMVVM\Commands\CommandReference.cs" />
-    <Compile Include="CoreMVVM\Commands\DelegateCommand.cs" />
-    <Compile Include="CoreMVVM\Events\CloseRequestEventArgs.cs" />
-    <Compile Include="CoreMVVM\Events\UICompletedEventArgs.cs" />
-    <Compile Include="CoreMVVM\Messenger\MessageToActionsMap.cs" />
-    <Compile Include="CoreMVVM\Messenger\Messenger.cs" />
-    <Compile Include="CoreMVVM\Messenger\WeakAction.cs" />
-    <Compile Include="CoreMVVM\Services\Interfaces\IOpenExperimentService.cs" />
-    <Compile Include="CoreMVVM\Services\Interfaces\IOpenFileService.cs" />
-    <Compile Include="CoreMVVM\Services\Interfaces\ISaveFileService.cs" />
-    <Compile Include="CoreMVVM\Services\Interfaces\IUIVisualizerService.cs" />
-    <Compile Include="CoreMVVM\Services\OpenFileService.cs" />
-    <Compile Include="CoreMVVM\Services\SaveFileService.cs" />
-    <Compile Include="CoreMVVM\Services\ServiceProvider.cs" />
-    <Compile Include="CoreMVVM\Services\UIVisualizerService.cs" />
-    <Compile Include="CoreMVVM\ViewModels\ViewModelBase.cs" />
     <Compile Include="DataModel\ActivateModel.cs" />
     <Compile Include="DataModel\DataModelBase.cs" />
     <Compile Include="DataModel\ExperimentTree.cs" />
@@ -271,15 +216,6 @@
     <Compile Include="Overlay\OverlayLineSegment.cs" />
     <Compile Include="Overlay\Tokenizer.cs" />
     <Compile Include="Shapes\TransmissionLossFieldShape.cs" />
-    <Compile Include="Simulation\SimulationDataContext.cs">
-      <DependentUpon>SimulationDataContext.lqml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Simulation\SimulationDataContext.Designer.cs">
-      <DependentUpon>SimulationDataContext.lqml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="TransmissionLoss\Bellhop\Bellhop.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFieldCache.cs" />
   </ItemGroup>
@@ -329,12 +265,12 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="ClassDiagram1.cd" />
     <None Include="Resources\Strings.resx">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Simulation\" />
     <Folder Include="TransmissionLoss\CASS\" />
   </ItemGroup>
   <ItemGroup>
