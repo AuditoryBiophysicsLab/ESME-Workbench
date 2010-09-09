@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="BellhopRunfile"
+           targetNamespace="http://esme.bu.edu/support/schemas/ESME_Experiment"
+           elementFormDefault="qualified"
+           xmlns="http://esme.bu.edu/support/schemas/ESME_Experiment"
+           xmlns:mstns="http://esme.bu.edu/support/schemas/ESME_Experiment"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           version="1.0">
+  <xs:include schemaLocation="EarthCoordinate.xsd"
+              id="EarthCoordinateSchema"/>
+  <xs:include schemaLocation="AnalysisPoint.xsd"
+              id="AnalysisPointSchema"/>
+  <xs:include schemaLocation="TransmissionLossField.xsd"
+              id="TransmissionLossFieldSchema"/>
+  <xs:complexType name="BellhopRunfile">
+    <xs:sequence>
+      <xs:element name="AnalysisPoint"
+                  maxOccurs="1"
+                  minOccurs="1"
+                  type="AnalysisPoint"/>
+      <xs:element name="TransmissionLossField"
+                  maxOccurs="1"
+                  minOccurs="1"
+                  type="TransmissionLossField"/>
+      <xs:element name="BellhopRadials"
+                  maxOccurs="1"
+                  minOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="BellhopRadial"
+                        minOccurs="1"
+                        maxOccurs="1">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Base64EncodedConfiguration"
+                              type="xs:string"
+                              maxOccurs="1"
+                              minOccurs="1" />
+                  <xs:element name="Base64EncodedBottomProfile"
+                              type="xs:string"
+                              maxOccurs="1"
+                              minOccurs="1" />
+                  <xs:element name="BearingFromSource_degrees"
+                              type="xs:float"
+                              minOccurs="1"
+                              maxOccurs="1" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
