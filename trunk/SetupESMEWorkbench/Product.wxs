@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
-  <Product Id="*" Name="ESME WorkBench" Language="1033" Version="1.1.2.0" Manufacturer="Boston University" UpgradeCode="f82eae19-b38d-47f9-bed7-33454e612509">
+  <Product Id="*" 
+           Name="ESME WorkBench" 
+           Language="1033" 
+           Version="1.1.2.0" 
+           Manufacturer="Boston University" 
+           UpgradeCode="f82eae19-b38d-47f9-bed7-33454e612509">
     <Package Id="*" InstallerVersion="300" Compressed="yes" />
 
     <Media Id="1" Cabinet="esme.cab" EmbedCab="yes" />
