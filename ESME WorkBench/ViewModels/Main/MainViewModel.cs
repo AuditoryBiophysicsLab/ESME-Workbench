@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using Cinch;
+using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.RecentFiles;
 using ESMEWorkBench.ViewModels.Ribbon;

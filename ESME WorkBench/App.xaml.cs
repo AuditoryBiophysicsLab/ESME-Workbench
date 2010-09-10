@@ -8,6 +8,7 @@ using System.Security.Principal;
 using System.Threading;
 using System.Windows;
 using Cinch;
+using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 
 namespace ESMEWorkBench
@@ -47,6 +48,8 @@ namespace ESMEWorkBench
             }
             try
             {
+                //ExperimentData.Test();
+
                 CinchBootStrapper.Initialise(new List<Assembly> {typeof (App).Assembly});
             }
             catch (Exception e)
