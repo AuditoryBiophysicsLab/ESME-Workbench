@@ -5,6 +5,13 @@
     <Sharing>SOLUTION</Sharing>
     <CSharp>
       <FormatSettings>
+        <ANONYMOUS_METHOD_DECLARATION_BRACES>NEXT_LINE</ANONYMOUS_METHOD_DECLARATION_BRACES>
+        <CASE_BLOCK_BRACES>NEXT_LINE</CASE_BLOCK_BRACES>
+        <EXPLICIT_PRIVATE_MODIFIER>False</EXPLICIT_PRIVATE_MODIFIER>
+        <INDENT_NESTED_FIXED_STMT>True</INDENT_NESTED_FIXED_STMT>
+        <INDENT_NESTED_USINGS_STMT>True</INDENT_NESTED_USINGS_STMT>
+        <INITIALIZER_BRACES>NEXT_LINE</INITIALIZER_BRACES>
+        <KEEP_USER_LINEBREAKS>False</KEEP_USER_LINEBREAKS>
         <MODIFIERS_ORDER IsNull="False">
           <Item>public</Item>
           <Item>protected</Item>
@@ -21,11 +28,38 @@
           <Item>unsafe</Item>
           <Item>volatile</Item>
         </MODIFIERS_ORDER>
+        <PLACE_SIMPLE_INITIALIZER_ON_SINGLE_LINE>False</PLACE_SIMPLE_INITIALIZER_ON_SINGLE_LINE>
+        <PLACE_SIMPLE_LINQ_ON_SINGLE_LINE>False</PLACE_SIMPLE_LINQ_ON_SINGLE_LINE>
+        <PLACE_SIMPLE_METHOD_ON_SINGLE_LINE>True</PLACE_SIMPLE_METHOD_ON_SINGLE_LINE>
+        <SIMPLE_EMBEDDED_STATEMENT_STYLE>ON_SINGLE_LINE</SIMPLE_EMBEDDED_STATEMENT_STYLE>
+        <WRAP_BEFORE_FIRST_TYPE_PARAMETER_CONSTRAINT>True</WRAP_BEFORE_FIRST_TYPE_PARAMETER_CONSTRAINT>
+        <WRAP_FOR_STMT_HEADER_STYLE>WRAP_IF_LONG</WRAP_FOR_STMT_HEADER_STYLE>
+        <WRAP_LIMIT>500</WRAP_LIMIT>
+        <WRAP_MULTIPLE_DECLARATION_STYLE>CHOP_ALWAYS</WRAP_MULTIPLE_DECLARATION_STYLE>
+        <WRAP_MULTIPLE_TYPE_PARAMEER_CONSTRAINTS_STYLE>CHOP_ALWAYS</WRAP_MULTIPLE_TYPE_PARAMEER_CONSTRAINTS_STYLE>
+        <WRAP_OBJECT_AND_COLLECTION_INITIALIZER_STYLE>WRAP_IF_LONG</WRAP_OBJECT_AND_COLLECTION_INITIALIZER_STYLE>
+        <WRAP_TERNARY_EXPR_STYLE>WRAP_IF_LONG</WRAP_TERNARY_EXPR_STYLE>
       </FormatSettings>
       <UsingsSettings />
       <Naming2>
         <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
         <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="TypesAndNamespaces" />
+        <PredefinedRule Inspect="True" Prefix="I" Suffix="" Style="AaBb" ElementKind="Interfaces" />
+        <PredefinedRule Inspect="True" Prefix="T" Suffix="" Style="AaBb" ElementKind="TypeParameters" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="MethodPropertyEvent" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="Locals" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="LocalConstants" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="Parameters" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PublicFields" />
+        <PredefinedRule Inspect="True" Prefix="_" Suffix="" Style="aaBb" ElementKind="PrivateInstanceFields" />
+        <PredefinedRule Inspect="True" Prefix="_" Suffix="" Style="aaBb" ElementKind="PrivateStaticFields" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="Constants" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PrivateConstants" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="StaticReadonly" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PrivateStaticReadonly" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="EnumMember" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="Other" />
       </Naming2>
     </CSharp>
     <VB>
