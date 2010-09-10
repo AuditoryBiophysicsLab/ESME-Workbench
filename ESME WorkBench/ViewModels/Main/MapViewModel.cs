@@ -66,8 +66,16 @@ namespace ESMEWorkBench.ViewModels.Main
 
             var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            BaseMapViewModel = new ShapefileLayerViewModel(Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"), this);
-            GridOverlayViewModel = new AdornmentLayerViewModel("Grid", new MyGraticuleAdornmentLayer(), this);
+            BaseMapViewModel = new ShapefileLayerViewModel(Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"), this)
+                               {
+                                   IsChecked = Properties.Settings.Default.ShowBasemap
+                               };
+            GridOverlayViewModel = new AdornmentLayerViewModel("Grid", new MyGraticuleAdornmentLayer(), this)
+                                   {
+                                       IsChecked = Properties.Settings.Default.ShowGrid
+                                   };
+
+            _map.MapTools.PanZoomBar.IsEnabled = Properties.Settings.Default.ShowPanZoom;
 
             _map.ZoomToScale(_map.ZoomLevelScales[3]);
         }
@@ -80,18 +88,21 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             var source = (CheckBoxDataViewModel) args;
             BaseMapViewModel.IsChecked = source.IsChecked;
+            Properties.Settings.Default.ShowBasemap = source.IsChecked;
         }
 
         private void ExecuteToggleGridOverlayDisplayCommand(Object args)
         {
             var source = (CheckBoxDataViewModel) args;
             GridOverlayViewModel.IsChecked = source.IsChecked;
+            Properties.Settings.Default.ShowGrid = source.IsChecked;
         }
 
         private void ExecuteTogglePanZoomDisplayCommand(Object args)
         {
             var source = (CheckBoxDataViewModel) args;
             _map.MapTools.PanZoomBar.IsEnabled = source.IsChecked;
+            Properties.Settings.Default.ShowPanZoom = source.IsChecked;
         }
 
         private void ExecuteClearAllLayersCommand(Object args)

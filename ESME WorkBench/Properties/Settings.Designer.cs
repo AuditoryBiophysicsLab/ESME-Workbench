@@ -85,13 +85,37 @@ namespace ESMEWorkBench.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Setting {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowBasemap {
             get {
-                return ((string)(this["Setting"]));
+                return ((bool)(this["ShowBasemap"]));
             }
             set {
-                this["Setting"] = value;
+                this["ShowBasemap"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowGrid {
+            get {
+                return ((bool)(this["ShowGrid"]));
+            }
+            set {
+                this["ShowGrid"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowPanZoom {
+            get {
+                return ((bool)(this["ShowPanZoom"]));
+            }
+            set {
+                this["ShowPanZoom"] = value;
             }
         }
     }

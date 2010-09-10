@@ -482,7 +482,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                          ToolTipTitle = "Base Map",
                                                                          ToolTipDescription =
                                                                              "Toggles the base map display",
-                                                                         IsChecked = true,
+                                                                         IsChecked = Properties.Settings.Default.ShowBasemap,
                                                                          Command = MapViewModel.ToggleBaseMapDisplayCommand,
                                                                      },
                                                                      new CheckBoxDataViewModel
@@ -491,7 +491,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                          ToolTipTitle = "Grid Overlay",
                                                                          ToolTipDescription =
                                                                              "Toggles the grid overlay",
-                                                                         IsChecked = true,
+                                                                         IsChecked = Properties.Settings.Default.ShowGrid,
                                                                          Command = MapViewModel.ToggleGridOverlayDisplayCommand,
                                                                      },
                                                                      new CheckBoxDataViewModel
@@ -500,7 +500,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                          ToolTipTitle = "Pan/Zoom",
                                                                          ToolTipDescription =
                                                                              "Toggles the pan/zoom control",
-                                                                         IsChecked = true,
+                                                                         IsChecked = Properties.Settings.Default.ShowPanZoom,
                                                                          Command = MapViewModel.TogglePanZoomDisplayCommand,
                                                                      },
                                                                  },
