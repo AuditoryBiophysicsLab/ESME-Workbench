@@ -14,7 +14,8 @@ namespace ESMEWorkBench.Data
     [XmlRoot("ESMESettings")]
     public class AppSettings : ViewModelBase
     {
-        public string ScenarioEditorExecutablePath
+#if false
+		public string ScenarioEditorExecutablePath
         {
             get { return _scenarioEditorExecutablePath; }
             set
@@ -30,6 +31,9 @@ namespace ESMEWorkBench.Data
         private static readonly PropertyChangedEventArgs ScenarioEditorExecutablePathChangedEventArgs =
             ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioEditorExecutablePath);
 
+  
+	#endif        
+        public string ScenarioEditorExecutablePath { get; set; }
         public string ScenarioBuilderDataDirectory { get; set; }
         public string EnvironmentBuilderExecutablePath { get; set; }
 

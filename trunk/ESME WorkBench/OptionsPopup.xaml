@@ -6,16 +6,23 @@
         Height="300" 
         Width="300">
     <DockPanel LastChildFill="True">
-        <DockPanel LastChildFill="False" DockPanel.Dock="Bottom">
+        <DockPanel LastChildFill="False"
+                   Margin="10"
+                   DockPanel.Dock="Bottom">
             <Button Width="50" Margin="5 0 0 0" IsCancel="True"  Content="Cancel" DockPanel.Dock="Right"/>
             <Button Width="50" IsDefault="True" Content="OK" DockPanel.Dock="Right" Command="{Binding OkCommand}"/>
         </DockPanel>
         <TabControl>
             <TabItem Header="Scenario Editor">
-                <ctl:FileOrDirectorySetting Caption="Scenario Editor executable files" 
-                                            FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
-                                            IsDirectoryBrowser="False"
-                                            FileName="{Binding AppSettings.ScenarioEditorExecutablePath}"/>
+                <StackPanel Orientation="Vertical">
+                    <ctl:FileOrDirectorySetting Caption="Scenario Editor executable files" 
+                                                FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
+                                                IsDirectoryBrowser="False"
+                                                FileName="{Binding AppSettings.ScenarioEditorExecutablePath}"/>
+                    <ctl:FileOrDirectorySetting Caption="Scenario Editor data directory" 
+                                                IsDirectoryBrowser="True"
+                                                FileName="{Binding AppSettings.ScenarioBuilderDataDirectory}"/>
+                </StackPanel>
             </TabItem>
         </TabControl>
     </DockPanel>

@@ -20,7 +20,7 @@ namespace ESMEWorkBench.Controls
         public FileOrDirectorySetting()
         {
             InitializeComponent();
-            DataContext = this;
+            //DataContext = this;
         }
 
         public string Caption
