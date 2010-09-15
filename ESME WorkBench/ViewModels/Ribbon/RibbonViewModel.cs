@@ -210,7 +210,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                                                                SmallImage = new Uri("Images/SmallIcons/bullet-2-icon.png", UriKind.Relative),
                                                                ToolTipTitle = "Analysis Point",
                                                                ToolTipDescription = "Add a new analysis point to the experiment (not functional)",
-                                                               Command = DisabledCommand,
+                                                               Command = MainViewModel.TestTransmissionLossViewCommand,
                                                            },
                                                            new ButtonDataViewModel
                                                            {

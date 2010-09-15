@@ -46,6 +46,7 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>true</CodeAnalysisFailOnMissingRules>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -57,6 +58,7 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
@@ -96,6 +98,10 @@
     <Compile Include="AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ColorBarView.xaml.cs">
+      <DependentUpon>ColorBarView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DataAxis.cs" />
     <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
       <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
     </Compile>
@@ -113,6 +119,9 @@
     </Compile>
     <Compile Include="OptionsPopup.xaml.cs">
       <DependentUpon>OptionsPopup.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossView.xaml.cs">
+      <DependentUpon>TransmissionLossView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\IHasName.cs" />
@@ -158,9 +167,16 @@
     <Compile Include="ViewModels\Ribbon\TabDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\TextBoxDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\ToggleButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\ColorMapViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialViewModel.cs" />
     <Page Include="AboutBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ColorBarView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\FileOrDirectorySetting.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -221,6 +237,10 @@
     <Page Include="Themes\WhistlerBlue.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionLossView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

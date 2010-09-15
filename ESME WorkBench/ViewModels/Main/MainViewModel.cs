@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Cinch;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.Ribbon;
+using ESMEWorkBench.ViewModels.TransmissionLoss;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -44,6 +45,12 @@ namespace ESMEWorkBench.ViewModels.Main
                     AppSettings.Reload();
             });
 
+            TestTransmissionLossViewCommand = new SimpleCommand<object, object>(delegate
+            {
+                var transmissionLossViewModel = new TransmissionLossFieldViewModel(@"C:\Users\Dave Anderson\Desktop\50kmbahamas.tlf", _viewAwareStatusService);
+                _visualizerService.Show("TransmissionLossViewModel", transmissionLossViewModel, true, null);
+            });
+
             LaunchExternalProgramCommand = new SimpleCommand<object, object>(delegate(Object arg)
             {
                 var executable = new Process();
@@ -67,6 +74,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<Object, Object> EditOptionsCommand { get; private set; }
         public SimpleCommand<Object, Object> LaunchExternalProgramCommand { get; private set; }
+        public SimpleCommand<Object, Object> TestTransmissionLossViewCommand { get; private set; }
 
         #endregion
     }
