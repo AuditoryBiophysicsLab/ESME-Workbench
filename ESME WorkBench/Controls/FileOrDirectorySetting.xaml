@@ -1,0 +1,9 @@
+﻿<UserControl x:Class="ESMEWorkBench.Controls.FileOrDirectorySetting" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<StackPanel Orientation="Vertical">
+		<Label Content="{Binding Caption}" />
+		<DockPanel LastChildFill="True">
+			<Button DockPanel.Dock="Right" Content=" ..." MinWidth="30" Name="btnOpenFile" Margin=" 5 0 0 0" Click="OpenFile_Click" />
+			<TextBox DockPanel.Dock="Left" Text="{Binding FileName}" />
+		</DockPanel>
+	</StackPanel>
+</UserControl>

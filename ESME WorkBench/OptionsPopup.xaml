@@ -1,0 +1,23 @@
+﻿<Window x:Class="ESMEWorkBench.OptionsPopup"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctl="clr-namespace:ESMEWorkBench.Controls" 
+        Title="User Options" 
+        Height="300" 
+        Width="300">
+    <DockPanel LastChildFill="True">
+        <DockPanel LastChildFill="False" DockPanel.Dock="Bottom">
+            <Button Width="50" Margin="5 0 0 0" IsCancel="True"  Content="Cancel" DockPanel.Dock="Right"/>
+            <Button Width="50" IsDefault="True" Content="OK" DockPanel.Dock="Right" Command="{Binding OkCommand}"/>
+        </DockPanel>
+        <TabControl>
+            <TabItem Header="Scenario Editor">
+                <ctl:FileOrDirectorySetting Caption="Scenario Editor executable files" 
+                                            FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
+                                            IsDirectoryBrowser="False"
+                                            DataContext="{Binding AppSettings}"
+                                            FileName="{Binding ScenarioEditorExecutablePath}"/>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

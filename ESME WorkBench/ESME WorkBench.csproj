@@ -70,9 +70,11 @@
     <Reference Include="NetTopologySuite, Version=1.7.3.31740, Culture=neutral, PublicKeyToken=f580a05016ebada1, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
@@ -91,6 +93,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AboutBox.xaml.cs">
+      <DependentUpon>AboutBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
+      <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\ExperimentData.cs" />
     <Compile Include="Data\IApplicationData.cs" />
     <Compile Include="Data\PersistentApplicationData.cs" />
@@ -102,11 +111,16 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="OptionsPopup.xaml.cs">
+      <DependentUpon>OptionsPopup.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AppSettings\ApplicationSetting.cs" />
     <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\IHasName.cs" />
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\LayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
+    <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\LayerDisplayViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModel.cs" />
     <Compile Include="ViewModels\Layers\OffsetProjection.cs" />
@@ -115,6 +129,7 @@
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\VirtualToggleButton.cs" />
     <Compile Include="ViewModels\Main\MapViewModel.cs" />
+    <Compile Include="ViewModels\Main\ProgramOptionsViewModel.cs" />
     <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
     <Compile Include="ViewModels\RecentFiles\IPersist.cs" />
     <Compile Include="ViewModels\RecentFiles\RecentFile.cs" />
@@ -144,6 +159,14 @@
     <Compile Include="ViewModels\Ribbon\TabDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\TextBoxDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\ToggleButtonDataViewModel.cs" />
+    <Page Include="AboutBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\FileOrDirectorySetting.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -156,6 +179,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="OptionsPopup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -272,7 +299,12 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\ESMELogo.png" />
+    <Resource Include="AboutLogo.png">
+      <SubType>Image</SubType>
+    </Resource>
     <Content Include="External References\Devart.Data.Linq.dll" />
+    <SplashScreen Include="Images\ESME Splash Screen.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="External References\GeoAPI.dll" />

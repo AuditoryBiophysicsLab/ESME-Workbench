@@ -19,6 +19,7 @@ namespace ESMEWorkBench.ViewModels.Main
         private readonly IMessageBoxService _messageBoxService;
         private readonly IViewAwareStatus _viewAwareStatusService;
         private WpfMap _map;
+        public string MapDLLVersion { get; private set; }
 
         [ImportingConstructor]
         public MapViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService)
@@ -59,6 +60,7 @@ namespace ESMEWorkBench.ViewModels.Main
             if ((_viewAwareStatusService == null) || (_viewAwareStatusService.View == null)) return;
 
             _map = ((MainWindow) _viewAwareStatusService.View).Map1;
+            MapDLLVersion = WpfMap.GetVersion();
             _map.MapUnit = GeographyUnit.DecimalDegree;
             _map.MapTools.PanZoomBar.HorizontalAlignment = HorizontalAlignment.Left;
             _map.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Top;
@@ -75,8 +77,9 @@ namespace ESMEWorkBench.ViewModels.Main
                                        IsChecked = Properties.Settings.Default.ShowGrid
                                    };
 
-            _map.MapTools.PanZoomBar.IsEnabled = Properties.Settings.Default.ShowPanZoom;
+            _map.MapTools.PanZoomBar.Visibility = Properties.Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
 
+            _map.CurrentExtent = new RectangleShape(new PointShape(-180, 90), new PointShape(180, -90));
             _map.ZoomToScale(_map.ZoomLevelScales[3]);
         }
 
@@ -101,7 +104,7 @@ namespace ESMEWorkBench.ViewModels.Main
         private void ExecuteTogglePanZoomDisplayCommand(Object args)
         {
             var source = (CheckBoxDataViewModel) args;
-            _map.MapTools.PanZoomBar.IsEnabled = source.IsChecked;
+            _map.MapTools.PanZoomBar.Visibility = source.IsChecked ? Visibility.Visible : Visibility.Hidden;
             Properties.Settings.Default.ShowPanZoom = source.IsChecked;
         }
 
