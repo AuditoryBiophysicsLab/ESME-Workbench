@@ -7,6 +7,9 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using ESME.Environment;
+using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.Bellhop;
 using HRC.Navigation;
 using System.Reflection;
 
@@ -23,7 +26,56 @@ namespace ESME.Model
         private static bool PassedValidation = false;
         #endregion
 
-        public TransmissionLossField TransmissionLossField { get; set; }
+
+        public BellhopRunFile(TransmissionLossJob transmissionLossJob,  EnvironmentInformation environmentInformation)
+        {
+            
+        }
+
+        public static BellhopRunFile Create(
+            TransmissionLossJob transmissionLossJob,
+            EnvironmentInformation environmentInformation, TransmissionLossSettings transmissionLossSettings)
+        {
+            int rangeCellCount = (int)Math.Round((transmissionLossJob.Radius / transmissionLossSettings.RangeCellSize)) + 1;
+            
+            BellhopRunFile BellhopRunFile = new BellhopRunFile
+            {
+                TransmissionLossJob = transmissionLossJob,
+            };
+
+            BottomProfile[] BottomProfiles = new BottomProfile[transmissionLossJob.NewAnalysisPoint.RadialCount];
+            SoundSpeedProfile[] SoundSpeedProfiles = new SoundSpeedProfile[transmissionLossJob.NewAnalysisPoint.RadialCount];
+            float[] bearings = new float[transmissionLossJob.NewAnalysisPoint.RadialCount];
+            float MaxCalculationDepth_meters = float.MinValue;
+            var bearingStep = 360.0f/transmissionLossJob.NewAnalysisPoint.RadialCount;  
+            for (int i = 0; i < transmissionLossJob.NewAnalysisPoint.RadialCount; i++)
+            {
+                bearings[i] = bearingStep*i + transmissionLossJob.NewAnalysisPoint.RadialBearing;
+                Transect curTransect = new Transect(null, transmissionLossJob.NewAnalysisPoint.Location, bearings[i], transmissionLossJob.Radius);
+                BottomProfiles[i] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
+                MaxCalculationDepth_meters = Math.Max((float)BottomProfiles[i].MaxDepth_Meters, MaxCalculationDepth_meters);
+                SoundSpeedProfiles[i] = environmentInformation.SoundSpeedField[curTransect.MidPoint];
+            }
+
+            int depthCellCount = (int)Math.Round((MaxCalculationDepth_meters / transmissionLossSettings.DepthCellSize)) + 1;
+            for (int i = 0; i < transmissionLossJob.NewAnalysisPoint.RadialCount; i++)
+            {
+                string BellhopConfig;
+                BellhopConfig = Bellhop.GetRadialConfiguration(
+                    transmissionLossJob, SoundSpeedProfiles[i],
+                    environmentInformation.Sediment, MaxCalculationDepth_meters,
+                    rangeCellCount, depthCellCount, false, false, false, 1500);
+                BellhopRunFile.BellhopRadials.Add(new BellhopRadial
+                {
+                    BearingFromSource_degrees = bearings[i],
+                    Configuration = BellhopConfig,
+                    BottomProfile = BottomProfiles[i].ToBellhopString(),
+                });
+            }
+            return BellhopRunFile;
+        }
+
+        public TransmissionLossJob TransmissionLossJob { get; set; }
         public BellhopRadialList BellhopRadials { get; set; }
         [XmlIgnore]
         public string OriginalFilename { get; private set; }
@@ -110,6 +162,12 @@ namespace ESME.Model
             PassedValidation = false;
         }
         #endregion
+    }
+
+    public class TransmissionLossSettings
+    {
+        public float RangeCellSize { get; set; }
+        public float DepthCellSize { get; set; }
     }
 
     public class BellhopRadial

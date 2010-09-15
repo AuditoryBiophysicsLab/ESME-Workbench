@@ -30,7 +30,7 @@ namespace ESME.Model
                 Bathymetry = new Bathymetry(@"C:\Users\Dave Anderson\Documents\ESME Workbench\Bahamas\Bahamas.eeb"),
                 SoundSpeedFieldName = "",
             };
-            TransmissionLossField tlf = new TransmissionLossField
+            OldTransmissionLossField tlf = new OldTransmissionLossField
             {
                 Filename = "",
                 MaxTLDepth_meters = 2000,
@@ -56,9 +56,9 @@ namespace ESME.Model
                 RadialCount = 4,
             };
             Globals.CurrentLocationName = "Test";
-            BellhopRunFile RunFile = Bellhop.CreateRunFile(tlf, Environment);
+            //BellhopRunFile RunFile = Bellhop.CreateRunFile(tlf, Environment); 
             string Filename = Globals.RandomRunFileFilename;
-            RunFile.Save(Filename);
+            //RunFile.Save(Filename);
             var TestFile = BellhopRunFile.Load(Filename);
         }
 
@@ -102,7 +102,7 @@ namespace ESME.Model
                 FixedSources = new FixedSourceList(),
                 AnalysisPoints = new AnalysisPointList(),
                 SpeciesList = new SpeciesList(@"C:\Projects\ESME\Workbench\Species"),
-                TransmissionLossFields = new TransmissionLossFieldList(),
+                TransmissionLossFields = new OldTransmissionLossFieldList(),
             };
 
             experiment.SpeciesList.ItemDeleted += new EventHandler<ItemDeletedEventArgs<Species>>(SpeciesList_ItemDeleted);
@@ -145,13 +145,13 @@ namespace ESME.Model
                 PingDuration_seconds = 1,
                 PingInterval_seconds = 30,
             });
-            experiment.TransmissionLossFields.Add(new TransmissionLossField(analysisPoint1)
+            experiment.TransmissionLossFields.Add(new OldTransmissionLossField(analysisPoint1)
             {
                 Filename = "",
                 MaxTLDepth_meters = 2000,
                 RadialCount = 8,
             });
-            experiment.TransmissionLossFields.Add(new TransmissionLossField(analysisPoint2)
+            experiment.TransmissionLossFields.Add(new OldTransmissionLossField(analysisPoint2)
             {
                 Filename = "",
                 MaxTLDepth_meters = 2000,

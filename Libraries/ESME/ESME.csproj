@@ -147,13 +147,17 @@
     <Compile Include="ShipTrack\Generator.cs" />
     <Compile Include="ShipTrack\ShipTrackProperties.cs" />
     <Compile Include="ShipTrack\Waypoint.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\RadialCalculator.cs" />
+    <Compile Include="TransmissionLoss\NewAnalysisPoint.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
-    <Compile Include="TransmissionLoss\FieldData.cs" />
-    <Compile Include="TransmissionLoss\RadialData.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossField.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossRadial.cs" />
     <Compile Include="TransmissionLoss\TLProcess.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="TransmissionLoss\TransmissionLossJob.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TransmissionLoss\Resources\CreateTLDatabase.sql" />
@@ -207,7 +211,7 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="Model\Tester.cs" />
-    <Compile Include="Model\TransmissionLossField.cs" />
+    <Compile Include="Model\OldTransmissionLossField.cs" />
     <Compile Include="NEMO\NemoBase.cs" />
     <Compile Include="NEMO\NemoFile.cs" />
     <Compile Include="NEMO\NemoPSM.cs" />
