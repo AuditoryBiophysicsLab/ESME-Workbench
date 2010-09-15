@@ -1,13 +1,9 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using Microsoft.Win32;
 
 namespace ESMEWorkBench.Controls
 {
-    /// <summary>
-    /// Interaction logic for TestControl.xaml
-    /// </summary>
-    public partial class FileOrDirectorySetting : UserControl
+    public partial class FileOrDirectorySetting
     {
         public static DependencyProperty CaptionProperty = DependencyProperty.Register("Caption", typeof (string), typeof (FileOrDirectorySetting), new FrameworkPropertyMetadata("Caption", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
@@ -20,7 +16,6 @@ namespace ESMEWorkBench.Controls
         public FileOrDirectorySetting()
         {
             InitializeComponent();
-            //DataContext = this;
         }
 
         public string Caption

@@ -25,17 +25,15 @@ namespace ESME.NEMO
             SimAreaName = GetString("simAreaName");
             TimeFrame = GetString("timeFrame");
 
-            string scenarioDirectory = Path.Combine(nemoDataDirectory, SimAreaName);
+            var scenarioDirectory = Path.Combine(nemoDataDirectory, SimAreaName);
 
-            foreach (XmlNode cur in scenario.ChildNodes)
-                if (cur.Name == "Platform")
-                    Platforms.Add(new NemoPlatform(cur, scenarioDirectory, this));
+            foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "Platform"))
+                Platforms.Add(new NemoPlatform(cur, scenarioDirectory, this));
 
-            foreach (XmlNode cur in scenario.ChildNodes)
-                if (cur.Name == "animals")
-                    Animals.Add(new NemoAnimals(cur, scenarioDirectory));
+            foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "animals"))
+                Animals.Add(new NemoAnimals(cur, scenarioDirectory));
 
-            string[] simAreaOverlays = Directory.GetFiles(Path.Combine(scenarioDirectory, "Areas"), "*_SIM_AREA.ovr");
+            var simAreaOverlays = Directory.GetFiles(Path.Combine(scenarioDirectory, "Areas"), "*_SIM_AREA.ovr");
             if ((simAreaOverlays != null) && (simAreaOverlays.Length > 0))
                 OverlayFile = new OverlayFile(simAreaOverlays[0]);
         }

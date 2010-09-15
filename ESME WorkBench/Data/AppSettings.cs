@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -7,35 +6,25 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using Cinch;
-using ESMEWorkBench.ViewModels.Main;
 
 namespace ESMEWorkBench.Data
 {
-    [XmlRoot("ESMESettings")]
-    public class AppSettings : ViewModelBase
+    public class AppSettings
     {
-#if false
-		public string ScenarioEditorExecutablePath
-        {
-            get { return _scenarioEditorExecutablePath; }
-            set
-            {
-                if (_scenarioEditorExecutablePath == value) return;
-                _scenarioEditorExecutablePath = value;
-                NotifyPropertyChanged(ScenarioEditorExecutablePathChangedEventArgs);
-            }
-        }
-
-        private string _scenarioEditorExecutablePath;
-
-        private static readonly PropertyChangedEventArgs ScenarioEditorExecutablePathChangedEventArgs =
-            ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioEditorExecutablePath);
-
-  
-	#endif        
         public string ScenarioEditorExecutablePath { get; set; }
-        public string ScenarioBuilderDataDirectory { get; set; }
-        public string EnvironmentBuilderExecutablePath { get; set; }
+        public string ScenarioDataDirectory { get; set; }
+        public string EnvironmentDatabaseDirectory { get; set; }
+
+        [XmlIgnore]
+        static readonly string AppSettingsDirectory;
+        static readonly string AppSettingsFile;
+
+        static AppSettings()
+        {
+            AppSettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().GetName().CodeBase));
+            if (!Directory.Exists(AppSettingsDirectory)) Directory.CreateDirectory(AppSettingsDirectory);
+            AppSettingsFile = Path.Combine(AppSettingsDirectory, "settings.xml");
+        }
 
         public AppSettings() { }
 
@@ -55,8 +44,18 @@ namespace ESMEWorkBench.Data
                 property.SetValue(this, property.GetValue(that, null), null);
         }
 
-
         #region Load/Save
+
+        /// <summary>
+        /// Reload the application settings from the default file
+        /// </summary>
+        public void Reload() { CopyFrom(Load()); }
+
+        /// <summary>
+        /// Load the application settings from the default filename
+        /// </summary>
+        /// <returns></returns>
+        public static AppSettings Load() { return Load(AppSettingsFile, null); }
 
         /// <summary>
         /// Load the persistent application data from a file
@@ -96,6 +95,11 @@ namespace ESMEWorkBench.Data
 
             return Deserialize(file, null);
         }
+
+        /// <summary>
+        /// Save the application data to the default filename
+        /// </summary>
+        public void Save() { Save(AppSettingsFile); }
 
         /// <summary>
         /// Save the persistent application data to a file

@@ -4,8 +4,14 @@
              Exit="Application_Exit"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-		<!-- Resources scoped at the Application level should be defined here. -->
-        
+        <!-- Resources scoped at the Application level should be defined here. -->
+        <!--
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/WhistlerBlue.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        -->
     </Application.Resources>
     <JumpList.JumpList>
         <JumpList ShowRecentCategory="True"

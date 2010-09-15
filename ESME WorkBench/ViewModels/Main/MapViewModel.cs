@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -7,31 +6,104 @@ using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Ribbon;
 using MEFedMVVM.Common;
-using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    [ExportViewModel("MapViewModel")]
-    public class MapViewModel : ViewModelBase, IDesignTimeAware
+    public class MapViewModel : ViewModelBase
     {
-        private readonly IMessageBoxService _messageBoxService;
-        private readonly IViewAwareStatus _viewAwareStatusService;
+        readonly IViewAwareStatus _viewAwareStatusService;
+        readonly IOpenFileService _openFileService;
+        readonly IMessageBoxService _messageBoxService;
         private WpfMap _map;
+        
         public string MapDLLVersion { get; private set; }
+        public LayerDisplayViewModel LayerDisplayViewModel { get; private set; }
 
-        [ImportingConstructor]
-        public MapViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService)
+        public MapViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService)
         {
             _viewAwareStatusService = viewAwareStatusService;
             _viewAwareStatusService.ViewLoaded += ViewAwareStatusServiceViewLoaded;
             _messageBoxService = messageBoxService;
+            _openFileService = openFileService;
 
-            ToggleBaseMapDisplayCommand = new SimpleCommand<object, object>(ExecuteToggleBaseMapDisplayCommand);
-            ToggleGridOverlayDisplayCommand = new SimpleCommand<object, object>(ExecuteToggleGridOverlayDisplayCommand);
-            TogglePanZoomDisplayCommand = new SimpleCommand<object, object>(ExecuteTogglePanZoomDisplayCommand);
-            ClearAllLayersCommand = new SimpleCommand<object, object>(ExecuteClearAllLayersCommand);
+            LayerDisplayViewModel = new LayerDisplayViewModel(this);
+
+            ToggleBaseMapDisplayCommand = new SimpleCommand<object, object>(delegate (Object args)
+            {
+                var source = (CheckBoxDataViewModel)args;
+                BaseMapViewModel.IsChecked = source.IsChecked;
+                Properties.Settings.Default.ShowBasemap = source.IsChecked;
+            });
+
+            ToggleGridOverlayDisplayCommand = new SimpleCommand<object, object>(delegate(Object args)
+            {
+                var source = (CheckBoxDataViewModel)args;
+                GridOverlayViewModel.IsChecked = source.IsChecked;
+                Properties.Settings.Default.ShowGrid = source.IsChecked;
+            });
+
+            TogglePanZoomDisplayCommand = new SimpleCommand<object, object>(delegate(Object args)
+            {
+                var source = (CheckBoxDataViewModel)args;
+                _map.MapTools.PanZoomBar.Visibility = source.IsChecked ? Visibility.Visible : Visibility.Hidden;
+                Properties.Settings.Default.ShowPanZoom = source.IsChecked;
+            });
+
+            ClearAllLayersCommand = new SimpleCommand<object, object>(delegate
+            {
+                Overlays.Clear();
+                AdornmentOverlay.Layers.Clear();
+                BaseMapViewModel = null;
+                GridOverlayViewModel = null;
+                ViewAwareStatusServiceViewLoaded();
+            });
+
+            AddShapefileCommand = new SimpleCommand<object, object>(delegate
+            {
+                _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
+                var result = _openFileService.ShowDialog(null);
+                if (!result.HasValue || !result.Value) return;
+                var overlayLayer = new ShapefileLayerViewModel(_openFileService.FileName, this);
+                LayerDisplayViewModel.Layers.Add(overlayLayer);
+            });
+
+            AddOverlayFileCommand = new SimpleCommand<object, object>(delegate
+            {
+                _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
+                var result = _openFileService.ShowDialog(null);
+                if (!result.HasValue || !result.Value) return;
+                try
+                {
+                    var overlayLayer = new OverlayFileLayerViewModel(_openFileService.FileName, this);
+                    LayerDisplayViewModel.Layers.Add(overlayLayer);
+                }
+                catch (Exception e)
+                {
+                    _messageBoxService.ShowError(string.Format("Error opening Overlay File {0}:\n{1}",
+                                                               _openFileService.FileName, e.Message));
+                }
+            });
+
+            AddScenarioFileCommand = new SimpleCommand<object, object>(delegate
+            {
+                _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
+                var result = _openFileService.ShowDialog(null);
+                if (!result.HasValue || !result.Value) return;
+                //NemoFile nemoFile;
+                try
+                {
+                    var overlayLayer = new ScenarioFileLayerViewModel(_openFileService.FileName, MainViewModel.AppSettings.ScenarioDataDirectory, this);
+                    LayerDisplayViewModel.Layers.Add(overlayLayer);
+                    //nemoFile = new NemoFile(_openFileService.FileName, @"C:\Users\Dave Anderson\Desktop\Scenario Builder 1.5.508\Sim Areas");
+                }
+                catch (Exception ex)
+                {
+                    _messageBoxService.ShowError("Error opening scenario file: " + ex.Message);
+                    return;
+                }
+            });
         }
 
         public LayerViewModel BaseMapViewModel { get; private set; }
@@ -42,15 +114,11 @@ namespace ESMEWorkBench.ViewModels.Main
         public SimpleCommand<Object, Object> TogglePanZoomDisplayCommand { get; private set; }
         public SimpleCommand<Object, Object> ClearAllLayersCommand { get; private set; }
 
-        #region IDesignTimeAware Members
+        public SimpleCommand<Object, Object> AddShapefileCommand { get; private set; }
+        public SimpleCommand<Object, Object> AddOverlayFileCommand { get; private set; }
+        public SimpleCommand<Object, Object> AddScenarioFileCommand { get; private set; }
 
-        public void DesignTimeInitialization()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
+        
         private void ViewAwareStatusServiceViewLoaded()
         {
             if (Designer.IsInDesignMode)
@@ -87,49 +155,5 @@ namespace ESMEWorkBench.ViewModels.Main
         public AdornmentOverlay AdornmentOverlay { get { return _map.AdornmentOverlay; } }
         public void Refresh() {_map.Refresh();}
 
-        private void ExecuteToggleBaseMapDisplayCommand(Object args)
-        {
-            var source = (CheckBoxDataViewModel) args;
-            BaseMapViewModel.IsChecked = source.IsChecked;
-            Properties.Settings.Default.ShowBasemap = source.IsChecked;
-        }
-
-        private void ExecuteToggleGridOverlayDisplayCommand(Object args)
-        {
-            var source = (CheckBoxDataViewModel) args;
-            GridOverlayViewModel.IsChecked = source.IsChecked;
-            Properties.Settings.Default.ShowGrid = source.IsChecked;
-        }
-
-        private void ExecuteTogglePanZoomDisplayCommand(Object args)
-        {
-            var source = (CheckBoxDataViewModel) args;
-            _map.MapTools.PanZoomBar.Visibility = source.IsChecked ? Visibility.Visible : Visibility.Hidden;
-            Properties.Settings.Default.ShowPanZoom = source.IsChecked;
-        }
-
-        private void ExecuteClearAllLayersCommand(Object args)
-        {
-            Overlays.Clear();
-            AdornmentOverlay.Layers.Clear();
-            BaseMapViewModel = null;
-            GridOverlayViewModel = null;
-            ViewAwareStatusServiceViewLoaded();
-        }
-#if false
-        //Function for getting the extent based on a collection of layers.
-        //It gets the overall extent of all the layers.
-        private RectangleShape GetFullExtent(IEnumerable<Layer> layers)
-        {
-            var rectangleShapes = new Collection<BaseShape>();
-
-            foreach (var layer in layers)
-            {
-                layer.Open();
-                if (layer.HasBoundingBox) rectangleShapes.Add(layer.GetBoundingBox());
-            }
-            return ExtentHelper.GetBoundingBoxOfItems(rectangleShapes);
-        }
-#endif
     }
 }
