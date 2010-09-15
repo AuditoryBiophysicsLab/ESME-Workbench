@@ -16,6 +16,7 @@ namespace TLCalc
 {
     internal class Program
     {
+#if true
         private static void Main(string[] args)
         {
             //input argument: directory to scan
@@ -31,27 +32,24 @@ namespace TLCalc
                     var runFile = BellhopRunFile.Load(file);
                     var outputFileName = Path.Combine(Path.GetDirectoryName(file),
                                                       Path.GetFileNameWithoutExtension(file) + ".tlf");
-                    //will become ~
-                    //var fieldcalculator = new fieldcalculator(runfile,outputfilename)
-                    //fieldcalculator will create an array of radial calculators.
-                    //runfile and outputfilename are properties not arguments. (and, oen day, a thread as an argument).
                     var fieldCalculator = new FieldCalculator()
                                               {
                                                   OutputFileName = outputFileName,
                                                   RunFile = runFile,
                                               };
                     fieldCalculator.ComputeField();
-                    
-                    var destFileName = Path.Combine(processedPath,Path.GetFileName(file));
+
+                    var destFileName = Path.Combine(processedPath, Path.GetFileName(file));
                     File.Delete(destFileName);
                     File.Move(file, destFileName);
                 }
                 Thread.Sleep(1000);
             }
 
-        }
-#if false
-        private static void TestMain(string[] args)
+        } 
+#else 
+        //private static void TestMain(string[] args)
+        private static void Main(string[] args)
         {
             #region create transmission loss job. the new base class for all acoustic simulations!
 
@@ -69,13 +67,13 @@ namespace TLCalc
                                               NewAnalysisPoint = new NewAnalysisPoint
                                                                      {
                                                                          IDField = 1,
-                                                                         Location = new EarthCoordinate(25, -77),
+                                                                         Location = new EarthCoordinate(26, -76.8),
                                                                          RadialBearing = 0,
                                                                          RadialCount = 16,
 
                                                                      },
-                                              Radius = 10000,
-                                              MaxDepth = 2000,
+                                              Radius = 50000,
+                                              MaxDepth = 3000,
                                           };
 
             #endregion
@@ -106,7 +104,7 @@ namespace TLCalc
 
             #region serialize bellhop run file object to file.
 
-            const string runFileFile = @"C:\tests\bellhop\foo.bellhop";
+            const string runFileFile = @"C:\tests\bellhop\50kmbahamas.bellhop";
             bellhopRunFile.Save(runFileFile);
 
             #endregion
@@ -118,7 +116,7 @@ namespace TLCalc
             #endregion
 
             #region run bellhop on new run file object.
-            ComputeField(newRunFile, @"C:\tests\bellhop\test.tlf");
+            ComputeField(newRunFile, @"C:\tests\bellhop\50kmbahamas.tlf");
 
             #endregion
 
