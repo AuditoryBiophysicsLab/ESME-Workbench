@@ -3,25 +3,32 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ctl="clr-namespace:ESMEWorkBench.Controls" 
         Title="User Options" 
-        Height="300" 
-        Width="300">
+        Height="500" 
+        Width="500">
     <DockPanel LastChildFill="True">
         <DockPanel LastChildFill="False"
                    Margin="10"
                    DockPanel.Dock="Bottom">
-            <Button Width="50" Margin="5 0 0 0" IsCancel="True"  Content="Cancel" DockPanel.Dock="Right"/>
-            <Button Width="50" IsDefault="True" Content="OK" DockPanel.Dock="Right" Command="{Binding OkCommand}"/>
+            <Button Width="75" Margin="10 0 0 0" IsCancel="True"  Content="Cancel" DockPanel.Dock="Right"/>
+            <Button Width="75" IsDefault="True" Content="OK" DockPanel.Dock="Right" Command="{Binding OkCommand}"/>
         </DockPanel>
         <TabControl>
-            <TabItem Header="Scenario Editor">
-                <StackPanel Orientation="Vertical">
+            <TabItem Header="Scenario" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <StackPanel Orientation="Vertical" Width="Auto" Height="Auto">
                     <ctl:FileOrDirectorySetting Caption="Scenario Editor executable files" 
                                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
                                                 IsDirectoryBrowser="False"
                                                 FileName="{Binding AppSettings.ScenarioEditorExecutablePath}"/>
                     <ctl:FileOrDirectorySetting Caption="Scenario Editor data directory" 
                                                 IsDirectoryBrowser="True"
-                                                FileName="{Binding AppSettings.ScenarioBuilderDataDirectory}"/>
+                                                FileName="{Binding AppSettings.ScenarioDataDirectory}"/>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Environment" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                    <ctl:FileOrDirectorySetting Caption="Environment database directory" 
+                                                IsDirectoryBrowser="True"
+                                                FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}"/>
                 </StackPanel>
             </TabItem>
         </TabControl>

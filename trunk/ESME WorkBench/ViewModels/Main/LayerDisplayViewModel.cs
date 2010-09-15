@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
-using MEFedMVVM.ViewModelLocator;
-using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    [ExportViewModel("LayerDisplayViewModel", false)]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class LayerDisplayViewModel : ViewModelBase
     {
         static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<LayerDisplayViewModel>(x => x.Layers);

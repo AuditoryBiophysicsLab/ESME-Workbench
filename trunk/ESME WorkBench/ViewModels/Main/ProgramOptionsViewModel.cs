@@ -1,55 +1,33 @@
 ﻿using System;
-using System.ComponentModel;
-using System.ComponentModel.Composition;
-using System.Configuration;
 using Cinch;
+using ESMEWorkBench.Data;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
     public class ProgramOptionsViewModel : ViewModelBase, IDesignTimeAware
     {
-        readonly IMessageBoxService _messageBoxService;
-        readonly IOpenFileService _openFileService;
-
-        public ProgramOptionsViewModel(IMessageBoxService messageBoxService, IOpenFileService openFileService, Data.AppSettings appSettings)
+        public ProgramOptionsViewModel()
         {
-            _messageBoxService = messageBoxService;
-            _openFileService = openFileService;
-            _appSettings = appSettings;
+            AppSettings = MainViewModel.AppSettings;
 
-            //ConfigurationManager.AppSettings[]
             OkCommand = new SimpleCommand<object, object>(delegate
-                                                          {
-                                                              CloseActivePopUpCommand.Execute(true);
-                                                          });
-        }
-
-        public Data.AppSettings AppSettings
-        {
-            get { return _appSettings; }
-            set
             {
-                if (_appSettings == value) return;
-                _appSettings = value;
-                NotifyPropertyChanged(AppSettingsChangedEventArgs);
-            }
+                AppSettings.Save();
+                CloseActivePopUpCommand.Execute(true);
+            });
+            CancelCommand = new SimpleCommand<object, object>(delegate
+            {
+                AppSettings.Reload();
+                CloseActivePopUpCommand.Execute(false);
+            });
         }
 
-        private Data.AppSettings _appSettings;
+        public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }
 
-        private static readonly PropertyChangedEventArgs AppSettingsChangedEventArgs =
-            ObservableHelper.CreateArgs<ProgramOptionsViewModel>(x => x.AppSettings);
-
-        #region IDesignTimeAware Members
-
-        public void DesignTimeInitialization() 
-        { 
-            throw new NotImplementedException(); 
-        }
-
-        #endregion
-
+        public AppSettings AppSettings { get; private set; }
+        
         public SimpleCommand<Object, Object> OkCommand { get; private set; }
+        public SimpleCommand<Object, Object> CancelCommand { get; private set; }
     }
 }
