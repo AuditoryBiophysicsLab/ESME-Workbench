@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="ESME.GUI.Controls.ColorBarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewmodel="clr-namespace:ESME.GUI.ViewModels">
+    <DockPanel LastChildFill="True"
+               MouseLeftButtonDown="DockPanel_MouseLeftButtonDown"
+               MouseWheel="Image_MouseWheel">
+        <DockPanel.RenderTransformOrigin>
+            0.5,0.5
+        </DockPanel.RenderTransformOrigin>
+        <DockPanel.RenderTransform>
+            <ScaleTransform ScaleY="-1" />
+        </DockPanel.RenderTransform>
+        <Border BorderBrush="Black" 
+                BorderThickness="0" 
+                x:Name="topMargin" 
+                Height="0" 
+                DockPanel.Dock="Top"/>
+        <Border BorderBrush="Black" 
+                BorderThickness="0" 
+                x:Name="botMargin" 
+                Height="0" 
+                DockPanel.Dock="Bottom"/>
+        <Image x:Name="_colorBarImage" 
+               Source="{Binding Source={x:Static viewmodel:ColorMapViewModel.Default}, Path=ColorBitmap}" 
+               Stretch="Fill" 
+               MouseMove="Image_MouseMove"
+               MouseDown="Image_MouseDown"
+               MouseUp="_colorBarImage_MouseUp"/>
+    </DockPanel>
+</UserControl>
