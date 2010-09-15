@@ -51,7 +51,7 @@ namespace ESMEWorkBench.ViewModels.Layers
             var currentMinY = currentExtent.LowerLeftPoint.Y;
 
             //Gets the increment according to the current extent of the map and the graticule density set 
-            //by the GrsaticuleDensity property
+            //by the GraticuleDensity property
             var increment = GetIncrement(currentExtent.Width, _graticuleDensity);
 
             //Collections of GraticuleLabel for labeling the different lines.

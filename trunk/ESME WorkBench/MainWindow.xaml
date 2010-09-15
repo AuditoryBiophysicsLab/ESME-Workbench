@@ -299,17 +299,15 @@
 					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Open Experiment]}" />
 					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Close Experiment]}" />
 					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[New Experiment]}" />
-					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Info]}" />
-					<ribbon:RibbonSeparator />
-					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Options]}" />
-					<ribbon:RibbonApplicationMenu.FooterPaneContent>
-						<DockPanel LastChildFill="False">
-							<ribbon:RibbonButton Command="ApplicationCommands.Close" Label="Exit" ToolTipTitle="Exit" SmallImageSource="Images\SmallIcons\Button-Close-icon.png" KeyTip="X" DockPanel.Dock="Right" Margin="2" />
-						</DockPanel>
-					</ribbon:RibbonApplicationMenu.FooterPaneContent>
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Info]}" />
+                    <ribbon:RibbonSeparator />
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Options]}" />
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Help]}" />
+                    <ribbon:RibbonSeparator />
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Exit]}" />
 					<ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
 						<ribbon:RibbonGallery DataContext="{Binding Path=RecentFiles}" ScrollViewer.VerticalScrollBarVisibility="Auto">
-							<ribbon:RibbonGalleryCategory Header="Recent Experiments" Background="Transparent" ItemsSource="{Binding CategoryDataCollection[0]}">
+							<ribbon:RibbonGalleryCategory Header="Recent Experiments" Background="Transparent" ItemsSource="{Binding CategoryDataCollection}">
 								<ribbon:RibbonGalleryCategory.ItemsPanel>
 									<ItemsPanelTemplate>
 										<StackPanel Orientation="Vertical" IsItemsHost="True" />
@@ -321,10 +319,6 @@
 				</ribbon:RibbonApplicationMenu>
 			</ribbon:Ribbon.ApplicationMenu>
 			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Experiment]}" KeyTip="E" Header="Experiment">
-				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario]}">
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Load]}" />
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}" />
-				</ribbon:RibbonGroup>
 				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Data]}">
                     <ribbon:RibbonButton DataContext="{Binding Path=Controls[Reset]}" />
                     <ribbon:RibbonButton DataContext="{Binding Path=Controls[Shapefile]}" />
@@ -346,8 +340,9 @@
 				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario File]}">
 					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Open]}" />
 					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Close]}" />
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}" />
-				</ribbon:RibbonGroup>
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}" />
+                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Run]}" />
+                </ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
 			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Environment]}" Header="Environment">
 				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Location]}">

@@ -6,15 +6,14 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Input;
 using Cinch;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.RecentFiles;
 using ESMEWorkBench.ViewModels.Ribbon;
-using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
-using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -23,9 +22,13 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         #region Data
 
-        private readonly IMessageBoxService _messageBoxService;
-        private readonly IOpenFileService _openFileService;
-        private readonly IViewAwareStatus _viewAwareStatusService;
+        readonly IMessageBoxService _messageBoxService;
+        readonly IOpenFileService _openFileService;
+        readonly IViewAwareStatus _viewAwareStatusService;
+        readonly IUIVisualizerService _visualizerService;
+        readonly Data.AppSettings _appSettings;
+
+        static readonly string AppSettingsDirectory;
 
         //private WpfMap _map;
 
@@ -36,16 +39,24 @@ namespace ESMEWorkBench.ViewModels.Main
 
         private RibbonViewModel _ribbonViewModel;
 
-        #region Ctor
+        #region Constructors
+
+        static MainViewModel()
+        {
+            AppSettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"ESME WorkBench");
+        }
 
         [ImportingConstructor]
         public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService,
-                             IOpenFileService openFileService)
+                             IOpenFileService openFileService, IUIVisualizerService visualizerService)
         {
             _viewAwareStatusService = viewAwareStatusService;
             _viewAwareStatusService.ViewLoaded += ViewAwareStatusServiceViewLoaded;
             _messageBoxService = messageBoxService;
             _openFileService = openFileService;
+            _visualizerService = visualizerService;
+
+            _appSettings = Data.AppSettings.Load(Path.Combine(AppSettingsDirectory, "ESMESettings.xml"));
 
             MapViewModel = new MapViewModel(_viewAwareStatusService, _messageBoxService);
             LayerDisplayViewModel = new LayerDisplayViewModel(MapViewModel);
@@ -54,6 +65,7 @@ namespace ESMEWorkBench.ViewModels.Main
             AddOverlayFileCommand = new SimpleCommand<object, object>(ExecuteAddOverlayFileCommand);
             AddScenarioFileCommand = new SimpleCommand<object, object>(ExecuteAddScenarioFileCommand);
             DisabledCommand = new SimpleCommand<object, object>(CanNeverExecuteCommand, ExecuteDisabledCommand);
+            EditOptionsCommand = new SimpleCommand<object, object>(ExecuteEditOptionsCommand);
 
             CreateRibbonBindings();
             //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");
@@ -146,12 +158,10 @@ namespace ESMEWorkBench.ViewModels.Main
         #region Commands
 
         public SimpleCommand<Object, Object> AddShapefileCommand { get; private set; }
-
         public SimpleCommand<Object, Object> AddOverlayFileCommand { get; private set; }
-
         public SimpleCommand<Object, Object> AddScenarioFileCommand { get; private set; }
-
         public SimpleCommand<Object, Object> DisabledCommand { get; private set; }
+        public SimpleCommand<Object, Object> EditOptionsCommand { get; private set; }
 
         private void ExecuteAddShapefileCommand(Object args)
         {
@@ -198,6 +208,17 @@ namespace ESMEWorkBench.ViewModels.Main
                 return;
             }
         }
+
+        private void ExecuteEditOptionsCommand(Object args)
+        {
+            var programOptionsViewModel = new ProgramOptionsViewModel(_messageBoxService, _openFileService, _appSettings);
+            var result = _visualizerService.ShowDialog("OptionsPopup", programOptionsViewModel);
+            if ((result.HasValue) && (result.Value))
+            {
+                
+            }
+        }
+
 
         private static bool CanNeverExecuteCommand(Object args)
         {
@@ -346,6 +367,19 @@ namespace ESMEWorkBench.ViewModels.Main
                                                       },
                                                       new MenuItemDataViewModel
                                                       {
+                                                          Label = "Help",
+                                                          LargeImage =
+                                                              new Uri("Images/LargeIcons/Button-Help-icon.png",
+                                                                      UriKind.Relative),
+                                                          SmallImage =
+                                                              new Uri("Images/SmallIcons/Button-Help-icon.png",
+                                                                      UriKind.Relative),
+                                                          ToolTipTitle = "Help",
+                                                          ToolTipDescription = "Help and About information for ESME WorkBench",
+                                                          Command = DisabledCommand,
+                                                      },
+                                                      new MenuItemDataViewModel
+                                                      {
                                                           Label = "Options",
                                                           LargeImage =
                                                               new Uri("Images/LargeIcons/Options.png", UriKind.Relative),
@@ -353,7 +387,18 @@ namespace ESMEWorkBench.ViewModels.Main
                                                               new Uri("Images/SmallIcons/Options.png", UriKind.Relative),
                                                           ToolTipTitle = "Options",
                                                           ToolTipDescription = "Edit application options and settings",
-                                                          Command = DisabledCommand,
+                                                          Command = EditOptionsCommand,
+                                                      },
+                                                      new MenuItemDataViewModel
+                                                      {
+                                                          Label = "Exit",
+                                                          LargeImage =
+                                                              new Uri("Images/LargeIcons/Button-Close-icon.png", UriKind.Relative),
+                                                          SmallImage =
+                                                              new Uri("Images/SmallIcons/Button-Close-icon.png", UriKind.Relative),
+                                                          ToolTipTitle = "Exit",
+                                                          ToolTipDescription = "Close the ESME WorkBench",
+                                                          Command = ApplicationCommands.Close,
                                                       },
                                                   },
                                           },
@@ -367,44 +412,6 @@ namespace ESMEWorkBench.ViewModels.Main
                                                  Groups =
                                                      new GroupList
                                                      {
-                                                         new GroupDataViewModel
-                                                         {
-                                                             Label = "Scenario",
-                                                             Controls =
-                                                                 new ControlList
-                                                                 {
-                                                                     new ButtonDataViewModel
-                                                                     {
-                                                                         Label = "Load",
-                                                                         LargeImage =
-                                                                             new Uri("Images/LargeIcons/AddFile.png",
-                                                                                     UriKind.Relative),
-                                                                         SmallImage =
-                                                                             new Uri("Images/SmallIcons/AddFile.png",
-                                                                                     UriKind.Relative),
-                                                                         ToolTipTitle = "Load Scenario File (Ctrl+L)",
-                                                                         ToolTipDescription =
-                                                                             "Load a scenario file into the simulation.",
-                                                                         Command = DisabledCommand,
-                                                                         KeyTip = "L",
-                                                                     },
-                                                                     new ButtonDataViewModel
-                                                                     {
-                                                                         Label = "Edit",
-                                                                         LargeImage =
-                                                                             new Uri("Images/LargeIcons/new-icon.png",
-                                                                                     UriKind.Relative),
-                                                                         SmallImage =
-                                                                             new Uri("Images/SmallIcons/new-icon.png",
-                                                                                     UriKind.Relative),
-                                                                         ToolTipTitle = "Edit Scenario File (Ctrl+E)",
-                                                                         ToolTipDescription =
-                                                                             "Edit the scenario file with the Scenario Builder.",
-                                                                         Command = DisabledCommand,
-                                                                         KeyTip = "E",
-                                                                     },
-                                                                 },
-                                                         },
                                                          new GroupDataViewModel
                                                          {
                                                              Label = "Data",
@@ -616,6 +623,20 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                          ToolTipTitle = "Edit scenario file",
                                                                          ToolTipDescription =
                                                                              "Launch the scenario editor (not functional)",
+                                                                         Command = DisabledCommand,
+                                                                     },
+                                                                     new ButtonDataViewModel
+                                                                     {
+                                                                         Label = "Run",
+                                                                         LargeImage =
+                                                                             new Uri("Images/LargeIcons/Button-Play-icon.png",
+                                                                                     UriKind.Relative),
+                                                                         SmallImage =
+                                                                             new Uri("Images/SmallIcons/Button-Play-icon.png",
+                                                                                     UriKind.Relative),
+                                                                         ToolTipTitle = "Run scenario",
+                                                                         ToolTipDescription =
+                                                                             "Run the scenario (not functional)",
                                                                          Command = DisabledCommand,
                                                                      },
                                                                  },
