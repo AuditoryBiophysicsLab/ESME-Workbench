@@ -15,8 +15,7 @@
                 <ctl:FileOrDirectorySetting Caption="Scenario Editor executable files" 
                                             FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
                                             IsDirectoryBrowser="False"
-                                            DataContext="{Binding AppSettings}"
-                                            FileName="{Binding ScenarioEditorExecutablePath}"/>
+                                            FileName="{Binding AppSettings.ScenarioEditorExecutablePath}"/>
             </TabItem>
         </TabControl>
     </DockPanel>
