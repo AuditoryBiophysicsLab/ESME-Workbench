@@ -10,14 +10,15 @@ namespace ESME.TransmissionLoss.Bellhop
 {
     class Bellhop
     {
+#if false
         public static BellhopRunFile CreateRunFile(
-            TransmissionLossField TransmissionLossField,
-            EnvironmentInformation EnvironmentInformation)
+           TransmissionLossField TransmissionLossField,
+           EnvironmentInformation EnvironmentInformation)
         {
             int RangeCellCount = (int)Math.Round((TransmissionLossField.AnalysisPoint.FieldRadius_meters / TransmissionLossField.AnalysisPoint.RangeCellSize_meters)) + 1;
             BellhopRunFile BellhopRunFile = new BellhopRunFile
             {
-                TransmissionLossField = TransmissionLossField,
+                TransmissionLossJob = TransmissionLossField,
             };
 
             BottomProfile[] BottomProfiles = new BottomProfile[TransmissionLossField.RadialCount];
@@ -47,12 +48,13 @@ namespace ESME.TransmissionLoss.Bellhop
                 });
             }
             return BellhopRunFile;
-        }
+        } 
+#endif
         //public static string GenerateBellhopRunInfo(SoundSource soundSource, bool SurfaceReflection, 
         //    bool UseVerticalBeamforming, bool GenerateArrivalsFile, double DepthCellSize_meters, 
         //    SedimentProperties Sediment, BottomProfile bottomProfile, SoundSpeedProfileProperties SSP, int NumRangeCells, int NumDepthCells, int NumBeams)
         public static string GetRadialConfiguration(
-            TransmissionLossField TransmissionLossField,
+            TransmissionLossJob TransmissionLossJob,
             SoundSpeedProfile SSP, SedimentType Sediment, float MaxCalculationDepth_meters,
             int RangeCellCount, int DepthCellCount,
             bool UseSurfaceReflection, bool UseVerticalBeamforming, bool GenerateArrivalsFile, int BeamCount)
@@ -62,7 +64,7 @@ namespace ESME.TransmissionLoss.Bellhop
             using (StringWriter sw = new StringWriter())
             {
                 sw.WriteLine("'TL'");
-                sw.WriteLine("{0:F},", TransmissionLossField.AnalysisPoint.AcousticProperties.HighFrequency_Hz);
+                sw.WriteLine("{0:F},", TransmissionLossJob.AcousticProperties.HighFrequency_Hz);
                 sw.WriteLine("1,"); // was NMEDIA in gui_genbellhopenv.m
                 if (UseSurfaceReflection)
                     sw.WriteLine("'CFMT',");
@@ -102,11 +104,11 @@ namespace ESME.TransmissionLoss.Bellhop
                     Sediment.CompressionWaveCoefficient, Sediment.ShearWaveCoefficient);
                 // Source and Receiver Depths and Ranges
                 sw.WriteLine("1    !NSD"); // Number of Source Depths
-                sw.WriteLine("  {0:F} / ! source_depth", Math.Max(1, TransmissionLossField.AnalysisPoint.AcousticProperties.SourceDepth_meters)); // source depth
+                sw.WriteLine("  {0:F} / ! source_depth", Math.Max(1, TransmissionLossJob.AcousticProperties.SourceDepth_meters)); // source depth
                 sw.WriteLine("{0}   ! NRD", DepthCellCount); // Number of Receiver Depths
                 sw.WriteLine("  0.0 {0:F} /  ! surface_depth (0.0) to max_depth (in meters)", MaxCalculationDepth_meters);
                 sw.WriteLine("{0}  ! NRR", RangeCellCount); // Number of receiver ranges
-                sw.WriteLine("  0.0 {0:F} /  ! start_range (0.0) to max_range (in km)", TransmissionLossField.AnalysisPoint.FieldRadius_meters / 1000.0);
+                sw.WriteLine("  0.0 {0:F} /  ! start_range (0.0) to max_range (in km)", TransmissionLossJob.Radius / 1000.0);
                 if (GenerateArrivalsFile)
                     sw.WriteLine("'aB'");
                 else
@@ -117,12 +119,12 @@ namespace ESME.TransmissionLoss.Bellhop
                         sw.WriteLine("'I'"); // Incoherent TL calculation
                 }
                 sw.WriteLine("{0}", BeamCount);    // Number of beams
-                Angle1 = TransmissionLossField.AnalysisPoint.AcousticProperties.DepressionElevationAngle_degrees - (TransmissionLossField.AnalysisPoint.AcousticProperties.VerticalBeamWidth_degrees / 2);
-                Angle2 = TransmissionLossField.AnalysisPoint.AcousticProperties.DepressionElevationAngle_degrees + (TransmissionLossField.AnalysisPoint.AcousticProperties.VerticalBeamWidth_degrees / 2);
+                Angle1 = TransmissionLossJob.AcousticProperties.DepressionElevationAngle_degrees - (TransmissionLossJob.AcousticProperties.VerticalBeamWidth_degrees / 2);
+                Angle2 = TransmissionLossJob.AcousticProperties.DepressionElevationAngle_degrees + (TransmissionLossJob.AcousticProperties.VerticalBeamWidth_degrees / 2);
                 sw.WriteLine(Angle1.ToString("###0.00") + " " + Angle2.ToString("###0.00") + " /"); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("-60.00 60.00 /"); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("{0:F} {1:F} {2:F} ! step zbox(meters) rbox(km)", experiment.TransmissionLossSettings.DepthCellSize, RealBottomDepth_Meters + 100, (bottomProfile.Length_Meters / 1000.0) * 1.01);
-                sw.WriteLine("0 {1:F} {2:F} ! step zbox(meters) rbox(km)", (float)(MaxCalculationDepth_meters / (float)DepthCellCount), MaxCalculationDepth_meters + 100, (TransmissionLossField.AnalysisPoint.FieldRadius_meters / 1000.0) * 1.01);
+                sw.WriteLine("0 {1:F} {2:F} ! step zbox(meters) rbox(km)", (float)(MaxCalculationDepth_meters / (float)DepthCellCount), MaxCalculationDepth_meters + 100, (TransmissionLossJob.Radius / 1000.0) * 1.01);
                 return sw.ToString();
             }
         }

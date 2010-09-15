@@ -1,30 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using HRC.Utility;
 
 namespace ESME.TransmissionLoss
 {
-    internal class TLProcess : Process
+    public class TLProcess : Process
     {
-        public int BeamCount;
-        private int progressPercent, curBeam;
-        public ImprovedBackgroundWorker BackgroundWorker;
+        public ImprovedBackgroundWorker BackgroundWorker { get; set; }
+        public int BeamCount { get; set; }
+        private int _curBeam;
+        private int _progressPercent;
 
-        public TLProcess(ImprovedBackgroundWorker BackgroundWorker)
+        public TLProcess()
         {
-            this.BackgroundWorker = BackgroundWorker;
-            BackgroundWorker.WorkerReportsProgress = true;
+        }
+
+        public TLProcess(ImprovedBackgroundWorker backgroundWorker)
+        {
+            BackgroundWorker = backgroundWorker;
+            if (BackgroundWorker != null)
+                BackgroundWorker.WorkerReportsProgress = true;
         }
 
         public int CurBeam
         {
             set
             {
-                curBeam = value;
-                ProgressPercent = (int)(((float)curBeam / (float)BeamCount) * 95.0f);
+                _curBeam = value;
+                ProgressPercent = (int) ((_curBeam/(float) BeamCount)*95.0f);
             }
         }
 
@@ -32,18 +34,18 @@ namespace ESME.TransmissionLoss
         {
             set
             {
-                if (value != progressPercent)
+                if (value != _progressPercent)
                 {
-                    progressPercent = value;
-                    if (progressPercent < 0)
-                        progressPercent = 0;
-                    if (progressPercent > 100)
-                        progressPercent = 100;
-                    if (!this.HasExited)
-                        BackgroundWorker.ReportProgress(progressPercent);
+                    _progressPercent = value;
+                    if (_progressPercent < 0)
+                        _progressPercent = 0;
+                    if (_progressPercent > 100)
+                        _progressPercent = 100;
+                    if ((!HasExited) && (BackgroundWorker != null))
+                        BackgroundWorker.ReportProgress(_progressPercent);
                 }
             }
-            get { return progressPercent; }
+            get { return _progressPercent; }
         }
     }
 }

@@ -14,7 +14,7 @@ namespace ESME.TransmissionLoss
     [XmlRoot(
         Namespace = "http://esme.bu.edu/support/schemas/ESME_Experiment.xsd",
         IsNullable = false)]
-    public class TransmissionLossFieldCache : List<TransmissionLossField>
+    public class TransmissionLossFieldCache : List<OldTransmissionLossField>
     {
         #region Private data members
         [XmlIgnore]
@@ -52,23 +52,23 @@ namespace ESME.TransmissionLoss
                     // we want to open the file, extract the metadata, and add a record to the list
                     try
                     {
-                        FieldData fd = FieldData.LoadHeader(f);
-                        Add(new TransmissionLossField
+                        TransmissionLossField fd = TransmissionLossField.LoadHeader(f);
+                        Add(new OldTransmissionLossField
                         {
                             Filename = Path.GetFileName(f),
-                            MaxTLDepth_meters = (int)fd.MaxCalculationDepth_meters,
+                            MaxTLDepth_meters = (int)fd.MaxCalculationDepthMeters,
                             RadialCount = fd.Radials.Count(),
                             AnalysisPoint = new AnalysisPoint
                             {
-                                FieldRadius_meters = fd.Radius_meters,
-                                Location = new HRC.Navigation.EarthCoordinate(fd.Latitude_degrees, fd.Longitude_degrees),
+                                FieldRadius_meters = fd.RadiusMeters,
+                                Location = new HRC.Navigation.EarthCoordinate(fd.LatitudeDegrees, fd.LongitudeDegrees),
                                 AcousticProperties = new AcousticProperties
                                 {
-                                    DepressionElevationAngle_degrees = fd.VerticalLookAngle_degrees,
-                                    SourceDepth_meters = fd.SourceDepth_meters,
-                                    HighFrequency_Hz = fd.HighFrequency_Hz,
-                                    LowFrequency_Hz = fd.LowFrequency_Hz,
-                                    VerticalBeamWidth_degrees = fd.VerticalBeamWidth_degrees,
+                                    DepressionElevationAngle_degrees = fd.VerticalLookAngleDegrees,
+                                    SourceDepth_meters = fd.SourceDepthMeters,
+                                    HighFrequency_Hz = fd.HighFrequencyHz,
+                                    LowFrequency_Hz = fd.LowFrequencyHz,
+                                    VerticalBeamWidth_degrees = fd.VerticalBeamWidthDegrees,
                                 },
                             },
                         });
