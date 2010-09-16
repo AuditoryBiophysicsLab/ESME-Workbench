@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using ESME.Model;
-using FileFormatException = System.IO.FileFormatException;
+using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss
 {
     public class TransmissionLossField
     {
-        public float LatitudeDegrees { get; private set; }
-        public float LongitudeDegrees { get; private set; }
-        public float SourceDepthMeters { get; private set; }
-        public float VerticalBeamWidthDegrees { get; private set; }
-        public float VerticalLookAngleDegrees { get; private set; }
-        public float LowFrequencyHz { get; private set; }
-        public float HighFrequencyHz { get; private set; }
-        public float MaxCalculationDepthMeters { get; private set; }
-        public long RadiusMeters { get; private set; }
-        public float[] DepthsMeters { get;  set; }
-        public float[] RangesMeters { get;  set; }
+        public float Latitude { get; private set; }
+        public float Longitude { get; private set; }
+        public float SourceDepth { get; private set; }
+        public float VerticalBeamWidth { get; private set; }
+        public float VerticalLookAngle { get; private set; }
+        public float LowFrequency { get; private set; }
+        public float HighFrequency { get; private set; }
+        public float MaxCalculationDepth { get; private set; }
+        public int Radius { get; private set; }
+        public float[] Depths { get;  set; }
+        public float[] Ranges { get;  set; }
         public TransmissionLossRadial[] Radials { get; private set; }
         public string Filename { get; set; }
 
@@ -36,18 +35,18 @@ namespace ESME.TransmissionLoss
 #if true
         public TransmissionLossField(BellhopRunFile runFile)
         {
-            LatitudeDegrees = (float) runFile.TransmissionLossJob.NewAnalysisPoint.Location.Latitude_degrees;
-            LongitudeDegrees = (float) runFile.TransmissionLossJob.NewAnalysisPoint.Location.Longitude_degrees;
-            SourceDepthMeters = runFile.TransmissionLossJob.AcousticProperties.SourceDepth_meters;
-            VerticalBeamWidthDegrees = runFile.TransmissionLossJob.AcousticProperties.VerticalBeamWidth_degrees;
-            VerticalLookAngleDegrees =
+            Latitude = (float) runFile.TransmissionLossJob.NewAnalysisPoint.Location.Latitude_degrees;
+            Longitude = (float) runFile.TransmissionLossJob.NewAnalysisPoint.Location.Longitude_degrees;
+            SourceDepth = runFile.TransmissionLossJob.AcousticProperties.SourceDepth_meters;
+            VerticalBeamWidth = runFile.TransmissionLossJob.AcousticProperties.VerticalBeamWidth_degrees;
+            VerticalLookAngle =
                 runFile.TransmissionLossJob.AcousticProperties.DepressionElevationAngle_degrees;
-            LowFrequencyHz = runFile.TransmissionLossJob.AcousticProperties.LowFrequency_Hz;
-            HighFrequencyHz = runFile.TransmissionLossJob.AcousticProperties.HighFrequency_Hz;
-            MaxCalculationDepthMeters = runFile.TransmissionLossJob.MaxDepth;
-            RadiusMeters = runFile.TransmissionLossJob.Radius;
-            //DepthsMeters = runFile.
-            //RangesMeters = runFile.
+            LowFrequency = runFile.TransmissionLossJob.AcousticProperties.LowFrequency_Hz;
+            HighFrequency = runFile.TransmissionLossJob.AcousticProperties.HighFrequency_Hz;
+            MaxCalculationDepth = runFile.TransmissionLossJob.MaxDepth;
+            Radius = runFile.TransmissionLossJob.Radius;
+            //Depths = runFile.
+            //Ranges = runFile.
             //Filename = Path.Combine(Field.DataDirectoryPath, Field.BinaryFileName);
         }
 #endif
@@ -60,9 +59,6 @@ namespace ESME.TransmissionLoss
 
         public void Load(bool loadHeadersOnly)
         {
-            int i;
-            bool eof = false;
-
             if (Filename == null)
                 throw new FileNotFoundException("TransmissionLossFieldData: Specify a filename before calling Load()");
             using (var stream = new BinaryReader(File.Open(Filename, FileMode.Open)))
@@ -70,32 +66,31 @@ namespace ESME.TransmissionLoss
                 if (stream.ReadUInt32() != Magic)
                     throw new FileFormatException(
                         "Attempted to read invalid data into a TransmissionLossFieldData object");
-                LatitudeDegrees = stream.ReadSingle();
-                LongitudeDegrees = stream.ReadSingle();
-                SourceDepthMeters = stream.ReadSingle();
-                VerticalBeamWidthDegrees = stream.ReadSingle();
-                VerticalLookAngleDegrees = stream.ReadSingle();
-                LowFrequencyHz = stream.ReadSingle();
-                HighFrequencyHz = stream.ReadSingle();
-                MaxCalculationDepthMeters = stream.ReadSingle();
-                RadiusMeters = stream.ReadInt32();
-                DepthsMeters = new float[stream.ReadInt32()];
-                for (i = 0; i < DepthsMeters.Length; i++)
-                    DepthsMeters[i] = stream.ReadSingle();
-                RangesMeters = new float[stream.ReadInt32()];
-                for (i = 0; i < RangesMeters.Length; i++)
-                    RangesMeters[i] = stream.ReadSingle();
+                Latitude = stream.ReadSingle();
+                Longitude = stream.ReadSingle();
+                SourceDepth = stream.ReadSingle();
+                VerticalBeamWidth = stream.ReadSingle();
+                VerticalLookAngle = stream.ReadSingle();
+                LowFrequency = stream.ReadSingle();
+                HighFrequency = stream.ReadSingle();
+                MaxCalculationDepth = stream.ReadSingle();
+                Radius = stream.ReadInt32();
+                var depthCount = stream.ReadInt32();
+                Depths = new float[depthCount];
+                for (var i = 0; i < Depths.Length; i++)
+                    Depths[i] = stream.ReadSingle();
+                var rangeCount = stream.ReadInt32();
+                Ranges = new float[rangeCount];
+                for (var i = 0; i < Ranges.Length; i++)
+                    Ranges[i] = stream.ReadSingle();
+                var radialCount = stream.ReadInt32();
+                for (var j = 0; j < radialCount; j++)
+                    _mRadials.Add(new TransmissionLossRadial(stream)
+                                 {
+                                     Ranges = Ranges,
+                                     Depths = Depths
+                                 });
                 _mSaved = true;
-                _mRadials.Clear();
-                try
-                {
-                    while (!eof)
-                        _mRadials.Add(new TransmissionLossRadial(stream, loadHeadersOnly));
-                }
-                catch (EndOfStreamException)
-                {
-                    eof = true;
-                }
                 _mRadials.Sort();
                 Radials = _mRadials.ToArray();
             }
@@ -103,64 +98,56 @@ namespace ESME.TransmissionLoss
 
         public void AddRadial(TransmissionLossRadial radial)
         {
-            if (radial.TransmissionLoss_dBSPL == null)
+            if (radial.TransmissionLoss == null)
                 throw new ApplicationException(
                     "TransmissionLossFieldData: Attempt to add a new radial that is not completely loaded into memory.  This operation is not supported.");
+            if (((Depths == null) || (Ranges == null)) &&
+                ((radial.Depths != null) && (radial.Ranges != null)))
+            {
+                Depths = radial.Depths;
+                Ranges = radial.Ranges;
+            }
             _mRadials.Add(radial);
             _mRadials.Sort();
             Radials = _mRadials.ToArray();
         }
 
-        public void Save(bool discardRadialDataAfterSave)
+        public void Save()
         {
-            bool saveSucceeded = false;
             if (Filename == null)
                 throw new FileNotFoundException("TransmissionLossFieldData: Specify a filename before calling Save()");
             if (!Directory.Exists(Path.GetDirectoryName(Filename)))
                 Directory.CreateDirectory(Path.GetDirectoryName(Filename));
 
-            for (int retry = 0; retry < 10; retry++)
+            using (var stream = new BinaryWriter(File.Open(Filename, FileMode.OpenOrCreate, FileAccess.Write)))
             {
-                try
+                if (!_mSaved)
                 {
-                    using (var stream = new BinaryWriter(File.Open(Filename, FileMode.OpenOrCreate, FileAccess.Write)))
-                    {
-                        if (!_mSaved)
-                        {
-                            stream.Write(Magic);
-                            stream.Write(LatitudeDegrees);
-                            stream.Write(LongitudeDegrees);
-                            stream.Write(SourceDepthMeters);
-                            stream.Write(VerticalBeamWidthDegrees);
-                            stream.Write(VerticalLookAngleDegrees);
-                            stream.Write(LowFrequencyHz);
-                            stream.Write(HighFrequencyHz);
-                            stream.Write(MaxCalculationDepthMeters);
-                            stream.Write(RadiusMeters);
-                            stream.Write(DepthsMeters.Length);
-                            foreach (float depth in DepthsMeters)
-                                stream.Write(depth);
-                            stream.Write(RangesMeters.Length);
-                            foreach (float range in RangesMeters)
-                                stream.Write(range);
-                            _mSaved = true;
-                        }
-                        foreach (TransmissionLossRadial radial in _mRadials)
-                            radial.Save(stream, discardRadialDataAfterSave);
-                        saveSucceeded = true;
-                        break;
-                    }
+                    stream.Write(Magic);
+                    stream.Write(Latitude);
+                    stream.Write(Longitude);
+                    stream.Write(SourceDepth);
+                    stream.Write(VerticalBeamWidth);
+                    stream.Write(VerticalLookAngle);
+                    stream.Write(LowFrequency);
+                    stream.Write(HighFrequency);
+                    stream.Write(MaxCalculationDepth);
+                    stream.Write(Radius);
+                    stream.Write(Depths.Length);
+                    foreach (var depth in Depths)
+                        stream.Write(depth);
+                    stream.Write(Ranges.Length);
+                    foreach (var range in Ranges)
+                        stream.Write(range);
+                    _mSaved = true;
                 }
-                catch (IOException)
-                {
-                    Thread.Sleep(1000);
-                }
+                stream.Write(_mRadials.Count);
+                foreach (var radial in _mRadials)
+                    radial.Save(stream);
             }
-            if (!saveSucceeded)
-                throw new IOException("FieldData: Could not save file.  Retry count exhausted.");
         }
 
-        private const UInt32 Magic = 0x99f84752;
+        private const UInt32 Magic = 0x99f84725;
         private readonly List<TransmissionLossRadial> _mRadials = new List<TransmissionLossRadial>();
         private bool _mSaved;
     }

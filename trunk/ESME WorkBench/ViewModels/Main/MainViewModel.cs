@@ -47,8 +47,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
             TestTransmissionLossViewCommand = new SimpleCommand<object, object>(delegate
             {
-                var transmissionLossViewModel = new TransmissionLossFieldViewModel(@"C:\Users\Dave Anderson\Desktop\50kmbahamas.tlf", _viewAwareStatusService);
-                _visualizerService.Show("TransmissionLossViewModel", transmissionLossViewModel, true, null);
+                var transmissionLossViewModel = new TransmissionLossFieldViewModel(@"C:\Users\Dave Anderson\Desktop\Bahamas.tlf");
+                _visualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
             });
 
             LaunchExternalProgramCommand = new SimpleCommand<object, object>(delegate(Object arg)
