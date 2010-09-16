@@ -56,19 +56,19 @@ namespace ESME.TransmissionLoss
                         Add(new OldTransmissionLossField
                         {
                             Filename = Path.GetFileName(f),
-                            MaxTLDepth_meters = (int)fd.MaxCalculationDepthMeters,
+                            MaxTLDepth_meters = (int)fd.MaxCalculationDepth,
                             RadialCount = fd.Radials.Count(),
                             AnalysisPoint = new AnalysisPoint
                             {
-                                FieldRadius_meters = fd.RadiusMeters,
-                                Location = new HRC.Navigation.EarthCoordinate(fd.LatitudeDegrees, fd.LongitudeDegrees),
+                                FieldRadius_meters = fd.Radius,
+                                Location = new HRC.Navigation.EarthCoordinate(fd.Latitude, fd.Longitude),
                                 AcousticProperties = new AcousticProperties
                                 {
-                                    DepressionElevationAngle_degrees = fd.VerticalLookAngleDegrees,
-                                    SourceDepth_meters = fd.SourceDepthMeters,
-                                    HighFrequency_Hz = fd.HighFrequencyHz,
-                                    LowFrequency_Hz = fd.LowFrequencyHz,
-                                    VerticalBeamWidth_degrees = fd.VerticalBeamWidthDegrees,
+                                    DepressionElevationAngle_degrees = fd.VerticalLookAngle,
+                                    SourceDepth_meters = fd.SourceDepth,
+                                    HighFrequency_Hz = fd.HighFrequency,
+                                    LowFrequency_Hz = fd.LowFrequency,
+                                    VerticalBeamWidth_degrees = fd.VerticalBeamWidth,
                                 },
                             },
                         });

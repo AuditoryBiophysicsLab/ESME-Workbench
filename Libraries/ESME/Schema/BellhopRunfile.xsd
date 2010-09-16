@@ -40,7 +40,7 @@
                               type="xs:string"
                               maxOccurs="1"
                               minOccurs="1" />
-                  <xs:element name="BearingFromSource_degrees"
+                  <xs:element name="BearingFromSource"
                               type="xs:float"
                               minOccurs="1"
                               maxOccurs="1" />

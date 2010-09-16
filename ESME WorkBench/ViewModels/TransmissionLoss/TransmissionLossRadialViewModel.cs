@@ -21,10 +21,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         {
             _colorMapViewModel = colorMapViewModel;
             TransmissionLossRadial = transmissionLossRadial;
-            RangeMin = TransmissionLossRadial.Ranges_meters.First();
-            RangeMax = TransmissionLossRadial.Ranges_meters.Last();
-            DepthMin = TransmissionLossRadial.Depths_meters.First();
-            DepthMax = TransmissionLossRadial.Depths_meters.Last();
+            RangeMin = TransmissionLossRadial.Ranges.First();
+            RangeMax = TransmissionLossRadial.Ranges.Last();
+            DepthMin = TransmissionLossRadial.Depths.First();
+            DepthMax = TransmissionLossRadial.Depths.Last();
             _dispatcher = Dispatcher.CurrentDispatcher;
         }
 
@@ -40,8 +40,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         private void RenderBitmap()
         {
-            var width = TransmissionLossRadial.Ranges_meters.Length;
-            var height = TransmissionLossRadial.Depths_meters.Length;
+            var width = TransmissionLossRadial.Ranges.Length;
+            var height = TransmissionLossRadial.Depths.Length;
 
             if (_writeableBitmap == null)
                 _writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
@@ -56,7 +56,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                     {
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        *((int*)curOffset) = _colorMapViewModel.Lookup(TransmissionLossRadial.TransmissionLoss_dBSPL[height - y - 1, x]).ToArgb();
+                        *((int*)curOffset) = _colorMapViewModel.Lookup(TransmissionLossRadial.TransmissionLoss[y, x]).ToArgb();
                         curOffset += sizeof(Int32);
                     }
                 }
