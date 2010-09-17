@@ -40,7 +40,7 @@ namespace ESMEWorkBench.ViewModels.Main
             EditOptionsCommand = new SimpleCommand<object, object>(delegate
                                                                    {
                                                                        var programOptionsViewModel = new ProgramOptionsViewModel();
-                                                                       bool? result = _visualizerService.ShowDialog("OptionsPopup", programOptionsViewModel);
+                                                                       var result = _visualizerService.ShowDialog("OptionsPopup", programOptionsViewModel);
                                                                        if ((result.HasValue) && (result.Value)) AppSettings.Save();
                                                                        else AppSettings.Reload();
                                                                    });
@@ -65,21 +65,28 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                                                                                                     {
                                                                                                                                                                                                                         StartInfo =
                                                                                                                                                                                                                             {
-                                                                                                                                                                                                                                FileName = AppSettings.ScenarioEditorExecutablePath
+                                                                                                                                                                                                                                FileName = AppSettings.ScenarioEditorExecutablePath,
+                                                                                                                                                                                                                                WorkingDirectory = Path.GetDirectoryName(AppSettings.ScenarioEditorExecutablePath),
                                                                                                                                                                                                                             }
                                                                                                                                                                                                                     }.Start();
                                                                                                                                                                                                                 });
 
-            LaunchEnvironmentBuilderCommand = new SimpleCommand<object, object>(delegate { return File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe")); }, delegate
-                                                                                                                                                                                                                           {
-                                                                                                                                                                                                                               new Process
-                                                                                                                                                                                                                               {
-                                                                                                                                                                                                                                   StartInfo =
-                                                                                                                                                                                                                                       {
-                                                                                                                                                                                                                                           FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe")
-                                                                                                                                                                                                                                       }
-                                                                                                                                                                                                                               }.Start();
-                                                                                                                                                                                                                           });
+            LaunchEnvironmentBuilderCommand = new SimpleCommand<object, object>(delegate
+                                                                                {
+                                                                                    var environmentBuilder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe");
+                                                                                    return (File.Exists(environmentBuilder) && ((AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(AppSettings.EnvironmentDatabaseDirectory))));
+                                                                                }, delegate
+                                                                                   {
+                                                                                       var environmentBuilder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe");
+                                                                                       new Process
+                                                                                       {
+                                                                                           StartInfo =
+                                                                                               {
+                                                                                                   FileName = environmentBuilder,
+                                                                                                   Arguments = string.Format("\"{0}\"", AppSettings.EnvironmentDatabaseDirectory),
+                                                                                               }
+                                                                                       }.Start();
+                                                                                   });
 
             MapViewModel = new MapViewModel(_viewAwareStatusService, _messageBoxService, _openFileService, _visualizerService);
 
