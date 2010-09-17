@@ -446,8 +446,7 @@
 		          DockPanel.Dock="Top"
 		          SelectedIndex="0">
 			<r:Ribbon.ApplicationMenu>
-				<r:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png"
-				                         LargeImageSource="Images\LargeIcons\Dolphin.png">
+				<r:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Wave.png" >
 					<r:RibbonApplicationMenuItem Header="Save Experiment"
 					                             ImageSource="Images\LargeIcons\save-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
