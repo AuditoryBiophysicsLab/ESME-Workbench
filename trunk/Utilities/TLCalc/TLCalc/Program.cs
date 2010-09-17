@@ -16,14 +16,15 @@ namespace TLCalc
 {
     internal class Program
     {
-#if true
         private static void Main(string[] args)
         {
-            //input argument: directory to scan
-            string searchPath = args[0];//!
-            //
-            string processedPath = args[1];
+            // input argument: directory to scan
+            var searchPath = args[0];
+            // Input files are put in this directory after they have been processed.
+            var processedPath = args[1];
 
+#if true
+            // Usage: TLCalc <SearchPath> <ProcessedPath>
             while (true)
             {
                 var files = Directory.GetFiles(searchPath, "*.bellhop");
@@ -45,12 +46,10 @@ namespace TLCalc
                 }
                 Thread.Sleep(1000);
             }
-
-        } 
-#else 
-        //private static void TestMain(string[] args)
-        private static void Main(string[] args)
-        {
+#else
+            // Usage: TLCalc <SearchPath> <ProcessedPath> <EnvironmentFile> <OutputFile>
+            var environmentFile = args[2];
+            var outputFile = args[3];
             #region create transmission loss job. the new base class for all acoustic simulations!
 
             var transmissionLossJob = new TransmissionLossJob
@@ -82,8 +81,8 @@ namespace TLCalc
 
             var environmentInformation = new EnvironmentInformation
                                              {
-                                                 Bathymetry = new Bathymetry(@"C:\tests\bathymetry\Bahamas.eeb"),
-                                                 SoundSpeedField = new SoundSpeedField(@"C:\tests\bathymetry\Bahamas.eeb"),
+                                                 Bathymetry = new Bathymetry(environmentFile),
+                                                 SoundSpeedField = new SoundSpeedField(environmentFile),
                                                  Sediment = SedimentTypes.SedimentArray[0],
                                              };
 
@@ -104,22 +103,21 @@ namespace TLCalc
 
             #region serialize bellhop run file object to file.
 
-            const string runFileFile = @"C:\tests\bellhop\50kmbahamas.bellhop";
-            bellhopRunFile.Save(runFileFile);
+            bellhopRunFile.Save(outputFile);
 
             #endregion
 
             #region deserialize bellhop run file from file to new object -- inside a timer tick with logic?
 
-            BellhopRunFile newRunFile = BellhopRunFile.Load(runFileFile);
+            var newRunFile = BellhopRunFile.Load(outputFile);
 
             #endregion
 
             #region run bellhop on new run file object.
-            ComputeField(newRunFile, @"C:\tests\bellhop\50kmbahamas.tlf");
+            //ComputeField(newRunFile, @"C:\tests\bellhop\50kmbahamas.tlf");
 
             #endregion
-
+#endif
 
         }
 
@@ -140,9 +138,9 @@ namespace TLCalc
                 fieldData.AddRadial(result);
             }
 
-            fieldData.DepthsMeters = fieldData.Radials[0].Depths_meters;
-            fieldData.RangesMeters = fieldData.Radials[0].Ranges_meters;
-            fieldData.Save(true);
+            fieldData.Depths = fieldData.Radials[0].Depths;
+            fieldData.Ranges = fieldData.Radials[0].Ranges;
+            fieldData.Save();
         }
 
         //public void ComputeRadial(object sender, DoWorkEventArgs e, string BellhopConfiguration, string BottomProfile, float Bearing)
@@ -281,6 +279,5 @@ namespace TLCalc
                 }
             }
         } 
-#endif
     }
 }
