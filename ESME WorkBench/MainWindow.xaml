@@ -11,6 +11,7 @@
                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                      xmlns:mru="clr-namespace:ESMEWorkBench.ViewModels.RecentFiles" 
+                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                      mef:ViewModelLocator.ViewModel="MainViewModel" 
                      SnapsToDevicePixels="True" 
                      Title="ESME WorkBench" 
@@ -293,21 +294,30 @@
 
 	</ribbon:RibbonWindow.Resources>
 	<DockPanel LastChildFill="True">
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding MapViewModel.MouseLatitude, StringFormat=Lat: {0:0.000000}}" />
+                    <TextBlock Text=" " />
+                    <TextBlock Text="{Binding MapViewModel.MouseLongitude, StringFormat=Lon: {0:0.000000}}" />
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
 		<ribbon:Ribbon x:Name="Ribbon" DockPanel.Dock="Top" DataContext="{Binding RibbonViewModel}">
 			<ribbon:Ribbon.ApplicationMenu>
 				<ribbon:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Dolphin.png" LargeImageSource="Images\LargeIcons\Dolphin.png" DataContext="{Binding ApplicationMenuItems}">
-					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Save Experiment]}" />
-					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Open Experiment]}" />
-					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Close Experiment]}" />
-					<ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[New Experiment]}" />
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Info]}" />
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding MenuItems[Save Experiment]}" />
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding MenuItems[Open Experiment]}" />
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding MenuItems[Close Experiment]}" />
+					<ribbon:RibbonApplicationMenuItem DataContext="{Binding MenuItems[New Experiment]}" />
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding MenuItems[Info]}" />
                     <ribbon:RibbonSeparator />
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Options]}" />
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Help]}" />
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding MenuItems[Options]}" />
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding MenuItems[Help]}" />
                     <ribbon:RibbonSeparator />
-                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding Path=MenuItems[Exit]}" />
+                    <ribbon:RibbonApplicationMenuItem DataContext="{Binding MenuItems[Exit]}" />
 					<ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
-						<ribbon:RibbonGallery DataContext="{Binding Path=RecentFiles}" ScrollViewer.VerticalScrollBarVisibility="Auto">
+						<ribbon:RibbonGallery DataContext="{Binding RecentFiles}" ScrollViewer.VerticalScrollBarVisibility="Auto">
 							<ribbon:RibbonGalleryCategory Header="Recent Experiments" Background="Transparent" ItemsSource="{Binding RecentFiles}" DataContext="{Binding}">
 								<ribbon:RibbonGalleryCategory.ItemsPanel>
 									<ItemsPanelTemplate>
@@ -319,43 +329,43 @@
 					</ribbon:RibbonApplicationMenu.AuxiliaryPaneContent>
 				</ribbon:RibbonApplicationMenu>
 			</ribbon:Ribbon.ApplicationMenu>
-			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Experiment]}" KeyTip="E" Header="Experiment">
-				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Data]}">
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Reset]}" />
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Shapefile]}" />
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Overlay]}" />
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Scenario]}" />
+			<ribbon:RibbonTab DataContext="{Binding Tabs[Experiment]}" KeyTip="E" Header="Experiment">
+				<ribbon:RibbonGroup DataContext="{Binding Groups[Data]}">
+                    <ribbon:RibbonButton DataContext="{Binding Controls[Reset]}" />
+                    <ribbon:RibbonButton DataContext="{Binding Controls[Shapefile]}" />
+                    <ribbon:RibbonButton DataContext="{Binding Controls[Overlay]}" />
+                    <ribbon:RibbonButton DataContext="{Binding Controls[Scenario]}" />
                 </ribbon:RibbonGroup>
-                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Show]}">
-                    <ribbon:RibbonCheckBox DataContext="{Binding Path=Controls[Base Map]}" CommandParameter="{Binding}" />
-                    <ribbon:RibbonCheckBox DataContext="{Binding Path=Controls[Grid Overlay]}" CommandParameter="{Binding}" />
-                    <ribbon:RibbonCheckBox DataContext="{Binding Path=Controls[Pan/Zoom]}" CommandParameter="{Binding}" />
+                <ribbon:RibbonGroup DataContext="{Binding Groups[Show]}">
+                    <ribbon:RibbonCheckBox DataContext="{Binding Controls[Base Map]}" CommandParameter="{Binding}" />
+                    <ribbon:RibbonCheckBox DataContext="{Binding Controls[Grid Overlay]}" CommandParameter="{Binding}" />
+                    <ribbon:RibbonCheckBox DataContext="{Binding Controls[Pan/Zoom]}" CommandParameter="{Binding}" />
                 </ribbon:RibbonGroup>
-                <ribbon:RibbonGroup DataContext="{Binding Path=Groups[Sounds]}">
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Analysis Point]}" />
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Fixed Source]}" />
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Quick Look]}" />
+                <ribbon:RibbonGroup DataContext="{Binding Groups[Sounds]}">
+					<ribbon:RibbonButton DataContext="{Binding Controls[Analysis Point]}" />
+					<ribbon:RibbonButton DataContext="{Binding Controls[Fixed Source]}" />
+					<ribbon:RibbonButton DataContext="{Binding Controls[Quick Look]}" />
 				</ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
-			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Scenario]}" Header="Scenario">
-				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Scenario File]}">
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Open]}" />
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Close]}" />
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}" />
-                    <ribbon:RibbonButton DataContext="{Binding Path=Controls[Run]}" />
+			<ribbon:RibbonTab DataContext="{Binding Tabs[Scenario]}" Header="Scenario">
+				<ribbon:RibbonGroup DataContext="{Binding Groups[Scenario File]}">
+					<ribbon:RibbonButton DataContext="{Binding Controls[Open]}" />
+					<ribbon:RibbonButton DataContext="{Binding Controls[Close]}" />
+                    <ribbon:RibbonButton DataContext="{Binding Controls[Edit]}" />
+                    <ribbon:RibbonButton DataContext="{Binding Controls[Run]}" />
                 </ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
-			<ribbon:RibbonTab DataContext="{Binding Path=Tabs[Environment]}" Header="Environment">
-				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Location]}">
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Open]}" />
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Close]}" />
-					<ribbon:RibbonButton DataContext="{Binding Path=Controls[Edit]}" />
+			<ribbon:RibbonTab DataContext="{Binding Tabs[Environment]}" Header="Environment">
+				<ribbon:RibbonGroup DataContext="{Binding Groups[Location]}">
+					<ribbon:RibbonButton DataContext="{Binding Controls[Open]}" />
+					<ribbon:RibbonButton DataContext="{Binding Controls[Close]}" />
+					<ribbon:RibbonButton DataContext="{Binding Controls[Edit]}" />
 				</ribbon:RibbonGroup>
-				<ribbon:RibbonGroup DataContext="{Binding Path=Groups[Layers]}">
-					<ribbon:RibbonComboBox DataContext="{Binding Path=Controls[0]}" />
-					<ribbon:RibbonComboBox DataContext="{Binding Path=Controls[1]}" />
-					<ribbon:RibbonComboBox DataContext="{Binding Path=Controls[2]}" />
-					<ribbon:RibbonComboBox DataContext="{Binding Path=Controls[3]}" />
+				<ribbon:RibbonGroup DataContext="{Binding Groups[Layers]}">
+					<ribbon:RibbonComboBox DataContext="{Binding Controls[0]}" />
+					<ribbon:RibbonComboBox DataContext="{Binding Controls[1]}" />
+					<ribbon:RibbonComboBox DataContext="{Binding Controls[2]}" />
+					<ribbon:RibbonComboBox DataContext="{Binding Controls[3]}" />
 				</ribbon:RibbonGroup>
 			</ribbon:RibbonTab>
 			<!--
@@ -456,7 +466,17 @@
 				</DockPanel>
 			</GroupBox>
 			<GridSplitter Name="GridSplitter" Grid.Column="1" Width="2" Background="Black" HorizontalAlignment="Center" Margin="5,0,5,0" VerticalAlignment="Stretch" ResizeBehavior="BasedOnAlignment" ResizeDirection="Columns" />
-			<uc1:WpfMap Name="Map1" Grid.Column="2" DataContext="{Binding Path=MapViewModel}"/>
-		</Grid>
+            <uc1:WpfMap Name="Map1" 
+                        Grid.Column="2">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                        <cinch:EventToCommandTrigger Command="{Binding MapViewModel.MouseLeftButtonUpCommand}" />
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="MouseMove">
+                        <cinch:EventToCommandTrigger Command="{Binding MapViewModel.MouseMoveCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </uc1:WpfMap>
+        </Grid>
 	</DockPanel>
 </ribbon:RibbonWindow>

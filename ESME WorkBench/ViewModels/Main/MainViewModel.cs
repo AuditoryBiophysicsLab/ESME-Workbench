@@ -1,11 +1,13 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Windows.Input;
 using Cinch;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.Ribbon;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 using MEFedMVVM.ViewModelLocator;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -54,12 +56,12 @@ namespace ESMEWorkBench.ViewModels.Main
             LaunchExternalProgramCommand = new SimpleCommand<object, object>(delegate(Object arg)
             {
                 var executable = new Process();
-                var executablePath = (string) arg;
+                var executablePath = (string)arg;
                 executable.StartInfo.FileName = executablePath;
                 executable.Start();
             });
 
-            MapViewModel = new MapViewModel(_viewAwareStatusService, _messageBoxService, _openFileService);
+            MapViewModel = new MapViewModel(_viewAwareStatusService, _messageBoxService, _openFileService, _visualizerService);
             RibbonViewModel = new RibbonViewModel(this, MapViewModel);
 
             //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");

@@ -13,4 +13,9 @@ namespace ESME
         string ExperimentName { get; }
         bool? ShowDialog();
     }
+
+    public interface IHasLog
+    {
+        string Log { get; set; }
+    }
 }

@@ -70,10 +70,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         private void RenderFinished()
         {
-            NotifyPropertyChanged(WriteableBitmapEventArgs);
+            NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
         }
 
-        static readonly PropertyChangedEventArgs WriteableBitmapEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.WriteableBitmap);
+        static readonly PropertyChangedEventArgs WriteableBitmapChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.WriteableBitmap);
 
         public TransmissionLossRadial TransmissionLossRadial { get; private set; }
         public float RangeMin { get; private set; }

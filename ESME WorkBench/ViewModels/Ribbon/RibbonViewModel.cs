@@ -308,7 +308,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                                                                SmallImage = new Uri("Images/SmallIcons/open-icon.png", UriKind.Relative),
                                                                ToolTipTitle = "Open environment file",
                                                                ToolTipDescription = "Open an environment file (not functional)",
-                                                               Command = DisabledCommand,
+                                                               Command = MapViewModel.OpenEnvironmentFileCommand,
                                                            },
                                                            new ButtonDataViewModel
                                                            {
@@ -317,7 +317,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                                                                SmallImage = new Uri("Images/SmallIcons/close-icon.png", UriKind.Relative),
                                                                ToolTipTitle = "Close environment file",
                                                                ToolTipDescription = "Close the current environment file (not functional)",
-                                                               Command = DisabledCommand,
+                                                               Command = MapViewModel.CloseEnvironmentFileCommand,
                                                            },
                                                            new ButtonDataViewModel
                                                            {

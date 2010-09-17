@@ -49,8 +49,8 @@ namespace ESME.Model
                     DepthCellSize_meters = 10,
                     Location = new EarthCoordinate
                     {
-                        Latitude_degrees = Environment.Bathymetry.Latitudes_degrees[Environment.Bathymetry.Latitudes_degrees.Length / 2],
-                        Longitude_degrees = Environment.Bathymetry.Longitudes_degrees[Environment.Bathymetry.Longitudes_degrees.Length / 2],
+                        Latitude_degrees = Environment.Bathymetry.Latitudes[Environment.Bathymetry.Latitudes.Length / 2],
+                        Longitude_degrees = Environment.Bathymetry.Longitudes[Environment.Bathymetry.Longitudes.Length / 2],
                     },
                 },
                 RadialCount = 4,

@@ -25,6 +25,8 @@ namespace ESME.Overlay
             Add(points);
             CreateSegments();
             ComputeBoundingBox();
+            CheckForClosure();
+            CheckCrossingSegments();
         }
 
         private void CreateSegments()
@@ -54,8 +56,6 @@ namespace ESME.Overlay
         {
             get
             {
-                CheckForClosure();
-                CheckCrossingSegments();
                 if (IsClosed && (!HasCrossingSegments))
                 {
                     // If we're a shape that can be used as a perimeter to bounce within

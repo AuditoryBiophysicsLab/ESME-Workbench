@@ -1,91 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace ESME.TransmissionLoss.Bellhop
 {
     public class BellhopOutput
     {
-        public string Title { get; private set; }
-        public string PlotType { get; private set; }
-        public float Xs { get; private set; }
-        public float Ys { get; private set; }
-        public float Frequency_Hz { get; private set; }
-        //public float[] Theta { get; private set; }
-        public float[] SourceDepths_meters { get; private set; }
-        public float[] ReceiverDepths_meters { get; private set; }
-        public float[] ReceiverRanges_meters { get; private set; }
-        public float[,] TransmissionLoss_dBSPL { get; private set; }
-        public float DataMax { get; private set; }
-        public float DataMin { get; private set; }
-        public float StatMax { get; private set; }
-        public float StatMin { get; private set; }
-        public float Mean { get; private set; }
-        public float Median { get; private set; }
-        public float Variance { get; private set; }
-        public float StandardDeviation { get; private set; }
-
-        public BellhopOutput(string BellhopFilename)
+        public BellhopOutput(string bellhopFilename)
         {
-            int RecordNumber, RecordLength, CurTheta, Source, Range, Depth;
-            int ThetaCount;
-            double Real, Imag;
-
-            using (BinaryReader reader = new BinaryReader(new FileStream(BellhopFilename, FileMode.Open, FileAccess.Read)))
+            using (var reader = new BinaryReader(new FileStream(bellhopFilename, FileMode.Open, FileAccess.Read)))
             {
-                RecordLength = reader.ReadInt32() * 4;
+                var recordLength = reader.ReadInt32()*4;
                 Title = new string(reader.ReadChars(80)).Trim();
-                reader.BaseStream.Seek(RecordLength, SeekOrigin.Begin);
+                reader.BaseStream.Seek(recordLength, SeekOrigin.Begin);
                 PlotType = new string(reader.ReadChars(10));
                 Xs = reader.ReadSingle();
                 Ys = reader.ReadSingle();
-                reader.BaseStream.Seek(2 * RecordLength, SeekOrigin.Begin);
-                Frequency_Hz = reader.ReadSingle();
+                reader.BaseStream.Seek(2*recordLength, SeekOrigin.Begin);
+                Frequency = reader.ReadSingle();
                 //Theta = new float[reader.ReadInt32()];
-                ThetaCount = reader.ReadInt32();
-                SourceDepths_meters = new float[reader.ReadInt32()];
-                ReceiverDepths_meters = new float[reader.ReadInt32()];
-                ReceiverRanges_meters = new float[reader.ReadInt32()];
-                TransmissionLoss_dBSPL = new float[ReceiverDepths_meters.Length, ReceiverRanges_meters.Length];
+                var thetaCount = reader.ReadInt32();
+                SourceDepths = new float[reader.ReadInt32()];
+                ReceiverDepths = new float[reader.ReadInt32()];
+                ReceiverRanges = new float[reader.ReadInt32()];
+                TransmissionLoss = new float[ReceiverDepths.Length,ReceiverRanges.Length];
 
-                reader.BaseStream.Seek(3 * RecordLength, SeekOrigin.Begin);
-                for (CurTheta = 0; CurTheta < ThetaCount; CurTheta++)
-                    /*Theta[CurTheta] = */
-                    reader.ReadSingle();
+                reader.BaseStream.Seek(3*recordLength, SeekOrigin.Begin);
+                for (var curTheta = 0; curTheta < thetaCount; curTheta++) /*Theta[CurTheta] = */ reader.ReadSingle();
 
-                reader.BaseStream.Seek(4 * RecordLength, SeekOrigin.Begin);
-                for (Source = 0; Source < SourceDepths_meters.Length; Source++)
-                    SourceDepths_meters[Source] = reader.ReadSingle();
+                reader.BaseStream.Seek(4*recordLength, SeekOrigin.Begin);
+                for (var source = 0; source < SourceDepths.Length; source++) SourceDepths[source] = reader.ReadSingle();
 
-                reader.BaseStream.Seek(5 * RecordLength, SeekOrigin.Begin);
-                for (Depth = 0; Depth < ReceiverDepths_meters.Length; Depth++)
-                    ReceiverDepths_meters[Depth] = reader.ReadSingle();
+                reader.BaseStream.Seek(5*recordLength, SeekOrigin.Begin);
+                for (var depth = 0; depth < ReceiverDepths.Length; depth++) ReceiverDepths[depth] = reader.ReadSingle();
 
-                reader.BaseStream.Seek(6 * RecordLength, SeekOrigin.Begin);
-                for (Range = 0; Range < ReceiverRanges_meters.Length; Range++)
-                    ReceiverRanges_meters[Range] = reader.ReadSingle();
+                reader.BaseStream.Seek(6*recordLength, SeekOrigin.Begin);
+                int range;
+                for (range = 0; range < ReceiverRanges.Length; range++) ReceiverRanges[range] = reader.ReadSingle();
 
-                for (CurTheta = 0; CurTheta < ThetaCount; CurTheta++)
+                for (var curTheta = 0; curTheta < thetaCount; curTheta++)
                 {
-                    for (Source = 0; Source < SourceDepths_meters.Length; Source++)
+                    for (var source = 0; source < SourceDepths.Length; source++)
                     {
-                        for (Depth = 0; Depth < ReceiverDepths_meters.Length; Depth++)
+                        for (var depth = 0; depth < ReceiverDepths.Length; depth++)
                         {
-                            RecordNumber = 7 + (CurTheta * SourceDepths_meters.Length * ReceiverDepths_meters.Length) +
-                                (Source * ReceiverDepths_meters.Length) + Depth;
-                            reader.BaseStream.Seek(RecordNumber * RecordLength, SeekOrigin.Begin);
-                            for (Range = 0; Range < ReceiverRanges_meters.Length; Range++)
+                            var recordNumber = 7 + (curTheta*SourceDepths.Length*ReceiverDepths.Length) + (source*ReceiverDepths.Length) + depth;
+                            reader.BaseStream.Seek(recordNumber*recordLength, SeekOrigin.Begin);
+                            for (range = 0; range < ReceiverRanges.Length; range++)
                             {
-                                Real = reader.ReadSingle();
-                                Imag = reader.ReadSingle();
-                                if (double.IsNaN(Real)) 
-                                    Real = 0;
-                                if (double.IsNaN(Imag)) 
-                                    Imag = 0;
-                                if (Source == 0)    // Currently we only support a single source with this code
-                                    TransmissionLoss_dBSPL[Depth, Range] = (float)Math.Abs(Math.Sqrt((Real * Real) + (Imag * Imag)));
+                                var real = reader.ReadSingle();
+                                var imag = reader.ReadSingle();
+                                if (double.IsNaN(real)) real = 0;
+                                if (double.IsNaN(imag)) imag = 0;
+                                if (source == 0) // Currently we only support a single source with this code
+                                    TransmissionLoss[depth, range] = (float) Math.Abs(Math.Sqrt((real*real) + (imag*imag)));
                             } // for Range
                         } // for Depth
                     } // for Source
@@ -96,52 +66,65 @@ namespace ESME.TransmissionLoss.Bellhop
             ProcessRawData();
         }
 
-        private void ProcessRawData()
+        public string Title { get; private set; }
+        public string PlotType { get; private set; }
+        public float Xs { get; private set; }
+        public float Ys { get; private set; }
+        public float Frequency { get; private set; }
+        public float[] SourceDepths { get; private set; }
+        public float[] ReceiverDepths { get; private set; }
+        public float[] ReceiverRanges { get; private set; }
+        public float[,] TransmissionLoss { get; private set; }
+        public float DataMax { get; private set; }
+        public float DataMin { get; private set; }
+        public float StatMax { get; private set; }
+        public float StatMin { get; private set; }
+        public float Mean { get; private set; }
+        public float Median { get; private set; }
+        public float Variance { get; private set; }
+        public float StandardDeviation { get; private set; }
+
+        void ProcessRawData()
         {
-            int Range, Depth;
-            float CurData;
+            float curData;
             float total = 0;
-            List<float> StatValues = new List<float>();
+            var statValues = new List<float>();
 
-            for (Depth = 0; Depth < ReceiverDepths_meters.Length; Depth++)
+            for (var depth = 0; depth < ReceiverDepths.Length; depth++)
             {
-                for (Range = 0; Range < ReceiverRanges_meters.Length; Range++)
+                for (var range = 0; range < ReceiverRanges.Length; range++)
                 {
-                    //if (Range == (ReceiverRanges_meters.Length - 1))
-                    //    System.Diagnostics.Debugger.Break();
+                    curData = TransmissionLoss[ReceiverDepths.Length - depth - 1, range];
+                    if (double.IsNaN(curData)) 
+                        Debug.WriteLine("NaN!");
 
-                    CurData = TransmissionLoss_dBSPL[ReceiverDepths_meters.Length - Depth - 1, Range];
-                    if (double.IsNaN(CurData))
-                        System.Diagnostics.Debug.WriteLine("NaN!");
+                    curData = (float) (-20*Math.Log10(Math.Max(curData, 1e-10)));
 
-                    CurData = (float)(-20 * Math.Log10(Math.Max(CurData, 1e-10)));
-
-                    DataMin = Math.Min(CurData, DataMin);
-                    DataMax = Math.Max(CurData, DataMax);
-                    if (CurData <= 120)
+                    DataMin = Math.Min(curData, DataMin);
+                    DataMax = Math.Max(curData, DataMax);
+                    if (curData <= 120)
                     {
-                        total += CurData;
-                        StatValues.Add(CurData);
+                        total += curData;
+                        statValues.Add(curData);
                     }
-                    TransmissionLoss_dBSPL[ReceiverDepths_meters.Length - Depth - 1, Range] = CurData;
-
+                    TransmissionLoss[ReceiverDepths.Length - depth - 1, range] = curData;
                 } // for (Range)
             } // for (Receiver)
-            if (StatValues.Count > 0)
+            if (statValues.Count > 0)
             {
-                StatValues.Sort();
-                Median = StatValues[StatValues.Count / 2];
-                Mean = StatValues.Average();
+                statValues.Sort();
+                Median = statValues[statValues.Count/2];
+                Mean = statValues.Average();
                 total = 0;
-                for (int i = 0; i < StatValues.Count; i++)
+                foreach (var t in statValues) 
                 {
-                    CurData = StatValues[i] - Mean;
-                    CurData *= CurData;
-                    total += CurData;
+                    curData = t - Mean;
+                    curData *= curData;
+                    total += curData;
                 }
-                Variance = total / StatValues.Count;
-                StandardDeviation = (float)Math.Sqrt(Variance);
-                StatMax = (float)Math.Round(Median + (0.75 * StandardDeviation));
+                Variance = total/statValues.Count;
+                StandardDeviation = (float) Math.Sqrt(Variance);
+                StatMax = (float) Math.Round(Median + (0.75*StandardDeviation));
                 StatMin = StatMax - 50;
             }
             else

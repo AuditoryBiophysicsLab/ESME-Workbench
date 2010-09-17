@@ -119,7 +119,7 @@ namespace ESME.TransmissionLoss
             if (!Directory.Exists(Path.GetDirectoryName(Filename)))
                 Directory.CreateDirectory(Path.GetDirectoryName(Filename));
 
-            using (var stream = new BinaryWriter(File.Open(Filename, FileMode.OpenOrCreate, FileAccess.Write)))
+            using (var stream = new BinaryWriter(File.Open(Filename, FileMode.Create, FileAccess.Write)))
             {
                 if (!_mSaved)
                 {
