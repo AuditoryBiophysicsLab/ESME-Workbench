@@ -15,7 +15,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
-    <ApplicationIcon>Application.ico</ApplicationIcon>
+    <ApplicationIcon>Wave.ico</ApplicationIcon>
     <Utf8Output>true</Utf8Output>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -373,6 +373,9 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\SmallIcons\Wave.png" />
+    <Resource Include="Images\Wave.gif" />
+    <Resource Include="Wave.ico" />
     <Resource Include="Images\ESMELogo.png" />
     <Resource Include="AboutLogo.png">
       <SubType>Image</SubType>
