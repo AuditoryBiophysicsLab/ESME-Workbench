@@ -593,14 +593,13 @@
 					                SmallImageSource="Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launch the scenario editor"
-					                Command="{Binding LaunchExternalProgramCommand}" />
+					                Command="{Binding LaunchScenarioEditorCommand}" />
 					<r:RibbonButton Label="Run"
 					                LargeImageSource="Images\LargeIcons\Button-Play-icon.png"
 					                SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Run the scenario"
-					                Command="{Binding DisabledCommand}"
-					                CommandParameter="{Binding AppSettings.ScenarioEditorExecutablePath}" />
+					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="V"
@@ -623,7 +622,7 @@
 					                SmallImageSource="Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launch the environment builder"
-					                Command="{Binding LaunchExternalProgramCommand}" />
+					                Command="{Binding LaunchEnvironmentBuilderCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Data Layers">
 					<r:RibbonComboBox Label="Wind"
