@@ -19,6 +19,7 @@ using HRC.Navigation;
 using MEFedMVVM.Common;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
+using Microsoft.Windows.Controls.Ribbon;
 using BathymetryOutOfBoundsException = ESME.Environment.BathymetryOutOfBoundsException;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -51,23 +52,23 @@ namespace ESMEWorkBench.ViewModels.Main
 
             ToggleBaseMapDisplayCommand = new SimpleCommand<object, object>(delegate (Object args)
             {
-                var source = (CheckBoxDataViewModel)args;
-                BaseMapViewModel.IsChecked = source.IsChecked;
-                Properties.Settings.Default.ShowBasemap = source.IsChecked;
+                var isChecked = (bool)args;
+                BaseMapViewModel.IsChecked = isChecked;
+                Properties.Settings.Default.ShowBasemap = isChecked;
             });
 
             ToggleGridOverlayDisplayCommand = new SimpleCommand<object, object>(delegate(Object args)
             {
-                var source = (CheckBoxDataViewModel)args;
-                GridOverlayViewModel.IsChecked = source.IsChecked;
-                Properties.Settings.Default.ShowGrid = source.IsChecked;
+                var isChecked = (bool)args;
+                GridOverlayViewModel.IsChecked = isChecked;
+                Properties.Settings.Default.ShowGrid = isChecked;
             });
 
             TogglePanZoomDisplayCommand = new SimpleCommand<object, object>(delegate(Object args)
             {
-                var source = (CheckBoxDataViewModel)args;
-                _map.MapTools.PanZoomBar.Visibility = source.IsChecked ? Visibility.Visible : Visibility.Hidden;
-                Properties.Settings.Default.ShowPanZoom = source.IsChecked;
+                var isChecked = (bool)args;
+                _map.MapTools.PanZoomBar.Visibility = isChecked ? Visibility.Visible : Visibility.Hidden;
+                Properties.Settings.Default.ShowPanZoom = isChecked;
             });
 
             ClearAllLayersCommand = new SimpleCommand<object, object>(delegate
