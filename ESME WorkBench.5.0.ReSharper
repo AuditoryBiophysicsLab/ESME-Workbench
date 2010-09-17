@@ -107,6 +107,7 @@
       <Abbreviation Text="ID" />
       <Abbreviation Text="EP" />
       <Abbreviation Text="DLL" />
+      <Abbreviation Text="SSP" />
     </Naming2>
   </CodeStyleSettings>
 </Configuration>
