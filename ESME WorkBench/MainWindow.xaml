@@ -538,20 +538,20 @@
 					                  ToolTipDescription="Toggles the base map display"
 					                  Command="{Binding MapViewModel.ToggleBaseMapDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowBasemap, Mode=TwoWay}"
-					                  CommandParameter="{Binding}" />
+					                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
 					<r:RibbonCheckBox Label="Grid Overlay"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Toggles the lat/lon grid overlay"
 					                  Command="{Binding MapViewModel.ToggleGridOverlayDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowGrid, Mode=TwoWay}"
-					                  CommandParameter="{Binding}" />
-					<r:RibbonCheckBox Label="Pan/Zoom"
+					                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
+                    <r:RibbonCheckBox Label="Pan/Zoom"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Toggles the pan/zoom control"
 					                  Command="{Binding MapViewModel.TogglePanZoomDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowPanZoom, Mode=TwoWay}"
-					                  CommandParameter="{Binding}" />
-				</r:RibbonGroup>
+					                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
+                </r:RibbonGroup>
 				<r:RibbonGroup Header="Sounds">
 					<r:RibbonButton Label="Analysis Point"
 					                LargeImageSource="Images\LargeIcons\bullet-2-icon.png"
