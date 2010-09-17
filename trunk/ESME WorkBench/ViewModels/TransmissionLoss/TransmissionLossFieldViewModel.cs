@@ -15,6 +15,14 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             SelectedRadial = 1;
         }
 
+        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField)
+        {
+            TransmissionLossField = transmissionLossField;
+            ColorMapViewModel = ColorMapViewModel.Default;
+
+            SelectedRadial = 1;
+        }
+
         public TransmissionLossField TransmissionLossField { get; private set; }
 
         public ColorMapViewModel ColorMapViewModel { get; private set; }

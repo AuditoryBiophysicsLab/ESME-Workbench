@@ -1,167 +1,151 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
-using HRC.Navigation;
-using System.Reflection;
 
 namespace ESME.Model
 {
-    [XmlRoot(
-        Namespace = "http://esme.bu.edu/support/schemas/ESME_Experiment.xsd", 
-        ElementName = "BellhopRunFile", 
-        IsNullable = false)]
+    [XmlRoot(Namespace = "http://esme.bu.edu/support/schemas/ESME_Experiment.xsd", ElementName = "BellhopRunFile", IsNullable = false)]
     public class BellhopRunFile
     {
         #region Private data members
-        [XmlIgnore]
-        private static bool PassedValidation = false;
+
+        [XmlIgnore] static bool _passedValidation;
+
         #endregion
 
-
-        public BellhopRunFile(TransmissionLossJob transmissionLossJob,  EnvironmentInformation environmentInformation)
-        {
-            
-        }
-
-        public static BellhopRunFile Create(
-            TransmissionLossJob transmissionLossJob,
-            EnvironmentInformation environmentInformation, TransmissionLossSettings transmissionLossSettings)
-        {
-            int rangeCellCount = (int)Math.Round((transmissionLossJob.Radius / transmissionLossSettings.RangeCellSize)) + 1;
-            
-            BellhopRunFile BellhopRunFile = new BellhopRunFile
-            {
-                TransmissionLossJob = transmissionLossJob,
-            };
-
-            BottomProfile[] BottomProfiles = new BottomProfile[transmissionLossJob.NewAnalysisPoint.RadialCount];
-            SoundSpeedProfile[] SoundSpeedProfiles = new SoundSpeedProfile[transmissionLossJob.NewAnalysisPoint.RadialCount];
-            float[] bearings = new float[transmissionLossJob.NewAnalysisPoint.RadialCount];
-            float MaxCalculationDepth_meters = float.MinValue;
-            var bearingStep = 360.0f/transmissionLossJob.NewAnalysisPoint.RadialCount;  
-            for (int i = 0; i < transmissionLossJob.NewAnalysisPoint.RadialCount; i++)
-            {
-                bearings[i] = bearingStep*i + transmissionLossJob.NewAnalysisPoint.RadialBearing;
-                Transect curTransect = new Transect(null, transmissionLossJob.NewAnalysisPoint.Location, bearings[i], transmissionLossJob.Radius);
-                BottomProfiles[i] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
-                MaxCalculationDepth_meters = Math.Max((float)BottomProfiles[i].MaxDepth_Meters, MaxCalculationDepth_meters);
-                SoundSpeedProfiles[i] = environmentInformation.SoundSpeedField[curTransect.MidPoint];
-            }
-
-            int depthCellCount = (int)Math.Round((MaxCalculationDepth_meters / transmissionLossSettings.DepthCellSize)) + 1;
-            for (int i = 0; i < transmissionLossJob.NewAnalysisPoint.RadialCount; i++)
-            {
-                string BellhopConfig;
-                BellhopConfig = Bellhop.GetRadialConfiguration(
-                    transmissionLossJob, SoundSpeedProfiles[i],
-                    environmentInformation.Sediment, MaxCalculationDepth_meters,
-                    rangeCellCount, depthCellCount, false, false, false, 1500);
-                BellhopRunFile.BellhopRadials.Add(new BellhopRadial
-                {
-                    BearingFromSource_degrees = bearings[i],
-                    Configuration = BellhopConfig,
-                    BottomProfile = BottomProfiles[i].ToBellhopString(),
-                });
-            }
-            return BellhopRunFile;
-        }
-
-        public TransmissionLossJob TransmissionLossJob { get; set; }
-        public BellhopRadialList BellhopRadials { get; set; }
-        [XmlIgnore]
-        public string OriginalFilename { get; private set; }
-
-        public BellhopRunFile()
-        {
-            BellhopRadials = new BellhopRadialList();
-        }
+        public BellhopRunFile(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation) { }
+        public BellhopRunFile() { BellhopRadials = new BellhopRadialList(); }
 
         #region Load and Save
-        public static BellhopRunFile Load(string Filename)
+
+        public static BellhopRunFile Load(string filename)
         {
-            var Assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            StringBuilder Schema = new StringBuilder();
-            string[] SchemaResources =
+            var assembly = Assembly.GetExecutingAssembly();
+            var schema = new StringBuilder();
+            string[] schemaResources = {
+                                           "ESME.Schema.EarthCoordinate.xsd", 
+                                           "ESME.Schema.AnalysisPoint.xsd", 
+                                           "ESME.Schema.AcousticProperties.xsd", 
+                                           "ESME.Schema.TransmissionLossField.xsd", 
+                                           "ESME.Schema.BellhopRunfile.xsd",
+                                       };
+            foreach (var resource in schemaResources)
             {
-                "ESME.Schema.EarthCoordinate.xsd",
-                "ESME.Schema.AnalysisPoint.xsd",
-                "ESME.Schema.AcousticProperties.xsd",
-                "ESME.Schema.TransmissionLossField.xsd",
-                "ESME.Schema.BellhopRunfile.xsd",
-            };
-            foreach (string Resource in SchemaResources)
-            {
-                using (StreamReader Reader = new StreamReader(Assembly.GetManifestResourceStream(Resource)))
-                    Schema.Append(Reader.ReadToEnd());
+                using (var reader = new StreamReader(assembly.GetManifestResourceStream(resource))) 
+                    schema.Append(reader.ReadToEnd());
             }
-            var FileReader = new StreamReader(Filename);
-            var File = FileReader.ReadToEnd();
-            FileReader.Close();
-            BellhopRunFile RunFile = Deserialize(File, Schema.ToString());
-            RunFile.OriginalFilename = File;
-            return RunFile;
+            var fileReader = new StreamReader(filename);
+            var file = fileReader.ReadToEnd();
+            fileReader.Close();
+            var runFile = Deserialize(file, schema.ToString());
+            runFile.OriginalFilename = file;
+            return runFile;
         }
 
-        public void Save(string Filename)
+        public void Save(string filename)
         {
-            var FileWriter = new StreamWriter(Filename, false);
-            FileWriter.Write(this.Serialize());
-            FileWriter.Close();
+            var fileWriter = new StreamWriter(filename, false);
+            fileWriter.Write(Serialize());
+            fileWriter.Close();
         }
+
         #endregion
 
         #region Serialize/Deserialize
+
         public string Serialize()
         {
-            MemoryStream ms = new MemoryStream();
-            XmlSerializer serializer = new XmlSerializer(this.GetType());
-            XmlWriterSettings Settings = new XmlWriterSettings
-            {
-                Encoding = Encoding.UTF8,
-                Indent = true,
-            };
-            XmlWriter writer = XmlWriter.Create(ms, Settings);
+            var ms = new MemoryStream();
+            var serializer = new XmlSerializer(GetType());
+            var settings = new XmlWriterSettings
+                           {
+                               Encoding = Encoding.UTF8,
+                               Indent = true,
+                           };
+            var writer = XmlWriter.Create(ms, settings);
 
             serializer.Serialize(writer, this);
             return Encoding.UTF8.GetString(ms.ToArray());
         }
 
-        public static BellhopRunFile Deserialize(string XmlString, string SchemaXml)
+        public static BellhopRunFile Deserialize(string xmlString, string schemaXml)
         {
-            StringReader schemaReader = new StringReader(SchemaXml);
-            XmlSchema schema = XmlSchema.Read(schemaReader, new ValidationEventHandler(ValidationError));
+            if (xmlString == null) throw new ArgumentNullException("xmlString");
+            var schemaReader = new StringReader(schemaXml);
+            var schema = XmlSchema.Read(schemaReader, ValidationError);
 
-            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
-            xmlReaderSettings.ValidationType = ValidationType.Schema;
+            var xmlReaderSettings = new XmlReaderSettings
+                                    {
+                                        ValidationType = ValidationType.Schema
+                                    };
             xmlReaderSettings.Schemas.Add(schema);
-            xmlReaderSettings.ValidationEventHandler += new ValidationEventHandler(ValidationError);
-            StringReader xmlStream = new StringReader(XmlString);
-            XmlReader xmlReader = XmlReader.Create(xmlStream, xmlReaderSettings);
-            PassedValidation = true;
-            while (xmlReader.Read()) ; // Empty body, all we want to do is validate the XML string we're about to deserialize
-            if (!PassedValidation)
-                return null;
+            xmlReaderSettings.ValidationEventHandler += ValidationError;
+            var xmlStream = new StringReader(xmlString);
+            var xmlReader = XmlReader.Create(xmlStream, xmlReaderSettings);
+            _passedValidation = true;
+            while (xmlReader.Read()) {}
+            if (!_passedValidation) return null;
 
-            StringReader reader = new StringReader(XmlString);
-            XmlSerializer serializer = new XmlSerializer(typeof(BellhopRunFile));
-            BellhopRunFile runfile = (BellhopRunFile)serializer.Deserialize(reader);
+            var reader = new StringReader(xmlString);
+            var serializer = new XmlSerializer(typeof (BellhopRunFile));
+            var runfile = (BellhopRunFile) serializer.Deserialize(reader);
             return runfile;
         }
 
-        private static void ValidationError(object sender, ValidationEventArgs arguments)
-        {
-            PassedValidation = false;
-        }
+        static void ValidationError(object sender, ValidationEventArgs arguments) { _passedValidation = false; }
+
         #endregion
+
+        public TransmissionLossJob TransmissionLossJob { get; set; }
+        public BellhopRadialList BellhopRadials { get; set; }
+
+        [XmlIgnore]
+        public string OriginalFilename { get; private set; }
+
+        public static BellhopRunFile Create(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, TransmissionLossSettings transmissionLossSettings)
+        {
+            var rangeCellCount = (int) Math.Round((transmissionLossJob.Radius/transmissionLossSettings.RangeCellSize)) + 1;
+
+            var bellhopRunFile = new BellhopRunFile
+                                 {
+                                     TransmissionLossJob = transmissionLossJob,
+                                 };
+
+            var bottomProfiles = new BottomProfile[transmissionLossJob.NewAnalysisPoint.RadialCount];
+            var soundSpeedProfiles = new SoundSpeedProfile[transmissionLossJob.NewAnalysisPoint.RadialCount];
+            var bearings = new float[transmissionLossJob.NewAnalysisPoint.RadialCount];
+            var maxCalculationDepthMeters = float.MinValue;
+            var bearingStep = 360.0f/transmissionLossJob.NewAnalysisPoint.RadialCount;
+            for (var i = 0; i < transmissionLossJob.NewAnalysisPoint.RadialCount; i++)
+            {
+                bearings[i] = bearingStep*i + transmissionLossJob.NewAnalysisPoint.RadialBearing;
+                var curTransect = new Transect(null, transmissionLossJob.NewAnalysisPoint.Location, bearings[i], transmissionLossJob.Radius);
+                bottomProfiles[i] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
+                maxCalculationDepthMeters = Math.Max((float) bottomProfiles[i].MaxDepth, maxCalculationDepthMeters);
+                soundSpeedProfiles[i] = environmentInformation.SoundSpeedField[curTransect.MidPoint];
+            }
+
+            var depthCellCount = (int) Math.Round((maxCalculationDepthMeters/transmissionLossSettings.DepthCellSize)) + 1;
+            for (var i = 0; i < transmissionLossJob.NewAnalysisPoint.RadialCount; i++)
+            {
+                var bellhopConfig = Bellhop.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[i], environmentInformation.Sediment, maxCalculationDepthMeters, rangeCellCount, depthCellCount, false, false, false, 1500);
+                bellhopRunFile.BellhopRadials.Add(new BellhopRadial
+                                                  {
+                                                      BearingFromSourceDegrees = bearings[i],
+                                                      Configuration = bellhopConfig,
+                                                      BottomProfile = bottomProfiles[i].ToBellhopString(),
+                                                  });
+            }
+            return bellhopRunFile;
+        }
     }
 
     public class TransmissionLossSettings
@@ -174,7 +158,7 @@ namespace ESME.Model
     {
         public string Base64EncodedConfiguration { get; set; }
         public string Base64EncodedBottomProfile { get; set; }
-        public float BearingFromSource_degrees { get; set; }
+        public float BearingFromSourceDegrees { get; set; }
 
         [XmlIgnore]
         public string Configuration
@@ -190,18 +174,10 @@ namespace ESME.Model
             get { return FromBase64(Base64EncodedBottomProfile); }
         }
 
-        private string ToBase64(string sourceData)
-        {
-            return System.Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(sourceData));
-        }
+        static string ToBase64(string sourceData) { return Convert.ToBase64String(Encoding.ASCII.GetBytes(sourceData)); }
 
-        private string FromBase64(string encodedData)
-        {
-            return System.Text.ASCIIEncoding.ASCII.GetString(System.Convert.FromBase64String(encodedData));
-        }
+        static string FromBase64(string encodedData) { return Encoding.ASCII.GetString(Convert.FromBase64String(encodedData)); }
     }
 
-    public class BellhopRadialList : List<BellhopRadial>
-    {
-    }
+    public class BellhopRadialList : List<BellhopRadial> {}
 }

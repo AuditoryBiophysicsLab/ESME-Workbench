@@ -1,10 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Input;
 using Cinch;
+using ESME.Environment;
+using ESME.Model;
+using ESME.Overlay;
+using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Ribbon;
+using ESMEWorkBench.ViewModels.TransmissionLoss;
+using HRC.Navigation;
 using MEFedMVVM.Common;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
@@ -16,13 +25,16 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IViewAwareStatus _viewAwareStatusService;
         readonly IOpenFileService _openFileService;
         readonly IMessageBoxService _messageBoxService;
-        private WpfMap _map;
+        readonly IUIVisualizerService _visualizerService;
+        WpfMap _map;
+        string _environmentFileName;
         
         public string MapDLLVersion { get; private set; }
         public LayerDisplayViewModel LayerDisplayViewModel { get; private set; }
 
-        public MapViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService)
+        public MapViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService, IUIVisualizerService visualizerService)
         {
+            _visualizerService = visualizerService;
             _viewAwareStatusService = viewAwareStatusService;
             _viewAwareStatusService.ViewLoaded += ViewAwareStatusServiceViewLoaded;
             _messageBoxService = messageBoxService;
@@ -69,6 +81,97 @@ namespace ESMEWorkBench.ViewModels.Main
                 LayerDisplayViewModel.Layers.Add(overlayLayer);
             });
 
+            OpenEnvironmentFileCommand = new SimpleCommand<object, object>(delegate(Object arg)
+            {
+                _openFileService.Filter = "ESME Environment File (*.eeb)|*.eeb";
+                var result = _openFileService.ShowDialog(null);
+                if (!result.HasValue || !result.Value) return;
+                _environmentFileName = _openFileService.FileName;
+                var bathymetry = new Bathymetry(_environmentFileName);
+
+                var overlayLayer = new OverlayShapesLayerViewModel(null, Path.GetFileNameWithoutExtension(_environmentFileName) + " bathymetry bounds", this);
+                overlayLayer.Overlay = new LayerOverlay { TileType = TileType.SingleTile };
+                
+                Overlays.Add(overlayLayer.Overlay);
+                overlayLayer.OverlayShapes.Add(bathymetry.BoundingBox);
+                overlayLayer.CommitShapes();
+
+                LayerDisplayViewModel.Layers.Add(overlayLayer);
+            });
+
+            MouseMoveCommand = new SimpleCommand<object, object>(delegate(Object arg)
+            {
+                var args = (EventToCommandArgs)arg;
+                var commandRan = args.CommandRan;
+                var o = args.CommandParameter;
+                var sender = args.Sender;
+                var e = (MouseEventArgs)args.EventArgs;
+                var point = e.MouseDevice.GetPosition(_map);
+                var pointShape = ExtentHelper.ToWorldCoordinate(_map.CurrentExtent, (float)point.X, (float)point.Y, (float)_map.ActualWidth, (float)_map.ActualHeight);
+                MouseLongitude = pointShape.X;
+                MouseLatitude = pointShape.Y;
+            });
+
+            MouseLeftButtonUpCommand = new SimpleCommand<object, object>(delegate
+            {
+                //_messageBoxService.ShowInformation(String.Format("Mouse click at ({0:0.000000}, {1:0.000000})", MouseLatitude, MouseLongitude));
+                #region create transmission loss job. the new base class for all acoustic simulations!
+
+                var transmissionLossJob = new TransmissionLossJob
+                {
+                    AcousticProperties = new AcousticProperties
+                    {
+                        SourceDepth_meters = 10,
+                        VerticalBeamWidth_degrees = 120,
+                        DepressionElevationAngle_degrees =0f,
+                        LowFrequency_Hz = 3500,
+                        HighFrequency_Hz = 3500,
+                    },
+                    NewAnalysisPoint = new NewAnalysisPoint
+                    {
+                        IDField = 1,
+                        Location = new EarthCoordinate(MouseLatitude, MouseLongitude),
+                        RadialBearing = 0,
+                        RadialCount = 16,
+
+                    },
+                    Radius = 10000,
+                    MaxDepth = 3000,
+                };
+
+                #endregion
+
+                #region create bellhop run file from tlj (and stuff)
+
+                var environmentInformation = new EnvironmentInformation
+                {
+                    Bathymetry = new Bathymetry(_environmentFileName),
+                    SoundSpeedField = new SoundSpeedField(_environmentFileName),
+                    Sediment = SedimentTypes.SedimentArray[0],
+                };
+
+                var transmissionLossSettings = new TransmissionLossSettings()
+                {
+                    DepthCellSize = 50,
+                    RangeCellSize = 50,
+                };
+
+                var bellhopRunFile = BellhopRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
+
+                var bellhopCalculatorViewModel = new BellhopCalculatorViewModel();
+                bellhopCalculatorViewModel.PropertyChanged += delegate(object sender, PropertyChangedEventArgs e)
+                                                              {
+                                                                  if (e.PropertyName != "TransmissionLossField") return;
+                                                                  var transmissionLossViewModel = new TransmissionLossFieldViewModel(bellhopCalculatorViewModel.TransmissionLossField);
+                                                                  _visualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
+                                                              };
+                _visualizerService.Show("BellhopCalculatorView", bellhopCalculatorViewModel, true, null);
+                bellhopCalculatorViewModel.Calculate(bellhopRunFile);
+                #endregion
+            });
+
+
+
             AddOverlayFileCommand = new SimpleCommand<object, object>(delegate
             {
                 _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
@@ -106,6 +209,40 @@ namespace ESMEWorkBench.ViewModels.Main
             });
         }
 
+        #region public double MouseLatitude { get; set; }
+
+        static readonly PropertyChangedEventArgs MouseLatitudeChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.MouseLatitude);
+        double _mouseLatitude;
+        public double MouseLatitude
+        {
+            get { return _mouseLatitude; }
+            set
+            {
+                if (_mouseLatitude == value) return;
+                _mouseLatitude = value;
+                NotifyPropertyChanged(MouseLatitudeChangedEventArgs);
+            }
+        }
+
+        #endregion
+
+        #region public double MouseLongitude { get; set; }
+
+        static readonly PropertyChangedEventArgs MouseLongitudeChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.MouseLongitude);
+        double _mouseLongitude;
+        public double MouseLongitude
+        {
+            get { return _mouseLongitude; }
+            set
+            {
+                if (_mouseLongitude == value) return;
+                _mouseLongitude = value;
+                NotifyPropertyChanged(MouseLongitudeChangedEventArgs);
+            }
+        }
+
+        #endregion
+
         public LayerViewModel BaseMapViewModel { get; private set; }
         public LayerViewModel GridOverlayViewModel { get; private set; }
 
@@ -118,7 +255,12 @@ namespace ESMEWorkBench.ViewModels.Main
         public SimpleCommand<Object, Object> AddOverlayFileCommand { get; private set; }
         public SimpleCommand<Object, Object> AddScenarioFileCommand { get; private set; }
 
-        
+        public SimpleCommand<Object, Object> OpenEnvironmentFileCommand { get; private set; }
+        public SimpleCommand<Object, Object> CloseEnvironmentFileCommand { get; private set; }
+
+        public SimpleCommand<Object, Object> MouseMoveCommand { get; private set; }
+        public SimpleCommand<Object, Object> MouseLeftButtonUpCommand { get; private set; }
+
         private void ViewAwareStatusServiceViewLoaded()
         {
             if (Designer.IsInDesignMode)
@@ -154,6 +296,5 @@ namespace ESMEWorkBench.ViewModels.Main
         public GeoCollection<Overlay> Overlays { get { return _map.Overlays; } }
         public AdornmentOverlay AdornmentOverlay { get { return _map.AdornmentOverlay; } }
         public void Refresh() {_map.Refresh();}
-
     }
 }

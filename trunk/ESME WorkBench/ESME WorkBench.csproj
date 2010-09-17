@@ -98,6 +98,9 @@
     <Compile Include="AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="BellhopCalculatorView.xaml.cs">
+      <DependentUpon>BellhopCalculatorView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ColorBarView.xaml.cs">
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
@@ -167,10 +170,15 @@
     <Compile Include="ViewModels\Ribbon\TabDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\TextBoxDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\ToggleButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\BellhopCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\ColorMapViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialViewModel.cs" />
     <Page Include="AboutBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="BellhopCalculatorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -24,17 +24,17 @@ namespace ESME.TransmissionLoss
             Variance = bellhopOutput.Variance;
             StandardDeviation = bellhopOutput.StandardDeviation;
 
-            TransmissionLoss = bellhopOutput.TransmissionLoss_dBSPL;
+            TransmissionLoss = bellhopOutput.TransmissionLoss;
 
             _depths = TransmissionLoss.GetLength(0);
             _ranges = TransmissionLoss.GetLength(1);
             _rangeStride = sizeof (float)*_ranges;
 
-            Depths = new float[bellhopOutput.ReceiverDepths_meters.Length];
-            Array.Copy(bellhopOutput.ReceiverDepths_meters, Depths, bellhopOutput.ReceiverDepths_meters.Length);
+            Depths = new float[bellhopOutput.ReceiverDepths.Length];
+            Array.Copy(bellhopOutput.ReceiverDepths, Depths, bellhopOutput.ReceiverDepths.Length);
 
-            Ranges = new float[bellhopOutput.ReceiverRanges_meters.Length];
-            Array.Copy(bellhopOutput.ReceiverRanges_meters, Ranges, bellhopOutput.ReceiverRanges_meters.Length);
+            Ranges = new float[bellhopOutput.ReceiverRanges.Length];
+            Array.Copy(bellhopOutput.ReceiverRanges, Ranges, bellhopOutput.ReceiverRanges.Length);
 
             IsSaved = false;
         }
