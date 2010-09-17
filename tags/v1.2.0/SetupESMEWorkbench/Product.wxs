@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
+  <?define ProductName = "ESME WorkBench 2010"?>
+  <?define OldProductVersion="1.1.2.0" ?>
+  <?define ProductVersion="1.2.0.0" ?>
+  <?define Manufacturer="Boston University"?>
+  <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
+  <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
+  <?define ESMEPath="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release"?>
+  <?define EnvironmentBuilderPath="C:\Projects\ESME Deliverables\trunk\Utilities\EnvironmentBuilder\bin\x86\Release"?>
+  <?define ReleaseNotesPath="C:\Projects\ESME Deliverables\trunk\Release Notes"?>
+  <Product Id="$(var.ProductCode)" 
+           Name="$(var.ProductName)" 
+           Version="$(var.ProductVersion)" 
+           Manufacturer="$(var.Manufacturer)" 
+           UpgradeCode="$(var.UpgradeCode)"
+           Language="1033" 
+           Codepage="1252">
+    <Package Description="ESME WorkBench 2010"
+             Comments="Deliverable for Phase 1, Iteration 2"
+             Manufacturer="$(var.Manufacturer)" 
+             InstallerVersion="300" 
+             Languages="1033" 
+             SummaryCodepage="1252"
+             Compressed="yes" 
+             AdminImage="no"
+             Platform="x86"
+             ReadOnly="yes"
+             ShortNames="no"
+             InstallScope="perMachine"
+             Keywords="Installer,ESME,WorkBench"/>
+
+    <Media Id="1" Cabinet="esme2010.cab" EmbedCab="yes" />
+
+    <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
+    <Upgrade Id="$(var.UpgradeCode)">
+      <UpgradeVersion Minimum="$(var.ProductVersion)"
+                      IncludeMinimum="no"
+                      OnlyDetect="yes"
+                      Language="1033"
+                      Property="NEWPRODUCTFOUND" />
+      <UpgradeVersion Minimum="$(var.OldProductVersion)"
+                      IncludeMinimum="yes"
+                      Maximum="$(var.ProductVersion)"
+                      IncludeMaximum="no"
+                      Language="1033"
+                      Property="UPGRADEFOUND" />
+    </Upgrade>
+    
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLLOCATION" Name="$(var.ProductName)">
+          <Component Id="ESME_WorkBench" Guid="de2c6c9d-6e47-43fa-9326-53326891ed41">
+            <!-- Core ESME executables and assemblies -->
+            <File Id="ESME_WorkBench.exe" 
+                  Name="ESME WorkBench.exe" 
+                  Source="$(var.ESMEPath)\ESME WorkBench.exe" 
+                  KeyPath="yes"/>
+            <File Id="ESME_WorkBench.exe.config" 
+                  Name="ESME WorkBench.exe.config" 
+                  Source="$(var.ESMEPath)\ESME WorkBench.exe.config" />
+            <File Id="ESME.dll" 
+                  Name="ESME.dll" 
+                  Source="$(var.ESMEPath)\ESME.dll" />
+            <File Id="HRC.dll"
+                  Name="HRC.dll"
+                  Source="$(var.ESMEPath)\HRC.dll" />
+            <File Id="ReleaseNotes"
+                  Name="ESME Workbench 2010 Release Notes.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench 2010 Release Notes.pdf" />
+
+            <!-- External executables -->
+            <File Id="EnvironmentBuilder.exe"
+                  Name="EnvironmentBuilder.exe"
+                  Source="$(var.EnvironmentBuilderPath)\EnvironmentBuilder.exe" />
+            <File Id="EnvironmentBuilder.exe.config"
+                  Name="EnvironmentBuilder.exe.config"
+                  Source="$(var.EnvironmentBuilderPath)\EnvironmentBuilder.exe.config" />
+            <File Id="bellhop.exe"
+                  Name="bellhop.exe"
+                  Source="$(var.ESMEPath)\bellhop.exe" />
+
+            <!-- ThinkGeo GIS assemblies -->
+            <File Id="MapSuiteCore.dll" 
+                  Name="MapSuiteCore.dll" 
+                  Source="$(var.ESMEPath)\MapSuiteCore.dll" />
+            <File Id="NetTopologySuite.dll" 
+                  Name="NetTopologySuite.dll" 
+                  Source="$(var.ESMEPath)\NetTopologySuite.dll" />
+            <File Id="GeoAPI.dll" 
+                  Name="GeoAPI.dll" 
+                  Source="$(var.ESMEPath)\GeoAPI.dll" />
+            <File Id="WpfDesktopEdition.dll" 
+                  Name="WpfDesktopEdition.dll" 
+                  Source="$(var.ESMEPath)\WpfDesktopEdition.dll" />
+
+            <!-- MVVM assemblies -->
+            <File Id="Cinch.WPF.dll" 
+                  Name="Cinch.WPF.dll" 
+                  Source="$(var.ESMEPath)\Cinch.WPF.dll" />
+            <File Id="MEFedMVVM.WPF.dll" 
+                  Name="MEFedMVVM.WPF.dll" 
+                  Source="$(var.ESMEPath)\MEFedMVVM.WPF.dll" />
+
+            <!-- Miscellaneous Microsoft assemblies -->
+            <File Id="Microsoft.Expression.InteractionsDLL" 
+                  Name="Microsoft.Expression.Interactions.dll" 
+                  Source="$(var.ESMEPath)\Microsoft.Expression.Interactions.dll" />
+            <File Id="System.Windows.Interactivity.dll" 
+                  Name="System.Windows.Interactivity.dll" 
+                  Source="$(var.ESMEPath)\System.Windows.Interactivity.dll" />
+            <File Id="Microsoft.Windows.Shell.dll" 
+                  Name="Microsoft.Windows.Shell.dll" 
+                  Source="$(var.ESMEPath)\Microsoft.Windows.Shell.dll" />
+
+            <!-- Microsoft Ribbon assembly -->
+            <File Id="RibbonControlsLibrary.dll" 
+                  Name="RibbonControlsLibrary.dll" 
+                  Source="$(var.ESMEPath)\RibbonControlsLibrary.dll" />
+
+            <!-- 3MBS assembly -->
+            <File Id="MBSWrapperClass.dll"
+                  Name="MBSWrapperClass.dll"
+                  Source="$(var.ESMEPath)\3MBSWrapperClass.dll" />
+
+            <!-- Readme.txt file, for release notes (eventually) -->
+            <File Id="Readme.txt" 
+                  Name="Readme.txt" 
+                  Source="$(var.ESMEPath)\ReadMe.txt" />
+          </Component>
+
+          <Component Id="ESME_Shortcuts" Guid="5D033776-4F54-44F9-BC3E-28D174AFA5AF">
+            <RegistryKey Root="HKCU" Key="Software\[Manufacturer]\[ProductName]">
+              <RegistryValue Value="Uninstall" Type="string" KeyPath="yes" />
+            </RegistryKey>
+            <Shortcut Id="ESME_WorkBench_Program_Group_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="$(var.ProductName)"
+                      WorkingDirectory="INSTALLLOCATION"
+                      Target="[INSTALLLOCATION]ESME WorkBench.exe"
+                      Advertise="no" />
+            <Shortcut Id="ReleaseNotes_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Release Notes"
+                      WorkingDirectory="INSTALLLOCATION"
+                      Target="[INSTALLLOCATION]ESME Workbench 2010 Release Notes.pdf"
+                      Advertise="no" />
+            <Shortcut Id="ESME_WorkBench_Desktop_Shortcut"
+                      Directory="DesktopFolder"
+                      Name="$(var.ProductName)"
+                      WorkingDirectory="INSTALLLOCATION"
+                      Target="[INSTALLLOCATION]ESME WorkBench.exe"
+                      Advertise="no" />
+            <Shortcut Id="UninstallProduct"
+                      Directory="ProgramMenuDir"
+                      Advertise="no"
+                      Name="Uninstall $(var.ProductName)"
+                      WorkingDirectory="INSTALLDIR"
+                      Target="[SystemFolder]msiexec.exe"
+                      Arguments="/x [ProductCode]"
+                      Description="Uninstalls $(var.ProductName)" />
+            <RemoveFolder Id="DeleteShortcutFolder"
+                          Directory="ProgramMenuDir"
+                          On="uninstall" />
+          </Component>
+
+          <Directory Id="GISDataFolder" Name="Sample GIS Data">
+            <Component Id="GISFiles" Guid="7BF299D9-28A5-4C2E-B572-5F701ACBAF7E">
+              <File Id="Countries02.shx" 
+                    Name="Countries02.shx" 
+                    Source="$(var.ESMEPath)\Sample GIS Data\Countries02.shx" 
+                    KeyPath="yes" />
+              <File Id="Countries02.dbf" 
+                    Name="Countries02.dbf" 
+                    Source="$(var.ESMEPath)\Sample GIS Data\Countries02.dbf" />
+              <File Id="Countries02.ids" 
+                    Name="Countries02.ids"
+                    Source="$(var.ESMEPath)\Sample GIS Data\Countries02.ids" />
+              <File Id="Countries02.idx" 
+                    Name="Countries02.idx"
+                    Source="$(var.ESMEPath)\Sample GIS Data\Countries02.idx" />
+              <File Id="Countries02.shp" 
+                    Name="Countries02.shp" 
+                    Source="$(var.ESMEPath)\Sample GIS Data\Countries02.shp" />
+            </Component>
+          </Directory>
+        </Directory>
+      </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop" />
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="$(var.ProductName)"/>
+      </Directory>
+    </Directory>
+
+    <Feature Id="ProductFeature" Title="ESME Workbench" Level="1" ConfigurableDirectory="INSTALLLOCATION">
+      <!-- TODO: Remove the comments around this ComponentRef element and the Component above in order to add resources to this installer. -->
+      <ComponentRef Id="ESME_WorkBench" />
+      <ComponentRef Id="GISFiles" />
+      <ComponentRef Id="ESME_Shortcuts"/>
+      <!-- Note: The following ComponentGroupRef is required to pull in generated authoring from project references. -->
+      <ComponentGroupRef Id="Product.Generated" />
+    </Feature>
+
+    <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
+    <CustomAction Id='IsPrivileged' Error='You must be an administrator to install this product' />
+    <InstallExecuteSequence>
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWPRODUCTFOUND</Custom>
+      <Custom Action='IsPrivileged' Before='LaunchConditions'>NOTPRIVILEGED</Custom>
+      <RemoveExistingProducts After="InstallFinalize" />
+    </InstallExecuteSequence>
+
+    <InstallUISequence>
+      <Custom Action='IsPrivileged' Before='LaunchConditions'>NOTPRIVILEGED</Custom>
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWPRODUCTFOUND</Custom>
+    </InstallUISequence>
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
+    <UIRef Id="WixUI_InstallDir" />
+    <!--
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="View README.TXT file when setup exits" />
+    <Property Id="WIXUI_INSTALLDIR" Value="TARGETDIR" />
+    <UI>
+      <UIRef Id="WixUI_InstallDir" />
+      <UIRef Id="WixUI_ErrorProgressText" />
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="ViewReadmeOnExit">
+        WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT = 1 and NOT Installed
+      </Publish>
+    </UI>
+    <Property Id="WixShellExecTarget" Value="[#ReadMe.txt]" />
+    <CustomAction Id="ViewReadmeOnExit" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+
+    <PropertyRef Id="NETFRAMEWORK40FULL"/>
+    <Condition Message="The .NET Framework 4.0 full version must be installed before installing ESME WorkBench">
+      <![CDATA[Installed OR NETFRAMEWORK40]]>
+    </Condition>
+    -->
+
+  </Product>
+</Wix>
