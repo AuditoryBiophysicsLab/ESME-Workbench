@@ -1,0 +1,401 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ExpressionBlendVersion>4.0.20421.0</ExpressionBlendVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1CD6E800-1D60-405A-BF80-F9CAE2E411E2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <DefaultClrNameSpace>ESMERibbonDemo</DefaultClrNameSpace>
+    <RootNamespace>ESMEWorkBench</RootNamespace>
+    <AssemblyName>ESME WorkBench</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <ApplicationIcon>Application.ico</ApplicationIcon>
+    <Utf8Output>true</Utf8Output>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>true</CodeAnalysisFailOnMissingRules>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL" />
+    <Reference Include="HRC, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86" />
+    <Reference Include="MapSuiteCore, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="NetTopologySuite, Version=1.7.3.31740, Culture=neutral, PublicKeyToken=f580a05016ebada1, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="RibbonControlsLibrary" />
+    <Reference Include="Microsoft.Windows.Shell" />
+    <Reference Include="WpfDesktopEdition, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="AboutBox.xaml.cs">
+      <DependentUpon>AboutBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="BellhopCalculatorView.xaml.cs">
+      <DependentUpon>BellhopCalculatorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ColorBarView.xaml.cs">
+      <DependentUpon>ColorBarView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DataAxis.cs" />
+    <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
+      <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\AppSettings.cs" />
+    <Compile Include="Data\ExperimentData.cs" />
+    <Compile Include="Data\IApplicationData.cs" />
+    <Compile Include="Data\PersistentApplicationData.cs" />
+    <Compile Include="Data\WatchableReferenceDatum.cs" />
+    <Compile Include="Data\WatchableList.cs" />
+    <Compile Include="OSInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="OptionsPopup.xaml.cs">
+      <DependentUpon>OptionsPopup.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossJobView.xaml.cs">
+      <DependentUpon>TransmissionLossJobView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossView.xaml.cs">
+      <DependentUpon>TransmissionLossView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ValueConverters.cs" />
+    <Compile Include="ViewModels\IHasName.cs" />
+    <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
+    <Compile Include="ViewModels\Layers\LayerViewModel.cs" />
+    <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
+    <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
+    <Compile Include="ViewModels\Main\LayerDisplayViewModel.cs" />
+    <Compile Include="ViewModels\Main\MainViewModel.cs" />
+    <Compile Include="ViewModels\Layers\OffsetProjection.cs" />
+    <Compile Include="ViewModels\Layers\OverlayLayerViewModel.cs" />
+    <Compile Include="ViewModels\Layers\RadarRasterSource.cs" />
+    <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
+    <Compile Include="ViewModels\Layers\VirtualToggleButton.cs" />
+    <Compile Include="ViewModels\Main\MapViewModel.cs" />
+    <Compile Include="ViewModels\Main\ProgramOptionsViewModel.cs" />
+    <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
+    <Compile Include="ViewModels\RecentFiles\IPersist.cs" />
+    <Compile Include="ViewModels\RecentFiles\RecentFile.cs" />
+    <Compile Include="ViewModels\RecentFiles\RecentFileList.cs" />
+    <Compile Include="ViewModels\RecentFiles\RegistryPersister.cs" />
+    <Compile Include="ViewModels\RecentFiles\XmlPersister.cs" />
+    <Compile Include="ViewModels\Ribbon\ApplicationMenuItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\ApplicationSplitMenuItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\ButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\CheckBoxDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\ComboBoxDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\ContextualTabGroupData.cs" />
+    <Compile Include="ViewModels\Ribbon\ControlDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\DelegateCommand.cs" />
+    <Compile Include="ViewModels\Ribbon\GalleryCategoryDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\GalleryDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\GalleryItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\GroupDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\MenuButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\MenuItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\RadioButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\RibbonListClasses.cs" />
+    <Compile Include="ViewModels\Ribbon\SeparatorDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\SplitButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\SplitMenuItemDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\TabDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\TextBoxDataViewModel.cs" />
+    <Compile Include="ViewModels\Ribbon\ToggleButtonDataViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\BellhopCalculatorViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\ColorMapViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossJobViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialViewModel.cs" />
+    <Page Include="AboutBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="BellhopCalculatorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ColorBarView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\FileOrDirectorySetting.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="OptionsPopup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\BureauBlack.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\BureauBlue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\ExpressionDark.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\ExpressionLight.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\GlassButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\GlassButtons.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\ShinyBlue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\ShinyRed.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\WhistlerBlue.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionLossJobView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLossView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <AppDesigner Include="Properties\" />
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Application.ico">
+      <Visible>false</Visible>
+    </None>
+    <None Include="Sample GIS Data\Countries02.dbf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Sample GIS Data\Countries02.ids">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Sample GIS Data\Countries02.idx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Sample GIS Data\Countries02.shp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Sample GIS Data\Countries02.shx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Resource Include="Images\LargeIcons\about-icon.png" />
+    <Resource Include="Images\LargeIcons\AddFile.png" />
+    <Resource Include="Images\LargeIcons\AddShapeFile.png" />
+    <Resource Include="Images\LargeIcons\bullet-2-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Add-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Close-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Delete-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-First-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Help-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Last-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Next-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Pause-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Play-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Previous-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Refresh-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Reload-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Stop-icon.png" />
+    <Resource Include="Images\LargeIcons\close-icon.png" />
+    <Resource Include="Images\LargeIcons\Distance learning.png" />
+    <Resource Include="Images\LargeIcons\Dolphin.png" />
+    <Resource Include="Images\LargeIcons\LargeIcon.png" />
+    <Resource Include="Images\LargeIcons\Layers-icon.png" />
+    <Resource Include="Images\LargeIcons\new-icon.png" />
+    <Resource Include="Images\LargeIcons\open-icon.png" />
+    <Resource Include="Images\LargeIcons\Plus.png" />
+    <Resource Include="Images\LargeIcons\save-icon.png" />
+    <Resource Include="Images\LargeIcons\Sound.png" />
+    <Resource Include="Images\LargeIcons\System-Globe-icon.png" />
+    <Resource Include="Images\LargeIcons\System-Map-icon.png" />
+    <Resource Include="Images\LargeIcons\System-Registry-icon.png" />
+    <Resource Include="Images\LargeIcons\Text-Bubble-icon.png" />
+    <Resource Include="Images\LargeIcons\web-V2-icon.png" />
+    <Resource Include="Images\LargeIcons\Yahoo-Widget-Engine-icon.png" />
+    <Resource Include="Images\SmallIcons\about-icon.png" />
+    <Resource Include="Images\SmallIcons\AddFile.png" />
+    <Resource Include="Images\SmallIcons\bullet-2-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Add-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Close-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Delete-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-First-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Help-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Last-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Next-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Pause-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Play-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Previous-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Refresh-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Reload-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Stop-icon.png" />
+    <Resource Include="Images\SmallIcons\close-icon.png" />
+    <Resource Include="Images\SmallIcons\Close.png" />
+    <Resource Include="Images\SmallIcons\Distance learning.png" />
+    <Resource Include="Images\SmallIcons\Dolphin.png" />
+    <Resource Include="Images\SmallIcons\Information.png" />
+    <Resource Include="Images\SmallIcons\Layers-icon.png" />
+    <Resource Include="Images\SmallIcons\new-icon.png" />
+    <Resource Include="Images\SmallIcons\New.png" />
+    <Resource Include="Images\SmallIcons\open-icon.png" />
+    <Resource Include="Images\SmallIcons\Open.png" />
+    <Resource Include="Images\SmallIcons\options-icon.png" />
+    <Resource Include="Images\SmallIcons\Options.png" />
+    <Resource Include="Images\SmallIcons\save-icon.png" />
+    <Resource Include="Images\SmallIcons\Save.png" />
+    <Resource Include="Images\SmallIcons\SmallIcon.png" />
+    <Resource Include="Images\SmallIcons\Sound.png" />
+    <Resource Include="Images\SmallIcons\System-Globe-icon.png" />
+    <Resource Include="Images\SmallIcons\System-Map-icon.png" />
+    <Resource Include="Images\SmallIcons\System-Registry-icon.png" />
+    <Resource Include="Images\SmallIcons\Text-Bubble-icon.png" />
+    <Resource Include="Images\SmallIcons\web-V2-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Application.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="External References\Cinch.WPF.dll" />
+    <None Include="External References\HRC.dll" />
+    <None Include="External References\MapSuiteCore.dll" />
+    <None Include="External References\MEFedMVVM.WPF.dll" />
+    <None Include="External References\Microsoft.Expression.Interactions.dll" />
+    <None Include="External References\Microsoft.Windows.Shell.dll" />
+    <None Include="External References\NetTopologySuite.dll" />
+    <None Include="External References\RibbonControlsLibrary.dll" />
+    <None Include="External References\System.Windows.Interactivity.dll" />
+    <None Include="External References\WpfDesktopEdition.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\ESMELogo.png" />
+    <Resource Include="AboutLogo.png">
+      <SubType>Image</SubType>
+    </Resource>
+    <Content Include="External References\Devart.Data.Linq.dll" />
+    <SplashScreen Include="Images\ESME Splash Screen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="External References\GeoAPI.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\ESME\ESME.csproj">
+      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
+      <Name>ESME</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+	     Other similar extension points exist, see Microsoft.Common.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
+</Project>
