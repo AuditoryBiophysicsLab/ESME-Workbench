@@ -32,9 +32,6 @@ namespace EnvironmentBuilder.Dialogs
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chooseEnvironmentDatabaseDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chooseNEMODataFilesDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadNEMOScenarioFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importOverlayFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,9 +89,6 @@ namespace EnvironmentBuilder.Dialogs
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.chooseEnvironmentDatabaseDirectoryToolStripMenuItem,
-            this.chooseNEMODataFilesDirectoryToolStripMenuItem,
-            this.loadNEMOScenarioFileToolStripMenuItem,
-            this.importOverlayFileToolStripMenuItem,
             this.toolStripMenuItem1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -109,15 +103,6 @@ namespace EnvironmentBuilder.Dialogs
             this.chooseEnvironmentDatabaseDirectoryToolStripMenuItem.Size = new System.Drawing.Size(377, 22);
             this.chooseEnvironmentDatabaseDirectoryToolStripMenuItem.Text = "Choose Environmental Database Directory...";
             this.chooseEnvironmentDatabaseDirectoryToolStripMenuItem.Click += new System.EventHandler(this.chooseEnvironmentDatabaseDirectoryToolStripMenuItem_Click);
-            // 
-            // chooseNEMODataFilesDirectoryToolStripMenuItem
-            // 
-            this.chooseNEMODataFilesDirectoryToolStripMenuItem.Name = "chooseNEMODataFilesDirectoryToolStripMenuItem";
-            this.chooseNEMODataFilesDirectoryToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.N)));
-            this.chooseNEMODataFilesDirectoryToolStripMenuItem.Size = new System.Drawing.Size(377, 22);
-            this.chooseNEMODataFilesDirectoryToolStripMenuItem.Text = "Choose NEMO Data Files Directory...";
-            this.chooseNEMODataFilesDirectoryToolStripMenuItem.Click += new System.EventHandler(this.chooseNEMODataFilesDirectoryToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
@@ -144,21 +129,21 @@ namespace EnvironmentBuilder.Dialogs
             // zoomIn
             // 
             this.zoomIn.Name = "zoomIn";
-            this.zoomIn.Size = new System.Drawing.Size(129, 22);
+            this.zoomIn.Size = new System.Drawing.Size(152, 22);
             this.zoomIn.Text = "Zoom In";
             this.zoomIn.Click += new System.EventHandler(this.zoomIn_Click);
             // 
             // zoomOut
             // 
             this.zoomOut.Name = "zoomOut";
-            this.zoomOut.Size = new System.Drawing.Size(129, 22);
+            this.zoomOut.Size = new System.Drawing.Size(152, 22);
             this.zoomOut.Text = "Zoom Out";
             this.zoomOut.Click += new System.EventHandler(this.zoomOut_Click);
             // 
             // resetToolStripMenuItem
             // 
             this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            this.resetToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.resetToolStripMenuItem.Text = "Reset";
             this.resetToolStripMenuItem.Click += new System.EventHandler(this.resetToolStripMenuItem_Click);
             // 
@@ -267,6 +252,11 @@ namespace EnvironmentBuilder.Dialogs
             this.contextMenuStrip2.Name = "contextMenuStrip2";
             this.contextMenuStrip2.Size = new System.Drawing.Size(161, 70);
             // 
+            // addOverlayFileToolStripMenuItem
+            // 
+            this.addOverlayFileToolStripMenuItem.Name = "addOverlayFileToolStripMenuItem";
+            this.addOverlayFileToolStripMenuItem.Size = new System.Drawing.Size(32, 19);
+            // 
             // displayToolStripMenuItem
             // 
             this.displayToolStripMenuItem.Checked = true;
@@ -341,8 +331,8 @@ namespace EnvironmentBuilder.Dialogs
             this.fileList_Control1.Name = "fileList_Control1";
             this.fileList_Control1.Size = new System.Drawing.Size(247, 169);
             this.fileList_Control1.TabIndex = 9;
-            this.fileList_Control1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.fileList_Control1_MouseDown);
             this.fileList_Control1.DragEnter += new System.Windows.Forms.DragEventHandler(this.fileList_Control1_DragEnter);
+            this.fileList_Control1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.fileList_Control1_MouseDown);
             // 
             // areaInfo1
             // 
@@ -375,11 +365,11 @@ namespace EnvironmentBuilder.Dialogs
             this.map_Panel1.TabIndex = 7;
             this.map_Panel1.West = 0F;
             this.map_Panel1.CoordinateChanged += new System.EventHandler<System.EventArgs>(this.map_Panel1_CoordinateChanged);
-            this.map_Panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseMove);
+            this.map_Panel1.DragEnter += new System.Windows.Forms.DragEventHandler(this.map_Panel1_DragEnter);
             this.map_Panel1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.map_Panel1_MouseClick);
             this.map_Panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseDown);
+            this.map_Panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseMove);
             this.map_Panel1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.map_Panel1_MouseUp);
-            this.map_Panel1.DragEnter += new System.Windows.Forms.DragEventHandler(this.map_Panel1_DragEnter);
             // 
             // EnvironmentBuilderGUI
             // 
@@ -399,8 +389,8 @@ namespace EnvironmentBuilder.Dialogs
             this.MinimumSize = new System.Drawing.Size(1078, 534);
             this.Name = "EnvironmentBuilderGUI";
             this.Text = "ESME Environment Builder";
-            this.Load += new System.EventHandler(this.Form_Load);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form_Closing);
+            this.Load += new System.EventHandler(this.Form_Load);
             this.Resize += new System.EventHandler(this.ESME_GE_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -442,16 +432,13 @@ namespace EnvironmentBuilder.Dialogs
         private System.Windows.Forms.ToolStripMenuItem chooseEnvironmentDatabaseDirectoryToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
-        private System.Windows.Forms.ToolStripMenuItem importOverlayFileToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip2;
         private System.Windows.Forms.ToolStripMenuItem displayToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addOverlayFileToolStripMenuItem;
         private EnvironmentBuilder.VisualControls.FileList_Control fileList_Control1;
-        private System.Windows.Forms.ToolStripMenuItem loadNEMOScenarioFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem extractCurrentViewToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem chooseNEMODataFilesDirectoryToolStripMenuItem;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog2;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
