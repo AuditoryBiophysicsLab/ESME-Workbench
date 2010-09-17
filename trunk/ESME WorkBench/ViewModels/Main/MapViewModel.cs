@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using Cinch;
@@ -10,6 +11,7 @@ using ESME.Environment;
 using ESME.Model;
 using ESME.Overlay;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.Bellhop;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Ribbon;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
@@ -17,6 +19,7 @@ using HRC.Navigation;
 using MEFedMVVM.Common;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
+using BathymetryOutOfBoundsException = ESME.Environment.BathymetryOutOfBoundsException;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -28,6 +31,8 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IUIVisualizerService _visualizerService;
         WpfMap _map;
         string _environmentFileName;
+
+        bool _environmentFileLoaded;
         
         public string MapDLLVersion { get; private set; }
         public LayerDisplayViewModel LayerDisplayViewModel { get; private set; }
@@ -39,6 +44,8 @@ namespace ESMEWorkBench.ViewModels.Main
             _viewAwareStatusService.ViewLoaded += ViewAwareStatusServiceViewLoaded;
             _messageBoxService = messageBoxService;
             _openFileService = openFileService;
+
+            Cursor = Cursors.Arrow;
 
             LayerDisplayViewModel = new LayerDisplayViewModel(this);
 
@@ -81,7 +88,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 LayerDisplayViewModel.Layers.Add(overlayLayer);
             });
 
-            OpenEnvironmentFileCommand = new SimpleCommand<object, object>(delegate(Object arg)
+            OpenEnvironmentFileCommand = new SimpleCommand<object, object>(delegate
             {
                 _openFileService.Filter = "ESME Environment File (*.eeb)|*.eeb";
                 var result = _openFileService.ShowDialog(null);
@@ -89,15 +96,28 @@ namespace ESMEWorkBench.ViewModels.Main
                 _environmentFileName = _openFileService.FileName;
                 var bathymetry = new Bathymetry(_environmentFileName);
 
-                var overlayLayer = new OverlayShapesLayerViewModel(null, Path.GetFileNameWithoutExtension(_environmentFileName) + " bathymetry bounds", this);
-                overlayLayer.Overlay = new LayerOverlay { TileType = TileType.SingleTile };
-                
+                var overlayLayer = new OverlayShapesLayerViewModel(null, Path.GetFileNameWithoutExtension(_environmentFileName) + " bathymetry bounds", this)
+                                   {
+                                       Overlay = new LayerOverlay
+                                                 {
+                                                     TileType = TileType.SingleTile
+                                                 }
+                                   };
+
                 Overlays.Add(overlayLayer.Overlay);
                 overlayLayer.OverlayShapes.Add(bathymetry.BoundingBox);
                 overlayLayer.CommitShapes();
 
+                _environmentFileLoaded = true;
+
                 LayerDisplayViewModel.Layers.Add(overlayLayer);
             });
+
+            QuickLookCommand = new SimpleCommand<object, object>(delegate { return _environmentFileLoaded; }, delegate
+                                                                                                              {
+                                                                                                                  Cursor = Cursors.Cross;
+                                                                                                                  IsQuickLookMode = true;
+                                                                                                              });
 
             MouseMoveCommand = new SimpleCommand<object, object>(delegate(Object arg)
             {
@@ -114,6 +134,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
             MouseLeftButtonUpCommand = new SimpleCommand<object, object>(delegate
             {
+                if (!IsQuickLookMode) return;
+                IsQuickLookMode = false;
                 //_messageBoxService.ShowInformation(String.Format("Mouse click at ({0:0.000000}, {1:0.000000})", MouseLatitude, MouseLongitude));
                 #region create transmission loss job. the new base class for all acoustic simulations!
 
@@ -121,11 +143,11 @@ namespace ESMEWorkBench.ViewModels.Main
                 {
                     AcousticProperties = new AcousticProperties
                     {
-                        SourceDepth_meters = 10,
-                        VerticalBeamWidth_degrees = 120,
-                        DepressionElevationAngle_degrees =0f,
-                        LowFrequency_Hz = 3500,
-                        HighFrequency_Hz = 3500,
+                        SourceDepth = 10,
+                        VerticalBeamWidth = 120,
+                        DepressionElevationAngle =0f,
+                        LowFrequency = 3500,
+                        HighFrequency = 3500,
                     },
                     NewAnalysisPoint = new NewAnalysisPoint
                     {
@@ -156,17 +178,36 @@ namespace ESMEWorkBench.ViewModels.Main
                     RangeCellSize = 50,
                 };
 
-                var bellhopRunFile = BellhopRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
+                var transmissionLossJobViewModel = new TransmissionLossJobViewModel
+                                                   {
+                                                       TransmissionLossJob = transmissionLossJob
+                                                   };
+                var result = _visualizerService.ShowDialog("TransmissionLossJobView", transmissionLossJobViewModel);
+                if ((!result.HasValue) || (!result.Value))
+                {
+                    Cursor = Cursors.Arrow;
+                    return;
+                }
 
-                var bellhopCalculatorViewModel = new BellhopCalculatorViewModel();
-                bellhopCalculatorViewModel.PropertyChanged += delegate(object sender, PropertyChangedEventArgs e)
-                                                              {
-                                                                  if (e.PropertyName != "TransmissionLossField") return;
-                                                                  var transmissionLossViewModel = new TransmissionLossFieldViewModel(bellhopCalculatorViewModel.TransmissionLossField);
-                                                                  _visualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
-                                                              };
-                _visualizerService.Show("BellhopCalculatorView", bellhopCalculatorViewModel, true, null);
-                bellhopCalculatorViewModel.Calculate(bellhopRunFile);
+                Cursor = Cursors.Wait;
+                Thread.Sleep(100);
+                
+                BellhopRunFile bellhopRunFile;
+                try
+                {
+                    bellhopRunFile = BellhopRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
+                }
+                catch (BathymetryOutOfBoundsException)
+                {
+                    _messageBoxService.ShowError("Unable to run quick look.\nDid you click outside the bounds of the environment file?");
+                    Cursor = Cursors.Arrow;
+                    return;
+                }
+                var transmissionLossField = FieldCalculator.ComputeField(bellhopRunFile, null);
+                var transmissionLossViewModel = new TransmissionLossFieldViewModel(transmissionLossField);
+                _visualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
+
+                Cursor = Cursors.Arrow;
                 #endregion
             });
 
@@ -209,6 +250,8 @@ namespace ESMEWorkBench.ViewModels.Main
             });
         }
 
+        public bool IsQuickLookMode { get; set; }
+
         #region public double MouseLatitude { get; set; }
 
         static readonly PropertyChangedEventArgs MouseLatitudeChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.MouseLatitude);
@@ -221,6 +264,23 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_mouseLatitude == value) return;
                 _mouseLatitude = value;
                 NotifyPropertyChanged(MouseLatitudeChangedEventArgs);
+            }
+        }
+
+        #endregion
+
+        #region public Cursor Cursor { get; set; }
+
+        static readonly PropertyChangedEventArgs CursorChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.Cursor);
+        Cursor _cursor;
+        public Cursor Cursor
+        {
+            get { return _cursor; }
+            set
+            {
+                if (_cursor == value) return;
+                _cursor = value;
+                NotifyPropertyChanged(CursorChangedEventArgs);
             }
         }
 
@@ -256,7 +316,7 @@ namespace ESMEWorkBench.ViewModels.Main
         public SimpleCommand<Object, Object> AddScenarioFileCommand { get; private set; }
 
         public SimpleCommand<Object, Object> OpenEnvironmentFileCommand { get; private set; }
-        public SimpleCommand<Object, Object> CloseEnvironmentFileCommand { get; private set; }
+        public SimpleCommand<Object, Object> QuickLookCommand { get; private set; }
 
         public SimpleCommand<Object, Object> MouseMoveCommand { get; private set; }
         public SimpleCommand<Object, Object> MouseLeftButtonUpCommand { get; private set; }

@@ -64,11 +64,11 @@ namespace ESME.TransmissionLoss
                                 Location = new HRC.Navigation.EarthCoordinate(fd.Latitude, fd.Longitude),
                                 AcousticProperties = new AcousticProperties
                                 {
-                                    DepressionElevationAngle_degrees = fd.VerticalLookAngle,
-                                    SourceDepth_meters = fd.SourceDepth,
-                                    HighFrequency_Hz = fd.HighFrequency,
-                                    LowFrequency_Hz = fd.LowFrequency,
-                                    VerticalBeamWidth_degrees = fd.VerticalBeamWidth,
+                                    DepressionElevationAngle = fd.VerticalLookAngle,
+                                    SourceDepth = fd.SourceDepth,
+                                    HighFrequency = fd.HighFrequency,
+                                    LowFrequency = fd.LowFrequency,
+                                    VerticalBeamWidth = fd.VerticalBeamWidth,
                                 },
                             },
                         });

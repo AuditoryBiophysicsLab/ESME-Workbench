@@ -17,7 +17,7 @@ namespace ESME.TransmissionLoss.Bellhop
             using (var sw = new StringWriter())
             {
                 sw.WriteLine("'TL'");
-                sw.WriteLine("{0:F},", transmissionLossJob.AcousticProperties.HighFrequency_Hz);
+                sw.WriteLine("{0:F},", transmissionLossJob.AcousticProperties.HighFrequency);
                 sw.WriteLine("1,"); // was NMEDIA in gui_genbellhopenv.m
                 sw.WriteLine(useSurfaceReflection ? "'CFMT'," : "'CVMT',");
 
@@ -53,7 +53,7 @@ namespace ESME.TransmissionLoss.Bellhop
                 sw.WriteLine("{0:F} {1:F} {2:F} {3:F} {4:F} {5:F} /", maxCalculationDepthMeters, sediment.CompressionWaveSpeed_metersSec, sediment.ShearWaveSpeed_metersSec, sediment.Density_gramsCC, sediment.CompressionWaveCoefficient, sediment.ShearWaveCoefficient);
                 // Source and Receiver Depths and Ranges
                 sw.WriteLine("1    !NSD"); // Number of Source Depths
-                sw.WriteLine("  {0:F} / ! source_depth", Math.Max(1, transmissionLossJob.AcousticProperties.SourceDepth_meters)); // source depth
+                sw.WriteLine("  {0:F} / ! source_depth", Math.Max(1, transmissionLossJob.AcousticProperties.SourceDepth)); // source depth
                 sw.WriteLine("{0}   ! NRD", depthCellCount); // Number of Receiver Depths
                 sw.WriteLine("  0.0 {0:F} /  ! surface_depth (0.0) to max_depth (in meters)", maxCalculationDepthMeters);
                 sw.WriteLine("{0}  ! NRR", rangeCellCount); // Number of receiver ranges
@@ -64,8 +64,8 @@ namespace ESME.TransmissionLoss.Bellhop
                     sw.WriteLine(useVerticalBeamforming ? "'IG*'" : "'I'");
                 }
                 sw.WriteLine("{0}", beamCount); // Number of beams
-                angle1 = transmissionLossJob.AcousticProperties.DepressionElevationAngle_degrees - (transmissionLossJob.AcousticProperties.VerticalBeamWidth_degrees/2);
-                angle2 = transmissionLossJob.AcousticProperties.DepressionElevationAngle_degrees + (transmissionLossJob.AcousticProperties.VerticalBeamWidth_degrees/2);
+                angle1 = transmissionLossJob.AcousticProperties.DepressionElevationAngle - (transmissionLossJob.AcousticProperties.VerticalBeamWidth/2);
+                angle2 = transmissionLossJob.AcousticProperties.DepressionElevationAngle + (transmissionLossJob.AcousticProperties.VerticalBeamWidth/2);
                 sw.WriteLine(angle1.ToString("###0.00") + " " + angle2.ToString("###0.00") + " /"); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("-60.00 60.00 /"); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("{0:F} {1:F} {2:F} ! step zbox(meters) rbox(km)", experiment.TransmissionLossSettings.DepthCellSize, RealBottomDepth_Meters + 100, (bottomProfile.Length / 1000.0) * 1.01);

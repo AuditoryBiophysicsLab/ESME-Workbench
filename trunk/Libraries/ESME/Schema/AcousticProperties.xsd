@@ -8,7 +8,7 @@
            version="1.0">
   <xs:complexType name="AcousticProperties">
     <xs:sequence>
-      <xs:element name="SourceDepth_meters"
+      <xs:element name="SourceDepth"
                   maxOccurs="1"
                   minOccurs="1">
         <xs:simpleType>
@@ -26,7 +26,7 @@
           </xs:restriction>
         </xs:simpleType>
       </xs:element>
-      <xs:element name="DepressionElevationAngle_degrees"
+      <xs:element name="DepressionElevationAngle"
                   maxOccurs="1"
                   minOccurs="1">
         <xs:simpleType>
@@ -36,7 +36,7 @@
           </xs:restriction>
         </xs:simpleType>
       </xs:element>
-      <xs:element name="LowFrequency_Hz"
+      <xs:element name="LowFrequency"
                   maxOccurs="1"
                   minOccurs="1">
         <xs:simpleType>
@@ -45,7 +45,7 @@
           </xs:restriction>
         </xs:simpleType>
       </xs:element>
-      <xs:element name="HighFrequency_Hz"
+      <xs:element name="HighFrequency"
                   maxOccurs="1"
                   minOccurs="1">
         <xs:simpleType>

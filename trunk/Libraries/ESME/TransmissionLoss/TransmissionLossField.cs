@@ -37,12 +37,12 @@ namespace ESME.TransmissionLoss
         {
             Latitude = (float) runFile.TransmissionLossJob.NewAnalysisPoint.Location.Latitude_degrees;
             Longitude = (float) runFile.TransmissionLossJob.NewAnalysisPoint.Location.Longitude_degrees;
-            SourceDepth = runFile.TransmissionLossJob.AcousticProperties.SourceDepth_meters;
-            VerticalBeamWidth = runFile.TransmissionLossJob.AcousticProperties.VerticalBeamWidth_degrees;
+            SourceDepth = runFile.TransmissionLossJob.AcousticProperties.SourceDepth;
+            VerticalBeamWidth = runFile.TransmissionLossJob.AcousticProperties.VerticalBeamWidth;
             VerticalLookAngle =
-                runFile.TransmissionLossJob.AcousticProperties.DepressionElevationAngle_degrees;
-            LowFrequency = runFile.TransmissionLossJob.AcousticProperties.LowFrequency_Hz;
-            HighFrequency = runFile.TransmissionLossJob.AcousticProperties.HighFrequency_Hz;
+                runFile.TransmissionLossJob.AcousticProperties.DepressionElevationAngle;
+            LowFrequency = runFile.TransmissionLossJob.AcousticProperties.LowFrequency;
+            HighFrequency = runFile.TransmissionLossJob.AcousticProperties.HighFrequency;
             MaxCalculationDepth = runFile.TransmissionLossJob.MaxDepth;
             Radius = runFile.TransmissionLossJob.Radius;
             //Depths = runFile.

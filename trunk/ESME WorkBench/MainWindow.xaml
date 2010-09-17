@@ -429,6 +429,9 @@
 		</Style>
 
 	</r:RibbonWindow.Resources>
+    <r:RibbonWindow.InputBindings>
+        <KeyBinding Command="{Binding CancelCurrentCommand}" Key="ESC"/>
+    </r:RibbonWindow.InputBindings>
 	<DockPanel LastChildFill="True">
 		<StatusBar DockPanel.Dock="Bottom">
 			<StatusBarItem>
@@ -567,7 +570,7 @@
 					                SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new quick look point to the experiment"
-					                Command="{Binding DisabledCommand}" />
+					                Command="{Binding MapViewModel.QuickLookCommand}" />
 				</r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="S"
@@ -614,7 +617,7 @@
 					                SmallImageSource="Images\SmallIcons\close-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Close the current environment file"
-					                Command="{Binding MapViewModel.CloseEnvironmentFileCommand}" />
+					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Edit"
 					                LargeImageSource="Images\LargeIcons\AddFile.png"
 					                SmallImageSource="Images\SmallIcons\AddFile.png"
@@ -842,6 +845,7 @@
 			              ResizeBehavior="BasedOnAlignment"
 			              ResizeDirection="Columns" />
 			<uc1:WpfMap Name="Map1"
+                        Cursor="{Binding MapViewModel.Cursor}"
 			            Grid.Column="2">
 				<i:Interaction.Triggers>
 					<i:EventTrigger EventName="MouseLeftButtonUp">

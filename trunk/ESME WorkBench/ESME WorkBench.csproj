@@ -123,6 +123,9 @@
     <Compile Include="OptionsPopup.xaml.cs">
       <DependentUpon>OptionsPopup.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TransmissionLossJobView.xaml.cs">
+      <DependentUpon>TransmissionLossJobView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TransmissionLossView.xaml.cs">
       <DependentUpon>TransmissionLossView.xaml</DependentUpon>
     </Compile>
@@ -172,6 +175,7 @@
     <Compile Include="ViewModels\TransmissionLoss\BellhopCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\ColorMapViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossJobViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialViewModel.cs" />
     <Page Include="AboutBox.xaml">
       <SubType>Designer</SubType>
@@ -244,6 +248,10 @@
     <Page Include="Themes\WhistlerBlue.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionLossJobView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TransmissionLossView.xaml">
       <SubType>Designer</SubType>
