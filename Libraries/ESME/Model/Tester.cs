@@ -38,11 +38,11 @@ namespace ESME.Model
                 {
                     AcousticProperties = new AcousticProperties
                     {
-                        DepressionElevationAngle_degrees = 0,
-                        HighFrequency_Hz = 3500,
-                        LowFrequency_Hz = 3500,
-                        SourceDepth_meters = 10,
-                        VerticalBeamWidth_degrees = 90,
+                        DepressionElevationAngle = 0,
+                        HighFrequency = 3500,
+                        LowFrequency = 3500,
+                        SourceDepth = 10,
+                        VerticalBeamWidth = 90,
                     },
                     FieldRadius_meters = 10000,
                     RangeCellSize_meters = 50,
@@ -115,11 +115,11 @@ namespace ESME.Model
                 Location = new EarthCoordinate(0, 0),
                 AcousticProperties = new AcousticProperties
                 {
-                    DepressionElevationAngle_degrees = 0,
-                    SourceDepth_meters = 10,
-                    HighFrequency_Hz = 3500,
-                    LowFrequency_Hz = 3500,
-                    VerticalBeamWidth_degrees = 90,
+                    DepressionElevationAngle = 0,
+                    SourceDepth = 10,
+                    HighFrequency = 3500,
+                    LowFrequency = 3500,
+                    VerticalBeamWidth = 90,
                 },
             };
             AnalysisPoint analysisPoint2 = new AnalysisPoint(analysisPoint1)

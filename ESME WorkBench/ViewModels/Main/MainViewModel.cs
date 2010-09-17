@@ -64,7 +64,13 @@ namespace ESMEWorkBench.ViewModels.Main
             MapViewModel = new MapViewModel(_viewAwareStatusService, _messageBoxService, _openFileService, _visualizerService);
 
             DisabledCommand = new SimpleCommand<object, object>(delegate { return false; }, delegate { });
-            
+
+            CancelCurrentCommand = new SimpleCommand<object, object>(delegate
+                                                                     {
+                                                                         MapViewModel.IsQuickLookMode = false;
+                                                                         MapViewModel.Cursor = Cursors.Arrow;
+                                                                     });
+
             //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");
         }
 
@@ -79,6 +85,7 @@ namespace ESMEWorkBench.ViewModels.Main
         public SimpleCommand<Object, Object> TestTransmissionLossViewCommand { get; private set; }
 
         public SimpleCommand<Object, Object> DisabledCommand { get; private set; }
+        public SimpleCommand<Object, Object> CancelCurrentCommand { get; private set; }
 
         #endregion
     }

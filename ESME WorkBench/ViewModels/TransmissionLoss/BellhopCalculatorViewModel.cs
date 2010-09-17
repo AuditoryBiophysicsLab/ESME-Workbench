@@ -37,7 +37,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (value == _log) return;
                 _log = value;
                 NotifyPropertyChanged(LogChangedEventArgs);
-                System.Diagnostics.Debug.Write(_log);
+                //System.Diagnostics.Debug.Write(_log);
             }
         }
 
