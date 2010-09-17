@@ -1,36 +1,26 @@
 ﻿using System;
-using System.IO;
-using System.Reflection;
-using System.Windows.Input;
 using Cinch;
-using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Main;
-using ESMEWorkBench.ViewModels.RecentFiles;
-using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.Ribbon
 {
-    public class RibbonViewModel : ViewModelBase, IDesignTimeAware
+    [ExportViewModel("RibbonViewModel")]
+    public class RibbonViewModel : ViewModelBase
     {
         public RibbonViewModel(MainViewModel mainViewModel, MapViewModel mapViewModel)
         {
             MainViewModel = mainViewModel;
             MapViewModel = mapViewModel;
             DisabledCommand = new SimpleCommand<object, object>(delegate { return false; }, delegate { });
-            if (!Designer.IsInDesignMode) CreateRibbonBindings();
         }
 
         public MainViewModel MainViewModel { get; private set; }
         public MapViewModel MapViewModel { get; private set; }
 
-        public ApplicationMenuItemList ApplicationMenuItems { get; private set; }
-        public TabList Tabs { get; private set; }
-
         public SimpleCommand<Object, Object> DisabledCommand { get; private set; }
 
-        public void DesignTimeInitialization() { CreateRibbonBindings(); }
-
+#if false
         void CreateRibbonBindings()
         {
             ApplicationMenuItems = new ApplicationMenuItemList
@@ -401,5 +391,6 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                        #endregion
                    };
         }
+#endif
     }
 }
