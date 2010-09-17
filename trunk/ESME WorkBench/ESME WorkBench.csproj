@@ -163,7 +163,6 @@
     <Compile Include="ViewModels\Ribbon\MenuItemDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\RadioButtonDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\RibbonListClasses.cs" />
-    <Compile Include="ViewModels\Ribbon\RibbonViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\SeparatorDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\SplitButtonDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\SplitMenuItemDataViewModel.cs" />

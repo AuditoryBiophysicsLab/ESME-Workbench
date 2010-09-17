@@ -62,13 +62,13 @@ namespace ESMEWorkBench.ViewModels.Main
             });
 
             MapViewModel = new MapViewModel(_viewAwareStatusService, _messageBoxService, _openFileService, _visualizerService);
-            RibbonViewModel = new RibbonViewModel(this, MapViewModel);
 
+            DisabledCommand = new SimpleCommand<object, object>(delegate { return false; }, delegate { });
+            
             //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");
         }
 
         public MapViewModel MapViewModel { get; set; }
-        public RibbonViewModel RibbonViewModel { get; private set; }
 
         #endregion
 
@@ -77,6 +77,8 @@ namespace ESMEWorkBench.ViewModels.Main
         public SimpleCommand<Object, Object> EditOptionsCommand { get; private set; }
         public SimpleCommand<Object, Object> LaunchExternalProgramCommand { get; private set; }
         public SimpleCommand<Object, Object> TestTransmissionLossViewCommand { get; private set; }
+
+        public SimpleCommand<Object, Object> DisabledCommand { get; private set; }
 
         #endregion
     }
