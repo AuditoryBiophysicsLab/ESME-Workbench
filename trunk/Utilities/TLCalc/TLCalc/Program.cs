@@ -23,7 +23,7 @@ namespace TLCalc
             // Input files are put in this directory after they have been processed.
             var processedPath = args[1];
 
-#if true
+#if false
             // Usage: TLCalc <SearchPath> <ProcessedPath>
             while (true)
             {
@@ -46,7 +46,6 @@ namespace TLCalc
                 }
                 Thread.Sleep(1000);
             }
-#else
             // Usage: TLCalc <SearchPath> <ProcessedPath> <EnvironmentFile> <OutputFile>
             var environmentFile = args[2];
             var outputFile = args[3];
