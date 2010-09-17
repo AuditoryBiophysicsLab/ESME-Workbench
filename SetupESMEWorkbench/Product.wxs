@@ -8,6 +8,7 @@
   <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
   <?define ESMEPath="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release"?>
+  <?define EnvironmentBuilderPath="C:\Projects\ESME Deliverables\trunk\Utilities\EnvironmentBuilder\bin\x86\Release"?>
   <?define ReleaseNotesPath="C:\Projects\ESME Deliverables\trunk\Release Notes"?>
   <Product Id="$(var.ProductCode)" 
            Name="$(var.ProductName)" 
@@ -72,10 +73,10 @@
             <!-- External executables -->
             <File Id="EnvironmentBuilder.exe"
                   Name="EnvironmentBuilder.exe"
-                  Source="$(var.ESMEPath)\EnvironmentBuilder.exe" />
+                  Source="$(var.EnvironmentBuilderPath)\EnvironmentBuilder.exe" />
             <File Id="EnvironmentBuilder.exe.config"
                   Name="EnvironmentBuilder.exe.config"
-                  Source="$(var.ESMEPath)\EnvironmentBuilder.exe.config" />
+                  Source="$(var.EnvironmentBuilderPath)\EnvironmentBuilder.exe.config" />
             <File Id="bellhop.exe"
                   Name="bellhop.exe"
                   Source="$(var.ESMEPath)\bellhop.exe" />
@@ -214,6 +215,9 @@
       <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWPRODUCTFOUND</Custom>
     </InstallUISequence>
 
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
+    <UIRef Id="WixUI_InstallDir" />
+    <!--
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="View README.TXT file when setup exits" />
     <Property Id="WIXUI_INSTALLDIR" Value="TARGETDIR" />
     <UI>
@@ -226,7 +230,6 @@
     <Property Id="WixShellExecTarget" Value="[#ReadMe.txt]" />
     <CustomAction Id="ViewReadmeOnExit" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
 
-    <!--
     <PropertyRef Id="NETFRAMEWORK40FULL"/>
     <Condition Message="The .NET Framework 4.0 full version must be installed before installing ESME WorkBench">
       <![CDATA[Installed OR NETFRAMEWORK40]]>
