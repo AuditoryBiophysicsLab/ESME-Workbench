@@ -10,13 +10,11 @@ namespace ESMEWorkBench.ViewModels.Layers
 {
     public class ShapefileLayerViewModel : LayerViewModel
     {
-        public ShapefileLayerViewModel(string shapefileFileName, MapViewModel mapViewModel) : base(Path.GetFileNameWithoutExtension(shapefileFileName), shapefileFileName, mapViewModel)
+        public ShapefileLayerViewModel(string shapefileFileName) 
+            : base(Path.GetFileNameWithoutExtension(shapefileFileName), shapefileFileName)
         {
-            Overlay = new LayerOverlay
-                      {
-                          TileType = TileType.SingleTile
-                      };
-            mapViewModel.Overlays.Add(Overlay);
+            Overlay = new LayerOverlay();
+            Globals.MapViewModel.Overlays.Add(Overlay);
 
             string projection = null;
             var projectionFile = Path.Combine(Path.GetDirectoryName(shapefileFileName), "projection.txt");

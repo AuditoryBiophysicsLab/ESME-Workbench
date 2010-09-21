@@ -15,41 +15,31 @@ namespace ESMEWorkBench.ViewModels.Main
     [ExportViewModel("MainViewModel")]
     public class MainViewModel : ViewModelBase
     {
-        #region Data
-
-        readonly IMessageBoxService _messageBoxService;
-        readonly IOpenFileService _openFileService;
-        readonly IViewAwareStatus _viewAwareStatusService;
-        readonly IUIVisualizerService _visualizerService;
-
-        public static AppSettings AppSettings { get; set; }
-
-        #endregion
-
         #region Constructors
 
-        static MainViewModel() { AppSettings = AppSettings.Load(); }
+        static MainViewModel() { Globals.AppSettings = AppSettings.Load(); }
 
         [ImportingConstructor]
         public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService, IUIVisualizerService visualizerService)
         {
-            _viewAwareStatusService = viewAwareStatusService;
-            _messageBoxService = messageBoxService;
-            _openFileService = openFileService;
-            _visualizerService = visualizerService;
+            Globals.ViewAwareStatus = viewAwareStatusService;
+            Globals.MessageBoxService = messageBoxService;
+            Globals.OpenFileService = openFileService;
+            Globals.UIVisualizerService = visualizerService;
+            Globals.MainViewModel = this;
 
             EditOptionsCommand = new SimpleCommand<object, object>(delegate
                                                                    {
                                                                        var programOptionsViewModel = new ProgramOptionsViewModel();
-                                                                       var result = _visualizerService.ShowDialog("OptionsPopup", programOptionsViewModel);
-                                                                       if ((result.HasValue) && (result.Value)) AppSettings.Save();
-                                                                       else AppSettings.Reload();
+                                                                       var result = Globals.UIVisualizerService.ShowDialog("OptionsPopup", programOptionsViewModel);
+                                                                       if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save();
+                                                                       else Globals.AppSettings.Reload();
                                                                    });
 
             TestTransmissionLossViewCommand = new SimpleCommand<object, object>(delegate
                                                                                 {
                                                                                     var transmissionLossViewModel = new TransmissionLossFieldViewModel(@"C:\Users\Dave Anderson\Desktop\Bahamas.tlf");
-                                                                                    _visualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
+                                                                                    Globals.UIVisualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
                                                                                 });
 
             LaunchExternalProgramCommand = new SimpleCommand<object, object>(delegate(Object arg)
@@ -60,14 +50,14 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                  executable.Start();
                                                                              });
 
-            LaunchScenarioEditorCommand = new SimpleCommand<object, object>(delegate { return (AppSettings.ScenarioEditorExecutablePath != null) && (File.Exists(AppSettings.ScenarioEditorExecutablePath)); }, delegate
+            LaunchScenarioEditorCommand = new SimpleCommand<object, object>(delegate { return (Globals.AppSettings.ScenarioEditorExecutablePath != null) && (File.Exists(Globals.AppSettings.ScenarioEditorExecutablePath)); }, delegate
                                                                                                                                                                                                                 {
                                                                                                                                                                                                                     new Process
                                                                                                                                                                                                                     {
                                                                                                                                                                                                                         StartInfo =
                                                                                                                                                                                                                             {
-                                                                                                                                                                                                                                FileName = AppSettings.ScenarioEditorExecutablePath,
-                                                                                                                                                                                                                                WorkingDirectory = Path.GetDirectoryName(AppSettings.ScenarioEditorExecutablePath),
+                                                                                                                                                                                                                                FileName = Globals.AppSettings.ScenarioEditorExecutablePath,
+                                                                                                                                                                                                                                WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.ScenarioEditorExecutablePath),
                                                                                                                                                                                                                             }
                                                                                                                                                                                                                     }.Start();
                                                                                                                                                                                                                 });
@@ -75,7 +65,7 @@ namespace ESMEWorkBench.ViewModels.Main
             LaunchEnvironmentBuilderCommand = new SimpleCommand<object, object>(delegate
                                                                                 {
                                                                                     var environmentBuilder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe");
-                                                                                    return (File.Exists(environmentBuilder) && ((AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(AppSettings.EnvironmentDatabaseDirectory))));
+                                                                                    return (File.Exists(environmentBuilder) && ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory))));
                                                                                 }, delegate
                                                                                    {
                                                                                        var environmentBuilder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe");
@@ -84,19 +74,19 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                            StartInfo =
                                                                                                {
                                                                                                    FileName = environmentBuilder,
-                                                                                                   Arguments = string.Format("\"{0}\"", AppSettings.EnvironmentDatabaseDirectory),
+                                                                                                   Arguments = string.Format("\"{0}\"", Globals.AppSettings.EnvironmentDatabaseDirectory),
                                                                                                }
                                                                                        }.Start();
                                                                                    });
 
-            MapViewModel = new MapViewModel(_viewAwareStatusService, _messageBoxService, _openFileService, _visualizerService);
+            Globals.MapViewModel = new MapViewModel();
 
             DisabledCommand = new SimpleCommand<object, object>(delegate { return false; }, delegate { });
 
             CancelCurrentCommand = new SimpleCommand<object, object>(delegate
                                                                      {
-                                                                         MapViewModel.IsQuickLookMode = false;
-                                                                         MapViewModel.Cursor = Cursors.Arrow;
+                                                                         Globals.MapViewModel.IsQuickLookMode = false;
+                                                                         Globals.MapViewModel.Cursor = Cursors.Arrow;
                                                                      });
 
             //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");
@@ -111,25 +101,22 @@ namespace ESMEWorkBench.ViewModels.Main
                 switch (Path.GetExtension(file).ToLower())
                 {
                     case ".shp":
-                        MapViewModel.AddShapeFile(file);
+                        Globals.MapViewModel.AddShapeFile(file);
                         break;
                     case ".ovr":
-                        MapViewModel.AddOverlayFile(file);
+                        Globals.MapViewModel.AddOverlayFile(file);
                         break;
                     case ".eeb":
-                        MapViewModel.AddEnvironmentFile(file);
+                        Globals.MapViewModel.AddEnvironmentFile(file);
                         break;
                     case ".nemo":
-                        if (MapViewModel.CanAddScenarioFile())
-                            MapViewModel.AddScenarioFile(file);
+                        if (Globals.MapViewModel.CanAddScenarioFile())
+                            Globals.MapViewModel.AddScenarioFile(file);
                         break;
                 }
             }
-            MapViewModel.Refresh();
+            Globals.MapViewModel.Refresh();
         }
-
-
-        public MapViewModel MapViewModel { get; set; }
 
         #endregion
 

@@ -9,7 +9,7 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         public ProgramOptionsViewModel()
         {
-            AppSettings = MainViewModel.AppSettings;
+            AppSettings = Globals.AppSettings;
 
             OkCommand = new SimpleCommand<object, object>(delegate
             {
