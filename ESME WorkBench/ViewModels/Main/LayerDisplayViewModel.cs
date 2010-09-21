@@ -12,16 +12,14 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<LayerDisplayViewModel>(x => x.Layers);
         ObservableCollection<LayerViewModel> _layers;
-        LayerViewModel _selectedLayer;
-        int _selectedIndex;
         readonly MapViewModel _mapViewModel;
 
         public LayerDisplayViewModel(MapViewModel mapViewModel)
         {
-            MoveLayerToTopCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerToTopCommand);
-            MoveLayerUpCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerUpCommand);
-            MoveLayerDownCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerDownCommand);
-            MoveLayerToBottomCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerToBottomCommand);
+            MoveLayerToBackCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerToTopCommand);
+            MoveLayerBackCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerUpCommand);
+            MoveLayerForwardCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerDownCommand);
+            MoveLayerToFrontCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerToBottomCommand);
             Layers = new ObservableCollection<LayerViewModel>();
             _mapViewModel = mapViewModel;
         }
@@ -39,107 +37,72 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        public void Clear()
-        {
-            foreach (var layer in Layers)
-            {
-                layer.Remove();
-                layer.PropertyChanged -= Layer_PropertyChanged;
-            }
-            Layers.Clear();
-        }
-
-        public SimpleCommand<Object, Object> MoveLayerToTopCommand { get; private set; }
-        public SimpleCommand<Object, Object> MoveLayerUpCommand { get; private set; }
-        public SimpleCommand<Object, Object> MoveLayerDownCommand { get; private set; }
-        public SimpleCommand<Object, Object> MoveLayerToBottomCommand { get; private set; }
+        public SimpleCommand<Object, Object> MoveLayerToBackCommand { get; private set; }
+        public SimpleCommand<Object, Object> MoveLayerBackCommand { get; private set; }
+        public SimpleCommand<Object, Object> MoveLayerForwardCommand { get; private set; }
+        public SimpleCommand<Object, Object> MoveLayerToFrontCommand { get; private set; }
 
         void ShapeLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Move:
-                case NotifyCollectionChangedAction.Reset:
-                    return;
-                case NotifyCollectionChangedAction.Add:
-                case NotifyCollectionChangedAction.Remove:
-                case NotifyCollectionChangedAction.Replace:
-                    break;
-            }
-            if (e.NewItems != null)
-                foreach (var newLayer in e.NewItems.Cast<LayerViewModel>())
-                {
-                    newLayer.PropertyChanged += Layer_PropertyChanged;
-                    _mapViewModel.Refresh();
-                }
-            if (e.OldItems != null)
-                foreach (var oldLayer in e.OldItems.Cast<LayerViewModel>())
-                {
-                    oldLayer.PropertyChanged -= Layer_PropertyChanged;
-                    oldLayer.Remove();
-                    _mapViewModel.Refresh();
-                }
             NotifyPropertyChanged(LayersChangedEventArgs);
         }
 
-        void Layer_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var src = (LayerViewModel)sender;
-            switch (e.PropertyName)
-            {
-                case "IsSelected":
-                    _selectedLayer = null;
-                    if (src.IsSelected)
-                        _selectedLayer = src;
-                    break;
-                default:
-                    return;
-            }
-        }
         #endregion
 
         void ExecuteMoveLayerUpCommand(Object args)
         {
-            _mapViewModel.Overlays.MoveTo(_selectedIndex + 1, _selectedIndex);
-            Layers.Move(_selectedIndex, _selectedIndex - 1);
+            var layer = (LayerViewModel)args;
+            if (layer == null) return;
+            var layerIndex = Layers.IndexOf(layer);
+            _mapViewModel.Overlays.MoveTo(layerIndex + 1, layerIndex);
+            Layers.Move(layerIndex, layerIndex - 1);
             _mapViewModel.Refresh();
         }
 
         void ExecuteMoveLayerDownCommand(Object args)
         {
-            _mapViewModel.Overlays.MoveTo(_selectedIndex + 1, _selectedIndex + 2);
-            Layers.Move(_selectedIndex, _selectedIndex + 1);
+            var layer = (LayerViewModel)args;
+            if (layer == null) return;
+            var layerIndex = Layers.IndexOf(layer);
+            _mapViewModel.Overlays.MoveTo(layerIndex + 1, layerIndex + 2);
+            Layers.Move(layerIndex, layerIndex + 1);
             _mapViewModel.Refresh();
         }
 
         void ExecuteMoveLayerToTopCommand(Object args)
         {
-            _mapViewModel.Overlays.MoveTo(_selectedIndex + 1, 1);
-            Layers.Move(_selectedIndex, 0);
+            var layer = (LayerViewModel)args;
+            if (layer == null) return;
+            var layerIndex = Layers.IndexOf(layer);
+            _mapViewModel.Overlays.MoveTo(layerIndex, 1);
+            Layers.Move(layerIndex, 0);
             _mapViewModel.Refresh();
         }
 
         void ExecuteMoveLayerToBottomCommand(Object args)
         {
-            _mapViewModel.Overlays.MoveTo(_selectedIndex + 1, _mapViewModel.Overlays.Count - 1);
-            Layers.Move(_selectedIndex, Layers.Count - 1);
+            var layer = (LayerViewModel)args;
+            if (layer == null) return;
+            var layerIndex = Layers.IndexOf(layer);
+            _mapViewModel.Overlays.MoveTo(layerIndex, _mapViewModel.Overlays.Count - 1);
+            Layers.Move(layerIndex, Layers.Count - 1);
             _mapViewModel.Refresh();
         }
 
         bool CanMoveLayerUpCommand(Object args)
         {
-            if (_selectedLayer == null)
-                return false;
-            _selectedIndex = Layers.IndexOf(_selectedLayer);
-            return _selectedIndex > 0;
+            var layer = (LayerViewModel) args;
+            if (layer == null) return false;
+            var layerIndex = Layers.IndexOf(layer);
+            return (layerIndex > 0) && (Layers.Count > 1);
         }
 
         bool CanMoveLayerDownCommand(Object args)
         {
-            if (_selectedLayer == null)
-                return false;
-            _selectedIndex = Layers.IndexOf(_selectedLayer);
-            return _selectedIndex < (Layers.Count - 1);
+            var layer = (LayerViewModel)args;
+            if (layer == null) return false;
+            var layerIndex = Layers.IndexOf(layer);
+            return ((layerIndex < (Layers.Count - 1)) && (Layers.Count > 1));
         }
     }
 }
