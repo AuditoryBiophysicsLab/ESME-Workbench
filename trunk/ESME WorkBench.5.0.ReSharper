@@ -116,6 +116,7 @@
       <Abbreviation Text="DLL" />
       <Abbreviation Text="SSP" />
       <Abbreviation Text="IUI" />
+      <Abbreviation Text="UI" />
     </Naming2>
   </CodeStyleSettings>
 </Configuration>

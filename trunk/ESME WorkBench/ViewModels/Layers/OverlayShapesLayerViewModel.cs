@@ -5,9 +5,9 @@ using System.ComponentModel;
 using System.Drawing;
 using Cinch;
 using ESME.Overlay;
-using ESMEWorkBench.ViewModels.Main;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
+using LineStyle = ThinkGeo.MapSuite.Core.LineStyle;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
@@ -17,16 +17,16 @@ namespace ESMEWorkBench.ViewModels.Layers
         InMemoryFeatureLayer _newLayer;
         float _width;
 
-        public OverlayShapesLayerViewModel(string name, IEnumerable<OverlayShape> shapes, MapViewModel mapViewModel) : base(name, null, mapViewModel)
+        public OverlayShapesLayerViewModel(string name, IEnumerable<OverlayShape> shapes) : base(name, null)
         {
             OverlayShapes = new ObservableCollection<OverlayShape>();
             ShapeLayers = new ObservableCollection<InMemoryFeatureLayer>();
 
-            foreach (OverlayShape shape in shapes) OverlayShapes.Add(shape);
+            foreach (var shape in shapes) OverlayShapes.Add(shape);
             CommitShapes();
         }
 
-        public OverlayShapesLayerViewModel(Overlay layerOverlay, string name, MapViewModel mapViewModel) : base(name, null, mapViewModel)
+        public OverlayShapesLayerViewModel(Overlay layerOverlay, string name) : base(name, null)
         {
             OverlayShapes = new ObservableCollection<OverlayShape>();
             ShapeLayers = new ObservableCollection<InMemoryFeatureLayer>();
@@ -50,25 +50,39 @@ namespace ESMEWorkBench.ViewModels.Layers
             }
         }
 
+        public LineStyle LineStyle { get; set; }
+
+        public PointStyle PointStyle { get; set; }
+
         void ShapeLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
             {
-                foreach (object item in e.NewItems)
+                foreach (var item in e.NewItems)
                 {
                     var newLayer = (InMemoryFeatureLayer) item;
-                    newLayer.ZoomLevelSet.ZoomLevel01.DefaultLineStyle.OuterPen = new GeoPen(GeoColor.FromArgb(_color.A, _color.R, _color.G, _color.B), _width);
-                    newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolPen = new GeoPen(GeoColor.FromArgb(_color.A, _color.R, _color.G, _color.B), _width);
-                    newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolSize = _width;
-                    newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolType = PointSymbolType.Circle;
+                    if ((LineStyle == null) && (PointStyle == null))
+                    {
+                        newLayer.ZoomLevelSet.ZoomLevel01.DefaultLineStyle.OuterPen = new GeoPen(GeoColor.FromArgb(_color.A, _color.R, _color.G, _color.B), _width);
+                        newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolPen = new GeoPen(GeoColor.FromArgb(_color.A, _color.R, _color.G, _color.B), _width);
+                        newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolSize = _width;
+                        newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle.SymbolType = PointSymbolType.Circle;
+                    }
+                    else
+                    {
+                        if (LineStyle != null) newLayer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(LineStyle);
+                        if (PointStyle != null) newLayer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(PointStyle);
+                    }
+                        
                     newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
+
                     ((LayerOverlay) Overlay).Layers.Add(newLayer);
                 }
                 //LayerOverlay.Refresh();
             }
             if (e.OldItems != null)
             {
-                foreach (object item in e.OldItems)
+                foreach (var item in e.OldItems)
                 {
                     var oldLayer = (InMemoryFeatureLayer) item;
                     ((LayerOverlay) Overlay).Layers.Remove(oldLayer);
@@ -100,7 +114,7 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         void OverlayShapesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            foreach (object item in e.NewItems)
+            foreach (var item in e.NewItems)
             {
                 var shape = (OverlayShape) item;
                 if (_newLayer != null)

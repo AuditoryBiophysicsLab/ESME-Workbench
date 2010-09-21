@@ -1,19 +1,16 @@
 ﻿using System.IO;
 using ESME.Overlay;
-using ESMEWorkBench.ViewModels.Main;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
     public class OverlayFileLayerViewModel : OverlayShapesLayerViewModel
     {
-        public OverlayFileLayerViewModel(string overlayFileName, MapViewModel mapViewModel) : base((Overlay) null, Path.GetFileNameWithoutExtension(overlayFileName), mapViewModel)
+        public OverlayFileLayerViewModel(string overlayFileName) 
+            : base(null, Path.GetFileNameWithoutExtension(overlayFileName))
         {
-            Overlay = new LayerOverlay
-                      {
-                          TileType = TileType.SingleTile
-                      };
-            mapViewModel.Overlays.Add(Overlay);
+            Overlay = new LayerOverlay();
+            Globals.MapViewModel.Overlays.Add(Overlay);
 
             var overlayFile = new OverlayFile(overlayFileName);
             foreach (var s in overlayFile.Shapes) OverlayShapes.Add(s);

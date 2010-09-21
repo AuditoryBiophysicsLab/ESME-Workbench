@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
@@ -10,11 +9,9 @@ using System.Windows.Input;
 using Cinch;
 using ESME.Environment;
 using ESME.Model;
-using ESME.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESMEWorkBench.ViewModels.Layers;
-using ESMEWorkBench.ViewModels.Ribbon;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 using MEFedMVVM.Common;
@@ -26,28 +23,20 @@ namespace ESMEWorkBench.ViewModels.Main
 {
     public class MapViewModel : ViewModelBase
     {
-        readonly IViewAwareStatus _viewAwareStatusService;
-        readonly IOpenFileService _openFileService;
-        readonly IMessageBoxService _messageBoxService;
         WpfMap _map;
         string _environmentFileName;
 
         bool _environmentFileLoaded;
         
         public string MapDLLVersion { get; private set; }
-        public LayerDisplayViewModel LayerDisplayViewModel { get; private set; }
 
-        public MapViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService, IUIVisualizerService visualizerService)
+        public MapViewModel()
         {
-            IUIVisualizerService = visualizerService;
-            _viewAwareStatusService = viewAwareStatusService;
-            _viewAwareStatusService.ViewLoaded += ViewAwareStatusServiceViewLoaded;
-            _messageBoxService = messageBoxService;
-            _openFileService = openFileService;
+            Globals.ViewAwareStatus.ViewLoaded += ViewAwareStatusServiceViewLoaded;
 
             Cursor = Cursors.Arrow;
 
-            LayerDisplayViewModel = new LayerDisplayViewModel(this);
+            Globals.LayerDisplayViewModel = new LayerDisplayViewModel(this);
 
             ToggleBaseMapDisplayCommand = new SimpleCommand<object, object>(delegate (Object args)
             {
@@ -72,18 +61,18 @@ namespace ESMEWorkBench.ViewModels.Main
 
             AddShapefileCommand = new SimpleCommand<object, object>(delegate
             {
-                _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
-                var result = _openFileService.ShowDialog(null);
+                Globals.OpenFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
+                var result = Globals.OpenFileService.ShowDialog(null);
                 if (!result.HasValue || !result.Value) return;
-                AddShapeFile(_openFileService.FileName);
+                AddShapeFile(Globals.OpenFileService.FileName);
             });
 
             OpenEnvironmentFileCommand = new SimpleCommand<object, object>(delegate
             {
-                _openFileService.Filter = "ESME Environment File (*.eeb)|*.eeb";
-                var result = _openFileService.ShowDialog(null);
+                Globals.OpenFileService.Filter = "ESME Environment File (*.eeb)|*.eeb";
+                var result = Globals.OpenFileService.ShowDialog(null);
                 if (!result.HasValue || !result.Value) return;
-                AddEnvironmentFile(_openFileService.FileName);
+                AddEnvironmentFile(Globals.OpenFileService.FileName);
             });
 
             QuickLookCommand = new SimpleCommand<object, object>(delegate { return _environmentFileLoaded; }, delegate
@@ -95,9 +84,6 @@ namespace ESMEWorkBench.ViewModels.Main
             MouseMoveCommand = new SimpleCommand<object, object>(delegate(Object arg)
             {
                 var args = (EventToCommandArgs)arg;
-                var commandRan = args.CommandRan;
-                var o = args.CommandParameter;
-                var sender = args.Sender;
                 var e = (MouseEventArgs)args.EventArgs;
                 var point = e.MouseDevice.GetPosition(_map);
                 var pointShape = ExtentHelper.ToWorldCoordinate(_map.CurrentExtent, (float)point.X, (float)point.Y, (float)_map.ActualWidth, (float)_map.ActualHeight);
@@ -109,7 +95,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (!IsQuickLookMode) return;
                 IsQuickLookMode = false;
-                //_messageBoxService.ShowInformation(String.Format("Mouse click at ({0:0.000000}, {1:0.000000})", MouseLatitude, MouseLongitude));
+                //Globals.MessageBoxService.ShowInformation(String.Format("Mouse click at ({0:0.000000}, {1:0.000000})", MouseLatitude, MouseLongitude));
                 #region create transmission loss job. the new base class for all acoustic simulations!
 
                 var transmissionLossJob = new TransmissionLossJob
@@ -145,7 +131,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     Sediment = SedimentTypes.SedimentArray[0],
                 };
 
-                var transmissionLossSettings = new TransmissionLossSettings()
+                var transmissionLossSettings = new TransmissionLossSettings
                 {
                     DepthCellSize = 50,
                     RangeCellSize = 50,
@@ -155,7 +141,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                    {
                                                        TransmissionLossJob = transmissionLossJob
                                                    };
-                var result = IUIVisualizerService.ShowDialog("TransmissionLossJobView", transmissionLossJobViewModel);
+                var result = Globals.UIVisualizerService.ShowDialog("TransmissionLossJobView", transmissionLossJobViewModel);
                 if ((!result.HasValue) || (!result.Value))
                 {
                     Cursor = Cursors.Arrow;
@@ -172,7 +158,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 }
                 catch (BathymetryOutOfBoundsException)
                 {
-                    _messageBoxService.ShowError("Unable to run quick look.\nDid you click outside the bounds of the environment file?");
+                    Globals.MessageBoxService.ShowError("Unable to run quick look.\nDid you click outside the bounds of the environment file?");
                     Cursor = Cursors.Arrow;
                     return;
                 }
@@ -180,13 +166,13 @@ namespace ESMEWorkBench.ViewModels.Main
                 {
                     var sb = new StringBuilder();
                     foreach (var e in ex.InnerExceptions) sb.Append(e.Message + "\n");
-                    _messageBoxService.ShowError("One or more errors occurred calculating transmission loss:\n" + sb);
+                    Globals.MessageBoxService.ShowError("One or more errors occurred calculating transmission loss:\n" + sb);
                     Cursor = Cursors.Arrow;
                     return;
                 }
                 var transmissionLossField = FieldCalculator.ComputeField(bellhopRunFile, null);
                 var transmissionLossViewModel = new TransmissionLossFieldViewModel(transmissionLossField);
-                IUIVisualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
+                Globals.UIVisualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
 
                 Cursor = Cursors.Arrow;
                 #endregion
@@ -194,18 +180,18 @@ namespace ESMEWorkBench.ViewModels.Main
             
             AddOverlayFileCommand = new SimpleCommand<object, object>(delegate
             {
-                _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
-                var result = _openFileService.ShowDialog(null);
+                Globals.OpenFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
+                var result = Globals.OpenFileService.ShowDialog(null);
                 if (!result.HasValue || !result.Value) return;
-                AddOverlayFile(_openFileService.FileName);
+                AddOverlayFile(Globals.OpenFileService.FileName);
             });
 
             AddScenarioFileCommand = new SimpleCommand<object, object>(delegate { return CanAddScenarioFile();}, delegate
             {
-                _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-                var result = _openFileService.ShowDialog(null);
+                Globals.OpenFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
+                var result = Globals.OpenFileService.ShowDialog(null);
                 if (!result.HasValue || !result.Value) return;
-                AddScenarioFile(_openFileService.FileName);
+                AddScenarioFile(Globals.OpenFileService.FileName);
             });
         }
 
@@ -262,8 +248,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        public IUIVisualizerService IUIVisualizerService { get; private set; }
-
         public LayerViewModel BaseMapViewModel { get; private set; }
         public LayerViewModel GridOverlayViewModel { get; private set; }
 
@@ -286,10 +270,10 @@ namespace ESMEWorkBench.ViewModels.Main
             if (Designer.IsInDesignMode)
                 return;
 
-            //_messageBoxService.ShowInformation("ViewModel created successfully");
-            if ((_viewAwareStatusService == null) || (_viewAwareStatusService.View == null)) return;
+            //Globals.MessageBoxService.ShowInformation("ViewModel created successfully");
+            if ((Globals.ViewAwareStatus == null) || (Globals.ViewAwareStatus.View == null)) return;
 
-            _map = ((MainWindow) _viewAwareStatusService.View).Map1;
+            _map = ((MainWindow) Globals.ViewAwareStatus.View).Map1;
             MapDLLVersion = WpfMap.GetVersion();
             _map.MapUnit = GeographyUnit.DecimalDegree;
             _map.MapTools.PanZoomBar.HorizontalAlignment = HorizontalAlignment.Left;
@@ -298,11 +282,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
             var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            BaseMapViewModel = new ShapefileLayerViewModel(Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"), this)
+            BaseMapViewModel = new ShapefileLayerViewModel(Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"))
                                {
                                    IsChecked = Properties.Settings.Default.ShowBasemap
                                };
-            GridOverlayViewModel = new AdornmentLayerViewModel("Grid", new MyGraticuleAdornmentLayer(), this)
+            GridOverlayViewModel = new AdornmentLayerViewModel("Grid", new MyGraticuleAdornmentLayer())
                                    {
                                        IsChecked = Properties.Settings.Default.ShowGrid
                                    };
@@ -315,27 +299,27 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public void AddShapeFile(string filename)
         {
-            var overlayLayer = new ShapefileLayerViewModel(filename, this);
-            LayerDisplayViewModel.Layers.Add(overlayLayer);
+            var overlayLayer = new ShapefileLayerViewModel(filename);
+            Globals.LayerDisplayViewModel.Layers.Add(overlayLayer);
         }
         
         public void AddOverlayFile(string filename)
         {
             try
             {
-                var overlayLayer = new OverlayFileLayerViewModel(filename, this);
-                LayerDisplayViewModel.Layers.Add(overlayLayer);
+                var overlayLayer = new OverlayFileLayerViewModel(filename);
+                Globals.LayerDisplayViewModel.Layers.Add(overlayLayer);
             }
             catch (Exception e)
             {
-                _messageBoxService.ShowError(string.Format("Error opening overlay file {0}:\n{1}",
+                Globals.MessageBoxService.ShowError(string.Format("Error opening overlay file {0}:\n{1}",
                                                            filename, e.Message));
             }
         }
 
         public bool CanAddScenarioFile()
         {
-            return ((MainViewModel.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(MainViewModel.AppSettings.ScenarioDataDirectory)));
+            return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)));
         }
 
         public void AddScenarioFile(string filename)
@@ -343,12 +327,12 @@ namespace ESMEWorkBench.ViewModels.Main
             if (!CanAddScenarioFile()) return;
             try
             {
-                var overlayLayer = new ScenarioFileLayerViewModel(filename, MainViewModel.AppSettings.ScenarioDataDirectory, this);
-                LayerDisplayViewModel.Layers.Add(overlayLayer);
+                var overlayLayer = new ScenarioFileLayerViewModel(filename, Globals.AppSettings.ScenarioDataDirectory);
+                Globals.LayerDisplayViewModel.Layers.Add(overlayLayer);
             }
             catch (Exception e)
             {
-                _messageBoxService.ShowError(string.Format("Error opening scenario file {0}:\n{1}",
+                Globals.MessageBoxService.ShowError(string.Format("Error opening scenario file {0}:\n{1}",
                                                            filename, e.Message));
             }
         }
@@ -363,16 +347,13 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             catch (Exception e)
             {
-                _messageBoxService.ShowError(string.Format("Error opening bathymetry file {0}:\n{1}",
+                Globals.MessageBoxService.ShowError(string.Format("Error opening bathymetry file {0}:\n{1}",
                                                            filename, e.Message));
                 return;
             }
-            var overlayLayer = new OverlayShapesLayerViewModel(null, Path.GetFileNameWithoutExtension(_environmentFileName) + " bathymetry bounds", this)
+            var overlayLayer = new OverlayShapesLayerViewModel(null, Path.GetFileNameWithoutExtension(_environmentFileName) + " bathymetry bounds")
             {
-                Overlay = new LayerOverlay
-                {
-                    TileType = TileType.SingleTile
-                }
+                Overlay = new LayerOverlay(),
             };
 
             Overlays.Add(overlayLayer.Overlay);
@@ -381,7 +362,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
             _environmentFileLoaded = true;
 
-            LayerDisplayViewModel.Layers.Add(overlayLayer);
+            Globals.LayerDisplayViewModel.Layers.Add(overlayLayer);
         }
 
         public GeoCollection<Overlay> Overlays { get { return _map.Overlays; } }

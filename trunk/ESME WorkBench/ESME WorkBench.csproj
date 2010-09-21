@@ -114,6 +114,7 @@
     <Compile Include="Data\PersistentApplicationData.cs" />
     <Compile Include="Data\WatchableReferenceDatum.cs" />
     <Compile Include="Data\WatchableList.cs" />
+    <Compile Include="Globals.cs" />
     <Compile Include="OSInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -132,12 +133,14 @@
     <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\IHasName.cs" />
     <Compile Include="ViewModels\Layers\AdornmentLayerViewModel.cs" />
+    <Compile Include="ViewModels\Layers\CustomStartEndLineStyle.cs" />
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\LayersCollection.cs" />
     <Compile Include="ViewModels\Layers\LayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\OverlayFileLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
+    <Compile Include="ViewModels\Layers\RasterLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\ScenarioFileLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\ShapefileLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\ShapeLayerViewModel.cs" />

@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
 using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
 
@@ -16,10 +15,10 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public LayerDisplayViewModel(MapViewModel mapViewModel)
         {
-            MoveLayerToBackCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerToTopCommand);
-            MoveLayerBackCommand = new SimpleCommand<object, object>(CanMoveLayerUpCommand, ExecuteMoveLayerUpCommand);
-            MoveLayerForwardCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerDownCommand);
-            MoveLayerToFrontCommand = new SimpleCommand<object, object>(CanMoveLayerDownCommand, ExecuteMoveLayerToBottomCommand);
+            MoveLayerToBackCommand = new SimpleCommand<object, object>(CanMoveLayerBackCommand, ExecuteMoveLayerToBackCommand);
+            MoveLayerBackCommand = new SimpleCommand<object, object>(CanMoveLayerBackCommand, ExecuteMoveLayerBackwardCommand);
+            MoveLayerForwardCommand = new SimpleCommand<object, object>(CanMoveLayerForwardCommand, ExecuteMoveLayerForwardCommand);
+            MoveLayerToFrontCommand = new SimpleCommand<object, object>(CanMoveLayerForwardCommand, ExecuteMoveLayerToFrontCommand);
             Layers = new ObservableCollection<LayerViewModel>();
             _mapViewModel = mapViewModel;
         }
@@ -49,55 +48,55 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        void ExecuteMoveLayerUpCommand(Object args)
+        void ExecuteMoveLayerForwardCommand(Object args)
         {
             var layer = (LayerViewModel)args;
             if (layer == null) return;
             var layerIndex = Layers.IndexOf(layer);
-            _mapViewModel.Overlays.MoveTo(layerIndex + 1, layerIndex);
-            Layers.Move(layerIndex, layerIndex - 1);
-            _mapViewModel.Refresh();
-        }
-
-        void ExecuteMoveLayerDownCommand(Object args)
-        {
-            var layer = (LayerViewModel)args;
-            if (layer == null) return;
-            var layerIndex = Layers.IndexOf(layer);
-            _mapViewModel.Overlays.MoveTo(layerIndex + 1, layerIndex + 2);
+            _mapViewModel.Overlays.MoveTo(layer.Overlay, layerIndex + 2);
             Layers.Move(layerIndex, layerIndex + 1);
             _mapViewModel.Refresh();
         }
 
-        void ExecuteMoveLayerToTopCommand(Object args)
+        void ExecuteMoveLayerBackwardCommand(Object args)
         {
             var layer = (LayerViewModel)args;
             if (layer == null) return;
             var layerIndex = Layers.IndexOf(layer);
-            _mapViewModel.Overlays.MoveTo(layerIndex, 1);
+            _mapViewModel.Overlays.MoveTo(layer.Overlay, layerIndex);
+            Layers.Move(layerIndex, layerIndex - 1);
+            _mapViewModel.Refresh();
+        }
+
+        void ExecuteMoveLayerToBackCommand(Object args)
+        {
+            var layer = (LayerViewModel)args;
+            if (layer == null) return;
+            var layerIndex = Layers.IndexOf(layer);
+            _mapViewModel.Overlays.MoveTo(layer.Overlay, 1);
             Layers.Move(layerIndex, 0);
             _mapViewModel.Refresh();
         }
 
-        void ExecuteMoveLayerToBottomCommand(Object args)
+        void ExecuteMoveLayerToFrontCommand(Object args)
         {
             var layer = (LayerViewModel)args;
             if (layer == null) return;
             var layerIndex = Layers.IndexOf(layer);
-            _mapViewModel.Overlays.MoveTo(layerIndex, _mapViewModel.Overlays.Count - 1);
+            _mapViewModel.Overlays.MoveTo(layer.Overlay, _mapViewModel.Overlays.Count - 1);
             Layers.Move(layerIndex, Layers.Count - 1);
             _mapViewModel.Refresh();
         }
 
-        bool CanMoveLayerUpCommand(Object args)
+        bool CanMoveLayerBackCommand(Object args)
         {
             var layer = (LayerViewModel) args;
             if (layer == null) return false;
             var layerIndex = Layers.IndexOf(layer);
-            return (layerIndex > 0) && (Layers.Count > 1);
+            return (layerIndex > 1) && (Layers.Count > 1);
         }
 
-        bool CanMoveLayerDownCommand(Object args)
+        bool CanMoveLayerForwardCommand(Object args)
         {
             var layer = (LayerViewModel)args;
             if (layer == null) return false;

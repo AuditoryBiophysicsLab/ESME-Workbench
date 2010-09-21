@@ -1,14 +1,13 @@
-﻿using ESMEWorkBench.ViewModels.Main;
-using ThinkGeo.MapSuite.Core;
+﻿using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
     public class AdornmentLayerViewModel : LayerViewModel
     {
-        public AdornmentLayerViewModel(string name, AdornmentLayer adornmentLayer, MapViewModel mapViewModel) : base(name, null, mapViewModel)
+        public AdornmentLayerViewModel(string name, AdornmentLayer adornmentLayer) : base(name, null)
         {
-            Overlay = mapViewModel.AdornmentOverlay;
-            mapViewModel.AdornmentOverlay.Layers.Add(adornmentLayer);
+            Overlay = Globals.MapViewModel.AdornmentOverlay;
+            Globals.MapViewModel.AdornmentOverlay.Layers.Add(adornmentLayer);
         }
     }
 }

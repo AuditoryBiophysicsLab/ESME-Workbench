@@ -12,7 +12,7 @@ namespace ESMEWorkBench.ViewModels.Layers
 {
     public abstract class LayerViewModel : ViewModelBase
     {
-        LayerViewModel _parent;
+        public LayerViewModel Parent { get; set; }
 
         #region public string LayerName { get; set; }
 
@@ -122,14 +122,16 @@ namespace ESMEWorkBench.ViewModels.Layers
 
             _isChecked = value;
 
-            if (updateChildren && _isChecked.HasValue) foreach (LayerViewModel child in Children) child.SetIsChecked(_isChecked, true, false);
+            if (updateChildren && _isChecked.HasValue) foreach (var child in Children) child.SetIsChecked(_isChecked, true, false);
 
-            if (updateParent && _parent != null) _parent.VerifyCheckState();
+            if (updateParent && Parent != null) Parent.VerifyCheckState();
 
             if (Overlay != null)
             {
-                if ((_isChecked == null) || (!_isChecked.Value)) Overlay.IsVisible = false;
-                else if (_isChecked.Value) Overlay.IsVisible = true;
+                if (_isChecked.HasValue)
+                    Overlay.IsVisible = _isChecked.Value;
+                else
+                    Overlay.IsVisible = true;
             }
 
             NotifyPropertyChanged(IsCheckedChangedEventArgs);
@@ -138,9 +140,9 @@ namespace ESMEWorkBench.ViewModels.Layers
         void VerifyCheckState()
         {
             bool? state = null;
-            for (int i = 0; i < Children.Count; ++i)
+            for (var i = 0; i < Children.Count; ++i)
             {
-                bool? current = Children[i].IsChecked;
+                var current = Children[i].IsChecked;
                 if (i == 0) state = current;
                 else if (state != current)
                 {
@@ -174,15 +176,17 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
 
-        protected LayerViewModel(string name, string fileName, MapViewModel mapViewModel)
+        public TileType TileType { get; set; }
+
+        protected LayerViewModel(string name, string fileName)
         {
             LayerName = name;
             FileName = fileName;
-            MapViewModel = mapViewModel;
             Children = new LayersCollection();
             Children.CollectionChanged += Children_CollectionChanged;
             IsChecked = true;
             ShowContextMenu = true;
+            TileType = TileType.SingleTile;
             ContextMenu = new List<MenuItemViewModel>
                           {
                               new MenuItemViewModel
@@ -193,25 +197,25 @@ namespace ESMEWorkBench.ViewModels.Layers
                                                   new MenuItemViewModel
                                                   {
                                                       Header = "Bring to front",
-                                                      Command = MapViewModel.LayerDisplayViewModel.MoveLayerToFrontCommand,
+                                                      Command = Globals.LayerDisplayViewModel.MoveLayerToFrontCommand,
                                                       CommandParameter = this,
                                                   },
                                                   new MenuItemViewModel
                                                   {
                                                       Header = "Bring forward",
-                                                      Command = MapViewModel.LayerDisplayViewModel.MoveLayerForwardCommand,
+                                                      Command = Globals.LayerDisplayViewModel.MoveLayerForwardCommand,
                                                       CommandParameter = this,
                                                   },
                                                   new MenuItemViewModel
                                                   {
                                                       Header = "Push backward",
-                                                      Command = MapViewModel.LayerDisplayViewModel.MoveLayerBackCommand,
+                                                      Command = Globals.LayerDisplayViewModel.MoveLayerBackCommand,
                                                       CommandParameter = this,
                                                   },
                                                   new MenuItemViewModel
                                                   {
                                                       Header = "Push to back",
-                                                      Command = MapViewModel.LayerDisplayViewModel.MoveLayerToBackCommand,
+                                                      Command = Globals.LayerDisplayViewModel.MoveLayerToBackCommand,
                                                       CommandParameter = this,
                                                   },
                                              },
@@ -219,12 +223,10 @@ namespace ESMEWorkBench.ViewModels.Layers
                               new MenuItemViewModel
                               {
                                   Header = "Remove",
-                                  Command = new SimpleCommand<object, object>(obj => Remove()),
+                                  Command = new SimpleCommand<object, object>(delegate{ Remove(); Globals.MapViewModel.Refresh();}),
                               },
                           };
         }
-
-        public MapViewModel MapViewModel { get; private set; }
 
         public Overlay Overlay { get; set; }
 
@@ -235,29 +237,29 @@ namespace ESMEWorkBench.ViewModels.Layers
                 {
                     oldLayer.Remove();
                 }
+            Globals.MapViewModel.Refresh();
         }
 
         void Initialize()
         {
             foreach (var child in Children)
             {
-                child._parent = this;
+                child.Parent = this;
                 child.Initialize();
             }
         }
 
         public void Remove()
         {
-            MapViewModel.Overlays.Remove(Overlay);
-            MapViewModel.Refresh();
-            MapViewModel.LayerDisplayViewModel.Layers.Remove(this);
+            Globals.MapViewModel.Overlays.Remove(Overlay);
+            Globals.LayerDisplayViewModel.Layers.Remove(this);
         }
     }
 
     public abstract class LayerViewModel<T> : LayerViewModel
         where T : Layer
     {
-        protected LayerViewModel(string name, string fileName, MapViewModel mapViewModel) : base(name, fileName, mapViewModel) { }
+        protected LayerViewModel(string name, string fileName, MapViewModel mapViewModel) : base(name, fileName) { }
 
         #region public T LayerData { get; set; }
 

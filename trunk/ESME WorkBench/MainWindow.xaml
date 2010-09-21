@@ -437,7 +437,7 @@
 				<ColumnDefinition Width="*"
 				                  MinWidth="500" />
 			</Grid.ColumnDefinitions>
-			<GroupBox DataContext="{Binding MapViewModel.LayerDisplayViewModel}"
+            <GroupBox DataContext="{x:Static app:Globals.LayerDisplayViewModel}"
 			          Grid.Column="0"
 			          Header="Layers">
 			    <TreeView DockPanel.Dock="Top"
