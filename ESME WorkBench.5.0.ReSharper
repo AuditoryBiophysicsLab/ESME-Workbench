@@ -115,6 +115,7 @@
       <Abbreviation Text="EP" />
       <Abbreviation Text="DLL" />
       <Abbreviation Text="SSP" />
+      <Abbreviation Text="IUI" />
     </Naming2>
   </CodeStyleSettings>
 </Configuration>
