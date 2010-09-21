@@ -7,11 +7,13 @@
                 xmlns:p="clr-namespace:ESMEWorkBench.Properties"
                 xmlns:app="clr-namespace:ESMEWorkBench"
                 xmlns:layers="clr-namespace:ESMEWorkBench.ViewModels.Layers"
+                xmlns:main="clr-namespace:ESMEWorkBench.ViewModels.Main"
                 xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:mru="clr-namespace:ESMEWorkBench.ViewModels.RecentFiles"
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
                 mef:ViewModelLocator.ViewModel="MainViewModel"
                 SnapsToDevicePixels="True"
                 Title="ESME WorkBench"
@@ -42,15 +44,30 @@
 				</Trigger>
 			</Style.Triggers>
 		</Style>
-		<HierarchicalDataTemplate x:Key="CheckBoxItemTemplate"
+        <Style x:Key="ContextMenuItemStyle">
+            <Setter Property="MenuItem.Header" Value="{Binding Header}"/>
+            <Setter Property="MenuItem.ItemsSource" Value="{Binding Children}"/>
+            <Setter Property="MenuItem.Command" Value="{Binding Command}" />
+            <Setter Property="MenuItem.CommandParameter" Value="{Binding CommandParameter}" />
+            <Setter Property="MenuItem.Icon" Value="{Binding Icon}" />
+            <Setter Property="MenuItem.IsChecked" Value="{Binding IsChecked}" />
+            <Setter Property="MenuItem.IsCheckable" Value="{Binding IsCheckable}" />
+        </Style>
+        <HierarchicalDataTemplate x:Key="CheckBoxItemTemplate"
 		                          ItemsSource="{Binding Children, Mode=OneTime}">
 			<StackPanel Orientation="Horizontal">
 				<!-- These elements are bound to a FooViewModel object. -->
 				<CheckBox Focusable="False"
 				          IsChecked="{Binding IsChecked}"
 				          VerticalAlignment="Center" />
-				<ContentPresenter Content="{Binding LayerName, Mode=OneTime}"
-				                  Margin="2,0" />
+                <ContentPresenter Content="{Binding LayerName, Mode=OneTime}"
+				                  Margin="2,0">
+                </ContentPresenter>
+                <StackPanel.ContextMenu>
+                    <ContextMenu IsOpen="{Binding ShowContextMenu, Mode=OneWay}" 
+                             ItemsSource="{Binding ContextMenu}" 
+                             ItemContainerStyle="{StaticResource ContextMenuItemStyle}"/>
+                </StackPanel.ContextMenu>
 			</StackPanel>
 		</HierarchicalDataTemplate>
 
@@ -62,372 +79,6 @@
 		</DataTemplate>
 
 		<app:GridLengthConverter x:Key="gridLengthConverter" />
-		<!-- RibbonControl -->
-		<Style x:Key="RibbonControlStyle">
-			<Setter Property="r:RibbonControlService.Label"
-			        Value="{Binding Label}" />
-			<Setter Property="r:RibbonControlService.LargeImageSource"
-			        Value="{Binding LargeImage}" />
-			<Setter Property="r:RibbonControlService.SmallImageSource"
-			        Value="{Binding SmallImage}" />
-			<Setter Property="r:RibbonControlService.ToolTipTitle"
-			        Value="{Binding ToolTipTitle}" />
-			<Setter Property="r:RibbonControlService.ToolTipDescription"
-			        Value="{Binding ToolTipDescription}" />
-			<Setter Property="r:RibbonControlService.ToolTipImageSource"
-			        Value="{Binding ToolTipImage}" />
-			<Setter Property="r:RibbonControlService.ToolTipFooterTitle"
-			        Value="{Binding ToolTipFooterTitle}" />
-			<Setter Property="r:RibbonControlService.ToolTipFooterDescription"
-			        Value="{Binding ToolTipFooterDescription}" />
-			<Setter Property="r:RibbonControlService.ToolTipFooterImageSource"
-			        Value="{Binding ToolTipFooterImage}" />
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding LargeImage}"
-				             Value="{x:Null}">
-					<Setter Property="r:RibbonControlService.LargeImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-				<DataTrigger Binding="{Binding SmallImage}"
-				             Value="{x:Null}">
-					<Setter Property="r:RibbonControlService.SmallImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-				<DataTrigger Binding="{Binding ToolTipImage}"
-				             Value="{x:Null}">
-					<Setter Property="r:RibbonControlService.ToolTipImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-				<DataTrigger Binding="{Binding ToolTipFooterImage}"
-				             Value="{x:Null}">
-					<Setter Property="r:RibbonControlService.ToolTipFooterImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-				<Trigger Property="r:RibbonControlService.IsInQuickAccessToolBar"
-				         Value="False">
-					<Setter Property="KeyTipService.KeyTip"
-					        Value="{Binding KeyTip}" />
-				</Trigger>
-			</Style.Triggers>
-		</Style>
-
-		<!-- RibbonGroup -->
-		<Style TargetType="{x:Type r:RibbonGroup}"
-		       BasedOn="{StaticResource RibbonControlStyle}">
-			<Setter Property="QuickAccessToolBarId"
-			        Value="{Binding Label}" />
-			<Setter Property="Header"
-			        Value="{Binding Label}" />
-		</Style>
-
-		<!-- RibbonButton -->
-		<Style TargetType="{x:Type r:RibbonButton}"
-		       BasedOn="{StaticResource RibbonControlStyle}">
-			<Setter Property="Command"
-			        Value="{Binding Command}" />
-			<Setter Property="CommandParameter"
-			        Value="{Binding CommandParameter}" />
-		</Style>
-
-		<!-- RibbonToggleButton -->
-		<Style TargetType="{x:Type r:RibbonToggleButton}"
-		       BasedOn="{StaticResource RibbonControlStyle}">
-			<Setter Property="Command"
-			        Value="{Binding Command}" />
-			<Setter Property="IsChecked"
-			        Value="{Binding IsChecked}" />
-		</Style>
-
-		<!-- RibbonRadioButton -->
-		<Style TargetType="{x:Type r:RibbonRadioButton}"
-		       BasedOn="{StaticResource RibbonControlStyle}">
-			<Setter Property="Command"
-			        Value="{Binding Command}" />
-			<Setter Property="IsChecked"
-			        Value="{Binding IsChecked}" />
-		</Style>
-
-		<!-- RibbonCheckBox -->
-		<Style TargetType="{x:Type r:RibbonCheckBox}"
-		       BasedOn="{StaticResource RibbonControlStyle}">
-			<Setter Property="Command"
-			        Value="{Binding Command}" />
-			<Setter Property="IsChecked"
-			        Value="{Binding IsChecked}" />
-		</Style>
-
-		<!-- RibbonTextBox -->
-		<Style TargetType="{x:Type r:RibbonTextBox}"
-		       BasedOn="{StaticResource RibbonControlStyle}">
-			<Setter Property="Command"
-			        Value="{Binding Command}" />
-			<Setter Property="Text"
-			        Value="{Binding Text}" />
-		</Style>
-
-		<!-- RibbonMenuButton -->
-		<Style TargetType="{x:Type r:RibbonMenuButton}"
-		       BasedOn="{StaticResource RibbonControlStyle}">
-			<Setter Property="QuickAccessToolBarId"
-			        Value="{Binding Command}" />
-			<Setter Property="CanUserResizeVertically"
-			        Value="{Binding IsVerticallyResizable}" />
-			<Setter Property="CanUserResizeHorizontally"
-			        Value="{Binding IsHorizontallyResizable}" />
-		</Style>
-
-		<!-- RibbonSplitButton -->
-		<Style TargetType="{x:Type r:RibbonSplitButton}"
-		       BasedOn="{StaticResource {x:Type r:RibbonMenuButton}}">
-			<Setter Property="IsCheckable"
-			        Value="{Binding IsCheckable}" />
-			<Setter Property="IsChecked"
-			        Value="{Binding IsChecked}" />
-			<Setter Property="Command"
-			        Value="{Binding Command}" />
-			<Setter Property="HeaderQuickAccessToolBarId"
-			        Value="{Binding Label}" />
-			<Setter Property="DropDownToolTipTitle"
-			        Value="{Binding DropDownButtonData.ToolTipTitle}" />
-			<Setter Property="DropDownToolTipDescription"
-			        Value="{Binding DropDownButtonData.ToolTipDescription}" />
-			<Setter Property="DropDownToolTipImageSource"
-			        Value="{Binding DropDownButtonData.ToolTipImage}" />
-			<Setter Property="DropDownToolTipFooterTitle"
-			        Value="{Binding DropDownButtonData.ToolTipFooterTitle}" />
-			<Setter Property="DropDownToolTipFooterDescription"
-			        Value="{Binding DropDownButtonData.ToolTipFooterDescription}" />
-			<Setter Property="DropDownToolTipFooterImageSource"
-			        Value="{Binding DropDownButtonData.ToolTipFooterImage}" />
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding DropDownButtonData.ToolTipImage}"
-				             Value="{x:Null}">
-					<Setter Property="DropDownToolTipImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-				<DataTrigger Binding="{Binding DropDownButtonData.ToolTipFooterImage}"
-				             Value="{x:Null}">
-					<Setter Property="DropDownToolTipFooterImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-			</Style.Triggers>
-		</Style>
-
-		<!-- RibbonComboBox -->
-		<Style TargetType="{x:Type r:RibbonComboBox}"
-		       BasedOn="{StaticResource {x:Type r:RibbonMenuButton}}">
-			<Setter Property="IsEditable"
-			        Value="True" />
-			<Setter Property="CanUserResizeVertically"
-			        Value="True" />
-		</Style>
-
-		<!-- RibbonGallery FilterItemContainerStyle -->
-		<Style TargetType="{x:Type r:RibbonMenuItem}"
-		       x:Key="FilterMenuItemStyle">
-			<Setter Property="Header"
-			        Value="{Binding Label}" />
-		</Style>
-
-		<!-- RibbonGallery -->
-		<Style TargetType="{x:Type r:RibbonGallery}">
-			<Style.Resources>
-				<!-- Note that this Style has been specified only to trump the 
-						 implicit style for RibbonMenuItem from being picked by the 
-						 items within the FilterMenuButton -->
-				<Style TargetType="{x:Type r:RibbonMenuItem}" />
-			</Style.Resources>
-			<Setter Property="r:RibbonControlService.SmallImageSource"
-			        Value="{Binding SmallImage}" />
-			<Setter Property="ItemsSource"
-			        Value="{Binding CategoryDataCollection}" />
-			<Setter Property="Command"
-			        Value="{Binding Command}" />
-			<Setter Property="SelectedItem"
-			        Value="{Binding SelectedItem}" />
-			<Setter Property="CanUserFilter"
-			        Value="{Binding CanUserFilter}" />
-			<Setter Property="FilterItemContainerStyle"
-			        Value="{StaticResource FilterMenuItemStyle}" />
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding SmallImage}"
-				             Value="{x:Null}">
-					<Setter Property="r:RibbonControlService.SmallImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-			</Style.Triggers>
-		</Style>
-
-		<!-- RibbonGalleryCategory -->
-		<Style TargetType="{x:Type r:RibbonGalleryCategory}">
-			<Setter Property="Header"
-			        Value="{Binding Label}" />
-			<Setter Property="ItemsSource"
-			        Value="{Binding GalleryItemDataCollection}" />
-		</Style>
-
-		<!-- RibbonMenuItem -->
-		<Style TargetType="{x:Type r:RibbonMenuItem}">
-			<Setter Property="Header"
-			        Value="{Binding Label}" />
-			<Setter Property="ImageSource"
-			        Value="{Binding SmallImage}" />
-			<Setter Property="r:RibbonControlService.ToolTipTitle"
-			        Value="{Binding ToolTipTitle}" />
-			<Setter Property="r:RibbonControlService.ToolTipDescription"
-			        Value="{Binding ToolTipDescription}" />
-			<Setter Property="r:RibbonControlService.ToolTipImageSource"
-			        Value="{Binding ToolTipImage}" />
-			<Setter Property="r:RibbonControlService.ToolTipFooterTitle"
-			        Value="{Binding ToolTipFooterTitle}" />
-			<Setter Property="r:RibbonControlService.ToolTipFooterDescription"
-			        Value="{Binding ToolTipFooterDescription}" />
-			<Setter Property="r:RibbonControlService.ToolTipFooterImageSource"
-			        Value="{Binding ToolTipFooterImage}" />
-			<Setter Property="KeyTipService.KeyTip"
-			        Value="{Binding KeyTip}" />
-			<Setter Property="Command"
-			        Value="{Binding Command}" />
-			<Setter Property="IsCheckable"
-			        Value="{Binding IsCheckable}" />
-			<Setter Property="IsChecked"
-			        Value="{Binding IsChecked}" />
-			<Setter Property="CanUserResizeVertically"
-			        Value="{Binding IsVerticallyResizable}" />
-			<Setter Property="CanUserResizeHorizontally"
-			        Value="{Binding IsHorizontallyResizable}" />
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding SmallImage}"
-				             Value="{x:Null}">
-					<Setter Property="ImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-				<DataTrigger Binding="{Binding ToolTipImage}"
-				             Value="{x:Null}">
-					<Setter Property="r:RibbonControlService.ToolTipImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-				<DataTrigger Binding="{Binding ToolTipFooterImage}"
-				             Value="{x:Null}">
-					<Setter Property="r:RibbonControlService.ToolTipFooterImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-			</Style.Triggers>
-		</Style>
-
-		<!-- RibbonSplitMenuItem -->
-		<Style TargetType="{x:Type r:RibbonSplitMenuItem}"
-		       BasedOn="{StaticResource {x:Type r:RibbonMenuItem}}">
-			<Setter Property="HeaderQuickAccessToolBarId"
-			        Value="{Binding Command}" />
-			<Setter Property="QuickAccessToolBarId"
-			        Value="{Binding DropDownButtonData.Command}" />
-			<Setter Property="HeaderKeyTip"
-			        Value="{Binding KeyTip}" />
-			<Setter Property="KeyTip"
-			        Value="{Binding DropDownButtonData.KeyTip}" />
-			<Setter Property="DropDownToolTipTitle"
-			        Value="{Binding DropDownButtonData.ToolTipTitle}" />
-			<Setter Property="DropDownToolTipDescription"
-			        Value="{Binding DropDownButtonData.ToolTipDescription}" />
-			<Setter Property="DropDownToolTipImageSource"
-			        Value="{Binding DropDownButtonData.ToolTipImage}" />
-			<Setter Property="DropDownToolTipFooterTitle"
-			        Value="{Binding DropDownButtonData.ToolTipFooterTitle}" />
-			<Setter Property="DropDownToolTipFooterDescription"
-			        Value="{Binding DropDownButtonData.ToolTipFooterDescription}" />
-			<Setter Property="DropDownToolTipFooterImageSource"
-			        Value="{Binding DropDownButtonData.ToolTipFooterImage}" />
-			<Style.Triggers>
-				<DataTrigger Binding="{Binding DropDownButtonData.ToolTipImage}"
-				             Value="{x:Null}">
-					<Setter Property="DropDownToolTipImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-				<DataTrigger Binding="{Binding DropDownButtonData.ToolTipFooterImage}"
-				             Value="{x:Null}">
-					<Setter Property="DropDownToolTipFooterImageSource"
-					        Value="{x:Null}" />
-				</DataTrigger>
-			</Style.Triggers>
-		</Style>
-
-		<!-- RibbonApplicationMenuItem -->
-		<Style TargetType="{x:Type r:RibbonApplicationMenuItem}"
-		       BasedOn="{StaticResource {x:Type r:RibbonMenuItem}}">
-			<Style.Triggers>
-				<Trigger Property="Level"
-				         Value="Middle">
-					<Setter Property="ImageSource"
-					        Value="{Binding SmallImage}" />
-					<Setter Property="KeyTipService.KeyTip"
-					        Value="{Binding KeyTip}" />
-					<Setter Property="Command"
-					        Value="{Binding Command}" />
-					<Setter Property="Header"
-					        Value="{Binding}" />
-					<Setter Property="HeaderTemplate">
-						<Setter.Value>
-							<DataTemplate>
-								<Grid>
-									<Grid.RowDefinitions>
-										<RowDefinition Height="Auto" />
-										<RowDefinition Height="Auto" />
-									</Grid.RowDefinitions>
-									<AccessText Grid.Row="0"
-									            FontWeight="Bold"
-									            Text="{Binding Label}" />
-									<TextBlock Grid.Row="1"
-									           Text="{Binding ToolTipTitle}"
-									           TextWrapping="Wrap" />
-								</Grid>
-							</DataTemplate>
-						</Setter.Value>
-					</Setter>
-				</Trigger>
-			</Style.Triggers>
-		</Style>
-
-		<!-- RibbonApplicationSplitMenuItem -->
-		<Style TargetType="{x:Type r:RibbonApplicationSplitMenuItem}"
-		       BasedOn="{StaticResource {x:Type r:RibbonSplitMenuItem}}" />
-
-		<!-- RibbonContextMenu -->
-		<Style TargetType="{x:Type r:RibbonContextMenu}">
-			<Style.Resources>
-				<!-- Note that this Style has been specified only to trump the 
-						 implicit style for RibbonMenuItem from being picked by the 
-						 items within the ContextMenu -->
-				<Style TargetType="{x:Type r:RibbonMenuItem}" />
-			</Style.Resources>
-		</Style>
-
-		<!-- RibbonControlGroup -->
-		<Style TargetType="{x:Type r:RibbonControlGroup}">
-			<Setter Property="Margin"
-			        Value="2,0,2,0" />
-		</Style>
-
-		<BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-		<!-- RibbonContextualTabGroup -->
-		<Style TargetType="{x:Type r:RibbonContextualTabGroup}">
-			<Setter Property="Header"
-			        Value="{Binding Header}" />
-			<Setter Property="Visibility"
-			        Value="{Binding IsVisible,Converter={StaticResource BoolToVisibilityConverter}}" />
-		</Style>
-
-		<!-- RibbonTab -->
-		<Style TargetType="{x:Type r:RibbonTab}"
-		       x:Key="ContextualTabStyle">
-			<Setter Property="ContextualTabGroupHeader"
-			        Value="{Binding ContextualTabGroupHeader}" />
-			<Setter Property="Header"
-			        Value="{Binding Header}" />
-			<Setter Property="IsSelected"
-			        Value="{Binding IsSelected}" />
-		</Style>
-
 	</r:RibbonWindow.Resources>
     <r:RibbonWindow.InputBindings>
         <KeyBinding Command="{Binding CancelCurrentCommand}" Key="ESC"/>
@@ -490,7 +141,7 @@
 					                             ToolTipDescription="Close the ESME WorkBench"
 					                             Command="Close" />
 					<r:RibbonApplicationMenu.AuxiliaryPaneContent>
-						<r:RibbonGallery DataContext="{Binding RecentFiles}"
+						<r:RibbonGallery ItemsSource="{Binding RecentFiles}"
 						                 ScrollViewer.VerticalScrollBarVisibility="Auto">
 							<r:RibbonGalleryCategory Header="Recent Experiments"
 							                         Background="Transparent"
@@ -509,12 +160,6 @@
 			<r:RibbonTab KeyTip="E"
 			             Header="Experiment">
 				<r:RibbonGroup Header="Map Data">
-					<r:RibbonButton Label="Clear"
-					                LargeImageSource="Images\LargeIcons\new-icon.png"
-					                SmallImageSource="Images\SmallIcons\new-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Clear all layers that have been added to the map"
-					                Command="{Binding MapViewModel.ClearAllLayersCommand}" />
 					<r:RibbonButton Label="Shapefile"
 					                SmallImageSource="Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -784,7 +429,7 @@
 				</r:RibbonGroup>
 			</r:RibbonTab>
 		</r:Ribbon>
-		<Grid>
+        <Grid AllowDrop="True">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
 				                  MinWidth="100" />
@@ -795,43 +440,11 @@
 			<GroupBox DataContext="{Binding MapViewModel.LayerDisplayViewModel}"
 			          Grid.Column="0"
 			          Header="Layers">
-				<DockPanel LastChildFill="True">
-					<StackPanel Orientation="Horizontal"
-					            HorizontalAlignment="Right"
-					            DockPanel.Dock="Bottom">
-						<Button FontFamily="Marlett"
-						        Command="{Binding MoveLayerToTopCommand}"
-						        ToolTip="Move selected layer to top">
-							<TextBlock Text="7">
-								<TextBlock.LayoutTransform>
-									<TransformGroup>
-										<RotateTransform Angle="180"
-										                 CenterX="0.5"
-										                 CenterY="0.5" />
-									</TransformGroup>
-								</TextBlock.LayoutTransform>
-							</TextBlock>
-						</Button>
-						<Button FontFamily="Marlett"
-						        Content="5"
-						        Command="{Binding MoveLayerUpCommand}"
-						        ToolTip="Move selected layer up" />
-						<Button FontFamily="Marlett"
-						        Content="6"
-						        Command="{Binding MoveLayerDownCommand}"
-						        ToolTip="Move selected layer down" />
-						<Button FontFamily="Marlett"
-						        Content="7"
-						        Command="{Binding MoveLayerToBottomCommand}"
-						        ToolTip="Move selected layer to bottom" />
-					</StackPanel>
-					<TreeView DockPanel.Dock="Top"
-					          ItemContainerStyle="{StaticResource LayersViewItemStyle}"
-					          DataContext="{Binding Path=Layers}"
-					          ItemsSource="{Binding}"
-					          ItemTemplate="{StaticResource CheckBoxItemTemplate}">
-					</TreeView>
-				</DockPanel>
+			    <TreeView DockPanel.Dock="Top"
+					        ItemContainerStyle="{StaticResource LayersViewItemStyle}"
+					        ItemsSource="{Binding Layers}"
+					        ItemTemplate="{StaticResource CheckBoxItemTemplate}">
+			    </TreeView>
 			</GroupBox>
 			<GridSplitter Name="GridSplitter"
 			              Grid.Column="1"
@@ -849,11 +462,17 @@
 					<i:EventTrigger EventName="MouseLeftButtonUp">
 						<cinch:EventToCommandTrigger Command="{Binding MapViewModel.MouseLeftButtonUpCommand}" />
 					</i:EventTrigger>
-					<i:EventTrigger EventName="MouseMove">
-						<cinch:EventToCommandTrigger Command="{Binding MapViewModel.MouseMoveCommand}" />
-					</i:EventTrigger>
-				</i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseMove">
+                        <cinch:EventToCommandTrigger Command="{Binding MapViewModel.MouseMoveCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
 			</uc1:WpfMap>
-		</Grid>
-	</DockPanel>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Drop">
+                    <ia:CallMethodAction TargetObject="{Binding}"
+                                     MethodName="FilesDropped"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Grid>
+    </DockPanel>
 </r:RibbonWindow>

@@ -33,7 +33,7 @@
 				           TextAlignment="Right"
 				           Margin="0 0 5 0"
 				           Text="Field radius (m)" />
-                <TextBlock Text="{Binding Radius}"
+                <TextBlock Text="{Binding TransmissionLossJob.Radius}"
 				           FontWeight="Bold" />
             </StackPanel>
             <StackPanel Orientation="Horizontal">

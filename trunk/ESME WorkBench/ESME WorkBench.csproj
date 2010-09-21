@@ -131,9 +131,16 @@
     </Compile>
     <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\IHasName.cs" />
+    <Compile Include="ViewModels\Layers\AdornmentLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
+    <Compile Include="ViewModels\Layers\LayersCollection.cs" />
     <Compile Include="ViewModels\Layers\LayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
+    <Compile Include="ViewModels\Layers\OverlayFileLayerViewModel.cs" />
+    <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
+    <Compile Include="ViewModels\Layers\ScenarioFileLayerViewModel.cs" />
+    <Compile Include="ViewModels\Layers\ShapefileLayerViewModel.cs" />
+    <Compile Include="ViewModels\Layers\ShapeLayerViewModel.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\LayerDisplayViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModel.cs" />
@@ -143,6 +150,7 @@
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\VirtualToggleButton.cs" />
     <Compile Include="ViewModels\Main\MapViewModel.cs" />
+    <Compile Include="ViewModels\Main\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\Main\ProgramOptionsViewModel.cs" />
     <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
     <Compile Include="ViewModels\RecentFiles\IPersist.cs" />

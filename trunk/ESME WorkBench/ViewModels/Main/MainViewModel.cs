@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Input;
 using Cinch;
 using ESMEWorkBench.Data;
@@ -100,6 +101,33 @@ namespace ESMEWorkBench.ViewModels.Main
 
             //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");
         }
+
+        public void FilesDropped(Object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
+            var droppedFilePaths = (string[])e.Data.GetData(DataFormats.FileDrop, true);
+            foreach (var file in droppedFilePaths)
+            {
+                switch (Path.GetExtension(file).ToLower())
+                {
+                    case ".shp":
+                        MapViewModel.AddShapeFile(file);
+                        break;
+                    case ".ovr":
+                        MapViewModel.AddOverlayFile(file);
+                        break;
+                    case ".eeb":
+                        MapViewModel.AddEnvironmentFile(file);
+                        break;
+                    case ".nemo":
+                        if (MapViewModel.CanAddScenarioFile())
+                            MapViewModel.AddScenarioFile(file);
+                        break;
+                }
+            }
+            MapViewModel.Refresh();
+        }
+
 
         public MapViewModel MapViewModel { get; set; }
 
