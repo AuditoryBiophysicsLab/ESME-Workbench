@@ -16,6 +16,8 @@ using ESME.TransmissionLoss.Bellhop;
 
 namespace ESME.Model
 {
+#if false
+    //todo: does this code fall completely out of date now?
     public static class Tester
     {
         public static void BellhopRunFileTest()
@@ -34,7 +36,7 @@ namespace ESME.Model
             {
                 Filename = "",
                 MaxTLDepth_meters = 2000,
-                AnalysisPoint = new AnalysisPoint
+                OldAnalysisPoint = new OldAnalysisPoint
                 {
                     AcousticProperties = new AcousticProperties
                     {
@@ -100,7 +102,7 @@ namespace ESME.Model
                     },
                 },
                 FixedSources = new FixedSourceList(),
-                AnalysisPoints = new AnalysisPointList(),
+                NewAnalysisPoints = new OldAnalysisPointList(),
                 SpeciesList = new SpeciesList(@"C:\Projects\ESME\Workbench\Species"),
                 TransmissionLossFields = new OldTransmissionLossFieldList(),
             };
@@ -109,7 +111,7 @@ namespace ESME.Model
 
             experiment.Animats = new AnimatList(experiment.SpeciesList);
 
-            AnalysisPoint analysisPoint1 = new AnalysisPoint
+            OldAnalysisPoint oldAnalysisPoint1 = new OldAnalysisPoint
             {
                 FieldRadius_meters = 20000,
                 Location = new EarthCoordinate(0, 0),
@@ -122,14 +124,14 @@ namespace ESME.Model
                     VerticalBeamWidth = 90,
                 },
             };
-            AnalysisPoint analysisPoint2 = new AnalysisPoint(analysisPoint1)
+            OldAnalysisPoint oldAnalysisPoint2 = new OldAnalysisPoint(oldAnalysisPoint1)
             {
                 Location = new EarthCoordinate(1, 1),
             };
-            experiment.AnalysisPoints.Add(analysisPoint1);
-            experiment.AnalysisPoints.Add(analysisPoint2);
+            experiment.NewAnalysisPoints.Add(oldAnalysisPoint1);
+            experiment.NewAnalysisPoints.Add(oldAnalysisPoint2);
 
-            experiment.FixedSources.Add(new FixedSource(analysisPoint1)
+            experiment.FixedSources.Add(new FixedSource(oldAnalysisPoint1)
             {
                 Name = "Source 1",
                 Bearing_degrees = 0,
@@ -137,7 +139,7 @@ namespace ESME.Model
                 PingDuration_seconds = 1,
                 PingInterval_seconds = 30,
             });
-            experiment.FixedSources.Add(new FixedSource(analysisPoint2)
+            experiment.FixedSources.Add(new FixedSource(oldAnalysisPoint2)
             {
                 Name = "Source 2",
                 Bearing_degrees = 0,
@@ -145,13 +147,13 @@ namespace ESME.Model
                 PingDuration_seconds = 1,
                 PingInterval_seconds = 30,
             });
-            experiment.TransmissionLossFields.Add(new OldTransmissionLossField(analysisPoint1)
+            experiment.TransmissionLossFields.Add(new OldTransmissionLossField(oldAnalysisPoint1)
             {
                 Filename = "",
                 MaxTLDepth_meters = 2000,
                 RadialCount = 8,
             });
-            experiment.TransmissionLossFields.Add(new OldTransmissionLossField(analysisPoint2)
+            experiment.TransmissionLossFields.Add(new OldTransmissionLossField(oldAnalysisPoint2)
             {
                 Filename = "",
                 MaxTLDepth_meters = 2000,
@@ -171,5 +173,6 @@ namespace ESME.Model
         {
             MessageBox.Show(arguments.Message, "XML Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-    }
+    } 
+#endif
 }

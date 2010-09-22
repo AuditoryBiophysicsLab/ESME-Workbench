@@ -39,7 +39,7 @@ namespace ESME.TransmissionLoss
     {
     }
 
-    public class AnalysisPointList : UniqueAutoIncrementList<NewAnalysisPoint>
+    public class NewAnalysisPointList : UniqueAutoIncrementList<NewAnalysisPoint>
     {
     }
 }
