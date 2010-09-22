@@ -8,6 +8,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using ESME.TransmissionLoss;
 using HRC.Navigation;
 using System.Windows.Forms;
 using System.Drawing;
@@ -39,7 +40,7 @@ namespace ESME.Model
         /// by TransmissionLossCalculator
         /// </summary>
         [XmlArray]
-        public AnalysisPointList AnalysisPoints { get; set; }
+        public NewAnalysisPointList NewAnalysisPoints { get; set; }
 
         /// <summary>
         /// A list of TransmissionLossFields that are already calculated.  Read from a cache file.
@@ -147,8 +148,8 @@ namespace ESME.Model
         private void Initialize()
         {
             Information.Initialize();
-            AnalysisPoints.Initialize();
-            FixedSources.Initialize(AnalysisPoints);
+            NewAnalysisPoints.Initialize();
+            FixedSources.Initialize(NewAnalysisPoints);
             SpeciesList.Initialize();
             Animats.Initialize(SpeciesList);
             ExperimentTree = ESME.DataModel.ExperimentTreeItem.Create(this);

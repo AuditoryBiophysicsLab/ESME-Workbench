@@ -12,7 +12,7 @@ using HRC.Navigation;
 
 namespace ESME.Model
 {
-    public class AnalysisPoint : IEquatable<AnalysisPoint>, IHasIDField
+    public class OldAnalysisPoint : IEquatable<OldAnalysisPoint>, IHasIDField
     {
         [XmlElement("AnalysisPointID")]
         public int IDField { get; set; }
@@ -22,7 +22,7 @@ namespace ESME.Model
         public float DepthCellSize_meters { get; set; }
         public AcousticProperties AcousticProperties { get; set; }
 
-        bool IEquatable<AnalysisPoint>.Equals(AnalysisPoint that)
+        bool IEquatable<OldAnalysisPoint>.Equals(OldAnalysisPoint that)
         {
             if (!this.Location.Equals(that.Location))
                 return false;
@@ -37,9 +37,9 @@ namespace ESME.Model
             return true;
         }
 
-        public AnalysisPoint() { }
+        public OldAnalysisPoint() { }
 
-        public AnalysisPoint(AnalysisPoint that)
+        public OldAnalysisPoint(OldAnalysisPoint that)
         {
             if (that.Location == null)
                 this.Location = null;
@@ -52,9 +52,9 @@ namespace ESME.Model
         }
     }
 
-    public class AnalysisPointDeletedEventArgs : ItemDeletedEventArgs<AnalysisPoint> { }
+    public class OldAnalysisPointDeletedEventArgs : ItemDeletedEventArgs<OldAnalysisPoint> { }
 
-    public class AnalysisPointList : UniqueAutoIncrementList<AnalysisPoint>
+    public class OldAnalysisPointList : UniqueAutoIncrementList<OldAnalysisPoint>
     {
     }
 }

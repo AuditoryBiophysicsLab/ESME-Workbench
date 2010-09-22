@@ -1,39 +1,38 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
+using ESME.TransmissionLoss;
 
 namespace ESME.Model
 {
     public class FixedSource
     {
-        public int AnalysisPointID { get; set; }
-        public string Name { get; set; }
-        public double Bearing_degrees { get; set; }
-        public double HorizontalHalfAngle_degrees { get; set; }
-        public double PingInterval_seconds { get; set; }
-        public double PingDuration_seconds { get; set; }
-
-        [XmlIgnore]
-        public AnalysisPoint AnalysisPoint { get; set; }
-
-        public FixedSource(AnalysisPoint AnalysisPoint)
+        public FixedSource(NewAnalysisPoint analysisPoint)
         {
-            this.AnalysisPoint = AnalysisPoint;
-            AnalysisPointID = AnalysisPoint.IDField;
+            AnalysisPoint = analysisPoint;
+            AnalysisPointID = analysisPoint.IDField;
         }
 
-        private FixedSource() { }
+/*
+        FixedSource() { }
+*/
+        public int AnalysisPointID { get; set; }
+        public string Name { get; set; }
+        public double BearingDegrees { get; set; }
+        public double HorizontalHalfAngleDegrees { get; set; }
+        public double PingIntervalSeconds { get; set; }
+        public double PingDurationSeconds { get; set; }
+
+        [XmlIgnore]
+        public NewAnalysisPoint AnalysisPoint { get; set; }
     }
 
     public class FixedSourceList : List<FixedSource>
     {
-        internal void Initialize(AnalysisPointList AnalysisPoints)
+        internal void Initialize(NewAnalysisPointList analysisPoints) { foreach (var f in this)
         {
-            foreach (var f in this)
-                f.AnalysisPoint = AnalysisPoints.Find(a => a.IDField == f.AnalysisPointID);
+            FixedSource f1 = f;
+            f.AnalysisPoint = analysisPoints.Find(a => a.IDField == f1.AnalysisPointID);
+        }
         }
     }
 }

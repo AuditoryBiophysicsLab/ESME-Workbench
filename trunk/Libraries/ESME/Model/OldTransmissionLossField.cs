@@ -37,7 +37,7 @@ namespace ESME.Model
         }
 
         [XmlIgnore]
-        public AnalysisPoint AnalysisPoint { get; set; }
+        public OldAnalysisPoint OldAnalysisPoint { get; set; }
         //[XmlIgnore]
         //public FieldData FieldData { get; set; }
         [XmlIgnore]
@@ -45,19 +45,19 @@ namespace ESME.Model
 
         internal OldTransmissionLossField() { }
 
-        public OldTransmissionLossField(AnalysisPoint AnalysisPoint) 
+        public OldTransmissionLossField(OldAnalysisPoint OldAnalysisPoint) 
         {
-            this.AnalysisPoint = AnalysisPoint;
-            AnalysisPointID = AnalysisPoint.IDField; 
+            this.OldAnalysisPoint = OldAnalysisPoint;
+            AnalysisPointID = OldAnalysisPoint.IDField; 
         }
     }
 
     public class OldTransmissionLossFieldList : List<OldTransmissionLossField>
     {
-        internal void Initialize(AnalysisPointList AnalysisPoints)
+        internal void Initialize(OldAnalysisPointList oldAnalysisPoints)
         {
             foreach (var f in this)
-                f.AnalysisPoint = AnalysisPoints.Find(a => a.IDField == f.AnalysisPointID);
+                f.OldAnalysisPoint = oldAnalysisPoints.Find(a => a.IDField == f.AnalysisPointID);
         }
 
     }
