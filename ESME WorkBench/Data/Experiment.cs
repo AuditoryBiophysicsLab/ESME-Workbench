@@ -199,10 +199,9 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        [XmlIgnore]
-
         #region public bool IsChanged { get; set; }
 
+        [XmlIgnore]
         public bool IsChanged
         {
             get { return _isChanged; }
@@ -214,12 +213,11 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs IsChangedChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.IsChanged);
-        bool _isChanged;
+        [XmlIgnore] static readonly PropertyChangedEventArgs IsChangedChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.IsChanged);
+        [XmlIgnore] bool _isChanged;
 
         #endregion
-
-
+        
         public Experiment()
         {
             Author = Environment.UserName;
