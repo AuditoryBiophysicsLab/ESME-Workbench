@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -9,19 +11,80 @@ using Cinch;
 
 namespace ESMEWorkBench.Data
 {
-    public class AppSettings
+    public class AppSettings : INotifyPropertyChanged
     {
-        public string ScenarioEditorExecutablePath { get; set; }
-        public string ScenarioDataDirectory { get; set; }
-        public string EnvironmentDatabaseDirectory { get; set; }
+        #region public string ScenarioEditorExecutablePath { get; set; }
+
+        [XmlElement] 
+        public string ScenarioEditorExecutablePath
+        {
+            get { return _scenarioEditorExecutablePath; }
+            set
+            {
+                if (_scenarioEditorExecutablePath == value) return;
+                _scenarioEditorExecutablePath = value;
+                NotifyPropertyChanged(ScenarioEditorExecutablePathChangedEventArgs);
+            }
+        }
+        [XmlIgnore] static readonly PropertyChangedEventArgs ScenarioEditorExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioEditorExecutablePath);
+        [XmlIgnore] string _scenarioEditorExecutablePath;
+
+        #endregion
+
+        #region public string ScenarioDataDirectory { get; set; }
+
+        [XmlElement]
+        public string ScenarioDataDirectory
+        {
+            get { return _scenarioDataDirectory; }
+            set
+            {
+                if (_scenarioDataDirectory == value) return;
+                _scenarioDataDirectory = value;
+                NotifyPropertyChanged(ScenarioDataDirectoryChangedEventArgs);
+            }
+        }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioDataDirectory);
+        [XmlIgnore] string _scenarioDataDirectory;
+
+        #endregion
+
+        #region public string EnvironmentDatabaseDirectory { get; set; }
+
+        [XmlElement]
+        public string EnvironmentDatabaseDirectory
+        {
+            get { return _environmentDatabaseDirectory; }
+            set
+            {
+                if (_environmentDatabaseDirectory == value) return;
+                _environmentDatabaseDirectory = value;
+                NotifyPropertyChanged(EnvironmentDatabaseDirectoryChangedEventArgs);
+            }
+        }
+
+        [XmlIgnore]
+        static readonly PropertyChangedEventArgs EnvironmentDatabaseDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.EnvironmentDatabaseDirectory);
+        [XmlIgnore]
+        string _environmentDatabaseDirectory;
+
+        #endregion
 
         [XmlIgnore]
         static readonly string AppSettingsDirectory;
-        static readonly string AppSettingsFile;
+        [XmlIgnore] static readonly string AppSettingsFile;
 
         static AppSettings()
         {
-            AppSettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().GetName().CodeBase));
+            try
+            {
+                AppSettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().GetName().CodeBase));
+            }
+            catch (Exception)
+            {
+                AppSettingsDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            }
             if (!Directory.Exists(AppSettingsDirectory)) Directory.CreateDirectory(AppSettingsDirectory);
             AppSettingsFile = Path.Combine(AppSettingsDirectory, "settings.xml");
         }
@@ -161,6 +224,11 @@ namespace ESMEWorkBench.Data
             throw new XmlSchemaValidationException(arguments.Message);
         }
 
+        #endregion
+
+        #region INotifyPropertyChanged members
+        private void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+        public event PropertyChangedEventHandler PropertyChanged;
         #endregion
     }
 }
