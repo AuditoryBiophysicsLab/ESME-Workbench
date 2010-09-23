@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
 
@@ -47,6 +48,16 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         #endregion
+
+        /// <summary>
+        /// Removes any and all scenario layers from the simulation
+        /// </summary>
+        public void RemoveScenarioLayers()
+        {
+            foreach (var layer in Layers.OfType<ScenarioFileLayerViewModel>())
+                layer.Remove();
+            Globals.Experiment.ScenarioFileName = null;
+        }
 
         void ExecuteMoveLayerForwardCommand(Object args)
         {

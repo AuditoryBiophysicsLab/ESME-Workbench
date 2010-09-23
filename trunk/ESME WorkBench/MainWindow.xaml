@@ -16,7 +16,7 @@
                 xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
                 mef:ViewModelLocator.ViewModel="MainViewModel"
                 SnapsToDevicePixels="True"
-                Title="ESME WorkBench"
+                Title="{Binding DecoratedExperimentName, StringFormat=ESME WorkBench: {0}}"
                 x:Name="MainView"
                 Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
                 Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
@@ -109,7 +109,12 @@
 		<KeyBinding Command="{Binding CancelCurrentCommand}"
 		            Key="Escape" />
 	</r:RibbonWindow.InputBindings>
-	<DockPanel LastChildFill="True">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <DockPanel LastChildFill="True">
 		<StatusBar DockPanel.Dock="Bottom">
 			<StatusBarItem>
 				<StackPanel Orientation="Horizontal">
@@ -121,7 +126,7 @@
 		</StatusBar>
 		<r:Ribbon x:Name="Ribbon"
 		          DockPanel.Dock="Top"
-		          SelectedIndex="2">
+		          SelectedIndex="0">
 			<r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Wave.png">
 					<r:RibbonApplicationMenuItem Header="Save Experiment"
@@ -228,7 +233,7 @@
 					                SmallImageSource="Images\SmallIcons\bullet-2-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new analysis point to the experiment"
-					                Command="{Binding DisabledCommand}" />
+					                Command="{Binding TestTransmissionLossViewCommand}" />
 					<r:RibbonButton Label="Fixed Source"
 					                LargeImageSource="Images\LargeIcons\Sound.png"
 					                SmallImageSource="Images\SmallIcons\Sound.png"
