@@ -9,7 +9,7 @@ using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using HRC.Navigation;
-
+//todo: deprecated.
 namespace ESME.Model
 {
     public class OldAnalysisPoint : IEquatable<OldAnalysisPoint>, IHasIDField

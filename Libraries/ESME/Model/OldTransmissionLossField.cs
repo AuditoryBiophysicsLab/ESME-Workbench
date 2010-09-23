@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 using ESME.TransmissionLoss;
 using System.IO;
 using System.Windows.Forms;
-
+//todo: deprecated.
 namespace ESME.Model
 {
     public class OldTransmissionLossField
