@@ -3,11 +3,11 @@ using System.Xml.Serialization;
 
 namespace ESMEWorkBench.Data
 {
-    public class ExperimentData : PersistentApplicationData<ExperimentData>, IApplicationData
+    public class OldExperimentData : PersistentApplicationData<OldExperimentData>, IApplicationData
     {
-        public ExperimentData(EventHandler valueChangedHandler) : this() { if (valueChangedHandler != null) ValueChanged += valueChangedHandler; }
+        public OldExperimentData(EventHandler valueChangedHandler) : this() { if (valueChangedHandler != null) ValueChanged += valueChangedHandler; }
 
-        public ExperimentData()
+        public OldExperimentData()
         {
             Initialize();
         }
@@ -80,7 +80,7 @@ namespace ESMEWorkBench.Data
             const string layerFileName2 = "LayerFileName2";
 
             Console.WriteLine(@"Creating new ExperimentData object");
-            var myData = new ExperimentData((s, e) => Console.WriteLine(@"Value Changed!"));
+            var myData = new OldExperimentData((s, e) => Console.WriteLine(@"Value Changed!"));
             Console.WriteLine(@"IsModified = " + (myData.IsModified ? "True" : "False"));
             Console.WriteLine(@"Setting TestString");
             myData.TestString = "Test String";
