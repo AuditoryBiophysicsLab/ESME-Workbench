@@ -44,30 +44,37 @@
 				</Trigger>
 			</Style.Triggers>
 		</Style>
-        <Style x:Key="ContextMenuItemStyle">
-            <Setter Property="MenuItem.Header" Value="{Binding Header}"/>
-            <Setter Property="MenuItem.ItemsSource" Value="{Binding Children}"/>
-            <Setter Property="MenuItem.Command" Value="{Binding Command}" />
-            <Setter Property="MenuItem.CommandParameter" Value="{Binding CommandParameter}" />
-            <Setter Property="MenuItem.Icon" Value="{Binding Icon}" />
-            <Setter Property="MenuItem.IsChecked" Value="{Binding IsChecked}" />
-            <Setter Property="MenuItem.IsCheckable" Value="{Binding IsCheckable}" />
-        </Style>
-        <HierarchicalDataTemplate x:Key="CheckBoxItemTemplate"
+		<Style x:Key="ContextMenuItemStyle">
+			<Setter Property="MenuItem.Header"
+			        Value="{Binding Header}" />
+			<Setter Property="MenuItem.ItemsSource"
+			        Value="{Binding Children}" />
+			<Setter Property="MenuItem.Command"
+			        Value="{Binding Command}" />
+			<Setter Property="MenuItem.CommandParameter"
+			        Value="{Binding CommandParameter}" />
+			<Setter Property="MenuItem.Icon"
+			        Value="{Binding Icon}" />
+			<Setter Property="MenuItem.IsChecked"
+			        Value="{Binding IsChecked}" />
+			<Setter Property="MenuItem.IsCheckable"
+			        Value="{Binding IsCheckable}" />
+		</Style>
+		<HierarchicalDataTemplate x:Key="CheckBoxItemTemplate"
 		                          ItemsSource="{Binding Children, Mode=OneTime}">
 			<StackPanel Orientation="Horizontal">
 				<!-- These elements are bound to a FooViewModel object. -->
 				<CheckBox Focusable="False"
 				          IsChecked="{Binding IsChecked}"
 				          VerticalAlignment="Center" />
-                <ContentPresenter Content="{Binding LayerName, Mode=OneTime}"
+				<ContentPresenter Content="{Binding LayerName, Mode=OneTime}"
 				                  Margin="2,0">
-                </ContentPresenter>
-                <StackPanel.ContextMenu>
-                    <ContextMenu IsOpen="{Binding ShowContextMenu, Mode=OneWay}" 
-                             ItemsSource="{Binding ContextMenu}" 
-                             ItemContainerStyle="{StaticResource ContextMenuItemStyle}"/>
-                </StackPanel.ContextMenu>
+				</ContentPresenter>
+				<StackPanel.ContextMenu>
+					<ContextMenu IsOpen="{Binding ShowContextMenu, Mode=OneWay}"
+					             ItemsSource="{Binding ContextMenu}"
+					             ItemContainerStyle="{StaticResource ContextMenuItemStyle}" />
+				</StackPanel.ContextMenu>
 			</StackPanel>
 		</HierarchicalDataTemplate>
 
@@ -79,25 +86,44 @@
 		</DataTemplate>
 
 		<app:GridLengthConverter x:Key="gridLengthConverter" />
+
+		<!-- RibbonGallery -->
+		<Style TargetType="{x:Type r:RibbonGallery}">
+			<Setter Property="SelectedItem"
+			        Value="{Binding SelectedItem}" />
+			<Setter Property="Command"
+			        Value="{Binding Command}" />
+			<Setter Property="CommandParameter"
+			        Value="{Binding SelectedItem}" />
+		</Style>
+
+		<!-- RibbonGalleryCategory -->
+		<Style x:Key="FileListCategory"
+		       TargetType="{x:Type r:RibbonGalleryCategory}">
+			<Setter Property="ItemsSource"
+			        Value="{Binding}" />
+		</Style>
+
 	</r:RibbonWindow.Resources>
-    <r:RibbonWindow.InputBindings>
-        <KeyBinding Command="{Binding CancelCurrentCommand}" Key="ESC"/>
-    </r:RibbonWindow.InputBindings>
+	<r:RibbonWindow.InputBindings>
+		<KeyBinding Command="{Binding CancelCurrentCommand}"
+		            Key="Escape" />
+	</r:RibbonWindow.InputBindings>
 	<DockPanel LastChildFill="True">
 		<StatusBar DockPanel.Dock="Bottom">
 			<StatusBarItem>
 				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="{Binding MapViewModel.MouseLatitude, StringFormat=Lat: {0:0.000000}}" />
+					<TextBlock Text="{Binding Source={x:Static app:Globals.MapViewModel}, Path=MouseLatitude, StringFormat=Lat: {0:0.000000}}" />
 					<TextBlock Text=" " />
-					<TextBlock Text="{Binding MapViewModel.MouseLongitude, StringFormat=Lon: {0:0.000000}}" />
+					<TextBlock Text="{Binding Source={x:Static app:Globals.MapViewModel}, Path=MouseLongitude, StringFormat=Lon: {0:0.000000}}" />
 				</StackPanel>
 			</StatusBarItem>
 		</StatusBar>
 		<r:Ribbon x:Name="Ribbon"
 		          DockPanel.Dock="Top"
-		          SelectedIndex="0">
+		          SelectedIndex="2">
 			<r:Ribbon.ApplicationMenu>
-				<r:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Wave.png" >
+				<r:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Wave.png">
 					<r:RibbonApplicationMenuItem Header="Save Experiment"
 					                             ImageSource="Images\LargeIcons\save-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
@@ -164,38 +190,38 @@
 					                SmallImageSource="Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add an ESRI Shapefile to the map"
-					                Command="{Binding MapViewModel.AddShapefileCommand}" />
+					                Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=AddShapefileCommand}" />
 					<r:RibbonButton Label="Overlay"
 					                SmallImageSource="Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a NUWC Overlay file to the map"
-					                Command="{Binding MapViewModel.AddOverlayFileCommand}" />
+					                Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=AddOverlayFileCommand}" />
 					<r:RibbonButton Label="Scenario"
 					                SmallImageSource="Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a NUWC Scenario file to the map"
-					                Command="{Binding MapViewModel.AddScenarioFileCommand}" />
+					                Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=AddScenarioFileCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Show">
 					<r:RibbonCheckBox Label="Base Map"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Toggles the base map display"
-					                  Command="{Binding MapViewModel.ToggleBaseMapDisplayCommand}"
+					                  Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=ToggleBaseMapDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowBasemap, Mode=TwoWay}"
 					                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
 					<r:RibbonCheckBox Label="Grid Overlay"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Toggles the lat/lon grid overlay"
-					                  Command="{Binding MapViewModel.ToggleGridOverlayDisplayCommand}"
+					                  Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=ToggleGridOverlayDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowGrid, Mode=TwoWay}"
 					                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
-                    <r:RibbonCheckBox Label="Pan/Zoom"
+					<r:RibbonCheckBox Label="Pan/Zoom"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Toggles the pan/zoom control"
-					                  Command="{Binding MapViewModel.TogglePanZoomDisplayCommand}"
+					                  Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=TogglePanZoomDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowPanZoom, Mode=TwoWay}"
 					                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
-                </r:RibbonGroup>
+				</r:RibbonGroup>
 				<r:RibbonGroup Header="Sounds">
 					<r:RibbonButton Label="Analysis Point"
 					                LargeImageSource="Images\LargeIcons\bullet-2-icon.png"
@@ -214,7 +240,7 @@
 					                SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new quick look point to the experiment"
-					                Command="{Binding MapViewModel.QuickLookCommand}" />
+					                Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=QuickLookCommand}" />
 				</r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="S"
@@ -225,7 +251,7 @@
 					                SmallImageSource="Images\SmallIcons\open-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Open a scenario file"
-					                Command="{Binding MapViewModel.AddScenarioFileCommand}" />
+					                Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=AddScenarioFileCommand}" />
 					<r:RibbonButton Label="Close"
 					                LargeImageSource="Images\LargeIcons\close-icon.png"
 					                SmallImageSource="Images\SmallIcons\close-icon.png"
@@ -254,7 +280,7 @@
 					                SmallImageSource="Images\SmallIcons\open-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Open an environment file"
-					                Command="{Binding MapViewModel.OpenEnvironmentFileCommand}" />
+					                Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=OpenEnvironmentFileCommand}" />
 					<r:RibbonButton Label="Close"
 					                LargeImageSource="Images\LargeIcons\close-icon.png"
 					                SmallImageSource="Images\SmallIcons\close-icon.png"
@@ -269,30 +295,75 @@
 					                Command="{Binding LaunchEnvironmentBuilderCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Data Layers">
-					<r:RibbonComboBox Label="Wind"
-					                  SmallImageSource="Images\SmallIcons\open-icon.png"
-					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a source for wind data"
-					                  IsEnabled="False"
-					                  IsEditable="False" />
-					<r:RibbonComboBox Label="Sound Speed"
-					                  SmallImageSource="Images\SmallIcons\open-icon.png"
-					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a source for sound speed data"
-					                  IsEnabled="False"
-					                  IsEditable="False" />
-					<r:RibbonComboBox Label="Sediment"
-					                  SmallImageSource="Images\SmallIcons\open-icon.png"
-					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a source for sediment data"
-					                  IsEnabled="False"
-					                  IsEditable="False" />
-					<r:RibbonComboBox Label="Bathymetry"
-					                  SmallImageSource="Images\SmallIcons\open-icon.png"
-					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a source for bathymetry data"
-					                  IsEnabled="False"
-					                  IsEditable="False" />
+					<StackPanel Orientation="Vertical">
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="Wind"
+							           Width="80"
+							           TextAlignment="Right"
+							           VerticalAlignment="Center"
+							           Margin="0 0 5 0" />
+							<r:RibbonComboBox ToolTipTitle="Wind"
+							                  ToolTipDescription="Select a source for wind data"
+							                  DataContext="{Binding Source={x:Static app:Globals.EnvironmentDatabaseViewModel}, Path=WindSpeedData}"
+							                  IsEnabled="True"
+							                  IsEditable="True">
+								<r:RibbonGallery MaxColumnCount="1">
+									<r:RibbonGalleryCategory ItemsSource="{Binding}" />
+								</r:RibbonGallery>
+							</r:RibbonComboBox>
+						</StackPanel>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="Sound Speed"
+							           Width="80"
+							           TextAlignment="Right"
+							           VerticalAlignment="Center"
+							           Margin="0 0 5 0" />
+							<r:RibbonComboBox ToolTipTitle="Sound Speed"
+							                  ToolTipDescription="Select a source for sound speed data"
+							                  DataContext="{Binding Source={x:Static app:Globals.EnvironmentDatabaseViewModel}, Path=SoundSpeedData}"
+							                  IsEnabled="True"
+							                  IsEditable="True">
+								<r:RibbonGallery MaxColumnCount="1">
+									<r:RibbonGalleryCategory ItemsSource="{Binding}" />
+								</r:RibbonGallery>
+							</r:RibbonComboBox>
+						</StackPanel>
+					</StackPanel>
+					<StackPanel Orientation="Vertical">
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="Sediment"
+							           Width="80"
+							           TextAlignment="Right"
+							           VerticalAlignment="Center"
+							           Margin="0 0 5 0" />
+							<r:RibbonComboBox ToolTipTitle="Sediment"
+							                  ToolTipDescription="Select a source for sediment data"
+							                  DataContext="{Binding Source={x:Static app:Globals.EnvironmentDatabaseViewModel}, Path=BottomTypeData}"
+							                  IsEnabled="True"
+							                  IsEditable="True">
+								<r:RibbonGallery MaxColumnCount="1">
+									<r:RibbonGalleryCategory ItemsSource="{Binding}" />
+								</r:RibbonGallery>
+							</r:RibbonComboBox>
+						</StackPanel>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="Bathymetry"
+							           Width="80"
+							           TextAlignment="Right"
+							           VerticalAlignment="Center"
+							           Margin="0 0 5 0" />
+							<r:RibbonComboBox ToolTipTitle="Bathymetry"
+                                              Width="150"
+							                  ToolTipDescription="Select a source for bathymetry data"
+							                  DataContext="{Binding Source={x:Static app:Globals.EnvironmentDatabaseViewModel}, Path=BathymetryData}"
+							                  IsEnabled="True"
+							                  IsEditable="True">
+								<r:RibbonGallery MaxColumnCount="1">
+									<r:RibbonGalleryCategory ItemsSource="{Binding}" />
+								</r:RibbonGallery>
+							</r:RibbonComboBox>
+						</StackPanel>
+					</StackPanel>
 				</r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="A"
@@ -429,7 +500,7 @@
 				</r:RibbonGroup>
 			</r:RibbonTab>
 		</r:Ribbon>
-        <Grid AllowDrop="True">
+		<Grid AllowDrop="True">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
 				                  MinWidth="100" />
@@ -437,14 +508,14 @@
 				<ColumnDefinition Width="*"
 				                  MinWidth="500" />
 			</Grid.ColumnDefinitions>
-            <GroupBox DataContext="{x:Static app:Globals.LayerDisplayViewModel}"
+			<GroupBox DataContext="{x:Static app:Globals.LayerDisplayViewModel}"
 			          Grid.Column="0"
 			          Header="Layers">
-			    <TreeView DockPanel.Dock="Top"
-					        ItemContainerStyle="{StaticResource LayersViewItemStyle}"
-					        ItemsSource="{Binding Layers}"
-					        ItemTemplate="{StaticResource CheckBoxItemTemplate}">
-			    </TreeView>
+				<TreeView DockPanel.Dock="Top"
+				          ItemContainerStyle="{StaticResource LayersViewItemStyle}"
+				          ItemsSource="{Binding Layers}"
+				          ItemTemplate="{StaticResource CheckBoxItemTemplate}">
+				</TreeView>
 			</GroupBox>
 			<GridSplitter Name="GridSplitter"
 			              Grid.Column="1"
@@ -456,23 +527,23 @@
 			              ResizeBehavior="BasedOnAlignment"
 			              ResizeDirection="Columns" />
 			<uc1:WpfMap Name="Map1"
-                        Cursor="{Binding MapViewModel.Cursor}"
+			            Cursor="{Binding Source={x:Static app:Globals.MapViewModel}, Path=Cursor}"
 			            Grid.Column="2">
 				<i:Interaction.Triggers>
 					<i:EventTrigger EventName="MouseLeftButtonUp">
-						<cinch:EventToCommandTrigger Command="{Binding MapViewModel.MouseLeftButtonUpCommand}" />
+						<cinch:EventToCommandTrigger Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=MouseLeftButtonUpCommand}" />
 					</i:EventTrigger>
-                    <i:EventTrigger EventName="MouseMove">
-                        <cinch:EventToCommandTrigger Command="{Binding MapViewModel.MouseMoveCommand}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
+					<i:EventTrigger EventName="MouseMove">
+						<cinch:EventToCommandTrigger Command="{Binding Source={x:Static app:Globals.MapViewModel}, Path=MouseMoveCommand}" />
+					</i:EventTrigger>
+				</i:Interaction.Triggers>
 			</uc1:WpfMap>
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="Drop">
-                    <ia:CallMethodAction TargetObject="{Binding}"
-                                     MethodName="FilesDropped"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </Grid>
-    </DockPanel>
+			<i:Interaction.Triggers>
+				<i:EventTrigger EventName="Drop">
+					<ia:CallMethodAction TargetObject="{Binding}"
+					                     MethodName="FilesDropped" />
+				</i:EventTrigger>
+			</i:Interaction.Triggers>
+		</Grid>
+	</DockPanel>
 </r:RibbonWindow>

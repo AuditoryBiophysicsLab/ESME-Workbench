@@ -127,12 +127,7 @@ namespace ESMEWorkBench.ViewModels.Layers
             if (updateParent && Parent != null) Parent.VerifyCheckState();
 
             if (Overlay != null)
-            {
-                if (_isChecked.HasValue)
-                    Overlay.IsVisible = _isChecked.Value;
-                else
-                    Overlay.IsVisible = true;
-            }
+                Overlay.IsVisible = !_isChecked.HasValue || _isChecked.Value;
 
             NotifyPropertyChanged(IsCheckedChangedEventArgs);
         }

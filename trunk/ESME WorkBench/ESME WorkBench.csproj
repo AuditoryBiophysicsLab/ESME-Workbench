@@ -144,6 +144,7 @@
     <Compile Include="ViewModels\Layers\ScenarioFileLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\ShapefileLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\ShapeLayerViewModel.cs" />
+    <Compile Include="ViewModels\Main\EnvironmentDatabaseViewModel.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\LayerDisplayViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModel.cs" />

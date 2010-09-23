@@ -17,8 +17,6 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         #region Constructors
 
-        static MainViewModel() { Globals.AppSettings = AppSettings.Load(); }
-
         [ImportingConstructor]
         public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService, IUIVisualizerService visualizerService)
         {
@@ -42,11 +40,15 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                     Globals.UIVisualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
                                                                                 });
 
-            LaunchExternalProgramCommand = new SimpleCommand<object, object>(delegate(Object arg)
+            LaunchExternalProgramCommand = new SimpleCommand<object, string>(delegate(string executablePath)
                                                                              {
-                                                                                 var executable = new Process();
-                                                                                 var executablePath = (string) arg;
-                                                                                 executable.StartInfo.FileName = executablePath;
+                                                                                 var executable = new Process
+                                                                                                  {
+                                                                                                      StartInfo =
+                                                                                                          {
+                                                                                                              FileName = executablePath
+                                                                                                          }
+                                                                                                  };
                                                                                  executable.Start();
                                                                              });
 
@@ -90,6 +92,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                      });
 
             //RibbonViewModel.RecentExperiments.InsertFile(@"C:\Users\Dave Anderson\Documents\ESME WorkBench\test.esme");
+
         }
 
         public void FilesDropped(Object sender, DragEventArgs e)
@@ -123,7 +126,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #region Commands
 
         public SimpleCommand<Object, Object> EditOptionsCommand { get; private set; }
-        public SimpleCommand<Object, Object> LaunchExternalProgramCommand { get; private set; }
+        public SimpleCommand<Object, string> LaunchExternalProgramCommand { get; private set; }
         public SimpleCommand<Object, Object> LaunchScenarioEditorCommand { get; private set; }
         public SimpleCommand<Object, Object> LaunchEnvironmentBuilderCommand { get; private set; }
         public SimpleCommand<Object, Object> TestTransmissionLossViewCommand { get; private set; }
