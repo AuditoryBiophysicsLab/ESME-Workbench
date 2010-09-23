@@ -45,10 +45,10 @@ namespace ESME.Model
         /// <summary>
         /// A list of TransmissionLossFields that are already calculated.  Read from a cache file.
         /// </summary>
-        [XmlIgnore]
-        public OldTransmissionLossFieldList TransmissionLossFields { get; set; }
+        //[XmlIgnore]
+       // public OldTransmissionLossFieldList TransmissionLossFields { get; set; }
 
-        [XmlIgnore]
+       // [XmlIgnore]
         public List<DataModel.ExperimentTreeItem> ExperimentTree { get; private set; }
 
         [XmlIgnore]

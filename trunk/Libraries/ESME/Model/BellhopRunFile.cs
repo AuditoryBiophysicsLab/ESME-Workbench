@@ -119,22 +119,22 @@ namespace ESME.Model
                                      TransmissionLossJob = transmissionLossJob,
                                  };
 
-            var bottomProfiles = new BottomProfile[transmissionLossJob.NewAnalysisPoint.RadialCount];
-            var soundSpeedProfiles = new SoundSpeedProfile[transmissionLossJob.NewAnalysisPoint.RadialCount];
-            var bearings = new float[transmissionLossJob.NewAnalysisPoint.RadialCount];
+            var bottomProfiles = new BottomProfile[transmissionLossJob.AnalysisPoint.RadialCount];
+            var soundSpeedProfiles = new SoundSpeedProfile[transmissionLossJob.AnalysisPoint.RadialCount];
+            var bearings = new float[transmissionLossJob.AnalysisPoint.RadialCount];
             var maxCalculationDepthMeters = float.MinValue;
-            var bearingStep = 360.0f/transmissionLossJob.NewAnalysisPoint.RadialCount;
-            for (var i = 0; i < transmissionLossJob.NewAnalysisPoint.RadialCount; i++)
+            var bearingStep = 360.0f/transmissionLossJob.AnalysisPoint.RadialCount;
+            for (var i = 0; i < transmissionLossJob.AnalysisPoint.RadialCount; i++)
             {
-                bearings[i] = bearingStep*i + transmissionLossJob.NewAnalysisPoint.RadialBearing;
-                var curTransect = new Transect(null, transmissionLossJob.NewAnalysisPoint.Location, bearings[i], transmissionLossJob.Radius);
+                bearings[i] = bearingStep*i + transmissionLossJob.AnalysisPoint.RadialBearing;
+                var curTransect = new Transect(null, transmissionLossJob.AnalysisPoint.Location, bearings[i], transmissionLossJob.Radius);
                 bottomProfiles[i] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
                 maxCalculationDepthMeters = Math.Max((float) bottomProfiles[i].MaxDepth, maxCalculationDepthMeters);
                 soundSpeedProfiles[i] = environmentInformation.SoundSpeedField[curTransect.MidPoint];
             }
 
             var depthCellCount = (int) Math.Round((maxCalculationDepthMeters/transmissionLossSettings.DepthCellSize)) + 1;
-            for (var i = 0; i < transmissionLossJob.NewAnalysisPoint.RadialCount; i++)
+            for (var i = 0; i < transmissionLossJob.AnalysisPoint.RadialCount; i++)
             {
                 var bellhopConfig = Bellhop.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[i], environmentInformation.Sediment, maxCalculationDepthMeters, rangeCellCount, depthCellCount, false, false, false, 1500);
                 bellhopRunFile.BellhopRadials.Add(new BellhopRadial

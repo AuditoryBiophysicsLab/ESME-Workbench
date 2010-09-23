@@ -35,8 +35,8 @@ namespace ESME.TransmissionLoss
 #if true
         public TransmissionLossField(BellhopRunFile runFile)
         {
-            Latitude = (float) runFile.TransmissionLossJob.NewAnalysisPoint.Location.Latitude_degrees;
-            Longitude = (float) runFile.TransmissionLossJob.NewAnalysisPoint.Location.Longitude_degrees;
+            Latitude = (float) runFile.TransmissionLossJob.AnalysisPoint.Location.Latitude_degrees;
+            Longitude = (float) runFile.TransmissionLossJob.AnalysisPoint.Location.Longitude_degrees;
             SourceDepth = runFile.TransmissionLossJob.AcousticProperties.SourceDepth;
             VerticalBeamWidth = runFile.TransmissionLossJob.AcousticProperties.VerticalBeamWidth;
             VerticalLookAngle =
@@ -50,6 +50,8 @@ namespace ESME.TransmissionLoss
             //Filename = Path.Combine(Field.DataDirectoryPath, Field.BinaryFileName);
         }
 #endif
+        public TransmissionLossField()
+        {} 
 
         public TransmissionLossField(string filename, bool loadHeadersOnly)
         {
@@ -151,4 +153,17 @@ namespace ESME.TransmissionLoss
         private readonly List<TransmissionLossRadial> _mRadials = new List<TransmissionLossRadial>();
         private bool _mSaved;
     }
+#if false
+    //todo: impelement properly -- > called in ESME_Experiment.cs
+    public class TransmissionLossFieldList : List<TransmissionLossField>
+    {
+        internal void Initialize(NewAnalysisPointList analysisPoints)
+        {
+
+            foreach (var f in this)
+                f.AnalysisPointID = analysisPoints.Find(a => a.IDField == f.AnalysisPointID);
+        }
+
+    } 
+#endif
 }

@@ -108,7 +108,7 @@ namespace ESMEWorkBench.ViewModels.Main
                         LowFrequency = 3500,
                         HighFrequency = 3500,
                     },
-                    NewAnalysisPoint = new NewAnalysisPoint
+                    AnalysisPoint = new AnalysisPoint
                     {
                         IDField = 1,
                         Location = new EarthCoordinate(MouseLatitude, MouseLongitude),

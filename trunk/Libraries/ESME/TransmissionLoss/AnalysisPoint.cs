@@ -5,7 +5,7 @@ using HRC.Navigation;
 
 namespace ESME.TransmissionLoss
 {
-    public class NewAnalysisPoint : IEquatable<NewAnalysisPoint>, IHasIDField
+    public class AnalysisPoint : IEquatable<AnalysisPoint>, IHasIDField
     {
         public EarthCoordinate Location { get; set; }
         public float RadialBearing { get; set; }
@@ -15,7 +15,7 @@ namespace ESME.TransmissionLoss
 
         #region IEquatable<AnalysisPoint> Members
 
-        bool IEquatable<NewAnalysisPoint>.Equals(NewAnalysisPoint that)
+        bool IEquatable<AnalysisPoint>.Equals(AnalysisPoint that)
         {
             if (!Location.Equals(that.Location))
                 return false;
@@ -35,11 +35,11 @@ namespace ESME.TransmissionLoss
         
     }
 
-    public class AnalysisPointDeletedEventArgs : ItemDeletedEventArgs<NewAnalysisPoint>
+    public class AnalysisPointDeletedEventArgs : ItemDeletedEventArgs<AnalysisPoint>
     {
     }
 
-    public class NewAnalysisPointList : UniqueAutoIncrementList<NewAnalysisPoint>
+    public class NewAnalysisPointList : UniqueAutoIncrementList<AnalysisPoint>
     {
     }
 }

@@ -9,7 +9,7 @@ namespace ESME.TransmissionLoss
 {
     public class TransmissionLossJob: IHasIDField
     {
-        public NewAnalysisPoint NewAnalysisPoint { get; set; }
+        public AnalysisPoint AnalysisPoint { get; set; }
         public AcousticProperties AcousticProperties { get; set; }
         /// <summary>
         /// transmission loss radius, in meters.

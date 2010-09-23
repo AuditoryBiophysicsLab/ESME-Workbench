@@ -149,7 +149,7 @@
     <Compile Include="ShipTrack\Waypoint.cs" />
     <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
     <Compile Include="TransmissionLoss\Bellhop\RadialCalculator.cs" />
-    <Compile Include="TransmissionLoss\NewAnalysisPoint.cs" />
+    <Compile Include="TransmissionLoss\AnalysisPoint.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossField.cs" />
@@ -269,6 +269,7 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="ClassDiagram1.cd" />
     <None Include="Resources\Strings.resx">
       <SubType>Designer</SubType>
     </None>
