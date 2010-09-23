@@ -13,11 +13,11 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using System.Windows.Forms;
 using ESME.TransmissionLoss.Bellhop;
-
+//todo: deprecated.
 namespace ESME.Model
 {
 #if false
-    //todo: does this code fall completely out of date now?
+   
     public static class Tester
     {
         public static void BellhopRunFileTest()

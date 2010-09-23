@@ -13,7 +13,7 @@ using HRC.Navigation;
 using System.Windows.Forms;
 using System.Drawing;
 using ESME;
-
+//todo: deprecated.
 namespace ESME.Model
 {
     [XmlRoot("ESME_Experiment")]
