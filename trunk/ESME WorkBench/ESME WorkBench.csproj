@@ -109,9 +109,10 @@
       <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Data\AppSettings.cs" />
-    <Compile Include="Data\ExperimentData.cs" />
+    <Compile Include="Data\OldExperimentData.cs" />
     <Compile Include="Data\IApplicationData.cs" />
     <Compile Include="Data\PersistentApplicationData.cs" />
+    <Compile Include="Data\SerializableData.cs" />
     <Compile Include="Data\WatchableReferenceDatum.cs" />
     <Compile Include="Data\WatchableList.cs" />
     <Compile Include="Globals.cs" />
@@ -392,6 +393,8 @@
     <Resource Include="AboutLogo.png">
       <SubType>Image</SubType>
     </Resource>
+    <Content Include="External References\3MBSLib.dll" />
+    <Content Include="External References\3MBSWrapperClass.dll" />
     <Content Include="External References\Devart.Data.Linq.dll" />
     <SplashScreen Include="Images\ESME Splash Screen.png" />
   </ItemGroup>

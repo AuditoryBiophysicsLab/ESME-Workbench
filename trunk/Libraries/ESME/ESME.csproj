@@ -73,10 +73,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="3MBSLib">
-      <HintPath>..\..\..\..\ESME\Workbench\mmmbs\3MBSLib.dll</HintPath>
+      <HintPath>..\..\ESME WorkBench\External References\3MBSLib.dll</HintPath>
     </Reference>
     <Reference Include="3MBSWrapperClass">
-      <HintPath>..\..\..\..\ESME\Workbench\mmmbs\3MBSWrapperClass.dll</HintPath>
+      <HintPath>..\..\ESME WorkBench\External References\3MBSWrapperClass.dll</HintPath>
     </Reference>
     <Reference Include="Accessibility" />
     <Reference Include="HRC">
