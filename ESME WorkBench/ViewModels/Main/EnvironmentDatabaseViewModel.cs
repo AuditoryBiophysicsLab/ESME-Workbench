@@ -25,19 +25,23 @@ namespace ESMEWorkBench.ViewModels.Main
 
             WindSpeedSelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(delegate(EnvironmentDataDescriptor param)
             {
-                WindSpeedEnvironmentFile = param.FilePath;
+                if (param != null)
+                    WindSpeedEnvironmentFile = param.FilePath;
             });
             SoundSpeedSelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(delegate(EnvironmentDataDescriptor param)
             {
-                SoundSpeedEnvironmentFile = param.FilePath;
+                if (param != null)
+                    SoundSpeedEnvironmentFile = param.FilePath;
             });
             BottomTypeSelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(delegate(EnvironmentDataDescriptor param)
             {
-                BottomTypeEnvironmentFile = param.FilePath;
+                if (param != null)
+                    BottomTypeEnvironmentFile = param.FilePath;
             });
             BathymetrySelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(delegate(EnvironmentDataDescriptor param)
             {
-                BathymetryEnvironmentFile = param.FilePath;
+                if (param != null)
+                    BathymetryEnvironmentFile = param.FilePath;
             });
         }
 
@@ -79,48 +83,48 @@ namespace ESMEWorkBench.ViewModels.Main
             BottomTypeData.Clear();
             BathymetryData.Clear();
             var files = Directory.GetFiles(DatabasePath, "*.eeb");
-            Parallel.ForEach(files, file =>
-                                    {
-                                        var dataFile = DataFile.Open(file);
-                                        foreach (var layer in dataFile.Layers)
-                                        {
-                                            switch (layer.Name.ToLower())
-                                            {
-                                                case "windspeed":
-                                                    WindSpeedData.Add(new EnvironmentDataDescriptor
-                                                                      {
-                                                                          FilePath = file,
-                                                                          ShortName = string.Format("{0} [{1}]", Path.GetFileNameWithoutExtension(file), layer.TimePeriod),
-                                                                          Command = WindSpeedSelectionChangedCommand,
-                                                                      });
-                                                    break;
-                                                case "soundspeed":
-                                                    SoundSpeedData.Add(new EnvironmentDataDescriptor
-                                                                       {
-                                                                           FilePath = file,
-                                                                           ShortName = string.Format("{0} [{1}]", Path.GetFileNameWithoutExtension(file), layer.TimePeriod),
-                                                                           Command = SoundSpeedSelectionChangedCommand,
-                                                                       });
-                                                    break;
-                                                case "bottomtype":
-                                                    BottomTypeData.Add(new EnvironmentDataDescriptor
-                                                                       {
-                                                                           FilePath = file,
-                                                                           ShortName = string.Format("{0}", Path.GetFileNameWithoutExtension(file)),
-                                                                           Command = BottomTypeSelectionChangedCommand,
-                                                                       });
-                                                    break;
-                                                case "bathymetry":
-                                                    BathymetryData.Add(new EnvironmentDataDescriptor
-                                                                       {
-                                                                           FilePath = file,
-                                                                           ShortName = string.Format("{0}", Path.GetFileNameWithoutExtension(file)),
-                                                                           Command = BathymetrySelectionChangedCommand,
-                                                                       });
-                                                    break;
-                                            }
-                                        }
-                                    });
+            foreach (var file in files)
+            {
+                var dataFile = DataFile.Open(file);
+                foreach (var layer in dataFile.Layers)
+                {
+                    switch (layer.Name.ToLower())
+                    {
+                        case "windspeed":
+                            WindSpeedData.Add(new EnvironmentDataDescriptor
+                                              {
+                                                  FilePath = file,
+                                                  ShortName = string.Format("{0} [{1}]", Path.GetFileNameWithoutExtension(file), layer.TimePeriod),
+                                                  Command = WindSpeedSelectionChangedCommand,
+                                              });
+                            break;
+                        case "soundspeed":
+                            SoundSpeedData.Add(new EnvironmentDataDescriptor
+                                               {
+                                                   FilePath = file,
+                                                   ShortName = string.Format("{0} [{1}]", Path.GetFileNameWithoutExtension(file), layer.TimePeriod),
+                                                   Command = SoundSpeedSelectionChangedCommand,
+                                               });
+                            break;
+                        case "bottomtype":
+                            BottomTypeData.Add(new EnvironmentDataDescriptor
+                                               {
+                                                   FilePath = file,
+                                                   ShortName = string.Format("{0}", Path.GetFileNameWithoutExtension(file)),
+                                                   Command = BottomTypeSelectionChangedCommand,
+                                               });
+                            break;
+                        case "bathymetry":
+                            BathymetryData.Add(new EnvironmentDataDescriptor
+                                               {
+                                                   FilePath = file,
+                                                   ShortName = string.Format("{0}", Path.GetFileNameWithoutExtension(file)),
+                                                   Command = BathymetrySelectionChangedCommand,
+                                               });
+                            break;
+                    }
+                }
+            }
             // TODO: Put initialization code for the file selections here, when a per-experiment data model is available
             // Remove these lines when initializing 'for-real'
             WindSpeedEnvironmentFile = WindSpeedData[0].FilePath;

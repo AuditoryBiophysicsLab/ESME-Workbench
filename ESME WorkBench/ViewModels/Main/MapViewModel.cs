@@ -151,10 +151,11 @@ namespace ESMEWorkBench.ViewModels.Main
                 Cursor = Cursors.Wait;
                 Thread.Sleep(100);
                 
-                BellhopRunFile bellhopRunFile;
+                TransmissionLossField transmissionLossField;
                 try
                 {
-                    bellhopRunFile = BellhopRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
+                    var bellhopRunFile = BellhopRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
+                    transmissionLossField = FieldCalculator.ComputeField(bellhopRunFile, null);
                 }
                 catch (BathymetryOutOfBoundsException)
                 {
@@ -170,8 +171,9 @@ namespace ESMEWorkBench.ViewModels.Main
                     Cursor = Cursors.Arrow;
                     return;
                 }
-                var transmissionLossField = FieldCalculator.ComputeField(bellhopRunFile, null);
                 var transmissionLossViewModel = new TransmissionLossFieldViewModel(transmissionLossField);
+                transmissionLossField.Filename = @".\test.tlf";
+                transmissionLossField.Save();
                 Globals.UIVisualizerService.Show("TransmissionLossView", transmissionLossViewModel, true, null);
 
                 Cursor = Cursors.Arrow;
@@ -270,10 +272,7 @@ namespace ESMEWorkBench.ViewModels.Main
             if (Designer.IsInDesignMode)
                 return;
 
-            //Globals.MessageBoxService.ShowInformation("ViewModel created successfully");
-            if ((Globals.ViewAwareStatus == null) || (Globals.ViewAwareStatus.View == null)) return;
-
-            _map = ((MainWindow) Globals.ViewAwareStatus.View).Map1;
+            _map = ((MainWindow)Globals.ViewAwareStatus.View).Map1;
             MapDLLVersion = WpfMap.GetVersion();
             _map.MapUnit = GeographyUnit.DecimalDegree;
             _map.MapTools.PanZoomBar.HorizontalAlignment = HorizontalAlignment.Left;
@@ -283,18 +282,25 @@ namespace ESMEWorkBench.ViewModels.Main
             var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             BaseMapViewModel = new ShapefileLayerViewModel(Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"))
-                               {
-                                   IsChecked = Properties.Settings.Default.ShowBasemap
-                               };
+            {
+                IsChecked = Properties.Settings.Default.ShowBasemap
+            };
             GridOverlayViewModel = new AdornmentLayerViewModel("Grid", new MyGraticuleAdornmentLayer())
-                                   {
-                                       IsChecked = Properties.Settings.Default.ShowGrid
-                                   };
+            {
+                IsChecked = Properties.Settings.Default.ShowGrid
+            };
 
             _map.MapTools.PanZoomBar.Visibility = Properties.Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
 
             _map.CurrentExtent = new RectangleShape(new PointShape(-180, 90), new PointShape(180, -90));
             _map.ZoomToScale(_map.ZoomLevelScales[3]);
+
+            if (Globals.IsInitializeExperimentNeeded)
+            {
+                if ((Globals.Experiment.ScenarioFileName != null) && (File.Exists(Globals.Experiment.ScenarioFileName)))
+                   AddScenarioFile(Globals.Experiment.ScenarioFileName);
+                else Globals.Experiment.ScenarioFileName = null;
+            }
         }
 
         public void AddShapeFile(string filename)
@@ -325,10 +331,20 @@ namespace ESMEWorkBench.ViewModels.Main
         public void AddScenarioFile(string filename)
         {
             if (!CanAddScenarioFile()) return;
+            if ((Globals.Experiment.ScenarioFileName != null) && (filename != Globals.Experiment.ScenarioFileName))
+            {
+                if (File.Exists(Globals.Experiment.ScenarioFileName))
+                {
+                    var result = Globals.MessageBoxService.ShowYesNo("This experiment already has a scenario file.  Replace it with this one?", CustomDialogIcons.Exclamation);
+                    if (result == CustomDialogResults.No) return;
+                    Globals.LayerDisplayViewModel.RemoveScenarioLayers();
+                }
+            }
             try
             {
                 var overlayLayer = new ScenarioFileLayerViewModel(filename, Globals.AppSettings.ScenarioDataDirectory);
                 Globals.LayerDisplayViewModel.Layers.Add(overlayLayer);
+                Globals.Experiment.ScenarioFileName = filename;
             }
             catch (Exception e)
             {
