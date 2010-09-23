@@ -6,7 +6,7 @@ namespace ESME.Model
 {
     public class FixedSource
     {
-        public FixedSource(NewAnalysisPoint analysisPoint)
+        public FixedSource(AnalysisPoint analysisPoint)
         {
             AnalysisPoint = analysisPoint;
             AnalysisPointID = analysisPoint.IDField;
@@ -23,7 +23,7 @@ namespace ESME.Model
         public double PingDurationSeconds { get; set; }
 
         [XmlIgnore]
-        public NewAnalysisPoint AnalysisPoint { get; set; }
+        public AnalysisPoint AnalysisPoint { get; set; }
     }
 
     public class FixedSourceList : List<FixedSource>

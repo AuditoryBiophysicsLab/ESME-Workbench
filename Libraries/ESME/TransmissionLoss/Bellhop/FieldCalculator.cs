@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using ESME.Model;
@@ -12,7 +11,7 @@ namespace ESME.TransmissionLoss.Bellhop
         {
             var stringBuilder = new StringBuilder();
             var fieldData = new TransmissionLossField(runFile);
-            var radialNum = 0;
+            int radialNum = 0;
             if (viewModel != null)
             {
                 stringBuilder.Append(String.Format("{0} Starting bellhop calculation\n", DateTime.Now));
@@ -20,7 +19,7 @@ namespace ESME.TransmissionLoss.Bellhop
             }
             Parallel.ForEach(runFile.BellhopRadials, (r, loopstate) =>
                                                      {
-                                                         var localRadialNum = ++radialNum;
+                                                         int localRadialNum = ++radialNum;
                                                          if (viewModel != null)
                                                          {
                                                              stringBuilder.Append(String.Format("{0} Launching radial {1} of {2} for calculation...\n", DateTime.Now, localRadialNum, runFile.BellhopRadials.Count));

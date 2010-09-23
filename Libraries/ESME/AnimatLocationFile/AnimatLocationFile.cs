@@ -153,7 +153,6 @@ namespace ESME.AnimatLocationFile
                     throw new ApplicationException("AnimatLocationFile:this[speciesname];species requested has zero animats");
                 long speciesStartIndex = 0;
                 long speciesEndIndex = 0;
-                long startOffset, endOffset;
                 int speciesCount = 0;
 
                 foreach (SpeciesDescriptor species in SpeciesDescriptors)
@@ -166,8 +165,8 @@ namespace ESME.AnimatLocationFile
                     }
                     speciesStartIndex += species.AnimatCount;
                 }
-                startOffset = speciesStartIndex * EarthCoordinate3D.Size;
-                endOffset = (_totalAnimatCount - speciesEndIndex) * EarthCoordinate3D.Size;
+                long startOffset = speciesStartIndex * EarthCoordinate3D.Size;
+                long endOffset = (_totalAnimatCount - speciesEndIndex) * EarthCoordinate3D.Size;
 
                 // number of species in the list prior to target species * number of animats per species
                 _reader.BaseStream.Position = _sizeOfHeader;
@@ -298,53 +297,45 @@ namespace ESME.AnimatLocationFile
         {
             var r = new Random((int)DateTime.Now.Ticks);
 
-            Console.WriteLine("Testing AllRecords...");
+            Console.WriteLine(@"Testing AllRecords...");
             if (AllRecords.Count() == _totalTimeRecords)
-                Console.WriteLine(" AllRecords() returned the same number of elements as totalTimeRecords.  PASS.");
+                Console.WriteLine(@" AllRecords() returned the same number of elements as totalTimeRecords.  PASS.");
             else
-                Console.WriteLine(" AllRecords() returned {0} but the value of totalTimeRecords is {1}",
+                Console.WriteLine(@" AllRecords() returned {0} but the value of totalTimeRecords is {1}",
                                   AllRecords.Count(), _totalTimeRecords);
 
-            Console.WriteLine("Testing this.speciesName accessor...");
+            Console.WriteLine(@"Testing this.speciesName accessor...");
             try
             {
-                Console.WriteLine("--asking for a species that does not exist.");
+                Console.WriteLine(@"--asking for a species that does not exist.");
                 IEnumerable<EarthCoordinate3D[]> badspecies = this["species that doesn't exist"];
                 Console.WriteLine(badspecies.Count()); //this will chuck an exception.                
             }
             catch (ApplicationException e)
             {
-                Console.WriteLine("---" + e.Message);
-                Console.WriteLine(
-                    "---Congrats, a known-false species doesn't exist and we know about it and threw an error. PASS.");
+                Console.WriteLine(@"---" + e.Message);
+                Console.WriteLine(@"---Congrats, a known-false species doesn't exist and we know about it and threw an error. PASS.");
             }
 
             IEnumerable<EarthCoordinate3D[]> goodspecies = this["generic_odontocete_3"];
             if (goodspecies.Count() == _totalTimeRecords)
-                Console.WriteLine(
-                    "--A known-good species was found and has the correct number of time records in it. PASS.");
+                Console.WriteLine(@"--A known-good species was found and has the correct number of time records in it. PASS.");
             else
-                Console.WriteLine(
-                    "--a known good species was found but has {0} time records in it when it ought to have {1}. FAIL.",
+                Console.WriteLine(@"--a known good species was found but has {0} time records in it when it ought to have {1}. FAIL.",
                     goodspecies.Count(), _totalTimeRecords);
 
-            Console.WriteLine("Testing timespan versus index this. accessors at a random index value...");
+            Console.WriteLine(@"Testing timespan versus index this. accessors at a random index value...");
 
             long tmp = r.Next(0, _totalTimeRecords / (int)_timeStepLength.TotalSeconds);
             EarthCoordinate3D[] indexed = this[tmp];
             EarthCoordinate3D[] timestepped = this[TimeSpan.FromSeconds(tmp * _timeStepLength.TotalSeconds)];
             bool fail = false;
-            for (int i = 0; i < indexed.Length; i++)
-            {
-                if (!indexed[i].Equals(timestepped[i]))
-                {
-                    Console.WriteLine("--index and timespan accessors return inconsistent records. FAIL.");
-                    fail = true;
-                    break;
-                }
+            if (indexed.Where((t, i) => !t.Equals(timestepped[i])).Any()) {
+                Console.WriteLine(@"--index and timespan accessors return inconsistent records. FAIL.");
+                fail = true;
             }
             if (!fail)
-                Console.WriteLine("--index {0} equals the {1}th second value (timestep: {2}). PASS.", tmp,
+                Console.WriteLine(@"--index {0} equals the {1}th second value (timestep: {2}). PASS.", tmp,
                                   tmp * _timeStepLength.TotalSeconds + _timeStepLength.TotalSeconds, _timeStepLength);
 
 #if false
@@ -380,7 +371,7 @@ namespace ESME.AnimatLocationFile
             CheckCanWrite();
 
             _writer.BaseStream.Position = 0;
-            _writer.Write(_magic);
+            _writer.Write(Magic);
             _writer.Write(_totalAnimatCount);
             _writer.Write(_totalTimeRecords);
             _writer.Write(_timeStepLength.Ticks);
@@ -402,7 +393,7 @@ namespace ESME.AnimatLocationFile
             CheckCanRead();
 
             _reader.BaseStream.Position = 0;
-            if (_reader.ReadUInt32() != _magic)
+            if (_reader.ReadUInt32() != Magic)
                 throw new FormatException("Attempted to read invalid animat track data");
             _totalAnimatCount = _reader.ReadInt32(); // read total animat count
             _totalTimeRecords = _reader.ReadInt32(); //read total time records
@@ -446,9 +437,7 @@ namespace ESME.AnimatLocationFile
         #endregion
 
         #region private data members
-        // ReSharper disable InconsistentNaming
-        private const UInt32 _magic = 0x6074d582;
-        // ReSharper restore InconsistentNaming
+        private const UInt32 Magic = 0x6074d582;
         private BinaryReader _reader;
         private long _sizeOfHeader;
         private TimeSpan _timeStepLength;
