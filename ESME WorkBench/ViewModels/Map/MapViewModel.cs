@@ -130,8 +130,49 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink("ReorderLayersInMapViewMessage")]
         void ReorderLayersInMapView(MapLayerReorderDescriptor mapLayerReorderDescriptor)
         {
-            if (mapLayerReorderDescriptor.DestinationIndex == -1) Overlays.MoveTo(mapLayerReorderDescriptor.Overlay, Overlays.Count - 1);
-            else Overlays.MoveTo(mapLayerReorderDescriptor.Overlay, mapLayerReorderDescriptor.DestinationIndex);
+            var source = mapLayerReorderDescriptor.SourceLayer;
+            var target = mapLayerReorderDescriptor.TargetLayer;
+            var minIndex = int.MaxValue;
+            var maxIndex = int.MinValue;
+            switch (mapLayerReorderDescriptor.MapLayerReorderCommand)
+            {
+                case MapLayerReorderCommand.MoveToBack:
+                    Overlays.MoveTo(source.Overlay, 1);
+                    break;
+                case MapLayerReorderCommand.MoveBackward:
+                    if ((target.Children == null) || (target.Children.Count == 0))
+                        Overlays.MoveDown(source.Overlay);
+                    else
+                    {
+                        FindMinMaxIndices(target, ref minIndex, ref maxIndex);
+                        Overlays.MoveTo(source.Overlay, minIndex);
+                    }
+                    break;
+                case MapLayerReorderCommand.MoveForward:
+                    if ((target.Children == null) || (target.Children.Count == 0))
+                        Overlays.MoveUp(source.Overlay);
+                    else
+                    {
+                        FindMinMaxIndices(target, ref minIndex, ref maxIndex);
+                        Overlays.MoveTo(source.Overlay, maxIndex);
+                    }
+                    break;
+                case MapLayerReorderCommand.MoveToFront:
+                    Overlays.MoveToTop(source.Overlay);
+                    break;
+            }
+        }
+
+        void FindMinMaxIndices(LayerViewModel layer, ref int minIndex, ref int maxIndex)
+        {
+            if (layer.Overlay != null)
+            {
+                var curIndex = Overlays.IndexOf(layer.Overlay);
+                minIndex = Math.Min(minIndex, curIndex);
+                maxIndex = Math.Max(maxIndex, curIndex);
+            }
+            foreach (var child in layer.Children)
+                FindMinMaxIndices(child, ref minIndex, ref maxIndex);
         }
 
         [MediatorMessageSink("RemoveOverlayFromMapViewMessage")]
