@@ -138,7 +138,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     Globals.DisplayException(_messageBoxService, ex, "Error opening dropped file {0}", file);
                 }
             }
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
+            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
         }
 
         #endregion

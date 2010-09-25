@@ -174,7 +174,7 @@ namespace ESMEWorkBench.ViewModels.Layers
             {
                 if (_layerTreeViewModel == value) return;
                 _layerTreeViewModel = value;
-                var orderMenu = ContextMenu.First(x => x.DisplayName == "Order");
+                var orderMenu = ContextMenu.First(x => x.Header == "Order");
                 orderMenu.Children.Add(new MenuItemViewModel
                                        {
                                            Header = "Bring to front",
@@ -254,69 +254,6 @@ namespace ESMEWorkBench.ViewModels.Layers
             Mediator.Instance.NotifyColleagues("RemoveOverlayFromMapMessage", Overlay);
             //Globals.LayerDisplayViewModel.Layers.Remove(this);
         }
-#if false
-        public static LayerViewModel FromShapefile(string shapefileFileName, LayerTreeViewModel layerTreeViewModel)
-        {
-            var result = new LayerViewModel(Path.GetFileNameWithoutExtension(shapefileFileName), shapefileFileName, layerTreeViewModel);
-            result.ContextMenu.InsertRange(0, new List<MenuItemViewModel>
-                                              {
-                                                  new MenuItemViewModel
-                                                  {
-                                                      Header = "Colors",
-                                                      Children = new List<MenuItemViewModel>
-                                                                 {
-                                                                     new MenuItemViewModel
-                                                                     {
-                                                                         Header = "Line color...",
-                                                                         Command = new SimpleCommand<object, object>(delegate
-                                                                                                                     {
-                                                                                                                         var cd = new ColorDialog
-                                                                                                                                  {
-                                                                                                                                      SolidColorOnly = true,
-                                                                                                                                      AnyColor = true,
-                                                                                                                                  };
-                                                                                                                         if (cd.ShowDialog() == DialogResult.OK) {}
-                                                                                                                     })
-                                                                     },
-                                                                     new MenuItemViewModel
-                                                                     {
-                                                                         Header = "Fill color...",
-                                                                         Command = new SimpleCommand<object, object>(delegate
-                                                                                                                     {
-                                                                                                                         var cd = new ColorDialog();
-                                                                                                                         if (cd.ShowDialog() == DialogResult.OK) {}
-                                                                                                                     })
-                                                                     }
-                                                                 }
-                                                  },
-                                              });
-            return result;
-        }
-#endif
+
     }
-#if false
-    public abstract class LayerViewModel<T> : LayerViewModel
-        where T : Layer
-    {
-        protected LayerViewModel(string name, string fileName, LayerTreeViewModel layerTreeViewModel) : base(name, fileName, layerTreeViewModel) { }
-
-        #region public T LayerData { get; set; }
-
-        static readonly PropertyChangedEventArgs LayerChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel<T>>(x => x.LayerData);
-        T _layerData;
-
-        public T LayerData
-        {
-            get { return _layerData; }
-            set
-            {
-                if (_layerData == value) return;
-                _layerData = value;
-                NotifyPropertyChanged(LayerChangedEventArgs);
-            }
-        }
-
-        #endregion
-    }
-#endif
 }

@@ -4,7 +4,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.Linq;
 using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
@@ -71,9 +70,9 @@ namespace ESMEWorkBench.ViewModels.Main
         public SimpleCommand<Object, Object> MoveLayerToFrontCommand { get; private set; }
 
 #if false
-        /// <summary>
-        ///   Removes any and all scenario layers from the simulation
-        /// </summary>
+    /// <summary>
+    ///   Removes any and all scenario layers from the simulation
+    /// </summary>
         public void RemoveScenarioLayers()
         {
             foreach (var layer in Layers.OfType<ScenarioFileLayerViewModel>()) layer.Remove();
@@ -83,62 +82,68 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void ExecuteMoveLayerForwardCommand(Object args)
         {
-            var layer = (LayerViewModel) args;
-            if (layer == null) return;
-            var layerIndex = Layers.IndexOf(layer);
+            var sourceLayer = (LayerViewModel) args;
+            if (sourceLayer == null) return;
+            var layerIndex = Layers.IndexOf(sourceLayer);
+            var targetLayer = Layers[layerIndex - 1];
             //_mapViewModel.Overlays.MoveTo(layer.Overlay, layerIndex + 2);
             Layers.Move(layerIndex, layerIndex + 1);
             Mediator.Instance.NotifyColleagues("ReorderLayersInMapViewMessage", new MapLayerReorderDescriptor
                                                                                 {
-                                                                                    Overlay = layer.Overlay,
-                                                                                    DestinationIndex = layerIndex + 2,
+                                                                                    MapLayerReorderCommand = MapLayerReorderCommand.MoveForward,
+                                                                                    SourceLayer = sourceLayer,
+                                                                                    TargetLayer = targetLayer,
                                                                                 });
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
+            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
         }
 
         void ExecuteMoveLayerBackwardCommand(Object args)
         {
-            var layer = (LayerViewModel) args;
-            if (layer == null) return;
-            var layerIndex = Layers.IndexOf(layer);
+            var sourceLayer = (LayerViewModel) args;
+            if (sourceLayer == null) return;
+            var layerIndex = Layers.IndexOf(sourceLayer);
+            var targetLayer = Layers[layerIndex - 1];
             //_mapViewModel.Overlays.MoveTo(layer.Overlay, layerIndex);
             Layers.Move(layerIndex, layerIndex - 1);
             Mediator.Instance.NotifyColleagues("ReorderLayersInMapViewMessage", new MapLayerReorderDescriptor
-            {
-                Overlay = layer.Overlay,
-                DestinationIndex = layerIndex,
-            });
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
+                                                                                {
+                                                                                    MapLayerReorderCommand = MapLayerReorderCommand.MoveBackward,
+                                                                                    SourceLayer = sourceLayer,
+                                                                                    TargetLayer = targetLayer,
+                                                                                });
+            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
         }
 
         void ExecuteMoveLayerToBackCommand(Object args)
         {
-            var layer = (LayerViewModel) args;
-            if (layer == null) return;
-            var layerIndex = Layers.IndexOf(layer);
+            var sourceLayer = (LayerViewModel) args;
+            if (sourceLayer == null) return;
+            var layerIndex = Layers.IndexOf(sourceLayer);
             //_mapViewModel.Overlays.MoveTo(layer.Overlay, 1);
             Layers.Move(layerIndex, 0);
             Mediator.Instance.NotifyColleagues("ReorderLayersInMapViewMessage", new MapLayerReorderDescriptor
-            {
-                Overlay = layer.Overlay,
-                DestinationIndex = 1,
-            });
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
+                                                                                {
+                                                                                    MapLayerReorderCommand = MapLayerReorderCommand.MoveToBack,
+                                                                                    SourceLayer = sourceLayer,
+                                                                                    TargetLayer = null,
+                                                                                });
+            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
         }
 
         void ExecuteMoveLayerToFrontCommand(Object args)
         {
-            var layer = (LayerViewModel) args;
-            if (layer == null) return;
-            var layerIndex = Layers.IndexOf(layer);
+            var sourceLayer = (LayerViewModel) args;
+            if (sourceLayer == null) return;
+            var layerIndex = Layers.IndexOf(sourceLayer);
             //_mapViewModel.Overlays.MoveTo(layer.Overlay, _mapViewModel.Overlays.Count - 1);
             Layers.Move(layerIndex, Layers.Count - 1);
             Mediator.Instance.NotifyColleagues("ReorderLayersInMapViewMessage", new MapLayerReorderDescriptor
-            {
-                Overlay = layer.Overlay,
-                DestinationIndex = -1,
-            });
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
+                                                                                {
+                                                                                    MapLayerReorderCommand = MapLayerReorderCommand.MoveToFront,
+                                                                                    SourceLayer = sourceLayer,
+                                                                                    TargetLayer = null,
+                                                                                });
+            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
         }
 
         bool CanMoveLayerBackCommand(Object args)
@@ -160,6 +165,7 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink("AddLayerToTreeViewMessage")]
         void AddLayer(LayerViewModel layer)
         {
+            layer.LayerTreeTreeViewModel = this;
             Layers.Add(layer);
         }
     }
