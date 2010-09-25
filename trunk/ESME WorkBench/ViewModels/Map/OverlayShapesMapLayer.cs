@@ -1,46 +1,31 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
+using System.Linq;
 using System.Windows.Media;
-using Cinch;
 using ESME.Overlay;
-using ESMEWorkBench.ViewModels.Main;
 using ThinkGeo.MapSuite.Core;
-using ThinkGeo.MapSuite.WpfDesktopEdition;
 using LineStyle = ThinkGeo.MapSuite.Core.LineStyle;
 
-namespace ESMEWorkBench.ViewModels.Layers
+namespace ESMEWorkBench.ViewModels.Map
 {
-#if false
-    public class OverlayShapesLayerViewModel : LayerViewModel
+    public class OverlayShapesMapLayer : MapLayer
     {
         Color _color;
         InMemoryFeatureLayer _newLayer;
         float _width;
 
-        public OverlayShapesLayerViewModel(string name, IEnumerable<OverlayShape> shapes, LayerTreeViewModel layerTreeViewModel) 
-            : base(name, null, layerTreeViewModel)
+        public OverlayShapesMapLayer()
         {
             OverlayShapes = new ObservableCollection<OverlayShape>();
             ShapeLayers = new ObservableCollection<InMemoryFeatureLayer>();
+        }
 
+        public OverlayShapesMapLayer(IEnumerable<OverlayShape> shapes) : this()
+        {
             foreach (var shape in shapes) OverlayShapes.Add(shape);
             CommitShapes();
         }
-
-        public OverlayShapesLayerViewModel(Overlay layerOverlay, string name, LayerTreeViewModel layerTreeViewModel)
-            : base(name, null, layerTreeViewModel)
-        {
-            OverlayShapes = new ObservableCollection<OverlayShape>();
-            ShapeLayers = new ObservableCollection<InMemoryFeatureLayer>();
-            if (layerOverlay != null) Overlay = layerOverlay;
-        }
-
-        #region public ObservableCollection<InMemoryFeatureLayer> ShapeLayers { get; set; }
-
-        static readonly PropertyChangedEventArgs ShapeLayersChangedEventArgs = ObservableHelper.CreateArgs<OverlayShapesLayerViewModel>(x => x.ShapeLayers);
-        ObservableCollection<InMemoryFeatureLayer> _shapeLayers;
 
         public ObservableCollection<InMemoryFeatureLayer> ShapeLayers
         {
@@ -50,9 +35,9 @@ namespace ESMEWorkBench.ViewModels.Layers
                 if (_shapeLayers == value) return;
                 _shapeLayers = value;
                 _shapeLayers.CollectionChanged += ShapeLayersCollectionChanged;
-                NotifyPropertyChanged(ShapeLayersChangedEventArgs);
             }
         }
+        ObservableCollection<InMemoryFeatureLayer> _shapeLayers;
 
         public LineStyle LineStyle { get; set; }
 
@@ -62,9 +47,8 @@ namespace ESMEWorkBench.ViewModels.Layers
         {
             if (e.NewItems != null)
             {
-                foreach (var item in e.NewItems)
+                foreach (var newLayer in e.NewItems.Cast<InMemoryFeatureLayer>()) 
                 {
-                    var newLayer = (InMemoryFeatureLayer) item;
                     if ((LineStyle == null) && (PointStyle == null))
                     {
                         newLayer.ZoomLevelSet.ZoomLevel01.DefaultLineStyle.OuterPen = new GeoPen(GeoColor.FromArgb(_color.A, _color.R, _color.G, _color.B), _width);
@@ -77,32 +61,16 @@ namespace ESMEWorkBench.ViewModels.Layers
                         if (LineStyle != null) newLayer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(LineStyle);
                         if (PointStyle != null) newLayer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(PointStyle);
                     }
-                        
+
                     newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
 
-                    ((LayerOverlay) Overlay).Layers.Add(newLayer);
+                    Layers.Add(newLayer);
                 }
-                //LayerOverlay.Refresh();
             }
-            if (e.OldItems != null)
-            {
-                foreach (var item in e.OldItems)
-                {
-                    var oldLayer = (InMemoryFeatureLayer) item;
-                    ((LayerOverlay) Overlay).Layers.Remove(oldLayer);
-                }
-                //LayerOverlay.Refresh();
-            }
-            NotifyPropertyChanged(ShapeLayersChangedEventArgs);
-            //WpfMap.Refresh();
+            if (e.OldItems == null) return;
+            foreach (var oldLayer in e.OldItems.Cast<InMemoryFeatureLayer>())
+                Layers.Remove(oldLayer);
         }
-
-        #endregion
-
-        #region public ObservableCollection<OverlayShape> OverlayShapes { get; set; }
-
-        static readonly PropertyChangedEventArgs OverlayShapesChangedEventArgs = ObservableHelper.CreateArgs<OverlayShapesLayerViewModel>(x => x.OverlayShapes);
-        ObservableCollection<OverlayShape> _overlayShapes;
 
         public ObservableCollection<OverlayShape> OverlayShapes
         {
@@ -112,15 +80,15 @@ namespace ESMEWorkBench.ViewModels.Layers
                 if (_overlayShapes == value) return;
                 _overlayShapes = value;
                 _overlayShapes.CollectionChanged += OverlayShapesCollectionChanged;
-                NotifyPropertyChanged(OverlayShapesChangedEventArgs);
             }
         }
+        ObservableCollection<OverlayShape> _overlayShapes;
 
         void OverlayShapesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             foreach (var item in e.NewItems)
             {
-                var shape = (OverlayShape) item;
+                var shape = (OverlayShape)item;
                 if (_newLayer != null)
                 {
                     if ((shape.Color != _color) || (shape.Width != _width)) CommitShapes();
@@ -133,10 +101,7 @@ namespace ESMEWorkBench.ViewModels.Layers
                 }
                 _newLayer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(shape.WellKnownText)));
             }
-            NotifyPropertyChanged(OverlayShapesChangedEventArgs);
         }
-
-        #endregion
 
         public void CommitShapes()
         {
@@ -144,5 +109,6 @@ namespace ESMEWorkBench.ViewModels.Layers
             _newLayer = null;
         }
     }
-#endif
+
+    class OverlayShapesMapLayerImpl : OverlayShapesMapLayer {}
 }

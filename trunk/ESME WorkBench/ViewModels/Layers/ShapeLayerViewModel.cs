@@ -7,9 +7,10 @@ using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
+#if false
     public class ShapeLayerViewModel : LayerViewModel<InMemoryFeatureLayer>
     {
-        public ShapeLayerViewModel(string name, OverlayShape shape, MapViewModel mapViewModel) : base(name, null, mapViewModel) { }
+        public ShapeLayerViewModel(string name, OverlayShape shape, LayerTreeViewModel layerTreeViewModel) : base(name, null, layerTreeViewModel) { }
 
         #region public Color Color { get; set; }
 
@@ -49,4 +50,5 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
     }
+#endif
 }

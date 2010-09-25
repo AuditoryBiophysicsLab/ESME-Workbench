@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using System.Windows.Media;
 using System.IO;
 
 namespace ESME.Overlay
@@ -34,7 +34,7 @@ namespace ESME.Overlay
             get { return Shapes[0].Color; }
             set
             {
-                foreach (OverlayShape s in Shapes)
+                foreach (var s in Shapes)
                     s.Color = value;
             }
         }

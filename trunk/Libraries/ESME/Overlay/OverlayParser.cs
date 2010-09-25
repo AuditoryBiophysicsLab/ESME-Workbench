@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Windows.Media;
 using System.Linq;
 using HRC.Navigation;
 
@@ -12,7 +12,7 @@ namespace ESME.Overlay
 
         public static OverlayShape[] Parse(string overlayFileName)
         {
-            Color curColor = Color.Red;
+            Color curColor = Colors.Red;
             var shapes = new List<OverlayShape>();
             OverlayLocationMode locationMode = OverlayLocationMode.LatLong;
             OverlayParseState curState = OverlayParseState.Initialization;
@@ -68,31 +68,31 @@ namespace ESME.Overlay
                                 var blue = tokenizer.NextToken().Value as float?;
                                 if ((red == null) || (green == null) || (blue == null))
                                     throw new ApplicationException("fill me in");
-                                curColor = Color.FromArgb((int) red, (int) green, (int) blue);
+                                curColor = Color.FromArgb(255, (byte)red, (byte)green, (byte)blue);
                                 break;
                             case OverlayKeywords.Red:
-                                curColor = Color.Red;
+                                curColor = Colors.Red;
                                 break;
                             case OverlayKeywords.Green:
-                                curColor = Color.Green;
+                                curColor = Colors.Green;
                                 break;
                             case OverlayKeywords.Purple:
-                                curColor = Color.Purple;
+                                curColor = Colors.Purple;
                                 break;
                             case OverlayKeywords.Yellow:
-                                curColor = Color.Yellow;
+                                curColor = Colors.Yellow;
                                 break;
                             case OverlayKeywords.White:
-                                curColor = Color.White;
+                                curColor = Colors.White;
                                 break;
                             case OverlayKeywords.Orange:
-                                curColor = Color.Orange;
+                                curColor = Colors.Orange;
                                 break;
                             case OverlayKeywords.Blue:
-                                curColor = Color.Blue;
+                                curColor = Colors.Blue;
                                 break;
                             case OverlayKeywords.Cyan:
-                                curColor = Color.Cyan;
+                                curColor = Colors.Cyan;
                                 break;
                             case OverlayKeywords.Origin:
                                 tokenizer.DiscardToEndOfLine();

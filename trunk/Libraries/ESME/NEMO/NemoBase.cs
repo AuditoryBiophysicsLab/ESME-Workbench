@@ -23,7 +23,21 @@ namespace ESME.NEMO
             ParentNode = parentNode;
         }
 
-        public static TimeSpan SimulationStepTime { get; set; }
+        #region public TimeSpan SimulationStepTime { get; set; }
+
+        public static TimeSpan SimulationStepTime
+        {
+            get { return _simulationStepTime; }
+            set
+            {
+                if (_simulationStepTime == value) return;
+                if (value.TotalSeconds <= 0.0) throw new ParameterOutOfRangeException(string.Format("SimulationStepTime must be a positive TimeSpan. {0} is an invalid value", _simulationStepTime));
+                _simulationStepTime = value;
+            }
+        }
+        static TimeSpan _simulationStepTime;
+
+        #endregion
 
         protected bool GetBool(string childElementName)
         {

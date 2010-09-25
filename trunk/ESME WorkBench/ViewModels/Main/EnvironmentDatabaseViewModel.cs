@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Cinch;
 using ESME.Environment;
 using ESMERibbonDemo.ViewModels;
@@ -127,10 +126,10 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             // TODO: Put initialization code for the file selections here, when a per-experiment data model is available
             // Remove these lines when initializing 'for-real'
-            WindSpeedEnvironmentFile = WindSpeedData[0].FilePath;
-            SoundSpeedEnvironmentFile = SoundSpeedData[0].FilePath;
-            BottomTypeEnvironmentFile = BottomTypeData[0].FilePath;
-            BathymetryEnvironmentFile = BathymetryData[0].FilePath;
+            WindSpeedEnvironmentFile = WindSpeedData.Count > 0 ? WindSpeedData[0].FilePath : null;
+            SoundSpeedEnvironmentFile =  SoundSpeedData.Count > 0 ? SoundSpeedData[0].FilePath : null;
+            BottomTypeEnvironmentFile =  BottomTypeData.Count > 0 ? BottomTypeData[0].FilePath : null;
+            BathymetryEnvironmentFile = BathymetryData.Count > 0 ? BathymetryData[0].FilePath : null;
         }
 
         #endregion

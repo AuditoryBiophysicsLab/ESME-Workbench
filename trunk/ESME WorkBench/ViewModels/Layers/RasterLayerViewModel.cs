@@ -1,37 +1,30 @@
 using System;
 using System.IO;
+using Cinch;
 using ESME.Environment;
+using ESMEWorkBench.ViewModels.Main;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
+#if false
     public class RasterLayerViewModel : LayerViewModel
     {
-        public RasterLayerViewModel(string layerName, string fileName)
-            : base(layerName, fileName)
+        public RasterLayerViewModel(string layerName, string fileName, LayerTreeViewModel layerTreeViewModel)
+            : base(layerName, fileName, layerTreeViewModel)
         {
-            Bathymetry bathymetry;
-            try
-            {
-                bathymetry = new Bathymetry(fileName);
-            }
-            catch (Exception e)
-            {
-                Globals.MessageBoxService.ShowError(string.Format("Error opening bathymetry file {0}:\n{1}",
-                                                           fileName, e.Message));
-                return;
-            }
-            var overlayLayer = new OverlayShapesLayerViewModel(null, Path.GetFileNameWithoutExtension(fileName) + " bathymetry bounds")
+            var bathymetry = new Bathymetry(fileName);
+            var overlayLayer = new OverlayShapesLayerViewModel(null, Path.GetFileNameWithoutExtension(fileName) + " bathymetry bounds", layerTreeViewModel)
             {
                 Overlay = new LayerOverlay(),
             };
 
-            Globals.MapViewModel.Overlays.Add(overlayLayer.Overlay);
+            //Globals.MapViewModel.Overlays.Add(overlayLayer.Overlay);
             overlayLayer.OverlayShapes.Add(bathymetry.BoundingBox);
             overlayLayer.CommitShapes();
 
-            Globals.LayerDisplayViewModel.Layers.Add(overlayLayer);
+            Mediator.Instance.NotifyColleagues<LayerViewModel>("AddLayerToTreeViewMessage", overlayLayer);
 
             //Gets the Bounding box of the Polygonshape representing the extent of the image layer.
             var imageLayerRectangleShape = new RectangleShape(bathymetry.BoundingBox.West, bathymetry.BoundingBox.North, bathymetry.BoundingBox.East, bathymetry.BoundingBox.South);
@@ -63,4 +56,5 @@ namespace ESMEWorkBench.ViewModels.Layers
             
         }
     }
+#endif
 }

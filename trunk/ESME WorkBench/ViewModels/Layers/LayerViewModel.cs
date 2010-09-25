@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using Cinch;
 using ESMEWorkBench.ViewModels.Main;
 using ThinkGeo.MapSuite.Core;
@@ -10,7 +12,7 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
-    public abstract class LayerViewModel : ViewModelBase
+    public class LayerViewModel : ViewModelBase
     {
         public LayerViewModel Parent { get; set; }
 
@@ -27,24 +29,6 @@ namespace ESMEWorkBench.ViewModels.Layers
                 if (_layerName == value) return;
                 _layerName = value;
                 NotifyPropertyChanged(NameChangedEventArgs);
-            }
-        }
-
-        #endregion
-
-        #region public string FileName { get; set; }
-
-        static readonly PropertyChangedEventArgs FileNameChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.FileName);
-        string _fileName;
-
-        public string FileName
-        {
-            get { return _fileName; }
-            set
-            {
-                if (_fileName == value) return;
-                _fileName = value;
-                NotifyPropertyChanged(FileNameChangedEventArgs);
             }
         }
 
@@ -126,8 +110,14 @@ namespace ESMEWorkBench.ViewModels.Layers
 
             if (updateParent && Parent != null) Parent.VerifyCheckState();
 
-            if (Overlay != null)
-                Overlay.IsVisible = !_isChecked.HasValue || _isChecked.Value;
+            try
+            {
+                if (Overlay != null) Overlay.IsVisible = !_isChecked.HasValue || _isChecked.Value;
+            }
+            catch (NullReferenceException e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
 
             NotifyPropertyChanged(IsCheckedChangedEventArgs);
         }
@@ -173,66 +163,81 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         public TileType TileType { get; set; }
 
-        protected LayerViewModel(string name, string fileName)
+        public Overlay Overlay { get; set; }
+
+        #region public LayerTreeViewModel LayerTreeViewModel { get; set; }
+
+        public LayerTreeViewModel LayerTreeTreeViewModel
+        {
+            get { return _layerTreeViewModel; }
+            set
+            {
+                if (_layerTreeViewModel == value) return;
+                _layerTreeViewModel = value;
+                var orderMenu = ContextMenu.First(x => x.DisplayName == "Order");
+                orderMenu.Children.Add(new MenuItemViewModel
+                                       {
+                                           Header = "Bring to front",
+                                           Command = _layerTreeViewModel.MoveLayerToFrontCommand,
+                                           CommandParameter = this,
+                                       });
+                orderMenu.Children.Add(new MenuItemViewModel
+                                       {
+                                           Header = "Bring forward",
+                                           Command = _layerTreeViewModel.MoveLayerForwardCommand,
+                                           CommandParameter = this,
+                                       });
+                orderMenu.Children.Add(new MenuItemViewModel
+                                       {
+                                           Header = "Push backward",
+                                           Command = _layerTreeViewModel.MoveLayerBackCommand,
+                                           CommandParameter = this,
+                                       });
+                orderMenu.Children.Add(new MenuItemViewModel
+                                       {
+                                           Header = "Push to back",
+                                           Command = _layerTreeViewModel.MoveLayerToBackCommand,
+                                           CommandParameter = this,
+                                       });
+                NotifyPropertyChanged(LayerTreeViewModelChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LayerTreeViewModelChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.LayerTreeTreeViewModel);
+        LayerTreeViewModel _layerTreeViewModel;
+
+        #endregion
+
+        public LayerViewModel(string name, Overlay overlay)
         {
             LayerName = name;
-            FileName = fileName;
+            Overlay = overlay;
             Children = new LayersCollection();
             Children.CollectionChanged += Children_CollectionChanged;
             IsChecked = true;
             ShowContextMenu = true;
             TileType = TileType.SingleTile;
-            ContextMenu = new List<MenuItemViewModel>
-                          {
-                              new MenuItemViewModel
-                              {
-                                  Header = "Order",
-                                  Children = new List<MenuItemViewModel>
-                                             {
-                                                  new MenuItemViewModel
-                                                  {
-                                                      Header = "Bring to front",
-                                                      Command = Globals.LayerDisplayViewModel.MoveLayerToFrontCommand,
-                                                      CommandParameter = this,
-                                                  },
-                                                  new MenuItemViewModel
-                                                  {
-                                                      Header = "Bring forward",
-                                                      Command = Globals.LayerDisplayViewModel.MoveLayerForwardCommand,
-                                                      CommandParameter = this,
-                                                  },
-                                                  new MenuItemViewModel
-                                                  {
-                                                      Header = "Push backward",
-                                                      Command = Globals.LayerDisplayViewModel.MoveLayerBackCommand,
-                                                      CommandParameter = this,
-                                                  },
-                                                  new MenuItemViewModel
-                                                  {
-                                                      Header = "Push to back",
-                                                      Command = Globals.LayerDisplayViewModel.MoveLayerToBackCommand,
-                                                      CommandParameter = this,
-                                                  },
-                                             },
-                              },
-                              new MenuItemViewModel
-                              {
-                                  Header = "Remove",
-                                  Command = new SimpleCommand<object, object>(delegate{ Remove(); Globals.MapViewModel.Refresh();}),
-                              },
-                          };
+            if (ContextMenu == null) ContextMenu = new List<MenuItemViewModel>();
+            ContextMenu.Add(new MenuItemViewModel
+                            {
+                                Header = "Order",
+                                Children = new List<MenuItemViewModel>(),
+                            });
+            ContextMenu.Add(new MenuItemViewModel
+                            {
+                                Header = "Remove",
+                                Command = new SimpleCommand<object, object>(delegate
+                                                                            {
+                                                                                Remove();
+                                                                                Mediator.Instance.NotifyColleagues("RefreshMapMessage");
+                                                                            }),
+                            });
         }
 
-        public Overlay Overlay { get; set; }
-
-        void Children_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        static void Children_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.OldItems != null)
-                foreach (var oldLayer in e.OldItems.Cast<LayerViewModel>())
-                {
-                    oldLayer.Remove();
-                }
-            Globals.MapViewModel.Refresh();
+            if (e.OldItems != null) foreach (var oldLayer in e.OldItems.Cast<LayerViewModel>()) oldLayer.Remove();
+            Mediator.Instance.NotifyColleagues("RefreshMapMessage");
         }
 
         void Initialize()
@@ -246,15 +251,54 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         public void Remove()
         {
-            Globals.MapViewModel.Overlays.Remove(Overlay);
-            Globals.LayerDisplayViewModel.Layers.Remove(this);
+            Mediator.Instance.NotifyColleagues("RemoveOverlayFromMapMessage", Overlay);
+            //Globals.LayerDisplayViewModel.Layers.Remove(this);
         }
+#if false
+        public static LayerViewModel FromShapefile(string shapefileFileName, LayerTreeViewModel layerTreeViewModel)
+        {
+            var result = new LayerViewModel(Path.GetFileNameWithoutExtension(shapefileFileName), shapefileFileName, layerTreeViewModel);
+            result.ContextMenu.InsertRange(0, new List<MenuItemViewModel>
+                                              {
+                                                  new MenuItemViewModel
+                                                  {
+                                                      Header = "Colors",
+                                                      Children = new List<MenuItemViewModel>
+                                                                 {
+                                                                     new MenuItemViewModel
+                                                                     {
+                                                                         Header = "Line color...",
+                                                                         Command = new SimpleCommand<object, object>(delegate
+                                                                                                                     {
+                                                                                                                         var cd = new ColorDialog
+                                                                                                                                  {
+                                                                                                                                      SolidColorOnly = true,
+                                                                                                                                      AnyColor = true,
+                                                                                                                                  };
+                                                                                                                         if (cd.ShowDialog() == DialogResult.OK) {}
+                                                                                                                     })
+                                                                     },
+                                                                     new MenuItemViewModel
+                                                                     {
+                                                                         Header = "Fill color...",
+                                                                         Command = new SimpleCommand<object, object>(delegate
+                                                                                                                     {
+                                                                                                                         var cd = new ColorDialog();
+                                                                                                                         if (cd.ShowDialog() == DialogResult.OK) {}
+                                                                                                                     })
+                                                                     }
+                                                                 }
+                                                  },
+                                              });
+            return result;
+        }
+#endif
     }
-
+#if false
     public abstract class LayerViewModel<T> : LayerViewModel
         where T : Layer
     {
-        protected LayerViewModel(string name, string fileName, MapViewModel mapViewModel) : base(name, fileName) { }
+        protected LayerViewModel(string name, string fileName, LayerTreeViewModel layerTreeViewModel) : base(name, fileName, layerTreeViewModel) { }
 
         #region public T LayerData { get; set; }
 
@@ -274,4 +318,5 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
     }
+#endif
 }
