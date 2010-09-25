@@ -10,28 +10,35 @@ namespace ESME.NEMO
         public NemoPlatform(XmlNode platform, string scenarioDirectory, NemoScenario nemoScenario)
             : base(platform)
         {
-            Sources = new List<NemoSource>();
-            Trackdefs = new List<NemoTrackdef>();
+            try
+            {
+                Sources = new List<NemoSource>();
+                Trackdefs = new List<NemoTrackdef>();
 
-            Description = GetString("description");
+                Description = GetString("description");
 
-            Launcher = GetString("launcher");
-            Towwer = GetString("towwer");
+                Launcher = GetString("launcher");
+                Towwer = GetString("towwer");
 
-            foreach (XmlNode cur in platform.ChildNodes)
-                if (cur.Name == "Source")
-                    Sources.Add(new NemoSource(cur));
+                foreach (XmlNode cur in platform.ChildNodes)
+                    if (cur.Name == "Source")
+                        Sources.Add(new NemoSource(cur));
 
-            foreach (XmlNode cur in platform.ChildNodes)
-                if (cur.Name == "trackDef")
-                    Trackdefs.Add(new NemoTrackdef(cur, scenarioDirectory));
+                foreach (XmlNode cur in platform.ChildNodes)
+                    if (cur.Name == "trackDef")
+                        Trackdefs.Add(new NemoTrackdef(cur, scenarioDirectory));
 
-            if (Trackdefs.Count == 0)
-                throw new FormatException("Platform.trackDef: At least one trackDef is required for each Platform");
+                if (Trackdefs.Count == 0)
+                    throw new FormatException("Platform.trackDef: At least one trackDef is required for each Platform");
 
-            NemoScenario = nemoScenario;
+                NemoScenario = nemoScenario;
 
-            BehaviorModel = new BehaviorModel(this);
+                BehaviorModel = new BehaviorModel(this);
+            }
+            catch (Exception e)
+            {
+                throw new PlatformException(string.Format("Error initializing platform {0}", Name), e);
+            }
         }
 
         public string Description { get; private set; }

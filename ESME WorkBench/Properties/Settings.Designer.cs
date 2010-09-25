@@ -118,5 +118,65 @@ namespace ESMEWorkBench.Properties {
                 this["ShowPanZoom"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastShapefileDirectory {
+            get {
+                return ((string)(this["LastShapefileDirectory"]));
+            }
+            set {
+                this["LastShapefileDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastOverlayFileDirectory {
+            get {
+                return ((string)(this["LastOverlayFileDirectory"]));
+            }
+            set {
+                this["LastOverlayFileDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastScenarioFileDirectory {
+            get {
+                return ((string)(this["LastScenarioFileDirectory"]));
+            }
+            set {
+                this["LastScenarioFileDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastExperimentFileDirectory {
+            get {
+                return ((string)(this["LastExperimentFileDirectory"]));
+            }
+            set {
+                this["LastExperimentFileDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastEnvironmentFileDirectory {
+            get {
+                return ((string)(this["LastEnvironmentFileDirectory"]));
+            }
+            set {
+                this["LastEnvironmentFileDirectory"] = value;
+            }
+        }
     }
 }

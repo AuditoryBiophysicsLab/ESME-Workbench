@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
+using System.Windows.Media;
 using ESME.Overlay;
 using HRC.Navigation;
 
@@ -130,7 +130,7 @@ namespace ESME.Environment
                                    new EarthCoordinate(MaxCoordinate.Latitude_degrees, MaxCoordinate.Longitude_degrees),
                                };
 
-                var shape = new OverlayLineSegments(bathyBox, Color.Black, 1, LineStyle.Solid);
+                var shape = new OverlayLineSegments(bathyBox, Colors.Black, 1, LineStyle.Solid);
                 return shape;
             }
         }

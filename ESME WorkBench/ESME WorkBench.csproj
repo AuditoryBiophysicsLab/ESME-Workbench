@@ -63,9 +63,8 @@
   <ItemGroup>
     <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL" />
-    <Reference Include="HRC, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86" />
     <Reference Include="MapSuiteCore, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\ThinkGeo\Map Suite Wpf Desktop Evaluation Edition 4.0\Developer Reference\WPF Desktop Edition\MapSuiteCore.dll</HintPath>
     </Reference>
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=x86" />
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -108,6 +107,12 @@
     <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
       <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\LayerTreeView.xaml.cs">
+      <DependentUpon>LayerTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MapView.xaml.cs">
+      <DependentUpon>MapView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\Experiment.cs" />
     <Compile Include="Data\OldExperimentData.cs" />
@@ -134,30 +139,38 @@
     </Compile>
     <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\IHasName.cs" />
-    <Compile Include="ViewModels\Layers\AdornmentLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\CustomStartEndLineStyle.cs" />
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\LayersCollection.cs" />
     <Compile Include="ViewModels\Layers\LayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
-    <Compile Include="ViewModels\Layers\OverlayFileLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\RasterLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\ScenarioFileLayerViewModel.cs" />
-    <Compile Include="ViewModels\Layers\ShapefileLayerViewModel.cs" />
+    <Compile Include="ViewModels\Map\BathymetryBoundsMapLayer.cs" />
+    <Compile Include="ViewModels\Map\MapLayer.cs" />
+    <Compile Include="ViewModels\Map\MapLayerReorderDescriptor.cs" />
+    <Compile Include="ViewModels\Map\OverlayShapesMapLayer.cs" />
+    <Compile Include="ViewModels\Map\ScenarioFileMapLayer.cs" />
+    <Compile Include="ViewModels\Map\OverlayFileMapLayer.cs" />
     <Compile Include="ViewModels\Layers\ShapeLayerViewModel.cs" />
     <Compile Include="ViewModels\Main\EnvironmentDatabaseViewModel.cs" />
+    <Compile Include="ViewModels\Main\ExperimentViewModelCommands.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
-    <Compile Include="ViewModels\Main\LayerDisplayViewModel.cs" />
-    <Compile Include="ViewModels\Main\MainViewModel.cs" />
+    <Compile Include="ViewModels\Main\OldLayerDisplayViewModel.cs" />
+    <Compile Include="ViewModels\Main\LayerTreeViewModel.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewModels\Main\ExperimentViewModel.cs" />
     <Compile Include="ViewModels\Layers\OffsetProjection.cs" />
     <Compile Include="ViewModels\Layers\OverlayLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\RadarRasterSource.cs" />
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\VirtualToggleButton.cs" />
-    <Compile Include="ViewModels\Main\MapViewModel.cs" />
+    <Compile Include="ViewModels\Map\MapViewModel.cs" />
     <Compile Include="ViewModels\Main\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\Main\ProgramOptionsViewModel.cs" />
+    <Compile Include="ViewModels\Map\ShapefileMapLayer.cs" />
     <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
     <Compile Include="ViewModels\RecentFiles\IPersist.cs" />
     <Compile Include="ViewModels\RecentFiles\RecentFile.cs" />
@@ -206,6 +219,14 @@
     <Page Include="Controls\FileOrDirectorySetting.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\LayerTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\MapView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -407,8 +428,14 @@
       <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
       <Name>ESME</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Libraries\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

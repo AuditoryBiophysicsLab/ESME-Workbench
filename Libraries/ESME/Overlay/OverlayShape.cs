@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Windows;
+using System.Windows.Media;
 using HRC.Navigation;
+using Color = System.Windows.Media.Color;
 
 namespace ESME.Overlay
 {
@@ -12,7 +15,7 @@ namespace ESME.Overlay
         protected string MyWellKnownText;
 
         protected OverlayShape()
-            : this(Color.Black, 1f)
+            : this(Colors.Black, 1f)
         {
         }
 
@@ -51,7 +54,7 @@ namespace ESME.Overlay
         public virtual bool Contains(EarthCoordinate location) { throw new NotImplementedException(); }
         public virtual EarthCoordinate Bounce(EarthCoordinate startLocation, EarthCoordinate proposedEndLocation) { throw new NotImplementedException(); }
         public abstract string WellKnownText { get; }
-        protected RectangleF BoundingBox { get; private set; }
+        protected Rect BoundingBox { get; private set; }
         public Color Color { get; set; }
 
         public float Width { get; set; }
@@ -109,20 +112,20 @@ namespace ESME.Overlay
 
         private void CalculateBoundingBox()
         {
-            double north = -90.0;
-            double south = 90.0;
-            double east = -180.0;
-            double west = 180.0;
-            foreach (EarthCoordinate curPoint in EarthCoordinates)
+            var north = -90.0;
+            var south = 90.0;
+            var east = -180.0;
+            var west = 180.0;
+            foreach (var curPoint in EarthCoordinates)
             {
                 north = Math.Max(curPoint.Latitude_degrees, north);
                 south = Math.Min(curPoint.Latitude_degrees, south);
                 east = Math.Max(curPoint.Longitude_degrees, east);
                 west = Math.Min(curPoint.Longitude_degrees, west);
             }
-            double width = Math.Abs(west - east);
-            double height = Math.Abs(north - south);
-            BoundingBox = new RectangleF((float)west, (float)north, (float)width, (float)height);
+            var width = Math.Abs(west - east);
+            var height = Math.Abs(north - south);
+            BoundingBox = new Rect(west, north, width, height);
         }
     }
 }

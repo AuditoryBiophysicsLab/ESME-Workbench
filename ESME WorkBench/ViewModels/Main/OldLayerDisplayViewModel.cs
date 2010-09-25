@@ -2,19 +2,19 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
 using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
+using ESMEWorkBench.ViewModels.Map;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    public class LayerDisplayViewModel : ViewModelBase
+    public class OldLayerDisplayViewModel : ViewModelBase
     {
-        static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<LayerDisplayViewModel>(x => x.Layers);
+        static readonly PropertyChangedEventArgs LayersChangedEventArgs = ObservableHelper.CreateArgs<OldLayerDisplayViewModel>(x => x.Layers);
         ObservableCollection<LayerViewModel> _layers;
         readonly MapViewModel _mapViewModel;
 
-        public LayerDisplayViewModel(MapViewModel mapViewModel)
+        public OldLayerDisplayViewModel(MapViewModel mapViewModel)
         {
             MoveLayerToBackCommand = new SimpleCommand<object, object>(CanMoveLayerBackCommand, ExecuteMoveLayerToBackCommand);
             MoveLayerBackCommand = new SimpleCommand<object, object>(CanMoveLayerBackCommand, ExecuteMoveLayerBackwardCommand);
@@ -49,16 +49,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        /// <summary>
-        /// Removes any and all scenario layers from the simulation
-        /// </summary>
-        public void RemoveScenarioLayers()
-        {
-            foreach (var layer in Layers.OfType<ScenarioFileLayerViewModel>())
-                layer.Remove();
-            Globals.Experiment.ScenarioFileName = null;
-        }
-
         void ExecuteMoveLayerForwardCommand(Object args)
         {
             var layer = (LayerViewModel)args;
@@ -66,7 +56,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var layerIndex = Layers.IndexOf(layer);
             _mapViewModel.Overlays.MoveTo(layer.Overlay, layerIndex + 2);
             Layers.Move(layerIndex, layerIndex + 1);
-            _mapViewModel.Refresh();
+            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
         }
 
         void ExecuteMoveLayerBackwardCommand(Object args)
@@ -76,7 +66,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var layerIndex = Layers.IndexOf(layer);
             _mapViewModel.Overlays.MoveTo(layer.Overlay, layerIndex);
             Layers.Move(layerIndex, layerIndex - 1);
-            _mapViewModel.Refresh();
+            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
         }
 
         void ExecuteMoveLayerToBackCommand(Object args)
@@ -86,7 +76,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var layerIndex = Layers.IndexOf(layer);
             _mapViewModel.Overlays.MoveTo(layer.Overlay, 1);
             Layers.Move(layerIndex, 0);
-            _mapViewModel.Refresh();
+            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
         }
 
         void ExecuteMoveLayerToFrontCommand(Object args)
@@ -96,7 +86,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var layerIndex = Layers.IndexOf(layer);
             _mapViewModel.Overlays.MoveTo(layer.Overlay, _mapViewModel.Overlays.Count - 1);
             Layers.Move(layerIndex, Layers.Count - 1);
-            _mapViewModel.Refresh();
+            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
         }
 
         bool CanMoveLayerBackCommand(Object args)

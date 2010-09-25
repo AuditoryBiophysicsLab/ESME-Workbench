@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Windows.Media;
 using ESME.NEMO;
 using ESME.Overlay;
 using HRC.Navigation;
@@ -15,7 +15,14 @@ namespace ESME.Platform
         public BehaviorModel(NemoPlatform nemoPlatform)
         {
             NemoPlatform = nemoPlatform;
-            Initialize();
+            try
+            {
+                Initialize();
+            }
+            catch (Exception e)
+            {
+                throw new PlatformBehaviorException(string.Format("Error initializing platform behavior"), e);
+            }
         }
 
         public NemoPlatform NemoPlatform { get; private set; }
@@ -29,9 +36,6 @@ namespace ESME.Platform
         private void Initialize()
         {
             ActiveModes = new List<ActiveMode>();
-
-            if (NemoBase.SimulationStepTime.TotalSeconds == 0.0)
-                throw new ApplicationException("ESME.Platform.BehaviorModel: NemoBase.SimulationStepTime is not set!");
 
             foreach (NemoSource source in NemoPlatform.Sources)
                 foreach (NemoMode mode in source.Modes)
@@ -100,9 +104,6 @@ namespace ESME.Platform
 
         private void MovementModel()
         {
-            if (NemoBase.SimulationStepTime.TotalSeconds == 0.0)
-                throw new ApplicationException("ESME.Platform.MovementModel: NemoBase.SimulationStepTime is not set!");
-
             var timestepCount = (int) NemoPlatform.NemoScenario.Duration.DivideBy(NemoBase.SimulationStepTime);
             DateTime currentTime = NemoPlatform.NemoScenario.StartTime;
             PlatformStates = new PlatformState[timestepCount];
@@ -128,7 +129,7 @@ namespace ESME.Platform
                 if (curTrackdef == null)
                 {
                     // look through all of our trackdefs
-                    foreach (NemoTrackdef trackdef in NemoPlatform.Trackdefs)
+                    foreach (var trackdef in NemoPlatform.Trackdefs)
                         // If we find one that contains the current time
                         if (trackdef.Contains(currentTime))
                         {
@@ -141,7 +142,7 @@ namespace ESME.Platform
                             if (curTrackdef.OverlayFile != null)
                             {
                                 if (curTrackdef.OverlayFile.Shapes.Count() != 1)
-                                    throw new ApplicationException("MovementModel: Attempt to use an OverlayFile with multiple shapes as a bounding region.  Operation unsupported.");
+                                    throw new PlatformMovementException(string.Format("Specified overlay file {0} is unsuitable for use as a bounding region.\nReason(s): Overlay file contains multiple shapes, therefore the bounding shape is undefined", curTrackdef.OverlayFile.FileName));
                                 curTrackBoundingRegion = curTrackdef.OverlayFile.Shapes[0];
                                 if (!curTrackBoundingRegion.IsUsableAsPerimeter)
                                 {
@@ -152,16 +153,16 @@ namespace ESME.Platform
                                         reasons.Append("Bounding region is not a simple polygon (segments cross each other), ");
                                     if (reasons.Length != 0)
                                         reasons.Remove(reasons.Length - 2, 2); // Remove the trailing ", "
-                                    throw new ApplicationException("MovementModel: Specified OverlayFile is unsuitable to use as a bounding region: " + reasons);
+                                    throw new PlatformMovementException(string.Format("Specified overlay file {0} is unsuitable for use as a bounding region.\nReason(s): {1}", curTrackdef.OverlayFile.FileName, reasons));
                                 }
                                 if (!curTrackBoundingRegion.Contains(curLocation))
-                                    throw new ApplicationException("MovementModel: Specified start location is not contained within the bounding region");
+                                    throw new PlatformMovementException(string.Format("Specified start location ({0:0.####}, {1:0.####}) is not contained within the trackdef bounding region", curLocation.Latitude_degrees, curLocation.Longitude_degrees));
                             }
                             else
                             {
                                 // Else, the current trackdef's overlay file IS null, and if the type is perimeter_bounce, that's a no-no
                                 if (curTrackdef.TrackType.ToLower() == "perimeter_bounce")
-                                    throw new ApplicationException("MovementModel: PERIMETER_BOUNCE trackdefs require a bounding region, none was supplied.");
+                                    throw new PlatformMovementException("PERIMETER_BOUNCE trackdefs require a bounding region, none was supplied.");
                             }
                             break;
                         }
@@ -197,7 +198,7 @@ namespace ESME.Platform
                                     {
                                         proposedLocation = new EarthCoordinate3D(curTrackBoundingRegion.Bounce(curLocation, proposedLocation));
                                         if (!curTrackBoundingRegion.Contains(proposedLocation))
-                                            throw new ApplicationException("MovementModel: Two reflections failed to keep the platform inside the bounding region.  Please check the bounding region closely for small pockets or other irregularities");
+                                            throw new PlatformMovementException("Two reflections failed to keep the platform inside the bounding region.  Please check the bounding region closely for small pockets or other irregularities");
                                     }
                                     //curLocation.Compare(proposedLocation);
                                     proposedLocation.Elevation_meters = curLocation.Elevation_meters;
@@ -205,7 +206,7 @@ namespace ESME.Platform
 
                                     curLocation = new EarthCoordinate3D(proposedLocation);
                                     if (!curTrackBoundingRegion.Contains(curLocation))
-                                        throw new ApplicationException("MovementModel: Reflected position is outside the bounding region");
+                                        throw new PlatformMovementException("Reflected position is outside the bounding region");
                                     overlayPoints.Add(new EarthCoordinate(curLocation));
                                 }
                             }
@@ -226,9 +227,9 @@ namespace ESME.Platform
                                         };
             }
             overlayPoints.Add(new EarthCoordinate(curLocation));
-            CourseOverlay = new OverlayLineSegments(overlayPoints.ToArray(), Color.Orange, 1, LineStyle.Dot);
-            CourseEnd = new OverlayPoint(curLocation, Color.Red, 2);
-            CourseStart = new OverlayPoint(NemoPlatform.Trackdefs[0].InitialLocation, Color.Green, 2);
+            CourseOverlay = new OverlayLineSegments(overlayPoints.ToArray(), Colors.Orange, 1, LineStyle.Dot);
+            CourseEnd = new OverlayPoint(curLocation, Colors.Red, 2);
+            CourseStart = new OverlayPoint(NemoPlatform.Trackdefs[0].InitialLocation, Colors.Green, 2);
         }
     }
 }

@@ -117,6 +117,7 @@
       <Abbreviation Text="SSP" />
       <Abbreviation Text="IUI" />
       <Abbreviation Text="UI" />
+      <Abbreviation Text="ESME" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
@@ -173,7 +174,30 @@
         </Variables>
         <CustomProperties />
       </Template>
+      <Template uid="c17325a7-a73c-4d85-977b-8fd001048816" shortcut="vmc" description="" text="#region $COMMANDNAME$Command&#xD;&#xA;public SimpleCommand&lt;object, object&gt; $COMMANDNAME$Command&#xD;&#xA;{&#xD;&#xA;    get { return _$PRIVATE$ ?? (_$PRIVATE$ = new SimpleCommand&lt;object, object&gt;(delegate { Mediator.Instance.NotifyColleagues(&quot;$COMMANDNAME$CommandMessage&quot;); })); }&#xD;&#xA;}&#xD;&#xA;SimpleCommand&lt;object, object&gt; _$PRIVATE$;&#xD;&#xA;#endregion" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="Everywhere" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="COMMANDNAME" expression="" initialRange="1" />
+          <Variable name="PRIVATE" expression="decapitalize(COMMANDNAME)" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
     </LiveTemplates>
+    <Surrounds>
+      <Template uid="0a82265f-a660-45c5-8733-8d570e5787a0" shortcut="" description="My Try-Catch" text="try {$SELECTION$} catch (Exception e) {&#xA;$SELSTART$throw new $EXCEPTION$(string.Format(&quot;$SELEND$&quot;),e);&#xA;}" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="Statement" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="EXCEPTION" expression="" initialRange="0" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+    </Surrounds>
     <FileTemplates>
       <Template uid="27677ffa-5bac-4402-80ae-22d4734f0f6c" shortcut="" description="Cinch ViewModel" text="using Cinch;&#xD;&#xA;&#xD;&#xA;namespace $NAMESPACE$&#xD;&#xA;{&#xD;&#xA;	public class $CLASS$ : ViewModelBase&#xD;&#xA;	{&#xD;&#xA;		$END$&#xD;&#xA;	}&#xD;&#xA;}&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
         <Context>

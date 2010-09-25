@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Media;
 using ESME.Model;
 using ESME.Overlay;
 using HRC.Navigation;
@@ -205,7 +205,7 @@ namespace ESME.AnimatLocationFile
                     trackpoints[i].Add(curTimeRecord[animatIDs[i]]);
                 }
             }
-            return trackpoints.Select(track => new OverlayLineSegments(track.ToArray(), Color.Red, 1, LineStyle.Solid));
+            return trackpoints.Select(track => new OverlayLineSegments(track.ToArray(), Colors.Red, 1, LineStyle.Solid));
         }
         /// <summary>
         /// Get position information about all animats at all times.

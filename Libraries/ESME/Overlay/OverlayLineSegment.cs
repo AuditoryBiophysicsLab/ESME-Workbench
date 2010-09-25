@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Drawing;
+using System.Windows;
+using System.Windows.Media;
 using System.Text;
 using HRC.Navigation;
 
@@ -8,7 +9,7 @@ namespace ESME.Overlay
     internal class OverlayLineSegment : OverlayShape
     {
         public OverlayLineSegment(EarthCoordinate p1, EarthCoordinate p2)
-            : this(p1, p2, Color.Black, 1f, LineStyle.Solid)
+            : this(p1, p2, Colors.Black, 1f, LineStyle.Solid)
         {
         }
 
@@ -97,9 +98,9 @@ namespace ESME.Overlay
 
             // If the lines do not overlap, and the bounding box of this point
             // contains the intersection point, then they DO intersect
-            EarthCoordinate intersectionPoint = IntersectionPoint(that);
+            var intersectionPoint = IntersectionPoint(that);
             //Console.WriteLine("Intersection point calculated to be ({0}, {1})", IntersectionPoint.Latitude_Degrees, IntersectionPoint.Longitude_Degrees);
-            if ((intersectionPoint != null) && (BoundingBox.Contains((PointF) intersectionPoint)))
+            if ((intersectionPoint != null) && (BoundingBox.Contains((Point) intersectionPoint)))
                 return true;
             //if (IntersectionPoint.Longitude_Degrees < BoundingBox.Left)
             //    Console.WriteLine("Intersection point is LEFT of the bounding box by {0}", BoundingBox.Left - IntersectionPoint.Longitude_Degrees);
@@ -125,16 +126,16 @@ namespace ESME.Overlay
             if (IsColinearWith(that))
             {
                 // If they are colinear, check if our bounding box contains either of the other segment's endpoints
-                if (BoundingBox.Contains((PointF) that.EarthCoordinates[0]) ||
-                    (BoundingBox.Contains((PointF) that.EarthCoordinates[1])))
+                if (BoundingBox.Contains((Point)that.EarthCoordinates[0]) ||
+                    (BoundingBox.Contains((Point)that.EarthCoordinates[1])))
                     // If it does, we overlap the other segment
                     return true;
 
                 // If it doesn't, then check if the other segment overlaps us.  This can happen if the other segment
                 // completely contains us, and is also longer than us. If that turns out to be the case, then one or
                 // both of our endpoints will be contained in the other segment's bounding box.
-                if (that.BoundingBox.Contains((PointF) EarthCoordinates[0]) ||
-                    (that.BoundingBox.Contains((PointF) EarthCoordinates[1])))
+                if (that.BoundingBox.Contains((Point)EarthCoordinates[0]) ||
+                    (that.BoundingBox.Contains((Point)EarthCoordinates[1])))
                     // If it does, we overlap the other segment
                     return true;
             }
