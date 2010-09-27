@@ -1,4 +1,4 @@
-﻿<r:RibbonWindow x:Class="ESMEWorkBench.MainView"
+﻿<r:RibbonWindow x:Class="ESMEWorkBench.Views.MainView"
                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
@@ -51,18 +51,18 @@
 		<KeyBinding Command="{Binding CancelCurrentCommand}"
 		            Key="Escape" />
 	</r:RibbonWindow.InputBindings>
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Closing">
-            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
-    <DockPanel LastChildFill="True">
+	<i:Interaction.Triggers>
+		<i:EventTrigger EventName="Closing">
+			<cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+		</i:EventTrigger>
+	</i:Interaction.Triggers>
+	<DockPanel LastChildFill="True">
 		<StatusBar DockPanel.Dock="Bottom">
 			<StatusBarItem>
 				<StackPanel Orientation="Horizontal">
 					<TextBlock Text="{Binding MouseEarthCoordinate.Latitude_degrees, StringFormat=Lat: {0:0.000000}}" />
 					<TextBlock Text=" " />
-                    <TextBlock Text="{Binding MouseEarthCoordinate.Longitude_degrees, StringFormat=Lon: {0:0.000000}}" />
+					<TextBlock Text="{Binding MouseEarthCoordinate.Longitude_degrees, StringFormat=Lon: {0:0.000000}}" />
 				</StackPanel>
 			</StatusBarItem>
 		</StatusBar>
@@ -70,46 +70,46 @@
 		          DockPanel.Dock="Top"
 		          SelectedIndex="0">
 			<r:Ribbon.ApplicationMenu>
-				<r:RibbonApplicationMenu SmallImageSource="Images\SmallIcons\Wave.png">
+				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
 					<r:RibbonApplicationMenuItem Header="Save Experiment"
-					                             ImageSource="Images\LargeIcons\save-icon.png"
+					                             ImageSource="..\Images\LargeIcons\save-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Save the current experiment"
 					                             Command="{Binding SaveExperimentCommand}" />
 					<r:RibbonApplicationMenuItem Header="Open Experiment"
-					                             ImageSource="Images\LargeIcons\open-icon.png"
+					                             ImageSource="..\Images\LargeIcons\open-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Open a previously saved experiment from an experiment file"
 					                             Command="{Binding OpenExperimentCommand}" />
 					<r:RibbonApplicationMenuItem Header="Close Experiment"
-					                             ImageSource="Images\LargeIcons\close-icon.png"
+					                             ImageSource="..\Images\LargeIcons\close-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Close the current experiment"
 					                             Command="{Binding CloseExperimentCommand}" />
 					<r:RibbonApplicationMenuItem Header="New Experiment"
-					                             ImageSource="Images\LargeIcons\new-icon.png"
+					                             ImageSource="..\Images\LargeIcons\new-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Create a new experiment"
 					                             Command="{Binding NewExperimentCommand}" />
 					<r:RibbonApplicationMenuItem Header="Info"
-					                             ImageSource="Images\LargeIcons\about-icon.png"
+					                             ImageSource="..\Images\LargeIcons\about-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Information about the current experiment"
 					                             Command="{Binding DisabledCommand}" />
 					<r:RibbonSeparator />
 					<r:RibbonApplicationMenuItem Header="Options"
-					                             ImageSource="Images\LargeIcons\about-icon.png"
+					                             ImageSource="..\Images\LargeIcons\about-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Edit application options and settings"
 					                             Command="{Binding EditOptionsCommand}" />
 					<r:RibbonApplicationMenuItem Header="Help"
-					                             ImageSource="Images\LargeIcons\Button-Help-icon.png"
+					                             ImageSource="..\Images\LargeIcons\Button-Help-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Help and About information for ESME WorkBench"
 					                             Command="{Binding DisabledCommand}" />
 					<r:RibbonSeparator />
 					<r:RibbonApplicationMenuItem Header="Exit"
-					                             ImageSource="Images\LargeIcons\Button-Close-icon.png"
+					                             ImageSource="..\Images\LargeIcons\Button-Close-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Close the ESME WorkBench"
 					                             Command="Close" />
@@ -134,17 +134,17 @@
 			             Header="Experiment">
 				<r:RibbonGroup Header="Map Data">
 					<r:RibbonButton Label="Shapefile"
-					                SmallImageSource="Images\SmallIcons\AddFile.png"
+					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add an ESRI Shapefile to the map"
 					                Command="{Binding AddShapefileCommand}" />
 					<r:RibbonButton Label="Overlay"
-					                SmallImageSource="Images\SmallIcons\AddFile.png"
+					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a NUWC Overlay file to the map"
 					                Command="{Binding AddOverlayFileCommand}" />
 					<r:RibbonButton Label="Scenario"
-					                SmallImageSource="Images\SmallIcons\AddFile.png"
+					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a NUWC Scenario file to the map"
 					                Command="{Binding AddScenarioFileCommand}" />
@@ -155,36 +155,36 @@
 					                  ToolTipDescription="Toggles the base map display"
 					                  Command="{Binding ToggleBaseMapDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowBasemap, Mode=TwoWay}"
-                                      CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
+					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
 					<r:RibbonCheckBox Label="Grid Overlay"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Toggles the lat/lon grid overlay"
 					                  Command="{Binding ToggleGridOverlayDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowGrid, Mode=TwoWay}"
-                                      CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
+					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
 					<r:RibbonCheckBox Label="Pan/Zoom"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Toggles the pan/zoom control"
 					                  Command="{Binding TogglePanZoomDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowPanZoom, Mode=TwoWay}"
-                                      CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
+					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Sounds">
 					<r:RibbonButton Label="Analysis Point"
-					                LargeImageSource="Images\LargeIcons\bullet-2-icon.png"
-					                SmallImageSource="Images\SmallIcons\bullet-2-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\bullet-2-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new analysis point to the experiment"
 					                Command="{Binding TestTransmissionLossViewCommand}" />
 					<r:RibbonButton Label="Fixed Source"
-					                LargeImageSource="Images\LargeIcons\Sound.png"
-					                SmallImageSource="Images\SmallIcons\Sound.png"
+					                LargeImageSource="..\Images\LargeIcons\Sound.png"
+					                SmallImageSource="..\Images\SmallIcons\Sound.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new fixed sound source to the experiment"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Quick Look"
-					                LargeImageSource="Images\LargeIcons\Button-Play-icon.png"
-					                SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new quick look point to the experiment"
 					                Command="{Binding QuickLookCommand}" />
@@ -194,26 +194,26 @@
 			             Header="Scenario">
 				<r:RibbonGroup Header="Scenario File">
 					<r:RibbonButton Label="Open"
-					                LargeImageSource="Images\LargeIcons\open-icon.png"
-					                SmallImageSource="Images\SmallIcons\open-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\open-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\open-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Open a scenario file"
 					                Command="{Binding AddScenarioFileCommand}" />
 					<r:RibbonButton Label="Close"
-					                LargeImageSource="Images\LargeIcons\close-icon.png"
-					                SmallImageSource="Images\SmallIcons\close-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\close-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\close-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Close the current scenario file"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Edit"
-					                LargeImageSource="Images\LargeIcons\AddFile.png"
-					                SmallImageSource="Images\SmallIcons\AddFile.png"
+					                LargeImageSource="..\Images\LargeIcons\AddFile.png"
+					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launch the scenario editor"
 					                Command="{Binding LaunchScenarioEditorCommand}" />
 					<r:RibbonButton Label="Run"
-					                LargeImageSource="Images\LargeIcons\Button-Play-icon.png"
-					                SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Run the scenario"
 					                Command="{Binding DisabledCommand}" />
@@ -223,25 +223,25 @@
 			             Header="Environment">
 				<r:RibbonGroup Header="Location">
 					<r:RibbonButton Label="Open"
-					                LargeImageSource="Images\LargeIcons\open-icon.png"
-					                SmallImageSource="Images\SmallIcons\open-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\open-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\open-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Open an environment file"
 					                Command="{Binding AddEnvironmentFileCommand}" />
 					<r:RibbonButton Label="Close"
-					                LargeImageSource="Images\LargeIcons\close-icon.png"
-					                SmallImageSource="Images\SmallIcons\close-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\close-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\close-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Close the current environment file"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Edit"
-					                LargeImageSource="Images\LargeIcons\AddFile.png"
-					                SmallImageSource="Images\SmallIcons\AddFile.png"
+					                LargeImageSource="..\Images\LargeIcons\AddFile.png"
+					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launch the environment builder"
 					                Command="{Binding LaunchEnvironmentBuilderCommand}" />
 				</r:RibbonGroup>
-                <!--
+				<!--
 				<r:RibbonGroup Header="Data Layers">
 					<StackPanel Orientation="Vertical">
 						<StackPanel Orientation="Horizontal">
@@ -321,48 +321,48 @@
 					<r:RibbonButton Label="Add Species"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a species to the simulation"
-					                LargeImageSource="Images\LargeIcons\Dolphin.png"
-					                SmallImageSource="Images\SmallIcons\Dolphin.png"
+					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
+					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton ToolTipTitle="Previous"
-					                SmallImageSource="Images\SmallIcons\Button-Previous-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Previous-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton ToolTipTitle="Next"
-					                SmallImageSource="Images\SmallIcons\Button-Next-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Next-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton ToolTipTitle="Delete"
-					                SmallImageSource="Images\SmallIcons\Button-Delete-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Delete-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton ToolTipTitle="Filter"
-					                SmallImageSource="Images\SmallIcons\SmallIcon.png"
+					                SmallImageSource="..\Images\SmallIcons\SmallIcon.png"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Animals">
 					<r:RibbonButton Label="Add Animal"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add an individual animal to the simulation"
-					                LargeImageSource="Images\LargeIcons\Dolphin.png"
-					                SmallImageSource="Images\SmallIcons\Dolphin.png"
+					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
+					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton ToolTipTitle="Previous"
-					                SmallImageSource="Images\SmallIcons\Button-Previous-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Previous-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton ToolTipTitle="Next"
-					                SmallImageSource="Images\SmallIcons\Button-Next-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Next-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton ToolTipTitle="Delete"
-					                SmallImageSource="Images\SmallIcons\Button-Delete-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Delete-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton ToolTipTitle="Filter"
-					                SmallImageSource="Images\SmallIcons\SmallIcon.png"
+					                SmallImageSource="..\Images\SmallIcons\SmallIcon.png"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Simulator">
 					<r:RibbonButton Label="Run Simulator"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Run the animal simulation"
-					                SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
-					                LargeImageSource="Images\LargeIcons\Button-Play-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
 			</r:RibbonTab>
@@ -371,69 +371,69 @@
 				<r:RibbonGroup Header="Simulator">
 					<r:RibbonButton Label="Run Simulator"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Play-icon.png"
-					                LargeImageSource="Images\LargeIcons\Button-Play-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
 					                ToolTipDescription="Run the acoustic simulator to compute transmission loss field"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Analysis Points">
 					<r:RibbonButton Label="Add"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Add-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Add-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Delete"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Delete-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Delete-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Properties"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Information.png"
+					                SmallImageSource="..\Images\SmallIcons\Information.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Previous"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Previous-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Previous-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Next"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Next-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Next-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Filter"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\SmallIcon.png"
+					                SmallImageSource="..\Images\SmallIcons\SmallIcon.png"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Modes">
 					<r:RibbonButton Label="Add"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Add-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Add-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Delete"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Delete-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Delete-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Properties"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Information.png"
+					                SmallImageSource="..\Images\SmallIcons\Information.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Previous"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Previous-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Previous-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Next"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Next-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Next-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Filter"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\SmallIcon.png"
+					                SmallImageSource="..\Images\SmallIcons\SmallIcon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Horizontal Plot"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\bullet-2-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Vertical Plot"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\System-Map-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\System-Map-icon.png"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
 			</r:RibbonTab>
@@ -442,8 +442,8 @@
 				<r:RibbonGroup Header="Reports?">
 					<r:RibbonButton Label="TBD"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="Images\SmallIcons\Button-Help-icon.png"
-					                LargeImageSource="Images\LargeIcons\Button-Help-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Help-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Button-Help-icon.png"
 					                ToolTipDescription="Not yet sure what's going to go here"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
@@ -459,7 +459,7 @@
 			</Grid.ColumnDefinitions>
 			<GroupBox Grid.Column="0"
 			          Header="Layers">
-                <Controls:LayerTreeView />
+				<Controls:LayerTreeView />
 			</GroupBox>
 			<GridSplitter Name="GridSplitter"
 			              Grid.Column="1"
@@ -470,8 +470,8 @@
 			              VerticalAlignment="Stretch"
 			              ResizeBehavior="BasedOnAlignment"
 			              ResizeDirection="Columns" />
-            <Controls:MapView Grid.Column="2" />
-            <i:Interaction.Triggers>
+			<Controls:MapView Grid.Column="2" />
+			<i:Interaction.Triggers>
 				<i:EventTrigger EventName="Drop">
 					<ia:CallMethodAction TargetObject="{Binding}"
 					                     MethodName="FilesDropped" />

@@ -96,10 +96,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AboutView.xaml.cs">
+    <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="BellhopCalculatorView.xaml.cs">
+    <Compile Include="Views\BellhopCalculatorView.xaml.cs">
       <DependentUpon>BellhopCalculatorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\ColorBarView.xaml.cs">
@@ -130,13 +130,13 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="ApplicationOptionsView.xaml.cs">
+    <Compile Include="Views\ApplicationOptionsView.xaml.cs">
       <DependentUpon>ApplicationOptionsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TransmissionLossJobView.xaml.cs">
+    <Compile Include="Views\TransmissionLossJobView.xaml.cs">
       <DependentUpon>TransmissionLossJobView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TransmissionLossView.xaml.cs">
+    <Compile Include="Views\TransmissionLossView.xaml.cs">
       <DependentUpon>TransmissionLossView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ValueConverters.cs" />
@@ -206,11 +206,11 @@
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossJobViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialViewModel.cs" />
-    <Page Include="AboutView.xaml">
+    <Page Include="Views\AboutView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="BellhopCalculatorView.xaml">
+    <Page Include="Views\BellhopCalculatorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -230,7 +230,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainView.xaml">
+    <Page Include="Views\MainView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -238,11 +238,11 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainView.xaml.cs">
+    <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="ApplicationOptionsView.xaml">
+    <Page Include="Views\ApplicationOptionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -286,11 +286,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="TransmissionLossJobView.xaml">
+    <Page Include="Views\TransmissionLossJobView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TransmissionLossView.xaml">
+    <Page Include="Views\TransmissionLossView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -414,7 +414,7 @@
     <Resource Include="Images\Wave.gif" />
     <Resource Include="Wave.ico" />
     <Resource Include="Images\ESMELogo.png" />
-    <Resource Include="AboutLogo.png">
+    <Resource Include="Images\AboutLogo.png">
       <SubType>Image</SubType>
     </Resource>
     <Content Include="External References\3MBSLib.dll" />

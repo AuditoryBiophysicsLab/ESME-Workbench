@@ -1,9 +1,9 @@
 ﻿using Cinch;
 
-namespace ESMEWorkBench
+namespace ESMEWorkBench.Views
 {
     /// <summary>
-    /// Interaction logic for Options.xaml
+    ///   Interaction logic for Options.xaml
     /// </summary>
     [PopupNameToViewLookupKeyMetadata("ApplicationOptionsView", typeof (ApplicationOptionsView))]
     public partial class ApplicationOptionsView

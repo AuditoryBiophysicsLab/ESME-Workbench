@@ -1,78 +1,75 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Navigation;
 using System.Xml;
 
-namespace ESMEWorkBench
+namespace ESMEWorkBench.Views
 {
     /// <summary>
-    /// Interaction logic for AboutView.xaml
+    ///   Interaction logic for AboutView.xaml
     /// </summary>
     public partial class AboutView
     {
         /// <summary>
-        /// Default constructor is protected so callers must use one with a parent.
+        ///   Default constructor is protected so callers must use one with a parent.
         /// </summary>
-        public AboutView()
-        {
-            InitializeComponent();
-        }
+        public AboutView() { InitializeComponent(); }
 
         /// <summary>
-        /// Constructor that takes a parent for this AboutView dialog.
+        ///   Constructor that takes a parent for this AboutView dialog.
         /// </summary>
-        /// <param name="parent">Parent window for this dialog.</param>
-        public AboutView(Window parent)
-            : this()
-        {
-            this.Owner = parent;
-        }
+        /// <param name = "parent">Parent window for this dialog.</param>
+        public AboutView(Window parent) : this() { this.Owner = parent; }
 
         /// <summary>
-        /// Handles click navigation on the hyperlink in the About dialog.
+        ///   Handles click navigation on the hyperlink in the About dialog.
         /// </summary>
-        /// <param name="sender">Object the sent the event.</param>
-        /// <param name="e">Navigation events arguments.</param>
-        private void HyperlinkRequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        /// <param name = "sender">Object the sent the event.</param>
+        /// <param name = "e">Navigation events arguments.</param>
+        void HyperlinkRequestNavigate(object sender, RequestNavigateEventArgs e)
         {
-            if (e.Uri == null || string.IsNullOrEmpty(e.Uri.OriginalString) != false) return;
+            if (e.Uri == null || string.IsNullOrEmpty(e.Uri.OriginalString)) return;
             var uri = e.Uri.AbsoluteUri;
             Process.Start(new ProcessStartInfo(uri));
             e.Handled = true;
         }
 
         #region AboutData Provider
-        #region Member data
-        private XmlDocument xmlDoc = null;
 
-        private const string propertyNameTitle = "Title";
-        private const string propertyNameDescription = "Description";
-        private const string propertyNameProduct = "Product";
-        private const string propertyNameCopyright = "Copyright";
-        private const string propertyNameCompany = "Company";
-        private const string xPathRoot = "ApplicationInfo/";
-        private const string xPathTitle = xPathRoot + propertyNameTitle;
-        private const string xPathVersion = xPathRoot + "Version";
-        private const string xPathDescription = xPathRoot + propertyNameDescription;
-        private const string xPathProduct = xPathRoot + propertyNameProduct;
-        private const string xPathCopyright = xPathRoot + propertyNameCopyright;
-        private const string xPathCompany = xPathRoot + propertyNameCompany;
-        private const string xPathLink = xPathRoot + "Link";
-        private const string xPathLinkUri = xPathRoot + "Link/@Uri";
+        #region Member data
+
+        XmlDocument xmlDoc;
+
+        const string propertyNameTitle = "Title";
+        const string propertyNameDescription = "Description";
+        const string propertyNameProduct = "Product";
+        const string propertyNameCopyright = "Copyright";
+        const string propertyNameCompany = "Company";
+        const string xPathRoot = "ApplicationInfo/";
+        const string xPathTitle = xPathRoot + propertyNameTitle;
+        const string xPathVersion = xPathRoot + "Version";
+        const string xPathDescription = xPathRoot + propertyNameDescription;
+        const string xPathProduct = xPathRoot + propertyNameProduct;
+        const string xPathCopyright = xPathRoot + propertyNameCopyright;
+        const string xPathCompany = xPathRoot + propertyNameCompany;
+        const string xPathLink = xPathRoot + "Link";
+        const string xPathLinkUri = xPathRoot + "Link/@Uri";
+
         #endregion
 
         #region Properties
+
         /// <summary>
-        /// Gets the title property, which is display in the About dialogs window title.
+        ///   Gets the title property, which is display in the About dialogs window title.
         /// </summary>
         public string ProductTitle
         {
             get
             {
-                string result = CalculatePropertyValue<AssemblyTitleAttribute>(propertyNameTitle, xPathTitle);
+                var result = CalculatePropertyValue<AssemblyTitleAttribute>(propertyNameTitle, xPathTitle);
                 if (string.IsNullOrEmpty(result))
                 {
                     // otherwise, just get the name of the assembly itself.
@@ -83,15 +80,15 @@ namespace ESMEWorkBench
         }
 
         /// <summary>
-        /// Gets the application's version information to show.
+        ///   Gets the application's version information to show.
         /// </summary>
         public string Version
         {
             get
             {
-                string result = string.Empty;
+                var result = string.Empty;
                 // first, try to get the version string from the assembly.
-                Version version = Assembly.GetExecutingAssembly().GetName().Version;
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
                 if (version != null)
                 {
                     result = version.ToString();
@@ -106,7 +103,7 @@ namespace ESMEWorkBench
         }
 
         /// <summary>
-        /// Gets the description about the application.
+        ///   Gets the description about the application.
         /// </summary>
         public string Description
         {
@@ -114,7 +111,7 @@ namespace ESMEWorkBench
         }
 
         /// <summary>
-        ///  Gets the product's full name.
+        ///   Gets the product's full name.
         /// </summary>
         public string Product
         {
@@ -122,7 +119,7 @@ namespace ESMEWorkBench
         }
 
         /// <summary>
-        /// Gets the copyright information for the product.
+        ///   Gets the copyright information for the product.
         /// </summary>
         public string Copyright
         {
@@ -130,7 +127,7 @@ namespace ESMEWorkBench
         }
 
         /// <summary>
-        /// Gets the product's company name.
+        ///   Gets the product's company name.
         /// </summary>
         public string Company
         {
@@ -138,7 +135,7 @@ namespace ESMEWorkBench
         }
 
         /// <summary>
-        /// Gets the link text to display in the About dialog.
+        ///   Gets the link text to display in the About dialog.
         /// </summary>
         public string LinkText
         {
@@ -146,32 +143,34 @@ namespace ESMEWorkBench
         }
 
         /// <summary>
-        /// Gets the link uri that is the navigation target of the link.
+        ///   Gets the link uri that is the navigation target of the link.
         /// </summary>
         public string LinkUri
         {
             get { return GetLogicalResourceString(xPathLinkUri); }
         }
+
         #endregion
 
         #region Resource location methods
+
         /// <summary>
-        /// Gets the specified property value either from a specific attribute, or from a resource dictionary.
+        ///   Gets the specified property value either from a specific attribute, or from a resource dictionary.
         /// </summary>
-        /// <typeparam name="T">Attribute type that we're trying to retrieve.</typeparam>
-        /// <param name="propertyName">Property name to use on the attribute.</param>
-        /// <param name="xpathQuery">XPath to the element in the XML data resource.</param>
+        /// <typeparam name = "T">Attribute type that we're trying to retrieve.</typeparam>
+        /// <param name = "propertyName">Property name to use on the attribute.</param>
+        /// <param name = "xpathQuery">XPath to the element in the XML data resource.</param>
         /// <returns>The resulting string to use for a property.
-        /// Returns null if no data could be retrieved.</returns>
-        private string CalculatePropertyValue<T>(string propertyName, string xpathQuery)
+        ///   Returns null if no data could be retrieved.</returns>
+        string CalculatePropertyValue<T>(string propertyName, string xpathQuery)
         {
-            string result = string.Empty;
+            var result = string.Empty;
             // first, try to get the property value from an attribute.
-            object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false);
+            var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof (T), false);
             if (attributes.Length > 0)
             {
-                T attrib = (T)attributes[0];
-                PropertyInfo property = attrib.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                var attrib = (T) attributes[0];
+                var property = attrib.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
                 if (property != null)
                 {
                     result = property.GetValue(attributes[0], null) as string;
@@ -188,7 +187,7 @@ namespace ESMEWorkBench
         }
 
         /// <summary>
-        /// Gets the XmlDataProvider's document from the resource dictionary.
+        ///   Gets the XmlDataProvider's document from the resource dictionary.
         /// </summary>
         protected virtual XmlDocument ResourceXmlDocument
         {
@@ -197,7 +196,7 @@ namespace ESMEWorkBench
                 if (xmlDoc == null)
                 {
                     // if we haven't already found the resource XmlDocument, then try to find it.
-                    XmlDataProvider provider = this.TryFindResource("aboutProvider") as XmlDataProvider;
+                    var provider = this.TryFindResource("aboutProvider") as XmlDataProvider;
                     if (provider != null)
                     {
                         // save away the XmlDocument, so we don't have to get it multiple times.
@@ -209,20 +208,20 @@ namespace ESMEWorkBench
         }
 
         /// <summary>
-        /// Gets the specified data element from the XmlDataProvider in the resource dictionary.
+        ///   Gets the specified data element from the XmlDataProvider in the resource dictionary.
         /// </summary>
-        /// <param name="xpathQuery">An XPath query to the XML element to retrieve.</param>
+        /// <param name = "xpathQuery">An XPath query to the XML element to retrieve.</param>
         /// <returns>The resulting string value for the specified XML element. 
-        /// Returns empty string if resource element couldn't be found.</returns>
+        ///   Returns empty string if resource element couldn't be found.</returns>
         protected virtual string GetLogicalResourceString(string xpathQuery)
         {
-            string result = string.Empty;
+            var result = string.Empty;
             // get the About xml information from the resources.
-            XmlDocument doc = this.ResourceXmlDocument;
+            var doc = this.ResourceXmlDocument;
             if (doc != null)
             {
                 // if we found the XmlDocument, then look for the specified data. 
-                XmlNode node = doc.SelectSingleNode(xpathQuery);
+                var node = doc.SelectSingleNode(xpathQuery);
                 if (node != null)
                 {
                     if (node is XmlAttribute)
@@ -239,7 +238,9 @@ namespace ESMEWorkBench
             }
             return result;
         }
+
         #endregion
+
         #endregion
     }
 }
