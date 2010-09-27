@@ -73,8 +73,7 @@
 			                   TickValueFormat="0" />
 		</DockPanel>
 		<Image Source="{Binding TransmissionLossRadialViewModel.WriteableBitmap}"
-		       Stretch="Fill"
-               
+		       Stretch="Fill"           
                />
     </DockPanel>
 </Window>
