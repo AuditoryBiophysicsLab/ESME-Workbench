@@ -1,10 +1,9 @@
-﻿using System.Windows;
-using Cinch;
+﻿using Cinch;
 
-namespace ESMEWorkBench
+namespace ESMEWorkBench.Views
 {
     /// <summary>
-    /// Interaction logic for BellhopCalculatorView.xaml
+    ///   Interaction logic for BellhopCalculatorView.xaml
     /// </summary>
     [PopupNameToViewLookupKeyMetadata("BellhopCalculatorView", typeof (BellhopCalculatorView))]
     public partial class BellhopCalculatorView

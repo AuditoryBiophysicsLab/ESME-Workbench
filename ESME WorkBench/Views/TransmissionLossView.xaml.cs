@@ -1,9 +1,9 @@
 ﻿using Cinch;
 
-namespace ESMEWorkBench
+namespace ESMEWorkBench.Views
 {
     /// <summary>
-    /// Interaction logic for TransmissionLossView.xaml
+    ///   Interaction logic for TransmissionLossView.xaml
     /// </summary>
     [PopupNameToViewLookupKeyMetadata("TransmissionLossView", typeof (TransmissionLossView))]
     public partial class TransmissionLossView
