@@ -20,7 +20,7 @@ using BathymetryOutOfBoundsException = ESME.Model.BathymetryOutOfBoundsException
 namespace ESMEWorkBench.ViewModels.Main
 {
     [ExportViewModel("ExperimentViewModel")]
-    public partial class ExperimentViewModel : ViewModelBase
+    public partial class MainViewModel : ViewModelBase
     {
         #region Private fields
 
@@ -36,7 +36,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #region Constructors
 
         [ImportingConstructor]
-        public ExperimentViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService, ISaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService, ISaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region public string DecoratedExperimentName { get; set; }
 
-        static readonly PropertyChangedEventArgs DecoratedExperimentNameChangedEventArgs = ObservableHelper.CreateArgs<ExperimentViewModel>(x => x.DecoratedExperimentName);
+        static readonly PropertyChangedEventArgs DecoratedExperimentNameChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.DecoratedExperimentName);
         string _decoratedExperimentName;
 
         public string DecoratedExperimentName
@@ -97,7 +97,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs MouseEarthCoordinateChangedEventArgs = ObservableHelper.CreateArgs<ExperimentViewModel>(x => x.MouseEarthCoordinate);
+        static readonly PropertyChangedEventArgs MouseEarthCoordinateChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseEarthCoordinate);
         EarthCoordinate _mouseEarthCoordinate;
 
         #endregion

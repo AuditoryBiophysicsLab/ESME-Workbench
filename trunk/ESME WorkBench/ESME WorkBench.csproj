@@ -157,13 +157,13 @@
     <Compile Include="ViewModels\Map\OverlayFileMapLayer.cs" />
     <Compile Include="ViewModels\Layers\ShapeLayerViewModel.cs" />
     <Compile Include="ViewModels\Main\EnvironmentDatabaseViewModel.cs" />
-    <Compile Include="ViewModels\Main\ExperimentViewModelCommands.cs" />
+    <Compile Include="ViewModels\Main\MainViewModelCommands.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\OldLayerDisplayViewModel.cs" />
     <Compile Include="ViewModels\Main\LayerTreeViewModel.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ViewModels\Main\ExperimentViewModel.cs" />
+    <Compile Include="ViewModels\Main\MainViewModel.cs" />
     <Compile Include="ViewModels\Layers\OffsetProjection.cs" />
     <Compile Include="ViewModels\Layers\OverlayLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\RadarRasterSource.cs" />
