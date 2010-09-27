@@ -11,7 +11,7 @@
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                 xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
                 xmlns:Controls="clr-namespace:ESMEWorkBench.Controls"
-                mef:ViewModelLocator.ViewModel="ExperimentViewModel"
+                mef:ViewModelLocator.ViewModel="MainViewModel"
                 SnapsToDevicePixels="True"
                 Title="{Binding DecoratedExperimentName, StringFormat=ESME WorkBench: {0}}"
                 Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"

@@ -9,7 +9,7 @@ using ESMEWorkBench.Properties;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    public partial class ExperimentViewModel
+    public partial class MainViewModel
     {
         #region Commands
 
