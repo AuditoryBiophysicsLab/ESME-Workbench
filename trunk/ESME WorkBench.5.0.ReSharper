@@ -118,6 +118,7 @@
       <Abbreviation Text="IUI" />
       <Abbreviation Text="UI" />
       <Abbreviation Text="ESME" />
+      <Abbreviation Text="PSM" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
@@ -148,19 +149,6 @@
         </Variables>
         <CustomProperties />
       </Template>
-      <Template uid="0aaed870-7399-4a41-966b-33f78f2bd5f2" shortcut="vmp" description="" text="#region public $TYPE$ $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;public $TYPE$ $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$; }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;$TYPE$ _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
-        <Context>
-          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
-        </Context>
-        <Categories />
-        <Variables>
-          <Variable name="TYPE" expression="" initialRange="0" />
-          <Variable name="NAME" expression="" initialRange="0" />
-          <Variable name="PRIVATE" expression="typeName()" initialRange="-1" />
-          <Variable name="CLASS" expression="decapitalize(NAME)" initialRange="0" />
-        </Variables>
-        <CustomProperties />
-      </Template>
       <Template uid="ba1abbe8-a3c7-47f2-a709-17277d8b18c6" shortcut="vml" description="" text="#region public ObservableCollection&lt;$TYPE$&gt; $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;public ObservableCollection&lt;$TYPE$&gt; $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$; }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged -= $NAME$CollectionChanged;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged += $NAME$CollectionChanged;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;void $NAME$CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged($NAME$ChangedEventArgs); }&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;$TYPE$ _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
         <Context>
           <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
@@ -182,6 +170,19 @@
         <Variables>
           <Variable name="COMMANDNAME" expression="" initialRange="1" />
           <Variable name="PRIVATE" expression="decapitalize(COMMANDNAME)" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="0aaed870-7399-4a41-966b-33f78f2bd5f2" shortcut="vmp" description="" text="#region public $TYPE$ $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;public $TYPE$ $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$; }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;$TYPE$ _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="TYPE" expression="" initialRange="0" />
+          <Variable name="NAME" expression="" initialRange="0" />
+          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
+          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
         </Variables>
         <CustomProperties />
       </Template>
