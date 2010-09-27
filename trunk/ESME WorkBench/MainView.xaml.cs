@@ -1,11 +1,11 @@
 ﻿namespace ESMEWorkBench
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainView.xaml
     /// </summary>
-    public partial class MainWindow
+    public partial class MainView
     {
-        public MainWindow()
+        public MainView()
         {
             InitializeComponent();
 

@@ -22,7 +22,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(delegate
                                                                                          {
                                                                                              var programOptionsViewModel = new ProgramOptionsViewModel();
-                                                                                             var result = _visualizerService.ShowDialog("OptionsPopup", programOptionsViewModel);
+                                                                                             var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
                                                                                              if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save();
                                                                                              else Globals.AppSettings.Reload();
                                                                                          }));
