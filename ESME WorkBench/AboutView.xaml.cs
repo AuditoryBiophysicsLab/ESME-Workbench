@@ -9,23 +9,23 @@ using System.Xml;
 namespace ESMEWorkBench
 {
     /// <summary>
-    /// Interaction logic for AboutBox.xaml
+    /// Interaction logic for AboutView.xaml
     /// </summary>
-    public partial class AboutBox : Window
+    public partial class AboutView
     {
         /// <summary>
         /// Default constructor is protected so callers must use one with a parent.
         /// </summary>
-        protected AboutBox()
+        public AboutView()
         {
             InitializeComponent();
         }
 
         /// <summary>
-        /// Constructor that takes a parent for this AboutBox dialog.
+        /// Constructor that takes a parent for this AboutView dialog.
         /// </summary>
         /// <param name="parent">Parent window for this dialog.</param>
-        public AboutBox(Window parent)
+        public AboutView(Window parent)
             : this()
         {
             this.Owner = parent;
@@ -36,14 +36,12 @@ namespace ESMEWorkBench
         /// </summary>
         /// <param name="sender">Object the sent the event.</param>
         /// <param name="e">Navigation events arguments.</param>
-        private void hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        private void HyperlinkRequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            if (e.Uri != null && string.IsNullOrEmpty(e.Uri.OriginalString) == false)
-            {
-                string uri = e.Uri.AbsoluteUri;
-                Process.Start(new ProcessStartInfo(uri));
-                e.Handled = true;
-            }
+            if (e.Uri == null || string.IsNullOrEmpty(e.Uri.OriginalString) != false) return;
+            var uri = e.Uri.AbsoluteUri;
+            Process.Start(new ProcessStartInfo(uri));
+            e.Handled = true;
         }
 
         #region AboutData Provider

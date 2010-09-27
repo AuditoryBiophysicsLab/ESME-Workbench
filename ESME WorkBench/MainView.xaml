@@ -1,4 +1,4 @@
-﻿<r:RibbonWindow x:Class="ESMEWorkBench.MainWindow"
+﻿<r:RibbonWindow x:Class="ESMEWorkBench.MainView"
                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
@@ -14,7 +14,6 @@
                 mef:ViewModelLocator.ViewModel="ExperimentViewModel"
                 SnapsToDevicePixels="True"
                 Title="{Binding DecoratedExperimentName, StringFormat=ESME WorkBench: {0}}"
-                x:Name="MainView"
                 Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
                 Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
                 Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"

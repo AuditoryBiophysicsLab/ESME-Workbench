@@ -1,4 +1,4 @@
-﻿<Window x:Class="ESMEWorkBench.AboutBox"
+﻿<Window x:Class="ESMEWorkBench.AboutView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="{Binding RelativeSource={RelativeSource Self}, Mode=OneTime, Path=ProductTitle}" 
@@ -83,7 +83,7 @@
                         Content="OK" />
                 <Label x:Name="productLink" x:Uid="productLink" Style="{StaticResource LinkLabelStyle}" >
                     <Hyperlink x:Name="hyperlink" x:Uid="hyperlink" NavigateUri="{Binding Mode=OneTime, Path=LinkUri}"  Style="{StaticResource LinkLabelStyle}"
-                               Hyperlink.RequestNavigate="hyperlink_RequestNavigate">
+                               Hyperlink.RequestNavigate="HyperlinkRequestNavigate">
                         <TextBlock Text="{Binding Mode=OneTime, Path=LinkText}" />
                     </Hyperlink>
                 </Label>
