@@ -6,22 +6,31 @@
         Height="300"
         Width="300">
 	<DockPanel LastChildFill="True">
-		<DockPanel DockPanel.Dock="Bottom">
+		<DockPanel DockPanel.Dock="Top" Margin="5">
+            <Menu Name="TransmissionLossViewFileMenu"/>
+            <MenuItem Header="_File">                
+                <MenuItem Header="Save As"></MenuItem>
+                <MenuItem Header="Export to"></MenuItem>
+                <MenuItem Header="Exit View" InputGestureText="Ctrl+W"></MenuItem>                
+            </MenuItem>
+            <MenuItem Header="_Edit"></MenuItem>
+        </DockPanel>
+
+        <DockPanel DockPanel.Dock="Bottom">
 			<StackPanel Orientation="Vertical"
 			            Margin="0 5 0 5">
 				<TextBlock Text="Drag slider to change the selected radial" />
 				<Slider AutoToolTipPlacement="BottomRight"
 				        AutoToolTipPrecision="0"
 				        TickPlacement="BottomRight"
-				        Margin="0 5 0 5"
 				        Minimum="1"
 				        Maximum="{Binding RadialCount}"
-				        Value="{Binding SelectedRadial}" />
+				        Value="{Binding SelectedRadial}"
+                        Margin="0 0 0 5"/>
 			</StackPanel>
 		</DockPanel>
-		<DockPanel DockPanel.Dock="Top"
-		           Height="22" />
-		<DockPanel DockPanel.Dock="Left">
+        
+        <DockPanel DockPanel.Dock="Left">
 			<DockPanel>
 				<TextBlock DockPanel.Dock="Bottom"
 				           MinHeight="{Binding ElementName=RangeAxis, Path=ActualHeight}" />
@@ -64,6 +73,8 @@
 			                   TickValueFormat="0" />
 		</DockPanel>
 		<Image Source="{Binding TransmissionLossRadialViewModel.WriteableBitmap}"
-		       Stretch="Fill" />
-	</DockPanel>
+		       Stretch="Fill"
+               
+               />
+    </DockPanel>
 </Window>
