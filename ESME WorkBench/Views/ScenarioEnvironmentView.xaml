@@ -1,0 +1,49 @@
+﻿<Window x:Class="ESMEWorkBench.Views.ScenarioEnvironmentView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        mef:ViewModelLocator.ViewModel="ScenarioEnvironmentViewModel"
+        Title="Scenario Environment Settings" Height="300" Width="300">
+    <DockPanel LastChildFill="True">
+        <DockPanel LastChildFill="False"
+		           Margin="10"
+		           DockPanel.Dock="Bottom">
+            <Button Width="75"
+			        Margin="10 0 0 0"
+			        IsCancel="True"
+			        Content="Cancel"
+			        DockPanel.Dock="Right" />
+            <Button Width="75"
+			        IsDefault="True"
+			        Content="OK"
+			        DockPanel.Dock="Right"
+			        Command="{Binding OkCommand}" />
+        </DockPanel>
+        <StackPanel Orientation="Vertical"
+				            Width="Auto"
+				            Height="Auto">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Experiment time frame" Margin="2"/>
+                <ComboBox ItemsSource="{Binding TimePeriods}" 
+                          ToolTip="Choose a time frame from the dropdown list (month or season)"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Wind data file" Margin="2"/>
+                <ComboBox ItemsSource="{Binding WindSpeedData}" />
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Sound speed data file" Margin="2"/>
+                <ComboBox ItemsSource="{Binding SoundSpeedData}" />
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Bottom type data file" Margin="2"/>
+                <ComboBox ItemsSource="{Binding BottomTypeData}" />
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Bathymetry data file" Margin="2"/>
+                <ComboBox ItemsSource="{Binding BathymetryData}" />
+            </StackPanel>
+        </StackPanel>
+
+    </DockPanel>
+</Window>

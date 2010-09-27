@@ -9,8 +9,7 @@ namespace ESME.NEMO
 {
     public class NemoScenario : NemoBase
     {
-        public NemoScenario(XmlNode scenario, string nemoDataDirectory)
-            : base(scenario)
+        public NemoScenario(XmlNode scenario, string nemoDataDirectory) : base(scenario)
         {
             try
             {
@@ -29,15 +28,12 @@ namespace ESME.NEMO
 
                 var scenarioDirectory = Path.Combine(nemoDataDirectory, SimAreaName);
 
-                foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "Platform"))
-                    Platforms.Add(new NemoPlatform(cur, scenarioDirectory, this));
+                foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "Platform")) Platforms.Add(new NemoPlatform(cur, scenarioDirectory, this));
 
-                foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "animals"))
-                    Animals.Add(new NemoAnimals(cur, scenarioDirectory));
+                foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "animals")) Animals.Add(new NemoAnimals(cur, scenarioDirectory));
 
                 var simAreaOverlays = Directory.GetFiles(Path.Combine(scenarioDirectory, "Areas"), "*_SIM_AREA.ovr");
-                if ((simAreaOverlays != null) && (simAreaOverlays.Length > 0))
-                    OverlayFile = new OverlayFile(simAreaOverlays[0]);
+                if ((simAreaOverlays != null) && (simAreaOverlays.Length > 0)) OverlayFile = new OverlayFile(simAreaOverlays[0]);
             }
             catch (Exception e)
             {
@@ -61,7 +57,10 @@ namespace ESME.NEMO
 
         public IEnumerable<NemoMode> ActiveModes()
         {
-            return from platform in Platforms from source in platform.Sources from mode in source.Modes select mode;
+            return from platform in Platforms
+                   from source in platform.Sources
+                   from mode in source.Modes
+                   select mode;
         }
     }
 }

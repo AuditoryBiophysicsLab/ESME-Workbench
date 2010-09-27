@@ -90,7 +90,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> TestTransmissionLossViewCommand
         {
-            get { return _testTransmissionLossView ?? (_testTransmissionLossView = new SimpleCommand<object, object>(delegate { Mediator.Instance.NotifyColleagues("TestTransmissionLossViewCommandMessage"); })); }
+            get { return _testTransmissionLossView ?? (_testTransmissionLossView = new SimpleCommand<object, object>(delegate { Mediator.Instance.NotifyColleagues("TestTransmissionLossViewCommandMessage", true); })); }
         }
 
         SimpleCommand<object, object> _testTransmissionLossView;
@@ -146,7 +146,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> OpenExperimentCommand
         {
-            get { return _openExperiment ?? (_openExperiment = new SimpleCommand<object, object>(delegate { SaveExperiment(); })); }
+            get { return _openExperiment ?? (_openExperiment = new SimpleCommand<object, object>(delegate { OpenExperiment(null); })); }
         }
 
         SimpleCommand<object, object> _openExperiment;
@@ -234,16 +234,15 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _addScenarioFile ?? (_addScenarioFile = new SimpleCommand<object, object>(delegate { return CanAddScenarioFile(); }, delegate
+                return _addScenarioFile ?? (_addScenarioFile = new SimpleCommand<object, object>(delegate { return IsAddScenarioFilePossible(); }, delegate
                                                                                                                                             {
                                                                                                                                                 _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
                                                                                                                                                 _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
                                                                                                                                                 var result = _openFileService.ShowDialog(null);
                                                                                                                                                 if (!result.HasValue || !result.Value) return;
                                                                                                                                                 if (!UserWantsToReplaceScenarioFileIfPresent(_openFileService.FileName)) return;
-                                                                                                                                                _experiment.ScenarioFileName = _openFileService.FileName;
+                                                                                                                                                if (!UserWantsToAddScenarioFile(_openFileService.FileName)) return;
                                                                                                                                                 Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-                                                                                                                                                Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", _openFileService.FileName);
                                                                                                                                                 Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
                                                                                                                                             }));
             }

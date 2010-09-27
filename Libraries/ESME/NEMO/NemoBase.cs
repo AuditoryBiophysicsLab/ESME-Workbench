@@ -9,19 +9,11 @@ namespace ESME.NEMO
     {
         protected XmlNode ParentNode;
 
-        static NemoBase()
-        {
-            SimulationStepTime = new TimeSpan(0, 0, 1);
-        }
+        static NemoBase() { SimulationStepTime = new TimeSpan(0, 0, 1); }
 
-        protected NemoBase()
-        {
-        }
+        protected NemoBase() { }
 
-        protected NemoBase(XmlNode parentNode)
-        {
-            ParentNode = parentNode;
-        }
+        protected NemoBase(XmlNode parentNode) { ParentNode = parentNode; }
 
         #region public TimeSpan SimulationStepTime { get; set; }
 
@@ -35,6 +27,7 @@ namespace ESME.NEMO
                 _simulationStepTime = value;
             }
         }
+
         static TimeSpan _simulationStepTime;
 
         #endregion
@@ -42,61 +35,45 @@ namespace ESME.NEMO
         protected bool GetBool(string childElementName)
         {
             bool tmpval;
-            if (bool.TryParse(GetInnerText(childElementName), out tmpval))
-                return tmpval;
+            if (bool.TryParse(GetInnerText(childElementName), out tmpval)) return tmpval;
             throw new FormatException(FormatError(childElementName));
         }
 
         protected int GetInt(string childElementName)
         {
             int tmpval;
-            if (int.TryParse(GetInnerText(childElementName), out tmpval))
-                return tmpval;
+            if (int.TryParse(GetInnerText(childElementName), out tmpval)) return tmpval;
             throw new FormatException(FormatError(childElementName));
         }
 
         protected float GetFloat(string childElementName)
         {
             float tmpval;
-            if (float.TryParse(GetInnerText(childElementName), out tmpval))
-                return tmpval;
+            if (float.TryParse(GetInnerText(childElementName), out tmpval)) return tmpval;
             throw new FormatException(FormatError(childElementName));
         }
 
         protected DateTime GetDateTime(string childElementName)
         {
             DateTime tmpval;
-            if (DateTime.TryParse(GetInnerText(childElementName), out tmpval))
-                return tmpval;
+            if (DateTime.TryParse(GetInnerText(childElementName), out tmpval)) return tmpval;
             throw new FormatException(FormatError(childElementName));
         }
 
         protected TimeSpan GetTimeSpan(string childElementName)
         {
             TimeSpan tmpval;
-            if (TimeSpan.TryParse(GetInnerText(childElementName).Trim().Replace(' ', '.'), out tmpval))
-                return tmpval;
+            if (TimeSpan.TryParse(GetInnerText(childElementName).Trim().Replace(' ', '.'), out tmpval)) return tmpval;
             throw new FormatException(FormatError(childElementName));
         }
 
-        protected EarthCoordinate GetEarthCoordinate(string latitudeElementName, string longitudeElementName)
-        {
-            return new EarthCoordinate(GetFloat(latitudeElementName), GetFloat(longitudeElementName));
-        }
+        protected EarthCoordinate GetEarthCoordinate(string latitudeElementName, string longitudeElementName) { return new EarthCoordinate(GetFloat(latitudeElementName), GetFloat(longitudeElementName)); }
 
-        protected EarthCoordinate3D GetEarthCoordinate3D(string latitudeElementName, string longitudeElementName,
-                                                         string elevationElementName)
-        {
-            return new EarthCoordinate3D(GetFloat(latitudeElementName), GetFloat(longitudeElementName),
-                                         GetFloat(elevationElementName));
-        }
+        protected EarthCoordinate3D GetEarthCoordinate3D(string latitudeElementName, string longitudeElementName, string elevationElementName) { return new EarthCoordinate3D(GetFloat(latitudeElementName), GetFloat(longitudeElementName), GetFloat(elevationElementName)); }
 
-        protected string GetString(string childElementName)
-        {
-            return GetInnerText(childElementName);
-        }
+        protected string GetString(string childElementName) { return GetInnerText(childElementName); }
 
-        private string GetInnerText(string childElementName)
+        string GetInnerText(string childElementName)
         {
             try
             {
@@ -110,9 +87,9 @@ namespace ESME.NEMO
             }
         }
 
-        private string XmlPath(string childElementName)
+        string XmlPath(string childElementName)
         {
-            XmlNode curNode = ParentNode;
+            var curNode = ParentNode;
             var path = new StringBuilder(childElementName);
             while (curNode.ParentNode != null)
             {
@@ -122,14 +99,8 @@ namespace ESME.NEMO
             return path.ToString();
         }
 
-        private string FormatError(string childElementName)
-        {
-            return string.Format("{0} format error", XmlPath(childElementName));
-        }
+        string FormatError(string childElementName) { return string.Format("{0} format error", XmlPath(childElementName)); }
 
-        private string MissingNode(string childElementName)
-        {
-            return string.Format("{0} is missing", XmlPath(childElementName));
-        }
+        string MissingNode(string childElementName) { return string.Format("{0} is missing", XmlPath(childElementName)); }
     }
 }

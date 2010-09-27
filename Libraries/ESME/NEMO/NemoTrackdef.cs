@@ -8,8 +8,7 @@ namespace ESME.NEMO
 {
     public class NemoTrackdef : NemoBase, IComparable<NemoTrackdef>
     {
-        public NemoTrackdef(XmlNode trackDef, string scenarioDirectory)
-            : base(trackDef)
+        public NemoTrackdef(XmlNode trackDef, string scenarioDirectory) : base(trackDef)
         {
             TrackType = GetString("trackType");
             StartTime = GetDateTime("startTime");
@@ -26,8 +25,7 @@ namespace ESME.NEMO
 
             InitialLocation = new EarthCoordinate3D(InitialLatitude, InitialLongitude, InitialHeight);
             EndTime = StartTime + Duration;
-            if (!string.IsNullOrEmpty(LimitFileName))
-                OverlayFile = new OverlayFile(Path.Combine(Path.Combine(scenarioDirectory, "Areas"), LimitFileName));
+            if (!string.IsNullOrEmpty(LimitFileName)) OverlayFile = new OverlayFile(Path.Combine(Path.Combine(scenarioDirectory, "Areas"), LimitFileName));
         }
 
         public string TrackType { get; private set; }
@@ -50,17 +48,13 @@ namespace ESME.NEMO
 
         #region IComparable<NemoTrackdef> Members
 
-        public int CompareTo(NemoTrackdef other)
-        {
-            return StartTime.CompareTo(other.StartTime);
-        }
+        public int CompareTo(NemoTrackdef other) { return StartTime.CompareTo(other.StartTime); }
 
         #endregion
 
         internal bool Contains(DateTime simulationTime)
         {
-            if ((StartTime <= simulationTime) && (simulationTime <= EndTime))
-                return true;
+            if ((StartTime <= simulationTime) && (simulationTime <= EndTime)) return true;
             return false;
         }
     }

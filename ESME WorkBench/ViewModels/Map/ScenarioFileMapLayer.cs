@@ -34,7 +34,7 @@ namespace ESMEWorkBench.ViewModels.Map
                 platformLayer.OverlayShapes.Add(behavior.CourseOverlay);
                 platformLayer.CommitShapes();
                 overlays.Add(platformLayerName, platformLayer);
-                var courseLayerViewModel = new LayerViewModel("Course", platformLayer);
+                var courseLayerViewModel = new LayerViewModel("Track", platformLayer);
                 platformLayerViewModel.Children.Add(courseLayerViewModel);
                 var opAreaCount = 0;
                 foreach (var trackdef in platform.Trackdefs)

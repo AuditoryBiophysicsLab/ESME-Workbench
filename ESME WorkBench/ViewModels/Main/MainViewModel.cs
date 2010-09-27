@@ -19,7 +19,7 @@ using BathymetryOutOfBoundsException = ESME.Model.BathymetryOutOfBoundsException
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    [ExportViewModel("ExperimentViewModel")]
+    [ExportViewModel("MainViewModel")]
     public partial class MainViewModel : ViewModelBase
     {
         #region Private fields
@@ -44,7 +44,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("***********\nExperimentViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                System.Diagnostics.Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
             _viewAwareStatusService = viewAwareStatusService;
@@ -52,8 +52,54 @@ namespace ESMEWorkBench.ViewModels.Main
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
+            _viewAwareStatusService.ViewLoaded += ViewLoaded;
 
-            _experiment = new Experiment();
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length == 2)
+            {
+                if (File.Exists(args[1]))
+                {
+                    if (args[1].EndsWith(".esme"))
+                    {
+                        try
+                        {
+                            LoadExperimentFile(_openFileService.FileName);
+                        }
+                        catch (Exception ex)
+                        {
+                            _messageBoxService.ShowError(string.Format("Error opening experiment file \"{0}\":\n{1}", args[1], ex.Message));
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _experiment = new Experiment();
+                DecoratedExperimentName = "<New experiment>";
+            }
+            _experiment.PropertyChanged += delegate(object s, PropertyChangedEventArgs e)
+            {
+                switch (e.PropertyName)
+                {
+                    case "IsChanged":
+                        if (_experiment.IsChanged)
+                        {
+                            if (DecoratedExperimentName.EndsWith(" *")) return;
+                            DecoratedExperimentName += " *";
+                        }
+                        else
+                        {
+                            if (!DecoratedExperimentName.EndsWith(" *")) return;
+                            DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
+                        }
+                        break;
+                }
+            };
+        }
+
+        static void ViewLoaded()
+        {
+            Mediator.Instance.NotifyColleagues("MainViewModelInitializedMessage", true);
         }
 
         protected override void OnDispose()
@@ -106,12 +152,16 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region Drag/Drop
 
-        public bool CanAddScenarioFile() { return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))); }
+        public bool IsAddScenarioFilePossible()
+        {
+            return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)));
+        }
 
         public void FilesDropped(Object sender, DragEventArgs e)
         {
             if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
             var droppedFilePaths = (string[]) e.Data.GetData(DataFormats.FileDrop, true);
+            var refreshNeeded = false;
             foreach (var file in droppedFilePaths)
             {
                 try
@@ -120,16 +170,24 @@ namespace ESMEWorkBench.ViewModels.Main
                     {
                         case ".shp":
                             Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", file);
+                            refreshNeeded = true;
                             break;
                         case ".ovr":
                             Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", file);
+                            refreshNeeded = true;
                             break;
                         case ".eeb":
                             _environmentFileName = file;
                             Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", file);
+                            refreshNeeded = true;
                             break;
                         case ".nemo":
-                            if (CanAddScenarioFile()) Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", file);
+                            if (UserWantsToAddScenarioFile(file))
+                            {
+                                _experiment.ScenarioFileName = file;
+                                Mediator.Instance.NotifyColleagues("AddScenarioToExperimentMessage", _experiment.NemoFile);
+                                refreshNeeded = true;
+                            }
                             break;
                     }
                 }
@@ -138,7 +196,14 @@ namespace ESMEWorkBench.ViewModels.Main
                     Globals.DisplayException(_messageBoxService, ex, "Error opening dropped file {0}", file);
                 }
             }
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
+            if (refreshNeeded) Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
+        }
+
+        public bool UserWantsToAddScenarioFile(string fileName)
+        {
+            if (!IsAddScenarioFilePossible()) return false;
+            if ((_experiment.ScenarioFileName != null) && (_messageBoxService.ShowYesNo("A scenario is already part of this experiment.\nWould you like to replace the current scenario file with this one?", CustomDialogIcons.Exclamation) != CustomDialogResults.Yes)) return false;
+            return true;
         }
 
         #endregion
@@ -171,58 +236,16 @@ namespace ESMEWorkBench.ViewModels.Main
                 _experiment.FileName = _openFileService.FileName;
                 Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
             }
-            _experiment = Experiment.Load(fileName);
+            LoadExperimentFile(_openFileService.FileName);
+            _experiment.InitializeIfViewModelsReady();
         }
 
-        void LoadExperiment()
+        void LoadExperimentFile(string fileName)
         {
-            var args = Environment.GetCommandLineArgs();
-            if (args.Length == 2)
-            {
-                if (File.Exists(args[1]))
-                {
-                    if (args[1].EndsWith(".esme"))
-                    {
-                        try
-                        {
-                            _experiment = Experiment.Load(args[1]);
-                            Globals.IsInitializeExperimentNeeded = true;
-                            DecoratedExperimentName = Path.GetFileName(args[1]);
-                        }
-                        catch (Exception ex)
-                        {
-                            _messageBoxService.ShowError(string.Format("Error opening experiment file \"{0}\":\n{1}", args[1], ex.Message));
-                        }
-                    }
-                }
-            }
-            else
-            {
-                _experiment = new Experiment();
-                DecoratedExperimentName = "<New experiment>";
-            }
-            _experiment.PropertyChanged += delegate(object s, PropertyChangedEventArgs e)
-                                           {
-                                               switch (e.PropertyName)
-                                               {
-                                                   case "IsChanged":
-                                                       if (_experiment.IsChanged)
-                                                       {
-                                                           if (DecoratedExperimentName.EndsWith(" *")) return;
-                                                           DecoratedExperimentName += " *";
-                                                       }
-                                                       else
-                                                       {
-                                                           if (!DecoratedExperimentName.EndsWith(" *")) return;
-                                                           DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
-                                                       }
-                                                       break;
-                                               }
-                                           };
-
-            //if ((Globals.Experiment.ScenarioFileName != null) && (File.Exists(Globals.Experiment.ScenarioFileName)))
-            //    AddScenarioFile(Globals.Experiment.ScenarioFileName);
-            //else Globals.Experiment.ScenarioFileName = null;
+            _experiment = Experiment.Load(fileName);
+            _experiment.FileName = fileName;
+            DecoratedExperimentName = Path.GetFileName(_openFileService.FileName);
+            _experiment.IsChanged = false;            
         }
 
         /// <summary>
@@ -231,7 +254,6 @@ namespace ESMEWorkBench.ViewModels.Main
         /// <returns>true if the file was saved, false otherwise.</returns>
         bool SaveExperiment()
         {
-            if ((_experiment == null) || (!_experiment.IsChanged)) return true;
             if (_experiment.FileName == null)
             {
                 _saveFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
@@ -260,6 +282,16 @@ namespace ESMEWorkBench.ViewModels.Main
 
         [MediatorMessageSink("SetMouseEarthCoordinateMessage")]
         void SetMouseEarthCoordinate(EarthCoordinate mouseEarthCoordinate) { MouseEarthCoordinate = mouseEarthCoordinate; }
+
+        [MediatorMessageSink("TestTransmissionLossViewCommandMessage")]
+        void TestTransmissionLossView(bool dummy)
+        {
+            _openFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
+            var result = _openFileService.ShowDialog((Window)_viewAwareStatusService.View);
+            if ((!result.HasValue) || (!result.Value)) return;
+            var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_openFileService.FileName);
+            _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
+        }
 
         [MediatorMessageSink("RunQuickLookMessage")]
         void RunQuickLook(bool dummy) 

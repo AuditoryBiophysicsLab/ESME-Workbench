@@ -36,6 +36,8 @@ namespace ESMEWorkBench.ViewModels.Main
             _viewAwareStatusService = viewAwareStatusService;
             _messageBoxService = messageBoxService;
 
+            _viewAwareStatusService.ViewLoaded += ViewLoaded;
+
             MoveLayerToBackCommand = new SimpleCommand<object, object>(CanMoveLayerBackCommand, ExecuteMoveLayerToBackCommand);
             MoveLayerBackCommand = new SimpleCommand<object, object>(CanMoveLayerBackCommand, ExecuteMoveLayerBackwardCommand);
             MoveLayerForwardCommand = new SimpleCommand<object, object>(CanMoveLayerForwardCommand, ExecuteMoveLayerForwardCommand);
@@ -69,16 +71,10 @@ namespace ESMEWorkBench.ViewModels.Main
         public SimpleCommand<Object, Object> MoveLayerForwardCommand { get; private set; }
         public SimpleCommand<Object, Object> MoveLayerToFrontCommand { get; private set; }
 
-#if false
-    /// <summary>
-    ///   Removes any and all scenario layers from the simulation
-    /// </summary>
-        public void RemoveScenarioLayers()
+        static void ViewLoaded()
         {
-            foreach (var layer in Layers.OfType<ScenarioFileLayerViewModel>()) layer.Remove();
-            //Globals.Experiment.ScenarioFileName = null;
+            Mediator.Instance.NotifyColleagues("LayerTreeViewModelInitializedMessage", true);
         }
-#endif
 
         void ExecuteMoveLayerForwardCommand(Object args)
         {

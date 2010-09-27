@@ -10,11 +10,9 @@ namespace ESMEWorkBench
         static Globals()
         {
             AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
-            //EnvironmentDatabaseViewModel = new EnvironmentDatabaseViewModel(AppSettings.EnvironmentDatabaseDirectory);
         }
 
         public static AppSettings AppSettings { get; set; }
-        public static bool IsInitializeExperimentNeeded { get; set; }
 
         public static void DisplayException(IMessageBoxService messageBoxService, Exception ex, string format, params object[] args)
         {
