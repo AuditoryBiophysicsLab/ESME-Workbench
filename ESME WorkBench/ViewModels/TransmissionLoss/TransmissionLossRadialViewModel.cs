@@ -14,12 +14,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     {
         readonly Dispatcher _dispatcher;
         bool _isRendered;
-        readonly ColorMapViewModel _colorMapViewModel;
+        
         WriteableBitmap _writeableBitmap;
 
         public TransmissionLossRadialViewModel(TransmissionLossRadial transmissionLossRadial, ColorMapViewModel colorMapViewModel)
         {
-            _colorMapViewModel = colorMapViewModel;
+            ColorMapViewModel = colorMapViewModel;
             TransmissionLossRadial = transmissionLossRadial;
             RangeMin = TransmissionLossRadial.Ranges.First();
             RangeMax = TransmissionLossRadial.Ranges.Last();
@@ -27,6 +27,38 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             DepthMax = TransmissionLossRadial.Depths.Last();
             _dispatcher = Dispatcher.CurrentDispatcher;
         }
+
+        #region public ColorMapViewModel ColorMapViewModel { get; set; }
+
+        public ColorMapViewModel ColorMapViewModel
+        {
+            get { return _colorMapViewModel; }
+            set
+            {
+                if (_colorMapViewModel == value) return;
+                _colorMapViewModel = value;
+                _colorMapViewModel.PropertyChanged += ColorMapViewModelPropertyChanged;
+                NotifyPropertyChanged(ColorMapViewModelChangedEventArgs);
+            }
+        }
+
+        void ColorMapViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "CurMinValue":
+                case "CurMaxValue":
+                    _isRendered = false;
+                    NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
+                    break;
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs ColorMapViewModelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.ColorMapViewModel);
+        private ColorMapViewModel _colorMapViewModel;
+
+        #endregion
+
 
         public WriteableBitmap WriteableBitmap
         {
