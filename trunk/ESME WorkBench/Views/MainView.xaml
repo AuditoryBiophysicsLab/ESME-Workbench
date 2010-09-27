@@ -50,7 +50,16 @@
 	<r:RibbonWindow.InputBindings>
 		<KeyBinding Command="{Binding CancelCurrentCommand}"
 		            Key="Escape" />
-	</r:RibbonWindow.InputBindings>
+        <KeyBinding Command="{Binding SaveExperimentCommand}"
+                    Modifiers="Control"
+                    Key="S" />
+        <KeyBinding Command="{Binding OpenExperimentCommand}"
+                    Modifiers="Control"
+                    Key="O" />
+        <KeyBinding Command="{Binding NewExperimentCommand}"
+                    Modifiers="Control"
+                    Key="N" />
+    </r:RibbonWindow.InputBindings>
 	<i:Interaction.Triggers>
 		<i:EventTrigger EventName="Closing">
 			<cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
@@ -72,11 +81,13 @@
 			<r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
 					<r:RibbonApplicationMenuItem Header="Save Experiment"
+                                                 InputGestureText="Ctrl+S"
 					                             ImageSource="..\Images\LargeIcons\save-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Save the current experiment"
 					                             Command="{Binding SaveExperimentCommand}" />
 					<r:RibbonApplicationMenuItem Header="Open Experiment"
+                                                 InputGestureText="Ctrl+O"
 					                             ImageSource="..\Images\LargeIcons\open-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Open a previously saved experiment from an experiment file"
@@ -87,6 +98,7 @@
 					                             ToolTipDescription="Close the current experiment"
 					                             Command="{Binding CloseExperimentCommand}" />
 					<r:RibbonApplicationMenuItem Header="New Experiment"
+                                                 InputGestureText="Ctrl+N"
 					                             ImageSource="..\Images\LargeIcons\new-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Create a new experiment"
@@ -106,7 +118,7 @@
 					                             ImageSource="..\Images\LargeIcons\Button-Help-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Help and About information for ESME WorkBench"
-					                             Command="{Binding DisabledCommand}" />
+					                             Command="Help" />
 					<r:RibbonSeparator />
 					<r:RibbonApplicationMenuItem Header="Exit"
 					                             ImageSource="..\Images\LargeIcons\Button-Close-icon.png"

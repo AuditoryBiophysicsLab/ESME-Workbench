@@ -5,8 +5,7 @@ namespace ESME.NEMO
 {
     public class NemoMode : NemoPSM
     {
-        public NemoMode(XmlNode mode)
-            : base(mode)
+        public NemoMode(XmlNode mode) : base(mode)
         {
             State = GetString("state");
             Linked = GetString("linked");
@@ -50,8 +49,7 @@ namespace ESME.NEMO
 
         internal bool Contains(DateTime simulationTime)
         {
-            if ((StartTime <= simulationTime) && (simulationTime <= EndTime))
-                return true;
+            if ((StartTime <= simulationTime) && (simulationTime <= EndTime)) return true;
             return false;
         }
     }

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using Cinch;
+using ESME.NEMO;
 using ESMEWorkBench.Controls;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Layers;
@@ -47,7 +48,7 @@ namespace ESMEWorkBench.ViewModels.Map
             _viewAwareStatusService = viewAwareStatusService;
             _messageBoxService = messageBoxService;
 
-            _viewAwareStatusService.ViewLoaded += ViewAwareStatusServiceViewLoaded;
+            _viewAwareStatusService.ViewLoaded += ViewLoaded;
 
             Cursor = Cursors.Arrow;
 
@@ -90,7 +91,7 @@ namespace ESMEWorkBench.ViewModels.Map
         public SimpleCommand<Object, EventToCommandArgs> MouseMoveCommand { get; private set; }
         public SimpleCommand<Object, Object> MouseLeftButtonUpCommand { get; private set; }
 
-        void ViewAwareStatusServiceViewLoaded()
+        void ViewLoaded()
         {
             if (Designer.IsInDesignMode) return;
 
@@ -114,7 +115,7 @@ namespace ESMEWorkBench.ViewModels.Map
             _map.CurrentExtent = new RectangleShape(new PointShape(-180, 90), new PointShape(180, -90));
             _map.ZoomToScale(_map.ZoomLevelScales[3]);
 
-            Mediator.Instance.NotifyColleagues("MapLayerLoaded");
+            Mediator.Instance.NotifyColleagues("MapViewModelInitializedMessage", true);
         }
 
         public GeoCollection<Overlay> Overlays
@@ -240,6 +241,14 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 Globals.DisplayException(_messageBoxService, ex, "Error opening file {0}", fileName);
             }
+        }
+
+        [MediatorMessageSink("AddScenarioToExperimentMessage")]
+        void AddScenarioToExperiment(NemoFile nemoFile)
+        {
+            var scenarioLayer = new ScenarioFileLayerViewModel(nemoFile, Overlays);
+            Mediator.Instance.NotifyColleagues("AddLayerToTreeViewMessage", scenarioLayer);
+            _map.Refresh();
         }
     }
 }

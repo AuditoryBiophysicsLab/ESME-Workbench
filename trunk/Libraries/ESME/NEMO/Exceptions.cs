@@ -10,6 +10,7 @@ namespace ESME.NEMO
         public ParameterOutOfRangeException(string message, Exception innerException) : base(message, innerException) { }
         public ParameterOutOfRangeException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+
     public class PlatformException : Exception
     {
         public PlatformException() { }
@@ -17,6 +18,7 @@ namespace ESME.NEMO
         public PlatformException(string message, Exception innerException) : base(message, innerException) { }
         public PlatformException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+
     public class ScenarioException : Exception
     {
         public ScenarioException() { }

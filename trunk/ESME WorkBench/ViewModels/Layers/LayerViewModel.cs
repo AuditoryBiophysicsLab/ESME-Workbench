@@ -2,19 +2,83 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 using Cinch;
 using ESMEWorkBench.ViewModels.Main;
-using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
     public class LayerViewModel : ViewModelBase
     {
-        public LayerViewModel Parent { get; set; }
+        public LayerViewModel(string name, Overlay overlay) : this(name) { Overlay = overlay; }
+
+        public LayerViewModel(string name) : this() { LayerName = name; }
+
+        public LayerViewModel()
+        {
+            Children = new LayersCollection();
+            IsChecked = true;
+            ContextMenu = new List<MenuItemViewModel>();
+            CanBeReordered = true;
+            CanBeRemoved = true;
+            ShowContextMenu = true;
+            TileType = TileType.SingleTile;
+        }
+
+        #region public bool CanBeReordered { get; set; }
+
+        public bool CanBeReordered
+        {
+            get { return _canBeReordered; }
+            set
+            {
+                if (_canBeReordered == value) return;
+                _canBeReordered = value;
+                if (CanBeReordered)
+                    ContextMenu.Add(new MenuItemViewModel
+                    {
+                        Header = "Order",
+                        Children = new List<MenuItemViewModel>(),
+                    });
+                else ContextMenu.Remove(ContextMenu.Find(x => x.Header == "Order"));
+                NotifyPropertyChanged(CanBeReorderedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CanBeReorderedChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.CanBeReordered);
+        bool _canBeReordered;
+
+        #endregion
+
+        #region public bool CanBeRemoved { get; set; }
+
+        public bool CanBeRemoved
+        {
+            get { return _canBeRemoved; }
+            set
+            {
+                if (_canBeRemoved == value) return;
+                _canBeRemoved = value;
+                if (CanBeRemoved)
+                    ContextMenu.Add(new MenuItemViewModel
+                    {
+                        Header = "Remove",
+                        Command = new SimpleCommand<object, object>(delegate
+                        {
+                            Remove();
+                            Mediator.Instance.NotifyColleagues("RefreshMapMessage");
+                        }),
+                    });
+                else ContextMenu.Remove(ContextMenu.Find(x => x.Header == "Remove"));
+                NotifyPropertyChanged(CanBeRemovedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CanBeRemovedChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.CanBeRemoved);
+        bool _canBeRemoved;
+
+        #endregion
 
         #region public string LayerName { get; set; }
 
@@ -157,13 +221,21 @@ namespace ESMEWorkBench.ViewModels.Layers
             }
         }
 
-        void ChildrenCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(ChildrenChangedEventArgs); }
+        void ChildrenCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (var oldItem in e.OldItems)
+                    {
+                        
+                    }
+                    break;
+            }
+            NotifyPropertyChanged(ChildrenChangedEventArgs);
+        }
 
         #endregion
-
-        public TileType TileType { get; set; }
-
-        public Overlay Overlay { get; set; }
 
         #region public LayerTreeViewModel LayerTreeViewModel { get; set; }
 
@@ -176,29 +248,29 @@ namespace ESMEWorkBench.ViewModels.Layers
                 _layerTreeViewModel = value;
                 var orderMenu = ContextMenu.First(x => x.Header == "Order");
                 orderMenu.Children.Add(new MenuItemViewModel
-                                       {
-                                           Header = "Bring to front",
-                                           Command = _layerTreeViewModel.MoveLayerToFrontCommand,
-                                           CommandParameter = this,
-                                       });
+                {
+                    Header = "Bring to front",
+                    Command = _layerTreeViewModel.MoveLayerToFrontCommand,
+                    CommandParameter = this,
+                });
                 orderMenu.Children.Add(new MenuItemViewModel
-                                       {
-                                           Header = "Bring forward",
-                                           Command = _layerTreeViewModel.MoveLayerForwardCommand,
-                                           CommandParameter = this,
-                                       });
+                {
+                    Header = "Bring forward",
+                    Command = _layerTreeViewModel.MoveLayerForwardCommand,
+                    CommandParameter = this,
+                });
                 orderMenu.Children.Add(new MenuItemViewModel
-                                       {
-                                           Header = "Push backward",
-                                           Command = _layerTreeViewModel.MoveLayerBackCommand,
-                                           CommandParameter = this,
-                                       });
+                {
+                    Header = "Push backward",
+                    Command = _layerTreeViewModel.MoveLayerBackCommand,
+                    CommandParameter = this,
+                });
                 orderMenu.Children.Add(new MenuItemViewModel
-                                       {
-                                           Header = "Push to back",
-                                           Command = _layerTreeViewModel.MoveLayerToBackCommand,
-                                           CommandParameter = this,
-                                       });
+                {
+                    Header = "Push to back",
+                    Command = _layerTreeViewModel.MoveLayerToBackCommand,
+                    CommandParameter = this,
+                });
                 NotifyPropertyChanged(LayerTreeViewModelChangedEventArgs);
             }
         }
@@ -208,38 +280,12 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
 
-        public LayerViewModel(string name, Overlay overlay)
-        {
-            LayerName = name;
-            Overlay = overlay;
-            Children = new LayersCollection();
-            Children.CollectionChanged += Children_CollectionChanged;
-            IsChecked = true;
-            ShowContextMenu = true;
-            TileType = TileType.SingleTile;
-            if (ContextMenu == null) ContextMenu = new List<MenuItemViewModel>();
-            ContextMenu.Add(new MenuItemViewModel
-                            {
-                                Header = "Order",
-                                Children = new List<MenuItemViewModel>(),
-                            });
-            ContextMenu.Add(new MenuItemViewModel
-                            {
-                                Header = "Remove",
-                                Command = new SimpleCommand<object, object>(delegate
-                                                                            {
-                                                                                Remove();
-                                                                                Mediator.Instance.NotifyColleagues("RefreshMapMessage");
-                                                                            }),
-                            });
-        }
+        public LayerViewModel Parent { get; set; }
 
-        static void Children_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.OldItems != null) foreach (var oldLayer in e.OldItems.Cast<LayerViewModel>()) oldLayer.Remove();
-            Mediator.Instance.NotifyColleagues("RefreshMapMessage");
-        }
+        public TileType TileType { get; set; }
 
+        public Overlay Overlay { get; set; }
+        
         void Initialize()
         {
             foreach (var child in Children)
@@ -254,6 +300,5 @@ namespace ESMEWorkBench.ViewModels.Layers
             Mediator.Instance.NotifyColleagues("RemoveOverlayFromMapMessage", Overlay);
             //Globals.LayerDisplayViewModel.Layers.Remove(this);
         }
-
     }
 }

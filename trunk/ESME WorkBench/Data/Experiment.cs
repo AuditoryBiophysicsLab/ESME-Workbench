@@ -1,13 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Windows;
+using System.IO;
 using System.Xml.Serialization;
 using Cinch;
+using ESME.NEMO;
 
 namespace ESMEWorkBench.Data
 {
     [Serializable]
-    public class Experiment : SerializableData<Experiment>
+    public partial class Experiment : SerializableData<Experiment>
     {
         #region public string Comments { get; set; }
 
@@ -190,12 +191,17 @@ namespace ESMEWorkBench.Data
             {
                 if (_scenarioFileName == value) return;
                 _scenarioFileName = value;
+                if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) 
+                    NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
                 NotifyPropertyChanged(ScenarioFileNameChangedEventArgs);
             }
         }
 
         [XmlIgnore] static readonly PropertyChangedEventArgs ScenarioFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.ScenarioFileName);
         [XmlIgnore] string _scenarioFileName;
+
+        [XmlIgnore]
+        public NemoFile NemoFile { get; private set; }
 
         #endregion
 
@@ -220,6 +226,15 @@ namespace ESMEWorkBench.Data
         
         public Experiment()
         {
+            try
+            {
+                Mediator.Instance.Register(this);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                throw;
+            }
             Author = Environment.UserName;
             Created = DateTime.Now;
             PropertyChanged += delegate(object s, PropertyChangedEventArgs e) { if (e.PropertyName != "IsChanged") IsChanged = true; };
@@ -249,6 +264,7 @@ namespace ESMEWorkBench.Data
             LastModified = DateTime.Now;
             ModifiedBy = Environment.UserName;
             base.SaveAs(fileName);
+            IsChanged = false;
         }
 
         public static void Test()
@@ -262,6 +278,21 @@ namespace ESMEWorkBench.Data
                            ScenarioFileName = "scenario"
                        };
             test.Save("test.esme");
+        }
+
+        public void InitializeIfViewModelsReady()
+        {
+            if (_mainViewModelInitialized && _mapViewModelInitialized && _layerTreeViewModelInitialized)
+                Initialize();
+        }
+
+        void Initialize()
+        {
+            if ((ScenarioFileName != null) && (File.Exists(ScenarioFileName)))
+            {
+                Mediator.Instance.NotifyColleagues("AddScenarioToExperimentMessage", NemoFile);
+                //Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", ScenarioFileName);
+            }
         }
     }
 }

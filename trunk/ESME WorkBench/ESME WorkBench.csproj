@@ -96,6 +96,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Data\ExperimentListeners.cs" />
+    <Compile Include="ViewModels\Main\ExperimentViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
@@ -133,6 +135,9 @@
     <Compile Include="Views\ApplicationOptionsView.xaml.cs">
       <DependentUpon>ApplicationOptionsView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ScenarioEnvironmentView.xaml.cs">
+      <DependentUpon>ScenarioEnvironmentView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\TransmissionLossJobView.xaml.cs">
       <DependentUpon>TransmissionLossJobView.xaml</DependentUpon>
     </Compile>
@@ -148,7 +153,7 @@
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\RasterLayerViewModel.cs" />
-    <Compile Include="ViewModels\Layers\ScenarioFileLayerViewModel.cs" />
+    <Compile Include="ViewModels\Layers\ScenarioLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\BathymetryBoundsMapLayer.cs" />
     <Compile Include="ViewModels\Map\MapLayer.cs" />
     <Compile Include="ViewModels\Map\MapLayerReorderDescriptor.cs" />
@@ -285,6 +290,10 @@
     <Page Include="Themes\WhistlerBlue.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ScenarioEnvironmentView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\TransmissionLossJobView.xaml">
       <SubType>Designer</SubType>

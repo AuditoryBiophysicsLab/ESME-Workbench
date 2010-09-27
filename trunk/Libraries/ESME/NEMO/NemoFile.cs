@@ -6,29 +6,27 @@ namespace ESME.NEMO
 {
     public class NemoFile : NemoBase
     {
-        private readonly string _fileName;
-        private readonly XmlDocument _nemoDocument;
+        readonly XmlDocument _xmlDocument;
 
         public NemoFile(string fileName, string nemoDataDirectory)
         {
             try
             {
-                _fileName = fileName;
-                _nemoDocument = new XmlDocument();
-                _nemoDocument.Load(fileName);
-                Scenario = new NemoScenario(_nemoDocument["Scenario"], nemoDataDirectory);
+                FileName = fileName;
+                _xmlDocument = new XmlDocument();
+                _xmlDocument.Load(FileName);
+                Scenario = new NemoScenario(_xmlDocument["Scenario"], nemoDataDirectory);
             }
             catch (Exception e)
             {
-                throw new FileFormatException(string.Format("Error opening NEMO file \"{0}\"", fileName), e);
+                throw new FileFormatException(string.Format("Error opening NEMO file \"{0}\"", FileName), e);
             }
         }
 
+        public string FileName { get; private set; }
+
         public NemoScenario Scenario { get; private set; }
 
-        public override string ToString()
-        {
-            return Path.GetFileName(_fileName);
-        }
+        public override string ToString() { return Path.GetFileName(FileName); }
     }
 }

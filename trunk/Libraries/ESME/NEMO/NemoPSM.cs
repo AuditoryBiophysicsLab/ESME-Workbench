@@ -5,8 +5,7 @@ namespace ESME.NEMO
 {
     public class NemoPSM : NemoBase
     {
-        public NemoPSM(XmlNode mode)
-            : base(mode)
+        public NemoPSM(XmlNode mode) : base(mode)
         {
             PSMName = GetString("psmName");
             PSMId = GetString("psmId");

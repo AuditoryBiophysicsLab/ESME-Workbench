@@ -6,7 +6,7 @@ namespace ESME.NEMO
 {
     public class NemoAnimals : NemoBase
     {
-        private readonly List<NemoSpecies> _species = new List<NemoSpecies>();
+        readonly List<NemoSpecies> _species = new List<NemoSpecies>();
 
         public NemoAnimals(XmlNode animals, string scenarioDirectory)
         {
