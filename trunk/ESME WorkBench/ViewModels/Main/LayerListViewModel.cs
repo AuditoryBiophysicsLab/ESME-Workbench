@@ -107,15 +107,15 @@ namespace ESMEWorkBench.ViewModels.Main
         bool CanLayerMoveUp(LayerViewModel sourceLayer)
         {
             if (sourceLayer == null) return false;
-            var layerIndex = LayerViewModels.IndexOf(sourceLayer);
-            return (layerIndex > 0) && (LayerViewModels.Count > 1);
+            MediatorMessage.Send(MediatorMessage.MapLayerIndexQuery, sourceLayer.MapLayer);
+            return ((sourceLayer.MapLayer.MapLayerIndex < (LayerViewModels.Count - 1)) && (LayerViewModels.Count > 1));
         }
 
         bool CanLayerMoveDown(LayerViewModel sourceLayer)
         {
             if (sourceLayer == null) return false;
-            var layerIndex = LayerViewModels.IndexOf(sourceLayer);
-            return ((layerIndex < (LayerViewModels.Count - 1)) && (LayerViewModels.Count > 1));
+            MediatorMessage.Send(MediatorMessage.MapLayerIndexQuery, sourceLayer.MapLayer);
+            return (sourceLayer.MapLayer.MapLayerIndex > 0) && (LayerViewModels.Count > 1);
         }
 
         [MediatorMessageSink(MediatorMessage.AddListLayer)]
@@ -123,5 +123,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         [MediatorMessageSink(MediatorMessage.RemoveLayer)]
         void RemoveLayer(MapLayer layer) { LayerViewModels.Remove(layer.LayerViewModel); }
+
+        [MediatorMessageSink(MediatorMessage.ListLayerMoveToIndex)]
+        void ListLayerMoveToIndex(MapLayer layer) { LayerViewModels.Move(LayerViewModels.IndexOf(layer.LayerViewModel), layer.MapLayerIndex); }
     }
 }

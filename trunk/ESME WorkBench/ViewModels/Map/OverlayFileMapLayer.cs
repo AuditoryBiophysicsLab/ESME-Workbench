@@ -41,14 +41,17 @@ namespace ESMEWorkBench.ViewModels.Map
         public void Add(OverlayShape overlayShape)
         {
             if (_layer == null) _layer = new InMemoryFeatureLayer();
-            if (LineStyle == null)
+            if (CustomLineStyle == null)
             {
-                LineColor = overlayShape.Color;
-                LineWidth = overlayShape.Width;
-            }
-            if (PointStyle == null)
-            {
-                PointStyle = new PointStyle(PointSymbolType.Circle, new GeoSolidBrush(GeoColor.FromArgb(LineColor.A, LineColor.R, LineColor.G, LineColor.B)), (int)LineWidth);
+                if (LineStyle == null)
+                {
+                    LineColor = overlayShape.Color;
+                    LineWidth = overlayShape.Width;
+                }
+                if (PointStyle == null)
+                {
+                    PointStyle = new PointStyle(PointSymbolType.Circle, new GeoSolidBrush(GeoColor.FromArgb(LineColor.A, LineColor.R, LineColor.G, LineColor.B)), (int) LineWidth);
+                }
             }
 
             _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(overlayShape.WellKnownText)));
@@ -62,9 +65,17 @@ namespace ESMEWorkBench.ViewModels.Map
         public void Done()
         {
             if (_layer == null) return;
-            //_layer.ZoomLevelSet.ZoomLevel01.CustomStyles.Clear();
-            if (LineStyle != null) _layer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(LineStyle);
-            if (PointStyle != null) _layer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(PointStyle);
+            if (CustomLineStyle != null)
+            {
+                _layer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(CustomLineStyle);
+            }
+            else
+            {
+
+                if (LineStyle != null) _layer.ZoomLevelSet.ZoomLevel01.DefaultLineStyle = LineStyle;
+                if (PointStyle != null) _layer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle = PointStyle;
+            }
+
             _layer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             Layers.Add(_layer);
         }

@@ -63,7 +63,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     {
                         try
                         {
-                            LoadExperimentFile(_openFileService.FileName);
+                            LoadExperimentFile(args[1]);
                         }
                         catch (Exception ex)
                         {
@@ -245,6 +245,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void OpenScenarioFile(string fileName)
         {
+            _openFileService.FileName = null;
             if (fileName == null)
             {
                 _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
@@ -254,7 +255,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 fileName = _openFileService.FileName;
             }
             if (!UserWantsToReplaceScenarioFileIfPresent(fileName)) return;
-            Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(fileName);
+            if (_openFileService.FileName != null)
+                Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
             MediatorMessage.Send(MediatorMessage.AddScenarioFileCommand, fileName);
         }
 
