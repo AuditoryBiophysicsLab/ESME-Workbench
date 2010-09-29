@@ -257,6 +257,17 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
+        [MediatorMessageSink(MediatorMessage.SetLayerLineColor)]
+        void SetLayerLineColor(MapLayer mapLayer)
+        {
+            RefreshMapView(true);
+        }
+        [MediatorMessageSink(MediatorMessage.SetLayerAreaColor)]
+        void SetLayerAreaColor(MapLayer mapLayer)
+        {
+            RefreshMapView(true);
+        }
+
         [MediatorMessageSink(MediatorMessage.AddScenarioLayer)]
         void AddScenarioLayer(NemoFile nemoFile)
         {

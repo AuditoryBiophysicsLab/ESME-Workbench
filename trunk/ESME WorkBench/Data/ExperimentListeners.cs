@@ -34,7 +34,6 @@ namespace ESMEWorkBench.Data
         [MediatorMessageSink(MediatorMessage.ExperimentLoaded)]
         void ExperimentLoaded(bool dummy)
         {
-            IsChanged = false;
             InitializeIfViewModelsReady();
         }
 

@@ -134,6 +134,7 @@ namespace ESMEWorkBench.ViewModels.Layers
                             if (result == DialogResult.OK)
                             {
                                 MapLayer.LineColor = Color.FromArgb(colorDialog.Color.A, colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B);
+                                MediatorMessage.Send(MediatorMessage.SetLayerLineColor, MapLayer);
                             }
                         }),
                     });
@@ -171,6 +172,7 @@ namespace ESMEWorkBench.ViewModels.Layers
                             if (result == DialogResult.OK)
                             {
                                 MapLayer.AreaColor = Color.FromArgb(colorDialog.Color.A, colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B);
+                                MediatorMessage.Send(MediatorMessage.SetLayerAreaColor, MapLayer);
                             }
                         }),
                     });

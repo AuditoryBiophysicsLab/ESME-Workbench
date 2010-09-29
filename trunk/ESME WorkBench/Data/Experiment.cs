@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.NEMO;
+using ESMEWorkBench.ViewModels.Layers;
 
 namespace ESMEWorkBench.Data
 {
@@ -207,6 +212,46 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public ObservableCollection<LayerSettings> LayerSettingsCollection { get; set; }
+
+        [XmlIgnore]
+        public ObservableCollection<LayerSettings> LayerSettingsCollection
+        {
+            get { return _layerSettingsCollection; }
+            set
+            {
+                if (_layerSettingsCollection == value) return;
+                if (_layerSettingsCollection != null) _layerSettingsCollection.CollectionChanged -= LayerSettingsCollectionCollectionChanged;
+                _layerSettingsCollection = value;
+                if (_layerSettingsCollection != null) _layerSettingsCollection.CollectionChanged += LayerSettingsCollectionCollectionChanged;
+                NotifyPropertyChanged(LayerSettingsCollectionChangedEventArgs);
+            }
+        }
+
+        void LayerSettingsCollectionCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(LayerSettingsCollectionChangedEventArgs); }
+        [XmlIgnore] static readonly PropertyChangedEventArgs LayerSettingsCollectionChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.LayerSettingsCollection);
+        [XmlIgnore] ObservableCollection<LayerSettings> _layerSettingsCollection;
+
+        #endregion
+
+        #region public ObservableCollection<LayerSettings> LayerSettingsList { get; set; }
+
+        [XmlElement]
+        public List<LayerSettings> LayerSettingsList
+        {
+            get { return _layerSettingsList; }
+            set
+            {
+                if (_layerSettingsList == value) return;
+                _layerSettingsList = value;
+            }
+        }
+
+        [XmlIgnore] List<LayerSettings> _layerSettingsList;
+
+        #endregion
+
+
         #region public bool IsChanged { get; set; }
 
         [XmlIgnore]
@@ -263,6 +308,9 @@ namespace ESMEWorkBench.Data
 
         public new void SaveAs(string fileName)
         {
+            LayerSettingsList = new List<LayerSettings>();
+            LayerSettingsList.AddRange(LayerSettingsCollection);
+            LayerSettingsList.Sort();
             LastModified = DateTime.Now;
             ModifiedBy = Environment.UserName;
             base.SaveAs(fileName);
@@ -291,8 +339,46 @@ namespace ESMEWorkBench.Data
         void Initialize()
         {
             MediatorMessage.Send(MediatorMessage.InitializeMapView);
+            LayerSettingsCollection = new ObservableCollection<LayerSettings>();
             AddScenarioFileCommand(ScenarioFileName);
+            foreach (var item in LayerSettingsList)
+            {
+                LayerSettingsCollection.Add(item);
+                if (item.FileName != null)
+                {
+                    switch (Path.GetExtension(FileName).ToLower())
+                    {
+                        case ".shp":
+                            MediatorMessage.Send(MediatorMessage.AddShapefileCommand, FileName);
+                            break;
+                        case ".ovr":
+                            MediatorMessage.Send(MediatorMessage.AddOverlayFileCommand, FileName);
+                            break;
+                        case ".eeb":
+                            MediatorMessage.Send(MediatorMessage.AddEnvironmentFileCommand, FileName);
+                            break;
+                    }
+                }
+            }
+            IsChanged = false;
         }
+    }
 
+    public class LayerSettings : IComparable<LayerSettings>
+    {
+        [XmlElement]
+        public string Name { get; set; }
+        [XmlElement]
+        public string FileName { get; set; }
+        [XmlElement]
+        public int Index { get; set; }
+        [XmlElement]
+        public Color LineColor { get; set; }
+        [XmlElement]
+        public float LineWidth { get; set; }
+        [XmlElement]
+        public Color AreaColor { get; set; }
+
+        int IComparable<LayerSettings>.CompareTo(LayerSettings that) { return Index.CompareTo(that.Index); }
     }
 }
