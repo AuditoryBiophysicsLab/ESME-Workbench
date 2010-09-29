@@ -1,25 +1,22 @@
 ﻿<UserControl x:Class="ESMEWorkBench.Controls.MapView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:uc1="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
              xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+             xmlns:WpfDesktopEdition="clr-namespace:ThinkGeo.MapSuite.WpfDesktopEdition;assembly=WpfDesktopEdition"
              mef:ViewModelLocator.ViewModel="MapViewModel"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <uc1:WpfMap Name="Map1"
-			            Cursor="{Binding Cursor}"
-			            Grid.Column="2">
-        <i:Interaction.Triggers>
-            <i:EventTrigger EventName="MouseLeftButtonUp">
-                <cinch:EventToCommandTrigger Command="{Binding MouseLeftButtonUpCommand}" />
-            </i:EventTrigger>
-            <i:EventTrigger EventName="MouseMove">
-                <cinch:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
-            </i:EventTrigger>
-        </i:Interaction.Triggers>
-    </uc1:WpfMap>
+             AllowDrop="True">
+	<DockPanel LastChildFill="True">
+        <WpfDesktopEdition:WpfMap x:Name="WpfMap" Cursor="{Binding Cursor}">
+            <i:Interaction.Triggers>
+				<i:EventTrigger EventName="MouseLeftButtonUp">
+					<cinch:EventToCommandTrigger Command="{Binding MouseLeftButtonUpCommand}" />
+				</i:EventTrigger>
+				<i:EventTrigger EventName="MouseMove">
+					<cinch:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
+				</i:EventTrigger>
+			</i:Interaction.Triggers>
+		</WpfDesktopEdition:WpfMap>
+	</DockPanel>
 </UserControl>

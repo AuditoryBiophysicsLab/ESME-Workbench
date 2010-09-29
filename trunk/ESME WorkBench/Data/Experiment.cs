@@ -202,6 +202,8 @@ namespace ESMEWorkBench.Data
 
         [XmlIgnore]
         public NemoFile NemoFile { get; private set; }
+        [XmlIgnore]
+        public IMessageBoxService MessageBoxService { get; set; }
 
         #endregion
 
@@ -232,7 +234,7 @@ namespace ESMEWorkBench.Data
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                System.Diagnostics.Debug.WriteLine("***********\nExperiment: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
             Author = Environment.UserName;
@@ -280,19 +282,17 @@ namespace ESMEWorkBench.Data
             test.Save("test.esme");
         }
 
-        public void InitializeIfViewModelsReady()
+        void InitializeIfViewModelsReady()
         {
-            if (_mainViewModelInitialized && _mapViewModelInitialized && _layerTreeViewModelInitialized)
+            if (_mainViewModelInitialized && _mapViewModelInitialized && _layerListViewModelInitialized)
                 Initialize();
         }
 
         void Initialize()
         {
-            if ((ScenarioFileName != null) && (File.Exists(ScenarioFileName)))
-            {
-                Mediator.Instance.NotifyColleagues("AddScenarioToExperimentMessage", NemoFile);
-                //Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", ScenarioFileName);
-            }
+            MediatorMessage.Send(MediatorMessage.InitializeMapView);
+            AddScenarioFileCommand(ScenarioFileName);
         }
+
     }
 }

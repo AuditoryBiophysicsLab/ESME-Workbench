@@ -1,30 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Cinch;
 using ESMEWorkBench.ViewModels.Main;
-using ThinkGeo.MapSuite.WpfDesktopEdition;
+using ESMEWorkBench.ViewModels.Map;
 
 namespace ESMEWorkBench.ViewModels.Layers
 {
     public class LayerViewModel : ViewModelBase
     {
-        public LayerViewModel(string name, Overlay overlay) : this(name) { Overlay = overlay; }
-
-        public LayerViewModel(string name) : this() { LayerName = name; }
-
-        public LayerViewModel()
+        public LayerViewModel(MapLayer mapLayer)
         {
-            Children = new LayersCollection();
+            MapLayer = mapLayer;
+            LayerType = MapLayer.LayerType;
+            Name = MapLayer.Name;
             IsChecked = true;
-            ContextMenu = new List<MenuItemViewModel>();
+            ContextMenu = new List<MenuItemViewModel<LayerViewModel>>();
             CanBeReordered = true;
             CanBeRemoved = true;
             ShowContextMenu = true;
-            TileType = TileType.SingleTile;
         }
+
+        #region public string Name { get; set; }
+
+        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.Name);
+        string _name;
+
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name == value) return;
+                _name = value;
+                NotifyPropertyChanged(NameChangedEventArgs);
+            }
+        }
+
+        #endregion
 
         #region public bool CanBeReordered { get; set; }
 
@@ -36,10 +50,10 @@ namespace ESMEWorkBench.ViewModels.Layers
                 if (_canBeReordered == value) return;
                 _canBeReordered = value;
                 if (CanBeReordered)
-                    ContextMenu.Add(new MenuItemViewModel
+                    ContextMenu.Add(new MenuItemViewModel<LayerViewModel>
                     {
                         Header = "Order",
-                        Children = new List<MenuItemViewModel>(),
+                        Children = new List<MenuItemViewModel<LayerViewModel>>(),
                     });
                 else ContextMenu.Remove(ContextMenu.Find(x => x.Header == "Order"));
                 NotifyPropertyChanged(CanBeReorderedChangedEventArgs);
@@ -61,13 +75,12 @@ namespace ESMEWorkBench.ViewModels.Layers
                 if (_canBeRemoved == value) return;
                 _canBeRemoved = value;
                 if (CanBeRemoved)
-                    ContextMenu.Add(new MenuItemViewModel
+                    ContextMenu.Add(new MenuItemViewModel<LayerViewModel>
                     {
                         Header = "Remove",
-                        Command = new SimpleCommand<object, object>(delegate
+                        Command = new SimpleCommand<LayerViewModel, LayerViewModel>(delegate
                         {
-                            Remove();
-                            Mediator.Instance.NotifyColleagues("RefreshMapMessage");
+                            MediatorMessage.Send(MediatorMessage.RemoveLayer, MapLayer);
                         }),
                     });
                 else ContextMenu.Remove(ContextMenu.Find(x => x.Header == "Remove"));
@@ -77,24 +90,6 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         static readonly PropertyChangedEventArgs CanBeRemovedChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.CanBeRemoved);
         bool _canBeRemoved;
-
-        #endregion
-
-        #region public string LayerName { get; set; }
-
-        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.LayerName);
-        string _layerName;
-
-        public string LayerName
-        {
-            get { return _layerName; }
-            set
-            {
-                if (_layerName == value) return;
-                _layerName = value;
-                NotifyPropertyChanged(NameChangedEventArgs);
-            }
-        }
 
         #endregion
 
@@ -110,7 +105,7 @@ namespace ESMEWorkBench.ViewModels.Layers
             {
                 if (_isSelected == value) return;
                 _isSelected = value;
-                //Console.WriteLine("{0} IsSelected={1}", LayerName, _isSelected);
+                //Console.WriteLine("{0} IsSelected={1}", Name, _isSelected);
                 NotifyPropertyChanged(IsSelectedChangedEventArgs);
             }
         }
@@ -138,9 +133,9 @@ namespace ESMEWorkBench.ViewModels.Layers
         #region public List<MenuItemViewModel> ContextMenu { get; set; }
 
         static readonly PropertyChangedEventArgs ContextMenuChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.ContextMenu);
-        List<MenuItemViewModel> _contextMenu;
+        List<MenuItemViewModel<LayerViewModel>> _contextMenu;
 
-        public List<MenuItemViewModel> ContextMenu
+        public List<MenuItemViewModel<LayerViewModel>> ContextMenu
         {
             get { return _contextMenu; }
             set
@@ -153,152 +148,91 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         #endregion
 
-        #region public bool? IsChecked { get; set; }
+        #region public bool IsChecked { get; set; }
 
         static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.IsChecked);
-        bool? _isChecked = false;
+        bool _isChecked;
 
-        public bool? IsChecked
+        public bool IsChecked
         {
             get { return _isChecked; }
-            set { SetIsChecked(value, true, true); }
-        }
-
-        void SetIsChecked(bool? value, bool updateChildren, bool updateParent)
-        {
-            if (value == _isChecked) return;
-
-            _isChecked = value;
-
-            if (updateChildren && _isChecked.HasValue) foreach (var child in Children) child.SetIsChecked(_isChecked, true, false);
-
-            if (updateParent && Parent != null) Parent.VerifyCheckState();
-
-            try
+            set
             {
-                if (Overlay != null) Overlay.IsVisible = !_isChecked.HasValue || _isChecked.Value;
-            }
-            catch (NullReferenceException e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-            }
+                if (value == _isChecked) return;
 
-            NotifyPropertyChanged(IsCheckedChangedEventArgs);
-        }
+                _isChecked = value;
 
-        void VerifyCheckState()
-        {
-            bool? state = null;
-            for (var i = 0; i < Children.Count; ++i)
-            {
-                var current = Children[i].IsChecked;
-                if (i == 0) state = current;
-                else if (state != current)
+                try
                 {
-                    state = null;
-                    break;
+                    MapLayer.IsVisible = _isChecked;
                 }
+                catch (NullReferenceException e)
+                {
+                    System.Diagnostics.Debug.WriteLine("Test!!!: " + e.Message);
+                }
+
+                NotifyPropertyChanged(IsCheckedChangedEventArgs);
             }
-            SetIsChecked(state, false, true);
         }
+
+        public MapLayer MapLayer { get; set; }
+
+        public LayerType LayerType { get; set; }
 
         #endregion
 
-        #region public LayersCollection Children { get; set; }
+        #region public LayerListViewModel LayerListViewModel { get; set; }
 
-        static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.Children);
-        LayersCollection _children;
-
-        public LayersCollection Children
+        public LayerListViewModel LayerListListViewModel
         {
-            get { return _children; }
+            get { return _layerListViewModel; }
             set
             {
-                if (_children == value) return;
-                _children = value;
-                _children.CollectionChanged += ChildrenCollectionChanged;
-                NotifyPropertyChanged(ChildrenChangedEventArgs);
-            }
-        }
-
-        void ChildrenCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Remove:
-                    foreach (var oldItem in e.OldItems)
-                    {
-                        
-                    }
-                    break;
-            }
-            NotifyPropertyChanged(ChildrenChangedEventArgs);
-        }
-
-        #endregion
-
-        #region public LayerTreeViewModel LayerTreeViewModel { get; set; }
-
-        public LayerTreeViewModel LayerTreeTreeViewModel
-        {
-            get { return _layerTreeViewModel; }
-            set
-            {
-                if (_layerTreeViewModel == value) return;
-                _layerTreeViewModel = value;
+                if (_layerListViewModel == value) return;
+                _layerListViewModel = value;
                 var orderMenu = ContextMenu.First(x => x.Header == "Order");
-                orderMenu.Children.Add(new MenuItemViewModel
+                orderMenu.Children.Add(new MenuItemViewModel<LayerViewModel>
                 {
                     Header = "Bring to front",
-                    Command = _layerTreeViewModel.MoveLayerToFrontCommand,
+                    Command = _layerListViewModel.MoveLayerToBottomCommand,
                     CommandParameter = this,
                 });
-                orderMenu.Children.Add(new MenuItemViewModel
+                orderMenu.Children.Add(new MenuItemViewModel<LayerViewModel>
                 {
                     Header = "Bring forward",
-                    Command = _layerTreeViewModel.MoveLayerForwardCommand,
+                    Command = _layerListViewModel.MoveLayerDownCommand,
                     CommandParameter = this,
                 });
-                orderMenu.Children.Add(new MenuItemViewModel
+                orderMenu.Children.Add(new MenuItemViewModel<LayerViewModel>
                 {
                     Header = "Push backward",
-                    Command = _layerTreeViewModel.MoveLayerBackCommand,
+                    Command = _layerListViewModel.MoveLayerUpCommand,
                     CommandParameter = this,
                 });
-                orderMenu.Children.Add(new MenuItemViewModel
+                orderMenu.Children.Add(new MenuItemViewModel<LayerViewModel>
                 {
                     Header = "Push to back",
-                    Command = _layerTreeViewModel.MoveLayerToBackCommand,
+                    Command = _layerListViewModel.MoveLayerToTopCommand,
                     CommandParameter = this,
                 });
                 NotifyPropertyChanged(LayerTreeViewModelChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs LayerTreeViewModelChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.LayerTreeTreeViewModel);
-        LayerTreeViewModel _layerTreeViewModel;
+        static readonly PropertyChangedEventArgs LayerTreeViewModelChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.LayerListListViewModel);
+        LayerListViewModel _layerListViewModel;
 
         #endregion
+    }
 
-        public LayerViewModel Parent { get; set; }
-
-        public TileType TileType { get; set; }
-
-        public Overlay Overlay { get; set; }
-        
-        void Initialize()
-        {
-            foreach (var child in Children)
-            {
-                child.Parent = this;
-                child.Initialize();
-            }
-        }
-
-        public void Remove()
-        {
-            Mediator.Instance.NotifyColleagues("RemoveOverlayFromMapMessage", Overlay);
-            //Globals.LayerDisplayViewModel.Layers.Remove(this);
-        }
+    public enum LayerType
+    {
+        Shapefile,
+        OverlayFile,
+        Scenario,
+        WindSpeed,
+        SoundSpeed,
+        BottomType,
+        Bathymetry,
     }
 }

@@ -24,7 +24,7 @@ namespace ESMEWorkBench.ViewModels.Layers
             overlayLayer.OverlayShapes.Add(bathymetry.BoundingBox);
             overlayLayer.CommitShapes();
 
-            Mediator.Instance.NotifyColleagues<LayerViewModel>("AddLayerToTreeViewMessage", overlayLayer);
+            MediatorMessage.Send<LayerViewModel>("AddLayerToTreeViewMessage", overlayLayer);
 
             //Gets the Bounding box of the Polygonshape representing the extent of the image layer.
             var imageLayerRectangleShape = new RectangleShape(bathymetry.BoundingBox.West, bathymetry.BoundingBox.North, bathymetry.BoundingBox.East, bathymetry.BoundingBox.South);

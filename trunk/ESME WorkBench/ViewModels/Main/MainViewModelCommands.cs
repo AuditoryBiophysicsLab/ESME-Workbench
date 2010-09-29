@@ -41,12 +41,16 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _launchScenarioEditor ?? (_launchScenarioEditor = new SimpleCommand<object, object>(delegate { return (Globals.AppSettings.ScenarioEditorExecutablePath != null) && (File.Exists(Globals.AppSettings.ScenarioEditorExecutablePath)); }, delegate
                                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                                   string arguments;
+                                                                                                                                                                                                                                                                   if ((_experiment == null) || (_experiment.ScenarioFileName == null) || (!File.Exists(_experiment.ScenarioFileName))) arguments = null;
+                                                                                                                                                                                                                                                                   else arguments = "\"" + _experiment.ScenarioFileName + "\"";
                                                                                                                                                                                                                                                                    new Process
                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                        StartInfo =
                                                                                                                                                                                                                                                                            {
                                                                                                                                                                                                                                                                                FileName = Globals.AppSettings.ScenarioEditorExecutablePath,
                                                                                                                                                                                                                                                                                WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.ScenarioEditorExecutablePath),
+                                                                                                                                                                                                                                                                               Arguments = arguments,
                                                                                                                                                                                                                                                                            }
                                                                                                                                                                                                                                                                    }.Start();
                                                                                                                                                                                                                                                                }));
@@ -90,7 +94,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> TestTransmissionLossViewCommand
         {
-            get { return _testTransmissionLossView ?? (_testTransmissionLossView = new SimpleCommand<object, object>(delegate { Mediator.Instance.NotifyColleagues("TestTransmissionLossViewCommandMessage", true); })); }
+            get { return _testTransmissionLossView ?? (_testTransmissionLossView = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.TestTransmissionLossViewCommand, true); })); }
         }
 
         SimpleCommand<object, object> _testTransmissionLossView;
@@ -112,7 +116,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<Object, Object> CancelCurrentCommand
         {
-            get { return _cancelCurrentCommand ?? (_cancelCurrentCommand = new SimpleCommand<object, object>(delegate { Mediator.Instance.NotifyColleagues("CancelCurrentCommandMessage"); })); }
+            get { return _cancelCurrentCommand ?? (_cancelCurrentCommand = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.CancelCurrentCommand); })); }
         }
 
         SimpleCommand<Object, Object> _cancelCurrentCommand;
@@ -179,7 +183,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> SaveExperimentAsCommand
         {
-            get { return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(delegate { Mediator.Instance.NotifyColleagues("SaveExperimentAsCommandMessage"); })); }
+            get { return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.SaveExperimentAsCommand); })); }
         }
 
         SimpleCommand<object, object> _saveExperimentAs;
@@ -218,8 +222,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                var result = _openFileService.ShowDialog(null);
                                                                                                if (!result.HasValue || !result.Value) return;
                                                                                                Settings.Default.LastShapefileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-                                                                                               Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", _openFileService.FileName);
-                                                                                               Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
+                                                                                               MediatorMessage.Send(MediatorMessage.AddShapefileCommand, _openFileService.FileName);
                                                                                            }));
             }
         }
@@ -234,17 +237,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _addScenarioFile ?? (_addScenarioFile = new SimpleCommand<object, object>(delegate { return IsAddScenarioFilePossible(); }, delegate
-                                                                                                                                            {
-                                                                                                                                                _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-                                                                                                                                                _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
-                                                                                                                                                var result = _openFileService.ShowDialog(null);
-                                                                                                                                                if (!result.HasValue || !result.Value) return;
-                                                                                                                                                if (!UserWantsToReplaceScenarioFileIfPresent(_openFileService.FileName)) return;
-                                                                                                                                                if (!UserWantsToAddScenarioFile(_openFileService.FileName)) return;
-                                                                                                                                                Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-                                                                                                                                                Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
-                                                                                                                                            }));
+                return _addScenarioFile ?? (_addScenarioFile = new SimpleCommand<object, object>(delegate { return IsAddScenarioFilePossible(); }, delegate { OpenScenarioFile(null); }));
             }
         }
 
@@ -265,8 +258,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                  var result = _openFileService.ShowDialog(null);
                                                                                                                  if (!result.HasValue || !result.Value) return;
                                                                                                                  Settings.Default.LastOverlayFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-                                                                                                                 Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", _openFileService.FileName);
-                                                                                                                 Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
+                                                                                                                 MediatorMessage.Send(MediatorMessage.AddOverlayFileCommand, _openFileService.FileName);
                                                                                                              }));
             }
         }
@@ -289,8 +281,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                            if (!result.HasValue || !result.Value) return;
                                                                                                            Settings.Default.LastEnvironmentFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
                                                                                                            _environmentFileName = _openFileService.FileName;
-                                                                                                           Mediator.Instance.NotifyColleagues("AddFileLayerToMapViewMessage", _openFileService.FileName);
-                                                                                                           Mediator.Instance.NotifyColleagues("RefreshMapViewMessage", true);
+                                                                                                           MediatorMessage.Send(MediatorMessage.AddEnvironmentFileCommand, _openFileService.FileName);
                                                                                                        }));
             }
         }
@@ -299,22 +290,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region ToggleBaseMapDisplayCommand
-
-        public SimpleCommand<object, Boolean> ToggleBaseMapDisplayCommand
-        {
-            get { return _toggleBaseMapDisplay ?? (_toggleBaseMapDisplay = new SimpleCommand<object, Boolean>(isChecked => Mediator.Instance.NotifyColleagues("SetBaseMapDisplayMessage", isChecked))); }
-        }
-
-        SimpleCommand<object, Boolean> _toggleBaseMapDisplay;
-
-        #endregion
-
         #region ToggleGridOverlayDisplayCommand
 
         public SimpleCommand<object, Boolean> ToggleGridOverlayDisplayCommand
         {
-            get { return _toggleGridOverlayDisplay ?? (_toggleGridOverlayDisplay = new SimpleCommand<object, Boolean>(isChecked => Mediator.Instance.NotifyColleagues("SetGridOverlayDisplayMessage", isChecked))); }
+            get { return _toggleGridOverlayDisplay ?? (_toggleGridOverlayDisplay = new SimpleCommand<object, Boolean>(isChecked => MediatorMessage.Send(MediatorMessage.ToggleGridOverlayDisplayCommand, isChecked))); }
         }
 
         SimpleCommand<object, Boolean> _toggleGridOverlayDisplay;
@@ -325,7 +305,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, Boolean> TogglePanZoomDisplayCommand
         {
-            get { return _togglePanZoomDisplay ?? (_togglePanZoomDisplay = new SimpleCommand<object, Boolean>(isChecked => Mediator.Instance.NotifyColleagues("SetPanZoomDisplayMessage", isChecked))); }
+            get { return _togglePanZoomDisplay ?? (_togglePanZoomDisplay = new SimpleCommand<object, Boolean>(isChecked => MediatorMessage.Send(MediatorMessage.TogglePanZoomDisplayCommand, isChecked))); }
         }
 
         SimpleCommand<object, Boolean> _togglePanZoomDisplay;
@@ -336,7 +316,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> QuickLookCommand
         {
-            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(delegate { Mediator.Instance.NotifyColleagues("QuickLookCommandMessage"); })); }
+            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.QuickLookCommand); })); }
         }
 
         SimpleCommand<object, object> _quickLook;

@@ -8,14 +8,15 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Map
 {
+#if false
     public class ScenarioFileMapLayer : OverlayShapesMapLayer
     {
-        public ScenarioFileMapLayer(string scenarioFileName, GeoCollection<Overlay> overlays, LayerViewModel layerViewModel)
+        public ScenarioFileMapLayer(string scenarioFileName, GeoCollection<Overlay> overlays, LayerOverlayViewModel layerOverlayViewModel)
         {
             FileName = scenarioFileName;
             Name = Path.GetFileNameWithoutExtension(scenarioFileName);
-            layerViewModel.LayerName = Name;
-            layerViewModel.Overlay = this;
+            layerOverlayViewModel.LayerName = Name;
+            layerOverlayViewModel.Overlay = this;
             var nemoFile = new NemoFile(scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
             foreach (var shape in nemoFile.Scenario.OverlayFile.Shapes) OverlayShapes.Add(shape);
             CommitShapes();
@@ -25,8 +26,8 @@ namespace ESMEWorkBench.ViewModels.Map
                 platformCount++;
                 var behavior = new BehaviorModel(platform);
                 var platformLayerName = "Platform " + platformCount + ": " + platform.Name;
-                var platformLayerViewModel = new LayerViewModel(platformLayerName, null);
-                layerViewModel.Children.Add(platformLayerViewModel);
+                var platformLayerViewModel = new LayerOverlayViewModel(platformLayerName, null);
+                //layerOverlayViewModel.Children.Add(platformLayerViewModel);
                 var platformLayer = new OverlayShapesMapLayer
                                     {
                                         LineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1)
@@ -34,8 +35,8 @@ namespace ESMEWorkBench.ViewModels.Map
                 platformLayer.OverlayShapes.Add(behavior.CourseOverlay);
                 platformLayer.CommitShapes();
                 overlays.Add(platformLayerName, platformLayer);
-                var courseLayerViewModel = new LayerViewModel("Track", platformLayer);
-                platformLayerViewModel.Children.Add(courseLayerViewModel);
+                var courseLayerViewModel = new LayerOverlayViewModel("Track", platformLayer);
+                //platformLayerViewModel.Children.Add(courseLayerViewModel);
                 var opAreaCount = 0;
                 foreach (var trackdef in platform.Trackdefs)
                 {
@@ -44,11 +45,12 @@ namespace ESMEWorkBench.ViewModels.Map
                     foreach (var shape in trackdef.OverlayFile.Shapes) opAreaLayer.OverlayShapes.Add(shape);
                     opAreaLayer.CommitShapes();
                     var opAreaName = "Platform " + platformCount + ": " + platform.Name + " OpArea";
-                    var opAreaLayerViewModel = platform.Trackdefs.Count == 1 ? new LayerViewModel("OpArea", opAreaLayer) : new LayerViewModel("OpArea " + opAreaCount, opAreaLayer);
-                    platformLayerViewModel.Children.Add(opAreaLayerViewModel);
+                    var opAreaLayerViewModel = platform.Trackdefs.Count == 1 ? new LayerOverlayViewModel("OpArea", opAreaLayer) : new LayerOverlayViewModel("OpArea " + opAreaCount, opAreaLayer);
+                    //platformLayerViewModel.Children.Add(opAreaLayerViewModel);
                     overlays.Add(opAreaName, opAreaLayer);
                 }
             }
         }
     }
+#endif
 }
