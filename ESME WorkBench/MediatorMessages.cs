@@ -31,6 +31,8 @@ namespace ESMEWorkBench
         public const string AddMapLayer = "AddMapLayerMessage";
         public const string AddListLayer = "AddListLayerMessage";
         public const string RemoveLayer = "RemoveLayerMessage";
+        public const string MapLayerIndexQuery = "MapLayerIndexQueryMessage";
+        public const string ListLayerMoveToIndex = "ListLayerMoveToIndexMessage";
 
         public const string MoveLayerToTop = "MoveLayerToTopMessage";
         public const string MoveLayerUp = "MoveLayerUpMessage";

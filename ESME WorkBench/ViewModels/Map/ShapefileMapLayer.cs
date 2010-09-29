@@ -7,7 +7,7 @@ namespace ESMEWorkBench.ViewModels.Map
 {
     public class ShapefileMapLayer : MapLayer
     {
-        public ShapefileMapLayer() { LayerType = LayerType.Shapefile; }
+        public ShapefileMapLayer() { LayerType = LayerType.Shapefile; Layers.Clear(); }
 
         #region public string ShapefileName { get; set; }
         [XmlElement]
@@ -34,8 +34,7 @@ namespace ESMEWorkBench.ViewModels.Map
                 }
                 else
                 {
-                    newLayer.ZoomLevelSet.ZoomLevel01.CustomStyles.Clear();
-                    newLayer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(AreaStyle);
+                    newLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyle;
                     newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
                 }
                 newLayer.RequireIndex = false;
@@ -45,7 +44,6 @@ namespace ESMEWorkBench.ViewModels.Map
                         InternalProjectionParameters = projection,
                         ExternalProjectionParameters = ManagedProj4Projection.GetEpsgParameters(4326),
                     };
-                Layers.Clear();
                 Layers.Add(newLayer);
             }
         }

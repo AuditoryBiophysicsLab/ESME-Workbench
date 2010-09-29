@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows.Forms;
+using System.Windows.Media;
 using Cinch;
 using ESMEWorkBench.ViewModels.Main;
 using ESMEWorkBench.ViewModels.Map;
@@ -14,12 +16,27 @@ namespace ESMEWorkBench.ViewModels.Layers
         {
             MapLayer = mapLayer;
             LayerType = MapLayer.LayerType;
+            ContextMenu = new List<MenuItemViewModel<LayerViewModel>>();
+            CanChangeLineColor = true;
+            CanBeRemoved = true;
             Name = MapLayer.Name;
             IsChecked = true;
-            ContextMenu = new List<MenuItemViewModel<LayerViewModel>>();
             CanBeReordered = true;
-            CanBeRemoved = true;
             ShowContextMenu = true;
+
+            switch (LayerType)
+            {
+                case LayerType.Scenario:
+                    CanBeRemoved = false;
+                    break;
+                case LayerType.Track:
+                    CanBeRemoved = false;
+                    CanChangeLineColor = false;
+                    break;
+                case LayerType.Shapefile:
+                    CanChangeAreaColor = true;
+                    break;
+            }
         }
 
         #region public string Name { get; set; }
@@ -90,6 +107,80 @@ namespace ESMEWorkBench.ViewModels.Layers
 
         static readonly PropertyChangedEventArgs CanBeRemovedChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.CanBeRemoved);
         bool _canBeRemoved;
+
+        #endregion
+
+        #region public bool CanChangeLineColor { get; set; }
+
+        public bool CanChangeLineColor
+        {
+            get { return _canChangeLineColor; }
+            set
+            {
+                if (_canChangeLineColor == value) return;
+                _canChangeLineColor = value;
+                if (CanChangeLineColor)
+                    ContextMenu.Add(new MenuItemViewModel<LayerViewModel>
+                    {
+                        Header = "Line Color",
+                        Command = new SimpleCommand<LayerViewModel, LayerViewModel>(delegate
+                        {
+                            var colorDialog = new ColorDialog
+                            {
+                                AllowFullOpen = true,
+                                AnyColor = true
+                            };
+                            var result = colorDialog.ShowDialog();
+                            if (result == DialogResult.OK)
+                            {
+                                MapLayer.LineColor = Color.FromArgb(colorDialog.Color.A, colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B);
+                            }
+                        }),
+                    });
+                else ContextMenu.Remove(ContextMenu.Find(x => x.Header == "Line Color"));
+                NotifyPropertyChanged(CanBeRemovedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CanChangeLineColorChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.CanChangeLineColor);
+        bool _canChangeLineColor;
+
+        #endregion
+
+        #region public bool CanChangeAreaColor { get; set; }
+
+        public bool CanChangeAreaColor
+        {
+            get { return _canChangeAreaColor; }
+            set
+            {
+                if (_canChangeAreaColor == value) return;
+                _canChangeAreaColor = value;
+                if (CanChangeAreaColor)
+                    ContextMenu.Add(new MenuItemViewModel<LayerViewModel>
+                    {
+                        Header = "Area Color",
+                        Command = new SimpleCommand<LayerViewModel, LayerViewModel>(delegate
+                        {
+                            var colorDialog = new ColorDialog
+                            {
+                                AllowFullOpen = true,
+                                AnyColor = true
+                            };
+                            var result = colorDialog.ShowDialog();
+                            if (result == DialogResult.OK)
+                            {
+                                MapLayer.AreaColor = Color.FromArgb(colorDialog.Color.A, colorDialog.Color.R, colorDialog.Color.G, colorDialog.Color.B);
+                            }
+                        }),
+                    });
+                else ContextMenu.Remove(ContextMenu.Find(x => x.Header == "Area Color"));
+                NotifyPropertyChanged(CanChangeAreaColorChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CanChangeAreaColorChangedEventArgs = ObservableHelper.CreateArgs<LayerViewModel>(x => x.CanChangeAreaColor);
+        bool _canChangeAreaColor;
 
         #endregion
 
@@ -193,26 +284,26 @@ namespace ESMEWorkBench.ViewModels.Layers
                 var orderMenu = ContextMenu.First(x => x.Header == "Order");
                 orderMenu.Children.Add(new MenuItemViewModel<LayerViewModel>
                 {
-                    Header = "Bring to front",
-                    Command = _layerListViewModel.MoveLayerToBottomCommand,
+                    Header = "Move to top",
+                    Command = _layerListViewModel.MoveLayerToTopCommand,
                     CommandParameter = this,
                 });
                 orderMenu.Children.Add(new MenuItemViewModel<LayerViewModel>
                 {
-                    Header = "Bring forward",
-                    Command = _layerListViewModel.MoveLayerDownCommand,
-                    CommandParameter = this,
-                });
-                orderMenu.Children.Add(new MenuItemViewModel<LayerViewModel>
-                {
-                    Header = "Push backward",
+                    Header = "Move up",
                     Command = _layerListViewModel.MoveLayerUpCommand,
                     CommandParameter = this,
                 });
                 orderMenu.Children.Add(new MenuItemViewModel<LayerViewModel>
                 {
-                    Header = "Push to back",
-                    Command = _layerListViewModel.MoveLayerToTopCommand,
+                    Header = "Move down",
+                    Command = _layerListViewModel.MoveLayerDownCommand,
+                    CommandParameter = this,
+                });
+                orderMenu.Children.Add(new MenuItemViewModel<LayerViewModel>
+                {
+                    Header = "Move to bottom",
+                    Command = _layerListViewModel.MoveLayerToBottomCommand,
                     CommandParameter = this,
                 });
                 NotifyPropertyChanged(LayerTreeViewModelChangedEventArgs);
@@ -230,6 +321,7 @@ namespace ESMEWorkBench.ViewModels.Layers
         Shapefile,
         OverlayFile,
         Scenario,
+        Track,
         WindSpeed,
         SoundSpeed,
         BottomType,

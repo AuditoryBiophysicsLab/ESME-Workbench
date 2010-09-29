@@ -188,24 +188,38 @@ namespace ESMEWorkBench.ViewModels.Map
         void MoveLayerToTop(MapLayer mapLayer)
         {
             _wpfMap.Overlays.MoveToTop(mapLayer);
+            MapLayerIndexQuery(mapLayer);
+            MediatorMessage.Send(MediatorMessage.ListLayerMoveToIndex, mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerUp)]
         void MoveLayerUp(MapLayer mapLayer)
         {
             _wpfMap.Overlays.MoveUp(mapLayer);
+            MapLayerIndexQuery(mapLayer);
+            MediatorMessage.Send(MediatorMessage.ListLayerMoveToIndex, mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerDown)]
         void MoveLayerDown(MapLayer mapLayer)
         {
             _wpfMap.Overlays.MoveDown(mapLayer);
+            MapLayerIndexQuery(mapLayer);
+            MediatorMessage.Send(MediatorMessage.ListLayerMoveToIndex, mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerToBottom)]
         void MoveLayerToBottom(MapLayer mapLayer)
         {
             _wpfMap.Overlays.MoveToBottom(mapLayer);
+            MapLayerIndexQuery(mapLayer);
+            MediatorMessage.Send(MediatorMessage.ListLayerMoveToIndex, mapLayer);
+        }
+
+        [MediatorMessageSink(MediatorMessage.MapLayerIndexQuery)]
+        void MapLayerIndexQuery(MapLayer mapLayer)
+        {
+            mapLayer.MapLayerIndex = _wpfMap.Overlays.IndexOf(mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.AddFileLayer)]
@@ -262,8 +276,8 @@ namespace ESMEWorkBench.ViewModels.Map
                 var track = new OverlayShapeMapLayer
                             {
                                 Name = platformLayerName + " track",
-                                LineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1),
-                                LayerType = LayerType.Scenario,
+                                CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1),
+                                LayerType = LayerType.Track,
                             };
                 var behavior = new BehaviorModel(platform);
                 track.Add(behavior.CourseOverlay);

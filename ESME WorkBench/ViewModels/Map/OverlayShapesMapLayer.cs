@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows.Media;
 using ESME.Overlay;
 using ThinkGeo.MapSuite.Core;
-using LineStyle = ThinkGeo.MapSuite.Core.LineStyle;
 
 namespace ESMEWorkBench.ViewModels.Map
 {
@@ -54,8 +53,16 @@ namespace ESMEWorkBench.ViewModels.Map
                     }
                     else
                     {
-                        if (LineStyle != null) newLayer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(LineStyle);
-                        if (PointStyle != null) newLayer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(PointStyle);
+                        if (CustomLineStyle != null)
+                        {
+                            newLayer.ZoomLevelSet.ZoomLevel01.CustomStyles.Add(CustomLineStyle);
+                        }
+                        else
+                        {
+
+                            if (LineStyle != null) newLayer.ZoomLevelSet.ZoomLevel01.DefaultLineStyle = LineStyle;
+                            if (PointStyle != null) newLayer.ZoomLevelSet.ZoomLevel01.DefaultPointStyle = PointStyle;
+                        }
                     }
 
                     newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;

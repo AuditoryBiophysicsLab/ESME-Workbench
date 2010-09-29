@@ -1,8 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Windows.Media;
 using System.Xml.Serialization;
-using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
@@ -12,8 +10,6 @@ namespace ESMEWorkBench.ViewModels.Map
     public class MapLayer : LayerOverlay
     {
         static Random _random;
-
-        public MapLayer() { }
 
         #region public string Name { get; set; }
 
@@ -94,13 +90,13 @@ namespace ESMEWorkBench.ViewModels.Map
             set
             {
                 if (_areaStyle == value) return;
-                if ((Layers.Count != 0) && (_areaStyle != null)) ((ShapeFileFeatureLayer) Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Remove(_areaStyle);
+                LineColor = Color.FromArgb(value.OutlinePen.Color.AlphaComponent, value.OutlinePen.Color.RedComponent, value.OutlinePen.Color.GreenComponent, value.OutlinePen.Color.BlueComponent);
+                LineWidth = value.OutlinePen.Width;
+                AreaColor = Color.FromArgb(value.FillSolidBrush.Color.AlphaComponent, value.FillSolidBrush.Color.RedComponent, value.FillSolidBrush.Color.GreenComponent, value.FillSolidBrush.Color.BlueComponent);
                 _areaStyle = value;
                 if (Layers.Count == 0) return;
-                ((ShapeFileFeatureLayer) Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = null;
-                ((ShapeFileFeatureLayer) Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
-                ((ShapeFileFeatureLayer) Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Add(_areaStyle);
-                ((ShapeFileFeatureLayer) Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
+                ((FeatureLayer)Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = _areaStyle;
+                ((FeatureLayer) Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             }
         }
 
@@ -118,12 +114,35 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_lineStyle == value) return;
                 _lineStyle = value;
+                if (Layers.Count == 0) return;
+                ((FeatureLayer)Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultLineStyle = _lineStyle;
+                ((FeatureLayer)Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             }
         }
 
         LineStyle _lineStyle;
 
         #endregion
+
+        #region public LineStyle CustomLineStyle { get; set; }
+
+        public LineStyle CustomLineStyle
+        {
+            get { return _customLineStyle; }
+            set
+            {
+                if (_customLineStyle == value) return;
+                _customLineStyle = value;
+                if (Layers.Count == 0) return;
+                ((FeatureLayer)Layers[0]).ZoomLevelSet.ZoomLevel01.CustomStyles.Add(_customLineStyle);
+                ((FeatureLayer)Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
+            }
+        }
+
+        LineStyle _customLineStyle;
+
+        #endregion
+
 
         #region public PointStyle PointStyle { get; set; }
 
@@ -135,6 +154,9 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_pointStyle == value) return;
                 _pointStyle = value;
+                if (Layers.Count == 0) return;
+                ((FeatureLayer)Layers[0]).ZoomLevelSet.ZoomLevel01.DefaultPointStyle = _pointStyle;
+                ((FeatureLayer)Layers[0]).ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             }
         }
 
@@ -192,5 +214,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         [XmlIgnore]
         public LayerViewModel LayerViewModel { get; set; }
+        [XmlIgnore]
+        public int MapLayerIndex { get; set; }
     }
 }
