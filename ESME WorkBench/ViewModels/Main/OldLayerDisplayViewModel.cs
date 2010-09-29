@@ -5,6 +5,7 @@ using System.ComponentModel;
 using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
+using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -24,7 +25,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _mapViewModel = mapViewModel;
         }
 
-        #region public ObservableCollection<LayerViewModel> Layers { get; set; }
+        #region public ObservableCollection<layerOverlayViewModel> LayerViewModels { get; set; }
         public ObservableCollection<LayerViewModel> Layers
         {
             get { return _layers; }
@@ -54,9 +55,9 @@ namespace ESMEWorkBench.ViewModels.Main
             var layer = (LayerViewModel)args;
             if (layer == null) return;
             var layerIndex = Layers.IndexOf(layer);
-            _mapViewModel.Overlays.MoveTo(layer.Overlay, layerIndex + 2);
+            _mapViewModel.Overlays.MoveTo(layer.MapLayer, layerIndex + 2);
             Layers.Move(layerIndex, layerIndex + 1);
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
+            MediatorMessage.Send(MediatorMessage.RefreshMap);
         }
 
         void ExecuteMoveLayerBackwardCommand(Object args)
@@ -64,9 +65,9 @@ namespace ESMEWorkBench.ViewModels.Main
             var layer = (LayerViewModel)args;
             if (layer == null) return;
             var layerIndex = Layers.IndexOf(layer);
-            _mapViewModel.Overlays.MoveTo(layer.Overlay, layerIndex);
+            _mapViewModel.Overlays.MoveTo(layer.MapLayer, layerIndex);
             Layers.Move(layerIndex, layerIndex - 1);
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
+            MediatorMessage.Send(MediatorMessage.RefreshMap);
         }
 
         void ExecuteMoveLayerToBackCommand(Object args)
@@ -74,9 +75,9 @@ namespace ESMEWorkBench.ViewModels.Main
             var layer = (LayerViewModel)args;
             if (layer == null) return;
             var layerIndex = Layers.IndexOf(layer);
-            _mapViewModel.Overlays.MoveTo(layer.Overlay, 1);
+            _mapViewModel.Overlays.MoveTo(layer.MapLayer, 1);
             Layers.Move(layerIndex, 0);
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
+            MediatorMessage.Send(MediatorMessage.RefreshMap);
         }
 
         void ExecuteMoveLayerToFrontCommand(Object args)
@@ -84,14 +85,14 @@ namespace ESMEWorkBench.ViewModels.Main
             var layer = (LayerViewModel)args;
             if (layer == null) return;
             var layerIndex = Layers.IndexOf(layer);
-            _mapViewModel.Overlays.MoveTo(layer.Overlay, _mapViewModel.Overlays.Count - 1);
+            _mapViewModel.Overlays.MoveTo(layer.MapLayer, _mapViewModel.Overlays.Count - 1);
             Layers.Move(layerIndex, Layers.Count - 1);
-            Mediator.Instance.NotifyColleagues("RefreshMapViewMessage");
+            MediatorMessage.Send(MediatorMessage.RefreshMap);
         }
 
         bool CanMoveLayerBackCommand(Object args)
         {
-            var layer = (LayerViewModel) args;
+            var layer = (LayerViewModel)args;
             if (layer == null) return false;
             var layerIndex = Layers.IndexOf(layer);
             return (layerIndex > 1) && (Layers.Count > 1);

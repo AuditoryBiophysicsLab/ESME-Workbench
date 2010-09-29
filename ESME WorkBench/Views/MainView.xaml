@@ -5,12 +5,12 @@
                 xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
                 xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
                 xmlns:p="clr-namespace:ESMEWorkBench.Properties"
-                xmlns:app="clr-namespace:ESMEWorkBench"
                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                 xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
                 xmlns:Controls="clr-namespace:ESMEWorkBench.Controls"
+                xmlns:app="clr-namespace:ESMEWorkBench"
                 mef:ViewModelLocator.ViewModel="MainViewModel"
                 SnapsToDevicePixels="True"
                 Title="{Binding DecoratedExperimentName, StringFormat=ESME WorkBench: {0}}"
@@ -26,10 +26,10 @@
 				<TextBlock Text="{Binding Label}" />
 			</StackPanel>
 		</DataTemplate>
+        
+        <app:GridLengthConverter x:Key="gridLengthConverter" />
 
-		<app:GridLengthConverter x:Key="gridLengthConverter" />
-
-		<!-- RibbonGallery -->
+        <!-- RibbonGallery -->
 		<Style TargetType="{x:Type r:RibbonGallery}">
 			<Setter Property="SelectedItem"
 			        Value="{Binding SelectedItem}" />
@@ -162,12 +162,6 @@
 					                Command="{Binding AddScenarioFileCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Show">
-					<r:RibbonCheckBox Label="Base Map"
-					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Toggles the base map display"
-					                  Command="{Binding ToggleBaseMapDisplayCommand}"
-					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowBasemap, Mode=TwoWay}"
-					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
 					<r:RibbonCheckBox Label="Grid Overlay"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Toggles the lat/lon grid overlay"
@@ -461,34 +455,34 @@
 				</r:RibbonGroup>
 			</r:RibbonTab>
 		</r:Ribbon>
-		<Grid AllowDrop="True">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
-				                  MinWidth="100" />
-				<ColumnDefinition Width="Auto" />
-				<ColumnDefinition Width="*"
-				                  MinWidth="500" />
-			</Grid.ColumnDefinitions>
-			<GroupBox Grid.Column="0"
-			          Header="Layers">
-				<Controls:LayerTreeView />
-			</GroupBox>
-			<GridSplitter Name="GridSplitter"
-			              Grid.Column="1"
-			              Width="2"
-			              Background="Black"
-			              HorizontalAlignment="Center"
-			              Margin="5,0,5,0"
-			              VerticalAlignment="Stretch"
-			              ResizeBehavior="BasedOnAlignment"
-			              ResizeDirection="Columns" />
-			<Controls:MapView Grid.Column="2" />
-			<i:Interaction.Triggers>
-				<i:EventTrigger EventName="Drop">
-					<ia:CallMethodAction TargetObject="{Binding}"
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
+			                  MinWidth="100" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*"
+			                  MinWidth="500" />
+            </Grid.ColumnDefinitions>
+            <GroupBox Grid.Column="0"
+		          Header="Layers">
+                <Controls:LayerTreeView/>
+            </GroupBox>
+            <GridSplitter Name="GridSplitter"
+		              Grid.Column="1"
+		              Width="2"
+		              Background="Black"
+		              HorizontalAlignment="Center"
+		              Margin="5,0,5,0"
+		              VerticalAlignment="Stretch"
+		              ResizeBehavior="BasedOnAlignment"
+		              ResizeDirection="Columns" />
+            <Controls:MapView Grid.Column="2" />
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Drop">
+                    <ia:CallMethodAction TargetObject="{Binding}"
 					                     MethodName="FilesDropped" />
-				</i:EventTrigger>
-			</i:Interaction.Triggers>
-		</Grid>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Grid>
 	</DockPanel>
 </r:RibbonWindow>

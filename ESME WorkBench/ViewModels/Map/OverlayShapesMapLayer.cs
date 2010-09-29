@@ -39,10 +39,6 @@ namespace ESMEWorkBench.ViewModels.Map
         }
         ObservableCollection<InMemoryFeatureLayer> _shapeLayers;
 
-        public LineStyle LineStyle { get; set; }
-
-        public PointStyle PointStyle { get; set; }
-
         void ShapeLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)

@@ -97,6 +97,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Data\ExperimentListeners.cs" />
+    <Compile Include="MediatorMessages.cs" />
     <Compile Include="ViewModels\Main\ExperimentViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
@@ -148,7 +149,6 @@
     <Compile Include="ViewModels\IHasName.cs" />
     <Compile Include="ViewModels\Layers\CustomStartEndLineStyle.cs" />
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
-    <Compile Include="ViewModels\Layers\LayersCollection.cs" />
     <Compile Include="ViewModels\Layers\LayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
@@ -165,12 +165,11 @@
     <Compile Include="ViewModels\Main\MainViewModelCommands.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\OldLayerDisplayViewModel.cs" />
-    <Compile Include="ViewModels\Main\LayerTreeViewModel.cs">
+    <Compile Include="ViewModels\Main\LayerListViewModel.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\Main\MainViewModel.cs" />
     <Compile Include="ViewModels\Layers\OffsetProjection.cs" />
-    <Compile Include="ViewModels\Layers\OverlayLayerViewModel.cs" />
     <Compile Include="ViewModels\Layers\RadarRasterSource.cs" />
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\VirtualToggleButton.cs" />

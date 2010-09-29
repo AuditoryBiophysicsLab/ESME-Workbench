@@ -82,12 +82,19 @@ namespace ESME.TransmissionLoss.Bellhop
 
             // We don't need to keep the results files around anymore, we're finished with them
             File.Delete(Path.Combine(workingDirectory, "BTYFIL"));
-            foreach (string s in Directory.GetFiles(workingDirectory, "ARRFIL_*")) File.Delete(s);
+            foreach (var s in Directory.GetFiles(workingDirectory, "ARRFIL_*")) File.Delete(s);
             //if (File.Exists(Path.Combine(WorkingDirectory, "ARRFIL")))
             //    File.Move(Path.Combine(WorkingDirectory, "ARRFIL"), "ARRFIL_" + TLParams.RadialNumber.ToString("00"));
 
             // Convert the Bellhop output file into a Radial binary file
-            var result = new TransmissionLossRadial(bearing, new BellhopOutput(Path.Combine(workingDirectory, "SHDFIL")));
+            var shdfile = Path.Combine(workingDirectory, "SHDFIL");
+            var count = 0;
+            while (!File.Exists(shdfile) && (count < 10))
+            {
+                Thread.Sleep(100);
+                count++;
+            }
+            var result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
 
 #if false
             
