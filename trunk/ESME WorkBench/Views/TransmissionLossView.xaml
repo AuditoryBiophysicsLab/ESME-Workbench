@@ -8,12 +8,12 @@
 	<DockPanel LastChildFill="True">
 		<DockPanel DockPanel.Dock="Top" Margin="5">
             <Menu Name="TransmissionLossViewFileMenu"/>
-            <MenuItem Header="_File">                
+            <MenuItem Header="_File" HorizontalAlignment="Left">                
                 <MenuItem Header="Save As"></MenuItem>
                 <MenuItem Header="Export to"></MenuItem>
                 <MenuItem Header="Exit View" InputGestureText="Ctrl+W"></MenuItem>                
             </MenuItem>
-            <MenuItem Header="_Edit"></MenuItem>
+            <MenuItem Header="_Edit" HorizontalAlignment="Left"></MenuItem>
         </DockPanel>
 
         <DockPanel DockPanel.Dock="Bottom">
