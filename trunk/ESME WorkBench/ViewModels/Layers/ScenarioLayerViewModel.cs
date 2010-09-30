@@ -63,7 +63,6 @@ namespace ESMEWorkBench.ViewModels.Layers
             overlay.CommitShapes();
             overlays.Add(layerName + Path.GetFileNameWithoutExtension(Path.GetRandomFileName()), overlay);
         }
-        
     }
 
     public class PlatformTrackLayerViewModel : LayerViewModel
