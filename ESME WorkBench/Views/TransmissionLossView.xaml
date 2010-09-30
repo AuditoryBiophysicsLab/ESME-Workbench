@@ -7,13 +7,15 @@
         Width="300">
 	<DockPanel LastChildFill="True">
 		<DockPanel DockPanel.Dock="Top" Margin="5">
-            <Menu Name="TransmissionLossViewFileMenu" HorizontalAlignment="Left">
-                <MenuItem Header="_File" HorizontalAlignment="Left">
-                    <MenuItem Header="Save As"/>
+            <Menu Name="TransmissionLossViewFileMenu" HorizontalAlignment="Stretch" BorderBrush="Black" BorderThickness="1">
+                <MenuItem Header="_File">
+                    <MenuItem Header="Save As" Command="{Binding SaveAsCommand}" InputGestureText="Ctrl+S"/>                        
                     <MenuItem Header="Export to"/>                    
                     <MenuItem Header="Exit View" InputGestureText="Ctrl+W"></MenuItem>
                 </MenuItem>
-                <MenuItem Header="_Edit" HorizontalAlignment="Left"></MenuItem>
+                <MenuItem Header="_Edit"/>
+                <MenuItem Header="_View"/>
+                <MenuItem Header=" _Help" HorizontalAlignment="Right"/>                       
             </Menu>
         </DockPanel>
 
