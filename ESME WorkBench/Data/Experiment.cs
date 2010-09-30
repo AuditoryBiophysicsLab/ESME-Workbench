@@ -341,6 +341,7 @@ namespace ESMEWorkBench.Data
             MediatorMessage.Send(MediatorMessage.InitializeMapView);
             LayerSettingsCollection = new ObservableCollection<LayerSettings>();
             AddScenarioFileCommand(ScenarioFileName);
+#if false
             foreach (var item in LayerSettingsList)
             {
                 LayerSettingsCollection.Add(item);
@@ -360,6 +361,7 @@ namespace ESMEWorkBench.Data
                     }
                 }
             }
+#endif
             IsChanged = false;
         }
     }
