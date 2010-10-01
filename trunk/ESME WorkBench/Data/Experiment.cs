@@ -251,7 +251,6 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-
         #region public bool IsChanged { get; set; }
 
         [XmlIgnore]
