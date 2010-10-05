@@ -10,23 +10,23 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     public class TransmissionLossFieldViewModel : ViewModelBase
     {
         private readonly ISaveFileService _saveFileService;
-        private IUIVisualizerService _visualizerService;
+        IViewAwareStatus _viewAwareStatus;
 
-        public TransmissionLossFieldViewModel(string fileName, ISaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public TransmissionLossFieldViewModel(string fileName, ISaveFileService saveFileService, IViewAwareStatus viewAwareStatus)
         {
             TransmissionLossField = TransmissionLossField.Load(fileName);
             ColorMapViewModel = ColorMapViewModel.Default;
             _saveFileService = saveFileService;
-            _visualizerService = visualizerService;
+            _viewAwareStatus = viewAwareStatus;
             SelectedRadial = 1;
         }
 
-        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField, ISaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField, ISaveFileService saveFileService, IViewAwareStatus viewAwareStatus)
         {
             TransmissionLossField = transmissionLossField;
             ColorMapViewModel = ColorMapViewModel.Default;
             _saveFileService = saveFileService;
-            _visualizerService = visualizerService;
+            _viewAwareStatus = viewAwareStatus;
 
             SelectedRadial = 1;
         }
@@ -78,7 +78,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                             {
                                 _saveFileService.Filter = "Portable Network Graphics (*.png)|(*.png)| JPEG (*.jpg)|(*.jpg)|Bitmap (*.bmp)|(*.bmp)";
                                 _saveFileService.OverwritePrompt = true;
-                                //_saveFileService.ShowDialog()
+                                //_saveFileService.ShowDialog((Window) _visualizerService)
                                 
                             }));
             }
