@@ -21,7 +21,10 @@ namespace ESMEWorkBench
         public const string LayerListViewModelInitialized = "LayerListViewModelInitializedMessage";
         public const string MapViewModelInitialized = "MapViewModelInitializedMessage";
         public const string MainViewModelInitialized = "MainViewModelInitializedMessage";
-        
+
+        public const string TransmissionLossFieldViewInitialized = "TransmissionLossFieldViewInitializedMessage";
+        public const string TransmissionLossRadialViewInitialized = "TransmissionLossRadialViewInitializedMessage";
+
         public const string ExperimentLoaded = "ExperimentLoadedMessage";
 
         public const string InitializeMapView = "InitializeMapViewMessage";
