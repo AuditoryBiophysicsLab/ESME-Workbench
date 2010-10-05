@@ -180,6 +180,21 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         private SimpleCommand<object, object> _saveAs;
 
         #endregion
+
+        #region CloseWindowCommand
+
+        public SimpleCommand<object, object> CloseWindowCommand
+        {
+            get { return _closeWindow ?? (_closeWindow = new SimpleCommand<object, object>(delegate 
+                {
+                    ((TransmissionLossView) _viewAwareStatus.View).Close();
+                }
+            )); }
+        }
+
+        SimpleCommand<object, object> _closeWindow;
+
+        #endregion
         
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) 
         {

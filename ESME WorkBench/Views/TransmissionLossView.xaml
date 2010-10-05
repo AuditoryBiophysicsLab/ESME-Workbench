@@ -6,7 +6,13 @@
         Title="{Binding TransmissionLossRadialViewModel.TransmissionLossRadial.BearingFromSource, StringFormat=Vertical Transmission Loss View: radial bearing: {0} degrees}"
         Height="300"
         Width="300">
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding SaveAsCommand}" Key="S" Modifiers="Control"/>
+        <KeyBinding Command="{Binding CloseWindowCommand}" Key="W" Modifiers="Control"/>
+    </Window.InputBindings>
+
     <DockPanel LastChildFill="True">
+
         <DockPanel DockPanel.Dock="Top" Margin="5">
             <Menu Name="TransmissionLossViewFileMenu" HorizontalAlignment="Stretch" BorderBrush="Black" BorderThickness="1">
                 <MenuItem Header="_File">
@@ -32,7 +38,7 @@
 				        Value="{Binding SelectedRadial}"
                         Margin="0 0 0 5"/>
             </StackPanel>
-        </DockPanel>        
+        </DockPanel>
         <Views:TransmissionLossRadialView x:Name="RadialView"/>
     </DockPanel>
 </Window>
