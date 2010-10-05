@@ -24,6 +24,9 @@ namespace ESMEWorkBench
 
         public const string TransmissionLossFieldViewInitialized = "TransmissionLossFieldViewInitializedMessage";
         public const string TransmissionLossRadialViewInitialized = "TransmissionLossRadialViewInitializedMessage";
+        public const string TransmissionLossRadialColorMapChanged = "TransmissionLossRadialColorMapChangedMessage";
+        public const string TransmissionLossRadialChanged = "TransmissionLossRadialChangedMessage";
+
 
         public const string ExperimentLoaded = "ExperimentLoadedMessage";
 

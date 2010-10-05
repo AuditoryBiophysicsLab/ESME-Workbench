@@ -1,39 +1,105 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.Properties;
+using ESMEWorkBench.Views;
+using MEFedMVVM.Services.Contracts;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
-    public class TransmissionLossFieldViewModel : ViewModelBase
+    public class TransmissionLossFieldViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         private readonly ISaveFileService _saveFileService;
         IViewAwareStatus _viewAwareStatus;
-
-        public TransmissionLossFieldViewModel(string fileName, ISaveFileService saveFileService, IViewAwareStatus viewAwareStatus)
+        bool _fieldInitialized,
+       _radialInitialized;
+        
+        public TransmissionLossFieldViewModel(string fileName, ISaveFileService saveFileService )
         {
+            RegisterMediator();
             TransmissionLossField = TransmissionLossField.Load(fileName);
+            
             ColorMapViewModel = ColorMapViewModel.Default;
             _saveFileService = saveFileService;
-            _viewAwareStatus = viewAwareStatus;
             SelectedRadial = 1;
         }
 
-        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField, ISaveFileService saveFileService, IViewAwareStatus viewAwareStatus)
+        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField, ISaveFileService saveFileService )
         {
+            RegisterMediator();
             TransmissionLossField = transmissionLossField;
             ColorMapViewModel = ColorMapViewModel.Default;
             _saveFileService = saveFileService;
-            _viewAwareStatus = viewAwareStatus;
-
             SelectedRadial = 1;
+        }
+
+        void RegisterMediator()
+        {
+            try
+           {
+               Mediator.Instance.Register(this);
+           }
+           catch (Exception ex)
+           {
+               Debug.WriteLine("***********\nTransmissionLossFieldViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+               throw;
+           }
+ 
+
+        }
+
+        [MediatorMessageSink(MediatorMessage.TransmissionLossFieldViewInitialized)]
+        void TransmissionLossFieldViewInitialized(bool dummy)
+        {
+            _fieldInitialized = true;
+            InitializeIfViewModelsReady();
+        }
+        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialViewInitialized)]
+        void TransmissionLossRadialViewInitialized(bool dummy)
+        {
+            _radialInitialized = true;
+            InitializeIfViewModelsReady();
+        }
+
+        void InitializeIfViewModelsReady()
+        {
+            if (_fieldInitialized && _radialInitialized)
+            {
+                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel);
+                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, TransmissionLossField.Radials[0]);
+                
+                
+
+            }
         }
 
         public TransmissionLossField TransmissionLossField { get; private set; }
 
-        public ColorMapViewModel ColorMapViewModel { get; private set; }
+        #region public ColorMapViewModel ColorMapViewModel { get; set; }
+
+        public ColorMapViewModel ColorMapViewModel
+        {
+            get { return _colorMapViewModel; }
+            set
+            {
+                if (_colorMapViewModel == value) return;
+                _colorMapViewModel = value;
+               // TransmissionLossRadialViewModel.ColorMapViewModel = ColorMapViewModel;
+                NotifyPropertyChanged(ColorMapViewModelChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ColorMapViewModelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.ColorMapViewModel);
+        ColorMapViewModel _colorMapViewModel;
+
+        #endregion
 
         public int RadialCount { get { return TransmissionLossField.Radials.Length; } }
 
@@ -47,7 +113,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (value == _selectedRadial) return;
                 _selectedRadial = value;
                 NotifyPropertyChanged(SelectedRadialChangedEventArgs);
-                TransmissionLossRadialViewModel = new TransmissionLossRadialViewModel(TransmissionLossField.Radials[_selectedRadial - 1], ColorMapViewModel);
+                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, TransmissionLossField.Radials[_selectedRadial -1]);
+                //TransmissionLossRadialViewModel.TransmissionLossRadial = TransmissionLossField.Radials[_selectedRadial - 1];
+               
             }
         }
 
@@ -76,9 +144,33 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         new SimpleCommand<object, object>(
                             delegate
                             {
-                                _saveFileService.Filter = "Portable Network Graphics (*.png)|(*.png)| JPEG (*.jpg)|(*.jpg)|Bitmap (*.bmp)|(*.bmp)";
+                                BitmapEncoder encoder = null;
+                                _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpg)|*.jpg|Bitmap (*.bmp)|*.bmp";
                                 _saveFileService.OverwritePrompt = true;
-                                //_saveFileService.ShowDialog((Window) _visualizerService)
+                                var result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
+                                if (result.HasValue && result.Value)
+                                {
+                                    //_saveFileService.FileName
+                                    switch (Path.GetExtension(_saveFileService.FileName).ToLower())
+                                    {
+                                        case ".jpg":
+                                        case ".jpeg":
+                                            encoder = new JpegBitmapEncoder();
+                                            break;
+                                        case ".png":
+                                            encoder = new PngBitmapEncoder();
+                                            break;
+                                        case ".bmp":
+                                            encoder = new BmpBitmapEncoder();
+                                            break;
+                                    }
+                                    
+                                    if(encoder == null) return;
+                                    var bmp = new RenderTargetBitmap(1024,768,96,96,PixelFormats.Pbgra32);
+                                    bmp.Render(((TransmissionLossView)_viewAwareStatus.View).RadialView);
+                                    encoder.Frames.Add(BitmapFrame.Create(bmp));
+                                    using (var stream = new FileStream(_saveFileService.FileName, FileMode.Create)) encoder.Save(stream);
+                                }
                                 
                             }));
             }
@@ -88,7 +180,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         private SimpleCommand<object, object> _saveAs;
 
         #endregion
-
+        
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) 
+        {
+            _viewAwareStatus = viewAwareStatusService;
+            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
+        }
 
     }
 }

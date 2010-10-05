@@ -142,6 +142,9 @@
     <Compile Include="Views\TransmissionLossJobView.xaml.cs">
       <DependentUpon>TransmissionLossJobView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\TransmissionLossRadialView.xaml.cs">
+      <DependentUpon>TransmissionLossRadialView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\TransmissionLossView.xaml.cs">
       <DependentUpon>TransmissionLossView.xaml</DependentUpon>
     </Compile>
@@ -295,6 +298,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\TransmissionLossJobView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TransmissionLossRadialView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
