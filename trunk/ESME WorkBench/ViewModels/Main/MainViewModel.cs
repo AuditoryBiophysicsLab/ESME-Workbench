@@ -6,7 +6,6 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using Cinch;
-using ESME.Environment;
 using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
@@ -30,7 +29,6 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IViewAwareStatus _viewAwareStatusService;
         readonly IUIVisualizerService _visualizerService;
         Experiment _experiment;
-        string _environmentFileName;
         #endregion
 
         #region Constructors
@@ -176,13 +174,9 @@ namespace ESMEWorkBench.ViewModels.Main
                             MediatorMessage.Send(MediatorMessage.AddOverlayFileCommand, file);
                             refreshNeeded = true;
                             break;
-                        case ".eeb":
-                            _environmentFileName = file;
-                            MediatorMessage.Send(MediatorMessage.AddEnvironmentFileCommand, file);
-                            refreshNeeded = true;
-                            break;
                         case ".nemo":
-                            OpenScenarioFile(file);
+                            if (!UserWantsToReplaceScenarioFileIfPresent(file)) continue;
+                            MediatorMessage.Send(MediatorMessage.AddScenarioFileCommand, file);
                             refreshNeeded = true;
                             break;
                     }
@@ -301,7 +295,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _openFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
             var result = _openFileService.ShowDialog((Window)_viewAwareStatusService.View);
             if ((!result.HasValue) || (!result.Value)) return;
-            var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_openFileService.FileName, _saveFileService);
+            var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_openFileService.FileName, _saveFileService, _visualizerService);
             _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
         }
 
@@ -337,8 +331,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
             var environmentInformation = new EnvironmentInformation
             {
-                Bathymetry = new Bathymetry(_environmentFileName),
-                SoundSpeedField = new SoundSpeedField(_environmentFileName),
+                //Bathymetry = new Bathymetry(_environmentFileName),
+                //SoundSpeedField = new SoundSpeedField(_environmentFileName),
                 Sediment = SedimentTypes.SedimentArray[0],
             };
 
@@ -392,7 +386,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_saveFileService.FileName, _saveFileService);
             }
             else
-                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(transmissionLossField, _saveFileService);
+                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(transmissionLossField, _saveFileService, _visualizerService);
             _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
 
             MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
