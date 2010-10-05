@@ -234,6 +234,25 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public List<string> Shapefiles { get; set; }
+
+        public List<string> Shapefiles
+        {
+            get { return _shapefiles; }
+            set
+            {
+                if (_shapefiles == value) return;
+                _shapefiles = value;
+                NotifyPropertyChanged(ShapefilesChangedEventArgs);
+            }
+        }
+
+        void ShapefilesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(ShapefilesChangedEventArgs); }
+        static readonly PropertyChangedEventArgs ShapefilesChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Shapefiles);
+        List<string> _shapefiles;
+
+        #endregion
+
         #region public ObservableCollection<LayerSettings> LayerSettingsList { get; set; }
 
         [XmlElement]
