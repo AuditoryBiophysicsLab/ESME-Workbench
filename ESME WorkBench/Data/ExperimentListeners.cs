@@ -37,25 +37,19 @@ namespace ESMEWorkBench.Data
             InitializeIfViewModelsReady();
         }
 
-        [MediatorMessageSink(MediatorMessage.AddShapefileCommand)]
+        [MediatorMessageSink(MediatorMessage.AddShapefile)]
         void AddShapefileCommand(string fileName)
         {
-            MediatorMessage.Send(MediatorMessage.AddFileLayer, fileName);
+            MediatorMessage.Send(MediatorMessage.AddShapefileCommand, fileName);
         }
 
-        [MediatorMessageSink(MediatorMessage.AddOverlayFileCommand)]
+        [MediatorMessageSink(MediatorMessage.AddOverlayFile)]
         void AddOverlayFileCommand(string fileName)
         {
-            MediatorMessage.Send(MediatorMessage.AddFileLayer, fileName);
+            MediatorMessage.Send(MediatorMessage.AddOverlayFileCommand, fileName);
         }
 
-        [MediatorMessageSink(MediatorMessage.AddEnvironmentFileCommand)]
-        void AddEnvironmentFileCommand(string fileName)
-        {
-            MediatorMessage.Send(MediatorMessage.AddFileLayer, fileName);
-        }
-
-        [MediatorMessageSink(MediatorMessage.AddScenarioFileCommand)]
+        [MediatorMessageSink(MediatorMessage.AddScenarioFile)]
         void AddScenarioFileCommand(string fileName)
         {
             if (fileName != null)
@@ -64,7 +58,7 @@ namespace ESMEWorkBench.Data
                 {
                     ScenarioFileName = fileName;
                     NemoFile = new NemoFile(fileName, Globals.AppSettings.ScenarioDataDirectory);
-                    MediatorMessage.Send(MediatorMessage.AddScenarioLayer, NemoFile);
+                    MediatorMessage.Send(MediatorMessage.AddScenarioFileCommand, NemoFile);
                 }
                 catch (Exception e)
                 {

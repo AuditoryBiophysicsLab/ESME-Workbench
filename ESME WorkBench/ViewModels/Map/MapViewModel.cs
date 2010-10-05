@@ -222,38 +222,36 @@ namespace ESMEWorkBench.ViewModels.Map
             mapLayer.MapLayerIndex = _wpfMap.Overlays.IndexOf(mapLayer);
         }
 
-        [MediatorMessageSink(MediatorMessage.AddFileLayer)]
-        void AddFileLayer(string fileName)
+        [MediatorMessageSink(MediatorMessage.AddOverlayFileCommand)]
+        void AddOverlayFileCommand(string fileName)
         {
             try
             {
-                switch (Path.GetExtension(fileName).ToLower())
+                MediatorMessage.Send(MediatorMessage.AddMapLayer, new OverlayFileMapLayer
                 {
-                    case ".shp":
-                        MediatorMessage.Send(MediatorMessage.AddMapLayer, new ShapefileMapLayer
-                                                                              {
-                                                                                  AreaStyle = MapLayer.RandomAreaStyle,
-                                                                                  ShapefileName = fileName,
-                                                                              });
-                        break;
-                    case ".ovr":
-                        MediatorMessage.Send(MediatorMessage.AddMapLayer, new OverlayFileMapLayer
-                                                                              {
-                                                                                  OverlayFileName = fileName,
-                                                                              });
-                        break;
-                    case ".eeb":
-                        MediatorMessage.Send(MediatorMessage.AddMapLayer, new BathymetryBoundsMapLayer
-                                                                              {
-                                                                                  BathymetryFileName = fileName,
-                                                                              });
-                        break;
-                }
-                _wpfMap.Refresh();
+                    OverlayFileName = fileName,
+                });
             }
             catch (Exception ex)
             {
-                Globals.DisplayException(_messageBoxService, ex, "Error opening file {0}", fileName);
+                Globals.DisplayException(_messageBoxService, ex, "Error opening overlay file {0}", fileName);
+            }
+        }
+
+        [MediatorMessageSink(MediatorMessage.AddShapefileCommand)]
+        void AddShapefileCommand(string fileName)
+        {
+            try
+            {
+                MediatorMessage.Send(MediatorMessage.AddMapLayer, new ShapefileMapLayer
+                {
+                    AreaStyle = MapLayer.RandomAreaStyle,
+                    ShapefileName = fileName,
+                });
+            }
+            catch (Exception ex)
+            {
+                Globals.DisplayException(_messageBoxService, ex, "Error opening shapefile {0}", fileName);
             }
         }
 
@@ -268,8 +266,8 @@ namespace ESMEWorkBench.ViewModels.Map
             RefreshMapView(true);
         }
 
-        [MediatorMessageSink(MediatorMessage.AddScenarioLayer)]
-        void AddScenarioLayer(NemoFile nemoFile)
+        [MediatorMessageSink(MediatorMessage.AddScenarioFileCommand)]
+        void AddScenarioFileCommand(NemoFile nemoFile)
         {
             var simArea = new OverlayShapeMapLayer
                           {
