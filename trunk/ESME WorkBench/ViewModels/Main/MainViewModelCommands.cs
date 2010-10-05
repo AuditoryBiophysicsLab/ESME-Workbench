@@ -267,29 +267,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region AddEnvironmentFileCommand
-
-        public SimpleCommand<object, object> AddEnvironmentFileCommand
-        {
-            get
-            {
-                return _addEnvironmentFile ?? (_addEnvironmentFile = new SimpleCommand<object, object>(delegate
-                                                                                                       {
-                                                                                                           _openFileService.Filter = "ESME Environment File (*.eeb)|*.eeb";
-                                                                                                           _openFileService.InitialDirectory = Settings.Default.LastEnvironmentFileDirectory;
-                                                                                                           var result = _openFileService.ShowDialog(null);
-                                                                                                           if (!result.HasValue || !result.Value) return;
-                                                                                                           Settings.Default.LastEnvironmentFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-                                                                                                           _environmentFileName = _openFileService.FileName;
-                                                                                                           MediatorMessage.Send(MediatorMessage.AddEnvironmentFileCommand, _openFileService.FileName);
-                                                                                                       }));
-            }
-        }
-
-        SimpleCommand<object, object> _addEnvironmentFile;
-
-        #endregion
-
         #region ToggleGridOverlayDisplayCommand
 
         public SimpleCommand<object, Boolean> ToggleGridOverlayDisplayCommand

@@ -10,13 +10,13 @@ namespace ESMEWorkBench
         public const string ToggleGridOverlayDisplayCommand = "ToggleGridOverlayDisplayCommandMessage";
         public const string TogglePanZoomDisplayCommand = "TogglePanZoomDisplayCommandMessage";
         public const string QuickLookCommand = "QuickLookCommandMessage";
-        public const string AddEnvironmentFileCommand = "AddEnvironmentFileCommandMessage";
         public const string AddOverlayFileCommand = "AddOverlayFileCommandMessage";
         public const string AddShapefileCommand = "AddShapefileCommandMessage";
         public const string AddScenarioFileCommand = "AddScenarioFileCommandMessage";
 
-        public const string AddScenarioLayer = "AddScenarioLayerMessage";
-        public const string AddFileLayer = "AddFileLayerMessage";
+        public const string AddScenarioFile = "AddScenarioFileMessage";
+        public const string AddShapefile = "AddShapefileMessage";
+        public const string AddOverlayFile = "AddOverlayFileMessage";
 
         public const string LayerListViewModelInitialized = "LayerListViewModelInitializedMessage";
         public const string MapViewModelInitialized = "MapViewModelInitializedMessage";
