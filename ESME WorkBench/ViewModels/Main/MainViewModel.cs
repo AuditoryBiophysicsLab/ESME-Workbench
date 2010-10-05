@@ -383,7 +383,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 transmissionLossField.Filename = _saveFileService.FileName;
                 transmissionLossField.Save();
-                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_saveFileService.FileName, _saveFileService);
+                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_saveFileService.FileName, _saveFileService, _visualizerService);
             }
             else
                 transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(transmissionLossField, _saveFileService, _visualizerService);
