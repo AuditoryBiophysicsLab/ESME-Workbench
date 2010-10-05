@@ -137,19 +137,6 @@
         </Variables>
         <CustomProperties />
       </Template>
-      <Template uid="8b3dc9c6-1c82-4a97-a1d5-79268a161f45" shortcut="xvml" description="" text="#region public ObservableCollection&lt;$TYPE$&gt; $NAME$ { get; set; }&#xD;&#xA;[XmlElement]&#xD;&#xA;public ObservableCollection&lt;$TYPE$&gt; $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$; }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged -= $NAME$CollectionChanged;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged += $NAME$CollectionChanged;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;void $NAME$CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged($NAME$ChangedEventArgs); }&#xD;&#xA;[XmlIgnore]&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;[XmlIgnore]&#xD;&#xA;$TYPE$ _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
-        <Context>
-          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
-        </Context>
-        <Categories />
-        <Variables>
-          <Variable name="TYPE" expression="" initialRange="0" />
-          <Variable name="NAME" expression="" initialRange="0" />
-          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
-          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
-        </Variables>
-        <CustomProperties />
-      </Template>
       <Template uid="ba1abbe8-a3c7-47f2-a709-17277d8b18c6" shortcut="vml" description="" text="#region public ObservableCollection&lt;$TYPE$&gt; $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;public ObservableCollection&lt;$TYPE$&gt; $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$; }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged -= $NAME$CollectionChanged;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged += $NAME$CollectionChanged;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;void $NAME$CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged($NAME$ChangedEventArgs); }&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;$TYPE$ _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
         <Context>
           <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
@@ -163,7 +150,7 @@
         </Variables>
         <CustomProperties />
       </Template>
-      <Template uid="c17325a7-a73c-4d85-977b-8fd001048816" shortcut="vmc" description="" text="#region $COMMANDNAME$Command&#xD;&#xA;public SimpleCommand&lt;object, object&gt; $COMMANDNAME$Command&#xD;&#xA;{&#xD;&#xA;    get { return _$PRIVATE$ ?? (_$PRIVATE$ = new SimpleCommand&lt;object, object&gt;(delegate { MediatorMessage.Send(&quot;$COMMANDNAME$CommandMessage&quot;); })); }&#xD;&#xA;}&#xD;&#xA;SimpleCommand&lt;object, object&gt; _$PRIVATE$;&#xD;&#xA;#endregion" reformat="True" shortenQualifiedReferences="True">
+      <Template uid="c17325a7-a73c-4d85-977b-8fd001048816" shortcut="vmc" description="" text="#region $COMMANDNAME$Command&#xD;&#xA;public SimpleCommand&lt;object, object&gt; $COMMANDNAME$Command&#xD;&#xA;{&#xD;&#xA;    get { return _$PRIVATE$ ?? (_$PRIVATE$ = new SimpleCommand&lt;object, object&gt;(delegate { Mediator.Instance.NotifyColleagues(&quot;$COMMANDNAME$CommandMessage&quot;); })); }&#xD;&#xA;}&#xD;&#xA;SimpleCommand&lt;object, object&gt; _$PRIVATE$;&#xD;&#xA;#endregion" reformat="True" shortenQualifiedReferences="True">
         <Context>
           <CSharpContext context="Everywhere" minimumLanguageVersion="3.0" />
         </Context>
@@ -187,14 +174,6 @@
         </Variables>
         <CustomProperties />
       </Template>
-      <Template uid="3f7cd8ae-f88b-43bc-ab3e-648bdea8565b" shortcut="mmc" description="" text="MediatorMessages." reformat="True" shortenQualifiedReferences="True">
-        <Context>
-          <CSharpContext context="Everywhere" minimumLanguageVersion="3.0" />
-        </Context>
-        <Categories />
-        <Variables />
-        <CustomProperties />
-      </Template>
       <Template uid="f4c489cb-def7-49ad-a814-8c2d345fa4b7" shortcut="mmcd" description="" text="public const string $Message$ = &quot;$Message$Message&quot;;" reformat="True" shortenQualifiedReferences="True">
         <Context>
           <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
@@ -202,6 +181,27 @@
         <Categories />
         <Variables>
           <Variable name="Message" expression="" initialRange="0" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="3f7cd8ae-f88b-43bc-ab3e-648bdea8565b" shortcut="mms" description="" text="MediatorMessage.Send(MediatorMessage" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="Everywhere" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables />
+        <CustomProperties />
+      </Template>
+      <Template uid="8b3dc9c6-1c82-4a97-a1d5-79268a161f45" shortcut="xvml" description="" text="#region public ObservableCollection&lt;$TYPE$&gt; $NAME$ { get; set; }&#xD;&#xA;[XmlElement]&#xD;&#xA;public ObservableCollection&lt;$TYPE$&gt; $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$; }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged -= $NAME$CollectionChanged;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged += $NAME$CollectionChanged;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;void $NAME$CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged($NAME$ChangedEventArgs); }&#xD;&#xA;[XmlIgnore]&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;[XmlIgnore]&#xD;&#xA;ObservableCollection&lt;$TYPE$&gt; _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="TYPE" expression="" initialRange="0" />
+          <Variable name="NAME" expression="" initialRange="0" />
+          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
+          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
         </Variables>
         <CustomProperties />
       </Template>
