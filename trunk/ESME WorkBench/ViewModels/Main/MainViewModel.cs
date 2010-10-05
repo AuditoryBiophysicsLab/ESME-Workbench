@@ -295,7 +295,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _openFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
             var result = _openFileService.ShowDialog((Window)_viewAwareStatusService.View);
             if ((!result.HasValue) || (!result.Value)) return;
-            var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_openFileService.FileName, _saveFileService, _visualizerService);
+            var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_openFileService.FileName, _saveFileService, _viewAwareStatusService);
             _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
         }
 
@@ -383,10 +383,10 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 transmissionLossField.Filename = _saveFileService.FileName;
                 transmissionLossField.Save();
-                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_saveFileService.FileName, _saveFileService, _visualizerService);
+                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_saveFileService.FileName, _saveFileService, _viewAwareStatusService);
             }
             else
-                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(transmissionLossField, _saveFileService, _visualizerService);
+                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(transmissionLossField, _saveFileService, _viewAwareStatusService);
             _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
 
             MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
