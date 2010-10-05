@@ -10,19 +10,23 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     public class TransmissionLossFieldViewModel : ViewModelBase
     {
         private readonly ISaveFileService _saveFileService;
-        public TransmissionLossFieldViewModel(string fileName, ISaveFileService saveFileService)
+        private IUIVisualizerService _visualizerService;
+
+        public TransmissionLossFieldViewModel(string fileName, ISaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
             TransmissionLossField = TransmissionLossField.Load(fileName);
             ColorMapViewModel = ColorMapViewModel.Default;
             _saveFileService = saveFileService;
+            _visualizerService = visualizerService;
             SelectedRadial = 1;
         }
 
-        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField, ISaveFileService saveFileService)
+        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField, ISaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
             TransmissionLossField = transmissionLossField;
             ColorMapViewModel = ColorMapViewModel.Default;
             _saveFileService = saveFileService;
+            _visualizerService = visualizerService;
 
             SelectedRadial = 1;
         }
@@ -72,8 +76,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         new SimpleCommand<object, object>(
                             delegate
                             {
-                                _saveFileService.Filter = "Portable Network Graphics (PNG) (*.png)|All files (*.*)|*.*";
+                                _saveFileService.Filter = "Portable Network Graphics (*.png)|(*.png)| JPEG (*.jpg)|(*.jpg)|Bitmap (*.bmp)|(*.bmp)";
                                 _saveFileService.OverwritePrompt = true;
+                                //_saveFileService.ShowDialog()
+                                
                             }));
             }
         }
