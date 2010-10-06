@@ -304,6 +304,7 @@ namespace ESMEWorkBench.Data
             PropertyChanged += delegate(object s, PropertyChangedEventArgs e) { if (e.PropertyName != "IsChanged") IsChanged = true; };
             CurrentExtent = "POLYGON((-173.84765625 123.442822265625,169.98046875 123.442822265625,169.98046875 -165.555615234375,-173.84765625 -165.555615234375,-173.84765625 123.442822265625))";
             CurrentScale = 147647947.5;
+            InitializeIfViewModelsReady();
         }
 
         public Experiment(string fileName)

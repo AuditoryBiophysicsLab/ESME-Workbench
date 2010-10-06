@@ -166,7 +166,14 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> CloseExperimentCommand
         {
-            get { return _closeExperiment ?? (_closeExperiment = new SimpleCommand<object, object>(delegate { if (UserCanceledBecauseExperimentUnsaved()) return; })); }
+            get
+            {
+                return _closeExperiment ?? (_closeExperiment = new SimpleCommand<object, object>(delegate
+                                                                                                 {
+                                                                                                     if (UserCanceledBecauseExperimentUnsaved()) return;
+                                                                                                     MediatorMessage.Send(MediatorMessage.CloseExperiment, true);
+                                                                                                 }));
+            }
         }
 
         SimpleCommand<object, object> _closeExperiment;

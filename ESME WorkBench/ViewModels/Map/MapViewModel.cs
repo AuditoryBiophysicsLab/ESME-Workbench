@@ -143,13 +143,23 @@ namespace ESMEWorkBench.ViewModels.Map
             //                            ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
             //                        });
             //Overlays["Basemap"].IsVisible = Settings.Default.ShowBasemap;
-            AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
-            AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
+            try
+            {
+                AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
+                AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
 
-            _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
+                _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
+            }
+            catch (Exception) {}
 
             //_wpfMap.CurrentExtent = new RectangleShape(new PointShape(-180, 90), new PointShape(180, -90));
             //_wpfMap.ZoomToScale(_wpfMap.ZoomLevelScales[3]);
+        }
+
+        [MediatorMessageSink(MediatorMessage.CloseExperiment)]
+        void CloseExperiment(bool dummy)
+        {
+            _wpfMap.Overlays.Clear();
         }
 
         [MediatorMessageSink(MediatorMessage.QuickLookCommand)]
