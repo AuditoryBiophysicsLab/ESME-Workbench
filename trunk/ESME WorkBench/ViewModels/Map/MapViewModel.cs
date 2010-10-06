@@ -162,8 +162,10 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.AddMapLayer)]
         void AddMapLayer(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.Add(mapLayer.LayerOverlay);
-            mapLayer.Index = _wpfMap.Overlays.IndexOf(mapLayer.LayerOverlay);
+            if (mapLayer.Index >= 0)
+                _wpfMap.Overlays.Insert(mapLayer.Index, mapLayer.LayerOverlay);
+            else
+                _wpfMap.Overlays.Add(mapLayer.LayerOverlay);
 
             MediatorMessage.Send(MediatorMessage.LayerAdded, mapLayer);
         }
@@ -198,6 +200,7 @@ namespace ESMEWorkBench.ViewModels.Map
         void MoveLayerToTop(MapLayerViewModel mapLayer)
         {
             _wpfMap.Overlays.MoveToTop(mapLayer.LayerOverlay);
+            RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
@@ -205,6 +208,7 @@ namespace ESMEWorkBench.ViewModels.Map
         void MoveLayerUp(MapLayerViewModel mapLayer)
         {
             _wpfMap.Overlays.MoveUp(mapLayer.LayerOverlay);
+            RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
@@ -212,6 +216,7 @@ namespace ESMEWorkBench.ViewModels.Map
         void MoveLayerDown(MapLayerViewModel mapLayer)
         {
             _wpfMap.Overlays.MoveDown(mapLayer.LayerOverlay);
+            RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
@@ -219,15 +224,10 @@ namespace ESMEWorkBench.ViewModels.Map
         void MoveLayerToBottom(MapLayerViewModel mapLayer)
         {
             _wpfMap.Overlays.MoveToBottom(mapLayer.LayerOverlay);
+            RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
-        [MediatorMessageSink(MediatorMessage.UpdateLayerIndices)]
-        void UpdateLayerIndices(IEnumerable<MapLayerViewModel> mapLayers)
-        {
-            foreach (var layer in mapLayers) layer.Index = _wpfMap.Overlays.IndexOf(layer.LayerOverlay);
-        }
-        
         [MediatorMessageSink(MediatorMessage.SetCurrentScale)]
         void SetCurrentScale(double newScale)
         {

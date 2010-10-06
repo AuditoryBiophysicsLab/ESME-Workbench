@@ -8,46 +8,154 @@ using System.Threading;
 using Cinch;
 using ESME.Environment;
 using ESMERibbonDemo.ViewModels;
+using ESMEWorkBench.Data;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    public class EnvironmentDatabaseViewModel : ViewModelBase
+    public class EnvironmentSettingsViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
-        public EnvironmentDatabaseViewModel(string databasePath)
-        {
-            DatabasePath = databasePath;
+        IViewAwareStatus _viewAwareStatus;
+        readonly string _experimentTimeFrame;
 
+        public EnvironmentSettingsViewModel(string databasePath, string experimentTimeFrame)
+        {
+            _experimentTimeFrame = experimentTimeFrame;
             WindSpeedData = new SelectableCollection<EnvironmentDataDescriptor>();
             SoundSpeedData = new SelectableCollection<EnvironmentDataDescriptor>();
             BottomTypeData = new SelectableCollection<EnvironmentDataDescriptor>();
             BathymetryData = new SelectableCollection<EnvironmentDataDescriptor>();
 
-            WindSpeedSelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(delegate(EnvironmentDataDescriptor param)
-            {
-                if (param != null)
-                    WindSpeedEnvironmentFile = param.FilePath;
-            });
-            SoundSpeedSelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(delegate(EnvironmentDataDescriptor param)
-            {
-                if (param != null)
-                    SoundSpeedEnvironmentFile = param.FilePath;
-            });
-            BottomTypeSelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(delegate(EnvironmentDataDescriptor param)
-            {
-                if (param != null)
-                    BottomTypeEnvironmentFile = param.FilePath;
-            });
-            BathymetrySelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(delegate(EnvironmentDataDescriptor param)
-            {
-                if (param != null)
-                    BathymetryEnvironmentFile = param.FilePath;
-            });
+            DatabasePath = databasePath;
+
+            TimeFrames = new ObservableCollection<string>
+                         {
+                             "january",
+                             "february",
+                             "march",
+                             "april",
+                             "may",
+                             "june",
+                             "july",
+                             "august",
+                             "september",
+                             "october",
+                             "november",
+                             "december",
+                             "winter",
+                             "spring",
+                             "summer",
+                             "autumn",
+                             "warm season",
+                             "cold season"
+                         };
+            foreach (var timeFrame in TimeFrames)
+                if (timeFrame == experimentTimeFrame) SelectedTimeFrameItem = timeFrame;
         }
 
-        public SimpleCommand<object, EnvironmentDataDescriptor> WindSpeedSelectionChangedCommand { get; private set; }
-        public SimpleCommand<object, EnvironmentDataDescriptor> SoundSpeedSelectionChangedCommand { get; private set; }
-        public SimpleCommand<object, EnvironmentDataDescriptor> BottomTypeSelectionChangedCommand { get; private set; }
-        public SimpleCommand<object, EnvironmentDataDescriptor> BathymetrySelectionChangedCommand { get; private set; }
+        #region public ObservableCollection<string> TimeFrames { get; set; }
+
+        public ObservableCollection<string> TimeFrames
+        {
+            get { return _timeFrames; }
+            set
+            {
+                if (_timeFrames == value) return;
+                if (_timeFrames != null) _timeFrames.CollectionChanged -= TimeFramesCollectionChanged;
+                _timeFrames = value;
+                if (_timeFrames != null) _timeFrames.CollectionChanged += TimeFramesCollectionChanged;
+                NotifyPropertyChanged(TimeFramesChangedEventArgs);
+            }
+        }
+
+        void TimeFramesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(TimeFramesChangedEventArgs); }
+        static readonly PropertyChangedEventArgs TimeFramesChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.TimeFrames);
+        ObservableCollection<string> _timeFrames;
+
+        #endregion
+
+        #region WindSpeedSelectionChangedCommand
+
+        public SimpleCommand<object, EnvironmentDataDescriptor> WindSpeedSelectionChangedCommand
+        {
+            get { return _windSpeedSelectionChangedCommand ?? (_windSpeedSelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(param => { if (param != null) WindSpeedEnvironmentFile = param.FilePath; })); }
+        }
+
+        SimpleCommand<object, EnvironmentDataDescriptor> _windSpeedSelectionChangedCommand;
+
+        #endregion
+
+        #region SoundSpeedSelectionChangedCommand
+
+        public SimpleCommand<object, EnvironmentDataDescriptor> SoundSpeedSelectionChangedCommand
+        {
+            get { return _soundSpeedSelectionChangedCommand ?? (_soundSpeedSelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(param => { if (param != null) SoundSpeedEnvironmentFile = param.FilePath; })); }
+        }
+
+        SimpleCommand<object, EnvironmentDataDescriptor> _soundSpeedSelectionChangedCommand;
+
+        #endregion
+
+        #region BottomTypeSelectionChangedCommand
+
+        public SimpleCommand<object, EnvironmentDataDescriptor> BottomTypeSelectionChangedCommand
+        {
+            get { return _bottomTypeSelectionChangedCommand ?? (_bottomTypeSelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(param => { if (param != null) BottomTypeEnvironmentFile = param.FilePath; })); }
+        }
+
+        SimpleCommand<object, EnvironmentDataDescriptor> _bottomTypeSelectionChangedCommand;
+
+        #endregion
+
+        #region BathymetrySelectionChangedCommand
+
+        public SimpleCommand<object, EnvironmentDataDescriptor> BathymetrySelectionChangedCommand
+        {
+            get { return _bathymetrySelectionChangedCommand ?? (_bathymetrySelectionChangedCommand = new SimpleCommand<object, EnvironmentDataDescriptor>(param => { if (param != null) BathymetryEnvironmentFile = param.FilePath; })); }
+        }
+
+        SimpleCommand<object, EnvironmentDataDescriptor> _bathymetrySelectionChangedCommand;
+
+        #endregion
+
+        #region OkCommand
+
+        public SimpleCommand<object, object> OkCommand
+        {
+            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(x => CloseActivePopUpCommand.Execute(true))); }
+        }
+
+        SimpleCommand<object, object> _okCommand;
+
+        #endregion
+
+        #region CancelCommand
+
+        public SimpleCommand<object, object> CancelCommand
+        {
+            get { return _cancelCommand ?? (_cancelCommand = new SimpleCommand<object, object>(x => CloseActivePopUpCommand.Execute(false))); }
+        }
+
+        SimpleCommand<object, object> _cancelCommand;
+
+        #endregion
+
+        #region public string SelectedTimeFrameItem { get; set; }
+
+        public string SelectedTimeFrameItem
+        {
+            get { return _selectedTimeFrameItem; }
+            set
+            {
+                if (_selectedTimeFrameItem == value) return;
+                _selectedTimeFrameItem = value;
+                NotifyPropertyChanged(SelectedTimeFrameItemChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedTimeFrameItemChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.SelectedTimeFrameItem);
+        string _selectedTimeFrameItem;
+
+        #endregion
 
         #region public string DatabasePath { get; set; }
 
@@ -58,22 +166,23 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_databasePath == value) return;
                 _databasePath = value;
-                var popThread = new Thread(Populate)
-                                {
-                                    IsBackground = true
-                                };
-                popThread.Start();
+                Populate();
+                //var popThread = new Thread(Populate)
+                //                {
+                //                    IsBackground = true
+                //                };
+                //popThread.Start();
                 NotifyPropertyChanged(DatabasePathChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs DatabasePathChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentDatabaseViewModel>(x => x.DatabasePath);
+        static readonly PropertyChangedEventArgs DatabasePathChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.DatabasePath);
         string _databasePath;
 
         /// <summary>
-        /// This runs on a background thread
+        ///   This runs on a background thread
         /// </summary>
-        private void Populate()
+        void Populate()
         {
             if ((DatabasePath == null) || (!Directory.Exists(DatabasePath))) return;
 
@@ -87,48 +196,52 @@ namespace ESMEWorkBench.ViewModels.Main
                 var dataFile = DataFile.Open(file);
                 foreach (var layer in dataFile.Layers)
                 {
+                    EnvironmentDataDescriptor curEnvironmentData;
                     switch (layer.Name.ToLower())
                     {
                         case "windspeed":
-                            WindSpeedData.Add(new EnvironmentDataDescriptor
-                                              {
-                                                  FilePath = file,
-                                                  ShortName = string.Format("{0} [{1}]", Path.GetFileNameWithoutExtension(file), layer.TimePeriod),
-                                                  Command = WindSpeedSelectionChangedCommand,
-                                              });
+                            curEnvironmentData = new EnvironmentDataDescriptor
+                                                 {
+                                                     FilePath = file,
+                                                     ShortName = string.Format("{0} [{1}]", Path.GetFileNameWithoutExtension(file), layer.TimePeriod),
+                                                     Command = WindSpeedSelectionChangedCommand,
+                                                 };
+                            WindSpeedData.Add(curEnvironmentData);
+                            if (layer.TimePeriod == _experimentTimeFrame) WindSpeedData.SelectedItem = curEnvironmentData;
                             break;
                         case "soundspeed":
-                            SoundSpeedData.Add(new EnvironmentDataDescriptor
-                                               {
-                                                   FilePath = file,
-                                                   ShortName = string.Format("{0} [{1}]", Path.GetFileNameWithoutExtension(file), layer.TimePeriod),
-                                                   Command = SoundSpeedSelectionChangedCommand,
-                                               });
+                            curEnvironmentData = new EnvironmentDataDescriptor
+                                                 {
+                                                     FilePath = file,
+                                                     ShortName = string.Format("{0} [{1}]", Path.GetFileNameWithoutExtension(file), layer.TimePeriod),
+                                                     Command = SoundSpeedSelectionChangedCommand,
+                                                 };
+                            SoundSpeedData.Add(curEnvironmentData);
+                            if (layer.TimePeriod == _experimentTimeFrame) SoundSpeedData.SelectedItem = curEnvironmentData;
                             break;
                         case "bottomtype":
-                            BottomTypeData.Add(new EnvironmentDataDescriptor
-                                               {
-                                                   FilePath = file,
-                                                   ShortName = string.Format("{0}", Path.GetFileNameWithoutExtension(file)),
-                                                   Command = BottomTypeSelectionChangedCommand,
-                                               });
+                            curEnvironmentData = new EnvironmentDataDescriptor
+                                                 {
+                                                     FilePath = file,
+                                                     ShortName = string.Format("{0}", Path.GetFileNameWithoutExtension(file)),
+                                                     Command = BottomTypeSelectionChangedCommand,
+                                                 };
+                            BottomTypeData.Add(curEnvironmentData);
                             break;
                         case "bathymetry":
-                            BathymetryData.Add(new EnvironmentDataDescriptor
-                                               {
-                                                   FilePath = file,
-                                                   ShortName = string.Format("{0}", Path.GetFileNameWithoutExtension(file)),
-                                                   Command = BathymetrySelectionChangedCommand,
-                                               });
+                            curEnvironmentData = new EnvironmentDataDescriptor
+                                                 {
+                                                     FilePath = file,
+                                                     ShortName = string.Format("{0}", Path.GetFileNameWithoutExtension(file)),
+                                                     Command = BathymetrySelectionChangedCommand,
+                                                 };
+                            BathymetryData.Add(curEnvironmentData);
                             break;
                     }
                 }
             }
-            // TODO: Put initialization code for the file selections here, when a per-experiment data model is available
-            // Remove these lines when initializing 'for-real'
-            WindSpeedEnvironmentFile = WindSpeedData.Count > 0 ? WindSpeedData[0].FilePath : null;
-            SoundSpeedEnvironmentFile =  SoundSpeedData.Count > 0 ? SoundSpeedData[0].FilePath : null;
-            BottomTypeEnvironmentFile =  BottomTypeData.Count > 0 ? BottomTypeData[0].FilePath : null;
+            // Initialize bottom type and bathymetry to be the first item in the list, as these data sets are time-invariant
+            BottomTypeEnvironmentFile = BottomTypeData.Count > 0 ? BottomTypeData[0].FilePath : null;
             BathymetryEnvironmentFile = BathymetryData.Count > 0 ? BathymetryData[0].FilePath : null;
         }
 
@@ -148,7 +261,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs WindSpeedEnvironmentFileChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentDatabaseViewModel>(x => x.WindSpeedEnvironmentFile);
+        static readonly PropertyChangedEventArgs WindSpeedEnvironmentFileChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.WindSpeedEnvironmentFile);
         string _windSpeedEnvironmentFile;
 
         #endregion
@@ -167,7 +280,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs SoundSpeedEnvironmentFileChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentDatabaseViewModel>(x => x.SoundSpeedEnvironmentFile);
+        static readonly PropertyChangedEventArgs SoundSpeedEnvironmentFileChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.SoundSpeedEnvironmentFile);
         string _soundSpeedEnvironmentFile;
 
         #endregion
@@ -186,7 +299,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs BottomTypeEnvironmentFileChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentDatabaseViewModel>(x => x.BottomTypeEnvironmentFile);
+        static readonly PropertyChangedEventArgs BottomTypeEnvironmentFileChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.BottomTypeEnvironmentFile);
         string _bottomTypeEnvironmentFile;
 
         #endregion
@@ -205,7 +318,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs BathymetryEnvironmentFileChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentDatabaseViewModel>(x => x.BathymetryEnvironmentFile);
+        static readonly PropertyChangedEventArgs BathymetryEnvironmentFileChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.BathymetryEnvironmentFile);
         string _bathymetryEnvironmentFile;
 
         #endregion
@@ -227,7 +340,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void WindSpeedDataCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(WindSpeedDataChangedEventArgs); }
 
-        static readonly PropertyChangedEventArgs WindSpeedDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentDatabaseViewModel>(x => x.WindSpeedData);
+        static readonly PropertyChangedEventArgs WindSpeedDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.WindSpeedData);
         SelectableCollection<EnvironmentDataDescriptor> _windSpeedData;
 
         #endregion
@@ -249,7 +362,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void SoundSpeedDataCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(SoundSpeedDataChangedEventArgs); }
 
-        static readonly PropertyChangedEventArgs SoundSpeedDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentDatabaseViewModel>(x => x.SoundSpeedData);
+        static readonly PropertyChangedEventArgs SoundSpeedDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.SoundSpeedData);
         SelectableCollection<EnvironmentDataDescriptor> _soundSpeedData;
 
         #endregion
@@ -271,7 +384,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void BottomTypeDataCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(BottomTypeDataChangedEventArgs); }
 
-        static readonly PropertyChangedEventArgs BottomTypeDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentDatabaseViewModel>(x => x.BottomTypeData);
+        static readonly PropertyChangedEventArgs BottomTypeDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.BottomTypeData);
         SelectableCollection<EnvironmentDataDescriptor> _bottomTypeData;
 
         #endregion
@@ -293,13 +406,20 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void BathymetryDataCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(BathymetryDataChangedEventArgs); }
 
-        static readonly PropertyChangedEventArgs BathymetryDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentDatabaseViewModel>(x => x.BathymetryData);
+        static readonly PropertyChangedEventArgs BathymetryDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.BathymetryData);
         SelectableCollection<EnvironmentDataDescriptor> _bathymetryData;
 
         #endregion
+
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
+        {
+            _viewAwareStatus = viewAwareStatusService;
+            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
+        }
     }
 
-    public class SelectableCollection<T> : ObservableCollection<T> where T : class, IHasName
+    public class SelectableCollection<T> : ObservableCollection<T>
+        where T : class, IHasName
     {
         #region public T SelectedItem { get; set; }
 
@@ -323,7 +443,6 @@ namespace ESMEWorkBench.ViewModels.Main
                              select item;
                 if (result == null) throw new IndexOutOfRangeException("SelectableCollection: Could not find item with name: " + name);
                 return result.First();
-                
             }
         }
 

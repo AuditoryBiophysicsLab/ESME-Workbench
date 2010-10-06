@@ -173,6 +173,40 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region RefreshMapCommand
+
+        public SimpleCommand<object, object> RefreshMapCommand
+        {
+            get { return _refreshMap ?? (_refreshMap = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); }
+        }
+
+        SimpleCommand<object, object> _refreshMap;
+
+        #endregion
+
+        #region ShowEnvironmentSettingsCommand
+
+        public SimpleCommand<object, object> ShowEnvironmentSettingsCommand
+        {
+            get
+            {
+                return _showEnvironmentSettings ?? (_showEnvironmentSettings = new SimpleCommand<object, object>(delegate { return ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory)) && (_experiment != null) && (_experiment.NemoFile != null)); }, delegate
+                                                                                                                                                                                                                                                                                                                                       {
+                                                                                                                                                                                                                                                                                                                                           var environmentSettingsViewModel = new EnvironmentSettingsViewModel(Globals.AppSettings.EnvironmentDatabaseDirectory, _experiment.NemoFile.Scenario.TimeFrame.ToLower());
+                                                                                                                                                                                                                                                                                                                                           var result = _visualizerService.ShowDialog("EnvironmentSettingsView", environmentSettingsViewModel);
+                                                                                                                                                                                                                                                                                                                                           if (!result.HasValue || !result.Value) return;
+                                                                                                                                                                                                                                                                                                                                           _experiment.BathymetryFileName = environmentSettingsViewModel.BathymetryData.SelectedItem.Name;
+                                                                                                                                                                                                                                                                                                                                           _experiment.BottomTypeFileName = environmentSettingsViewModel.BottomTypeData.SelectedItem.Name;
+                                                                                                                                                                                                                                                                                                                                           _experiment.SoundSpeedFileName = environmentSettingsViewModel.SoundSpeedData.SelectedItem.Name;
+                                                                                                                                                                                                                                                                                                                                           _experiment.WindSpeedFileName = environmentSettingsViewModel.WindSpeedData.SelectedItem.Name;
+                                                                                                                                                                                                                                                                                                                                       }));
+            }
+        }
+
+        SimpleCommand<object, object> _showEnvironmentSettings;
+
+        #endregion
+
         #region SaveExperimentCommand
 
         public SimpleCommand<object, object> SaveExperimentCommand
@@ -240,10 +274,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> AddScenarioFileCommand
         {
-            get
-            {
-                return _addScenarioFile ?? (_addScenarioFile = new SimpleCommand<object, object>(delegate { return IsAddScenarioFilePossible(); }, delegate { OpenScenarioFile(null); }));
-            }
+            get { return _addScenarioFile ?? (_addScenarioFile = new SimpleCommand<object, object>(delegate { return IsAddScenarioFilePossible(); }, delegate { OpenScenarioFile(null); })); }
         }
 
         SimpleCommand<object, object> _addScenarioFile;

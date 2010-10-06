@@ -54,7 +54,7 @@ namespace ESME.Overlay
         public virtual bool Contains(EarthCoordinate location) { throw new NotImplementedException(); }
         public virtual EarthCoordinate Bounce(EarthCoordinate startLocation, EarthCoordinate proposedEndLocation) { throw new NotImplementedException(); }
         public abstract string WellKnownText { get; }
-        protected Rect BoundingBox { get; private set; }
+        public Rect BoundingBox { get; private set; }
         public Color Color { get; set; }
 
         public float Width { get; set; }

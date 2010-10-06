@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Media;
 using ESME.Overlay;
 using HRC.Navigation;
@@ -52,22 +53,7 @@ namespace ESME.Environment
 
         const UInt32 Magic = 0x728dcde6;
 
-        #region Public constructors
-
-        public Bathymetry(string filename, float[,] elevations, double[] latitudes, double[] longitudes, float minElevation, float maxElevation)
-        {
-            Elevations = elevations;
-            Latitudes = latitudes;
-            Longitudes = longitudes;
-            MinElevation = minElevation;
-            MaxElevation = maxElevation;
-            Filename = filename;
-
-            MinCoordinate = new EarthCoordinate(latitudes[0], Longitudes[0]);
-            MaxCoordinate = new EarthCoordinate(latitudes[latitudes.Length - 1], longitudes[longitudes.Length - 1]);
-        }
-
-        public Bathymetry(string filename)
+        Bathymetry()
         {
             MinCoordinate = null;
             MaxCoordinate = null;
@@ -76,6 +62,72 @@ namespace ESME.Environment
             Latitudes = null;
             Longitudes = null;
             Elevations = null;
+        }
+
+        #region Public constructors
+
+        public Bathymetry(string filename, float[,] elevations, double[] latitudes, double[] longitudes, float minElevation, float maxElevation) : this()
+        {
+            Filename = filename;
+
+            MinCoordinate = new EarthCoordinate(latitudes[0], Longitudes[0]);
+            MaxCoordinate = new EarthCoordinate(latitudes[latitudes.Length - 1], longitudes[longitudes.Length - 1]);
+        }
+
+        public Bathymetry(string filename, float north, float west, float south, float east)
+        {
+            Filename = filename;
+            if (Path.GetExtension(filename) != ".eeb") throw new FileFormatException(string.Format("Bathymetry: Unknown file type \"{0}\"", Path.GetFileName(filename)));
+            var file = DataFile.Open(filename);
+            foreach (var layer in file.Layers)
+            {
+                if (layer.Name != "bathymetry") continue;
+                int westLonIndex,
+                    eastLonIndex;
+                int southLatIndex,
+                    northLatIndex;
+                float lonShift = 0;
+                westLonIndex = eastLonIndex = southLatIndex = northLatIndex = 0;
+                if (layer.LongitudeAxis.Values[0] > west)
+                {
+                    lonShift = 360;
+                    west += lonShift;
+                    east += lonShift;
+                }
+                for (var i = 0; i < layer.LongitudeAxis.Values.Length; i++)
+                {
+                    if (west >= layer.LongitudeAxis.Values[i]) 
+                        westLonIndex = i;
+                    if (east >= layer.LongitudeAxis.Values[i]) 
+                        eastLonIndex = i;
+                }
+                Longitudes = new double[eastLonIndex - westLonIndex];
+                for (var i = 0; i < Longitudes.Length; i++) Longitudes[i] = layer.LongitudeAxis.Values[i + westLonIndex] - lonShift;
+
+                for (var i = 0; i < layer.LatitudeAxis.UnwrappedValues.Length; i++)
+                {
+                    if (south >= layer.LatitudeAxis.UnwrappedValues[i]) southLatIndex = i;
+                    if (north >= layer.LatitudeAxis.UnwrappedValues[i]) northLatIndex = i;
+                }
+                Latitudes = new double[northLatIndex - southLatIndex];
+                for (var i = 0; i < Latitudes.Length; i++) Latitudes[i] = layer.LatitudeAxis.UnwrappedValues[i + southLatIndex];
+
+                MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
+                MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
+                MinElevation = float.MaxValue;
+                MaxElevation = float.MinValue;
+                Elevations = layer.Get2DData(southLatIndex, northLatIndex, northLatIndex - southLatIndex, westLonIndex, eastLonIndex, eastLonIndex - westLonIndex);
+                for (var row = 0; row < Elevations.GetLength(0); row++)
+                    for (var col = 0; col < Elevations.GetLength(1); col++)
+                    {
+                        MinElevation = Math.Min(MinElevation, Elevations[row, col]);
+                        MaxElevation = Math.Max(MaxElevation, Elevations[row, col]);
+                    }
+            }
+        }
+
+        public Bathymetry(string filename) : this()
+        {
             Filename = filename;
             if (Path.GetExtension(filename) == ".eeb")
             {

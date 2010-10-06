@@ -145,12 +145,18 @@
 			<r:RibbonTab KeyTip="E"
 			             Header="Experiment">
 				<r:RibbonGroup Header="Map Data">
-					<r:RibbonButton Label="Shapefile"
+                    <r:RibbonButton Label="Refresh"
+					                SmallImageSource="..\Images\SmallIcons\Button-Refresh-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Button-Refresh-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Refresh the map display"
+					                Command="{Binding RefreshMapCommand}" />
+                    <r:RibbonButton Label="Shapefile"
 					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add an ESRI Shapefile to the map"
 					                Command="{Binding AddShapefileCommand}" />
-					<r:RibbonButton Label="Overlay"
+                    <r:RibbonButton Label="Overlay"
 					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a NUWC Overlay file to the map"
@@ -228,18 +234,12 @@
 			<r:RibbonTab KeyTip="V"
 			             Header="Environment">
 				<r:RibbonGroup Header="Location">
-					<r:RibbonButton Label="Close"
-					                LargeImageSource="..\Images\LargeIcons\close-icon.png"
-					                SmallImageSource="..\Images\SmallIcons\close-icon.png"
+					<r:RibbonButton Label="Settings"
+					                LargeImageSource="..\Images\LargeIcons\Distance-learning.png"
+					                SmallImageSource="..\Images\SmallIcons\Distance-learning.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Close the current environment file"
-					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton Label="Edit"
-					                LargeImageSource="..\Images\LargeIcons\AddFile.png"
-					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Launch the environment builder"
-					                Command="{Binding LaunchEnvironmentBuilderCommand}" />
+					                ToolTipDescription="Configure the environmental data to be used for the experiment"
+					                Command="{Binding ShowEnvironmentSettingsCommand}" />
 				</r:RibbonGroup>
 				<!--
 				<r:RibbonGroup Header="Data Layers">

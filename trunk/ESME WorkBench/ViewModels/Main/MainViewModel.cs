@@ -262,6 +262,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
             }
             _experiment.Save();
+            DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
             return true;
         }
 
