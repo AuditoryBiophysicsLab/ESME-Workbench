@@ -1,20 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Windows;
-using System.Windows.Input;
 using Cinch;
-using ESME.Model;
-using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.Bellhop;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
+using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
-using BathymetryOutOfBoundsException = ESME.Model.BathymetryOutOfBoundsException;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -29,6 +24,7 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IViewAwareStatus _viewAwareStatusService;
         readonly IUIVisualizerService _visualizerService;
         Experiment _experiment;
+
         #endregion
 
         #region Constructors
@@ -42,7 +38,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
             _viewAwareStatusService = viewAwareStatusService;
@@ -72,33 +68,30 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             else
             {
-                _experiment = new Experiment();
+                _experiment = new Experiment{MessageBoxService = _messageBoxService};
                 DecoratedExperimentName = "<New experiment>";
             }
             _experiment.PropertyChanged += delegate(object s, PropertyChangedEventArgs e)
-            {
-                switch (e.PropertyName)
-                {
-                    case "IsChanged":
-                        if (_experiment.IsChanged)
-                        {
-                            if (DecoratedExperimentName.EndsWith(" *")) return;
-                            DecoratedExperimentName += " *";
-                        }
-                        else
-                        {
-                            if (!DecoratedExperimentName.EndsWith(" *")) return;
-                            DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
-                        }
-                        break;
-                }
-            };
+                                           {
+                                               switch (e.PropertyName)
+                                               {
+                                                   case "IsChanged":
+                                                       if (_experiment.IsChanged)
+                                                       {
+                                                           if (DecoratedExperimentName.EndsWith(" *")) return;
+                                                           DecoratedExperimentName += " *";
+                                                       }
+                                                       else
+                                                       {
+                                                           if (!DecoratedExperimentName.EndsWith(" *")) return;
+                                                           DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
+                                                       }
+                                                       break;
+                                               }
+                                           };
         }
 
-        static void ViewLoaded()
-        {
-            MediatorMessage.Send(MediatorMessage.MainViewModelInitialized);
-        }
+        static void ViewLoaded() { MediatorMessage.Send(MediatorMessage.MainViewModelInitialized); }
 
         protected override void OnDispose()
         {
@@ -150,10 +143,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region Drag/Drop
 
-        public bool IsAddScenarioFilePossible()
-        {
-            return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)));
-        }
+        public bool IsAddScenarioFilePossible() { return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))); }
 
         public void FilesDropped(Object sender, DragEventArgs e)
         {
@@ -167,11 +157,8 @@ namespace ESMEWorkBench.ViewModels.Main
                     switch (Path.GetExtension(file).ToLower())
                     {
                         case ".shp":
-                            MediatorMessage.Send(MediatorMessage.AddShapefileCommand, file);
-                            refreshNeeded = true;
-                            break;
                         case ".ovr":
-                            MediatorMessage.Send(MediatorMessage.AddOverlayFileCommand, file);
+                            MediatorMessage.Send(MediatorMessage.AddFileCommand, file);
                             refreshNeeded = true;
                             break;
                         case ".nemo":
@@ -231,10 +218,15 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void LoadExperimentFile(string fileName)
         {
-            _experiment = Experiment.Load(fileName);
+            var extraTypes = new[]
+                             {
+                                 typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer)
+                             };
+            _experiment = Experiment.Load(fileName, extraTypes);
+            _experiment.FileName = fileName;
             _experiment.MessageBoxService = _messageBoxService;
             MediatorMessage.Send(MediatorMessage.ExperimentLoaded);
-            DecoratedExperimentName = Path.GetFileName(fileName);
+            DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
         }
 
         void OpenScenarioFile(string fileName)
@@ -244,13 +236,12 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
                 _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
-                var result = _openFileService.ShowDialog((Window)_viewAwareStatusService.View);
+                var result = _openFileService.ShowDialog((Window) _viewAwareStatusService.View);
                 if (!result.HasValue || !result.Value) return;
                 fileName = _openFileService.FileName;
             }
             if (!UserWantsToReplaceScenarioFileIfPresent(fileName)) return;
-            if (_openFileService.FileName != null)
-                Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
+            if (_openFileService.FileName != null) Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
             MediatorMessage.Send(MediatorMessage.AddScenarioFileCommand, fileName);
         }
 
@@ -284,115 +275,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (result == CustomDialogResults.No) return false;
             }
             return true;
-        }
-
-        [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate)]
-        void SetMouseEarthCoordinate(EarthCoordinate mouseEarthCoordinate) { MouseEarthCoordinate = mouseEarthCoordinate; }
-
-        [MediatorMessageSink(MediatorMessage.TestTransmissionLossViewCommand)]
-        void TestTransmissionLossView(bool dummy)
-        {
-            _openFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
-            var result = _openFileService.ShowDialog((Window)_viewAwareStatusService.View);
-            if ((!result.HasValue) || (!result.Value)) return;
-            var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_openFileService.FileName, _saveFileService);
-            _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
-        }
-
-        [MediatorMessageSink(MediatorMessage.RunQuickLook)]
-        void RunQuickLook(bool dummy) 
-{
-            #region create transmission loss job. the new base class for all acoustic simulations!
-
-            var transmissionLossJob = new TransmissionLossJob
-            {
-                AcousticProperties = new AcousticProperties
-                {
-                    SourceDepth = 10,
-                    VerticalBeamWidth = 120,
-                    DepressionElevationAngle = 0f,
-                    LowFrequency = 3500,
-                    HighFrequency = 3500,
-                },
-                AnalysisPoint = new AnalysisPoint
-                {
-                    IDField = 1,
-                    Location = MouseEarthCoordinate,
-                    RadialBearing = 0,
-                    RadialCount = 16,
-                },
-                Radius = 10000,
-                MaxDepth = 3000,
-            };
-
-            #endregion
-
-            #region create bellhop run file from tlj (and stuff)
-
-            var environmentInformation = new EnvironmentInformation
-            {
-                //Bathymetry = new Bathymetry(_environmentFileName),
-                //SoundSpeedField = new SoundSpeedField(_environmentFileName),
-                Sediment = SedimentTypes.SedimentArray[0],
-            };
-
-            var transmissionLossSettings = new TransmissionLossSettings
-            {
-                DepthCellSize = 50,
-                RangeCellSize = 50,
-            };
-
-            var transmissionLossJobViewModel = new TransmissionLossJobViewModel
-            {
-                TransmissionLossJob = transmissionLossJob
-            };
-            var result = _visualizerService.ShowDialog("TransmissionLossJobView", transmissionLossJobViewModel);
-            if ((!result.HasValue) || (!result.Value))
-            {
-                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-                return;
-            }
-
-            MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Wait);
-
-            TransmissionLossField transmissionLossField;
-            try
-            {
-                var bellhopRunFile = BellhopRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
-                transmissionLossField = FieldCalculator.ComputeField(bellhopRunFile, null);
-            }
-            catch (BathymetryOutOfBoundsException)
-            {
-                _messageBoxService.ShowError("Unable to run quick look.\nDid you click outside the bounds of the environment file?");
-                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-                return;
-            }
-            catch (AggregateException ex)
-            {
-                var sb = new StringBuilder();
-                foreach (var e in ex.InnerExceptions) sb.Append(e.Message + "\n");
-                _messageBoxService.ShowError("One or more errors occurred calculating transmission loss:\n" + sb);
-                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-                return;
-            }
-            _saveFileService.OverwritePrompt = true;
-            _saveFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
-            var saveResult = _saveFileService.ShowDialog((Window)_viewAwareStatusService.View);
-            TransmissionLossFieldViewModel transmissionLossFieldViewModel;
-            if (saveResult.HasValue && saveResult.Value)
-            {
-                transmissionLossField.Filename = _saveFileService.FileName;
-                transmissionLossField.Save();
-                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_saveFileService.FileName, _saveFileService);
-            }
-            else
-                transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(transmissionLossField, _saveFileService);
-            _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
-
-            MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-
-            #endregion
-
         }
     }
 }

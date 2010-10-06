@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using Cinch;
-using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using MEFedMVVM.ViewModelLocator;
 
@@ -38,93 +38,43 @@ namespace ESMEWorkBench.ViewModels.Main
 
             _viewAwareStatusService.ViewLoaded += ViewLoaded;
 
-            MoveLayerToTopCommand = new SimpleCommand<LayerViewModel, LayerViewModel>(CanLayerMoveUp, ExecuteMoveLayerToTopCommand);
-            MoveLayerUpCommand = new SimpleCommand<LayerViewModel, LayerViewModel>(CanLayerMoveUp, ExecuteMoveLayerUpCommand);
-            MoveLayerDownCommand = new SimpleCommand<LayerViewModel, LayerViewModel>(CanLayerMoveDown, ExecuteMoveLayerDownCommand);
-            MoveLayerToBottomCommand = new SimpleCommand<LayerViewModel, LayerViewModel>(CanLayerMoveDown, ExecuteMoveLayerToBottomCommand);
-            LayerViewModels = new ObservableCollection<LayerViewModel>();
+            MapLayers = new ObservableCollection<MapLayerViewModel>();
         }
 
-        #region public ObservableCollection<layerOverlayViewModel> LayerViewModels { get; set; }
+        #region public ObservableCollection<layerOverlayViewModel> MapLayers { get; set; }
 
-        public ObservableCollection<LayerViewModel> LayerViewModels
+        public ObservableCollection<MapLayerViewModel> MapLayers
         {
             get { return _layerViewModels; }
             set
             {
                 if (_layerViewModels == value) return;
+                if (_layerViewModels != null) _layerViewModels.CollectionChanged -= ShapeMapLayersCollectionChanged;
                 _layerViewModels = value;
-                _layerViewModels.CollectionChanged += ShapeLayerViewModelsCollectionChanged;
-                NotifyPropertyChanged(LayerViewModelsChangedEventArgs);
+                _layerViewModels.CollectionChanged += ShapeMapLayersCollectionChanged;
+                NotifyPropertyChanged(MapLayersChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs LayerViewModelsChangedEventArgs = ObservableHelper.CreateArgs<LayerListViewModel>(x => x.LayerViewModels);
-        ObservableCollection<LayerViewModel> _layerViewModels;
+        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<LayerListViewModel>(x => x.MapLayers);
+        ObservableCollection<MapLayerViewModel> _layerViewModels;
 
-        void ShapeLayerViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(LayerViewModelsChangedEventArgs); }
+        void ShapeMapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(MapLayersChangedEventArgs); }
 
         #endregion
-
-        public SimpleCommand<LayerViewModel, LayerViewModel> MoveLayerToTopCommand { get; private set; }
-        public SimpleCommand<LayerViewModel, LayerViewModel> MoveLayerUpCommand { get; private set; }
-        public SimpleCommand<LayerViewModel, LayerViewModel> MoveLayerDownCommand { get; private set; }
-        public SimpleCommand<LayerViewModel, LayerViewModel> MoveLayerToBottomCommand { get; private set; }
 
         static void ViewLoaded()
         {
             MediatorMessage.Send(MediatorMessage.LayerListViewModelInitialized);
         }
 
-        static void ExecuteMoveLayerUpCommand(LayerViewModel sourceLayer)
-        {
-            if (sourceLayer == null) return;
-            MediatorMessage.Send(MediatorMessage.MoveLayerUp, sourceLayer.MapLayer);
-            MediatorMessage.Send(MediatorMessage.RefreshMap);
-        }
-
-        static void ExecuteMoveLayerDownCommand(LayerViewModel sourceLayer)
-        {
-            if (sourceLayer == null) return;
-            MediatorMessage.Send(MediatorMessage.MoveLayerDown, sourceLayer.MapLayer);
-            MediatorMessage.Send(MediatorMessage.RefreshMap);
-        }
-
-        static void ExecuteMoveLayerToBottomCommand(LayerViewModel sourceLayer)
-        {
-            if (sourceLayer == null) return;
-            MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, sourceLayer.MapLayer);
-            MediatorMessage.Send(MediatorMessage.RefreshMap);
-        }
-
-        static void ExecuteMoveLayerToTopCommand(LayerViewModel sourceLayer)
-        {
-            if (sourceLayer == null) return;
-            MediatorMessage.Send(MediatorMessage.MoveLayerToTop, sourceLayer.MapLayer);
-            MediatorMessage.Send(MediatorMessage.RefreshMap);
-        }
-
-        bool CanLayerMoveUp(LayerViewModel sourceLayer)
-        {
-            if (sourceLayer == null) return false;
-            MediatorMessage.Send(MediatorMessage.MapLayerIndexQuery, sourceLayer.MapLayer);
-            return ((sourceLayer.MapLayer.MapLayerIndex < (LayerViewModels.Count - 1)) && (LayerViewModels.Count > 1));
-        }
-
-        bool CanLayerMoveDown(LayerViewModel sourceLayer)
-        {
-            if (sourceLayer == null) return false;
-            MediatorMessage.Send(MediatorMessage.MapLayerIndexQuery, sourceLayer.MapLayer);
-            return (sourceLayer.MapLayer.MapLayerIndex > 0) && (LayerViewModels.Count > 1);
-        }
-
-        [MediatorMessageSink(MediatorMessage.AddListLayer)]
-        void AddListLayer(LayerViewModel layer) { layer.LayerListListViewModel = this; LayerViewModels.Add(layer); }
+        [MediatorMessageSink(MediatorMessage.SetLayerCollection)]
+        void SetLayerCollection(ObservableCollection<MapLayerViewModel> mapLayers) { MapLayers = mapLayers; }
 
         [MediatorMessageSink(MediatorMessage.RemoveLayer)]
-        void RemoveLayer(MapLayer layer) { LayerViewModels.Remove(layer.LayerViewModel); }
+        void RemoveLayer(MapLayerViewModel layer) { MapLayers.Remove(layer); }
 
-        [MediatorMessageSink(MediatorMessage.ListLayerMoveToIndex)]
-        void ListLayerMoveToIndex(MapLayer layer) { LayerViewModels.Move(LayerViewModels.IndexOf(layer.LayerViewModel), layer.MapLayerIndex); }
+        [MediatorMessageSink(MediatorMessage.LayersReordered)]
+        void ReorderLayer(MapLayerViewModel layer) { MapLayers.Move(MapLayers.IndexOf(layer), layer.Index); }
     }
 }

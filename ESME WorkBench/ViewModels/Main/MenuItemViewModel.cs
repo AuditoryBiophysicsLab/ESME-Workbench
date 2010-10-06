@@ -7,6 +7,8 @@ namespace ESMEWorkBench.ViewModels.Main
 {
     public class MenuItemViewModel<T> : ViewModelBase
     {
+        public MenuItemViewModel() {Children = new List<MenuItemViewModel<T>>();}
+
         #region public bool IsCheckable { get; set; }
 
         public bool IsCheckable

@@ -13,17 +13,17 @@ namespace ESMEWorkBench.ViewModels.Main
 
             OkCommand = new SimpleCommand<object, object>(delegate
             {
-                AppSettings.Save();
+                AppSettings.Save(null);
                 CloseActivePopUpCommand.Execute(true);
             });
             CancelCommand = new SimpleCommand<object, object>(delegate
             {
-                AppSettings.Reload();
+                AppSettings.Reload(null);
                 CloseActivePopUpCommand.Execute(false);
             });
         }
 
-        public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }
+        public void DesignTimeInitialization() { AppSettings = AppSettings.Load(null); }
 
         public AppSettings AppSettings { get; private set; }
         

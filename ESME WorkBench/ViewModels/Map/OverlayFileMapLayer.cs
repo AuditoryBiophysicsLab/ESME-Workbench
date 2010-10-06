@@ -9,7 +9,7 @@ namespace ESMEWorkBench.ViewModels.Map
 {
     public class OverlayFileMapLayer : OverlayShapeMapLayer
     {
-        public OverlayFileMapLayer() { LayerType = LayerType.OverlayFile; Layers.Clear(); }
+        public OverlayFileMapLayer() { LayerType = LayerType.OverlayFile; LayerOverlay.Layers.Clear(); }
 
         #region public string OverlayFileName { get; set; }
         [XmlElement]
@@ -33,9 +33,9 @@ namespace ESMEWorkBench.ViewModels.Map
         #endregion
     }
 
-    public class OverlayShapeMapLayer : MapLayer
+    public class OverlayShapeMapLayer : MapLayerViewModel
     {
-        public OverlayShapeMapLayer() { Layers.Clear(); }
+        public OverlayShapeMapLayer() { LayerOverlay.Layers.Clear(); }
 
         InMemoryFeatureLayer _layer;
         public void Add(OverlayShape overlayShape)
@@ -77,7 +77,7 @@ namespace ESMEWorkBench.ViewModels.Map
             }
 
             _layer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
-            Layers.Add(_layer);
+            LayerOverlay.Layers.Add(_layer);
         }
     }
 }

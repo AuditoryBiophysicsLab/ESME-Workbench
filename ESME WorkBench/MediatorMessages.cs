@@ -10,13 +10,11 @@ namespace ESMEWorkBench
         public const string ToggleGridOverlayDisplayCommand = "ToggleGridOverlayDisplayCommandMessage";
         public const string TogglePanZoomDisplayCommand = "TogglePanZoomDisplayCommandMessage";
         public const string QuickLookCommand = "QuickLookCommandMessage";
-        public const string AddOverlayFileCommand = "AddOverlayFileCommandMessage";
-        public const string AddShapefileCommand = "AddShapefileCommandMessage";
+        public const string AddFileCommand = "AddFileCommandMessage";
         public const string AddScenarioFileCommand = "AddScenarioFileCommandMessage";
 
-        public const string AddScenarioFile = "AddScenarioFileMessage";
-        public const string AddShapefile = "AddShapefileMessage";
-        public const string AddOverlayFile = "AddOverlayFileMessage";
+        public const string SetLayerCollection = "SetLayerCollectionMessage";
+        public const string LayerAdded = "LayerAddedMessage";
 
         public const string LayerListViewModelInitialized = "LayerListViewModelInitializedMessage";
         public const string MapViewModelInitialized = "MapViewModelInitializedMessage";
@@ -27,6 +25,12 @@ namespace ESMEWorkBench
         public const string TransmissionLossRadialColorMapChanged = "TransmissionLossRadialColorMapChangedMessage";
         public const string TransmissionLossRadialChanged = "TransmissionLossRadialChangedMessage";
 
+        public const string CurrentScaleChanged = "CurrentScaleChangedMessage";
+        public const string CurrentExtentChanged = "CurrentExtentChangedMessage";
+        public const string SetCurrentScale = "SetCurrentScaleMessage";
+        public const string SetCurrentExtent = "SetCurrentExtentMessage";
+
+        public const string SetLayerIndex = "SetLayerIndexMessage";
 
         public const string ExperimentLoaded = "ExperimentLoadedMessage";
 
@@ -38,7 +42,7 @@ namespace ESMEWorkBench
         public const string AddListLayer = "AddListLayerMessage";
         public const string RemoveLayer = "RemoveLayerMessage";
         public const string MapLayerIndexQuery = "MapLayerIndexQueryMessage";
-        public const string ListLayerMoveToIndex = "ListLayerMoveToIndexMessage";
+        public const string LayersReordered = "ListLayerMoveToIndexMessage";
         public const string SetLayerLineColor = "SetLayerLineColorMessage";
         public const string SetLayerAreaColor = "SetLayerAreaColorMessage";
 
@@ -46,6 +50,7 @@ namespace ESMEWorkBench
         public const string MoveLayerUp = "MoveLayerUpMessage";
         public const string MoveLayerDown = "MoveLayerDownMessage";
         public const string MoveLayerToBottom = "MoveLayerToBottomMessage";
+        public const string UpdateLayerIndices = "UpdateLayerIndicesMessage";
         
         public const string ToggleLayerVisibility = "ToggleLayerVisibilityMessage";
         

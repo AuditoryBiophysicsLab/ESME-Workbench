@@ -19,7 +19,7 @@ namespace ESMEWorkBench
     public partial class App
     {
 #if DEBUG
-        private static readonly string Logfile, DumpFile;
+        public static readonly string Logfile, DumpFile;
 
         static App()
         {

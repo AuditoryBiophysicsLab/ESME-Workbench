@@ -4,11 +4,16 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.NEMO;
 using ESMEWorkBench.ViewModels.Layers;
+using ESMEWorkBench.ViewModels.Map;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.Data
 {
@@ -207,66 +212,43 @@ namespace ESMEWorkBench.Data
 
         [XmlIgnore]
         public NemoFile NemoFile { get; private set; }
-        [XmlIgnore]
-        public IMessageBoxService MessageBoxService { get; set; }
 
         #endregion
 
-        #region public ObservableCollection<LayerSettings> LayerSettingsCollection { get; set; }
+        #region public ObservableCollection<MapLayerViewModel> MapLayers { get; set; }
 
-        [XmlIgnore]
-        public ObservableCollection<LayerSettings> LayerSettingsCollection
+        public ObservableCollection<MapLayerViewModel> MapLayers
         {
-            get { return _layerSettingsCollection; }
+            get { return _mapLayers; }
             set
             {
-                if (_layerSettingsCollection == value) return;
-                if (_layerSettingsCollection != null) _layerSettingsCollection.CollectionChanged -= LayerSettingsCollectionCollectionChanged;
-                _layerSettingsCollection = value;
-                if (_layerSettingsCollection != null) _layerSettingsCollection.CollectionChanged += LayerSettingsCollectionCollectionChanged;
-                NotifyPropertyChanged(LayerSettingsCollectionChangedEventArgs);
+                if (_mapLayers == value) return;
+                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
+                _mapLayers = value;
+                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
+                NotifyPropertyChanged(MapLayersChangedEventArgs);
             }
         }
 
-        void LayerSettingsCollectionCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(LayerSettingsCollectionChangedEventArgs); }
-        [XmlIgnore] static readonly PropertyChangedEventArgs LayerSettingsCollectionChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.LayerSettingsCollection);
-        [XmlIgnore] ObservableCollection<LayerSettings> _layerSettingsCollection;
-
-        #endregion
-
-        #region public List<string> Shapefiles { get; set; }
-
-        public List<string> Shapefiles
+        void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            get { return _shapefiles; }
-            set
+            switch (e.Action)
             {
-                if (_shapefiles == value) return;
-                _shapefiles = value;
-                NotifyPropertyChanged(ShapefilesChangedEventArgs);
+                case NotifyCollectionChangedAction.Add:
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    break;
             }
+            NotifyPropertyChanged(MapLayersChangedEventArgs);
         }
-
-        void ShapefilesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(ShapefilesChangedEventArgs); }
-        static readonly PropertyChangedEventArgs ShapefilesChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Shapefiles);
-        List<string> _shapefiles;
-
-        #endregion
-
-        #region public ObservableCollection<LayerSettings> LayerSettingsList { get; set; }
-
-        [XmlElement]
-        public List<LayerSettings> LayerSettingsList
-        {
-            get { return _layerSettingsList; }
-            set
-            {
-                if (_layerSettingsList == value) return;
-                _layerSettingsList = value;
-            }
-        }
-
-        [XmlIgnore] List<LayerSettings> _layerSettingsList;
+        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.MapLayers);
+        ObservableCollection<MapLayerViewModel> _mapLayers;
 
         #endregion
 
@@ -288,7 +270,19 @@ namespace ESMEWorkBench.Data
         [XmlIgnore] bool _isChanged;
 
         #endregion
-        
+
+        [XmlIgnore]
+        bool _isInitialized;
+
+        [XmlElement]
+        public string CurrentExtent { get; set; }
+
+        [XmlElement]
+        public double CurrentScale { get; set; }
+
+        [XmlIgnore]
+        public IMessageBoxService MessageBoxService { private get; set; }
+
         public Experiment()
         {
             try
@@ -303,6 +297,8 @@ namespace ESMEWorkBench.Data
             Author = Environment.UserName;
             Created = DateTime.Now;
             PropertyChanged += delegate(object s, PropertyChangedEventArgs e) { if (e.PropertyName != "IsChanged") IsChanged = true; };
+            CurrentExtent = "POLYGON((-173.84765625 123.442822265625,169.98046875 123.442822265625,169.98046875 -165.555615234375,-173.84765625 -165.555615234375,-173.84765625 123.442822265625))";
+            CurrentScale = 147647947.5;
         }
 
         public Experiment(string fileName)
@@ -313,39 +309,23 @@ namespace ESMEWorkBench.Data
 
         public Experiment(Experiment that) { CopyFrom(that); }
 
-        public new void Save()
+        public void Save()
         {
             SaveAs(FileName);
         }
 
-        public new void Save(string fileName)
+        public void Save(string fileName)
         {
             FileName = fileName;
             SaveAs(FileName);
         }
 
-        public new void SaveAs(string fileName)
+        public void SaveAs(string fileName)
         {
-            LayerSettingsList = new List<LayerSettings>();
-            LayerSettingsList.AddRange(LayerSettingsCollection);
-            LayerSettingsList.Sort();
             LastModified = DateTime.Now;
             ModifiedBy = Environment.UserName;
-            base.SaveAs(fileName);
+            SaveAs(fileName, new[] { typeof(MapLayerViewModel), typeof(ShapefileMapLayer), typeof(OverlayShapeMapLayer), typeof(OverlayFileMapLayer) });
             IsChanged = false;
-        }
-
-        public static void Test()
-        {
-            var test = new Experiment
-                       {
-                           WindSpeedFileName = "wind",
-                           SoundSpeedFileName = "sound",
-                           BottomTypeFileName = "bottom",
-                           BathymetryFileName = "bathymetry",
-                           ScenarioFileName = "scenario"
-                       };
-            test.Save("test.esme");
         }
 
         void InitializeIfViewModelsReady()
@@ -357,48 +337,49 @@ namespace ESMEWorkBench.Data
         void Initialize()
         {
             MediatorMessage.Send(MediatorMessage.InitializeMapView);
-            LayerSettingsCollection = new ObservableCollection<LayerSettings>();
-            AddScenarioFileCommand(ScenarioFileName);
-#if false
-            foreach (var item in LayerSettingsList)
+            if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent));
+            if (CurrentScale != 0) MediatorMessage.Send(MediatorMessage.SetCurrentScale, CurrentScale);
+            if (MapLayers == null)
             {
-                LayerSettingsCollection.Add(item);
-                if (item.FileName != null)
-                {
-                    switch (Path.GetExtension(FileName).ToLower())
-                    {
-                        case ".shp":
-                            MediatorMessage.Send(MediatorMessage.AddShapefileCommand, FileName);
-                            break;
-                        case ".ovr":
-                            MediatorMessage.Send(MediatorMessage.AddOverlayFileCommand, FileName);
-                            break;
-                        case ".eeb":
-                            MediatorMessage.Send(MediatorMessage.AddEnvironmentFileCommand, FileName);
-                            break;
-                    }
-                }
+                var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                MapLayers = new ObservableCollection<MapLayerViewModel>
+                            {
+                                new ShapefileMapLayer
+                                {
+                                    LineColor = Colors.Tan,
+                                    AreaColor = Colors.LightGreen,
+                                    CanBeRemoved = false,
+                                    CanBeReordered = true,
+                                    CanChangeAreaColor = true,
+                                    CanChangeLineColor = true,
+                                    ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
+                                    Name = "Base Map",
+                                    LayerType = LayerType.BaseMap,
+                                }
+                            };
             }
-#endif
+            MapLayerViewModel.Layers = MapLayers;
+            MediatorMessage.Send(MediatorMessage.SetLayerCollection, MapLayers);
+            foreach (var layer in MapLayers)
+            {
+                switch (layer.LayerType)
+                {
+                    case LayerType.BaseMap:
+                    case LayerType.Shapefile:
+                    case LayerType.OverlayFile:
+                        MediatorMessage.Send(MediatorMessage.AddMapLayer, layer);
+                        break;
+                    case LayerType.SimArea:
+                        AddScenarioFileCommand(ScenarioFileName);
+                        break;
+                    case LayerType.Track:
+                    case LayerType.OpArea:
+                        break;
+                }
+                //MediatorMessage.Send(MediatorMessage.SetLayerIndex, layer);
+            }
             IsChanged = false;
+            _isInitialized = true;
         }
-    }
-
-    public class LayerSettings : IComparable<LayerSettings>
-    {
-        [XmlElement]
-        public string Name { get; set; }
-        [XmlElement]
-        public string FileName { get; set; }
-        [XmlElement]
-        public int Index { get; set; }
-        [XmlElement]
-        public Color LineColor { get; set; }
-        [XmlElement]
-        public float LineWidth { get; set; }
-        [XmlElement]
-        public Color AreaColor { get; set; }
-
-        int IComparable<LayerSettings>.CompareTo(LayerSettings that) { return Index.CompareTo(that.Index); }
     }
 }

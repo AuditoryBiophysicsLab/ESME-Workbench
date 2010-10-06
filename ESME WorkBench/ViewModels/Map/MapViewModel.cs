@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -11,6 +12,7 @@ using Cinch;
 using ESME.NEMO;
 using ESME.Platform;
 using ESMEWorkBench.Controls;
+using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Layers;
 using HRC.Navigation;
@@ -44,7 +46,7 @@ namespace ESMEWorkBench.ViewModels.Map
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("***********\nMapViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                Globals.DisplayException(messageBoxService, ex, "***********\nMapViewModel: Mediator registration failed\n***********");
                 throw;
             }
             _viewAwareStatusService = viewAwareStatusService;
@@ -98,11 +100,17 @@ namespace ESMEWorkBench.ViewModels.Map
             if (Designer.IsInDesignMode) return;
 
             _wpfMap = ((MapView) _viewAwareStatusService.View).WpfMap;
+
+            MapLayerViewModel.MapOverlay = _wpfMap.Overlays;
+
             MapDLLVersion = WpfMap.GetVersion();
             _wpfMap.MapUnit = GeographyUnit.DecimalDegree;
             _wpfMap.MapTools.PanZoomBar.HorizontalAlignment = HorizontalAlignment.Left;
             _wpfMap.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Top;
             _wpfMap.MapTools.Logo.IsEnabled = false;
+
+            _wpfMap.CurrentScaleChanged += (s, e) => MediatorMessage.Send(MediatorMessage.CurrentScaleChanged, e);
+            _wpfMap.CurrentExtentChanged += (s, e) => MediatorMessage.Send(MediatorMessage.CurrentExtentChanged, e);
 
             MediatorMessage.Send(MediatorMessage.MapViewModelInitialized);
         }
@@ -120,13 +128,14 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.InitializeMapView)]
         void InitializeMapView(bool dummy)
         {
-            var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            MediatorMessage.Send(MediatorMessage.AddMapLayer, new ShapefileMapLayer
-                                                                  {
-                                                                      AreaStyle = MapLayer.RandomAreaStyle,
-                                                                      ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
-                                                                      Name = "Base Map",
-                                                                  });
+            //var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            //MediatorMessage.Send(MediatorMessage.AddMapLayer, new ShapefileMapLayer
+            //                                                  {
+            //                                                      AreaStyle = MapLayerViewModel.RandomAreaStyle,
+            //                                                      ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
+            //                                                      Name = "Base Map",
+            //                                                      LayerType = LayerType.BaseMap,
+            //                                                  });
             //Overlays.Add("Basemap", new ShapefileMapLayer
             //                        {
             //                            LineColor = Colors.Purple,
@@ -134,35 +143,33 @@ namespace ESMEWorkBench.ViewModels.Map
             //                            ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
             //                        });
             //Overlays["Basemap"].IsVisible = Settings.Default.ShowBasemap;
-
             AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
             AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
 
             _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
 
-            _wpfMap.CurrentExtent = new RectangleShape(new PointShape(-180, 90), new PointShape(180, -90));
-            _wpfMap.ZoomToScale(_wpfMap.ZoomLevelScales[3]);
+            //_wpfMap.CurrentExtent = new RectangleShape(new PointShape(-180, 90), new PointShape(180, -90));
+            //_wpfMap.ZoomToScale(_wpfMap.ZoomLevelScales[3]);
         }
 
         [MediatorMessageSink(MediatorMessage.QuickLookCommand)]
-        void QuickLook(bool dummy)
+        void QuickLookCommand(bool dummy)
         {
             IsQuickLookMode = true;
             Cursor = Cursors.Cross;
         }
 
         [MediatorMessageSink(MediatorMessage.AddMapLayer)]
-        void AddLayer(MapLayer layer)
+        void AddMapLayer(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.Add(layer);
-            layer.LayerViewModel = new LayerViewModel(layer);
+            _wpfMap.Overlays.Add(mapLayer.LayerOverlay);
+            mapLayer.Index = _wpfMap.Overlays.IndexOf(mapLayer.LayerOverlay);
 
-            //_synchronizationContext.InvokeWithoutBlocking(x => MediatorMessage.Send(MediatorMessage.AddListLayer, layer.LayerViewModel), null);
-            MediatorMessage.Send(MediatorMessage.AddListLayer, layer.LayerViewModel);
+            MediatorMessage.Send(MediatorMessage.LayerAdded, mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.RemoveLayer)]
-        void RemoveLayer(MapLayer layer) { _wpfMap.Overlays.Remove(layer); }
+        void RemoveLayer(MapLayerViewModel mapLayer) { _wpfMap.Overlays.Remove(mapLayer.LayerOverlay); }
 
         [MediatorMessageSink(MediatorMessage.RefreshMap)]
         void RefreshMapView(bool dummy) { _wpfMap.Refresh(); }
@@ -185,129 +192,56 @@ namespace ESMEWorkBench.ViewModels.Map
         void SetMapCursor(Cursor cursor) { Cursor = cursor; }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerToTop)]
-        void MoveLayerToTop(MapLayer mapLayer)
+        void MoveLayerToTop(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveToTop(mapLayer);
-            MapLayerIndexQuery(mapLayer);
-            MediatorMessage.Send(MediatorMessage.ListLayerMoveToIndex, mapLayer);
+            _wpfMap.Overlays.MoveToTop(mapLayer.LayerOverlay);
+            MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerUp)]
-        void MoveLayerUp(MapLayer mapLayer)
+        void MoveLayerUp(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveUp(mapLayer);
-            MapLayerIndexQuery(mapLayer);
-            MediatorMessage.Send(MediatorMessage.ListLayerMoveToIndex, mapLayer);
+            _wpfMap.Overlays.MoveUp(mapLayer.LayerOverlay);
+            MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerDown)]
-        void MoveLayerDown(MapLayer mapLayer)
+        void MoveLayerDown(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveDown(mapLayer);
-            MapLayerIndexQuery(mapLayer);
-            MediatorMessage.Send(MediatorMessage.ListLayerMoveToIndex, mapLayer);
+            _wpfMap.Overlays.MoveDown(mapLayer.LayerOverlay);
+            MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerToBottom)]
-        void MoveLayerToBottom(MapLayer mapLayer)
+        void MoveLayerToBottom(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveToBottom(mapLayer);
-            MapLayerIndexQuery(mapLayer);
-            MediatorMessage.Send(MediatorMessage.ListLayerMoveToIndex, mapLayer);
+            _wpfMap.Overlays.MoveToBottom(mapLayer.LayerOverlay);
+            MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
-        [MediatorMessageSink(MediatorMessage.MapLayerIndexQuery)]
-        void MapLayerIndexQuery(MapLayer mapLayer)
+        [MediatorMessageSink(MediatorMessage.UpdateLayerIndices)]
+        void UpdateLayerIndices(IEnumerable<MapLayerViewModel> mapLayers)
         {
-            mapLayer.MapLayerIndex = _wpfMap.Overlays.IndexOf(mapLayer);
+            foreach (var layer in mapLayers) layer.Index = _wpfMap.Overlays.IndexOf(layer.LayerOverlay);
+        }
+        
+        [MediatorMessageSink(MediatorMessage.SetCurrentScale)]
+        void SetCurrentScale(double newScale)
+        {
+            _wpfMap.CurrentScale = newScale;
         }
 
-        [MediatorMessageSink(MediatorMessage.AddOverlayFileCommand)]
-        void AddOverlayFileCommand(string fileName)
+        [MediatorMessageSink(MediatorMessage.SetCurrentExtent)]
+        void SetCurrentExtent(RectangleShape newExtent)
         {
-            try
-            {
-                MediatorMessage.Send(MediatorMessage.AddMapLayer, new OverlayFileMapLayer
-                {
-                    OverlayFileName = fileName,
-                });
-            }
-            catch (Exception ex)
-            {
-                Globals.DisplayException(_messageBoxService, ex, "Error opening overlay file {0}", fileName);
-            }
-        }
-
-        [MediatorMessageSink(MediatorMessage.AddShapefileCommand)]
-        void AddShapefileCommand(string fileName)
-        {
-            try
-            {
-                MediatorMessage.Send(MediatorMessage.AddMapLayer, new ShapefileMapLayer
-                {
-                    AreaStyle = MapLayer.RandomAreaStyle,
-                    ShapefileName = fileName,
-                });
-            }
-            catch (Exception ex)
-            {
-                Globals.DisplayException(_messageBoxService, ex, "Error opening shapefile {0}", fileName);
-            }
+            _wpfMap.CurrentExtent = newExtent;
+            _wpfMap.Refresh();
         }
 
         [MediatorMessageSink(MediatorMessage.SetLayerLineColor)]
-        void SetLayerLineColor(MapLayer mapLayer)
-        {
-            RefreshMapView(true);
-        }
+        void SetLayerLineColor(MapLayerViewModel mapLayer) { RefreshMapView(true); }
+
         [MediatorMessageSink(MediatorMessage.SetLayerAreaColor)]
-        void SetLayerAreaColor(MapLayer mapLayer)
-        {
-            RefreshMapView(true);
-        }
-
-        [MediatorMessageSink(MediatorMessage.AddScenarioFileCommand)]
-        void AddScenarioFileCommand(NemoFile nemoFile)
-        {
-            var simArea = new OverlayShapeMapLayer
-                          {
-                              Name = nemoFile.Scenario.SimAreaName + " sim area",
-                              LayerType = LayerType.Scenario,
-                          };
-            simArea.Add(nemoFile.Scenario.OverlayFile.Shapes);
-            simArea.Done();
-            MediatorMessage.Send(MediatorMessage.AddMapLayer, simArea);
-            var platformCount = 0;
-            foreach (var platform in nemoFile.Scenario.Platforms)
-            {
-                platformCount++;
-                var platformLayerName = "Platform " + platformCount + ": " + platform.Name;
-                var track = new OverlayShapeMapLayer
-                            {
-                                Name = platformLayerName + " track",
-                                CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1),
-                                LayerType = LayerType.Track,
-                            };
-                var behavior = new BehaviorModel(platform);
-                track.Add(behavior.CourseOverlay);
-                track.Done();
-                MediatorMessage.Send(MediatorMessage.AddMapLayer, track);
-                var opAreaCount = 0;
-                foreach (var trackdef in platform.Trackdefs)
-                {
-                    opAreaCount++;
-                    var opArea = new OverlayShapeMapLayer
-                                 {
-                                     Name = platformLayerName + " op area" + (platform.Trackdefs.Count == 1 ? "" : " " + opAreaCount),
-                                     LayerType = LayerType.Scenario,
-                                 };
-                    opArea.Add(trackdef.OverlayFile.Shapes);
-                    opArea.Done();
-                    MediatorMessage.Send(MediatorMessage.AddMapLayer, opArea);
-                }
-            }
-
-            _wpfMap.Refresh();
-        }
+        void SetLayerAreaColor(MapLayerViewModel mapLayer) { RefreshMapView(true); }
     }
 }
