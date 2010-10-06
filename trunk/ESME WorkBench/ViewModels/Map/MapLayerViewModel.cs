@@ -30,23 +30,23 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             LayerOverlay = new LayerOverlay();
 
-            _removeMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
+            _removeMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => CanBeRemoved, obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
 
-            _lineColorMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj =>
-                                                                                             {
-                                                                                                 var result = ColorDialog.ShowDialog();
-                                                                                                 if (result != DialogResult.OK) return;
-                                                                                                 LineColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
-                                                                                                 MediatorMessage.Send(MediatorMessage.SetLayerLineColor, this);
-                                                                                             });
+            _lineColorMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => CanChangeLineColor, obj =>
+                                                                                                                        {
+                                                                                                                            var result = ColorDialog.ShowDialog();
+                                                                                                                            if (result != DialogResult.OK) return;
+                                                                                                                            LineColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
+                                                                                                                            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                                        });
 
-            _areaColorMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj =>
-                                                                                             {
-                                                                                                 var result = ColorDialog.ShowDialog();
-                                                                                                 if (result != DialogResult.OK) return;
-                                                                                                 AreaColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
-                                                                                                 MediatorMessage.Send(MediatorMessage.SetLayerAreaColor, this);
-                                                                                             });
+            _areaColorMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => CanChangeAreaColor, obj =>
+                                                                                                                        {
+                                                                                                                            var result = ColorDialog.ShowDialog();
+                                                                                                                            if (result != DialogResult.OK) return;
+                                                                                                                            AreaColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
+                                                                                                                            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                                        });
 
             _moveToTopMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index < (Layers.Count - 1), obj => MediatorMessage.Send(MediatorMessage.MoveLayerToTop, this));
             _moveUpMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index < (Layers.Count - 1), obj => MediatorMessage.Send(MediatorMessage.MoveLayerUp, this));
@@ -64,10 +64,23 @@ namespace ESMEWorkBench.ViewModels.Map
             _orderMenu.Children.Add(_moveDownMenu);
             _orderMenu.Children.Add(_moveToBottomMenu);
 
-            _colorMenu.Children.Add(_lineColorMenu);
-            _colorMenu.Children.Add(_areaColorMenu);
+            for (var lineWidth = 0.5f; lineWidth <= 5; lineWidth += 0.5f)
+            {
+                var width = lineWidth;
+                _lineWeightMenu.Children.Add(new MenuItemViewModel<MapLayerViewModel>
+                                             {
+                                                 Header = string.Format("{0:0.0}", lineWidth),
+                                                 Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => CanChangeLineWidth, obj =>
+                                                                                                                   {
+                                                                                                                       LineWidth = width;
+                                                                                                                       MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                                   }),
+                                             });
+            }
 
-            IsChecked = true;
+            _colorMenu.Children.Add(_lineColorMenu);
+            _colorMenu.Children.Add(_lineWeightMenu);
+            _colorMenu.Children.Add(_areaColorMenu);
         }
 
         public static GeoCollection<Overlay> MapOverlay
@@ -87,7 +100,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         readonly MenuItemViewModel<MapLayerViewModel> _colorMenu = new MenuItemViewModel<MapLayerViewModel>
                                                                    {
-                                                                       Header = "Change Color",
+                                                                       Header = "Colors & Lines",
                                                                    };
 
         readonly MenuItemViewModel<MapLayerViewModel> _removeMenu = new MenuItemViewModel<MapLayerViewModel>
@@ -104,6 +117,11 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                        {
                                                                            Header = "Area Color",
                                                                        };
+
+        readonly MenuItemViewModel<MapLayerViewModel> _lineWeightMenu = new MenuItemViewModel<MapLayerViewModel>
+                                                                        {
+                                                                            Header = "Line Weight",
+                                                                        };
 
         readonly MenuItemViewModel<MapLayerViewModel> _moveToTopMenu = new MenuItemViewModel<MapLayerViewModel>
                                                                        {
@@ -288,12 +306,6 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_layerType == value) return;
                 _layerType = value;
-                switch (_layerType)
-                {
-                    case LayerType.BaseMap:
-                        Name = "Base Map";
-                        break;
-                }
             }
         }
 
@@ -336,14 +348,6 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_canBeRemoved == value) return;
                 _canBeRemoved = value;
-                if (_canBeRemoved)
-                {
-                    if (ContextMenu.IndexOf(_removeMenu) == -1) ContextMenu.Add(_removeMenu);
-                }
-                else
-                {
-                    if (ContextMenu.IndexOf(_removeMenu) != -1) ContextMenu.Remove(_removeMenu);
-                }
                 NotifyPropertyChanged(CanBeRemovedChangedEventArgs);
             }
         }
@@ -362,22 +366,6 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_canChangeLineColor == value) return;
                 _canChangeLineColor = value;
-                if (_canChangeLineColor)
-                {
-                    if (_colorMenu.Children.IndexOf(_lineColorMenu) == -1) ContextMenu.Add(_lineColorMenu);
-                }
-                else
-                {
-                    if (_colorMenu.Children.IndexOf(_lineColorMenu) != -1) ContextMenu.Remove(_lineColorMenu);
-                }
-                if (_canChangeLineColor || _canChangeAreaColor)
-                {
-                    if (ContextMenu.IndexOf(_colorMenu) == -1) ContextMenu.Add(_colorMenu);
-                }
-                else
-                {
-                    if (ContextMenu.IndexOf(_colorMenu) != -1) ContextMenu.Remove(_colorMenu);
-                }
                 NotifyPropertyChanged(CanChangeLineColorChangedEventArgs);
             }
         }
@@ -394,24 +382,7 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return _canChangeAreaColor; }
             set
             {
-                if (_canChangeAreaColor == value) return;
                 _canChangeAreaColor = value;
-                if (_canChangeAreaColor)
-                {
-                    if (_colorMenu.Children.IndexOf(_areaColorMenu) == -1) ContextMenu.Add(_areaColorMenu);
-                }
-                else
-                {
-                    if (_colorMenu.Children.IndexOf(_areaColorMenu) != -1) ContextMenu.Remove(_areaColorMenu);
-                }
-                if (_canChangeLineColor || _canChangeAreaColor)
-                {
-                    if (ContextMenu.IndexOf(_colorMenu) == -1) ContextMenu.Add(_colorMenu);
-                }
-                else
-                {
-                    if (ContextMenu.IndexOf(_colorMenu) != -1) ContextMenu.Remove(_colorMenu);
-                }
                 NotifyPropertyChanged(CanChangeAreaColorChangedEventArgs);
             }
         }
@@ -421,21 +392,21 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
-        #region public bool IsSelected { get; set; }
+        #region public bool CanChangeLineWidth { get; set; }
 
-        static readonly PropertyChangedEventArgs IsSelectedChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.IsSelected);
-        bool _isSelected;
-
-        public bool IsSelected
+        public bool CanChangeLineWidth
         {
-            get { return _isSelected; }
+            get { return _canChangeLineWidth; }
             set
             {
-                if (_isSelected == value) return;
-                _isSelected = value;
-                NotifyPropertyChanged(IsSelectedChangedEventArgs);
+                if (_canChangeLineWidth == value) return;
+                _canChangeLineWidth = value;
+                NotifyPropertyChanged(CanChangeLineWidthChangedEventArgs);
             }
         }
+
+        static readonly PropertyChangedEventArgs CanChangeLineWidthChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeLineWidth);
+        bool _canChangeLineWidth = true;
 
         #endregion
 

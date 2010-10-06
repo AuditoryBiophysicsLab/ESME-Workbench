@@ -12,8 +12,6 @@
 	<UserControl.Resources>
 		<Style x:Key="LayersViewItemStyle"
 		       TargetType="ListBoxItem">
-			<Setter Property="IsSelected"
-			        Value="{Binding IsSelected, Mode=TwoWay}" />
 			<Setter Property="KeyboardNavigation.AcceptsReturn"
 			        Value="True" />
 			<Setter Property="layers:VirtualToggleButton.IsVirtualToggleButton"

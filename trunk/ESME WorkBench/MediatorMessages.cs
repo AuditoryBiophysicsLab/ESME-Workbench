@@ -37,14 +37,13 @@ namespace ESMEWorkBench
         public const string InitializeMapView = "InitializeMapViewMessage";
         public const string SetMapCursor = "SetMapCursorMessage";
         public const string RefreshMap = "RefreshMapMessage";
+        public const string RefreshLayer = "RefreshLayerMessage";
 
         public const string AddMapLayer = "AddMapLayerMessage";
         public const string AddListLayer = "AddListLayerMessage";
         public const string RemoveLayer = "RemoveLayerMessage";
         public const string MapLayerIndexQuery = "MapLayerIndexQueryMessage";
         public const string LayersReordered = "ListLayerMoveToIndexMessage";
-        public const string SetLayerLineColor = "SetLayerLineColorMessage";
-        public const string SetLayerAreaColor = "SetLayerAreaColorMessage";
 
         public const string MoveLayerToTop = "MoveLayerToTopMessage";
         public const string MoveLayerUp = "MoveLayerUpMessage";
@@ -54,10 +53,6 @@ namespace ESMEWorkBench
         
         public const string ToggleLayerVisibility = "ToggleLayerVisibilityMessage";
         
-        public const string ChangeLayerLineColor = "ChangeLayerLineColorMessage";
-        public const string ChangeLayerLineWidth = "ChangeLayerLineWidthMessage";
-        public const string ChangeLayerFillColor = "ChangeLayerFillColorMessage";
-
         public const string RunQuickLook = "RunQuickLookMessage";
 
         public const string SetMouseEarthCoordinate = "SetMouseEarthCoordinateMessage";
