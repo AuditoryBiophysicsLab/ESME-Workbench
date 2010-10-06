@@ -49,7 +49,7 @@
 	</UserControl.Resources>
 	<ListBox DockPanel.Dock="Top"
 	         ItemContainerStyle="{StaticResource LayersViewItemStyle}"
-	         ItemsSource="{Binding LayerViewModels}"
+	         ItemsSource="{Binding MapLayers}"
 	         ItemTemplate="{StaticResource CheckBoxItemTemplate}">
 	</ListBox>
 </UserControl>

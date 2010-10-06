@@ -228,12 +228,6 @@
 			<r:RibbonTab KeyTip="V"
 			             Header="Environment">
 				<r:RibbonGroup Header="Location">
-					<r:RibbonButton Label="Open"
-					                LargeImageSource="..\Images\LargeIcons\open-icon.png"
-					                SmallImageSource="..\Images\SmallIcons\open-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Open an environment file"
-					                Command="{Binding AddEnvironmentFileCommand}" />
 					<r:RibbonButton Label="Close"
 					                LargeImageSource="..\Images\LargeIcons\close-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\close-icon.png"

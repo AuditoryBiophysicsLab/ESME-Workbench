@@ -5,9 +5,9 @@ using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Map
 {
-    public class ShapefileMapLayer : MapLayer
+    public class ShapefileMapLayer : MapLayerViewModel
     {
-        public ShapefileMapLayer() { LayerType = LayerType.Shapefile; Layers.Clear(); }
+        public ShapefileMapLayer() { LayerType = LayerType.Shapefile; LayerOverlay.Layers.Clear(); }
 
         #region public string ShapefileName { get; set; }
         [XmlElement]
@@ -19,7 +19,16 @@ namespace ESMEWorkBench.ViewModels.Map
                 if (_shapefileName == value) return;
                 _shapefileName = value;
 
-                Name = Path.GetFileNameWithoutExtension(_shapefileName);
+                switch (LayerType)
+                {
+                    case LayerType.Shapefile:
+                        Name = Path.GetFileNameWithoutExtension(_shapefileName);
+                        break;
+                    case LayerType.BaseMap:
+                        Name = "Base Map";
+                        break;
+                }
+                    
                 string projection = null;
                 var projectionFile = Path.Combine(Path.GetDirectoryName(_shapefileName), "projection.txt");
                 if (File.Exists(projectionFile))
@@ -44,7 +53,7 @@ namespace ESMEWorkBench.ViewModels.Map
                         InternalProjectionParameters = projection,
                         ExternalProjectionParameters = ManagedProj4Projection.GetEpsgParameters(4326),
                     };
-                Layers.Add(newLayer);
+                LayerOverlay.Layers.Add(newLayer);
             }
         }
 

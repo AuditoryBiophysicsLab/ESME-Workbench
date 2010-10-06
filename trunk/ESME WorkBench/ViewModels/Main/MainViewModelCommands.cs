@@ -6,6 +6,7 @@ using System.Reflection;
 using Cinch;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.Map;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -21,10 +22,14 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(delegate
                                                                                          {
+                                                                                             var extraTypes = new[]
+                                                                                                              {
+                                                                                                                  typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer)
+                                                                                                              };
                                                                                              var programOptionsViewModel = new ProgramOptionsViewModel();
                                                                                              var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
-                                                                                             if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save();
-                                                                                             else Globals.AppSettings.Reload();
+                                                                                             if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
+                                                                                             else Globals.AppSettings.Reload(extraTypes);
                                                                                          }));
             }
         }
@@ -222,7 +227,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                var result = _openFileService.ShowDialog(null);
                                                                                                if (!result.HasValue || !result.Value) return;
                                                                                                Settings.Default.LastShapefileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-                                                                                               MediatorMessage.Send(MediatorMessage.AddShapefileCommand, _openFileService.FileName);
+                                                                                               MediatorMessage.Send(MediatorMessage.AddFileCommand, _openFileService.FileName);
                                                                                            }));
             }
         }
@@ -258,7 +263,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                  var result = _openFileService.ShowDialog(null);
                                                                                                                  if (!result.HasValue || !result.Value) return;
                                                                                                                  Settings.Default.LastOverlayFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-                                                                                                                 MediatorMessage.Send(MediatorMessage.AddOverlayFileCommand, _openFileService.FileName);
+                                                                                                                 MediatorMessage.Send(MediatorMessage.AddFileCommand, _openFileService.FileName);
                                                                                                              }));
             }
         }
