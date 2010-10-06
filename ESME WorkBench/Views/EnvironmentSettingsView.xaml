@@ -1,9 +1,9 @@
-﻿<Window x:Class="ESMEWorkBench.Views.ScenarioEnvironmentView"
+﻿<Window x:Class="ESMEWorkBench.Views.EnvironmentSettingsView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-        mef:ViewModelLocator.ViewModel="ScenarioEnvironmentViewModel"
-        Title="Scenario Environment Settings" Height="300" Width="300">
+        mef:ViewModelLocator.ViewModel="EnvironmentSettingsViewModel"
+        Title="Environment Settings" Height="300" Width="300">
     <DockPanel LastChildFill="True">
         <DockPanel LastChildFill="False"
 		           Margin="10"
@@ -23,25 +23,30 @@
 				            Width="Auto"
 				            Height="Auto">
             <StackPanel Orientation="Vertical">
-                <TextBlock Text="Experiment time frame" Margin="2"/>
-                <ComboBox ItemsSource="{Binding TimePeriods}" 
+                <TextBlock Text="Scenario time frame" Margin="2"/>
+                <ComboBox ItemsSource="{Binding TimeFrames}" 
+                          SelectedItem="{Binding SelectedTimeFrameItem}"
                           ToolTip="Choose a time frame from the dropdown list (month or season)"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Wind data file" Margin="2"/>
-                <ComboBox ItemsSource="{Binding WindSpeedData}" />
+                <ComboBox ItemsSource="{Binding WindSpeedData}" 
+                          SelectedItem="{Binding WindSpeedData.SelectedItem}"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Sound speed data file" Margin="2"/>
-                <ComboBox ItemsSource="{Binding SoundSpeedData}" />
+                <ComboBox ItemsSource="{Binding SoundSpeedData}" 
+                          SelectedItem="{Binding SoundSpeedData.SelectedItem}"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Bottom type data file" Margin="2"/>
-                <ComboBox ItemsSource="{Binding BottomTypeData}" />
+                <ComboBox ItemsSource="{Binding BottomTypeData}"  
+                          SelectedItem="{Binding BottomTypeData.SelectedItem}"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Bathymetry data file" Margin="2"/>
-                <ComboBox ItemsSource="{Binding BathymetryData}" />
+                <ComboBox ItemsSource="{Binding BathymetryData}"  
+                          SelectedItem="{Binding BathymetryData.SelectedItem}"/>
             </StackPanel>
         </StackPanel>
 

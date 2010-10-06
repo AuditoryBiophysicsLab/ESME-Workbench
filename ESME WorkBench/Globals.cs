@@ -38,9 +38,11 @@ namespace ESMEWorkBench
                 ex = ex.InnerException;
             }
             messageBoxService.ShowError(sb.ToString());
+#if DEBUG
             Debug.WriteLine(sb.ToString());
             using (var sw = new StreamWriter(App.Logfile, true))
                 sw.WriteLine(sb.ToString());
+#endif
         }
     }
 }

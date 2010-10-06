@@ -33,6 +33,7 @@ namespace ESMEWorkBench
         public const string SetLayerIndex = "SetLayerIndexMessage";
 
         public const string ExperimentLoaded = "ExperimentLoadedMessage";
+        public const string SetExperimentAsModified = "SetExperimentAsModifiedMessage";
 
         public const string InitializeMapView = "InitializeMapViewMessage";
         public const string SetMapCursor = "SetMapCursorMessage";
@@ -49,7 +50,6 @@ namespace ESMEWorkBench
         public const string MoveLayerUp = "MoveLayerUpMessage";
         public const string MoveLayerDown = "MoveLayerDownMessage";
         public const string MoveLayerToBottom = "MoveLayerToBottomMessage";
-        public const string UpdateLayerIndices = "UpdateLayerIndicesMessage";
         
         public const string ToggleLayerVisibility = "ToggleLayerVisibilityMessage";
         

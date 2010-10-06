@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Xml.Serialization;
@@ -37,6 +36,7 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                                                                             var result = ColorDialog.ShowDialog();
                                                                                                                             if (result != DialogResult.OK) return;
                                                                                                                             LineColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
+                                                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                                                                                                                             MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
                                                                                                                         });
 
@@ -45,13 +45,30 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                                                                             var result = ColorDialog.ShowDialog();
                                                                                                                             if (result != DialogResult.OK) return;
                                                                                                                             AreaColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
+                                                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                                                                                                                             MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
                                                                                                                         });
 
-            _moveToTopMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index < (Layers.Count - 1), obj => MediatorMessage.Send(MediatorMessage.MoveLayerToTop, this));
-            _moveUpMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index < (Layers.Count - 1), obj => MediatorMessage.Send(MediatorMessage.MoveLayerUp, this));
-            _moveDownMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index > 0, obj => MediatorMessage.Send(MediatorMessage.MoveLayerDown, this));
-            _moveToBottomMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index > 0, obj => MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, this));
+            _moveToTopMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index < (Layers.Count - 1), obj =>
+                                                                                                                                {
+                                                                                                                                    MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                                                    MediatorMessage.Send(MediatorMessage.MoveLayerToTop, this);
+                                                                                                                                });
+            _moveUpMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index < (Layers.Count - 1), obj =>
+                                                                                                                             {
+                                                                                                                                 MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                                                 MediatorMessage.Send(MediatorMessage.MoveLayerUp, this);
+                                                                                                                             });
+            _moveDownMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index > 0, obj =>
+                                                                                                              {
+                                                                                                                  MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                                  MediatorMessage.Send(MediatorMessage.MoveLayerDown, this);
+                                                                                                              });
+            _moveToBottomMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index > 0, obj =>
+                                                                                                                  {
+                                                                                                                      MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                                      MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, this);
+                                                                                                                  });
 
             ContextMenu = new List<MenuItemViewModel<MapLayerViewModel>>
                           {
@@ -71,10 +88,11 @@ namespace ESMEWorkBench.ViewModels.Map
                                              {
                                                  Header = string.Format("{0:0.0}", lineWidth),
                                                  Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => CanChangeLineWidth, obj =>
-                                                                                                                   {
-                                                                                                                       LineWidth = width;
-                                                                                                                       MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                                                                                                                   }),
+                                                                                                                                              {
+                                                                                                                                                  LineWidth = width;
+                                                                                                                                                  MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                                                                  MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                                                              }),
                                              });
             }
 
@@ -322,14 +340,6 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_canBeReordered == value) return;
                 _canBeReordered = value;
-                if (_canBeReordered)
-                {
-                    if (ContextMenu.IndexOf(_orderMenu) == -1) ContextMenu.Add(_orderMenu);
-                }
-                else
-                {
-                    if (ContextMenu.IndexOf(_orderMenu) != -1) ContextMenu.Remove(_orderMenu);
-                }
                 NotifyPropertyChanged(CanBeReorderedChangedEventArgs);
             }
         }
@@ -465,10 +475,7 @@ namespace ESMEWorkBench.ViewModels.Map
                 {
                     LayerOverlay.IsVisible = _isChecked;
                 }
-                catch (NullReferenceException e)
-                {
-                    Debug.WriteLine("Test!!!: " + e.Message);
-                }
+                catch (NullReferenceException) {}
 
                 NotifyPropertyChanged(IsCheckedChangedEventArgs);
             }

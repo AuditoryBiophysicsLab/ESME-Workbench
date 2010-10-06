@@ -2,8 +2,8 @@
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
   <?define ProductName = "ESME WorkBench 2010"?>
-  <?define OldProductVersion="1.1.2.0" ?>
-  <?define ProductVersion="1.2.0.0" ?>
+  <?define OldProductVersion="1.2.0.0" ?>
+  <?define ProductVersion="1.3.0.0" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
@@ -55,6 +55,11 @@
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLLOCATION" Name="$(var.ProductName)">
           <Component Id="ESME_WorkBench" Guid="de2c6c9d-6e47-43fa-9326-53326891ed41">
+            <ProgId Id="ESMEWorkbench.esmefile" Description="ESME WorkBench Experiment file" Icon="ESME_WorkBench.exe" IconIndex="1">
+              <Extension Id="esme" ContentType="application/esme">
+                <Verb Id="open" Command="Open" TargetFile="ESME_WorkBench.exe" Argument='"%1"'/>
+              </Extension>
+            </ProgId>
             <!-- Core ESME executables and assemblies -->
             <File Id="ESME_WorkBench.exe" 
                   Name="ESME WorkBench.exe" 

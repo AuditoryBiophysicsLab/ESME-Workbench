@@ -10,7 +10,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
+using ESME.Environment;
 using ESME.NEMO;
+using ESME.Overlay;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using ThinkGeo.MapSuite.Core;
@@ -283,6 +285,9 @@ namespace ESMEWorkBench.Data
         [XmlIgnore]
         public IMessageBoxService MessageBoxService { private get; set; }
 
+        [XmlIgnore]
+        public Bathymetry Bathymetry { get; private set; }
+
         public Experiment()
         {
             try
@@ -371,6 +376,11 @@ namespace ESMEWorkBench.Data
                         break;
                     case LayerType.SimArea:
                         AddScenarioFileCommand(ScenarioFileName);
+                        if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
+                        {
+                            var boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
+                            Bathymetry = new Bathymetry(BathymetryFileName, (float)boundingBox.Bottom, (float)boundingBox.Left, (float)boundingBox.Top, (float)boundingBox.Right);
+                        }
                         break;
                     case LayerType.Track:
                     case LayerType.OpArea:
