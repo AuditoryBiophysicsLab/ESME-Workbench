@@ -68,6 +68,12 @@ namespace ESMEWorkBench.ViewModels.Main
             MediatorMessage.Send(MediatorMessage.LayerListViewModelInitialized);
         }
 
+        [MediatorMessageSink(MediatorMessage.CloseExperiment)]
+        void CloseExperiment(bool dummy)
+        {
+            MapLayers = null;
+        }
+
         [MediatorMessageSink(MediatorMessage.SetLayerCollection)]
         void SetLayerCollection(ObservableCollection<MapLayerViewModel> mapLayers) { MapLayers = mapLayers; }
 

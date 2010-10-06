@@ -1,4 +1,5 @@
-﻿using Cinch;
+﻿using System;
+using Cinch;
 
 namespace ESMEWorkBench
 {
@@ -32,6 +33,8 @@ namespace ESMEWorkBench
 
         public const string SetLayerIndex = "SetLayerIndexMessage";
 
+        public const string CloseExperiment = "CloseExperimentMessage";
+        public const string ExperimentClosed = "ExperimentClosedMessage";
         public const string ExperimentLoaded = "ExperimentLoadedMessage";
         public const string SetExperimentAsModified = "SetExperimentAsModifiedMessage";
 
@@ -57,7 +60,14 @@ namespace ESMEWorkBench
 
         public const string SetMouseEarthCoordinate = "SetMouseEarthCoordinateMessage";
 
-        public static void Send<T>(string key, T message) { Mediator.Instance.NotifyColleagues(key, message); }
+        public static void Send<T>(string key, T message) 
+        {
+            try
+            {
+                Mediator.Instance.NotifyColleagues(key, message);
+            }
+            catch (Exception) {}
+        }
         public static void Send(string key) { Mediator.Instance.NotifyColleagues(key, true); }
         public static void SendAsync<T>(string key, T message) { Mediator.Instance.NotifyColleaguesAsync(key, message); }
         public static void SendAsync(string key) { Mediator.Instance.NotifyColleaguesAsync(key, true); }

@@ -6,6 +6,7 @@ using Cinch;
 using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
+using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 
@@ -120,6 +121,17 @@ namespace ESMEWorkBench.ViewModels.Main
 
             #endregion
 
+        }
+
+        [MediatorMessageSink(MediatorMessage.ExperimentClosed)]
+        void ExperimentClosed(bool dummy)
+        {
+            _experiment = new Experiment
+            {
+                MessageBoxService = _messageBoxService
+            };
+            HookPropertyChanged(_experiment);
+            DecoratedExperimentName = "<New experiment>";
         }
     }
 }

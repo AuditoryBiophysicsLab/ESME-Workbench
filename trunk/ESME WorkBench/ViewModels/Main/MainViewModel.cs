@@ -71,24 +71,29 @@ namespace ESMEWorkBench.ViewModels.Main
                 _experiment = new Experiment{MessageBoxService = _messageBoxService};
                 DecoratedExperimentName = "<New experiment>";
             }
-            _experiment.PropertyChanged += delegate(object s, PropertyChangedEventArgs e)
-                                           {
-                                               switch (e.PropertyName)
-                                               {
-                                                   case "IsChanged":
-                                                       if (_experiment.IsChanged)
-                                                       {
-                                                           if (DecoratedExperimentName.EndsWith(" *")) return;
-                                                           DecoratedExperimentName += " *";
-                                                       }
-                                                       else
-                                                       {
-                                                           if (!DecoratedExperimentName.EndsWith(" *")) return;
-                                                           DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
-                                                       }
-                                                       break;
-                                               }
-                                           };
+            HookPropertyChanged(_experiment);
+        }
+
+        void HookPropertyChanged(Experiment experiment)
+        {
+            experiment.PropertyChanged += delegate(object s, PropertyChangedEventArgs e)
+            {
+                switch (e.PropertyName)
+                {
+                    case "IsChanged":
+                        if (_experiment.IsChanged)
+                        {
+                            if (DecoratedExperimentName.EndsWith(" *")) return;
+                            DecoratedExperimentName += " *";
+                        }
+                        else
+                        {
+                            if (!DecoratedExperimentName.EndsWith(" *")) return;
+                            DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
+                        }
+                        break;
+                }
+            };
         }
 
         static void ViewLoaded() { MediatorMessage.Send(MediatorMessage.MainViewModelInitialized); }

@@ -81,6 +81,13 @@ namespace ESMEWorkBench.Data
             }
         }
 
+        [MediatorMessageSink(MediatorMessage.CloseExperiment)]
+        void CloseExperiment(bool dummy)
+        {
+            MapLayers.Clear();
+            MediatorMessage.Send(MediatorMessage.ExperimentClosed, true);
+        }
+
         OverlayShapeMapLayer FindOverlayShapeMapLayer(LayerType layerType, string layerName) { return (OverlayShapeMapLayer) MapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault(); }
 
         [MediatorMessageSink(MediatorMessage.AddScenarioFileCommand)]
