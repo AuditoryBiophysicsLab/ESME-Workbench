@@ -172,13 +172,16 @@ namespace ESMEWorkBench.ViewModels.Map
         void RemoveLayer(MapLayerViewModel mapLayer) { _wpfMap.Overlays.Remove(mapLayer.LayerOverlay); }
 
         [MediatorMessageSink(MediatorMessage.RefreshMap)]
-        void RefreshMapView(bool dummy) { _wpfMap.Refresh(); }
+        void RefreshMap(bool dummy) { _wpfMap.Refresh(); }
+
+        [MediatorMessageSink(MediatorMessage.RefreshLayer)]
+        void RefreshLayer(MapLayerViewModel layer) { _wpfMap.Refresh(layer.LayerOverlay); }
 
         [MediatorMessageSink(MediatorMessage.ToggleGridOverlayDisplayCommand)]
         void ToggleGridOverlayDisplay(Boolean isVisible)
         {
             AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid = isVisible;
-            RefreshMapView(true);
+            RefreshMap(true);
         }
 
         [MediatorMessageSink(MediatorMessage.TogglePanZoomDisplayCommand)]
@@ -237,11 +240,5 @@ namespace ESMEWorkBench.ViewModels.Map
             _wpfMap.CurrentExtent = newExtent;
             _wpfMap.Refresh();
         }
-
-        [MediatorMessageSink(MediatorMessage.SetLayerLineColor)]
-        void SetLayerLineColor(MapLayerViewModel mapLayer) { RefreshMapView(true); }
-
-        [MediatorMessageSink(MediatorMessage.SetLayerAreaColor)]
-        void SetLayerAreaColor(MapLayerViewModel mapLayer) { RefreshMapView(true); }
     }
 }
