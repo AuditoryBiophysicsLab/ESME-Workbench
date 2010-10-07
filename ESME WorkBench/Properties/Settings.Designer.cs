@@ -178,5 +178,53 @@ namespace ESMEWorkBench.Properties {
                 this["LastEnvironmentFileDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double TLTop {
+            get {
+                return ((double)(this["TLTop"]));
+            }
+            set {
+                this["TLTop"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double TLLeft {
+            get {
+                return ((double)(this["TLLeft"]));
+            }
+            set {
+                this["TLLeft"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("800")]
+        public double TLWidth {
+            get {
+                return ((double)(this["TLWidth"]));
+            }
+            set {
+                this["TLWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("600")]
+        public double TLHeight {
+            get {
+                return ((double)(this["TLHeight"]));
+            }
+            set {
+                this["TLHeight"] = value;
+            }
+        }
     }
 }
