@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using ESME.TransmissionLoss.Bellhop;
+using HRC.Navigation;
 
 namespace ESME.TransmissionLoss
 {
@@ -60,8 +61,8 @@ namespace ESME.TransmissionLoss
             IsSaved = true;
             TransmissionLoss = new float[_depths,_ranges];
             ClearAxisData();
-            for (var i = 0; i < _depths; i++) // Depths
-                for (var j = 0; j < _ranges; j++) // Ranges
+            for (int i = 0; i < _depths; i++) // Depths
+                for (int j = 0; j < _ranges; j++) // Ranges
                     TransmissionLoss[i, j] = stream.ReadSingle();
         }
 
@@ -103,7 +104,7 @@ namespace ESME.TransmissionLoss
             if ((depthCell >= _depths) || (rangeCell >= _ranges)) throw new ArgumentException("TransmissionLossRadialData: Attempted to seek to data indices out of their valid ranges");
 
             // Skip past the header information (9 floats [statistics] and 2 ints [depth count and range count])
-            var seekOffset = _seekOffset + (sizeof (float)*9) + (sizeof (int)*2);
+            long seekOffset = _seekOffset + (sizeof (float)*9) + (sizeof (int)*2);
             // Compute the offset to the desired depth and range cell 
             // offset = (Depth Cell * Stride of one Range) + RangeCell) * sizeof(float)
             seekOffset += (depthCell*_rangeStride) + (rangeCell*sizeof (float));
@@ -131,13 +132,55 @@ namespace ESME.TransmissionLoss
             stream.Write(StandardDeviation);
             stream.Write(_depths);
             stream.Write(_ranges);
-            for (var i = 0; i < _depths; i++) // Depths
-                for (var j = 0; j < _ranges; j++) // Ranges
+            for (int i = 0; i < _depths; i++) // Depths
+                for (int j = 0; j < _ranges; j++) // Ranges
                     stream.Write(TransmissionLoss[i, j]);
             TransmissionLoss = null;
             IsSaved = true;
         }
 
-        
+        public void SaveAsCSV(string fileName, TransmissionLossField transmissionLossField)
+        {
+            using (var sw = new StreamWriter(fileName))
+            {
+                // Write the X axis values out first
+                sw.WriteLine("Vertical Transmission Loss (dB)");
+                sw.Write(",Range (m),");
+
+                for (int i = 0; i < Ranges.Length; i++) sw.Write(Ranges[i] + ","); //write out the X axis values.
+                sw.WriteLine(); // Terminate the line
+                sw.WriteLine("Depth (m)");
+                // Write the slice data
+                for (int i = 0; i <= Depths.Length; i++)
+                {
+                    // Write out the Y axis value
+                    sw.Write(Depths[i] + ",,");
+                    for (var j = 0; j < Ranges.Length; j++)
+                    {
+                        sw.Write(TransmissionLoss[Depths.Length -i -1, j] + ","); //todo: verify dimension match.
+                    } 
+                    sw.WriteLine(); // Terminate the line
+                } // for i
+                sw.WriteLine();
+                //sw.Write(",Bottom depth:,");
+                //for (var i = 0; i < Ranges.Length; i++)
+                //    sw.Write(bottomProfile.Profile[i].ToString() + ",");
+                sw.WriteLine();
+                sw.WriteLine();
+                sw.WriteLine("Sound Source information");
+                sw.WriteLine("Source Latitude," + transmissionLossField.Latitude);
+                sw.WriteLine("Source Longitude," + transmissionLossField.Longitude);
+                sw.WriteLine("Depth (m)," + transmissionLossField.SourceDepth);
+                sw.WriteLine("High Frequency (Hz)," + transmissionLossField.HighFrequency);
+                sw.WriteLine("Low Frequency (Hz)," + transmissionLossField.LowFrequency);
+                var radialEnd = new EarthCoordinate(transmissionLossField.Latitude, transmissionLossField.Longitude);
+                radialEnd.Move(BearingFromSource, transmissionLossField.Radius);
+                sw.WriteLine("Receiver Latitude," + radialEnd.Latitude_degrees);
+                sw.WriteLine("Receiver Longitude," + radialEnd.Longitude_degrees);
+                sw.WriteLine();
+            } // using sw
+        }
+
+        // SaveAsCSV()
     }
 }
