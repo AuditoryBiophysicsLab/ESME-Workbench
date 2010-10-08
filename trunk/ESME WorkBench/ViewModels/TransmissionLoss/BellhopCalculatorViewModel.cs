@@ -167,7 +167,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             foreach (var radial in BellhopRadialCalculatorViewModels) TransmissionLossField.AddRadial(radial.TransmissionLossRadial);
             TransmissionLossField.Depths = TransmissionLossField.Radials[0].Depths;
             TransmissionLossField.Ranges = TransmissionLossField.Radials[0].Ranges;
-            _dispatcher.Invoke(PropertyChangedDelegate, TransmissionLossFieldChangedEventArgs);
+            _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(TransmissionLossFieldChangedEventArgs));
         }
 
         #endregion
@@ -205,7 +205,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_bearingFromSource == value) return;
                 _bearingFromSource = value;
-                NotifyPropertyChanged(BearingFromSourceChangedEventArgs);
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(BearingFromSourceChangedEventArgs));
             }
         }
 
