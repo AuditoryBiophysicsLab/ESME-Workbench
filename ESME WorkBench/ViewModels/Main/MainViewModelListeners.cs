@@ -87,7 +87,13 @@ namespace ESMEWorkBench.ViewModels.Main
             try
             {
                 var bellhopRunFile = BellhopRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
-                transmissionLossField = FieldCalculator.ComputeField(bellhopRunFile, null);
+                //transmissionLossField = FieldCalculator.ComputeField(bellhopRunFile, null);
+                var bellhopCalculatorViewModel = new BellhopCalculatorViewModel
+                                                 {
+                                                     BellhopRunFile = bellhopRunFile
+                                                 };
+                _visualizerService.ShowDialog("BellhopCalculatorView", bellhopCalculatorViewModel);
+                transmissionLossField = bellhopCalculatorViewModel.TransmissionLossField;
             }
             catch (BathymetryOutOfBoundsException)
             {
@@ -109,6 +115,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
                 return;
             }
+
+#if false
             _saveFileService.OverwritePrompt = true;
             _saveFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
             var saveResult = _saveFileService.ShowDialog((Window) _viewAwareStatusService.View);
@@ -117,6 +125,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 transmissionLossField.Filename = _saveFileService.FileName;
                 transmissionLossField.Save();
             }
+#endif
             var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(transmissionLossField, _saveFileService);
             _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
 
