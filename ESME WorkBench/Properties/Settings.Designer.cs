@@ -226,5 +226,29 @@ namespace ESMEWorkBench.Properties {
                 this["TLHeight"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastCSVExportFileDirectory {
+            get {
+                return ((string)(this["LastCSVExportFileDirectory"]));
+            }
+            set {
+                this["LastCSVExportFileDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastImageExportFileDirectory {
+            get {
+                return ((string)(this["LastImageExportFileDirectory"]));
+            }
+            set {
+                this["LastImageExportFileDirectory"] = value;
+            }
+        }
     }
 }
