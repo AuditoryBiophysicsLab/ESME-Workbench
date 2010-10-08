@@ -93,8 +93,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 return _saveAs ?? (_saveAs = new SimpleCommand<object, object>(delegate
                                                                                {
                                                                                    BitmapEncoder encoder = null;
-                                                                                   //_saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpg)|*.jpg|Bitmap (*.bmp)|*.bmp";
-                                                                                   _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png";
+                                                                                   _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpg)|*.jpg|Bitmap (*.bmp)|*.bmp";
+                                                                                   //_saveFileService.Filter = "Portable Network Graphics (*.png)|*.png";
                                                                                    _saveFileService.OverwritePrompt = true;
                                                                                    bool? result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
                                                                                    if (result.HasValue && result.Value)
