@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -17,7 +20,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     public class BellhopCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
-        StringBuilder[] _bellhopOutputData;
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
 
@@ -36,24 +38,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs = ObservableHelper.CreateArgs<BellhopCalculatorViewModel>(x => x.TransmissionLossField);
         TransmissionLossField _transmissionLossField;
-
-        #endregion
-
-        #region public string Log { get; }
-
-        public string Log
-        {
-            get { return _log.ToString(); }
-        }
-
-        static readonly PropertyChangedEventArgs LogChangedEventArgs = ObservableHelper.CreateArgs<BellhopCalculatorViewModel>(x => x.Log);
-        readonly StringBuilder _log = new StringBuilder();
-
-        void LogMessage(string format, params object[] args)
-        {
-            lock (this) _log.Append(string.Format(format, args));
-            _dispatcher.Invoke(PropertyChangedDelegate, LogChangedEventArgs);
-        }
 
         #endregion
 
@@ -85,15 +69,35 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_bellhopRunFile == value) return;
                 _bellhopRunFile = value;
                 NotifyPropertyChanged(BellhopRunFileChangedEventArgs);
-                var bw = new BackgroundWorker();
-                bw.DoWork += Calculate;
-                bw.RunWorkerCompleted += delegate { CloseActivePopUpCommand.Execute(true); };
-                bw.RunWorkerAsync(_bellhopRunFile);
+                if (_dispatcher != null) SetupRadialViewModels();
             }
         }
 
         static readonly PropertyChangedEventArgs BellhopRunFileChangedEventArgs = ObservableHelper.CreateArgs<BellhopCalculatorViewModel>(x => x.BellhopRunFile);
         BellhopRunFile _bellhopRunFile;
+
+        void SetupRadialViewModels()
+        {
+            if ((_dispatcher == null) || (BellhopRunFile == null)) return;
+
+            TransmissionLossField = new TransmissionLossField(BellhopRunFile);
+            for (var i = 0; i < BellhopRunFile.BellhopRadials.Count; i++)
+            {
+                var radialViewModel = new BellhopRadialCalculatorViewModel(_bellhopRunFile.BellhopRadials[i], i, _dispatcher);
+                radialViewModel.PropertyChanged += (s, e) =>
+                                                   {
+                                                       if (e.PropertyName != "ProgressPercent") return;
+                                                       float radialCount = BellhopRadialCalculatorViewModels.Count;
+                                                       var progress = BellhopRadialCalculatorViewModels.Sum(radial => radial.ProgressPercent/radialCount);
+                                                       TotalProgress = progress;
+                                                   };
+                BellhopRadialCalculatorViewModels.Add(radialViewModel);
+            }
+            var bw = new BackgroundWorker();
+            bw.DoWork += Calculate;
+            bw.RunWorkerCompleted += delegate { CloseActivePopUpCommand.Execute(true); };
+            bw.RunWorkerAsync(_bellhopRunFile);
+        }
 
         #endregion
 
@@ -104,6 +108,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _viewAwareStatus = viewAwareStatusService;
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
             _dispatcher = ((Window) _viewAwareStatus.View).Dispatcher;
+            if (BellhopRunFile != null) SetupRadialViewModels();
         }
 
         #endregion
@@ -122,38 +127,186 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region public ObservableCollection<BellhopRadialCalculatorViewModel> BellhopRadialCalculatorViewModels { get; set; }
+
+        public ObservableCollection<BellhopRadialCalculatorViewModel> BellhopRadialCalculatorViewModels
+        {
+            get { return _bellhopRadialCalculatorViewModels; }
+            set
+            {
+                if (_bellhopRadialCalculatorViewModels == value) return;
+                if (_bellhopRadialCalculatorViewModels != null) _bellhopRadialCalculatorViewModels.CollectionChanged -= BellhopRadialCalculatorViewModelsCollectionChanged;
+                _bellhopRadialCalculatorViewModels = value;
+                if (_bellhopRadialCalculatorViewModels != null) _bellhopRadialCalculatorViewModels.CollectionChanged += BellhopRadialCalculatorViewModelsCollectionChanged;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(BellhopRadialCalculatorViewModelsChangedEventArgs));
+            }
+        }
+
+        void BellhopRadialCalculatorViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(BellhopRadialCalculatorViewModelsChangedEventArgs); }
+        static readonly PropertyChangedEventArgs BellhopRadialCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<BellhopCalculatorViewModel>(x => x.BellhopRadialCalculatorViewModels);
+        ObservableCollection<BellhopRadialCalculatorViewModel> _bellhopRadialCalculatorViewModels = new ObservableCollection<BellhopRadialCalculatorViewModel>();
+
+        #endregion
+
         #region BackgroundWorker thread that computes the TransmissionLossField in parallel
 
         void Calculate(object sender, DoWorkEventArgs args)
         {
             var runFile = (BellhopRunFile) args.Argument;
-            TransmissionLossField = new TransmissionLossField(runFile);
             var radialNum = 0;
             var radialProgress = 100f/runFile.BellhopRadials.Count;
             TotalProgress = 0f;
-            LogMessage("{0} Starting bellhop calculation for {1} radials\n", DateTime.Now, runFile.BellhopRadials.Count);
-            _bellhopOutputData = new StringBuilder[runFile.BellhopRadials.Count];
+
             Parallel.ForEach<BellhopRadial, float>(runFile.BellhopRadials, () => 0, (radial, loopstate, progress) =>
                                                                                     {
                                                                                         var localRadialNum = Interlocked.Increment(ref radialNum);
-                                                                                        _bellhopOutputData[localRadialNum - 1] = new StringBuilder();
-                                                                                        LogMessage("{0} Beginning calculation of radial {1}...\n", DateTime.Now, localRadialNum);
-                                                                                        TransmissionLossField.AddRadial(ComputeRadial(radial.Configuration, radial.BottomProfile, radial.BearingFromSourceDegrees, _bellhopOutputData[localRadialNum - 1]));
-                                                                                        _dispatcher.Invoke(PropertyChangedDelegate, TransmissionLossFieldChangedEventArgs);
-                                                                                        LogMessage("{0} Calculation of radial {1} complete.\n", DateTime.Now, localRadialNum);
+                                                                                        var radialViewModel = BellhopRadialCalculatorViewModels[localRadialNum - 1];
+                                                                                        radialViewModel.Start();
                                                                                         return radialProgress;
                                                                                     }, (finalResult) => TotalProgress += finalResult);
-            LogMessage("{0} Bellhop calculation complete.\n", DateTime.Now);
+            foreach (var radial in BellhopRadialCalculatorViewModels) TransmissionLossField.AddRadial(radial.TransmissionLossRadial);
             TransmissionLossField.Depths = TransmissionLossField.Radials[0].Depths;
             TransmissionLossField.Ranges = TransmissionLossField.Radials[0].Ranges;
             _dispatcher.Invoke(PropertyChangedDelegate, TransmissionLossFieldChangedEventArgs);
         }
 
         #endregion
+    }
+
+    public class BellhopRadialCalculatorViewModel : ViewModelBase
+    {
+        readonly Dispatcher _dispatcher;
+        readonly StringBuilder _bellhopOutputData;
+        readonly BellhopRadial _bellhopRadial;
+
+        public BellhopRadialCalculatorViewModel(BellhopRadial bellhopRadial, int radialNumber, Dispatcher dispatcher)
+        {
+            //dispatcher.VerifyAccess();
+            _bellhopRadial = bellhopRadial;
+            _dispatcher = dispatcher;
+            _bellhopOutputData = new StringBuilder();
+            RadialNumber = radialNumber;
+            BearingFromSource = bellhopRadial.BearingFromSourceDegrees;
+            Status = "Starting";
+        }
+
+        public void Start()
+        {
+            TransmissionLossRadial = ComputeRadial(_bellhopRadial.Configuration, _bellhopRadial.BottomProfile, _bellhopRadial.BearingFromSourceDegrees);
+            Status = "Complete";
+        }
+
+        #region public double BearingFromSource { get; set; }
+
+        public double BearingFromSource
+        {
+            get { return _bearingFromSource; }
+            set
+            {
+                if (_bearingFromSource == value) return;
+                _bearingFromSource = value;
+                NotifyPropertyChanged(BearingFromSourceChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BearingFromSourceChangedEventArgs = ObservableHelper.CreateArgs<BellhopRadialCalculatorViewModel>(x => x.BearingFromSource);
+        double _bearingFromSource;
+
+        #endregion
+
+        #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
+
+        public TransmissionLossRadial TransmissionLossRadial
+        {
+            get { return _transmissionLossRadial; }
+            set
+            {
+                if (_transmissionLossRadial == value) return;
+                _transmissionLossRadial = value;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(TransmissionLossRadialChangedEventArgs));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TransmissionLossRadialChangedEventArgs = ObservableHelper.CreateArgs<BellhopRadialCalculatorViewModel>(x => x.TransmissionLossRadial);
+        TransmissionLossRadial _transmissionLossRadial;
+
+        #endregion
+
+        #region public int RadialNumber { get; set; }
+
+        public int RadialNumber
+        {
+            get { return _radialNumber; }
+            set
+            {
+                if (_radialNumber == value) return;
+                _radialNumber = value;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(RadialNumberChangedEventArgs));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RadialNumberChangedEventArgs = ObservableHelper.CreateArgs<BellhopRadialCalculatorViewModel>(x => x.RadialNumber);
+        int _radialNumber;
+
+        #endregion
+
+        #region public string Status { get; set; }
+
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                if (_status == value) return;
+                _status = value;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(StatusChangedEventArgs));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs StatusChangedEventArgs = ObservableHelper.CreateArgs<BellhopRadialCalculatorViewModel>(x => x.Status);
+        string _status;
+
+        #endregion
+
+        #region public int ProgressPercent { get; set; }
+
+        public int ProgressPercent
+        {
+            get { return _progressPercent; }
+            set
+            {
+                if (_progressPercent == value) return;
+                _progressPercent = value;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ProgressPercentChangedEventArgs));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ProgressPercentChangedEventArgs = ObservableHelper.CreateArgs<BellhopRadialCalculatorViewModel>(x => x.ProgressPercent);
+        int _progressPercent;
+
+        #endregion
+
+        #region public string ErrorText { get; set; }
+
+        public string ErrorText
+        {
+            get { return _errorText; }
+            set
+            {
+                if (_errorText == value) return;
+                _errorText = value;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ErrorTextChangedEventArgs));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ErrorTextChangedEventArgs = ObservableHelper.CreateArgs<BellhopRadialCalculatorViewModel>(x => x.ErrorText);
+        string _errorText;
+
+        #endregion
 
         #region Code that computes the radial by running bellhop and reading the output files it creates
 
-        static TransmissionLossRadial ComputeRadial(string bellhopConfiguration, string bottomProfile, float bearing, StringBuilder stringBuilder)
+        TransmissionLossRadial ComputeRadial(string bellhopConfiguration, string bottomProfile, float bearing)
         {
             var workingDirectory = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
 
@@ -173,19 +326,20 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                      RedirectStandardError = true,
                                                      WorkingDirectory = workingDirectory
                                                  },
-                                     StringBuilder = stringBuilder
                                  };
-
+            bellhopProcess.PropertyChanged += (sender, e) => { if (e.PropertyName == "ProgressPercent") ProgressPercent = ((TransmissionLossProcess) sender).ProgressPercent; };
             bellhopProcess.OutputDataReceived += OutputDataRecieved;
             bellhopProcess.Start();
             bellhopProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
             bellhopProcess.StandardInput.WriteLine(bellhopConfiguration);
             bellhopProcess.BeginOutputReadLine();
+            Status = "Running";
             while (!bellhopProcess.HasExited)
             {
                 Thread.Sleep(100);
             }
-            Debug.WriteLine("Bellhop error output for radial bearing " + bearing + " deg: \n" + bellhopProcess.StandardError.ReadToEnd());
+            ErrorText = bellhopProcess.StandardError.ReadToEnd();
+            //Debug.WriteLine("Bellhop error output for radial bearing " + bearing + " deg: \n" + ErrorText);
 
             // We don't need to keep the results files around anymore, we're finished with them
             File.Delete(Path.Combine(workingDirectory, "BTYFIL"));
@@ -202,10 +356,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             var result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
             File.Delete(Path.Combine(workingDirectory, "SHDFIL"));
             Directory.Delete(workingDirectory, true);
+            bellhopProcess.ProgressPercent = 100;
             return result;
         }
 
-        static void OutputDataRecieved(object sendingProcess, DataReceivedEventArgs outLine)
+        void OutputDataRecieved(object sendingProcess, DataReceivedEventArgs outLine)
         {
             var theProcess = (TransmissionLossProcess) sendingProcess;
             string[] fields;
@@ -216,7 +371,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             // Collect the command output.
             if (String.IsNullOrEmpty(outLine.Data)) return;
             // Add the text to the collected output.
-            theProcess.StringBuilder.Append(outLine.Data);
+            _bellhopOutputData.Append(outLine.Data);
             var curLine = outLine.Data.Trim();
             if (curLine.StartsWith("Tracing beam"))
             {
