@@ -15,6 +15,9 @@
 		<KeyBinding Command="{Binding CloseWindowCommand}"
 		            Key="W"
 		            Modifiers="Control" />
+        <KeyBinding Command="{Binding ExportAsCommand}"
+                    Key="E"
+                    Modifiers="Control" />
 	</Window.InputBindings>
 
 	<DockPanel LastChildFill="True">
@@ -30,7 +33,8 @@
 					          Command="{Binding SaveAsCommand}"
 					          InputGestureText="Ctrl+S" />
 					<MenuItem Header="Export to CSV"
-					          Command="{Binding ExportAsCommand}" />
+					          Command="{Binding ExportAsCommand}"
+                              InputGestureText="Ctrl+E"/>
 					<MenuItem Header="Exit View"
                               Command="{Binding CloseWindowCommand}"
 					          InputGestureText="Ctrl+W">
