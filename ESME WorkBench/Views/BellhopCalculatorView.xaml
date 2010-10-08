@@ -4,11 +4,70 @@
         Title="{Binding TotalProgress, StringFormat=Bellhop Calculation in progress: {0:0.#}% complete}"
         Height="600"
         Width="500">
+    <Window.Resources>
+        <Style x:Key="RadialCalculatorStatusStyle"
+		       TargetType="TextBlock">
+            <Style.Triggers>
+                <Trigger Property="Text"
+				         Value="Complete">
+                    <Setter Property="FontWeight"
+					        Value="Bold" />
+                    <Setter Property="Foreground"
+					        Value="Black" />
+                </Trigger>
+                <Trigger Property="Text"
+				         Value="Starting">
+                    <Setter Property="Foreground"
+					        Value="Gold" />
+                </Trigger>
+                <Trigger Property="Text"
+				         Value="Running">
+                    <Setter Property="Foreground"
+					        Value="Green" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="RadialCalculatorProgressStyle"
+               TargetType="ProgressBar">
+            <Style.Triggers>
+                <Trigger Property="Value"
+                         Value="100">
+                    <Setter Property="Visibility"
+                            Value="Hidden" />
+                </Trigger>
+                <Trigger Property="Value"
+                         Value="0">
+                    <Setter Property="Visibility"
+                            Value="Hidden" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <DataTemplate x:Key="RadialCalculatorItemTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="75"/>
+                    <ColumnDefinition Width="75" />
+                    <ColumnDefinition Width="75" />
+                    <ColumnDefinition Width="100" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding RadialNumber, StringFormat=Radial {00}}"
+                           TextAlignment="Right"
+                           Grid.Column="0"/>
+                <TextBlock Text="{Binding BearingFromSource, StringFormat={}{0:0.0} deg}" 
+                           TextAlignment="Right"
+                           Grid.Column="1"/>
+                <TextBlock Text="{Binding Status}" 
+                           TextAlignment="Center"
+                           Style="{StaticResource RadialCalculatorStatusStyle}"
+                           Grid.Column="2"/>
+                <ProgressBar Value="{Binding ProgressPercent}" 
+                             Style="{StaticResource RadialCalculatorProgressStyle}"
+                             Grid.Column="3"/>
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
 	<DockPanel LastChildFill="True">
-		<TextBlock TextWrapping="Wrap">
-			<TextBlock.Text>
-				<Binding Path="Log" />
-			</TextBlock.Text>
-		</TextBlock>
+        <ListBox ItemsSource="{Binding BellhopRadialCalculatorViewModels}"
+                 ItemTemplate="{StaticResource RadialCalculatorItemTemplate}"/>
 	</DockPanel>
 </Window>
