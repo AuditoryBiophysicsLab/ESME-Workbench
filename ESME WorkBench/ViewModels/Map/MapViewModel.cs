@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -109,8 +111,13 @@ namespace ESMEWorkBench.ViewModels.Map
             _wpfMap.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Top;
             _wpfMap.MapTools.Logo.IsEnabled = false;
 
-            _wpfMap.CurrentScaleChanged += (s, e) => MediatorMessage.Send(MediatorMessage.CurrentScaleChanged, e);
-            _wpfMap.CurrentExtentChanged += (s, e) => MediatorMessage.Send(MediatorMessage.CurrentExtentChanged, e);
+            _wpfMap.CurrentScaleChanged += (s, e) => { if (_experiment != null) _experiment.CurrentScale = e.CurrentScale; };
+            _wpfMap.CurrentExtentChanged += (s, e) => { if (_experiment != null) _experiment.CurrentExtent = e.CurrentExtent.GetWellKnownText(); };
+
+            AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
+            AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
+
+            _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
 
             MediatorMessage.Send(MediatorMessage.MapViewModelInitialized);
         }
@@ -125,42 +132,80 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return _wpfMap.AdornmentOverlay; }
         }
 
-        [MediatorMessageSink(MediatorMessage.InitializeMapView)]
-        void InitializeMapView(bool dummy)
+        #region public Experiment Experiment { get; set; }
+
+        public Experiment Experiment
         {
-            //var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            //MediatorMessage.Send(MediatorMessage.AddMapLayer, new ShapefileMapLayer
-            //                                                  {
-            //                                                      AreaStyle = MapLayerViewModel.RandomAreaStyle,
-            //                                                      ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
-            //                                                      Name = "Base Map",
-            //                                                      LayerType = LayerType.BaseMap,
-            //                                                  });
-            //Overlays.Add("Basemap", new ShapefileMapLayer
-            //                        {
-            //                            LineColor = Colors.Purple,
-            //                            AreaColor = Colors.Yellow,
-            //                            ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
-            //                        });
-            //Overlays["Basemap"].IsVisible = Settings.Default.ShowBasemap;
-            try
+            get { return _experiment; }
+            set
             {
-                AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
-                AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
+                if (_experiment == value) return;
+                if (_experiment != null) _experiment.MapLayers.CollectionChanged -= MapLayers_CollectionChanged;
+                _wpfMap.Overlays.Clear();
+                _experiment = value;
+                if (_experiment != null)
+                {
+                    foreach (var layer in _experiment.MapLayers)
+                    {
+                        _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay);
+                        _wpfMap.Refresh(layer.LayerOverlay);
+                    }
+                    _experiment.MapLayers.CollectionChanged += MapLayers_CollectionChanged;
+                    _wpfMap.CurrentExtent = new RectangleShape(_experiment.CurrentExtent);
+                    _wpfMap.CurrentScale = _experiment.CurrentScale;
+                    _wpfMap.Refresh();
 
-                _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
+                }
+                NotifyPropertyChanged(ExperimentChangedEventArgs);
             }
-            catch (Exception) {}
-
-            //_wpfMap.CurrentExtent = new RectangleShape(new PointShape(-180, 90), new PointShape(180, -90));
-            //_wpfMap.ZoomToScale(_wpfMap.ZoomLevelScales[3]);
         }
+
+        static readonly PropertyChangedEventArgs ExperimentChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.Experiment);
+        Experiment _experiment;
+
+        void MapLayers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null)
+                        foreach (var layer in e.NewItems.Cast<MapLayerViewModel>().Where(layer => !_wpfMap.Overlays.Contains(layer.Name)))
+                        {
+                            _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay);
+                            _wpfMap.Refresh(layer.LayerOverlay);
+                        }
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    Debug.WriteLine("MapView: LayerCollection.Move");
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    if (e.OldItems != null) foreach (var layer in e.OldItems) _wpfMap.Overlays.Remove(((MapLayerViewModel) layer).LayerOverlay);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    Debug.WriteLine("MapView: LayerCollection.Replace");
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    _wpfMap.Overlays.Clear();
+                    foreach (var layer in _experiment.MapLayers) _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay);
+                    break;
+            }
+        }
+
+        #endregion
+
+
 
         [MediatorMessageSink(MediatorMessage.QuickLookCommand)]
         void QuickLookCommand(bool dummy)
         {
             IsQuickLookMode = true;
             Cursor = Cursors.Cross;
+        }
+
+        [MediatorMessageSink(MediatorMessage.SetExperiment)]
+        void SetExperiment(Experiment experiment)
+        {
+            Experiment = experiment;
         }
 
         [MediatorMessageSink(MediatorMessage.AddMapLayer)]
@@ -230,19 +275,6 @@ namespace ESMEWorkBench.ViewModels.Map
             _wpfMap.Overlays.MoveToBottom(mapLayer.LayerOverlay);
             RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
-        }
-
-        [MediatorMessageSink(MediatorMessage.SetCurrentScale)]
-        void SetCurrentScale(double newScale)
-        {
-            _wpfMap.CurrentScale = newScale;
-        }
-
-        [MediatorMessageSink(MediatorMessage.SetCurrentExtent)]
-        void SetCurrentExtent(RectangleShape newExtent)
-        {
-            _wpfMap.CurrentExtent = newExtent;
-            _wpfMap.Refresh();
         }
     }
 }

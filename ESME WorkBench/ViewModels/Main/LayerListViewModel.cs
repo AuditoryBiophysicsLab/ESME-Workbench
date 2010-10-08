@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using Cinch;
+using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.Map;
 using MEFedMVVM.ViewModelLocator;
 
@@ -51,7 +52,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_layerViewModels == value) return;
                 if (_layerViewModels != null) _layerViewModels.CollectionChanged -= ShapeMapLayersCollectionChanged;
                 _layerViewModels = value;
-                _layerViewModels.CollectionChanged += ShapeMapLayersCollectionChanged;
+                if (_layerViewModels != null) _layerViewModels.CollectionChanged += ShapeMapLayersCollectionChanged;
                 NotifyPropertyChanged(MapLayersChangedEventArgs);
             }
         }
@@ -62,16 +63,38 @@ namespace ESMEWorkBench.ViewModels.Main
         void ShapeMapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(MapLayersChangedEventArgs); }
 
         #endregion
+        #region public Experiment Experiment { get; set; }
+
+        public Experiment Experiment
+        {
+            get { return _experiment; }
+            set
+            {
+                if (_experiment == value) return;
+                _experiment = value;
+                NotifyPropertyChanged(ExperimentChangedEventArgs);
+                OnExperimentChanged(_experiment);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExperimentChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.Experiment);
+        Experiment _experiment;
+        void OnExperimentChanged(Experiment experiment) 
+        {
+            MapLayers = experiment == null ? null : experiment.MapLayers;
+        }
+
+        #endregion
+
+        [MediatorMessageSink(MediatorMessage.SetExperiment)]
+        void SetExperiment(Experiment experiment)
+        {
+            Experiment = experiment;
+        }
 
         static void ViewLoaded()
         {
             MediatorMessage.Send(MediatorMessage.LayerListViewModelInitialized);
-        }
-
-        [MediatorMessageSink(MediatorMessage.CloseExperiment)]
-        void CloseExperiment(bool dummy)
-        {
-            while (MapLayers.Count > 0) MediatorMessage.Send(MediatorMessage.RemoveLayer, MapLayers[0]);
         }
 
         [MediatorMessageSink(MediatorMessage.SetLayerCollection)]

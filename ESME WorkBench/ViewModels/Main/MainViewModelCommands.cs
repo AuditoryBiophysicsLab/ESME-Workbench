@@ -162,24 +162,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region CloseExperimentCommand
-
-        public SimpleCommand<object, object> CloseExperimentCommand
-        {
-            get
-            {
-                return _closeExperiment ?? (_closeExperiment = new SimpleCommand<object, object>(delegate
-                                                                                                 {
-                                                                                                     if (UserCanceledBecauseExperimentUnsaved()) return;
-                                                                                                     MediatorMessage.Send(MediatorMessage.CloseExperiment, true);
-                                                                                                 }));
-            }
-        }
-
-        SimpleCommand<object, object> _closeExperiment;
-
-        #endregion
-
         #region RefreshMapCommand
 
         public SimpleCommand<object, object> RefreshMapCommand
@@ -229,7 +211,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> SaveExperimentAsCommand
         {
-            get { return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.SaveExperimentAsCommand); })); }
+            get { return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(delegate { SaveExperimentAs(); ; })); }
         }
 
         SimpleCommand<object, object> _saveExperimentAs;
@@ -246,7 +228,9 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                              {
                                                                                                  if (UserCanceledBecauseExperimentUnsaved()) return;
                                                                                                  _experiment = new Experiment();
+                                                                                                 _experiment.InitializeIfViewModelsReady();
                                                                                                  DecoratedExperimentName = "<New experiment>";
+                                                                                                 HookPropertyChanged(_experiment);
                                                                                              }));
             }
         }
@@ -265,6 +249,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                            {
                                                                                                _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
                                                                                                _openFileService.InitialDirectory = Settings.Default.LastShapefileDirectory;
+                                                                                               _openFileService.FileName = null;
                                                                                                var result = _openFileService.ShowDialog(null);
                                                                                                if (!result.HasValue || !result.Value) return;
                                                                                                Settings.Default.LastShapefileDirectory = Path.GetDirectoryName(_openFileService.FileName);
@@ -298,6 +283,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                              {
                                                                                                                  _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
                                                                                                                  _openFileService.InitialDirectory = Settings.Default.LastOverlayFileDirectory;
+                                                                                                                 _openFileService.FileName = null;
                                                                                                                  var result = _openFileService.ShowDialog(null);
                                                                                                                  if (!result.HasValue || !result.Value) return;
                                                                                                                  Settings.Default.LastOverlayFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
@@ -336,7 +322,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> QuickLookCommand
         {
-            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.QuickLookCommand); })); }
+            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => (((_experiment != null) && (_experiment.NemoFile != null)) && (_experiment.Bathymetry != null)) && (_experiment.SoundSpeedField != null), delegate { MediatorMessage.Send(MediatorMessage.QuickLookCommand); })); }
         }
 
         SimpleCommand<object, object> _quickLook;

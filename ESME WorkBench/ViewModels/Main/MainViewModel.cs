@@ -69,6 +69,8 @@ namespace ESMEWorkBench.ViewModels.Main
             else
             {
                 _experiment = new Experiment{MessageBoxService = _messageBoxService};
+                HookPropertyChanged(_experiment);
+                _experiment.InitializeIfViewModelsReady();
                 DecoratedExperimentName = "<New experiment>";
             }
             HookPropertyChanged(_experiment);
@@ -213,6 +215,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 _openFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
                 _openFileService.InitialDirectory = Settings.Default.LastExperimentFileDirectory;
+                _openFileService.FileName = null;
                 var result = _openFileService.ShowDialog((Window) _viewAwareStatusService.View);
                 if ((!result.HasValue) || (!result.Value)) return;
                 _experiment.FileName = _openFileService.FileName;
@@ -223,7 +226,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void LoadExperimentFile(string fileName)
         {
-            MediatorMessage.Send(MediatorMessage.CloseExperiment);
+            MediatorMessage.Send(MediatorMessage.SetExperiment, (Experiment)null);
             var extraTypes = new[]
                              {
                                  typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer)
@@ -231,8 +234,9 @@ namespace ESMEWorkBench.ViewModels.Main
             _experiment = Experiment.Load(fileName, extraTypes);
             _experiment.FileName = fileName;
             _experiment.MessageBoxService = _messageBoxService;
-            MediatorMessage.Send(MediatorMessage.ExperimentLoaded);
             DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
+            HookPropertyChanged(_experiment);
+            _experiment.InitializeIfViewModelsReady();
         }
 
         void OpenScenarioFile(string fileName)
@@ -242,6 +246,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
                 _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
+                _openFileService.FileName = null;
                 var result = _openFileService.ShowDialog((Window) _viewAwareStatusService.View);
                 if (!result.HasValue || !result.Value) return;
                 fileName = _openFileService.FileName;
@@ -251,6 +256,26 @@ namespace ESMEWorkBench.ViewModels.Main
             MediatorMessage.Send(MediatorMessage.AddScenarioFileCommand, fileName);
         }
 
+        bool SaveExperimentDialog()
+        {
+            _saveFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
+            _saveFileService.OverwritePrompt = true;
+            _saveFileService.InitialDirectory = Settings.Default.LastExperimentFileDirectory;
+            _saveFileService.FileName = null;
+            var result = _saveFileService.ShowDialog((Window)_viewAwareStatusService.View);
+            if ((!result.HasValue) || (!result.Value)) return false;
+            _experiment.FileName = _saveFileService.FileName;
+            Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
+            return true;
+        }
+
+        bool SaveExperimentAs()
+        {
+            if (!SaveExperimentDialog()) return false;
+            _experiment.Save();
+            DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
+            return true;
+        }
         /// <summary>
         ///   If the experiment has not been given a file name, prompt the user for it, then save
         /// </summary>
@@ -259,13 +284,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (_experiment.FileName == null)
             {
-                _saveFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
-                _saveFileService.OverwritePrompt = true;
-                _saveFileService.InitialDirectory = Settings.Default.LastExperimentFileDirectory;
-                var result = _saveFileService.ShowDialog((Window) _viewAwareStatusService.View);
-                if ((!result.HasValue) || (!result.Value)) return false;
-                _experiment.FileName = _saveFileService.FileName;
-                Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
+                if (!SaveExperimentDialog()) return false;
             }
             _experiment.Save();
             DecoratedExperimentName = Path.GetFileName(_experiment.FileName);

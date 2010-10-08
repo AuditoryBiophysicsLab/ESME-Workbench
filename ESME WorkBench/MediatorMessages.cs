@@ -14,6 +14,8 @@ namespace ESMEWorkBench
         public const string AddFileCommand = "AddFileCommandMessage";
         public const string AddScenarioFileCommand = "AddScenarioFileCommandMessage";
 
+        public const string SetExperiment = "SetExperimentMessage";
+
         public const string SetLayerCollection = "SetLayerCollectionMessage";
         public const string LayerAdded = "LayerAddedMessage";
 
@@ -33,7 +35,6 @@ namespace ESMEWorkBench
 
         public const string SetLayerIndex = "SetLayerIndexMessage";
 
-        public const string CloseExperiment = "CloseExperimentMessage";
         public const string ExperimentClosed = "ExperimentClosedMessage";
         public const string ExperimentLoaded = "ExperimentLoadedMessage";
         public const string SetExperimentAsModified = "SetExperimentAsModifiedMessage";

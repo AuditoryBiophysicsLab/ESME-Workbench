@@ -80,13 +80,19 @@
 		          SelectedIndex="0">
 			<r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
-					<r:RibbonApplicationMenuItem Header="Save Experiment"
+                    <r:RibbonApplicationMenuItem Header="Save Experiment"
                                                  InputGestureText="Ctrl+S"
 					                             ImageSource="..\Images\LargeIcons\save-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Save the current experiment"
 					                             Command="{Binding SaveExperimentCommand}" />
-					<r:RibbonApplicationMenuItem Header="Open Experiment"
+                    <r:RibbonApplicationMenuItem Header="Save Experiment As"
+                                                 InputGestureText="Alt+S"
+					                             ImageSource="..\Images\LargeIcons\save-icon.png"
+					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
+					                             ToolTipDescription="Save the current experiment with a new file name"
+					                             Command="{Binding SaveExperimentAsCommand}" />
+                    <r:RibbonApplicationMenuItem Header="Open Experiment"
                                                  InputGestureText="Ctrl+O"
 					                             ImageSource="..\Images\LargeIcons\open-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
@@ -96,7 +102,7 @@
 					                             ImageSource="..\Images\LargeIcons\close-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Close the current experiment"
-					                             Command="{Binding CloseExperimentCommand}" />
+					                             Command="{Binding NewExperimentCommand}" />
 					<r:RibbonApplicationMenuItem Header="New Experiment"
                                                  InputGestureText="Ctrl+N"
 					                             ImageSource="..\Images\LargeIcons\new-icon.png"
@@ -187,7 +193,7 @@
 					                SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new analysis point to the experiment"
-					                Command="{Binding TestTransmissionLossViewCommand}" />
+					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Fixed Source"
 					                LargeImageSource="..\Images\LargeIcons\Sound.png"
 					                SmallImageSource="..\Images\SmallIcons\Sound.png"
