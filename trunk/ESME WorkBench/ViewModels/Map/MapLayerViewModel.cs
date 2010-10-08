@@ -420,24 +420,6 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
-        #region public bool ShowContextMenu { get; set; }
-
-        static readonly PropertyChangedEventArgs ShowContextMenuEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ShowContextMenu);
-        bool _showContextMenu;
-
-        public bool ShowContextMenu
-        {
-            get { return _showContextMenu; }
-            set
-            {
-                if (_showContextMenu == value) return;
-                _showContextMenu = value;
-                NotifyPropertyChanged(ShowContextMenuEventArgs);
-            }
-        }
-
-        #endregion
-
         #region public List<MenuItemViewModel> ContextMenu { get; set; }
 
         static readonly PropertyChangedEventArgs ContextMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ContextMenu);
