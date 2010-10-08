@@ -471,7 +471,7 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return (_mapOverlay != null) ? _mapOverlay.IndexOf(LayerOverlay) : _index; }
             set
             {
-                if (_mapOverlay != null) _mapOverlay.MoveTo(LayerOverlay, value);
+                if ((_mapOverlay != null) && (_mapOverlay.Contains(LayerOverlay))) _mapOverlay.MoveTo(LayerOverlay, value);
                 _index = value;
             }
         }

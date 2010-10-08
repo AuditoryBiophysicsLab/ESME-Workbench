@@ -156,12 +156,6 @@ namespace ESMEWorkBench.ViewModels.Map
             //_wpfMap.ZoomToScale(_wpfMap.ZoomLevelScales[3]);
         }
 
-        [MediatorMessageSink(MediatorMessage.CloseExperiment)]
-        void CloseExperiment(bool dummy)
-        {
-            _wpfMap.Overlays.Clear();
-        }
-
         [MediatorMessageSink(MediatorMessage.QuickLookCommand)]
         void QuickLookCommand(bool dummy)
         {

@@ -71,7 +71,7 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.CloseExperiment)]
         void CloseExperiment(bool dummy)
         {
-            MapLayers = null;
+            while (MapLayers.Count > 0) MediatorMessage.Send(MediatorMessage.RemoveLayer, MapLayers[0]);
         }
 
         [MediatorMessageSink(MediatorMessage.SetLayerCollection)]

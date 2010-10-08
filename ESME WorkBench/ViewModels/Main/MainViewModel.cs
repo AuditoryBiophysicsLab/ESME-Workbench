@@ -223,6 +223,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void LoadExperimentFile(string fileName)
         {
+            MediatorMessage.Send(MediatorMessage.CloseExperiment);
             var extraTypes = new[]
                              {
                                  typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer)

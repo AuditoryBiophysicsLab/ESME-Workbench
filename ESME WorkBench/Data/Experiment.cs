@@ -401,10 +401,10 @@ namespace ESMEWorkBench.Data
         {
             if (NemoFile == null) return;
             var boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
-            var north = (float)boundingBox.Bottom;
-            var west = (float)boundingBox.Left;
-            var south = (float)boundingBox.Top;
-            var east = (float)boundingBox.Right;
+            var north = (float)boundingBox.Bottom + 2;
+            var west = (float)boundingBox.Left - 2;
+            var south = (float)boundingBox.Top - 2;
+            var east = (float)boundingBox.Right + 2;
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
                 Bathymetry = new Bathymetry(BathymetryFileName, north, west, south, east);
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
