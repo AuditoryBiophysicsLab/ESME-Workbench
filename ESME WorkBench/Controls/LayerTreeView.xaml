@@ -37,8 +37,7 @@
 				                  Margin="2,0">
 				</ContentPresenter>
 				<StackPanel.ContextMenu>
-					<ContextMenu IsOpen="{Binding ShowContextMenu, Mode=OneWay}"
-					             ItemsSource="{Binding ContextMenu}"
+					<ContextMenu ItemsSource="{Binding ContextMenu}"
 					             ItemContainerStyle="{StaticResource ContextMenuItemStyle}" />
 				</StackPanel.ContextMenu>
 			</StackPanel>
