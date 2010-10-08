@@ -12,12 +12,13 @@
 		<KeyBinding Command="{Binding SaveAsCommand}"
 		            Key="S"
 		            Modifiers="Control" />
+        <KeyBinding Command="{Binding ExportAsCommand}"
+		            Key="E"
+		            Modifiers="Control" />
 		<KeyBinding Command="{Binding CloseWindowCommand}"
 		            Key="W"
 		            Modifiers="Control" />
-        <KeyBinding Command="{Binding ExportAsCommand}"
-                    Key="E"
-                    Modifiers="Control" />
+		
 	</Window.InputBindings>
 
 	<DockPanel LastChildFill="True">
@@ -34,16 +35,14 @@
 					          InputGestureText="Ctrl+S" />
 					<MenuItem Header="Export to CSV"
 					          Command="{Binding ExportAsCommand}"
-                              InputGestureText="Ctrl+E"/>
+					          InputGestureText="Ctrl+E" />
 					<MenuItem Header="Exit View"
-                              Command="{Binding CloseWindowCommand}"
-					          InputGestureText="Ctrl+W">
-					</MenuItem>
+					          Command="{Binding CloseWindowCommand}"
+					          InputGestureText="Ctrl+W" />
 				</MenuItem>
 				<MenuItem Header=" _Help"
 				          HorizontalAlignment="Right"
-                          IsEnabled="False"
-                          />
+				          IsEnabled="False" />
 			</Menu>
 		</DockPanel>
 

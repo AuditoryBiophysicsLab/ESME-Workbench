@@ -96,12 +96,14 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                                                    _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpg)|*.jpg|Bitmap (*.bmp)|*.bmp";
                                                                                    //_saveFileService.Filter = "Portable Network Graphics (*.png)|*.png";
                                                                                    _saveFileService.OverwritePrompt = true;
+                                                                                   _saveFileService.FileName = null;
+                                                                                   _saveFileService.InitialDirectory = Properties.Settings.Default.LastImageExportFileDirectory;
                                                                                    bool? result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
                                                                                    if (result.HasValue && result.Value)
                                                                                    {
-                                                                                       //_saveFileService.FileName
+                                                                                       Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
                                                                                        
-#if true //todo graham turn this back on when it works.
+#if true //todo graham turn this back on when it works.)
                                                                                        switch (Path.GetExtension(_saveFileService.FileName).ToLower())
                                                                                        {
                                                                                            case ".jpg":
@@ -137,10 +139,13 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             get { return _exportAs ?? (_exportAs = new SimpleCommand<object, object>(delegate
                                                                                      {
                                                                                          _saveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
+                                                                                         _saveFileService.FileName = null;
+                                                                                         _saveFileService.InitialDirectory = Properties.Settings.Default.LastCSVExportFileDirectory;
                                                                                          _saveFileService.OverwritePrompt = true;
                                                                                          bool? result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
                                                                                          if (result.HasValue && result.Value)
                                                                                          {
+                                                                                             Properties.Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
                                                                                              TransmissionLossField.Radials[SelectedRadial].SaveAsCSV(_saveFileService.FileName, TransmissionLossField);
                                                                                          }
                                                                                      })); }
