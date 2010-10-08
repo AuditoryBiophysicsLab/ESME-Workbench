@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
+using ESME.Model;
 using ESME.NEMO;
 using ESME.Overlay;
 using ESMEWorkBench.ViewModels.Layers;
@@ -288,6 +289,9 @@ namespace ESMEWorkBench.Data
         [XmlIgnore]
         public Bathymetry Bathymetry { get; private set; }
 
+        [XmlIgnore]
+        public SoundSpeedField SoundSpeedField { get; private set; }
+
         public Experiment()
         {
             try
@@ -380,7 +384,12 @@ namespace ESMEWorkBench.Data
                         if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
                         {
                             var boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
-                            Bathymetry = new Bathymetry(BathymetryFileName, (float)boundingBox.Bottom, (float)boundingBox.Left, (float)boundingBox.Top, (float)boundingBox.Right);
+                            var north = (float) boundingBox.Bottom;
+                            var west = (float) boundingBox.Left;
+                            var south = (float) boundingBox.Top;
+                            var east = (float) boundingBox.Right;
+                            Bathymetry = new Bathymetry(BathymetryFileName, north, west, south, east);
+                            SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
                         }
                         break;
                     case LayerType.Track:

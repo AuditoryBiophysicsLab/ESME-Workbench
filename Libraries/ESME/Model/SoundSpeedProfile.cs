@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using System.IO;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Schema;
-using System.Xml.Serialization;
+using System.Text;
 using HRC.Navigation;
 
 namespace ESME.Model
@@ -15,49 +9,52 @@ namespace ESME.Model
     public class SoundSpeedProfile
     {
         #region Public Properties
+
         public string TimePeriod { get; internal set; }
         public EarthCoordinate Location { get; internal set; }
-        public float[] Depths_meters { get; internal set; }
-        public float[] SoundSpeeds_metersSecond { get; internal set; }
+        public float[] Depths { get; internal set; }
+        public float[] SoundSpeeds { get; internal set; }
+        public float MaxDepth { get; internal set; }
+
         #endregion
 
-        internal readonly static UInt32 Magic = 0xe1071103;
+        internal static readonly UInt32 Magic = 0xe1071103;
 
         #region Public Constructors
+
         public SoundSpeedProfile() { }
 
-        public SoundSpeedProfile(string TimePeriod, EarthCoordinate Location, float[] Depths_meters, float[] SoundSpeeds_metersSecond)
+        public SoundSpeedProfile(string timePeriod, EarthCoordinate location, IList<float> depths, IList<float> soundSpeeds)
         {
-            this.TimePeriod = TimePeriod;
-            this.Location = Location;
+            TimePeriod = timePeriod;
+            Location = location;
 
-            var Speeds = new List<float>();
-            var Depths = new List<float>();
-            for (int i = 0; i < SoundSpeeds_metersSecond.Length; i++)
+            var speedList = new List<float>();
+            var depthList = new List<float>();
+            for (var i = 0; i < soundSpeeds.Count; i++)
             {
-                if (float.IsNaN(SoundSpeeds_metersSecond[i]))
-                    break;
-                Speeds.Add(SoundSpeeds_metersSecond[i]);
-                Depths.Add(Depths_meters[i]);
+                if (float.IsNaN(soundSpeeds[i])) break;
+                speedList.Add(soundSpeeds[i]);
+                depthList.Add(depths[i]);
             }
-            this.SoundSpeeds_metersSecond = Speeds.ToArray();
-            this.Depths_meters = Depths.ToArray();
+            SoundSpeeds = speedList.ToArray();
+            Depths = depthList.ToArray();
+            MaxDepth = Depths.Length == 0 ? 0 : Depths[Depths.Length - 1];
         }
 
         public SoundSpeedProfile(BinaryReader stream)
         {
             int i;
-            if (stream.ReadUInt32() != Magic)
-                throw new FormatException("Format error reading SoundSpeedProfile from file");
+            if (stream.ReadUInt32() != Magic) throw new FormatException("Format error reading SoundSpeedProfile from file");
             TimePeriod = stream.ReadString();
             Location = new EarthCoordinate(stream);
-            Depths_meters = new float[stream.ReadInt32()];
-            for (i = 0; i < Depths_meters.Length; i++)
-                Depths_meters[i] = stream.ReadSingle();
-            SoundSpeeds_metersSecond = new float[stream.ReadInt32()];
-            for (i = 0; i < SoundSpeeds_metersSecond.Length; i++)
-                SoundSpeeds_metersSecond[i] = stream.ReadSingle();
+            Depths = new float[stream.ReadInt32()];
+            for (i = 0; i < Depths.Length; i++) Depths[i] = stream.ReadSingle();
+            SoundSpeeds = new float[stream.ReadInt32()];
+            for (i = 0; i < SoundSpeeds.Length; i++) SoundSpeeds[i] = stream.ReadSingle();
+            MaxDepth = Depths[Depths.Length - 1];
         }
+
         #endregion
 
         public void Save(BinaryWriter stream)
@@ -66,58 +63,56 @@ namespace ESME.Model
             stream.Write(Magic);
             stream.Write(TimePeriod);
             Location.Write(stream);
-            stream.Write(Depths_meters.Length);
-            for (i = 0; i < Depths_meters.Length; i++)
-                stream.Write(Depths_meters[i]);
-            stream.Write(SoundSpeeds_metersSecond.Length);
-            for (i = 0; i < SoundSpeeds_metersSecond.Length; i++)
-                stream.Write(SoundSpeeds_metersSecond[i]);
+            stream.Write(Depths.Length);
+            for (i = 0; i < Depths.Length; i++) stream.Write(Depths[i]);
+            stream.Write(SoundSpeeds.Length);
+            for (i = 0; i < SoundSpeeds.Length; i++) stream.Write(SoundSpeeds[i]);
         }
 
-        public readonly static SoundSpeedProfile Empty = new SoundSpeedProfile
-        {
-            TimePeriod = string.Empty,
-            Location = null,
-            Depths_meters = null,
-            SoundSpeeds_metersSecond = null,
-        };
+        public static readonly SoundSpeedProfile Empty = new SoundSpeedProfile
+                                                         {
+                                                             TimePeriod = string.Empty,
+                                                             Location = null,
+                                                             Depths = null,
+                                                             SoundSpeeds = null,
+                                                         };
 
-        private static SoundSpeedProfile Read(string date, string sspPath)
+        static SoundSpeedProfile Read(string date, string sspPath)
         {
             var depthList = new List<float>();
             var soundspeedList = new List<float>();
 
-            string fileName = sspPath.Substring(sspPath.LastIndexOf('_') + 1).Replace(".ssp", "");
-            string[] nameArray = fileName.Split('x');
+            var fileName = sspPath.Substring(sspPath.LastIndexOf('_') + 1).Replace(".ssp", "");
+            var nameArray = fileName.Split('x');
 
-            double latitude, longitude;
+            double latitude,
+                   longitude;
 
-            if (nameArray.Length != 2 || !double.TryParse(nameArray[0], out latitude) || !double.TryParse(nameArray[1], out longitude))
-                throw new FileNameFormatException("The Sound Speed Profile file did not have the expected file name format.");
+            if (nameArray.Length != 2 || !double.TryParse(nameArray[0], out latitude) || !double.TryParse(nameArray[1], out longitude)) throw new FileNameFormatException("The Sound Speed Profile file did not have the expected file name format.");
 
-            if (!File.Exists(sspPath))
-                throw new FileNotFoundException("The requested Sound Speed Profile file does not exist.");
+            if (!File.Exists(sspPath)) throw new FileNotFoundException("The requested Sound Speed Profile file does not exist.");
 
-            FileInfo fileInfo = new FileInfo(sspPath);
-            if (fileInfo.Length == 0)
-                throw new FileIsEmptyException("The requested Sound Speed Profile file is empty.");
+            var fileInfo = new FileInfo(sspPath);
+            if (fileInfo.Length == 0) throw new FileIsEmptyException("The requested Sound Speed Profile file is empty.");
 
-            using (StreamReader streamReader = new StreamReader(sspPath, Encoding.ASCII))
+            using (var streamReader = new StreamReader(sspPath, Encoding.ASCII))
             {
                 string line;
                 string[] lineArray;
 
                 while ((line = streamReader.ReadLine()) != null)
                 {
-                    lineArray = line.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    lineArray = line.Split(new[]
+                                           {
+                                               ' ', '\t'
+                                           }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (lineArray.Length == 2)
                     {
                         depthList.Add(float.Parse(lineArray[0]));
                         soundspeedList.Add(float.Parse(lineArray[1]));
                     }
-                    else if (lineArray.Length != 0)
-                        throw new FileFormatException("The Sound Speed Profile file did not have the expected format.");
+                    else if (lineArray.Length != 0) throw new FileFormatException("The Sound Speed Profile file did not have the expected format.");
                 }
             }
 
@@ -126,13 +121,10 @@ namespace ESME.Model
 
         public static SoundSpeedProfile Read(string date, double latitude, double longitude, string ssfPath)
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo(ssfPath);
-            FileInfo[] fileInfo = directoryInfo.GetFiles("*" + latitude.ToString("###.0000") + "x" + longitude.ToString("###.0000") + "*");
+            var directoryInfo = new DirectoryInfo(ssfPath);
+            var fileInfo = directoryInfo.GetFiles("*" + latitude.ToString("###.0000") + "x" + longitude.ToString("###.0000") + "*");
 
-            if (fileInfo.Length == 1)
-                return Read(date, fileInfo[0].FullName);
-            else
-                return SoundSpeedProfile.Empty;
+            return fileInfo.Length == 1 ? Read(date, fileInfo[0].FullName) : Empty;
         }
     }
 }

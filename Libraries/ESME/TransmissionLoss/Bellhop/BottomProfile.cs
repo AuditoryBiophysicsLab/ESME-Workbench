@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using ESME.Environment;
+using ESME.Model;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.Bellhop
