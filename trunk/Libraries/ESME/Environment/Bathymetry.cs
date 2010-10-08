@@ -13,37 +13,37 @@ namespace ESME.Environment
         #region Public properties
 
         /// <summary>
-        /// Elevations of all points in the bathymetry, in meters.  Positive values are ABOVE sea level
+        ///   Elevations of all points in the bathymetry, in meters.  Positive values are ABOVE sea level
         /// </summary>
         public float[,] Elevations { get; internal set; }
 
         /// <summary>
-        /// List of latitudes (in degrees) for which we have elevation points
+        ///   List of latitudes (in degrees) for which we have elevation points
         /// </summary>
         public double[] Latitudes { get; internal set; }
 
         /// <summary>
-        /// List of longitudes (in degrees) for which we have elevation points
+        ///   List of longitudes (in degrees) for which we have elevation points
         /// </summary>
         public double[] Longitudes { get; internal set; }
 
         /// <summary>
-        /// Lowest elevation in the bathymetry.  Usually below sea level (negative).
+        ///   Lowest elevation in the bathymetry.  Usually below sea level (negative).
         /// </summary>
         public float MinElevation { get; internal set; }
 
         /// <summary>
-        /// Highest elevation in the bathymetry.  May be above sea level (positive).
+        ///   Highest elevation in the bathymetry.  May be above sea level (positive).
         /// </summary>
         public float MaxElevation { get; internal set; }
 
         /// <summary>
-        /// Corner of the bathymetry that has the minimum lat and lon values
+        ///   Corner of the bathymetry that has the minimum lat and lon values
         /// </summary>
         public EarthCoordinate MinCoordinate { get; internal set; }
 
         /// <summary>
-        /// Corner of the bathymetry that has the maximum lat and lon values
+        ///   Corner of the bathymetry that has the maximum lat and lon values
         /// </summary>
         public EarthCoordinate MaxCoordinate { get; internal set; }
 
@@ -79,51 +79,26 @@ namespace ESME.Environment
             Filename = filename;
             if (Path.GetExtension(filename) != ".eeb") throw new FileFormatException(string.Format("Bathymetry: Unknown file type \"{0}\"", Path.GetFileName(filename)));
             var file = DataFile.Open(filename);
-            foreach (var layer in file.Layers)
-            {
-                if (layer.Name != "bathymetry") continue;
-                int westLonIndex,
-                    eastLonIndex;
-                int southLatIndex,
-                    northLatIndex;
-                float lonShift = 0;
-                westLonIndex = eastLonIndex = southLatIndex = northLatIndex = 0;
-                if (layer.LongitudeAxis.Values[0] > west)
-                {
-                    lonShift = 360;
-                    west += lonShift;
-                    east += lonShift;
-                }
-                for (var i = 0; i < layer.LongitudeAxis.Values.Length; i++)
-                {
-                    if (west >= layer.LongitudeAxis.Values[i]) 
-                        westLonIndex = i;
-                    if (east >= layer.LongitudeAxis.Values[i]) 
-                        eastLonIndex = i;
-                }
-                Longitudes = new double[eastLonIndex - westLonIndex];
-                for (var i = 0; i < Longitudes.Length; i++) Longitudes[i] = layer.LongitudeAxis.Values[i + westLonIndex] - lonShift;
 
-                for (var i = 0; i < layer.LatitudeAxis.UnwrappedValues.Length; i++)
-                {
-                    if (south >= layer.LatitudeAxis.UnwrappedValues[i]) southLatIndex = i;
-                    if (north >= layer.LatitudeAxis.UnwrappedValues[i]) northLatIndex = i;
-                }
-                Latitudes = new double[northLatIndex - southLatIndex];
-                for (var i = 0; i < Latitudes.Length; i++) Latitudes[i] = layer.LatitudeAxis.UnwrappedValues[i + southLatIndex];
+            var layer = file["bathymetry"];
+            if (layer == null) throw new FileFormatException(string.Format("Bathymetry: Specified environment file \"{0}\"does not contain a bathymetry layer", filename));
 
-                MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
-                MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
-                MinElevation = float.MaxValue;
-                MaxElevation = float.MinValue;
-                Elevations = layer.Get2DData(southLatIndex, northLatIndex, northLatIndex - southLatIndex, westLonIndex, eastLonIndex, eastLonIndex - westLonIndex);
-                for (var row = 0; row < Elevations.GetLength(0); row++)
-                    for (var col = 0; col < Elevations.GetLength(1); col++)
-                    {
-                        MinElevation = Math.Min(MinElevation, Elevations[row, col]);
-                        MaxElevation = Math.Max(MaxElevation, Elevations[row, col]);
-                    }
-            }
+            Longitudes = layer.LongitudeAxis.DoubleValuesBetween(west, east);
+            Latitudes = layer.LatitudeAxis.DoubleValuesBetween(south, north);
+            var lonIndices = layer.LongitudeAxis.IndicesBetween(west, east);
+            var latIndices = layer.LatitudeAxis.IndicesBetween(south, north);
+
+            MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
+            MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
+            MinElevation = float.MaxValue;
+            MaxElevation = float.MinValue;
+            Elevations = layer.Get2DData(latIndices[0], latIndices[latIndices.Length - 1], lonIndices[0], lonIndices[lonIndices.Length - 1]);
+            for (var row = 0; row < Elevations.GetLength(0); row++)
+                for (var col = 0; col < Elevations.GetLength(1); col++)
+                {
+                    MinElevation = Math.Min(MinElevation, Elevations[row, col]);
+                    MaxElevation = Math.Max(MaxElevation, Elevations[row, col]);
+                }
         }
 
         public Bathymetry(string filename) : this()
@@ -234,18 +209,10 @@ namespace ESME.Environment
             stream.Write(Latitudes.Length);
             foreach (var lat in Latitudes) stream.Write(lat);
 
-            for (var lat = 0; lat < Latitudes.Length; lat++) 
-                for (var lon = 0; lon < Longitudes.Length; lon++) 
-                    stream.Write(Elevations[lat, lon]);
+            for (var lat = 0; lat < Latitudes.Length; lat++) for (var lon = 0; lon < Longitudes.Length; lon++) stream.Write(Elevations[lat, lon]);
         }
 
-        public bool ContainsCoordinate(EarthCoordinate coordinate)
-        {
-            return (MinCoordinate.Longitude_degrees <= coordinate.Longitude_degrees) &&
-                   (coordinate.Longitude_degrees <= MaxCoordinate.Longitude_degrees) &&
-                   (MinCoordinate.Latitude_degrees <= coordinate.Latitude_degrees) &&
-                   (coordinate.Latitude_degrees <= MaxCoordinate.Latitude_degrees);
-        }
+        public bool ContainsCoordinate(EarthCoordinate coordinate) { return (MinCoordinate.Longitude_degrees <= coordinate.Longitude_degrees) && (coordinate.Longitude_degrees <= MaxCoordinate.Longitude_degrees) && (MinCoordinate.Latitude_degrees <= coordinate.Latitude_degrees) && (coordinate.Latitude_degrees <= MaxCoordinate.Latitude_degrees); }
 
         // lookup a coordinate in the current bathymetry dataset.
         // The elevation at the requested coordinate is returned in the 'out' parameter Elevation
@@ -297,10 +264,5 @@ namespace ESME.Environment
             }
             return -1; // value not found within the array
         }
-    }
-
-    public class BathymetryOutOfBoundsException : Exception
-    {
-        public BathymetryOutOfBoundsException(string message) : base(message) { }
     }
 }

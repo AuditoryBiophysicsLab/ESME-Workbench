@@ -51,6 +51,30 @@ namespace ESME.Model
         public BathymetryOutOfBoundsException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
+    public class BathymetryTooShallowException : ESMEModelException
+    {
+        public BathymetryTooShallowException() { }
+        public BathymetryTooShallowException(string message) : base(message) { }
+        public BathymetryTooShallowException(string message, Exception innerException) : base(message, innerException) { }
+        public BathymetryTooShallowException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    public class LongitudeOutOfRangeException : ESMEModelException
+    {
+        public LongitudeOutOfRangeException() { }
+        public LongitudeOutOfRangeException(string message) : base(message) { }
+        public LongitudeOutOfRangeException(string message, Exception innerException) : base(message, innerException) { }
+        public LongitudeOutOfRangeException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    public class LatitudeOutOfRangeException : ESMEModelException
+    {
+        public LatitudeOutOfRangeException() { }
+        public LatitudeOutOfRangeException(string message) : base(message) { }
+        public LatitudeOutOfRangeException(string message, Exception innerException) : base(message, innerException) { }
+        public LatitudeOutOfRangeException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
     public class SpeciesNotFoundException : ESMEModelException
     {
         public SpeciesNotFoundException() { }

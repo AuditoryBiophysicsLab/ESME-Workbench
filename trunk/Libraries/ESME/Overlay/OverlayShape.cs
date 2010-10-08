@@ -125,7 +125,7 @@ namespace ESME.Overlay
             }
             var width = Math.Abs(west - east);
             var height = Math.Abs(north - south);
-            BoundingBox = new Rect(west, north, width, height);
+            BoundingBox = new Rect(west, south, width, height);
         }
     }
 }

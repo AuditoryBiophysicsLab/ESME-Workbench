@@ -21,7 +21,7 @@ namespace ESME.TransmissionLoss.Bellhop
                 sw.WriteLine("1,"); // was NMEDIA in gui_genbellhopenv.m
                 sw.WriteLine(useSurfaceReflection ? "'CFMT'," : "'CVMT',");
 
-                if (depthCellCount < 5) return "Error: Maximum depth of transect (" + maxCalculationDepthMeters + " meters) less than minimum required for transmission loss calculations.\nPlease choose a different location for this transect.";
+                if (depthCellCount < 5) throw new BathymetryTooShallowException("Error: Maximum depth of transect (" + maxCalculationDepthMeters + " meters) less than minimum required for transmission loss calculations.\nPlease choose a different location for this transect.");
 
                 sw.WriteLine("{0}, 0.0, {1:F}, !NMESH SIGMA Z(NSSP)", rangeCellCount, maxCalculationDepthMeters);
 
@@ -30,18 +30,18 @@ namespace ESME.TransmissionLoss.Bellhop
                 //    SoundSpeedProfile = ExtrapolateSSP(SoundSpeedProfile, RealBottomDepth_Meters);
 
                 double depth2;
-                var depth1 = depth2 = ssp.Depths_meters[0];
+                var depth1 = depth2 = ssp.Depths[0];
                 double speed2;
-                var speed1 = speed2 = ssp.SoundSpeeds_metersSecond[0];
-                for (var i = 0; i < ssp.Depths_meters.Length; i++)
+                var speed1 = speed2 = ssp.SoundSpeeds[0];
+                for (var i = 0; i < ssp.Depths.Length; i++)
                 {
-                    if (ssp.Depths_meters[i] < maxCalculationDepthMeters)
+                    if (ssp.Depths[i] < maxCalculationDepthMeters)
                     {
                         depth1 = depth2;
-                        depth2 = ssp.Depths_meters[i];
+                        depth2 = ssp.Depths[i];
                         speed1 = speed2;
-                        speed2 = ssp.SoundSpeeds_metersSecond[i];
-                        sw.WriteLine("{0:F} {1:F} /", ssp.Depths_meters[i], ssp.SoundSpeeds_metersSecond[i]);
+                        speed2 = ssp.SoundSpeeds[i];
+                        sw.WriteLine("{0:F} {1:F} /", ssp.Depths[i], ssp.SoundSpeeds[i]);
                     }
                     else
                     {

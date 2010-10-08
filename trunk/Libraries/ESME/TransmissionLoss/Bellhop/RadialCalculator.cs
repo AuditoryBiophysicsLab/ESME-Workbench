@@ -31,7 +31,7 @@ namespace ESME.TransmissionLoss.Bellhop
 
             // Create a process, run BELLHOP, and exit
             //BellhopProcess = new TLProcess(bw);
-            var bellhopProcess = new TLProcess
+            var bellhopProcess = new TransmissionLossProcess
                                  {
                                      StartInfo = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "Bellhop.exe"))
                                                  {
@@ -75,7 +75,7 @@ namespace ESME.TransmissionLoss.Bellhop
                 // mProgress_percent = BellhopProcess.ProgressPercent;
             }
             // mProgress_percent = BellhopProcess.ProgressPercent;
-            bellhopProcess.StandardError.ReadToEnd();
+            Debug.WriteLine("Bellhop error output for radial bearing " + bearing + " deg: \n" + bellhopProcess.StandardError.ReadToEnd());
             //if (BellhopOutputData.ToString() != "")
             //    MessageBox.Show(BellhopOutputData.ToString());
             //System.Diagnostics.Debug.WriteLine("BELLHOP Exit Code: " + BellhopProcess.ExitCode);
@@ -91,7 +91,7 @@ namespace ESME.TransmissionLoss.Bellhop
             var count = 0;
             while (!File.Exists(shdfile) && (count < 10))
             {
-                Thread.Sleep(100);
+                Thread.Sleep(200);
                 count++;
             }
             var result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
@@ -117,7 +117,7 @@ namespace ESME.TransmissionLoss.Bellhop
 
         static void OutputDataRecieved(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            var theProcess = (TLProcess) sendingProcess;
+            var theProcess = (TransmissionLossProcess) sendingProcess;
             string curLine;
             string[] fields;
             char[] separators = {
