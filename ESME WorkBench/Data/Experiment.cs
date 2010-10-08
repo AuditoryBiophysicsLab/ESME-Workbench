@@ -148,6 +148,7 @@ namespace ESMEWorkBench.Data
                 if (_soundSpeedFileName == value) return;
                 _soundSpeedFileName = value;
                 NotifyPropertyChanged(SoundSpeedFileNameChangedEventArgs);
+                InitializeEnvironment();
             }
         }
 
@@ -167,6 +168,7 @@ namespace ESMEWorkBench.Data
                 if (_bottomTypeFileName == value) return;
                 _bottomTypeFileName = value;
                 NotifyPropertyChanged(BottomTypeFileNameChangedEventArgs);
+                InitializeEnvironment();
             }
         }
 
@@ -186,6 +188,7 @@ namespace ESMEWorkBench.Data
                 if (_bathymetryFileName == value) return;
                 _bathymetryFileName = value;
                 NotifyPropertyChanged(BathymetryFileNameChangedEventArgs);
+                InitializeEnvironment();
             }
         }
 
@@ -207,6 +210,7 @@ namespace ESMEWorkBench.Data
                 if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) 
                     NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
                 NotifyPropertyChanged(ScenarioFileNameChangedEventArgs);
+                InitializeEnvironment();
             }
         }
 
@@ -381,16 +385,7 @@ namespace ESMEWorkBench.Data
                         break;
                     case LayerType.SimArea:
                         AddScenarioFileCommand(ScenarioFileName);
-                        if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
-                        {
-                            var boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
-                            var north = (float) boundingBox.Bottom;
-                            var west = (float) boundingBox.Left;
-                            var south = (float) boundingBox.Top;
-                            var east = (float) boundingBox.Right;
-                            Bathymetry = new Bathymetry(BathymetryFileName, north, west, south, east);
-                            SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
-                        }
+                        InitializeEnvironment();
                         break;
                     case LayerType.Track:
                     case LayerType.OpArea:
@@ -400,6 +395,20 @@ namespace ESMEWorkBench.Data
             }
             IsChanged = false;
             _isInitialized = true;
+        }
+
+        void InitializeEnvironment()
+        {
+            if (NemoFile == null) return;
+            var boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
+            var north = (float)boundingBox.Bottom;
+            var west = (float)boundingBox.Left;
+            var south = (float)boundingBox.Top;
+            var east = (float)boundingBox.Right;
+            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
+                Bathymetry = new Bathymetry(BathymetryFileName, north, west, south, east);
+            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
+                SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
         }
     }
 }
