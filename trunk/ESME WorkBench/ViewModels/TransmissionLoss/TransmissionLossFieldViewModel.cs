@@ -109,7 +109,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                                                            case ".jpg":
                                                                                            case ".jpeg":
                                                                                                encoder = new JpegBitmapEncoder();
-
                                                                                                break;
                                                                                            case ".png":
                                                                                                encoder = new PngBitmapEncoder();
@@ -121,8 +120,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 #endif
 
                                                                                        if (encoder == null) return;
-                                                                                       var bmp = new RenderTargetBitmap(1024, 768, 96, 96, PixelFormats.Pbgra32);
-                                                                                       bmp.Render(((TransmissionLossView) _viewAwareStatus.View).RadialView);
+                                                                                       
+                                                                                       var theView = ((TransmissionLossView) _viewAwareStatus.View).RadialView;
+                                                                                       var bmp = new RenderTargetBitmap((int)theView.ActualWidth, (int)theView.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                                                                                       bmp.Render(theView);
                                                                                        encoder.Frames.Add(BitmapFrame.Create(bmp));
                                                                                        using (var stream = new FileStream(_saveFileService.FileName, FileMode.Create)) encoder.Save(stream);
                                                                                    }
