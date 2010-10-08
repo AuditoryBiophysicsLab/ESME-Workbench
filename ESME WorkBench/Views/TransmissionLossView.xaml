@@ -29,7 +29,7 @@
 					<MenuItem Header="Save As"
 					          Command="{Binding SaveAsCommand}"
 					          InputGestureText="Ctrl+S" />
-					<MenuItem Header="Export to"
+					<MenuItem Header="Export to CSV"
 					          Command="{Binding ExportAsCommand}" />
 					<MenuItem Header="Exit View"
                               Command="{Binding CloseWindowCommand}"
