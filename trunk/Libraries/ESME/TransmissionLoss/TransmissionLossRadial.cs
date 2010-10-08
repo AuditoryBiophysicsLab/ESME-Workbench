@@ -151,7 +151,7 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine(); // Terminate the line
                 sw.WriteLine("Depth (m)");
                 // Write the slice data
-                for (int i = 0; i <= Depths.Length; i++)
+                for (int i = 0; i < Depths.Length; i++)
                 {
                     // Write out the Y axis value
                     sw.Write(Depths[i] + ",,");

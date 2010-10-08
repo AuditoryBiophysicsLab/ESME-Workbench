@@ -100,8 +100,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                                                    if (result.HasValue && result.Value)
                                                                                    {
                                                                                        //_saveFileService.FileName
-                                                                                       encoder = new PngBitmapEncoder();
-#if false //todo graham turn this back on when it works.
+                                                                                       
+#if true //todo graham turn this back on when it works.
                                                                                        switch (Path.GetExtension(_saveFileService.FileName).ToLower())
                                                                                        {
                                                                                            case ".jpg":
