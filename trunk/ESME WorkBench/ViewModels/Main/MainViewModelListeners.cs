@@ -21,7 +21,8 @@ namespace ESMEWorkBench.ViewModels.Main
         void TestTransmissionLossView(bool dummy)
         {
             _openFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
-            var result = _openFileService.ShowDialog((Window) _viewAwareStatusService.View);
+            _openFileService.FileName = null;
+            var result = _openFileService.ShowDialog((Window)_viewAwareStatusService.View);
             if ((!result.HasValue) || (!result.Value)) return;
             var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_openFileService.FileName, _saveFileService);
             _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
@@ -119,6 +120,7 @@ namespace ESMEWorkBench.ViewModels.Main
 #if false
             _saveFileService.OverwritePrompt = true;
             _saveFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
+            _saveFileService.FileName = null;
             var saveResult = _saveFileService.ShowDialog((Window) _viewAwareStatusService.View);
             if (saveResult.HasValue && saveResult.Value)
             {
@@ -141,8 +143,9 @@ namespace ESMEWorkBench.ViewModels.Main
                           {
                               MessageBoxService = _messageBoxService
                           };
-            HookPropertyChanged(_experiment);
             DecoratedExperimentName = "<New experiment>";
+            _experiment.InitializeIfViewModelsReady();
+            HookPropertyChanged(_experiment);
         }
     }
 }

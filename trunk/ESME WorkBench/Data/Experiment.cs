@@ -312,7 +312,6 @@ namespace ESMEWorkBench.Data
             PropertyChanged += delegate(object s, PropertyChangedEventArgs e) { if (e.PropertyName != "IsChanged") IsChanged = true; };
             CurrentExtent = "POLYGON((-173.84765625 123.442822265625,169.98046875 123.442822265625,169.98046875 -165.555615234375,-173.84765625 -165.555615234375,-173.84765625 123.442822265625))";
             CurrentScale = 147647947.5;
-            InitializeIfViewModelsReady();
         }
 
         public Experiment(string fileName)
@@ -342,7 +341,7 @@ namespace ESMEWorkBench.Data
             IsChanged = false;
         }
 
-        void InitializeIfViewModelsReady()
+        public void InitializeIfViewModelsReady()
         {
             if (_mainViewModelInitialized && _mapViewModelInitialized && _layerListViewModelInitialized)
                 Initialize();
@@ -350,7 +349,6 @@ namespace ESMEWorkBench.Data
 
         void Initialize()
         {
-            MediatorMessage.Send(MediatorMessage.InitializeMapView);
             if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent));
             if (CurrentScale != 0) MediatorMessage.Send(MediatorMessage.SetCurrentScale, CurrentScale);
             if (MapLayers == null)
@@ -373,28 +371,11 @@ namespace ESMEWorkBench.Data
                             };
             }
             MapLayerViewModel.Layers = MapLayers;
-            MediatorMessage.Send(MediatorMessage.SetLayerCollection, MapLayers);
-            foreach (var layer in MapLayers)
-            {
-                switch (layer.LayerType)
-                {
-                    case LayerType.BaseMap:
-                    case LayerType.Shapefile:
-                    case LayerType.OverlayFile:
-                        MediatorMessage.Send(MediatorMessage.AddMapLayer, layer);
-                        break;
-                    case LayerType.SimArea:
-                        AddScenarioFileCommand(ScenarioFileName);
-                        InitializeEnvironment();
-                        break;
-                    case LayerType.Track:
-                    case LayerType.OpArea:
-                        break;
-                }
-                //MediatorMessage.Send(MediatorMessage.SetLayerIndex, layer);
-            }
+            InitializeEnvironment();
+            AddScenarioFileCommand(ScenarioFileName);
             IsChanged = false;
             _isInitialized = true;
+            MediatorMessage.Send(MediatorMessage.SetExperiment, this);
         }
 
         void InitializeEnvironment()

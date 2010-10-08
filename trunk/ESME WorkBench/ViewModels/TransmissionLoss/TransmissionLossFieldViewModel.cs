@@ -98,7 +98,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                                                    _saveFileService.OverwritePrompt = true;
                                                                                    _saveFileService.FileName = null;
                                                                                    _saveFileService.InitialDirectory = Properties.Settings.Default.LastImageExportFileDirectory;
-                                                                                   bool? result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
+                                                                                   _saveFileService.FileName = null;
+                                                                                   var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
                                                                                    if (result.HasValue && result.Value)
                                                                                    {
                                                                                        Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
@@ -143,7 +144,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                                                          _saveFileService.FileName = null;
                                                                                          _saveFileService.InitialDirectory = Properties.Settings.Default.LastCSVExportFileDirectory;
                                                                                          _saveFileService.OverwritePrompt = true;
-                                                                                         bool? result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
+                                                                                         _saveFileService.FileName = null;
+                                                                                         var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
                                                                                          if (result.HasValue && result.Value)
                                                                                          {
                                                                                              Properties.Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
