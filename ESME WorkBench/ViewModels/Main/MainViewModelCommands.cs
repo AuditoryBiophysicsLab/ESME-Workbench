@@ -211,7 +211,14 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> SaveExperimentAsCommand
         {
-            get { return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(delegate { SaveExperimentAs(); ; })); }
+            get
+            {
+                return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(delegate
+                                                                                                   {
+                                                                                                       SaveExperimentAs();
+                                                                                                       ;
+                                                                                                   }));
+            }
         }
 
         SimpleCommand<object, object> _saveExperimentAs;
@@ -318,6 +325,17 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region ToggleScaleBarDisplayCommand
+
+        public SimpleCommand<object, Boolean> ToggleScaleBarDisplayCommand
+        {
+            get { return _toggleScaleBarDisplay ?? (_toggleScaleBarDisplay = new SimpleCommand<object, Boolean>(isChecked => MediatorMessage.Send(MediatorMessage.ToggleScaleBarDisplayCommand, isChecked))); }
+        }
+
+        SimpleCommand<object, Boolean> _toggleScaleBarDisplay;
+
+        #endregion
+
         #region QuickLookCommand
 
         public SimpleCommand<object, object> QuickLookCommand
@@ -326,6 +344,17 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _quickLook;
+
+        #endregion
+
+        #region SelectRecentFileCommand
+
+        public SimpleCommand<object, string> SelectRecentFileCommand
+        {
+            get { return _selectRecentFileCommand ?? (_selectRecentFileCommand = new SimpleCommand<object, string>(file => _messageBoxService.ShowInformation(file))); }
+        }
+
+        SimpleCommand<object, string> _selectRecentFileCommand;
 
         #endregion
 

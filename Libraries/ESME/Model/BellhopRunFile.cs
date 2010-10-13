@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -31,17 +32,11 @@ namespace ESME.Model
             var assembly = Assembly.GetExecutingAssembly();
             var schema = new StringBuilder();
             string[] schemaResources = {
-                                           "ESME.Schema.EarthCoordinate.xsd", 
-                                           "ESME.Schema.AnalysisPoint.xsd", 
-                                           "ESME.Schema.AcousticProperties.xsd", 
-                                           "ESME.Schema.TransmissionLossField.xsd", 
-                                           "ESME.Schema.BellhopRunfile.xsd",
+                                           "ESME.Schema.EarthCoordinate.xsd", "ESME.Schema.AnalysisPoint.xsd", "ESME.Schema.AcousticProperties.xsd", "ESME.Schema.TransmissionLossField.xsd", "ESME.Schema.BellhopRunfile.xsd",
                                        };
-            foreach (var resource in schemaResources)
-            {
+            foreach (var resource in schemaResources.Where(resource => assembly.GetManifestResourceStream(resource) != null)) 
                 using (var reader = new StreamReader(assembly.GetManifestResourceStream(resource))) 
                     schema.Append(reader.ReadToEnd());
-            }
             var fileReader = new StreamReader(filename);
             var file = fileReader.ReadToEnd();
             fileReader.Close();

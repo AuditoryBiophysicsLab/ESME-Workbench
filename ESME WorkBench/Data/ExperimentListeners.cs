@@ -6,6 +6,7 @@ using System.Windows.Media;
 using Cinch;
 using ESME.NEMO;
 using ESME.Platform;
+using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using ThinkGeo.MapSuite.Core;
@@ -77,7 +78,24 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        OverlayShapeMapLayer FindOverlayShapeMapLayer(LayerType layerType, string layerName) { return (OverlayShapeMapLayer) MapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault(); }
+        [MediatorMessageSink(MediatorMessage.AddAnalysisPoint)]
+        void AddAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+            AnalysisPoints.Add(analysisPoint);
+        }
+
+        [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
+        void EditAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+        }
+
+        [MediatorMessageSink(MediatorMessage.DeleteAnalysisPoint)]
+        void RemoveAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+            AnalysisPoints.Remove(analysisPoint);
+        }
+
+        OverlayShapeMapLayer FindOverlayShapeMapLayer(LayerType layerType, string layerName) { return (OverlayShapeMapLayer)MapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault(); }
 
         [MediatorMessageSink(MediatorMessage.AddScenarioFileCommand)]
         void AddScenarioFileCommand(string fileName)

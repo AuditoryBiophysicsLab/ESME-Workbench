@@ -7,22 +7,39 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
 using ESME.Model;
 using ESME.NEMO;
 using ESME.Overlay;
+using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
+using ESMEWorkBench.ViewModels.Main;
 using ESMEWorkBench.ViewModels.Map;
 using ThinkGeo.MapSuite.Core;
+using MapShapeLayer = ESMEWorkBench.ViewModels.Map.MapShapeLayer;
 
 namespace ESMEWorkBench.Data
 {
     [Serializable]
     public partial class Experiment : SerializableData<Experiment>
     {
+        public static Type[] ReferencedTypes
+        {
+            get
+            {
+                return _referencedTypes ?? (_referencedTypes = new[]
+                                                               {
+                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel)
+                                                               });
+            }
+        }
+
+        static Type[] _referencedTypes;
         #region public string Comments { get; set; }
 
         [XmlElement]
@@ -259,6 +276,63 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public ObservableCollection<AnalysisPoint> AnalysisPoints { get; set; }
+
+        public ObservableCollection<AnalysisPoint> AnalysisPoints
+        {
+            get { return _analysisPoints; }
+            set
+            {
+                if (_analysisPoints == value) return;
+                if (_analysisPoints != null) _analysisPoints.CollectionChanged -= AnalysisPointsCollectionChanged;
+                _analysisPoints = value;
+                if (_analysisPoints != null) _analysisPoints.CollectionChanged += AnalysisPointsCollectionChanged;
+                NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
+            }
+        }
+
+        void AnalysisPointsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null)
+                    {
+                        if (AnalysisPointLayer == null) return;
+                        foreach (var item in e.NewItems)
+                        {
+                            AnalysisPointLayer.AddMarker(((AnalysisPoint) item).Location, item);
+                        }
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    if (e.OldItems != null)
+                    {
+                        if (AnalysisPointLayer == null) return;
+                        foreach (var item in e.OldItems)
+                        {
+                            AnalysisPointLayer.RemoveMarker(item);
+                        }
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    break;
+            }
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+        }
+        static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnalysisPoints);
+        ObservableCollection<AnalysisPoint> _analysisPoints;
+
+        #endregion
+
+        [XmlIgnore]
+        public MarkerLayerViewModel AnalysisPointLayer { get; private set; }
+
         #region public bool IsChanged { get; set; }
 
         [XmlIgnore]
@@ -295,6 +369,9 @@ namespace ESMEWorkBench.Data
 
         [XmlIgnore]
         public SoundSpeedField SoundSpeedField { get; private set; }
+
+        [XmlIgnore]
+        public string LocalStorageRoot { get; private set; }
 
         public Experiment()
         {
@@ -337,7 +414,7 @@ namespace ESMEWorkBench.Data
         {
             LastModified = DateTime.Now;
             ModifiedBy = Environment.UserName;
-            SaveAs(fileName, new[] { typeof(MapLayerViewModel), typeof(ShapefileMapLayer), typeof(OverlayShapeMapLayer), typeof(OverlayFileMapLayer) });
+            SaveAs(fileName, ReferencedTypes);
             IsChanged = false;
         }
 
@@ -354,6 +431,15 @@ namespace ESMEWorkBench.Data
             if (MapLayers == null)
             {
                 var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                AnalysisPointLayer = new MarkerLayerViewModel
+                                     {
+                                         Name="Analysis Points",
+                                         CanBeRemoved = false,
+                                         CanBeReordered = true,
+                                         CanChangeAreaColor = false,
+                                         CanChangeLineColor = false,
+                                         LayerType = LayerType.AnalysisPoint,
+                                     };
                 MapLayers = new ObservableCollection<MapLayerViewModel>
                             {
                                 new ShapefileMapLayer
@@ -367,8 +453,39 @@ namespace ESMEWorkBench.Data
                                     ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
                                     Name = "Base Map",
                                     LayerType = LayerType.BaseMap,
-                                }
+                                },
+                                AnalysisPointLayer,
                             };
+            }
+            foreach (var layer in MapLayers.Where(layer => layer.Name == "Analysis Points"))
+            {
+                AnalysisPointLayer = (MarkerLayerViewModel) layer;
+                AnalysisPointLayer.MarkerImageUri = new Uri("pack://application:,,,/ESME WorkBench;component/Images/AQUA.png");
+                if (AnalysisPoints != null)
+                {
+                    foreach (var ap in AnalysisPoints)
+                    {
+                        var marker = AnalysisPointLayer.AddMarker(ap.Location, ap);
+                        marker.ContextMenu = new ContextMenu();
+                        marker.ContextMenu.Items.Add(new MenuItem
+                        {
+                            Header = "Run transmission loss...",
+                            Command = RunTransmissionLossCommand,
+                            CommandParameter = ap,
+                        });
+                        marker.ContextMenu.Items.Add(new MenuItem
+                        {
+                            Header = "Delete",
+                            Command = DeleteAnalysisPointCommand,
+                            CommandParameter = ap,
+                        });
+                    }
+                }
+            }
+            if (FileName != null)
+            {
+                LocalStorageRoot = Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
+                if (!Directory.Exists(LocalStorageRoot)) Directory.CreateDirectory(LocalStorageRoot);
             }
             MapLayerViewModel.Layers = MapLayers;
             InitializeEnvironment();
@@ -391,5 +508,30 @@ namespace ESMEWorkBench.Data
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
                 SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
         }
+
+        #region RunTransmissionLossCommand
+
+        public SimpleCommand<object, object> RunTransmissionLossCommand
+        {
+            get { return _runTransmissionLossCommand ?? (_runTransmissionLossCommand = new SimpleCommand<object, object>(delegate
+                                                                                                                         {
+                                                                                                                             MediatorMessage.Send(MediatorMessage.DoNothing);
+                                                                                                                         })); }
+        }
+
+        SimpleCommand<object, object> _runTransmissionLossCommand;
+
+        #endregion
+
+        #region DeleteAnalysisPointCommand
+
+        public SimpleCommand<object, AnalysisPoint> DeleteAnalysisPointCommand
+        {
+            get { return _deleteAnalysisPointCommand ?? (_deleteAnalysisPointCommand = new SimpleCommand<object, AnalysisPoint>(ap => MediatorMessage.Send(MediatorMessage.DeleteAnalysisPoint, ap))); }
+        }
+
+        SimpleCommand<object, AnalysisPoint> _deleteAnalysisPointCommand;
+
+        #endregion
     }
 }
