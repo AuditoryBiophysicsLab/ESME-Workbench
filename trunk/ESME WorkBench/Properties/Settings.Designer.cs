@@ -250,5 +250,17 @@ namespace ESMEWorkBench.Properties {
                 this["LastImageExportFileDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowScaleBar {
+            get {
+                return ((bool)(this["ShowScaleBar"]));
+            }
+            set {
+                this["ShowScaleBar"] = value;
+            }
+        }
     }
 }

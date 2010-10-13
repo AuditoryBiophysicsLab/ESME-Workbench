@@ -132,17 +132,29 @@
 					                             ToolTipDescription="Close the ESME WorkBench"
 					                             Command="Close" />
 					<r:RibbonApplicationMenu.AuxiliaryPaneContent>
-						<r:RibbonGallery ItemsSource="{Binding RecentFiles}"
-						                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <r:RibbonGallery ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                                         CanUserFilter="False">
 							<r:RibbonGalleryCategory Header="Recent Experiments"
-							                         Background="Transparent"
-							                         ItemsSource="{Binding RecentFiles}">
+                                                     ItemsSource="{Binding RecentFiles}"
+							                         Background="Transparent">
 								<r:RibbonGalleryCategory.ItemsPanel>
 									<ItemsPanelTemplate>
-										<StackPanel Orientation="Vertical"
-										            IsItemsHost="True" />
-									</ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical"
+										            IsItemsHost="True">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="Click">
+                                                    <cinch:EventToCommandTrigger Command="{Binding Path=Command, RelativeSource={RelativeSource Self}}" 
+                                                                                 CommandParameter="{Binding Path=CommandParameter, RelativeSource={RelativeSource Self}}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                        </StackPanel>
+                                    </ItemsPanelTemplate>
 								</r:RibbonGalleryCategory.ItemsPanel>
+                                <r:RibbonGalleryCategory.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ShortName}"/>
+                                    </DataTemplate>
+                                </r:RibbonGalleryCategory.ItemTemplate>
 							</r:RibbonGalleryCategory>
 						</r:RibbonGallery>
 					</r:RibbonApplicationMenu.AuxiliaryPaneContent>
@@ -173,20 +185,26 @@
 					                ToolTipDescription="Add a NUWC Scenario file to the map"
 					                Command="{Binding AddScenarioFileCommand}" />
 				</r:RibbonGroup>
-				<r:RibbonGroup Header="Show">
-					<r:RibbonCheckBox Label="Grid Overlay"
+				<r:RibbonGroup Header="Overlays">
+					<r:RibbonCheckBox Label="Lat/Lon Grid"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Toggles the lat/lon grid overlay"
+					                  ToolTipDescription="Shows and hides the latitude/longitude grid overlay on the map"
 					                  Command="{Binding ToggleGridOverlayDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowGrid, Mode=TwoWay}"
 					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
-					<r:RibbonCheckBox Label="Pan/Zoom"
+                    <r:RibbonCheckBox Label="Pan &amp; Zoom"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Toggles the pan/zoom control"
+					                  ToolTipDescription="Shows and hides the pan/zoom control overlay on the map"
 					                  Command="{Binding TogglePanZoomDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowPanZoom, Mode=TwoWay}"
 					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
-				</r:RibbonGroup>
+                    <r:RibbonCheckBox Label="Scale Bar"
+					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                  ToolTipDescription="Shows and hides the scale bar overlay on the map"
+					                  Command="{Binding ToggleScaleBarDisplayCommand}"
+					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowScaleBar, Mode=TwoWay}"
+					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
+                </r:RibbonGroup>
 				<r:RibbonGroup Header="Sounds">
 					<r:RibbonButton Label="Analysis Point"
 					                LargeImageSource="..\Images\LargeIcons\bullet-2-icon.png"

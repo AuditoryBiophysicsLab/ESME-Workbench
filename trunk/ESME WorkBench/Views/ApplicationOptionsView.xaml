@@ -36,16 +36,16 @@
 					                            FileName="{Binding AppSettings.ScenarioDataDirectory}" />
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="Environment"
+            <TabItem Header="Environment"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
-				<StackPanel Orientation="Vertical"
+                <StackPanel Orientation="Vertical"
 				            VerticalAlignment="Top">
-					<ctl:FileOrDirectorySetting Caption="Environment database directory"
+                    <ctl:FileOrDirectorySetting Caption="Environment database directory"
 					                            IsDirectoryBrowser="True"
 					                            FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
-				</StackPanel>
-			</TabItem>
-		</TabControl>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
 	</DockPanel>
 </Window>

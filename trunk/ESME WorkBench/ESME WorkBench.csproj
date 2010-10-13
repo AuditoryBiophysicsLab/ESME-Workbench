@@ -98,9 +98,13 @@
     </ApplicationDefinition>
     <Compile Include="Data\ExperimentListeners.cs" />
     <Compile Include="MediatorMessages.cs" />
+    <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
     <Compile Include="ViewModels\Main\ExperimentViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModelListeners.cs" />
+    <Compile Include="ViewModels\Map\MarkerLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapLayerViewModel.cs" />
+    <Compile Include="ViewModels\Map\MapShape.cs" />
+    <Compile Include="ViewModels\Map\MapShapeLayer.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
@@ -419,6 +423,7 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\AQUA.png" />
     <Resource Include="Images\LargeIcons\Distance-learning.png" />
     <Resource Include="Images\SmallIcons\Wave.png" />
     <Resource Include="Images\Wave.gif" />

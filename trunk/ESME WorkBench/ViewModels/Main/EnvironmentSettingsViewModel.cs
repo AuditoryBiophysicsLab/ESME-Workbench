@@ -4,11 +4,9 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Cinch;
 using ESME.Environment;
 using ESMERibbonDemo.ViewModels;
-using ESMEWorkBench.Data;
 
 namespace ESMEWorkBench.ViewModels.Main
 {

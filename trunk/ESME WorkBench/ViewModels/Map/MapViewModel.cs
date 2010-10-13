@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.IO;
+using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
+using System.Windows.Markup;
 using Cinch;
-using ESME.NEMO;
-using ESME.Platform;
 using ESMEWorkBench.Controls;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
@@ -54,7 +51,6 @@ namespace ESMEWorkBench.ViewModels.Map
             _viewAwareStatusService = viewAwareStatusService;
             _messageBoxService = messageBoxService;
             //_synchronizationContext = synchronizationContext;
-
 
             Cursor = Cursors.Arrow;
 
@@ -116,6 +112,18 @@ namespace ESMEWorkBench.ViewModels.Map
 
             AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
             AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
+            var localizedName = ((MapView) _viewAwareStatusService.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
+
+            var customUnitScaleBarAdornmentLayer = new CustomUnitScaleBarAdornmentLayer
+                                                   {
+                                                       // Text to be displayed on the scale bar
+                                                       UnitText = "Km",
+                                                       //Ratio of meters to specified units
+                                                       MeterToUnit = 1000,
+                                                       GeoFont = new GeoFont(localizedName, 10),
+                                                       GeoSolidBrush = new GeoSolidBrush(GeoColor.StandardColors.Black),
+                                                   };
+            AdornmentOverlay.Layers.Add("Scale", customUnitScaleBarAdornmentLayer);
 
             _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
 
@@ -145,16 +153,15 @@ namespace ESMEWorkBench.ViewModels.Map
                 _experiment = value;
                 if (_experiment != null)
                 {
-                    foreach (var layer in _experiment.MapLayers)
+                    foreach (var layer in _experiment.MapLayers.Where(layer => layer.Overlay != null))
                     {
-                        _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay);
-                        _wpfMap.Refresh(layer.LayerOverlay);
+                        _wpfMap.Overlays.Add(layer.Name, layer.Overlay);
+                        _wpfMap.Refresh(layer.Overlay);
                     }
                     _experiment.MapLayers.CollectionChanged += MapLayers_CollectionChanged;
                     _wpfMap.CurrentExtent = new RectangleShape(_experiment.CurrentExtent);
                     _wpfMap.CurrentScale = _experiment.CurrentScale;
                     _wpfMap.Refresh();
-
                 }
                 NotifyPropertyChanged(ExperimentChangedEventArgs);
             }
@@ -169,10 +176,10 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 case NotifyCollectionChangedAction.Add:
                     if (e.NewItems != null)
-                        foreach (var layer in e.NewItems.Cast<MapLayerViewModel>().Where(layer => !_wpfMap.Overlays.Contains(layer.Name)))
+                        foreach (var layer in e.NewItems.Cast<MapLayerViewModel>().Where(layer => !_wpfMap.Overlays.Contains(layer.Name)).Where(layer => layer.Overlay != null))
                         {
-                            _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay);
-                            _wpfMap.Refresh(layer.LayerOverlay);
+                            _wpfMap.Overlays.Add(layer.Name, layer.Overlay);
+                            _wpfMap.Refresh(layer.Overlay);
                         }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -193,8 +200,6 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
-
-
         [MediatorMessageSink(MediatorMessage.QuickLookCommand)]
         void QuickLookCommand(bool dummy)
         {
@@ -203,18 +208,13 @@ namespace ESMEWorkBench.ViewModels.Map
         }
 
         [MediatorMessageSink(MediatorMessage.SetExperiment)]
-        void SetExperiment(Experiment experiment)
-        {
-            Experiment = experiment;
-        }
+        void SetExperiment(Experiment experiment) { Experiment = experiment; }
 
         [MediatorMessageSink(MediatorMessage.AddMapLayer)]
         void AddMapLayer(MapLayerViewModel mapLayer)
         {
-            if (mapLayer.Index >= 0)
-                _wpfMap.Overlays.Insert(mapLayer.Index, mapLayer.LayerOverlay);
-            else
-                _wpfMap.Overlays.Add(mapLayer.LayerOverlay);
+            if (mapLayer.Index >= 0) _wpfMap.Overlays.Insert(mapLayer.Index, mapLayer.LayerOverlay);
+            else _wpfMap.Overlays.Add(mapLayer.LayerOverlay);
 
             MediatorMessage.Send(MediatorMessage.LayerAdded, mapLayer);
         }
@@ -240,6 +240,13 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             _wpfMap.MapTools.PanZoomBar.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
             Settings.Default.ShowPanZoom = isVisible;
+        }
+
+        [MediatorMessageSink(MediatorMessage.ToggleScaleBarDisplayCommand)]
+        void ToggleScaleBarDisplayCommand(Boolean isVisible)
+        {
+            AdornmentOverlay.Layers["Scale"].IsVisible = Settings.Default.ShowScaleBar = isVisible;
+            RefreshMap(true);
         }
 
         [MediatorMessageSink(MediatorMessage.SetMapCursor)]
@@ -276,5 +283,6 @@ namespace ESMEWorkBench.ViewModels.Map
             RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
+
     }
 }

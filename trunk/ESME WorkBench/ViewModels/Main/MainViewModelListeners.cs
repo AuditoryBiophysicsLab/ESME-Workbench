@@ -82,6 +82,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 return;
             }
 
+            transmissionLossJob.AnalysisPoint.TransmissionLossJobs.Add(transmissionLossJob);
+            MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, transmissionLossJob.AnalysisPoint);
+
             MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Wait);
 
             TransmissionLossField transmissionLossField;

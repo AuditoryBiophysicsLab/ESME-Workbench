@@ -29,48 +29,48 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             LayerOverlay = new LayerOverlay();
 
-            _removeMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => CanBeRemoved, obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
+            _removeMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
 
-            _lineColorMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => CanChangeLineColor, obj =>
-                                                                                                                        {
-                                                                                                                            var result = ColorDialog.ShowDialog();
-                                                                                                                            if (result != DialogResult.OK) return;
-                                                                                                                            LineColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
-                                                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                                            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                                                                                                                        });
+            _lineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
+                                                                                                  {
+                                                                                                      var result = ColorDialog.ShowDialog();
+                                                                                                      if (result != DialogResult.OK) return;
+                                                                                                      LineColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
+                                                                                                      MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                      MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                  });
 
-            _areaColorMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => CanChangeAreaColor, obj =>
-                                                                                                                        {
-                                                                                                                            var result = ColorDialog.ShowDialog();
-                                                                                                                            if (result != DialogResult.OK) return;
-                                                                                                                            AreaColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
-                                                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                                            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                                                                                                                        });
+            _areaColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeAreaColor, obj =>
+                                                                                                  {
+                                                                                                      var result = ColorDialog.ShowDialog();
+                                                                                                      if (result != DialogResult.OK) return;
+                                                                                                      AreaColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
+                                                                                                      MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                      MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                  });
 
-            _moveToTopMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index < (Layers.Count - 1), obj =>
-                                                                                                                                {
-                                                                                                                                    MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                                                    MediatorMessage.Send(MediatorMessage.MoveLayerToTop, this);
-                                                                                                                                });
-            _moveUpMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index < (Layers.Count - 1), obj =>
-                                                                                                                             {
-                                                                                                                                 MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                                                 MediatorMessage.Send(MediatorMessage.MoveLayerUp, this);
-                                                                                                                             });
-            _moveDownMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index > 0, obj =>
-                                                                                                              {
-                                                                                                                  MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                                  MediatorMessage.Send(MediatorMessage.MoveLayerDown, this);
-                                                                                                              });
-            _moveToBottomMenu.Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(arg => Index > 0, obj =>
-                                                                                                                  {
-                                                                                                                      MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                                      MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, this);
-                                                                                                                  });
+            _moveToTopMenu.Command = new SimpleCommand<object, object>(arg => Index < (Layers.Count - 1), obj =>
+                                                                                                          {
+                                                                                                              MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                              MediatorMessage.Send(MediatorMessage.MoveLayerToTop, this);
+                                                                                                          });
+            _moveUpMenu.Command = new SimpleCommand<object, object>(arg => Index < (Layers.Count - 1), obj =>
+                                                                                                       {
+                                                                                                           MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                           MediatorMessage.Send(MediatorMessage.MoveLayerUp, this);
+                                                                                                       });
+            _moveDownMenu.Command = new SimpleCommand<object, object>(arg => Index > 0, obj =>
+                                                                                        {
+                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                            MediatorMessage.Send(MediatorMessage.MoveLayerDown, this);
+                                                                                        });
+            _moveToBottomMenu.Command = new SimpleCommand<object, object>(arg => Index > 0, obj =>
+                                                                                            {
+                                                                                                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, this);
+                                                                                            });
 
-            ContextMenu = new List<MenuItemViewModel<MapLayerViewModel>>
+            ContextMenu = new List<MenuItemViewModel>
                           {
                               _orderMenu,
                               _colorMenu,
@@ -84,15 +84,15 @@ namespace ESMEWorkBench.ViewModels.Map
             for (var lineWidth = 0.5f; lineWidth <= 5; lineWidth += 0.5f)
             {
                 var width = lineWidth;
-                _lineWeightMenu.Children.Add(new MenuItemViewModel<MapLayerViewModel>
+                _lineWeightMenu.Children.Add(new MenuItemViewModel
                                              {
                                                  Header = string.Format("{0:0.0}", lineWidth),
-                                                 Command = new SimpleCommand<MapLayerViewModel, MapLayerViewModel>(obj => CanChangeLineWidth, obj =>
-                                                                                                                                              {
-                                                                                                                                                  LineWidth = width;
-                                                                                                                                                  MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                                                                  MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                                                                                                                                              }),
+                                                 Command = new SimpleCommand<object, object>(obj => CanChangeLineWidth, obj =>
+                                                                                                                        {
+                                                                                                                            LineWidth = width;
+                                                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                                            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                                        }),
                                              });
             }
 
@@ -101,76 +101,84 @@ namespace ESMEWorkBench.ViewModels.Map
             _colorMenu.Children.Add(_areaColorMenu);
         }
 
-        public static GeoCollection<Overlay> MapOverlay
-        {
-            set { _mapOverlay = value; }
-        }
+        public static GeoCollection<Overlay> MapOverlay { get; set; }
 
-        static GeoCollection<Overlay> _mapOverlay;
+        LayerOverlay _layerOverlay;
 
         [XmlIgnore]
-        public LayerOverlay LayerOverlay { get; set; }
+        public LayerOverlay LayerOverlay
+        {
+            get { return _layerOverlay; }
+            set
+            {
+                _layerOverlay = value;
+                Overlay = _layerOverlay;
+            }
+        }
 
-        readonly MenuItemViewModel<MapLayerViewModel> _orderMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                   {
-                                                                       Header = "Layer Order",
-                                                                   };
+        [XmlIgnore]
+        public Overlay Overlay { get; set; }
 
-        readonly MenuItemViewModel<MapLayerViewModel> _colorMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                   {
-                                                                       Header = "Colors & Lines",
-                                                                   };
+        readonly MenuItemViewModel _orderMenu = new MenuItemViewModel
+                                                {
+                                                    Header = "Layer Order",
+                                                };
 
-        readonly MenuItemViewModel<MapLayerViewModel> _removeMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                    {
-                                                                        Header = "Remove Layer",
-                                                                    };
+        readonly MenuItemViewModel _colorMenu = new MenuItemViewModel
+                                                {
+                                                    Header = "Colors & Lines",
+                                                };
 
-        readonly MenuItemViewModel<MapLayerViewModel> _lineColorMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                       {
-                                                                           Header = "Line Color",
-                                                                       };
+        readonly MenuItemViewModel _removeMenu = new MenuItemViewModel
+                                                 {
+                                                     Header = "Remove Layer",
+                                                 };
 
-        readonly MenuItemViewModel<MapLayerViewModel> _areaColorMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                       {
-                                                                           Header = "Area Color",
-                                                                       };
+        readonly MenuItemViewModel _lineColorMenu = new MenuItemViewModel
+                                                    {
+                                                        Header = "Line Color",
+                                                    };
 
-        readonly MenuItemViewModel<MapLayerViewModel> _lineWeightMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                        {
-                                                                            Header = "Line Weight",
-                                                                        };
+        readonly MenuItemViewModel _areaColorMenu = new MenuItemViewModel
+                                                    {
+                                                        Header = "Area Color",
+                                                    };
 
-        readonly MenuItemViewModel<MapLayerViewModel> _moveToTopMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                       {
-                                                                           Header = "Move to top",
-                                                                       };
+        readonly MenuItemViewModel _lineWeightMenu = new MenuItemViewModel
+                                                     {
+                                                         Header = "Line Weight",
+                                                     };
 
-        readonly MenuItemViewModel<MapLayerViewModel> _moveUpMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                    {
-                                                                        Header = "Move up",
-                                                                    };
+        readonly MenuItemViewModel _moveToTopMenu = new MenuItemViewModel
+                                                    {
+                                                        Header = "Move to top",
+                                                    };
 
-        readonly MenuItemViewModel<MapLayerViewModel> _moveDownMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                      {
-                                                                          Header = "Move down",
-                                                                      };
+        readonly MenuItemViewModel _moveUpMenu = new MenuItemViewModel
+                                                 {
+                                                     Header = "Move up",
+                                                 };
 
-        readonly MenuItemViewModel<MapLayerViewModel> _moveToBottomMenu = new MenuItemViewModel<MapLayerViewModel>
-                                                                          {
-                                                                              Header = "Move to bottom",
-                                                                          };
+        readonly MenuItemViewModel _moveDownMenu = new MenuItemViewModel
+                                                   {
+                                                       Header = "Move down",
+                                                   };
+
+        readonly MenuItemViewModel _moveToBottomMenu = new MenuItemViewModel
+                                                       {
+                                                           Header = "Move to bottom",
+                                                       };
 
         #region public string Name { get; set; }
 
         [XmlElement]
         public string Name
         {
-            get { return LayerOverlay.Name; }
+            get { return Overlay.Name; }
             set
             {
-                if (LayerOverlay.Name == value) return;
-                LayerOverlay.Name = value;
+                if (Overlay.Name == value) return;
+                Overlay.Name = value;
             }
         }
 
@@ -423,10 +431,10 @@ namespace ESMEWorkBench.ViewModels.Map
         #region public List<MenuItemViewModel> ContextMenu { get; set; }
 
         static readonly PropertyChangedEventArgs ContextMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ContextMenu);
-        List<MenuItemViewModel<MapLayerViewModel>> _contextMenu;
+        List<MenuItemViewModel> _contextMenu;
 
         [XmlIgnore]
-        public List<MenuItemViewModel<MapLayerViewModel>> ContextMenu
+        public List<MenuItemViewModel> ContextMenu
         {
             get { return _contextMenu; }
             set
@@ -468,10 +476,10 @@ namespace ESMEWorkBench.ViewModels.Map
         [XmlElement]
         public int Index
         {
-            get { return (_mapOverlay != null) ? _mapOverlay.IndexOf(LayerOverlay) : _index; }
+            get { return (MapOverlay != null) ? MapOverlay.IndexOf(LayerOverlay) : _index; }
             set
             {
-                if ((_mapOverlay != null) && (_mapOverlay.Contains(LayerOverlay))) _mapOverlay.MoveTo(LayerOverlay, value);
+                if ((MapOverlay != null) && (MapOverlay.Contains(LayerOverlay))) MapOverlay.MoveTo(LayerOverlay, value);
                 _index = value;
             }
         }

@@ -5,9 +5,9 @@ using Cinch;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    public class MenuItemViewModel<T> : ViewModelBase
+    public class MenuItemViewModel : ViewModelBase
     {
-        public MenuItemViewModel() {Children = new List<MenuItemViewModel<T>>();}
+        public MenuItemViewModel() { Children = new List<MenuItemViewModel>(); }
 
         #region public bool IsCheckable { get; set; }
 
@@ -22,7 +22,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs IsCheckableChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel<T>>(x => x.IsCheckable);
+        static readonly PropertyChangedEventArgs IsCheckableChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel>(x => x.IsCheckable);
         bool _isCheckable;
 
         #endregion
@@ -40,7 +40,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel<T>>(x => x.IsChecked);
+        static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel>(x => x.IsChecked);
         bool _isChecked;
 
         #endregion
@@ -58,7 +58,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs IconChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel<T>>(x => x.Icon);
+        static readonly PropertyChangedEventArgs IconChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel>(x => x.Icon);
         Object _icon;
 
         #endregion
@@ -76,14 +76,14 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs HeaderChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel<T>>(x => x.Header);
+        static readonly PropertyChangedEventArgs HeaderChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel>(x => x.Header);
         string _header;
 
         #endregion
 
         #region public IList<MenuViewModel> Children { get; set; }
 
-        public IList<MenuItemViewModel<T>> Children
+        public IList<MenuItemViewModel> Children
         {
             get { return _children; }
             set
@@ -94,8 +94,8 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel<T>>(x => x.Children);
-        IList<MenuItemViewModel<T>> _children;
+        static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel>(x => x.Children);
+        IList<MenuItemViewModel> _children;
 
         #endregion
 
@@ -112,11 +112,11 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs CommandParameterChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel<T>>(x => x.CommandParameter);
+        static readonly PropertyChangedEventArgs CommandParameterChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel>(x => x.CommandParameter);
         Object _commandParameter;
 
         #endregion
-    
-        public SimpleCommand<T, T> Command { get; set; }
+
+        public SimpleCommand<object, object> Command { get; set; }
     }
 }

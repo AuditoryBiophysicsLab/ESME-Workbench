@@ -10,9 +10,14 @@ namespace ESMEWorkBench
         public const string SaveExperimentAsCommand = "SaveExperimentAsCommandMessage";
         public const string ToggleGridOverlayDisplayCommand = "ToggleGridOverlayDisplayCommandMessage";
         public const string TogglePanZoomDisplayCommand = "TogglePanZoomDisplayCommandMessage";
+        public const string ToggleScaleBarDisplayCommand = "ToggleScaleBarDisplayCommandMessage";
         public const string QuickLookCommand = "QuickLookCommandMessage";
         public const string AddFileCommand = "AddFileCommandMessage";
         public const string AddScenarioFileCommand = "AddScenarioFileCommandMessage";
+
+        public const string AddAnalysisPoint = "AddAnalysisPointMessage";
+        public const string EditAnalysisPoint = "EditAnalysisPointMessage";
+        public const string DeleteAnalysisPoint = "DeleteAnalysisPointMessage";
 
         public const string SetExperiment = "SetExperimentMessage";
 
@@ -39,7 +44,7 @@ namespace ESMEWorkBench
         public const string ExperimentLoaded = "ExperimentLoadedMessage";
         public const string SetExperimentAsModified = "SetExperimentAsModifiedMessage";
 
-        public const string InitializeMapView = "InitializeMapViewMessage";
+        public const string DoNothing = "DoNothingMessage";
         public const string SetMapCursor = "SetMapCursorMessage";
         public const string RefreshMap = "RefreshMapMessage";
         public const string RefreshLayer = "RefreshLayerMessage";
