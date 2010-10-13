@@ -22,6 +22,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs LatitudeChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Latitude);
         DataWrapper<double> _latitude;
+        static readonly SimpleRule LatitudeRule;
 
         #endregion
 
@@ -40,6 +41,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Longitude);
         DataWrapper<double> _longitude;
+        static readonly SimpleRule LongitudeRule;
 
         #endregion
 
@@ -58,6 +60,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs RadiusChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Radius);
         DataWrapper<int> _radius;
+        static readonly SimpleRule RadiusRule;
 
         #endregion
 
@@ -76,6 +79,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs RadialBearingChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialBearing);
         DataWrapper<float> _radialBearing;
+        static readonly SimpleRule RadialBearingRule;
 
         #endregion
 
@@ -94,6 +98,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs SourceDepthChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.SourceDepth);
         DataWrapper<float> _sourceDepth;
+        static readonly SimpleRule SourceDepthRule;
 
         #endregion
 
@@ -112,6 +117,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialCount);
         DataWrapper<int> _radialCount;
+        static readonly SimpleRule RadialCountRule;
 
         #endregion
 
@@ -130,6 +136,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs LowFrequencyChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.LowFrequency);
         DataWrapper<float> _lowFrequency;
+        static readonly SimpleRule LowFrequencyRule;
 
         #endregion
 
@@ -148,6 +155,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs HighFrequencyChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.HighFrequency);
         DataWrapper<float> _highFrequency;
+        static readonly SimpleRule HighFrequencyRule;
 
         #endregion
 
@@ -166,6 +174,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs VerticalBeamWidthChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.VerticalBeamWidth);
         DataWrapper<float> _verticalBeamWidth;
+        static readonly SimpleRule VerticalBeamWidthRule;
 
         #endregion
 
@@ -184,12 +193,14 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs DepressionElevationAngleChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.DepressionElevationAngle);
         DataWrapper<float> _depressionElevationAngle;
+        static readonly SimpleRule DepressionElevationRule;
 
         #endregion
 
         static readonly PropertyChangedEventArgs TransmissionLossJobChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.TransmissionLossJob);
 
         TransmissionLossJob _transmissionLossJob;
+
         public TransmissionLossJobViewModel()
         {
             #region Create DataWrappers
@@ -207,7 +218,77 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
             #endregion
 
+            #region Create validation rules
+
+            Latitude.AddRule(LatitudeRule);
+            Longitude.AddRule(LongitudeRule);
+            Radius.AddRule(RadiusRule);
+            RadialBearing.AddRule(RadialBearingRule);
+            SourceDepth.AddRule(SourceDepthRule);
+            RadialCount.AddRule(RadialCountRule);
+            LowFrequency.AddRule(LowFrequencyRule);
+            HighFrequency.AddRule(HighFrequencyRule);
+            HighFrequency.AddRule(VerticalBeamWidthRule);
+            VerticalBeamWidth.AddRule(LatitudeRule);
+            DepressionElevationAngle.AddRule(DepressionElevationRule);
+
+            #endregion
+
             OkCommand = new SimpleCommand<object, object>(delegate { CloseActivePopUpCommand.Execute(true); });
+        }
+
+        static TransmissionLossJobViewModel()
+        {
+            LatitudeRule = new SimpleRule("Latitude", "Latitude must be in the range -90 to +90", domObj =>
+            {
+                var obj = (DataWrapper<double>)domObj;
+                return ((-90 <= obj.DataValue) && (obj.DataValue <= 90));
+            });
+            LongitudeRule = new SimpleRule("Longitude", "Longitude must be in the range -180 to +180", domObj =>
+            {
+                var obj = (DataWrapper<double>)domObj;
+                return ((-180 <= obj.DataValue) && (obj.DataValue <= 180));
+            });
+            RadiusRule = new SimpleRule("Radius", "Radius must be greater than zero", domObj =>
+            {
+                var obj = (DataWrapper<int>)domObj;
+                return (obj.DataValue > 0);
+            });
+            RadialBearingRule = new SimpleRule("RadialBearing", "RadialBearing must be in the range -180 to +180", domObj =>
+            {
+                var obj = (DataWrapper<float>)domObj;
+                return ((-180 <= obj.DataValue) && (obj.DataValue <= 180));
+            });
+            SourceDepthRule = new SimpleRule("SourceDepth", "SourceDepth must be greater than zero", domObj =>
+            {
+                var obj = (DataWrapper<float>)domObj;
+                return (obj.DataValue > 0);
+            });
+            RadialCountRule = new SimpleRule("RadialCount", "RadialCount must be greater than zero", domObj =>
+            {
+                var obj = (DataWrapper<int>)domObj;
+                return (obj.DataValue > 0);
+            });
+            LowFrequencyRule = new SimpleRule("LowFrequency", "LowFrequency must be greater than zero", domObj =>
+            {
+                var obj = (DataWrapper<float>)domObj;
+                return (obj.DataValue > 0);
+            });
+            HighFrequencyRule = new SimpleRule("HighFrequency", "HighFrequency must be greater than zero", domObj =>
+            {
+                var obj = (DataWrapper<float>)domObj;
+                return (obj.DataValue > 0);
+            });
+            VerticalBeamWidthRule = new SimpleRule("VerticalBeamWidth", "VerticalBeamWidth must be greater than zero", domObj =>
+            {
+                var obj = (DataWrapper<float>)domObj;
+                return (obj.DataValue > 0);
+            });
+            DepressionElevationRule = new SimpleRule("DepressionElevationAngle", "DepressionElevationAngle must be in the range -90 to +90", domObj =>
+            {
+                var obj = (DataWrapper<float>)domObj;
+                return ((-90 <= obj.DataValue) && (obj.DataValue <= 90));
+            });
         }
 
         public TransmissionLossJob TransmissionLossJob
