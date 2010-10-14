@@ -120,6 +120,7 @@
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Model\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
+    <Compile Include="Overlay\Exceptions.cs" />
     <Compile Include="Overlay\OverlayCircle.cs" />
     <Compile Include="Overlay\OverlayFile.cs" />
     <Compile Include="Overlay\OverlayFiles.cs" />
