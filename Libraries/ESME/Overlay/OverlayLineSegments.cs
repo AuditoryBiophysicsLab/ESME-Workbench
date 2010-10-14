@@ -114,9 +114,11 @@ namespace ESME.Overlay
 
             //start.Move(ProposedCourse.ReciprocalDegrees, 1000);
             //end.Move(ProposedCourse.Degrees, 1000);
+#if MATLAB_DEBUG_OUTPUT
             Console.WriteLine("Course=zeros(2,2);\nCourse(1,:)=[{0} {1}];\nCourse(2,:)=[{2} {3}];",
                 startLocation.Longitude_degrees, startLocation.Latitude_degrees, 
                 proposedEndLocation.Longitude_degrees, proposedEndLocation.Latitude_degrees);
+#endif
             var proposedCourse = new Course(startLocation, proposedEndLocation);
             var proposedCourseSegment = new OverlayLineSegment(startLocation, proposedEndLocation);
             for (var i = 0; i < _segments.Count(); i++)
