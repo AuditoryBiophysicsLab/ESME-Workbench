@@ -81,6 +81,7 @@ namespace ESMEWorkBench.Data
         [MediatorMessageSink(MediatorMessage.AddAnalysisPoint)]
         void AddAnalysisPoint(AnalysisPoint analysisPoint)
         {
+            if (AnalysisPoints == null) AnalysisPoints = new ObservableCollection<AnalysisPoint>();
             AnalysisPoints.Add(analysisPoint);
         }
 
@@ -104,19 +105,22 @@ namespace ESMEWorkBench.Data
             try
             {
                 ScenarioFileName = fileName;
-                var simAreaName = NemoFile.Scenario.SimAreaName + " sim area";
-                var simArea = FindOverlayShapeMapLayer(LayerType.SimArea, simAreaName) ?? new OverlayShapeMapLayer
-                                                                                          {
-                                                                                              Name = NemoFile.Scenario.SimAreaName + " sim area",
-                                                                                              CanBeRemoved = false,
-                                                                                              CanBeReordered = true,
-                                                                                              CanChangeAreaColor = false,
-                                                                                              CanChangeLineColor = true,
-                                                                                              LayerType = LayerType.SimArea,
-                                                                                          };
-                simArea.Add(NemoFile.Scenario.OverlayFile.Shapes);
-                simArea.Done();
-                if (MapLayers.IndexOf(simArea) == -1) MapLayers.Add(simArea);
+                if (NemoFile.Scenario.OverlayFile != null)
+                {
+                    var simAreaName = NemoFile.Scenario.SimAreaName + " sim area";
+                    var simArea = FindOverlayShapeMapLayer(LayerType.SimArea, simAreaName) ?? new OverlayShapeMapLayer
+                                                                                              {
+                                                                                                  Name = NemoFile.Scenario.SimAreaName + " sim area",
+                                                                                                  CanBeRemoved = false,
+                                                                                                  CanBeReordered = true,
+                                                                                                  CanChangeAreaColor = false,
+                                                                                                  CanChangeLineColor = true,
+                                                                                                  LayerType = LayerType.SimArea,
+                                                                                              };
+                    simArea.Add(NemoFile.Scenario.OverlayFile.Shapes);
+                    simArea.Done();
+                    if (MapLayers.IndexOf(simArea) == -1) MapLayers.Add(simArea);
+                }
                 var platformCount = 0;
                 foreach (var platform in NemoFile.Scenario.Platforms)
                 {

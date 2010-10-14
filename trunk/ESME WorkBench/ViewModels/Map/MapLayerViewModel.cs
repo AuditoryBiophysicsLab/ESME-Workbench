@@ -99,6 +99,8 @@ namespace ESMEWorkBench.ViewModels.Map
             _colorMenu.Children.Add(_lineColorMenu);
             _colorMenu.Children.Add(_lineWeightMenu);
             _colorMenu.Children.Add(_areaColorMenu);
+
+            IsChecked = true;
         }
 
         public static GeoCollection<Overlay> MapOverlay { get; set; }

@@ -32,8 +32,8 @@ namespace ESME.NEMO
 
                 foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "animals")) Animals.Add(new NemoAnimals(cur, scenarioDirectory));
 
-                var simAreaOverlays = Directory.GetFiles(Path.Combine(scenarioDirectory, "Areas"), "*_SIM_AREA.ovr");
-                if ((simAreaOverlays != null) && (simAreaOverlays.Length > 0)) OverlayFile = new OverlayFile(simAreaOverlays[0]);
+                //var simAreaOverlays = Directory.GetFiles(Path.Combine(scenarioDirectory, "Areas"), "*_SIM_AREA.ovr");
+                //if ((simAreaOverlays != null) && (simAreaOverlays.Length > 0)) OverlayFile = new OverlayFile(simAreaOverlays[0]);
             }
             catch (Exception e)
             {
