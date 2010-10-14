@@ -498,7 +498,21 @@ namespace ESMEWorkBench.Data
         void InitializeEnvironment()
         {
             if (NemoFile == null) return;
-            var boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
+            var boundingBox = new Rect();
+            if (NemoFile.Scenario.OverlayFile != null)
+                boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
+            else
+            {
+                foreach (var platform in NemoFile.Scenario.Platforms)
+                    foreach (var trackdef in platform.Trackdefs)
+                    {
+                        if ((boundingBox.Width == 0) && (boundingBox.Height == 0)) 
+                            boundingBox = trackdef.OverlayFile.Shapes[0].BoundingBox;
+                        else 
+                            boundingBox.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
+                    }
+                        
+            }
             var north = (float)boundingBox.Bottom + 2;
             var west = (float)boundingBox.Left - 2;
             var south = (float)boundingBox.Top - 2;
