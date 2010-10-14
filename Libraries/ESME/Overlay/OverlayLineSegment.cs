@@ -254,7 +254,9 @@ namespace ESME.Overlay
             // Now we will figure out exactly where.
 
             if (IsVertical)
-                return new EarthCoordinate(this[0].Longitude_degrees, that.Y(this[0].Longitude_degrees));
+                return new EarthCoordinate(that.Y(this[0].Longitude_degrees), this[0].Longitude_degrees);
+            if (that.IsVertical)
+                return new EarthCoordinate(Y(that[0].Longitude_degrees), that[0].Longitude_degrees);
             //if (this.IsHorizontal)
             //    return new PointF(that.X(this.Points[0].Y), this.Points[0].Y);
 
@@ -267,11 +269,11 @@ namespace ESME.Overlay
             // (this.m - that.m)*x = that.b - this.b
             // divide both sides by this.m - that.m, yielding:
             // x = (that.b - this.b) / (this.m - that.m)
-            double xIntersect = (that._b - _b)/(_m - that._m);
+            var xIntersect = (that._b - _b)/(_m - that._m);
 
             // now that we have xIntersect, we solve for y by plugging in xIntersect into
             // either one of our line equations.  Arbitrarily, we'll pick the first one.
-            double yIntersect = Y(xIntersect);
+            var yIntersect = Y(xIntersect);
 
             return new EarthCoordinate(yIntersect, xIntersect);
 
@@ -280,23 +282,38 @@ namespace ESME.Overlay
 
         public override bool Contains(EarthCoordinate pointToTest)
         {
+            var verticalMatch = false;
+            var horizontalMatch = false;
             // We don't know or care if this line segment is drawn west to east in longitude, so we will test for both possibilities.
             // The same thing goes for north and south with respect to latitude.
 
             // If one or the other is true, then the test is deemed to have succeeded.  If neither are true, the test fails.
 
             // If the point's longitude is within the span of longitudes covered by this line segment
-            if (((this[0].Longitude_degrees <= pointToTest.Longitude_degrees) &&
-                 (pointToTest.Longitude_degrees <= this[1].Longitude_degrees)) ||
-                ((this[1].Longitude_degrees <= pointToTest.Longitude_degrees) &&
-                 (pointToTest.Longitude_degrees <= this[0].Longitude_degrees)))
+            if (IsVertical)
+            {
+                var deltaLon = Math.Abs(this[0].Longitude_degrees - pointToTest.Longitude_degrees);
+                if (deltaLon < 1e-6) verticalMatch = true;
+            }
+            else
+            {
+                if (((this[0].Longitude_degrees <= pointToTest.Longitude_degrees) && (pointToTest.Longitude_degrees <= this[1].Longitude_degrees)) ||
+                    ((this[1].Longitude_degrees <= pointToTest.Longitude_degrees) && (pointToTest.Longitude_degrees <= this[0].Longitude_degrees))) 
+                    verticalMatch = true;
+            }
+            if (IsHorizontal)
+            {
+                var deltaLat = Math.Abs(this[0].Latitude_degrees - pointToTest.Latitude_degrees);
+                if (deltaLat < 1e-6) horizontalMatch = true;
+            }
+            else
+            {
                 // If the point's latitude is within the span of latitudes covered by this line segment
-                if (((this[0].Latitude_degrees <= pointToTest.Latitude_degrees) &&
-                     (pointToTest.Latitude_degrees <= this[1].Latitude_degrees)) ||
-                    ((this[1].Latitude_degrees <= pointToTest.Latitude_degrees) &&
-                     (pointToTest.Latitude_degrees <= this[0].Latitude_degrees)))
-                    return true; // The line segment contains the point
-            return false; // The line segment does not contain the point
+                if (((this[0].Latitude_degrees <= pointToTest.Latitude_degrees) && (pointToTest.Latitude_degrees <= this[1].Latitude_degrees)) || 
+                    ((this[1].Latitude_degrees <= pointToTest.Latitude_degrees) && (pointToTest.Latitude_degrees <= this[0].Latitude_degrees))) 
+                    horizontalMatch = true;
+            }
+            return verticalMatch && horizontalMatch; // The line segment does not contain the point
         }
 
         #endregion

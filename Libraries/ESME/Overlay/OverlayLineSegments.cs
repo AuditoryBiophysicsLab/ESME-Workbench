@@ -1,10 +1,9 @@
-﻿#define MATLAB_DEBUG_OUTPUT
+﻿//#define MATLAB_DEBUG_OUTPUT
 using System;
 using System.Collections.Generic;
 using System.Windows.Media;
 using System.Linq;
 using System.Text;
-using ESME.Model;
 using HRC.Navigation;
 
 namespace ESME.Overlay
@@ -64,7 +63,7 @@ namespace ESME.Overlay
                     // Calculate the "normal" vector to each side of our polygon.
                     // For now, the normal vector is defined as a coplanar vector perpendicular to the side in question,
                     // having a length of 100m, whose endpoint is inside the polygon
-                    for (int i = 0; i < Length - 1; i++)
+                    for (var i = 0; i < Length - 1; i++)
                     {
                         var edgeNormalCourse = new Course(this[i], this[i + 1]);
                         var trialCw = _segments[i].Midpoint;
@@ -115,9 +114,9 @@ namespace ESME.Overlay
 
             //start.Move(ProposedCourse.ReciprocalDegrees, 1000);
             //end.Move(ProposedCourse.Degrees, 1000);
-            //Console.WriteLine("Course=zeros(2,2);\nCourse(1,:)=[{0} {1}];\nCourse(2,:)=[{2} {3}];",
-            //    StartLocation.Longitude_Degrees, StartLocation.Latitude_Degrees, 
-            //    ProposedEndLocation.Longitude_Degrees, ProposedEndLocation.Latitude_Degrees);
+            Console.WriteLine("Course=zeros(2,2);\nCourse(1,:)=[{0} {1}];\nCourse(2,:)=[{2} {3}];",
+                startLocation.Longitude_degrees, startLocation.Latitude_degrees, 
+                proposedEndLocation.Longitude_degrees, proposedEndLocation.Latitude_degrees);
             var proposedCourse = new Course(startLocation, proposedEndLocation);
             var proposedCourseSegment = new OverlayLineSegment(startLocation, proposedEndLocation);
             for (var i = 0; i < _segments.Count(); i++)
@@ -156,7 +155,7 @@ namespace ESME.Overlay
             // it always joins to the first one (by definition)
 
             // Special case for the first segment - we stop at the second to last segment
-            for (int j = 2; j < _segments.Count() - 1; j++)
+            for (var j = 2; j < _segments.Count() - 1; j++)
             {
                 if (_segments[0].Intersects(_segments[j]))
                 {
@@ -166,9 +165,9 @@ namespace ESME.Overlay
             }
 
             // Check the rest of the pairs, now stopping at the last segment
-            for (int i = 1; i < _segments.Count() - 2; i++)
+            for (var i = 1; i < _segments.Count() - 2; i++)
             {
-                for (int j = i + 2; j < _segments.Count(); j++)
+                for (var j = i + 2; j < _segments.Count(); j++)
                 {
                     if (_segments[i].Intersects(_segments[j]))
                     {
@@ -203,11 +202,11 @@ namespace ESME.Overlay
 
             // Andy: your point-within-a-polygon algorithm goes here
             //cn = 0;    % the crossing number counter
-            int crossingNumber = 0;
+            var crossingNumber = 0;
 
             //% loop through all edges of the polygon
             //for i=1:n % edge from V(i) to V(i+1)
-            for (int i = 0; i < (EarthCoordinates.Count - 1); i++)
+            for (var i = 0; i < (EarthCoordinates.Count - 1); i++)
             {
                 // if (((V(i).y <= P.y) && (V(i+1).y > P.y)) ||    % an upward crossing
                 //     ((V(i).y > P.y) && (V(i+1).y <= P.y)))      % a downward crossing
@@ -217,7 +216,7 @@ namespace ESME.Overlay
                     ((EarthCoordinates[i].Latitude_degrees > coordinate.Latitude_degrees) &&
                      (EarthCoordinates[i + 1].Latitude_degrees <= coordinate.Latitude_degrees)))
                 {
-                    double vt = (coordinate.Latitude_degrees - EarthCoordinates[i].Latitude_degrees) /
+                    var vt = (coordinate.Latitude_degrees - EarthCoordinates[i].Latitude_degrees) /
                                 (EarthCoordinates[i + 1].Latitude_degrees - EarthCoordinates[i].Latitude_degrees);
                     // if (P.x < (V(i).x + vt * (V(i+1).x - V(i).x))) % P.x < intersect
                     //     cn = cn + 1;   % a valid crossing of y=P.y right of P.x
