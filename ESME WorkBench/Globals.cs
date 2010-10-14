@@ -20,7 +20,7 @@ namespace ESMEWorkBench
         public static void DisplayException(IMessageBoxService messageBoxService, Exception ex, string format, params object[] args)
         {
             var sb = new StringBuilder(string.Format(format, args));
-            sb.Append("\n\n");
+            sb.Append("\n");
             while (ex != null)
             {
                 if (ex is CompositionException)
@@ -28,12 +28,12 @@ namespace ESMEWorkBench
                     var compositionException = (CompositionException) ex;
                     foreach (var error in compositionException.Errors)
                     {
-                        sb.Append(error.Description + "\n");
+                        sb.Append(ex.GetType() + ": " + error.Description + "\n");
                     }
                 }
                 else
                 {
-                    sb.Append(ex.Message + "\n");
+                    sb.Append(ex.GetType() + ": " + ex.Message + "\n");
                 }
                 ex = ex.InnerException;
             }
