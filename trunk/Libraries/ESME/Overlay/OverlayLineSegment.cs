@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Text;
+using ESME.Model;
 using HRC.Navigation;
 
 namespace ESME.Overlay
@@ -222,7 +223,7 @@ namespace ESME.Overlay
         private double Y(double x)
         {
             if (IsVertical)
-                throw new AlgebraicException("OverlayLineSegment: Can't solve for Y on a vertical line");
+                throw new AlgebraicException("Can't solve for Y on a vertical line");
             return (_m*x) + _b;
         }
 
@@ -234,7 +235,7 @@ namespace ESME.Overlay
         private double X(double y)
         {
             if (IsHorizontal)
-                throw new AlgebraicException("OverlayLineSegment: Can't solve for X on a horizontal line");
+                throw new AlgebraicException("Can't solve for X on a horizontal line");
             return (y - _b)/_m;
         }
 
@@ -244,7 +245,7 @@ namespace ESME.Overlay
             {
                 if (IsColinearWith(that))
                     throw new GeometricException(
-                        "OverlayLineSegment: Lines are colinear, there is no single defined intersection point");
+                        "Lines are colinear, there is no single defined intersection point");
                 return null;
                 //throw new GeometricException(
                 //    "OverlayLineSegment: Lines are parallel but not colinear, they do not intersect");

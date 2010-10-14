@@ -215,7 +215,6 @@
     <Compile Include="NEMO\NemoFile.cs" />
     <Compile Include="NEMO\NemoPSM.cs" />
     <Compile Include="Overlay\LineReader.cs" />
-    <Compile Include="Overlay\OverlayExceptions.cs" />
     <Compile Include="Overlay\OverlayLineSegment.cs" />
     <Compile Include="Overlay\Tokenizer.cs" />
     <Compile Include="Shapes\TransmissionLossFieldShape.cs" />

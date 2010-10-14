@@ -1,9 +1,10 @@
-﻿//#define MATLAB_DEBUG_OUTPUT
+﻿#define MATLAB_DEBUG_OUTPUT
 using System;
 using System.Collections.Generic;
 using System.Windows.Media;
 using System.Linq;
 using System.Text;
+using ESME.Model;
 using HRC.Navigation;
 
 namespace ESME.Overlay
@@ -83,11 +84,11 @@ namespace ESME.Overlay
 #if MATLAB_DEBUG_OUTPUT
         private void MatlabDumpVertices()
         {
-            Console.WriteLine("Vertices=zeros({0}, 2);", this.Length);
-            Console.WriteLine("Intersects=zeros({0}, 2);", this.Length);
-            for (int i = 0; i < this.Length; i++)
+            Console.WriteLine("Vertices=zeros({0}, 2);", Length);
+            Console.WriteLine("Intersects=zeros({0}, 2);", Length);
+            for (var i = 0; i < Length; i++)
             {
-                Console.WriteLine("Vertices({0},:)=[{1} {2}];", i + 1, this[i].Longitude_Degrees, this[i].Latitude_Degrees);
+                Console.WriteLine("Vertices({0},:)=[{1} {2}];", i + 1, this[i].Longitude_degrees, this[i].Latitude_degrees);
             }
         }
 #endif
@@ -119,20 +120,17 @@ namespace ESME.Overlay
             //    ProposedEndLocation.Longitude_Degrees, ProposedEndLocation.Latitude_Degrees);
             var proposedCourse = new Course(startLocation, proposedEndLocation);
             var proposedCourseSegment = new OverlayLineSegment(startLocation, proposedEndLocation);
-            for (int i = 0; i < _segments.Count(); i++)
+            for (var i = 0; i < _segments.Count(); i++)
             {
-                EarthCoordinate intersect = proposedCourseSegment.IntersectionPoint(_segments[i]);
+                var intersect = proposedCourseSegment.IntersectionPoint(_segments[i]);
 #if MATLAB_DEBUG_OUTPUT
-                Console.WriteLine("Intersects({0},:)=[{1} {2}];", i + 1, Intersect.Longitude_Degrees, Intersect.Latitude_Degrees);
-#else
-                if (proposedCourseSegment.Contains(intersect) && _segments[i].Contains(intersect))
-                {
-                    proposedCourse.Reflect(Normals[i]);
-                    var result = new EarthCoordinate(startLocation);
-                    result.Move(proposedCourse, proposedEndLocation.GetDistanceTo_Meters(startLocation));
-                    return result;
-                }
+                Console.WriteLine("Intersects({0},:)=[{1} {2}];", i + 1, intersect.Longitude_degrees, intersect.Latitude_degrees);
 #endif
+                if (!proposedCourseSegment.Contains(intersect) || !_segments[i].Contains(intersect)) continue;
+                proposedCourse.Reflect(Normals[i]);
+                var result = new EarthCoordinate(startLocation);
+                result.Move(proposedCourse, proposedEndLocation.GetDistanceTo_Meters(startLocation));
+                return result;
             }
 #if MATLAB_DEBUG_OUTPUT
             Console.WriteLine("figure;");
@@ -141,11 +139,8 @@ namespace ESME.Overlay
             Console.WriteLine("plot(Course(:, 1), Course(:, 2), 'r-o');");
             Console.WriteLine("plot(Intersects(:, 1), Intersects(:, 2), 'bx');");
             Console.WriteLine("legend('Area Boundary', 'Course Segment under review', 'Calculated intersection points');");
-            return ProposedEndLocation;
-#else
-            throw new ApplicationException(
-                "Bounce: Apparently the proposed course didn't intersect with any of the edges of the figure");
 #endif
+            throw new GeometricException("The proposed course didn't intersect with any of the edges of the figure");
         }
 
         /// <summary>

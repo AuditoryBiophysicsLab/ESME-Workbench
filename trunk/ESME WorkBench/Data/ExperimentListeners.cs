@@ -104,7 +104,6 @@ namespace ESMEWorkBench.Data
             try
             {
                 ScenarioFileName = fileName;
-                NemoFile = new NemoFile(fileName, Globals.AppSettings.ScenarioDataDirectory);
                 var simAreaName = NemoFile.Scenario.SimAreaName + " sim area";
                 var simArea = FindOverlayShapeMapLayer(LayerType.SimArea, simAreaName) ?? new OverlayShapeMapLayer
                                                                                           {
@@ -160,7 +159,7 @@ namespace ESMEWorkBench.Data
             }
             catch (Exception e)
             {
-                MessageBoxService.ShowError("Error opening scenario file: \n" + e.Message);
+                Globals.DisplayException(MessageBoxService, e, "Error opening scenario file");
             }
         }
     }
