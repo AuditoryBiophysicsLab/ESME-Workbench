@@ -212,6 +212,17 @@ namespace ESME.Environment
             for (var lat = 0; lat < Latitudes.Length; lat++) for (var lon = 0; lon < Longitudes.Length; lon++) stream.Write(Elevations[lat, lon]);
         }
 
+        public void SaveToYXZ(string fileName)
+        {
+            using (var stream = new StreamWriter(File.Create(fileName)))
+            {
+                for (var lat = 0; lat < Latitudes.Length; lat++)
+                    for (var lon = 0; lon < Longitudes.Length; lon++)
+                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], -Elevations[lat, lon]));
+            }
+        }
+
+
         public bool ContainsCoordinate(EarthCoordinate coordinate) { return (MinCoordinate.Longitude_degrees <= coordinate.Longitude_degrees) && (coordinate.Longitude_degrees <= MaxCoordinate.Longitude_degrees) && (MinCoordinate.Latitude_degrees <= coordinate.Latitude_degrees) && (coordinate.Latitude_degrees <= MaxCoordinate.Latitude_degrees); }
 
         // lookup a coordinate in the current bathymetry dataset.
