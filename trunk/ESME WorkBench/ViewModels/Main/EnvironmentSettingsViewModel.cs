@@ -42,9 +42,9 @@ namespace ESMEWorkBench.ViewModels.Main
                              "winter",
                              "spring",
                              "summer",
-                             "autumn",
-                             "warm season",
-                             "cold season"
+                             "fall",
+                             "warm",
+                             "cold"
                          };
             foreach (var timeFrame in TimeFrames)
                 if (timeFrame == experimentTimeFrame) SelectedTimeFrameItem = timeFrame;
