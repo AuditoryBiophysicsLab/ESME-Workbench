@@ -290,7 +290,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                              {
                                                                                                                  _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
                                                                                                                  _openFileService.InitialDirectory = Settings.Default.LastOverlayFileDirectory;
-                                                                                                                 _openFileService.FileName = null;
+                                                                                                                 _openFileService.FileName = "";
                                                                                                                  var result = _openFileService.ShowDialog(null);
                                                                                                                  if (!result.HasValue || !result.Value) return;
                                                                                                                  Settings.Default.LastOverlayFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
