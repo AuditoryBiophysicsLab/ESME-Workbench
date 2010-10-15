@@ -233,13 +233,13 @@
 					                LargeImageSource="..\Images\LargeIcons\open-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\open-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Open a scenario file"
+					                ToolTipDescription="Associate a scenario file with the current experiment"
 					                Command="{Binding AddScenarioFileCommand}" />
 					<r:RibbonButton Label="Close"
 					                LargeImageSource="..\Images\LargeIcons\close-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\close-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Close the current scenario file"
+					                ToolTipDescription="Remove the scenario (if any) from the current experiment"
 					                Command="{Binding DisabledCommand}" />
 					<r:RibbonButton Label="Edit"
 					                LargeImageSource="..\Images\LargeIcons\AddFile.png"
@@ -268,6 +268,7 @@
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="A"
 			             Header="Animals">
+                <!--
 				<r:RibbonGroup Header="Species">
 					<r:RibbonButton Label="Add Species"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -316,7 +317,22 @@
 					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
-			</r:RibbonTab>
+                -->
+                <r:RibbonGroup Header="Populate">
+                    <r:RibbonButton Label="Launch MMMBS"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator"
+					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
+					                Command="{Binding DisabledCommand}" />
+                    <r:RibbonButton Label="Load population"
+					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
+					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Add an Animal Population File to the experiment"
+					                Command="{Binding AddAnimalPopulationFileCommand}" />
+                </r:RibbonGroup>
+            </r:RibbonTab>
 			<r:RibbonTab KeyTip="C"
 			             Header="Acoustics">
 				<r:RibbonGroup Header="Simulator">
