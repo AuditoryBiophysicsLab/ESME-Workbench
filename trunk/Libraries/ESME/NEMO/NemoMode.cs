@@ -18,7 +18,7 @@ namespace ESME.NEMO
             PulseLength = new TimeSpan(0, 0, 0, 0, (int) Math.Round(GetFloat("pulseLength")));
             HorizontalBeamWidth = GetFloat("horizontalBeamWidth");
             VerticalBeamWidth = GetFloat("verticalBeamWidth");
-            DepthElAngle = GetFloat("depthElAngle");
+            DepressionElevationAngle = GetFloat("depthElAngle");
             RelativeBeamAngle = GetFloat("relativeBeamAngle");
             Radius = GetFloat("radius");
             //UsePlatformTimes = GetBool("usePlatformTimes");
@@ -38,7 +38,7 @@ namespace ESME.NEMO
         public TimeSpan PulseLength { get; private set; }
         public float HorizontalBeamWidth { get; private set; }
         public float VerticalBeamWidth { get; private set; }
-        public float DepthElAngle { get; private set; }
+        public float DepressionElevationAngle { get; private set; }
         public float RelativeBeamAngle { get; private set; }
         public float Radius { get; private set; }
         //public bool UsePlatformTimes { get; private set; }

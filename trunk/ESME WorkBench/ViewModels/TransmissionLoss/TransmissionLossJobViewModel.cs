@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Cinch;
+using ESME.Model;
+using ESME.NEMO;
 using ESME.TransmissionLoss;
+using HRC.Navigation;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     public class TransmissionLossJobViewModel : EditableValidatingViewModelBase
     {
-        #region public DataWrapper<double> Latitude { get; set; }
+        #region public DataWrapper<double> Latitude { get; private set; }
 
         public DataWrapper<double> Latitude
         {
@@ -25,7 +29,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public DataWrapper<double> Longitude { get; set; }
+        #region public DataWrapper<double> Longitude { get; private set; }
 
         public DataWrapper<double> Longitude
         {
@@ -43,9 +47,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public DataWrapper<int> Radius { get; set; }
+        #region public DataWrapper<float> Radius { get; private set; }
 
-        public DataWrapper<int> Radius
+        public DataWrapper<float> Radius
         {
             get { return _radius; }
             private set
@@ -57,29 +61,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
 
         static readonly PropertyChangedEventArgs RadiusChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Radius);
-        DataWrapper<int> _radius;
+        DataWrapper<float> _radius;
 
         #endregion
 
-        #region public DataWrapper<float> RadialBearing { get; set; }
-
-        public DataWrapper<float> RadialBearing
-        {
-            get { return _radialBearing; }
-            private set
-            {
-                if (_radialBearing == value) return;
-                _radialBearing = value;
-                NotifyPropertyChanged(RadialBearingChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RadialBearingChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialBearing);
-        DataWrapper<float> _radialBearing;
-
-        #endregion
-
-        #region public DataWrapper<float> SourceDepth { get; set; }
+        #region public DataWrapper<float> SourceDepth { get; private set; }
 
         public DataWrapper<float> SourceDepth
         {
@@ -97,25 +83,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public DataWrapper<int> RadialCount { get; set; }
-
-        public DataWrapper<int> RadialCount
-        {
-            get { return _radialCount; }
-            private set
-            {
-                if (_radialCount == value) return;
-                _radialCount = value;
-                NotifyPropertyChanged(RadialCountChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialCount);
-        DataWrapper<int> _radialCount;
-
-        #endregion
-
-        #region public DataWrapper<float> LowFrequency { get; set; }
+        #region public DataWrapper<float> LowFrequency { get; private set; }
 
         public DataWrapper<float> LowFrequency
         {
@@ -133,7 +101,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public DataWrapper<float> HighFrequency { get; set; }
+        #region public DataWrapper<float> HighFrequency { get; private set; }
 
         public DataWrapper<float> HighFrequency
         {
@@ -151,7 +119,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public DataWrapper<float> VerticalBeamWidth { get; set; }
+        #region public DataWrapper<float> VerticalBeamWidth { get; private set; }
 
         public DataWrapper<float> VerticalBeamWidth
         {
@@ -169,7 +137,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public DataWrapper<float> DepressionElevationAngle { get; set; }
+        #region public DataWrapper<float> DepressionElevationAngle { get; private set; }
 
         public DataWrapper<float> DepressionElevationAngle
         {
@@ -187,17 +155,51 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        static readonly PropertyChangedEventArgs TransmissionLossJobChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.TransmissionLossJob);
+        #region public DataWrapper<float> RadialBearing { get; private set; }
 
-        TransmissionLossJob _transmissionLossJob;
+        public DataWrapper<float> RadialBearing
+        {
+            get { return _radialBearing; }
+            private set
+            {
+                if (_radialBearing == value) return;
+                _radialBearing = value;
+                NotifyPropertyChanged(RadialBearingChangedEventArgs);
+            }
+        }
 
-        public TransmissionLossJobViewModel()
+        static readonly PropertyChangedEventArgs RadialBearingChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialBearing);
+        DataWrapper<float> _radialBearing;
+
+        #endregion
+
+        #region public DataWrapper<int> RadialCount { get; private set; }
+
+        public DataWrapper<int> RadialCount
+        {
+            get { return _radialCount; }
+            private set
+            {
+                if (_radialCount == value) return;
+                _radialCount = value;
+                NotifyPropertyChanged(RadialCountChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialCount);
+        DataWrapper<int> _radialCount;
+
+        #endregion
+
+        readonly IEnumerable<DataWrapperBase> _cachedListOfDataWrappers;
+        readonly int _maxCalculationDepth;
+        public TransmissionLossJobViewModel(EarthCoordinate location, float platformDepth, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
         {
             #region Create DataWrappers
 
             Latitude = new DataWrapper<double>(this, LatitudeChangedEventArgs);
             Longitude = new DataWrapper<double>(this, LongitudeChangedEventArgs);
-            Radius = new DataWrapper<int>(this, RadiusChangedEventArgs);
+            Radius = new DataWrapper<float>(this, RadiusChangedEventArgs);
             RadialBearing = new DataWrapper<float>(this, RadialBearingChangedEventArgs);
             SourceDepth = new DataWrapper<float>(this, SourceDepthChangedEventArgs);
             RadialCount = new DataWrapper<int>(this, RadialCountChangedEventArgs);
@@ -208,67 +210,82 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
             #endregion
 
+            Latitude.DataValue = location.Latitude_degrees;
+            Longitude.DataValue = location.Longitude_degrees;
+            Radius.DataValue = nemoMode.Radius;
+            SourceDepth.DataValue = platformDepth + nemoMode.DepthOffset;
+            LowFrequency.DataValue = nemoMode.LowFrequency;
+            HighFrequency.DataValue = nemoMode.HighFrequency;
+            VerticalBeamWidth.DataValue = nemoMode.VerticalBeamWidth;
+            DepressionElevationAngle.DataValue = nemoMode.DepressionElevationAngle;
+            RadialBearing.DataValue = 0;
+            RadialCount.DataValue = radialCount;
+            _maxCalculationDepth = maxCalculationDepth;
+
+            _cachedListOfDataWrappers = DataWrapperHelper.GetWrapperProperties(this);
+            foreach (var wrapper in _cachedListOfDataWrappers) wrapper.IsEditable = false;
+
             #region Create validation rules
 
-            Latitude.AddRule(new SimpleRule("Latitude", "Latitude must be in the range -90 to +90", domObj =>
+            Latitude.AddRule(new SimpleRule("DataValue", "Latitude must be in the range -90 to +90", domObj =>
             {
                 var obj = (DataWrapper<double>)domObj;
-                return ((-90 <= obj.DataValue) && (obj.DataValue <= 90));
+                return ((obj.DataValue < -90) || (90 < obj.DataValue));
             }));
-            Longitude.AddRule(new SimpleRule("Longitude", "Longitude must be in the range -180 to +180", domObj =>
+            Longitude.AddRule(new SimpleRule("DataValue", "Longitude must be in the range -180 to +180", domObj =>
             {
                 var obj = (DataWrapper<double>)domObj;
-                return ((-180 <= obj.DataValue) && (obj.DataValue <= 180));
+                return ((obj.DataValue < -180) || (180 < obj.DataValue));
             }));
-            Radius.AddRule(new SimpleRule("Radius", "Radius must be greater than zero", domObj =>
+            Radius.AddRule(new SimpleRule("DataValue", "Radius must be greater than zero", domObj =>
+            {
+                var obj = (DataWrapper<float>)domObj;
+                return (obj.DataValue <= 0);
+            }));
+            RadialBearing.AddRule(new SimpleRule("DataValue", "RadialBearing must be in the range -180 to +180", domObj =>
+            {
+                var obj = (DataWrapper<float>)domObj;
+                return ((obj.DataValue < -180) || (180 < obj.DataValue));
+            }));
+            SourceDepth.AddRule(new SimpleRule("DataValue", "SourceDepth must be greater than zero", domObj =>
+            {
+                var obj = (DataWrapper<float>)domObj;
+                return (obj.DataValue <= 0);
+            }));
+            RadialCount.AddRule(new SimpleRule("DataValue", "RadialCount must be greater than zero", domObj =>
             {
                 var obj = (DataWrapper<int>)domObj;
-                return (obj.DataValue > 0);
+                return (obj.DataValue <= 0);
             }));
-            RadialBearing.AddRule(new SimpleRule("RadialBearing", "RadialBearing must be in the range -180 to +180", domObj =>
+            LowFrequency.AddRule(new SimpleRule("DataValue", "LowFrequency must be greater than zero", domObj =>
             {
                 var obj = (DataWrapper<float>)domObj;
-                return ((-180 <= obj.DataValue) && (obj.DataValue <= 180));
+                return (obj.DataValue <= 0);
             }));
-            SourceDepth.AddRule(new SimpleRule("SourceDepth", "SourceDepth must be greater than zero", domObj =>
+            LowFrequency.AddRule(new SimpleRule("DataValue", "LowFrequency must be less than HighFrequency", domObj =>
             {
                 var obj = (DataWrapper<float>)domObj;
-                return (obj.DataValue > 0);
+                return (obj.DataValue >= HighFrequency.DataValue);
             }));
-            RadialCount.AddRule(new SimpleRule("RadialCount", "RadialCount must be greater than zero", domObj =>
-            {
-                var obj = (DataWrapper<int>)domObj;
-                return (obj.DataValue > 0);
-            }));
-            LowFrequency.AddRule(new SimpleRule("LowFrequency", "LowFrequency must be greater than zero", domObj =>
+            HighFrequency.AddRule(new SimpleRule("DataValue", "HighFrequency must be greater than zero", domObj =>
             {
                 var obj = (DataWrapper<float>)domObj;
-                return (obj.DataValue > 0);
+                return (obj.DataValue <= 0);
             }));
-            LowFrequency.AddRule(new SimpleRule("HighFrequency", "LowFrequency must be less than HighFrequency", domObj =>
+            HighFrequency.AddRule(new SimpleRule("DataValue", "HighFrequency must be greater than LowFrequency", domObj =>
             {
                 var obj = (DataWrapper<float>)domObj;
-                return (obj.DataValue < HighFrequency.DataValue);
+                return (obj.DataValue <= LowFrequency.DataValue);
             }));
-            HighFrequency.AddRule(new SimpleRule("HighFrequency", "HighFrequency must be greater than zero", domObj =>
+            VerticalBeamWidth.AddRule(new SimpleRule("DataValue", "VerticalBeamWidth must be between zero and +180", domObj =>
             {
                 var obj = (DataWrapper<float>)domObj;
-                return (obj.DataValue > 0);
+                return ((0 <= obj.DataValue) && (180 < obj.DataValue));
             }));
-            HighFrequency.AddRule(new SimpleRule("HighFrequency", "HighFrequency must be greater than LowFrequency", domObj =>
+            DepressionElevationAngle.AddRule(new SimpleRule("DataValue", "DepressionElevationAngle must be in the range -90 to +90", domObj =>
             {
                 var obj = (DataWrapper<float>)domObj;
-                return (obj.DataValue > LowFrequency.DataValue);
-            }));
-            VerticalBeamWidth.AddRule(new SimpleRule("VerticalBeamWidth", "VerticalBeamWidth must be between zero and +180", domObj =>
-            {
-                var obj = (DataWrapper<float>)domObj;
-                return ((obj.DataValue > 0) && (obj.DataValue <= 180));
-            }));
-            DepressionElevationAngle.AddRule(new SimpleRule("DepressionElevationAngle", "DepressionElevationAngle must be in the range -90 to +90", domObj =>
-            {
-                var obj = (DataWrapper<float>)domObj;
-                return ((-90 <= obj.DataValue) && (obj.DataValue <= 90));
+                return ((obj.DataValue < -90) || (90 < obj.DataValue));
             }));
 
             #endregion
@@ -278,12 +295,28 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         public TransmissionLossJob TransmissionLossJob
         {
-            get { return _transmissionLossJob; }
-            set
+            get
             {
-                if (value == _transmissionLossJob) return;
-                _transmissionLossJob = value;
-                NotifyPropertyChanged(TransmissionLossJobChangedEventArgs);
+                return new TransmissionLossJob
+                {
+                    AcousticProperties = new AcousticProperties
+                    {
+                        SourceDepth = SourceDepth.DataValue,
+                        VerticalBeamWidth = VerticalBeamWidth.DataValue,
+                        DepressionElevationAngle = DepressionElevationAngle.DataValue,
+                        LowFrequency = LowFrequency.DataValue,
+                        HighFrequency = HighFrequency.DataValue,
+                    },
+                    AnalysisPoint = new AnalysisPoint
+                    {
+                        IDField = 1,
+                        Location = new EarthCoordinate(Latitude.DataValue, Longitude.DataValue),
+                        RadialBearing = RadialBearing.DataValue,
+                        RadialCount = RadialCount.DataValue,
+                    },
+                    Radius = (int)Radius.DataValue,
+                    MaxDepth = _maxCalculationDepth,
+                };
             }
         }
 

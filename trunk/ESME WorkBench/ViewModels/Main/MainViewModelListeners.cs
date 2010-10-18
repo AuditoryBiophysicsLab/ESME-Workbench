@@ -33,6 +33,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             #region create transmission loss job. the new base class for all acoustic simulations!
 
+#if false
             var transmissionLossJob = new TransmissionLossJob
                                       {
                                           AcousticProperties = new AcousticProperties
@@ -54,6 +55,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                           MaxDepth = 3000,
                                       };
 
+#endif
             #endregion
 
             #region create bellhop run file from tlj (and stuff)
@@ -71,10 +73,11 @@ namespace ESMEWorkBench.ViewModels.Main
                                                RangeCellSize = 50,
                                            };
 
-            var transmissionLossJobViewModel = new TransmissionLossJobViewModel
-                                               {
-                                                   TransmissionLossJob = transmissionLossJob
-                                               };
+            var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, 0, _experiment.NemoFile.Scenario.Platforms[0].Sources[0].Modes[0], 16, 3000);
+            //var transmissionLossJobViewModel = new TransmissionLossJobViewModel
+            //                                   {
+            //                                       TransmissionLossJob = transmissionLossJob
+            //                                   };
             var result = _visualizerService.ShowDialog("TransmissionLossJobView", transmissionLossJobViewModel);
             if ((!result.HasValue) || (!result.Value))
             {
@@ -82,15 +85,15 @@ namespace ESMEWorkBench.ViewModels.Main
                 return;
             }
 
-            transmissionLossJob.AnalysisPoint.TransmissionLossJobs.Add(transmissionLossJob);
-            MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, transmissionLossJob.AnalysisPoint);
+            transmissionLossJobViewModel.TransmissionLossJob.AnalysisPoint.TransmissionLossJobs.Add(transmissionLossJobViewModel.TransmissionLossJob);
+            MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, transmissionLossJobViewModel.TransmissionLossJob.AnalysisPoint);
 
             MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Wait);
 
             TransmissionLossField transmissionLossField;
             try
             {
-                var bellhopRunFile = BellhopRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
+                var bellhopRunFile = BellhopRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
                 //transmissionLossField = FieldCalculator.ComputeField(bellhopRunFile, null);
                 var bellhopCalculatorViewModel = new BellhopCalculatorViewModel
                                                  {
