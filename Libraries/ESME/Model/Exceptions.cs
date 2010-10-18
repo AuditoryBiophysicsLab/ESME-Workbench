@@ -90,4 +90,20 @@ namespace ESME.Model
         public PropertyNotInitializedException(string message, Exception innerException) : base(message, innerException) { }
         public PropertyNotInitializedException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+    public class AnimatInterfaceConfigurationException : Exception
+    {
+        public AnimatInterfaceConfigurationException() { }
+        public AnimatInterfaceConfigurationException(string message) : base(message) { }
+        public AnimatInterfaceConfigurationException(string message, Exception innerException) : base(message, innerException) { }
+        public AnimatInterfaceConfigurationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    public class AnimatInterfaceMMBSException : Exception
+    {
+        public AnimatInterfaceMMBSException() { }
+        public AnimatInterfaceMMBSException(string message) : base(message) { }
+        public AnimatInterfaceMMBSException(string message, Exception innerException) : base(message, innerException) { }
+        public AnimatInterfaceMMBSException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
 }
