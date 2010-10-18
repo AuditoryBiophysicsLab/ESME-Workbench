@@ -518,7 +518,7 @@ namespace ESMEWorkBench.Data
             var south = (float)boundingBox.Top - 2;
             var east = (float)boundingBox.Right + 2;
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
-                Bathymetry = new Environment2DData(BathymetryFileName, north, west, south, east);
+                Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", north, west, south, east);
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
                 SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
         }
