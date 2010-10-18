@@ -109,7 +109,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Environment\Bathymetry.cs" />
+    <Compile Include="Environment\Environment2DData.cs" />
     <Compile Include="Environment\Binary Data Classes\DataArray.cs" />
     <Compile Include="Environment\Binary Data Classes\DataAxis.cs" />
     <Compile Include="Environment\Binary Data Classes\DataFile.cs" />

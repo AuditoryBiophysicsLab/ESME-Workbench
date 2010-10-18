@@ -8,42 +8,42 @@ using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class Bathymetry
+    public class Environment2DData
     {
         #region Public properties
 
         /// <summary>
-        ///   Elevations of all points in the bathymetry, in meters.  Positive values are ABOVE sea level
+        ///   Values of all points in the data set
         /// </summary>
-        public float[,] Elevations { get; internal set; }
+        public float[,] Values { get; internal set; }
 
         /// <summary>
-        ///   List of latitudes (in degrees) for which we have elevation points
+        ///   List of latitudes (in degrees) for which we have values
         /// </summary>
         public double[] Latitudes { get; internal set; }
 
         /// <summary>
-        ///   List of longitudes (in degrees) for which we have elevation points
+        ///   List of longitudes (in degrees) for which we have values
         /// </summary>
         public double[] Longitudes { get; internal set; }
 
         /// <summary>
-        ///   Lowest elevation in the bathymetry.  Usually below sea level (negative).
+        ///   Lowest value in the data set.
         /// </summary>
-        public float MinElevation { get; internal set; }
+        public float MinValue { get; internal set; }
 
         /// <summary>
-        ///   Highest elevation in the bathymetry.  May be above sea level (positive).
+        ///   Highest value in the data set
         /// </summary>
-        public float MaxElevation { get; internal set; }
+        public float MaxValue { get; internal set; }
 
         /// <summary>
-        ///   Corner of the bathymetry that has the minimum lat and lon values
+        ///   Corner of the data set that has the minimum lat and lon values
         /// </summary>
         public EarthCoordinate MinCoordinate { get; internal set; }
 
         /// <summary>
-        ///   Corner of the bathymetry that has the maximum lat and lon values
+        ///   Corner of the data set that has the maximum lat and lon values
         /// </summary>
         public EarthCoordinate MaxCoordinate { get; internal set; }
 
@@ -53,20 +53,20 @@ namespace ESME.Environment
 
         const UInt32 Magic = 0x728dcde6;
 
-        Bathymetry()
+        Environment2DData()
         {
             MinCoordinate = null;
             MaxCoordinate = null;
-            MaxElevation = 0;
-            MinElevation = 0;
+            MaxValue = 0;
+            MinValue = 0;
             Latitudes = null;
             Longitudes = null;
-            Elevations = null;
+            Values = null;
         }
 
         #region Public constructors
 
-        public Bathymetry(string filename, float[,] elevations, double[] latitudes, double[] longitudes, float minElevation, float maxElevation) : this()
+        public Environment2DData(string filename, float[,] values, double[] latitudes, double[] longitudes, float minElevation, float maxElevation) : this()
         {
             Filename = filename;
 
@@ -74,14 +74,14 @@ namespace ESME.Environment
             MaxCoordinate = new EarthCoordinate(latitudes[latitudes.Length - 1], longitudes[longitudes.Length - 1]);
         }
 
-        public Bathymetry(string filename, float north, float west, float south, float east)
+        public Environment2DData(string filename, float north, float west, float south, float east)
         {
             Filename = filename;
-            if (Path.GetExtension(filename) != ".eeb") throw new FileFormatException(string.Format("Bathymetry: Unknown file type \"{0}\"", Path.GetFileName(filename)));
+            if (Path.GetExtension(filename) != ".eeb") throw new FileFormatException(string.Format("environment2DData: Unknown file type \"{0}\"", Path.GetFileName(filename)));
             var file = DataFile.Open(filename);
 
-            var layer = file["bathymetry"];
-            if (layer == null) throw new FileFormatException(string.Format("Bathymetry: Specified environment file \"{0}\"does not contain a bathymetry layer", filename));
+            var layer = file["environment2DData"];
+            if (layer == null) throw new FileFormatException(string.Format("environment2DData: Specified environment file \"{0}\"does not contain a environment2DData layer", filename));
 
             Longitudes = layer.LongitudeAxis.DoubleValuesBetween(west, east);
             Latitudes = layer.LatitudeAxis.DoubleValuesBetween(south, north);
@@ -90,18 +90,18 @@ namespace ESME.Environment
 
             MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
             MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
-            MinElevation = float.MaxValue;
-            MaxElevation = float.MinValue;
-            Elevations = layer.Get2DData(latIndices[0], latIndices[latIndices.Length - 1], lonIndices[0], lonIndices[lonIndices.Length - 1]);
-            for (var row = 0; row < Elevations.GetLength(0); row++)
-                for (var col = 0; col < Elevations.GetLength(1); col++)
+            MinValue = float.MaxValue;
+            MaxValue = float.MinValue;
+            Values = layer.Get2DData(latIndices[0], latIndices[latIndices.Length - 1], lonIndices[0], lonIndices[lonIndices.Length - 1]);
+            for (var row = 0; row < Values.GetLength(0); row++)
+                for (var col = 0; col < Values.GetLength(1); col++)
                 {
-                    MinElevation = Math.Min(MinElevation, Elevations[row, col]);
-                    MaxElevation = Math.Max(MaxElevation, Elevations[row, col]);
+                    MinValue = Math.Min(MinValue, Values[row, col]);
+                    MaxValue = Math.Max(MaxValue, Values[row, col]);
                 }
         }
 
-        public Bathymetry(string filename) : this()
+        public Environment2DData(string filename) : this()
         {
             Filename = filename;
             if (Path.GetExtension(filename) == ".eeb")
@@ -111,7 +111,7 @@ namespace ESME.Environment
                 var file = DataFile.Open(filename);
                 foreach (var layer in file.Layers)
                 {
-                    if (layer.Name != "bathymetry") continue;
+                    if (layer.Name != "environment2DData") continue;
                     Latitudes = layer.LatitudeAxis.UnwrappedValues;
                     Longitudes = layer.LongitudeAxis.UnwrappedValues;
                     //array = layer.DataArray.Data;
@@ -119,15 +119,15 @@ namespace ESME.Environment
                     MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
                     MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
 
-                    MinElevation = float.MaxValue;
-                    MaxElevation = float.MinValue;
+                    MinValue = float.MaxValue;
+                    MaxValue = float.MinValue;
 
-                    Elevations = layer.Get2DData(0, layer.RowCount - 1, layer.RowCount, 0, layer.ColumnCount - 1, layer.ColumnCount);
-                    for (var row = 0; row < Elevations.GetLength(0); row++)
-                        for (var col = 0; col < Elevations.GetLength(1); col++)
+                    Values = layer.Get2DData(0, layer.RowCount - 1, layer.RowCount, 0, layer.ColumnCount - 1, layer.ColumnCount);
+                    for (var row = 0; row < Values.GetLength(0); row++)
+                        for (var col = 0; col < Values.GetLength(1); col++)
                         {
-                            MinElevation = Math.Min(MinElevation, Elevations[row, col]);
-                            MaxElevation = Math.Max(MaxElevation, Elevations[row, col]);
+                            MinValue = Math.Min(MinValue, Values[row, col]);
+                            MaxValue = Math.Max(MaxValue, Values[row, col]);
                         }
                 }
             }
@@ -175,10 +175,10 @@ namespace ESME.Environment
             int lat,
                 lon;
 
-            if (stream.ReadUInt32() != Magic) throw new FormatException("Attempted to read invalid data into Bathymetry");
+            if (stream.ReadUInt32() != Magic) throw new FormatException("Attempted to read invalid data into environment2DData");
 
-            MinElevation = stream.ReadSingle();
-            MaxElevation = stream.ReadSingle();
+            MinValue = stream.ReadSingle();
+            MaxValue = stream.ReadSingle();
 
             MinCoordinate = new EarthCoordinate(stream);
             MaxCoordinate = new EarthCoordinate(stream);
@@ -189,16 +189,16 @@ namespace ESME.Environment
             Latitudes = new double[stream.ReadInt32()];
             for (lat = 0; lat < Latitudes.Length; lat++) Latitudes[lat] = stream.ReadDouble();
 
-            Elevations = new float[Latitudes.Length,Longitudes.Length];
-            for (lat = 0; lat < Latitudes.Length; lat++) for (lon = 0; lon < Longitudes.Length; lon++) Elevations[lat, lon] = stream.ReadSingle();
+            Values = new float[Latitudes.Length,Longitudes.Length];
+            for (lat = 0; lat < Latitudes.Length; lat++) for (lon = 0; lon < Longitudes.Length; lon++) Values[lat, lon] = stream.ReadSingle();
         }
 
         public void Save(BinaryWriter stream)
         {
             stream.Write(Magic);
 
-            stream.Write(MinElevation);
-            stream.Write(MaxElevation);
+            stream.Write(MinValue);
+            stream.Write(MaxValue);
 
             MinCoordinate.Write(stream);
             MaxCoordinate.Write(stream);
@@ -209,26 +209,41 @@ namespace ESME.Environment
             stream.Write(Latitudes.Length);
             foreach (var lat in Latitudes) stream.Write(lat);
 
-            for (var lat = 0; lat < Latitudes.Length; lat++) for (var lon = 0; lon < Longitudes.Length; lon++) stream.Write(Elevations[lat, lon]);
+            for (var lat = 0; lat < Latitudes.Length; lat++) for (var lon = 0; lon < Longitudes.Length; lon++) stream.Write(Values[lat, lon]);
         }
 
-        public void SaveToYXZ(string fileName)
+        /// <summary>
+        /// Saves a data set to a text file in YXZ format.
+        /// The output data file will be a three-column text file 
+        /// LatitudeValue LongitudeValue ScaleFactor*DataValueAtLatLon
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="scaleFactor"></param>
+        public void SaveToYXZ(string fileName, float scaleFactor)
         {
             using (var stream = new StreamWriter(File.Create(fileName)))
             {
                 for (var lat = 0; lat < Latitudes.Length; lat++)
                     for (var lon = 0; lon < Longitudes.Length; lon++)
-                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], -Elevations[lat, lon]));
+                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor * Values[lat, lon]));
             }
         }
-
 
         public bool ContainsCoordinate(EarthCoordinate coordinate) { return (MinCoordinate.Longitude_degrees <= coordinate.Longitude_degrees) && (coordinate.Longitude_degrees <= MaxCoordinate.Longitude_degrees) && (MinCoordinate.Latitude_degrees <= coordinate.Latitude_degrees) && (coordinate.Latitude_degrees <= MaxCoordinate.Latitude_degrees); }
 
-        // lookup a coordinate in the current bathymetry dataset.
-        // The elevation at the requested coordinate is returned in the 'out' parameter Elevation
-        // If the requested coordinate is contained in the bathymetry dataset, the function return value is 'true', 'false' otherwise
-        public bool LookupElevation(EarthCoordinate3D coordinate, out float elevation)
+        /// <summary>
+        /// Look up a value in the current data set.
+        /// </summary>
+        /// <param name="coordinate">
+        /// The coordinate to search the data set for
+        /// </param>
+        /// <param name="value">
+        /// The value at the requested coordinate
+        /// </param>
+        /// <returns>
+        /// If the requested coordinate is contained in the data set, the function return value is 'true', 'false' otherwise
+        /// </returns>
+        public bool Lookup(EarthCoordinate3D coordinate, out float value)
         {
             if (ContainsCoordinate(coordinate))
             {
@@ -236,19 +251,27 @@ namespace ESME.Environment
                 var longIndex = LookupIndex(coordinate.Longitude_degrees, Longitudes);
                 if ((latIndex >= 0) && (longIndex >= 0))
                 {
-                    elevation = Elevations[latIndex, longIndex];
+                    value = Values[latIndex, longIndex];
                     return true;
                 }
             }
-            elevation = float.NaN;
+            value = float.NaN;
             return false;
         }
 
-
-        // lookup a coordinate in the current bathymetry dataset.
-        // The elevation at the requested coordinate is returned in the 'out' parameter Elevation
-        // If the requested coordinate is contained in the bathymetry dataset, the function return value is 'true', 'false' otherwise
-        public bool LookupElevation(EarthCoordinate coordinate, out float elevation)
+        /// <summary>
+        /// Look up a value in the current data set.
+        /// </summary>
+        /// <param name="coordinate">
+        /// The coordinate to search the data set for
+        /// </param>
+        /// <param name="value">
+        /// The value at the requested coordinate
+        /// </param>
+        /// <returns>
+        /// If the requested coordinate is contained in the data set, the function return value is 'true', 'false' otherwise
+        /// </returns>
+        public bool Lookup(EarthCoordinate coordinate, out float value)
         {
             if (ContainsCoordinate(coordinate))
             {
@@ -256,11 +279,11 @@ namespace ESME.Environment
                 var longIndex = LookupIndex(coordinate.Longitude_degrees, Longitudes);
                 if ((latIndex >= 0) && (longIndex >= 0))
                 {
-                    elevation = Elevations[latIndex, longIndex];
+                    value = Values[latIndex, longIndex];
                     return true;
                 }
             }
-            elevation = float.NaN;
+            value = float.NaN;
             return false;
         }
 

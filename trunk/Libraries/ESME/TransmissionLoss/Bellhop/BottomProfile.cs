@@ -11,7 +11,7 @@ namespace ESME.TransmissionLoss.Bellhop
     {
         const UInt32 Magic = 0x2bf6f6e5;
 
-        public BottomProfile(int numberOfPointsInTransect, Transect transect, Bathymetry bathymetry)
+        public BottomProfile(int numberOfPointsInTransect, Transect transect, Environment2DData environment2DData)
         {
             MaxDepth = double.MinValue;
             Profile = new double[numberOfPointsInTransect];
@@ -20,7 +20,7 @@ namespace ESME.TransmissionLoss.Bellhop
             var currentPoint = transect.StartPoint;
             for (var i = 0; i < numberOfPointsInTransect; i++)
             {
-                Profile[i] = Math.Abs(TwoDBilinearApproximation(bathymetry.Latitudes, bathymetry.Longitudes, bathymetry.Elevations, currentPoint));
+                Profile[i] = Math.Abs(TwoDBilinearApproximation(environment2DData.Latitudes, environment2DData.Longitudes, environment2DData.Values, currentPoint));
                 if (MaxDepth < Profile[i])
                 {
                     MaxDepth = Profile[i];

@@ -365,7 +365,7 @@ namespace ESMEWorkBench.Data
         public IMessageBoxService MessageBoxService { private get; set; }
 
         [XmlIgnore]
-        public Bathymetry Bathymetry { get; private set; }
+        public Environment2DData Environment2DData { get; private set; }
 
         [XmlIgnore]
         public SoundSpeedField SoundSpeedField { get; private set; }
@@ -518,7 +518,7 @@ namespace ESMEWorkBench.Data
             var south = (float)boundingBox.Top - 2;
             var east = (float)boundingBox.Right + 2;
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
-                Bathymetry = new Bathymetry(BathymetryFileName, north, west, south, east);
+                Environment2DData = new Environment2DData(BathymetryFileName, north, west, south, east);
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
                 SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
         }
