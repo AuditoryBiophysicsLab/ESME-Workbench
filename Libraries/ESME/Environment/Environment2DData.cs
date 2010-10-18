@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Windows.Media;
 using ESME.Overlay;
 using HRC.Navigation;
@@ -66,22 +65,22 @@ namespace ESME.Environment
 
         #region Public constructors
 
-        public Environment2DData(string filename, float[,] values, double[] latitudes, double[] longitudes, float minElevation, float maxElevation) : this()
+        public Environment2DData(string fileName, float[,] values, double[] latitudes, double[] longitudes, float minElevation, float maxElevation) : this()
         {
-            Filename = filename;
+            Filename = fileName;
 
             MinCoordinate = new EarthCoordinate(latitudes[0], Longitudes[0]);
             MaxCoordinate = new EarthCoordinate(latitudes[latitudes.Length - 1], longitudes[longitudes.Length - 1]);
         }
 
-        public Environment2DData(string filename, float north, float west, float south, float east)
+        public Environment2DData(string fileName, string layerName, float north, float west, float south, float east)
         {
-            Filename = filename;
-            if (Path.GetExtension(filename) != ".eeb") throw new FileFormatException(string.Format("environment2DData: Unknown file type \"{0}\"", Path.GetFileName(filename)));
-            var file = DataFile.Open(filename);
+            Filename = fileName;
+            if (Path.GetExtension(fileName) != ".eeb") throw new FileFormatException(string.Format("environment2DData: Unknown file type \"{0}\"", Path.GetFileName(fileName)));
+            var file = DataFile.Open(fileName);
 
-            var layer = file["environment2DData"];
-            if (layer == null) throw new FileFormatException(string.Format("environment2DData: Specified environment file \"{0}\"does not contain a environment2DData layer", filename));
+            var layer = file[layerName];
+            if (layer == null) throw new FileFormatException(string.Format("environment2DData: Specified environment file \"{0}\"does not contain a environment2DData layer", fileName));
 
             Longitudes = layer.LongitudeAxis.DoubleValuesBetween(west, east);
             Latitudes = layer.LatitudeAxis.DoubleValuesBetween(south, north);
@@ -101,14 +100,14 @@ namespace ESME.Environment
                 }
         }
 
-        public Environment2DData(string filename) : this()
+        public Environment2DData(string fileName) : this()
         {
-            Filename = filename;
-            if (Path.GetExtension(filename) == ".eeb")
+            Filename = fileName;
+            if (Path.GetExtension(fileName) == ".eeb")
             {
                 //float[, ,] array;
                 //float curValue;
-                var file = DataFile.Open(filename);
+                var file = DataFile.Open(fileName);
                 foreach (var layer in file.Layers)
                 {
                     if (layer.Name != "environment2DData") continue;
@@ -133,12 +132,12 @@ namespace ESME.Environment
             }
             else
             {
-                using (var stream = new BinaryReader(new FileStream(filename, FileMode.Open)))
+                using (var stream = new BinaryReader(new FileStream(fileName, FileMode.Open)))
                 {
                     Load(stream);
                 }
             }
-            Filename = filename;
+            Filename = fileName;
         }
 
         #endregion

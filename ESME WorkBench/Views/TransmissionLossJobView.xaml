@@ -12,7 +12,7 @@
 				           TextAlignment="Right"
 				           Margin="0 0 5 0"
 				           Text="Latitude (deg)" />
-                <TextBox Text="{Binding TransmissionLossJob.AnalysisPoint.Location.Latitude_degrees, StringFormat={}{0:0.000000}}"
+                <TextBox Text="{Binding TransmissionLossJob.AnalysisPoint.Location.Latitude_degrees, StringFormat={}{0:0.000000}, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"
 				           FontWeight="Bold" />
             </DockPanel>
             <DockPanel LastChildFill="True">
