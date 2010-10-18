@@ -156,7 +156,7 @@ namespace ESME.Model
             DisplayLayers = DisplayLayer.CreateDisplayLayers();
             Globals.CurrentExperimentName = Information.Name;
             Globals.CurrentLocationName = Environment.LocationName;
-            Environment.Bathymetry = new ESME.Environment.Bathymetry(Globals.CurrentEnvironmentFile);
+            Environment.Environment2DData = new ESME.Environment.Environment2DData(Globals.CurrentEnvironmentFile);
         }
         #endregion
     }

@@ -340,7 +340,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> QuickLookCommand
         {
-            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => (((_experiment != null) && (_experiment.NemoFile != null)) && (_experiment.Bathymetry != null)) && (_experiment.SoundSpeedField != null), delegate { MediatorMessage.Send(MediatorMessage.QuickLookCommand); })); }
+            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => (((_experiment != null) && (_experiment.NemoFile != null)) && (_experiment.Environment2DData != null)) && (_experiment.SoundSpeedField != null), delegate { MediatorMessage.Send(MediatorMessage.QuickLookCommand); })); }
         }
 
         SimpleCommand<object, object> _quickLook;

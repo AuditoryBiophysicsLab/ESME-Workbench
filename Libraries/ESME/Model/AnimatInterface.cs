@@ -39,7 +39,7 @@ namespace ESME.Model
         }
 
         public string AnimatLogFilePath { get; set; }
-        public Bathymetry Bathymetry { get; set; }
+        public Environment2DData Environment2DData { get; set; }
 
         #endregion
 
@@ -293,7 +293,7 @@ namespace ESME.Model
                 curAnimat = AnimatList[i];
                 // Make sure the animat is still contained in the current bathymetry dataset, and if so get the depth at the animat's current position
                 float bathymetryDepthMeters;
-                bool animatIsWithinBathymetry = Bathymetry.LookupElevation(curAnimat.Location, out bathymetryDepthMeters);
+                bool animatIsWithinBathymetry = Environment2DData.Lookup(curAnimat.Location, out bathymetryDepthMeters);
 
                 if (animatIsWithinBathymetry)
                 {

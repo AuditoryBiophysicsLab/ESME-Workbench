@@ -24,7 +24,7 @@ namespace ESME.Model
         [XmlIgnore]
         public SoundSpeedField SoundSpeedField { get; set; }
         [XmlIgnore]
-        public Bathymetry Bathymetry { get; set; }
+        public Environment2DData Environment2DData { get; set; }
 
         public EnvironmentInformation(string LocationName, string SoundSpeedFieldName, float WindSpeed_knots)
             : this()
@@ -40,7 +40,7 @@ namespace ESME.Model
             WindSpeed_knots = 0f;
             Sediment = Basement = null;
             SoundSpeedField = null;
-            Bathymetry = null;
+            Environment2DData = null;
         }
 
         #region IDataErrorInfo Members
