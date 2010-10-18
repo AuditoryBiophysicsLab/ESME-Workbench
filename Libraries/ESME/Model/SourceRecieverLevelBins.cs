@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Xml.Linq;
 
@@ -8,83 +7,87 @@ namespace ESME.Model
 {
     public class SourceRecieverLevelBins
     {
-        public float LowExposure_dBSPL { get; set; }
-        public float BinWidth_dBSPL { get; set; }
+        /// <summary>
+        /// Lowest tracked exposure level, in dB re: 1 uPa
+        /// </summary>
+        public float LowExposureLevel { get; set; }
+
+        /// <summary>
+        /// Exposure bin width, in dB
+        /// </summary>
+        public float BinWidth { get; set; }
+
+        /// <summary>
+        /// The actual array of recieved level bins
+        /// </summary>
         public int[] Bins { get; set; }
 
-        public SourceRecieverLevelBins(float LowExposure_dBSPL, float BinWidth_dBSPL, int BinCount)
+        public SourceRecieverLevelBins(float lowExposure, float binWidth, int binCount)
         {
-            this.LowExposure_dBSPL = LowExposure_dBSPL;
-            this.BinWidth_dBSPL = BinWidth_dBSPL;
-            Bins = new int[BinCount + 2];
+            LowExposureLevel = lowExposure;
+            BinWidth = binWidth;
+            Bins = new int[binCount + 2];
         }
 
-        public void AddExposure(float ExposureLevel_dBSPL)
+        public void AddExposure(float exposureLevel)
         {
-            int bin = 0;
-            if (ExposureLevel_dBSPL < LowExposure_dBSPL)
-                bin = 0;
-            else
-                bin = (int)Math.Min(((ExposureLevel_dBSPL - LowExposure_dBSPL) / BinWidth_dBSPL) + 1, Bins.Length - 1);
+            int bin;
+            if (exposureLevel < LowExposureLevel) bin = 0;
+            else bin = (int) Math.Min(((exposureLevel - LowExposureLevel)/BinWidth) + 1, Bins.Length - 1);
             Bins[bin]++;
         }
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
-            foreach (int b in Bins)
-                sb.Append(b.ToString()+", ");
+            foreach (var b in Bins) sb.Append(b + ", ");
 
             return sb.Remove(sb.Length - 2, 2).ToString();
         }
 
-        public void AddLevelRangeMetadata(int RecieverCount, int SourceCount, System.IO.StreamWriter sw)
+        public void AddLevelRangeMetadata(int recieverCount, int sourceCount, StreamWriter sw)
         {
             sw.Write("ReceieverCount, SourceCount, BinCount, ");
-            for (int i = 0; i < Bins.Length - 1; i++)
-                sw.Write("Bin{0}Width, ", i);
+            for (var i = 0; i < Bins.Length - 1; i++) sw.Write("Bin{0}Width, ", i);
             sw.WriteLine("Bin{0}Width", Bins.Length - 1);
-            sw.Write("{0}, {1}, {2}, ", RecieverCount, SourceCount, Bins.Length);
-            sw.Write("{0}, ", LowExposure_dBSPL);
-            float cur = LowExposure_dBSPL;
-            for (int i = 1; i < Bins.Length - 2; i++)
+            sw.Write("{0}, {1}, {2}, ", recieverCount, sourceCount, Bins.Length);
+            sw.Write("{0}, ", LowExposureLevel);
+            var cur = LowExposureLevel;
+            for (var i = 1; i < Bins.Length - 2; i++)
             {
-                sw.Write("{0}, ", BinWidth_dBSPL);
-                cur += BinWidth_dBSPL;
+                sw.Write("{0}, ", BinWidth);
+                cur += BinWidth;
             }
             sw.WriteLine("{0}", 230 - cur);
         }
 
-        public void AddLevelRangeMetadata(XElement RootElement)
+        public void AddLevelRangeMetadata(XElement rootElement)
         {
-
-            XElement LevelRanges = new XElement("LevelRanges");
-            XElement LowRange = new XElement("LowValue", 0);
-            XElement HighRange = new XElement("HighValue", LowExposure_dBSPL);
-            float CurLow, CurHigh;
-            LevelRanges.Add(new XElement("LevelRange", LowRange, HighRange));
-            CurLow = LowExposure_dBSPL;
-            for (int i = 0; i < Bins.Length - 2; i++)
+            var levelRanges = new XElement("LevelRanges");
+            var lowRange = new XElement("LowValue", 0);
+            var highRange = new XElement("HighValue", LowExposureLevel);
+            levelRanges.Add(new XElement("LevelRange", lowRange, highRange));
+            var curLow = LowExposureLevel;
+            for (var i = 0; i < Bins.Length - 2; i++)
             {
-                CurHigh = CurLow + BinWidth_dBSPL;
-                LowRange = new XElement("LowValue", CurLow);
-                HighRange = new XElement("HighValue", CurHigh);
-                LevelRanges.Add(new XElement("LevelRange", LowRange, HighRange));
-                CurLow = CurHigh;
+                var curHigh = curLow + BinWidth;
+                lowRange = new XElement("LowValue", curLow);
+                highRange = new XElement("HighValue", curHigh);
+                levelRanges.Add(new XElement("LevelRange", lowRange, highRange));
+                curLow = curHigh;
             }
-            LowRange = new XElement("LowValue", CurLow);
-            HighRange = new XElement("HighValue", 230);
-            LevelRanges.Add(new XElement("LevelRange", LowRange, HighRange));
-            RootElement.Add(LevelRanges);
+            lowRange = new XElement("LowValue", curLow);
+            highRange = new XElement("HighValue", 230);
+            levelRanges.Add(new XElement("LevelRange", lowRange, highRange));
+            rootElement.Add(levelRanges);
         }
 
-        public void AddExposureBins(XElement SourceElement)
+        public void AddExposureBins(XElement sourceElement)
         {
-            XElement ExposureBins = new XElement("ExposureBins");
-            foreach (int bin in Bins)
-                ExposureBins.Add(new XElement("ExposureBin", bin));
-            SourceElement.Add(ExposureBins);
+            var exposureBins = new XElement("ExposureBins");
+            foreach (var bin in Bins) exposureBins.Add(new XElement("ExposureBin", bin));
+            sourceElement.Add(exposureBins);
         }
     }
 }

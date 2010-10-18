@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using mbs;
+using System.Linq;
 using System.Xml.Serialization;
+using mbs;
 
 namespace ESME.Model
 {
@@ -13,30 +12,25 @@ namespace ESME.Model
         internal int ReferenceCount { get; set; }
         internal string Filename { get; set; }
         public string SpeciesName { get; set; }
+
         [XmlElement("SpeciesID")]
         public int IDField { get; set; }
+
         [XmlIgnore]
         public int Index { get; set; }
 
-        internal Species(string SpeciesFilename)
+        internal Species(string speciesFilename)
         {
-            Initialize(SpeciesFilename);
-            SpeciesName = Path.GetFileNameWithoutExtension(SpeciesFilename);
-            Filename = SpeciesFilename;
+            Initialize(speciesFilename);
+            SpeciesName = Path.GetFileNameWithoutExtension(speciesFilename);
+            Filename = speciesFilename;
         }
 
-        private Species() { }
+        static void Initialize(string speciesFilename) { if (!File.Exists(speciesFilename)) throw new FileNotFoundException("Species(" + speciesFilename + "): File not found"); }
 
-        private void Initialize(string SpeciesFilename)
+        internal void AddToSimulationEnvironment(C3mbs simulationEnvironment)
         {
-            if (!File.Exists(SpeciesFilename))
-                throw new FileNotFoundException("Species(" + SpeciesFilename + "): File not found");
-        }
-
-        internal void AddToSimulationEnvironment(C3mbs SimulationEnvironment)
-        {
-            mbsRESULT result;
-            result = SimulationEnvironment.AddSpecies(Filename);
+            var result = simulationEnvironment.AddSpecies(Filename);
             if (mbsRESULT.OK != result)
             {
                 //System.Diagnostics.Debug.WriteLine("AddSpecies FAILED: " + C3mbs.MbsResultToString(result));
@@ -44,37 +38,24 @@ namespace ESME.Model
             }
         }
 
-        public override string ToString()
-        {
-            return SpeciesName;
-        }
+        public override string ToString() { return SpeciesName; }
 
         bool IEquatable<Species>.Equals(Species that)
         {
-            if (this.Filename == that.Filename)
-                return true;
-            return false;
+            return Filename == that.Filename;
         }
-
     }
 
-    public class SpeciesDeletedEventArgs : ItemDeletedEventArgs<Species> { }
+    public class SpeciesDeletedEventArgs : ItemDeletedEventArgs<Species> {}
 
     public class SpeciesList : UniqueAutoIncrementList<Species>
     {
-        private string SpeciesDirectory;
-
-        private SpeciesList() 
+        public SpeciesList(string speciesDirectory)
         {
+            var files = Directory.GetFiles(speciesDirectory, "*.spe");
+            foreach (var file in files) Add(new Species(file));
         }
 
-        public SpeciesList(string SpeciesDirectory)
-        {
-            this.SpeciesDirectory = SpeciesDirectory;
-            string[] files = Directory.GetFiles(SpeciesDirectory, "*.spe");
-            foreach (string file in files)
-                this.Add(new Species(file));
-        }
         public IEnumerable<Species> ReferencedSpecies
         {
             get
@@ -84,47 +65,36 @@ namespace ESME.Model
                              select s;
                 return result;
             }
-
         }
 
 
-        private new void Add(Species Species) { base.Add(Species); }
-        private new void Remove(Species Species) { base.Remove(Species); }
-        private new void AddRange(IEnumerable<Species> Collection) { }
-        private new void RemoveRange(int Index, int Count) { }
-        private new int RemoveAll(Predicate<Species> match) { return 0; }
-        private new void Clear() { }
+        new void Add(Species species) { base.Add(species); }
+        new void Remove(Species species) { base.Remove(species); }
+        new void AddRange(IEnumerable<Species> collection) { }
+        new void RemoveRange(int index, int count) { }
+        new int RemoveAll(Predicate<Species> match) { return 0; }
+        new void Clear() { }
 
-        internal int AddReference(string SpeciesName)
+        internal int AddReference(string speciesName)
         {
-            Species result = this.Find(s => s.SpeciesName == SpeciesName);
-            if (result == null)
-                throw new SpeciesNotFoundException("SpeciesList.Add: Requested species \"" + SpeciesName + "\" was not found");
+            var result = Find(s => s.SpeciesName == speciesName);
+            if (result == null) throw new SpeciesNotFoundException("SpeciesList.Add: Requested species \"" + speciesName + "\" was not found");
             result.ReferenceCount++;
             return result.IDField;
         }
 
-        public void RemoveReference(string SpeciesName)
+        public void RemoveReference(string speciesName)
         {
-            Species result = this.Find(s => s.SpeciesName == SpeciesName);
-            if (result == null)
-                throw new SpeciesNotFoundException("SpeciesList.Add: Requested species \"" + SpeciesName + "\" was not found");
-            if (result.ReferenceCount > 0)
-                result.ReferenceCount--;
+            var result = Find(s => s.SpeciesName == speciesName);
+            if (result == null) throw new SpeciesNotFoundException("SpeciesList.Add: Requested species \"" + speciesName + "\" was not found");
+            if (result.ReferenceCount > 0) result.ReferenceCount--;
         }
 
-        public void ClearReferences()
-        {
-            foreach (Species s in this)
-                s.ReferenceCount = 0;
-        }
+        public void ClearReferences() { foreach (var s in this) s.ReferenceCount = 0; }
 
-        public Species this[string SpeciesName]
+        public Species this[string speciesName]
         {
-            get
-            {
-                return this.Find(s => s.SpeciesName == SpeciesName);
-            }
+            get { return Find(s => s.SpeciesName == speciesName); }
         }
 
         public string[] SpeciesNames
