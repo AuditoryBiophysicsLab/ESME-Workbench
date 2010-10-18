@@ -60,7 +60,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
             var environmentInformation = new EnvironmentInformation
                                          {
-                                             Environment2DData = _experiment.Environment2DData,
+                                             Environment2DData = _experiment.Bathymetry,
                                              SoundSpeedField = _experiment.SoundSpeedField,
                                              Sediment = SedimentTypes.SedimentArray[0],
                                          };

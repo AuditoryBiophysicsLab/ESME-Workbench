@@ -34,7 +34,7 @@ namespace ESME.Model
             if (mbsRESULT.OK != result)
             {
                 //System.Diagnostics.Debug.WriteLine("AddSpecies FAILED: " + C3mbs.MbsResultToString(result));
-                throw new ApplicationException("C3mbs::AddSpecies(" + Filename + ") FATAL error " + C3mbs.MbsResultToString(result));
+                throw new ApplicationException("C3mbs::AddSpecies(" + Filename + ") FATAL error " + _mmmbs.MbsResultToString(result));
             }
         }
 
@@ -44,6 +44,9 @@ namespace ESME.Model
         {
             return Filename == that.Filename;
         }
+
+        readonly C3mbs _mmmbs = new C3mbs();
+
     }
 
     public class SpeciesDeletedEventArgs : ItemDeletedEventArgs<Species> {}
