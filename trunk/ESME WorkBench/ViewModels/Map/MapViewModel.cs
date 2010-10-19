@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
@@ -15,6 +14,7 @@ using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Layers;
 using HRC.Navigation;
+using HRC.Services;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ThinkGeo.MapSuite.Core;
@@ -36,8 +36,9 @@ namespace ESMEWorkBench.ViewModels.Map
         public string MapDLLVersion { get; private set; }
 
         [ImportingConstructor]
-        public MapViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService)
+        public MapViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IHRCColorPickerService colorPickerService)
         {
+            MapLayerViewModel.ColorPickerService = colorPickerService;
             viewAwareStatusService.ViewLoaded += ViewLoaded;
             try
             {

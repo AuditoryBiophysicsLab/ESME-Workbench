@@ -10,6 +10,7 @@ using ESMERibbonDemo.ViewModels;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using HRC.Navigation;
+using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -20,8 +21,8 @@ namespace ESMEWorkBench.ViewModels.Main
         #region Private fields
 
         readonly IMessageBoxService _messageBoxService;
-        readonly IOpenFileService _openFileService;
-        readonly ISaveFileService _saveFileService;
+        readonly IHRCOpenFileService _openFileService;
+        readonly IHRCSaveFileService _saveFileService;
         readonly IViewAwareStatus _viewAwareStatusService;
         readonly IUIVisualizerService _visualizerService;
         Experiment _experiment;
@@ -31,7 +32,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #region Constructors
 
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IOpenFileService openFileService, ISaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
             try
             {

@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
+using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
@@ -93,14 +94,14 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         readonly Dispatcher _dispatcher;
         readonly IViewAwareStatus _viewAwareStatus;
         bool _isRendered;
-        ISaveFileService _saveFileService;
+        IHRCSaveFileService _saveFileService;
         IUIVisualizerService _visualizerService;
 
         WriteableBitmap _writeableBitmap;
 
 
         [ImportingConstructor]
-        public TransmissionLossRadialViewModel(IViewAwareStatus viewAwareStatus, ISaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public TransmissionLossRadialViewModel(IViewAwareStatus viewAwareStatus, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
             RegisterMediator();
             _viewAwareStatus = viewAwareStatus;

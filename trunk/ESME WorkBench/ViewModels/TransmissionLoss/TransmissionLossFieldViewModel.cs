@@ -8,6 +8,7 @@ using System.Windows.Media.Imaging;
 using Cinch;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.Views;
+using HRC.Services;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
@@ -15,7 +16,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     {
         static readonly PropertyChangedEventArgs SelectedRadialChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.SelectedRadial);
         
-        readonly ISaveFileService _saveFileService;
+        readonly IHRCSaveFileService _saveFileService;
 
         bool _fieldInitialized,
              _radialInitialized;
@@ -23,7 +24,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         int _selectedRadial;
         IViewAwareStatus _viewAwareStatus;
 
-        public TransmissionLossFieldViewModel(string fileName, ISaveFileService saveFileService)
+        public TransmissionLossFieldViewModel(string fileName, IHRCSaveFileService saveFileService)
         {
             RegisterMediator();
             TransmissionLossField = TransmissionLossField.Load(fileName);
@@ -33,7 +34,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             SelectedRadial = 1;
         }
 
-        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField, ISaveFileService saveFileService)
+        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField, IHRCSaveFileService saveFileService)
         {
             RegisterMediator();
             TransmissionLossField = transmissionLossField;

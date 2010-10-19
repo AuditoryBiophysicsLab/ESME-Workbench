@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows.Forms;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Main;
+using HRC.Services;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
@@ -17,14 +17,8 @@ namespace ESMEWorkBench.ViewModels.Map
     {
         static Random _random;
 
-        static readonly ColorDialog ColorDialog = new ColorDialog
-                                                  {
-                                                      AllowFullOpen = true,
-                                                      AnyColor = true
-                                                  };
-
         public static ObservableCollection<MapLayerViewModel> Layers;
-
+        public static IHRCColorPickerService ColorPickerService { get; set; }
         public MapLayerViewModel()
         {
             LayerOverlay = new LayerOverlay();
@@ -33,18 +27,18 @@ namespace ESMEWorkBench.ViewModels.Map
 
             _lineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
                                                                                                   {
-                                                                                                      var result = ColorDialog.ShowDialog();
-                                                                                                      if (result != DialogResult.OK) return;
-                                                                                                      LineColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
+                                                                                                      var result = ColorPickerService.ShowDialog();
+                                                                                                      if (!result.HasValue || !result.Value) return;
+                                                                                                      LineColor = ColorPickerService.Color;
                                                                                                       MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                                                                                                       MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
                                                                                                   });
 
             _areaColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeAreaColor, obj =>
                                                                                                   {
-                                                                                                      var result = ColorDialog.ShowDialog();
-                                                                                                      if (result != DialogResult.OK) return;
-                                                                                                      AreaColor = Color.FromArgb(ColorDialog.Color.A, ColorDialog.Color.R, ColorDialog.Color.G, ColorDialog.Color.B);
+                                                                                                      var result = ColorPickerService.ShowDialog();
+                                                                                                      if (!result.HasValue || !result.Value) return;
+                                                                                                      AreaColor = ColorPickerService.Color;
                                                                                                       MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                                                                                                       MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
                                                                                                   });

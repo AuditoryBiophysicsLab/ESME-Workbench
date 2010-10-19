@@ -1,27 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
 using ESME.Model;
 using ESME.NEMO;
-using ESME.Overlay;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
-using ESMEWorkBench.ViewModels.Main;
 using ESMEWorkBench.ViewModels.Map;
 using ThinkGeo.MapSuite.Core;
-using MapShapeLayer = ESMEWorkBench.ViewModels.Map.MapShapeLayer;
 
 namespace ESMEWorkBench.Data
 {
@@ -40,6 +36,7 @@ namespace ESMEWorkBench.Data
         }
 
         static Type[] _referencedTypes;
+
         #region public string Comments { get; set; }
 
         [XmlElement]
@@ -224,8 +221,7 @@ namespace ESMEWorkBench.Data
             {
                 if (_scenarioFileName == value) return;
                 _scenarioFileName = value;
-                if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) 
-                    NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
+                if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
                 NotifyPropertyChanged(ScenarioFileNameChangedEventArgs);
                 InitializeEnvironment();
             }
@@ -271,6 +267,7 @@ namespace ESMEWorkBench.Data
             }
             NotifyPropertyChanged(MapLayersChangedEventArgs);
         }
+
         static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.MapLayers);
         ObservableCollection<MapLayerViewModel> _mapLayers;
 
@@ -325,6 +322,7 @@ namespace ESMEWorkBench.Data
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
+
         static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnalysisPoints);
         ObservableCollection<AnalysisPoint> _analysisPoints;
 
@@ -352,8 +350,7 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        [XmlIgnore]
-        bool _isInitialized;
+        [XmlIgnore] bool _isInitialized;
 
         [XmlElement]
         public string CurrentExtent { get; set; }
@@ -381,7 +378,7 @@ namespace ESMEWorkBench.Data
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("***********\nExperiment: Mediator registration failed: " + ex.Message + "\n***********");
+                Debug.WriteLine("***********\nExperiment: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
             Author = Environment.UserName;
@@ -391,18 +388,11 @@ namespace ESMEWorkBench.Data
             CurrentScale = 147647947.5;
         }
 
-        public Experiment(string fileName)
-            : this()
-        {
-            FileName = fileName;
-        }
+        public Experiment(string fileName) : this() { FileName = fileName; }
 
         public Experiment(Experiment that) { CopyFrom(that); }
 
-        public void Save()
-        {
-            SaveAs(FileName);
-        }
+        public void Save() { SaveAs(FileName); }
 
         public void Save(string fileName)
         {
@@ -418,11 +408,7 @@ namespace ESMEWorkBench.Data
             IsChanged = false;
         }
 
-        public void InitializeIfViewModelsReady()
-        {
-            if (_mainViewModelInitialized && _mapViewModelInitialized && _layerListViewModelInitialized)
-                Initialize();
-        }
+        public void InitializeIfViewModelsReady() { if (_mainViewModelInitialized && _mapViewModelInitialized && _layerListViewModelInitialized) Initialize(); }
 
         void Initialize()
         {
@@ -433,7 +419,7 @@ namespace ESMEWorkBench.Data
                 var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 AnalysisPointLayer = new MarkerLayerViewModel
                                      {
-                                         Name="Analysis Points",
+                                         Name = "Analysis Points",
                                          CanBeRemoved = false,
                                          CanBeReordered = true,
                                          CanChangeAreaColor = false,
@@ -468,17 +454,17 @@ namespace ESMEWorkBench.Data
                         var marker = AnalysisPointLayer.AddMarker(ap.Location, ap);
                         marker.ContextMenu = new ContextMenu();
                         marker.ContextMenu.Items.Add(new MenuItem
-                        {
-                            Header = "Run transmission loss...",
-                            Command = RunTransmissionLossCommand,
-                            CommandParameter = ap,
-                        });
+                                                     {
+                                                         Header = "Run transmission loss...",
+                                                         Command = RunTransmissionLossCommand,
+                                                         CommandParameter = ap,
+                                                     });
                         marker.ContextMenu.Items.Add(new MenuItem
-                        {
-                            Header = "Delete",
-                            Command = DeleteAnalysisPointCommand,
-                            CommandParameter = ap,
-                        });
+                                                     {
+                                                         Header = "Delete",
+                                                         Command = DeleteAnalysisPointCommand,
+                                                         CommandParameter = ap,
+                                                     });
                     }
                 }
             }
@@ -499,38 +485,29 @@ namespace ESMEWorkBench.Data
         {
             if (NemoFile == null) return;
             var boundingBox = new Rect();
-            if (NemoFile.Scenario.OverlayFile != null)
-                boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
+            if (NemoFile.Scenario.OverlayFile != null) boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
             else
             {
                 foreach (var platform in NemoFile.Scenario.Platforms)
                     foreach (var trackdef in platform.Trackdefs)
                     {
-                        if ((boundingBox.Width == 0) && (boundingBox.Height == 0)) 
-                            boundingBox = trackdef.OverlayFile.Shapes[0].BoundingBox;
-                        else 
-                            boundingBox.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
+                        if ((boundingBox.Width == 0) && (boundingBox.Height == 0)) boundingBox = trackdef.OverlayFile.Shapes[0].BoundingBox;
+                        else boundingBox.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
                     }
-                        
             }
-            var north = (float)boundingBox.Bottom + 2;
-            var west = (float)boundingBox.Left - 2;
-            var south = (float)boundingBox.Top - 2;
-            var east = (float)boundingBox.Right + 2;
-            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
-                Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", north, west, south, east);
-            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
-                SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
+            var north = (float) boundingBox.Bottom + 2;
+            var west = (float) boundingBox.Left - 2;
+            var south = (float) boundingBox.Top - 2;
+            var east = (float) boundingBox.Right + 2;
+            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", north, west, south, east);
+            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
         }
 
         #region RunTransmissionLossCommand
 
         public SimpleCommand<object, object> RunTransmissionLossCommand
         {
-            get { return _runTransmissionLossCommand ?? (_runTransmissionLossCommand = new SimpleCommand<object, object>(delegate
-                                                                                                                         {
-                                                                                                                             MediatorMessage.Send(MediatorMessage.DoNothing);
-                                                                                                                         })); }
+            get { return _runTransmissionLossCommand ?? (_runTransmissionLossCommand = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.DoNothing); })); }
         }
 
         SimpleCommand<object, object> _runTransmissionLossCommand;
