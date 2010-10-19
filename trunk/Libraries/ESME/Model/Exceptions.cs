@@ -106,4 +106,20 @@ namespace ESME.Model
         public AnimatInterfaceMMBSException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
+    public class AnimatLocationFileException : Exception
+    {
+        public AnimatLocationFileException() { }
+        public AnimatLocationFileException(string message) : base(message) { }
+        public AnimatLocationFileException(string message, Exception innerException) : base(message, innerException) { }
+        public AnimatLocationFileException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
+    public class AnimatMMBSException : Exception
+    {
+        public AnimatMMBSException() { }
+        public AnimatMMBSException(string message) : base(message) { }
+        public AnimatMMBSException(string message, Exception innerException) : base(message, innerException) { }
+        public AnimatMMBSException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
 }

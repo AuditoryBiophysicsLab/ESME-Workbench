@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading;
 using ESME.Environment;
-using ESME.Overlay;
 using mbs;
 
 namespace ESME.Model
@@ -45,21 +44,203 @@ namespace ESME.Model
         #region public methods
 
         /// <summary>
+        /// Intended to be called within an external loop. Increments 3mb by one timestep, calculates and logs new animat positions. 
+        /// </summary>
+        /// <returns>true if more timesteps are available.  false if no more positions need to be calculated. </returns>
+        public bool Step()
+        {
+            if (_isStatic) throw new AnimatInterfaceConfigurationException("Cannot Step a static animat interface.");
+
+            var stepTime = (int) _timeStep.TotalSeconds;
+
+
+            if (_beenInitialized != true) throw new AnimatInterfaceConfigurationException("AnimatInterface:Step; Cannot call animat simulator without initializing first.");
+            if (_secondsRemaining > stepTime)
+            {
+                Page3MB(stepTime);
+                UpdatePositions();
+                UpdateAnimatSoundExposure();
+                UpdateAnimatBathymetry();
+
+                _secondsElapsed += stepTime;
+                _secondsRemaining -= stepTime;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// shuts it down, and closes the log file.
+        /// </summary>
+        public void Close()
+        {
+            if (_isStatic) return; //because the log file isn't available.
+            //3mb
+
+            //animat location file
+            _animatLocationFile.Close();
+        }
+
+        /// <summary>
+        /// will return a fully populated, initialized, and paused animatInterface.
+        /// </summary>
+        /// <param name="animatScenarioFile"></param>
+        /// <param name="speciesDirectory"></param>
+        /// <param name="animatLogFilePath"></param>
+        /// <param name="mmmbsOutputDirectory"></param>
+        /// <param name="bathymetryFile"></param>
+        /// <param name="simulationDuration"></param>
+        /// <param name="simulationTimeStep"></param>
+        /// <returns></returns>
+        public AnimatInterface Create(string animatScenarioFile, string speciesDirectory, string bathymetryFile, string animatLogFilePath, string mmmbsOutputDirectory, TimeSpan simulationDuration, TimeSpan simulationTimeStep)
+        {
+            mbsRESULT mbsResult;
+            mbsCONFIG config = _mmmbs.GetConfiguration();
+            mbsRUNSTATE runState;
+            //set the output directory
+            if (mbsRESULT.OK != (mbsResult = _mmmbs.SetOutputDirectory(mmmbsOutputDirectory))) throw new AnimatInterfaceMMBSException("SetOutputDirectory Error:" + _mmmbs.MbsResultToString(mbsResult));
+            //load the .sce file
+            if (mbsRESULT.OK != (mbsResult = _mmmbs.LoadScenario(animatScenarioFile))) throw new AnimatInterfaceMMBSException("LoadScenario Error:" + _mmmbs.MbsResultToString(mbsResult));
+            //make sure we're in durationless mode.
+            config.durationLess = true;
+            _mmmbs.SetConfiguration(config);
+            //set up the position array from the values in the .sce file (not the ones in animatList, which doesn't exist yet..)
+            int animatCount = _mmmbs.GetAnimatCount();
+
+            _posArray = new mbsPosition[animatCount];
+
+            //initialize the run, and wait until it's fully initialized.
+            if (mbsRESULT.OK != (mbsResult = _mmmbs.InitializeRun())) throw new AnimatInterfaceMMBSException("InitializeRun Error:" + _mmmbs.MbsResultToString(mbsResult));
+            while ((runState = _mmmbs.GetRunState()) == mbsRUNSTATE.INITIALIZING)
+            {
+                //wait until initializing is done.
+                Thread.Sleep(1);
+            }
+
+            //get the initial positions of every animat
+            if (mbsRESULT.OK != (mbsResult = _mmmbs.GetAnimatCoordinates(_posArray))) throw new AnimatInterfaceMMBSException("Error Fetching Initial Animat Coordinates: " + _mmmbs.MbsResultToString(mbsResult));
+
+            //create and return an initialized animatInterface.
+            var result = new AnimatInterface
+                         {
+                             AnimatList = new AnimatList(new SpeciesList(speciesDirectory)),
+                             AnimatLogFilePath = animatLogFilePath,
+                             Bathymetry = new Environment2DData(bathymetryFile),
+                             SimulationDuration = simulationDuration,
+                             TimeStep = simulationTimeStep,
+                         };
+            // and log the positions to the new animat log file.  
+
+            return result;
+        }
+        /// <summary>
+        /// create a barebones animat interface from a 3mb scenario file.  This animat interface currently contains only a list of animats and species present in the scenario file, with their static positions. 
+        /// </summary>
+        /// <param name="animatScenarioFile"></param>
+        /// <returns></returns>
+        public AnimatInterface Create(string animatScenarioFile)
+        {
+            _isStatic = true;
+
+            //must return an animat interface with a populated AnimatList.
+            return new AnimatInterface
+                   {
+                       AnimatList = new AnimatList(animatScenarioFile),
+                   };
+        }
+
+        #endregion
+
+        #region private methods
+
+        AnimatInterface() { }
+
+        /// <summary>
         /// Invokes necessary sanity checks to determine if AnimatInterface has been properly made ready.  Brings 3MB online and ready to start calculating animat tracks.  Creates a new AnimatLocationFile.
         /// </summary>
-        public void InitializeAnimatSimulator()
+        void InitializeAnimatSimulator()
         {
             StartupCheck();
 
             #region 3mb Init
 
 #if false
+            Initialize3MBMulti();
+#else
+            Initialize3MB();
+#endif
+
+            #endregion
+
+            #region animat location file
+
+            _animatLocationFile = AnimatLocationFile.AnimatLocationFile.Create(AnimatLogFilePath, _timeStep, _simulationDuration, AnimatList);
+            UpdatePositions();
+
+            #endregion
+
+            _secondsRemaining = (int) _simulationDuration.TotalSeconds;
+            _beenInitialized = true;
+        }
+
+        //single-threaded
+        void Initialize3MB()
+        {
+            //single-threaded code follows.  Known to work with (pre october 2010) 3mb DLLs, compiles on new dlls. different emphasis than .sce-centric code in Create().
+            mbsRESULT result;
+
+            _posArray = new mbsPosition[AnimatList.Count];
+            _mbsBathymetry = new double[AnimatList.Count];
+            _mbsSoundExposure = new double[AnimatList.Count];
+
+            //add each species
+            for (int i = 0; i < AnimatList.SpeciesList.Count; i++)
+            {
+                AnimatList.SpeciesList[i].Index = i;
+                result = _mmmbs.AddSpecies(AnimatList.SpeciesList[i].Filename);
+                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException("C3mbs::AddSpecies FATAL error " + _mmmbs.MbsResultToString(result));
+            }
+            //add all the animats of each species.
+            for (int i = 0; i < AnimatList.Count; i++)
+            {
+                _posArray[i] = new mbsPosition
+                               {
+                                   latitude = AnimatList[i].Location.Latitude_degrees,
+                                   longitude = AnimatList[i].Location.Longitude_degrees,
+                                   depth = -AnimatList[i].Location.Elevation_meters
+                               };
+
+                result = _mmmbs.AddIndividualAnimat(AnimatList[i].Species.Index, _posArray[i]);
+                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException("C3mbs::AddIndividualAnimat FATAL error " + _mmmbs.MbsResultToString(result));
+            }
+            //logs the 0th position 
+            //   _animatLocationFile.AddTimeRecords(_posArray);
+
+            _mmmbs.SetDuration((int) _simulationDuration.TotalSeconds); //is this what we really want to do?
+
+            UpdateAnimatBathymetry();
+
+            if (mbsRESULT.OK != (result = _mmmbs.RunScenarioNumIterations(0)))
+            {
+                throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error " + _mmmbs.MbsResultToString(result));
+            }
+
+            while (_mmmbs.GetRunState() == mbsRUNSTATE.INITIALIZING)
+            {
+                Thread.Sleep(1);
+            }
+        }
+
+#if false
+    //multithreaded.
+        void Initialize3MBMulti()
+        {
             mbsRESULT mbResult = mbsRESULT.OK;
             mbsCONFIG mbConfig;
             mbsRUNSTATE mbRunState;
-            numAnimatsPerInstance = AnimatList.Count / System.Environment.ProcessorCount;//todo
+            //numAnimatsPerInstance = AnimatList.Count / System.Environment.ProcessorCount;//todo
             //number of threads = proc count 
-            AnimatList.SpeciesList.
+            // AnimatList.SpeciesList.
             // par
             for (int i = 0; i < _mmmbsArray.Length && mbsRESULT.OK == mbResult; i++)
             {
@@ -113,6 +294,8 @@ namespace ESME.Model
                 //add all the animats of each species.
 
                 // Allocate space for this 3mb intance's animat positional data.
+                //todo
+
                 _parallelPosArray[i] = new mbsPosition[numAnimatsPerInstance];
 
                 for (int index = 0; index < AnimatList.Count; index++)
@@ -148,125 +331,11 @@ namespace ESME.Model
                 }
 
 
-            } 
-
-
-#else
-            //single-threaded code follows.  Known to work with (pre october 2010) 3mb DLLs, compiles on new dlls. 
-            mbsRESULT result;
-
-            _posArray = new mbsPosition[AnimatList.Count];
-            _mbsBathymetry = new double[AnimatList.Count];
-            _mbsSoundExposure = new double[AnimatList.Count];
-
-            //add each species
-            for (int i = 0; i < AnimatList.SpeciesList.Count; i++)
-            {
-                AnimatList.SpeciesList[i].Index = i;
-                result = _mmmbs.AddSpecies(AnimatList.SpeciesList[i].Filename);
-                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException("C3mbs::AddSpecies FATAL error " + _mmmbs.MbsResultToString(result));
-            }
-            //add all the animats of each species.
-            for (int i = 0; i < AnimatList.Count; i++)
-            {
-                _posArray[i] = new mbsPosition
-                               {
-                                   latitude = AnimatList[i].Location.Latitude_degrees,
-                                   longitude = AnimatList[i].Location.Longitude_degrees,
-                                   depth = -AnimatList[i].Location.Elevation_meters
-                               };
-
-                result = _mmmbs.AddIndividualAnimat(AnimatList[i].Species.Index, _posArray[i]);
-                if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException("C3mbs::AddIndividualAnimat FATAL error " + _mmmbs.MbsResultToString(result));
-            }
-            //logs the 0th position 
-            //   _animatLocationFile.AddTimeRecords(_posArray);
-
-            _mmmbs.SetDuration((int)_simulationDuration.TotalSeconds); //is this what we really want to do?
-
-            UpdateAnimatBathymetry();
-
-            if (mbsRESULT.OK != (result = _mmmbs.RunScenarioNumIterations(0)))
-            {
-                throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error " + _mmmbs.MbsResultToString(result));
             }
 
-            while (_mmmbs.GetRunState() == mbsRUNSTATE.INITIALIZING)
-            {
-                Thread.Sleep(1);
-            }
-            //set each animat's starting position bathymetry data.  
+
+        }
 #endif
-
-            #endregion
-
-            #region animat location file
-
-            _animatLocationFile = AnimatLocationFile.AnimatLocationFile.Create(AnimatLogFilePath, _timeStep, _simulationDuration, AnimatList);
-
-            #endregion
-
-            UpdatePositions();
-            _secondsRemaining = (int) _simulationDuration.TotalSeconds;
-            _beenInitialized = true;
-        }
-
-        /// <summary>
-        /// Intended to be called within an external loop. Increments 3mb by one timestep, calculates and logs new animat positions. 
-        /// </summary>
-        /// <returns>true if more timesteps are available.  false if no more positions need to be calculated. </returns>
-        public bool Step()
-        {
-            var stepTime = (int) _timeStep.TotalSeconds;
-
-
-            if (_beenInitialized != true) throw new AnimatInterfaceConfigurationException("AnimatInterface:Step; Cannot call animat simulator without initializing first.");
-            if (_secondsRemaining > stepTime)
-            {
-                Page3MB(stepTime);
-                UpdatePositions();
-                UpdateAnimatSoundExposure();
-                UpdateAnimatBathymetry();
-
-                _secondsElapsed += stepTime;
-                _secondsRemaining -= stepTime;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// shuts it down, and closes the log file.
-        /// </summary>
-        public void Close()
-        {
-            //3mb
-
-            //animat location file
-            _animatLocationFile.Close();
-        }
-        /// <summary>
-        /// stub.  
-        /// </summary>
-        /// <param name="popArea"></param>
-        /// <param name="numAnimats"></param>
-        /// <param name="speciesName"></param>
-        public void Populate(OverlayLineSegments popArea, int numAnimats, string speciesName) //todo: add current population code here and hit test. 
-        { }
-
-        /// <summary>
-        /// will return a fully populated, initialized, and paused animatInterface.
-        /// </summary>
-        /// <param name="animatScenarioFile"></param>
-        /// <param name="mmmbsOutputDirectory"></param>
-        /// <returns></returns>
-       // public AnimatInterface Create(string animatScenarioFile, string mmmbsOutputDirectory)
-      //  {
-            
-       // }
-        #endregion
-
-        #region private methods
 
         /// <summary>
         /// sleeps 1ms, then runs 3mb once.  chucks exceptions and aborts 3mb if bad stuff happens.
@@ -369,9 +438,10 @@ namespace ESME.Model
         #region private data members
 
         readonly C3mbs _mmmbs = new C3mbs();
-        readonly C3mbs[] _mmmbsArray = new C3mbs[System.Environment.ProcessorCount];//todo
+        readonly C3mbs[] _mmmbsArray = new C3mbs[System.Environment.ProcessorCount]; //todo
         AnimatLocationFile.AnimatLocationFile _animatLocationFile;
         bool _beenInitialized;
+        bool _isStatic;
         double[] _mbsBathymetry;
         double[] _mbsSoundExposure;
         mbsPosition[][] _parallelPosArray;
@@ -383,7 +453,7 @@ namespace ESME.Model
         TimeSpan _simulationDuration = TimeSpan.Zero;
         TimeSpan _timeStep = TimeSpan.Zero;
 
-        int numAnimatsPerInstance;
+        int _numAnimatsPerInstance;
 
         #endregion
     }
