@@ -46,6 +46,16 @@
 					                            FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
                 </StackPanel>
             </TabItem>
+            <TabItem Header="Animals"
+			         HorizontalContentAlignment="Stretch"
+			         VerticalContentAlignment="Stretch">
+                <StackPanel Orientation="Vertical"
+				            VerticalAlignment="Top">
+                    <ctl:FileOrDirectorySetting Caption="MMMBS executable file"
+					                            IsDirectoryBrowser="True"
+					                            FileName="{Binding AppSettings.MMMBSExecutablePath}" />
+                </StackPanel>
+            </TabItem>
         </TabControl>
 	</DockPanel>
 </Window>

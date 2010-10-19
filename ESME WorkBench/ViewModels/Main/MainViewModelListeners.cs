@@ -153,5 +153,22 @@ namespace ESMEWorkBench.ViewModels.Main
             _experiment.InitializeIfViewModelsReady();
             HookPropertyChanged(_experiment);
         }
+
+        [MediatorMessageSink(MediatorMessage.LaunchMMMBSCommand)]
+        void LaunchMMMBS(bool dummy)
+        {
+            
+        }
+
+        [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]
+        void AddAnimatPopulationFile(bool dummy)
+        {
+            _openFileService.Filter = "Animat Scenario Files (*.sce)|*.sce";
+            _openFileService.FileName = null;
+            var result = _openFileService.ShowDialog((Window)_viewAwareStatusService.View);
+            if ((!result.HasValue) || (!result.Value)) return;
+            var animatInterface =  AnimatInterface.Create(_openFileService.FileName);
+            animatInterface.Test();
+        }
     }
 }

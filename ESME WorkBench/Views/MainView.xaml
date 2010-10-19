@@ -77,7 +77,7 @@
 		</StatusBar>
 		<r:Ribbon x:Name="Ribbon"
 		          DockPanel.Dock="Top"
-		          SelectedIndex="0">
+		          SelectedIndex="3">
 			<r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
                     <r:RibbonApplicationMenuItem Header="Save Experiment"
@@ -324,7 +324,7 @@
 					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
-					                Command="{Binding DisabledCommand}" />
+					                Command="{Binding LaunchMMMBSCommand}" />
                     <r:RibbonButton Label="Load population"
 					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
 					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
