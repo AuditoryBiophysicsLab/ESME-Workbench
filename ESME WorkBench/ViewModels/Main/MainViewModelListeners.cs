@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
@@ -7,6 +8,7 @@ using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESMEWorkBench.Data;
+using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 
@@ -157,7 +159,21 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.LaunchMMMBSCommand)]
         void LaunchMMMBS(bool dummy)
         {
-            
+
+        }
+
+        [MediatorMessageSink(MediatorMessage.CreateMMMBSBathymetryFileCommand)]
+        void CreateMMMBSBathymetryFile(bool dummy)
+        {
+            if ((_experiment == null) || (_experiment.Bathymetry == null)) return;
+            _saveFileService.Filter = "MMMBS bathymetry files (*.bth)|*.bth|All files (*.*)|*.*";
+            _saveFileService.OverwritePrompt = true;
+            _saveFileService.InitialDirectory = Settings.Default.LastBathymetryFileDirectory;
+            _saveFileService.FileName = null;
+            var result = _saveFileService.ShowDialog((Window)_viewAwareStatusService.View);
+            if ((!result.HasValue) || (!result.Value)) return;
+            Settings.Default.LastBathymetryFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
+            _experiment.Bathymetry.SaveToYXZ(_saveFileService.FileName, -1); 
         }
 
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]

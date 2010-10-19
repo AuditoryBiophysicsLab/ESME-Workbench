@@ -67,6 +67,7 @@ namespace ESMEWorkBench
         public const string SetMouseEarthCoordinate = "SetMouseEarthCoordinateMessage";
 
         public const string LaunchMMMBSCommand = "LaunchMMMBSCommandMessage";
+        public const string CreateMMMBSBathymetryFileCommand = "CreateMMMBSBathymetryFileCommandMessage";
         public const string AddAnimatPopulationFileCommand = "AddAnimatPopulationFileCommandMessage";
 
         public static void Send<T>(string key, T message) 

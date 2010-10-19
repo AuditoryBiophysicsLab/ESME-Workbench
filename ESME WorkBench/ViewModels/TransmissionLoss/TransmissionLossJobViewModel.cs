@@ -290,6 +290,15 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region public override bool IsValid { get; set; }
+
+        public override bool IsValid
+        {
+            get { return base.IsValid && DataWrapperHelper.AllValid(_editableFields); }
+        }
+
+        #endregion
+
         readonly int _maxCalculationDepth;
 
         public TransmissionLossJobViewModel(EarthCoordinate location, float platformDepth, NemoMode nemoMode, int radialCount, int maxCalculationDepth)

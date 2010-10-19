@@ -9,8 +9,15 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     public class LabeledDataWrapper<T> : DataWrapper<T>
     {
-        public LabeledDataWrapper(IParentablePropertyExposer parent, PropertyChangedEventArgs parentPropertyChangeArgs) : base(parent, parentPropertyChangeArgs) { ValidationRules = new ObservableCollection<SimpleRule>(); }
-        public LabeledDataWrapper(IParentablePropertyExposer parent, PropertyChangedEventArgs parentPropertyChangeArgs, Action valuesChangedCallBack) : base(parent, parentPropertyChangeArgs, valuesChangedCallBack) { ValidationRules = new ObservableCollection<SimpleRule>(); }
+        public LabeledDataWrapper(IParentablePropertyExposer parent, PropertyChangedEventArgs parentPropertyChangeArgs) : base(parent, parentPropertyChangeArgs) { Initialize(); }
+
+        public LabeledDataWrapper(IParentablePropertyExposer parent, PropertyChangedEventArgs parentPropertyChangeArgs, Action valuesChangedCallBack) : base(parent, parentPropertyChangeArgs, valuesChangedCallBack) { Initialize(); }
+
+        void Initialize()
+        {
+            ValidationRules = new ObservableCollection<SimpleRule>();
+            IsEditable = false;
+        }
 
         #region public string Label { get; set; }
 
@@ -53,8 +60,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null) foreach (var newItem in e.NewItems.Cast<SimpleRule>())
-                        AddRule(newItem);
+                    if (e.NewItems != null) foreach (var newItem in e.NewItems.Cast<SimpleRule>()) AddRule(newItem);
                     break;
                 case NotifyCollectionChangedAction.Move:
                 case NotifyCollectionChangedAction.Remove:

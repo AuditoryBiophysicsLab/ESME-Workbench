@@ -77,7 +77,7 @@
 		</StatusBar>
 		<r:Ribbon x:Name="Ribbon"
 		          DockPanel.Dock="Top"
-		          SelectedIndex="3">
+		          SelectedIndex="0">
 			<r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
                     <r:RibbonApplicationMenuItem Header="Save Experiment"
@@ -331,6 +331,12 @@
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add an Animal Population File to the experiment"
 					                Command="{Binding AddAnimalPopulationFileCommand}" />
+                    <r:RibbonButton Label="Create Bathymetry File"
+					                SmallImageSource="..\Images\SmallIcons\save-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\save-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS"
+					                Command="{Binding CreateMMMBSBathymetryFileCommand}" />
                 </r:RibbonGroup>
             </r:RibbonTab>
 			<r:RibbonTab KeyTip="C"
