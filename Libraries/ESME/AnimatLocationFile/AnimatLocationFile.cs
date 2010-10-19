@@ -150,7 +150,7 @@ namespace ESME.AnimatLocationFile
             {
                 CheckCanRead();
                 if ((SpeciesDescriptors.Find(x => x.SpeciesName == speciesName)) == null)
-                    throw new ApplicationException("AnimatLocationFile:this[speciesname];species requested has zero animats");
+                    throw new AnimatLocationFileException("AnimatLocationFile:this[speciesname];species requested has zero animats");
                 long speciesStartIndex = 0;
                 long speciesEndIndex = 0;
                 int speciesCount = 0;

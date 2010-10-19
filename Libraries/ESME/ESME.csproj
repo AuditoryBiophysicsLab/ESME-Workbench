@@ -177,9 +177,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnimatLocationFile\AnimatLocationFile.cs" />
-    <Compile Include="DataModel\ActivateModel.cs" />
-    <Compile Include="DataModel\DataModelBase.cs" />
-    <Compile Include="DataModel\ExperimentTree.cs" />
     <Compile Include="Environment\Binary Data Classes\DataArraySourceInfo.cs" />
     <Compile Include="Environment\Binary Data Classes\DataColumn.cs" />
     <Compile Include="Environment\Binary Data Classes\DataPoint.cs" />
@@ -192,7 +189,6 @@
     <Compile Include="Model\BellhopRunFile.cs" />
     <Compile Include="Model\DisplayLayers.cs" />
     <Compile Include="Model\EnvironmentInformation.cs" />
-    <Compile Include="Model\ESME_Experiment.cs" />
     <Compile Include="Model\Exceptions.cs" />
     <Compile Include="Model\ExperimentInformation.cs" />
     <Compile Include="Model\SourceRecieverLevelBins.cs" />
@@ -223,46 +219,6 @@
     <Compile Include="TransmissionLoss\TransmissionLossFieldCache.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\add.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\bathymetry.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\Control_PictureBox.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\delete.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\genericInternet.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\play.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\properties.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\searchWeb.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\sediment.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\ssp.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\tl.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\wind.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\window2.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="DataModel\SmallIcons\XPfolder_Open2.bmp" />
     <EmbeddedResource Include="Model\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>

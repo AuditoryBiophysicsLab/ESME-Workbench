@@ -9,15 +9,7 @@ namespace ESME.Model
 {
     public class Species : IEquatable<Species>, IHasIDField
     {
-        internal int ReferenceCount { get; set; }
-        internal string Filename { get; set; }
-        public string SpeciesName { get; set; }
-
-        [XmlElement("SpeciesID")]
-        public int IDField { get; set; }
-
-        [XmlIgnore]
-        public int Index { get; set; }
+        readonly C3mbs _mmmbs = new C3mbs();
 
         internal Species(string speciesFilename)
         {
@@ -26,11 +18,32 @@ namespace ESME.Model
             Filename = speciesFilename;
         }
 
+        internal Species() { }
+        internal int ReferenceCount { get; set; }
+        internal string Filename { get; set; }
+        public string SpeciesName { get; set; }
+
+        [XmlIgnore]
+        public int Index { get; set; }
+
+        #region IEquatable<Species> Members
+
+        bool IEquatable<Species>.Equals(Species that) { return Filename == that.Filename; }
+
+        #endregion
+
+        #region IHasIDField Members
+
+        [XmlElement("SpeciesID")]
+        public int IDField { get; set; }
+
+        #endregion
+
         static void Initialize(string speciesFilename) { if (!File.Exists(speciesFilename)) throw new FileNotFoundException("Species(" + speciesFilename + "): File not found"); }
 
         internal void AddToSimulationEnvironment(C3mbs simulationEnvironment)
         {
-            var result = simulationEnvironment.AddSpecies(Filename);
+            mbsRESULT result = simulationEnvironment.AddSpecies(Filename);
             if (mbsRESULT.OK != result)
             {
                 //System.Diagnostics.Debug.WriteLine("AddSpecies FAILED: " + C3mbs.MbsResultToString(result));
@@ -39,14 +52,6 @@ namespace ESME.Model
         }
 
         public override string ToString() { return SpeciesName; }
-
-        bool IEquatable<Species>.Equals(Species that)
-        {
-            return Filename == that.Filename;
-        }
-
-        readonly C3mbs _mmmbs = new C3mbs();
-
     }
 
     public class SpeciesDeletedEventArgs : ItemDeletedEventArgs<Species> {}
@@ -55,18 +60,38 @@ namespace ESME.Model
     {
         public SpeciesList(string speciesDirectory)
         {
-            var files = Directory.GetFiles(speciesDirectory, "*.spe");
-            foreach (var file in files) Add(new Species(file));
+            string[] files = Directory.GetFiles(speciesDirectory, "*.spe");
+            foreach (string file in files) Add(new Species(file));
+        }
+
+        public SpeciesList()
+        {
+            
         }
 
         public IEnumerable<Species> ReferencedSpecies
         {
             get
             {
-                var result = from Species s in this
-                             where s.ReferenceCount > 0
-                             select s;
+                IEnumerable<Species> result = from Species s in this
+                                              where s.ReferenceCount > 0
+                                              select s;
                 return result;
+            }
+        }
+
+        public Species this[string speciesName]
+        {
+            get { return Find(s => s.SpeciesName == speciesName); }
+        }
+
+        public string[] SpeciesNames
+        {
+            get
+            {
+                IEnumerable<string> result = from s in this
+                                             select s.SpeciesName;
+                return result.ToArray();
             }
         }
 
@@ -80,7 +105,7 @@ namespace ESME.Model
 
         internal int AddReference(string speciesName)
         {
-            var result = Find(s => s.SpeciesName == speciesName);
+            Species result = Find(s => s.SpeciesName == speciesName);
             if (result == null) throw new SpeciesNotFoundException("SpeciesList.Add: Requested species \"" + speciesName + "\" was not found");
             result.ReferenceCount++;
             return result.IDField;
@@ -88,26 +113,11 @@ namespace ESME.Model
 
         public void RemoveReference(string speciesName)
         {
-            var result = Find(s => s.SpeciesName == speciesName);
+            Species result = Find(s => s.SpeciesName == speciesName);
             if (result == null) throw new SpeciesNotFoundException("SpeciesList.Add: Requested species \"" + speciesName + "\" was not found");
             if (result.ReferenceCount > 0) result.ReferenceCount--;
         }
 
-        public void ClearReferences() { foreach (var s in this) s.ReferenceCount = 0; }
-
-        public Species this[string speciesName]
-        {
-            get { return Find(s => s.SpeciesName == speciesName); }
-        }
-
-        public string[] SpeciesNames
-        {
-            get
-            {
-                var result = from s in this
-                             select s.SpeciesName;
-                return result.ToArray();
-            }
-        }
+        public void ClearReferences() { foreach (Species s in this) s.ReferenceCount = 0; }
     }
 }

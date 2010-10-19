@@ -1,21 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using HRC.Navigation;
+using mbs;
 
 namespace ESME.Model
 {
     public class Animat
     {
+        [XmlIgnore]
+        public SourceRecieverLevelBins[] LevelBins;
+        [XmlIgnore]
+        double _soundPressureLevel;
+
+        #region Public Properties
         [XmlElement]
         public EarthCoordinate3D Location { get; set; }
 
         [XmlElement]
         public int SpeciesID { get; set; }
-
-        [XmlIgnore] double _soundPressureLevel;
 
         [XmlIgnore]
         internal int AnimatID { get; set; }
@@ -45,9 +51,10 @@ namespace ESME.Model
 
         [XmlIgnore]
         public Species Species { get; internal set; }
+        #endregion
 
-        [XmlIgnore] public SourceRecieverLevelBins[] LevelBins;
-
+        #region constructors 
+        
         public Animat(EarthCoordinate3D location, string speciesName) : this()
         {
             Location = location;
@@ -69,18 +76,27 @@ namespace ESME.Model
             MaxSoundPressureLevel = 0.0;
         }
 
+        public Animat(mbsPosition position, Species species)
+        {
+            Location = new EarthCoordinate3D(position.latitude, position.longitude, -position.depth);
+            Species = species;
+        }
+
         public Animat(Animat source) : this()
         {
             Location = source.Location;
             SpeciesName = source.SpeciesName;
         }
+        #endregion
+
+        #region public methods
 
         public void RecordExposure(int sourceID, float receieveLevel) { LevelBins[sourceID].AddExposure(receieveLevel); }
 
         public void CreateLevelBins(int sourceCount, float lowReceiveLevel, float binWidth, int binCount)
         {
             LevelBins = new SourceRecieverLevelBins[sourceCount];
-            for (var i = 0; i < sourceCount; i++) LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
+            for (int i = 0; i < sourceCount; i++) LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
         }
 
         public void AddAnimatRecord(XElement sourceElement)
@@ -88,7 +104,7 @@ namespace ESME.Model
             var animat = new XElement("Animat");
             animat.Add(new XElement("AnimatID", AnimatID));
             var sources = new XElement("Sources");
-            for (var sourceID = 0; sourceID < LevelBins.Length; sourceID++)
+            for (int sourceID = 0; sourceID < LevelBins.Length; sourceID++)
             {
                 var source = new XElement("Source");
                 source.Add(new XElement("SourceID", sourceID));
@@ -98,27 +114,88 @@ namespace ESME.Model
             animat.Add(sources);
             sourceElement.Add(animat);
         }
+
+        #endregion
     }
 
     public class AnimatList : List<Animat>
     {
-        [XmlIgnore]
-        public SpeciesList SpeciesList { get; set; }
-
         readonly EventHandler<ItemDeletedEventArgs<Species>> _itemDeletedHandler;
+        readonly C3mbs _mmmbs = new C3mbs();
 
         AnimatList() { _itemDeletedHandler = new EventHandler<ItemDeletedEventArgs<Species>>(SpeciesList_ItemDeleted); }
 
         public AnimatList(SpeciesList speciesList) { SpeciesList = speciesList; }
 
-        public void Initialize(SpeciesList speciesList)
+        /// <summary>
+        /// Creates an AnimatList from an (animat) Scenario File (*.sce), resulting from a 3MB.exe run.
+        /// </summary>
+        /// <param name="animatScenarioFile">path to the .sce file.</param>
+        public AnimatList(string animatScenarioFile)
+        {
+            mbsRESULT mbsResult;
+            mbsCONFIG config = _mmmbs.GetConfiguration();
+            mbsRUNSTATE runState;
+
+            //load the .sce file
+            if (mbsRESULT.OK != (mbsResult = _mmmbs.LoadScenario(animatScenarioFile))) throw new AnimatMMBSException("LoadScenario Error:" + _mmmbs.MbsResultToString(mbsResult));
+            //make sure we're in durationless mode.
+            config.durationLess = true;
+            _mmmbs.SetConfiguration(config);
+            //get species count
+            int speciesCount = _mmmbs.GetSpeciesCount();
+            
+            //make a species list.
+            SpeciesList = new SpeciesList();
+            for (var i = 0; i <= speciesCount; i++)
+            {
+                SpeciesList.Add(new Species
+                                {
+                                    SpeciesName = _mmmbs.GetSpeciesDisplayTitle(i),
+                                    ReferenceCount = _mmmbs.GetIndivdualCount(i),
+                                });
+            }
+            //set up the position array from the values in the .sce file (not the ones in animatList, which doesn't exist yet..)
+            int animatCount = _mmmbs.GetAnimatCount();
+            var posArray = new mbsPosition[animatCount];
+
+            //initialize the run, and wait until it's fully initialized.
+            if (mbsRESULT.OK != (mbsResult = _mmmbs.InitializeRun())) throw new AnimatMMBSException("InitializeRun Error:" + _mmmbs.MbsResultToString(mbsResult));
+            while ((runState = _mmmbs.GetRunState()) == mbsRUNSTATE.INITIALIZING)
+            {
+                //wait until initializing is done.
+                Thread.Sleep(1);
+            }
+
+            //get the initial positions of every animat
+            if (mbsRESULT.OK != (mbsResult = _mmmbs.GetAnimatCoordinates(posArray))) throw new AnimatMMBSException("Error Fetching Initial Animat Coordinates: " + _mmmbs.MbsResultToString(mbsResult));
+
+            int speciesIndex = 0;
+            Species curSpecies = SpeciesList[speciesIndex];
+            int nextSpeciesAnimatIndex = curSpecies.ReferenceCount;
+            //add animats to each species. 
+            for (int i = 0; i < posArray.Length; i++)
+            {
+                if (i >= nextSpeciesAnimatIndex)
+                {
+                    curSpecies = SpeciesList[++speciesIndex];
+                    nextSpeciesAnimatIndex += curSpecies.ReferenceCount;
+                }
+                mbsPosition mbsPosition = posArray[i];
+                Add(new Animat(mbsPosition, curSpecies));
+            }
+        }
+
+        [XmlIgnore]
+        public SpeciesList SpeciesList { get; set; }
+
+        void Initialize(SpeciesList speciesList)
         {
             if (speciesList == null) throw new PropertyNotInitializedException("AnimatList.Initialize(): SpeciesList must be set before calling this method");
             SpeciesList = speciesList;
             SpeciesList.ItemDeleted -= _itemDeletedHandler;
             SpeciesList.ItemDeleted += _itemDeletedHandler;
-            foreach (var a in this.Where(a => a != null)) 
-                a.Species = SpeciesList.Find(x => x.IDField == a.SpeciesID);
+            foreach (Animat a in this.Where(a => a != null)) a.Species = SpeciesList.Find(x => x.IDField == a.SpeciesID);
         }
 
         void SpeciesList_ItemDeleted(object sender, ItemDeletedEventArgs<Species> e) { RemoveAll(a => a.SpeciesID == e.Item.IDField); }
@@ -126,7 +203,7 @@ namespace ESME.Model
         public void AddAnimatList(XElement rootElement)
         {
             var animats = new XElement("Animats");
-            foreach (var a in this) a.AddAnimatRecord(animats);
+            foreach (Animat a in this) a.AddAnimatRecord(animats);
             rootElement.Add(animats);
         }
 
@@ -158,7 +235,7 @@ namespace ESME.Model
             Clear();
         }
 
-        void Renumber() { for (var i = 0; i < this.Count(); i++) this[i].AnimatID = i; }
+        void Renumber() { for (int i = 0; i < this.Count(); i++) this[i].AnimatID = i; }
 
         new void AddRange(IEnumerable<Animat> collection) { throw new NotImplementedException(); }
         new void RemoveRange(int index, int count) { throw new NotImplementedException(); }
