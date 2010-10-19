@@ -92,33 +92,35 @@ namespace ESME.Model
         /// <param name="simulationDuration"></param>
         /// <param name="simulationTimeStep"></param>
         /// <returns></returns>
-        public AnimatInterface Create(string animatScenarioFile, string speciesDirectory, string bathymetryFile, string animatLogFilePath, string mmmbsOutputDirectory, TimeSpan simulationDuration, TimeSpan simulationTimeStep)
+        public static AnimatInterface Create(string animatScenarioFile, string speciesDirectory, string bathymetryFile, string animatLogFilePath, string mmmbsOutputDirectory, TimeSpan simulationDuration, TimeSpan simulationTimeStep)
         {
+            
+            C3mbs mbs = new C3mbs();
             mbsRESULT mbsResult;
-            mbsCONFIG config = _mmmbs.GetConfiguration();
+            mbsCONFIG config = mbs.GetConfiguration();
             mbsRUNSTATE runState;
             //set the output directory
-            if (mbsRESULT.OK != (mbsResult = _mmmbs.SetOutputDirectory(mmmbsOutputDirectory))) throw new AnimatInterfaceMMBSException("SetOutputDirectory Error:" + _mmmbs.MbsResultToString(mbsResult));
+            if (mbsRESULT.OK != (mbsResult = mbs.SetOutputDirectory(mmmbsOutputDirectory))) throw new AnimatInterfaceMMBSException("SetOutputDirectory Error:" + mbs.MbsResultToString(mbsResult));
             //load the .sce file
-            if (mbsRESULT.OK != (mbsResult = _mmmbs.LoadScenario(animatScenarioFile))) throw new AnimatInterfaceMMBSException("LoadScenario Error:" + _mmmbs.MbsResultToString(mbsResult));
+            if (mbsRESULT.OK != (mbsResult = mbs.LoadScenario(animatScenarioFile))) throw new AnimatInterfaceMMBSException("LoadScenario Error:" + mbs.MbsResultToString(mbsResult));
             //make sure we're in durationless mode.
             config.durationLess = true;
-            _mmmbs.SetConfiguration(config);
+            mbs.SetConfiguration(config);
             //set up the position array from the values in the .sce file (not the ones in animatList, which doesn't exist yet..)
-            int animatCount = _mmmbs.GetAnimatCount();
+            int animatCount = mbs.GetAnimatCount();
 
-            _posArray = new mbsPosition[animatCount];
+            var posArray = new mbsPosition[animatCount];
 
             //initialize the run, and wait until it's fully initialized.
-            if (mbsRESULT.OK != (mbsResult = _mmmbs.InitializeRun())) throw new AnimatInterfaceMMBSException("InitializeRun Error:" + _mmmbs.MbsResultToString(mbsResult));
-            while ((runState = _mmmbs.GetRunState()) == mbsRUNSTATE.INITIALIZING)
+            if (mbsRESULT.OK != (mbsResult = mbs.InitializeRun())) throw new AnimatInterfaceMMBSException("InitializeRun Error:" + mbs.MbsResultToString(mbsResult));
+            while ((runState = mbs.GetRunState()) == mbsRUNSTATE.INITIALIZING)
             {
                 //wait until initializing is done.
                 Thread.Sleep(1);
             }
 
             //get the initial positions of every animat
-            if (mbsRESULT.OK != (mbsResult = _mmmbs.GetAnimatCoordinates(_posArray))) throw new AnimatInterfaceMMBSException("Error Fetching Initial Animat Coordinates: " + _mmmbs.MbsResultToString(mbsResult));
+            if (mbsRESULT.OK != (mbsResult = mbs.GetAnimatCoordinates(posArray))) throw new AnimatInterfaceMMBSException("Error Fetching Initial Animat Coordinates: " + mbs.MbsResultToString(mbsResult));
 
             //create and return an initialized animatInterface.
             var result = new AnimatInterface
@@ -138,17 +140,21 @@ namespace ESME.Model
         /// </summary>
         /// <param name="animatScenarioFile"></param>
         /// <returns></returns>
-        public AnimatInterface Create(string animatScenarioFile)
+        public static AnimatInterface Create(string animatScenarioFile)
         {
-            _isStatic = true;
-
+            
             //must return an animat interface with a populated AnimatList.
             return new AnimatInterface
                    {
                        AnimatList = new AnimatList(animatScenarioFile),
+                       _isStatic = true,
                    };
         }
 
+        public void Test()
+        {
+
+        }
         #endregion
 
         #region private methods

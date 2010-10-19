@@ -358,6 +358,42 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region AddAnimalPopulationFileCommand
+
+        public SimpleCommand<object, object> AddAnimalPopulationFileCommand
+        {
+            get { return _addAnimalPopulationFile ?? (_addAnimalPopulationFile = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.AddAnimatPopulationFileCommand); })); }
+        }
+
+        SimpleCommand<object, object> _addAnimalPopulationFile;
+
+        #endregion
+
+        #region LaunchMMMBSCommand
+
+        public SimpleCommand<object, object> LaunchMMMBSCommand
+        {
+            
+            get
+            {
+                return _launchMMMBS ?? (_launchMMMBS = new SimpleCommand<object, object>(delegate { return (Globals.AppSettings.MMMBSExecutablePath != null) && (File.Exists(Globals.AppSettings.MMMBSExecutablePath)); }, delegate
+                                                                                                                                                                                                                                                               {
+                                                                                                                                                                                                                                                                   new Process
+                                                                                                                                                                                                                                                                   {
+                                                                                                                                                                                                                                                                       StartInfo =
+                                                                                                                                                                                                                                                                           {
+                                                                                                                                                                                                                                                                               FileName = Globals.AppSettings.MMMBSExecutablePath,
+                                                                                                                                                                                                                                                                               WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.MMMBSExecutablePath),
+                                                                                                                                                                                                                                                                           }
+                                                                                                                                                                                                                                                                   }.Start();
+                                                                                                                                                                                                                                                               }));
+            }
+        }
+
+        SimpleCommand<object, object> _launchMMMBS;
+
+        #endregion
+
         #endregion
     }
 }
