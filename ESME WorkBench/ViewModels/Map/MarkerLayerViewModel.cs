@@ -2,8 +2,6 @@
 using System.Linq;
 using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
-using Cinch;
-using ESME.TransmissionLoss;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
@@ -24,6 +22,7 @@ namespace ESMEWorkBench.ViewModels.Map
         #endregion
 
         #region public Uri MarkerImageUri { get; set; }
+
         [XmlIgnore]
         public Uri MarkerImageUri
         {
@@ -40,14 +39,14 @@ namespace ESMEWorkBench.ViewModels.Map
         BitmapImage _imageSource;
 
         #endregion
-        
+
         public Marker AddMarker(EarthCoordinate location, object tag)
         {
             var newMarker = new Marker(location.Longitude_degrees, location.Latitude_degrees)
                             {
                                 ImageSource = _imageSource,
                                 Tag = tag,
-                                YScreenOffset = -(_imageSource.Height / 2),
+                                YScreenOffset = -(_imageSource.Height/2),
                             };
             _markerOverlay.Markers.Add(newMarker);
             return newMarker;
@@ -55,7 +54,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         public void RemoveMarker(object tag)
         {
-            foreach (var marker in _markerOverlay.Markers.Where(marker => marker.Tag == tag)) 
+            foreach (var marker in _markerOverlay.Markers.Where(marker => marker.Tag == tag))
             {
                 _markerOverlay.Markers.Remove(marker);
                 break;

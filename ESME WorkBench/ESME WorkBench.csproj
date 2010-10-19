@@ -96,6 +96,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\EditableTextBlock.xaml.cs">
+      <DependentUpon>EditableTextBlock.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Data\ExperimentListeners.cs" />
     <Compile Include="MediatorMessages.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
@@ -106,6 +109,7 @@
     <Compile Include="ViewModels\Map\MapShape.cs" />
     <Compile Include="ViewModels\Map\MapShapeLayer.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
@@ -213,6 +217,10 @@
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossJobViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialViewModel.cs" />
+    <Page Include="Controls\EditableTextBlock.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\AboutView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
