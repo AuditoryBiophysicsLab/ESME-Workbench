@@ -262,5 +262,17 @@ namespace ESMEWorkBench.Properties {
                 this["ShowScaleBar"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastBathymetryFileDirectory {
+            get {
+                return ((string)(this["LastBathymetryFileDirectory"]));
+            }
+            set {
+                this["LastBathymetryFileDirectory"] = value;
+            }
+        }
     }
 }

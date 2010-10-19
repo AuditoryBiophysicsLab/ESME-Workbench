@@ -20,7 +20,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(delegate
+                return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(obj =>
                                                                                          {
                                                                                              var extraTypes = new[]
                                                                                                               {
@@ -44,21 +44,21 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _launchScenarioEditor ?? (_launchScenarioEditor = new SimpleCommand<object, object>(delegate { return (Globals.AppSettings.ScenarioEditorExecutablePath != null) && (File.Exists(Globals.AppSettings.ScenarioEditorExecutablePath)); }, delegate
-                                                                                                                                                                                                                                                               {
-                                                                                                                                                                                                                                                                   string arguments;
-                                                                                                                                                                                                                                                                   if ((_experiment == null) || (_experiment.ScenarioFileName == null) || (!File.Exists(_experiment.ScenarioFileName))) arguments = null;
-                                                                                                                                                                                                                                                                   else arguments = "\"" + _experiment.ScenarioFileName + "\"";
-                                                                                                                                                                                                                                                                   new Process
-                                                                                                                                                                                                                                                                   {
-                                                                                                                                                                                                                                                                       StartInfo =
-                                                                                                                                                                                                                                                                           {
-                                                                                                                                                                                                                                                                               FileName = Globals.AppSettings.ScenarioEditorExecutablePath,
-                                                                                                                                                                                                                                                                               WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.ScenarioEditorExecutablePath),
-                                                                                                                                                                                                                                                                               Arguments = arguments,
-                                                                                                                                                                                                                                                                           }
-                                                                                                                                                                                                                                                                   }.Start();
-                                                                                                                                                                                                                                                               }));
+                return _launchScenarioEditor ?? (_launchScenarioEditor = new SimpleCommand<object, object>(arg => (Globals.AppSettings.ScenarioEditorExecutablePath != null) && (File.Exists(Globals.AppSettings.ScenarioEditorExecutablePath)), obj =>
+                                                                                                                                                                                                                                                 {
+                                                                                                                                                                                                                                                     string arguments;
+                                                                                                                                                                                                                                                     if ((_experiment == null) || (_experiment.ScenarioFileName == null) || (!File.Exists(_experiment.ScenarioFileName))) arguments = null;
+                                                                                                                                                                                                                                                     else arguments = "\"" + _experiment.ScenarioFileName + "\"";
+                                                                                                                                                                                                                                                     new Process
+                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                         StartInfo =
+                                                                                                                                                                                                                                                             {
+                                                                                                                                                                                                                                                                 FileName = Globals.AppSettings.ScenarioEditorExecutablePath,
+                                                                                                                                                                                                                                                                 WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.ScenarioEditorExecutablePath),
+                                                                                                                                                                                                                                                                 Arguments = arguments,
+                                                                                                                                                                                                                                                             }
+                                                                                                                                                                                                                                                     }.Start();
+                                                                                                                                                                                                                                                 }));
             }
         }
 
@@ -72,11 +72,11 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _launchEnvironmentBuilder ?? (_launchEnvironmentBuilder = new SimpleCommand<object, object>(delegate
+                return _launchEnvironmentBuilder ?? (_launchEnvironmentBuilder = new SimpleCommand<object, object>(arg =>
                                                                                                                    {
                                                                                                                        var environmentBuilder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe");
                                                                                                                        return (File.Exists(environmentBuilder) && ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory))));
-                                                                                                                   }, delegate
+                                                                                                                   }, obj =>
                                                                                                                       {
                                                                                                                           var environmentBuilder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "EnvironmentBuilder.exe");
                                                                                                                           new Process
@@ -99,7 +99,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> TestTransmissionLossViewCommand
         {
-            get { return _testTransmissionLossView ?? (_testTransmissionLossView = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.TestTransmissionLossViewCommand, true); })); }
+            get { return _testTransmissionLossView ?? (_testTransmissionLossView = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.TestTransmissionLossViewCommand, true))); }
         }
 
         SimpleCommand<object, object> _testTransmissionLossView;
@@ -110,7 +110,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> DisabledCommand
         {
-            get { return _disabled ?? (_disabled = new SimpleCommand<object, object>(delegate { return false; }, delegate { })); }
+            get { return _disabled ?? (_disabled = new SimpleCommand<object, object>(arg => false, obj => { })); }
         }
 
         SimpleCommand<object, object> _disabled;
@@ -121,7 +121,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<Object, Object> CancelCurrentCommand
         {
-            get { return _cancelCurrentCommand ?? (_cancelCurrentCommand = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.CancelCurrentCommand); })); }
+            get { return _cancelCurrentCommand ?? (_cancelCurrentCommand = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.CancelCurrentCommand))); }
         }
 
         SimpleCommand<Object, Object> _cancelCurrentCommand;
@@ -134,7 +134,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(delegate(EventToCommandArgs vcArgs)
+                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
                                                                                                      {
                                                                                                          var ea = (CancelEventArgs) vcArgs.EventArgs;
                                                                                                          if ((_experiment == null) || (!_experiment.IsChanged)) return;
@@ -155,7 +155,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> OpenExperimentCommand
         {
-            get { return _openExperiment ?? (_openExperiment = new SimpleCommand<object, object>(delegate { OpenExperiment(null); })); }
+            get { return _openExperiment ?? (_openExperiment = new SimpleCommand<object, object>(obj => OpenExperiment(null))); }
         }
 
         SimpleCommand<object, object> _openExperiment;
@@ -166,7 +166,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> RefreshMapCommand
         {
-            get { return _refreshMap ?? (_refreshMap = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.RefreshMap, true); })); }
+            get { return _refreshMap ?? (_refreshMap = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.RefreshMap, true))); }
         }
 
         SimpleCommand<object, object> _refreshMap;
@@ -179,16 +179,16 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _showEnvironmentSettings ?? (_showEnvironmentSettings = new SimpleCommand<object, object>(delegate { return ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory)) && (_experiment != null) && (_experiment.NemoFile != null)); }, delegate
-                                                                                                                                                                                                                                                                                                                                       {
-                                                                                                                                                                                                                                                                                                                                           var environmentSettingsViewModel = new EnvironmentSettingsViewModel(Globals.AppSettings.EnvironmentDatabaseDirectory, _experiment.NemoFile.Scenario.TimeFrame.ToLower());
-                                                                                                                                                                                                                                                                                                                                           var result = _visualizerService.ShowDialog("EnvironmentSettingsView", environmentSettingsViewModel);
-                                                                                                                                                                                                                                                                                                                                           if (!result.HasValue || !result.Value) return;
-                                                                                                                                                                                                                                                                                                                                           _experiment.BathymetryFileName = environmentSettingsViewModel.BathymetryData.SelectedItem.Name;
-                                                                                                                                                                                                                                                                                                                                           _experiment.BottomTypeFileName = environmentSettingsViewModel.BottomTypeData.SelectedItem.Name;
-                                                                                                                                                                                                                                                                                                                                           _experiment.SoundSpeedFileName = environmentSettingsViewModel.SoundSpeedData.SelectedItem.Name;
-                                                                                                                                                                                                                                                                                                                                           _experiment.WindSpeedFileName = environmentSettingsViewModel.WindSpeedData.SelectedItem.Name;
-                                                                                                                                                                                                                                                                                                                                       }));
+                return _showEnvironmentSettings ?? (_showEnvironmentSettings = new SimpleCommand<object, object>(arg => ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory)) && (_experiment != null) && (_experiment.NemoFile != null)), obj =>
+                                                                                                                                                                                                                                                                                                                         {
+                                                                                                                                                                                                                                                                                                                             var environmentSettingsViewModel = new EnvironmentSettingsViewModel(Globals.AppSettings.EnvironmentDatabaseDirectory, _experiment.NemoFile.Scenario.TimeFrame.ToLower());
+                                                                                                                                                                                                                                                                                                                             var result = _visualizerService.ShowDialog("EnvironmentSettingsView", environmentSettingsViewModel);
+                                                                                                                                                                                                                                                                                                                             if (!result.HasValue || !result.Value) return;
+                                                                                                                                                                                                                                                                                                                             _experiment.BathymetryFileName = environmentSettingsViewModel.BathymetryData.SelectedItem.Name;
+                                                                                                                                                                                                                                                                                                                             _experiment.BottomTypeFileName = environmentSettingsViewModel.BottomTypeData.SelectedItem.Name;
+                                                                                                                                                                                                                                                                                                                             _experiment.SoundSpeedFileName = environmentSettingsViewModel.SoundSpeedData.SelectedItem.Name;
+                                                                                                                                                                                                                                                                                                                             _experiment.WindSpeedFileName = environmentSettingsViewModel.WindSpeedData.SelectedItem.Name;
+                                                                                                                                                                                                                                                                                                                         }));
             }
         }
 
@@ -200,7 +200,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> SaveExperimentCommand
         {
-            get { return _saveExperiment ?? (_saveExperiment = new SimpleCommand<object, object>(delegate { SaveExperiment(); })); }
+            get { return _saveExperiment ?? (_saveExperiment = new SimpleCommand<object, object>(obj => SaveExperiment())); }
         }
 
         SimpleCommand<object, object> _saveExperiment;
@@ -211,14 +211,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> SaveExperimentAsCommand
         {
-            get
-            {
-                return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(delegate
-                                                                                                   {
-                                                                                                       SaveExperimentAs();
-                                                                                                       ;
-                                                                                                   }));
-            }
+            get { return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(obj => SaveExperimentAs())); }
         }
 
         SimpleCommand<object, object> _saveExperimentAs;
@@ -231,7 +224,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _newExperiment ?? (_newExperiment = new SimpleCommand<object, object>(delegate
+                return _newExperiment ?? (_newExperiment = new SimpleCommand<object, object>(obj =>
                                                                                              {
                                                                                                  if (UserCanceledBecauseExperimentUnsaved()) return;
                                                                                                  _experiment = new Experiment();
@@ -252,7 +245,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _addShapefile ?? (_addShapefile = new SimpleCommand<object, object>(delegate
+                return _addShapefile ?? (_addShapefile = new SimpleCommand<object, object>(obj =>
                                                                                            {
                                                                                                _openFileService.Filter = "ESRI Shapefiles (*.shp)|*.shp";
                                                                                                _openFileService.InitialDirectory = Settings.Default.LastShapefileDirectory;
@@ -273,7 +266,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> AddScenarioFileCommand
         {
-            get { return _addScenarioFile ?? (_addScenarioFile = new SimpleCommand<object, object>(delegate { return IsAddScenarioFilePossible(); }, delegate { OpenScenarioFile(null); })); }
+            get { return _addScenarioFile ?? (_addScenarioFile = new SimpleCommand<object, object>(arg => IsAddScenarioFilePossible(), obj => OpenScenarioFile(null))); }
         }
 
         SimpleCommand<object, object> _addScenarioFile;
@@ -286,7 +279,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _addOverlayFileCommand ?? (_addOverlayFileCommand = new SimpleCommand<object, object>(delegate
+                return _addOverlayFileCommand ?? (_addOverlayFileCommand = new SimpleCommand<object, object>(obj =>
                                                                                                              {
                                                                                                                  _openFileService.Filter = "NUWC Overlay Files (*.ovr)|*.ovr";
                                                                                                                  _openFileService.InitialDirectory = Settings.Default.LastOverlayFileDirectory;
@@ -340,7 +333,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> QuickLookCommand
         {
-            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => (((_experiment != null) && (_experiment.NemoFile != null)) && (_experiment.Bathymetry != null)) && (_experiment.SoundSpeedField != null), delegate { MediatorMessage.Send(MediatorMessage.QuickLookCommand); })); }
+            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => (((_experiment != null) && (_experiment.NemoFile != null)) && (_experiment.Bathymetry != null)) && (_experiment.SoundSpeedField != null), obj => MediatorMessage.Send(MediatorMessage.QuickLookCommand))); }
         }
 
         SimpleCommand<object, object> _quickLook;
@@ -362,7 +355,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> AddAnimalPopulationFileCommand
         {
-            get { return _addAnimalPopulationFile ?? (_addAnimalPopulationFile = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.AddAnimatPopulationFileCommand); })); }
+            get { return _addAnimalPopulationFile ?? (_addAnimalPopulationFile = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.AddAnimatPopulationFileCommand))); }
         }
 
         SimpleCommand<object, object> _addAnimalPopulationFile;
@@ -373,24 +366,31 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> LaunchMMMBSCommand
         {
-            
             get
             {
-                return _launchMMMBS ?? (_launchMMMBS = new SimpleCommand<object, object>(delegate { return (Globals.AppSettings.MMMBSExecutablePath != null) && (File.Exists(Globals.AppSettings.MMMBSExecutablePath)); }, delegate
-                                                                                                                                                                                                                                                               {
-                                                                                                                                                                                                                                                                   new Process
-                                                                                                                                                                                                                                                                   {
-                                                                                                                                                                                                                                                                       StartInfo =
-                                                                                                                                                                                                                                                                           {
-                                                                                                                                                                                                                                                                               FileName = Globals.AppSettings.MMMBSExecutablePath,
-                                                                                                                                                                                                                                                                               WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.MMMBSExecutablePath),
-                                                                                                                                                                                                                                                                           }
-                                                                                                                                                                                                                                                                   }.Start();
-                                                                                                                                                                                                                                                               }));
+                return _launchMMMBS ?? (_launchMMMBS = new SimpleCommand<object, object>(arg => (Globals.AppSettings.MMMBSExecutablePath != null) && (File.Exists(Globals.AppSettings.MMMBSExecutablePath)), obj => new Process
+                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                        StartInfo =
+                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                FileName = Globals.AppSettings.MMMBSExecutablePath,
+                                                                                                                                                                                                                                WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.MMMBSExecutablePath),
+                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                    }.Start()));
             }
         }
 
         SimpleCommand<object, object> _launchMMMBS;
+
+        #endregion
+
+        #region CreateMMMBSBathymetryFileCommand
+
+        public SimpleCommand<object, object> CreateMMMBSBathymetryFileCommand
+        {
+            get { return _createMMMBSBathymetryFileCommand ?? (_createMMMBSBathymetryFileCommand = new SimpleCommand<object, object>(obj => ((_experiment != null) && (_experiment.Bathymetry != null)), obj => MediatorMessage.Send(MediatorMessage.CreateMMMBSBathymetryFileCommand))); }
+        }
+
+        SimpleCommand<object, object> _createMMMBSBathymetryFileCommand;
 
         #endregion
 

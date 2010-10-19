@@ -4,8 +4,7 @@
         Title="Transmission Loss Parameters"
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-        Width="Auto"
-        Height="Auto">
+        SizeToContent="WidthAndHeight" WindowStyle="ToolWindow" ResizeMode="NoResize">
     <Window.Resources>
         <Style x:Key="ValidatingTextBox" TargetType="{x:Type TextBox}">
             <Setter Property="Margin" Value="0 0 5 0" />
@@ -39,116 +38,12 @@
             </Grid>
         </DataTemplate>
     </Window.Resources>
-	<DockPanel LastChildFill="True">
-        <!--
-        <StackPanel Orientation="Vertical"
-		            DockPanel.Dock="Top">
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="{Binding Latitude.Label}" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding Latitude.IsReadOnly}"
-                         Text="{Binding Latitude.DataValue, StringFormat={}{0:0.000000}, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}">
-                    <i:Interaction.Behaviors>
-                        <cinch:NumericTextBoxBehaviour/>
-                    </i:Interaction.Behaviors>
-                </TextBox>
-            </DockPanel>
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="{Binding Longitude.Label}" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding Longitude.IsReadOnly}"
-                         Text="{Binding Longitude.DataValue, StringFormat={}{0:0.000000}, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}">
-                    <i:Interaction.Behaviors>
-                        <cinch:NumericTextBoxBehaviour/>
-                    </i:Interaction.Behaviors>
-                </TextBox>
-            </DockPanel>
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="Field radius (m)" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding Radius.IsReadOnly}"
-                         Text="{Binding Radius.DataValue, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"/>
-            </DockPanel>
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="First radial bearing (deg)" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding Latitude.IsReadOnly}"
-                         Text="{Binding RadialBearing.DataValue, StringFormat={}{0:0.#}, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"/>
-            </DockPanel>
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="Source depth (m)" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding SourceDepth.IsReadOnly}"
-                         Text="{Binding SourceDepth.DataValue, StringFormat={}{0:0.#}, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"/>
-            </DockPanel>
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="Radial count" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding RadialCount.IsReadOnly}"
-                         Text="{Binding RadialCount.DataValue, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"/>
-            </DockPanel>
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="Low Frequency (Hz)" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding LowFrequency.IsReadOnly}"
-                         Text="{Binding LowFrequency.DataValue, StringFormat={}{0:0.#}, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}">
-                    <i:Interaction.Behaviors>
-                        <cinch:NumericTextBoxBehaviour/>
-                    </i:Interaction.Behaviors>
-                </TextBox>
-            </DockPanel>
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="High Frequency (Hz)" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding HighFrequency.IsReadOnly}"
-                         Text="{Binding HighFrequency.DataValue, StringFormat={}{0:0.#}, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"/>
-            </DockPanel>
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="Vertical Beam Width (deg)" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding VerticalBeamWidth.IsReadOnly}"
-                         Text="{Binding VerticalBeamWidth.DataValue, StringFormat={}{0:0.#}, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"/>
-            </DockPanel>
-            <DockPanel LastChildFill="True">
-                <TextBlock Width="200"
-				           TextAlignment="Right"
-				           Margin="0 0 5 0"
-				           Text="Depression/Elevation Angle (deg)" />
-                <TextBox Style="{StaticResource ValidatingTextBox}"
-                         IsReadOnly="{Binding DepressionElevationAngle.IsReadOnly}"
-                         Text="{Binding DepressionElevationAngle.DataValue, StringFormat={}{0:0.#}, Mode=TwoWay, ValidatesOnDataErrors=True, ValidatesOnExceptions=True}"/>
-            </DockPanel>
-        </StackPanel>
-        -->
+	<StackPanel>
+        <ListBox ItemsSource="{Binding EditableFields}"
+                 ItemTemplate="{StaticResource LabeledDataWrapperTemplate}" 
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
         <DockPanel LastChildFill="False"
-		           DockPanel.Dock="Bottom"
 		           Margin="10">
 			<Button Content="Cancel"
 			        IsCancel="True"
@@ -159,9 +54,9 @@
 			        Width="100"
 			        DockPanel.Dock="Right"
 			        Command="{Binding OkCommand}" />
+            <CheckBox IsChecked="{Binding IsEditable}" 
+                      Margin="0 0 10 0"
+                      Content="Editable" />
 		</DockPanel>
-        <ListBox DockPanel.Dock="Top"
-                 ItemsSource="{Binding EditableFields}"
-                 ItemTemplate="{StaticResource LabeledDataWrapperTemplate}" />
-    </DockPanel>
+    </StackPanel>
 </Window>
