@@ -93,7 +93,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 foreach (var source in platform.Sources)
                     foreach (var mode in source.Modes)
                     {
-                        var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, 0, mode, 16, 3000)
+                        var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, -platform.Trackdefs[0].InitialHeight, mode, 16, 3000)
                                                            {
                                                                Name = string.Format("{0}.{1}.{2}", platform.Name, source.Name, mode.Name),
                                                            };
@@ -102,6 +102,24 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("AnalysisPointView", analysisPointViewModel);
             if ((!result.HasValue) || (!result.Value))
             {
+                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
+                return;
+            }
+            MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPointViewModel.AnalysisPoint);
+            try
+            {
+                foreach (var transmissionLossJobViewModel in analysisPointViewModel.TransmissionLossJobViewModels)
+                    MediatorMessage.Send(MediatorMessage.QueueBellhopJob, BellhopRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings));
+            }
+            catch (BathymetryOutOfBoundsException)
+            {
+                _messageBoxService.ShowError("Unable to add analysis point.\nDid you click outside the bounds of the simulation area?");
+                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
+                return;
+            }
+            catch (BathymetryTooShallowException)
+            {
+                _messageBoxService.ShowError("This area is too shallow to place an analysis point.  Pick a different area.");
                 MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
                 return;
             }
@@ -117,7 +135,6 @@ namespace ESMEWorkBench.ViewModels.Main
             MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, transmissionLossJobViewModel.TransmissionLossJob.AnalysisPoint);
 
             MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Wait);
-
             TransmissionLossField transmissionLossField;
             try
             {
@@ -200,7 +217,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _saveFileService.ShowDialog((Window)_viewAwareStatusService.View);
             if ((!result.HasValue) || (!result.Value)) return;
             Settings.Default.LastBathymetryFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-            _experiment.Bathymetry.SaveToYXZ(_saveFileService.FileName, -1); 
+            _experiment.Bathymetry.SaveToYXZ(_saveFileService.FileName, 1); 
         }
 
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]
