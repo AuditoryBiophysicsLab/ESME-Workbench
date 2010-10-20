@@ -2,6 +2,7 @@
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Cinch;
 using ESMEWorkBench.Data;
@@ -43,6 +44,19 @@ namespace ESMEWorkBench
             using (var sw = new StreamWriter(App.Logfile, true))
                 sw.WriteLine(sb.ToString());
 #endif
+        }
+
+        public static string Filter(this string s, Func<char, bool> trueIfKeep)
+        {
+            if (!string.IsNullOrEmpty(s))
+            {
+                var sb = new StringBuilder(s.Length);
+                foreach (var c in s.Where(c => trueIfKeep(c)))
+                    sb.Append(c);
+
+                return sb.ToString();
+            }
+            return s;
         }
     }
 }
