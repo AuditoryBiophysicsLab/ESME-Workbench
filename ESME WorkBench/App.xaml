@@ -3,34 +3,40 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Exit="Application_Exit"
              StartupUri="Views\MainView.xaml">
-    <Application.Resources>
-        <!-- Resources scoped at the Application level should be defined here. -->
-        <!--
+	<Application.Resources>
+		<!-- Resources scoped at the Application level should be defined here. -->
+		<!--
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/WhistlerBlue.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
         -->
-        <Style x:Key="ContextMenuItemStyle">
-            <Setter Property="MenuItem.Header"
+		<Style x:Key="ContextMenuItemStyle">
+			<Setter Property="MenuItem.Header"
 			        Value="{Binding Header}" />
-            <Setter Property="MenuItem.ItemsSource"
+			<Setter Property="MenuItem.ItemsSource"
 			        Value="{Binding Children}" />
-            <Setter Property="MenuItem.Command"
+			<Setter Property="MenuItem.Command"
 			        Value="{Binding Command}" />
-            <Setter Property="MenuItem.CommandParameter"
+			<Setter Property="MenuItem.CommandParameter"
 			        Value="{Binding CommandParameter}" />
-            <Setter Property="MenuItem.Icon"
+			<Setter Property="MenuItem.Icon"
 			        Value="{Binding Icon}" />
-            <Setter Property="MenuItem.IsChecked"
+			<Setter Property="MenuItem.IsChecked"
 			        Value="{Binding IsChecked}" />
-            <Setter Property="MenuItem.IsCheckable"
+			<Setter Property="MenuItem.IsCheckable"
 			        Value="{Binding IsCheckable}" />
-        </Style>
-    </Application.Resources>
-    <JumpList.JumpList>
-        <JumpList ShowRecentCategory="True"
-                  ShowFrequentCategory="True" />
-    </JumpList.JumpList>
+		</Style>
+		<ResourceDictionary x:Key="ControlTemplates">
+			<ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ControlTemplates\Shared.xaml" />
+                <ResourceDictionary Source="ControlTemplates\ProgressBar.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Application.Resources>
+	<JumpList.JumpList>
+		<JumpList ShowRecentCategory="True"
+		          ShowFrequentCategory="True" />
+	</JumpList.JumpList>
 </Application>

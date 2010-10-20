@@ -76,7 +76,15 @@ namespace ESMEWorkBench.ViewModels.Main
                                            };
 
 #if true
-            var analysisPointViewModel = new AnalysisPointViewModel();
+            var analysisPointViewModel = new AnalysisPointViewModel
+            {
+                AnalysisPoint = new AnalysisPoint
+                {
+                    Location = MouseEarthCoordinate,
+                    RadialBearing = 0,
+                    RadialCount = 16,
+                }
+            };
             foreach (var platform in _experiment.NemoFile.Scenario.Platforms)
                 foreach (var source in platform.Sources)
                     foreach (var mode in source.Modes)

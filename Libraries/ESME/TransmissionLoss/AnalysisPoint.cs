@@ -39,7 +39,6 @@ namespace ESME.TransmissionLoss
 
         #endregion
 
-
         #region IEquatable<AnalysisPoint> Members
 
         bool IEquatable<AnalysisPoint>.Equals(AnalysisPoint that)
@@ -58,12 +57,7 @@ namespace ESME.TransmissionLoss
         [XmlElement("AnalysisPointID")]
         public int IDField { get; set; }
 
-        #endregion
-        
-    }
-
-    public class AnalysisPointDeletedEventArgs : ItemDeletedEventArgs<AnalysisPoint>
-    {
+        #endregion        
     }
 
     public class NewAnalysisPointList : UniqueAutoIncrementList<AnalysisPoint>

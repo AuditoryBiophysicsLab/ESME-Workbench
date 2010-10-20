@@ -57,29 +57,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public LabeledDataWrapper<float> Radius { get; private set; }
-
-        public LabeledDataWrapper<float> Radius
-        {
-            get { return _radius; }
-            private set
-            {
-                if (_radius == value) return;
-                _radius = value;
-                _radius.ValidationRules.Add(new SimpleRule("DataValue", "Radius must be greater than zero", domObj =>
-                                                                                                            {
-                                                                                                                var obj = (DataWrapper<float>) domObj;
-                                                                                                                return (obj.DataValue <= 0);
-                                                                                                            }));
-                NotifyPropertyChanged(RadiusChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RadiusChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Radius);
-        LabeledDataWrapper<float> _radius;
-
-        #endregion
-
         #region public LabeledDataWrapper<float> SourceDepth { get; private set; }
 
         public LabeledDataWrapper<float> SourceDepth
@@ -217,16 +194,39 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_radialBearing == value) return;
                 _radialBearing = value;
                 _radialBearing.ValidationRules.Add(new SimpleRule("DataValue", "RadialBearing must be in the range -180 to +180", domObj =>
-                                                                                                                                  {
-                                                                                                                                      var obj = (DataWrapper<float>) domObj;
-                                                                                                                                      return ((obj.DataValue < -180) || (180 < obj.DataValue));
-                                                                                                                                  }));
+                {
+                    var obj = (DataWrapper<float>)domObj;
+                    return ((obj.DataValue < -180) || (180 < obj.DataValue));
+                }));
                 NotifyPropertyChanged(RadialBearingChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs RadialBearingChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialBearing);
         LabeledDataWrapper<float> _radialBearing;
+
+        #endregion
+
+        #region public LabeledDataWrapper<float> Radius { get; private set; }
+
+        public LabeledDataWrapper<float> Radius
+        {
+            get { return _radius; }
+            private set
+            {
+                if (_radius == value) return;
+                _radius = value;
+                _radius.ValidationRules.Add(new SimpleRule("DataValue", "Radius must be greater than zero", domObj =>
+                {
+                    var obj = (DataWrapper<float>)domObj;
+                    return (obj.DataValue <= 0);
+                }));
+                NotifyPropertyChanged(RadiusChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RadiusChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Radius);
+        LabeledDataWrapper<float> _radius;
 
         #endregion
 
@@ -240,10 +240,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_radialCount == value) return;
                 _radialCount = value;
                 _radialCount.ValidationRules.Add(new SimpleRule("DataValue", "RadialCount must be greater than zero", domObj =>
-                                                                                                                      {
-                                                                                                                          var obj = (DataWrapper<int>) domObj;
-                                                                                                                          return (obj.DataValue <= 0);
-                                                                                                                      }));
+                {
+                    var obj = (DataWrapper<int>)domObj;
+                    return (obj.DataValue <= 0);
+                }));
                 NotifyPropertyChanged(RadialCountChangedEventArgs);
             }
         }
@@ -331,23 +331,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         {
                             Label = "Longitude (deg)"
                         };
-            Radius = new LabeledDataWrapper<float>(this, RadiusChangedEventArgs)
-                     {
-                         Label = "Field radius (m)",
-                         IsEditable = true,
-                     };
-            RadialBearing = new LabeledDataWrapper<float>(this, RadialBearingChangedEventArgs)
-                            {
-                                Label = "First radial bearing (deg)"
-                            };
             SourceDepth = new LabeledDataWrapper<float>(this, SourceDepthChangedEventArgs)
                           {
                               Label = "Source depth (m)"
-                          };
-            RadialCount = new LabeledDataWrapper<int>(this, RadialCountChangedEventArgs)
-                          {
-                              Label = "Radial count",
-                              IsEditable = true,
                           };
             LowFrequency = new LabeledDataWrapper<float>(this, LowFrequencyChangedEventArgs)
                            {
@@ -365,18 +351,33 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                        {
                                            Label = "Depression/Elevation Angle (deg)"
                                        };
+            RadialBearing = new LabeledDataWrapper<float>(this, RadialBearingChangedEventArgs)
+                            {
+                                IsEditable = true,
+                                Label = "First radial bearing (deg)"
+                            };
+            Radius = new LabeledDataWrapper<float>(this, RadiusChangedEventArgs)
+                     {
+                         Label = "Field radius (m)",
+                         IsEditable = true,
+                     };
+            RadialCount = new LabeledDataWrapper<int>(this, RadialCountChangedEventArgs)
+                          {
+                              Label = "Radial count",
+                              IsEditable = true,
+                          };
 
             #endregion
 
             Latitude.DataValue = location.Latitude_degrees;
             Longitude.DataValue = location.Longitude_degrees;
-            Radius.DataValue = nemoMode.Radius;
-            SourceDepth.DataValue = platformDepth + nemoMode.DepthOffset;
+            SourceDepth.DataValue = Math.Max(1, platformDepth + nemoMode.DepthOffset);
             LowFrequency.DataValue = nemoMode.LowFrequency;
             HighFrequency.DataValue = nemoMode.HighFrequency;
             VerticalBeamWidth.DataValue = nemoMode.VerticalBeamWidth;
             DepressionElevationAngle.DataValue = nemoMode.DepressionElevationAngle;
             RadialBearing.DataValue = 0;
+            Radius.DataValue = nemoMode.Radius;
             RadialCount.DataValue = radialCount;
             _maxCalculationDepth = maxCalculationDepth;
 
