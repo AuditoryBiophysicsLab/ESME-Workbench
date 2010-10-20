@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Cinch;
+using ESME.TransmissionLoss;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
@@ -53,6 +54,25 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
 
         #endregion
+
+        #region public AnalysisPoint AnalysisPoint { get; set; }
+
+        public AnalysisPoint AnalysisPoint
+        {
+            get { return _analysisPoint; }
+            set
+            {
+                if (_analysisPoint == value) return;
+                _analysisPoint = value;
+                NotifyPropertyChanged(AnalysisPointChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.AnalysisPoint);
+        AnalysisPoint _analysisPoint;
+
+        #endregion
+
 
         #region public bool IsValid { get; set; }
 
