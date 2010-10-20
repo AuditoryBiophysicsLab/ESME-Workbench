@@ -75,18 +75,32 @@ namespace ESMEWorkBench.ViewModels.Main
                                                RangeCellSize = 50,
                                            };
 
-            var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, 0, _experiment.NemoFile.Scenario.Platforms[0].Sources[0].Modes[0], 16, 3000);
-            //var transmissionLossJobViewModel = new TransmissionLossJobViewModel
-            //                                   {
-            //                                       TransmissionLossJob = transmissionLossJob
-            //                                   };
+#if true
+            var analysisPointViewModel = new AnalysisPointViewModel();
+            foreach (var platform in _experiment.NemoFile.Scenario.Platforms)
+                foreach (var source in platform.Sources)
+                    foreach (var mode in source.Modes)
+                    {
+                        var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, 0, mode, 16, 3000)
+                                                           {
+                                                               Name = string.Format("{0}.{1}.{2}", platform.Name, source.Name, mode.Name),
+                                                           };
+                        analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
+                    }
+            var result = _visualizerService.ShowDialog("AnalysisPointView", analysisPointViewModel);
+            if ((!result.HasValue) || (!result.Value))
+            {
+                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
+                return;
+            }
+#else
+            var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, 0, mode, 16, 3000);
             var result = _visualizerService.ShowDialog("TransmissionLossJobView", transmissionLossJobViewModel);
             if ((!result.HasValue) || (!result.Value))
             {
                 MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
                 return;
             }
-
             transmissionLossJobViewModel.TransmissionLossJob.AnalysisPoint.TransmissionLossJobs.Add(transmissionLossJobViewModel.TransmissionLossJob);
             MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, transmissionLossJobViewModel.TransmissionLossJob.AnalysisPoint);
 
@@ -124,6 +138,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
                 return;
             }
+#endif
 
 #if false
             _saveFileService.OverwritePrompt = true;
@@ -135,9 +150,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 transmissionLossField.Filename = _saveFileService.FileName;
                 transmissionLossField.Save();
             }
-#endif
             var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(transmissionLossField, _saveFileService);
             _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
+#endif
 
             MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
 

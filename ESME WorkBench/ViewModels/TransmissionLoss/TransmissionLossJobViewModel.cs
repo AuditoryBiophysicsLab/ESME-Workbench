@@ -299,6 +299,24 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region public string Name { get; set; }
+
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name == value) return;
+                _name = value;
+                NotifyPropertyChanged(NameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Name);
+        string _name;
+
+        #endregion
+
         readonly int _maxCalculationDepth;
 
         public TransmissionLossJobViewModel(EarthCoordinate location, float platformDepth, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
@@ -315,7 +333,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         };
             Radius = new LabeledDataWrapper<float>(this, RadiusChangedEventArgs)
                      {
-                         Label = "Field radius (m)"
+                         Label = "Field radius (m)",
+                         IsEditable = true,
                      };
             RadialBearing = new LabeledDataWrapper<float>(this, RadialBearingChangedEventArgs)
                             {
@@ -327,7 +346,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                           };
             RadialCount = new LabeledDataWrapper<int>(this, RadialCountChangedEventArgs)
                           {
-                              Label = "Radial count"
+                              Label = "Radial count",
+                              IsEditable = true,
                           };
             LowFrequency = new LabeledDataWrapper<float>(this, LowFrequencyChangedEventArgs)
                            {
@@ -361,8 +381,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _maxCalculationDepth = maxCalculationDepth;
 
             _editableFields = DataWrapperHelper.GetWrapperProperties(this);
-
-            OkCommand = new SimpleCommand<object, object>(delegate { return IsValid; }, delegate { CloseActivePopUpCommand.Execute(true); });
         }
 
         public TransmissionLossJob TransmissionLossJob
@@ -392,6 +410,15 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        public SimpleCommand<Object, Object> OkCommand { get; private set; }
+        #region OKCommand
+
+        public SimpleCommand<object, object> OkCommand
+        {
+            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(delegate { return IsValid; }, delegate { CloseActivePopUpCommand.Execute(true); })); }
+        }
+
+        SimpleCommand<object, object> _okCommand;
+
+        #endregion
     }
 }
