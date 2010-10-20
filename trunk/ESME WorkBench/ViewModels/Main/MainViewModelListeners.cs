@@ -3,12 +3,16 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Cinch;
 using ESME.Model;
+using ESME.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.Layers;
+using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 
@@ -208,6 +212,26 @@ namespace ESMEWorkBench.ViewModels.Main
             if ((!result.HasValue) || (!result.Value)) return;
             var animatInterface =  AnimatInterface.Create(_openFileService.FileName);
             animatInterface.Test();
+
+            //begin hackery; create an overlay object from the animat interface.
+            var layer = new OverlayShapeMapLayer
+                        {
+                            Name = "animats",
+                            CanBeRemoved = false,
+                            CanBeReordered = true,
+                            LayerType = LayerType.Animal,
+                        };
+            for (int index = 0; index < animatInterface.AnimatList.Count; index++)
+            {
+                    var animat = animatInterface.AnimatList[index];
+                    layer.Add(new OverlayPoint(animat.Location, Colors.Black, 2));
+                
+            }
+
+            layer.Done();
+            _experiment.MapLayers.Add(layer);
+            MediatorMessage.Send(MediatorMessage.RefreshMap,true);
+            
         }
     }
 }
