@@ -55,7 +55,7 @@ namespace ESMEWorkBench.ViewModels.Map
             }
 
             _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(overlayShape.WellKnownText)));
-            LayerOverlay.Layers.Add(_layer);
+            //LayerOverlay.Layers.Add(_layer);
         }
 
         public void Add(IEnumerable<OverlayShape> overlayShapes)
