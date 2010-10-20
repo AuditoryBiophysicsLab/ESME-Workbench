@@ -153,7 +153,7 @@ namespace ESME.Model
 
         public void Test()
         {
-
+            Console.WriteLine("hello");
         }
         #endregion
 

@@ -182,7 +182,7 @@ namespace ESME.Model
                     nextSpeciesAnimatIndex += curSpecies.ReferenceCount;
                 }
                 mbsPosition mbsPosition = posArray[i];
-                Add(new Animat(mbsPosition, curSpecies));
+                Add(new Animat(mbsPosition, curSpecies){SpeciesName = curSpecies.SpeciesName,});
             }
         }
 
