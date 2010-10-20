@@ -113,6 +113,9 @@
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\AnalysisPointView.xaml.cs">
+      <DependentUpon>AnalysisPointView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\BellhopCalculatorView.xaml.cs">
       <DependentUpon>BellhopCalculatorView.xaml</DependentUpon>
     </Compile>
@@ -222,6 +225,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\AboutView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AnalysisPointView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
