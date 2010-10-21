@@ -151,10 +151,10 @@ namespace ESME.Model
                    };
         }
 
-        public void Test()
+        public void Test(string logPath)
         {
             //matlab-friendly csv output of positions
-            var logFilePath = @"C:\tests\seeding\log.txt";
+            var logFilePath = Path.Combine(logPath,"log.txt");
             using(var mywriter = new StreamWriter(logFilePath))
             {
                 mywriter.WriteLine("All Animat Starting Positions: lat/long/depth ");

@@ -178,18 +178,22 @@ namespace ESME.Model
             Species curSpecies = SpeciesList[speciesIndex];
             int nextSpeciesAnimatIndex = curSpecies.ReferenceCount;
             //add animats to each species. 
+            var curAnimatCount = 0;
             for (int i = 0; i < posArray.Length; i++)
             {
+                
                 if (i >= nextSpeciesAnimatIndex)
                 {
-                    curSpecies.ReferenceCount -= nextSpeciesAnimatIndex;
+                    curSpecies.ReferenceCount -= curAnimatCount;
+                    curAnimatCount = 0;
                     curSpecies = SpeciesList[++speciesIndex];
                     nextSpeciesAnimatIndex += curSpecies.ReferenceCount;
                 }
                 mbsPosition mbsPosition = posArray[i];
                 Add(new Animat(mbsPosition, curSpecies){SpeciesName = curSpecies.SpeciesName,});
+                curAnimatCount++;
             }
-            curSpecies.ReferenceCount -= nextSpeciesAnimatIndex;
+            curSpecies.ReferenceCount -= curAnimatCount;
         }
 
         [XmlIgnore]
