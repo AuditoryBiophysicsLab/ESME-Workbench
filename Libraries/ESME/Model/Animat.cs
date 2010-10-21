@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 using HRC.Navigation;
 using mbs;
 
+
 namespace ESME.Model
 {
     public class Animat
@@ -142,16 +143,17 @@ namespace ESME.Model
             //make sure we're in durationless mode.
             config.durationLess = true;
             _mmmbs.SetConfiguration(config);
+           
             //get species count
             int speciesCount = _mmmbs.GetSpeciesCount();
             
             //make a species list.
             SpeciesList = new SpeciesList();
-            for (var i = 0; i <= speciesCount; i++)
+            for (var i = 0; i < speciesCount; i++)
             {
                 SpeciesList.Add(new Species
                                 {
-                                    SpeciesName = _mmmbs.GetSpeciesDisplayTitle(i),
+                                    SpeciesName = _mmmbs.GetSpeciesDisplayTitle(i).Filter(c=>!char.IsControl(c)),
                                     ReferenceCount = _mmmbs.GetIndivdualCount(i),
                                 });
             }
@@ -166,6 +168,8 @@ namespace ESME.Model
                 //wait until initializing is done.
                 Thread.Sleep(1);
             }
+            //bump the positions once, otherwise depths aren't set. 
+            if (mbsRESULT.OK != (mbsResult = _mmmbs.RunScenarioNumIterations(1))) throw new AnimatMMBSException("RunScenario Error:" + _mmmbs.MbsResultToString(mbsResult));
 
             //get the initial positions of every animat
             if (mbsRESULT.OK != (mbsResult = _mmmbs.GetAnimatCoordinates(posArray))) throw new AnimatMMBSException("Error Fetching Initial Animat Coordinates: " + _mmmbs.MbsResultToString(mbsResult));
@@ -178,12 +182,14 @@ namespace ESME.Model
             {
                 if (i >= nextSpeciesAnimatIndex)
                 {
+                    curSpecies.ReferenceCount -= nextSpeciesAnimatIndex;
                     curSpecies = SpeciesList[++speciesIndex];
                     nextSpeciesAnimatIndex += curSpecies.ReferenceCount;
                 }
                 mbsPosition mbsPosition = posArray[i];
                 Add(new Animat(mbsPosition, curSpecies){SpeciesName = curSpecies.SpeciesName,});
             }
+            curSpecies.ReferenceCount -= nextSpeciesAnimatIndex;
         }
 
         [XmlIgnore]

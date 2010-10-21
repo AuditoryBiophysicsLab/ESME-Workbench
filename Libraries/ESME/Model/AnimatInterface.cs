@@ -153,7 +153,16 @@ namespace ESME.Model
 
         public void Test()
         {
-            Console.WriteLine("hello");
+            //matlab-friendly csv output of positions
+            var logFilePath = @"C:\tests\seeding\log.txt";
+            using(var mywriter = new StreamWriter(logFilePath))
+            {
+                mywriter.WriteLine("All Animat Starting Positions: lat/long/depth ");
+                foreach (var animat in AnimatList)
+                {
+                    mywriter.WriteLine(string.Format("{0},{1},{2}",animat.Location.Latitude_degrees , animat.Location.Longitude_degrees , animat.Location.Elevation_meters ));
+                }
+            }
         }
         #endregion
 
