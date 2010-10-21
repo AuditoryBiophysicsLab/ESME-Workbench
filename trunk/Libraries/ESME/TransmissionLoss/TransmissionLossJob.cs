@@ -38,7 +38,7 @@ namespace ESME.TransmissionLoss
         #region IHasIDField Members
 
         [XmlElement("TransmissionLossJobID")]
-        public int IDField { get; set; }
+        public ulong IDField { get; set; }
 
         #endregion
     }

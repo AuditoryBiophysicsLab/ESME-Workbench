@@ -15,7 +15,7 @@ namespace ESME.Model
 /*
         FixedSource() { }
 */
-        public int AnalysisPointID { get; set; }
+        public ulong AnalysisPointID { get; set; }
         public string Name { get; set; }
         public double BearingDegrees { get; set; }
         public double HorizontalHalfAngleDegrees { get; set; }

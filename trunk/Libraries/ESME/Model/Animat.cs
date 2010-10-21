@@ -22,7 +22,7 @@ namespace ESME.Model
         public EarthCoordinate3D Location { get; set; }
 
         [XmlElement]
-        public int SpeciesID { get; set; }
+        public ulong SpeciesID { get; set; }
 
         [XmlIgnore]
         internal int AnimatID { get; set; }

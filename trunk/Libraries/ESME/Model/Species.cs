@@ -35,7 +35,7 @@ namespace ESME.Model
         #region IHasIDField Members
 
         [XmlElement("SpeciesID")]
-        public int IDField { get; set; }
+        public ulong IDField { get; set; }
 
         #endregion
 
@@ -103,7 +103,7 @@ namespace ESME.Model
         new int RemoveAll(Predicate<Species> match) { return 0; }
         new void Clear() { }
 
-        internal int AddReference(string speciesName)
+        internal ulong AddReference(string speciesName)
         {
             Species result = Find(s => s.SpeciesName == speciesName);
             if (result == null) throw new SpeciesNotFoundException("SpeciesList.Add: Requested species \"" + speciesName + "\" was not found");
