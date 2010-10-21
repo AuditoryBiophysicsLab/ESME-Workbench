@@ -13,7 +13,7 @@ namespace ESME.Model
 {
     public class OldTransmissionLossField
     {
-        public int AnalysisPointID { get; set; }
+        public ulong AnalysisPointID { get; set; }
         public string Filename { get; set; }
         public int MaxTLDepth_meters { get; set; }
         public OldTransmissionLossRadialList TransmissionLossRadials { get; set; }

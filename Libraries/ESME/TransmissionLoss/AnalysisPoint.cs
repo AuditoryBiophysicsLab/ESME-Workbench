@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Xml.Serialization;
 using ESME.Model;
 using HRC.Navigation;
@@ -11,15 +9,17 @@ namespace ESME.TransmissionLoss
     public class AnalysisPoint : IEquatable<AnalysisPoint>, IHasIDField
     {
         /// <summary>
-        /// Location of the analysis point
+        ///   Location of the analysis point
         /// </summary>
         public EarthCoordinate Location { get; set; }
+
         /// <summary>
-        /// Bearing of the lowest-numbered radial from this point.  All radials will be evenly spaced starting with this bearing
+        ///   Bearing of the lowest-numbered radial from this point.  All radials will be evenly spaced starting with this bearing
         /// </summary>
         public float RadialBearing { get; set; }
+
         /// <summary>
-        /// How many radials will be calculated for all active modes at this analysis point
+        ///   How many radials will be calculated for all active modes at this analysis point
         /// </summary>
         public int RadialCount { get; set; }
 
@@ -43,10 +43,8 @@ namespace ESME.TransmissionLoss
 
         bool IEquatable<AnalysisPoint>.Equals(AnalysisPoint that)
         {
-            if (!Location.Equals(that.Location))
-                return false;
-            if (RadialBearing != that.RadialBearing)
-                return false;
+            if (!Location.Equals(that.Location)) return false;
+            if (RadialBearing != that.RadialBearing) return false;
             return RadialCount == that.RadialCount;
         }
 
@@ -55,12 +53,10 @@ namespace ESME.TransmissionLoss
         #region IHasIDField Members
 
         [XmlElement("AnalysisPointID")]
-        public int IDField { get; set; }
+        public ulong IDField { get; set; }
 
-        #endregion        
+        #endregion
     }
 
-    public class NewAnalysisPointList : UniqueAutoIncrementList<AnalysisPoint>
-    {
-    }
+    public class NewAnalysisPointList : UniqueAutoIncrementList<AnalysisPoint> {}
 }

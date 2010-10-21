@@ -14,7 +14,7 @@ using ESME.TransmissionLoss.Bellhop;
 namespace ESME.Model
 {
     [XmlRoot(Namespace = "http://esme.bu.edu/support/schemas/ESME_Experiment.xsd", ElementName = "BellhopRunFile", IsNullable = false)]
-    public class BellhopRunFile
+    public class BellhopRunFile : IHasIDField
     {
         #region Private data members
 
@@ -101,6 +101,7 @@ namespace ESME.Model
 
         public string Name { get; set; }
         public string Metadata { get; set; }
+        public ulong IDField { get; set; }
 
         TransmissionLossJob _transmissionLossJob;
         public TransmissionLossJob TransmissionLossJob

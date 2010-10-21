@@ -364,6 +364,33 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public ulong NextObjectID { get; set; }
+
+        public ulong NextObjectID
+        {
+            get
+            {
+                lock (this)
+                {
+                    NotifyPropertyChanged(NextObjectIDChangedEventArgs);
+                    return _nextObjectID++;
+                }
+            }
+            set
+            {
+                if (_nextObjectIDSetLocked) throw new ApplicationException("Write access to NextObjectID is forbidden.  Read access is permitted");
+                if (_nextObjectID == value) return;
+                _nextObjectID = value;
+                _nextObjectIDSetLocked = true;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NextObjectIDChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.NextObjectID);
+        ulong _nextObjectID;
+        bool _nextObjectIDSetLocked = false;
+
+        #endregion
+
         [XmlIgnore]
         public MarkerLayerViewModel AnalysisPointLayer { get; private set; }
 
@@ -493,7 +520,11 @@ namespace ESMEWorkBench.Data
             if (FileName != null)
             {
                 LocalStorageRoot = Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
-                if (!Directory.Exists(LocalStorageRoot)) Directory.CreateDirectory(LocalStorageRoot);
+                if (!Directory.Exists(LocalStorageRoot))
+                {
+                    var directoryInfo = Directory.CreateDirectory(LocalStorageRoot);
+                    directoryInfo.Attributes = FileAttributes.Directory | FileAttributes.Hidden; 
+                }
             }
             MapLayerViewModel.Layers = MapLayers;
             InitializeEnvironment();

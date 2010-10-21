@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -88,16 +90,16 @@ namespace ESMEWorkBench.ViewModels.Main
                     RadialCount = 16,
                 }
             };
-            foreach (var platform in _experiment.NemoFile.Scenario.Platforms)
-                foreach (var source in platform.Sources)
-                    foreach (var mode in source.Modes)
-                    {
-                        var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, -platform.Trackdefs[0].InitialHeight, mode, 16, 3000)
-                                                           {
-                                                               Name = string.Format("{0}.{1}.{2}", platform.Name, source.Name, mode.Name),
-                                                           };
-                        analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
-                    }
+            foreach (var transmissionLossJobViewModel in from platform in _experiment.NemoFile.Scenario.Platforms
+                                                         from source in platform.Sources
+                                                         from mode in source.Modes
+                                                         select new TransmissionLossJobViewModel(MouseEarthCoordinate, -platform.Trackdefs[0].InitialHeight, mode, 16, 3000)
+                                                                {
+                                                                    Name = string.Format("{0}.{1}.{2}", platform.Name, source.Name, mode.Name),
+                                                                }) 
+                                                                {
+                                                                    analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
+                                                                }
             var result = _visualizerService.ShowDialog("AnalysisPointView", analysisPointViewModel);
             if ((!result.HasValue) || (!result.Value))
             {
@@ -105,38 +107,33 @@ namespace ESMEWorkBench.ViewModels.Main
                 return;
             }
             MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPointViewModel.AnalysisPoint);
-            try
+            if (_bellhopQueueCalculatorViewModel == null)
             {
-                if (_bellhopQueueCalculatorViewModel == null)
-                {
-                    _bellhopQueueCalculatorViewModel = new BellhopQueueCalculatorViewModel(_experiment.LocalStorageRoot);
-                    _visualizerService.Show("BellhopQueueCalculatorView", _bellhopQueueCalculatorViewModel, false, null);
-                }
-                var bw1 = new BackgroundWorker();
-                bw1.DoWork += delegate
-                              {
-                                  foreach (var transmissionLossJobViewModel in analysisPointViewModel.TransmissionLossJobViewModels)
-                                  {
-                                      var bw2 = new BackgroundWorker();
-                                      var model = transmissionLossJobViewModel;
-                                      bw2.DoWork += delegate { _dispatcher.BeginInvoke(new MediatorSendDelegate(MediatorMessage.Send), DispatcherPriority.Background, MediatorMessage.QueueBellhopJob, BellhopRunFile.Create(model.TransmissionLossJob, environmentInformation, transmissionLossSettings)); };
-                                      bw2.RunWorkerAsync();
-                                  }
-                              };
-                bw1.RunWorkerAsync();
+                _bellhopQueueCalculatorViewModel = new BellhopQueueCalculatorViewModel(_experiment.LocalStorageRoot);
+                _visualizerService.Show("BellhopQueueCalculatorView", _bellhopQueueCalculatorViewModel, false, null);
             }
-            catch (BathymetryOutOfBoundsException)
-            {
-                _messageBoxService.ShowError("Unable to add analysis point.\nDid you click outside the bounds of the simulation area?");
-                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-                return;
-            }
-            catch (BathymetryTooShallowException)
-            {
-                _messageBoxService.ShowError("This area is too shallow to place an analysis point.  Pick a different area.");
-                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-                return;
-            }
+            var backgroundWorker = new BackgroundWorker();
+            backgroundWorker.DoWork += delegate
+                                        {
+                                            try
+                                            {
+                                                foreach (var transmissionLossJobViewModel in analysisPointViewModel.TransmissionLossJobViewModels) 
+                                                    _dispatcher.BeginInvoke(new MediatorSendDelegate(MediatorMessage.Send), DispatcherPriority.Background, MediatorMessage.QueueBellhopJob, BellhopRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings));
+                                            }
+                                            catch (BathymetryOutOfBoundsException)
+                                            {
+                                                _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("Unable to add analysis point.\nDid you click outside the bounds of the simulation area?"));
+                                                _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
+                                                return;
+                                            }
+                                            catch (BathymetryTooShallowException)
+                                            {
+                                                _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("This area is too shallow to place an analysis point.  Pick a different area."));
+                                                _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
+                                                return;
+                                            }
+                                        };
+            backgroundWorker.RunWorkerAsync();
 #else
             var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, 0, mode, 16, 3000);
             var result = _visualizerService.ShowDialog("TransmissionLossJobView", transmissionLossJobViewModel);
