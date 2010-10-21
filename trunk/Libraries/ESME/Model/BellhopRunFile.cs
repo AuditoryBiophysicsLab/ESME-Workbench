@@ -99,7 +99,22 @@ namespace ESME.Model
 
         #endregion
 
-        public TransmissionLossJob TransmissionLossJob { get; set; }
+        public string Name { get; set; }
+        public string Metadata { get; set; }
+
+        TransmissionLossJob _transmissionLossJob;
+        public TransmissionLossJob TransmissionLossJob
+        {
+            get { return _transmissionLossJob; }
+            set
+            {
+                if (value == _transmissionLossJob) return;
+                _transmissionLossJob = value;
+                Name = _transmissionLossJob.Name;
+                Metadata = _transmissionLossJob.Metadata;
+            }
+        }
+
         public BellhopRadialList BellhopRadials { get; set; }
 
         [XmlIgnore]

@@ -23,6 +23,17 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
 
+        #region public constructor
+
+        public BellhopFieldCalculatorViewModel() { }
+
+        public BellhopFieldCalculatorViewModel(Dispatcher dispatcher)
+        {
+            _dispatcher = dispatcher;
+        }
+
+        #endregion
+
         #region public TransmissionLossField TransmissionLossField { get; set; }
 
         public TransmissionLossField TransmissionLossField
@@ -68,6 +79,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_bellhopRunFile == value) return;
                 _bellhopRunFile = value;
+                Name = _bellhopRunFile.Name;
                 NotifyPropertyChanged(BellhopRunFileChangedEventArgs);
                 if (_dispatcher != null) SetupRadialViewModels();
             }
@@ -93,11 +105,74 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                    };
                 BellhopRadialCalculatorViewModels.Add(radialViewModel);
             }
-            var bw = new BackgroundWorker();
-            bw.DoWork += Calculate;
-            bw.RunWorkerCompleted += delegate { CloseActivePopUpCommand.Execute(true); };
-            bw.RunWorkerAsync(_bellhopRunFile);
         }
+
+        public void Start(RunWorkerCompletedEventHandler runWorkerCompletedEventHandler)
+        {
+            lock (this)
+            {
+                if (IsStarted) return;
+                IsStarted = true;
+                var bw = new BackgroundWorker();
+                bw.DoWork += Calculate;
+                bw.RunWorkerCompleted += delegate { IsCompleted = true; };
+                if (runWorkerCompletedEventHandler != null) bw.RunWorkerCompleted += runWorkerCompletedEventHandler;
+                bw.RunWorkerAsync(_bellhopRunFile);
+            }
+        }
+        #endregion
+
+        #region public bool IsStarted { get; set; }
+
+        public bool IsStarted
+        {
+            get { return _isStarted; }
+            set
+            {
+                if (_isStarted == value) return;
+                _isStarted = value;
+                NotifyPropertyChanged(IsStartedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsStartedChangedEventArgs = ObservableHelper.CreateArgs<BellhopFieldCalculatorViewModel>(x => x.IsStarted);
+        bool _isStarted;
+
+        #endregion
+
+        #region public bool IsCompleted { get; set; }
+
+        public bool IsCompleted
+        {
+            get { return _isCompleted; }
+            set
+            {
+                if (_isCompleted == value) return;
+                _isCompleted = value;
+                NotifyPropertyChanged(IsCompletedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsCompletedChangedEventArgs = ObservableHelper.CreateArgs<BellhopFieldCalculatorViewModel>(x => x.IsCompleted);
+        bool _isCompleted;
+
+        #endregion
+
+        #region public string Name { get; set; }
+
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name == value) return;
+                _name = value;
+                NotifyPropertyChanged(NameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<BellhopFieldCalculatorViewModel>(x => x.Name);
+        string _name;
 
         #endregion
 

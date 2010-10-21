@@ -108,6 +108,12 @@ namespace ESMEWorkBench.ViewModels.Main
             MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPointViewModel.AnalysisPoint);
             try
             {
+                if (_bellhopQueueCalculatorViewModel == null)
+                {
+                    _bellhopQueueCalculatorViewModel = new BellhopQueueCalculatorViewModel(_experiment.LocalStorageRoot);
+                    _visualizerService.Show("BellhopQueueCalculatorView", _bellhopQueueCalculatorViewModel, false, null);
+                }
+
                 foreach (var transmissionLossJobViewModel in analysisPointViewModel.TransmissionLossJobViewModels)
                     MediatorMessage.Send(MediatorMessage.QueueBellhopJob, BellhopRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings));
             }

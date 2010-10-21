@@ -111,8 +111,6 @@ namespace ESMEWorkBench.ViewModels.Main
         void ViewLoaded()
         {
             MediatorMessage.Send(MediatorMessage.MainViewModelInitialized);
-            _bellhopQueueCalculatorViewModel = new BellhopQueueCalculatorViewModel();
-            _visualizerService.Show("BellhopQueueCalculatorView", _bellhopQueueCalculatorViewModel, false, null);
         }
 
         static void ViewUnloaded()
