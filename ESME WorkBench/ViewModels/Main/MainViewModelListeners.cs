@@ -248,23 +248,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
             //begin hackery; create an overlay object from the animat interface.
             
-            animatInterface.Test(); // right now, dumps a log file of all positions to a test file.
+            animatInterface.Test(_experiment.LocalStorageRoot); // right now, dumps a log file of all positions to a test file.
 
-#if true
-            var layer = new OverlayShapeMapLayer
-                            {
-                                Name = "animats",
-                                CanBeRemoved = false,
-                                CanBeReordered = true,
-                                LayerType = LayerType.Animal,
-                            };
-
-            foreach (var animat in animatInterface.AnimatList) layer.Add(new OverlayPoint(animat.Location, Colors.Black, 2));
-
-            layer.Done();
-            _experiment.MapLayers.Add(layer);
-            MediatorMessage.Send(MediatorMessage.RefreshMap, true); 
-#else
             //create one layer for each species.
             var layers = new OverlayShapeMapLayer[animatInterface.AnimatList.SpeciesList.Count];
             //for each species...
@@ -272,13 +257,16 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 var speciesID = animatInterface.AnimatList.SpeciesList[i].SpeciesName;
                 //name and set properties on the layer
-                layers[i].Name = speciesID;
-                layers[i].CanBeRemoved = false;
-                layers[i].CanBeReordered = true;
-                layers[i].LayerType = LayerType.Animal;
-    
+                layers[i] = new OverlayShapeMapLayer
+                            {
+                                Name = speciesID,
+                                CanBeRemoved = false,
+                                CanBeReordered = true,
+                                LayerType = LayerType.Animal,
+                            };
+
                 //find all the animats who have the same speciesName
-                var animatsInSpecies = animatInterface.AnimatList.Find(a => a.SpeciesName == speciesID);
+                var animatsInSpecies = animatInterface.AnimatList.FindAll(a => a.SpeciesName == speciesID);
                 //and add each one to the layer.
                 foreach (var animat in animatsInSpecies)
                 {
@@ -291,7 +279,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 MediatorMessage.Send(MediatorMessage.RefreshMap,true);
 
             }
-#endif
+
         }
     }
 }
