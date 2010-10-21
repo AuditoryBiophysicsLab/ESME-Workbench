@@ -66,10 +66,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_sourceDepth == value) return;
                 _sourceDepth = value;
-                _sourceDepth.ValidationRules.Add(new SimpleRule("DataValue", "SourceDepth must be greater than zero", domObj =>
+                _sourceDepth.ValidationRules.Add(new SimpleRule("DataValue", "SourceDepth must be greater than or equal to zero", domObj =>
                                                                                                                       {
                                                                                                                           var obj = (DataWrapper<float>) domObj;
-                                                                                                                          return (obj.DataValue <= 0);
+                                                                                                                          return (obj.DataValue < 0);
                                                                                                                       }));
                 NotifyPropertyChanged(SourceDepthChangedEventArgs);
             }
