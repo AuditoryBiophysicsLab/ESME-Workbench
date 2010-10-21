@@ -238,11 +238,8 @@ namespace ESMEWorkBench.ViewModels.Main
                             CanBeReordered = true,
                             LayerType = LayerType.Animal,
                         };
-            for (int index = 0; index < animatInterface.AnimatList.Count; index++)
-            {
-                    var animat = animatInterface.AnimatList[index];
-                    layer.Add(new OverlayPoint(animat.Location, Colors.Black, 2));
-                
+            foreach (var animat in animatInterface.AnimatList) {
+                layer.Add(new OverlayPoint(animat.Location, Colors.Black, 2));
             }
 
             layer.Done();
