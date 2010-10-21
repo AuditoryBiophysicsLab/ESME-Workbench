@@ -471,6 +471,7 @@ namespace ESMEWorkBench.Data
                                          CanChangeAreaColor = false,
                                          CanChangeLineColor = false,
                                          LayerType = LayerType.AnalysisPoint,
+                                         MarkerImageUri = new Uri("pack://application:,,,/ESME WorkBench;component/Images/AQUA.png"),
                                      };
                 MapLayers = new ObservableCollection<MapLayerViewModel>
                             {
