@@ -227,6 +227,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _newExperiment ?? (_newExperiment = new SimpleCommand<object, object>(obj =>
                                                                                              {
                                                                                                  if (UserCanceledBecauseExperimentUnsaved()) return;
+                                                                                                 if (_experiment != null) _experiment.Close();
                                                                                                  _experiment = new Experiment();
                                                                                                  _experiment.InitializeIfViewModelsReady();
                                                                                                  DecoratedExperimentName = "<New experiment>";
@@ -333,7 +334,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> QuickLookCommand
         {
-            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => (((_experiment != null) && (_experiment.NemoFile != null)) && (_experiment.Bathymetry != null)) && (_experiment.SoundSpeedField != null), obj => MediatorMessage.Send(MediatorMessage.QuickLookCommand))); }
+            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => (((_experiment != null) && (_experiment.NemoFile != null)) && (_experiment.Bathymetry != null)) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null), obj => MediatorMessage.Send(MediatorMessage.QuickLookCommand))); }
         }
 
         SimpleCommand<object, object> _quickLook;

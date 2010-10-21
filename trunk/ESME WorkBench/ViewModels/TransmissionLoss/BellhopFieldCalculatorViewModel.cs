@@ -231,6 +231,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             var radialProgress = 100f/runFile.BellhopRadials.Count;
             TotalProgress = 0f;
 
+            TransmissionLossField.IDField = runFile.IDField;
             Parallel.ForEach<BellhopRadial, float>(runFile.BellhopRadials, () => 0, (radial, loopstate, progress) =>
                                                                                     {
                                                                                         var localRadialNum = Interlocked.Increment(ref radialNum);

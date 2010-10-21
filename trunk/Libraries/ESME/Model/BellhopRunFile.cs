@@ -139,7 +139,7 @@ namespace ESME.Model
             {
                 bearings[i] = bearingStep*i + transmissionLossJob.AnalysisPoint.RadialBearing;
                 var curTransect = new Transect(null, transmissionLossJob.AnalysisPoint.Location, bearings[i], transmissionLossJob.Radius);
-                bottomProfiles[i] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Environment2DData);
+                bottomProfiles[i] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
                 maxCalculationDepthMeters = Math.Max((float) bottomProfiles[i].MaxDepth, maxCalculationDepthMeters);
                 soundSpeedProfiles[i] = environmentInformation.SoundSpeedField[curTransect.MidPoint];
             }
@@ -155,6 +155,7 @@ namespace ESME.Model
                                                       BottomProfile = bottomProfiles[i].ToBellhopString(),
                                                   });
             }
+            bellhopRunFile.IDField = transmissionLossJob.IDField;
             return bellhopRunFile;
         }
     }

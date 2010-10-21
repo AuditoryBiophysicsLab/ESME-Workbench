@@ -6,10 +6,11 @@ using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss
 {
-    public class TransmissionLossField
+    public class TransmissionLossField : IHasIDField
     {
         public string Name { get; private set; }
         public string Metadata { get; private set; }
+        public ulong IDField { get; set; }
         public float SourceLevel { get; private set; }
         public float Latitude { get; private set; }
         public float Longitude { get; private set; }
@@ -49,6 +50,7 @@ namespace ESME.TransmissionLoss
             HighFrequency = runFile.TransmissionLossJob.AcousticProperties.HighFrequency;
             MaxCalculationDepth = runFile.TransmissionLossJob.MaxDepth;
             Radius = runFile.TransmissionLossJob.Radius;
+            IDField = runFile.IDField;
             //Depths = runFile.
             //Ranges = runFile.
             //Filename = Path.Combine(Field.DataDirectoryPath, Field.BinaryFileName);
@@ -75,6 +77,7 @@ namespace ESME.TransmissionLoss
                 Name = stream.ReadString();
                 Metadata = stream.ReadString();
                 SourceLevel = stream.ReadSingle();
+                IDField = stream.ReadUInt64();
                 Latitude = stream.ReadSingle();
                 Longitude = stream.ReadSingle();
                 SourceDepth = stream.ReadSingle();
@@ -136,6 +139,7 @@ namespace ESME.TransmissionLoss
                     stream.Write(Name);
                     stream.Write(Metadata);
                     stream.Write(SourceLevel);
+                    stream.Write(IDField);
                     stream.Write(Latitude);
                     stream.Write(Longitude);
                     stream.Write(SourceDepth);
@@ -159,9 +163,10 @@ namespace ESME.TransmissionLoss
             }
         }
 
-        private const UInt32 Magic = 0x93f34725;
+        private const UInt32 Magic = 0x93f34525;
         private readonly List<TransmissionLossRadial> _mRadials = new List<TransmissionLossRadial>();
         private bool _mSaved;
+
     }
 #if false
     //todo: impelement properly -- > called in ESME_Experiment.cs
