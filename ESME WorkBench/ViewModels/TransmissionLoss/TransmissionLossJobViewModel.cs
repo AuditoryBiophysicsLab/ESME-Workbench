@@ -317,6 +317,24 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region public string Metadata { get; set; }
+
+        public string Metadata
+        {
+            get { return _metadata; }
+            set
+            {
+                if (_metadata == value) return;
+                _metadata = value;
+                NotifyPropertyChanged(MetadataChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MetadataChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Metadata);
+        string _metadata;
+
+        #endregion
+
         readonly int _maxCalculationDepth;
 
         public TransmissionLossJobViewModel(EarthCoordinate location, float platformDepth, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
@@ -407,6 +425,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                            },
                            Radius = (int) Radius.DataValue,
                            MaxDepth = _maxCalculationDepth,
+                           Name = Name,
+                           Metadata = Metadata,
                        };
             }
         }

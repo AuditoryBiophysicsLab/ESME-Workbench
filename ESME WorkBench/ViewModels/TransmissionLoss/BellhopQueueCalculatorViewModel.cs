@@ -3,8 +3,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
@@ -16,7 +16,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     {
         #region public constructor
 
-        public BellhopQueueCalculatorViewModel()
+        readonly string _outputDirectory;
+        public BellhopQueueCalculatorViewModel(string outputDirectory)
         {
             try
             {
@@ -27,7 +28,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 Debug.WriteLine("***********\nBellhopQueueCalculatorViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
-
+            _outputDirectory = outputDirectory;
             BellhopFieldCalculatorViewModels = new ObservableCollection<BellhopFieldCalculatorViewModel>();
         }
 
@@ -57,10 +58,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 case NotifyCollectionChangedAction.Add:
                     if (e.NewItems != null)
-                        foreach (var newItem in e.NewItems.Cast<BellhopFieldCalculatorViewModel>())
-                        {
-                            _window.Visibility = Visibility.Visible;
-                        }
+                        foreach (var newItem in e.NewItems.Cast<BellhopFieldCalculatorViewModel>()) {}
                     break;
                 case NotifyCollectionChangedAction.Move:
                     break;
@@ -72,7 +70,29 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 case NotifyCollectionChangedAction.Reset:
                     break;
             }
+            if (BellhopFieldCalculatorViewModels.Count < 1) _window.Visibility = Visibility.Collapsed;
+            else _window.Show();
+            StartWorkIfNeeded();
             NotifyPropertyChanged(BellhopFieldCalculatorViewModelsChangedEventArgs);
+        }
+
+        void StartWorkIfNeeded()
+        {
+            if (BellhopFieldCalculatorViewModels.Count > 0)
+                BellhopFieldCalculatorViewModels[0].Start(delegate { HandleCompletedQueueItem(); });
+        }
+
+        void HandleCompletedQueueItem()
+        {
+            while ((BellhopFieldCalculatorViewModels.Count > 0) && (BellhopFieldCalculatorViewModels[0].IsCompleted))
+            {
+                var transmissionLossField = BellhopFieldCalculatorViewModels[0].TransmissionLossField;
+                var fileName = Path.Combine(_outputDirectory, Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".tlf");
+                transmissionLossField.Filename = fileName;
+                transmissionLossField.Save();
+                BellhopFieldCalculatorViewModels.Remove(BellhopFieldCalculatorViewModels[0]);
+            }
+            StartWorkIfNeeded();
         }
 
         #endregion
@@ -80,7 +100,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         [MediatorMessageSink(MediatorMessage.QueueBellhopJob)]
         void QueueBellhopJob(BellhopRunFile bellhopRunFile)
         {
-            BellhopFieldCalculatorViewModels.Add(new BellhopFieldCalculatorViewModel
+            BellhopFieldCalculatorViewModels.Add(new BellhopFieldCalculatorViewModel(_dispatcher)
             {
                 BellhopRunFile = bellhopRunFile,
             });
@@ -103,7 +123,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _viewAwareStatus = viewAwareStatusService;
             _window = (Window) _viewAwareStatus.View;
             _dispatcher = _window.Dispatcher;
-            _window.Visibility = Visibility.Hidden;
+            //_window.Visibility = Visibility.Collapsed;
         }
 
         #endregion

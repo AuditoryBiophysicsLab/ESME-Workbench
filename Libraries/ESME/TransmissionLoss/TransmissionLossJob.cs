@@ -8,6 +8,9 @@ namespace ESME.TransmissionLoss
         [XmlIgnore]
         public AnalysisPoint AnalysisPoint { get; set; }
 
+        public string Name { get; set; }
+        public string Metadata { get; set; }
+
         public AcousticProperties AcousticProperties { get; set; }
 
         /// <summary>

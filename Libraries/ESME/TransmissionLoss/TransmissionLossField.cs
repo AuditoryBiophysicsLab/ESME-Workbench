@@ -8,6 +8,8 @@ namespace ESME.TransmissionLoss
 {
     public class TransmissionLossField
     {
+        public string Name { get; private set; }
+        public string Metadata { get; private set; }
         public float Latitude { get; private set; }
         public float Longitude { get; private set; }
         public float SourceDepth { get; private set; }
@@ -32,15 +34,15 @@ namespace ESME.TransmissionLoss
             return new TransmissionLossField(filename, false);
         }
 
-#if true
         public TransmissionLossField(BellhopRunFile runFile)
         {
+            Name = runFile.Name ?? "";
+            Metadata = runFile.Metadata ?? "";
             Latitude = (float) runFile.TransmissionLossJob.AnalysisPoint.Location.Latitude_degrees;
             Longitude = (float) runFile.TransmissionLossJob.AnalysisPoint.Location.Longitude_degrees;
             SourceDepth = runFile.TransmissionLossJob.AcousticProperties.SourceDepth;
             VerticalBeamWidth = runFile.TransmissionLossJob.AcousticProperties.VerticalBeamWidth;
-            VerticalLookAngle =
-                runFile.TransmissionLossJob.AcousticProperties.DepressionElevationAngle;
+            VerticalLookAngle = runFile.TransmissionLossJob.AcousticProperties.DepressionElevationAngle;
             LowFrequency = runFile.TransmissionLossJob.AcousticProperties.LowFrequency;
             HighFrequency = runFile.TransmissionLossJob.AcousticProperties.HighFrequency;
             MaxCalculationDepth = runFile.TransmissionLossJob.MaxDepth;
@@ -49,7 +51,7 @@ namespace ESME.TransmissionLoss
             //Ranges = runFile.
             //Filename = Path.Combine(Field.DataDirectoryPath, Field.BinaryFileName);
         }
-#endif
+
         public TransmissionLossField()
         {} 
 
@@ -68,6 +70,8 @@ namespace ESME.TransmissionLoss
                 if (stream.ReadUInt32() != Magic)
                     throw new FileFormatException(
                         "Attempted to read invalid data into a TransmissionLossFieldData object");
+                Name = stream.ReadString();
+                Metadata = stream.ReadString();
                 Latitude = stream.ReadSingle();
                 Longitude = stream.ReadSingle();
                 SourceDepth = stream.ReadSingle();
@@ -126,6 +130,8 @@ namespace ESME.TransmissionLoss
                 if (!_mSaved)
                 {
                     stream.Write(Magic);
+                    stream.Write(Name);
+                    stream.Write(Metadata);
                     stream.Write(Latitude);
                     stream.Write(Longitude);
                     stream.Write(SourceDepth);
@@ -149,7 +155,7 @@ namespace ESME.TransmissionLoss
             }
         }
 
-        private const UInt32 Magic = 0x99f84725;
+        private const UInt32 Magic = 0x93f84725;
         private readonly List<TransmissionLossRadial> _mRadials = new List<TransmissionLossRadial>();
         private bool _mSaved;
     }
