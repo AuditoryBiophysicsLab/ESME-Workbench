@@ -255,6 +255,28 @@ namespace ESMEWorkBench.Data
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null)
+                    {
+                        foreach (var item in e.NewItems)
+                        {
+                            var layer = (MapLayerViewModel) item;
+                            if (layer.LayerType == LayerType.AnalysisPoint)
+                            {
+                                if (AnalysisPointLayer == null)
+                                {
+                                    AnalysisPointLayer = (MarkerLayerViewModel) layer;
+                                    AnalysisPointLayer.MarkerImageUri = new Uri("pack://application:,,,/ESME WorkBench;component/Images/AQUA.png");
+                                    if (AnalysisPoints != null)
+                                    {
+                                        foreach (var ap in AnalysisPoints)
+                                            AddContextMenuToAnalysisPoint(ap);
+                                    }
+                                }
+                                else
+                                    throw new ApplicationException("Experiment error: Analysis point layer already exists!");
+                            }
+                        }
+                    }
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     break;
@@ -298,9 +320,7 @@ namespace ESMEWorkBench.Data
                     {
                         if (AnalysisPointLayer == null) return;
                         foreach (var item in e.NewItems)
-                        {
-                            AnalysisPointLayer.AddMarker(((AnalysisPoint) item).Location, item);
-                        }
+                            AddContextMenuToAnalysisPoint((AnalysisPoint) item);
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -310,9 +330,7 @@ namespace ESMEWorkBench.Data
                     {
                         if (AnalysisPointLayer == null) return;
                         foreach (var item in e.OldItems)
-                        {
                             AnalysisPointLayer.RemoveMarker(item);
-                        }
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
@@ -321,6 +339,24 @@ namespace ESMEWorkBench.Data
                     break;
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+        }
+
+        void AddContextMenuToAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+            var marker = AnalysisPointLayer.AddMarker(analysisPoint.Location, analysisPoint);
+            marker.ContextMenu = new ContextMenu();
+            marker.ContextMenu.Items.Add(new MenuItem
+            {
+                Header = "Run transmission loss...",
+                Command = RunTransmissionLossCommand,
+                CommandParameter = analysisPoint,
+            });
+            marker.ContextMenu.Items.Add(new MenuItem
+            {
+                Header = "Delete",
+                Command = DeleteAnalysisPointCommand,
+                CommandParameter = analysisPoint,
+            });
         }
 
         static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnalysisPoints);
@@ -386,11 +422,21 @@ namespace ESMEWorkBench.Data
             PropertyChanged += delegate(object s, PropertyChangedEventArgs e) { if (e.PropertyName != "IsChanged") IsChanged = true; };
             CurrentExtent = "POLYGON((-173.84765625 123.442822265625,169.98046875 123.442822265625,169.98046875 -165.555615234375,-173.84765625 -165.555615234375,-173.84765625 123.442822265625))";
             CurrentScale = 147647947.5;
+            PropertyChanged += LocalPropertyChanged;
         }
 
-        public Experiment(string fileName) : this() { FileName = fileName; }
+        static void LocalPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "FileName":
+                    break;
+            }
+        }
 
-        public Experiment(Experiment that) { CopyFrom(that); }
+        //public Experiment(string fileName) : this() { FileName = fileName; }
+
+        //public Experiment(Experiment that) : this() { CopyFrom(that); }
 
         public void Save() { SaveAs(FileName); }
 
@@ -442,31 +488,6 @@ namespace ESMEWorkBench.Data
                                 },
                                 AnalysisPointLayer,
                             };
-            }
-            foreach (var layer in MapLayers.Where(layer => layer.Name == "Analysis Points"))
-            {
-                AnalysisPointLayer = (MarkerLayerViewModel) layer;
-                AnalysisPointLayer.MarkerImageUri = new Uri("pack://application:,,,/ESME WorkBench;component/Images/AQUA.png");
-                if (AnalysisPoints != null)
-                {
-                    foreach (var ap in AnalysisPoints)
-                    {
-                        var marker = AnalysisPointLayer.AddMarker(ap.Location, ap);
-                        marker.ContextMenu = new ContextMenu();
-                        marker.ContextMenu.Items.Add(new MenuItem
-                                                     {
-                                                         Header = "Run transmission loss...",
-                                                         Command = RunTransmissionLossCommand,
-                                                         CommandParameter = ap,
-                                                     });
-                        marker.ContextMenu.Items.Add(new MenuItem
-                                                     {
-                                                         Header = "Delete",
-                                                         Command = DeleteAnalysisPointCommand,
-                                                         CommandParameter = ap,
-                                                     });
-                    }
-                }
             }
             if (FileName != null)
             {

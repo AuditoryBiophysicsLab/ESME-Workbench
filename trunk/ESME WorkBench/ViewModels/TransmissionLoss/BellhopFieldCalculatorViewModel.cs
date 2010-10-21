@@ -18,7 +18,7 @@ using ESME.TransmissionLoss.Bellhop;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
-    public class BellhopCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    public class BellhopFieldCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
@@ -36,7 +36,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs = ObservableHelper.CreateArgs<BellhopCalculatorViewModel>(x => x.TransmissionLossField);
+        static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs = ObservableHelper.CreateArgs<BellhopFieldCalculatorViewModel>(x => x.TransmissionLossField);
         TransmissionLossField _transmissionLossField;
 
         #endregion
@@ -54,7 +54,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs TotalProgressChangedEventArgs = ObservableHelper.CreateArgs<BellhopCalculatorViewModel>(x => x.TotalProgress);
+        static readonly PropertyChangedEventArgs TotalProgressChangedEventArgs = ObservableHelper.CreateArgs<BellhopFieldCalculatorViewModel>(x => x.TotalProgress);
         float _totalProgress;
 
         #endregion
@@ -73,7 +73,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs BellhopRunFileChangedEventArgs = ObservableHelper.CreateArgs<BellhopCalculatorViewModel>(x => x.BellhopRunFile);
+        static readonly PropertyChangedEventArgs BellhopRunFileChangedEventArgs = ObservableHelper.CreateArgs<BellhopFieldCalculatorViewModel>(x => x.BellhopRunFile);
         BellhopRunFile _bellhopRunFile;
 
         void SetupRadialViewModels()
@@ -106,7 +106,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
             _viewAwareStatus = viewAwareStatusService;
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
             _dispatcher = ((Window) _viewAwareStatus.View).Dispatcher;
             if (BellhopRunFile != null) SetupRadialViewModels();
         }
@@ -122,7 +121,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             get { return _propertyChangedDelegate ?? (_propertyChangedDelegate = new PropertyChangedCallback(NotifyPropertyChanged)); }
         }
 
-        static readonly PropertyChangedEventArgs PropertyChangedDelegateChangedEventArgs = ObservableHelper.CreateArgs<BellhopCalculatorViewModel>(x => x.PropertyChangedDelegate);
+        static readonly PropertyChangedEventArgs PropertyChangedDelegateChangedEventArgs = ObservableHelper.CreateArgs<BellhopFieldCalculatorViewModel>(x => x.PropertyChangedDelegate);
         PropertyChangedCallback _propertyChangedDelegate;
 
         #endregion
@@ -143,7 +142,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
 
         void BellhopRadialCalculatorViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(BellhopRadialCalculatorViewModelsChangedEventArgs); }
-        static readonly PropertyChangedEventArgs BellhopRadialCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<BellhopCalculatorViewModel>(x => x.BellhopRadialCalculatorViewModels);
+        static readonly PropertyChangedEventArgs BellhopRadialCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<BellhopFieldCalculatorViewModel>(x => x.BellhopRadialCalculatorViewModels);
         ObservableCollection<BellhopRadialCalculatorViewModel> _bellhopRadialCalculatorViewModels = new ObservableCollection<BellhopRadialCalculatorViewModel>();
 
         #endregion

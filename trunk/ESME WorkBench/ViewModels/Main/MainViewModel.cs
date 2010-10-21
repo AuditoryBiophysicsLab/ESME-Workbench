@@ -4,11 +4,14 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using Cinch;
 using ESMERibbonDemo.ViewModels;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
@@ -26,11 +29,10 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IViewAwareStatus _viewAwareStatusService;
         readonly IUIVisualizerService _visualizerService;
         Experiment _experiment;
-
+        BellhopQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
         #endregion
 
         #region Constructors
-
         [ImportingConstructor]
         public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
@@ -43,12 +45,14 @@ namespace ESMEWorkBench.ViewModels.Main
                 Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
+
             _viewAwareStatusService = viewAwareStatusService;
             _messageBoxService = messageBoxService;
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
             _viewAwareStatusService.ViewLoaded += ViewLoaded;
+            _viewAwareStatusService.ViewUnloaded += ViewUnloaded;
 
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
@@ -104,7 +108,17 @@ namespace ESMEWorkBench.ViewModels.Main
                                           };
         }
 
-        static void ViewLoaded() { MediatorMessage.Send(MediatorMessage.MainViewModelInitialized); }
+        void ViewLoaded()
+        {
+            MediatorMessage.Send(MediatorMessage.MainViewModelInitialized);
+            _bellhopQueueCalculatorViewModel = new BellhopQueueCalculatorViewModel();
+            _visualizerService.Show("BellhopQueueCalculatorView", _bellhopQueueCalculatorViewModel, false, null);
+        }
+
+        static void ViewUnloaded()
+        {
+            MediatorMessage.Send(MediatorMessage.ApplicationClosing);
+        }
 
         protected override void OnDispose()
         {
