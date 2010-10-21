@@ -1,14 +1,13 @@
-﻿using System;
+﻿using System.ComponentModel;
 using System.IO;
-using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Cinch;
 using ESME.Model;
 using ESME.Overlay;
 using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.Bellhop;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Layers;
@@ -28,7 +27,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             _openFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
             _openFileService.FileName = null;
-            var result = _openFileService.ShowDialog((Window)_viewAwareStatusService.View);
+            var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
             var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_openFileService.FileName, _saveFileService);
             _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
@@ -113,9 +112,18 @@ namespace ESMEWorkBench.ViewModels.Main
                     _bellhopQueueCalculatorViewModel = new BellhopQueueCalculatorViewModel(_experiment.LocalStorageRoot);
                     _visualizerService.Show("BellhopQueueCalculatorView", _bellhopQueueCalculatorViewModel, false, null);
                 }
-
-                foreach (var transmissionLossJobViewModel in analysisPointViewModel.TransmissionLossJobViewModels)
-                    MediatorMessage.Send(MediatorMessage.QueueBellhopJob, BellhopRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings));
+                var bw1 = new BackgroundWorker();
+                bw1.DoWork += delegate
+                              {
+                                  foreach (var transmissionLossJobViewModel in analysisPointViewModel.TransmissionLossJobViewModels)
+                                  {
+                                      var bw2 = new BackgroundWorker();
+                                      var model = transmissionLossJobViewModel;
+                                      bw2.DoWork += delegate { _dispatcher.BeginInvoke(new MediatorSendDelegate(MediatorMessage.Send), DispatcherPriority.Background, MediatorMessage.QueueBellhopJob, BellhopRunFile.Create(model.TransmissionLossJob, environmentInformation, transmissionLossSettings)); };
+                                      bw2.RunWorkerAsync();
+                                  }
+                              };
+                bw1.RunWorkerAsync();
             }
             catch (BathymetryOutOfBoundsException)
             {
@@ -194,6 +202,8 @@ namespace ESMEWorkBench.ViewModels.Main
             #endregion
         }
 
+        delegate void MediatorSendDelegate(string message, object param);
+
         [MediatorMessageSink(MediatorMessage.ExperimentClosed)]
         void ExperimentClosed(bool dummy)
         {
@@ -220,7 +230,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _saveFileService.OverwritePrompt = true;
             _saveFileService.InitialDirectory = Settings.Default.LastBathymetryFileDirectory;
             _saveFileService.FileName = null;
-            var result = _saveFileService.ShowDialog((Window)_viewAwareStatusService.View);
+            var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
             Settings.Default.LastBathymetryFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
             _experiment.Bathymetry.SaveToYXZ(_saveFileService.FileName, 1); 
@@ -231,7 +241,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             _openFileService.Filter = "Animat Scenario Files (*.sce)|*.sce";
             _openFileService.FileName = null;
-            var result = _openFileService.ShowDialog((Window)_viewAwareStatusService.View);
+            var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
             var animatInterface =  AnimatInterface.Create(_openFileService.FileName);
             animatInterface.Test();

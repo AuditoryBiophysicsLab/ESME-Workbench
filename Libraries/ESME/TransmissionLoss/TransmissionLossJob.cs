@@ -27,6 +27,11 @@ namespace ESME.TransmissionLoss
 
         public string Filename { get; set; }
 
+        /// <summary>
+        /// Source Level in dB SPL re: 1uPa
+        /// </summary>
+        public float SourceLevel { get; set; }
+
         [XmlIgnore]
         public TransmissionLossField TransmissionLossField { get; set; }
 

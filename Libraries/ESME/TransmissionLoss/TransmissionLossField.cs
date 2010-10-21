@@ -10,6 +10,7 @@ namespace ESME.TransmissionLoss
     {
         public string Name { get; private set; }
         public string Metadata { get; private set; }
+        public float SourceLevel { get; private set; }
         public float Latitude { get; private set; }
         public float Longitude { get; private set; }
         public float SourceDepth { get; private set; }
@@ -38,6 +39,7 @@ namespace ESME.TransmissionLoss
         {
             Name = runFile.Name ?? "";
             Metadata = runFile.Metadata ?? "";
+            SourceLevel = runFile.TransmissionLossJob.SourceLevel;
             Latitude = (float) runFile.TransmissionLossJob.AnalysisPoint.Location.Latitude_degrees;
             Longitude = (float) runFile.TransmissionLossJob.AnalysisPoint.Location.Longitude_degrees;
             SourceDepth = runFile.TransmissionLossJob.AcousticProperties.SourceDepth;
@@ -72,6 +74,7 @@ namespace ESME.TransmissionLoss
                         "Attempted to read invalid data into a TransmissionLossFieldData object");
                 Name = stream.ReadString();
                 Metadata = stream.ReadString();
+                SourceLevel = stream.ReadSingle();
                 Latitude = stream.ReadSingle();
                 Longitude = stream.ReadSingle();
                 SourceDepth = stream.ReadSingle();
@@ -132,6 +135,7 @@ namespace ESME.TransmissionLoss
                     stream.Write(Magic);
                     stream.Write(Name);
                     stream.Write(Metadata);
+                    stream.Write(SourceLevel);
                     stream.Write(Latitude);
                     stream.Write(Longitude);
                     stream.Write(SourceDepth);
@@ -155,7 +159,7 @@ namespace ESME.TransmissionLoss
             }
         }
 
-        private const UInt32 Magic = 0x93f84725;
+        private const UInt32 Magic = 0x93f34725;
         private readonly List<TransmissionLossRadial> _mRadials = new List<TransmissionLossRadial>();
         private bool _mSaved;
     }
