@@ -9,7 +9,7 @@ using HRC.Navigation;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
-    public class TransmissionLossJobViewModel : EditableValidatingViewModelBase
+    public class TransmissionLossJobViewModel : EditableValidatingViewModelBase, IHasIDField
     {
         #region public LabeledDataWrapper<double> Latitude { get; private set; }
 
@@ -355,6 +355,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        public ulong IDField { get; set; }
+
         readonly int _maxCalculationDepth;
 
         public TransmissionLossJobViewModel(EarthCoordinate location, float platformDepth, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
@@ -449,6 +451,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                            Name = Name,
                            Metadata = Metadata,
                            SourceLevel = SourceLevel,
+                           IDField = IDField,
                        };
             }
         }

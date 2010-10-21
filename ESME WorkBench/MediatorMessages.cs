@@ -40,7 +40,6 @@ namespace ESMEWorkBench
 
         public const string SetLayerIndex = "SetLayerIndexMessage";
 
-        public const string ExperimentClosed = "ExperimentClosedMessage";
         public const string ExperimentLoaded = "ExperimentLoadedMessage";
         public const string SetExperimentAsModified = "SetExperimentAsModifiedMessage";
 

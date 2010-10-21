@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Permissions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -413,8 +414,6 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        [XmlIgnore] bool _isInitialized;
-
         [XmlElement]
         public string CurrentExtent { get; set; }
 
@@ -431,7 +430,81 @@ namespace ESMEWorkBench.Data
         public SoundSpeedField SoundSpeedField { get; private set; }
 
         [XmlIgnore]
-        public string LocalStorageRoot { get; private set; }
+        #region public string LocalStorageRoot { get; set; }
+
+        public string LocalStorageRoot
+        {
+            get
+            {
+                if (FileName == null) throw new ApplicationException("The new experiment must be saved before performing this operation");
+                var localStorageRoot = Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
+                if (!Directory.Exists(localStorageRoot))
+                {
+                    var directoryInfo = Directory.CreateDirectory(localStorageRoot);
+                    directoryInfo.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+                }
+                if (FileSystemWatcher == null)
+                {
+                    FileSystemWatcher = new FileSystemWatcher(localStorageRoot)
+                                        {
+                                            NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                                            Filter = "*.tlf",
+                                        };
+                    FileSystemWatcher.Changed += TransmissionLossFieldFileChanged;
+                    FileSystemWatcher.Deleted += TransmissionLossFieldFileChanged;
+                    FileSystemWatcher.EnableRaisingEvents = true;
+                }
+                return localStorageRoot;
+            }
+        }
+
+        #endregion
+
+        [XmlIgnore]
+        #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; set; }
+
+        public ObservableCollection<TransmissionLossField> TransmissionLossFields
+        {
+            get { return _transmissionLossFields; }
+            set
+            {
+                if (_transmissionLossFields == value) return;
+                if (_transmissionLossFields != null) _transmissionLossFields.CollectionChanged -= TransmissionLossFieldsCollectionChanged;
+                _transmissionLossFields = value;
+                if (_transmissionLossFields != null) _transmissionLossFields.CollectionChanged += TransmissionLossFieldsCollectionChanged;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TransmissionLossFieldsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.TransmissionLossFields);
+        ObservableCollection<TransmissionLossField> _transmissionLossFields;
+
+        void TransmissionLossFieldsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null) foreach (var newItem in e.NewItems.Cast<TransmissionLossField>())
+                    {
+                        Console.WriteLine("Added tlf: " + newItem.Name);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    if (e.OldItems != null) foreach (var oldItem in e.OldItems.Cast<TransmissionLossField>()) {}
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    break;
+            }
+            NotifyPropertyChanged(TransmissionLossFieldsChangedEventArgs);
+        }
+
+        #endregion
+
+        [XmlIgnore]
+        FileSystemWatcher FileSystemWatcher { get; set; }
 
         public Experiment()
         {
@@ -450,6 +523,7 @@ namespace ESMEWorkBench.Data
             CurrentExtent = "POLYGON((-173.84765625 123.442822265625,169.98046875 123.442822265625,169.98046875 -165.555615234375,-173.84765625 -165.555615234375,-173.84765625 123.442822265625))";
             CurrentScale = 147647947.5;
             PropertyChanged += LocalPropertyChanged;
+            TransmissionLossFields = new ObservableCollection<TransmissionLossField>();
         }
 
         static void LocalPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -460,10 +534,6 @@ namespace ESMEWorkBench.Data
                     break;
             }
         }
-
-        //public Experiment(string fileName) : this() { FileName = fileName; }
-
-        //public Experiment(Experiment that) : this() { CopyFrom(that); }
 
         public void Save() { SaveAs(FileName); }
 
@@ -481,15 +551,23 @@ namespace ESMEWorkBench.Data
             IsChanged = false;
         }
 
-        public void InitializeIfViewModelsReady() { if (_mainViewModelInitialized && _mapViewModelInitialized && _layerListViewModelInitialized) Initialize(); }
+        public void Close()
+        {
+            if (FileSystemWatcher != null)
+            {
+                FileSystemWatcher.EnableRaisingEvents = false;
+                FileSystemWatcher = null;
+            }
+        }
 
+
+        public void InitializeIfViewModelsReady() { if (_mainViewModelInitialized && _mapViewModelInitialized && _layerListViewModelInitialized) Initialize(); }
+        
         void Initialize()
         {
             if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent));
             if (CurrentScale != 0) MediatorMessage.Send(MediatorMessage.SetCurrentScale, CurrentScale);
-            if (MapLayers == null)
-            {
-                var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (AnalysisPointLayer == null)
                 AnalysisPointLayer = new MarkerLayerViewModel
                                      {
                                          Name = "Analysis Points",
@@ -500,6 +578,9 @@ namespace ESMEWorkBench.Data
                                          LayerType = LayerType.AnalysisPoint,
                                          MarkerImageUri = new Uri("pack://application:,,,/ESME WorkBench;component/Images/AQUA.png"),
                                      };
+            if (MapLayers == null)
+            {
+                var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 MapLayers = new ObservableCollection<MapLayerViewModel>
                             {
                                 new ShapefileMapLayer
@@ -519,19 +600,38 @@ namespace ESMEWorkBench.Data
             }
             if (FileName != null)
             {
-                LocalStorageRoot = Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
-                if (!Directory.Exists(LocalStorageRoot))
-                {
-                    var directoryInfo = Directory.CreateDirectory(LocalStorageRoot);
-                    directoryInfo.Attributes = FileAttributes.Directory | FileAttributes.Hidden; 
-                }
+                var backgroundWorker = new BackgroundWorker();
+                backgroundWorker.DoWork += delegate { ProcessTransmissionLossFieldFiles(LocalStorageRoot); };
+                backgroundWorker.RunWorkerAsync();
             }
             MapLayerViewModel.Layers = MapLayers;
             InitializeEnvironment();
             AddScenarioFileCommand(ScenarioFileName);
             IsChanged = false;
-            _isInitialized = true;
             MediatorMessage.Send(MediatorMessage.SetExperiment, this);
+        }
+
+        void TransmissionLossFieldFileChanged(object sender, FileSystemEventArgs e)
+        {
+            if ((e.ChangeType & WatcherChangeTypes.Created) == WatcherChangeTypes.Created) { }
+            if ((e.ChangeType & WatcherChangeTypes.Deleted) == WatcherChangeTypes.Deleted) { }
+            if ((e.ChangeType & WatcherChangeTypes.Changed) == WatcherChangeTypes.Changed) { ProcessTransmissionLossFieldFile(e.FullPath);}
+            if ((e.ChangeType & WatcherChangeTypes.Renamed) == WatcherChangeTypes.Renamed) { }
+            if ((e.ChangeType & WatcherChangeTypes.All) == WatcherChangeTypes.All) { }
+            //Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
+        }
+
+        void ProcessTransmissionLossFieldFiles(string directoryName)
+        {
+            foreach (var file in Directory.GetFiles(directoryName, "*.tlf"))
+                ProcessTransmissionLossFieldFile(file);
+        }
+
+        void ProcessTransmissionLossFieldFile(string fileName)
+        {
+            var newField = TransmissionLossField.LoadHeader(fileName);
+            if (TransmissionLossFields.Any(field => field.IDField == newField.IDField)) return;
+            TransmissionLossFields.Add(newField);
         }
 
         void InitializeEnvironment()

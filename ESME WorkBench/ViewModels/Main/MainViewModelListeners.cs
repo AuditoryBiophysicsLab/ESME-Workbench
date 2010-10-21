@@ -38,38 +38,11 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.RunQuickLook)]
         void RunQuickLook(bool dummy)
         {
-            #region create transmission loss job. the new base class for all acoustic simulations!
-
-#if false
-            var transmissionLossJob = new TransmissionLossJob
-                                      {
-                                          AcousticProperties = new AcousticProperties
-                                                               {
-                                                                   SourceDepth = 10,
-                                                                   VerticalBeamWidth = 120,
-                                                                   DepressionElevationAngle = 0f,
-                                                                   LowFrequency = 3500,
-                                                                   HighFrequency = 3500,
-                                                               },
-                                          AnalysisPoint = new AnalysisPoint
-                                                          {
-                                                              IDField = 1,
-                                                              Location = MouseEarthCoordinate,
-                                                              RadialBearing = 0,
-                                                              RadialCount = 16,
-                                                          },
-                                          Radius = 30000,
-                                          MaxDepth = 3000,
-                                      };
-
-#endif
-            #endregion
-
             #region create bellhop run file from tlj (and stuff)
 
             var environmentInformation = new EnvironmentInformation
                                          {
-                                             Environment2DData = _experiment.Bathymetry,
+                                             Bathymetry = _experiment.Bathymetry,
                                              SoundSpeedField = _experiment.SoundSpeedField,
                                              Sediment = SedimentTypes.SedimentArray[0],
                                          };
@@ -96,6 +69,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                          select new TransmissionLossJobViewModel(MouseEarthCoordinate, -platform.Trackdefs[0].InitialHeight, mode, 16, 3000)
                                                                 {
                                                                     Name = string.Format("{0}.{1}.{2}", platform.Name, source.Name, mode.Name),
+                                                                    IDField = _experiment.NextObjectID,
                                                                 }) 
                                                                 {
                                                                     analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
@@ -200,18 +174,6 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         delegate void MediatorSendDelegate(string message, object param);
-
-        [MediatorMessageSink(MediatorMessage.ExperimentClosed)]
-        void ExperimentClosed(bool dummy)
-        {
-            _experiment = new Experiment
-                          {
-                              MessageBoxService = _messageBoxService
-                          };
-            DecoratedExperimentName = "<New experiment>";
-            _experiment.InitializeIfViewModelsReady();
-            HookPropertyChanged(_experiment);
-        }
 
         [MediatorMessageSink(MediatorMessage.LaunchMMMBSCommand)]
         void LaunchMMMBS(bool dummy)
