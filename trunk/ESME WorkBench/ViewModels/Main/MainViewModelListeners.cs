@@ -244,24 +244,54 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
             var animatInterface =  AnimatInterface.Create(_openFileService.FileName);
-            animatInterface.Test();
+           
 
             //begin hackery; create an overlay object from the animat interface.
+            
+            animatInterface.Test(); // right now, dumps a log file of all positions to a test file.
+
+#if true
             var layer = new OverlayShapeMapLayer
-                        {
-                            Name = "animats",
-                            CanBeRemoved = false,
-                            CanBeReordered = true,
-                            LayerType = LayerType.Animal,
-                        };
-            foreach (var animat in animatInterface.AnimatList) {
-                layer.Add(new OverlayPoint(animat.Location, Colors.Black, 2));
-            }
+                            {
+                                Name = "animats",
+                                CanBeRemoved = false,
+                                CanBeReordered = true,
+                                LayerType = LayerType.Animal,
+                            };
+
+            foreach (var animat in animatInterface.AnimatList) layer.Add(new OverlayPoint(animat.Location, Colors.Black, 2));
 
             layer.Done();
             _experiment.MapLayers.Add(layer);
-            MediatorMessage.Send(MediatorMessage.RefreshMap,true);
-            
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true); 
+#else
+            //create one layer for each species.
+            var layers = new OverlayShapeMapLayer[animatInterface.AnimatList.SpeciesList.Count];
+            //for each species...
+            for (int i = 0; i < animatInterface.AnimatList.SpeciesList.Count; i++)
+            {
+                var speciesID = animatInterface.AnimatList.SpeciesList[i].SpeciesName;
+                //name and set properties on the layer
+                layers[i].Name = speciesID;
+                layers[i].CanBeRemoved = false;
+                layers[i].CanBeReordered = true;
+                layers[i].LayerType = LayerType.Animal;
+    
+                //find all the animats who have the same speciesName
+                var animatsInSpecies = animatInterface.AnimatList.Find(a => a.SpeciesName == speciesID);
+                //and add each one to the layer.
+                foreach (var animat in animatsInSpecies)
+                {
+                    layers[i].Add(new OverlayPoint(animat.Location,Colors.Black,2));    
+                }
+
+                //finish the layer, add it to the map, force a refresh.
+                layers[i].Done();
+                _experiment.MapLayers.Add(layers[i]);
+                MediatorMessage.Send(MediatorMessage.RefreshMap,true);
+
+            }
+#endif
         }
     }
 }
