@@ -335,6 +335,26 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region public float SourceLevel { get; set; }
+        /// <summary>
+        /// Source Level in dB SPL re: 1uPa
+        /// </summary>
+        public float SourceLevel
+        {
+            get { return _sourceLevel; }
+            set
+            {
+                if (_sourceLevel == value) return;
+                _sourceLevel = value;
+                NotifyPropertyChanged(SourceLevelChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SourceLevelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.SourceLevel);
+        float _sourceLevel;
+
+        #endregion
+
         readonly int _maxCalculationDepth;
 
         public TransmissionLossJobViewModel(EarthCoordinate location, float platformDepth, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
@@ -397,6 +417,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             RadialBearing.DataValue = 0;
             Radius.DataValue = nemoMode.Radius;
             RadialCount.DataValue = radialCount;
+            SourceLevel = nemoMode.SourceLevel;
             _maxCalculationDepth = maxCalculationDepth;
 
             _editableFields = DataWrapperHelper.GetWrapperProperties(this);
@@ -427,6 +448,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                            MaxDepth = _maxCalculationDepth,
                            Name = Name,
                            Metadata = Metadata,
+                           SourceLevel = SourceLevel,
                        };
             }
         }

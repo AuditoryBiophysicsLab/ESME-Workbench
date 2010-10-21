@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Threading;
 using Cinch;
 using ESMERibbonDemo.ViewModels;
 using ESMEWorkBench.Data;
@@ -26,15 +27,16 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IMessageBoxService _messageBoxService;
         readonly IHRCOpenFileService _openFileService;
         readonly IHRCSaveFileService _saveFileService;
-        readonly IViewAwareStatus _viewAwareStatusService;
+        readonly IViewAwareStatus _viewAwareStatus;
         readonly IUIVisualizerService _visualizerService;
         Experiment _experiment;
         BellhopQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
+        Dispatcher _dispatcher;
         #endregion
 
         #region Constructors
         [ImportingConstructor]
-        public MainViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public MainViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
             try
             {
@@ -46,13 +48,13 @@ namespace ESMEWorkBench.ViewModels.Main
                 throw;
             }
 
-            _viewAwareStatusService = viewAwareStatusService;
+            _viewAwareStatus = viewAwareStatus;
             _messageBoxService = messageBoxService;
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
-            _viewAwareStatusService.ViewLoaded += ViewLoaded;
-            _viewAwareStatusService.ViewUnloaded += ViewUnloaded;
+            _viewAwareStatus.ViewLoaded += ViewLoaded;
+            _viewAwareStatus.ViewUnloaded += ViewUnloaded;
 
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
@@ -110,6 +112,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void ViewLoaded()
         {
+            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
             MediatorMessage.Send(MediatorMessage.MainViewModelInitialized);
         }
 
@@ -234,7 +237,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _openFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
                 _openFileService.InitialDirectory = Settings.Default.LastExperimentFileDirectory;
                 _openFileService.FileName = null;
-                var result = _openFileService.ShowDialog((Window) _viewAwareStatusService.View);
+                var result = _openFileService.ShowDialog((Window) _viewAwareStatus.View);
                 if ((!result.HasValue) || (!result.Value)) return;
                 _experiment.FileName = _openFileService.FileName;
                 Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
@@ -261,7 +264,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
                 _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
                 _openFileService.FileName = null;
-                var result = _openFileService.ShowDialog((Window) _viewAwareStatusService.View);
+                var result = _openFileService.ShowDialog((Window) _viewAwareStatus.View);
                 if (!result.HasValue || !result.Value) return;
                 fileName = _openFileService.FileName;
             }
@@ -276,7 +279,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _saveFileService.OverwritePrompt = true;
             _saveFileService.InitialDirectory = Settings.Default.LastExperimentFileDirectory;
             _saveFileService.FileName = null;
-            var result = _saveFileService.ShowDialog((Window) _viewAwareStatusService.View);
+            var result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return false;
             _experiment.FileName = _saveFileService.FileName;
             Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);

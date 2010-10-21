@@ -120,6 +120,7 @@
       <Abbreviation Text="ESME" />
       <Abbreviation Text="PSM" />
       <Abbreviation Text="WPF" />
+      <Abbreviation Text="MMMBS" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
