@@ -442,7 +442,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                            AnalysisPoint = new AnalysisPoint
                                            {
                                                IDField = 1,
-                                               Location = new EarthCoordinate(Latitude.DataValue, Longitude.DataValue),
+                                               EarthCoordinate = new EarthCoordinate(Latitude.DataValue, Longitude.DataValue),
                                                RadialBearing = RadialBearing.DataValue,
                                                RadialCount = RadialCount.DataValue,
                                            },

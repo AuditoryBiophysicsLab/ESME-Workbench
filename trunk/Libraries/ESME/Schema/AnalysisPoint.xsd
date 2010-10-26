@@ -21,7 +21,7 @@
           </xs:restriction>
         </xs:simpleType>
       </xs:element>
-      <xs:element name="Location"
+      <xs:element name="EarthCoordinate"
                   maxOccurs="1"
                   minOccurs="1"
                   type="EarthCoordinate"/>

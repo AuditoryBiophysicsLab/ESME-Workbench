@@ -138,7 +138,7 @@ namespace ESME.Model
             for (var i = 0; i < transmissionLossJob.AnalysisPoint.RadialCount; i++)
             {
                 bearings[i] = bearingStep*i + transmissionLossJob.AnalysisPoint.RadialBearing;
-                var curTransect = new Transect(null, transmissionLossJob.AnalysisPoint.Location, bearings[i], transmissionLossJob.Radius);
+                var curTransect = new Transect(null, transmissionLossJob.AnalysisPoint.EarthCoordinate, bearings[i], transmissionLossJob.Radius);
                 bottomProfiles[i] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
                 maxCalculationDepthMeters = Math.Max((float) bottomProfiles[i].MaxDepth, maxCalculationDepthMeters);
                 soundSpeedProfiles[i] = environmentInformation.SoundSpeedField[curTransect.MidPoint];

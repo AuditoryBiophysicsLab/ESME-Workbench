@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Xml.Serialization;
 using ESME.Model;
 using HRC.Navigation;
@@ -8,10 +9,15 @@ namespace ESME.TransmissionLoss
 {
     public class AnalysisPoint : IEquatable<AnalysisPoint>, IHasIDField
     {
+        public AnalysisPoint()
+        {
+            TransmissionLossJobs = new ObservableCollection<TransmissionLossJob>();
+            TransmissionLossFields = new ObservableCollection<TransmissionLossField>();
+        }
         /// <summary>
-        ///   Location of the analysis point
+        ///   EarthCoordinate of the analysis point
         /// </summary>
-        public EarthCoordinate Location { get; set; }
+        public EarthCoordinate EarthCoordinate { get; set; }
 
         /// <summary>
         ///   Bearing of the lowest-numbered radial from this point.  All radials will be evenly spaced starting with this bearing
@@ -31,19 +37,46 @@ namespace ESME.TransmissionLoss
             set
             {
                 if (_transmissionLossJobs == value) return;
+                if (_transmissionLossJobs != null) _transmissionLossJobs.CollectionChanged -= TransmissionLossJobsCollectionChanged;
                 _transmissionLossJobs = value;
+                if (_transmissionLossJobs != null) _transmissionLossJobs.CollectionChanged += TransmissionLossJobsCollectionChanged;
             }
         }
 
+        void TransmissionLossJobsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+        }
         ObservableCollection<TransmissionLossJob> _transmissionLossJobs = new ObservableCollection<TransmissionLossJob>();
 
         #endregion
 
+        [XmlIgnore]
+        #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; set; }
+
+        public ObservableCollection<TransmissionLossField> TransmissionLossFields
+        {
+            get { return _transmissionLossFields; }
+            set
+            {
+                if (_transmissionLossFields == value) return;
+                if (_transmissionLossFields != null) _transmissionLossFields.CollectionChanged -= TransmissionLossFieldsCollectionChanged;
+                _transmissionLossFields = value;
+                if (_transmissionLossFields != null) _transmissionLossFields.CollectionChanged += TransmissionLossFieldsCollectionChanged;
+            }
+        }
+
+        void TransmissionLossFieldsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+        }
+        ObservableCollection<TransmissionLossField> _transmissionLossFields;
+
+        #endregion
+        
         #region IEquatable<AnalysisPoint> Members
 
         bool IEquatable<AnalysisPoint>.Equals(AnalysisPoint that)
         {
-            if (!Location.Equals(that.Location)) return false;
+            if (!EarthCoordinate.Equals(that.EarthCoordinate)) return false;
             if (RadialBearing != that.RadialBearing) return false;
             return RadialCount == that.RadialCount;
         }
