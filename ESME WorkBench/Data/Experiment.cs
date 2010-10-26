@@ -344,7 +344,7 @@ namespace ESMEWorkBench.Data
 
         void AddContextMenuToAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            var marker = AnalysisPointLayer.AddMarker(analysisPoint.Location, analysisPoint);
+            var marker = AnalysisPointLayer.AddMarker(analysisPoint.EarthCoordinate, analysisPoint);
             marker.ContextMenu = new ContextMenu();
             marker.ContextMenu.Items.Add(new MenuItem
             {
@@ -387,8 +387,8 @@ namespace ESMEWorkBench.Data
         }
 
         static readonly PropertyChangedEventArgs NextObjectIDChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.NextObjectID);
-        ulong _nextObjectID;
-        bool _nextObjectIDSetLocked = false;
+        ulong _nextObjectID = 1;
+        bool _nextObjectIDSetLocked;
 
         #endregion
 
@@ -506,6 +506,8 @@ namespace ESMEWorkBench.Data
         [XmlIgnore]
         FileSystemWatcher FileSystemWatcher { get; set; }
 
+        [XmlIgnore] bool _isInitialized;
+
         public Experiment()
         {
             try
@@ -609,6 +611,9 @@ namespace ESMEWorkBench.Data
             AddScenarioFileCommand(ScenarioFileName);
             IsChanged = false;
             MediatorMessage.Send(MediatorMessage.SetExperiment, this);
+            foreach (var transmissionLossField in TransmissionLossFields)
+                MatchTransmissionLossFieldToAnalysisPoints(transmissionLossField);
+            _isInitialized = true;
         }
 
         void TransmissionLossFieldFileChanged(object sender, FileSystemEventArgs e)
@@ -632,6 +637,17 @@ namespace ESMEWorkBench.Data
             var newField = TransmissionLossField.LoadHeader(fileName);
             if (TransmissionLossFields.Any(field => field.IDField == newField.IDField)) return;
             TransmissionLossFields.Add(newField);
+            if (_isInitialized) MatchTransmissionLossFieldToAnalysisPoints(newField);
+        }
+
+        void MatchTransmissionLossFieldToAnalysisPoints(TransmissionLossField transmissionLossField)
+        {
+            foreach (var analysisPoint in AnalysisPoints.Where(analysisPoint => transmissionLossField.EarthCoordinate.Equals(analysisPoint.EarthCoordinate))) 
+            {
+                analysisPoint.TransmissionLossFields.Add(transmissionLossField);
+                Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.EarthCoordinate.Latitude_degrees, analysisPoint.EarthCoordinate.Longitude_degrees));
+                return;
+            }
         }
 
         void InitializeEnvironment()

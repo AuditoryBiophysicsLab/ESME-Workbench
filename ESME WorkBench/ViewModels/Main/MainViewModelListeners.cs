@@ -58,7 +58,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 AnalysisPoint = new AnalysisPoint
                 {
-                    Location = MouseEarthCoordinate,
+                    EarthCoordinate = MouseEarthCoordinate,
                     RadialBearing = 0,
                     RadialCount = 16,
                 }

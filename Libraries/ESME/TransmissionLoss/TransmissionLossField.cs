@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using ESME.Model;
+using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss
@@ -25,6 +26,7 @@ namespace ESME.TransmissionLoss
         public float[] Ranges { get;  set; }
         public TransmissionLossRadial[] Radials { get; private set; }
         public string Filename { get; set; }
+        public EarthCoordinate EarthCoordinate { get; private set; }
 
         public static TransmissionLossField LoadHeader(string filename)
         {
@@ -41,8 +43,9 @@ namespace ESME.TransmissionLoss
             Name = runFile.Name ?? "";
             Metadata = runFile.Metadata ?? "";
             SourceLevel = runFile.TransmissionLossJob.SourceLevel;
-            Latitude = (float) runFile.TransmissionLossJob.AnalysisPoint.Location.Latitude_degrees;
-            Longitude = (float) runFile.TransmissionLossJob.AnalysisPoint.Location.Longitude_degrees;
+            Latitude = (float) runFile.TransmissionLossJob.AnalysisPoint.EarthCoordinate.Latitude_degrees;
+            Longitude = (float) runFile.TransmissionLossJob.AnalysisPoint.EarthCoordinate.Longitude_degrees;
+            EarthCoordinate = new EarthCoordinate(Latitude, Longitude);
             SourceDepth = runFile.TransmissionLossJob.AcousticProperties.SourceDepth;
             VerticalBeamWidth = runFile.TransmissionLossJob.AcousticProperties.VerticalBeamWidth;
             VerticalLookAngle = runFile.TransmissionLossJob.AcousticProperties.DepressionElevationAngle;
@@ -80,6 +83,7 @@ namespace ESME.TransmissionLoss
                 IDField = stream.ReadUInt64();
                 Latitude = stream.ReadSingle();
                 Longitude = stream.ReadSingle();
+                EarthCoordinate = new EarthCoordinate(Latitude, Longitude);
                 SourceDepth = stream.ReadSingle();
                 VerticalBeamWidth = stream.ReadSingle();
                 VerticalLookAngle = stream.ReadSingle();
