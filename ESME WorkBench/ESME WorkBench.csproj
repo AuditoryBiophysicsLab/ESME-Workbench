@@ -464,7 +464,6 @@
       <SubType>Image</SubType>
     </Resource>
     <Content Include="External References\3MBSLib.dll" />
-    <Content Include="External References\3MBSWrapperClass.dll" />
     <Content Include="External References\Devart.Data.Linq.dll" />
     <SplashScreen Include="Images\ESME Splash Screen.png" />
   </ItemGroup>

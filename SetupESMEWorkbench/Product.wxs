@@ -127,11 +127,6 @@
                   Name="RibbonControlsLibrary.dll" 
                   Source="$(var.ESMEPath)\RibbonControlsLibrary.dll" />
 
-            <!-- 3MBS assembly -->
-            <File Id="MBSWrapperClass.dll"
-                  Name="MBSWrapperClass.dll"
-                  Source="$(var.ESMEPath)\3MBSWrapperClass.dll" />
-
             <!-- Readme.txt file, for release notes (eventually) -->
             <File Id="Readme.txt" 
                   Name="Readme.txt" 
