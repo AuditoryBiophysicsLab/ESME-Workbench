@@ -274,5 +274,17 @@ namespace ESMEWorkBench.Properties {
                 this["LastBathymetryFileDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastAnimatPopulationDirectory {
+            get {
+                return ((string)(this["LastAnimatPopulationDirectory"]));
+            }
+            set {
+                this["LastAnimatPopulationDirectory"] = value;
+            }
+        }
     }
 }

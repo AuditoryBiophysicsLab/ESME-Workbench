@@ -5,6 +5,8 @@ namespace ESME.Overlay
 {
     public class OverlayPoint : OverlayShape
     {
+        public OverlayPoint(EarthCoordinate point) : this(point, Colors.Black, 1) { }
+
         public OverlayPoint(EarthCoordinate point, Color color, float width)
             : base(color, width)
         {

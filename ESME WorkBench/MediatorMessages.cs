@@ -62,6 +62,7 @@ namespace ESMEWorkBench
         public const string ToggleLayerVisibility = "ToggleLayerVisibilityMessage";
         
         public const string RunQuickLook = "RunQuickLookMessage";
+        public const string RunExperimentCommand = "RunExperimentCommandMessage";
 
         public const string SetMouseEarthCoordinate = "SetMouseEarthCoordinateMessage";
 

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Media;
 using Cinch;
-using ESME.NEMO;
 using ESME.Platform;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
@@ -50,7 +49,6 @@ namespace ESMEWorkBench.Data
                     case ".shp":
                         MapLayers.Add(new ShapefileMapLayer
                                       {
-                                          AreaStyle = MapLayerViewModel.RandomAreaStyle,
                                           ShapefileName = fileName,
                                           CanBeRemoved = true,
                                           CanBeReordered = true,
@@ -138,6 +136,7 @@ namespace ESMEWorkBench.Data
                                                                                                 };
                     track.CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1);
                     var behavior = new BehaviorModel(platform);
+                    //behavior.CourseChangePoints
                     track.Add(behavior.CourseOverlay);
                     track.Done();
                     if (MapLayers.IndexOf(track) == -1) MapLayers.Add(track);

@@ -15,6 +15,7 @@ using Cinch;
 using ESME.Environment;
 using ESME.Model;
 using ESME.NEMO;
+using ESME.Overlay;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
@@ -163,7 +164,7 @@ namespace ESMEWorkBench.Data
                 if (_soundSpeedFileName == value) return;
                 _soundSpeedFileName = value;
                 NotifyPropertyChanged(SoundSpeedFileNameChangedEventArgs);
-                InitializeEnvironment();
+                InitializeEnvironment(false);
             }
         }
 
@@ -183,7 +184,7 @@ namespace ESMEWorkBench.Data
                 if (_bottomTypeFileName == value) return;
                 _bottomTypeFileName = value;
                 NotifyPropertyChanged(BottomTypeFileNameChangedEventArgs);
-                InitializeEnvironment();
+                InitializeEnvironment(false);
             }
         }
 
@@ -203,7 +204,7 @@ namespace ESMEWorkBench.Data
                 if (_bathymetryFileName == value) return;
                 _bathymetryFileName = value;
                 NotifyPropertyChanged(BathymetryFileNameChangedEventArgs);
-                InitializeEnvironment();
+                InitializeEnvironment(false);
             }
         }
 
@@ -224,7 +225,7 @@ namespace ESMEWorkBench.Data
                 _scenarioFileName = value;
                 if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
                 NotifyPropertyChanged(ScenarioFileNameChangedEventArgs);
-                InitializeEnvironment();
+                InitializeEnvironment(false);
             }
         }
 
@@ -364,6 +365,72 @@ namespace ESMEWorkBench.Data
         ObservableCollection<AnalysisPoint> _analysisPoints;
 
         #endregion
+
+        #region public ObservableCollection<string> AnimalPopulationFiles { get; set; }
+
+        public ObservableCollection<string> AnimalPopulationFiles
+        {
+            get { return _animalPopulationFiles; }
+            set
+            {
+                if (_animalPopulationFiles == value) return;
+                if (_animalPopulationFiles != null) _animalPopulationFiles.CollectionChanged -= AnimalPopulationFilesCollectionChanged;
+                _animalPopulationFiles = value;
+                if (_animalPopulationFiles != null) _animalPopulationFiles.CollectionChanged += AnimalPopulationFilesCollectionChanged;
+                NotifyPropertyChanged(AnimalPopulationFilesChangedEventArgs);
+            }
+        }
+
+        void AnimalPopulationFilesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null)
+                    {
+                        foreach (var item in e.NewItems)
+                        {
+                            var animatInterface = AnimatInterface.Create((string)item);
+
+                            //for each species...
+                            foreach (var species in animatInterface.AnimatList.SpeciesList)
+                            {
+                                var speciesName = species.SpeciesName;
+                                var animatsInSpecies = animatInterface.AnimatList.FindAll(a => a.SpeciesName == speciesName);
+                                var layerName = "Species: " + speciesName.Replace('_', ' ');
+                                var layer = FindOverlayShapeMapLayer(LayerType.Animal, layerName) ?? new OverlayShapeMapLayer
+                                                                                                     {
+                                                                                                         Name = layerName,
+                                                                                                         CanBeRemoved = false,
+                                                                                                         CanBeReordered = true,
+                                                                                                         CanChangeLineColor = true,
+                                                                                                         CanChangeLineWidth = true,
+                                                                                                         LayerType = LayerType.Animal,
+                                                                                                     };
+                                foreach (var animat in animatsInSpecies)
+                                    layer.Add(new OverlayPoint(animat.Location));
+                                layer.Done();
+                                if (MapLayers.IndexOf(layer) == -1) MapLayers.Add(layer);
+                            }
+                        }
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    break;
+            }
+            NotifyPropertyChanged(MapLayersChangedEventArgs);
+        }
+        static readonly PropertyChangedEventArgs AnimalPopulationFilesChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnimalPopulationFiles);
+        ObservableCollection<string> _animalPopulationFiles;
+
+        #endregion
+
 
         #region public ulong NextObjectID { get; set; }
 
@@ -607,7 +674,7 @@ namespace ESMEWorkBench.Data
                 backgroundWorker.RunWorkerAsync();
             }
             MapLayerViewModel.Layers = MapLayers;
-            InitializeEnvironment();
+            InitializeEnvironment(true);
             AddScenarioFileCommand(ScenarioFileName);
             IsChanged = false;
             MediatorMessage.Send(MediatorMessage.SetExperiment, this);
@@ -650,8 +717,10 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        void InitializeEnvironment()
+        void InitializeEnvironment(bool isFromInitialize)
         {
+            if (!isFromInitialize && !_isInitialized) return;
+
             if (NemoFile == null) return;
             var boundingBox = new Rect();
             if (NemoFile.Scenario.OverlayFile != null) boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
@@ -668,8 +737,35 @@ namespace ESMEWorkBench.Data
             var west = (float) boundingBox.Left - 2;
             var south = (float) boundingBox.Top - 2;
             var east = (float) boundingBox.Right + 2;
+
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", north, west, south, east);
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
+            if (Bathymetry != null)
+            {
+                const string bathyBoundsName = "Bathymetry: Boundary";
+                var boundLayerExists = false;
+                foreach (var bathyLayer in MapLayers.Where(curLayer => curLayer.Name == bathyBoundsName).Cast<OverlayShapeMapLayer>())
+                {
+                    bathyLayer.Add(Bathymetry.BoundingBox);
+                    bathyLayer.Done();
+                    boundLayerExists = true;
+                }
+                if (!boundLayerExists)
+                {
+                    var layer = new OverlayShapeMapLayer
+                                {
+                                    Name = bathyBoundsName,
+                                    CanBeReordered = true,
+                                    CanChangeLineColor = true,
+                                    CanChangeLineWidth = true,
+                                    CanBeRemoved = false,
+                                    LayerType = LayerType.Bathymetry,
+                                };
+                    layer.Add(Bathymetry.BoundingBox);
+                    layer.Done();
+                    MapLayers.Add(layer);
+                }
+            }
         }
 
         #region RunTransmissionLossCommand

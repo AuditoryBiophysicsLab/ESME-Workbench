@@ -19,9 +19,16 @@ namespace ESMEWorkBench.ViewModels.Map
 
         public static ObservableCollection<MapLayerViewModel> Layers;
         public static IHRCColorPickerService ColorPickerService { get; set; }
+
+        static MapLayerViewModel() { _random = new Random(); }
+
         public MapLayerViewModel()
         {
             LayerOverlay = new LayerOverlay();
+
+            AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
+            LineStyle = CreateLineStyle(LineColor, LineWidth);
+            PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int) (LineWidth + 0.5));
 
             _removeMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
 
@@ -135,6 +142,11 @@ namespace ESMEWorkBench.ViewModels.Map
                                                         Header = "Line Color",
                                                     };
 
+        readonly MenuItemViewModel _pointColorMenu = new MenuItemViewModel
+                                                     {
+                                                         Header = "Symbol Color",
+                                                     };
+
         readonly MenuItemViewModel _areaColorMenu = new MenuItemViewModel
                                                     {
                                                         Header = "Area Color",
@@ -143,6 +155,51 @@ namespace ESMEWorkBench.ViewModels.Map
         readonly MenuItemViewModel _lineWeightMenu = new MenuItemViewModel
                                                      {
                                                          Header = "Line Weight",
+                                                     };
+
+        readonly MenuItemViewModel _pointSizeMenu = new MenuItemViewModel
+                                                    {
+                                                        Header = "Symbol Size",
+                                                    };
+
+        readonly MenuItemViewModel _pointStyleMenu = new MenuItemViewModel
+                                                     {
+                                                         Header = "Symbol Shape",
+                                                         Children = new List<MenuItemViewModel>
+                                                                    {
+                                                                        new MenuItemViewModel
+                                                                        {
+                                                                            Header = "Circle"
+                                                                        },
+                                                                        new MenuItemViewModel
+                                                                        {
+                                                                            Header = "Square"
+                                                                        },
+                                                                        new MenuItemViewModel
+                                                                        {
+                                                                            Header = "Triangle"
+                                                                        },
+                                                                        new MenuItemViewModel
+                                                                        {
+                                                                            Header = "Cross"
+                                                                        },
+                                                                        new MenuItemViewModel
+                                                                        {
+                                                                            Header = "Diamond"
+                                                                        },
+                                                                        new MenuItemViewModel
+                                                                        {
+                                                                            Header = "Diamond 2"
+                                                                        },
+                                                                        new MenuItemViewModel
+                                                                        {
+                                                                            Header = "Star"
+                                                                        },
+                                                                        new MenuItemViewModel
+                                                                        {
+                                                                            Header = "Star 2"
+                                                                        },
+                                                                    },
                                                      };
 
         readonly MenuItemViewModel _moveToTopMenu = new MenuItemViewModel
@@ -192,10 +249,11 @@ namespace ESMEWorkBench.ViewModels.Map
                 _lineColor = value;
                 AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
                 LineStyle = CreateLineStyle(LineColor, LineWidth);
+                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)Math.Max(1, LineWidth));
             }
         }
 
-        Color _lineColor = Color.FromArgb(0, 0, 0, 0);
+        Color _lineColor = RandomColor;
 
         #endregion
 
@@ -211,10 +269,11 @@ namespace ESMEWorkBench.ViewModels.Map
                 _lineWidth = value;
                 AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
                 LineStyle = CreateLineStyle(LineColor, LineWidth);
+                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
             }
         }
 
-        float _lineWidth = 1f;
+        float _lineWidth = (float) (((_random.NextDouble() * 9) + 1) / 2);
 
         #endregion
 
@@ -232,7 +291,7 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        Color _areaColor = Color.FromArgb(0, 0, 0, 0);
+        Color _areaColor = RandomColor;
 
         #endregion
 
@@ -278,6 +337,24 @@ namespace ESMEWorkBench.ViewModels.Map
         LineStyle _lineStyle;
 
         #endregion
+
+        #region public PointSymbolType PointSymbolType { get; set; }
+
+        public PointSymbolType PointSymbolType
+        {
+            get { return _pointSymbolType; }
+            set
+            {
+                if (_pointSymbolType == value) return;
+                _pointSymbolType = value;
+                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
+            }
+        }
+
+        PointSymbolType _pointSymbolType = (PointSymbolType)(_random.Next(8));
+
+        #endregion
+
 
         #region public LineStyle CustomLineStyle { get; set; }
 
@@ -488,17 +565,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         static LineStyle CreateLineStyle(Color pen, float width) { return new LineStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width)); }
 
-        [XmlIgnore]
-        public static AreaStyle RandomAreaStyle
-        {
-            get { return CreateAreaStyle(RandomColor, 1f, RandomColor); }
-        }
-
-        [XmlIgnore]
-        public static LineStyle RandomLineStyle
-        {
-            get { return CreateLineStyle(RandomColor, 1f); }
-        }
+        static PointStyle CreatePointStyle(PointSymbolType pointSymbolType, Color pen, int width) { return new PointStyle(pointSymbolType, new GeoSolidBrush(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B)), width); }
 
         [XmlIgnore]
         static Color RandomColor
