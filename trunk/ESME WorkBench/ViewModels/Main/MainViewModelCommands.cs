@@ -334,9 +334,13 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> QuickLookCommand
         {
-            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => (((_experiment != null) && (_experiment.NemoFile != null)) && (_experiment.Bathymetry != null)) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null), obj => MediatorMessage.Send(MediatorMessage.QuickLookCommand))); }
+            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => CanRunQuickLook(), obj => MediatorMessage.Send(MediatorMessage.QuickLookCommand))); }
         }
 
+        bool CanRunQuickLook()
+        {
+            return (_experiment != null) && (_experiment.NemoFile != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null);
+        }
         SimpleCommand<object, object> _quickLook;
 
         #endregion
@@ -392,6 +396,22 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _createMMMBSBathymetryFileCommand;
+
+        #endregion
+
+        #region RunExperimentCommand
+
+        public SimpleCommand<object, object> RunExperimentCommand
+        {
+            get { return _runExperiment ?? (_runExperiment = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.RunExperimentCommand, _experiment); })); }
+        }
+
+        bool CanRunExperiment()
+        {
+            return CanRunQuickLook() && 
+        }
+
+        SimpleCommand<object, object> _runExperiment;
 
         #endregion
 

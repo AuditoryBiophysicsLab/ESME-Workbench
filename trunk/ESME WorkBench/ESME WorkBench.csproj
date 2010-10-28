@@ -103,6 +103,7 @@
     <Compile Include="MediatorMessages.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
     <Compile Include="ViewModels\Main\MainViewModelListeners.cs" />
+    <Compile Include="ViewModels\Main\SimulationViewModel.cs" />
     <Compile Include="ViewModels\Map\MarkerLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapShape.cs" />
@@ -155,6 +156,9 @@
     </Compile>
     <Compile Include="Views\EnvironmentSettingsView.xaml.cs">
       <DependentUpon>EnvironmentSettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SimulationView.xaml.cs">
+      <DependentUpon>SimulationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TransmissionLossJobView.xaml.cs">
       <DependentUpon>TransmissionLossJobView.xaml</DependentUpon>
@@ -327,6 +331,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\SimulationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\TransmissionLossJobView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -385,7 +393,7 @@
     <Resource Include="Images\LargeIcons\Button-Refresh-icon.png" />
     <Resource Include="Images\LargeIcons\Button-Reload-icon.png" />
     <Resource Include="Images\LargeIcons\Button-Stop-icon.png" />
-    <Resource Include="Images\LargeIcons\close-icon.png" />
+    <Resource Include="Images\LargeIcons\close-file-icon.png" />
     <Resource Include="Images\LargeIcons\Dolphin.png" />
     <Resource Include="Images\LargeIcons\LargeIcon.png" />
     <Resource Include="Images\LargeIcons\Layers-icon.png" />
@@ -416,7 +424,7 @@
     <Resource Include="Images\SmallIcons\Button-Refresh-icon.png" />
     <Resource Include="Images\SmallIcons\Button-Reload-icon.png" />
     <Resource Include="Images\SmallIcons\Button-Stop-icon.png" />
-    <Resource Include="Images\SmallIcons\close-icon.png" />
+    <Resource Include="Images\SmallIcons\close-file-icon.png" />
     <Resource Include="Images\SmallIcons\Close.png" />
     <Resource Include="Images\SmallIcons\Distance-learning.png" />
     <Resource Include="Images\SmallIcons\Dolphin.png" />
@@ -454,6 +462,14 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\SmallIcons\application-icon.png" />
+    <Resource Include="Images\SmallIcons\close-icon.png" />
+    <Resource Include="Images\SmallIcons\delete-icon.png" />
+    <Resource Include="Images\SmallIcons\edit-icon.png" />
+    <Resource Include="Images\LargeIcons\application-icon.png" />
+    <Resource Include="Images\LargeIcons\close-icon.png" />
+    <Resource Include="Images\LargeIcons\delete-icon.png" />
+    <Resource Include="Images\LargeIcons\edit-icon.png" />
     <Resource Include="Images\AQUA.png" />
     <Resource Include="Images\LargeIcons\Distance-learning.png" />
     <Resource Include="Images\SmallIcons\Wave.png" />

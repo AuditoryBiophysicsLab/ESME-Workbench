@@ -198,27 +198,50 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]
         void AddAnimatPopulationFile(bool dummy)
         {
+            _openFileService.InitialDirectory = Settings.Default.LastAnimatPopulationDirectory;
             _openFileService.Filter = "Animat Scenario Files (*.sce)|*.sce";
             _openFileService.FileName = null;
             var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
+            Settings.Default.LastAnimatPopulationDirectory = Path.GetDirectoryName(_openFileService.FileName);
+            _experiment.AnimalPopulationFiles.Add(_openFileService.FileName);
+#if false
             var animatInterface =  AnimatInterface.Create(_openFileService.FileName);
            
 
             //begin hackery; create an overlay object from the animat interface.
             
-            animatInterface.Test(_experiment.LocalStorageRoot); // right now, dumps a log file of all positions to a test file.
+            //animatInterface.Test(_experiment.LocalStorageRoot); // right now, dumps a log file of all positions to a test file.
 
+            //for each species...
+            foreach (var species in animatInterface.AnimatList.SpeciesList)
+            {
+                var speciesName = species.SpeciesName;
+                var animatsInSpecies = animatInterface.AnimatList.FindAll(a => a.SpeciesName == speciesName);
+                var layer = new OverlayShapeMapLayer
+                            {
+                                Name = "Species: " + speciesName.Replace('_', ' '),
+                                CanBeRemoved = false,
+                                CanBeReordered = true,
+                                CanChangeLineColor = true,
+                                CanChangeLineWidth = true,
+                                LayerType = LayerType.Animal,
+                            };
+                foreach (var animat in animatsInSpecies)
+                    layer.Add(new OverlayPoint(animat.Location));
+                layer.Done();
+                _experiment.MapLayers.Add(layer);
+            }
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
             //create one layer for each species.
             var layers = new OverlayShapeMapLayer[animatInterface.AnimatList.SpeciesList.Count];
-            //for each species...
-            for (int i = 0; i < animatInterface.AnimatList.SpeciesList.Count; i++)
+            for (var i = 0; i < animatInterface.AnimatList.SpeciesList.Count; i++)
             {
                 var speciesID = animatInterface.AnimatList.SpeciesList[i].SpeciesName;
                 //name and set properties on the layer
                 layers[i] = new OverlayShapeMapLayer
                             {
-                                Name = speciesID,
+                                Name = "Species: " + speciesID.Replace('_', ' '),
                                 CanBeRemoved = false,
                                 CanBeReordered = true,
                                 LayerType = LayerType.Animal,
@@ -238,7 +261,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 MediatorMessage.Send(MediatorMessage.RefreshMap,true);
 
             }
-
+#endif
         }
     }
 }
