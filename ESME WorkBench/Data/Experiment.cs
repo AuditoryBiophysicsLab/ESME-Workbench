@@ -390,13 +390,13 @@ namespace ESMEWorkBench.Data
                     {
                         foreach (var item in e.NewItems)
                         {
-                            var animatInterface = AnimatInterface.Create((string)item);
+                            if (AnimatInterface == null) AnimatInterface = AnimatInterface.Create((string)item);
 
                             //for each species...
-                            foreach (var species in animatInterface.AnimatList.SpeciesList)
+                            foreach (var species in AnimatInterface.AnimatList.SpeciesList)
                             {
                                 var speciesName = species.SpeciesName;
-                                var animatsInSpecies = animatInterface.AnimatList.FindAll(a => a.SpeciesName == speciesName);
+                                var animatsInSpecies = AnimatInterface.AnimatList.FindAll(a => a.SpeciesName == speciesName);
                                 var layerName = "Species: " + speciesName.Replace('_', ' ');
                                 var layer = FindOverlayShapeMapLayer(LayerType.Animal, layerName) ?? new OverlayShapeMapLayer
                                                                                                      {
@@ -431,7 +431,6 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-
         #region public ulong NextObjectID { get; set; }
 
         public ulong NextObjectID
@@ -458,6 +457,9 @@ namespace ESMEWorkBench.Data
         bool _nextObjectIDSetLocked;
 
         #endregion
+
+        [XmlIgnore]
+        public AnimatInterface AnimatInterface { get; set; }
 
         [XmlIgnore]
         public MarkerLayerViewModel AnalysisPointLayer { get; private set; }

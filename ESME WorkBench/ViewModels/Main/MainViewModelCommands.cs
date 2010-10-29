@@ -408,7 +408,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         bool CanRunExperiment()
         {
-            return CanRunQuickLook() && 
+            return CanRunQuickLook();
         }
 
         SimpleCommand<object, object> _runExperiment;
