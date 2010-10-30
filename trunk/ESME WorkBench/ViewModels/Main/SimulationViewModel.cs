@@ -17,6 +17,7 @@ namespace ESMEWorkBench.ViewModels.Main
         public SimulationViewModel(Experiment experiment)
         {
             _experiment = experiment;
+            IsRunning = false;
 
             SecondsPerTimeStep = new LabeledDataWrapper<int>(this, SecondsPerTimeStepChangedEventArgs)
                                  {
@@ -57,12 +58,12 @@ namespace ESMEWorkBench.ViewModels.Main
                              new LabelValuePair
                              {
                                  Label = "Total animal count",
-                                 Value = "TBD - add to Experiment please!",
+                                 Value = _experiment.AnimatInterface.AnimatList.Count.ToString(),
                              },
                              new LabelValuePair
                              {
                                  Label = "Species count",
-                                 Value = "TBD - add to Experiment please!",
+                                 Value = _experiment.AnimatInterface.AnimatList.SpeciesList.Count.ToString(),
                              },
                              new LabelValuePair
                              {
@@ -97,6 +98,24 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public string OutputFileName { get; set; }
+
+        public string OutputFileName
+        {
+            get { return _outputFileName; }
+            set
+            {
+                if (_outputFileName == value) return;
+                _outputFileName = value;
+                NotifyPropertyChanged(OutputFileNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OutputFileNameChangedEventArgs = ObservableHelper.CreateArgs<SimulationViewModel>(x => x.OutputFileName);
+        string _outputFileName;
+
+        #endregion
+
         #region public ObservableCollection<LabelValuePair> Parameters { get; set; }
 
         public ObservableCollection<LabelValuePair> Parameters
@@ -117,6 +136,40 @@ namespace ESMEWorkBench.ViewModels.Main
         ObservableCollection<LabelValuePair> _parameters;
 
         #endregion
+
+        public bool IsRunning { get; set; }
+
+        #region CancelCommand
+
+        public SimpleCommand<object, object> CancelCommand
+        {
+            get { return _cancel ?? (_cancel = new SimpleCommand<object, object>(x => Cancel())); }
+        }
+
+        void Cancel()
+        {
+            if (!IsRunning) CloseActivePopUpCommand.Execute(false);
+        }
+
+        SimpleCommand<object, object> _cancel;
+
+        #endregion
+
+        #region OkCommand
+
+        public SimpleCommand<object, object> OkCommand
+        {
+            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(x=> (SecondsPerTimeStep.DataValue > 0) && (OutputFileName != null) && (!IsRunning), x => Run())); }
+        }
+
+        void Run()
+        {
+            CloseActivePopUpCommand.Execute(true);
+        }
+        SimpleCommand<object, object> _okCommand;
+
+        #endregion
+
     }
 
     public class LabelValuePair

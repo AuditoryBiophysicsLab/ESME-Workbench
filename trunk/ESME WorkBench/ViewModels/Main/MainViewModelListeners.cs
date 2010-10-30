@@ -263,5 +263,12 @@ namespace ESMEWorkBench.ViewModels.Main
             }
 #endif
         }
+
+        [MediatorMessageSink(MediatorMessage.RunExperimentCommand)]
+        void RunExperiment(Experiment experiment)
+        {
+            var simulationViewModel = new SimulationViewModel(experiment);
+            var result = _visualizerService.ShowDialog("SimulationView", simulationViewModel);
+        }
     }
 }
