@@ -24,6 +24,7 @@ namespace ESME.NEMO
             {
                 if (_simulationStepTime == value) return;
                 if (value.TotalSeconds <= 0.0) throw new ParameterOutOfRangeException(string.Format("SimulationStepTime must be a positive TimeSpan. {0} is an invalid value", _simulationStepTime));
+                if (value.TotalSeconds != Math.Floor(value.TotalSeconds)) throw new ParameterOutOfRangeException(string.Format("SimulationStepTime must specify an integer number of seconds.  {0} is an invalid value", _simulationStepTime));
                 _simulationStepTime = value;
             }
         }

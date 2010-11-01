@@ -27,7 +27,7 @@ namespace ESME.Platform
 
         public NemoPlatform NemoPlatform { get; private set; }
         public List<ActiveMode> ActiveModes { get; private set; }
-        public PlatformState[] PlatformStates { get; private set; }
+        public PlatformStates PlatformStates { get; private set; }
         public OverlayPoint CourseStart { get; private set; }
         public OverlayPoint CourseEnd { get; private set; }
         public List<CourseChangeDatum> CourseChangePoints { get; private set; }
@@ -37,18 +37,47 @@ namespace ESME.Platform
         void Initialize()
         {
             ActiveModes = new List<ActiveMode>();
-
+            
             foreach (var source in NemoPlatform.Sources)
                 foreach (var mode in source.Modes)
+                {
+                    CalculateActiveTimeSteps(NemoPlatform.NemoScenario, mode);
                     ActiveModes.Add(new ActiveMode
                                     {
                                         NemoMode = mode
                                     });
+                }
 
             //TBD: Low priority: Validate that none of the list of trackdefs overlaps in time with any others in the list
             //     Only do this after checking with NUWC to make sure it's necessary
 
             MovementModel();
+        }
+
+        static List<ActiveSourceState> CalculateActiveTimeSteps(NemoScenario nemoScenario, NemoMode nemoMode)
+        {
+            var results = new List<ActiveSourceState>();
+            var scenarioEndTime = nemoScenario.StartTime + nemoScenario.Duration;
+            var pulsesPerStep = NemoBase.SimulationStepTime.TotalSeconds/nemoMode.PulseInterval.TotalSeconds;
+            //var durationPerStep = pulsesPerStep*nemoMode.PulseLength.TotalSeconds;
+            var fractionalPulseCount = 0.0;
+            var realPulseCount = 0;
+            for (var curTime = nemoScenario.StartTime; curTime <= scenarioEndTime; curTime += NemoBase.SimulationStepTime)
+            {
+                fractionalPulseCount += pulsesPerStep;
+                if ((int)fractionalPulseCount > realPulseCount)
+                {
+                    var actualPulses = (int) fractionalPulseCount - realPulseCount;
+                    results.Add(new ActiveSourceState
+                                {
+                                    NemoMode = nemoMode,
+                                    SimulationTime = curTime,
+                                    ActiveTime = new TimeSpan(0, 0, 0, 0, (int) (nemoMode.PulseLength.TotalMilliseconds*actualPulses)),
+                                });
+                    realPulseCount += actualPulses;
+                }
+            }
+            return results;
         }
 
         List<ActiveSourceState> GetActiveSources(DateTime simulationTime, float currentCourseDegrees)
@@ -94,7 +123,7 @@ namespace ESME.Platform
                 var curSourceState = new ActiveSourceState
                                      {
                                          ActiveFraction = (float) fraction,
-                                         Heading_degrees = currentCourseDegrees
+                                         RelativeHeading = currentCourseDegrees
                                      };
 
                 results.Add(curSourceState);
@@ -108,7 +137,7 @@ namespace ESME.Platform
         {
             var timestepCount = (int) NemoPlatform.NemoScenario.Duration.DivideBy(NemoBase.SimulationStepTime);
             var currentTime = NemoPlatform.NemoScenario.StartTime;
-            PlatformStates = new PlatformState[timestepCount];
+            PlatformStates = new PlatformStates();
             NemoTrackdef curTrackdef = null;
             var curLocation = new EarthCoordinate3D(0, 0, 0);
             EarthCoordinate3D proposedLocation;
@@ -123,7 +152,7 @@ namespace ESME.Platform
             // Put trackdefs in ascending start-time order, if they weren't already
             NemoPlatform.Trackdefs.Sort();
 
-            for (var i = 0; i < PlatformStates.Length; i++, currentTime += NemoBase.SimulationStepTime)
+            for (var i = 0; i < timestepCount; i++, currentTime += NemoBase.SimulationStepTime)
             {
                 // if we have a current trackdef we're processing, AND that current trackdef DOES NOT CONTAIN the current time
                 // THEN we no longer have a current trackdef
@@ -221,14 +250,14 @@ namespace ESME.Platform
                     // If we don't have a current trackdef, that means our speed is zero
                     curSpeedMetersPerSecond = 0;
 
-                // Put the current location, course, speed and time into the current index of the PlatformStates array
-                PlatformStates[i] = new PlatformState
-                                    {
-                                        Location = curLocation,
-                                        Course_degrees = (float) curCourseDegrees,
-                                        Speed_meters_per_second = (float) curSpeedMetersPerSecond,
-                                        SimulationTime = currentTime
-                                    };
+                // Put the current location, course, speed and time into the PlatformStates list
+                PlatformStates.Add(new PlatformState
+                                   {
+                                       Location = curLocation,
+                                       Course = (float) curCourseDegrees,
+                                       Speed = (float) curSpeedMetersPerSecond,
+                                       SimulationTime = currentTime
+                                   });
             }
             overlayPoints.Add(new EarthCoordinate(curLocation));
             CourseOverlay = new OverlayLineSegments(overlayPoints.ToArray(), Colors.Orange, 1, LineStyle.Dot);
