@@ -16,12 +16,12 @@ namespace ESME.Platform
         /// <summary>
         /// Current course, in degrees from true north (clockwise = positive)
         /// </summary>
-        public float Course_degrees { get; internal set; }
+        public float Course { get; internal set; }
 
         /// <summary>
         /// Current platform speed in meters per second
         /// </summary>
-        public float Speed_meters_per_second { get; internal set; }
+        public float Speed { get; internal set; }
 
         /// <summary>
         /// Simulated date and time for which this state is valid
@@ -36,8 +36,21 @@ namespace ESME.Platform
         public PlatformState()
         {
             ActiveSourceStates = null;
-            Speed_meters_per_second = float.NaN;
-            Course_degrees = float.NaN;
+            Speed = float.NaN;
+            Course = float.NaN;
+        }
+    }
+
+    public class PlatformStates : List<PlatformState>
+    {
+        public PlatformState this[DateTime simulationTime]
+        {
+            get
+            {
+                foreach (var platformState in this.Where(platformState => platformState.SimulationTime >= simulationTime)) 
+                    return platformState;
+                throw new IndexOutOfRangeException(string.Format("PlatformStates: Requested time index {0} not found", simulationTime));
+            }
         }
     }
 }

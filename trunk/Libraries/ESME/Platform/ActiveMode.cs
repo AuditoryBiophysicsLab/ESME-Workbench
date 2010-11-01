@@ -51,10 +51,10 @@ namespace ESME.Platform
                 yield return new ActiveSourceState
                                  {
                                      ActiveModeID = ActiveModeID,
-                                     SourceLevel_dBSPL = currentSourceLevel,
-                                     psmID = psmid,
+                                     SourceLevel = currentSourceLevel,
+                                     PsmId = psmid,
                                      SimulationTime = curSimTime,
-                                     Heading_degrees = beamAngle,
+                                     RelativeHeading = beamAngle,
                                      ActiveFraction = (float) activeFrac
                                      // Add beam width and radius
                                  };

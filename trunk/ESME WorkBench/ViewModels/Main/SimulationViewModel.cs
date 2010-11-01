@@ -1,15 +1,21 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Windows;
+using System.Windows.Threading;
 using Cinch;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    internal class SimulationViewModel : EditableValidatingViewModelBase
+    internal class SimulationViewModel : EditableValidatingViewModelBase, IViewStatusAwareInjectionAware
     {
+        IViewAwareStatus _viewAwareStatus;
+        Dispatcher _dispatcher;
+
         #region public constructor
 
         readonly Experiment _experiment;
@@ -139,6 +145,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public bool IsRunning { get; set; }
 
+        public bool IsCompleted { get; set; }
+
         #region CancelCommand
 
         public SimpleCommand<object, object> CancelCommand
@@ -164,11 +172,64 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void Run()
         {
+            lock (this)
+            {
+                if (IsRunning) return;
+                IsRunning = true;
+                var bw = new BackgroundWorker();
+                bw.DoWork += CalculateExposures;
+                bw.RunWorkerCompleted += delegate { IsCompleted = true; };
+                bw.RunWorkerAsync(_experiment);
+            }
+
             CloseActivePopUpCommand.Execute(true);
         }
         SimpleCommand<object, object> _okCommand;
 
         #endregion
+
+        #region IViewStatusAwareInjectionAware Members
+
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
+        {
+            _viewAwareStatus = viewAwareStatusService;
+            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+        }
+
+        #endregion
+
+
+        void CalculateExposures(object sender, DoWorkEventArgs args)
+        {
+            var experiment = (Experiment)args.Argument;
+            var animats = experiment.AnimatInterface.AnimatList;
+            var scenario = experiment.NemoFile.Scenario;
+            var platforms = scenario.Platforms;
+            var timeStepCount = (int)(scenario.Duration.TotalSeconds / SecondsPerTimeStep.DataValue);
+            var timeStep = new TimeSpan(0, 0, 0, SecondsPerTimeStep.DataValue);
+            var scenarioEndTime = scenario.StartTime + scenario.Duration;
+            for (var curTime = scenario.StartTime; curTime <= scenarioEndTime; curTime += timeStep)
+            {
+                foreach (var platform in platforms)
+                {
+                    foreach (var source in platform.Sources)
+                    {
+                        foreach (var mode in source.Modes)
+                        {
+                            // Find a TL field that matches the current mode
+                            // Loop through each animat and expose it if necessary
+                            foreach (var animat in animats)
+                            {
+                                // If the animat is not within the radius, skip it.
+                                //if (platform.BehaviorModel.PlatformStates[curTime].ActiveSourceStates
+                            }
+                        }
+                    }
+                }
+            }
+
+            //_dispatcher.InvokeIfRequired(() => NotifyPropertyChanged());
+        }
 
     }
 
