@@ -596,6 +596,7 @@ namespace ESMEWorkBench.Data
             CurrentScale = 147647947.5;
             PropertyChanged += LocalPropertyChanged;
             TransmissionLossFields = new ObservableCollection<TransmissionLossField>();
+            AnimalPopulationFiles = new ObservableCollection<string>();
         }
 
         static void LocalPropertyChanged(object sender, PropertyChangedEventArgs e)
