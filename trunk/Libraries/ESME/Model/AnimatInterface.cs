@@ -157,10 +157,10 @@ namespace ESME.Model
             var logFilePath = Path.Combine(logPath,"log.txt");
             using(var mywriter = new StreamWriter(logFilePath))
             {
-                mywriter.WriteLine("All Animat Starting Positions: lat/long/depth ");
+                mywriter.WriteLine("All Animat Starting Positions: ID/lat/long/depth ");
                 foreach (var animat in AnimatList)
                 {
-                    mywriter.WriteLine(string.Format("{0},{1},{2}",animat.Location.Latitude_degrees , animat.Location.Longitude_degrees , animat.Location.Elevation_meters ));
+                    mywriter.WriteLine(string.Format("{0},{1},{2},{3}",animat.AnimatID,animat.Location.Latitude_degrees , animat.Location.Longitude_degrees , animat.Location.Elevation_meters ));
                 }
             }
         }

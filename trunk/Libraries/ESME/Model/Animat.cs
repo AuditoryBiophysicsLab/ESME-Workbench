@@ -169,7 +169,7 @@ namespace ESME.Model
                 Thread.Sleep(1);
             }
             //bump the positions once, otherwise depths aren't set. 
-            if (mbsRESULT.OK != (mbsResult = _mmmbs.RunScenarioNumIterations(1))) throw new AnimatMMBSException("RunScenario Error:" + _mmmbs.MbsResultToString(mbsResult));
+            //if (mbsRESULT.OK != (mbsResult = _mmmbs.RunScenarioNumIterations(1))) throw new AnimatMMBSException("RunScenario Error:" + _mmmbs.MbsResultToString(mbsResult));
 
             //get the initial positions of every animat
             if (mbsRESULT.OK != (mbsResult = _mmmbs.GetAnimatCoordinates(posArray))) throw new AnimatMMBSException("Error Fetching Initial Animat Coordinates: " + _mmmbs.MbsResultToString(mbsResult));
