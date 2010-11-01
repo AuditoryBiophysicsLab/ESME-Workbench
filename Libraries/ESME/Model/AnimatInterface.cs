@@ -151,7 +151,7 @@ namespace ESME.Model
                    };
         }
 
-        public void Test(string logPath)
+        public void OutputLogFile(string logPath)
         {
             //matlab-friendly csv output of positions
             var logFilePath = Path.Combine(logPath,"log.txt");

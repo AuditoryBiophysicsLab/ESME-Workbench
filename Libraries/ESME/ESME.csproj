@@ -119,6 +119,7 @@
     <Compile Include="Environment\Transect.cs" />
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Model\AnimatInterface.cs" />
+    <Compile Include="Model\BehaviorModelTest.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="Overlay\Exceptions.cs" />
     <Compile Include="Overlay\OverlayCircle.cs" />
