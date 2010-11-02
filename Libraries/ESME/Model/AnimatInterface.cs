@@ -44,7 +44,7 @@ namespace ESME.Model
         #region public methods
 
         /// <summary>
-        /// Intended to be called within an external loop. Increments 3mb by one timestep, calculates and logs new animat positions. 
+        ///   Intended to be called within an external loop. Increments 3mb by one timestep, calculates and logs new animat positions.
         /// </summary>
         /// <returns>true if more timesteps are available.  false if no more positions need to be calculated. </returns>
         public bool Step()
@@ -70,7 +70,7 @@ namespace ESME.Model
         }
 
         /// <summary>
-        /// shuts it down, and closes the log file.
+        ///   shuts it down, and closes the log file.
         /// </summary>
         public void Close()
         {
@@ -82,22 +82,21 @@ namespace ESME.Model
         }
 
         /// <summary>
-        /// will return a fully populated, initialized, and paused animatInterface.
+        ///   will return a fully populated, initialized, and paused animatInterface.
         /// </summary>
-        /// <param name="animatScenarioFile"></param>
-        /// <param name="speciesDirectory"></param>
-        /// <param name="animatLogFilePath"></param>
-        /// <param name="mmmbsOutputDirectory"></param>
-        /// <param name="bathymetryFile"></param>
-        /// <param name="simulationDuration"></param>
-        /// <param name="simulationTimeStep"></param>
+        /// <param name = "animatScenarioFile"></param>
+        /// <param name = "speciesDirectory"></param>
+        /// <param name = "animatLogFilePath"></param>
+        /// <param name = "mmmbsOutputDirectory"></param>
+        /// <param name = "bathymetryFile"></param>
+        /// <param name = "simulationDuration"></param>
+        /// <param name = "simulationTimeStep"></param>
         /// <returns></returns>
         public static AnimatInterface Create(string animatScenarioFile, string speciesDirectory, string bathymetryFile, string animatLogFilePath, string mmmbsOutputDirectory, TimeSpan simulationDuration, TimeSpan simulationTimeStep)
         {
-            
-            C3mbs mbs = new C3mbs();
+            var mbs = new C3mbs();
             mbsRESULT mbsResult;
-            mbsCONFIG config = mbs.GetConfiguration();
+            var config = mbs.GetConfiguration();
             mbsRUNSTATE runState;
             //set the output directory
             if (mbsRESULT.OK != (mbsResult = mbs.SetOutputDirectory(mmmbsOutputDirectory))) throw new AnimatInterfaceMMBSException("SetOutputDirectory Error:" + mbs.MbsResultToString(mbsResult));
@@ -107,7 +106,7 @@ namespace ESME.Model
             config.durationLess = true;
             mbs.SetConfiguration(config);
             //set up the position array from the values in the .sce file (not the ones in animatList, which doesn't exist yet..)
-            int animatCount = mbs.GetAnimatCount();
+            var animatCount = mbs.GetAnimatCount();
 
             var posArray = new mbsPosition[animatCount];
 
@@ -135,14 +134,14 @@ namespace ESME.Model
 
             return result;
         }
+
         /// <summary>
-        /// create a barebones animat interface from a 3mb scenario file.  This animat interface currently contains only a list of animats and species present in the scenario file, with their static positions. 
+        ///   create a barebones animat interface from a 3mb scenario file.  This animat interface currently contains only a list of animats and species present in the scenario file, with their static positions.
         /// </summary>
-        /// <param name="animatScenarioFile"></param>
+        /// <param name = "animatScenarioFile"></param>
         /// <returns></returns>
         public static AnimatInterface Create(string animatScenarioFile)
         {
-            
             //must return an animat interface with a populated AnimatList.
             return new AnimatInterface
                    {
@@ -151,30 +150,41 @@ namespace ESME.Model
                    };
         }
 
+        public void SummarizeAnimatExposuresToSpeciesBins()
+        {
+            foreach (var animat in AnimatList)
+                animat.SummarizeExposureToSpeciesBins();
+        }
+
         public void WriteSpeciesLevelBins(string filename)
         {
-            using (StreamWriter sw = new StreamWriter(filename))
+            var once = true;
+            using (var sw = new StreamWriter(filename))
             {
-                
                 foreach (var species in AnimatList.SpeciesList)
                 {
                     if (species.LevelBins != null)
                     {
+                        if (once)
+                        {
+                            sw.WriteLine("Bins widths (dB SPL re: 1 uPa):,{0}", species.LevelBins[0].BinWidth);
+                            sw.WriteLine("Low bin counts all animats whose max exposure is less than {0} dB", species.LevelBins[0].LowExposureLevel);
+                            sw.WriteLine("High bin counts all animats whose max exposure is greater than {0} dB", species.LevelBins[0].LowExposureLevel + ((species.LevelBins[0].Bins.Length - 2) * species.LevelBins[0].BinWidth));
+                            sw.WriteLine("Header values displayed are bin centers");
+                            sw.WriteLine("Data values displayed are the number of animats whose max exposure falls into the specified bin");
+                            once = false;
+                        }
                         sw.WriteLine("Species Name, {0}", species.SpeciesName);
                         sw.Write("Mode Name,");
-                        for (var bin = 0; bin < species.LevelBins[0].Bins.Length; bin++)
-                            sw.Write("{0} dB,",
-                                     species.LevelBins[0].LowExposureLevel + species.LevelBins[0].BinWidth*bin);
+                        species.LevelBins[0].WriteBinHeader(sw);
                         sw.WriteLine();
-
 
                         for (var mode = 0; mode < species.LevelBins.Length; mode++)
                         {
                             if (species.LevelBins[mode].ModeName != null)
                             {
                                 sw.Write("{0},", species.LevelBins[mode].ModeName);
-                                foreach (var bincount in species.LevelBins[mode].Bins)
-                                    sw.Write("{0},", bincount);
+                                species.LevelBins[mode].WriteBinValues(sw);
                                 sw.WriteLine();
                             }
                         }
@@ -182,30 +192,26 @@ namespace ESME.Model
                     }
                     else
                     {
-                        sw.WriteLine("{0} was not exposed.", species.SpeciesName);
+                        sw.WriteLine("{0}, No exposures", species.SpeciesName);
                     }
                 }
-
-
-
-
             }
-            
         }
 
         public void OutputLogFile(string logPath)
         {
             //matlab-friendly csv output of positions
-            var logFilePath = Path.Combine(logPath,"log.txt");
-            using(var mywriter = new StreamWriter(logFilePath))
+            var logFilePath = Path.Combine(logPath, "log.txt");
+            using (var mywriter = new StreamWriter(logFilePath))
             {
                 mywriter.WriteLine("All Animat Starting Positions: ID/lat/long/depth ");
                 foreach (var animat in AnimatList)
                 {
-                    mywriter.WriteLine(string.Format("{0},{1},{2},{3}",animat.AnimatID,animat.Location.Latitude_degrees , animat.Location.Longitude_degrees , animat.Location.Elevation_meters ));
+                    mywriter.WriteLine(string.Format("{0},{1},{2},{3}", animat.AnimatID, animat.Location.Latitude_degrees, animat.Location.Longitude_degrees, animat.Location.Elevation_meters));
                 }
             }
         }
+
         #endregion
 
         #region private methods
@@ -213,7 +219,7 @@ namespace ESME.Model
         AnimatInterface() { }
 
         /// <summary>
-        /// Invokes necessary sanity checks to determine if AnimatInterface has been properly made ready.  Brings 3MB online and ready to start calculating animat tracks.  Creates a new AnimatLocationFile.
+        ///   Invokes necessary sanity checks to determine if AnimatInterface has been properly made ready.  Brings 3MB online and ready to start calculating animat tracks.  Creates a new AnimatLocationFile.
         /// </summary>
         void InitializeAnimatSimulator()
         {
@@ -251,14 +257,14 @@ namespace ESME.Model
             _mbsSoundExposure = new double[AnimatList.Count];
 
             //add each species
-            for (int i = 0; i < AnimatList.SpeciesList.Count; i++)
+            for (var i = 0; i < AnimatList.SpeciesList.Count; i++)
             {
                 AnimatList.SpeciesList[i].Index = i;
                 result = _mmmbs.AddSpecies(AnimatList.SpeciesList[i].Filename);
                 if (mbsRESULT.OK != result) throw new AnimatInterfaceMMBSException("C3mbs::AddSpecies FATAL error " + _mmmbs.MbsResultToString(result));
             }
             //add all the animats of each species.
-            for (int i = 0; i < AnimatList.Count; i++)
+            for (var i = 0; i < AnimatList.Count; i++)
             {
                 _posArray[i] = new mbsPosition
                                {
@@ -395,12 +401,12 @@ namespace ESME.Model
 #endif
 
         /// <summary>
-        /// sleeps 1ms, then runs 3mb once.  chucks exceptions and aborts 3mb if bad stuff happens.
+        ///   sleeps 1ms, then runs 3mb once.  chucks exceptions and aborts 3mb if bad stuff happens.
         /// </summary>
-        /// <param name="stepTime"></param>
+        /// <param name = "stepTime"></param>
         void Page3MB(int stepTime)
         {
-            mbsRESULT result = _mmmbs.RunScenarioNumIterations(stepTime);
+            var result = _mmmbs.RunScenarioNumIterations(stepTime);
             if (result != mbsRESULT.OK)
             {
                 _mmmbs.AbortRun();
@@ -413,7 +419,7 @@ namespace ESME.Model
         }
 
         /// <summary>
-        /// Sanity checking.  Makes sure species, animats, and sim time exist and are nonzero.
+        ///   Sanity checking.  Makes sure species, animats, and sim time exist and are nonzero.
         /// </summary>
         void StartupCheck()
         {
@@ -435,7 +441,7 @@ namespace ESME.Model
             const double lat = 0.0;
             const double lon = 0.0;
 
-            for (int i = 0; i < AnimatList.Count; i++) _mbsSoundExposure[i] = curSPL;
+            for (var i = 0; i < AnimatList.Count; i++) _mbsSoundExposure[i] = curSPL;
 
             if (mbsRESULT.OK != (result = _mmmbs.SetAnimatAcousticExposure(lat, lon, _mbsSoundExposure)))
             {
@@ -446,7 +452,7 @@ namespace ESME.Model
 
 
         /// <summary>
-        /// must be run after page3MB to make any sense.  Requests current animat state from 3mb, dumps this into a new time record in a preexisting animatlocationfile. 
+        ///   must be run after page3MB to make any sense.  Requests current animat state from 3mb, dumps this into a new time record in a preexisting animatlocationfile.
         /// </summary>
         void UpdatePositions()
         {
@@ -462,19 +468,19 @@ namespace ESME.Model
         }
 
         /// <summary>
-        /// updates bathymetry
+        ///   updates bathymetry
         /// </summary>
         void UpdateAnimatBathymetry()
         {
             Animat curAnimat;
             mbsRESULT result;
 
-            for (int i = 0; i < AnimatList.Count; i++)
+            for (var i = 0; i < AnimatList.Count; i++)
             {
                 curAnimat = AnimatList[i];
                 // Make sure the animat is still contained in the current bathymetry dataset, and if so get the depth at the animat's current position
                 float bathymetryDepthMeters;
-                bool animatIsWithinBathymetry = Bathymetry.Lookup(curAnimat.Location, out bathymetryDepthMeters);
+                var animatIsWithinBathymetry = Bathymetry.Lookup(curAnimat.Location, out bathymetryDepthMeters);
 
                 if (animatIsWithinBathymetry)
                 {

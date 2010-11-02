@@ -104,12 +104,20 @@
                   Source="$(var.ESMEPath)\WpfDesktopEdition.dll" />
 
             <!-- MVVM assemblies -->
-            <File Id="Cinch.WPF.dll" 
-                  Name="Cinch.WPF.dll" 
+            <File Id="Cinch.WPF.dll"
+                  Name="Cinch.WPF.dll"
                   Source="$(var.ESMEPath)\Cinch.WPF.dll" />
-            <File Id="MEFedMVVM.WPF.dll" 
-                  Name="MEFedMVVM.WPF.dll" 
+            <File Id="MEFedMVVM.WPF.dll"
+                  Name="MEFedMVVM.WPF.dll"
                   Source="$(var.ESMEPath)\MEFedMVVM.WPF.dll" />
+
+            <!-- 3MB assemblies -->
+            <File Id="MMMBSLib.dll"
+                  Name="3MBSLib.dll"
+                  Source="$(var.ESMEPath)\3MBSLib.dll" />
+            <File Id="MMMBWrapperClass.dll"
+                  Name="3MBWrapperClass.dll"
+                  Source="$(var.ESMEPath)\3MBWrapperClass.dll" />
 
             <!-- Miscellaneous Microsoft assemblies -->
             <File Id="Microsoft.Expression.InteractionsDLL" 

@@ -95,7 +95,23 @@ namespace ESME.Model
         public void RecordExposure(string modeName, int sourceID, float receieveLevel)
         {
             LevelBins[sourceID].AddExposure(receieveLevel, modeName); 
-            Species.LevelBins[sourceID].AddExposure(receieveLevel, modeName);
+            //Species.LevelBins[sourceID].AddExposure(receieveLevel, modeName);
+        }
+
+        public void SummarizeExposureToSpeciesBins()
+        {
+            if (LevelBins == null) return;
+            for (var source = 0; source < LevelBins.Length; source++)
+            {
+                for (var bin = LevelBins[source].Bins.Length - 1; bin <= 0; bin--)
+                {
+                    if (LevelBins[source].Bins[bin] > 0)
+                    {
+                        Species.LevelBins[source].Bins[bin]++;
+                        break;
+                    }
+                }
+            }
         }
 
         public void CreateLevelBins(int sourceCount, float lowReceiveLevel, float binWidth, int binCount)
