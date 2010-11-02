@@ -43,7 +43,7 @@ namespace ESME.TransmissionLoss
         {
             return (FloatMatch(LowFrequency, nemoMode.LowFrequency, 0.1f)) &&
                    (FloatMatch(HighFrequency, nemoMode.HighFrequency, 0.1f)) &&
-                   (FloatMatch(SourceDepth, nemoMode.SourceDepth, 0.1f)) &&
+                   (FloatMatch(-SourceDepth, nemoMode.SourceDepth, 0.1f)) &&
                    (FloatMatch(VerticalBeamWidth, nemoMode.VerticalBeamWidth, 0.1f)) &&
                    (FloatMatch(DepressionElevationAngle, nemoMode.DepressionElevationAngle, 0.1f)) &&
                    (Radius >= nemoMode.Radius) && 
@@ -77,12 +77,12 @@ namespace ESME.TransmissionLoss
                     var sourceRadial = Radials[sourceRadialIndex];
 
                     int sourceRangeIndex;
-                    for (sourceRangeIndex = 0; sourceRangeIndex < sourceRadial.Ranges.Length; sourceRangeIndex++)
-                        if (sourceRadial.Ranges[sourceRangeIndex] >= range) break;
+                    for (sourceRangeIndex = 0; sourceRangeIndex < sourceRadial.Ranges.Length - 1; sourceRangeIndex++)
+                        if (sourceRadial.Ranges[sourceRangeIndex + 1] >= range) break;
                     
                     int sourceDepthIndex;
-                    for (sourceDepthIndex = 0; sourceDepthIndex < sourceRadial.Depths.Length; sourceDepthIndex++)
-                        if (sourceRadial.Depths[sourceDepthIndex] >= depth) break;
+                    for (sourceDepthIndex = 0; sourceDepthIndex < sourceRadial.Depths.Length - 1; sourceDepthIndex++)
+                        if (sourceRadial.Depths[sourceDepthIndex + 1] >= depth) break;
                     
                     return sourceRadial[sourceDepthIndex, sourceRangeIndex];
                 }
@@ -180,8 +180,8 @@ namespace ESME.TransmissionLoss
             _dataIsLoaded = false;
             Depths = null;
             Ranges = null;
-            _radials = null;
-            _pieSlices = null;
+            _radials = new List<TransmissionLossRadial>(); ;
+            _pieSlices = new List<PieSlice>();
             Radials = null;
         }
 

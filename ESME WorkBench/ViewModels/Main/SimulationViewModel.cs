@@ -87,6 +87,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_secondsPerTimeStep == value) return;
                 _secondsPerTimeStep = value;
+                //_secondsPerTimeStep.DataValue = 10;
                 _secondsPerTimeStep.ValidationRules.Add(new SimpleRule("DataValue", "Value must be an integer between 1 and 100, inclusive", domObj =>
                                                                                                                                              {
                                                                                                                                                  var obj = (DataWrapper<int>) domObj;
@@ -187,10 +188,11 @@ namespace ESMEWorkBench.ViewModels.Main
                 var bw = new BackgroundWorker();
                 bw.DoWork += CalculateExposures;
                 bw.RunWorkerCompleted += delegate { IsCompleted = true; };
+                bw.RunWorkerCompleted += delegate { CloseActivePopUpCommand.Execute(true); };
                 bw.RunWorkerAsync(_experiment);
             }
 
-            CloseActivePopUpCommand.Execute(true);
+            //CloseActivePopUpCommand.Execute(true);
         }
         SimpleCommand<object, object> _okCommand;
 
@@ -221,7 +223,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 platform.CalculateBehavior();
  
             // Loop through all time, one timestep per iteration
-            for (var curTime = scenario.StartTime; curTime <= scenarioEndTime; curTime += timeStep)
+            for (var curTime = scenario.StartTime; curTime < scenarioEndTime; curTime += timeStep)
             {
                 // For the current time step, loop through all platform
                 foreach (var platform in platforms)
@@ -241,7 +243,7 @@ namespace ESMEWorkBench.ViewModels.Main
                             {
                                 // Find a TL field that matches the current mode
                                 var transmissionLossField = experiment.NearestMatchingTransmissionLoss(mode, platformLocation);
-                                if (transmissionLossField == null) throw new ApplicationException(string.Format("Bug!"));
+                                if (transmissionLossField == null) throw new ApplicationException(string.Format("No transmission loss fields found for mode {0}", mode.Name));
                                 transmissionLossField.LoadData();
 
                                 var horizontalBeamLookDirection = new Course(platformCourse + mode.RelativeBeamAngle);
@@ -255,10 +257,13 @@ namespace ESMEWorkBench.ViewModels.Main
                                     // If the animat is not within the radius, skip it.
                                     if ((animatRange <= beamRadius) && (horizontalBeamLimits.Contains(animatBearing)))
                                     {
-                                        var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) (-animat.Location.Elevation_meters));
+                                        var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) animat.Location.Elevation_meters);
                                         var soundPressureLevel = mode.SourceLevel - transmissionLoss;
-                                        animat.CreateLevelBins(modeCount, 120, 6, 15);
-                                        animat.RecordExposure(mode.ModeID, soundPressureLevel);
+                                        if (soundPressureLevel >= 120)
+                                        {
+                                            animat.CreateLevelBins(modeCount, 120, 6, 15);
+                                            animat.RecordExposure(mode.ModeID, soundPressureLevel);
+                                        }
                                     }
                                     //if (platform.BehaviorModel.PlatformStates[curTime].ActiveSourceStates
                                 }
