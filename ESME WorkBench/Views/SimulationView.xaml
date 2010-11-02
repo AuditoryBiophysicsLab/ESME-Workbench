@@ -19,20 +19,23 @@
 
 	</Window.Resources>
 	<DockPanel LastChildFill="True">
-		<DockPanel LastChildFill="False"
-		           DockPanel.Dock="Bottom"
+        <StackPanel Orientation="Vertical"
+                    DockPanel.Dock="Bottom">
+            <DockPanel LastChildFill="False"
 		           Margin="10">
-			<Button Content="Cancel"
+                <Button Content="Cancel"
 			        IsCancel="True"
 			        Width="100"
 			        Margin="10 0 0 0"
 			        DockPanel.Dock="Right"
 			        Command="{Binding CancelCommand}" />
-			<Button Content="OK"
+                <Button Content="OK"
 			        Width="100"
 			        DockPanel.Dock="Right"
 			        Command="{Binding OkCommand}" />
-		</DockPanel>
+            </DockPanel>
+            <ProgressBar Value="{Binding PercentComplete}" Height="22" />
+        </StackPanel>
         <ctl:FileOrDirectorySetting Caption="Output file (CSV format)"
 		                            DockPanel.Dock="Bottom"
 		                            FileNameFilter="Comma-separated values file (*.csv)|*.csv|All files (*.*)|*.*"
