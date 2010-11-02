@@ -170,10 +170,13 @@ namespace ESME.Model
 
                         for (var mode = 0; mode < species.LevelBins.Length; mode++)
                         {
-                            sw.Write("{0},", species.LevelBins[mode].ModeName);
-                            foreach (var bincount in species.LevelBins[mode].Bins)
-                                sw.Write("{0},", bincount);
-                            sw.WriteLine();
+                            if (species.LevelBins[mode].ModeName != null)
+                            {
+                                sw.Write("{0},", species.LevelBins[mode].ModeName);
+                                foreach (var bincount in species.LevelBins[mode].Bins)
+                                    sw.Write("{0},", bincount);
+                                sw.WriteLine();
+                            }
                         }
                         sw.WriteLine();
                     }
