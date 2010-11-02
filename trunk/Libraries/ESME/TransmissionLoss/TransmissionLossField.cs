@@ -79,6 +79,8 @@ namespace ESME.TransmissionLoss
                     int sourceRangeIndex;
                     for (sourceRangeIndex = 0; sourceRangeIndex < sourceRadial.Ranges.Length - 1; sourceRangeIndex++)
                         if (sourceRadial.Ranges[sourceRangeIndex + 1] >= range) break;
+                    //if (sourceRangeIndex == sourceRadialRanges.Length - 1)
+
                     
                     int sourceDepthIndex;
                     for (sourceDepthIndex = 0; sourceDepthIndex < sourceRadial.Depths.Length - 1; sourceDepthIndex++)
@@ -159,9 +161,8 @@ namespace ESME.TransmissionLoss
                                      Ranges = Ranges,
                                      Depths = Depths
                                  });
-                for (var j = 0; j < radialCount - 1; j++)
-                    _pieSlices.Add(new PieSlice(_radials[j].BearingFromSource, _radials[j + 1].BearingFromSource));
-                _pieSlices.Add(new PieSlice(_radials[_radials.Count - 1].BearingFromSource, _radials[0].BearingFromSource));
+                for (var j = 0; j < radialCount; j++)
+                    _pieSlices.Add(new PieSlice(_radials[j].BearingFromSource, 360.0 / _radials.Count));
                 _saved = true;
                 _radials.Sort();
                 Radials = _radials.ToArray();
