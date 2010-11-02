@@ -42,7 +42,7 @@
 		            DockPanel.Dock="Bottom">
 			<TextBlock Text="Please enter the simulation time step, in seconds"
 			           Margin="5 5 0 0" />
-			<TextBox Text="{Binding SecondsPerTimeStep}"
+			<TextBox Text="{Binding SecondsPerTimeStep.DataValue}"
 			         Width="100"
 			         Margin="5" />
 		</StackPanel>
