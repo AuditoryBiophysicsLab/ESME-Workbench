@@ -196,6 +196,12 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         SimpleCommand<object, object> _okCommand;
 
+        void Complete()
+        {
+            _experiment.AnimatInterface.WriteSpeciesLevelBins(OutputFileName);
+            CloseActivePopUpCommand.Execute(true);
+        }
+
         #endregion
 
         #region IViewStatusAwareInjectionAware Members
