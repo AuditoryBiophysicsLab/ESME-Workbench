@@ -92,10 +92,11 @@ namespace ESME.Model
 
         #region public methods
 
-        public void RecordExposure(int sourceID, float receieveLevel) { LevelBins[sourceID].AddExposure(receieveLevel); }
+        public void RecordExposure(int sourceID, float receieveLevel) { LevelBins[sourceID].AddExposure(receieveLevel); Species.LevelBins[sourceID].AddExposure(receieveLevel);}
 
         public void CreateLevelBins(int sourceCount, float lowReceiveLevel, float binWidth, int binCount)
         {
+            Species.CreateLevelBins(sourceCount,lowReceiveLevel,binWidth,binCount);
             if (LevelBins != null) return;
             LevelBins = new SourceRecieverLevelBins[sourceCount];
             for (var i = 0; i < sourceCount; i++) LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
@@ -165,9 +166,7 @@ namespace ESME.Model
                 //wait until initializing is done.
                 Thread.Sleep(1);
             }
-            //bump the positions once, otherwise depths aren't set. 
-            //if (mbsRESULT.OK != (mbsResult = _mmmbs.RunScenarioNumIterations(1))) throw new AnimatMMBSException("RunScenario Error:" + _mmmbs.MbsResultToString(mbsResult));
-
+            
             //get the initial positions of every animat
             if (mbsRESULT.OK != (mbsResult = _mmmbs.GetAnimatCoordinates(posArray))) throw new AnimatMMBSException("Error Fetching Initial Animat Coordinates: " + _mmmbs.MbsResultToString(mbsResult));
 

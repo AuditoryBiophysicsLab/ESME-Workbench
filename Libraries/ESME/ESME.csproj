@@ -119,7 +119,6 @@
     <Compile Include="Environment\Transect.cs" />
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Model\AnimatInterface.cs" />
-    <Compile Include="Model\BehaviorModelTest.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="Overlay\Exceptions.cs" />
     <Compile Include="Overlay\OverlayCircle.cs" />
@@ -142,6 +141,7 @@
     <Compile Include="Platform\ActiveMode.cs" />
     <Compile Include="NEMO\ActiveTimeStep.cs" />
     <Compile Include="Platform\BehaviorModel.cs" />
+    <Compile Include="Platform\BehaviorModelTest.cs" />
     <Compile Include="Platform\Exceptions.cs" />
     <Compile Include="Platform\PlatformState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
