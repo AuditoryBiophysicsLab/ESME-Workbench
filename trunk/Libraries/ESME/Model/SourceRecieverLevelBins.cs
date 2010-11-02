@@ -40,6 +40,28 @@ namespace ESME.Model
             Bins[bin]++;
         }
 
+        public void WriteSummaryHeader(StreamWriter stream)
+        {
+            stream.WriteLine("Bins widths (dB SPL re: 1 uPa):,{0}", BinWidth);
+            stream.WriteLine("Low bin counts all pings less than {0} dB", LowExposureLevel);
+            stream.WriteLine("High bin counts all pings greater than {0} dB", LowExposureLevel + ((Bins.Length - 2) * BinWidth));
+            stream.WriteLine("Values displayed are bin centers");
+        }
+
+        public void WriteBinHeader(StreamWriter stream)
+        {
+            stream.Write("< {0},", LowExposureLevel);
+            for (var bin = 1; bin < Bins.Length - 1; bin++)
+                stream.Write("{0},", LowExposureLevel + (BinWidth / 2) + ((bin - 1) * BinWidth));
+            stream.Write("> {0},", LowExposureLevel + ((Bins.Length - 2) * BinWidth));
+        }
+
+        public void WriteBinValues(StreamWriter stream)
+        {
+            for (var bin = 1; bin < Bins.Length; bin++)
+                stream.Write("{0},", Bins[bin]);
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();
