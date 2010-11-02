@@ -141,6 +141,25 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public double PercentComplete { get; set; }
+
+        public double PercentComplete
+        {
+            get { return _percentComplete; }
+            set
+            {
+                if (_percentComplete == value) return;
+                _percentComplete = value;
+                NotifyPropertyChanged(PercentCompleteChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PercentCompleteChangedEventArgs = ObservableHelper.CreateArgs<SimulationViewModel>(x => x.PercentComplete);
+        double _percentComplete;
+
+        #endregion
+
+
         public bool IsRunning { get; set; }
 
         public bool IsCompleted { get; set; }
@@ -221,6 +240,8 @@ namespace ESMEWorkBench.ViewModels.Main
             var animats = experiment.AnimatInterface.AnimatList;
             var scenario = experiment.NemoFile.Scenario;
             var platforms = scenario.Platforms;
+            var totalSteps = (scenario.Duration.TotalSeconds/SecondsPerTimeStep.DataValue);
+            var curStep = 0.0;
             var timeStep = new TimeSpan(0, 0, 0, SecondsPerTimeStep.DataValue);
             var scenarioEndTime = scenario.StartTime + scenario.Duration;
             var modeCount = scenario.ModeCount;
@@ -278,11 +299,10 @@ namespace ESMEWorkBench.ViewModels.Main
                         }
                     }
                 }
+                var step = curStep++;
+                _dispatcher.InvokeIfRequired(() => PercentComplete = (step / totalSteps) * 100);
             }
-
-            //_dispatcher.InvokeIfRequired(() => NotifyPropertyChanged());
         }
-
     }
 
     public class LabelValuePair
