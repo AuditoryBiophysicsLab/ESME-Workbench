@@ -17,6 +17,8 @@ namespace ESME.Model
         /// </summary>
         public float BinWidth { get; set; }
 
+        public string ModeName { get; set; }
+
         /// <summary>
         /// The actual array of recieved level bins
         /// </summary>
