@@ -151,18 +151,6 @@ namespace ESME.Model
                    };
         }
 
-        public void AggregateLevelBins()
-        {
-            foreach (var animat in AnimatList)
-            {
-                if (animat.LevelBins != null)
-                {
-                    animat.Species.
-                }
-                    
-            }
-        }
-
         public void OutputLogFile(string logPath)
         {
             //matlab-friendly csv output of positions
