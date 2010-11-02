@@ -9,6 +9,8 @@ namespace ESME.Model
 {
     public class Species : IEquatable<Species>, IHasIDField
     {
+        [XmlIgnore] public SourceRecieverLevelBins[] LevelBins;
+
         #region Public Properties
 
         [XmlIgnore]
@@ -32,9 +34,8 @@ namespace ESME.Model
 
         #endregion
 
-        [XmlIgnore] public SourceRecieverLevelBins[] LevelBins;
-
         #region public methods
+
         public override string ToString()
         {
             return SpeciesName;
@@ -44,10 +45,13 @@ namespace ESME.Model
         {
             if (LevelBins != null) return;
             LevelBins = new SourceRecieverLevelBins[sourceCount];
-            for (var i = 0; i < sourceCount; i++) LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
+            for (int i = 0; i < sourceCount; i++)
+                LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
         }
 
         #endregion
+
+        #region internal methods and properties
 
         internal Species(string speciesFilename)
         {
@@ -62,6 +66,19 @@ namespace ESME.Model
 
         internal int ReferenceCount { get; set; }
         internal string Filename { get; set; }
+
+        internal void AddToSimulationEnvironment(C3mbs simulationEnvironment)
+        {
+            mbsRESULT result = simulationEnvironment.AddSpecies(Filename);
+            if (mbsRESULT.OK != result)
+            {
+                //System.Diagnostics.Debug.WriteLine("AddSpecies FAILED: " + C3mbs.MbsResultToString(result));
+                throw new ApplicationException("C3mbs::AddSpecies(" + Filename + ") FATAL error " +
+                                               _mmmbs.MbsResultToString(result));
+            }
+        }
+
+        #endregion
 
         #region IEquatable<Species> Members
 
@@ -91,19 +108,6 @@ namespace ESME.Model
             if (!File.Exists(speciesFilename))
                 throw new FileNotFoundException("Species(" + speciesFilename + "): File not found");
         }
-
-        internal void AddToSimulationEnvironment(C3mbs simulationEnvironment)
-        {
-            mbsRESULT result = simulationEnvironment.AddSpecies(Filename);
-            if (mbsRESULT.OK != result)
-            {
-                //System.Diagnostics.Debug.WriteLine("AddSpecies FAILED: " + C3mbs.MbsResultToString(result));
-                throw new ApplicationException("C3mbs::AddSpecies(" + Filename + ") FATAL error " +
-                                               _mmmbs.MbsResultToString(result));
-            }
-        }
-
-        
     }
 
     public class SpeciesDeletedEventArgs : ItemDeletedEventArgs<Species>
@@ -112,6 +116,7 @@ namespace ESME.Model
 
     public class SpeciesList : UniqueAutoIncrementList<Species>
     {
+        #region Public Methods
         public SpeciesList(string speciesDirectory)
         {
             string[] files = Directory.GetFiles(speciesDirectory, "*.spe");
@@ -148,7 +153,22 @@ namespace ESME.Model
             }
         }
 
+        public void RemoveReference(string speciesName)
+        {
+            Species result = Find(s => s.SpeciesName == speciesName);
+            if (result == null)
+                throw new SpeciesNotFoundException("SpeciesList.Add: Requested species \"" + speciesName +
+                                                   "\" was not found");
+            if (result.ReferenceCount > 0) result.ReferenceCount--;
+        }
 
+        public void ClearReferences()
+        {
+            foreach (Species s in this) s.ReferenceCount = 0;
+        }
+        #endregion
+
+        #region Private and Internal Methods
         private new void Add(Species species)
         {
             base.Add(species);
@@ -184,20 +204,7 @@ namespace ESME.Model
                                                    "\" was not found");
             result.ReferenceCount++;
             return result.IDField;
-        }
-
-        public void RemoveReference(string speciesName)
-        {
-            Species result = Find(s => s.SpeciesName == speciesName);
-            if (result == null)
-                throw new SpeciesNotFoundException("SpeciesList.Add: Requested species \"" + speciesName +
-                                                   "\" was not found");
-            if (result.ReferenceCount > 0) result.ReferenceCount--;
-        }
-
-        public void ClearReferences()
-        {
-            foreach (Species s in this) s.ReferenceCount = 0;
-        }
+        } 
+        #endregion
     }
 }
