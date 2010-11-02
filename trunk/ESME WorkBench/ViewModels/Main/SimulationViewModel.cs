@@ -289,7 +289,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                         if (soundPressureLevel >= 120)
                                         {
                                             animat.CreateLevelBins(modeCount, 120, 6, 15);
-                                            animat.RecordExposure(mode.ModeID, soundPressureLevel);
+                                            animat.RecordExposure(mode.PSMName, mode.ModeID, soundPressureLevel);
                                         }
                                     }
                                     //if (platform.BehaviorModel.PlatformStates[curTime].ActiveSourceStates

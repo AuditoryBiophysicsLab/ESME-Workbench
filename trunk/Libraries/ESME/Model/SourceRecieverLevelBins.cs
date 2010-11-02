@@ -31,8 +31,9 @@ namespace ESME.Model
             Bins = new int[binCount + 2];
         }
 
-        public void AddExposure(float exposureLevel)
+        public void AddExposure(float exposureLevel, string modeName)
         {
+            if (ModeName != modeName) ModeName = modeName;
             int bin;
             if (exposureLevel < LowExposureLevel) bin = 0;
             else bin = (int) Math.Min(((exposureLevel - LowExposureLevel)/BinWidth) + 1, Bins.Length - 1);

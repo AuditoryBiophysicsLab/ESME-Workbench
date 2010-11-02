@@ -92,7 +92,11 @@ namespace ESME.Model
 
         #region public methods
 
-        public void RecordExposure(int sourceID, float receieveLevel) { LevelBins[sourceID].AddExposure(receieveLevel); Species.LevelBins[sourceID].AddExposure(receieveLevel);}
+        public void RecordExposure(string modeName, int sourceID, float receieveLevel)
+        {
+            LevelBins[sourceID].AddExposure(receieveLevel, modeName); 
+            Species.LevelBins[sourceID].AddExposure(receieveLevel, modeName);
+        }
 
         public void CreateLevelBins(int sourceCount, float lowReceiveLevel, float binWidth, int binCount)
         {
