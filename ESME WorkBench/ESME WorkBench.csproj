@@ -18,6 +18,21 @@
     <ApplicationIcon>Wave.ico</ApplicationIcon>
     <Utf8Output>true</Utf8Output>
     <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -462,6 +477,38 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\SmallIcons\accept-icon.png" />
+    <Resource Include="Images\SmallIcons\add-1-icon.png" />
+    <Resource Include="Images\SmallIcons\add-2-icon.png" />
+    <Resource Include="Images\SmallIcons\alert-icon.png" />
+    <Resource Include="Images\SmallIcons\back-icon.png" />
+    <Resource Include="Images\SmallIcons\calculator-icon.png" />
+    <Resource Include="Images\SmallIcons\cancel-icon.png" />
+    <Resource Include="Images\SmallIcons\chart-icon.png" />
+    <Resource Include="Images\SmallIcons\configure-icon.png" />
+    <Resource Include="Images\SmallIcons\down-icon.png" />
+    <Resource Include="Images\SmallIcons\export-icon.png" />
+    <Resource Include="Images\SmallIcons\forward-icon.png" />
+    <Resource Include="Images\SmallIcons\import-icon.png" />
+    <Resource Include="Images\SmallIcons\info-icon.png" />
+    <Resource Include="Images\SmallIcons\process-icon.png" />
+    <Resource Include="Images\SmallIcons\up-icon.png" />
+    <Resource Include="Images\LargeIcons\accept-icon.png" />
+    <Resource Include="Images\LargeIcons\add-1-icon.png" />
+    <Resource Include="Images\LargeIcons\add-2-icon.png" />
+    <Resource Include="Images\LargeIcons\alert-icon.png" />
+    <Resource Include="Images\LargeIcons\back-icon.png" />
+    <Resource Include="Images\LargeIcons\calculator-icon.png" />
+    <Resource Include="Images\LargeIcons\cancel-icon.png" />
+    <Resource Include="Images\LargeIcons\chart-icon.png" />
+    <Resource Include="Images\LargeIcons\configure-icon.png" />
+    <Resource Include="Images\LargeIcons\down-icon.png" />
+    <Resource Include="Images\LargeIcons\export-icon.png" />
+    <Resource Include="Images\LargeIcons\forward-icon.png" />
+    <Resource Include="Images\LargeIcons\import-icon.png" />
+    <Resource Include="Images\LargeIcons\info-icon.png" />
+    <Resource Include="Images\LargeIcons\process-icon.png" />
+    <Resource Include="Images\LargeIcons\up-icon.png" />
     <Resource Include="Images\SmallIcons\application-icon.png" />
     <Resource Include="Images\SmallIcons\close-icon.png" />
     <Resource Include="Images\SmallIcons\delete-icon.png" />
@@ -479,7 +526,6 @@
     <Resource Include="Images\AboutLogo.png">
       <SubType>Image</SubType>
     </Resource>
-    <Content Include="External References\3MBSLib.dll" />
     <Content Include="External References\Devart.Data.Linq.dll" />
     <SplashScreen Include="Images\ESME Splash Screen.png" />
   </ItemGroup>
@@ -495,6 +541,28 @@
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
