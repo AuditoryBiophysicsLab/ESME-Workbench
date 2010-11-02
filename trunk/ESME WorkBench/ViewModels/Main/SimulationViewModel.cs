@@ -188,7 +188,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 var bw = new BackgroundWorker();
                 bw.DoWork += CalculateExposures;
                 bw.RunWorkerCompleted += delegate { IsCompleted = true; };
-                bw.RunWorkerCompleted += delegate { CloseActivePopUpCommand.Execute(true); };
+                bw.RunWorkerCompleted += delegate { Complete(); };
                 bw.RunWorkerAsync(_experiment);
             }
 
