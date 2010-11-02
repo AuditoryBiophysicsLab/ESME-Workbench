@@ -151,8 +151,42 @@ namespace ESME.Model
                    };
         }
 
-        public void WriteSpeciesLevelBins(string Filename)
+        public void WriteSpeciesLevelBins(string filename)
         {
+            using (StreamWriter sw = new StreamWriter(filename))
+            {
+                
+                foreach (var species in AnimatList.SpeciesList)
+                {
+                    if (species.LevelBins != null)
+                    {
+                        sw.WriteLine("Species Name, {0}", species.SpeciesName);
+                        sw.Write("Mode Name,");
+                        for (var bin = 0; bin < species.LevelBins[0].Bins.Length; bin++)
+                            sw.Write("{0} dB,",
+                                     species.LevelBins[0].LowExposureLevel + species.LevelBins[0].BinWidth*bin);
+                        sw.WriteLine();
+
+
+                        for (var mode = 0; mode < species.LevelBins.Length; mode++)
+                        {
+                            sw.Write("{0},", species.LevelBins[mode].ModeName);
+                            foreach (var bincount in species.LevelBins[mode].Bins)
+                                sw.Write("{0},", bincount);
+                            sw.WriteLine();
+                        }
+                        sw.WriteLine();
+                    }
+                    else
+                    {
+                        sw.WriteLine("{0} was not exposed.", species.SpeciesName);
+                    }
+                }
+
+
+
+
+            }
             
         }
 
