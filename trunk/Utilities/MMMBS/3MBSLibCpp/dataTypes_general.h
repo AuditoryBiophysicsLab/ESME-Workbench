@@ -12,7 +12,7 @@
 // super.sub (2 decimal places) 
 // starting version 5.4 bottom following has horizontal travel rates
 #define MMBSLIB_VERSION_SUPER  8
-#define MMBSLIB_VERSION_SUB     5
+#define MMBSLIB_VERSION_SUB     6
 #define MMMBLIB_SPECIES_VERSION_SUPER 8
 #define MMMBLIB_SPECIES_VERSION_SUB 5
 #define MMMBLIB_BINOUTPUT_VERSION_SUPER 1 // String will have 3 decimal places.

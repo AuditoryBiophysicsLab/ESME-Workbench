@@ -491,6 +491,7 @@ size_t CFileManagerStatic::CalculateConfigurationBytesPerAnimatState(BINARYOUTPU
 	size_t bytes = 0;
 	ANIMATSTATE_FILEOUT as = {0};
 
+	as.aeCmltve = 0; // quiet compiler warning.
 	if(BinOut.enabled == FALSE)
 		return 0;
 	if(BinOut.animat.ID == TRUE)

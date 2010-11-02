@@ -28,6 +28,7 @@
 // User may enter -1 to finish run.
 RESLT CScenario::RunScenario(int NumIterations)
 {
+#ifndef NOCSENARIOFUNCTIONS
 	if(m_exit == TRUE)
 		return OK;
 
@@ -86,6 +87,6 @@ RESLT CScenario::RunScenario(int NumIterations)
 
 	m_mbsPausedMutex.Lock();
 	m_mbsPausedMutex.Unlock();
-
+#endif//NOCSENARIOFUNCTIONS
 	return OK;
 }

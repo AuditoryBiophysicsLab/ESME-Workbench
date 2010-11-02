@@ -15,6 +15,8 @@ CFileManager::CFileManager(void)
 	m_fmThread.SetIRunnablePointer((IRunnableFMgr *) this);
 	m_fmThread.m_thread1Running = FALSE;
 	m_fmThread.m_thread1RunningAck = FALSE;
+	m_fmThread.m_thread2Running = FALSE;
+	m_fmThread.m_thread2RunningAck = FALSE;
 	m_csvList = NULL;
 	m_memLocReportFd = NULL;
 	m_bufferWrite = 0;

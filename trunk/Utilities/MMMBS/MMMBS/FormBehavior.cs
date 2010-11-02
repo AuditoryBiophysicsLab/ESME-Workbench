@@ -66,41 +66,21 @@ namespace MBSGUI
             //--------------------------------//
             // Shelf
             if(m_beh.envAttrDepth.shelfEnabled == true)
-            {
-                //
-                DepthShelfButton.Enabled = true;
-                DepthShelfButton.BackColor = System.Drawing.Color.Chartreuse;
-            }
+                DepthShelfEnableButton.BackColor = System.Drawing.Color.Chartreuse;
             else
-            {
-                DepthShelfButton.Enabled = false;
-                DepthShelfButton.BackColor = System.Drawing.SystemColors.ControlDark;
-            }
+                DepthShelfEnableButton.BackColor = System.Drawing.SystemColors.Control;
  
             // Basin
             if(m_beh.envAttrDepth.basinEnabled == true)
-            {
-                DepthBasinButton.Enabled = true;
-                DepthBasinButton.BackColor = System.Drawing.Color.Chartreuse;
-            }
+                DepthBasinEnableButton.BackColor = System.Drawing.Color.Chartreuse;
             else
-            {
-                DepthBasinButton.Enabled = false;
-                DepthBasinButton.BackColor = System.Drawing.SystemColors.ControlDark;
-            }
+                DepthBasinEnableButton.BackColor = System.Drawing.SystemColors.Control;
 
             // Slope
             if(m_beh.envAttrDepth.slopeEnabled == true)
-            {
-                DepthSlopeButton.Enabled = true;
-                DepthSlopeButton.BackColor = System.Drawing.Color.Chartreuse;
-                //DepthSlopeButton.Text = "DEEPER than " + m_beh.envAttrDepth.slopeDepth + ", GREATER than " + m_beh.envAttrDepth.slopeSlope;
-            }
+                DepthSlopeEnableButton.BackColor = System.Drawing.Color.Chartreuse;
             else
-            {
-                DepthSlopeButton.Enabled = false;
-                DepthSlopeButton.BackColor = System.Drawing.SystemColors.ControlDark;
-            }
+                DepthSlopeEnableButton.BackColor = System.Drawing.SystemColors.Control;
 
 
             //--------------------------------------//

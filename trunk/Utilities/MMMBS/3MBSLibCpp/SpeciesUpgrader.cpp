@@ -1343,7 +1343,7 @@ RESLT CSpeciesUpgrader::UpgradeV7(HANDLE Hd, __int64 SpecesFileLocation, SPECIES
 
 RESLT CSpeciesUpgrader::ConvertV7toV8(SPECIES_MDL *pV8, SPECIES_MDL_V7 *pV7)
 {
-	int i;
+	unsigned int i;
 	memset(pV8, 0, sizeof(SPECIES_MDL));
 
 	memcpy(&pV8->description, &pV7->description, sizeof(SPECIESSPECIFICATION));

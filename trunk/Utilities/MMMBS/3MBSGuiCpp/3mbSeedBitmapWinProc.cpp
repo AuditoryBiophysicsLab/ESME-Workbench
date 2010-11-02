@@ -735,6 +735,8 @@ LRESULT CALLBACK BathyBitmapWindowProc(HWND hWnd, UINT message, WPARAM wParam, L
 		break;
 
 	case WM_LBUTTONUP:
+		if(g_bBlockNextMouseClick == TRUE)
+			break;
 		ReleaseCapture();
 		GetClientRect(hWnd, &rect); // This will retrieve this windows size.
 		memset(&coordValues, 0, sizeof(ENVMOUSECLICK));

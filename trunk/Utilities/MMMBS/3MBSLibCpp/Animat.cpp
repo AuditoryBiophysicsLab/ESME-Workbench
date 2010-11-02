@@ -115,7 +115,7 @@ void CAnimat::InitializeRun(const USERPARAMS *pUserSce,
 	m_speciesDef = &pSpeMdl->m_speciesModel;
 	m_bathymetry = pBathymetryRef;
 	// Salinity and temperature ignored for now.
-	m_state->podFollowFocal.maxFocalDistance = focalDistance;
+	m_state->podFollowFocal.focalDistance = focalDistance;
 	m_pSpeciesGroupParams = pSpeGroupParams;
 
 	//--------------------------------------//
@@ -226,7 +226,7 @@ void CAnimat::InitializeRun(const USERPARAMS *pUserSce,
 			m_state->depth = m_speciesDef->description.deepWaterSeedingDepth;
 	}
 
-	m_state->submdl.dive.projectedDepth = m_state->depth;
+	m_state->submdl.dive.calcDepth = m_state->depth;
 
 
 	// Travel rate submodel
@@ -296,143 +296,186 @@ the animat's state after initialization is completed.
 
 The animat state struct member offScreenInf(type OFFSCREEN_INF) is only set here when the animat goes off screen.
 */
-void CAnimat::HandleOffScreeen(ANIMATSTATE *State)
+void CAnimat::HandleOffScreeen()
 {
-	State = State; // quiet compiler warning until I finish this up.
-#if 0
-	OFFSCREEN_INF offScrn = {0};
+	BATHYEXTREMES envMinMax = m_bathymetry->GetExtremes();
+	BOOL travelRateModelUpdated; // Direction model terminated then started a new direction
+	double shallowest;
+	int loopCnt;
+	int intVal;
+	double bathyDepth;
+	BEHTRAN *behTran;
+	double deepest;
+	double tempTravelRate;
+	double tempTravelHeading;
+	int tempClock = 0;
+	OFFSCREEN_INF offscreen = {0};
 	COORDINATE tempFocalCoord = {0};
+	BATHYVALUE bathyValue;
 
-	// If no bathymetry loaded there is nothing to check.  
-	if(m_bathymetry->IsDataLoaded() == FALSE)
-		return;
 
-	// If animat did not go off screen then there is nothing to do.
-	if(CoordinatesOnScreen(&State->coord, &m_bathymetry->GetExtremes()) == TRUE)
-		return;
+	// The animat went off screen and is to be reset.  Copy its last acoustic
+	// exposure information into the state so it may be accounted for in the
+	// acoustic exposure statical analysis.
 
-	//----------------------------------------------------------------------------------//
-	// Copy or place persitent needed information from the animat state into local
-	// variables to copy back into the animat state after it is cleared out.
-	//----------------------------------------------------------------------------//
-	// Indicate the animat went off screen.
-	offScrn.offScreen = TRUE;
+	// Assign a new risk threshold
+	m_fRiskThreshold = m_pRefRandom->rndreal(0.0, 1.0);
 
-	// Save the animat's PREVIOUS lvl A, B phys states, current instantaneous and cumulative
-	// acoustic exposure values.
-	offScrn.lvlAPhysFlagPrev = State->acstcExp.lvlAPhysFlag; 
-	offScrn.lvlBPhysFlagPrev = State->acstcExp.lvlBPhysFlag;
-	offScrn.actualSrcInstantValue = State->acstcExp.actualSrcInstantValue;
-	offScrn.cumulativeValue = State->acstcExp.cumulativeValue;
-	if(State->acstcExp.risk > 0)
-	{
-		offScrn.lvlBBehFlagPrev = TRUE;
-		offScrn.lvlBBehRiskValue = State->acstcExp.risk;
-	}
+	offscreen.offScreen = TRUE; // Indicates the animat went off map
+
+	// Save its current lvl A, B phys states
+	offscreen.lvlAPhysFlagPrev = m_state->acstcExp.lvlAPhysFlag; 
+	offscreen.lvlBPhysFlagPrev = m_state->acstcExp.lvlBPhysFlag;
+
+
+	offscreen.lvlBBehFlagPrev = TRUE;
+	offscreen.lvlBBehRiskValue = m_state->acstcExp.risk;
+
+	// Save the instant and cumulative values for..?
+	offscreen.actualSrcInstantValue = m_state->acstcExp.actualSrcInstantValue;
+	offscreen.cumulativeValue = m_state->acstcExp.cumulativeValue;
+
 
 	// Make temporary copies of variable values that will not change.
-	tempFocalCoord = State->podFollowFocal.focalCoord;
-	tempClock = State->simClock;
-	COORDINATE currentCoord = State->coord;
-#if 0
+	if(m_focalCoordSet == TRUE)
+		tempFocalCoord = m_state->podFollowFocal.focalCoord;
+	tempClock = m_state->simClock;
+	COORDINATE currentCoord = m_state->coord;
 
 	m_focalCoordSet = m_focalCoordSet; // does not change.
+	tempTravelRate = m_state->setTravelRate;
+	tempTravelHeading = m_state->setHeading;
+
 	memset(m_state, 0, sizeof(ANIMATSTATE));
 	memset(&m_bathySector, 0, sizeof(ENVDATA_INDEX));
 
-	State->simClock = tempClock;
+	m_state->simClock = tempClock;
 
 	// Copy the offscreen information into the animat state
-	memcpy(OffInf, &offscreen, sizeof(OFFSCREEN_INF));
+	memcpy(&m_state->offScreenInf, &offscreen, sizeof(OFFSCREEN_INF));
 
 
 	// Replace the animat that went off screen.
-	double bathyDepth = BATHY_MIN_SEED_DEPTH;
-
+	bathyDepth = BATHY_MIN_SEED_DEPTH;
 
 	// Continue on the other side of the screen
-	State->coord = m_staticLib.ContinueOtherSideOfScreenLatLon(currentCoord, envMinMax);
-	if(TRUE == m_staticLib.LatLonWithinBoundaries(State->coord.lat, State->coord.lon, envMinMax))
-		bathyDepth = m_bathymetry->GetValueAtCoordinate(State->coord.lat, State->coord.lon, &m_bathySector);
+	m_state->coord = m_staticLib.ContinueOtherSideOfScreenLatLon(currentCoord, envMinMax);
+	if(TRUE == m_staticLib.LatLonWithinBoundaries(m_state->coord.lat, m_state->coord.lon, envMinMax))
+	{
+		bathyValue = m_bathymetry->GetValueAtCoordinate(m_state->coord.lat, m_state->coord.lon, &m_bathySector);
+		bathyDepth = bathyValue.depth;
+	}
 
 	// In case the bathymetry on the other side is land...
 	while(bathyDepth >= BATHY_MIN_SEED_DEPTH || bathyDepth >= m_speciesDef->description.shoreFollowDepth
 				|| bathyDepth >= m_speciesDef->description.minSeedingDepth)
 	{
-		State->coord = m_staticLib.RandomLatLon(envMinMaxenvMinMax, m_pRefRandom);
-		bathyDepth = m_bathymetry->GetValueAtCoordinate(State->coord.lat, State->coord.lon, &m_bathySector);
+		m_state->coord = m_staticLib.RandomLatLon(envMinMax, m_pRefRandom);
+		bathyValue = m_bathymetry->GetValueAtCoordinate(m_state->coord.lat, m_state->coord.lon, &m_bathySector);
+		bathyDepth = bathyValue.depth;
 	}
 
-	m_initialCoord = State->coord;
-	State->bathyDepth = bathyDepth;
+	m_initialCoord = m_state->coord;
+	m_state->bathyDepth = bathyDepth;
+
+	if(m_state->bathyDepth > 0)
+		m_state->bathyDepth = 0; // keep the animats in the ocean.
 
 
 	////////////////////////////////////////////////////////////////
-	//---------------------//
-	// Initialize Behaviors
-	//---------------------//
-	// Behavior transition submodel
-	intVal = m_pRefSpeciesModel->IntialBehavior(State->simClock, &m_speciesDef->initialBehavior);
-	_ASSERT((intVal >= 0) && (intVal < 65536 /*Max number a 16-bit unsigned integer can hold*/));
-	State->behState = (UINT16)intVal;
-	_ASSERT(State->behState < m_speciesDef->description.numBehaviors && State->behState >= 0);
-	State->submdl.behavior.timeLapsed = 0;
-	State->submdl.behavior.endDice = m_pRefRandom->myrand();
+	//-----------------------//
+	// Reinitialize Behaviors
+	//-----------------------//
+	loopCnt = 0; // a means to prevent infinte loops.
+	_ASSERT(m_speciesDef->initBehSpanCnt >= 1);
+	do
+	{
+		intVal = m_pRefRandom->rnd(0, m_speciesDef->initBehSpanCnt-1);
+		_ASSERT(0 <= intVal && intVal < m_speciesDef->initBehSpanCnt);
+		behTran = &m_speciesDef->initialBehavior.arr[intVal];
+	}while(behTran->depthSpan.shallow < m_state->bathyDepth && loopCnt++ < 1000);
+	deepest = behTran->depthSpan.deep;
+	shallowest = behTran->depthSpan.shallow;
+	intVal = m_pRefSpeciesModel->IntialBehavior(m_state->simClock, &behTran->m);
+	_ASSERT((intVal >= 0) && (intVal < 65536 /*Max number a 16-bit unsigned integer can hold*/) && ((UINT32)intVal <m_speciesDef->description.numBehaviors));
+	m_state->behState = (UINT16)intVal;
+
+	_ASSERT(m_state->behState < m_speciesDef->description.numBehaviors && m_state->behState >= 0);
+	m_state->submdl.behavior.timeLapsed = 0;
+	m_state->submdl.behavior.endDice = m_pRefRandom->myrand();
 
 	// Depth must be shallower than or equal to bathy depth.
-	State->depth = m_pRefSpeciesModel->DepthModel(&m_speciesDef->p.behavior[State->behState].dive.depth);
-	if(State->depth < State->bathyDepth)
-		State->depth = State->bathyDepth;
-	State->submdl.dive.projectedDepth = State->depth;
+	m_state->depth = m_pRefSpeciesModel->DepthModel(&m_speciesDef->p.behavior[m_state->behState].dive.depth);
+
+	if(deepest < m_state->bathyDepth)
+		deepest = m_state->bathyDepth;
+	if(shallowest < m_state->bathyDepth)
+		shallowest = m_state->bathyDepth;
+	if(shallowest < deepest)
+		shallowest = deepest;
+
+
+	if(m_state->depth < deepest)
+		m_state->depth = deepest;
+	if(m_state->depth > shallowest)
+		m_state->depth = shallowest;
+
+	// Animat's intial depth must also be shallower than or equal to its maximum seeding
+	// depth, if any.
+	if(m_speciesDef->description.deepWaterSeedingDepthEnabled == TRUE)
+	{
+		if(m_state->depth < m_speciesDef->description.deepWaterSeedingDepth)
+			m_state->depth = m_speciesDef->description.deepWaterSeedingDepth;
+	}
+
+	m_state->submdl.dive.calcDepth = m_state->depth;
+
 
 	// Travel rate submodel
-//		State->submdl.travelRate.rate = m_pRefSpeciesModel->RateModel(&m_speciesDef->p.behavior[State->behState].travelRate);
-//		State->submdl.travelRate.timeLapsed = 0;
-//		State->submdl.travelRate.endDice = m_pRefRandom->myrand();
+	m_state->submdl.travelRate.rate = tempTravelRate; //m_pRefSpeciesModel->RateModel(&m_speciesDef->p.behavior[m_state->behState].travelRate);
+	m_state->submdl.travelRate.timeLapsed = 0;
+	m_state->submdl.travelRate.endDice = m_pRefRandom->myrand();
 
 	// Bearing
-//		State->submdl.travelDirection.bearing = m_pRefRandom->myrand() * 360;
-//		State->submdl.travelDirection.timeLapsed = 0;
-//		State->submdl.travelDirection.endDice = m_pRefRandom->myrand();
+	m_state->submdl.travelDirection.bearing = tempTravelHeading;
+	m_state->submdl.travelDirection.timeLapsed = 0;
+	m_state->submdl.travelDirection.endDice = m_pRefRandom->myrand();
 
 	// Dive Rate
 	if(m_pRefRandom->myrand() > 0.5)
 	{
-		State->submdl.dive.activity = ASCENDING;
-		State->submdl.dive.rate.rate = m_pRefSpeciesModel->RateModel(&m_speciesDef->p.behavior[State->behState].dive.ascentRate);
+		m_state->submdl.dive.activity = ASCENDING;
+		m_state->submdl.dive.rate.rate = m_pRefSpeciesModel->RateModel(&m_speciesDef->p.behavior[m_state->behState].dive.ascentRate);
 	}
 	else
 	{
-		State->submdl.dive.activity = DESCENDING;
-		State->submdl.dive.rate.rate = m_pRefSpeciesModel->RateModel(&m_speciesDef->p.behavior[State->behState].dive.descentRate);
+		m_state->submdl.dive.activity = DESCENDING;
+		m_state->submdl.dive.rate.rate = m_pRefSpeciesModel->RateModel(&m_speciesDef->p.behavior[m_state->behState].dive.descentRate);
 	}
-	State->submdl.dive.rate.timeLapsed = 0;
-	State->submdl.dive.rate.endDice = m_pRefRandom->myrand();
+	m_state->submdl.dive.rate.timeLapsed = 0;
+	m_state->submdl.dive.rate.endDice = m_pRefRandom->myrand();
 
 	// Dive Depth
-	State->submdl.dive.targetDepth = m_pRefSpeciesModel->DepthModel(&m_speciesDef->p.behavior[State->behState].dive.depth);
-	if(State->submdl.dive.targetDepth > State->depth)
-		State->submdl.dive.targetDepth = State->depth;
+	m_state->submdl.dive.targetDepth = m_pRefSpeciesModel->DepthModel(&m_speciesDef->p.behavior[m_state->behState].dive.depth);
+	if(m_state->submdl.dive.targetDepth > m_state->depth)
+		m_state->submdl.dive.targetDepth = m_state->depth;
 
 	// Beached?
-	if(State->bathyDepth >= m_speciesDef->acousticAversion.beachingDepth || State->bathyDepth >= m_speciesDef->description.shoreFollowDepth)
+	if(m_state->bathyDepth >= m_speciesDef->acousticAversion.beachingDepth || m_state->bathyDepth >= m_speciesDef->description.shoreFollowDepth)
 	{
-		State->beached = TRUE;
-		State->submdl.travelRate.rate = 0;
-		State->submdl.dive.rate.rate = 0;
-		State->submdl.dive.activity = BEACHED;
+		m_state->beached = TRUE;
+		m_state->submdl.travelRate.rate = 0;
+		m_state->submdl.dive.rate.rate = 0;
+		m_state->submdl.dive.activity = BEACHED;
 	}
 
 	// Set initialization to handle acoustic response and pod following?
 	// Merge behaviors???
-	State->setDiveRate = State->submdl.dive.rate.rate;
-	State->setHeading = State->submdl.travelDirection.bearing;
-	State->setTravelRate = State->submdl.travelRate.rate;
+	m_state->setDiveRate = m_state->submdl.dive.rate.rate;
+	m_state->setHeading = m_state->submdl.travelDirection.bearing;
+	m_state->setTravelRate = m_state->submdl.travelRate.rate;
 	///////////////////////OFF Screen ////////////////////////////////////
-#endif
-#endif
 }
-
 
 /*****************************************************************************************
 * MEMBER FUNCTION:  CAnimat::Update()
@@ -459,28 +502,14 @@ void CAnimat::HandleOffScreeen(ANIMATSTATE *State)
 
 void CAnimat::Update(DWORD *pAnimatNumber)
 {
-	COORDINATE tempFocalCoord = {0};
-	int tempClock = 0;
-	OFFSCREEN_INF offscreen = {0};
-	int intVal;
 	BATHYEXTREMES envMinMax = m_bathymetry->GetExtremes();
+	NRMLBEHMDL *pNormalBehaviorRef;
 	MATRIX *nrmlBehTransMatrix;
 	GAUSS gauss;
 	int timeIndex;
-	double bathyDepth;
 	BATHYVALUE bathyValue;
 	BOOL directionModelUpdated; // Direction model terminated then started a new direction
-	BOOL travelRateModelUpdated; // Direction model terminated then started a new direction
-
-
-	BEHTRAN *behTran;
-	double deepest;
-	double shallowest;
-	int loopCnt;
-
-//	BOOL immediateTransitionEnabled = FALSE;
-//	if(IMMEDIATETRANSITION == 1)
-//		immediateTransitionEnabled = TRUE;
+	BOOL bVal;
 
 	*pAnimatNumber = m_uniqueId;
 
@@ -506,185 +535,21 @@ void CAnimat::Update(DWORD *pAnimatNumber)
 	m_currentCoord = m_state->coord;
 
 
-
-
-	// OFF SCREEN 
-	// ************* Handle Off Map Animats *********************************************//
-	// Determine if the animat went off screen
-	double tempTravelRate;
-	double tempTravelHeading;
-	HandleOffScreeen(m_state);
-#if 1
+	// Handle animats that strayed off the map.
 	memset(&m_state->offScreenInf, 0, sizeof(OFFSCREEN_INF));
-	if(m_bathymetry->IsDataLoaded() == TRUE && (m_state->coord.lat > envMinMax.xMax || m_state->coord.lat < envMinMax.xMin ||
-		m_state->coord.lon > envMinMax.yMax || m_state->coord.lon < envMinMax.yMin))
+	bVal = m_bathymetry->IsDataLoaded();
+	if(bVal)
 	{
-		// The animat went off screen and is to be reset.  Copy its last acoustic
-		// exposure information into the state so it may be accounted for in the
-		// acoustic exposure statical analysis.
-
-		// Assign a new risk threshold
-		m_fRiskThreshold = m_pRefRandom->rndreal(0.0, 1.0);
-
-		offscreen.offScreen = TRUE; // Indicates the animat went off map
-
-		// Save its current lvl A, B phys states
-		offscreen.lvlAPhysFlagPrev = m_state->acstcExp.lvlAPhysFlag; 
-		offscreen.lvlBPhysFlagPrev = m_state->acstcExp.lvlBPhysFlag;
-
-
-		offscreen.lvlBBehFlagPrev = TRUE;
-		offscreen.lvlBBehRiskValue = m_state->acstcExp.risk;
-
-		// Save the instant and cumulative values for..?
-		offscreen.actualSrcInstantValue = m_state->acstcExp.actualSrcInstantValue;
-		offscreen.cumulativeValue = m_state->acstcExp.cumulativeValue;
-
-
-		// Make temporary copies of variable values that will not change.
-		if(m_focalCoordSet == TRUE)
-			tempFocalCoord = m_state->podFollowFocal.focalCoord;
-		tempClock = m_state->simClock;
-		COORDINATE currentCoord = m_state->coord;
-
-		m_focalCoordSet = m_focalCoordSet; // does not change.
-		tempTravelRate = m_state->setTravelRate;
-		tempTravelHeading = m_state->setHeading;
-
-		memset(m_state, 0, sizeof(ANIMATSTATE));
-		memset(&m_bathySector, 0, sizeof(ENVDATA_INDEX));
-
-		m_state->simClock = tempClock;
-
-		// Copy the offscreen information into the animat state
-		memcpy(&m_state->offScreenInf, &offscreen, sizeof(OFFSCREEN_INF));
-
-
-		// Replace the animat that went off screen.
-		bathyDepth = BATHY_MIN_SEED_DEPTH;
-
-		// Continue on the other side of the screen
-		m_state->coord = m_staticLib.ContinueOtherSideOfScreenLatLon(currentCoord, envMinMax);
-		if(TRUE == m_staticLib.LatLonWithinBoundaries(m_state->coord.lat, m_state->coord.lon, envMinMax))
-		{
-			bathyValue = m_bathymetry->GetValueAtCoordinate(m_state->coord.lat, m_state->coord.lon, &m_bathySector);
-			bathyDepth = bathyValue.depth;
-		}
-
-		// In case the bathymetry on the other side is land...
-		while(bathyDepth >= BATHY_MIN_SEED_DEPTH || bathyDepth >= m_speciesDef->description.shoreFollowDepth
-					|| bathyDepth >= m_speciesDef->description.minSeedingDepth)
-		{
-			m_state->coord = m_staticLib.RandomLatLon(envMinMax, m_pRefRandom);
-			bathyValue = m_bathymetry->GetValueAtCoordinate(m_state->coord.lat, m_state->coord.lon, &m_bathySector);
-			bathyDepth = bathyValue.depth;
-		}
-
-		m_initialCoord = m_state->coord;
-		m_state->bathyDepth = bathyDepth;
-
-		if(m_state->bathyDepth > 0)
-			m_state->bathyDepth = 0; // keep the animats in the ocean.
-
-
-		////////////////////////////////////////////////////////////////
-		//-----------------------//
-		// Reinitialize Behaviors
-		//-----------------------//
-		loopCnt = 0; // a means to prevent infinte loops.
-		_ASSERT(m_speciesDef->initBehSpanCnt >= 1);
-		do
-		{
-			intVal = m_pRefRandom->rnd(0, m_speciesDef->initBehSpanCnt-1);
-			_ASSERT(0 <= intVal && intVal < m_speciesDef->initBehSpanCnt);
-			behTran = &m_speciesDef->initialBehavior.arr[intVal];
-		}while(behTran->depthSpan.shallow < m_state->bathyDepth && loopCnt++ < 1000);
-		deepest = behTran->depthSpan.deep;
-		shallowest = behTran->depthSpan.shallow;
-		intVal = m_pRefSpeciesModel->IntialBehavior(m_state->simClock, &behTran->m);
-		_ASSERT((intVal >= 0) && (intVal < 65536 /*Max number a 16-bit unsigned integer can hold*/) && ((UINT32)intVal <m_speciesDef->description.numBehaviors));
-		m_state->behState = (UINT16)intVal;
-
-		_ASSERT(m_state->behState < m_speciesDef->description.numBehaviors && m_state->behState >= 0);
-		m_state->submdl.behavior.timeLapsed = 0;
-		m_state->submdl.behavior.endDice = m_pRefRandom->myrand();
-
-		// Depth must be shallower than or equal to bathy depth.
-		m_state->depth = m_pRefSpeciesModel->DepthModel(&m_speciesDef->p.behavior[m_state->behState].dive.depth);
-
-		if(deepest < m_state->bathyDepth)
-			deepest = m_state->bathyDepth;
-		if(shallowest < m_state->bathyDepth)
-			shallowest = m_state->bathyDepth;
-		if(shallowest < deepest)
-			shallowest = deepest;
-
-
-		if(m_state->depth < deepest)
-			m_state->depth = deepest;
-		if(m_state->depth > shallowest)
-			m_state->depth = shallowest;
-
-		// Animat's intial depth must also be shallower than or equal to its maximum seeding
-		// depth, if any.
-		if(m_speciesDef->description.deepWaterSeedingDepthEnabled == TRUE)
-		{
-			if(m_state->depth < m_speciesDef->description.deepWaterSeedingDepth)
-				m_state->depth = m_speciesDef->description.deepWaterSeedingDepth;
-		}
-
-		m_state->submdl.dive.projectedDepth = m_state->depth;
-
-
-		// Travel rate submodel
-		m_state->submdl.travelRate.rate = tempTravelRate; //m_pRefSpeciesModel->RateModel(&m_speciesDef->p.behavior[m_state->behState].travelRate);
-		m_state->submdl.travelRate.timeLapsed = 0;
-		m_state->submdl.travelRate.endDice = m_pRefRandom->myrand();
-
-		// Bearing
-		m_state->submdl.travelDirection.bearing = tempTravelHeading;
-		m_state->submdl.travelDirection.timeLapsed = 0;
-		m_state->submdl.travelDirection.endDice = m_pRefRandom->myrand();
-
-		// Dive Rate
-		if(m_pRefRandom->myrand() > 0.5)
-		{
-			m_state->submdl.dive.activity = ASCENDING;
-			m_state->submdl.dive.rate.rate = m_pRefSpeciesModel->RateModel(&m_speciesDef->p.behavior[m_state->behState].dive.ascentRate);
-		}
-		else
-		{
-			m_state->submdl.dive.activity = DESCENDING;
-			m_state->submdl.dive.rate.rate = m_pRefSpeciesModel->RateModel(&m_speciesDef->p.behavior[m_state->behState].dive.descentRate);
-		}
-		m_state->submdl.dive.rate.timeLapsed = 0;
-		m_state->submdl.dive.rate.endDice = m_pRefRandom->myrand();
-
-		// Dive Depth
-		m_state->submdl.dive.targetDepth = m_pRefSpeciesModel->DepthModel(&m_speciesDef->p.behavior[m_state->behState].dive.depth);
-		if(m_state->submdl.dive.targetDepth > m_state->depth)
-			m_state->submdl.dive.targetDepth = m_state->depth;
-
-		// Beached?
-		if(m_state->bathyDepth >= m_speciesDef->acousticAversion.beachingDepth || m_state->bathyDepth >= m_speciesDef->description.shoreFollowDepth)
-		{
-			m_state->beached = TRUE;
-			m_state->submdl.travelRate.rate = 0;
-			m_state->submdl.dive.rate.rate = 0;
-			m_state->submdl.dive.activity = BEACHED;
-		}
-
-		// Set initialization to handle acoustic response and pod following?
-		// Merge behaviors???
-		m_state->setDiveRate = m_state->submdl.dive.rate.rate;
-		m_state->setHeading = m_state->submdl.travelDirection.bearing;
-		m_state->setTravelRate = m_state->submdl.travelRate.rate;
-		///////////////////////OFF Screen ////////////////////////////////////
+		bVal = (m_state->coord.lat > envMinMax.xMax || m_state->coord.lat < envMinMax.xMin ||
+			m_state->coord.lon > envMinMax.yMax || m_state->coord.lon < envMinMax.yMin);
+		if(bVal)
+			HandleOffScreeen();
 	}
-#endif
+
+
 
 	m_state->depth = DepthCalc(m_state->setDiveRate, m_state->depth, m_state->submdl.dive.activity);
-	m_state->submdl.dive.projectedDepth = DepthCalc(m_state->setDiveRate, m_state->submdl.dive.projectedDepth, m_state->submdl.dive.activity);
+	m_state->submdl.dive.calcDepth = DepthCalc(m_state->setDiveRate, m_state->submdl.dive.calcDepth, m_state->submdl.dive.activity);
 
 	if(m_bathyDepthSet == FALSE)
 	{
@@ -692,7 +557,6 @@ void CAnimat::Update(DWORD *pAnimatNumber)
 		m_state->bathyDepth = bathyValue.depth;
 		m_state->bathySlope = bathyValue.slope;
 		m_state->bathySlopeHeading = bathyValue.slopeHeading;
-
 	}
 
 	// Enforce animat depth values
@@ -717,8 +581,8 @@ void CAnimat::Update(DWORD *pAnimatNumber)
 		return;
 	}
 
-
-	// Restore to previous modeled values if any modifiers temporarily changed the state values.
+	// Restore any set values determined though modeling there were temporariliy changed
+	// by modifiers at the end of the previous iteration.
 	m_state->setDiveRate = m_state->submdl.dive.rate.rate;
 	m_state->setHeading = m_state->submdl.travelDirection.bearing;
 	m_state->setTravelRate = m_state->submdl.travelRate.rate;
@@ -743,12 +607,12 @@ void CAnimat::Update(DWORD *pAnimatNumber)
 		m_state->podFollowFocal.timeLapsed++;
 
 	// Depth environmental attractors
-	if(m_state->depthEnvAtt.isActive == TRUE)
-		m_state->depthEnvAtt.timeLapsed++;
+	//if(m_state->depthEnvAtt.isActive == TRUE)
+		//m_state->depthEnvAtt.timeLapsed++;
 
 	// Temperature environmental attractors
-	if(m_state->tempEnvAtt.isActive == TRUE)
-		m_state->tempEnvAtt.timeLapsed++;
+	//if(m_state->tempEnvAtt.isActive == TRUE)
+		//m_state->tempEnvAtt.timeLapsed++;
 
 	// Shore following has no time lapse.
 
@@ -759,33 +623,36 @@ void CAnimat::Update(DWORD *pAnimatNumber)
 	// Determine which, if any, of the three depthenvironmental attractors has been
 	// activated and the desired heading.  Desired head is a function of the slope's
 	// heading.
-	RunEnvAttrctrResponse(&m_speciesDef->p.behavior[m_state->behState].depthEnvAtt,
-		&m_state->depthEnvAtt, m_state);
+	pNormalBehaviorRef = &m_speciesDef->p.behavior[m_state->behState];
+	RunEnvAttrctrResponse(&pNormalBehaviorRef->depthEnvAtt,	&m_state->depthEnvAtt, m_state);
 
-	RunEnvAttrctrResponse(&m_tempEnvAttCoordSet, &m_speciesDef->p.behavior[m_state->behState].tempEnvAtt,
-		&m_state->tempEnvAtt);
+	//RunEnvAttrctrResponse(&m_tempEnvAttCoordSet, &m_speciesDef->p.behavior[m_state->behState].tempEnvAtt,
+		//&m_state->tempEnvAtt);
 	RunPodFollowingResponse();
 	RunAcousticResponse();
 
+	//----------------------------------------------------------------------------------//
+	// 4. Determine the animat's behavior state for the next iteration
 	//-------------------------------------------------//
-	// 4. Determine the animat's current behavior state
-	//-------------------------------------------------//
-	// Changed 1/21/10 pending discussion with Dorian.
-	// Determine if time for a behavior transition and what the next behavior is if so.
-//	if(m_state->submdl.dive.surfInterval.timeLapsed >= m_state->submdl.dive.surfInterval.setDuration && m_state->depth==0)
-//		BehaviorTransition(); // moved to dive
 	_ASSERT(m_speciesDef->p.behavior[m_state->behState].nrmlBehTransCnt >= 1);
 
 	/* Only check for behavior transition if there are multiple behaviors and a next
 	 * behavior has not been determined. */
-	if(m_speciesDef->description.numBehaviors > 1)
-		BehaviorTransition();
+	if(m_speciesDef->description.numBehaviors > 1 && m_state->behTransActive == FALSE)
+		BehaviorTransitionx();
+
+
+
+#ifdef _DEBUG
+	if(m_state->behTransActive == TRUE)
+		_ASSERT(m_state->nextBehState >= 0);
+#endif
 
 	/* Actual behavior transitions occur only at the end of a surface interval the animat
 	 * is at the surface, and a next behavior has been determined..*/
-	if(m_state->submdl.dive.surfInterval.timeLapsed >= m_state->submdl.dive.surfInterval.setDuration &&
-		m_state->submdl.dive.activity == IN_SURFACE_INTERVAL && 
-		m_state->behTransActive == TRUE)
+	bVal = m_state->submdl.dive.surfInterval.timeLapsed >= m_state->submdl.dive.surfInterval.setDuration;
+	bVal &= m_state->submdl.dive.activity == IN_SURFACE_INTERVAL && m_state->behTransActive == TRUE;
+	if(bVal)
 	{
 		_ASSERT(m_state->nextBehState >= 0);
 		m_state->behState = (UINT16)m_state->nextBehState;
@@ -793,7 +660,6 @@ void CAnimat::Update(DWORD *pAnimatNumber)
 
 		// Maintained for both behavior termination formulea
 		m_state->submdl.behavior.timeLapsed = 0;
-#if 1
 		if(m_speciesDef->p.behavior[m_state->behState].nrmlBehTermType == T50_K_TERM)
 		{
 			m_state->submdl.behavior.endDice = m_pRefRandom->myrand();
@@ -809,7 +675,6 @@ void CAnimat::Update(DWORD *pAnimatNumber)
 			m_state->submdl.behavior.timeRemaining = (int)m_pRefSpeciesModel->RateModel(&gauss);
 			m_state->submdl.behavior.endDice = 0;
 		}
-#endif
 		m_state->behTransActive = FALSE;
 		m_state->nextBehState = -1;
 	}
@@ -824,7 +689,7 @@ void CAnimat::Update(DWORD *pAnimatNumber)
 	DIVEMDL diveMdl = m_speciesDef->p.behavior[m_state->behState].dive;;
 
 	// Bottom Following will override animat travel rate.
-	if(m_state->submdl.dive.activity == BOTTOM_FOLLOWING && diveMdl.bttmFollow.type == BOTTOMFOLLOWS_REPLACEMENT_MDL)
+	if(m_state->submdl.dive.activity == BOTTOM_FOLLOWING && 	diveMdl.bttmFollow.type == BOTTOMFOLLOWS_REPLACEMENT_MDL)
 		trvlRateMdl = diveMdl.bttmFollow.rateMdl;
 
 	// Acoustic aversion, if active, may modify cetain submodels and impact transition.
@@ -833,8 +698,7 @@ void CAnimat::Update(DWORD *pAnimatNumber)
 	// Other active stimulus-based behaviors only impact transition.  Shore following
 	// doesn't.
 	PodFollowingAdjustState(&travelDirMdl);
-	EnvAttractorAdjustState(&travelDirMdl, &m_state->tempEnvAtt);
-	//EnvAttractorAdjustState(&travelDirMdl, &m_state->depthEnvAtt);
+	//EnvAttractorAdjustState(&travelDirMdl, &m_state->tempEnvAtt);
 
 
 
@@ -1076,6 +940,12 @@ void CAnimat::RunPodFollowingResponse()
 {
 	DISTANGL da;// = {0};
 
+	// Testing and Debug
+#ifdef _DEBUG
+	if(m_uniqueId == 1)
+		m_uniqueId = 1;
+#endif
+
 	m_state->podFollowFocal.isActive = FALSE;// explicitly stating...
 
 	if(m_focalCoordSet == FALSE)
@@ -1088,27 +958,27 @@ void CAnimat::RunPodFollowingResponse()
 	// distance, set pod following active.
 	da = m_staticLib.DetermineBearing(m_state->coord, m_state->podFollowFocal.focalCoord);
 
-	// Debugging
-	//da.angle = 0; // Animat does do crwdb in the forced angle.
-	//
-
 	m_state->podFollowFocal.desiredHeading = da.angle;
 	m_state->podFollowFocal.distanceTo = da.distance;
 
 	// Commenting these out made the animat behave normally not under pod following influence, as expected.
-	if(da.distance > m_state->podFollowFocal.maxFocalDistance)
+	if(da.distance > m_state->podFollowFocal.focalDistance)
 		m_state->podFollowFocal.isActive = TRUE;
 	else
 		m_state->podFollowFocal.timeLapsed = 0;
 
+#ifdef _DEBUG
+	if(m_uniqueId == 1 && da.distance <= m_state->podFollowFocal.focalDistance)
+		m_uniqueId = 1;
+#endif
+
+
 	m_focalCoordSet = FALSE;
 }
 
-// Needs work when more is known, especially delta considerations.
 void CAnimat::RunEnvAttrctrResponse(DEPTH_ENV_ATTRACTOR_MDL *Mdl, ENVATTRACTORSTATE *pEnvAttractorStateRef,
 									const ANIMATSTATE *pRefAnimatState)
 {
-	DISTANGL da;
 	pEnvAttractorStateRef->isActive = FALSE;// explicitly stating...
 
 	BATHYCOMPARE bathyShelfCmp;
@@ -1163,7 +1033,7 @@ void CAnimat::RunEnvAttrctrResponse(DEPTH_ENV_ATTRACTOR_MDL *Mdl, ENVATTRACTORST
 		{
 			pEnvAttractorStateRef->desiredHeading = pRefAnimatState->bathySlopeHeading + 180.0;// Stimuli's angle.
 			pEnvAttractorStateRef->value = pRefAnimatState->setTravelRate; // Stimuli's magnitude
-			pEnvAttractorStateRef->timeLapsed++;
+			//pEnvAttractorStateRef->timeLapsed++;
 			pEnvAttractorStateRef->isActive = TRUE;
 		}
 		else
@@ -1178,7 +1048,7 @@ void CAnimat::RunEnvAttrctrResponse(DEPTH_ENV_ATTRACTOR_MDL *Mdl, ENVATTRACTORST
 		{
 			pEnvAttractorStateRef->desiredHeading = pRefAnimatState->bathySlopeHeading; // Stimuli's angle.
 			pEnvAttractorStateRef->value = pRefAnimatState->setTravelRate; // Stimuli's magnitude
-			pEnvAttractorStateRef->timeLapsed++;
+			//pEnvAttractorStateRef->timeLapsed++;
 			pEnvAttractorStateRef->isActive = TRUE;
 		}
 		else
@@ -1195,7 +1065,7 @@ void CAnimat::RunEnvAttrctrResponse(DEPTH_ENV_ATTRACTOR_MDL *Mdl, ENVATTRACTORST
 		}
 
 		pEnvAttractorStateRef->value = pRefAnimatState->setTravelRate; // Stimuli's magnitude
-		pEnvAttractorStateRef->timeLapsed++;
+		//pEnvAttractorStateRef->timeLapsed++;
 		pEnvAttractorStateRef->isActive = TRUE;
 
 		// Slope
@@ -1210,6 +1080,7 @@ void CAnimat::RunEnvAttrctrResponse(DEPTH_ENV_ATTRACTOR_MDL *Mdl, ENVATTRACTORST
 
 
 // Needs work when more is known, especially delta considerations.
+#if 0
 void CAnimat::RunEnvAttrctrResponse(BOOL *CoordIsSet, ENVATTRACTORMDL *Mdl, ENVATTRACTORSTATE *State)
 {
 	DISTANGL da;
@@ -1217,7 +1088,7 @@ void CAnimat::RunEnvAttrctrResponse(BOOL *CoordIsSet, ENVATTRACTORMDL *Mdl, ENVA
 
 	if(*CoordIsSet == FALSE)
 	{
-		State->timeLapsed = 0;
+		//State->timeLapsed = 0;
 		return;
 	}
 
@@ -1229,16 +1100,16 @@ void CAnimat::RunEnvAttrctrResponse(BOOL *CoordIsSet, ENVATTRACTORMDL *Mdl, ENVA
 		// distance, set pod following active.
 		da = m_staticLib.DetermineBearing(m_state->coord, State->coordTo);
 		State->desiredHeading = da.angle;
-		State->distanceTo = da.distance;
+		//State->distanceTo = da.distance;
 
 		// For now, just set active to TRUE.
 		State->isActive = TRUE;
 	}
-	else
-		State->timeLapsed = 0;
+	//else
+		//State->timeLapsed = 0;
 	*CoordIsSet = FALSE;
 }
-
+#endif
 void CAnimat::HandleDepthEnvironmentalAttractor()
 {
 	const DIRECTIONSTATE *dirStateCpy = &m_state->submdl.travelDirection;
@@ -1774,22 +1645,11 @@ void CAnimat::EnforceDepthValueRules()
 	if(m_state->submdl.dive.activity == BOTTOM_FOLLOWING)
 		m_state->depth = m_state->bathyDepth;
 	else
-		m_state->submdl.dive.projectedDepth = m_state->depth;
-
-#if 0
-	// If the animat is not bottom following or descending or descending reversal
-	// set the projected depth equal to the actual.
-	if(m_state->submdl.dive.activity != BOTTOM_FOLLOWING && m_state->submdl.dive.activity != DESCENDING &&
-		m_state->submdl.dive.activity != DESCENDING_REVERSAL)
-		m_state->submdl.dive.projectedDepth = m_state->depth;
-	else if(m_state->submdl.dive.activity == BOTTOM_FOLLOWING)
-		m_state->depth = m_state->bathyDepth;
-#endif
-
-
+		m_state->submdl.dive.calcDepth = m_state->depth;
 }
 
 // Used for both depth and temperature.
+#if 0
 void CAnimat::EnvAttractorAdjustState(DIRCTNMDL *TravelDirMdl, ENVATTRACTORSTATE *EnvRs)
 {
 	if(EnvRs->isActive == TRUE && EnvRs->timeLapsed == 0)
@@ -1798,11 +1658,16 @@ void CAnimat::EnvAttractorAdjustState(DIRCTNMDL *TravelDirMdl, ENVATTRACTORSTATE
 	if(EnvRs->isActive == TRUE)
 		TravelDirMdl->modelType = CORRELATED_RANDOM_WALK_WITH_DIR_BIASING;
 }
-
+#endif
 
 void CAnimat::PodFollowingAdjustState(DIRCTNMDL *TravelDirMdl)
 {
-	if(m_state->podFollowFocal.isActive == TRUE/* && m_state->podFollowFocal.timeLapsed == 0*/)
+#ifdef _DEBUG
+	if(m_uniqueId == 1 && m_state->podFollowFocal.isActive == TRUE)
+		m_uniqueId = 1;
+#endif
+
+	if(m_state->podFollowFocal.isActive == TRUE && m_state->podFollowFocal.timeLapsed == 0)
 		m_state->submdl.travelDirection.endDice = -1; //forces a change in travel direction
 
 	if(m_state->podFollowFocal.isActive == TRUE)
@@ -2020,7 +1885,7 @@ MATRIX *CAnimat::GetCurrentBehaviorTransitionMatrix(int *TimeRow)
 *	structure holding relevant behavior information.
 *
 *****************************************************************************************/
-void CAnimat::BehaviorTransition()
+void CAnimat::BehaviorTransitionx()
 {
 	int transtionRow;
 	BEHTRANSMDL *behTrans = NULL;
@@ -2030,20 +1895,11 @@ void CAnimat::BehaviorTransition()
 	// BEHTRANS_TERM_MODEL is set to T50_K_TERM and the next behavior has been determined
 	// using time elapsed or when BEHTRANS_TERM_MODEL is set to T50_K_TERM and the
 	// remaining time in the behavior reaches zero.
-	if(m_state->behTransActive == TRUE)
-	{
-		_ASSERT(m_state->nextBehState >= 0);
-		return;
-	}
-	else if(m_speciesDef->p.behavior[m_state->behState].nrmlBehTermType == GAUSSIAN_TERM && m_state->submdl.behavior.timeRemaining > 0)
+	if(m_speciesDef->p.behavior[m_state->behState].nrmlBehTermType == GAUSSIAN_TERM && m_state->submdl.behavior.timeRemaining > 0)
 	{
 		m_state->submdl.behavior.timeRemaining--;
 		return;
 	}
-
-
-	//_ASSERT(m_state->nextBehState == -1);
-	//_ASSERT(m_speciesDef->p.behavior[m_state->behState].nrmlBehTransCnt >= 1);
 
 	//----------------------------------------------------------------------------------//
 	// Determine which behavior transition matrix to use.
@@ -2051,32 +1907,18 @@ void CAnimat::BehaviorTransition()
 	nrmlBehTransMatrix = GetCurrentBehaviorTransitionMatrix(&transtionRow);
 	//----------------------------------------------------------------------------------//
 
-	//----------------------------------------------------------------------------------//
-	// Environmental Attractors Override (NOT CURRENTLY IMPLEMENTED SO VERIFY NOT ACTIVE)
-	//----------------------------------------------------------------------------------//
-	_ASSERT(m_state->tempEnvAtt.isActive == FALSE);
-//	if(m_state->depthEnvAtt.isActive && m_state->tempEnvAtt.isActive)
-//	{
-//		if(m_speciesDef->p.behavior[m_state->behState].depthHasPriorityOverTemp == TRUE)
-//			behTrans = &m_speciesDef->p.behavior[m_state->behState].depthEnvAttBehTrans;
-//		else
-//			behTrans = &m_speciesDef->p.behavior[m_state->behState].tempEnvAttBehTrans;
-//	}
-//	else if(m_state->depthEnvAtt.isActive)
-//		behTrans = &m_speciesDef->p.behavior[m_state->behState].depthEnvAttBehTrans;
-	//else
-	if(m_state->tempEnvAtt.isActive)
-		behTrans = &m_speciesDef->p.behavior[m_state->behState].tempEnvAttBehTrans;
-	//-----------------------------------------------------------------------------------//
-
 
 	//----------------------------------------------------------------------------------//
 	// Behavior Transition
 	//---------------------//
 	// Determine if there is a behavior transition.  BehaviorTransition() returning a -1
 	// means no transition.
-	m_state->nextBehState = (INT16)m_pRefSpeciesModel->BehaviorTransition(m_speciesDef->p.behavior[m_state->behState].nrmlBehTermType,
-		&m_state->submdl.behavior, nrmlBehTransMatrix, m_state->simClock);
+	m_state->nextBehState = (INT16)m_pRefSpeciesModel->BehaviorTransition(
+		m_speciesDef->p.behavior[m_state->behState].nrmlBehTermType,
+		&m_state->submdl.behavior,
+		nrmlBehTransMatrix,
+		m_state->simClock);
+
 	if(m_state->nextBehState == -1)
 		return;
 
@@ -2356,8 +2198,6 @@ BOOL CAnimat::RunDiveModel(const DIVEMDL *Model)
 		if(state->surfInterval.timeLapsed <= state->surfInterval.setDuration)
 			break;
 
-//		BehaviorTransition(); 
-
 		state->activity = DESCENDING;
 		state->rate.rate = m_pRefSpeciesModel->RateModel(&Model->descentRate);
 		state->rate.timeLapsed = 0;
@@ -2372,7 +2212,7 @@ BOOL CAnimat::RunDiveModel(const DIVEMDL *Model)
 
 		// If the projected depth is shallower than the target depth break, otherwise 
 		// transition to ASCENDING.
-		if(state->projectedDepth > state->targetDepth)
+		if(state->calcDepth > state->targetDepth)
 			break;
 
 		state->activity = ASCENDING;
@@ -2384,7 +2224,7 @@ BOOL CAnimat::RunDiveModel(const DIVEMDL *Model)
 		break;
 
 	case ASCENDING:
-		_ASSERTE(state->projectedDepth == m_state->depth);
+		_ASSERTE(state->calcDepth == m_state->depth);
 
 		// If the animat hasn't reached the surface break.
 		if(m_state->depth < 0)
@@ -2439,7 +2279,7 @@ BOOL CAnimat::RunDiveModel(const DIVEMDL *Model)
 		break;
 
 	case ASCENDING_REVERSAL:
-		_ASSERTE(state->projectedDepth == m_state->depth);
+		_ASSERTE(state->calcDepth == m_state->depth);
 
 		if(m_state->depth == 0)
 		{
@@ -2468,7 +2308,7 @@ BOOL CAnimat::RunDiveModel(const DIVEMDL *Model)
 		break;
 
 	case DESCENDING_REVERSAL:
-		_ASSERTE(state->projectedDepth == m_state->depth);
+		_ASSERTE(state->calcDepth == m_state->depth);
 	
 		// Switch to either ascend or reveral ascend if the duration of the current leg
 		// is up or bethos reached.
@@ -2536,7 +2376,7 @@ COORDINATE CAnimat::CalcNewCoord(COORDINATE InitCoord, COORDINATE CurrentCoord, 
 	COORDINATE c;
 
 	bear = (PI / 180) * Heading;
-	if(DistanceCalcMethod == PLANAR_GEOMETRY)
+	if(DistanceCalcMethod == PLANAR_GEOMETRY) // planar geometry
 	{
 		// Add the XY components of the distance traveled this iteration to the total XY
 		// distance traveled for the entire simulation. 
@@ -2548,7 +2388,7 @@ COORDINATE CAnimat::CalcNewCoord(COORDINATE InitCoord, COORDINATE CurrentCoord, 
 		bear = atan2(pDeltaXY->y,pDeltaXY->x);
 		pRefCoord = &InitCoord;
 	}
-	else //DistanceCalcMethod = LAT_LON
+	else //DistanceCalcMethod = LAT_LON (Great Circle)
 	{
 		meters = Rate;
 		pRefCoord = &CurrentCoord;
@@ -2652,7 +2492,7 @@ void CAnimat::GetFileOutStateCopy(ANIMATSTATE_FILEOUT *State)
 	State->temperature = 0;//(float)m_temperature;
 
 	State->targetDepth = (float)m_state->submdl.dive.targetDepth;
-	State->calcDepth = (float)m_state->submdl.dive.projectedDepth; //30
+	State->calcDepth = (float)m_state->submdl.dive.calcDepth; //30
 	State->xDistance = (float)m_state->deltaXY.x; // 41.A
 	State->yDistance = (float)m_state->deltaXY.y; // 41.B
 

@@ -25,7 +25,7 @@ DWORD WINAPI DelayInputToBathyBitmapWindowThread(LPVOID lpParameter)
 	while(threadInf->noRepaint == FALSE)
 		Sleep(10); // here noRepaint is being used as an acknowlegement that the thread is running.
 
-	Sleep(2000);
+	Sleep(500);
 	threadInf->running = FALSE;
 	g_bBlockNextMouseClick = FALSE;
 	CloseHandle(threadInf->hdl);
@@ -115,8 +115,6 @@ LRESULT CALLBACK BathyBitmapDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	int listBoxCount;
 	BOOL fileSelected;
 	LRESULT dlgResult;
-	CSpecies *pSpe;
-
 
 	static CFileExtracter fileExtractor;
 

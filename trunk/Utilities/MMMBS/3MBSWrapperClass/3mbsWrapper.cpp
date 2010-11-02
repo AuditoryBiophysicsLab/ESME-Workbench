@@ -171,6 +171,8 @@ String^ mbs::C3mbs::MbsResultToString(mbs::mbsRESULT Result)
 		return gcnew String("INVALID_SPECIES_SEEEDING_DEPTH");
 	case mbsRESULT::COORDINATE_OFF_MAP: // 52
 		return gcnew String("COORDINATE_OFF_MAP");	
+	case mbsRESULT::NULL_POINTER_RETUNRED_ERROR:
+		return gcnew String("NULL_POINTER_RETURNED_ERROR");	
 	default:
 		return gcnew String("unlisted error....");
 	}
@@ -1155,7 +1157,7 @@ mbs::mbsANIMAT_STATE mbs::C3mbs::RetrieveFirstAnimatStateAtIndex(DWORD Index)
 	//mas.temperature = as;
 	//mas.packedData =
 	mas.targetDepth = as.submdl.dive.targetDepth;
-	mas.calcDepth = as.submdl.dive.projectedDepth;
+	mas.calcDepth = as.submdl.dive.calcDepth;
 	mas.xDistance = as.deltaXY.x; // 41
 	mas.yDistance = as.deltaXY.y; // 41
 
@@ -1356,6 +1358,9 @@ void mbs::C3mbs::SetConfiguration(mbsCONFIG Configuration)
 	if(Configuration.maintainFirstAnimatState == true) // (C), tells 3mb to hold the first animat's state for the entire run.
 		c.maintainFirstAnimatState = TRUE;
 
+	_ASSERT(m_sce != NULL);
+	if(m_sce == NULL)
+		return;
 	return m_sce->SetConfiguration(c);
 }
 mbs::mbsCONFIG mbs::C3mbs::GetConfiguration()
@@ -1722,11 +1727,19 @@ mbs::mbsSCENARIO_PARAMS mbs::C3mbs::GetSceParams()
 
 unsigned int mbs::C3mbs::LibraryVersionSuper()
 {
+	_ASSERT(m_sce != NULL);
+	if(m_sce == NULL)
+		return 0;
+
 	return m_sce->GetScenarioParamsCopy().libVerSuper;
 }
 
 unsigned int mbs::C3mbs::LibraryVersionSub()
 {
+	_ASSERT(m_sce != NULL);
+	if(m_sce == NULL)
+		return 0;
+
 	return m_sce->GetScenarioParamsCopy().libVerSub;
 }
 

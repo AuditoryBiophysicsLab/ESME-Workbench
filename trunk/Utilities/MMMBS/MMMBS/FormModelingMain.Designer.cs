@@ -2258,94 +2258,94 @@ namespace MBSGUI
             // 
             this.ShallowEnvAttButton00.BackColor = System.Drawing.Color.Chartreuse;
             this.ShallowEnvAttButton00.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ShallowEnvAttButton00.Location = new System.Drawing.Point(146, 70);
+            this.ShallowEnvAttButton00.Location = new System.Drawing.Point(212, 70);
             this.ShallowEnvAttButton00.Name = "ShallowEnvAttButton00";
             this.ShallowEnvAttButton00.Size = new System.Drawing.Size(21, 15);
             this.ShallowEnvAttButton00.TabIndex = 166;
             this.ShallowEnvAttButton00.UseVisualStyleBackColor = false;
-            this.ShallowEnvAttButton00.Click += new System.EventHandler(this.ToggleShallowWaterState);
+            this.ShallowEnvAttButton00.Click += new System.EventHandler(this.ToggleSlopeWaterState);
             // 
             // ShallowEnvAttButton02
             // 
             this.ShallowEnvAttButton02.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ShallowEnvAttButton02.Enabled = false;
             this.ShallowEnvAttButton02.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ShallowEnvAttButton02.Location = new System.Drawing.Point(146, 118);
+            this.ShallowEnvAttButton02.Location = new System.Drawing.Point(212, 118);
             this.ShallowEnvAttButton02.Name = "ShallowEnvAttButton02";
             this.ShallowEnvAttButton02.Size = new System.Drawing.Size(21, 15);
             this.ShallowEnvAttButton02.TabIndex = 153;
             this.ShallowEnvAttButton02.UseVisualStyleBackColor = false;
-            this.ShallowEnvAttButton02.Click += new System.EventHandler(this.ToggleShallowWaterState);
+            this.ShallowEnvAttButton02.Click += new System.EventHandler(this.ToggleSlopeWaterState);
             // 
             // ShallowEnvAttButton03
             // 
             this.ShallowEnvAttButton03.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ShallowEnvAttButton03.Enabled = false;
             this.ShallowEnvAttButton03.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ShallowEnvAttButton03.Location = new System.Drawing.Point(146, 142);
+            this.ShallowEnvAttButton03.Location = new System.Drawing.Point(212, 142);
             this.ShallowEnvAttButton03.Name = "ShallowEnvAttButton03";
             this.ShallowEnvAttButton03.Size = new System.Drawing.Size(21, 15);
             this.ShallowEnvAttButton03.TabIndex = 154;
             this.ShallowEnvAttButton03.UseVisualStyleBackColor = false;
-            this.ShallowEnvAttButton03.Click += new System.EventHandler(this.ToggleShallowWaterState);
+            this.ShallowEnvAttButton03.Click += new System.EventHandler(this.ToggleSlopeWaterState);
             // 
             // ShallowEnvAttButton01
             // 
             this.ShallowEnvAttButton01.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ShallowEnvAttButton01.Location = new System.Drawing.Point(146, 94);
+            this.ShallowEnvAttButton01.Location = new System.Drawing.Point(212, 94);
             this.ShallowEnvAttButton01.Name = "ShallowEnvAttButton01";
             this.ShallowEnvAttButton01.Size = new System.Drawing.Size(21, 15);
             this.ShallowEnvAttButton01.TabIndex = 152;
             this.ShallowEnvAttButton01.UseVisualStyleBackColor = true;
-            this.ShallowEnvAttButton01.Click += new System.EventHandler(this.ToggleShallowWaterState);
+            this.ShallowEnvAttButton01.Click += new System.EventHandler(this.ToggleSlopeWaterState);
             // 
             // ShallowEnvAttButton04
             // 
             this.ShallowEnvAttButton04.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ShallowEnvAttButton04.Enabled = false;
             this.ShallowEnvAttButton04.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ShallowEnvAttButton04.Location = new System.Drawing.Point(641, 68);
+            this.ShallowEnvAttButton04.Location = new System.Drawing.Point(706, 68);
             this.ShallowEnvAttButton04.Name = "ShallowEnvAttButton04";
             this.ShallowEnvAttButton04.Size = new System.Drawing.Size(21, 15);
             this.ShallowEnvAttButton04.TabIndex = 155;
             this.ShallowEnvAttButton04.UseVisualStyleBackColor = false;
-            this.ShallowEnvAttButton04.Click += new System.EventHandler(this.ToggleShallowWaterState);
+            this.ShallowEnvAttButton04.Click += new System.EventHandler(this.ToggleSlopeWaterState);
             // 
             // ShallowEnvAttButton05
             // 
             this.ShallowEnvAttButton05.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ShallowEnvAttButton05.Enabled = false;
             this.ShallowEnvAttButton05.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ShallowEnvAttButton05.Location = new System.Drawing.Point(641, 92);
+            this.ShallowEnvAttButton05.Location = new System.Drawing.Point(706, 92);
             this.ShallowEnvAttButton05.Name = "ShallowEnvAttButton05";
             this.ShallowEnvAttButton05.Size = new System.Drawing.Size(21, 15);
             this.ShallowEnvAttButton05.TabIndex = 156;
             this.ShallowEnvAttButton05.UseVisualStyleBackColor = false;
-            this.ShallowEnvAttButton05.Click += new System.EventHandler(this.ToggleShallowWaterState);
+            this.ShallowEnvAttButton05.Click += new System.EventHandler(this.ToggleSlopeWaterState);
             // 
             // ShallowEnvAttButton06
             // 
             this.ShallowEnvAttButton06.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ShallowEnvAttButton06.Enabled = false;
             this.ShallowEnvAttButton06.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ShallowEnvAttButton06.Location = new System.Drawing.Point(641, 116);
+            this.ShallowEnvAttButton06.Location = new System.Drawing.Point(706, 116);
             this.ShallowEnvAttButton06.Name = "ShallowEnvAttButton06";
             this.ShallowEnvAttButton06.Size = new System.Drawing.Size(21, 15);
             this.ShallowEnvAttButton06.TabIndex = 157;
             this.ShallowEnvAttButton06.UseVisualStyleBackColor = false;
-            this.ShallowEnvAttButton06.Click += new System.EventHandler(this.ToggleShallowWaterState);
+            this.ShallowEnvAttButton06.Click += new System.EventHandler(this.ToggleSlopeWaterState);
             // 
             // ShallowEnvAttButton07
             // 
             this.ShallowEnvAttButton07.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ShallowEnvAttButton07.Enabled = false;
             this.ShallowEnvAttButton07.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ShallowEnvAttButton07.Location = new System.Drawing.Point(641, 140);
+            this.ShallowEnvAttButton07.Location = new System.Drawing.Point(706, 140);
             this.ShallowEnvAttButton07.Name = "ShallowEnvAttButton07";
             this.ShallowEnvAttButton07.Size = new System.Drawing.Size(21, 15);
             this.ShallowEnvAttButton07.TabIndex = 158;
             this.ShallowEnvAttButton07.UseVisualStyleBackColor = false;
-            this.ShallowEnvAttButton07.Click += new System.EventHandler(this.ToggleShallowWaterState);
+            this.ShallowEnvAttButton07.Click += new System.EventHandler(this.ToggleSlopeWaterState);
             // 
             // ColdEnvAttButton00
             // 
@@ -2443,12 +2443,12 @@ namespace MBSGUI
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(136, 51);
+            this.label7.Location = new System.Drawing.Point(208, 51);
             this.label7.Margin = new System.Windows.Forms.Padding(3, 0, 1, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(38, 12);
+            this.label7.Size = new System.Drawing.Size(28, 12);
             this.label7.TabIndex = 167;
-            this.label7.Text = "Shallow";
+            this.label7.Text = "Slope";
             // 
             // label8
             // 
@@ -2457,20 +2457,20 @@ namespace MBSGUI
             this.label8.Location = new System.Drawing.Point(176, 51);
             this.label8.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(27, 12);
+            this.label8.Size = new System.Drawing.Size(28, 12);
             this.label8.TabIndex = 168;
-            this.label8.Text = "Deep";
+            this.label8.Text = "Basin";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(205, 51);
+            this.label9.Location = new System.Drawing.Point(142, 51);
             this.label9.Margin = new System.Windows.Forms.Padding(1, 0, 3, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(29, 12);
+            this.label9.Size = new System.Drawing.Size(26, 12);
             this.label9.TabIndex = 169;
-            this.label9.Text = "Break";
+            this.label9.Text = "Shelf";
             // 
             // label10
             // 
@@ -2491,7 +2491,7 @@ namespace MBSGUI
             this.DeepEnvAttButton00.Size = new System.Drawing.Size(21, 15);
             this.DeepEnvAttButton00.TabIndex = 185;
             this.DeepEnvAttButton00.UseVisualStyleBackColor = false;
-            this.DeepEnvAttButton00.Click += new System.EventHandler(this.ToggleDeepWaterState);
+            this.DeepEnvAttButton00.Click += new System.EventHandler(this.ToggleBasinWaterState);
             // 
             // DeepEnvAttButton02
             // 
@@ -2503,7 +2503,7 @@ namespace MBSGUI
             this.DeepEnvAttButton02.Size = new System.Drawing.Size(21, 15);
             this.DeepEnvAttButton02.TabIndex = 172;
             this.DeepEnvAttButton02.UseVisualStyleBackColor = false;
-            this.DeepEnvAttButton02.Click += new System.EventHandler(this.ToggleDeepWaterState);
+            this.DeepEnvAttButton02.Click += new System.EventHandler(this.ToggleBasinWaterState);
             // 
             // DeepEnvAttButton03
             // 
@@ -2515,7 +2515,7 @@ namespace MBSGUI
             this.DeepEnvAttButton03.Size = new System.Drawing.Size(21, 15);
             this.DeepEnvAttButton03.TabIndex = 173;
             this.DeepEnvAttButton03.UseVisualStyleBackColor = false;
-            this.DeepEnvAttButton03.Click += new System.EventHandler(this.ToggleDeepWaterState);
+            this.DeepEnvAttButton03.Click += new System.EventHandler(this.ToggleBasinWaterState);
             // 
             // DeepEnvAttButton01
             // 
@@ -2525,7 +2525,7 @@ namespace MBSGUI
             this.DeepEnvAttButton01.Size = new System.Drawing.Size(21, 15);
             this.DeepEnvAttButton01.TabIndex = 171;
             this.DeepEnvAttButton01.UseVisualStyleBackColor = true;
-            this.DeepEnvAttButton01.Click += new System.EventHandler(this.ToggleDeepWaterState);
+            this.DeepEnvAttButton01.Click += new System.EventHandler(this.ToggleBasinWaterState);
             // 
             // DeepEnvAttButton04
             // 
@@ -2537,7 +2537,7 @@ namespace MBSGUI
             this.DeepEnvAttButton04.Size = new System.Drawing.Size(21, 15);
             this.DeepEnvAttButton04.TabIndex = 174;
             this.DeepEnvAttButton04.UseVisualStyleBackColor = false;
-            this.DeepEnvAttButton04.Click += new System.EventHandler(this.ToggleDeepWaterState);
+            this.DeepEnvAttButton04.Click += new System.EventHandler(this.ToggleBasinWaterState);
             // 
             // DeepEnvAttButton05
             // 
@@ -2549,7 +2549,7 @@ namespace MBSGUI
             this.DeepEnvAttButton05.Size = new System.Drawing.Size(21, 15);
             this.DeepEnvAttButton05.TabIndex = 175;
             this.DeepEnvAttButton05.UseVisualStyleBackColor = false;
-            this.DeepEnvAttButton05.Click += new System.EventHandler(this.ToggleDeepWaterState);
+            this.DeepEnvAttButton05.Click += new System.EventHandler(this.ToggleBasinWaterState);
             // 
             // DeepEnvAttButton06
             // 
@@ -2561,7 +2561,7 @@ namespace MBSGUI
             this.DeepEnvAttButton06.Size = new System.Drawing.Size(21, 15);
             this.DeepEnvAttButton06.TabIndex = 176;
             this.DeepEnvAttButton06.UseVisualStyleBackColor = false;
-            this.DeepEnvAttButton06.Click += new System.EventHandler(this.ToggleDeepWaterState);
+            this.DeepEnvAttButton06.Click += new System.EventHandler(this.ToggleBasinWaterState);
             // 
             // DeepEnvAttButton07
             // 
@@ -2573,100 +2573,100 @@ namespace MBSGUI
             this.DeepEnvAttButton07.Size = new System.Drawing.Size(21, 15);
             this.DeepEnvAttButton07.TabIndex = 177;
             this.DeepEnvAttButton07.UseVisualStyleBackColor = false;
-            this.DeepEnvAttButton07.Click += new System.EventHandler(this.ToggleDeepWaterState);
+            this.DeepEnvAttButton07.Click += new System.EventHandler(this.ToggleBasinWaterState);
             // 
             // BreakEnvAttButton00
             // 
             this.BreakEnvAttButton00.BackColor = System.Drawing.Color.Chartreuse;
             this.BreakEnvAttButton00.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BreakEnvAttButton00.Location = new System.Drawing.Point(212, 70);
+            this.BreakEnvAttButton00.Location = new System.Drawing.Point(145, 70);
             this.BreakEnvAttButton00.Name = "BreakEnvAttButton00";
             this.BreakEnvAttButton00.Size = new System.Drawing.Size(21, 15);
             this.BreakEnvAttButton00.TabIndex = 200;
             this.BreakEnvAttButton00.UseVisualStyleBackColor = false;
-            this.BreakEnvAttButton00.Click += new System.EventHandler(this.ToggleBreakWaterState);
+            this.BreakEnvAttButton00.Click += new System.EventHandler(this.ToggleShelfWaterState);
             // 
             // BreakEnvAttButton02
             // 
             this.BreakEnvAttButton02.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.BreakEnvAttButton02.Enabled = false;
             this.BreakEnvAttButton02.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BreakEnvAttButton02.Location = new System.Drawing.Point(212, 118);
+            this.BreakEnvAttButton02.Location = new System.Drawing.Point(145, 118);
             this.BreakEnvAttButton02.Name = "BreakEnvAttButton02";
             this.BreakEnvAttButton02.Size = new System.Drawing.Size(21, 15);
             this.BreakEnvAttButton02.TabIndex = 187;
             this.BreakEnvAttButton02.UseVisualStyleBackColor = false;
-            this.BreakEnvAttButton02.Click += new System.EventHandler(this.ToggleBreakWaterState);
+            this.BreakEnvAttButton02.Click += new System.EventHandler(this.ToggleShelfWaterState);
             // 
             // BreakEnvAttButton03
             // 
             this.BreakEnvAttButton03.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.BreakEnvAttButton03.Enabled = false;
             this.BreakEnvAttButton03.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BreakEnvAttButton03.Location = new System.Drawing.Point(212, 142);
+            this.BreakEnvAttButton03.Location = new System.Drawing.Point(145, 142);
             this.BreakEnvAttButton03.Name = "BreakEnvAttButton03";
             this.BreakEnvAttButton03.Size = new System.Drawing.Size(21, 15);
             this.BreakEnvAttButton03.TabIndex = 188;
             this.BreakEnvAttButton03.UseVisualStyleBackColor = false;
-            this.BreakEnvAttButton03.Click += new System.EventHandler(this.ToggleBreakWaterState);
+            this.BreakEnvAttButton03.Click += new System.EventHandler(this.ToggleShelfWaterState);
             // 
             // BreakEnvAttButton01
             // 
             this.BreakEnvAttButton01.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BreakEnvAttButton01.Location = new System.Drawing.Point(212, 94);
+            this.BreakEnvAttButton01.Location = new System.Drawing.Point(145, 94);
             this.BreakEnvAttButton01.Name = "BreakEnvAttButton01";
             this.BreakEnvAttButton01.Size = new System.Drawing.Size(21, 15);
             this.BreakEnvAttButton01.TabIndex = 186;
             this.BreakEnvAttButton01.UseVisualStyleBackColor = true;
-            this.BreakEnvAttButton01.Click += new System.EventHandler(this.ToggleBreakWaterState);
+            this.BreakEnvAttButton01.Click += new System.EventHandler(this.ToggleShelfWaterState);
             // 
             // BreakEnvAttButton04
             // 
             this.BreakEnvAttButton04.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.BreakEnvAttButton04.Enabled = false;
             this.BreakEnvAttButton04.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BreakEnvAttButton04.Location = new System.Drawing.Point(707, 68);
+            this.BreakEnvAttButton04.Location = new System.Drawing.Point(644, 68);
             this.BreakEnvAttButton04.Name = "BreakEnvAttButton04";
             this.BreakEnvAttButton04.Size = new System.Drawing.Size(21, 15);
             this.BreakEnvAttButton04.TabIndex = 189;
             this.BreakEnvAttButton04.UseVisualStyleBackColor = false;
-            this.BreakEnvAttButton04.Click += new System.EventHandler(this.ToggleBreakWaterState);
+            this.BreakEnvAttButton04.Click += new System.EventHandler(this.ToggleShelfWaterState);
             // 
             // BreakEnvAttButton05
             // 
             this.BreakEnvAttButton05.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.BreakEnvAttButton05.Enabled = false;
             this.BreakEnvAttButton05.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BreakEnvAttButton05.Location = new System.Drawing.Point(707, 92);
+            this.BreakEnvAttButton05.Location = new System.Drawing.Point(644, 92);
             this.BreakEnvAttButton05.Name = "BreakEnvAttButton05";
             this.BreakEnvAttButton05.Size = new System.Drawing.Size(21, 15);
             this.BreakEnvAttButton05.TabIndex = 190;
             this.BreakEnvAttButton05.UseVisualStyleBackColor = false;
-            this.BreakEnvAttButton05.Click += new System.EventHandler(this.ToggleBreakWaterState);
+            this.BreakEnvAttButton05.Click += new System.EventHandler(this.ToggleShelfWaterState);
             // 
             // BreakEnvAttButton06
             // 
             this.BreakEnvAttButton06.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.BreakEnvAttButton06.Enabled = false;
             this.BreakEnvAttButton06.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BreakEnvAttButton06.Location = new System.Drawing.Point(707, 116);
+            this.BreakEnvAttButton06.Location = new System.Drawing.Point(644, 116);
             this.BreakEnvAttButton06.Name = "BreakEnvAttButton06";
             this.BreakEnvAttButton06.Size = new System.Drawing.Size(21, 15);
             this.BreakEnvAttButton06.TabIndex = 191;
             this.BreakEnvAttButton06.UseVisualStyleBackColor = false;
-            this.BreakEnvAttButton06.Click += new System.EventHandler(this.ToggleBreakWaterState);
+            this.BreakEnvAttButton06.Click += new System.EventHandler(this.ToggleShelfWaterState);
             // 
             // BreakEnvAttButton07
             // 
             this.BreakEnvAttButton07.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.BreakEnvAttButton07.Enabled = false;
             this.BreakEnvAttButton07.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BreakEnvAttButton07.Location = new System.Drawing.Point(707, 140);
+            this.BreakEnvAttButton07.Location = new System.Drawing.Point(644, 140);
             this.BreakEnvAttButton07.Name = "BreakEnvAttButton07";
             this.BreakEnvAttButton07.Size = new System.Drawing.Size(21, 15);
             this.BreakEnvAttButton07.TabIndex = 192;
             this.BreakEnvAttButton07.UseVisualStyleBackColor = false;
-            this.BreakEnvAttButton07.Click += new System.EventHandler(this.ToggleBreakWaterState);
+            this.BreakEnvAttButton07.Click += new System.EventHandler(this.ToggleShelfWaterState);
             // 
             // label5
             // 
@@ -3060,12 +3060,12 @@ namespace MBSGUI
             // 
             this.label25.AutoSize = true;
             this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label25.Location = new System.Drawing.Point(701, 51);
+            this.label25.Location = new System.Drawing.Point(641, 51);
             this.label25.Margin = new System.Windows.Forms.Padding(1, 0, 3, 0);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(29, 12);
+            this.label25.Size = new System.Drawing.Size(26, 12);
             this.label25.TabIndex = 257;
-            this.label25.Text = "Break";
+            this.label25.Text = "Shelf";
             // 
             // label26
             // 
@@ -3074,20 +3074,20 @@ namespace MBSGUI
             this.label26.Location = new System.Drawing.Point(672, 51);
             this.label26.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(27, 12);
+            this.label26.Size = new System.Drawing.Size(28, 12);
             this.label26.TabIndex = 256;
-            this.label26.Text = "Deep";
+            this.label26.Text = "Basin";
             // 
             // label27
             // 
             this.label27.AutoSize = true;
             this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label27.Location = new System.Drawing.Point(632, 51);
+            this.label27.Location = new System.Drawing.Point(702, 51);
             this.label27.Margin = new System.Windows.Forms.Padding(3, 0, 1, 0);
             this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(38, 12);
+            this.label27.Size = new System.Drawing.Size(28, 12);
             this.label27.TabIndex = 255;
-            this.label27.Text = "Shallow";
+            this.label27.Text = "Slope";
             // 
             // label15
             // 
@@ -3520,9 +3520,9 @@ namespace MBSGUI
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Marine Mammal Movement and Behavior Species Model - Biomimetica";
             this.Load += new System.EventHandler(this.FormSpeciesDesigner_Load);
-            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.FormSpeciesDefinition_MouseUp);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FormSpeciesDefinition_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.FormSpeciesDefinition_MouseMove);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.FormSpeciesDefinition_MouseUp);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);

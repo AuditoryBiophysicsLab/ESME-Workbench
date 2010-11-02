@@ -665,7 +665,9 @@ DWORD WINAPI RunPDFThread(LPVOID lpParameter)
 
 	double candidateLat, candidateLon;
 
-	BOOL bRes;
+	int relationToPolygon;
+	BATHYEXTREMES bathyextremes;
+	BOOL bVal;
 	RECT rect;
 	int seedAttemptCnt;
 	int polygonAnimatAdd;
@@ -718,6 +720,9 @@ DWORD WINAPI RunPDFThread(LPVOID lpParameter)
 	_ASSERT(param->mean > 0 &&  param->std > 0);
 	pdf = staticLib.GenerateCumInvGaussPDF(param->mean, param->std);
 	_ASSERT(pdf.buffLen > 1);
+
+	// Added 2010/11/02 for BU's ESME seeding.
+	bathyextremes = param->pShapeRef->pRefSce->GetBathymetryClassRef()->GetExtremes();
 
 	//-------------------------------------------------------------------------------------//
 	// Use results of the Cumulative Gaussian Probability Distribution Function to make 
@@ -935,18 +940,42 @@ DWORD WINAPI RunPDFThread(LPVOID lpParameter)
 				candidateLon = param->p3mbRandomRef->rndreal(lonMin, lonMax);
 
 				// Add animats to scenario around polygon y.
-				if(INSIDE == (bRes = staticLib.InsidePolygon(pPolygonRef, numVertices, candidateLat, candidateLon)))
+				relationToPolygon = staticLib.InsidePolygon(pPolygonRef, numVertices, candidateLat, candidateLon); 
+				if(INSIDE == relationToPolygon)
 				{
 					inhabInf.coord.lat = candidateLat;
 					inhabInf.coord.lon = candidateLon;
-					param->pShapeRef->pRefSce->AddIndividual(iSpe, inhabInf);
-					totalAnimatAdd++;
+					//param->pShapeRef->pRefSce->AddIndividual(iSpe, inhabInf);
+
+					//--------------------------------------------------------------------//
+					// Added 2010/11/02 for BU's ESME seeding.
+					bVal  = inhabInf.coord.lat <= bathyextremes.xMax;
+					bVal &= inhabInf.coord.lat >= bathyextremes.xMin;
+					bVal &= inhabInf.coord.lon <= bathyextremes.yMax;
+					bVal &= inhabInf.coord.lon >= bathyextremes.yMin;
+
+					if(bVal == TRUE)
+					{
+						param->pShapeRef->pRefSce->AddIndividual(iSpe, inhabInf);
+						totalAnimatAdd++;
+					}
+
+#ifdef _DEBUG
+					if(bVal != TRUE)
+						totalAnimatAdd = totalAnimatAdd;
+
+#endif
+					//--------------------------------------------------------------------//
+
+					//totalAnimatAdd++;
 					break;
 				}
 				seedAttemptCnt++;
 			}
+#ifdef _DEBUG
 			if(param->threadInf.exit == FALSE)
-				_ASSERT(bRes == INSIDE && seedAttemptCnt <= 3000);
+				_ASSERT(relationToPolygon == INSIDE && seedAttemptCnt <= 3000);
+#endif
 		}
 	}
 
