@@ -159,8 +159,24 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public bool IsRunning { get; set; }
 
-        public bool IsRunning { get; set; }
+        public bool IsRunning
+        {
+            get { return _isRunning; }
+            set
+            {
+                if (_isRunning == value) return;
+                _isRunning = value;
+                NotifyPropertyChanged(IsRunningChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsRunningChangedEventArgs = ObservableHelper.CreateArgs<SimulationViewModel>(x => x.IsRunning);
+        bool _isRunning;
+
+        #endregion
+
 
         public bool IsCompleted { get; set; }
 
