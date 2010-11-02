@@ -2,12 +2,13 @@
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
   <?define ProductName = "ESME WorkBench 2010"?>
-  <?define OldProductVersion="1.2.0.0" ?>
-  <?define ProductVersion="1.3.0.0" ?>
+  <?define OldProductVersion="1.3.0.0" ?>
+  <?define ProductVersion="1.4.0.0" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
   <?define ESMEPath="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release"?>
+  <?define MMMBSPath="C:\Projects\ESME Deliverables\trunk\Utilities\MMMBS\demoProjects"?>
   <?define EnvironmentBuilderPath="C:\Projects\ESME Deliverables\trunk\Utilities\EnvironmentBuilder\bin\x86\Release"?>
   <?define ReleaseNotesPath="C:\Projects\ESME Deliverables\trunk\Release Notes"?>
   <Product Id="$(var.ProductCode)" 
@@ -18,9 +19,9 @@
            Language="1033" 
            Codepage="1252">
     <Package Description="ESME WorkBench 2010"
-             Comments="Deliverable for Phase 1, Iteration 2"
+             Comments="Deliverable for Phase 1, Iteration 4"
              Manufacturer="$(var.Manufacturer)" 
-             InstallerVersion="300" 
+             InstallerVersion="400" 
              Languages="1033" 
              SummaryCodepage="1252"
              Compressed="yes" 
@@ -114,10 +115,16 @@
             <!-- 3MB assemblies -->
             <File Id="MMMBSLib.dll"
                   Name="3MBSLib.dll"
-                  Source="$(var.ESMEPath)\3MBSLib.dll" />
+                  Source="$(var.MMMBSPath)\3MBSLib.dll" />
             <File Id="MMMBWrapperClass.dll"
                   Name="3MBWrapperClass.dll"
-                  Source="$(var.ESMEPath)\3MBWrapperClass.dll" />
+                  Source="$(var.MMMBSPath)\3MBWrapperClass.dll" />
+            <File Id="MMMB.exe"
+                  Name="3MB.exe"
+                  Source="$(var.MMMBSPath)\3MB.exe" />
+            <File Id="MMMBSpeciesBuilder.exe"
+                  Name="3mbSpeciesBuilder.exe"
+                  Source="$(var.MMMBSPath)\3mbSpeciesBuilder.exe" />
 
             <!-- Miscellaneous Microsoft assemblies -->
             <File Id="Microsoft.Expression.InteractionsDLL" 
