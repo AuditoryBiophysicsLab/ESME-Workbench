@@ -10,6 +10,7 @@ namespace ESME.Model
     public partial class BehaviorModel
     {
         //todo: think about this. 
+#if false
         static List<ActiveSourceState> TestCalculateActiveTimeSteps(NemoScenario nemoScenario, NemoMode nemoMode)
         {
             var results = new List<ActiveSourceState>();
@@ -34,6 +35,7 @@ namespace ESME.Model
                 }
             }
             return results;
-        }
+        } 
+#endif
     }
 }
