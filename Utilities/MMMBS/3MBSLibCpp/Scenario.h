@@ -172,8 +172,12 @@ typedef struct AnimatFileNaming
 	TCHAR	fileTitle[SIZE_256]; // this should be changed to BUFFERED_MAX_PATH
 }ANIMATFILENAMING;
 
+//--------------------------------------------------------------------------------------//
+// For commenting out the bodies of this class's methods for debugging.
+//#define NOCSENARIOFUNCTIONS
+//--------------------------------------------------------------------------------------//
 
-class CScenario : public IRunnable
+class CScenario: public IRunnable
 {
 public:
 	//-----------------------//
@@ -184,15 +188,17 @@ public:
 
 
 private: // member variables
-	CStaticScenario m_staticScenario;
+
 	CFileManagerStatic m_fileManagerStatic;
+
 	C3mbStaticsLib m_staticLib;
-	//C3MBRandom m_3MBRandom;
+	CStaticScenario m_staticScenario;
 
-
+#ifndef NOCSENARIOFUNCTIONS
 	CListManager <CSpecies> m_speciesList; // the population of animats by species
-	//CListManager <ACOUSTICSRCESUMMARY> m_acstcSrcList;
+
 	CFileManager m_fileMgr; // file manager handles scenario execution file IO
+
 	CMutex m_mbsActiveMutex; // a mutex for thread safety.
 	CMutex m_mbsPausedMutex; // a mutex for thread safety.
 	CirThread m_runThread; 	// A thread class for all threads run by class CScenario.
@@ -217,7 +223,7 @@ private: // member variables
 		// than zero and decrements each iteration.  If zero, stops until calling routine
 		// sceResets it.
 	//----------------------------------------------------------------------//
-
+#endif//_REMOVEME2
 	BOOL AcousticSourcePings(DWORD CurrentIteration, ACOUSTICSRCEINF AcstcSrc);
 	BOOL Throttle(int ThrottleIteration, int CurrentIteration, int ScenarioDuration, BOOL Durationless);
 
@@ -231,7 +237,6 @@ public: // Member Functions
 	// of a sound source for the Nth sound source model loaded in
 
 	RESLT ExtractBinaryDataToText(TCHAR *szFileName);
-
 
 	CWorkingList *GetWorkingList(int StartTime, int Duration);
 

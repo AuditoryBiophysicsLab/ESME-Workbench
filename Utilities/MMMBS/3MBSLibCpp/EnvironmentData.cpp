@@ -1031,6 +1031,7 @@ int CEnvironmentData::CalculateStorageBytes(void)
 	int vAdditionalBytes16byteAlign;
 	int totalBytes;
 
+	reserved1[0] = reserved2[0] = 0; //quiet compiler warnings
 
 	_ASSERT(m_dimensionType == ENVDAT_UNINITIALIZED || m_dimensionType == ENVDAT_3D || m_dimensionType == ENVDAT_4D);
 	if(m_dimensionType == ENVDAT_3Dx2V)

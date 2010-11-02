@@ -55,7 +55,7 @@ int C3MBRandom::flip(double prob)
 /* Flip a biased coin - true if heads */
 {
 //	copyIt(prob);
-    double d = randomperc ();
+    randomperc ();
 
     if (randomperc () <= prob)
         return (1);
@@ -73,7 +73,7 @@ int C3MBRandom::initrandomnormaldeviate()
 double C3MBRandom::noise(double mu, double sigma)
 /* normal noise with specified mean & std dev: mu & sigma */
 {
-    double d = randomnormaldeviate ();
+    randomnormaldeviate ();
     return ((randomnormaldeviate () * sigma) + mu);
 }
 
@@ -100,8 +100,8 @@ int C3MBRandom::randomize()
 double C3MBRandom::randomnormaldeviate()
 /* random normal deviate after ACM algorithm 267 / Box-Muller Method */
 {
-    double d = randomperc ();
     double t, rndx1;
+    randomperc ();
 
     if (rndcalcflag)
     {
@@ -142,7 +142,7 @@ int C3MBRandom::rnd(int low, int high)
 /* Pick a random integer between low and high */
 {
     int i;
-    double d = randomperc ();
+    randomperc ();
 
     if (low >= high)
         i = low;

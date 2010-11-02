@@ -43,9 +43,10 @@ namespace _3MBParallelTest
         {
             int i;
             int j;
-            int nNumInstances = 4;              // Number of 3mb processes to run in parallel.
+            int nNumInstances = 1;              // Number of 3mb processes to run in parallel.
             int numAnimatsPerInstance = 1000;  // Number of animats in each 3mb instance.
             uint duration = (uint)(5 * 3600);        // Number of simulated seconds 3mb is to run.
+            int mmbSetDuration = (int)0;        // Number of simulated seconds 3mb is to run.
             uint numIterations = duration+1; ;  // The number of iterations is always the duration +1.
             string speFileName = "generic_mysticete.spe"; // demo species to use.
             Boolean feedback = true;
@@ -87,6 +88,8 @@ namespace _3MBParallelTest
                 mbConfig.enabled = false; // binary output enabled/disabled
                 mbConfig.durationLess = true; // ESME runs 3mb in a durationless mode.
                 mmmbs[i].SetConfiguration(mbConfig);
+
+                mmmbs[i].SetDuration(mmbSetDuration);
 
 
                 //----------------------------------------------------------------------//
@@ -197,7 +200,28 @@ namespace _3MBParallelTest
 
                 // Allocate space for this 3mb intance's animat positional data.
                 mbStepPosition[i] = new mbsPosition[numAnimatsPerInstance];
+
+
+                // Get Initial animat data.
+                mbResult = mmmbs[i].GetAnimatCoordinates(mbStepPosition[i]);
+
+                sz = string.Format(
+                    "Initial Location Proc ({1}/{2}) animat({3}/{4}):  [{5,11:0.0000000}, {6,11:0.0000000}, {7,7:0.00}]",
+                    i,                                // 0: step
+                    j+1,                              // 1: process
+                    nNumInstances,                    // 2: number of proceses
+                    0+1,                              // 3: animat number (animat index + 1)
+                    numAnimatsPerInstance,            // 4: number of animats (per 3mb instance)
+                    mbStepPosition[i][0].latitude,    // 5: lat of animat at index 0
+                    mbStepPosition[i][0].longitude,   // 6: lon of animat at index 0
+                    mbStepPosition[i][0].depth);      // 7: depth of animat at index 0
+                Console.WriteLine(sz);
+
+
+
             }
+
+
 
             //--------------------------------------------------------------------------//
             // Step through the 3mb instances

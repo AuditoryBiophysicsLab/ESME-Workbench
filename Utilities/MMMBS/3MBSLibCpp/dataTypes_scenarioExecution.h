@@ -40,7 +40,7 @@ typedef struct FollowState
 	// Status
 	BOOL isActive;
 	int timeLapsed;
-	double maxFocalDistance; // s/b in species modeling, but is set during setup, so is placed here.
+	double focalDistance; // s/b in species modeling, but is set during setup, so is placed here.
 	double distanceTo;
 	double desiredHeading;// the heading this stimulus wants the animat to go
 	COORDINATE focalCoord;
@@ -54,13 +54,13 @@ typedef struct ShoreFollowState
 
 typedef struct EnvironmentalAttractorSettings
 {
-	double distanceTo;
-	double angleTo;
+	double distanceTo; // remove
+	double angleTo; // remove
 	double desiredHeading;// the heading this stimulus wants the animat to go
 	BOOL isActive;
-	COORDINATE coordTo;
+	COORDINATE coordTo; //remove
 	double value;
-	int timeLapsed;
+	//int timeLapsed;
 }ENVATTRACTORSTATE;
 
 
@@ -92,7 +92,7 @@ typedef struct DiveState
 	SRFINTRVLSTATE surfInterval;
 	RATESTATE rate;
 	double targetDepth;
-	double projectedDepth;
+	double calcDepth;
 	REVERSALSTATE reversal;
 	ACTIVITY activity;
 }DIVESTATE;
@@ -133,27 +133,22 @@ typedef struct AcousticAversionState
 {
 	// Stimulus
 	COORDINATE actualSrcCoord;
-	//COORDINATE responseCoord;
 	double actualSrcInstantValue;
 	double cumulativeValue;
-	//double responseValue;
 	double responseSrcAngle;
 	double desiredHeading;
 
 	// Book Keeping
-	// Status
 	double risk;
 	double maxInstant;
 	BOOL isSet; // set by external function.  Being set does not mean acoustic aversion is active.
 	BOOL isActive; // Once acoustic respons is activated it remains activated
-	//BOOL isPermanentlyActive;
 	int timeLapsed;
+
 	BOOL lvlAPhysFlag; // Flag indicating if the source is currently exceeding threshold.
 	int lvlAPhysFlagCnt; // Number of times threshold has been exceeded (not duration of it).
 	BOOL lvlBPhysFlag; // Flag indicating if the source is currently exceeding threshold.
 	int lvlBPhysFlagCnt; // Number of times threshold has been exceeded (not duration of it).
-
-
 	BOOL lvlBBehFlag; //Flag indicating if the source is currently exceeding threshold.
 	int lvlBBehFlagCnt; //Number of times threshold has been exceeded (not duration of it).
 }ACSTCAVRSN_STATE;
@@ -195,7 +190,6 @@ typedef struct AnimatState
 	UINT16 behState;		// behavioral state of the marine mammal at time
 	INT16 nextBehState;    // the next behavioral state of the marine mammal at time
 	BOOL behTransActive;    // indicates a next behavior state has been determined.
-	//COORDINATE initialCoord;
 	BOOL beached;
 
 	double setDiveRate; // set by the models

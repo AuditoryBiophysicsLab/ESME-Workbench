@@ -54,6 +54,8 @@ void UpdateRunScenario(GLOBALDATA *gdata, DWORD TotalAnimatCount, DWORD Duration
 	SCESTATE state;
 	static SCEACTIVITY prevAct; // previous activity
 	double prcnt;
+	DWORD currentTickCount;
+	DWORD totMs;
 
 	static TCHAR  szBuff[SIZE_128] = {0};
 	HHMMSS hhmmss;
@@ -71,15 +73,18 @@ void UpdateRunScenario(GLOBALDATA *gdata, DWORD TotalAnimatCount, DWORD Duration
 	}
 	else if(SpecialCase == FINALIZE)
 	{
-		hhmmss = staticLib.Time_To24HrMinSec((GetTickCount()-startTick)/1000);
-		_stprintf_s(szBuff, sizeof(szBuff), "Simulation Finished.  Total Time: %02d:%02d:%02d",
-			hhmmss.hour, hhmmss.min, hhmmss.sec);
+		totMs = GetTickCount()-startTick;
+		hhmmss = staticLib.Time_To24HrMinSec((totMs)/1000);
+		
+		_stprintf_s(szBuff, sizeof(szBuff), "Simulation Finished.  Total Time: %02d:%02d:%02d (%d ms)",
+			hhmmss.hour, hhmmss.min, hhmmss.sec, totMs);
 		PostMessage(gdata->hwin, WM_UPDATE_PROGRESS_MESSAGE , 0, (LPARAM)szBuff);
 		return;
 	}
 	else
 	{
-		if(GetTickCount() - lastUpdateTick < REFRESHTICKS && prevAct != __RUN_FINISHED)
+		currentTickCount = GetTickCount();
+		if(currentTickCount - lastUpdateTick < REFRESHTICKS && prevAct != __RUN_FINISHED)
 			return;
 
 		lastUpdateTick = GetTickCount();
@@ -100,9 +105,10 @@ void UpdateRunScenario(GLOBALDATA *gdata, DWORD TotalAnimatCount, DWORD Duration
 	switch(state.activity)
 	{
 	case __RUN_FINISHED:
-		hhmmss = staticLib.Time_To24HrMinSec((GetTickCount()-startTick)/1000);
-		_stprintf_s(szBuff, sizeof(szBuff), "Simulation Finished.  Total Time: %02d:%02d:%02d",
-			hhmmss.hour, hhmmss.min, hhmmss.sec);
+		totMs = GetTickCount()-startTick;
+		hhmmss = staticLib.Time_To24HrMinSec((totMs)/1000);
+		_stprintf_s(szBuff, sizeof(szBuff), "Simulation Finished.  Total Time: %02d:%02d:%02d (%d ms)",
+			hhmmss.hour, hhmmss.min, hhmmss.sec, totMs);
 		PostMessage(gdata->hwin, WM_UPDATE_PROGRESS_MESSAGE , 0, (LPARAM)szBuff);
 		break;
 	case ___ALLOCOUTPUTBUFF:
@@ -178,7 +184,7 @@ DWORD WINAPI ScenarioThread(LPVOID lpParameter)
 	DWORD startTick = GetTickCount();
 	DWORD totAniCnt;
 	DWORD duration;
-
+	BOOL windowPreviouslyDisabled;
 
 	//int remSecs = 0;
 	//HHMMSS hhmmss;
@@ -224,6 +230,10 @@ DWORD WINAPI ScenarioThread(LPVOID lpParameter)
 		while(gdata->sceRunThreadInf.exit == FALSE && gdata->sce.GetState().activity != __RUN_FINISHED)
 		{
 			UpdateRunScenario(gdata, totAniCnt, duration);
+			windowPreviouslyDisabled = EnableWindow(gdata->hwin, TRUE);
+			if(windowPreviouslyDisabled != FALSE)
+				windowPreviouslyDisabled = FALSE;
+
 			Sleep(25);
 		}
 

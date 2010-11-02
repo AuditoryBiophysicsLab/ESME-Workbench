@@ -88,9 +88,6 @@ namespace MBSGUI
             this.CanclButton = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.DepthSlopeButton = new System.Windows.Forms.Button();
-            this.DepthBasinButton = new System.Windows.Forms.Button();
-            this.DepthShelfButton = new System.Windows.Forms.Button();
             this.TravelRateGroupBox.SuspendLayout();
             this.SrfIntrvlGroupBox.SuspendLayout();
             this.BttmFollowGroupBox.SuspendLayout();
@@ -634,16 +631,16 @@ namespace MBSGUI
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(19, 136);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(157, 13);
+            this.label1.Size = new System.Drawing.Size(84, 13);
             this.label1.TabIndex = 127;
-            this.label1.Text = "Simultaneous Activation Priority:";
+            this.label1.Text = "Attractor Priority:";
             // 
             // TemperaturePriorityRadioButton
             // 
             this.TemperaturePriorityRadioButton.AutoSize = true;
             this.TemperaturePriorityRadioButton.Enabled = false;
             this.TemperaturePriorityRadioButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TemperaturePriorityRadioButton.Location = new System.Drawing.Point(250, 134);
+            this.TemperaturePriorityRadioButton.Location = new System.Drawing.Point(178, 134);
             this.TemperaturePriorityRadioButton.Name = "TemperaturePriorityRadioButton";
             this.TemperaturePriorityRadioButton.Size = new System.Drawing.Size(85, 17);
             this.TemperaturePriorityRadioButton.TabIndex = 126;
@@ -662,7 +659,7 @@ namespace MBSGUI
             this.TempEnvGroupBox.Controls.Add(this.TempColdValueTextBox);
             this.TempEnvGroupBox.Controls.Add(this.TempFrontWaterEnableButton);
             this.TempEnvGroupBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TempEnvGroupBox.Location = new System.Drawing.Point(288, 19);
+            this.TempEnvGroupBox.Location = new System.Drawing.Point(196, 19);
             this.TempEnvGroupBox.Name = "TempEnvGroupBox";
             this.TempEnvGroupBox.Size = new System.Drawing.Size(161, 104);
             this.TempEnvGroupBox.TabIndex = 100;
@@ -779,65 +776,56 @@ namespace MBSGUI
             // 
             // DepthEnvGroupBox
             // 
-            this.DepthEnvGroupBox.Controls.Add(this.DepthSlopeButton);
-            this.DepthEnvGroupBox.Controls.Add(this.DepthBasinButton);
-            this.DepthEnvGroupBox.Controls.Add(this.DepthShelfButton);
             this.DepthEnvGroupBox.Controls.Add(this.DepthBasinEnableButton);
             this.DepthEnvGroupBox.Controls.Add(this.DepthSlopeEnableButton);
             this.DepthEnvGroupBox.Controls.Add(this.DepthShelfEnableButton);
             this.DepthEnvGroupBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DepthEnvGroupBox.Location = new System.Drawing.Point(6, 19);
             this.DepthEnvGroupBox.Name = "DepthEnvGroupBox";
-            this.DepthEnvGroupBox.Size = new System.Drawing.Size(100, 94);
+            this.DepthEnvGroupBox.Size = new System.Drawing.Size(178, 104);
             this.DepthEnvGroupBox.TabIndex = 99;
             this.DepthEnvGroupBox.TabStop = false;
-            this.DepthEnvGroupBox.Text = "Bathymetrical";
+            this.DepthEnvGroupBox.Text = "Bathymetrical (depth and slope)";
             // 
             // DepthBasinEnableButton
             // 
             this.DepthBasinEnableButton.BackColor = System.Drawing.SystemColors.Control;
-            this.DepthBasinEnableButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
-            this.DepthBasinEnableButton.FlatAppearance.BorderSize = 0;
             this.DepthBasinEnableButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.IndianRed;
             this.DepthBasinEnableButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.RosyBrown;
             this.DepthBasinEnableButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.DepthBasinEnableButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DepthBasinEnableButton.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.DepthBasinEnableButton.Location = new System.Drawing.Point(8, 41);
+            this.DepthBasinEnableButton.Location = new System.Drawing.Point(8, 46);
             this.DepthBasinEnableButton.Name = "DepthBasinEnableButton";
-            this.DepthBasinEnableButton.Size = new System.Drawing.Size(51, 26);
+            this.DepthBasinEnableButton.Size = new System.Drawing.Size(162, 26);
             this.DepthBasinEnableButton.TabIndex = 76;
             this.DepthBasinEnableButton.TabStop = false;
-            this.DepthBasinEnableButton.Text = "Basin:";
-            this.DepthBasinEnableButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.DepthBasinEnableButton.Text = "Basin ( > -550 m,  < 1.0 deg)";
+            this.DepthBasinEnableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.DepthBasinEnableButton.UseVisualStyleBackColor = false;
             this.DepthBasinEnableButton.Click += new System.EventHandler(this.DepthShallowWaterEnableButton_Click);
             // 
             // DepthSlopeEnableButton
             // 
             this.DepthSlopeEnableButton.BackColor = System.Drawing.SystemColors.Control;
-            this.DepthSlopeEnableButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
-            this.DepthSlopeEnableButton.FlatAppearance.BorderSize = 0;
             this.DepthSlopeEnableButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.IndianRed;
             this.DepthSlopeEnableButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.RosyBrown;
             this.DepthSlopeEnableButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.DepthSlopeEnableButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DepthSlopeEnableButton.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.DepthSlopeEnableButton.Location = new System.Drawing.Point(8, 67);
+            this.DepthSlopeEnableButton.Location = new System.Drawing.Point(8, 74);
             this.DepthSlopeEnableButton.Name = "DepthSlopeEnableButton";
-            this.DepthSlopeEnableButton.Size = new System.Drawing.Size(51, 23);
+            this.DepthSlopeEnableButton.Size = new System.Drawing.Size(162, 26);
             this.DepthSlopeEnableButton.TabIndex = 75;
             this.DepthSlopeEnableButton.TabStop = false;
-            this.DepthSlopeEnableButton.Text = "Slope:";
-            this.DepthSlopeEnableButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.DepthSlopeEnableButton.Text = "Slope ( > -150 m, > 1.0 deg)";
+            this.DepthSlopeEnableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.DepthSlopeEnableButton.UseVisualStyleBackColor = false;
             this.DepthSlopeEnableButton.Click += new System.EventHandler(this.DepthDeepWaterEnableButton_Click);
             // 
             // DepthShelfEnableButton
             // 
             this.DepthShelfEnableButton.BackColor = System.Drawing.SystemColors.Control;
-            this.DepthShelfEnableButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
-            this.DepthShelfEnableButton.FlatAppearance.BorderSize = 0;
             this.DepthShelfEnableButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.IndianRed;
             this.DepthShelfEnableButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.RosyBrown;
             this.DepthShelfEnableButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -845,11 +833,11 @@ namespace MBSGUI
             this.DepthShelfEnableButton.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.DepthShelfEnableButton.Location = new System.Drawing.Point(8, 18);
             this.DepthShelfEnableButton.Name = "DepthShelfEnableButton";
-            this.DepthShelfEnableButton.Size = new System.Drawing.Size(51, 23);
+            this.DepthShelfEnableButton.Size = new System.Drawing.Size(162, 26);
             this.DepthShelfEnableButton.TabIndex = 59;
             this.DepthShelfEnableButton.TabStop = false;
-            this.DepthShelfEnableButton.Text = "Shelf:";
-            this.DepthShelfEnableButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.DepthShelfEnableButton.Text = "Shelf ( < -550 m,  < 1.0 deg)";
+            this.DepthShelfEnableButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.DepthShelfEnableButton.UseVisualStyleBackColor = false;
             this.DepthShelfEnableButton.Click += new System.EventHandler(this.DepthShelfWaterEnableButton_Click);
             // 
@@ -858,7 +846,7 @@ namespace MBSGUI
             this.DepthPriorityRadioButton.AutoSize = true;
             this.DepthPriorityRadioButton.Enabled = false;
             this.DepthPriorityRadioButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DepthPriorityRadioButton.Location = new System.Drawing.Point(182, 134);
+            this.DepthPriorityRadioButton.Location = new System.Drawing.Point(110, 134);
             this.DepthPriorityRadioButton.Name = "DepthPriorityRadioButton";
             this.DepthPriorityRadioButton.Size = new System.Drawing.Size(54, 17);
             this.DepthPriorityRadioButton.TabIndex = 125;
@@ -953,51 +941,6 @@ namespace MBSGUI
             this.label2.TabIndex = 134;
             this.label2.Text = "Depth (m)";
             this.label2.Visible = false;
-            // 
-            // DepthSlopeButton
-            // 
-            this.DepthSlopeButton.BackColor = System.Drawing.SystemColors.Control;
-            this.DepthSlopeButton.Enabled = false;
-            this.DepthSlopeButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.IndianRed;
-            this.DepthSlopeButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.RosyBrown;
-            this.DepthSlopeButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DepthSlopeButton.Location = new System.Drawing.Point(65, 71);
-            this.DepthSlopeButton.Name = "DepthSlopeButton";
-            this.DepthSlopeButton.Size = new System.Drawing.Size(21, 15);
-            this.DepthSlopeButton.TabIndex = 78;
-            this.DepthSlopeButton.TabStop = false;
-            this.DepthSlopeButton.UseVisualStyleBackColor = false;
-            this.DepthSlopeButton.Click += new System.EventHandler(this.DepthSlopeButton_Click);
-            // 
-            // DepthBasinButton
-            // 
-            this.DepthBasinButton.BackColor = System.Drawing.SystemColors.Control;
-            this.DepthBasinButton.Enabled = false;
-            this.DepthBasinButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.IndianRed;
-            this.DepthBasinButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.RosyBrown;
-            this.DepthBasinButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DepthBasinButton.Location = new System.Drawing.Point(65, 47);
-            this.DepthBasinButton.Name = "DepthBasinButton";
-            this.DepthBasinButton.Size = new System.Drawing.Size(21, 15);
-            this.DepthBasinButton.TabIndex = 77;
-            this.DepthBasinButton.TabStop = false;
-            this.DepthBasinButton.UseVisualStyleBackColor = false;
-            this.DepthBasinButton.Click += new System.EventHandler(this.DepthBasinButton_Click);
-            // 
-            // DepthShelfButton
-            // 
-            this.DepthShelfButton.BackColor = System.Drawing.SystemColors.Control;
-            this.DepthShelfButton.Enabled = false;
-            this.DepthShelfButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.IndianRed;
-            this.DepthShelfButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.RosyBrown;
-            this.DepthShelfButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DepthShelfButton.Location = new System.Drawing.Point(65, 22);
-            this.DepthShelfButton.Name = "DepthShelfButton";
-            this.DepthShelfButton.Size = new System.Drawing.Size(21, 15);
-            this.DepthShelfButton.TabIndex = 28;
-            this.DepthShelfButton.TabStop = false;
-            this.DepthShelfButton.UseVisualStyleBackColor = false;
-            this.DepthShelfButton.Click += new System.EventHandler(this.DepthShelfButton_Click);
             // 
             // FormBehavior
             // 
@@ -1110,8 +1053,5 @@ namespace MBSGUI
         private System.Windows.Forms.Button CanclButton;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button DepthSlopeButton;
-        private System.Windows.Forms.Button DepthBasinButton;
-        private System.Windows.Forms.Button DepthShelfButton;
     }
 }

@@ -62,6 +62,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoESME", "demoProjects\ES
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3MBParallelTest", "ConsoleApplication1\3MBParallelTest.csproj", "{B59440A6-C3C7-4923-8FFC-4570BA461628}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESMECodeSnippit", "ESMECodeSnippit\ESMECodeSnippit.csproj", "{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -307,6 +309,20 @@ Global
 		{B59440A6-C3C7-4923-8FFC-4570BA461628}.Release|x64.ActiveCfg = Release|x86
 		{B59440A6-C3C7-4923-8FFC-4570BA461628}.Release|x86.ActiveCfg = Release|x86
 		{B59440A6-C3C7-4923-8FFC-4570BA461628}.Release|x86.Build.0 = Release|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Debug|Win32.ActiveCfg = Debug|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Debug|x64.ActiveCfg = Debug|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Debug|x86.ActiveCfg = Debug|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Debug|x86.Build.0 = Debug|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Release|Any CPU.ActiveCfg = Release|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Release|Mixed Platforms.Build.0 = Release|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Release|Win32.ActiveCfg = Release|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Release|x64.ActiveCfg = Release|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Release|x86.ActiveCfg = Release|x86
+		{383B0B38-C1C9-43F6-97D2-B5BED225D6A4}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

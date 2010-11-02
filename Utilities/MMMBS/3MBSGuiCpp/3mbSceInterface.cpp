@@ -868,6 +868,7 @@ int CBitmapEnvFunctions::GetSpeciesCount()
 BATHYEXTREMES CBitmapEnvFunctions::GetBathyExtremes()
 {
 	BATHYEXTREMES ret = {0};
+	CBathymetry *bathyRef;
 	switch(m_state)
 	{
 	case UNINITIALIZED_STATE:
@@ -879,7 +880,12 @@ BATHYEXTREMES CBitmapEnvFunctions::GetBathyExtremes()
 		ret.yMax = 1;
 		return ret;
 	case SEED_SCENARIO_STATE:
-		return (m_sce->GetBathymetryClassRef())->GetExtremes();
+		bathyRef = m_sce->GetBathymetryClassRef();
+		_ASSERT(bathyRef != NULL);
+		if(bathyRef == NULL)
+			return ret;
+		ret = bathyRef->GetExtremes();
+		return ret;
 	case PLAYBACK_STATE:
 		return m_playback->envData.bathymetry.GetExtremes();
 	}
@@ -888,12 +894,18 @@ BATHYEXTREMES CBitmapEnvFunctions::GetBathyExtremes()
 
 RESLT CBitmapEnvFunctions::GetRawDataCopy(RAWENVIRONMENTALDATA *pEnvironmentalData, BOOL GetSlope)
 {
+	RESLT ret;
+	CBathymetry *bathyRef;
 	switch(m_state)
 	{
 	case UNINITIALIZED_STATE:
 		return OK;
 	case SEED_SCENARIO_STATE:
-		return (m_sce->GetBathymetryClassRef())->GetRawDataCopy(pEnvironmentalData, GetSlope);
+		bathyRef = m_sce->GetBathymetryClassRef();
+		_ASSERT(bathyRef != NULL);
+		if(bathyRef == NULL)
+			return NULL_POINTER_RETUNRED_ERROR;
+		return bathyRef->GetRawDataCopy(pEnvironmentalData, GetSlope);
 	case PLAYBACK_STATE:
 		return m_playback->envData.bathymetry.GetRawDataCopy(pEnvironmentalData, GetSlope);
 	}

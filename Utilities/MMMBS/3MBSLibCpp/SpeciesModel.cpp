@@ -1132,8 +1132,6 @@ double CSpeciesModel::GetMaxRate(const GAUSS *R)
 * ARGUMENTS:
 *	Bearing - Starting bearing used as a starting point to determine next
 *					bearing.
-*	BehaviorTransition - Behavioral state used for setting calculation into correct
-*					row.
 *
 * MEMBER VARIABLES ALTERED:
 *	No other member variables are altered, but certain other member
@@ -1162,10 +1160,12 @@ double CSpeciesModel::Direction(const RANDOMWALK *M)
 	// Quiet compiler warning.
 	RANDOMWALK m = *M;
 	m.termCoeff = m.termCoeff;
-
 	return m_staticLib.KeepWithin360(m_pC3MBRandomRef->myrand() * 360);
 }
-double CSpeciesModel::Direction(const CORRANDWALK *M, double Bearing){	return m_staticLib.KeepWithin360(Bearing + m_pC3MBRandomRef->noise(0, M->perturbation));}
+double CSpeciesModel::Direction(const CORRANDWALK *M, double Bearing)
+{
+	return m_staticLib.KeepWithin360(Bearing + m_pC3MBRandomRef->noise(0, M->perturbation));
+}
 double CSpeciesModel::Direction(const CORRANDWALKDB *M, double Bearing)
 {
 	double left, right;		// degree arc, to the right or left, between current bearing and

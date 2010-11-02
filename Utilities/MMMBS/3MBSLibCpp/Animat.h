@@ -158,22 +158,22 @@ private:
 	// Stimulus-based behaviors
 	//-------------------------//
 	BOOL CoordinatesOnScreen(const COORDINATE *Crd, ENVMINMAX *EnvMinMax);
-	void HandleOffScreeen(ANIMATSTATE *State);
+	void HandleOffScreeen();
 	void RunPodFollowingResponse();
 	void PodFollowingAdjustState(DIRCTNMDL *TravelDirMdl);
 	void RunAcousticResponse();
 	void AcousticAversionAdjustModelAndState(RATEMDL *TravelRateMdl, DIRCTNMDL *TravelDirMdl, DIVEMDL *DiveMdl);
 
 	void RunEnvAttrctrResponse(DEPTH_ENV_ATTRACTOR_MDL *Mdl, ENVATTRACTORSTATE *pEnvAttractorStateRef, const ANIMATSTATE *pRefAnimatState);
-	void RunEnvAttrctrResponse(BOOL *CoordIsSet, ENVATTRACTORMDL *Mdl, ENVATTRACTORSTATE *EnvRs);
-	void EnvAttractorAdjustState(DIRCTNMDL *TravelDirMdl, ENVATTRACTORSTATE *EnvRs);
+	//void RunEnvAttrctrResponse(BOOL *CoordIsSet, ENVATTRACTORMDL *Mdl, ENVATTRACTORSTATE *EnvRs);
+	//void EnvAttractorAdjustState(DIRCTNMDL *TravelDirMdl, ENVATTRACTORSTATE *EnvRs);
 
 	void HandleDepthEnvironmentalAttractor();
 
 
 	void HandleNearbyShore(const RATEMDL *TravelRateMdl, const DIRCTNMDL *TravelDirMdl);
 	double GetShoreFollowingBearing(double NrmlHeading);
-	void BehaviorTransition();
+	void BehaviorTransitionx();
 	MATRIX *GetCurrentBehaviorTransitionMatrix(int *TimeRow);
 	void NormalTravel();
 	BOOL RunTravelRateModel(const RATEMDL *RateModel, RATESTATE *State);

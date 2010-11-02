@@ -437,18 +437,18 @@ namespace MMMBSLib
         public static Boolean ENVINFL_DEPTH_DEEP_ENABLED = false;
         public static Boolean ENVINFL_DEPTH_SHELF_ENABLED = false;
 
-        public static double ENVINFL_DEPTH_SHELF_BATHYDEPTH = -550;
-        public static double ENVINFL_DEPTH_BASIN_BATHYDEPTH = -550;
-        public static double ENVINFL_DEPTH_SLOPE_BATHYDEPTH = -150;
+        public static double ENVINFL_DEPTH_SHELF_BATHYDEPTH_METERS = -550; // negative for below surface.
+        public static double ENVINFL_DEPTH_BASIN_BATHYDEPTH_METERS = -550; // negative for below surface.
+        public static double ENVINFL_DEPTH_SLOPE_BATHYDEPTH_METERS = -150; // negative for below surface.
 
-        public static double ENVINFL_DEPTH_SHELF_BATHYSLOPE = 1.0;
-        public static double ENVINFL_DEPTH_BASIN_BATHYSLOPE = 1.0;
-        public static double ENVINFL_DEPTH_SLOPE_BATHYSLOPE = 1.0;
+        public static double ENVINFL_DEPTH_SHELF_BATHYSLOPE_DEGREES = 1.0; // values less than this
+        public static double ENVINFL_DEPTH_BASIN_BATHYSLOPE_DEGREES = 1.0; // values less than this
+        public static double ENVINFL_DEPTH_SLOPE_BATHYSLOPE_DEGREES = 1.0; // values greater than this
 
         // Temperature, Celsius
         public static Boolean ENVINFL_TEMP_COLD_ENABLED = false;
         public static Boolean ENVINFL_TEMP_WARM_ENABLED = false;
-        public static Boolean ENVINFL_TEMP_SHELF_ENABLED = false;
+        public static Boolean ENVINFL_TEMP_FRONT_ENABLED = false;
 
         public static double ENVINFL_TEMP_COLD = 20;
         public static double ENVINFL_TEMP_WARM = 70;

@@ -498,35 +498,55 @@ namespace MBSGUI
                 m_displayBehColorButton[index].BackColor = m_bitmapMgr.ToggleDisplayColor(index);
         }
 
-
-        private void ToggleShallowWaterState(object sender, EventArgs e)
-        {
-            int index = GuiUtils.MatchIndex(m_shallowWaterButton, (Button)sender);
-            CBehavior beh = m_speMdl.GetBehaviorCopy(index);
-            beh.envAttrDepth.slopeEnabled = !beh.envAttrDepth.slopeEnabled;
-            m_speMdl.SetBehavior(index, beh);
-            UpdateEnvAttState(true, beh.envAttrDepth.slopeEnabled, m_shallowWaterButton[index]);
-            UpdateModifiedStatus();
-            Run3MB(false, false);
-        }
-
-        private void ToggleDeepWaterState(object sender, EventArgs e)
-        {
-            int index = GuiUtils.MatchIndex(m_deepWaterButton, (Button)sender);
-            CBehavior beh = m_speMdl.GetBehaviorCopy(index);
-            beh.envAttrDepth.basinEnabled = !beh.envAttrDepth.basinEnabled;
-            UpdateEnvAttState(true, beh.envAttrDepth.basinEnabled, m_deepWaterButton[index]);
-            m_speMdl.SetBehavior(index, beh);
-            UpdateModifiedStatus();
-            Run3MB(false, false);
-        }
-
-        private void ToggleBreakWaterState(object sender, EventArgs e)
+        private void ToggleShelfWaterState(object sender, EventArgs e)
         {
             int index = GuiUtils.MatchIndex(m_breakWaterButton, (Button)sender);
             CBehavior beh = m_speMdl.GetBehaviorCopy(index);
+
             beh.envAttrDepth.shelfEnabled = !beh.envAttrDepth.shelfEnabled;
+            beh.envAttrDepth.basinEnabled = false;
+            beh.envAttrDepth.slopeEnabled = false;
+
             UpdateEnvAttState(true, beh.envAttrDepth.shelfEnabled, m_breakWaterButton[index]);
+            UpdateEnvAttState(true, beh.envAttrDepth.basinEnabled, m_deepWaterButton[index]);
+            UpdateEnvAttState(true, beh.envAttrDepth.slopeEnabled, m_shallowWaterButton[index]);
+
+            m_speMdl.SetBehavior(index, beh);
+            UpdateModifiedStatus();
+            Run3MB(false, false);
+        }
+
+        private void ToggleBasinWaterState(object sender, EventArgs e)
+        {
+            int index = GuiUtils.MatchIndex(m_deepWaterButton, (Button)sender);
+            CBehavior beh = m_speMdl.GetBehaviorCopy(index);
+
+            beh.envAttrDepth.shelfEnabled = false;
+            beh.envAttrDepth.basinEnabled = !beh.envAttrDepth.basinEnabled;
+            beh.envAttrDepth.slopeEnabled = false;
+
+            UpdateEnvAttState(true, beh.envAttrDepth.shelfEnabled, m_breakWaterButton[index]);
+            UpdateEnvAttState(true, beh.envAttrDepth.basinEnabled, m_deepWaterButton[index]);
+            UpdateEnvAttState(true, beh.envAttrDepth.slopeEnabled, m_shallowWaterButton[index]);
+
+            m_speMdl.SetBehavior(index, beh);
+            UpdateModifiedStatus();
+            Run3MB(false, false);
+        }
+
+        private void ToggleSlopeWaterState(object sender, EventArgs e)
+        {
+            int index = GuiUtils.MatchIndex(m_shallowWaterButton, (Button)sender);
+            CBehavior beh = m_speMdl.GetBehaviorCopy(index);
+
+            beh.envAttrDepth.shelfEnabled = false;
+            beh.envAttrDepth.basinEnabled = false;
+            beh.envAttrDepth.slopeEnabled = !beh.envAttrDepth.slopeEnabled;
+
+            UpdateEnvAttState(true, beh.envAttrDepth.shelfEnabled, m_breakWaterButton[index]);
+            UpdateEnvAttState(true, beh.envAttrDepth.basinEnabled, m_deepWaterButton[index]);
+            UpdateEnvAttState(true, beh.envAttrDepth.slopeEnabled, m_shallowWaterButton[index]);
+
             m_speMdl.SetBehavior(index, beh);
             UpdateModifiedStatus();
             Run3MB(false, false);

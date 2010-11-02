@@ -1804,6 +1804,12 @@ TCHAR *C3mbStaticsLib::MbsResultToString(RESLT MbsResult, TCHAR *szMessageBuffer
 			_snprintf_s(szCaptionBuffer, CaptionBufferLength, CaptionBufferLength, "Bad Location Error");
 		break;
 
+	case NULL_POINTER_RETUNRED_ERROR:
+		_snprintf_s(szMessageBuffer, BufferLen, BufferLen, TEXT("Null Pointer Returned"));
+		if(szCaptionBuffer != NULL && CaptionBufferLength >0)
+			_snprintf_s(szCaptionBuffer, CaptionBufferLength, CaptionBufferLength, "NULL Pointer");
+		break;
+
 	default:
 		_snprintf_s(szMessageBuffer, BufferLen, BufferLen, "Unknown Error");
 		if(szCaptionBuffer != NULL && CaptionBufferLength >0)

@@ -474,7 +474,6 @@ LRESULT CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					outputLimIntrvlDlgParam.start, outputLimIntrvlDlgParam.interval);
 			}
 			UpdateScenarioGUI(gdata);
-		break;
 			break;
 
 		case ID_SPECIFICDATAPOINTTIMES_LOADFILE:
@@ -1763,116 +1762,108 @@ LRESULT CALLBACK SceTimeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
 LRESULT CALLBACK DisplayDefaultParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	TCHAR szBuff[800];
+	TCHAR szBuff[SIZE_4096];
 	TCHAR szDate[SIZE_32];
 	TCHAR szTime[SIZE_32];
 	CScenario sce;
 	CStaticScenario sceStat;
-
+	CFileManager m_fileMgr; // file manager handles scenario execution file IO
 	int i;
-	//USERPARAMS params = sce.GetCurrentScenarioParams();
 	SCENARIOPARAMS sceParams = sce.GetScenarioParamsCopy();
-
-	sceStat.GetBuildDateTimeString(szDate, sizeof(szDate), szTime, sizeof(szTime));
 
 	lParam = lParam; // keep the compiler warning quiet.
 	switch (message)
 	{
-		case WM_INITDIALOG:
-			sprintf_s(szBuff, sizeof(szBuff), "%s%d.%02d\n\n%s%s, %s\n%s%s, %s",
-				SZ_ABOUT_VERSION2,
-				MMBSLIB_VERSION_SUPER,
-				MMBSLIB_VERSION_SUB,
-				SZ_ABOUT_BUILD2,
-				__DATE__,
-				__TIME__,
-				SZ_ABOUT_BUILD_3MBSLIB2,
-				szDate,
-				szTime
-				);
+	case WM_INITDIALOG:
+		sceStat.GetBuildDateTimeString(szDate, sizeof(szDate), szTime, sizeof(szTime));
+		sprintf_s(szBuff, sizeof(szBuff), "%s%d.%02d\n\n%s%s, %s\n%s%s, %s",
+			SZ_ABOUT_VERSION2,
+			MMBSLIB_VERSION_SUPER,
+			MMBSLIB_VERSION_SUB,
+			SZ_ABOUT_BUILD2,
+			__DATE__,
+			__TIME__,
+			SZ_ABOUT_BUILD_3MBSLIB2,
+			szDate,
+			szTime
+			);
 
-			SetDlgItemText(hDlg, IDC_STATIC_ABOUT, szBuff);
+		SetDlgItemText(hDlg, IDC_STATIC_ABOUT, szBuff);
 
-			memset(szBuff, 0, sizeof(szBuff));
+		memset(szBuff, 0, sizeof(szBuff));
 
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Bathymetry depth that all animats beach: %5.2f\n", (float)BATHY_MIN_SEED_DEPTH );
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Bathymetry depth that all animats beach: %5.2f\n", (float)BATHY_MIN_SEED_DEPTH );
 
 
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Max number of inhabitants:\n");
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tAcoustic sources and animats combined: %d\n", MAX_NUM_ANIMATS);
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Max number of inhabitants:\n");
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tAcoustic sources and animats combined: %d\n", MAX_NUM_ANIMATS);
 
+		{
+			BOOL multipleSourcesAllowed = MULTISOUNDSOURCEALLOWED; // to prevent compiler warning.
+			if(multipleSourcesAllowed == FALSE)
+				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tMax number of acoustic sources: %d\n", 1);
+		}
+
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\nAcoustic Source Ping\n");
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tOutput dB: %.1f\n", (float)ACSTC_SOURCE_LEVEL_DB);
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tStart iteration: %d\n", ACSTC_SOURCE_BEGINS_ITERATION);
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tDuty cycle: %03.2f\n", 1.0/ACSTC_SOURCE_DUTY_PERIOD);
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\n");
+
+
+		// System Allocation
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Max scenario duration: 7 days (%d seconds)\n", 7 * 24 * 60 * 60);
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Max phys memory dynamically allocated for output buffer: %d GB.\n", ((MAXIMUM_PHYSICAL_MEMORY_ALLOC/1024)/1024)/1024);
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\n");
+		SetDlgItemText(hDlg, IDC_STATIC_DEFAULT_VALUES, szBuff);
+
+
+		memset(szBuff, 0, sizeof(szBuff));
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Species groups (%d):\n", NUM_SPEGROUPS_INUSE - 1); // minus 1 for the acoustic source
+
+		for(i=0; i<(NUM_SPEGROUPS_INUSE)/2 && i<NUM_SPEGROUPS_INUSE-1; i++)
+		{
+			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t%s\n", SZSPECIESGROUPNAMEBUFFER[i]);
+			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl A Phys: %.1f\n", sceParams.speciesGroup[i].lvlAphys);
+			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl B Phys: %.1f\n", sceParams.speciesGroup[i].lvlBphys);
+			if(i != SPECIALCONSIDRTNS)
 			{
-				BOOL multipleSourcesAllowed = MULTISOUNDSOURCEALLOWED; // to prevent compiler warning.
-				if(multipleSourcesAllowed == FALSE)
-					sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tMax number of acoustic sources: %d\n", 1);
+				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tRisk: %.1f\n", sceParams.speciesGroup[i].lvlBBeh_RiskA);
 			}
-
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\nAcoustic Source Ping\n");
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tOutput dB: %.1f\n", (float)ACSTC_SOURCE_LEVEL_DB);
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tStart iteration: %d\n", ACSTC_SOURCE_BEGINS_ITERATION);
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\tDuty cycle: %03.2f\n", 1.0/ACSTC_SOURCE_DUTY_PERIOD);
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\n");
-
-
-			// System Allocation
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Max scenario duration: 7 days (%d seconds)\n", 7 * 24 * 60 * 60);
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Max phys memory dynamically allocated for output buffer: %d GB.\n", ((MAXIMUM_PHYSICAL_MEMORY_ALLOC/1024)/1024)/1024);
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\n");
-			SetDlgItemText(hDlg, IDC_STATIC_DEFAULT_VALUES, szBuff);
-
-
-			memset(szBuff, 0, sizeof(szBuff));
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "Species groups (%d):\n", NUM_SPEGROUPS_INUSE - 1); // minus 1 for the acoustic source
-
-			for(i=0; i<(NUM_SPEGROUPS_INUSE)/2 && i<NUM_SPEGROUPS_INUSE-1; i++)
+			else
 			{
-				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t%s\n", SZSPECIESGROUPNAMEBUFFER[i]);
-				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl A Phys: %.1f\n", sceParams.speciesGroup[i].lvlAphys);
-				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl B Phys: %.1f\n", sceParams.speciesGroup[i].lvlBphys);
-				if(i != SPECIALCONSIDRTNS)
-				{
-					sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tRisk: %.1f\n", sceParams.speciesGroup[i].lvlBBeh_RiskA);
-				}
-				else
-				{
-					sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl B Beh: %.1f\n", sceParams.speciesGroup[i].lvlBBeh_RiskA);
-				}
+				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl B Beh: %.1f\n", sceParams.speciesGroup[i].lvlBBeh_RiskA);
 			}
-			SetDlgItemText(hDlg, IDC_STATIC_DEFAULT_VALUES2, szBuff);
+		}
+		SetDlgItemText(hDlg, IDC_STATIC_DEFAULT_VALUES2, szBuff);
 
-			memset(szBuff, 0, sizeof(szBuff));
-			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\n");
-			for(; i<(NUM_SPEGROUPS_INUSE-1); i++)
+		memset(szBuff, 0, sizeof(szBuff));
+		sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\n");
+		for(; i<(NUM_SPEGROUPS_INUSE-1); i++)
+		{
+			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t%s\n", SZSPECIESGROUPNAMEBUFFER[i]);
+			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl A Phys: %.1f\n", sceParams.speciesGroup[i].lvlAphys);
+			sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl B Phys: %.1f\n", sceParams.speciesGroup[i].lvlBphys);
+			if(i != SPECIALCONSIDRTNS)
 			{
-				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t%s\n", SZSPECIESGROUPNAMEBUFFER[i]);
-				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl A Phys: %.1f\n", sceParams.speciesGroup[i].lvlAphys);
-				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl B Phys: %.1f\n", sceParams.speciesGroup[i].lvlBphys);
-				if(i != SPECIALCONSIDRTNS)
-				{
-					sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tRisk: %.1f\n", sceParams.speciesGroup[i].lvlBBeh_RiskA);
-				}
-				else
-				{
-					sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl B Beh: %.1f\n", sceParams.speciesGroup[i].lvlBBeh_RiskA);
-				}
+				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tRisk: %.1f\n", sceParams.speciesGroup[i].lvlBBeh_RiskA);
 			}
-			SetDlgItemText(hDlg, IDC_STATIC_DEFAULT_VALUES3, szBuff);
+			else
+			{
+				sprintf_s(&szBuff[strlen(szBuff)], sizeof(szBuff)-strlen(szBuff), "\t\tLvl B Beh: %.1f\n", sceParams.speciesGroup[i].lvlBBeh_RiskA);
+			}
+		}
+		SetDlgItemText(hDlg, IDC_STATIC_DEFAULT_VALUES3, szBuff);
+		return TRUE;
+
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) 
+		{
+			EndDialog(hDlg, LOWORD(wParam));
 			return TRUE;
-
-		case WM_COMMAND:
-			if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) 
-			{
-				EndDialog(hDlg, LOWORD(wParam));
-				return TRUE;
-			}
-			break;
+		}
+		break;
 	}
-
-//	{
-//		TCHAR dog[100];
-//		CommDlg_OpenSave_GetFolderPath(hDlg, 100, dog); 
-//	}
-
     return FALSE;
 }
 
@@ -1912,7 +1903,7 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 			SetDlgItemText(hDlg, IDC_STATIC_ABOUT, szBuff);
-				return TRUE;
+			return TRUE;
 
 		case WM_COMMAND:
 			if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) 

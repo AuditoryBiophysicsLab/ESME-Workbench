@@ -186,18 +186,18 @@ namespace MMMBSLib
             m_envAttDirDepth.basinEnabled = MBSDEFAULTS.ENVINFL_DEPTH_DEEP_ENABLED;
             m_envAttDirDepth.shelfEnabled = MBSDEFAULTS.ENVINFL_DEPTH_SHELF_ENABLED;
 
-            m_envAttDirDepth.shelfDepth = MBSDEFAULTS.ENVINFL_DEPTH_SHELF_BATHYDEPTH;
-            m_envAttDirDepth.basinDepth = MBSDEFAULTS.ENVINFL_DEPTH_BASIN_BATHYDEPTH;
-            m_envAttDirDepth.slopeDepth = MBSDEFAULTS.ENVINFL_DEPTH_SLOPE_BATHYDEPTH;
+            m_envAttDirDepth.shelfDepth = MBSDEFAULTS.ENVINFL_DEPTH_SHELF_BATHYDEPTH_METERS;
+            m_envAttDirDepth.basinDepth = MBSDEFAULTS.ENVINFL_DEPTH_BASIN_BATHYDEPTH_METERS;
+            m_envAttDirDepth.slopeDepth = MBSDEFAULTS.ENVINFL_DEPTH_SLOPE_BATHYDEPTH_METERS;
 
-            m_envAttDirDepth.shelfSlope = MBSDEFAULTS.ENVINFL_DEPTH_SHELF_BATHYSLOPE;
-            m_envAttDirDepth.basinSlope = MBSDEFAULTS.ENVINFL_DEPTH_BASIN_BATHYSLOPE;
-            m_envAttDirDepth.slopeSlope = MBSDEFAULTS.ENVINFL_DEPTH_SLOPE_BATHYSLOPE;
+            m_envAttDirDepth.shelfSlope = MBSDEFAULTS.ENVINFL_DEPTH_SHELF_BATHYSLOPE_DEGREES;
+            m_envAttDirDepth.basinSlope = MBSDEFAULTS.ENVINFL_DEPTH_BASIN_BATHYSLOPE_DEGREES;
+            m_envAttDirDepth.slopeSlope = MBSDEFAULTS.ENVINFL_DEPTH_SLOPE_BATHYSLOPE_DEGREES;
 
 
             m_envAttDirTemp.coldEnabled = MBSDEFAULTS.ENVINFL_TEMP_COLD_ENABLED;
             m_envAttDirTemp.warmEnabled = MBSDEFAULTS.ENVINFL_TEMP_WARM_ENABLED;
-            m_envAttDirTemp.frontEnabled = MBSDEFAULTS.ENVINFL_TEMP_SHELF_ENABLED;
+            m_envAttDirTemp.frontEnabled = MBSDEFAULTS.ENVINFL_TEMP_FRONT_ENABLED;
             m_envAttDirTemp.cold = MBSDEFAULTS.ENVINFL_TEMP_COLD;
             m_envAttDirTemp.warm = MBSDEFAULTS.ENVINFL_TEMP_WARM;
             m_envAttDirTemp.front = MBSDEFAULTS.ENVINFL_TEMP_SHELF;
