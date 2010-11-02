@@ -140,7 +140,7 @@
     <Compile Include="NEMO\NemoSpecies.cs" />
     <Compile Include="NEMO\NemoTrackdef.cs" />
     <Compile Include="Platform\ActiveMode.cs" />
-    <Compile Include="Platform\ActiveSourceState.cs" />
+    <Compile Include="NEMO\ActiveTimeStep.cs" />
     <Compile Include="Platform\BehaviorModel.cs" />
     <Compile Include="Platform\Exceptions.cs" />
     <Compile Include="Platform\PlatformState.cs" />

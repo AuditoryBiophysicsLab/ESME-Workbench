@@ -10,7 +10,7 @@ using HRC.Utility;
 
 namespace ESME.Platform
 {
-    public class BehaviorModel
+    public partial class BehaviorModel
     {
         public BehaviorModel(NemoPlatform nemoPlatform)
         {
@@ -26,7 +26,6 @@ namespace ESME.Platform
         }
 
         public NemoPlatform NemoPlatform { get; private set; }
-        public List<ActiveMode> ActiveModes { get; private set; }
         public PlatformStates PlatformStates { get; private set; }
         public OverlayPoint CourseStart { get; private set; }
         public OverlayPoint CourseEnd { get; private set; }
@@ -36,102 +35,15 @@ namespace ESME.Platform
 
         void Initialize()
         {
-            ActiveModes = new List<ActiveMode>();
-            
             foreach (var source in NemoPlatform.Sources)
                 foreach (var mode in source.Modes)
-                {
-                    CalculateActiveTimeSteps(NemoPlatform.NemoScenario, mode);
-                    ActiveModes.Add(new ActiveMode
-                                    {
-                                        NemoMode = mode
-                                    });
-                }
+                    mode.CalculateActiveTimeSteps(NemoPlatform.NemoScenario);
 
             //TBD: Low priority: Validate that none of the list of trackdefs overlaps in time with any others in the list
             //     Only do this after checking with NUWC to make sure it's necessary
 
             MovementModel();
         }
-
-        static List<ActiveSourceState> CalculateActiveTimeSteps(NemoScenario nemoScenario, NemoMode nemoMode)
-        {
-            var results = new List<ActiveSourceState>();
-            var scenarioEndTime = nemoScenario.StartTime + nemoScenario.Duration;
-            var pulsesPerStep = NemoBase.SimulationStepTime.TotalSeconds/nemoMode.PulseInterval.TotalSeconds;
-            //var durationPerStep = pulsesPerStep*nemoMode.PulseLength.TotalSeconds;
-            var fractionalPulseCount = 0.0;
-            var realPulseCount = 0;
-            for (var curTime = nemoScenario.StartTime; curTime <= scenarioEndTime; curTime += NemoBase.SimulationStepTime)
-            {
-                fractionalPulseCount += pulsesPerStep;
-                if ((int)fractionalPulseCount > realPulseCount)
-                {
-                    var actualPulses = (int) fractionalPulseCount - realPulseCount;
-                    results.Add(new ActiveSourceState
-                                {
-                                    NemoMode = nemoMode,
-                                    SimulationTime = curTime,
-                                    ActiveTime = new TimeSpan(0, 0, 0, 0, (int) (nemoMode.PulseLength.TotalMilliseconds*actualPulses)),
-                                });
-                    realPulseCount += actualPulses;
-                }
-            }
-            return results;
-        }
-
-        List<ActiveSourceState> GetActiveSources(DateTime simulationTime, float currentCourseDegrees)
-        {
-            var results = new List<ActiveSourceState>();
-            // This routine will go through all ActiveModes, looking for modes that are active 
-            // during the time step specified inside currentState.  If any are found, they will be added to
-            // the currentState.ActiveModes list
-            foreach (var curMode in ActiveModes)
-            {
-                var nemoMode = curMode.NemoMode;
-                if (!nemoMode.Contains(simulationTime)) continue;
-                // How long after the start of the current mode is the simulation time
-                var frameStartOffset = simulationTime - nemoMode.StartTime;
-                TimeSpan frameEndOffset;
-
-                // Make sure the end of the current frame does not go beyond the active time for the current mode
-                if (nemoMode.Contains(simulationTime + NemoBase.SimulationStepTime)) frameEndOffset = (simulationTime + NemoBase.SimulationStepTime) - nemoMode.StartTime;
-                else frameEndOffset = nemoMode.Duration;
-
-                var frameStartModulo = frameStartOffset.Modulo(nemoMode.PulseInterval);
-                var frameEndModulo = frameEndOffset.Modulo(nemoMode.PulseInterval);
-
-                var activeTime = new TimeSpan(0);
-
-                if (frameStartModulo < nemoMode.PulseLength)
-                {
-                    // At least some part of the active part of the cycle was captured at
-                    // the beginning of the current frame
-                    activeTime += nemoMode.PulseLength - frameStartModulo;
-                }
-                if (frameEndModulo < nemoMode.PulseLength)
-                {
-                    // At least some part of the active part of the cycle was captured at
-                    // the end of the current frame
-                    activeTime += frameEndModulo;
-                }
-
-                // Compute the fraction of the current frame where the current source is active
-                // This fraction can be, at most, 1.0
-                var fraction = Math.Min(1.0, activeTime.DivideBy(NemoBase.SimulationStepTime));
-
-                var curSourceState = new ActiveSourceState
-                                     {
-                                         ActiveFraction = (float) fraction,
-                                         RelativeHeading = currentCourseDegrees
-                                     };
-
-                results.Add(curSourceState);
-            } // foreach
-            return results;
-        }
-
-        // GetActiveSources()
 
         void MovementModel()
         {

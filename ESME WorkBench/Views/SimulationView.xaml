@@ -36,7 +36,7 @@
         <ctl:FileOrDirectorySetting Caption="Output file (CSV format)"
 		                            DockPanel.Dock="Bottom"
 		                            FileNameFilter="Comma-separated values file (*.csv)|*.csv|All files (*.*)|*.*"
-		                            IsDirectoryBrowser="False"
+		                            UseSaveFileDialog="True"
 		                            FileName="{Binding OutputFileName}" />
         <StackPanel Orientation="Horizontal"
 		            DockPanel.Dock="Bottom">

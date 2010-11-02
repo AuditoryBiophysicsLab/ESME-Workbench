@@ -96,8 +96,9 @@ namespace ESME.Model
 
         public void CreateLevelBins(int sourceCount, float lowReceiveLevel, float binWidth, int binCount)
         {
+            if (LevelBins != null) return;
             LevelBins = new SourceRecieverLevelBins[sourceCount];
-            for (int i = 0; i < sourceCount; i++) LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
+            for (var i = 0; i < sourceCount; i++) LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
         }
 
         public void AddAnimatRecord(XElement sourceElement)
@@ -105,7 +106,7 @@ namespace ESME.Model
             var animat = new XElement("Animat");
             animat.Add(new XElement("AnimatID", AnimatID));
             var sources = new XElement("Sources");
-            for (int sourceID = 0; sourceID < LevelBins.Length; sourceID++)
+            for (var sourceID = 0; sourceID < LevelBins.Length; sourceID++)
             {
                 var source = new XElement("Source");
                 source.Add(new XElement("SourceID", sourceID));
@@ -121,10 +122,7 @@ namespace ESME.Model
 
     public class AnimatList : List<Animat>
     {
-        readonly EventHandler<ItemDeletedEventArgs<Species>> _itemDeletedHandler;
         readonly C3mbs _mmmbs = new C3mbs();
-
-        AnimatList() { _itemDeletedHandler = new EventHandler<ItemDeletedEventArgs<Species>>(SpeciesList_ItemDeleted); }
 
         public AnimatList(SpeciesList speciesList) { SpeciesList = speciesList; }
 
@@ -135,8 +133,7 @@ namespace ESME.Model
         public AnimatList(string animatScenarioFile)
         {
             mbsRESULT mbsResult;
-            mbsCONFIG config = _mmmbs.GetConfiguration();
-            mbsRUNSTATE runState;
+            var config = _mmmbs.GetConfiguration();
 
             //load the .sce file
             if (mbsRESULT.OK != (mbsResult = _mmmbs.LoadScenario(animatScenarioFile))) throw new AnimatMMBSException("LoadScenario Error:" + _mmmbs.MbsResultToString(mbsResult));
@@ -145,7 +142,7 @@ namespace ESME.Model
             _mmmbs.SetConfiguration(config);
            
             //get species count
-            int speciesCount = _mmmbs.GetSpeciesCount();
+            var speciesCount = _mmmbs.GetSpeciesCount();
             
             //make a species list.
             SpeciesList = new SpeciesList();
@@ -158,12 +155,12 @@ namespace ESME.Model
                                 });
             }
             //set up the position array from the values in the .sce file (not the ones in animatList, which doesn't exist yet..)
-            int animatCount = _mmmbs.GetAnimatCount();
+            var animatCount = _mmmbs.GetAnimatCount();
             var posArray = new mbsPosition[animatCount];
 
             //initialize the run, and wait until it's fully initialized.
             if (mbsRESULT.OK != (mbsResult = _mmmbs.InitializeRun())) throw new AnimatMMBSException("InitializeRun Error:" + _mmmbs.MbsResultToString(mbsResult));
-            while ((runState = _mmmbs.GetRunState()) == mbsRUNSTATE.INITIALIZING)
+            while ((_mmmbs.GetRunState()) == mbsRUNSTATE.INITIALIZING)
             {
                 //wait until initializing is done.
                 Thread.Sleep(1);
@@ -174,12 +171,12 @@ namespace ESME.Model
             //get the initial positions of every animat
             if (mbsRESULT.OK != (mbsResult = _mmmbs.GetAnimatCoordinates(posArray))) throw new AnimatMMBSException("Error Fetching Initial Animat Coordinates: " + _mmmbs.MbsResultToString(mbsResult));
 
-            int speciesIndex = 0;
-            Species curSpecies = SpeciesList[speciesIndex];
-            int nextSpeciesAnimatIndex = curSpecies.ReferenceCount;
+            var speciesIndex = 0;
+            var curSpecies = SpeciesList[speciesIndex];
+            var nextSpeciesAnimatIndex = curSpecies.ReferenceCount;
             //add animats to each species. 
             var curAnimatCount = 0;
-            for (int i = 0; i < posArray.Length; i++)
+            for (var i = 0; i < posArray.Length; i++)
             {
                 
                 if (i >= nextSpeciesAnimatIndex)
@@ -189,7 +186,7 @@ namespace ESME.Model
                     curSpecies = SpeciesList[++speciesIndex];
                     nextSpeciesAnimatIndex += curSpecies.ReferenceCount;
                 }
-                mbsPosition mbsPosition = posArray[i];
+                var mbsPosition = posArray[i];
                 Add(new Animat(mbsPosition, curSpecies){SpeciesName = curSpecies.SpeciesName,});
                 curAnimatCount++;
             }
@@ -199,21 +196,10 @@ namespace ESME.Model
         [XmlIgnore]
         public SpeciesList SpeciesList { get; set; }
 
-        void Initialize(SpeciesList speciesList)
-        {
-            if (speciesList == null) throw new PropertyNotInitializedException("AnimatList.Initialize(): SpeciesList must be set before calling this method");
-            SpeciesList = speciesList;
-            SpeciesList.ItemDeleted -= _itemDeletedHandler;
-            SpeciesList.ItemDeleted += _itemDeletedHandler;
-            foreach (Animat a in this.Where(a => a != null)) a.Species = SpeciesList.Find(x => x.IDField == a.SpeciesID);
-        }
-
-        void SpeciesList_ItemDeleted(object sender, ItemDeletedEventArgs<Species> e) { RemoveAll(a => a.SpeciesID == e.Item.IDField); }
-
         public void AddAnimatList(XElement rootElement)
         {
             var animats = new XElement("Animats");
-            foreach (Animat a in this) a.AddAnimatRecord(animats);
+            foreach (var a in this) a.AddAnimatRecord(animats);
             rootElement.Add(animats);
         }
 
@@ -245,7 +231,7 @@ namespace ESME.Model
             Clear();
         }
 
-        void Renumber() { for (int i = 0; i < this.Count(); i++) this[i].AnimatID = i; }
+        void Renumber() { for (var i = 0; i < this.Count(); i++) this[i].AnimatID = i; }
 
         new void AddRange(IEnumerable<Animat> collection) { throw new NotImplementedException(); }
         new void RemoveRange(int index, int count) { throw new NotImplementedException(); }

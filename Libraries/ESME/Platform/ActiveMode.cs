@@ -5,6 +5,7 @@ using HRC.Utility;
 
 namespace ESME.Platform
 {
+#if false
     public class ActiveMode
     {
         public ActiveMode()
@@ -73,4 +74,5 @@ namespace ESME.Platform
             yield break;
         }
     }
+#endif
 }
