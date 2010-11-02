@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ESME.NEMO;
 using HRC.Navigation;
 
 namespace ESME.Platform
@@ -28,14 +29,8 @@ namespace ESME.Platform
         /// </summary>
         public DateTime SimulationTime { get; internal set; }
 
-        /// <summary>
-        /// A list of active sources at the current time
-        /// </summary>
-        public List<ActiveSourceState> ActiveSourceStates { get; internal set; }
-
         public PlatformState()
         {
-            ActiveSourceStates = null;
             Speed = float.NaN;
             Course = float.NaN;
         }

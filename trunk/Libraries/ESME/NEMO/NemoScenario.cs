@@ -25,10 +25,11 @@ namespace ESME.NEMO
                 Duration = GetTimeSpan("duration");
                 SimAreaName = GetString("simAreaName");
                 TimeFrame = GetString("timeFrame");
-
+                var modeID = 0;
                 var scenarioDirectory = Path.Combine(nemoDataDirectory, SimAreaName);
 
-                foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "Platform")) Platforms.Add(new NemoPlatform(cur, scenarioDirectory, this));
+                foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "Platform")) Platforms.Add(new NemoPlatform(cur, scenarioDirectory, this, ref modeID));
+                ModeCount = modeID;
 
                 foreach (var cur in scenario.ChildNodes.Cast<XmlNode>().Where(cur => cur.Name == "animals")) Animals.Add(new NemoAnimals(cur, scenarioDirectory));
 
@@ -52,6 +53,11 @@ namespace ESME.NEMO
         public string TimeFrame { get; private set; }
         public List<NemoPlatform> Platforms { get; private set; }
         public List<NemoAnimals> Animals { get; private set; }
+
+        /// <summary>
+        /// A count of the number of unique modes in this scenario, generally used when creating source-receiver level bins
+        /// </summary>
+        public int ModeCount { get; private set; }
 
         public OverlayFile OverlayFile { get; private set; }
 

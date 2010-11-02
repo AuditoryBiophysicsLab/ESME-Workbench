@@ -72,7 +72,7 @@ namespace ESME.Overlay
                         if (Contains(trialCw))
                             Normals[i] = new Course(edgeNormalCourse.Degrees);
                         else
-                            Normals[i] = new Course(edgeNormalCourse.ReciprocalDegrees);
+                            Normals[i] = new Course(edgeNormalCourse.Reciprocal);
                     }
                     return true;
                 }

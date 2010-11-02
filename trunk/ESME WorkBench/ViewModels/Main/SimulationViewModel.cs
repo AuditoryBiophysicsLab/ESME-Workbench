@@ -6,8 +6,10 @@ using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
+using ESME.NEMO;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
+using HRC.Navigation;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -70,11 +72,6 @@ namespace ESMEWorkBench.ViewModels.Main
                              {
                                  Label = "Species count",
                                  Value = _experiment.AnimatInterface.AnimatList.SpeciesList.Count.ToString(),
-                             },
-                             new LabelValuePair
-                             {
-                                 Label = "Estimated run time",
-                                 Value = "Oh, a fair while",
                              },
                          };
         }
@@ -167,7 +164,18 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> OkCommand
         {
-            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(x=> (SecondsPerTimeStep.DataValue > 0) && (OutputFileName != null) && (!IsRunning), x => Run())); }
+            get
+            {
+                return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(
+                    delegate
+                    {
+                        return (SecondsPerTimeStep.DataValue > 0) && (OutputFileName != null) && (!IsRunning);
+                    }, 
+                    delegate
+                    {
+                        Run();
+                    }));
+            }
         }
 
         void Run()
@@ -205,23 +213,56 @@ namespace ESMEWorkBench.ViewModels.Main
             var animats = experiment.AnimatInterface.AnimatList;
             var scenario = experiment.NemoFile.Scenario;
             var platforms = scenario.Platforms;
-            var timeStepCount = (int)(scenario.Duration.TotalSeconds / SecondsPerTimeStep.DataValue);
             var timeStep = new TimeSpan(0, 0, 0, SecondsPerTimeStep.DataValue);
             var scenarioEndTime = scenario.StartTime + scenario.Duration;
+            var modeCount = scenario.ModeCount;
+            NemoBase.SimulationStepTime = new TimeSpan(0, 0, SecondsPerTimeStep.DataValue);
+            foreach (var platform in platforms)
+                platform.CalculateBehavior();
+ 
+            // Loop through all time, one timestep per iteration
             for (var curTime = scenario.StartTime; curTime <= scenarioEndTime; curTime += timeStep)
             {
+                // For the current time step, loop through all platform
                 foreach (var platform in platforms)
                 {
+                    var platformState = platform.BehaviorModel.PlatformStates[curTime];
+                    var platformLocation = platformState.Location;
+                    var platformCourse = platformState.Course;
+                    // For the current platform, loop through all sources
                     foreach (var source in platform.Sources)
                     {
+                        // for the current source, loop through all modes
                         foreach (var mode in source.Modes)
                         {
-                            // Find a TL field that matches the current mode
-                            // Loop through each animat and expose it if necessary
-                            foreach (var animat in animats)
+                            var activeTime = mode.ActiveTimeSteps[curTime];
+                            // If the current mode is active at least once during the current time step
+                            if (activeTime != null)
                             {
-                                // If the animat is not within the radius, skip it.
-                                //if (platform.BehaviorModel.PlatformStates[curTime].ActiveSourceStates
+                                // Find a TL field that matches the current mode
+                                var transmissionLossField = experiment.NearestMatchingTransmissionLoss(mode, platformLocation);
+                                if (transmissionLossField == null) throw new ApplicationException(string.Format("Bug!"));
+                                transmissionLossField.LoadData();
+
+                                var horizontalBeamLookDirection = new Course(platformCourse + mode.RelativeBeamAngle);
+                                var horizontalBeamLimits = new PieSlice(horizontalBeamLookDirection - (mode.HorizontalBeamWidth / 2), horizontalBeamLookDirection + (mode.HorizontalBeamWidth / 2));
+                                var beamRadius = mode.Radius;
+                                // Loop through each animat and expose it if necessary
+                                foreach (var animat in animats)
+                                {
+                                    var animatRange = (float)(platformLocation.GetDistanceTo_Meters(animat.Location));
+                                    var animatBearing = (float)(platformLocation.GetBearingTo_Degrees(animat.Location));
+                                    // If the animat is not within the radius, skip it.
+                                    if ((animatRange <= beamRadius) && (horizontalBeamLimits.Contains(animatBearing)))
+                                    {
+                                        var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) (-animat.Location.Elevation_meters));
+                                        var soundPressureLevel = mode.SourceLevel - transmissionLoss;
+                                        animat.CreateLevelBins(modeCount, 120, 6, 15);
+                                        animat.RecordExposure(mode.ModeID, soundPressureLevel);
+                                    }
+                                    //if (platform.BehaviorModel.PlatformStates[curTime].ActiveSourceStates
+                                }
+                                transmissionLossField.DiscardData();
                             }
                         }
                     }

@@ -19,6 +19,7 @@ using ESME.Overlay;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
+using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.Data
@@ -363,6 +364,19 @@ namespace ESMEWorkBench.Data
 
         static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnalysisPoints);
         ObservableCollection<AnalysisPoint> _analysisPoints;
+
+        public TransmissionLossField NearestMatchingTransmissionLoss(NemoMode nemoMode, EarthCoordinate location)
+        {
+            TransmissionLossField nearestMatch = null;
+            foreach (var analysisPoint in AnalysisPoints)
+                foreach (var transmissionLossField in analysisPoint.TransmissionLossFields)
+                    if (transmissionLossField.IsAcousticMatchFor(nemoMode))
+                    {
+                        if (nearestMatch == null) nearestMatch = transmissionLossField;
+                        else if (location.GetDistanceTo_Meters(nearestMatch.EarthCoordinate) > location.GetDistanceTo_Meters(transmissionLossField.EarthCoordinate)) nearestMatch = transmissionLossField;
+                    }
+            return nearestMatch;
+        }
 
         #endregion
 

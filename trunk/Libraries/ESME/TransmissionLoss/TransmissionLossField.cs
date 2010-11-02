@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using ESME.Model;
+using ESME.NEMO;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 
@@ -17,7 +18,7 @@ namespace ESME.TransmissionLoss
         public float Longitude { get; private set; }
         public float SourceDepth { get; private set; }
         public float VerticalBeamWidth { get; private set; }
-        public float VerticalLookAngle { get; private set; }
+        public float DepressionElevationAngle { get; private set; }
         public float LowFrequency { get; private set; }
         public float HighFrequency { get; private set; }
         public float MaxCalculationDepth { get; private set; }
@@ -38,6 +39,57 @@ namespace ESME.TransmissionLoss
             return new TransmissionLossField(filename, false);
         }
 
+        public bool IsAcousticMatchFor(NemoMode nemoMode)
+        {
+            return (FloatMatch(LowFrequency, nemoMode.LowFrequency, 0.1f)) &&
+                   (FloatMatch(HighFrequency, nemoMode.HighFrequency, 0.1f)) &&
+                   (FloatMatch(SourceDepth, nemoMode.SourceDepth, 0.1f)) &&
+                   (FloatMatch(VerticalBeamWidth, nemoMode.VerticalBeamWidth, 0.1f)) &&
+                   (FloatMatch(DepressionElevationAngle, nemoMode.DepressionElevationAngle, 0.1f)) &&
+                   (Radius >= nemoMode.Radius) && 
+                   (SourceLevel >= nemoMode.SourceLevel);
+        }
+
+        static bool FloatMatch(float value1, float value2, float tolerance)
+        {
+            return Math.Abs(value1 - value2) <= tolerance;
+        }
+
+        public float Lookup(float bearing, float range, float depth)
+        {
+            for (var slice = 0; slice < _pieSlices.Count; slice++)
+            {
+                var pieSlice = _pieSlices[slice];
+                if (pieSlice.Contains(bearing))
+                {
+                    int sourceRadialIndex;
+                    var isLeft = pieSlice.IsLeftCloserTo(bearing);
+                    if (slice < (_pieSlices.Count - 1))
+                    {
+                        if (isLeft) sourceRadialIndex = slice;
+                        else sourceRadialIndex = slice + 1;
+                    }
+                    else
+                    {
+                        if (isLeft) sourceRadialIndex = _pieSlices.Count - 1;
+                        else sourceRadialIndex = 0;
+                    }
+                    var sourceRadial = Radials[sourceRadialIndex];
+
+                    int sourceRangeIndex;
+                    for (sourceRangeIndex = 0; sourceRangeIndex < sourceRadial.Ranges.Length; sourceRangeIndex++)
+                        if (sourceRadial.Ranges[sourceRangeIndex] >= range) break;
+                    
+                    int sourceDepthIndex;
+                    for (sourceDepthIndex = 0; sourceDepthIndex < sourceRadial.Depths.Length; sourceDepthIndex++)
+                        if (sourceRadial.Depths[sourceDepthIndex] >= depth) break;
+                    
+                    return sourceRadial[sourceDepthIndex, sourceRangeIndex];
+                }
+            }
+            throw new ApplicationException(string.Format("Error looking up value in TransmissionLossField: This field does not contain bearing {0}, range {1}, depth {2}", bearing, range, depth));
+        }
+
         public TransmissionLossField(BellhopRunFile runFile)
         {
             Name = runFile.Name ?? "";
@@ -48,7 +100,7 @@ namespace ESME.TransmissionLoss
             EarthCoordinate = new EarthCoordinate(Latitude, Longitude);
             SourceDepth = runFile.TransmissionLossJob.AcousticProperties.SourceDepth;
             VerticalBeamWidth = runFile.TransmissionLossJob.AcousticProperties.VerticalBeamWidth;
-            VerticalLookAngle = runFile.TransmissionLossJob.AcousticProperties.DepressionElevationAngle;
+            DepressionElevationAngle = runFile.TransmissionLossJob.AcousticProperties.DepressionElevationAngle;
             LowFrequency = runFile.TransmissionLossJob.AcousticProperties.LowFrequency;
             HighFrequency = runFile.TransmissionLossJob.AcousticProperties.HighFrequency;
             MaxCalculationDepth = runFile.TransmissionLossJob.MaxDepth;
@@ -68,11 +120,11 @@ namespace ESME.TransmissionLoss
             Load(loadHeadersOnly);
         }
 
-        public void Load(bool loadHeadersOnly)
+        void Load(bool loadHeadersOnly)
         {
             if (Filename == null)
                 throw new FileNotFoundException("TransmissionLossFieldData: Specify a filename before calling Load()");
-            using (var stream = new BinaryReader(File.Open(Filename, FileMode.Open)))
+                using (var stream = new BinaryReader(File.Open(Filename, FileMode.Open)))
             {
                 if (stream.ReadUInt32() != Magic)
                     throw new FileFormatException(
@@ -86,11 +138,12 @@ namespace ESME.TransmissionLoss
                 EarthCoordinate = new EarthCoordinate(Latitude, Longitude);
                 SourceDepth = stream.ReadSingle();
                 VerticalBeamWidth = stream.ReadSingle();
-                VerticalLookAngle = stream.ReadSingle();
+                DepressionElevationAngle = stream.ReadSingle();
                 LowFrequency = stream.ReadSingle();
                 HighFrequency = stream.ReadSingle();
                 MaxCalculationDepth = stream.ReadSingle();
                 Radius = stream.ReadInt32();
+                if (loadHeadersOnly) return;
                 var depthCount = stream.ReadInt32();
                 Depths = new float[depthCount];
                 for (var i = 0; i < Depths.Length; i++)
@@ -101,15 +154,35 @@ namespace ESME.TransmissionLoss
                     Ranges[i] = stream.ReadSingle();
                 var radialCount = stream.ReadInt32();
                 for (var j = 0; j < radialCount; j++)
-                    _mRadials.Add(new TransmissionLossRadial(stream)
+                    _radials.Add(new TransmissionLossRadial(stream)
                                  {
                                      Ranges = Ranges,
                                      Depths = Depths
                                  });
-                _mSaved = true;
-                _mRadials.Sort();
-                Radials = _mRadials.ToArray();
+                for (var j = 0; j < radialCount - 1; j++)
+                    _pieSlices.Add(new PieSlice(_radials[j].BearingFromSource, _radials[j + 1].BearingFromSource));
+                _pieSlices.Add(new PieSlice(_radials[_radials.Count - 1].BearingFromSource, _radials[0].BearingFromSource));
+                _saved = true;
+                _radials.Sort();
+                Radials = _radials.ToArray();
+                _dataIsLoaded = true;
             }
+        }
+
+        public void LoadData()
+        {
+            if (!_dataIsLoaded)
+                Load(false);
+        }
+
+        public void DiscardData()
+        {
+            _dataIsLoaded = false;
+            Depths = null;
+            Ranges = null;
+            _radials = null;
+            _pieSlices = null;
+            Radials = null;
         }
 
         public void AddRadial(TransmissionLossRadial radial)
@@ -123,9 +196,9 @@ namespace ESME.TransmissionLoss
                 Depths = radial.Depths;
                 Ranges = radial.Ranges;
             }
-            _mRadials.Add(radial);
-            _mRadials.Sort();
-            Radials = _mRadials.ToArray();
+            _radials.Add(radial);
+            _radials.Sort();
+            Radials = _radials.ToArray();
         }
 
         public void Save()
@@ -137,7 +210,7 @@ namespace ESME.TransmissionLoss
 
             using (var stream = new BinaryWriter(File.Open(Filename, FileMode.Create, FileAccess.Write)))
             {
-                if (!_mSaved)
+                if (!_saved)
                 {
                     stream.Write(Magic);
                     stream.Write(Name);
@@ -148,7 +221,7 @@ namespace ESME.TransmissionLoss
                     stream.Write(Longitude);
                     stream.Write(SourceDepth);
                     stream.Write(VerticalBeamWidth);
-                    stream.Write(VerticalLookAngle);
+                    stream.Write(DepressionElevationAngle);
                     stream.Write(LowFrequency);
                     stream.Write(HighFrequency);
                     stream.Write(MaxCalculationDepth);
@@ -159,17 +232,19 @@ namespace ESME.TransmissionLoss
                     stream.Write(Ranges.Length);
                     foreach (var range in Ranges)
                         stream.Write(range);
-                    _mSaved = true;
+                    _saved = true;
                 }
-                stream.Write(_mRadials.Count);
-                foreach (var radial in _mRadials)
+                stream.Write(_radials.Count);
+                foreach (var radial in _radials)
                     radial.Save(stream);
             }
         }
 
-        private const UInt32 Magic = 0x93f34525;
-        private readonly List<TransmissionLossRadial> _mRadials = new List<TransmissionLossRadial>();
-        private bool _mSaved;
+        const UInt32 Magic = 0x93f34525;
+        List<TransmissionLossRadial> _radials = new List<TransmissionLossRadial>();
+        List<PieSlice> _pieSlices = new List<PieSlice>();
+        bool _dataIsLoaded;
+        bool _saved;
 
     }
 #if false

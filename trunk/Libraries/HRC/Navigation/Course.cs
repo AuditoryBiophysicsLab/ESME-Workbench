@@ -1,89 +1,153 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace HRC.Navigation
 {
     public class Course
     {
-        private double mCourse_degrees, mReciprocalCourse_degrees;
-        private const double DEGREES_TO_RADIANS = Math.PI / 180.0;
-        private const double RADIANS_TO_DEGREES = 180.0 / Math.PI;
+        double _course;
+
+        const double DegreesToRadians = Math.PI/180.0;
+        const double RadiansToDegrees = 180.0/Math.PI;
 
         public Course()
         {
-            mCourse_degrees = 0;
+            _course = 0;
             Normalize();
         }
 
-        public Course(double InitialBearing_Degrees)
+        /// <summary>
+        /// Create a new Course object
+        /// </summary>
+        /// <param name="initialBearing">Initial course, in degrees</param>
+        public Course(double initialBearing)
         {
-            mCourse_degrees = InitialBearing_Degrees;
+            _course = initialBearing;
             Normalize();
         }
 
-        public Course(EarthCoordinate InitialPoint, EarthCoordinate FinalPoint)
+        /// <summary>
+        /// Create a new Course object, which will be initialized with the course required to get from initialPoint to finalPoint
+        /// </summary>
+        /// <param name="initialPoint">Starting point of the course</param>
+        /// <param name="finalPoint">Ending point of the course</param>
+        public Course(EarthCoordinate initialPoint, EarthCoordinate finalPoint)
         {
-            mCourse_degrees = InitialPoint.GetBearingTo_Degrees(FinalPoint);
+            _course = initialPoint.GetBearingTo_Degrees(finalPoint);
             Normalize();
         }
 
-        public double Degrees 
-        { 
-            get { return mCourse_degrees; } 
+        public double Degrees
+        {
+            get { return _course; }
             set
             {
-                mCourse_degrees = value;
+                _course = value;
                 Normalize();
             }
         }
-        public double Radians 
-        { 
-            get { return mCourse_degrees * DEGREES_TO_RADIANS; }
+
+        public double Radians
+        {
+            get { return _course*DegreesToRadians; }
             set
             {
-                mCourse_degrees = value * RADIANS_TO_DEGREES;
+                _course = value*RadiansToDegrees;
                 Normalize();
             }
         }
 
-        public double ReciprocalDegrees { get { return mReciprocalCourse_degrees; } }
-        public double ReciprocalRadians { get { return mReciprocalCourse_degrees * DEGREES_TO_RADIANS; } }
+        public static Course operator +(Course c1, Course c2) { return new Course(c1.Degrees + c2.Degrees); }
+        public static Course operator +(Course c1, double c2) { return new Course(c1.Degrees + c2); }
+        public static Course operator -(Course c1, Course c2) { return new Course(c1.Degrees - c2.Degrees); }
+        public static Course operator -(Course c1, double c2) { return new Course(c1.Degrees - c2); }
+
+        public double Reciprocal { get; private set; }
+
+        public double ReciprocalRadians
+        {
+            get { return Reciprocal*DegreesToRadians; }
+        }
 
         // Reflects a bearing given the normal vector (bearing) of the reflecting surface.
         // For correct results, please ensure the normal vector is pointing towards the inbound
         // bearing vector.
-        public void Reflect(Course NormalToReflector)
+        public void Reflect(Course normalToReflector)
         {
-            double myX, myY, normX, normY, dot, newX, newY;
-
-            myX = Math.Sin(Radians);
-            myY = Math.Cos(Radians);
-            normX = Math.Sin(NormalToReflector.Radians);
-            normY = Math.Cos(NormalToReflector.Radians);
+            var myX = Math.Sin(Radians);
+            var myY = Math.Cos(Radians);
+            var normX = Math.Sin(normalToReflector.Radians);
+            var normY = Math.Cos(normalToReflector.Radians);
 
             // Compute the dot product of the current bearing and the normal vector;
-            dot = (myX * normX) + (myY * normY);
-            newX = myX - (2 * dot * normX);
-            newY = myY - (2 * dot * normY);
+            var dot = (myX*normX) + (myY*normY);
+            var newX = myX - (2*dot*normX);
+            var newY = myY - (2*dot*normY);
 
-            mCourse_degrees = Math.Atan2(newX, newY) * RADIANS_TO_DEGREES;
+            _course = Math.Atan2(newX, newY)*RadiansToDegrees;
             Normalize();
         }
 
         // Normalize the bearing to +/- 180 degrees
-        private void Normalize()
+        void Normalize()
         {
-            while (mCourse_degrees > 180)
-                mCourse_degrees -= 360;
-            while (mCourse_degrees < -180)
-                mCourse_degrees += 360;
-            mReciprocalCourse_degrees = mCourse_degrees + 180;
-            while (mReciprocalCourse_degrees > 180)
-                mReciprocalCourse_degrees -= 360;
-            while (mReciprocalCourse_degrees < -180)
-                mReciprocalCourse_degrees += 360;
+            while (_course > 180) _course -= 360;
+            while (_course < -180) _course += 360;
+            Reciprocal = _course + 180;
+            while (Reciprocal > 180) Reciprocal -= 360;
+            while (Reciprocal < -180) Reciprocal += 360;
         }
+    }
+
+    public class PieSlice
+    {
+        readonly double _left;
+        readonly double _right;
+        #region public constructor
+
+        /// <summary>
+        /// Construct a pie slice which runs clockwise from the left hand course to the right hand course
+        /// </summary>
+        /// <param name="leftHandCourse">Left hand course</param>
+        /// <param name="rightHandCourse">Right hand course</param>
+        public PieSlice(Course leftHandCourse, Course rightHandCourse) : this(leftHandCourse.Degrees, rightHandCourse.Degrees) { }
+
+        /// <summary>
+        /// Construct a pie slice which runs clockwise from the left hand course to the right hand course
+        /// </summary>
+        /// <param name="leftHandCourse">Left hand course, in degrees</param>
+        /// <param name="rightHandCourse">Right hand course, in degrees</param>
+        public PieSlice(double leftHandCourse, double rightHandCourse)
+        {
+            _left = Normalize(leftHandCourse);
+            _right = Normalize(rightHandCourse);
+            _right -= _left;
+        }
+
+        #endregion
+
+        public bool Contains(double course)
+        {
+            return (Normalize(course) - _left) <= _right;
+        }
+
+        public bool IsLeftCloserTo(double course)
+        {
+            var normalizedCourse = (Normalize(course) - _left);
+            return normalizedCourse < (_right - normalizedCourse);
+        }
+
+        public bool IsRightCloserTo(double course)
+        {
+            var normalizedCourse = (Normalize(course) - _left);
+            return normalizedCourse > (_right - normalizedCourse);
+        }
+
+        // Normalize the value to fall into the range of 0 <= value <= 360 degrees
+        static double Normalize(double value)
+        {
+            while (value < 0.0) value += 360.0;
+            return value % 360.0;
+        }
+
     }
 }
