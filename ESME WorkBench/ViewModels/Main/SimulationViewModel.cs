@@ -290,7 +290,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                 transmissionLossField.LoadData();
 
                                 var horizontalBeamLookDirection = new Course(platformCourse + mode.RelativeBeamAngle);
-                                var horizontalBeamLimits = new PieSlice(horizontalBeamLookDirection - (mode.HorizontalBeamWidth / 2), horizontalBeamLookDirection + (mode.HorizontalBeamWidth / 2));
+                                var horizontalBeamLimits = new PieSlice(horizontalBeamLookDirection - (mode.HorizontalBeamWidth / 2), mode.HorizontalBeamWidth);
                                 var beamRadius = mode.Radius;
                                 // Loop through each animat and expose it if necessary
                                 foreach (var animat in animats)
