@@ -151,6 +151,11 @@ namespace ESME.Model
                    };
         }
 
+        public void WriteSpeciesLevelBins(string Filename)
+        {
+            
+        }
+
         public void OutputLogFile(string logPath)
         {
             //matlab-friendly csv output of positions
