@@ -44,14 +44,9 @@ namespace ESME.Model
         {
             if (LevelBins != null) return;
             LevelBins = new SourceRecieverLevelBins[sourceCount];
-            for (int i = 0; i < sourceCount; i++) LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
+            for (var i = 0; i < sourceCount; i++) LevelBins[i] = new SourceRecieverLevelBins(lowReceiveLevel, binWidth, binCount);
         }
 
-        
-
-        public void RecordExposure(int sourceID, float receieveLevel) { LevelBins[sourceID].AddExposure(receieveLevel); }
-
-        
         #endregion
 
         internal Species(string speciesFilename)
