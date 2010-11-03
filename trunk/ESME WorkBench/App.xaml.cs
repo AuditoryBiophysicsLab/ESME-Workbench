@@ -8,7 +8,6 @@ using System.Security.Principal;
 using System.Threading;
 using System.Windows;
 using Cinch;
-using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 
 namespace ESMEWorkBench
@@ -23,6 +22,7 @@ namespace ESMEWorkBench
 
         static App()
         {
+            //MessageBox.Show("App starting up - static constructor");
             Logfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_app_log.txt");
             if (OSInfo.OperatingSystemName == "XP")
             {
@@ -41,10 +41,12 @@ namespace ESMEWorkBench
         /// </summary>
         public App()
         {
+            //MessageBox.Show("App starting up - default constructor");
             if (OSInfo.OperatingSystemName == "XP")
             {
                 MessageBox.Show("Windows XP is not currently supported by this application, pending satisfactory resolution of application startup crash", "Operating system not supported");
                 Current.Shutdown();
+                return;
             }
             try
             {

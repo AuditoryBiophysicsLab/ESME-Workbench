@@ -21,7 +21,7 @@
     <Package Description="ESME WorkBench 2010"
              Comments="Deliverable for Phase 1, Iteration 4"
              Manufacturer="$(var.Manufacturer)" 
-             InstallerVersion="400" 
+             InstallerVersion="300" 
              Languages="1033" 
              SummaryCodepage="1252"
              Compressed="yes" 
@@ -142,10 +142,6 @@
                   Name="RibbonControlsLibrary.dll" 
                   Source="$(var.ESMEPath)\RibbonControlsLibrary.dll" />
 
-            <!-- Readme.txt file, for release notes (eventually) -->
-            <File Id="Readme.txt" 
-                  Name="Readme.txt" 
-                  Source="$(var.ESMEPath)\ReadMe.txt" />
           </Component>
 
           <Component Id="ESME_Shortcuts" Guid="5D033776-4F54-44F9-BC3E-28D174AFA5AF">

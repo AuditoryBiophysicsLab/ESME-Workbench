@@ -477,6 +477,7 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <SplashScreen Include="Images\ESME Splash Screen Joke.png" />
     <Resource Include="Images\SmallIcons\accept-icon.png" />
     <Resource Include="Images\SmallIcons\add-1-icon.png" />
     <Resource Include="Images\SmallIcons\add-2-icon.png" />
@@ -527,7 +528,7 @@
       <SubType>Image</SubType>
     </Resource>
     <Content Include="External References\Devart.Data.Linq.dll" />
-    <SplashScreen Include="Images\ESME Splash Screen.png" />
+    <Resource Include="Images\ESME Splash Screen.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="External References\GeoAPI.dll" />
