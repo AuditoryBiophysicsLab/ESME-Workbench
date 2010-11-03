@@ -1,22 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME WorkBench", "ESME WorkBench\ESME WorkBench.csproj", "{1CD6E800-1D60-405A-BF80-F9CAE2E411E2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3} = {9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{939BCFE6-6EB1-4C69-AE35-267863882AAF}"
 	ProjectSection(SolutionItems) = preProject
 		Release Notes\ESME Workbench 2010 Release Notes.docx = Release Notes\ESME Workbench 2010 Release Notes.docx
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{426FE9B9-11A0-4693-A699-FBCB7D0AD2E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME WorkBench", "ESME WorkBench\ESME WorkBench.csproj", "{1CD6E800-1D60-405A-BF80-F9CAE2E411E2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3} = {9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}
 	EndProjectSection
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Installer", "SetupESMEWorkbench\Installer.wixproj", "{68A96070-B68E-41C3-8B29-A4D21100CCA4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1CD6E800-1D60-405A-BF80-F9CAE2E411E2} = {1CD6E800-1D60-405A-BF80-F9CAE2E411E2}
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{426FE9B9-11A0-4693-A699-FBCB7D0AD2E1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME", "Libraries\ESME\ESME.csproj", "{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}"
 EndProject
@@ -52,6 +52,7 @@ Global
 		{1CD6E800-1D60-405A-BF80-F9CAE2E411E2}.Release|x86.Build.0 = Release|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Debug|Mixed Platforms.Build.0 = Debug|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Debug|x86.ActiveCfg = Debug|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|Any CPU.ActiveCfg = Release|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|Mixed Platforms.ActiveCfg = Release|x86
@@ -73,6 +74,7 @@ Global
 		{7AC63864-7638-41C4-969C-D3197EF2BED9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7AC63864-7638-41C4-969C-D3197EF2BED9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7AC63864-7638-41C4-969C-D3197EF2BED9}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{7AC63864-7638-41C4-969C-D3197EF2BED9}.Debug|Mixed Platforms.Build.0 = Debug|x86
 		{7AC63864-7638-41C4-969C-D3197EF2BED9}.Debug|x86.ActiveCfg = Debug|x86
 		{7AC63864-7638-41C4-969C-D3197EF2BED9}.Debug|x86.Build.0 = Debug|x86
 		{7AC63864-7638-41C4-969C-D3197EF2BED9}.Release|Any CPU.ActiveCfg = Release|Any CPU

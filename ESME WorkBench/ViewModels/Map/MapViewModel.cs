@@ -111,6 +111,7 @@ namespace ESMEWorkBench.ViewModels.Map
             _wpfMap.CurrentScaleChanged += (s, e) => { if (_experiment != null) _experiment.CurrentScale = e.CurrentScale; };
             _wpfMap.CurrentExtentChanged += (s, e) => { if (_experiment != null) _experiment.CurrentExtent = e.CurrentExtent.GetWellKnownText(); };
 
+#if true
             AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
             AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
             var localizedName = ((MapView) _viewAwareStatusService.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
@@ -127,6 +128,7 @@ namespace ESMEWorkBench.ViewModels.Map
             AdornmentOverlay.Layers.Add("Scale", customUnitScaleBarAdornmentLayer);
 
             _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
+#endif
 
             MediatorMessage.Send(MediatorMessage.MapViewModelInitialized);
         }
