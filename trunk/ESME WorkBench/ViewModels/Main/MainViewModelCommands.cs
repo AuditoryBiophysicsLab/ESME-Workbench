@@ -373,14 +373,19 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _launchMMMBS ?? (_launchMMMBS = new SimpleCommand<object, object>(arg => (Globals.AppSettings.MMMBSExecutablePath != null) && (File.Exists(Globals.AppSettings.MMMBSExecutablePath)), obj => new Process
-                                                                                                                                                                                                                    {
-                                                                                                                                                                                                                        StartInfo =
-                                                                                                                                                                                                                            {
-                                                                                                                                                                                                                                FileName = Globals.AppSettings.MMMBSExecutablePath,
-                                                                                                                                                                                                                                WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.MMMBSExecutablePath),
-                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                    }.Start()));
+                return _launchMMMBS ?? (_launchMMMBS = new SimpleCommand<object, object>(obj =>
+                                                                                         {
+                                                                                             var mbsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "3MB.exe");
+
+                                                                                             new Process
+                                                                                             {
+                                                                                                 StartInfo =
+                                                                                                     {
+                                                                                                         FileName = mbsPath,
+                                                                                                         WorkingDirectory = Path.GetDirectoryName(mbsPath),
+                                                                                                     }
+                                                                                             }.Start();
+                                                                                         }));
             }
         }
 
@@ -403,12 +408,13 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> RunExperimentCommand
         {
-            get { return _runExperiment ?? (_runExperiment = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.RunExperimentCommand, _experiment); })); }
+            get { return _runExperiment ?? (_runExperiment = new SimpleCommand<object, object>(arg => CanRunExperiment(), delegate { MediatorMessage.Send(MediatorMessage.RunExperimentCommand, _experiment); })); }
         }
 
         bool CanRunExperiment()
         {
-            return CanRunQuickLook();
+            if ((_experiment == null) || (_experiment.AnalysisPoints == null) || (_experiment.AnimatInterface == null)) return false;
+            return CanRunQuickLook() && (_experiment.AnalysisPoints.Count > 0);
         }
 
         SimpleCommand<object, object> _runExperiment;

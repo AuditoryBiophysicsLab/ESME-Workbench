@@ -359,7 +359,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         readonly int _maxCalculationDepth;
 
-        public TransmissionLossJobViewModel(EarthCoordinate location, float platformDepth, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
+        public TransmissionLossJobViewModel(EarthCoordinate location, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
         {
             #region Create DataWrappers
 
@@ -411,7 +411,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
             Latitude.DataValue = location.Latitude_degrees;
             Longitude.DataValue = location.Longitude_degrees;
-            SourceDepth.DataValue = Math.Max(1, platformDepth + nemoMode.DepthOffset);
+            SourceDepth.DataValue = Math.Max(1, nemoMode.SourceDepth + nemoMode.DepthOffset);
             LowFrequency.DataValue = nemoMode.LowFrequency;
             HighFrequency.DataValue = nemoMode.HighFrequency;
             VerticalBeamWidth.DataValue = nemoMode.VerticalBeamWidth;

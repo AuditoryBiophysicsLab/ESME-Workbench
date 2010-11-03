@@ -63,17 +63,30 @@ namespace ESMEWorkBench.ViewModels.Main
                     RadialCount = 16,
                 }
             };
+#if true
             foreach (var transmissionLossJobViewModel in from platform in _experiment.NemoFile.Scenario.Platforms
                                                          from source in platform.Sources
                                                          from mode in source.Modes
-                                                         select new TransmissionLossJobViewModel(MouseEarthCoordinate, -platform.Trackdefs[0].InitialHeight, mode, 16, 3000)
-                                                                {
-                                                                    Name = string.Format("{0}.{1}.{2}", platform.Name, source.Name, mode.Name),
-                                                                    IDField = _experiment.NextObjectID,
-                                                                }) 
-                                                                {
-                                                                    analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
-                                                                }
+                                                         select new TransmissionLossJobViewModel(MouseEarthCoordinate, mode, 16, 3000)
+                                                         {
+                                                             Name = string.Format("{0}.{1}.{2}", platform.Name, source.Name, mode.Name),
+                                                             IDField = _experiment.NextObjectID,
+                                                         })
+            {
+                analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
+            }
+#else
+            var distinctModes = (from platform in _experiment.NemoFile.Scenario.Platforms
+                                 from source in platform.Sources
+                                 from mode in source.Modes
+                                 select mode).Distinct();
+            foreach (var mode in distinctModes)
+                analysisPointViewModel.TransmissionLossJobViewModels.Add(new TransmissionLossJobViewModel(MouseEarthCoordinate, mode, 16, 3000)
+                                                                         {
+                                                                             Name = string.Format("{0}", mode.Name),
+                                                                             IDField = _experiment.NextObjectID,
+                                                                         });
+#endif
             var result = _visualizerService.ShowDialog("AnalysisPointView", analysisPointViewModel);
             if ((!result.HasValue) || (!result.Value))
             {

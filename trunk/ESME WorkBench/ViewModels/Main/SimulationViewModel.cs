@@ -250,7 +250,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-
         void CalculateExposures(object sender, DoWorkEventArgs args)
         {
             var experiment = (Experiment)args.Argument;
