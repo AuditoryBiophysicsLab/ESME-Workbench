@@ -406,7 +406,6 @@ namespace ESMEWorkBench.Data
                         {
                             if (AnimatInterface == null) AnimatInterface = AnimatInterface.Create((string)item);
 
-                            
                             //for each species...
                             foreach (var species in AnimatInterface.AnimatList.SpeciesList)
                             {

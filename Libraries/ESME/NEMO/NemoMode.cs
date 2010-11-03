@@ -3,7 +3,7 @@ using System.Xml;
 
 namespace ESME.NEMO
 {
-    public class NemoMode : NemoPSM
+    public class NemoMode : NemoPSM, IEquatable<NemoMode>
     {
         public NemoMode(XmlNode mode, float platformHeight, int modeID) : base(mode)
         {
@@ -80,6 +80,23 @@ namespace ESME.NEMO
         {
             if ((StartTime <= simulationTime) && (simulationTime <= EndTime)) return true;
             return false;
+        }
+
+        public bool Equals(NemoMode other) 
+        {
+            const double tolerance = 0.1;
+            return Compare(SourceDepth, other.SourceDepth, tolerance) && 
+                   Compare(SourceLevel, other.SourceLevel, tolerance) && 
+                   Compare(LowFrequency, other.LowFrequency, tolerance) &&
+                   Compare(HighFrequency, other.HighFrequency, tolerance) &&
+                   Compare(VerticalBeamWidth, other.VerticalBeamWidth, tolerance) &&
+                   Compare(DepressionElevationAngle, other.DepressionElevationAngle, tolerance) &&
+                   Compare(Radius, other.Radius, tolerance);
+        }
+
+        static bool Compare(double left, double right, double tolerance)
+        {
+            return Math.Abs(left - right) <= tolerance;
         }
     }
 }

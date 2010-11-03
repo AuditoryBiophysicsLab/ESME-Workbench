@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using System.Threading;
 using System.Windows;
 using Cinch;
 using ESMEWorkBench.Properties;
+#if DEBUG
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Threading;
+#endif
 
 namespace ESMEWorkBench
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    ///   Interaction logic for App.xaml
     /// </summary>
     public partial class App
     {
@@ -24,7 +26,7 @@ namespace ESMEWorkBench
         {
             //MessageBox.Show("App starting up - static constructor");
             Logfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_app_log.txt");
-            if (OSInfo.OperatingSystemName == "XP")
+            if (OSInfo.OperatingSystemName != "XP")
             {
                 DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_crash.mdmp");
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -37,14 +39,22 @@ namespace ESMEWorkBench
         #region Initialization
 
         /// <summary>
-        /// Initialize Cinch using the CinchBootStrapper. 
+        ///   Initialize Cinch using the CinchBootStrapper.
         /// </summary>
         public App()
         {
-            //MessageBox.Show("App starting up - default constructor");
+#if DEBUG
+            using (var sw = new StreamWriter(Logfile, true))
+                sw.WriteLine("{0} App starting up - default constructor", DateTime.Now);
+#endif
             if (OSInfo.OperatingSystemName == "XP")
             {
-                MessageBox.Show("Windows XP is not currently supported by this application, pending satisfactory resolution of application startup crash", "Operating system not supported");
+#if DEBUG
+                using (var sw = new StreamWriter(Logfile, true))
+                    sw.WriteLine("{0} Windows XP is not currently supported by this application, pending satisfactory resolution of application startup crash", DateTime.Now);
+#else
+                MessageBox.Show("Windows XP is not currently supported by this application, pending satisfactory resolution of application startup crash");
+#endif
                 Current.Shutdown();
                 return;
             }
@@ -52,7 +62,10 @@ namespace ESMEWorkBench
             {
                 //ExperimentData.Test();
 
-                CinchBootStrapper.Initialise(new List<Assembly> {typeof (App).Assembly});
+                CinchBootStrapper.Initialise(new List<Assembly>
+                                             {
+                                                 typeof (App).Assembly
+                                             });
             }
             catch (Exception e)
             {
@@ -87,7 +100,7 @@ namespace ESMEWorkBench
 
         #endregion
 
-        private void Application_Exit(object sender, ExitEventArgs e)
+        void Application_Exit(object sender, ExitEventArgs e)
         {
 #if DEBUG
             using (var sw = new StreamWriter(Logfile, true))
@@ -105,8 +118,8 @@ namespace ESMEWorkBench
             if (ex == null)
                 return;
             // ExceptionPolicy.HandleException(ex, "Default Policy");
-            MessageBox.Show(
-                "An unhandled exception occurred, and the application is terminating. For more information, see your Application event log.");
+            using (var sw = new StreamWriter(Logfile, true))
+                sw.WriteLine("An unhandled exception occurred, and the application is terminating. For more information, see your Application event log.");
 
             var pEP = Marshal.GetExceptionPointers();
             CreateDump(Process.GetCurrentProcess().Id, DumpFile, 0x00000002, //MinidumpType.MiniDumpWithFullMemory

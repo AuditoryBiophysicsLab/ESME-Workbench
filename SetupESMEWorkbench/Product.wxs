@@ -9,6 +9,7 @@
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
   <?define ESMEPath="C:\Projects\ESME Deliverables\trunk\ESME WorkBench\bin\x86\Release"?>
   <?define MMMBSPath="C:\Projects\ESME Deliverables\trunk\Utilities\MMMBS\demoProjects"?>
+  <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define EnvironmentBuilderPath="C:\Projects\ESME Deliverables\trunk\Utilities\EnvironmentBuilder\bin\x86\Release"?>
   <?define ReleaseNotesPath="C:\Projects\ESME Deliverables\trunk\Release Notes"?>
   <Product Id="$(var.ProductCode)" 
@@ -141,9 +142,10 @@
             <File Id="RibbonControlsLibrary.dll" 
                   Name="RibbonControlsLibrary.dll" 
                   Source="$(var.ESMEPath)\RibbonControlsLibrary.dll" />
-
           </Component>
-
+          
+          <Merge Id="vc100" Language="1033" src="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x86.msm" DiskId="1" />
+          
           <Component Id="ESME_Shortcuts" Guid="5D033776-4F54-44F9-BC3E-28D174AFA5AF">
             <RegistryKey Root="HKCU" Key="Software\[Manufacturer]\[ProductName]">
               <RegistryValue Value="Uninstall" Type="string" KeyPath="yes" />
@@ -210,6 +212,7 @@
     <Feature Id="ProductFeature" Title="ESME Workbench" Level="1" ConfigurableDirectory="INSTALLLOCATION">
       <!-- TODO: Remove the comments around this ComponentRef element and the Component above in order to add resources to this installer. -->
       <ComponentRef Id="ESME_WorkBench" />
+      <MergeRef Id="vc100"/>
       <ComponentRef Id="GISFiles" />
       <ComponentRef Id="ESME_Shortcuts"/>
       <!-- Note: The following ComponentGroupRef is required to pull in generated authoring from project references. -->

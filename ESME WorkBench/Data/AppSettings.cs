@@ -71,25 +71,6 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        #region public string MMMBSExecutablePath { get; set; }
-
-        public string MMMBSExecutablePath
-        {
-            get { return _mMMBSExecutablePath; }
-            set
-            {
-                if (_mMMBSExecutablePath == value) return;
-                _mMMBSExecutablePath = value;
-                NotifyPropertyChanged(MMMBSExecutablePathChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs MMMBSExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.MMMBSExecutablePath);
-        string _mMMBSExecutablePath;
-
-        #endregion
-
-
         [XmlIgnore]
         static readonly string AppSettingsDirectory;
         [XmlIgnore] 

@@ -103,10 +103,11 @@ namespace ESME.Model
             if (LevelBins == null) return;
             for (var source = 0; source < LevelBins.Length; source++)
             {
-                for (var bin = LevelBins[source].Bins.Length - 1; bin <= 0; bin--)
+                for (var bin = LevelBins[source].Bins.Length - 1; bin >= 0; bin--)
                 {
                     if (LevelBins[source].Bins[bin] > 0)
                     {
+                        if (string.IsNullOrEmpty(Species.LevelBins[source].ModeName)) Species.LevelBins[source].ModeName = LevelBins[source].ModeName;
                         Species.LevelBins[source].Bins[bin]++;
                         break;
                     }
