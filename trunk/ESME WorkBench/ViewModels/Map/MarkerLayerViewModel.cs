@@ -46,7 +46,7 @@ namespace ESMEWorkBench.ViewModels.Map
                             {
                                 ImageSource = _imageSource,
                                 Tag = tag,
-                                YScreenOffset = -(_imageSource.Height/2),
+                                //YScreenOffset = -(_imageSource.Height/2),
                             };
             _markerOverlay.Markers.Add(newMarker);
             return newMarker;
