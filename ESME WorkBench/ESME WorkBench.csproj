@@ -79,13 +79,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL" />
-    <Reference Include="MapSuiteCore, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="MapSuiteCore, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>C:\Program Files (x86)\ThinkGeo\Map Suite Wpf Desktop Evaluation Edition 4.0\Developer Reference\WPF Desktop Edition\MapSuiteCore.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=x86" />
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="NetTopologySuite, Version=1.7.3.31740, Culture=neutral, PublicKeyToken=f580a05016ebada1, processorArchitecture=MSIL" />
+    <Reference Include="NetTopologySuite, Version=1.7.3.31740, Culture=neutral, PublicKeyToken=f580a05016ebada1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
@@ -104,7 +109,9 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="RibbonControlsLibrary" />
     <Reference Include="Microsoft.Windows.Shell" />
-    <Reference Include="WpfDesktopEdition, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="WpfDesktopEdition, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
