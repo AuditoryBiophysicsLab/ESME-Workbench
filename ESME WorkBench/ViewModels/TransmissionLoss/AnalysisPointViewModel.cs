@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
@@ -22,9 +17,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IHRCSaveFileService _saveFileService;
 
-        bool _analysisPointInitialized,
-             _fieldInitialized,
-             _radialInitialized;
+        bool _iAmInitialized;
+        AnalysisPoint _tempAnalysisPoint;
 
         [ImportingConstructor]
         public AnalysisPointViewModel(IViewAwareStatus viewAwareStatus, IHRCSaveFileService saveFileService)
@@ -91,36 +85,15 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         [MediatorMessageSink(MediatorMessage.AnalysisPointChanged)]
         void AnalysisPointChanged(AnalysisPoint analysisPoint)
         {
-            AnalysisPoint = analysisPoint;
+            if (_iAmInitialized) AnalysisPoint = analysisPoint;
+            else _tempAnalysisPoint = analysisPoint;
         }
 
         [MediatorMessageSink(MediatorMessage.AnalysisPointViewInitialized)]
         void AnalysisPointViewInitialized(bool dummy)
         {
-            _analysisPointInitialized = true;
-            InitializeIfViewModelsReady();
-        }
-
-        [MediatorMessageSink(MediatorMessage.TransmissionLossFieldViewInitialized)]
-        void TransmissionLossFieldViewInitialized(bool dummy)
-        {
-            _fieldInitialized = true;
-            InitializeIfViewModelsReady();
-        }
-
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialViewInitialized)]
-        void TransmissionLossRadialViewInitialized(bool dummy)
-        {
-            _radialInitialized = true;
-            InitializeIfViewModelsReady();
-        }
-
-        void InitializeIfViewModelsReady()
-        {
-            if (_analysisPointInitialized && _fieldInitialized && _radialInitialized)
-            {
-                MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, AnalysisPoint.TransmissionLossFields[SelectedField]);
-            }
+            _iAmInitialized = true;
+            if (_tempAnalysisPoint != null) AnalysisPoint = _tempAnalysisPoint;
         }
     }
 }
