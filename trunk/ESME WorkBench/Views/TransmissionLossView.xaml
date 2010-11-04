@@ -45,8 +45,15 @@
 				          IsEnabled="False" />
 			</Menu>
 		</DockPanel>
-
-		<TabControl>
+        <DockPanel LastChildFill="True">
+            <ListBox Width="81">
+                <ListBoxItem >
+                    
+                </ListBoxItem>
+            </ListBox>
+        </DockPanel>
+        <TabControl>
+                
 			<TabItem Header="Vertical">
 				<DockPanel LastChildFill="True">
 
