@@ -87,7 +87,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                              IDField = _experiment.NextObjectID,
                                                                          });
 #endif
-            var result = _visualizerService.ShowDialog("AnalysisPointView", analysisPointViewModel);
+            var result = _visualizerService.ShowDialog("AnalysisPointCalculationPreviewView", analysisPointViewModel);
             if ((!result.HasValue) || (!result.Value))
             {
                 MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
