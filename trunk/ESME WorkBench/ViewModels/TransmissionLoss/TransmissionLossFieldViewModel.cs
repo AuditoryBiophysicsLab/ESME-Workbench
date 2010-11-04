@@ -40,7 +40,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             TransmissionLossField = transmissionLossField;
             ColorMapViewModel = ColorMapViewModel.Default;
             _saveFileService = saveFileService;
-            SelectedRadial = 1;
+            //SelectedRadial = 1;
         }
 
         public TransmissionLossField TransmissionLossField { get; private set; }

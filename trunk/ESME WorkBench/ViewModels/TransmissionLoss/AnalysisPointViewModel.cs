@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Cinch;
@@ -10,12 +11,16 @@ using ESME.TransmissionLoss;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
-    class AnalysisPointViewModel : ViewModelBase 
+    class AnalysisPointViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
+        IViewAwareStatus _viewAwareStatus;
+
         public AnalysisPointViewModel(AnalysisPoint analysisPoint )
         {
-            AnalysisPoint = analysisPoint;
+            RegisterMediator();
+
             TransmissionLossFieldViewModels = new ObservableCollection<TransmissionLossFieldViewModel>();
+            AnalysisPoint = analysisPoint;
         }
 
         #region public AnalysisPoint AnalysisPoint { get; set; }
@@ -27,10 +32,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_analysisPoint == value) return;
                 _analysisPoint = value;
-                NotifyPropertyChanged(AnalysisPointChangedEventArgs);
                 //populate the list 
                 foreach (var field in _analysisPoint.TransmissionLossFields)
                     TransmissionLossFieldViewModels.Add(new TransmissionLossFieldViewModel(field, null));
+                if (TransmissionLossFieldViewModels.Count > 0)
+                    SelectedItem = TransmissionLossFieldViewModels[0];
+                NotifyPropertyChanged(AnalysisPointChangedEventArgs);
             }
         }
 
@@ -68,7 +75,13 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             set
             {
                 if (_selectedItem == value) return;
+                if (_selectedItem != null) _selectedItem.TransmissionLossField.DiscardData();
                 _selectedItem = value;
+                if (_selectedItem != null)
+                {
+                    _selectedItem.TransmissionLossField.LoadData();
+                    _selectedItem.SelectedRadial = 1;
+                }
                 NotifyPropertyChanged(SelectedItemChangedEventArgs);
             }
         }
@@ -77,7 +90,24 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         TransmissionLossFieldViewModel _selectedItem;
 
         #endregion
+        
+        void RegisterMediator()
+        {
+            try
+            {
+                Mediator.Instance.Register(this);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("***********\nAnalysisPointViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                throw;
+            }
+        }
 
-
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
+        {
+            _viewAwareStatus = viewAwareStatusService;
+            //_viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
+        }
     }
 }

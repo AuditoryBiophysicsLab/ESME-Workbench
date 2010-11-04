@@ -350,8 +350,8 @@ namespace ESMEWorkBench.Data
             marker.ContextMenu = new ContextMenu();
             marker.ContextMenu.Items.Add(new MenuItem
             {
-                Header = "Run transmission loss...",
-                Command = RunTransmissionLossCommand,
+                Header = "View...",
+                Command = ViewAnalysisPointCommand,
                 CommandParameter = analysisPoint,
             });
             marker.ContextMenu.Items.Add(new MenuItem
@@ -785,14 +785,17 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        #region RunTransmissionLossCommand
+        #region ViewAnalysisPointCommand
 
-        public SimpleCommand<object, object> RunTransmissionLossCommand
+        public SimpleCommand<object, AnalysisPoint> ViewAnalysisPointCommand
         {
-            get { return _runTransmissionLossCommand ?? (_runTransmissionLossCommand = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.DoNothing); })); }
+            get
+            {
+                return _viewAnalysisPointCommand ?? (_viewAnalysisPointCommand = new SimpleCommand<object, AnalysisPoint>(analysisPoint => MediatorMessage.Send(MediatorMessage.ViewAnalysisPoint, analysisPoint))); 
+            }
         }
 
-        SimpleCommand<object, object> _runTransmissionLossCommand;
+        SimpleCommand<object, AnalysisPoint> _viewAnalysisPointCommand;
 
         #endregion
 

@@ -18,6 +18,7 @@ namespace ESMEWorkBench
         public const string AddAnalysisPoint = "AddAnalysisPointMessage";
         public const string EditAnalysisPoint = "EditAnalysisPointMessage";
         public const string DeleteAnalysisPoint = "DeleteAnalysisPointMessage";
+        public const string ViewAnalysisPoint = "ViewAnalysisPointMessage";
 
         public const string SetExperiment = "SetExperimentMessage";
 

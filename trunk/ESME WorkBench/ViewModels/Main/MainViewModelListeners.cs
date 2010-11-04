@@ -283,5 +283,12 @@ namespace ESMEWorkBench.ViewModels.Main
             var simulationViewModel = new SimulationViewModel(experiment);
             var result = _visualizerService.ShowDialog("SimulationView", simulationViewModel);
         }
+
+        [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint)]
+        void ViewAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+            var analysisPointViewModel = new AnalysisPointViewModel(analysisPoint);
+            _visualizerService.Show("TransmissionLossView", analysisPointViewModel, true, null);
+        }
     }
 }
