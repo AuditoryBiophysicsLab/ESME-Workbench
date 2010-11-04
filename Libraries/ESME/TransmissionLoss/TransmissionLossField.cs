@@ -41,9 +41,10 @@ namespace ESME.TransmissionLoss
 
         public bool IsAcousticMatchFor(NemoMode nemoMode)
         {
+            if (nemoMode.PSMName == "SH60B|ALFS|Search") System.Diagnostics.Debugger.Break();
             return (FloatMatch(LowFrequency, nemoMode.LowFrequency, 0.1f)) &&
                    (FloatMatch(HighFrequency, nemoMode.HighFrequency, 0.1f)) &&
-                   (FloatMatch(-SourceDepth, nemoMode.SourceDepth, 0.1f)) &&
+                   (FloatMatch(SourceDepth, nemoMode.SourceDepth, 0.1f)) &&
                    (FloatMatch(VerticalBeamWidth, nemoMode.VerticalBeamWidth, 0.1f)) &&
                    (FloatMatch(DepressionElevationAngle, nemoMode.DepressionElevationAngle, 0.1f)) &&
                    (Radius >= nemoMode.Radius) && 

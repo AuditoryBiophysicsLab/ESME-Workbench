@@ -130,7 +130,7 @@
     <Compile Include="ViewModels\Map\MapLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapShape.cs" />
     <Compile Include="ViewModels\Map\MapShapeLayer.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
     <Compile Include="Views\AboutView.xaml.cs">

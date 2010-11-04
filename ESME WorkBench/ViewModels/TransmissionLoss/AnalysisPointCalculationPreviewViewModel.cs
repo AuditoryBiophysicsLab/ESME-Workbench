@@ -7,11 +7,11 @@ using ESME.TransmissionLoss;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
-    class AnalysisPointViewModel : ViewModelBase
+    class AnalysisPointCalculationPreviewViewModel : ViewModelBase
     {
         #region public constructor
 
-        public AnalysisPointViewModel() { TransmissionLossJobViewModels = new ObservableCollection<TransmissionLossJobViewModel>(); }
+        public AnalysisPointCalculationPreviewViewModel() { TransmissionLossJobViewModels = new ObservableCollection<TransmissionLossJobViewModel>(); }
 
         #endregion
 
@@ -30,7 +30,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs TransmissionLossJobViewModelsChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.TransmissionLossJobViewModels);
+        static readonly PropertyChangedEventArgs TransmissionLossJobViewModelsChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointCalculationPreviewViewModel>(x => x.TransmissionLossJobViewModels);
         ObservableCollection<TransmissionLossJobViewModel> _transmissionLossJobViewModels;
 
         void TransmissionLossJobViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -68,7 +68,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.AnalysisPoint);
+        static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointCalculationPreviewViewModel>(x => x.AnalysisPoint);
         AnalysisPoint _analysisPoint;
 
         #endregion
@@ -78,7 +78,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         public bool IsValid { get { return TransmissionLossJobViewModels.All(transmissionLossJobViewModel => transmissionLossJobViewModel.IsValid); } }
 
-        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.IsValid);
+        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointCalculationPreviewViewModel>(x => x.IsValid);
 
         #endregion
 
