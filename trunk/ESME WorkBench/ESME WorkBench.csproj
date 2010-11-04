@@ -137,6 +137,9 @@
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\AnalysisPointCalculationPreviewView.xaml.cs">
+      <DependentUpon>AnalysisPointCalculationPreviewView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\AnalysisPointView.xaml.cs">
       <DependentUpon>AnalysisPointView.xaml</DependentUpon>
     </Compile>
@@ -182,6 +185,9 @@
     </Compile>
     <Compile Include="Views\SimulationView.xaml.cs">
       <DependentUpon>SimulationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TransmissionLossFieldView.xaml.cs">
+      <DependentUpon>TransmissionLossFieldView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\TransmissionLossJobView.xaml.cs">
       <DependentUpon>TransmissionLossJobView.xaml</DependentUpon>
@@ -263,6 +269,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\AboutView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AnalysisPointCalculationPreviewView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -355,6 +365,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SimulationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TransmissionLossFieldView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
