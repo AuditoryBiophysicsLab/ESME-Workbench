@@ -5,10 +5,32 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"             
              xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
              xmlns:Views="clr-namespace:ESMEWorkBench.Views"
+             xmlns:Properties="clr-namespace:ESMEWorkBench.Properties"
              mef:ViewModelLocator.ViewModel="AnalysisPointViewModel"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="310" Width="824">
     <Grid>
-            
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"
+			                  MinWidth="100" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*"
+			                  MinWidth="500" />
+        </Grid.ColumnDefinitions>
+        <GroupBox Grid.Column="0" >
+            <ListBox ItemsSource="{Binding AnalysisPoint.TransmissionLossFields}"
+                     SelectedIndex="{Binding SelectedField}"                            
+             />
+        </GroupBox>
+        <GridSplitter Name="GridSplitter"
+		              Grid.Column="1"
+		              Width="0"
+		              Background="Black"
+		              HorizontalAlignment="Center"
+		              Margin="5,0,7,0"
+		              VerticalAlignment="Stretch"
+		              ResizeBehavior="BasedOnAlignment"
+		              ResizeDirection="Columns"/>
+        <Views:TransmissionLossFieldView Grid.Column="2"/>
     </Grid>
 </UserControl>
