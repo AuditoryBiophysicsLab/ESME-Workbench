@@ -9,7 +9,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
-using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
@@ -94,21 +93,19 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         readonly Dispatcher _dispatcher;
         readonly IViewAwareStatus _viewAwareStatus;
         bool _isRendered;
-        IHRCSaveFileService _saveFileService;
-        IUIVisualizerService _visualizerService;
+        bool _iAmInitialized;
+        TransmissionLossRadial _tempRadial;
 
         WriteableBitmap _writeableBitmap;
 
 
         [ImportingConstructor]
-        public TransmissionLossRadialViewModel(IViewAwareStatus viewAwareStatus, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public TransmissionLossRadialViewModel(IViewAwareStatus viewAwareStatus)
         {
             RegisterMediator();
             _viewAwareStatus = viewAwareStatus;
-            _saveFileService = saveFileService;
-            _visualizerService = visualizerService;
             _dispatcher = Dispatcher.CurrentDispatcher;
-            //_viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
+            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel.Default);
         }
 
@@ -137,15 +134,26 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialColorMapChanged)]
         void TransmissionLossRadialColorMapChanged(ColorMapViewModel colorMapViewModel) { ColorMapViewModel = colorMapViewModel; }
 
+        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialViewInitialized)]
+        void TransmissionLossRadialViewInitialized(bool dummy)
+        {
+            _iAmInitialized = true;
+            if (_tempRadial != null) TransmissionLossRadial = _tempRadial;
+        }
+
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
-        void TransmissionLossRadialChanged(TransmissionLossRadial transmissionLossRadial) { TransmissionLossRadial = transmissionLossRadial; }
+        void TransmissionLossRadialChanged(TransmissionLossRadial transmissionLossRadial)
+        {
+            if (_iAmInitialized) TransmissionLossRadial = transmissionLossRadial;
+            else _tempRadial = transmissionLossRadial;
+        }
 
         void RenderBitmap()
         {
             if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
 
-            int width = TransmissionLossRadial.Ranges.Length;
-            int height = TransmissionLossRadial.Depths.Length;
+            var width = TransmissionLossRadial.Ranges.Length;
+            var height = TransmissionLossRadial.Depths.Length;
 
             if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
 
@@ -153,9 +161,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             unsafe
             {
                 var curOffset = (int) _writeableBitmap.BackBuffer;
-                for (int y = 0; y < height; y++)
+                for (var y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (var x = 0; x < width; x++)
                     {
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.

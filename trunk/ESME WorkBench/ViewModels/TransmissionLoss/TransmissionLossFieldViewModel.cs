@@ -2,13 +2,8 @@
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.IO;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Cinch;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.Views;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 
@@ -21,8 +16,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         
         readonly IViewAwareStatus _viewAwareStatus;
 
-        bool _fieldInitialized,
-             _radialInitialized;
+        bool _iAmInitialized;
+        TransmissionLossField _tempField;
 
         [ImportingConstructor]
         public TransmissionLossFieldViewModel(IHRCSaveFileService saveFileService, IViewAwareStatus viewAwareStatus)
@@ -30,7 +25,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             RegisterMediator();
             _viewAwareStatus = viewAwareStatus;
             ColorMapViewModel = ColorMapViewModel.Default;
-            //_viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
+            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
         }
 
         #region public TransmissionLossField TransmissionLossField { get; set; }
@@ -42,6 +37,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_transmissionLossField == value) return;
                 _transmissionLossField = value;
+                _transmissionLossField.LoadData();
                 SelectedRadial = 1;
                 NotifyPropertyChanged(TransmissionLossFieldChangedEventArgs);
                 NotifyPropertyChanged(RadialCountChangedEventArgs);
@@ -137,28 +133,17 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         void SaveRadialAsCSV(string fileName) { TransmissionLossField.Radials[SelectedRadial].SaveAsCSV(fileName, TransmissionLossField); }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossFieldChanged)]
-        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField) { TransmissionLossField = transmissionLossField; }
+        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField)
+        {
+            if (_iAmInitialized) TransmissionLossField = transmissionLossField;
+            else _tempField = transmissionLossField;
+        }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossFieldViewInitialized)]
         void TransmissionLossFieldViewInitialized(bool dummy)
         {
-            _fieldInitialized = true;
-            InitializeIfViewModelsReady();
-        }
-
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialViewInitialized)]
-        void TransmissionLossRadialViewInitialized(bool dummy)
-        {
-            _radialInitialized = true;
-            InitializeIfViewModelsReady();
-        }
-
-        void InitializeIfViewModelsReady()
-        {
-            if (_fieldInitialized && _radialInitialized)
-            {
-                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel);
-            }
+            _iAmInitialized = true;
+            if (_tempField != null) TransmissionLossField = _tempField;
         }
     }
 }
