@@ -132,6 +132,7 @@
     <Compile Include="ViewModels\Map\MapShapeLayer.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
@@ -195,8 +196,8 @@
     <Compile Include="Views\TransmissionLossRadialView.xaml.cs">
       <DependentUpon>TransmissionLossRadialView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\TransmissionLossView.xaml.cs">
-      <DependentUpon>TransmissionLossView.xaml</DependentUpon>
+    <Compile Include="Views\AnalysisPointVisualizerView.xaml.cs">
+      <DependentUpon>AnalysisPointVisualizerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\IHasName.cs" />
@@ -380,7 +381,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\TransmissionLossView.xaml">
+    <Page Include="Views\AnalysisPointVisualizerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

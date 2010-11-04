@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -9,46 +10,59 @@ using Cinch;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.Views;
 using HRC.Services;
+using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
-    public class TransmissionLossFieldViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    [ExportViewModel("TransmissionLossFieldViewModel")]
+    public class TransmissionLossFieldViewModel : ViewModelBase
     {
         static readonly PropertyChangedEventArgs SelectedRadialChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.SelectedRadial);
         
-        readonly IHRCSaveFileService _saveFileService;
+        readonly IViewAwareStatus _viewAwareStatus;
 
         bool _fieldInitialized,
              _radialInitialized;
 
-        int _selectedRadial;
-        IViewAwareStatus _viewAwareStatus;
-
-        public TransmissionLossFieldViewModel(string fileName, IHRCSaveFileService saveFileService)
+        [ImportingConstructor]
+        public TransmissionLossFieldViewModel(IHRCSaveFileService saveFileService, IViewAwareStatus viewAwareStatus)
         {
             RegisterMediator();
-            TransmissionLossField = TransmissionLossField.Load(fileName);
-
+            _viewAwareStatus = viewAwareStatus;
             ColorMapViewModel = ColorMapViewModel.Default;
-            _saveFileService = saveFileService;
-            SelectedRadial = 1;
+            //_viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
         }
 
-        public TransmissionLossFieldViewModel(TransmissionLossField transmissionLossField, IHRCSaveFileService saveFileService)
+        #region public TransmissionLossField TransmissionLossField { get; set; }
+
+        public TransmissionLossField TransmissionLossField
         {
-            RegisterMediator();
-            TransmissionLossField = transmissionLossField;
-            ColorMapViewModel = ColorMapViewModel.Default;
-            _saveFileService = saveFileService;
-            //SelectedRadial = 1;
+            get { return _transmissionLossField; }
+            set
+            {
+                if (_transmissionLossField == value) return;
+                _transmissionLossField = value;
+                SelectedRadial = 1;
+                NotifyPropertyChanged(TransmissionLossFieldChangedEventArgs);
+                NotifyPropertyChanged(RadialCountChangedEventArgs);
+            }
         }
 
-        public TransmissionLossField TransmissionLossField { get; private set; }
+        static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.TransmissionLossField);
+        TransmissionLossField _transmissionLossField;
+
+        #endregion
+
+        #region public int RadialCount { get; set; }
 
         public int RadialCount
         {
-            get { return TransmissionLossField.Radials.Length; }
+            get { return TransmissionLossField != null ? TransmissionLossField.Radials.Length : 0; }
         }
+
+        static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.RadialCount);
+
+        #endregion
 
         public int SelectedRadial
         {
@@ -59,10 +73,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 _selectedRadial = value;
                 NotifyPropertyChanged(SelectedRadialChangedEventArgs);
                 MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, TransmissionLossField.Radials[_selectedRadial - 1]);
-                SelectedRadialBearing = TransmissionLossField.Radials[_selectedRadial - 1].BearingFromSource;
+                MediatorMessage.Send(MediatorMessage.SetSelectedRadialBearing, TransmissionLossField.Radials[_selectedRadial - 1].BearingFromSource);
                 //TransmissionLossRadialViewModel.TransmissionLossRadial = TransmissionLossField.Radials[_selectedRadial - 1];
             }
         }
+        int _selectedRadial;
+
 
         #region public double SelectedRadialBearing { get; set; }
 
@@ -83,93 +99,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         #endregion
 
 
-        #region SaveAsCommand
-
-        SimpleCommand<object, object> _saveAs;
-
-        public SimpleCommand<object, object> SaveAsCommand
-        {
-            get
-            {
-                return _saveAs ?? (_saveAs = new SimpleCommand<object, object>(delegate
-                                                                               {
-                                                                                   BitmapEncoder encoder = null;
-                                                                                   _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpg)|*.jpg|Bitmap (*.bmp)|*.bmp";
-                                                                                   //_saveFileService.Filter = "Portable Network Graphics (*.png)|*.png";
-                                                                                   _saveFileService.OverwritePrompt = true;
-                                                                                   _saveFileService.FileName = null;
-                                                                                   _saveFileService.InitialDirectory = Properties.Settings.Default.LastImageExportFileDirectory;
-                                                                                   _saveFileService.FileName = null;
-                                                                                   var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
-                                                                                   if (result.HasValue && result.Value)
-                                                                                   {
-                                                                                       Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                                                                                       
-#if true //todo graham turn this back on when it works.)
-                                                                                       switch (Path.GetExtension(_saveFileService.FileName).ToLower())
-                                                                                       {
-                                                                                           case ".jpg":
-                                                                                           case ".jpeg":
-                                                                                               encoder = new JpegBitmapEncoder();
-                                                                                               break;
-                                                                                           case ".png":
-                                                                                               encoder = new PngBitmapEncoder();
-                                                                                               break;
-                                                                                           case ".bmp":
-                                                                                               encoder = new BmpBitmapEncoder();
-                                                                                               break;
-                                                                                       } 
-#endif
-
-                                                                                       if (encoder == null) return;
-                                                                                       
-                                                                                       var theView = ((TransmissionLossView) _viewAwareStatus.View).RadialView;
-                                                                                       var bmp = new RenderTargetBitmap((int)theView.ActualWidth, (int)theView.ActualHeight, 96, 96, PixelFormats.Pbgra32);
-                                                                                       bmp.Render(theView);
-                                                                                       encoder.Frames.Add(BitmapFrame.Create(bmp));
-                                                                                       using (var stream = new FileStream(_saveFileService.FileName, FileMode.Create)) encoder.Save(stream);
-                                                                                   }
-                                                                               }));
-            }
-        }
-
-        #endregion
-
-        #region ExportAsCommand
-
-        public SimpleCommand<object, object> ExportAsCommand
-        {
-            get { return _exportAs ?? (_exportAs = new SimpleCommand<object, object>(delegate
-                                                                                     {
-                                                                                         _saveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
-                                                                                         _saveFileService.FileName = null;
-                                                                                         _saveFileService.InitialDirectory = Properties.Settings.Default.LastCSVExportFileDirectory;
-                                                                                         _saveFileService.OverwritePrompt = true;
-                                                                                         _saveFileService.FileName = null;
-                                                                                         var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
-                                                                                         if (result.HasValue && result.Value)
-                                                                                         {
-                                                                                             Properties.Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                                                                                             TransmissionLossField.Radials[SelectedRadial].SaveAsCSV(_saveFileService.FileName, TransmissionLossField);
-                                                                                         }
-                                                                                     })); }
-        }
-
-        SimpleCommand<object, object> _exportAs;
-
-        #endregion
-
-        #region CloseWindowCommand
-
-        SimpleCommand<object, object> _closeWindow;
-
-        public SimpleCommand<object, object> CloseWindowCommand
-        {
-            get { return _closeWindow ?? (_closeWindow = new SimpleCommand<object, object>(delegate { ((TransmissionLossView) _viewAwareStatus.View).Close(); })); }
-        }
-
-        #endregion
-
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
 
         static readonly PropertyChangedEventArgs ColorMapViewModelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.ColorMapViewModel);
@@ -189,16 +118,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region IViewStatusAwareInjectionAware Members
-
-        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
-        {
-            _viewAwareStatus = viewAwareStatusService;
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
-        }
-
-        #endregion
-
         void RegisterMediator()
         {
             try
@@ -211,6 +130,14 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 throw;
             }
         }
+        [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
+        void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
+
+        [MediatorMessageSink(MediatorMessage.SaveRadialAsCSV)]
+        void SaveRadialAsCSV(string fileName) { TransmissionLossField.Radials[SelectedRadial].SaveAsCSV(fileName, TransmissionLossField); }
+
+        [MediatorMessageSink(MediatorMessage.TransmissionLossFieldChanged)]
+        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField) { TransmissionLossField = transmissionLossField; }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossFieldViewInitialized)]
         void TransmissionLossFieldViewInitialized(bool dummy)
@@ -231,7 +158,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             if (_fieldInitialized && _radialInitialized)
             {
                 MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel);
-                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, TransmissionLossField.Radials[0]);
             }
         }
     }

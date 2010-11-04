@@ -22,14 +22,13 @@
 							        AutoToolTipPrecision="0"
 							        TickPlacement="BottomRight"
 							        Minimum="1"
-							        Maximum="{Binding SelectedItem.RadialCount}"
-							        Value="{Binding SelectedItem.SelectedRadial}"
+							        Maximum="{Binding RadialCount}"
+							        Value="{Binding SelectedRadial}"
 							        Margin="5" />
                     </StackPanel>                  
                     
                 </DockPanel>                
-                <Views:TransmissionLossRadialView x:Name="RadialView"
-                                                      DataContext="{Binding SelectedItem}"/>
+                <Views:TransmissionLossRadialView x:Name="RadialView" />
             </DockPanel>
         </TabItem>
         <TabItem Header="Horizontal"

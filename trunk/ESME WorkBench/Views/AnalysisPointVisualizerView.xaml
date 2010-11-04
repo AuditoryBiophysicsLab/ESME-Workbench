@@ -1,4 +1,4 @@
-﻿<Window x:Class="ESMEWorkBench.Views.TransmissionLossView"
+﻿<Window x:Class="ESMEWorkBench.Views.AnalysisPointVisualizerView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Views="clr-namespace:ESMEWorkBench.Views"
@@ -45,47 +45,7 @@
 				          IsEnabled="False" />
 			</Menu>
 		</DockPanel>
-        <DockPanel LastChildFill="True">
-            <ListBox Width="81"
-                     ItemsSource="{Binding TransmissionLossFieldViewModels}"
-                     SelectedItem="{Binding SelectedItem}"
-                     
-                
-                
-                />
-                
-            
-        </DockPanel>
-        <TabControl>
-                
-			<TabItem Header="Vertical">
-				<DockPanel LastChildFill="True">
+        <Views:AnalysisPointView />
 
-					<DockPanel DockPanel.Dock="Bottom">
-						<StackPanel Orientation="Vertical"
-						            Margin="5 0 5 0">
-							<TextBlock Text="Drag slider to change the selected radial" />
-							<Slider AutoToolTipPlacement="BottomRight"
-							        AutoToolTipPrecision="0"
-							        TickPlacement="BottomRight"
-							        Minimum="1"
-							        Maximum="{Binding SelectedItem.RadialCount}"
-							        Value="{Binding SelectedItem.SelectedRadial}"
-							        Margin="5" />
-						</StackPanel>
-					</DockPanel>
-					<Views:TransmissionLossRadialView x:Name="RadialView"
-                                                      DataContext="{Binding SelectedItem}"/>
-				</DockPanel>
-			</TabItem>
-			<TabItem Header="Horizontal"
-			         IsEnabled="False" />
-			<TabItem Header="Minimum"
-			         IsEnabled="False" />
-			<TabItem Header="Maximum"
-			         IsEnabled="False" />
-			<TabItem Header="Mean"
-			         IsEnabled="False" />
-		</TabControl>
 	</DockPanel>
 </Window>

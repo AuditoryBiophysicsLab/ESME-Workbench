@@ -5,7 +5,6 @@ namespace ESMEWorkBench
 {
     internal static class MediatorMessage
     {
-        public const string TestTransmissionLossViewCommand = "TestTransmissionLossViewCommandMessage";
         public const string CancelCurrentCommand = "CancelCurrentCommandMessage";
         public const string SaveExperimentAsCommand = "SaveExperimentAsCommandMessage";
         public const string ToggleGridOverlayDisplayCommand = "ToggleGridOverlayDisplayCommandMessage";
@@ -29,10 +28,15 @@ namespace ESMEWorkBench
         public const string MapViewModelInitialized = "MapViewModelInitializedMessage";
         public const string MainViewModelInitialized = "MainViewModelInitializedMessage";
 
+        public const string AnalysisPointViewInitialized = "AnalysisPointViewInitializedMessage";
         public const string TransmissionLossFieldViewInitialized = "TransmissionLossFieldViewInitializedMessage";
         public const string TransmissionLossRadialViewInitialized = "TransmissionLossRadialViewInitializedMessage";
+        public const string AnalysisPointChanged = "AnalysisPointChangedMessage";
+        public const string TransmissionLossFieldChanged = "TransmissionLossFieldChangedMessage";
         public const string TransmissionLossRadialColorMapChanged = "TransmissionLossRadialColorMapChangedMessage";
         public const string TransmissionLossRadialChanged = "TransmissionLossRadialChangedMessage";
+        public const string SaveRadialAsCSV = "SaveRadialAsCSVMessage";
+        public const string SetSelectedRadialBearing = "SetSelectedRadialBearingMessage";
 
         public const string CurrentScaleChanged = "CurrentScaleChangedMessage";
         public const string CurrentExtentChanged = "CurrentExtentChangedMessage";

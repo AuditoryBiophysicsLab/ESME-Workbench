@@ -108,7 +108,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
             _dispatcher = Dispatcher.CurrentDispatcher;
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
+            //_viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
+            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel.Default);
         }
 
         public WriteableBitmap WriteableBitmap
