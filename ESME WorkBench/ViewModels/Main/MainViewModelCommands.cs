@@ -95,17 +95,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region TestTransmissionLossViewCommand
-
-        public SimpleCommand<object, object> TestTransmissionLossViewCommand
-        {
-            get { return _testTransmissionLossView ?? (_testTransmissionLossView = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.TestTransmissionLossViewCommand, true))); }
-        }
-
-        SimpleCommand<object, object> _testTransmissionLossView;
-
-        #endregion
-
         #region DisabledCommand
 
         public SimpleCommand<object, object> DisabledCommand

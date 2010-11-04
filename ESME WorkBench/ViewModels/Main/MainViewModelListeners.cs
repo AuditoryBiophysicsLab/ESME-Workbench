@@ -24,17 +24,6 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate)]
         void SetMouseEarthCoordinate(EarthCoordinate mouseEarthCoordinate) { MouseEarthCoordinate = mouseEarthCoordinate; }
 
-        [MediatorMessageSink(MediatorMessage.TestTransmissionLossViewCommand)]
-        void TestTransmissionLossView(bool dummy)
-        {
-            _openFileService.Filter = "Transmission Loss files (*.tlf)|*.tlf|All files (*.*)|*.*";
-            _openFileService.FileName = null;
-            var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
-            if ((!result.HasValue) || (!result.Value)) return;
-            var transmissionLossFieldViewModel = new TransmissionLossFieldViewModel(_openFileService.FileName, _saveFileService);
-            _visualizerService.Show("TransmissionLossView", transmissionLossFieldViewModel, true, null);
-        }
-
         [MediatorMessageSink(MediatorMessage.RunQuickLook)]
         void RunQuickLook(bool dummy)
         {
@@ -287,8 +276,8 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint)]
         void ViewAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            var analysisPointViewModel = new AnalysisPointViewModel(analysisPoint);
-            _visualizerService.Show("TransmissionLossView", analysisPointViewModel, true, null);
+            var analysisPointVisualizerViewModel = new AnalysisPointVisualizerViewModel(analysisPoint, _saveFileService);
+            _visualizerService.ShowDialog("AnalysisPointVisualizerView", analysisPointVisualizerViewModel);
         }
     }
 }

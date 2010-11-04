@@ -3,24 +3,38 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
+using HRC.Services;
+using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
-    class AnalysisPointViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    [ExportViewModel("AnalysisPointViewModel")]
+    class AnalysisPointViewModel : ViewModelBase
     {
-        IViewAwareStatus _viewAwareStatus;
+        readonly Dispatcher _dispatcher;
+        readonly IViewAwareStatus _viewAwareStatus;
+        readonly IHRCSaveFileService _saveFileService;
 
-        public AnalysisPointViewModel(AnalysisPoint analysisPoint )
+        bool _analysisPointInitialized,
+             _fieldInitialized,
+             _radialInitialized;
+
+        [ImportingConstructor]
+        public AnalysisPointViewModel(IViewAwareStatus viewAwareStatus, IHRCSaveFileService saveFileService)
         {
             RegisterMediator();
+            _viewAwareStatus = viewAwareStatus;
+            _saveFileService = saveFileService;
+            _dispatcher = Dispatcher.CurrentDispatcher;
 
-            TransmissionLossFieldViewModels = new ObservableCollection<TransmissionLossFieldViewModel>();
-            AnalysisPoint = analysisPoint;
+            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.AnalysisPointViewInitialized, true);
         }
 
         #region public AnalysisPoint AnalysisPoint { get; set; }
@@ -32,12 +46,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_analysisPoint == value) return;
                 _analysisPoint = value;
-                //populate the list 
-                foreach (var field in _analysisPoint.TransmissionLossFields)
-                    TransmissionLossFieldViewModels.Add(new TransmissionLossFieldViewModel(field, null));
-                if (TransmissionLossFieldViewModels.Count > 0)
-                    SelectedItem = TransmissionLossFieldViewModels[0];
                 NotifyPropertyChanged(AnalysisPointChangedEventArgs);
+                SelectedField = 0;
             }
         }
 
@@ -46,51 +56,25 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public ObservableCollection<TransmissionLossFieldViewModel> TransmissionLossFieldViewModels { get; set; }
+        #region public int SelectedField { get; set; }
 
-        public ObservableCollection<TransmissionLossFieldViewModel> TransmissionLossFieldViewModels
+        public int SelectedField
         {
-            get { return _transmissionLossFieldViewModels; }
+            get { return _selectedField; }
             set
             {
-                if (_transmissionLossFieldViewModels == value) return;
-                if (_transmissionLossFieldViewModels != null) _transmissionLossFieldViewModels.CollectionChanged -= TransmissionLossFieldViewModelsCollectionChanged;
-                _transmissionLossFieldViewModels = value;
-                if (_transmissionLossFieldViewModels != null) _transmissionLossFieldViewModels.CollectionChanged += TransmissionLossFieldViewModelsCollectionChanged;
-                NotifyPropertyChanged(TransmissionLossFieldViewModelsChangedEventArgs);
+                if (_selectedField == value) return;
+                _selectedField = value;
+                NotifyPropertyChanged(SelectedFieldChangedEventArgs);
+                MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, AnalysisPoint.TransmissionLossFields[SelectedField]);
             }
         }
 
-        void TransmissionLossFieldViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(TransmissionLossFieldViewModelsChangedEventArgs); }
-        static readonly PropertyChangedEventArgs TransmissionLossFieldViewModelsChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.TransmissionLossFieldViewModels);
-        ObservableCollection<TransmissionLossFieldViewModel> _transmissionLossFieldViewModels;
+        static readonly PropertyChangedEventArgs SelectedFieldChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.SelectedField);
+        int _selectedField;
 
         #endregion
 
-        #region public TransmissionLossFieldViewModel SelectedItem { get; set; }
-
-        public TransmissionLossFieldViewModel SelectedItem
-        {
-            get { return _selectedItem; }
-            set
-            {
-                if (_selectedItem == value) return;
-                if (_selectedItem != null) _selectedItem.TransmissionLossField.DiscardData();
-                _selectedItem = value;
-                if (_selectedItem != null)
-                {
-                    _selectedItem.TransmissionLossField.LoadData();
-                    _selectedItem.SelectedRadial = 1;
-                }
-                NotifyPropertyChanged(SelectedItemChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedItemChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.SelectedItem);
-        TransmissionLossFieldViewModel _selectedItem;
-
-        #endregion
-        
         void RegisterMediator()
         {
             try
@@ -104,10 +88,39 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
+        [MediatorMessageSink(MediatorMessage.AnalysisPointChanged)]
+        void AnalysisPointChanged(AnalysisPoint analysisPoint)
         {
-            _viewAwareStatus = viewAwareStatusService;
-            //_viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
+            AnalysisPoint = analysisPoint;
+        }
+
+        [MediatorMessageSink(MediatorMessage.AnalysisPointViewInitialized)]
+        void AnalysisPointViewInitialized(bool dummy)
+        {
+            _analysisPointInitialized = true;
+            InitializeIfViewModelsReady();
+        }
+
+        [MediatorMessageSink(MediatorMessage.TransmissionLossFieldViewInitialized)]
+        void TransmissionLossFieldViewInitialized(bool dummy)
+        {
+            _fieldInitialized = true;
+            InitializeIfViewModelsReady();
+        }
+
+        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialViewInitialized)]
+        void TransmissionLossRadialViewInitialized(bool dummy)
+        {
+            _radialInitialized = true;
+            InitializeIfViewModelsReady();
+        }
+
+        void InitializeIfViewModelsReady()
+        {
+            if (_analysisPointInitialized && _fieldInitialized && _radialInitialized)
+            {
+                MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, AnalysisPoint.TransmissionLossFields[SelectedField]);
+            }
         }
     }
 }
