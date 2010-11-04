@@ -286,7 +286,8 @@ namespace ESMEWorkBench.ViewModels.Main
                             {
                                 // Find a TL field that matches the current mode
                                 var transmissionLossField = experiment.NearestMatchingTransmissionLoss(mode, platformLocation);
-                                if (transmissionLossField == null) throw new ApplicationException(string.Format("No transmission loss fields found for mode {0}", mode.Name));
+                                if (transmissionLossField == null) 
+                                    throw new ApplicationException(string.Format("No transmission loss fields found for mode {0}", mode.PSMName));
                                 transmissionLossField.LoadData();
 
                                 var horizontalBeamLookDirection = new Course(platformCourse + mode.RelativeBeamAngle);

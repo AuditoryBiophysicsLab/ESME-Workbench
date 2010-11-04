@@ -54,7 +54,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                            };
 
 #if true
-            var analysisPointViewModel = new AnalysisPointViewModel
+            var analysisPointViewModel = new AnalysisPointCalculationPreviewViewModel
             {
                 AnalysisPoint = new AnalysisPoint
                 {
@@ -63,7 +63,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     RadialCount = 16,
                 }
             };
-#if true
+#if false
             foreach (var transmissionLossJobViewModel in from platform in _experiment.NemoFile.Scenario.Platforms
                                                          from source in platform.Sources
                                                          from mode in source.Modes
@@ -83,7 +83,7 @@ namespace ESMEWorkBench.ViewModels.Main
             foreach (var mode in distinctModes)
                 analysisPointViewModel.TransmissionLossJobViewModels.Add(new TransmissionLossJobViewModel(MouseEarthCoordinate, mode, 16, 3000)
                                                                          {
-                                                                             Name = string.Format("{0}", mode.Name),
+                                                                             Name = string.Format("{0}", mode.PSMName),
                                                                              IDField = _experiment.NextObjectID,
                                                                          });
 #endif
