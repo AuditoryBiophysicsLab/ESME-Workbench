@@ -1,6 +1,8 @@
 ﻿<Window x:Class="ESMEWorkBench.Views.BellhopQueueCalculatorView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         Title="BellhopQueueCalculatorView" Height="300" Width="300" Visibility="Visible">
     <Window.Resources>
         <Style x:Key="RadialCalculatorStatusStyle"
@@ -86,6 +88,12 @@
         </HierarchicalDataTemplate>
 
     </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <DockPanel LastChildFill="True">
         <TreeView ItemsSource="{Binding BellhopFieldCalculatorViewModels}"
                   ItemTemplate="{StaticResource BellhopQueueTreeViewTemplate}"/>

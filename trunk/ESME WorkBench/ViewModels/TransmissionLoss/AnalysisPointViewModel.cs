@@ -40,8 +40,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_analysisPoint == value) return;
                 _analysisPoint = value;
-                NotifyPropertyChanged(AnalysisPointChangedEventArgs);
                 SelectedField = 0;
+                NotifyPropertyChanged(AnalysisPointChangedEventArgs);
             }
         }
 
@@ -57,6 +57,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             get { return _selectedField; }
             set
             {
+                if (value < 0) return;
                 _selectedField = value;
                 MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, AnalysisPoint.TransmissionLossFields[SelectedField]);
                 NotifyPropertyChanged(SelectedFieldChangedEventArgs);
