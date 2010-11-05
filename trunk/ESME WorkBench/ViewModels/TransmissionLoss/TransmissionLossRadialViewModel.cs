@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -9,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
+using ESMEWorkBench.Views;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
@@ -159,6 +161,44 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 Debug.WriteLine("TransmissionLossRadialViewModel: Deferred initialization of transmission loss field radial");
             }
         }
+
+        [MediatorMessageSink(MediatorMessage.SaveRadialBitmap)]
+        void SaveRadialBitmap(string fileName)
+        {
+            BitmapEncoder encoder = null;
+
+            
+#if true //todo graham turn this back on when it works.)
+            
+            switch (Path.GetExtension(fileName).ToLower())
+            {
+                case ".jpg":
+                case ".jpeg":
+                    encoder = new JpegBitmapEncoder();
+                    
+                    break;
+                case ".png":
+                    encoder = new PngBitmapEncoder();
+                    
+                    break;
+                case ".bmp":
+                    encoder = new BmpBitmapEncoder();
+                    
+                    break;
+            }
+#endif
+
+            if (encoder == null) return;
+
+
+            var theView = ((TransmissionLossRadialView)_viewAwareStatus.View);
+            var bmp = new RenderTargetBitmap((int)theView.ActualWidth, (int)theView.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+            bmp.Render(theView);
+            encoder.Frames.Add(BitmapFrame.Create(bmp));
+            using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
+        }
+
+        
 
         void RenderBitmap()
         {
