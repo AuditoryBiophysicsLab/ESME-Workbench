@@ -411,7 +411,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
             Latitude.DataValue = location.Latitude_degrees;
             Longitude.DataValue = location.Longitude_degrees;
-            SourceDepth.DataValue = Math.Max(1, nemoMode.SourceDepth + nemoMode.DepthOffset);
+            SourceDepth.DataValue = Math.Max(1, nemoMode.SourceDepth);
             LowFrequency.DataValue = nemoMode.LowFrequency;
             HighFrequency.DataValue = nemoMode.HighFrequency;
             VerticalBeamWidth.DataValue = nemoMode.VerticalBeamWidth;

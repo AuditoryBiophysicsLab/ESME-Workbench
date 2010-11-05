@@ -3,8 +3,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
@@ -77,7 +75,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         string _selectedTransmissionLossFieldName;
 
         #endregion
-        
+
         #region CloseWindowCommand
 
         SimpleCommand<object, object> _closeWindow;
@@ -148,8 +146,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
 
-        [MediatorMessageSink(MediatorMessage.SetSelectedTransmissionLossFieldName)]
-        void SetSelectedTransmissionLossFieldName(string selectedTransmissionLossFieldName) { SelectedTransmissionLossFieldName = selectedTransmissionLossFieldName; }
+        [MediatorMessageSink(MediatorMessage.TransmissionLossFieldChanged)]
+        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField) { SelectedTransmissionLossFieldName = transmissionLossField.Name; }
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) 
         {
