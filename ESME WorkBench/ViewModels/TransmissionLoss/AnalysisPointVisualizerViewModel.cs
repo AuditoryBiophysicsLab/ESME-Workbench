@@ -99,7 +99,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 return _saveAs ?? (_saveAs = new SimpleCommand<object, object>(delegate
                 {
-                    BitmapEncoder encoder = null;
+                    
                     _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpg)|*.jpg|Bitmap (*.bmp)|*.bmp";
                     //_saveFileService.Filter = "Portable Network Graphics (*.png)|*.png";
                     _saveFileService.OverwritePrompt = true;
@@ -110,30 +110,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                     if (result.HasValue && result.Value)
                     {
                         Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-
-#if true //todo graham turn this back on when it works.)
-                        switch (Path.GetExtension(_saveFileService.FileName).ToLower())
-                        {
-                            case ".jpg":
-                            case ".jpeg":
-                                encoder = new JpegBitmapEncoder();
-                                break;
-                            case ".png":
-                                encoder = new PngBitmapEncoder();
-                                break;
-                            case ".bmp":
-                                encoder = new BmpBitmapEncoder();
-                                break;
-                        }
-#endif
-
-                        if (encoder == null) return;
-
-                        var theView = ((TransmissionLossFieldView)_viewAwareStatus.View).RadialView;
-                        var bmp = new RenderTargetBitmap((int)theView.ActualWidth, (int)theView.ActualHeight, 96, 96, PixelFormats.Pbgra32);
-                        bmp.Render(theView);
-                        encoder.Frames.Add(BitmapFrame.Create(bmp));
-                        using (var stream = new FileStream(_saveFileService.FileName, FileMode.Create)) encoder.Save(stream);
+                        MediatorMessage.Send(MediatorMessage.SaveRadialBitmap,_saveFileService.FileName);
                     }
                 }));
             }

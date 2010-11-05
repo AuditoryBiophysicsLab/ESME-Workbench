@@ -7,7 +7,8 @@
              xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
              mef:ViewModelLocator.ViewModel="TransmissionLossRadialViewModel"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="300"
+             Background="White">
     <DockPanel x:Name="RadialView">
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
@@ -32,7 +33,7 @@
 					                   AxisLabel="Transmission Loss (dB SPL)"
 					                   StartValue="{Binding ColorMapViewModel.MaxValue}"
 					                   EndValue="{Binding ColorMapViewModel.MinValue}"
-					                   TickValueFormat="0.#" />
+					                   TickValueFormat="0.#"/>
                     <controls:ColorBarView ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
 					                       Maximum="{Binding ColorMapViewModel.MaxValue}"
 					                       Minimum="{Binding ColorMapViewModel.MinValue}"
