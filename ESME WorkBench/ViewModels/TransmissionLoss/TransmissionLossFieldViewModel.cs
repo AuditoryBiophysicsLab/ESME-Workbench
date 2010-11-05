@@ -135,15 +135,27 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         [MediatorMessageSink(MediatorMessage.TransmissionLossFieldChanged)]
         void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField)
         {
-            if (_iAmInitialized) TransmissionLossField = transmissionLossField;
-            else _tempField = transmissionLossField;
+            if (_iAmInitialized)
+            {
+                Debug.WriteLine("TransmissionLossFieldViewModel: Initializing transmission loss field");
+                TransmissionLossField = transmissionLossField;
+            }
+            else
+            {
+                Debug.WriteLine("TransmissionLossFieldViewModel: Deferring initialization of transmission loss field");
+                _tempField = transmissionLossField;
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossFieldViewInitialized)]
         void TransmissionLossFieldViewInitialized(bool dummy)
         {
             _iAmInitialized = true;
-            if (_tempField != null) TransmissionLossField = _tempField;
+            if (_tempField != null)
+            {
+                TransmissionLossField = _tempField;
+                Debug.WriteLine("TransmissionLossFieldViewModel: Deferred initialization of transmission loss field completed");
+            }
         }
     }
 }
