@@ -65,7 +65,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             get { return _selectedRadial; }
             set
             {
-                if (value == _selectedRadial) return;
                 _selectedRadial = value;
                 NotifyPropertyChanged(SelectedRadialChangedEventArgs);
                 MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, TransmissionLossField.Radials[_selectedRadial - 1]);
@@ -93,8 +92,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         double _selectedRadialBearing;
 
         #endregion
-
-
+        
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
 
         static readonly PropertyChangedEventArgs ColorMapViewModelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.ColorMapViewModel);

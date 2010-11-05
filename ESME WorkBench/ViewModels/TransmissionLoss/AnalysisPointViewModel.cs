@@ -57,10 +57,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             get { return _selectedField; }
             set
             {
-                if (_selectedField == value) return;
                 _selectedField = value;
-                NotifyPropertyChanged(SelectedFieldChangedEventArgs);
                 MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, AnalysisPoint.TransmissionLossFields[SelectedField]);
+                NotifyPropertyChanged(SelectedFieldChangedEventArgs);
             }
         }
 

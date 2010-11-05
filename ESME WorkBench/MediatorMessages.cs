@@ -37,6 +37,7 @@ namespace ESMEWorkBench
         public const string TransmissionLossRadialChanged = "TransmissionLossRadialChangedMessage";
         public const string SaveRadialAsCSV = "SaveRadialAsCSVMessage";
         public const string SetSelectedRadialBearing = "SetSelectedRadialBearingMessage";
+        public const string SetSelectedTransmissionLossFieldName = "SetSelectedTransmissionLossFieldNameMessage";
 
         public const string CurrentScaleChanged = "CurrentScaleChangedMessage";
         public const string CurrentExtentChanged = "CurrentExtentChangedMessage";
