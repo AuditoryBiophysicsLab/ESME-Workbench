@@ -79,6 +79,9 @@
             <File Id="ReleaseNotes"
                   Name="ESME Workbench 2010 Release Notes.pdf"
                   Source="$(var.ReleaseNotesPath)\ESME Workbench 2010 Release Notes.pdf" />
+            <File Id="UserGuide"
+                  Name="ESME Workbench 2010 User Guide.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench 2010 User Guide.pdf" />
 
             <!-- External executables -->
             <File Id="EnvironmentBuilder.exe"
@@ -161,6 +164,12 @@
                       Name="Release Notes"
                       WorkingDirectory="INSTALLLOCATION"
                       Target="[INSTALLLOCATION]ESME Workbench 2010 Release Notes.pdf"
+                      Advertise="no" />
+            <Shortcut Id="UserGuide_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Release Notes"
+                      WorkingDirectory="INSTALLLOCATION"
+                      Target="[INSTALLLOCATION]ESME Workbench 2010 User Guide.pdf"
                       Advertise="no" />
             <Shortcut Id="ESME_WorkBench_Desktop_Shortcut"
                       Directory="DesktopFolder"
