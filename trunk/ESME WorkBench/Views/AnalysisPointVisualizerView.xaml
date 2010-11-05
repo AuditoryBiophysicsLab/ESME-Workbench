@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Views="clr-namespace:ESMEWorkBench.Views"
         xmlns:Properties="clr-namespace:ESMEWorkBench.Properties"
-        Title="{Binding SelectedRadialBearing, StringFormat=Transmission Loss: radial bearing {0} degrees}"
         Top="{Binding Source={x:Static Properties:Settings.Default}, Path=TLTop, Mode=TwoWay}"
         Left="{Binding Source={x:Static Properties:Settings.Default}, Path=TLLeft, Mode=TwoWay}"
         Height="{Binding Source={x:Static Properties:Settings.Default}, Path=TLHeight, Mode=TwoWay}"
@@ -21,6 +20,13 @@
 		
 	</Window.InputBindings>
 
+    <Window.Title>
+        <MultiBinding StringFormat="Transmission Loss: {0} radial bearing {1:0.#} degrees">
+            <Binding Path="SelectedTransmissionLossFieldName"/>
+            <Binding Path="SelectedRadialBearing"/>
+        </MultiBinding>
+    </Window.Title>
+    
 	<DockPanel LastChildFill="True">
 
 			<Menu Name="TransmissionLossViewFileMenu"

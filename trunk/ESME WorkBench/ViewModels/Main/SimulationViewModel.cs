@@ -30,7 +30,9 @@ namespace ESMEWorkBench.ViewModels.Main
             SecondsPerTimeStep = new LabeledDataWrapper<int>(this, SecondsPerTimeStepChangedEventArgs)
                                  {
                                      IsEditable = true,
+                                     DataValue = Properties.Settings.Default.SecondsPerTimeStep,
                                  };
+            OutputFileName = Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, Path.GetFileNameWithoutExtension(_experiment.FileName) + string.Format("_run_{0:00}{1:00}{2:00}.csv", DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second));
             Parameters = new ObservableCollection<LabelValuePair>
                          {
                              new LabelValuePair
@@ -112,6 +114,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_outputFileName == value) return;
                 _outputFileName = value;
                 NotifyPropertyChanged(OutputFileNameChangedEventArgs);
+                Properties.Settings.Default.ExperimentReportDirectory = Path.GetDirectoryName(_outputFileName);
             }
         }
 
@@ -209,6 +212,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     }, 
                     delegate
                     {
+                        Properties.Settings.Default.SecondsPerTimeStep = SecondsPerTimeStep.DataValue;
                         Run();
                     }));
             }

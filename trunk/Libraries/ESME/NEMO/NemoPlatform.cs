@@ -21,7 +21,7 @@ namespace ESME.NEMO
 
                 foreach (XmlNode cur in platform.ChildNodes) if (cur.Name == "trackDef") Trackdefs.Add(new NemoTrackdef(cur, scenarioDirectory));
 
-                foreach (XmlNode cur in platform.ChildNodes) if (cur.Name == "Source") Sources.Add(new NemoSource(cur, Trackdefs[0].InitialHeight, ref modeID));
+                foreach (XmlNode cur in platform.ChildNodes) if (cur.Name == "Source") Sources.Add(new NemoSource(cur, Math.Abs(Trackdefs[0].InitialHeight), ref modeID));
                 
                 if (Trackdefs.Count == 0) throw new FormatException("Platform.trackDef: At least one trackDef is required for each Platform");
 

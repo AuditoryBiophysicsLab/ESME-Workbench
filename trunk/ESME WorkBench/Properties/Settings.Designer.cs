@@ -286,5 +286,29 @@ namespace ESMEWorkBench.Properties {
                 this["LastAnimatPopulationDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SecondsPerTimeStep {
+            get {
+                return ((int)(this["SecondsPerTimeStep"]));
+            }
+            set {
+                this["SecondsPerTimeStep"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ExperimentReportDirectory {
+            get {
+                return ((string)(this["ExperimentReportDirectory"]));
+            }
+            set {
+                this["ExperimentReportDirectory"] = value;
+            }
+        }
     }
 }

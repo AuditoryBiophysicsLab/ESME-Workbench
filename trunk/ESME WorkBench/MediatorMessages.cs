@@ -75,7 +75,6 @@ namespace ESMEWorkBench
 
         public const string QueueBellhopJob = "QueueBellhopJobMessage";
 
-        public const string LaunchMMMBSCommand = "LaunchMMMBSCommandMessage";
         public const string CreateMMMBSBathymetryFileCommand = "CreateMMMBSBathymetryFileCommandMessage";
         public const string AddAnimatPopulationFileCommand = "AddAnimatPopulationFileCommandMessage";
 
