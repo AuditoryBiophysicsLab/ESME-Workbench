@@ -319,12 +319,14 @@
 					                SmallImageSource="..\Images\SmallIcons\application-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\application-icon.png"
 					                Command="{Binding LaunchMMMBSCommand}" />
+                    <!--
                     <r:RibbonButton Label="Launch SpeciesBuilder"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator's Species File Editor"
 					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
 					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
 					                Command="{Binding LaunchMMMBSpeciesBuilderCommand}" />
+                    -->
                     <r:RibbonButton Label="Load population"
 					                SmallImageSource="..\Images\SmallIcons\Button-Add-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\Button-Add-icon.png"
