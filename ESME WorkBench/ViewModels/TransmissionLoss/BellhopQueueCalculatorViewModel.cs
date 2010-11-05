@@ -17,8 +17,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         #region public constructor
 
         readonly string _outputDirectory;
-        public BellhopQueueCalculatorViewModel(string outputDirectory)
+        readonly IMessageBoxService _messageBoxService;
+        public BellhopQueueCalculatorViewModel(string outputDirectory, IMessageBoxService messageBoxService)
         {
+            _messageBoxService = messageBoxService;
             try
             {
                 Mediator.Instance.Register(this);
@@ -94,6 +96,27 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
             StartWorkIfNeeded();
         }
+
+        #endregion
+
+        #region ViewClosingCommand
+
+        public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
+        {
+            get
+            {
+                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
+                {
+                    if (BellhopFieldCalculatorViewModels.Count == 0) return;
+
+                    var ea = (CancelEventArgs)vcArgs.EventArgs;
+                    ea.Cancel = true;
+                    ((Window) _viewAwareStatus.View).WindowState = WindowState.Minimized;
+                }));
+            }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _viewClosing;
 
         #endregion
 
