@@ -85,15 +85,27 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         [MediatorMessageSink(MediatorMessage.AnalysisPointChanged)]
         void AnalysisPointChanged(AnalysisPoint analysisPoint)
         {
-            if (_iAmInitialized) AnalysisPoint = analysisPoint;
-            else _tempAnalysisPoint = analysisPoint;
+            if (_iAmInitialized)
+            {
+                Debug.WriteLine("AnalysisPointViewModel: Initializing analysis point");
+                AnalysisPoint = analysisPoint;
+            }
+            else
+            {
+                Debug.WriteLine("AnalysisPointViewModel: Deferring initialization of analysis point");
+                _tempAnalysisPoint = analysisPoint;
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.AnalysisPointViewInitialized)]
         void AnalysisPointViewInitialized(bool dummy)
         {
             _iAmInitialized = true;
-            if (_tempAnalysisPoint != null) AnalysisPoint = _tempAnalysisPoint;
+            if (_tempAnalysisPoint != null)
+            {
+                AnalysisPoint = _tempAnalysisPoint;
+                Debug.WriteLine("AnalysisPointViewModel: Deferred initialization of analysis point completed");
+            }
         }
     }
 }

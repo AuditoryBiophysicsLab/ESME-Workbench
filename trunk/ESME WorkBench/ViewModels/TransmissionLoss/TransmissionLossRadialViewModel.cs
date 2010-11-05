@@ -134,18 +134,30 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialColorMapChanged)]
         void TransmissionLossRadialColorMapChanged(ColorMapViewModel colorMapViewModel) { ColorMapViewModel = colorMapViewModel; }
 
+        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
+        void TransmissionLossRadialChanged(TransmissionLossRadial transmissionLossRadial)
+        {
+            if (_iAmInitialized)
+            {
+                Debug.WriteLine("TransmissionLossRadialViewModel: Initializing transmission loss radial");
+                TransmissionLossRadial = transmissionLossRadial;
+            }
+            else
+            {
+                Debug.WriteLine("TransmissionLossRadialViewModel: Deferring initialization of transmission loss radial");
+                _tempRadial = transmissionLossRadial;
+            }
+        }
+
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialViewInitialized)]
         void TransmissionLossRadialViewInitialized(bool dummy)
         {
             _iAmInitialized = true;
-            if (_tempRadial != null) TransmissionLossRadial = _tempRadial;
-        }
-
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
-        void TransmissionLossRadialChanged(TransmissionLossRadial transmissionLossRadial)
-        {
-            if (_iAmInitialized) TransmissionLossRadial = transmissionLossRadial;
-            else _tempRadial = transmissionLossRadial;
+            if (_tempRadial != null)
+            {
+                TransmissionLossRadial = _tempRadial;
+                Debug.WriteLine("TransmissionLossRadialViewModel: Deferred initialization of transmission loss field radial");
+            }
         }
 
         void RenderBitmap()
@@ -223,6 +235,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_transmissionLossRadial == value) return;
                 _transmissionLossRadial = value;
+                _isRendered = false;
+                _writeableBitmap = null;
                 RangeMin = TransmissionLossRadial.Ranges.First();
                 RangeMax = TransmissionLossRadial.Ranges.Last();
                 DepthMin = TransmissionLossRadial.Depths.First();
