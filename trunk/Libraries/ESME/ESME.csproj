@@ -154,6 +154,8 @@
     <Compile Include="TransmissionLoss\AnalysisPoint.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
+    <Compile Include="TransmissionLoss\SoundPressureLevelField.cs" />
+    <Compile Include="TransmissionLoss\SoundPressureRadial.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossField.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRadial.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossProcess.cs">

@@ -382,6 +382,32 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region LaunchMMMBSpeciesBuilderCommand
+
+        public SimpleCommand<object, object> LaunchMMMBSpeciesBuilderCommand
+        {
+            get
+            {
+                return _launchMMMBSpeciesBuilder ?? (_launchMMMBSpeciesBuilder = new SimpleCommand<object, object>(obj =>
+                                                                                                                   {
+                                                                                                                       var mbsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "3mbSpeciesBuilder.exe");
+
+                                                                                                                       new Process
+                                                                                                                       {
+                                                                                                                           StartInfo =
+                                                                                                                               {
+                                                                                                                                   FileName = mbsPath,
+                                                                                                                                   WorkingDirectory = Path.GetDirectoryName(mbsPath),
+                                                                                                                               }
+                                                                                                                       }.Start();
+                                                                                                                   }));
+            }
+        }
+
+        SimpleCommand<object, object> _launchMMMBSpeciesBuilder;
+
+        #endregion
+
         #region CreateMMMBSBathymetryFileCommand
 
         public SimpleCommand<object, object> CreateMMMBSBathymetryFileCommand
