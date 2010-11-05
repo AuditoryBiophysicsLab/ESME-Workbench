@@ -167,7 +167,7 @@
                       Advertise="no" />
             <Shortcut Id="UserGuide_Shortcut"
                       Directory="ProgramMenuDir"
-                      Name="Release Notes"
+                      Name="User Guide"
                       WorkingDirectory="INSTALLLOCATION"
                       Target="[INSTALLLOCATION]ESME Workbench 2010 User Guide.pdf"
                       Advertise="no" />
