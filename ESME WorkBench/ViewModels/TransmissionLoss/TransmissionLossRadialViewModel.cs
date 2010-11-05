@@ -166,9 +166,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         void SaveRadialBitmap(string fileName)
         {
             BitmapEncoder encoder = null;
-
-            
-#if true //todo graham turn this back on when it works.)
             
             switch (Path.GetExtension(fileName).ToLower())
             {
@@ -186,7 +183,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                     
                     break;
             }
-#endif
+
 
             if (encoder == null) return;
 

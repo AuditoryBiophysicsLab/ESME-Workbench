@@ -40,6 +40,7 @@ namespace ESME.TransmissionLoss
             IsSaved = false;
         }
 
+        public TransmissionLossRadial() {  }
         public TransmissionLossRadial(BinaryReader stream)
         {
             if (_seekOffset == -1) _seekOffset = stream.BaseStream.Seek(0, SeekOrigin.Current);

@@ -25,7 +25,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         {
             RegisterMediator();
             _saveFileService = saveFileService;
-
+            
             if (_iAmInitialized)
             {
                 Debug.WriteLine("AnalysisPointVisualizerViewModel: Initializing analysis point");
@@ -68,6 +68,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_selectedTransmissionLossFieldName == value) return;
                 _selectedTransmissionLossFieldName = value;
                 NotifyPropertyChanged(SelectedTransmissionLossFieldNameChangedEventArgs);
+                
+                
+                
             }
         }
 
@@ -75,6 +78,22 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         string _selectedTransmissionLossFieldName;
 
         #endregion
+
+        #region public string  OutputFileName { get; set; }
+
+        public string  OutputFileName
+        {
+            get
+            {
+                //update the default ouput file string
+                var fieldName = SelectedTransmissionLossFieldName.Replace('|', ' ');
+                return Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, fieldName + string.Format(" radial {0} degrees", SelectedRadialBearing));
+                
+            }
+        }
+
+        #endregion
+
 
         #region CloseWindowCommand
 
@@ -99,11 +118,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 {
                     
                     _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpg)|*.jpg|Bitmap (*.bmp)|*.bmp";
-                    //_saveFileService.Filter = "Portable Network Graphics (*.png)|*.png";
                     _saveFileService.OverwritePrompt = true;
-                    _saveFileService.FileName = null;
-                    _saveFileService.InitialDirectory = Properties.Settings.Default.LastImageExportFileDirectory;
-                    _saveFileService.FileName = null;
+                    _saveFileService.FileName = OutputFileName;
+                   
                     var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
                     if (result.HasValue && result.Value)
                     {
@@ -125,10 +142,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 return _exportAs ?? (_exportAs = new SimpleCommand<object, object>(delegate
                 {
                     _saveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
-                    _saveFileService.FileName = null;
-                    _saveFileService.InitialDirectory = Properties.Settings.Default.LastCSVExportFileDirectory;
                     _saveFileService.OverwritePrompt = true;
-                    _saveFileService.FileName = null;
+                    _saveFileService.FileName = OutputFileName;
+
                     var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
                     if (result.HasValue && result.Value)
                     {
