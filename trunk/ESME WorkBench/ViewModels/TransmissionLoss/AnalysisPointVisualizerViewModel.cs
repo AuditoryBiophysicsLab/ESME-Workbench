@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -21,6 +18,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
         readonly IHRCSaveFileService _saveFileService;
+        bool _iAmInitialized;
+        readonly AnalysisPoint _tempAnalysisPoint;
 
         #region public constructor
 
@@ -29,7 +28,16 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             RegisterMediator();
             _saveFileService = saveFileService;
 
-            MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, analysisPoint);
+            if (_iAmInitialized)
+            {
+                Debug.WriteLine("AnalysisPointVisualizerViewModel: Initializing analysis point");
+                MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, analysisPoint);
+            }
+            else
+            {
+                Debug.WriteLine("AnalysisPointVisualizerViewModel: Deferring initialization of analysis point");
+                _tempAnalysisPoint = analysisPoint;
+            }
         }
 
         #endregion
@@ -52,6 +60,24 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region public string SelectedTransmissionLossFieldName { get; set; }
+
+        public string SelectedTransmissionLossFieldName
+        {
+            get { return _selectedTransmissionLossFieldName; }
+            set
+            {
+                if (_selectedTransmissionLossFieldName == value) return;
+                _selectedTransmissionLossFieldName = value;
+                NotifyPropertyChanged(SelectedTransmissionLossFieldNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedTransmissionLossFieldNameChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointVisualizerViewModel>(x => x.SelectedTransmissionLossFieldName);
+        string _selectedTransmissionLossFieldName;
+
+        #endregion
+        
         #region CloseWindowCommand
 
         SimpleCommand<object, object> _closeWindow;
@@ -62,6 +88,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
 
         #endregion
+
         #region SaveAsCommand
 
         SimpleCommand<object, object> _saveAs;
@@ -144,11 +171,21 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
 
+        [MediatorMessageSink(MediatorMessage.SetSelectedTransmissionLossFieldName)]
+        void SetSelectedTransmissionLossFieldName(string selectedTransmissionLossFieldName) { SelectedTransmissionLossFieldName = selectedTransmissionLossFieldName; }
+
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) 
         {
             _viewAwareStatus = viewAwareStatusService;
             _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+            _iAmInitialized = true;
+            if (_tempAnalysisPoint != null)
+            {
+                MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, _tempAnalysisPoint);
+                Debug.WriteLine("AnalysisPointVisualizerViewModel: Deferred initialization of analysis point completed");
+            }
         }
+
         void RegisterMediator()
         {
             try

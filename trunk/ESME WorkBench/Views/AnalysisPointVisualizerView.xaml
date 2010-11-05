@@ -23,9 +23,8 @@
 
 	<DockPanel LastChildFill="True">
 
-		<DockPanel DockPanel.Dock="Top"
-		           Margin="5">
 			<Menu Name="TransmissionLossViewFileMenu"
+                  DockPanel.Dock="Top"
 			      HorizontalAlignment="Stretch"
 			      BorderBrush="Black"
 			      BorderThickness="1">
@@ -44,8 +43,7 @@
 				          HorizontalAlignment="Right"
 				          IsEnabled="False" />
 			</Menu>
-		</DockPanel>
-        <Views:AnalysisPointView />
+        <Views:AnalysisPointView DockPanel.Dock="Bottom"/>
 
 	</DockPanel>
 </Window>
