@@ -1,0 +1,55 @@
+﻿<Window x:Class="ESMEWorkBench.Views.AnalysisPointVisualizerView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Views="clr-namespace:ESMEWorkBench.Views"
+        xmlns:Properties="clr-namespace:ESMEWorkBench.Properties"
+        Top="{Binding Source={x:Static Properties:Settings.Default}, Path=TLTop, Mode=TwoWay}"
+        Left="{Binding Source={x:Static Properties:Settings.Default}, Path=TLLeft, Mode=TwoWay}"
+        Height="{Binding Source={x:Static Properties:Settings.Default}, Path=TLHeight, Mode=TwoWay}"
+        Width="{Binding Source={x:Static Properties:Settings.Default}, Path=TLWidth, Mode=TwoWay}">
+	<Window.InputBindings>
+		<KeyBinding Command="{Binding SaveAsCommand}"
+		            Key="S"
+		            Modifiers="Control" />
+        <KeyBinding Command="{Binding ExportAsCommand}"
+		            Key="E"
+		            Modifiers="Control" />
+		<KeyBinding Command="{Binding CloseWindowCommand}"
+		            Key="W"
+		            Modifiers="Control" />
+		
+	</Window.InputBindings>
+
+    <Window.Title>
+        <MultiBinding StringFormat="Transmission Loss: {0} radial bearing {1:0.#} degrees">
+            <Binding Path="SelectedTransmissionLossFieldName"/>
+            <Binding Path="SelectedRadialBearing"/>
+        </MultiBinding>
+    </Window.Title>
+    
+	<DockPanel LastChildFill="True">
+
+			<Menu Name="TransmissionLossViewFileMenu"
+                  DockPanel.Dock="Top"
+			      HorizontalAlignment="Stretch"
+			      BorderBrush="Black"
+			      BorderThickness="1">
+				<MenuItem Header="_File">
+					<MenuItem Header="Save As"
+					          Command="{Binding SaveAsCommand}"
+					          InputGestureText="Ctrl+S" />
+					<MenuItem Header="Export to CSV"
+					          Command="{Binding ExportAsCommand}"
+					          InputGestureText="Ctrl+E" />
+					<MenuItem Header="Exit View"
+					          Command="{Binding CloseWindowCommand}"
+					          InputGestureText="Ctrl+W" />
+				</MenuItem>
+				<MenuItem Header=" _Help"
+				          HorizontalAlignment="Right"
+				          IsEnabled="False" />
+			</Menu>
+        <Views:AnalysisPointView DockPanel.Dock="Bottom"/>
+
+	</DockPanel>
+</Window>
