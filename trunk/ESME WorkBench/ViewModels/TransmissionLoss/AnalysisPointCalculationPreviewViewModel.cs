@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Cinch;
+using ESME.Model;
 using ESME.TransmissionLoss;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
@@ -11,7 +12,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     {
         #region public constructor
 
-        public AnalysisPointCalculationPreviewViewModel() { TransmissionLossJobViewModels = new ObservableCollection<TransmissionLossJobViewModel>(); }
+        public AnalysisPointCalculationPreviewViewModel()
+        {
+            TransmissionLossJobViewModels = new ObservableCollection<TransmissionLossJobViewModel>();
+            BellhopRunFiles = new ObservableCollection<BellhopRunFile>();
+        }
 
         #endregion
 
@@ -55,6 +60,28 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region public ObservableCollection<BellhopRunFile> BellhopRunFiles { get; set; }
+
+        public ObservableCollection<BellhopRunFile> BellhopRunFiles
+        {
+            get { return _bellhopRunFiles; }
+            set
+            {
+                if (_bellhopRunFiles == value) return;
+                if (_bellhopRunFiles != null) _bellhopRunFiles.CollectionChanged -= BellhopRunFilesCollectionChanged;
+                _bellhopRunFiles = value;
+                if (_bellhopRunFiles != null) _bellhopRunFiles.CollectionChanged += BellhopRunFilesCollectionChanged;
+                NotifyPropertyChanged(BellhopRunFilesChangedEventArgs);
+            }
+        }
+
+        void BellhopRunFilesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(BellhopRunFilesChangedEventArgs); }
+        static readonly PropertyChangedEventArgs BellhopRunFilesChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointCalculationPreviewViewModel>(x => x.BellhopRunFiles);
+        ObservableCollection<BellhopRunFile> _bellhopRunFiles;
+
+        #endregion
+
+
         #region public AnalysisPoint AnalysisPoint { get; set; }
 
         public AnalysisPoint AnalysisPoint
@@ -73,7 +100,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-
         #region public bool IsValid { get; set; }
 
         public bool IsValid { get { return TransmissionLossJobViewModels.All(transmissionLossJobViewModel => transmissionLossJobViewModel.IsValid); } }
@@ -81,7 +107,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointCalculationPreviewViewModel>(x => x.IsValid);
 
         #endregion
-
 
         #region OKCommand
 

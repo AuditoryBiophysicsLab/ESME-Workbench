@@ -29,18 +29,6 @@
         
         <app:GridLengthConverter x:Key="gridLengthConverter" />
 
-        <!-- RibbonGallery 
-		<Style TargetType="{x:Type r:RibbonGallery}">
-			<Setter Property="SelectedItem"
-			        Value="{Binding SelectedItem}" />
-		</Style>
-
-		<Style x:Key="FileListCategory"
-		       TargetType="{x:Type r:RibbonGalleryCategory}">
-			<Setter Property="ItemsSource"
-			        Value="{Binding}" />
-		</Style> -->
-
 	</r:RibbonWindow.Resources>
 	<r:RibbonWindow.InputBindings>
 		<KeyBinding Command="{Binding CancelCurrentCommand}"
@@ -209,7 +197,7 @@
 					                SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new analysis point to the experiment"
-					                Command="{Binding DisabledCommand}" />
+					                Command="{Binding AnalysisPointCommand}" />
 					<r:RibbonButton Label="Fixed Source"
 					                LargeImageSource="..\Images\LargeIcons\Sound.png"
 					                SmallImageSource="..\Images\SmallIcons\Sound.png"
@@ -221,8 +209,8 @@
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new quick look point to the experiment"
-					                Command="{Binding QuickLookCommand}" />
-				</r:RibbonGroup>
+                                    Command="{Binding DisabledCommand}" />
+                </r:RibbonGroup>
                 <r:RibbonGroup Header="Scenario">
                     <r:RibbonButton Label="Open"
 					                LargeImageSource="..\Images\LargeIcons\open-icon.png"

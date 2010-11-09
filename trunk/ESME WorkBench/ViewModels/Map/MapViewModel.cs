@@ -203,8 +203,8 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
-        [MediatorMessageSink(MediatorMessage.QuickLookCommand)]
-        void QuickLookCommand(bool dummy)
+        [MediatorMessageSink(MediatorMessage.AnalysisPointCommand)]
+        void AnalysisPointCommand(bool dummy)
         {
             IsQuickLookMode = true;
             Cursor = Cursors.Cross;

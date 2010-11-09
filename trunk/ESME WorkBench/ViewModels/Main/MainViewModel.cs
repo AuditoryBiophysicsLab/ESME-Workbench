@@ -327,8 +327,8 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return _recentFilesSelectedItem; }
             set
             {
-                if (_recentFilesSelectedItem == value) return;
                 _recentFilesSelectedItem = value;
+                if (_recentFilesSelectedItem == null) return;
                 NotifyPropertyChanged(RecentFilesSelectedItemChangedEventArgs);
                 try
                 {
