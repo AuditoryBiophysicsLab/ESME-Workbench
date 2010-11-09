@@ -8,8 +8,6 @@ namespace ESMEWorkBench.ViewModels.RecentFiles
 {
     public class RecentFileList : ViewModelBase
     {
-        IPersist _persister;
-
         public int MaxNumberOfFiles { get; set; }
 
         public RecentFileList()
@@ -29,6 +27,7 @@ namespace ESMEWorkBench.ViewModels.RecentFiles
                 _persister = value;
             }
         }
+        IPersist _persister;
 
         #region public ObservableCollection<RecentFileDescriptor> List { get; set; }
 
@@ -53,7 +52,7 @@ namespace ESMEWorkBench.ViewModels.RecentFiles
 
         void UpdateList()
         {
-            List.Clear();
+            if (List.Count > 0) List.Clear();
             foreach (var recent in Persister.RecentFiles(MaxNumberOfFiles))
                 List.Add(new RecentFileDescriptor(recent));
         }
