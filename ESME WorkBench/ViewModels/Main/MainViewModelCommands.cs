@@ -336,11 +336,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region QuickLookCommand
+        #region AnalysisPointCommand
 
-        public SimpleCommand<object, object> QuickLookCommand
+        public SimpleCommand<object, object> AnalysisPointCommand
         {
-            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => CanRunQuickLook(), obj => MediatorMessage.Send(MediatorMessage.QuickLookCommand))); }
+            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => CanRunQuickLook(), obj => MediatorMessage.Send(MediatorMessage.AnalysisPointCommand))); }
         }
 
         bool CanRunQuickLook()
