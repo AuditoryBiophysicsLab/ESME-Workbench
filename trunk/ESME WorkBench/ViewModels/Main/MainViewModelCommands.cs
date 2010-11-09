@@ -162,6 +162,23 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region ResetScenarioZoomLevelCommand
+
+        public SimpleCommand<object, object> ResetScenarioZoomLevelCommand
+        {
+            get
+            {
+                return _resetScenarioZoomLevel ?? (_resetScenarioZoomLevel = new SimpleCommand<object, object>(
+                    obj => _experiment.NemoFile != null,
+                    obj =>
+                        MediatorMessage.Send(MediatorMessage.SetScenarioMapExtent, true)));
+            }
+        }
+
+        SimpleCommand<object, object> _resetScenarioZoomLevel;
+
+        #endregion
+
         #region ShowEnvironmentSettingsCommand
 
         public SimpleCommand<object, object> ShowEnvironmentSettingsCommand

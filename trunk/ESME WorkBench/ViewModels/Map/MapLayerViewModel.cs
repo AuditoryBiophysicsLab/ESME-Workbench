@@ -28,7 +28,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
             AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
             LineStyle = CreateLineStyle(LineColor, LineWidth);
-            PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int) (LineWidth + 0.5));
+            PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
 
             _removeMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
 
@@ -273,7 +273,7 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        float _lineWidth = (float) (((_random.NextDouble() * 9) + 1) / 2);
+        float _lineWidth = (float) Math.Max(1, ((_random.NextDouble() * 9) + 1) / 2);
 
         #endregion
 

@@ -163,12 +163,12 @@
 			<r:RibbonTab KeyTip="E"
 			             Header="Experiment">
 				<r:RibbonGroup Header="Map Data">
-                    <r:RibbonButton Label="Refresh"
+                  <!-- <r:RibbonButton Label="Refresh"
 					                SmallImageSource="..\Images\SmallIcons\Button-Refresh-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\Button-Refresh-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Refresh the map display"
-					                Command="{Binding RefreshMapCommand}" />
+					                Command="{Binding RefreshMapCommand}" /> -->
                     <r:RibbonButton Label="Shapefile"
 					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -225,7 +225,41 @@
 					                ToolTipDescription="Add a new quick look point to the experiment"
 					                Command="{Binding QuickLookCommand}" />
 				</r:RibbonGroup>
-			</r:RibbonTab>
+                <r:RibbonGroup Header="Scenario">
+                    <r:RibbonButton Label="Open"
+					                LargeImageSource="..\Images\LargeIcons\open-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\open-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Associate a scenario file with the current experiment"
+					                Command="{Binding AddScenarioFileCommand}" />
+                    <r:RibbonButton Label="Edit"
+					                LargeImageSource="..\Images\LargeIcons\application-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\application-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Launch the scenario editor"
+					                Command="{Binding LaunchScenarioEditorCommand}" />
+                    <r:RibbonButton Label="Run"
+					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Run the scenario"
+					                Command="{Binding RunExperimentCommand}" />
+                    <r:RibbonButton Label="Zoom to Scenario"
+					                LargeImageSource="..\Images\LargeIcons\Magnifying-Glass-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Magnifying-Glass-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Resets the map position to the current scenario"
+					                Command="{Binding ResetScenarioZoomLevelCommand}" />
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Environment">
+                    <r:RibbonButton Label="Settings"
+					                LargeImageSource="..\Images\LargeIcons\Distance-learning.png"
+					                SmallImageSource="..\Images\SmallIcons\Distance-learning.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Configure the environmental data to be used for the experiment"
+					                Command="{Binding ShowEnvironmentSettingsCommand}" />
+                </r:RibbonGroup>
+            </r:RibbonTab>
 			<r:RibbonTab KeyTip="S"
 			             Header="Scenario">
 				<r:RibbonGroup Header="Scenario File">
