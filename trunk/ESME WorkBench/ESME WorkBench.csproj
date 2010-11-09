@@ -500,6 +500,8 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\SmallIcons\Magnifying-Glass-icon.png" />
+    <Resource Include="Images\LargeIcons\Magnifying-Glass-icon.png" />
     <Resource Include="Images\ESME Splash Screen Joke.png" />
     <Resource Include="Images\SmallIcons\accept-icon.png" />
     <Resource Include="Images\SmallIcons\add-1-icon.png" />
