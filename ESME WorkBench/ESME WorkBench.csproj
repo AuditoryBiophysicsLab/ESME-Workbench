@@ -228,7 +228,6 @@
     <Compile Include="ViewModels\Map\ShapefileMapLayer.cs" />
     <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
     <Compile Include="ViewModels\RecentFiles\IPersist.cs" />
-    <Compile Include="ViewModels\RecentFiles\RecentFile.cs" />
     <Compile Include="ViewModels\RecentFiles\RecentFileList.cs" />
     <Compile Include="ViewModels\RecentFiles\RegistryPersister.cs" />
     <Compile Include="ViewModels\RecentFiles\XmlPersister.cs" />

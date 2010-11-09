@@ -29,22 +29,17 @@
         
         <app:GridLengthConverter x:Key="gridLengthConverter" />
 
-        <!-- RibbonGallery -->
+        <!-- RibbonGallery 
 		<Style TargetType="{x:Type r:RibbonGallery}">
 			<Setter Property="SelectedItem"
 			        Value="{Binding SelectedItem}" />
-			<Setter Property="Command"
-			        Value="{Binding Command}" />
-			<Setter Property="CommandParameter"
-			        Value="{Binding SelectedItem}" />
 		</Style>
 
-		<!-- RibbonGalleryCategory -->
 		<Style x:Key="FileListCategory"
 		       TargetType="{x:Type r:RibbonGalleryCategory}">
 			<Setter Property="ItemsSource"
 			        Value="{Binding}" />
-		</Style>
+		</Style> -->
 
 	</r:RibbonWindow.Resources>
 	<r:RibbonWindow.InputBindings>
@@ -133,20 +128,15 @@
 					                             Command="Close" />
 					<r:RibbonApplicationMenu.AuxiliaryPaneContent>
                         <r:RibbonGallery ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                                         SelectedItem="{Binding RecentFilesSelectedItem}"
                                          CanUserFilter="False">
 							<r:RibbonGalleryCategory Header="Recent Experiments"
-                                                     ItemsSource="{Binding RecentFiles}"
+                                                     ItemsSource="{Binding RecentFiles.List}"
 							                         Background="Transparent">
 								<r:RibbonGalleryCategory.ItemsPanel>
 									<ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical"
 										            IsItemsHost="True">
-                                            <i:Interaction.Triggers>
-                                                <i:EventTrigger EventName="Click">
-                                                    <cinch:EventToCommandTrigger Command="{Binding Path=Command, RelativeSource={RelativeSource Self}}" 
-                                                                                 CommandParameter="{Binding Path=CommandParameter, RelativeSource={RelativeSource Self}}"/>
-                                                </i:EventTrigger>
-                                            </i:Interaction.Triggers>
                                         </StackPanel>
                                     </ItemsPanelTemplate>
 								</r:RibbonGalleryCategory.ItemsPanel>
