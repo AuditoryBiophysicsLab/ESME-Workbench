@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
-using ESMERibbonDemo.ViewModels;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.RecentFiles;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 using HRC.Services;
@@ -85,7 +82,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 DecoratedExperimentName = "<New experiment>";
             }
             HookPropertyChanged(_experiment);
-            TestRecentFiles();
+            //TestRecentFiles();
         }
 
         void HookPropertyChanged(Experiment experiment)
@@ -176,7 +173,7 @@ namespace ESMEWorkBench.ViewModels.Main
         public void FilesDropped(Object sender, DragEventArgs e)
         {
             if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
-            var droppedFilePaths = (string[]) e.Data.GetData(DataFormats.FileDrop, true);
+            var droppedFilePaths = (string[])e.Data.GetData(DataFormats.FileDrop, true);
             var refreshNeeded = false;
             foreach (var file in droppedFilePaths)
             {
@@ -237,17 +234,18 @@ namespace ESMEWorkBench.ViewModels.Main
                 _openFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
                 _openFileService.InitialDirectory = Settings.Default.LastExperimentFileDirectory;
                 _openFileService.FileName = null;
-                var result = _openFileService.ShowDialog((Window) _viewAwareStatus.View);
+                var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
                 if ((!result.HasValue) || (!result.Value)) return;
                 _experiment.FileName = _openFileService.FileName;
                 Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
             }
             LoadExperimentFile(_openFileService.FileName);
+            RecentFiles.InsertFile(_openFileService.FileName);
         }
 
         void LoadExperimentFile(string fileName)
         {
-            MediatorMessage.Send(MediatorMessage.SetExperiment, (Experiment) null);
+            MediatorMessage.Send(MediatorMessage.SetExperiment, (Experiment)null);
             _experiment = Experiment.Load(fileName, Experiment.ReferencedTypes);
             _experiment.FileName = fileName;
             _experiment.MessageBoxService = _messageBoxService;
@@ -264,7 +262,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
                 _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
                 _openFileService.FileName = null;
-                var result = _openFileService.ShowDialog((Window) _viewAwareStatus.View);
+                var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
                 if (!result.HasValue || !result.Value) return;
                 fileName = _openFileService.FileName;
             }
@@ -279,7 +277,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _saveFileService.OverwritePrompt = true;
             _saveFileService.InitialDirectory = Settings.Default.LastExperimentFileDirectory;
             _saveFileService.FileName = null;
-            var result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
+            var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return false;
             _experiment.FileName = _saveFileService.FileName;
             Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
@@ -306,6 +304,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             _experiment.Save();
             DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
+            RecentFiles.InsertFile(_experiment.FileName);
             return true;
         }
 
@@ -321,63 +320,49 @@ namespace ESMEWorkBench.ViewModels.Main
             return true;
         }
 
-        #region public SelectableCollection<RecentFileDescriptor> RecentFiles { get; set; }
+        #region public RecentFileDescriptor RecentFilesSelectedItem { get; set; }
 
-        public SelectableCollection<RecentFileDescriptor> RecentFiles
+        public RecentFileDescriptor RecentFilesSelectedItem
+        {
+            get { return _recentFilesSelectedItem; }
+            set
+            {
+                if (_recentFilesSelectedItem == value) return;
+                _recentFilesSelectedItem = value;
+                NotifyPropertyChanged(RecentFilesSelectedItemChangedEventArgs);
+                try
+                {
+                    LoadExperimentFile(_recentFilesSelectedItem.LongName);
+                }
+                catch (Exception e)
+                {
+                    _messageBoxService.ShowError("Error opening experiment: " + e.Message);
+                    RecentFiles.RemoveFile(_recentFilesSelectedItem.LongName);
+                }
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RecentFilesSelectedItemChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RecentFilesSelectedItem);
+        RecentFileDescriptor _recentFilesSelectedItem;
+
+        #endregion
+
+        #region public RecentFileList RecentFiles { get; set; }
+
+        public RecentFileList RecentFiles
         {
             get { return _recentFiles; }
             set
             {
                 if (_recentFiles == value) return;
-                if (_recentFiles != null) _recentFiles.CollectionChanged -= RecentFilesCollectionChanged;
                 _recentFiles = value;
-                if (_recentFiles != null) _recentFiles.CollectionChanged += RecentFilesCollectionChanged;
                 NotifyPropertyChanged(RecentFilesChangedEventArgs);
             }
         }
 
-        void RecentFilesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(RecentFilesChangedEventArgs); }
         static readonly PropertyChangedEventArgs RecentFilesChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RecentFiles);
-
-        SelectableCollection<RecentFileDescriptor> _recentFiles;
-
-        void TestRecentFiles()
-        {
-            RecentFiles = new SelectableCollection<RecentFileDescriptor>
-                          {
-                              new RecentFileDescriptor
-                              {
-                                  ShortName = "File1",
-                                  LongName = "User picked File1",
-                                  Command = SelectRecentFileCommand,
-                              },
-                              new RecentFileDescriptor
-                              {
-                                  ShortName = "File2",
-                                  LongName = "User picked File2",
-                                  Command = SelectRecentFileCommand,
-                              }
-                          };
-        }
+        RecentFileList _recentFiles = new RecentFileList();
 
         #endregion
-    }
-
-    public class RecentFileDescriptor : IHasName
-    {
-        public string ShortName { get; set; }
-        public string LongName { get; set; }
-        public SimpleCommand<object, string> Command { get; set; }
-
-        public string CommandParameter
-        {
-            get { return LongName; }
-        }
-
-        public string Name
-        {
-            get { return LongName; }
-            set { LongName = value; }
-        }
     }
 }

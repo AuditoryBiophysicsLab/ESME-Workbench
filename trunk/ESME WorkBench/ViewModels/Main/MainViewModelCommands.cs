@@ -355,7 +355,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, string> SelectRecentFileCommand
         {
-            get { return _selectRecentFileCommand ?? (_selectRecentFileCommand = new SimpleCommand<object, string>(file => _messageBoxService.ShowInformation(file))); }
+            get { return _selectRecentFileCommand ?? (_selectRecentFileCommand = new SimpleCommand<object, string>(file => 
+                _messageBoxService.ShowInformation(file))); }
         }
 
         SimpleCommand<object, string> _selectRecentFileCommand;

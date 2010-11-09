@@ -1,13 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using Cinch;
-using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.Ribbon
 {
-    [ExportViewModel("GalleryDataViewModel")]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class GalleryDataViewModel<T> : ControlDataViewModel
     {
         ObservableCollection<GalleryCategoryDataViewModel<T>> _controlDataCollection;
