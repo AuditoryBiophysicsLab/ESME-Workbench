@@ -351,18 +351,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region SelectRecentFileCommand
-
-        public SimpleCommand<object, string> SelectRecentFileCommand
-        {
-            get { return _selectRecentFileCommand ?? (_selectRecentFileCommand = new SimpleCommand<object, string>(file => 
-                _messageBoxService.ShowInformation(file))); }
-        }
-
-        SimpleCommand<object, string> _selectRecentFileCommand;
-
-        #endregion
-
         #region AddAnimalPopulationFileCommand
 
         public SimpleCommand<object, object> AddAnimalPopulationFileCommand

@@ -130,9 +130,12 @@
                         <r:RibbonGallery ScrollViewer.VerticalScrollBarVisibility="Auto" 
                                          SelectedItem="{Binding RecentFilesSelectedItem}"
                                          CanUserFilter="False">
-							<r:RibbonGalleryCategory Header="Recent Experiments"
+							<r:RibbonGalleryCategory
                                                      ItemsSource="{Binding RecentFiles.List}"
 							                         Background="Transparent">
+                                <r:RibbonGalleryCategory.Header>
+                                    <TextBlock Background="LightGray" FontWeight="Bold" Text="Recent Files" />
+                                </r:RibbonGalleryCategory.Header>
 								<r:RibbonGalleryCategory.ItemsPanel>
 									<ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical"
@@ -145,6 +148,11 @@
                                         <TextBlock Text="{Binding ShortName}"/>
                                     </DataTemplate>
                                 </r:RibbonGalleryCategory.ItemTemplate>
+                                <r:RibbonGalleryCategory.Style>
+                                    <Style>
+                                        
+                                    </Style>
+                                </r:RibbonGalleryCategory.Style>
 							</r:RibbonGalleryCategory>
 						</r:RibbonGallery>
 					</r:RibbonApplicationMenu.AuxiliaryPaneContent>
