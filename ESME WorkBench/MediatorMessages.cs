@@ -13,6 +13,7 @@ namespace ESMEWorkBench
         public const string QuickLookCommand = "QuickLookCommandMessage";
         public const string AddFileCommand = "AddFileCommandMessage";
         public const string AddScenarioFileCommand = "AddScenarioFileCommandMessage";
+        public const string SetScenarioMapExtent = "SetScenarioMapExtentMessage";   
 
         public const string AddAnalysisPoint = "AddAnalysisPointMessage";
         public const string EditAnalysisPoint = "EditAnalysisPointMessage";
@@ -39,6 +40,7 @@ namespace ESMEWorkBench
         public const string SaveRadialBitmap = "SaveRadialBitmapMessage";
         public const string SetSelectedRadialBearing = "SetSelectedRadialBearingMessage";
         public const string SetSelectedTransmissionLossFieldName = "SetSelectedTransmissionLossFieldNameMessage";
+        public const string ResetSelectedField = "ResetSelectedFieldMessage";
 
         public const string CurrentScaleChanged = "CurrentScaleChangedMessage";
         public const string CurrentExtentChanged = "CurrentExtentChangedMessage";

@@ -2,13 +2,16 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Windows.Media;
 using Cinch;
-using ESME.Platform;
+using ESME.Environment;
+using ESME.Model;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using ThinkGeo.MapSuite.Core;
+using BehaviorModel = ESME.Platform.BehaviorModel;
 
 namespace ESMEWorkBench.Data
 {
@@ -159,11 +162,36 @@ namespace ESMEWorkBench.Data
                         if (MapLayers.IndexOf(opArea) == -1) MapLayers.Add(opArea);
                     }
                 }
+                SetScenarioMapExtent(true);
             }
             catch (Exception e)
             {
                 Globals.DisplayException(MessageBoxService, e, "Error opening scenario file");
             }
+        }
+
+
+        [MediatorMessageSink(MediatorMessage.SetScenarioMapExtent)]
+        void SetScenarioMapExtent(bool dummy)
+        {
+            var boundingBox = new Rect();
+            if (NemoFile.Scenario.OverlayFile != null) boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
+            else
+            {
+                foreach (var platform in NemoFile.Scenario.Platforms)
+                    foreach (var trackdef in platform.Trackdefs)
+                    {
+                        if ((boundingBox.Width == 0) && (boundingBox.Height == 0)) boundingBox = trackdef.OverlayFile.Shapes[0].BoundingBox;
+                        else boundingBox.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
+                    }
+            }
+            var north = (float) boundingBox.Bottom + 3;
+            var west = (float) boundingBox.Left - 3;
+            var south = (float) boundingBox.Top - 3;
+            var east = (float) boundingBox.Right + 3;
+
+            var mapExtent = new RectangleShape(west, north, east, south);
+            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
         }
     }
 }

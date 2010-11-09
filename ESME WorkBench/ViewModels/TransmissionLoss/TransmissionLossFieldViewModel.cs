@@ -28,6 +28,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
         }
 
+        public TransmissionLossFieldViewModel() {  }
+
         #region public TransmissionLossField TransmissionLossField { get; set; }
 
         public TransmissionLossField TransmissionLossField

@@ -2,7 +2,9 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
@@ -30,6 +32,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 Debug.WriteLine("AnalysisPointVisualizerViewModel: Initializing analysis point");
                 MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, analysisPoint);
+                TransmissionLossFieldChanged(analysisPoint.TransmissionLossFields[0]);
             }
             else
             {
@@ -86,12 +89,19 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             get
             {
                 //update the default ouput file string
-                var fieldName = SelectedTransmissionLossFieldName.Replace('|', ' ');
-                return Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, fieldName + string.Format(" radial {0} degrees", SelectedRadialBearing));
-                
-            }
-        }
+                //todo:possible race condition ?
+                lock (this)
+                {
+                    if (SelectedTransmissionLossFieldName == null) return null;
+                    var fieldName = SelectedTransmissionLossFieldName.Replace('|', ' ');
+                    return Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, fieldName + string.Format(" radial {0} degrees", SelectedRadialBearing));
+                }
 
+
+            }
+
+        }
+        
         #endregion
 
 
@@ -117,8 +127,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 return _saveAs ?? (_saveAs = new SimpleCommand<object, object>(delegate
                 {
                     
-                    _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpg)|*.jpg|Bitmap (*.bmp)|*.bmp";
+                    _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpeg)|*.jpg|Bitmap (*.bmp)|*.bmp";
                     _saveFileService.OverwritePrompt = true;
+                    //if (OutputFileName == null) return;
                     _saveFileService.FileName = OutputFileName;
                    
                     var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
@@ -127,6 +138,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
                         MediatorMessage.Send(MediatorMessage.SaveRadialBitmap,_saveFileService.FileName);
                     }
+                    //MediatorMessage.Send(MediatorMessage.ResetSelectedField, true);
+                    Keyboard.Focus((Window)_viewAwareStatus.View);
                 }));
             }
         }
@@ -151,6 +164,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         Properties.Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
                         MediatorMessage.Send(MediatorMessage.SaveRadialAsCSV, _saveFileService.FileName);
                     }
+                    //MediatorMessage.Send(MediatorMessage.ResetSelectedField,true);
+                    Keyboard.Focus((Window)_viewAwareStatus.View);
                 }));
             }
         }
@@ -163,15 +178,17 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossFieldChanged)]
-        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField) { SelectedTransmissionLossFieldName = transmissionLossField.Name; }
+        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField) { lock(this) SelectedTransmissionLossFieldName = transmissionLossField.Name; }
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) 
         {
             _viewAwareStatus = viewAwareStatusService;
             _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
             _iAmInitialized = true;
+
             if (_tempAnalysisPoint != null)
             {
+                TransmissionLossFieldChanged(_tempAnalysisPoint.TransmissionLossFields[0]);
                 MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, _tempAnalysisPoint);
                 Debug.WriteLine("AnalysisPointVisualizerViewModel: Deferred initialization of analysis point completed");
             }

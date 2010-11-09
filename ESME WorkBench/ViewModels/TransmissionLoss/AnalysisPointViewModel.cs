@@ -82,6 +82,13 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
+        [MediatorMessageSink(MediatorMessage.ResetSelectedField)]
+        void ResetSelectedField(bool dummy)
+        {
+            SelectedField = _selectedField;
+        }
+
+
         [MediatorMessageSink(MediatorMessage.AnalysisPointChanged)]
         void AnalysisPointChanged(AnalysisPoint analysisPoint)
         {

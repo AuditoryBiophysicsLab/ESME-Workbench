@@ -287,5 +287,13 @@ namespace ESMEWorkBench.ViewModels.Map
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
+        [MediatorMessageSink(MediatorMessage.SetCurrentExtent)]
+        void SetCurrentExtent(RectangleShape rectangleShape)
+        {
+            _wpfMap.CurrentExtent = rectangleShape;
+           // _wpfMap.CurrentScale = _experiment.CurrentScale; //?
+            _wpfMap.Refresh();
+        }
+
     }
 }

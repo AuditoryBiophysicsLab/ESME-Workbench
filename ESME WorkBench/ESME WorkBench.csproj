@@ -135,6 +135,8 @@
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelFieldViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelRadialViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>

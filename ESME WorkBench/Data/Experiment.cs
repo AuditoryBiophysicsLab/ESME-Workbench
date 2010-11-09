@@ -651,7 +651,7 @@ namespace ESMEWorkBench.Data
         
         void Initialize()
         {
-            if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent));
+           // if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent));
             if (CurrentScale != 0) MediatorMessage.Send(MediatorMessage.SetCurrentScale, CurrentScale);
             if (AnalysisPointLayer == null)
                 AnalysisPointLayer = new MarkerLayerViewModel
