@@ -123,7 +123,6 @@ namespace ESMEWorkBench.Data
                                                                                               };
                     simArea.Add(NemoFile.Scenario.OverlayFile.Shapes);
                     simArea.Done();
-                   // if (MapLayers.IndexOf(simArea) == -1) MapLayers.Add(simArea);
                     if(MapLayers.IndexOf(simArea) == -1) layersToAdd.Add(simArea);
                 }
                 var platformCount = 0;
@@ -146,7 +145,6 @@ namespace ESMEWorkBench.Data
                     //behavior.CourseChangePoints
                     track.Add(behavior.CourseOverlay);
                     track.Done();
-                    //if (MapLayers.IndexOf(track) == -1) MapLayers.Add(track);
                     if (MapLayers.IndexOf(track) == -1) layersToAdd.Add(track);
                     var opAreaCount = 0;
                     foreach (var trackdef in platform.Trackdefs)
@@ -164,7 +162,7 @@ namespace ESMEWorkBench.Data
                                                                                                };
                         opArea.Add(trackdef.OverlayFile.Shapes);
                         opArea.Done();
-                        if (MapLayers.IndexOf(opArea) == -1) layersToAdd.Add(opArea);// MapLayers.Add(opArea);
+                        if (MapLayers.IndexOf(opArea) == -1) layersToAdd.Add(opArea);
                     }
                 }
 
