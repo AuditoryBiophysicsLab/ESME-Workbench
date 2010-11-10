@@ -111,7 +111,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
         }
 
-        public TransmissionLossRadialViewModel() {  }
+       
 
         public WriteableBitmap WriteableBitmap
         {

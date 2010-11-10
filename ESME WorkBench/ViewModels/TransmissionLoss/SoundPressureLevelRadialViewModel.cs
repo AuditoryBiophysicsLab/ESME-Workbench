@@ -10,7 +10,7 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     [ExportViewModel("SoundPressureLevelRadialViewModel")]
-    class SoundPressureLevelRadialViewModel:TransmissionLossRadialViewModel
+    class SoundPressureLevelRadialViewModel : ViewModelBase
     {
         [ImportingConstructor]
         public SoundPressureLevelRadialViewModel(IViewAwareStatus viewAwareStatus)
