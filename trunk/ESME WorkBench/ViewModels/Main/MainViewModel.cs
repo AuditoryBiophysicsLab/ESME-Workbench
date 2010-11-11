@@ -366,6 +366,17 @@ namespace ESMEWorkBench.ViewModels.Main
             return true;
         }
 
+        void ShowEnvironmentSettingsView()
+        {
+            var environmentSettingsViewModel = new EnvironmentSettingsViewModel(Globals.AppSettings.EnvironmentDatabaseDirectory, _experiment);
+            var result = _visualizerService.ShowDialog("EnvironmentSettingsView", environmentSettingsViewModel);
+            if (!result.HasValue || !result.Value) return;
+            _experiment.BathymetryFileName = environmentSettingsViewModel.BathymetryData.SelectedItem.Name;
+            _experiment.BottomTypeFileName = environmentSettingsViewModel.BottomTypeData.SelectedItem.Name;
+            _experiment.SoundSpeedFileName = environmentSettingsViewModel.SoundSpeedData.SelectedItem.Name;
+            _experiment.WindSpeedFileName = environmentSettingsViewModel.WindSpeedData.SelectedItem.Name;
+        }
+
         #region public RecentFileDescriptor RecentFilesSelectedItem { get; set; }
 
         public RecentFileDescriptor RecentFilesSelectedItem

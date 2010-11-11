@@ -10,7 +10,14 @@
              d:DesignHeight="300"
              d:DesignWidth="300">
 	<UserControl.Resources>
-		<Style x:Key="LayersViewItemStyle"
+        <Style x:Key="ContextMenuItemStyle">
+            <Setter Property="MenuItem.Header" Value="{Binding Header}"/>
+            <Setter Property="MenuItem.ItemsSource" Value="{Binding Children}"/>
+            <Setter Property="MenuItem.Command" Value="{Binding Command}" />
+            <Setter Property="MenuItem.Icon" Value="{Binding Icon}" />
+        </Style>
+
+        <Style x:Key="LayersViewItemStyle"
 		       TargetType="ListBoxItem">
 			<Setter Property="KeyboardNavigation.AcceptsReturn"
 			        Value="True" />
@@ -18,7 +25,7 @@
 			        Value="True" />
 			<Setter Property="layers:VirtualToggleButton.IsChecked"
 			        Value="{Binding IsChecked}" />
-			<Style.Triggers>
+            <Style.Triggers>
 				<Trigger Property="IsSelected"
 				         Value="True">
 					<Setter Property="FontWeight"
@@ -26,27 +33,25 @@
 				</Trigger>
 			</Style.Triggers>
 		</Style>
-
+        
 		<DataTemplate x:Key="CheckBoxItemTemplate">
 			<StackPanel Orientation="Horizontal">
-				<!-- These elements are bound to a FooViewModel object. -->
 				<CheckBox Focusable="False"
 				          IsChecked="{Binding IsChecked}"
 				          VerticalAlignment="Center" />
-				<ContentPresenter Content="{Binding Name, Mode=OneTime}"
-				                  Margin="2,0">
-				</ContentPresenter>
-				<StackPanel.ContextMenu>
-					<ContextMenu ItemsSource="{Binding ContextMenu}"
-					             ItemContainerStyle="{StaticResource ContextMenuItemStyle}" />
-				</StackPanel.ContextMenu>
-			</StackPanel>
+                <ContentPresenter Content="{Binding Name, Mode=OneTime}" 
+                                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}"
+                                  Margin="2,0"/>
+                <StackPanel.ContextMenu>
+                    <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}" 
+                                 ItemsSource="{Binding ContextMenu}" />
+                </StackPanel.ContextMenu>
+            </StackPanel>
 		</DataTemplate>
-
 	</UserControl.Resources>
-	<ListBox DockPanel.Dock="Top"
+    <ListBox DockPanel.Dock="Top"
 	         ItemContainerStyle="{StaticResource LayersViewItemStyle}"
 	         ItemsSource="{Binding MapLayers}"
 	         ItemTemplate="{StaticResource CheckBoxItemTemplate}">
-	</ListBox>
+    </ListBox>
 </UserControl>

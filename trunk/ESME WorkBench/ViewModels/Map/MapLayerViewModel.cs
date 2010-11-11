@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
@@ -70,7 +71,10 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                                                 MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                                                                                                 MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, this);
                                                                                             });
-
+            CtxMenu = new ContextMenu();
+            CtxMenu.Items.Add(_orderMenu);
+            CtxMenu.Items.Add(_colorMenu);
+            CtxMenu.Items.Add(_removeMenu);
             ContextMenu = new List<MenuItemViewModel>
                           {
                               _orderMenu,
@@ -354,8 +358,7 @@ namespace ESMEWorkBench.ViewModels.Map
         PointSymbolType _pointSymbolType = (PointSymbolType)(_random.Next(8));
 
         #endregion
-
-
+        
         #region public LineStyle CustomLineStyle { get; set; }
 
         [XmlIgnore]
@@ -500,6 +503,25 @@ namespace ESMEWorkBench.ViewModels.Map
         bool _canChangeLineWidth = true;
 
         #endregion
+
+        #region public ContextMenu CtxMenu { get; set; }
+
+        public ContextMenu CtxMenu
+        {
+            get { return _ctxMenu; }
+            set
+            {
+                if (_ctxMenu == value) return;
+                _ctxMenu = value;
+                NotifyPropertyChanged(CtxMenuChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CtxMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CtxMenu);
+        ContextMenu _ctxMenu;
+
+        #endregion
+
 
         #region public List<MenuItemViewModel> ContextMenu { get; set; }
 

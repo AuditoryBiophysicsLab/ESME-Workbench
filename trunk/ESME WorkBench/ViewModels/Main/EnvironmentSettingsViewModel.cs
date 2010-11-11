@@ -7,6 +7,7 @@ using System.Linq;
 using Cinch;
 using ESME.Environment;
 using ESMERibbonDemo.ViewModels;
+using ESMEWorkBench.Data;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -15,9 +16,9 @@ namespace ESMEWorkBench.ViewModels.Main
         IViewAwareStatus _viewAwareStatus;
         readonly string _experimentTimeFrame;
 
-        public EnvironmentSettingsViewModel(string databasePath, string experimentTimeFrame)
+        public EnvironmentSettingsViewModel(string databasePath, Experiment experiment)
         {
-            _experimentTimeFrame = experimentTimeFrame;
+            _experimentTimeFrame = experiment.NemoFile.Scenario.TimeFrame.ToLower();
             WindSpeedData = new SelectableCollection<EnvironmentDataDescriptor>();
             SoundSpeedData = new SelectableCollection<EnvironmentDataDescriptor>();
             BottomTypeData = new SelectableCollection<EnvironmentDataDescriptor>();
@@ -47,7 +48,7 @@ namespace ESMEWorkBench.ViewModels.Main
                              "cold"
                          };
             foreach (var timeFrame in TimeFrames)
-                if (timeFrame == experimentTimeFrame) SelectedTimeFrameItem = timeFrame;
+                if (timeFrame == _experimentTimeFrame) SelectedTimeFrameItem = timeFrame;
         }
 
         #region public ObservableCollection<string> TimeFrames { get; set; }
