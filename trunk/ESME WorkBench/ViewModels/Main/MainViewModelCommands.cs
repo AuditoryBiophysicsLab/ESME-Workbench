@@ -228,18 +228,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> NewExperimentCommand
         {
-            get
-            {
-                return _newExperiment ?? (_newExperiment = new SimpleCommand<object, object>(obj =>
-                                                                                             {
-                                                                                                 if (UserCanceledBecauseExperimentUnsaved()) return;
-                                                                                                 if (_experiment != null) _experiment.Close();
-                                                                                                 _experiment = new Experiment();
-                                                                                                 _experiment.InitializeIfViewModelsReady();
-                                                                                                 DecoratedExperimentName = "<New experiment>";
-                                                                                                 HookPropertyChanged(_experiment);
-                                                                                             }));
-            }
+            get { return _newExperiment ?? (_newExperiment = new SimpleCommand<object, object>(obj => NewExperiment())); }
         }
 
         SimpleCommand<object, object> _newExperiment;
