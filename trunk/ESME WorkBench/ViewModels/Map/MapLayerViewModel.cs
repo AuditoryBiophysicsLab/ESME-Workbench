@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
@@ -25,7 +26,8 @@ namespace ESMEWorkBench.ViewModels.Map
         public MapLayerViewModel()
         {
             LayerOverlay = new LayerOverlay();
-
+            LineColorBrush = new SolidColorBrush(_lineColor);
+            AreaColorBrush = new SolidColorBrush(_areaColor);
             AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
             LineStyle = CreateLineStyle(LineColor, LineWidth);
             PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
@@ -255,12 +257,32 @@ namespace ESMEWorkBench.ViewModels.Map
                 AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
                 LineStyle = CreateLineStyle(LineColor, LineWidth);
                 PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)Math.Max(1, LineWidth));
+                LineColorBrush = new SolidColorBrush(_lineColor);
             }
         }
 
         Color _lineColor = RandomColor;
 
         #endregion
+
+        #region public Brush LineColorBrush { get; set; }
+
+        public Brush LineColorBrush
+        {
+            get { return _lineColorBrush; }
+            set
+            {
+                if (_lineColorBrush == value) return;
+                _lineColorBrush = value;
+                NotifyPropertyChanged(LineColorBrushChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LineColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorBrush);
+        Brush _lineColorBrush;
+
+        #endregion
+
 
         #region public float LineWidth { get; set; }
 
@@ -302,12 +324,32 @@ namespace ESMEWorkBench.ViewModels.Map
                 if (_areaColor == value) return;
                 _areaColor = value;
                 AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
+                AreaColorBrush = new SolidColorBrush(_areaColor);
             }
         }
 
         Color _areaColor = RandomColor;
 
         #endregion
+
+        #region public Brush AreaColorBrush { get; set; }
+
+        public Brush AreaColorBrush
+        {
+            get { return _areaColorBrush; }
+            set
+            {
+                if (_areaColorBrush == value) return;
+                _areaColorBrush = value;
+                NotifyPropertyChanged(AreaColorBrushChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AreaColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorBrush);
+        Brush _areaColorBrush;
+
+        #endregion
+
 
         #region public AreaStyle AreaStyle { get; set; }
 
@@ -408,6 +450,44 @@ namespace ESMEWorkBench.ViewModels.Map
         PointStyle _pointStyle;
 
         #endregion
+
+        public Visibility IsLineColorVisible
+        {
+            get
+            {
+                switch(LayerType)
+                {
+                    default:
+                        return Visibility.Hidden;
+                    case LayerType.BaseMap:
+                    case LayerType.Shapefile:
+                    case LayerType.OverlayFile:
+                    case LayerType.SimArea:
+                    case LayerType.OpArea:
+                    case LayerType.Bathymetry:
+                    case LayerType.Animal:
+                        return Visibility.Visible;
+                
+                }
+            }
+        }
+
+        public Visibility IsAreaColorVisible
+        {
+            get
+            {
+                switch (LayerType)
+                {
+                    default:
+                        return Visibility.Hidden;
+                    case LayerType.BaseMap:
+                    case LayerType.Shapefile:
+                        return Visibility.Visible;
+                   
+                }
+            }
+        }
+
 
         #region public LayerType LayerType { get; set; }
 
