@@ -117,6 +117,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        public float LineWidth { get; set; }
+
         public SimpleCommand<object, object> Command { get; set; }
     }
 }

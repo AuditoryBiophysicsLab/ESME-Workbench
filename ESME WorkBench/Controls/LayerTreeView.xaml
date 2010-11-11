@@ -15,6 +15,9 @@
             <Setter Property="MenuItem.ItemsSource" Value="{Binding Children}"/>
             <Setter Property="MenuItem.Command" Value="{Binding Command}" />
             <Setter Property="MenuItem.Icon" Value="{Binding Icon}" />
+            <Setter Property="MenuItem.IsCheckable" Value="{Binding IsCheckable}"/>
+            <Setter Property="MenuItem.IsChecked" Value="{Binding IsChecked}"/>  
+            <Setter Property="MenuItem.CommandParameter" Value="{Binding}"/>
         </Style>
 
         <Style x:Key="LayersViewItemStyle"
