@@ -81,18 +81,21 @@ namespace ESMEWorkBench.ViewModels.Map
             _orderMenu.Children.Add(_moveDownMenu);
             _orderMenu.Children.Add(_moveToBottomMenu);
 
-            for (var lineWidth = 0.5f; lineWidth <= 5; lineWidth += 0.5f)
+            for (var lineWidth = 1.0f; lineWidth <= 5; lineWidth += 0.5f)
             {
                 var width = lineWidth;
                 _lineWeightMenu.Children.Add(new MenuItemViewModel
                                              {
                                                  Header = string.Format("{0:0.0}", lineWidth),
+                                                 IsCheckable = true,
+                                                 LineWidth = lineWidth,
                                                  Command = new SimpleCommand<object, object>(obj => CanChangeLineWidth, obj =>
                                                                                                                         {
                                                                                                                             LineWidth = width;
                                                                                                                             MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                                                                                                                             MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
                                                                                                                         }),
+
                                              });
             }
 
@@ -101,6 +104,7 @@ namespace ESMEWorkBench.ViewModels.Map
             _colorMenu.Children.Add(_areaColorMenu);
 
             IsChecked = true;
+            CheckProperLineWidthMenu();
         }
 
         public static GeoCollection<Overlay> MapOverlay { get; set; }
@@ -168,7 +172,9 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                     {
                                                                         new MenuItemViewModel
                                                                         {
-                                                                            Header = "Circle"
+                                                                            Header = "Circle",
+                                                                            IsCheckable = true,
+                                                                            IsChecked = true,
                                                                         },
                                                                         new MenuItemViewModel
                                                                         {
@@ -269,11 +275,20 @@ namespace ESMEWorkBench.ViewModels.Map
                 AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
                 LineStyle = CreateLineStyle(LineColor, LineWidth);
                 PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
+                CheckProperLineWidthMenu();
             }
         }
 
-        float _lineWidth = (float) Math.Max(1, ((_random.NextDouble() * 9) + 1) / 2);
+        //float _lineWidth = (float)Math.Max(1, ((_random.NextDouble() * 9) + 1) / 2);
+        float _lineWidth = _random.Next(2, 10) / 2.0f;
 
+        void CheckProperLineWidthMenu()
+        {
+            foreach (var child in _lineWeightMenu.Children)
+            {
+                child.IsChecked = child.LineWidth == _lineWidth;
+            }
+        }
         #endregion
 
         #region public Color AreaColor { get; set; }
