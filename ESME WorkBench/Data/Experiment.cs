@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -404,7 +405,19 @@ namespace ESMEWorkBench.Data
                     {
                         foreach (var item in e.NewItems)
                         {
-                            if (AnimatInterface == null) AnimatInterface = AnimatInterface.Create((string)item);
+                            var animatPopulationFile = (string) item;
+                            if (!File.Exists(animatPopulationFile))
+                            {
+                                var result = MessageBoxService.ShowYesNo("This experiment references an animal population file that cannot be located on this computer.  The file referenced is:\n" + animatPopulationFile + "\nProceed with opening this experiment?  If yes, all existing animal population information will be removed.", CustomDialogIcons.Question);
+                                if (result == CustomDialogResults.Yes)
+                                {
+                                    _deleteAllSpeciesLayersOnInitialize = true;
+                                    AnimalPopulationFiles.Remove(animatPopulationFile);
+                                    return;
+                                }
+                                throw new UserCanceledOperationException("The operation was canceled by user request");
+                            }
+                            if (AnimatInterface == null) AnimatInterface = AnimatInterface.Create(animatPopulationFile);
 
                             //for each species...
                             foreach (var species in AnimatInterface.AnimatList.SpeciesList)
@@ -504,7 +517,7 @@ namespace ESMEWorkBench.Data
         public double CurrentScale { get; set; }
 
         [XmlIgnore]
-        public IMessageBoxService MessageBoxService { private get; set; }
+        public static IMessageBoxService MessageBoxService { private get; set; }
 
         [XmlIgnore]
         public Environment2DData Bathymetry { get; private set; }
@@ -590,6 +603,7 @@ namespace ESMEWorkBench.Data
         FileSystemWatcher FileSystemWatcher { get; set; }
 
         [XmlIgnore] bool _isInitialized;
+        bool _deleteAllSpeciesLayersOnInitialize;
 
         public Experiment()
         {
@@ -697,6 +711,11 @@ namespace ESMEWorkBench.Data
             MediatorMessage.Send(MediatorMessage.SetExperiment, this);
             foreach (var transmissionLossField in TransmissionLossFields)
                 MatchTransmissionLossFieldToAnalysisPoints(transmissionLossField);
+            if (_deleteAllSpeciesLayersOnInitialize)
+            {
+                var layersToRemove = MapLayers.Where(layer => layer.LayerType == LayerType.Animal).ToList();
+                foreach (var layer in layersToRemove) MapLayers.Remove(layer);
+            }
             _isInitialized = true;
         }
 

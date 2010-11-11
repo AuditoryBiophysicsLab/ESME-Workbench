@@ -20,15 +20,7 @@
                 Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
                 mc:Ignorable="d">
 	<r:RibbonWindow.Resources>
-		<DataTemplate x:Key="MRUTemplate"
-		              DataType="mru:RecentFile">
-			<StackPanel Orientation="Vertical">
-				<TextBlock Text="{Binding Label}" />
-			</StackPanel>
-		</DataTemplate>
-        
         <app:GridLengthConverter x:Key="gridLengthConverter" />
-
 	</r:RibbonWindow.Resources>
 	<r:RibbonWindow.InputBindings>
 		<KeyBinding Command="{Binding CancelCurrentCommand}"
@@ -53,9 +45,11 @@
 			<StatusBarItem>
 				<StackPanel Orientation="Horizontal">
 					<TextBlock Text="{Binding MouseEarthCoordinate.Latitude_degrees, StringFormat=Lat: {0:0.000000}}" />
-					<TextBlock Text=" " />
-					<TextBlock Text="{Binding MouseEarthCoordinate.Longitude_degrees, StringFormat=Lon: {0:0.000000}}" />
-				</StackPanel>
+                    <TextBlock Text=" " />
+                    <TextBlock Text="{Binding MouseEarthCoordinate.Longitude_degrees, StringFormat=Lon: {0:0.000000}}" />
+                    <TextBlock Text=" " />
+                    <TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
+                </StackPanel>
 			</StatusBarItem>
 		</StatusBar>
 		<r:Ribbon x:Name="Ribbon"

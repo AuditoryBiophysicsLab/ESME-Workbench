@@ -52,6 +52,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _visualizerService = visualizerService;
             _viewAwareStatus.ViewLoaded += ViewLoaded;
             _viewAwareStatus.ViewUnloaded += ViewUnloaded;
+            Experiment.MessageBoxService = _messageBoxService;
 
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
@@ -73,10 +74,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             else
             {
-                _experiment = new Experiment
-                              {
-                                  MessageBoxService = _messageBoxService
-                              };
+                _experiment = new Experiment();
                 HookPropertyChanged(_experiment);
                 _experiment.InitializeIfViewModelsReady();
                 DecoratedExperimentName = "<New experiment>";
@@ -155,6 +153,12 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_mouseEarthCoordinate == value) return;
                 _mouseEarthCoordinate = value;
+                if (_experiment.Bathymetry != null)
+                {
+                    float mouseDepth;
+                    if (_experiment.Bathymetry.Lookup(_mouseEarthCoordinate, out mouseDepth)) MouseDepth = mouseDepth;
+                    else MouseDepth = null;
+                }
                 NotifyPropertyChanged(MouseEarthCoordinateChangedEventArgs);
             }
         }
@@ -163,6 +167,25 @@ namespace ESMEWorkBench.ViewModels.Main
         EarthCoordinate _mouseEarthCoordinate;
 
         #endregion
+
+        #region public float? MouseDepth { get; set; }
+
+        public float? MouseDepth
+        {
+            get { return _mouseDepth; }
+            set
+            {
+                if (_mouseDepth == value) return;
+                _mouseDepth = value;
+                NotifyPropertyChanged(MouseDepthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MouseDepthChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MouseDepth);
+        float? _mouseDepth;
+
+        #endregion
+
 
         #endregion
 
@@ -245,13 +268,36 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void LoadExperimentFile(string fileName)
         {
+            Experiment newExperiment;
+            try
+            {
+                newExperiment = Experiment.Load(fileName, Experiment.ReferencedTypes);
+                newExperiment.FileName = fileName;
+            }
+            catch (UserCanceledOperationException)
+            {
+                return;
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError("Error opening experiment: " + e.Message);
+                return;
+            }
             MediatorMessage.Send(MediatorMessage.SetExperiment, (Experiment)null);
-            _experiment = Experiment.Load(fileName, Experiment.ReferencedTypes);
-            _experiment.FileName = fileName;
-            _experiment.MessageBoxService = _messageBoxService;
+            _experiment = newExperiment;
             DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
             HookPropertyChanged(_experiment);
             _experiment.InitializeIfViewModelsReady();
+        }
+
+        void NewExperiment()
+        {
+            if (UserCanceledBecauseExperimentUnsaved()) return;
+            if (_experiment != null) _experiment.Close();
+            _experiment = new Experiment();
+            _experiment.InitializeIfViewModelsReady();
+            DecoratedExperimentName = "<New experiment>";
+            HookPropertyChanged(_experiment);
         }
 
         void OpenScenarioFile(string fileName)
