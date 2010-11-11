@@ -49,6 +49,10 @@ namespace ESMEWorkBench.ViewModels.Main
                          };
             foreach (var timeFrame in TimeFrames)
                 if (timeFrame == _experimentTimeFrame) SelectedTimeFrameItem = timeFrame;
+            if (experiment.WindSpeedFileName != null) WindSpeedEnvironmentFile = experiment.WindSpeedFileName;
+            if (experiment.SoundSpeedFileName != null) SoundSpeedEnvironmentFile = experiment.SoundSpeedFileName;
+            if (experiment.BottomTypeFileName != null) BottomTypeEnvironmentFile = experiment.BottomTypeFileName;
+            if (experiment.BathymetryFileName != null) BathymetryEnvironmentFile = experiment.BathymetryFileName;
         }
 
         #region public ObservableCollection<string> TimeFrames { get; set; }
