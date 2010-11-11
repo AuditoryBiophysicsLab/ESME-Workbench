@@ -173,6 +173,7 @@ namespace ESMEWorkBench.Data
             catch (Exception e)
             {
                 Globals.DisplayException(MessageBoxService, e, "Error opening scenario file");
+                ScenarioFileName = null;
             }
         }
 
