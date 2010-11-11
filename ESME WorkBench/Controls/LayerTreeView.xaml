@@ -10,17 +10,24 @@
              d:DesignHeight="300"
              d:DesignWidth="300">
 	<UserControl.Resources>
-        <Style x:Key="ContextMenuItemStyle">
-            <Setter Property="MenuItem.Header" Value="{Binding Header}"/>
-            <Setter Property="MenuItem.ItemsSource" Value="{Binding Children}"/>
-            <Setter Property="MenuItem.Command" Value="{Binding Command}" />
-            <Setter Property="MenuItem.Icon" Value="{Binding Icon}" />
-            <Setter Property="MenuItem.IsCheckable" Value="{Binding IsCheckable}"/>
-            <Setter Property="MenuItem.IsChecked" Value="{Binding IsChecked}"/>  
-            <Setter Property="MenuItem.CommandParameter" Value="{Binding}"/>
-        </Style>
+		<Style x:Key="ContextMenuItemStyle">
+			<Setter Property="MenuItem.Header"
+			        Value="{Binding Header}" />
+			<Setter Property="MenuItem.ItemsSource"
+			        Value="{Binding Children}" />
+			<Setter Property="MenuItem.Command"
+			        Value="{Binding Command}" />
+			<Setter Property="MenuItem.Icon"
+			        Value="{Binding Icon}" />
+			<Setter Property="MenuItem.IsCheckable"
+			        Value="{Binding IsCheckable}" />
+			<Setter Property="MenuItem.IsChecked"
+			        Value="{Binding IsChecked}" />
+			<Setter Property="MenuItem.CommandParameter"
+			        Value="{Binding}" />
+		</Style>
 
-        <Style x:Key="LayersViewItemStyle"
+		<Style x:Key="LayersViewItemStyle"
 		       TargetType="ListBoxItem">
 			<Setter Property="KeyboardNavigation.AcceptsReturn"
 			        Value="True" />
@@ -28,7 +35,7 @@
 			        Value="True" />
 			<Setter Property="layers:VirtualToggleButton.IsChecked"
 			        Value="{Binding IsChecked}" />
-            <Style.Triggers>
+			<Style.Triggers>
 				<Trigger Property="IsSelected"
 				         Value="True">
 					<Setter Property="FontWeight"
@@ -36,36 +43,52 @@
 				</Trigger>
 			</Style.Triggers>
 		</Style>
-        
+
 		<DataTemplate x:Key="CheckBoxItemTemplate">
 			<Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="10" />
-                </Grid.ColumnDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="16" />
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="16" />
+					<ColumnDefinition Width="16" />
+					<ColumnDefinition Width="10" />
+				</Grid.ColumnDefinitions>
 				<CheckBox Focusable="False"
-                          Grid.Column="0"
+				          Grid.Column="0"
 				          IsChecked="{Binding IsChecked}"
 				          VerticalAlignment="Center" />
-                <ContentPresenter Content="{Binding Name, Mode=OneTime}" 
-                                  Grid.Column="1"
-                                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}"/>
-                <Rectangle Width="12" Grid.Column="2" Height="12" Fill="{Binding LineColorBrush}" Visibility="{Binding IsLineColorVisible}" VerticalAlignment="Center" ToolTip="Line color" />
-                <Rectangle Width="12" Grid.Column="3" Height="12" Fill="{Binding AreaColorBrush}" Visibility="{Binding IsAreaColorVisible}" VerticalAlignment="Center" ToolTip="Fill color" />
-                <Grid.ContextMenu>
-                    <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}" 
-                                 ItemsSource="{Binding ContextMenu}" />
-                </Grid.ContextMenu>
-            </Grid>
+				<ContentPresenter Content="{Binding Name, Mode=OneTime}"
+				                  Grid.Column="1"
+				                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
+				<Rectangle Width="12"
+				           RadiusX="3"
+				           RadiusY="3"
+				           Grid.Column="2"
+				           Height="12"
+				           Fill="{Binding LineColorBrush}"
+				           Visibility="{Binding IsLineColorVisible}"
+				           VerticalAlignment="Center"
+				           ToolTip="Line color" />
+				<Rectangle Width="12"
+				           RadiusX="3"
+				           RadiusY="3"
+				           Grid.Column="3"
+				           Height="12"
+				           Fill="{Binding AreaColorBrush}"
+				           Visibility="{Binding IsAreaColorVisible}"
+				           VerticalAlignment="Center"
+				           ToolTip="Fill color" />
+				<Grid.ContextMenu>
+					<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+					             ItemsSource="{Binding ContextMenu}" />
+				</Grid.ContextMenu>
+			</Grid>
 		</DataTemplate>
 	</UserControl.Resources>
-    <ListBox DockPanel.Dock="Top"
-             x:Name="ListBox"
+	<ListBox DockPanel.Dock="Top"
+	         x:Name="ListBox"
 	         ItemContainerStyle="{StaticResource LayersViewItemStyle}"
 	         ItemsSource="{Binding MapLayers}"
 	         ItemTemplate="{StaticResource CheckBoxItemTemplate}">
-    </ListBox>
+	</ListBox>
 </UserControl>
