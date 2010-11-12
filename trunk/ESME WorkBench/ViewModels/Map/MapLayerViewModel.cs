@@ -51,6 +51,7 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                                                       MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                                                                                                       MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
                                                                                                   });
+            _pointColorMenu.Command = _lineColorMenu.Command;
 
             _moveToTopMenu.Command = new SimpleCommand<object, object>(arg => Index < (Layers.Count - 1), obj =>
                                                                                                           {
@@ -81,12 +82,18 @@ namespace ESMEWorkBench.ViewModels.Map
                               {
                                   _lineColorMenu,
                                   _lineWeightMenu,
-
                               };
             AreaColorPickerMenu = new List<MenuItemViewModel>
                                   {
                                       _areaColorMenu,
                                   };
+           
+            PointShapePickerMenu = new List<MenuItemViewModel>
+                                   {
+                                       _pointColorMenu,
+                                       _symbolSizeMenu,
+                                       _pointStyleMenu,
+                                   };
             _orderMenu.Children.Add(_moveToTopMenu);
             _orderMenu.Children.Add(_moveUpMenu);
             _orderMenu.Children.Add(_moveDownMenu);
@@ -110,12 +117,48 @@ namespace ESMEWorkBench.ViewModels.Map
                                              });
             }
 
+            for (var pointSize = 1; pointSize <= 10; pointSize++)
+            {
+                var size = pointSize;
+                _symbolSizeMenu.Children.Add(new MenuItemViewModel
+                {
+                    Header = string.Format("{0}", pointSize),
+                    IsCheckable = true,
+                    LineWidth = pointSize,
+                    Command = new SimpleCommand<object, object>(obj => CanChangeLineWidth, obj =>
+                    {
+                        LineWidth = size;
+                        MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                        MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                    }),
+
+                });
+            }
+
+            foreach (var item in _pointStyleMenu.Children)
+            {
+                var item1 = item;
+                item.Command = new SimpleCommand<object, object>(obj =>
+                {
+                    PointSymbolType = item1.PointSymbolType;
+                    MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                    MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                });
+            }
+
             _colorMenu.Children.Add(_lineColorMenu);
             _colorMenu.Children.Add(_lineWeightMenu);
             _colorMenu.Children.Add(_areaColorMenu);
 
             IsChecked = true;
+           
+
             CheckProperLineWidthMenu();
+            CheckProperPointSymbolTypeMenu();
+            while (PointSymbolType == PointSymbolType.Cross )
+            {
+                PointSymbolType= (PointSymbolType)(_random.Next(8));
+            }
         }
 
         public static GeoCollection<Overlay> MapOverlay { get; set; }
@@ -171,10 +214,10 @@ namespace ESMEWorkBench.ViewModels.Map
                                                          Header = "Line Weight",
                                                      };
 
-        readonly MenuItemViewModel _pointSizeMenu = new MenuItemViewModel
-                                                    {
-                                                        Header = "Symbol Size",
-                                                    };
+        readonly MenuItemViewModel _symbolSizeMenu = new MenuItemViewModel
+                                                     {
+                                                         Header = "Symbol Size",
+                                                     };
 
         readonly MenuItemViewModel _pointStyleMenu = new MenuItemViewModel
                                                      {
@@ -185,35 +228,43 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                         {
                                                                             Header = "Circle",
                                                                             IsCheckable = true,
-                                                                            IsChecked = true,
+                                                                            PointSymbolType = PointSymbolType.Circle,
                                                                         },
                                                                         new MenuItemViewModel
                                                                         {
-                                                                            Header = "Square"
+                                                                            Header = "Square",
+                                                                            IsCheckable = true,
+                                                                            PointSymbolType = PointSymbolType.Square,
                                                                         },
                                                                         new MenuItemViewModel
                                                                         {
-                                                                            Header = "Triangle"
+                                                                            Header = "Triangle",
+                                                                            IsCheckable = true,
+                                                                            PointSymbolType = PointSymbolType.Triangle,
                                                                         },
                                                                         new MenuItemViewModel
                                                                         {
-                                                                            Header = "Cross"
+                                                                            Header = "Diamond",
+                                                                            IsCheckable = true,
+                                                                            PointSymbolType = PointSymbolType.Diamond,
                                                                         },
                                                                         new MenuItemViewModel
                                                                         {
-                                                                            Header = "Diamond"
+                                                                            Header = "Diamond 2",
+                                                                            IsCheckable = true,
+                                                                            PointSymbolType = PointSymbolType.Diamond2,
                                                                         },
                                                                         new MenuItemViewModel
                                                                         {
-                                                                            Header = "Diamond 2"
+                                                                            Header = "Star",
+                                                                            IsCheckable = true,
+                                                                            PointSymbolType = PointSymbolType.Star,
                                                                         },
                                                                         new MenuItemViewModel
                                                                         {
-                                                                            Header = "Star"
-                                                                        },
-                                                                        new MenuItemViewModel
-                                                                        {
-                                                                            Header = "Star 2"
+                                                                            Header = "Star 2",
+                                                                            IsCheckable = true,
+                                                                            PointSymbolType = PointSymbolType.Star2,
                                                                         },
                                                                     },
                                                      };
@@ -381,6 +432,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         AreaStyle _areaStyle;
 
+
         #endregion
 
         #region public LineStyle LineStyle { get; set; }
@@ -413,10 +465,19 @@ namespace ESMEWorkBench.ViewModels.Map
                 if (_pointSymbolType == value) return;
                 _pointSymbolType = value;
                 PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
+                CheckProperPointSymbolTypeMenu();
             }
         }
 
         PointSymbolType _pointSymbolType = (PointSymbolType)(_random.Next(8));
+       
+        void CheckProperPointSymbolTypeMenu()
+        {
+            foreach (var child in _pointStyleMenu.Children)
+            {
+                child.IsChecked = child.PointSymbolType == _pointSymbolType;
+            }
+        }
 
         #endregion
         
@@ -497,6 +558,21 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
+        [XmlIgnore]
+        public bool IsFeatureLayer
+        {
+            get
+            {
+                switch(LayerType)
+                {
+                    default:
+                        return false;
+                    case LayerType.Animal:
+                        return true;
+                }
+            }
+        }
+
 
         #region public LayerType LayerType { get; set; }
 
@@ -507,6 +583,8 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_layerType == value) return;
                 _layerType = value;
+                
+                LineOrPointPickerMenu = IsFeatureLayer ? PointShapePickerMenu : LineColorPickerMenu;
             }
         }
 
@@ -640,6 +718,24 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
+        #region public List<MenuItemViewModel> LineOrPointPickerMenu { get; set; }
+        [XmlIgnore]
+        public List<MenuItemViewModel> LineOrPointPickerMenu
+        {
+            get { return _lineOrPointPickerMenu; }
+            set
+            {
+                if (_lineOrPointPickerMenu == value) return;
+                _lineOrPointPickerMenu = value;
+                NotifyPropertyChanged(LineOrPointPickerMenuChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LineOrPointPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineOrPointPickerMenu);
+        List<MenuItemViewModel> _lineOrPointPickerMenu;
+
+        #endregion
+
         #region public List<MenuItemViewModel> AreaColorPickerMenu { get; set; }
         [XmlIgnore]
         public List<MenuItemViewModel> AreaColorPickerMenu
@@ -655,6 +751,24 @@ namespace ESMEWorkBench.ViewModels.Map
 
         static readonly PropertyChangedEventArgs AreaColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorPickerMenu);
         List<MenuItemViewModel> _areaColorPickerMenu;
+
+        #endregion
+        
+        #region public List<MenuItemViewModel> PointShapePickerMenu { get; set; }
+        [XmlIgnore]
+        public List<MenuItemViewModel> PointShapePickerMenu
+        {
+            get { return _pointShapePickerMenu; }
+            set
+            {
+                if (_pointShapePickerMenu == value) return;
+                _pointShapePickerMenu = value;
+                NotifyPropertyChanged(PointShapePickerMenuChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PointShapePickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.PointShapePickerMenu);
+        List<MenuItemViewModel> _pointShapePickerMenu;
 
         #endregion
         

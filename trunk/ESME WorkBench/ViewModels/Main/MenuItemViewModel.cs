@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Cinch;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -118,6 +119,8 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         public float LineWidth { get; set; }
+
+        public PointSymbolType PointSymbolType { get; set; }
 
         public SimpleCommand<object, object> Command { get; set; }
     }
