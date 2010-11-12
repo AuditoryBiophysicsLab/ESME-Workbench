@@ -75,9 +75,19 @@ namespace ESMEWorkBench.ViewModels.Map
             ContextMenu = new List<MenuItemViewModel>
                           {
                               _orderMenu,
-                              _colorMenu,
+                             // _colorMenu,
                               _removeMenu
                           };
+            LineColorPickerMenu = new List<MenuItemViewModel>
+                              {
+                                  _lineColorMenu,
+                                  _lineWeightMenu,
+
+                              };
+            AreaColorPickerMenu = new List<MenuItemViewModel>
+                                  {
+                                      _areaColorMenu,
+                                  };
             _orderMenu.Children.Add(_moveToTopMenu);
             _orderMenu.Children.Add(_moveUpMenu);
             _orderMenu.Children.Add(_moveDownMenu);
@@ -613,6 +623,43 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
+        #region public List<MenuItemViewModel> LineColorPickerMenu { get; set; }
+
+        public List<MenuItemViewModel> LineColorPickerMenu
+        {
+            get { return _lineColorPickerMenu; }
+            set
+            {
+                if (_lineColorPickerMenu == value) return;
+                _lineColorPickerMenu = value;
+                NotifyPropertyChanged(LineColorPickerMenuChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LineColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorPickerMenu);
+        List<MenuItemViewModel> _lineColorPickerMenu;
+
+        #endregion
+
+        #region public List<MenuItemViewModel> AreaColorPickerMenu { get; set; }
+
+        public List<MenuItemViewModel> AreaColorPickerMenu
+        {
+            get { return _areaColorPickerMenu; }
+            set
+            {
+                if (_areaColorPickerMenu == value) return;
+                _areaColorPickerMenu = value;
+                NotifyPropertyChanged(AreaColorPickerMenuChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AreaColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorPickerMenu);
+        List<MenuItemViewModel> _areaColorPickerMenu;
+
+        #endregion
+
+        
         #region public bool IsChecked { get; set; }
 
         static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.IsChecked);
