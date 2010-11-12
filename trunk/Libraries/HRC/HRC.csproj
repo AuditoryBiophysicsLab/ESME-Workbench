@@ -123,6 +123,7 @@
     <Compile Include="Services\HRCColorPickerService.cs" />
     <Compile Include="Services\HRCOpenFileService.cs" />
     <Compile Include="Services\HRCSaveFileService.cs" />
+    <Compile Include="Utility\AssemblyTricks.cs" />
     <Compile Include="Utility\BackgroundThreadInfo.cs">
       <SubType>UserControl</SubType>
     </Compile>

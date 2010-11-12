@@ -103,8 +103,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
         
         #endregion
-
-
+        
         #region CloseWindowCommand
 
         SimpleCommand<object, object> _closeWindow;

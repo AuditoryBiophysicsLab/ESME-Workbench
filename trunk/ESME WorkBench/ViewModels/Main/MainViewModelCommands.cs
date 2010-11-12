@@ -419,6 +419,17 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region AboutCommand
+
+        public SimpleCommand<object, object> AboutCommand
+        {
+            get { return _about ?? (_about = new SimpleCommand<object, object>(arg => ShowAboutView())); }
+        }
+
+        SimpleCommand<object, object> _about;
+
+        #endregion
+
         #endregion
     }
 }
