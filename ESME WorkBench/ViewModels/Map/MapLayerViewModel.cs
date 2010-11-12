@@ -265,6 +265,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
+        [XmlIgnore]
         #region public Brush LineColorBrush { get; set; }
 
         public Brush LineColorBrush
@@ -282,7 +283,6 @@ namespace ESMEWorkBench.ViewModels.Map
         Brush _lineColorBrush;
 
         #endregion
-
 
         #region public float LineWidth { get; set; }
 
@@ -332,6 +332,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
+        [XmlIgnore]
         #region public Brush AreaColorBrush { get; set; }
 
         public Brush AreaColorBrush
@@ -349,7 +350,6 @@ namespace ESMEWorkBench.ViewModels.Map
         Brush _areaColorBrush;
 
         #endregion
-
 
         #region public AreaStyle AreaStyle { get; set; }
 

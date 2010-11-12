@@ -15,10 +15,14 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         IViewAwareStatus _viewAwareStatus;
         readonly string _experimentTimeFrame;
+        readonly IMessageBoxService _messageBoxService;
+        readonly Experiment _experiment;
 
-        public EnvironmentSettingsViewModel(string databasePath, Experiment experiment)
+        public EnvironmentSettingsViewModel(string databasePath, Experiment experiment, IMessageBoxService messageBoxService)
         {
+            _messageBoxService = messageBoxService;
             _experimentTimeFrame = experiment.NemoFile.Scenario.TimeFrame.ToLower();
+            _experiment = experiment;
             WindSpeedData = new SelectableCollection<EnvironmentDataDescriptor>();
             SoundSpeedData = new SelectableCollection<EnvironmentDataDescriptor>();
             BottomTypeData = new SelectableCollection<EnvironmentDataDescriptor>();
@@ -49,10 +53,10 @@ namespace ESMEWorkBench.ViewModels.Main
                          };
             foreach (var timeFrame in TimeFrames)
                 if (timeFrame == _experimentTimeFrame) SelectedTimeFrameItem = timeFrame;
-            if (experiment.WindSpeedFileName != null) WindSpeedEnvironmentFile = experiment.WindSpeedFileName;
-            if (experiment.SoundSpeedFileName != null) SoundSpeedEnvironmentFile = experiment.SoundSpeedFileName;
-            if (experiment.BottomTypeFileName != null) BottomTypeEnvironmentFile = experiment.BottomTypeFileName;
-            if (experiment.BathymetryFileName != null) BathymetryEnvironmentFile = experiment.BathymetryFileName;
+            if (_experiment.WindSpeedFileName != null) WindSpeedEnvironmentFile = _experiment.WindSpeedFileName;
+            if (_experiment.SoundSpeedFileName != null) SoundSpeedEnvironmentFile = _experiment.SoundSpeedFileName;
+            if (_experiment.BottomTypeFileName != null) BottomTypeEnvironmentFile = _experiment.BottomTypeFileName;
+            if (_experiment.BathymetryFileName != null) BathymetryEnvironmentFile = _experiment.BathymetryFileName;
         }
 
         #region public ObservableCollection<string> TimeFrames { get; set; }
@@ -124,7 +128,23 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> OkCommand
         {
-            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(x => CloseActivePopUpCommand.Execute(true))); }
+            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(x =>
+                                                                                       {
+                                                                                           if (((_experiment.WindSpeedFileName != null) && (_experiment.WindSpeedFileName != WindSpeedData.SelectedItem.FilePath)) ||
+                                                                                               ((_experiment.SoundSpeedFileName != null) && (_experiment.SoundSpeedFileName != WindSpeedData.SelectedItem.FilePath)) ||
+                                                                                               ((_experiment.BottomTypeFileName != null) && (_experiment.BottomTypeFileName != WindSpeedData.SelectedItem.FilePath)) ||
+                                                                                               ((_experiment.BathymetryFileName != null) && (_experiment.BathymetryFileName != WindSpeedData.SelectedItem.FilePath)))
+                                                                                           {
+                                                                                               if (_messageBoxService.ShowOkCancel("Changing the environment settings for this experiment will cause all precomputed transmission loss fields to become invalid and therefore they will be deleted.  Really change the environmental settings?", CustomDialogIcons.Exclamation) == CustomDialogResults.Cancel)
+                                                                                               {
+                                                                                                   if (_experiment.WindSpeedFileName != null) WindSpeedEnvironmentFile = _experiment.WindSpeedFileName;
+                                                                                                   if (_experiment.SoundSpeedFileName != null) SoundSpeedEnvironmentFile = _experiment.SoundSpeedFileName;
+                                                                                                   if (_experiment.BottomTypeFileName != null) BottomTypeEnvironmentFile = _experiment.BottomTypeFileName;
+                                                                                                   if (_experiment.BathymetryFileName != null) BathymetryEnvironmentFile = _experiment.BathymetryFileName;
+                                                                                               }
+                                                                                           }
+                                                                                           CloseActivePopUpCommand.Execute(true);
+                                                                                       })); }
         }
 
         SimpleCommand<object, object> _okCommand;
