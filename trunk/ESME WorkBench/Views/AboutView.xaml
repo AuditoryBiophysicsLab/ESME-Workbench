@@ -1,0 +1,53 @@
+﻿<Window x:Class="ESMEWorkBench.Views.AboutView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About ESME Workbench 2010"
+        Width="600"
+        Height="370">
+    <DockPanel LastChildFill="True">
+        <Image Source="/Images/ESMELogo.png" 
+               DockPanel.Dock="Top"/>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="5">
+            <Button Content="OK" Width="100" Command="{Binding OkCommand}" />
+        </StackPanel>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width=".45" />
+                <ColumnDefinition Width=".1" />
+                <ColumnDefinition Width=".45" />
+            </Grid.ColumnDefinitions>
+            <ListBox Grid.Column="0" 
+                     ItemsSource="{Binding Column1Items}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width=".3" />
+                                <ColumnDefinition Width=".05" />
+                                <ColumnDefinition Width=".65" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Label}" />
+                            <TextBlock Grid.Column="2" Text="{Binding Value}" FontWeight="Bold" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <ListBox Grid.Column="2"
+                     ItemsSource="{Binding Column2Items}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width=".3" />
+                                <ColumnDefinition Width=".05" />
+                                <ColumnDefinition Width=".65" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Label}" />
+                            <TextBlock Grid.Column="2" Text="{Binding Value}" FontWeight="Bold" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </DockPanel>
+</Window>
