@@ -75,7 +75,6 @@ namespace ESMEWorkBench.ViewModels.Map
             ContextMenu = new List<MenuItemViewModel>
                           {
                               _orderMenu,
-                             // _colorMenu,
                               _removeMenu
                           };
             LineColorPickerMenu = new List<MenuItemViewModel>
@@ -460,7 +459,7 @@ namespace ESMEWorkBench.ViewModels.Map
         PointStyle _pointStyle;
 
         #endregion
-
+        [XmlIgnore]
         public Visibility IsLineColorVisible
         {
             get
@@ -481,7 +480,7 @@ namespace ESMEWorkBench.ViewModels.Map
                 }
             }
         }
-
+        [XmlIgnore]
         public Visibility IsAreaColorVisible
         {
             get
@@ -624,7 +623,7 @@ namespace ESMEWorkBench.ViewModels.Map
         #endregion
 
         #region public List<MenuItemViewModel> LineColorPickerMenu { get; set; }
-
+        [XmlIgnore]
         public List<MenuItemViewModel> LineColorPickerMenu
         {
             get { return _lineColorPickerMenu; }
@@ -642,7 +641,7 @@ namespace ESMEWorkBench.ViewModels.Map
         #endregion
 
         #region public List<MenuItemViewModel> AreaColorPickerMenu { get; set; }
-
+        [XmlIgnore]
         public List<MenuItemViewModel> AreaColorPickerMenu
         {
             get { return _areaColorPickerMenu; }
@@ -658,7 +657,6 @@ namespace ESMEWorkBench.ViewModels.Map
         List<MenuItemViewModel> _areaColorPickerMenu;
 
         #endregion
-
         
         #region public bool IsChecked { get; set; }
 

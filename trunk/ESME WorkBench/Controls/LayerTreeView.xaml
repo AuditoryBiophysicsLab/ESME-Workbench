@@ -60,24 +60,7 @@
 				<ContentPresenter Content="{Binding Name, Mode=OneTime}"
 				                  Grid.Column="1"
 				                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
-
-				<Rectangle Width="12"
-				           RadiusX="3"
-				           RadiusY="3"
-				           Grid.Column="3"
-				           Height="12"
-				           Fill="{Binding LineColorBrush}"
-				           Visibility="{Binding IsLineColorVisible}"
-				           VerticalAlignment="Center"
-				           ToolTip="Area color">
-					<Rectangle.ContextMenu>
-						<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding AreaColorPickerMenu}" />
-
-					</Rectangle.ContextMenu>
-				</Rectangle>
-
-				<Rectangle Width="12"
+                <Rectangle Width="12"
 				           RadiusX="3"
 				           RadiusY="3"
 				           Grid.Column="2"
@@ -85,14 +68,32 @@
 				           Fill="{Binding AreaColorBrush}"
 				           Visibility="{Binding IsAreaColorVisible}"
 				           VerticalAlignment="Center"
-				           ToolTip="Line color"
+				           ToolTip="Area color"
 				           Name="LineColor">
+                    <Rectangle.ContextMenu>
+                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+						             ItemsSource="{Binding AreaColorPickerMenu}" />
+
+                    </Rectangle.ContextMenu>
+                </Rectangle>
+                
+                <Rectangle Width="12"
+				           RadiusX="3"
+				           RadiusY="3"
+				           Grid.Column="3"
+				           Height="12"
+				           Fill="{Binding LineColorBrush}"
+				           Visibility="{Binding IsLineColorVisible}"
+				           VerticalAlignment="Center"
+				           ToolTip="Line color">
 					<Rectangle.ContextMenu>
 						<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 						             ItemsSource="{Binding LineColorPickerMenu}" />
 
 					</Rectangle.ContextMenu>
 				</Rectangle>
+
+				
 
 				<Grid.ContextMenu>
 					<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
