@@ -138,11 +138,21 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("SimulationView", simulationViewModel);
         }
 
+        [MediatorMessageSink(MediatorMessage.AddAnalysisPoint)]
+        void AddAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+        }
+
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPoint)]
         void ViewAnalysisPoint(AnalysisPoint analysisPoint)
         {
             var analysisPointVisualizerViewModel = new AnalysisPointVisualizerViewModel(analysisPoint, _saveFileService);
             _visualizerService.ShowDialog("AnalysisPointVisualizerView", analysisPointVisualizerViewModel);
+        }
+
+        [MediatorMessageSink(MediatorMessage.CalculateAnalysisPoint)]
+        void CalculateAnalysisPoint(AnalysisPoint analysisPoint)
+        {
         }
     }
 }

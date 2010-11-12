@@ -258,7 +258,7 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.MoveLayerToTop)]
         void MoveLayerToTop(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveToTop(mapLayer.LayerOverlay);
+            _wpfMap.Overlays.MoveToTop(mapLayer.Overlay);
             RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
@@ -266,7 +266,7 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.MoveLayerUp)]
         void MoveLayerUp(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveUp(mapLayer.LayerOverlay);
+            _wpfMap.Overlays.MoveUp(mapLayer.Overlay);
             RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
@@ -274,7 +274,7 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.MoveLayerDown)]
         void MoveLayerDown(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveDown(mapLayer.LayerOverlay);
+            _wpfMap.Overlays.MoveDown(mapLayer.Overlay);
             RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
@@ -282,7 +282,7 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.MoveLayerToBottom)]
         void MoveLayerToBottom(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveToBottom(mapLayer.LayerOverlay);
+            _wpfMap.Overlays.MoveToBottom(mapLayer.Overlay);
             RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }

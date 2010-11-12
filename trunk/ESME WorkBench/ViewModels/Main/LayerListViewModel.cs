@@ -104,6 +104,9 @@ namespace ESMEWorkBench.ViewModels.Main
         void RemoveLayer(MapLayerViewModel layer) { MapLayers.Remove(layer); }
 
         [MediatorMessageSink(MediatorMessage.LayersReordered)]
-        void ReorderLayer(MapLayerViewModel layer) { MapLayers.Move(MapLayers.IndexOf(layer), layer.Index); }
+        void ReorderLayer(MapLayerViewModel layer) 
+        {
+            MapLayers.Move(MapLayers.IndexOf(layer), layer.Index); 
+        }
     }
 }

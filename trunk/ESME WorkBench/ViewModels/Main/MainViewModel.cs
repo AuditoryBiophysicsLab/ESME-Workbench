@@ -368,7 +368,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void ShowEnvironmentSettingsView()
         {
-            var environmentSettingsViewModel = new EnvironmentSettingsViewModel(Globals.AppSettings.EnvironmentDatabaseDirectory, _experiment);
+            var environmentSettingsViewModel = new EnvironmentSettingsViewModel(Globals.AppSettings.EnvironmentDatabaseDirectory, _experiment, _messageBoxService);
             var result = _visualizerService.ShowDialog("EnvironmentSettingsView", environmentSettingsViewModel);
             if (!result.HasValue || !result.Value) return;
             _experiment.BathymetryFileName = environmentSettingsViewModel.BathymetryData.SelectedItem.Name;

@@ -357,6 +357,12 @@ namespace ESMEWorkBench.Data
             });
             marker.ContextMenu.Items.Add(new MenuItem
             {
+                Header = "Recalculate...",
+                Command = RecalculateAnalysisPointCommand,
+                CommandParameter = analysisPoint,
+            });
+            marker.ContextMenu.Items.Add(new MenuItem
+            {
                 Header = "Delete",
                 Command = DeleteAnalysisPointCommand,
                 CommandParameter = analysisPoint,
@@ -520,11 +526,17 @@ namespace ESMEWorkBench.Data
         public static IMessageBoxService MessageBoxService { private get; set; }
 
         [XmlIgnore]
-        public Environment2DData Bathymetry { get; private set; }
+        public Environment2DData WindSpeed { get; private set; }
 
         [XmlIgnore]
         public SoundSpeedField SoundSpeedField { get; private set; }
 
+        [XmlIgnore]
+        public Environment2DData BottomType { get; private set; }
+
+        [XmlIgnore]
+        public Environment2DData Bathymetry { get; private set; }
+        
         [XmlIgnore]
         #region public string LocalStorageRoot { get; set; }
 
@@ -774,6 +786,8 @@ namespace ESMEWorkBench.Data
             var south = (float) boundingBox.Top - 2;
             var east = (float) boundingBox.Right + 2;
 
+            if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName))) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", north, west, south, east);
+            if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName))) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", north, west, south, east);
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", north, west, south, east);
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
             if (Bathymetry != null)
@@ -815,6 +829,17 @@ namespace ESMEWorkBench.Data
         }
 
         SimpleCommand<object, AnalysisPoint> _viewAnalysisPointCommand;
+
+        #endregion
+
+        #region RecalculateAnalysisPointCommand
+
+        public SimpleCommand<object, object> RecalculateAnalysisPointCommand
+        {
+            get { return _recalculateAnalysisPoint ?? (_recalculateAnalysisPoint = new SimpleCommand<object, object>(analysisPoint => MediatorMessage.Send(MediatorMessage.CalculateAnalysisPoint, analysisPoint))); }
+        }
+
+        SimpleCommand<object, object> _recalculateAnalysisPoint;
 
         #endregion
 
