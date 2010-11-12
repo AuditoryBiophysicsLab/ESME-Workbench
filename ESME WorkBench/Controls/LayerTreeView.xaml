@@ -88,7 +88,7 @@
 				           ToolTip="Line color">
 					<Rectangle.ContextMenu>
 						<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding LineColorPickerMenu}" />
+						             ItemsSource="{Binding LineOrPointPickerMenu}" />
 
 					</Rectangle.ContextMenu>
 				</Rectangle>
