@@ -81,7 +81,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-
         #region public AnalysisPoint AnalysisPoint { get; set; }
 
         public AnalysisPoint AnalysisPoint

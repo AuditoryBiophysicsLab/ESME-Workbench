@@ -90,10 +90,10 @@
 					                             ImageSource="..\Images\LargeIcons\about-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Information about the current experiment"
-					                             Command="{Binding DisabledCommand}" />
+					                             Command="{Binding AboutCommand}" />
 					<r:RibbonSeparator />
 					<r:RibbonApplicationMenuItem Header="Options"
-					                             ImageSource="..\Images\LargeIcons\about-icon.png"
+					                             ImageSource="..\Images\LargeIcons\gear-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Edit application options and settings"
 					                             Command="{Binding EditOptionsCommand}" />

@@ -356,6 +356,12 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        void ShowAboutView()
+        {
+            var aboutViewModel = new AboutViewModel();
+            _visualizerService.ShowDialog("AboutView", aboutViewModel);
+        }
+
         bool UserWantsToReplaceScenarioFileIfPresent(string filename)
         {
             if ((_experiment != null) && (_experiment.ScenarioFileName != null) && (filename != _experiment.ScenarioFileName))

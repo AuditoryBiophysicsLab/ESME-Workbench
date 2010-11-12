@@ -7,8 +7,8 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("ESME WorkBench")]
-[assembly: AssemblyDescription("ESME WorkBench Phase 1 Iteration 1 Version 2")]
+[assembly: AssemblyTitle("ESME WorkBench 2010")]
+[assembly: AssemblyDescription("ESME WorkBench 2010 Phase 2 Iteration 1")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Boston University")]
 [assembly: AssemblyProduct("ESME WorkBench")]
@@ -57,6 +57,6 @@ using System.Resources;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.1.2.0")]
-[assembly: AssemblyFileVersion("1.1.2.0")]
+[assembly: AssemblyVersion("2.1")]
+[assembly: AssemblyFileVersion("2.1")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
