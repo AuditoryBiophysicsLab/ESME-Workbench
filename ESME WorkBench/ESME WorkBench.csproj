@@ -85,6 +85,8 @@
     <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Kent.Boogaart.Converters, Version=1.1.0.0, Culture=neutral, PublicKeyToken=cc96fa93a217f7a1, processorArchitecture=MSIL" />
+    <Reference Include="Kent.Boogaart.HelperTrinity, Version=1.2.0.0, Culture=neutral, PublicKeyToken=cc96fa93a217f7a1, processorArchitecture=MSIL" />
     <Reference Include="MapSuiteCore, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>C:\Program Files (x86)\ThinkGeo\Map Suite Wpf Desktop Evaluation Edition 4.0\Developer Reference\WPF Desktop Edition\MapSuiteCore.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -126,6 +128,9 @@
     </Compile>
     <Compile Include="Controls\ProgressMarker.xaml.cs">
       <DependentUpon>ProgressMarker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ScatterPlot.xaml.cs">
+      <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
     <Compile Include="Data\ExperimentListeners.cs" />
     <Compile Include="Exceptions.cs" />
@@ -271,6 +276,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\ProgressMarker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ScatterPlot.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -513,6 +522,8 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="External References\Kent.Boogaart.Converters.dll" />
+    <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
     <Resource Include="Images\SmallIcons\gear-icon.png" />
     <Resource Include="Images\LargeIcons\gear-icon.png" />
     <Resource Include="Images\SmallIcons\Magnifying-Glass-icon.png" />
