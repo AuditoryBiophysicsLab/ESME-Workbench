@@ -123,6 +123,6 @@
         </ControlTemplate>
     </UserControl.Resources>
     <Grid>
-        <ProgressBar Template="{StaticResource ProgressBarMarkerFill}" Value="50" Orientation="Horizontal"/>
+        <ProgressBar Template="{StaticResource ProgressBarMarkerFill}" Value="50"/>
     </Grid>
 </UserControl>
