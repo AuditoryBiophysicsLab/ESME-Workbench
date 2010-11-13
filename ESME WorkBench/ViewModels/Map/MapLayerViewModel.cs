@@ -366,10 +366,8 @@ namespace ESMEWorkBench.ViewModels.Map
 
         void CheckProperLineWidthMenu()
         {
-            foreach (var child in _lineWeightMenu.Children)
-            {
-                child.IsChecked = child.LineWidth == _lineWidth;
-            }
+            foreach (var child in _lineWeightMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
+            foreach (var child in _symbolSizeMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
         }
         #endregion
 

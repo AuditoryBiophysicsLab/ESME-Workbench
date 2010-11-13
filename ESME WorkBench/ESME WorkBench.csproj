@@ -124,6 +124,9 @@
     <Compile Include="Controls\EditableTextBlock.xaml.cs">
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ProgressMarker.xaml.cs">
+      <DependentUpon>ProgressMarker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Data\ExperimentListeners.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="MediatorMessages.cs" />
@@ -266,6 +269,10 @@
     <Page Include="Controls\EditableTextBlock.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\ProgressMarker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ControlTemplates\progressbar.xaml">
       <Generator>MSBuild:Compile</Generator>
