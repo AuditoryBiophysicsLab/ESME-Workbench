@@ -4,46 +4,125 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:converters="clr-namespace:ESMEWorkBench"
+             xmlns:con="http://schemas.kent.boogaart.com/converters"
              mc:Ignorable="d" 
-             d:DesignHeight="150" d:DesignWidth="100">
+             d:DesignHeight="500" d:DesignWidth="500">
     <UserControl.Resources>
+        <Style x:Key="{x:Type ProgressBar}" TargetType="{x:Type ProgressBar}">
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ProgressBar}">
+                                <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="3" SnapsToDevicePixels="true">
+                                    <Border BorderThickness="1,1,1,0" BorderBrush="#BEBEBE" CornerRadius="2">
+                                        <Border BorderThickness="1" BorderBrush="#EFEFEF" CornerRadius="1">
+                                            <DockPanel Name="PART_Track" Margin="0,0,0,1" LastChildFill="false">
+                                                <Decorator Name="PART_Indicator" DockPanel.Dock="Bottom">
+                                                    <Rectangle>
+                                                        <Rectangle.LayoutTransform>
+                                                            <RotateTransform Angle="-90" />
+                                                        </Rectangle.LayoutTransform>
+                                                        <Rectangle.Fill>
+                                                            <MultiBinding>
+                                                                <MultiBinding.Converter>
+                                                                    <converters:ProgressBarBrushConverter />
+                                                                </MultiBinding.Converter>
+                                                                <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                                <Binding Path="IsIndeterminate" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                                <Binding Path="ActualHeight" ElementName="PART_Indicator" />
+                                                                <Binding Path="ActualWidth" ElementName="PART_Indicator" />
+                                                                <Binding Path="ActualHeight" ElementName="PART_Track" />
+                                                            </MultiBinding>
+                                                        </Rectangle.Fill>
+                                                    </Rectangle>
+                                                </Decorator>
+                                            </DockPanel>
+                                        </Border>
+                                    </Border>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+            <Setter Property="Background" Value="{DynamicResource WindowBrush}" />
+            <Setter Property="BorderBrush" Value="#686868" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ProgressBar}">
+                        <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="3" SnapsToDevicePixels="true">
+                            <Border BorderThickness="1,1,1,0" BorderBrush="#BEBEBE" CornerRadius="2">
+                                <Border BorderThickness="1" BorderBrush="#EFEFEF" CornerRadius="1">
+                                    <DockPanel Name="PART_Track" Margin="1,0,0,1" LastChildFill="false">
+                                        <Rectangle Name="PART_Indicator">
+                                            <Rectangle.Fill>
+                                                <MultiBinding>
+                                                    <MultiBinding.Converter>
+                                                        <converters:ProgressBarBrushConverter />
+                                                    </MultiBinding.Converter>
+                                                    <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                    <Binding Path="IsIndeterminate" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                    <Binding Path="ActualWidth" ElementName="PART_Indicator" />
+                                                    <Binding Path="ActualHeight" ElementName="PART_Indicator" />
+                                                    <Binding Path="ActualWidth" ElementName="PART_Track" />
+                                                </MultiBinding>
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+                                    </DockPanel>
+                                </Border>
+                            </Border>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <ControlTemplate x:Key="ProgressBarMarkerFill" TargetType="{x:Type ProgressBar}">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="100"/>
-                    <RowDefinition Height="50"/>
-                </Grid.RowDefinitions>
-                <Path Grid.Row="0" x:Name="PART_Track" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Fill" StrokeLineJoin="Round" Stroke="Black" StrokeThickness="1" Data="M 40,65 A 30,30 45 1 1 60,65 Z ">
+                <Path x:Name="PART_Track" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Fill" StrokeLineJoin="Round" Stroke="Black" StrokeThickness="2" Data="M 65,40 A 30,30 45 1 1 65,60 L 40,50  L 65,40 Z ">
+                    <Path.LayoutTransform>
+                        <RotateTransform Angle="-90" />
+                    </Path.LayoutTransform>
+
                     <Path.Fill>
                         <MultiBinding>
                             <MultiBinding.Converter>
                                 <converters:ProgressBarBrushConverter />
                             </MultiBinding.Converter>
-                            <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}"/>
-                            <Binding Path="IsIndeterminate" RelativeSource="{RelativeSource TemplatedParent}"/>
-                            <Binding Path="ActualWidth" ElementName="PART_Indicator"/>
-                            <Binding Path="ActualHeight" ElementName="PART_Indicator"/>
-                            <Binding Path="ActualWidth" ElementName="PART_Track"/>
+                            <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
+                            <Binding Path="IsIndeterminate" RelativeSource="{RelativeSource TemplatedParent}" />
+                            <Binding Path="ActualWidth" ElementName="PART_Indicator" />
+                            <Binding Path="ActualHeight" ElementName="PART_Indicator" />
+                            <Binding Path="ActualWidth" ElementName="PART_Track" />
                         </MultiBinding>
                     </Path.Fill>
                 </Path>
-                <Path Grid.Row="1" x:Name="PART_Track2" VerticalAlignment="Stretch" Stretch="Uniform" StrokeLineJoin="Round" Stroke="Black" StrokeThickness="1" Data="M 60,65 L 50,95 L 40,65 Z "/>
+                <Canvas>
+                    <TextBlock Text="{TemplateBinding Property=Value, Converter={con:FormatConverter {}{0}%}}" 
+                               x:Name="ProgressText"
+                               Foreground="Black"
+                               FontWeight="Bold"
+                               FontSize="{Binding RelativeSource={RelativeSource Self}, Path=Parent.ActualHeight, Converter={con:ExpressionConverter {}{0} * 0.2}}"                               
+                               Canvas.Top="{Binding RelativeSource={RelativeSource Self}, Path=Parent.ActualHeight, Converter={con:ExpressionConverter {}{0} * 0.2}}">
+                        <Canvas.Left>
+                            <MultiBinding Converter="{con:ExpressionConverter {}( {0} / 2 ) - ( {1} / 2 )}">
+                                <Binding RelativeSource="{RelativeSource Self}" Path="Parent.ActualWidth"/>
+                                <Binding RelativeSource="{RelativeSource Self}" Path="ActualWidth"/>
+                            </MultiBinding>
+                        </Canvas.Left>
+                    </TextBlock>
+                </Canvas>
                 <Decorator HorizontalAlignment="Left" Margin="1" x:Name="PART_Indicator" />
-                <TextBlock Text="Foo!" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Black" FontWeight="Bold">
-                    <TextBlock.BitmapEffect>
-                        <OuterGlowBitmapEffect GlowColor="White" GlowSize="10" />
-                    </TextBlock.BitmapEffect>
-                </TextBlock>
-
             </Grid>
             <ControlTemplate.Triggers>
                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Value}" Value="100">
-                    <Setter TargetName="PART_Track" Property="Stroke" Value="Orange" />
+                    <Setter TargetName="PART_Track" Property="Stroke" Value="Green" />
                 </DataTrigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
     </UserControl.Resources>
     <Grid>
-        <ProgressBar Template="{StaticResource ProgressBarMarkerFill}" Value="50" Orientation="Vertical"/>
+        <ProgressBar Template="{StaticResource ProgressBarMarkerFill}" Value="50" Orientation="Horizontal"/>
     </Grid>
 </UserControl>
