@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="ESMEWorkBench.Controls.ProgressMarker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:ESMEWorkBench"
+             mc:Ignorable="d" 
+             d:DesignHeight="150" d:DesignWidth="100">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="ProgressBarMarkerFill" TargetType="{x:Type ProgressBar}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                <Path Grid.Row="0" x:Name="PART_Track" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Fill" StrokeLineJoin="Round" Stroke="Black" StrokeThickness="1" Data="M 40,65 A 30,30 45 1 1 60,65 Z ">
+                    <Path.Fill>
+                        <MultiBinding>
+                            <MultiBinding.Converter>
+                                <converters:ProgressBarBrushConverter />
+                            </MultiBinding.Converter>
+                            <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}"/>
+                            <Binding Path="IsIndeterminate" RelativeSource="{RelativeSource TemplatedParent}"/>
+                            <Binding Path="ActualWidth" ElementName="PART_Indicator"/>
+                            <Binding Path="ActualHeight" ElementName="PART_Indicator"/>
+                            <Binding Path="ActualWidth" ElementName="PART_Track"/>
+                        </MultiBinding>
+                    </Path.Fill>
+                </Path>
+                <Path Grid.Row="1" x:Name="PART_Track2" VerticalAlignment="Stretch" Stretch="Uniform" StrokeLineJoin="Round" Stroke="Black" StrokeThickness="1" Data="M 60,65 L 50,95 L 40,65 Z "/>
+                <Decorator HorizontalAlignment="Left" Margin="1" x:Name="PART_Indicator" />
+                <TextBlock Text="Foo!" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Black" FontWeight="Bold">
+                    <TextBlock.BitmapEffect>
+                        <OuterGlowBitmapEffect GlowColor="White" GlowSize="10" />
+                    </TextBlock.BitmapEffect>
+                </TextBlock>
+
+            </Grid>
+            <ControlTemplate.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Value}" Value="100">
+                    <Setter TargetName="PART_Track" Property="Stroke" Value="Orange" />
+                </DataTrigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <ProgressBar Template="{StaticResource ProgressBarMarkerFill}" Value="50" Orientation="Vertical"/>
+    </Grid>
+</UserControl>
