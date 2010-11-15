@@ -358,11 +358,11 @@
 			<r:RibbonTab KeyTip="C"
 			             Header="Acoustics">
                 <r:RibbonGroup Header="Simulator">
-                    <r:RibbonButton Label="Run Simulator"
+                    <r:RibbonButton Label="Show Queue"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
-					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
-					                ToolTipDescription="Run the acoustic simulator to compute transmission loss field"
+					                SmallImageSource="..\Images\SmallIcons\Database-Process-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Database-Process-icon.png"
+					                ToolTipDescription="Displays the current work queue for acoustic simulation"
 					                Command="{Binding DisabledCommand}" />
                     <r:RibbonButton Label="Options"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -374,36 +374,39 @@
                 <r:RibbonGroup Header="Analysis Points">
                     <r:RibbonButton Label="Inspect"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="..\Images\SmallIcons\Magnifying-Glass-icon.png"
-					                LargeImageSource="..\Images\LargeIcons\Magnifying-Glass-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\Database-Inspect-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Database-Inspect-icon.png"
 					                ToolTipDescription="Inspect an analysis point"
 					                Command="{Binding DisabledCommand}" />
+                </r:RibbonGroup>
+                <!--
+                <r:RibbonGroup Header="Analysis Points">
                     <r:RibbonButton Label="Add"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Button-Add-icon.png"
 					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton Label="Delete"
+                    <r:RibbonButton Label="Delete"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Button-Delete-icon.png"
 					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton Label="Properties"
+                    <r:RibbonButton Label="Properties"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Information.png"
 					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton Label="Previous"
+                    <r:RibbonButton Label="Previous"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Button-Previous-icon.png"
 					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton Label="Next"
+                    <r:RibbonButton Label="Next"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Button-Next-icon.png"
 					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton Label="Filter"
+                    <r:RibbonButton Label="Filter"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\SmallIcon.png"
 					                Command="{Binding DisabledCommand}" />
-				</r:RibbonGroup>
-				<r:RibbonGroup Header="Modes">
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Modes">
 					<r:RibbonButton Label="Add"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Button-Add-icon.png"
@@ -437,6 +440,7 @@
 					                SmallImageSource="..\Images\SmallIcons\System-Map-icon.png"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
+                -->
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="R"
 			             Header="Reports">

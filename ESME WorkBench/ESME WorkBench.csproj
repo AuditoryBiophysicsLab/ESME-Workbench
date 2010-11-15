@@ -533,6 +533,8 @@
   <ItemGroup>
     <Content Include="External References\Kent.Boogaart.Converters.dll" />
     <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
+    <Resource Include="Images\LargeIcons\Database-Inspect-icon.png" />
+    <Resource Include="Images\SmallIcons\Database-Inspect-icon.png" />
     <Resource Include="Images\LargeIcons\Database-Process-icon.png" />
     <Resource Include="Images\SmallIcons\gear-icon.png" />
     <Resource Include="Images\LargeIcons\gear-icon.png" />
