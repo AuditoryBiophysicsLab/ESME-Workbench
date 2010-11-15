@@ -3,7 +3,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
   <?define ProductName = "ESME WorkBench 2010"?>
   <?define OldProductVersion="1.4.0.0" ?>
-  <?define ProductVersion="2.1.0.0" ?>
+  <?define ProductVersion="2.1.1.0" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
@@ -115,6 +115,14 @@
             <File Id="MEFedMVVM.WPF.dll"
                   Name="MEFedMVVM.WPF.dll"
                   Source="$(var.ESMEPath)\MEFedMVVM.WPF.dll" />
+            
+            <!-- Miscellaneous assemblies -->
+            <File Id="Kent.Boogaart.Converters.dll"
+                  Name="Kent.Boogaart.Converters.dll"
+                  Source="$(var.ESMEPath)\Kent.Boogaart.Converters.dll" />
+            <File Id="Kent.Boogaart.HelperTrinity.dll"
+                  Name="Kent.Boogaart.HelperTrinity.dll"
+                  Source="$(var.ESMEPath)\Kent.Boogaart.HelperTrinity.dll" />
 
             <!-- 3MB assemblies -->
             <File Id="MMMBSLib.dll"
