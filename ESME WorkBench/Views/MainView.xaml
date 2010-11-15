@@ -203,7 +203,7 @@
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new quick look point to the experiment"
-                                    Command="{Binding DisabledCommand}" />
+                                    Command="{Binding QuickLookCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Scenario">
                     <r:RibbonButton Label="Open"
@@ -357,16 +357,28 @@
             </r:RibbonTab>
 			<r:RibbonTab KeyTip="C"
 			             Header="Acoustics">
-				<r:RibbonGroup Header="Simulator">
-					<r:RibbonButton Label="Run Simulator"
+                <r:RibbonGroup Header="Simulator">
+                    <r:RibbonButton Label="Run Simulator"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
 					                ToolTipDescription="Run the acoustic simulator to compute transmission loss field"
 					                Command="{Binding DisabledCommand}" />
-				</r:RibbonGroup>
-				<r:RibbonGroup Header="Analysis Points">
-					<r:RibbonButton Label="Add"
+                    <r:RibbonButton Label="Options"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                SmallImageSource="..\Images\SmallIcons\gear-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\gear-icon.png"
+					                ToolTipDescription="View or change acoustic simulation options"
+					                Command="{Binding DisabledCommand}" />
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Analysis Points">
+                    <r:RibbonButton Label="Inspect"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                SmallImageSource="..\Images\SmallIcons\Magnifying-Glass-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\Magnifying-Glass-icon.png"
+					                ToolTipDescription="Inspect an analysis point"
+					                Command="{Binding DisabledCommand}" />
+                    <r:RibbonButton Label="Add"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Button-Add-icon.png"
 					                Command="{Binding DisabledCommand}" />

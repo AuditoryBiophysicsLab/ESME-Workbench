@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ESMEWorkBench.Views.AnalysisPointCalculationPreviewView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Analysis Point View"
+        Title="New Analysis Point"
         SizeToContent="WidthAndHeight"
         WindowStyle="ToolWindow"
         ResizeMode="NoResize">

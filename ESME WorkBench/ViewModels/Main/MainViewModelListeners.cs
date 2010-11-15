@@ -19,11 +19,15 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.SetMouseEarthCoordinate)]
         void SetMouseEarthCoordinate(EarthCoordinate mouseEarthCoordinate) { MouseEarthCoordinate = mouseEarthCoordinate; }
 
-        [MediatorMessageSink(MediatorMessage.RunQuickLook)]
-        void RunQuickLook(bool dummy)
+        [MediatorMessageSink(MediatorMessage.SetupAndRunQuickLookPoint)]
+        void SetupAndRunQuickLookPoint(bool dummy)
         {
-            #region create bellhop run file from tlj (and stuff)
+            
+        }
 
+        [MediatorMessageSink(MediatorMessage.SetupAndRunAnalysisPoint)]
+        void SetupAndRunAnalysisPoint(bool dummy)
+        {
             var environmentInformation = new EnvironmentInformation
                                          {
                                              Bathymetry = _experiment.Bathymetry,
@@ -99,8 +103,6 @@ namespace ESMEWorkBench.ViewModels.Main
             backgroundWorker.RunWorkerAsync();
 
             MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-
-            #endregion
         }
 
         delegate void MediatorSendDelegate(string message, object param);

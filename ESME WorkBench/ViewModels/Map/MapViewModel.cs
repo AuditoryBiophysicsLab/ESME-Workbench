@@ -8,6 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
+using System.Xml.Serialization;
 using Cinch;
 using ESMEWorkBench.Controls;
 using ESMEWorkBench.Data;
@@ -65,13 +66,23 @@ namespace ESMEWorkBench.ViewModels.Map
 
             MouseLeftButtonUpCommand = new SimpleCommand<object, object>(delegate
                                                                          {
-                                                                             if (!IsQuickLookMode) return;
-                                                                             IsQuickLookMode = false;
-                                                                             MediatorMessage.Send(MediatorMessage.RunQuickLook);
+                                                                             if (IsAnalysisPointMode)
+                                                                             {
+                                                                                 IsAnalysisPointMode = false;
+                                                                                 MediatorMessage.Send(MediatorMessage.SetupAndRunAnalysisPoint);
+                                                                             }
+                                                                             if (IsQuickLookPointMode)
+                                                                             {
+                                                                                 IsQuickLookPointMode = false;
+                                                                                 MediatorMessage.Send(MediatorMessage.SetupAndRunQuickLookPoint);
+                                                                             }
                                                                          });
         }
 
-        public bool IsQuickLookMode { get; set; }
+        [XmlIgnore]
+        public bool IsAnalysisPointMode { get; set; }
+        [XmlIgnore]
+        public bool IsQuickLookPointMode { get; set; }
 
         #region public Cursor Cursor { get; set; }
 
@@ -206,7 +217,14 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.AnalysisPointCommand)]
         void AnalysisPointCommand(bool dummy)
         {
-            IsQuickLookMode = true;
+            IsAnalysisPointMode = true;
+            Cursor = Cursors.Cross;
+        }
+
+        [MediatorMessageSink(MediatorMessage.QuickLookPointCommand)]
+        void QuickLookPointCommand(bool dummy)
+        {
+            IsQuickLookPointMode = true;
             Cursor = Cursors.Cross;
         }
 

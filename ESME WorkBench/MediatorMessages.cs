@@ -10,10 +10,11 @@ namespace ESMEWorkBench
         public const string ToggleGridOverlayDisplayCommand = "ToggleGridOverlayDisplayCommandMessage";
         public const string TogglePanZoomDisplayCommand = "TogglePanZoomDisplayCommandMessage";
         public const string ToggleScaleBarDisplayCommand = "ToggleScaleBarDisplayCommandMessage";
-        public const string AnalysisPointCommand = "QuickLookCommandMessage";
+        public const string AnalysisPointCommand = "AnalysisPointCommandMessage";
+        public const string QuickLookPointCommand = "QuickLookPointCommandMessage";
         public const string AddFileCommand = "AddFileCommandMessage";
         public const string AddScenarioFileCommand = "AddScenarioFileCommandMessage";
-        public const string SetScenarioMapExtent = "SetScenarioMapExtentMessage";   
+        public const string SetScenarioMapExtent = "SetScenarioMapExtentMessage";
 
         public const string AddAnalysisPoint = "AddAnalysisPointMessage";
         public const string EditAnalysisPoint = "EditAnalysisPointMessage";
@@ -70,8 +71,9 @@ namespace ESMEWorkBench
         public const string MoveLayerToBottom = "MoveLayerToBottomMessage";
         
         public const string ToggleLayerVisibility = "ToggleLayerVisibilityMessage";
-        
-        public const string RunQuickLook = "RunQuickLookMessage";
+
+        public const string SetupAndRunQuickLookPoint = "SetupAndRunQuickLookPointMessage";
+        public const string SetupAndRunAnalysisPoint = "SetupAndRunAnalysisPointMessage";
         public const string RunExperimentCommand = "RunExperimentCommandMessage";
 
         public const string SetMouseEarthCoordinate = "SetMouseEarthCoordinateMessage";

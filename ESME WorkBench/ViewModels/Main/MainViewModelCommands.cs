@@ -317,14 +317,29 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> AnalysisPointCommand
         {
-            get { return _quickLook ?? (_quickLook = new SimpleCommand<object, object>(o => CanRunQuickLook(), obj => MediatorMessage.Send(MediatorMessage.AnalysisPointCommand))); }
+            get { return _analysisPoint ?? (_analysisPoint = new SimpleCommand<object, object>(o => CanPlaceAnalysisPoint(), obj => MediatorMessage.Send(MediatorMessage.AnalysisPointCommand))); }
+        }
+
+        bool CanPlaceAnalysisPoint()
+        {
+            return (_experiment != null) && (_experiment.NemoFile != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null);
+        }
+        SimpleCommand<object, object> _analysisPoint;
+
+        #endregion
+
+        #region QuickLookCommand
+
+        public SimpleCommand<object, object> QuickLookCommand
+        {
+            get { return _quickLookPoint ?? (_quickLookPoint = new SimpleCommand<object, object>(o => CanRunQuickLook(), obj => MediatorMessage.Send(MediatorMessage.QuickLookPointCommand))); }
         }
 
         bool CanRunQuickLook()
         {
-            return (_experiment != null) && (_experiment.NemoFile != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null);
+            return (_experiment != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null);
         }
-        SimpleCommand<object, object> _quickLook;
+        SimpleCommand<object, object> _quickLookPoint;
 
         #endregion
 
@@ -412,7 +427,7 @@ namespace ESMEWorkBench.ViewModels.Main
         bool CanRunExperiment()
         {
             if ((_experiment == null) || (_experiment.AnalysisPoints == null) || (_experiment.AnimatInterface == null)) return false;
-            return CanRunQuickLook() && (_experiment.AnalysisPoints.Count > 0);
+            return CanPlaceAnalysisPoint() && (_experiment.AnalysisPoints.Count > 0);
         }
 
         SimpleCommand<object, object> _runExperiment;

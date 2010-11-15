@@ -199,6 +199,9 @@
     <Compile Include="Views\EnvironmentSettingsView.xaml.cs">
       <DependentUpon>EnvironmentSettingsView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\QuickLookView.xaml.cs">
+      <DependentUpon>QuickLookView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SimulationView.xaml.cs">
       <DependentUpon>SimulationView.xaml</DependentUpon>
     </Compile>
@@ -387,6 +390,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\QuickLookView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SimulationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -486,6 +493,7 @@
     <Resource Include="Images\SmallIcons\Button-Stop-icon.png" />
     <Resource Include="Images\SmallIcons\close-file-icon.png" />
     <Resource Include="Images\SmallIcons\Close.png" />
+    <Resource Include="Images\SmallIcons\Database-Process-icon.png" />
     <Resource Include="Images\SmallIcons\Distance-learning.png" />
     <Resource Include="Images\SmallIcons\Dolphin.png" />
     <Resource Include="Images\SmallIcons\Information.png" />
@@ -524,6 +532,7 @@
   <ItemGroup>
     <Content Include="External References\Kent.Boogaart.Converters.dll" />
     <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
+    <Resource Include="Images\LargeIcons\Database-Process-icon.png" />
     <Resource Include="Images\SmallIcons\gear-icon.png" />
     <Resource Include="Images\LargeIcons\gear-icon.png" />
     <Resource Include="Images\SmallIcons\Magnifying-Glass-icon.png" />
