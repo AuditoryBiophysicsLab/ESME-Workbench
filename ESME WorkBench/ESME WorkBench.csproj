@@ -150,6 +150,7 @@
     <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelRadialViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldListItemViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
