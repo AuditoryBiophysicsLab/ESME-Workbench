@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
+using ESMEWorkBench.Views;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 
@@ -19,6 +23,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         bool _iAmInitialized;
         AnalysisPoint _tempAnalysisPoint;
+        TreeView _treeView;
 
         [ImportingConstructor]
         public AnalysisPointViewModel(IViewAwareStatus viewAwareStatus, IHRCSaveFileService saveFileService)
@@ -27,8 +32,20 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _viewAwareStatus = viewAwareStatus;
             _saveFileService = saveFileService;
             _dispatcher = Dispatcher.CurrentDispatcher;
+            _viewAwareStatus.ViewLoaded += () =>
+                                           {
+                                               _treeView = ((AnalysisPointView) _viewAwareStatus.View).TreeView;
+                                               MediatorMessage.Send(MediatorMessage.AnalysisPointViewInitialized, true);
+                                           };
+            TransmissionLossFieldListItems = new ObservableCollection<TransmissionLossFieldListItemViewModel>();
+            
+        }
 
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.AnalysisPointViewInitialized, true);
+        void InitializeTreeViewModel()
+        {
+            if (TransmissionLossFieldListItems.Count > 0)
+                TransmissionLossFieldListItems.Clear();
+            foreach (var field in _analysisPoint.TransmissionLossFields) TransmissionLossFieldListItems.Add(new TransmissionLossFieldListItemViewModel(field));
         }
 
         #region public AnalysisPoint AnalysisPoint { get; set; }
@@ -42,11 +59,48 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 _analysisPoint = value;
                 SelectedField = 0;
                 NotifyPropertyChanged(AnalysisPointChangedEventArgs);
+                InitializeTreeViewModel();
             }
         }
 
         static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.AnalysisPoint);
         AnalysisPoint _analysisPoint;
+
+        #endregion
+
+        #region public ObservableCollection<TransmissionLossFieldListItemViewModel> TransmissionLossFieldListItems { get; set; }
+
+        public ObservableCollection<TransmissionLossFieldListItemViewModel> TransmissionLossFieldListItems
+        {
+            get { return _transmissionLossFieldListItems; }
+            set
+            {
+                if (_transmissionLossFieldListItems == value) return;
+                if (_transmissionLossFieldListItems != null) _transmissionLossFieldListItems.CollectionChanged -= TransmissionLossFieldListItemsCollectionChanged;
+                _transmissionLossFieldListItems = value;
+                if (_transmissionLossFieldListItems != null) _transmissionLossFieldListItems.CollectionChanged += TransmissionLossFieldListItemsCollectionChanged;
+                NotifyPropertyChanged(TransmissionLossFieldListItemsChangedEventArgs);
+            }
+        }
+
+        void TransmissionLossFieldListItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(TransmissionLossFieldListItemsChangedEventArgs); }
+        static readonly PropertyChangedEventArgs TransmissionLossFieldListItemsChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.TransmissionLossFieldListItems);
+        ObservableCollection<TransmissionLossFieldListItemViewModel> _transmissionLossFieldListItems;
+
+        #endregion
+
+        #region TreeViewSelectionChangedCommand
+
+        public SimpleCommand<object, object> TreeViewSelectionChangedCommand
+        {
+            get { return _treeViewSelectionChanged ?? (_treeViewSelectionChanged = new SimpleCommand<object, object>(delegate
+                                                                                                                     {
+                                                                                                                         MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged,((TransmissionLossFieldListItemViewModel)_treeView.SelectedItem).TransmissionLossField );
+
+                                                                                                                     })); }
+        }
+
+        SimpleCommand<object, object> _treeViewSelectionChanged;
 
         #endregion
 
@@ -96,6 +150,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 Debug.WriteLine("AnalysisPointViewModel: Initializing analysis point");
                 AnalysisPoint = analysisPoint;
+                InitializeTreeViewModel();
+                
             }
             else
             {

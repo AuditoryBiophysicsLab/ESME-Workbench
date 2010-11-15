@@ -33,6 +33,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 Debug.WriteLine("AnalysisPointVisualizerViewModel: Initializing analysis point");
                 MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, analysisPoint);
                 TransmissionLossFieldChanged(analysisPoint.TransmissionLossFields[0]);
+                
             }
             else
             {
