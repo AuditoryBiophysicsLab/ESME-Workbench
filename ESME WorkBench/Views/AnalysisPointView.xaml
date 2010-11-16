@@ -7,11 +7,15 @@
              xmlns:Views="clr-namespace:ESMEWorkBench.Views"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+             xmlns:p="clr-namespace:ESMEWorkBench.Properties"
+             xmlns:app="clr-namespace:ESMEWorkBench"
              mef:ViewModelLocator.ViewModel="AnalysisPointViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
-             d:DesignWidth="650">
+             d:DesignWidth="650"
+             >
 	<UserControl.Resources>
+        <app:GridLengthConverter x:Key="gridLengthConverter" />
 		<HierarchicalDataTemplate x:Key="PlatformSourceModeTreeTemplate"
 		                          ItemsSource="{Binding AcousticProperties}">
 			<TextBlock Text="{Binding FieldName}" />
@@ -47,7 +51,7 @@
 	</UserControl.Resources>
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="Auto"
+            <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=TransmissionLayersWidth, Mode=TwoWay}"
 			                  MinWidth="100" />
 			<ColumnDefinition Width="Auto" />
 			<ColumnDefinition Width="*"
@@ -66,10 +70,10 @@
 		</GroupBox>
 		<GridSplitter Name="GridSplitter"
 		              Grid.Column="1"
-		              Width="0"
+		              Width="2"
 		              Background="Black"
 		              HorizontalAlignment="Center"
-		              Margin="5,0,7,0"
+		              Margin="5,0,5,0"
 		              VerticalAlignment="Stretch"
 		              ResizeBehavior="BasedOnAlignment"
 		              ResizeDirection="Columns" />

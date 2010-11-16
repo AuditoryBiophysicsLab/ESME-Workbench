@@ -310,5 +310,17 @@ namespace ESMEWorkBench.Properties {
                 this["ExperimentReportDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("150")]
+        public double TransmissionLayersWidth {
+            get {
+                return ((double)(this["TransmissionLayersWidth"]));
+            }
+            set {
+                this["TransmissionLayersWidth"] = value;
+            }
+        }
     }
 }
