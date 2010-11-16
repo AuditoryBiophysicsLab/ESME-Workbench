@@ -68,7 +68,7 @@
 				           Fill="{Binding AreaColorBrush}"
 				           Visibility="{Binding IsAreaColorVisible}"
 				           VerticalAlignment="Center"
-				           ToolTip="Area color"
+				           ToolTip="Area color: Right click to change"
 				           Name="LineColor">
                     <Rectangle.ContextMenu>
                         <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
@@ -85,7 +85,7 @@
 				           Fill="{Binding LineColorBrush}"
 				           Visibility="{Binding IsLineColorVisible}"
 				           VerticalAlignment="Center"
-				           ToolTip="Line color">
+				           ToolTip="{Binding PointLineTooltip}">
 					<Rectangle.ContextMenu>
 						<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 						             ItemsSource="{Binding LineOrPointPickerMenu}" />
