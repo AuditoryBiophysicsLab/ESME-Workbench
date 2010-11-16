@@ -19,194 +19,22 @@ namespace ESMEWorkBench.ViewModels.Map
         static Random _random;
 
         public static ObservableCollection<MapLayerViewModel> Layers;
-        public static IHRCColorPickerService ColorPickerService { get; set; }
+        static readonly PropertyChangedEventArgs LineColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorBrush);
+        static readonly PropertyChangedEventArgs AreaColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorBrush);
 
-        static MapLayerViewModel() { _random = new Random(); }
-
-        public MapLayerViewModel()
-        {
-            LayerOverlay = new LayerOverlay();
-            LineColorBrush = new SolidColorBrush(_lineColor);
-            AreaColorBrush = new SolidColorBrush(_areaColor);
-            AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-            LineStyle = CreateLineStyle(LineColor, LineWidth);
-            PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
-
-            _removeMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
-
-            _lineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
-                                                                                                  {
-                                                                                                      var result = ColorPickerService.ShowDialog();
-                                                                                                      if (!result.HasValue || !result.Value) return;
-                                                                                                      LineColor = ColorPickerService.Color;
-                                                                                                      MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                      MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                                                                                                  });
-
-            _areaColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeAreaColor, obj =>
-                                                                                                  {
-                                                                                                      var result = ColorPickerService.ShowDialog();
-                                                                                                      if (!result.HasValue || !result.Value) return;
-                                                                                                      AreaColor = ColorPickerService.Color;
-                                                                                                      MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                      MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                                                                                                  });
-            _pointColorMenu.Command = _lineColorMenu.Command;
-
-            _moveToTopMenu.Command = new SimpleCommand<object, object>(arg => Index < (Layers.Count - 1), obj =>
-                                                                                                          {
-                                                                                                              MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                              MediatorMessage.Send(MediatorMessage.MoveLayerToTop, this);
-                                                                                                          });
-            _moveUpMenu.Command = new SimpleCommand<object, object>(arg => Index < (Layers.Count - 1), obj =>
-                                                                                                       {
-                                                                                                           MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                           MediatorMessage.Send(MediatorMessage.MoveLayerUp, this);
-                                                                                                       });
-            _moveDownMenu.Command = new SimpleCommand<object, object>(arg => Index > 0, obj =>
-                                                                                        {
-                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                            MediatorMessage.Send(MediatorMessage.MoveLayerDown, this);
-                                                                                        });
-            _moveToBottomMenu.Command = new SimpleCommand<object, object>(arg => Index > 0, obj =>
-                                                                                            {
-                                                                                                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, this);
-                                                                                            });
-            ContextMenu = new List<MenuItemViewModel>
-                          {
-                              _orderMenu,
-                              _removeMenu
-                          };
-            LineColorPickerMenu = new List<MenuItemViewModel>
-                              {
-                                  _lineColorMenu,
-                                  _lineWeightMenu,
-                              };
-            AreaColorPickerMenu = new List<MenuItemViewModel>
-                                  {
-                                      _areaColorMenu,
-                                  };
-           
-            PointShapePickerMenu = new List<MenuItemViewModel>
-                                   {
-                                       _pointColorMenu,
-                                       _symbolSizeMenu,
-                                       _pointStyleMenu,
-                                   };
-            _orderMenu.Children.Add(_moveToTopMenu);
-            _orderMenu.Children.Add(_moveUpMenu);
-            _orderMenu.Children.Add(_moveDownMenu);
-            _orderMenu.Children.Add(_moveToBottomMenu);
-
-            for (var lineWidth = 1.0f; lineWidth <= 5; lineWidth += 0.5f)
-            {
-                var width = lineWidth;
-                _lineWeightMenu.Children.Add(new MenuItemViewModel
-                                             {
-                                                 Header = string.Format("{0:0.0}", lineWidth),
-                                                 IsCheckable = true,
-                                                 LineWidth = lineWidth,
-                                                 Command = new SimpleCommand<object, object>(obj => CanChangeLineWidth, obj =>
-                                                                                                                        {
-                                                                                                                            LineWidth = width;
-                                                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                                                                                                                            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                                                                                                                        }),
-
-                                             });
-            }
-
-            for (var pointSize = 1; pointSize <= 10; pointSize++)
-            {
-                var size = pointSize;
-                _symbolSizeMenu.Children.Add(new MenuItemViewModel
-                {
-                    Header = string.Format("{0}", pointSize),
-                    IsCheckable = true,
-                    LineWidth = pointSize,
-                    Command = new SimpleCommand<object, object>(obj => CanChangeLineWidth, obj =>
-                    {
-                        LineWidth = size;
-                        MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                        MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                    }),
-
-                });
-            }
-
-            foreach (var item in _pointStyleMenu.Children)
-            {
-                var item1 = item;
-                item.Command = new SimpleCommand<object, object>(obj =>
-                {
-                    PointSymbolType = item1.PointSymbolType;
-                    MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
-                    MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
-                });
-            }
-
-            _colorMenu.Children.Add(_lineColorMenu);
-            _colorMenu.Children.Add(_lineWeightMenu);
-            _colorMenu.Children.Add(_areaColorMenu);
-
-            IsChecked = true;
-           
-
-            CheckProperLineWidthMenu();
-            CheckProperPointSymbolTypeMenu();
-            while (PointSymbolType == PointSymbolType.Cross )
-            {
-                PointSymbolType= (PointSymbolType)(_random.Next(8));
-            }
-        }
-
-        public static GeoCollection<Overlay> MapOverlay { get; set; }
-
-        LayerOverlay _layerOverlay;
-
-        [XmlIgnore]
-        public LayerOverlay LayerOverlay
-        {
-            get { return _layerOverlay; }
-            set
-            {
-                _layerOverlay = value;
-                Overlay = _layerOverlay;
-            }
-        }
-
-        [XmlIgnore]
-        public Overlay Overlay { get; set; }
-
-        readonly MenuItemViewModel _orderMenu = new MenuItemViewModel
-                                                {
-                                                    Header = "Layer Order",
-                                                };
+        readonly MenuItemViewModel _areaColorMenu = new MenuItemViewModel
+                                                    {
+                                                        Header = "Area Color",
+                                                    };
 
         readonly MenuItemViewModel _colorMenu = new MenuItemViewModel
                                                 {
                                                     Header = "Colors & Lines",
                                                 };
 
-        readonly MenuItemViewModel _removeMenu = new MenuItemViewModel
-                                                 {
-                                                     Header = "Remove Layer",
-                                                 };
-
         readonly MenuItemViewModel _lineColorMenu = new MenuItemViewModel
                                                     {
                                                         Header = "Line Color",
-                                                    };
-
-        readonly MenuItemViewModel _pointColorMenu = new MenuItemViewModel
-                                                     {
-                                                         Header = "Symbol Color",
-                                                     };
-
-        readonly MenuItemViewModel _areaColorMenu = new MenuItemViewModel
-                                                    {
-                                                        Header = "Area Color",
                                                     };
 
         readonly MenuItemViewModel _lineWeightMenu = new MenuItemViewModel
@@ -214,9 +42,34 @@ namespace ESMEWorkBench.ViewModels.Map
                                                          Header = "Line Weight",
                                                      };
 
-        readonly MenuItemViewModel _symbolSizeMenu = new MenuItemViewModel
+        readonly MenuItemViewModel _moveDownMenu = new MenuItemViewModel
+                                                   {
+                                                       Header = "Move down",
+                                                   };
+
+        readonly MenuItemViewModel _moveToBottomMenu = new MenuItemViewModel
+                                                       {
+                                                           Header = "Move to bottom",
+                                                       };
+
+        readonly MenuItemViewModel _moveToTopMenu = new MenuItemViewModel
+                                                    {
+                                                        Header = "Move to top",
+                                                    };
+
+        readonly MenuItemViewModel _moveUpMenu = new MenuItemViewModel
+                                                 {
+                                                     Header = "Move up",
+                                                 };
+
+        readonly MenuItemViewModel _orderMenu = new MenuItemViewModel
+                                                {
+                                                    Header = "Layer Order",
+                                                };
+
+        readonly MenuItemViewModel _pointColorMenu = new MenuItemViewModel
                                                      {
-                                                         Header = "Symbol Size",
+                                                         Header = "Symbol Color",
                                                      };
 
         readonly MenuItemViewModel _pointStyleMenu = new MenuItemViewModel
@@ -269,147 +122,47 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                     },
                                                      };
 
-        readonly MenuItemViewModel _moveToTopMenu = new MenuItemViewModel
-                                                    {
-                                                        Header = "Move to top",
-                                                    };
-
-        readonly MenuItemViewModel _moveUpMenu = new MenuItemViewModel
+        readonly MenuItemViewModel _removeMenu = new MenuItemViewModel
                                                  {
-                                                     Header = "Move up",
+                                                     Header = "Remove Layer",
                                                  };
 
-        readonly MenuItemViewModel _moveDownMenu = new MenuItemViewModel
-                                                   {
-                                                       Header = "Move down",
-                                                   };
+        readonly MenuItemViewModel _symbolSizeMenu = new MenuItemViewModel
+                                                     {
+                                                         Header = "Symbol Size",
+                                                     };
 
-        readonly MenuItemViewModel _moveToBottomMenu = new MenuItemViewModel
-                                                       {
-                                                           Header = "Move to bottom",
-                                                       };
+        Brush _areaColorBrush;
+        int _index = -1;
+        LayerOverlay _layerOverlay;
 
-        #region public string Name { get; set; }
-
-        [XmlElement]
-        public string Name
-        {
-            get { return Overlay.Name; }
-            set
-            {
-                if (Overlay.Name == value) return;
-                Overlay.Name = value;
-            }
-        }
-
-        #endregion
-
-        #region public Color LineColor { get; set; }
-
-        [XmlElement]
-        public Color LineColor
-        {
-            get { return _lineColor; }
-            set
-            {
-                if (_lineColor == value) return;
-                _lineColor = value;
-                AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-                LineStyle = CreateLineStyle(LineColor, LineWidth);
-                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)Math.Max(1, LineWidth));
-                LineColorBrush = new SolidColorBrush(_lineColor);
-            }
-        }
-
-        Color _lineColor = RandomColor;
-
-        #endregion
-
-        [XmlIgnore]
-        #region public Brush LineColorBrush { get; set; }
-
-        public Brush LineColorBrush
-        {
-            get { return _lineColorBrush; }
-            set
-            {
-                if (_lineColorBrush == value) return;
-                _lineColorBrush = value;
-                NotifyPropertyChanged(LineColorBrushChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs LineColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorBrush);
         Brush _lineColorBrush;
 
-        #endregion
-
-        #region public float LineWidth { get; set; }
-
-        [XmlElement]
-        public float LineWidth
-        {
-            get { return _lineWidth; }
-            set
-            {
-                if (_lineWidth == value) return;
-                _lineWidth = value;
-                AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-                LineStyle = CreateLineStyle(LineColor, LineWidth);
-                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
-                CheckProperLineWidthMenu();
-            }
-        }
-
-        //float _lineWidth = (float)Math.Max(1, ((_random.NextDouble() * 9) + 1) / 2);
-        float _lineWidth = _random.Next(2, 10) / 2.0f;
-
-        void CheckProperLineWidthMenu()
-        {
-            foreach (var child in _lineWeightMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
-            foreach (var child in _symbolSizeMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
-        }
-        #endregion
-
-        #region public Color AreaColor { get; set; }
-
-        [XmlElement]
-        public Color AreaColor
-        {
-            get { return _areaColor; }
-            set
-            {
-                if (_areaColor == value) return;
-                _areaColor = value;
-                AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-                AreaColorBrush = new SolidColorBrush(_areaColor);
-            }
-        }
-
-        Color _areaColor = RandomColor;
-
-        #endregion
+        #region Helpers
 
         [XmlIgnore]
-        #region public Brush AreaColorBrush { get; set; }
-
-        public Brush AreaColorBrush
+        static Color RandomColor
         {
-            get { return _areaColorBrush; }
-            set
+            get
             {
-                if (_areaColorBrush == value) return;
-                _areaColorBrush = value;
-                NotifyPropertyChanged(AreaColorBrushChangedEventArgs);
+                if (_random == null) _random = new Random();
+                var randomBytes = new byte[3];
+                _random.NextBytes(randomBytes);
+                return Color.FromArgb(255, randomBytes[0], randomBytes[1], randomBytes[2]);
             }
         }
 
-        static readonly PropertyChangedEventArgs AreaColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorBrush);
-        Brush _areaColorBrush;
+        static AreaStyle CreateAreaStyle(Color pen, float width, Color brush) { return new AreaStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width), new GeoSolidBrush(GeoColor.FromArgb(brush.A, brush.R, brush.G, brush.B))); }
+
+        static LineStyle CreateLineStyle(Color pen, float width) { return new LineStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width)); }
+
+        static PointStyle CreatePointStyle(PointSymbolType pointSymbolType, Color pen, int width) { return new PointStyle(pointSymbolType, new GeoSolidBrush(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B)), width); }
 
         #endregion
 
         #region public AreaStyle AreaStyle { get; set; }
+
+        AreaStyle _areaStyle;
 
         [XmlIgnore]
         public AreaStyle AreaStyle
@@ -428,12 +181,11 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        AreaStyle _areaStyle;
-
-
         #endregion
 
         #region public LineStyle LineStyle { get; set; }
+
+        LineStyle _lineStyle;
 
         [XmlIgnore]
         public LineStyle LineStyle
@@ -449,11 +201,11 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        LineStyle _lineStyle;
-
         #endregion
 
         #region public PointSymbolType PointSymbolType { get; set; }
+
+        PointSymbolType _pointSymbolType = (PointSymbolType) (_random.Next(8));
 
         public PointSymbolType PointSymbolType
         {
@@ -462,24 +214,24 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_pointSymbolType == value) return;
                 _pointSymbolType = value;
-                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
+                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int) LineWidth);
                 CheckProperPointSymbolTypeMenu();
             }
         }
 
-        PointSymbolType _pointSymbolType = (PointSymbolType)(_random.Next(8));
-       
         void CheckProperPointSymbolTypeMenu()
         {
-            foreach (var child in _pointStyleMenu.Children)
+            foreach (MenuItemViewModel child in _pointStyleMenu.Children)
             {
                 child.IsChecked = child.PointSymbolType == _pointSymbolType;
             }
         }
 
         #endregion
-        
+
         #region public LineStyle CustomLineStyle { get; set; }
+
+        LineStyle _customLineStyle;
 
         [XmlIgnore]
         public LineStyle CustomLineStyle
@@ -495,11 +247,11 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        LineStyle _customLineStyle;
-
         #endregion
 
         #region public PointStyle PointStyle { get; set; }
+
+        PointStyle _pointStyle;
 
         [XmlIgnore]
         public PointStyle PointStyle
@@ -515,15 +267,286 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        PointStyle _pointStyle;
+        #endregion
+
+        #region public float LineWidth { get; set; }
+
+        //float _lineWidth = (float)Math.Max(1, ((_random.NextDouble() * 9) + 1) / 2);
+        float _lineWidth = _random.Next(2, 10)/2.0f;
+
+        [XmlElement]
+        public float LineWidth
+        {
+            get { return _lineWidth; }
+            set
+            {
+                if (_lineWidth == value) return;
+                _lineWidth = value;
+                AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
+                LineStyle = CreateLineStyle(LineColor, LineWidth);
+                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int) LineWidth);
+                CheckProperLineWidthMenu();
+            }
+        }
+
+        void CheckProperLineWidthMenu()
+        {
+            foreach (MenuItemViewModel child in _lineWeightMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
+            foreach (MenuItemViewModel child in _symbolSizeMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
+        }
 
         #endregion
+
+        #region public Color AreaColor { get; set; }
+
+        Color _areaColor = RandomColor;
+
+        [XmlElement]
+        public Color AreaColor
+        {
+            get { return _areaColor; }
+            set
+            {
+                if (_areaColor == value) return;
+                _areaColor = value;
+                AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
+                AreaColorBrush = new SolidColorBrush(_areaColor);
+            }
+        }
+
+        #endregion
+
+        #region public string Name { get; set; }
+
+        [XmlElement]
+        public string Name
+        {
+            get { return Overlay.Name; }
+            set
+            {
+                if (Overlay.Name == value) return;
+                Overlay.Name = value;
+            }
+        }
+
+        #endregion
+
+        #region public Color LineColor { get; set; }
+
+        Color _lineColor = RandomColor;
+
+        [XmlElement]
+        public Color LineColor
+        {
+            get { return _lineColor; }
+            set
+            {
+                if (_lineColor == value) return;
+                _lineColor = value;
+                AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
+                LineStyle = CreateLineStyle(LineColor, LineWidth);
+                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int) Math.Max(1, LineWidth));
+                LineColorBrush = new SolidColorBrush(_lineColor);
+            }
+        }
+
+        #endregion
+
+        static MapLayerViewModel() { _random = new Random(); }
+
+        public MapLayerViewModel()
+        {
+            LayerOverlay = new LayerOverlay();
+            LineColorBrush = new SolidColorBrush(_lineColor);
+            AreaColorBrush = new SolidColorBrush(_areaColor);
+            AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
+            LineStyle = CreateLineStyle(LineColor, LineWidth);
+            PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int) LineWidth);
+
+            _removeMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
+
+            _lineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
+                                                                                                  {
+                                                                                                      bool? result = ColorPickerService.ShowDialog();
+                                                                                                      if (!result.HasValue || !result.Value) return;
+                                                                                                      LineColor = ColorPickerService.Color;
+                                                                                                      MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                      MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                  });
+
+            _areaColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeAreaColor, obj =>
+                                                                                                  {
+                                                                                                      bool? result = ColorPickerService.ShowDialog();
+                                                                                                      if (!result.HasValue || !result.Value) return;
+                                                                                                      AreaColor = ColorPickerService.Color;
+                                                                                                      MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                      MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                  });
+            _pointColorMenu.Command = _lineColorMenu.Command;
+
+            _moveToTopMenu.Command = new SimpleCommand<object, object>(arg => Index < (Layers.Count - 1), obj =>
+                                                                                                          {
+                                                                                                              MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                              MediatorMessage.Send(MediatorMessage.MoveLayerToTop, this);
+                                                                                                          });
+            _moveUpMenu.Command = new SimpleCommand<object, object>(arg => Index < (Layers.Count - 1), obj =>
+                                                                                                       {
+                                                                                                           MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                           MediatorMessage.Send(MediatorMessage.MoveLayerUp, this);
+                                                                                                       });
+            _moveDownMenu.Command = new SimpleCommand<object, object>(arg => Index > 0, obj =>
+                                                                                        {
+                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                            MediatorMessage.Send(MediatorMessage.MoveLayerDown, this);
+                                                                                        });
+            _moveToBottomMenu.Command = new SimpleCommand<object, object>(arg => Index > 0, obj =>
+                                                                                            {
+                                                                                                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, this);
+                                                                                            });
+            ContextMenu = new List<MenuItemViewModel>
+                          {
+                              _orderMenu,
+                              _removeMenu
+                          };
+            LineColorPickerMenu = new List<MenuItemViewModel>
+                                  {
+                                      _lineColorMenu,
+                                      _lineWeightMenu,
+                                  };
+            AreaColorPickerMenu = new List<MenuItemViewModel>
+                                  {
+                                      _areaColorMenu,
+                                  };
+
+            PointShapePickerMenu = new List<MenuItemViewModel>
+                                   {
+                                       _pointColorMenu,
+                                       _symbolSizeMenu,
+                                       _pointStyleMenu,
+                                   };
+            _orderMenu.Children.Add(_moveToTopMenu);
+            _orderMenu.Children.Add(_moveUpMenu);
+            _orderMenu.Children.Add(_moveDownMenu);
+            _orderMenu.Children.Add(_moveToBottomMenu);
+
+            for (float lineWidth = 1.0f; lineWidth <= 5; lineWidth += 0.5f)
+            {
+                float width = lineWidth;
+                _lineWeightMenu.Children.Add(new MenuItemViewModel
+                                             {
+                                                 Header = string.Format("{0:0.0}", lineWidth),
+                                                 IsCheckable = true,
+                                                 LineWidth = lineWidth,
+                                                 Command = new SimpleCommand<object, object>(obj => CanChangeLineWidth, obj =>
+                                                                                                                        {
+                                                                                                                            LineWidth = width;
+                                                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                                            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                                        }),
+                                             });
+            }
+
+            for (int pointSize = 1; pointSize <= 10; pointSize++)
+            {
+                int size = pointSize;
+                _symbolSizeMenu.Children.Add(new MenuItemViewModel
+                                             {
+                                                 Header = string.Format("{0}", pointSize),
+                                                 IsCheckable = true,
+                                                 LineWidth = pointSize,
+                                                 Command = new SimpleCommand<object, object>(obj => CanChangeLineWidth, obj =>
+                                                                                                                        {
+                                                                                                                            LineWidth = size;
+                                                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                                                                            MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                                                                        }),
+                                             });
+            }
+
+            foreach (MenuItemViewModel item in _pointStyleMenu.Children)
+            {
+                MenuItemViewModel item1 = item;
+                item.Command = new SimpleCommand<object, object>(obj =>
+                                                                 {
+                                                                     PointSymbolType = item1.PointSymbolType;
+                                                                     MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                                                                     MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+                                                                 });
+            }
+
+            _colorMenu.Children.Add(_lineColorMenu);
+            _colorMenu.Children.Add(_lineWeightMenu);
+            _colorMenu.Children.Add(_areaColorMenu);
+
+            IsChecked = true;
+
+
+            CheckProperLineWidthMenu();
+            CheckProperPointSymbolTypeMenu();
+            while (PointSymbolType == PointSymbolType.Cross)
+            {
+                PointSymbolType = (PointSymbolType) (_random.Next(8));
+            }
+        }
+
+        public static IHRCColorPickerService ColorPickerService { get; set; }
+        public static GeoCollection<Overlay> MapOverlay { get; set; }
+
+        [XmlIgnore]
+        public LayerOverlay LayerOverlay
+        {
+            get { return _layerOverlay; }
+            set
+            {
+                _layerOverlay = value;
+                Overlay = _layerOverlay;
+            }
+        }
+
+        [XmlIgnore]
+        public Overlay Overlay { get; set; }
+
+        [XmlIgnore]
+
+        #region public Brush LineColorBrush { get; set; }
+
+            public Brush LineColorBrush
+        {
+            get { return _lineColorBrush; }
+            set
+            {
+                if (_lineColorBrush == value) return;
+                _lineColorBrush = value;
+                NotifyPropertyChanged(LineColorBrushChangedEventArgs);
+            }
+        }
+
+        #endregion
+
+        [XmlIgnore]
+
+        #region public Brush AreaColorBrush { get; set; }
+
+            public Brush AreaColorBrush
+        {
+            get { return _areaColorBrush; }
+            set
+            {
+                if (_areaColorBrush == value) return;
+                _areaColorBrush = value;
+                NotifyPropertyChanged(AreaColorBrushChangedEventArgs);
+            }
+        }
+
+        #endregion
+
         [XmlIgnore]
         public Visibility IsLineColorVisible
         {
             get
             {
-                switch(LayerType)
+                switch (LayerType)
                 {
                     default:
                         return Visibility.Hidden;
@@ -535,10 +558,10 @@ namespace ESMEWorkBench.ViewModels.Map
                     case LayerType.Bathymetry:
                     case LayerType.Animal:
                         return Visibility.Visible;
-                
                 }
             }
         }
+
         [XmlIgnore]
         public Visibility IsAreaColorVisible
         {
@@ -551,7 +574,6 @@ namespace ESMEWorkBench.ViewModels.Map
                     case LayerType.BaseMap:
                     case LayerType.Shapefile:
                         return Visibility.Visible;
-                   
                 }
             }
         }
@@ -561,7 +583,7 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             get
             {
-                switch(LayerType)
+                switch (LayerType)
                 {
                     default:
                         return false;
@@ -581,8 +603,20 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
+        [XmlElement]
+        public int Index
+        {
+            get { return (MapOverlay != null) ? MapOverlay.IndexOf(LayerOverlay) : _index; }
+            set
+            {
+                if ((MapOverlay != null) && (MapOverlay.Contains(LayerOverlay))) MapOverlay.MoveTo(LayerOverlay, value);
+                _index = value;
+            }
+        }
 
         #region public LayerType LayerType { get; set; }
+
+        LayerType _layerType;
 
         public LayerType LayerType
         {
@@ -591,16 +625,17 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_layerType == value) return;
                 _layerType = value;
-                
+
                 LineOrPointPickerMenu = IsFeatureLayer ? PointShapePickerMenu : LineColorPickerMenu;
             }
         }
 
-        LayerType _layerType;
-
         #endregion
 
         #region public bool CanBeReordered { get; set; }
+
+        static readonly PropertyChangedEventArgs CanBeReorderedChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanBeReordered);
+        bool _canBeReordered;
 
         public bool CanBeReordered
         {
@@ -613,12 +648,12 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        static readonly PropertyChangedEventArgs CanBeReorderedChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanBeReordered);
-        bool _canBeReordered;
-
         #endregion
 
         #region public bool CanBeRemoved { get; set; }
+
+        static readonly PropertyChangedEventArgs CanBeRemovedChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanBeRemoved);
+        bool _canBeRemoved;
 
         public bool CanBeRemoved
         {
@@ -631,12 +666,12 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        static readonly PropertyChangedEventArgs CanBeRemovedChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanBeRemoved);
-        bool _canBeRemoved;
-
         #endregion
 
         #region public bool CanChangeLineColor { get; set; }
+
+        static readonly PropertyChangedEventArgs CanChangeLineColorChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeLineColor);
+        bool _canChangeLineColor;
 
         public bool CanChangeLineColor
         {
@@ -649,12 +684,12 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        static readonly PropertyChangedEventArgs CanChangeLineColorChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeLineColor);
-        bool _canChangeLineColor;
-
         #endregion
 
         #region public bool CanChangeAreaColor { get; set; }
+
+        static readonly PropertyChangedEventArgs CanChangeAreaColorChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeAreaColor);
+        bool _canChangeAreaColor;
 
         public bool CanChangeAreaColor
         {
@@ -666,12 +701,12 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        static readonly PropertyChangedEventArgs CanChangeAreaColorChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeAreaColor);
-        bool _canChangeAreaColor;
-
         #endregion
 
         #region public bool CanChangeLineWidth { get; set; }
+
+        static readonly PropertyChangedEventArgs CanChangeLineWidthChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeLineWidth);
+        bool _canChangeLineWidth = true;
 
         public bool CanChangeLineWidth
         {
@@ -683,9 +718,6 @@ namespace ESMEWorkBench.ViewModels.Map
                 NotifyPropertyChanged(CanChangeLineWidthChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs CanChangeLineWidthChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanChangeLineWidth);
-        bool _canChangeLineWidth = true;
 
         #endregion
 
@@ -709,6 +741,10 @@ namespace ESMEWorkBench.ViewModels.Map
         #endregion
 
         #region public List<MenuItemViewModel> LineColorPickerMenu { get; set; }
+
+        static readonly PropertyChangedEventArgs LineColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorPickerMenu);
+        List<MenuItemViewModel> _lineColorPickerMenu;
+
         [XmlIgnore]
         public List<MenuItemViewModel> LineColorPickerMenu
         {
@@ -721,12 +757,13 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        static readonly PropertyChangedEventArgs LineColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorPickerMenu);
-        List<MenuItemViewModel> _lineColorPickerMenu;
-
         #endregion
 
         #region public List<MenuItemViewModel> LineOrPointPickerMenu { get; set; }
+
+        static readonly PropertyChangedEventArgs LineOrPointPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineOrPointPickerMenu);
+        List<MenuItemViewModel> _lineOrPointPickerMenu;
+
         [XmlIgnore]
         public List<MenuItemViewModel> LineOrPointPickerMenu
         {
@@ -739,12 +776,13 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        static readonly PropertyChangedEventArgs LineOrPointPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineOrPointPickerMenu);
-        List<MenuItemViewModel> _lineOrPointPickerMenu;
-
         #endregion
 
         #region public List<MenuItemViewModel> AreaColorPickerMenu { get; set; }
+
+        static readonly PropertyChangedEventArgs AreaColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorPickerMenu);
+        List<MenuItemViewModel> _areaColorPickerMenu;
+
         [XmlIgnore]
         public List<MenuItemViewModel> AreaColorPickerMenu
         {
@@ -757,12 +795,13 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        static readonly PropertyChangedEventArgs AreaColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorPickerMenu);
-        List<MenuItemViewModel> _areaColorPickerMenu;
-
         #endregion
-        
+
         #region public List<MenuItemViewModel> PointShapePickerMenu { get; set; }
+
+        static readonly PropertyChangedEventArgs PointShapePickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.PointShapePickerMenu);
+        List<MenuItemViewModel> _pointShapePickerMenu;
+
         [XmlIgnore]
         public List<MenuItemViewModel> PointShapePickerMenu
         {
@@ -775,11 +814,8 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
-        static readonly PropertyChangedEventArgs PointShapePickerMenuChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.PointShapePickerMenu);
-        List<MenuItemViewModel> _pointShapePickerMenu;
-
         #endregion
-        
+
         #region public bool IsChecked { get; set; }
 
         static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.IsChecked);
@@ -806,42 +842,12 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
-        [XmlElement]
-        public int Index
-        {
-            get { return (MapOverlay != null) ? MapOverlay.IndexOf(LayerOverlay) : _index; }
-            set
-            {
-                if ((MapOverlay != null) && (MapOverlay.Contains(LayerOverlay))) MapOverlay.MoveTo(LayerOverlay, value);
-                _index = value;
-            }
-        }
+        #region INotifyPropertyChanged Members
 
-        int _index = -1;
-
-        #region Helpers
-
-        static AreaStyle CreateAreaStyle(Color pen, float width, Color brush) { return new AreaStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width), new GeoSolidBrush(GeoColor.FromArgb(brush.A, brush.R, brush.G, brush.B))); }
-
-        static LineStyle CreateLineStyle(Color pen, float width) { return new LineStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width)); }
-
-        static PointStyle CreatePointStyle(PointSymbolType pointSymbolType, Color pen, int width) { return new PointStyle(pointSymbolType, new GeoSolidBrush(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B)), width); }
-
-        [XmlIgnore]
-        static Color RandomColor
-        {
-            get
-            {
-                if (_random == null) _random = new Random();
-                var randomBytes = new byte[3];
-                _random.NextBytes(randomBytes);
-                return Color.FromArgb(255, randomBytes[0], randomBytes[1], randomBytes[2]);
-            }
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
 
         #endregion
 
         void NotifyPropertyChanged(PropertyChangedEventArgs e) { if (PropertyChanged != null) PropertyChanged(this, e); }
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
