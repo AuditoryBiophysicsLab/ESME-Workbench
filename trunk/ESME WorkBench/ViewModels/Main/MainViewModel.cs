@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESMEWorkBench.Data;
@@ -262,8 +263,11 @@ namespace ESMEWorkBench.ViewModels.Main
                 _experiment.FileName = _openFileService.FileName;
                 Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
             }
-            LoadExperimentFile(_openFileService.FileName);
-            RecentFiles.InsertFile(_openFileService.FileName);
+            using (var cursor = new OverrideCursor(Cursors.Wait))
+            {
+                LoadExperimentFile(_openFileService.FileName);
+                RecentFiles.InsertFile(_openFileService.FileName);
+            }
         }
 
         void LoadExperimentFile(string fileName)
