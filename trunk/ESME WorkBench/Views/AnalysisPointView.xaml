@@ -27,16 +27,23 @@
 						           Text="{Binding Value }" />
 					</StackPanel>
 				</DataTemplate>
-                
-			</HierarchicalDataTemplate.ItemTemplate>
-            <HierarchicalDataTemplate.ItemContainerStyle>
-                <Style TargetType="TreeViewItem">
-                    <Setter Property="IsEnabled" Value="False"/>
-                    
-                </Style>
-            </HierarchicalDataTemplate.ItemContainerStyle>
 
-        </HierarchicalDataTemplate>
+			</HierarchicalDataTemplate.ItemTemplate>
+			<HierarchicalDataTemplate.ItemContainerStyle>
+				<Style TargetType="TreeViewItem">
+					<Setter Property="IsEnabled"
+					        Value="False" />
+					<Style.Triggers>
+						<Trigger Property="IsSelected"
+						         Value="True">
+							<Setter Property="FontWeight"
+							        Value="Bold" />
+						</Trigger>
+					</Style.Triggers>
+				</Style>
+			</HierarchicalDataTemplate.ItemContainerStyle>
+
+		</HierarchicalDataTemplate>
 	</UserControl.Resources>
 	<Grid>
 		<Grid.ColumnDefinitions>
@@ -46,26 +53,17 @@
 			<ColumnDefinition Width="*"
 			                  MinWidth="500" />
 		</Grid.ColumnDefinitions>
-		<GroupBox Grid.Column="0">
-			<!-- <ListBox ItemsSource="{Binding AnalysisPoint.TransmissionLossFields}"
-                     SelectedIndex="{Binding SelectedField}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name}" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox> -->
-            <TreeView ItemsSource="{Binding TransmissionLossFieldListItems}"
+		<GroupBox Grid.Column="0">			
+			<TreeView ItemsSource="{Binding TransmissionLossFieldListItems}"
 			          ItemTemplate="{StaticResource PlatformSourceModeTreeTemplate}"
-                      x:Name="TreeView">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="SelectedItemChanged">
-                        <cinch:EventToCommandTrigger Command="{Binding TreeViewSelectionChangedCommand}"/>
-                        
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </TreeView>
-        </GroupBox>
+			          x:Name="TreeView">
+				<i:Interaction.Triggers>
+					<i:EventTrigger EventName="SelectedItemChanged">
+						<cinch:EventToCommandTrigger Command="{Binding TreeViewSelectionChangedCommand}" />
+					</i:EventTrigger>
+				</i:Interaction.Triggers>
+			</TreeView>
+		</GroupBox>
 		<GridSplitter Name="GridSplitter"
 		              Grid.Column="1"
 		              Width="0"
