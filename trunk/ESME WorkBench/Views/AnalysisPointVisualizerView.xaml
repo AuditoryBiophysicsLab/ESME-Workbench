@@ -6,7 +6,9 @@
         Top="{Binding Source={x:Static Properties:Settings.Default}, Path=TLTop, Mode=TwoWay}"
         Left="{Binding Source={x:Static Properties:Settings.Default}, Path=TLLeft, Mode=TwoWay}"
         Height="{Binding Source={x:Static Properties:Settings.Default}, Path=TLHeight, Mode=TwoWay}"
-        Width="{Binding Source={x:Static Properties:Settings.Default}, Path=TLWidth, Mode=TwoWay}">
+        Width="{Binding Source={x:Static Properties:Settings.Default}, Path=TLWidth, Mode=TwoWay}"
+        MinWidth="800"
+        >
 	<Window.InputBindings>
 		<KeyBinding Command="{Binding SaveAsCommand}"
 		            Key="S"

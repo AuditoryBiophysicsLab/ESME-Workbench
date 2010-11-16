@@ -74,5 +74,8 @@
     <Setting Name="ExperimentReportDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="TransmissionLayersWidth" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">150</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
