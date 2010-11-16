@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Xml.Serialization;
@@ -28,7 +29,7 @@ namespace ESMEWorkBench.ViewModels.Map
     {
         #region Private fields
 
-        readonly IViewAwareStatus _viewAwareStatusService;
+        readonly IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBoxService;
         WpfMap _wpfMap;
 
@@ -37,10 +38,10 @@ namespace ESMEWorkBench.ViewModels.Map
         public string MapDLLVersion { get; private set; }
 
         [ImportingConstructor]
-        public MapViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService, IHRCColorPickerService colorPickerService)
+        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCColorPickerService colorPickerService)
         {
             MapLayerViewModel.ColorPickerService = colorPickerService;
-            viewAwareStatusService.ViewLoaded += ViewLoaded;
+            viewAwareStatus.ViewLoaded += ViewLoaded;
             try
             {
                 Mediator.Instance.Register(this);
@@ -50,7 +51,7 @@ namespace ESMEWorkBench.ViewModels.Map
                 Globals.DisplayException(messageBoxService, ex, "***********\nMapViewModel: Mediator registration failed\n***********");
                 throw;
             }
-            _viewAwareStatusService = viewAwareStatusService;
+            _viewAwareStatus = viewAwareStatus;
             _messageBoxService = messageBoxService;
             //_synchronizationContext = synchronizationContext;
 
@@ -109,7 +110,7 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             if (Designer.IsInDesignMode) return;
 
-            _wpfMap = ((MapView) _viewAwareStatusService.View).WpfMap;
+            _wpfMap = ((MapView) _viewAwareStatus.View).WpfMap;
 
             MapLayerViewModel.MapOverlay = _wpfMap.Overlays;
 
@@ -125,7 +126,7 @@ namespace ESMEWorkBench.ViewModels.Map
 #if true
             AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
             AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
-            var localizedName = ((MapView) _viewAwareStatusService.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
+            var localizedName = ((MapView) _viewAwareStatus.View).FontFamily.FamilyNames[XmlLanguage.GetLanguage(CultureInfo.CurrentUICulture.Name)];
 
             var customUnitScaleBarAdornmentLayer = new CustomUnitScaleBarAdornmentLayer
                                                    {
@@ -311,6 +312,12 @@ namespace ESMEWorkBench.ViewModels.Map
             _wpfMap.CurrentExtent = rectangleShape;
            // _wpfMap.CurrentScale = _experiment.CurrentScale; //?
             _wpfMap.Refresh();
+        }
+
+        [MediatorMessageSink(MediatorMessage.EnableGUI)]
+        void EnableGUI(bool enable)
+        {
+            ((UserControl)_viewAwareStatus.View).IsEnabled = enable;
         }
 
     }

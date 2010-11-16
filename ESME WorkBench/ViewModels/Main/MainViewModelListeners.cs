@@ -152,6 +152,12 @@ namespace ESMEWorkBench.ViewModels.Main
             _visualizerService.ShowDialog("AnalysisPointVisualizerView", analysisPointVisualizerViewModel);
         }
 
+        [MediatorMessageSink(MediatorMessage.EnableGUI)]
+        void EnableGUI(bool enable)
+        {
+            ((Window) _viewAwareStatus.View).IsEnabled = enable;
+        }
+
         [MediatorMessageSink(MediatorMessage.CalculateAnalysisPoint)]
         void CalculateAnalysisPoint(AnalysisPoint analysisPoint)
         {

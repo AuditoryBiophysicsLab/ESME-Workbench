@@ -5,6 +5,8 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Windows;
+using System.Windows.Controls;
 using Cinch;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.Map;
@@ -17,13 +19,13 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         #region Private fields
 
-        readonly IViewAwareStatus _viewAwareStatusService;
+        readonly IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBoxService;
 
         #endregion
 
         [ImportingConstructor]
-        public LayerListViewModel(IViewAwareStatus viewAwareStatusService, IMessageBoxService messageBoxService)
+        public LayerListViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService)
         {
             try
             {
@@ -34,10 +36,10 @@ namespace ESMEWorkBench.ViewModels.Main
                 Debug.WriteLine("***********\nLayerTreeViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
-            _viewAwareStatusService = viewAwareStatusService;
+            _viewAwareStatus = viewAwareStatus;
             _messageBoxService = messageBoxService;
 
-            _viewAwareStatusService.ViewLoaded += ViewLoaded;
+            _viewAwareStatus.ViewLoaded += ViewLoaded;
 
             MapLayers = new ObservableCollection<MapLayerViewModel>();
         }
@@ -107,6 +109,12 @@ namespace ESMEWorkBench.ViewModels.Main
         void ReorderLayer(MapLayerViewModel layer) 
         {
             MapLayers.Move(MapLayers.IndexOf(layer), layer.Index); 
+        }
+
+        [MediatorMessageSink(MediatorMessage.EnableGUI)]
+        void EnableGUI(bool enable)
+        {
+            ((UserControl)_viewAwareStatus.View).IsEnabled = enable;
         }
     }
 }

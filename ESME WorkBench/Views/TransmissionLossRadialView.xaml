@@ -30,7 +30,7 @@
 				           Margin="5 0 0 0">
                     <controls:DataAxis AxisLocation="Left"
 					                   DockPanel.Dock="Right"
-					                   AxisLabel="Transmission Loss (dB SPL)"
+					                   AxisLabel="Transmission Loss (dBgs)"
 					                   StartValue="{Binding ColorMapViewModel.MaxValue}"
 					                   EndValue="{Binding ColorMapViewModel.MinValue}"
 					                   TickValueFormat="0.#"/>
