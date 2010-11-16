@@ -571,6 +571,16 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
+        [XmlIgnore]
+        public string PointLineTooltip
+        {
+            get
+            {
+                if (IsFeatureLayer) return "Symbol: Right click to change symbol, size, and color";
+                return "Line: Right click to change width and color ";
+            }
+        }
+
 
         #region public LayerType LayerType { get; set; }
 
