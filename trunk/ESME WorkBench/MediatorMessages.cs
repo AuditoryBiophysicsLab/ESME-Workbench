@@ -23,6 +23,7 @@ namespace ESMEWorkBench
         public const string CalculateAnalysisPoint = "CalculateAnalysisPointMessage";
 
         public const string SetExperiment = "SetExperimentMessage";
+        public const string EnableGUI = "EnableGUIMessage";
 
         public const string SetLayerCollection = "SetLayerCollectionMessage";
         public const string LayerAdded = "LayerAddedMessage";

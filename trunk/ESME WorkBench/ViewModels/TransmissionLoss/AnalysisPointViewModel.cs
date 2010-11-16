@@ -95,7 +95,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         {
             get { return _treeViewSelectionChanged ?? (_treeViewSelectionChanged = new SimpleCommand<object, object>(delegate
                                                                                                                      {
-                                                                                                                         MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged,((TransmissionLossFieldListItemViewModel)_treeView.SelectedItem).TransmissionLossField );
+                                                                                                                         if (TransmissionLossFieldListItems.Count == 0) return;
+                                                                                                                         var selectedItem = ((TransmissionLossFieldListItemViewModel)_treeView.SelectedItem) ?? TransmissionLossFieldListItems[0];
+                                                                                                                         MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged,selectedItem.TransmissionLossField);
 
                                                                                                                      })); }
         }

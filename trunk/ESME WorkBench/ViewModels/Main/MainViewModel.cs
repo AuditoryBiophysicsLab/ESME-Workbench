@@ -272,26 +272,37 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void LoadExperimentFile(string fileName)
         {
-            Experiment newExperiment;
             try
             {
-                newExperiment = Experiment.Load(fileName, Experiment.ReferencedTypes);
-                newExperiment.FileName = fileName;
+                using (var cursor = new OverrideCursor(Cursors.Wait))
+                {
+                    MediatorMessage.Send(MediatorMessage.EnableGUI, false);
+                    Experiment newExperiment;
+                    try
+                    {
+                        newExperiment = Experiment.Load(fileName, Experiment.ReferencedTypes);
+                        newExperiment.FileName = fileName;
+                    }
+                    catch (UserCanceledOperationException)
+                    {
+                        return;
+                    }
+                    catch (Exception e)
+                    {
+                        _messageBoxService.ShowError("Error opening experiment: " + e.Message);
+                        return;
+                    }
+                    MediatorMessage.Send(MediatorMessage.SetExperiment, (Experiment) null);
+                    _experiment = newExperiment;
+                    DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
+                    HookPropertyChanged(_experiment);
+                    _experiment.InitializeIfViewModelsReady();
+                }
             }
-            catch (UserCanceledOperationException)
+            finally
             {
-                return;
+                MediatorMessage.Send(MediatorMessage.EnableGUI, true);
             }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError("Error opening experiment: " + e.Message);
-                return;
-            }
-            MediatorMessage.Send(MediatorMessage.SetExperiment, (Experiment)null);
-            _experiment = newExperiment;
-            DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
-            HookPropertyChanged(_experiment);
-            _experiment.InitializeIfViewModelsReady();
         }
 
         void NewExperiment()
