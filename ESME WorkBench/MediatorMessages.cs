@@ -44,6 +44,7 @@ namespace ESMEWorkBench
         public const string SetSelectedRadialBearing = "SetSelectedRadialBearingMessage";
         public const string SetSelectedTransmissionLossFieldName = "SetSelectedTransmissionLossFieldNameMessage";
         public const string ResetSelectedField = "ResetSelectedFieldMessage";
+        public const string AcousticOptions = "AcousticOptionsMessage";
 
         public const string CurrentScaleChanged = "CurrentScaleChangedMessage";
         public const string CurrentExtentChanged = "CurrentExtentChangedMessage";

@@ -369,7 +369,7 @@
 					                SmallImageSource="..\Images\SmallIcons\gear-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\gear-icon.png"
 					                ToolTipDescription="View or change acoustic simulation options"
-					                Command="{Binding DisabledCommand}" />
+					                Command="{Binding AcousticOptionsCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Analysis Points">
                     <r:RibbonButton Label="Inspect"
