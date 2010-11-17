@@ -13,6 +13,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     {
         #region public LabeledDataWrapper<double> Latitude { get; private set; }
 
+        static readonly PropertyChangedEventArgs LatitudeChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Latitude);
+        LabeledDataWrapper<double> _latitude;
+
         public LabeledDataWrapper<double> Latitude
         {
             get { return _latitude; }
@@ -29,12 +32,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs LatitudeChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Latitude);
-        LabeledDataWrapper<double> _latitude;
-
         #endregion
 
         #region public LabeledDataWrapper<double> Longitude { get; private set; }
+
+        static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Longitude);
+        LabeledDataWrapper<double> _longitude;
 
         public LabeledDataWrapper<double> Longitude
         {
@@ -52,12 +55,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Longitude);
-        LabeledDataWrapper<double> _longitude;
-
         #endregion
 
         #region public LabeledDataWrapper<float> SourceDepth { get; private set; }
+
+        static readonly PropertyChangedEventArgs SourceDepthChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.SourceDepth);
+        LabeledDataWrapper<float> _sourceDepth;
 
         public LabeledDataWrapper<float> SourceDepth
         {
@@ -67,20 +70,20 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_sourceDepth == value) return;
                 _sourceDepth = value;
                 _sourceDepth.ValidationRules.Add(new SimpleRule("DataValue", "SourceDepth must be greater than or equal to zero", domObj =>
-                                                                                                                      {
-                                                                                                                          var obj = (DataWrapper<float>) domObj;
-                                                                                                                          return (obj.DataValue < 0);
-                                                                                                                      }));
+                                                                                                                                  {
+                                                                                                                                      var obj = (DataWrapper<float>) domObj;
+                                                                                                                                      return (obj.DataValue < 0);
+                                                                                                                                  }));
                 NotifyPropertyChanged(SourceDepthChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs SourceDepthChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.SourceDepth);
-        LabeledDataWrapper<float> _sourceDepth;
-
         #endregion
 
         #region public LabeledDataWrapper<float> LowFrequency { get; private set; }
+
+        static readonly PropertyChangedEventArgs LowFrequencyChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.LowFrequency);
+        LabeledDataWrapper<float> _lowFrequency;
 
         public LabeledDataWrapper<float> LowFrequency
         {
@@ -104,12 +107,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs LowFrequencyChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.LowFrequency);
-        LabeledDataWrapper<float> _lowFrequency;
-
         #endregion
 
         #region public LabeledDataWrapper<float> HighFrequency { get; private set; }
+
+        static readonly PropertyChangedEventArgs HighFrequencyChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.HighFrequency);
+        LabeledDataWrapper<float> _highFrequency;
 
         public LabeledDataWrapper<float> HighFrequency
         {
@@ -133,12 +136,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs HighFrequencyChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.HighFrequency);
-        LabeledDataWrapper<float> _highFrequency;
-
         #endregion
 
         #region public LabeledDataWrapper<float> VerticalBeamWidth { get; private set; }
+
+        static readonly PropertyChangedEventArgs VerticalBeamWidthChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.VerticalBeamWidth);
+        LabeledDataWrapper<float> _verticalBeamWidth;
 
         public LabeledDataWrapper<float> VerticalBeamWidth
         {
@@ -156,12 +159,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs VerticalBeamWidthChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.VerticalBeamWidth);
-        LabeledDataWrapper<float> _verticalBeamWidth;
-
         #endregion
 
         #region public LabeledDataWrapper<float> DepressionElevationAngle { get; private set; }
+
+        static readonly PropertyChangedEventArgs DepressionElevationAngleChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.DepressionElevationAngle);
+        LabeledDataWrapper<float> _depressionElevationAngle;
 
         public LabeledDataWrapper<float> DepressionElevationAngle
         {
@@ -179,12 +182,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs DepressionElevationAngleChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.DepressionElevationAngle);
-        LabeledDataWrapper<float> _depressionElevationAngle;
-
         #endregion
 
         #region public LabeledDataWrapper<float> RadialBearing { get; private set; }
+
+        static readonly PropertyChangedEventArgs RadialBearingChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialBearing);
+        LabeledDataWrapper<float> _radialBearing;
 
         public LabeledDataWrapper<float> RadialBearing
         {
@@ -194,20 +197,20 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_radialBearing == value) return;
                 _radialBearing = value;
                 _radialBearing.ValidationRules.Add(new SimpleRule("DataValue", "RadialBearing must be in the range -180 to +180", domObj =>
-                {
-                    var obj = (DataWrapper<float>)domObj;
-                    return ((obj.DataValue < -180) || (180 < obj.DataValue));
-                }));
+                                                                                                                                  {
+                                                                                                                                      var obj = (DataWrapper<float>) domObj;
+                                                                                                                                      return ((obj.DataValue < -180) || (180 < obj.DataValue));
+                                                                                                                                  }));
                 NotifyPropertyChanged(RadialBearingChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs RadialBearingChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialBearing);
-        LabeledDataWrapper<float> _radialBearing;
-
         #endregion
 
         #region public LabeledDataWrapper<float> Radius { get; private set; }
+
+        static readonly PropertyChangedEventArgs RadiusChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Radius);
+        LabeledDataWrapper<float> _radius;
 
         public LabeledDataWrapper<float> Radius
         {
@@ -217,20 +220,20 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_radius == value) return;
                 _radius = value;
                 _radius.ValidationRules.Add(new SimpleRule("DataValue", "Radius must be greater than zero", domObj =>
-                {
-                    var obj = (DataWrapper<float>)domObj;
-                    return (obj.DataValue <= 0);
-                }));
+                                                                                                            {
+                                                                                                                var obj = (DataWrapper<float>) domObj;
+                                                                                                                return (obj.DataValue <= 0);
+                                                                                                            }));
                 NotifyPropertyChanged(RadiusChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs RadiusChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Radius);
-        LabeledDataWrapper<float> _radius;
-
         #endregion
 
         #region public LabeledDataWrapper<int> RadialCount { get; private set; }
+
+        static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialCount);
+        LabeledDataWrapper<int> _radialCount;
 
         public LabeledDataWrapper<int> RadialCount
         {
@@ -240,20 +243,20 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_radialCount == value) return;
                 _radialCount = value;
                 _radialCount.ValidationRules.Add(new SimpleRule("DataValue", "RadialCount must be greater than zero", domObj =>
-                {
-                    var obj = (DataWrapper<int>)domObj;
-                    return (obj.DataValue <= 0);
-                }));
+                                                                                                                      {
+                                                                                                                          var obj = (DataWrapper<int>) domObj;
+                                                                                                                          return (obj.DataValue <= 0);
+                                                                                                                      }));
                 NotifyPropertyChanged(RadialCountChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialCount);
-        LabeledDataWrapper<int> _radialCount;
-
         #endregion
 
         #region public IEnumerable<DataWrapperBase> EditableFields { get; set; }
+
+        static readonly PropertyChangedEventArgs EditableFieldsChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.EditableFields);
+        IEnumerable<DataWrapperBase> _editableFields;
 
         public IEnumerable<DataWrapperBase> EditableFields
         {
@@ -266,12 +269,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs EditableFieldsChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.EditableFields);
-        IEnumerable<DataWrapperBase> _editableFields;
-
         #endregion
 
         #region public bool IsEditable { get; set; }
+
+        static readonly PropertyChangedEventArgs IsEditableChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.IsEditable);
+        bool _isEditable;
 
         public bool IsEditable
         {
@@ -280,13 +283,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_isEditable == value) return;
                 _isEditable = value;
-                foreach (var wrapper in _editableFields) wrapper.IsEditable = _isEditable;
+                foreach (DataWrapperBase wrapper in _editableFields) wrapper.IsEditable = _isEditable;
                 NotifyPropertyChanged(IsEditableChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs IsEditableChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.IsEditable);
-        bool _isEditable;
 
         #endregion
 
@@ -301,6 +301,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #region public string Name { get; set; }
 
+        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Name);
+        string _name;
+
         public string Name
         {
             get { return _name; }
@@ -312,12 +315,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Name);
-        string _name;
-
         #endregion
 
         #region public string Metadata { get; set; }
+
+        static readonly PropertyChangedEventArgs MetadataChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Metadata);
+        string _metadata;
 
         public string Metadata
         {
@@ -330,12 +333,13 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs MetadataChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Metadata);
-        string _metadata;
-
         #endregion
 
         #region public float SourceLevel { get; set; }
+
+        static readonly PropertyChangedEventArgs SourceLevelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.SourceLevel);
+        float _sourceLevel;
+
         /// <summary>
         /// Source Level in dB SPL re: 1uPa
         /// </summary>
@@ -350,12 +354,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs SourceLevelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.SourceLevel);
-        float _sourceLevel;
-
         #endregion
-
-        public ulong IDField { get; set; }
 
         readonly int _maxCalculationDepth;
 
@@ -393,18 +392,15 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                        };
             RadialBearing = new LabeledDataWrapper<float>(this, RadialBearingChangedEventArgs)
                             {
-                                IsEditable = true,
                                 Label = "First radial bearing (deg)"
                             };
             Radius = new LabeledDataWrapper<float>(this, RadiusChangedEventArgs)
                      {
                          Label = "Field radius (m)",
-                         IsEditable = true,
                      };
             RadialCount = new LabeledDataWrapper<int>(this, RadialCountChangedEventArgs)
                           {
                               Label = "Radial count",
-                              IsEditable = true,
                           };
 
             #endregion
@@ -458,12 +454,18 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #region OKCommand
 
+        SimpleCommand<object, object> _okCommand;
+
         public SimpleCommand<object, object> OkCommand
         {
             get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(delegate { return IsValid; }, delegate { CloseActivePopUpCommand.Execute(true); })); }
         }
 
-        SimpleCommand<object, object> _okCommand;
+        #endregion
+
+        #region IHasIDField Members
+
+        public ulong IDField { get; set; }
 
         #endregion
     }
