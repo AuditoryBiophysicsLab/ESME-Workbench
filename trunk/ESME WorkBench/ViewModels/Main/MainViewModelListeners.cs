@@ -37,8 +37,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
             var transmissionLossSettings = new TransmissionLossSettings
                                            {
-                                               DepthCellSize = 50,
-                                               RangeCellSize = 50,
+                                               DepthCellSize = (float)_experiment.BellhopDepthCellSize,
+                                               RangeCellSize = (float)_experiment.BellhopRangeCellSize,
                                            };
 
             var analysisPointViewModel = new AnalysisPointCalculationPreviewViewModel
@@ -166,7 +166,7 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.AcousticOptions)]
         void AcousticOptions(bool dummy)
         {
-            var acousticOptions = new AcousticEngineParameterViewModel();
+            var acousticOptions = new AcousticEngineParameterViewModel(_experiment);
             _visualizerService.ShowDialog("AcousticEngineParameterConfigurationView", acousticOptions);
         }
     }

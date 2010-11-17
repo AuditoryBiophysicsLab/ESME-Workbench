@@ -5,14 +5,17 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using Cinch;
+using ESMEWorkBench.Data;
 using ESMEWorkBench.ViewModels.Main;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     class AcousticEngineParameterViewModel : ViewModelBase  
     {
-        public AcousticEngineParameterViewModel()
+        Experiment _experiment;
+        public AcousticEngineParameterViewModel(Experiment experiment)
         {
+            _experiment = experiment;
             BellhopParameters = new EditableLabelListViewModel
                                 {
                                     LabelWidth = 125,
@@ -22,10 +25,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                       new LabelValuePair
                                                       {
                                                           Label = "Range Cell Size (m): ",
+                                                          Value = experiment.BellhopRangeCellSize.ToString(),
                                                       },
                                                       new LabelValuePair
                                                       {
                                                           Label = "Depth Cell Size (m): ",
+                                                          Value = experiment.BellhopDepthCellSize.ToString(),
                                                       },
                                                   }
                                 };
@@ -53,7 +58,14 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         public SimpleCommand<object, object> OkCommand
         {
-            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { CloseActivePopUpCommand.Execute(true); })); }
+            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate
+                                                                         {
+                                                                             //magic validation not-here; here we assume the user values are okay.
+                                                                             //todo  scrubscrub
+                                                                             _experiment.BellhopRangeCellSize = Double.Parse(BellhopParameters.ItemsSource[0].Value);
+                                                                             _experiment.BellhopDepthCellSize = Double.Parse(BellhopParameters.ItemsSource[1].Value);
+                                                                             CloseActivePopUpCommand.Execute(true);
+                                                                         })); }
         }
 
         SimpleCommand<object, object> _ok;

@@ -464,6 +464,43 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public double BellhopRangeCellSize { get; set; }
+
+        public double BellhopRangeCellSize
+        {
+            get { return _bellhopRangeCellSize; }
+            set
+            {
+                if (_bellhopRangeCellSize == value) return;
+                _bellhopRangeCellSize = value;
+                NotifyPropertyChanged(BellhopRangeCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BellhopRangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopRangeCellSize);
+        double _bellhopRangeCellSize;
+
+        #endregion
+
+        #region public double BellhopDepthCellSize { get; set; }
+
+        public double BellhopDepthCellSize
+        {
+            get { return _bellhopDepthCellSize; }
+            set
+            {
+                if (_bellhopDepthCellSize == value) return;
+                _bellhopDepthCellSize = value;
+                NotifyPropertyChanged(BellhopDepthCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BellhopDepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopDepthCellSize);
+        double _bellhopDepthCellSize;
+
+        #endregion
+
+
         #region public ulong NextObjectID { get; set; }
 
         public ulong NextObjectID
