@@ -162,5 +162,12 @@ namespace ESMEWorkBench.ViewModels.Main
         void CalculateAnalysisPoint(AnalysisPoint analysisPoint)
         {
         }
+
+        [MediatorMessageSink(MediatorMessage.AcousticOptions)]
+        void AcousticOptions(bool dummy)
+        {
+            var acousticOptions = new AcousticEngineParameterViewModel();
+            _visualizerService.ShowDialog("AcousticEngineParameterConfigurationView", acousticOptions);
+        }
     }
 }

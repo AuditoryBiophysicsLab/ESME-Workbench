@@ -12,7 +12,6 @@ namespace ESME.TransmissionLoss
         public SoundPressureLevelField(TransmissionLossField transmissionLossField)
         {
             if (transmissionLossField.Radials.Length == 0) return;
-           CalculateSPL();
         }
 
         public void CalculateSPL()

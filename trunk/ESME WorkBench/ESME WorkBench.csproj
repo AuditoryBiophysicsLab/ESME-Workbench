@@ -137,6 +137,7 @@
     <Compile Include="MediatorMessages.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
     <Compile Include="ViewModels\Main\AboutViewModel.cs" />
+    <Compile Include="ViewModels\Main\EditableLabelListViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModelListeners.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\Main\SimulationViewModel.cs" />
@@ -144,6 +145,7 @@
     <Compile Include="ViewModels\Map\MapLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapShape.cs" />
     <Compile Include="ViewModels\Map\MapShapeLayer.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
@@ -154,6 +156,9 @@
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldListItemViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AcousticEngineParameterConfigurationView.xaml.cs">
+      <DependentUpon>AcousticEngineParameterConfigurationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\AnalysisPointCalculationPreviewView.xaml.cs">
       <DependentUpon>AnalysisPointCalculationPreviewView.xaml</DependentUpon>
@@ -194,6 +199,9 @@
     </Compile>
     <Compile Include="Views\ApplicationOptionsView.xaml.cs">
       <DependentUpon>ApplicationOptionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\EditableLabelValueListView.xaml.cs">
+      <DependentUpon>EditableLabelValueListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\BellhopQueueCalculatorView.xaml.cs">
       <DependentUpon>BellhopQueueCalculatorView.xaml</DependentUpon>
@@ -300,6 +308,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\AcousticEngineParameterConfigurationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AnalysisPointCalculationPreviewView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -325,6 +337,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\MapView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\EditableLabelValueListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
