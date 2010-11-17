@@ -7,7 +7,7 @@ namespace ESME.TransmissionLoss
 {
     class SoundPressureLevelField:TransmissionLossField
     {
-        public SoundPressureRadial[] SPLRadials { get; private set; }
+        public SoundPressureLevelRadial[] SPLRadials { get; private set; }
        
         public SoundPressureLevelField(TransmissionLossField transmissionLossField)
         {
@@ -17,7 +17,7 @@ namespace ESME.TransmissionLoss
 
         public void CalculateSPL()
         {
-            SPLRadials = new SoundPressureRadial[Radials.Length];
+            SPLRadials = new SoundPressureLevelRadial[Radials.Length];
             for (int index = 0; index < Radials.Length; index++)
             {
                 var radial = Radials[index];
