@@ -22,8 +22,8 @@ namespace ESME.Model
 
         #endregion
 
-        public BellhopRunFile(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation) { }
-        public BellhopRunFile() { BellhopRadials = new BellhopRadialList(); }
+        private BellhopRunFile(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation) { }
+        private BellhopRunFile() { BellhopRadials = new BellhopRadialList(); }
 
         #region Load and Save
 

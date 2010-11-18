@@ -154,6 +154,7 @@
     <Compile Include="TransmissionLoss\AnalysisPoint.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
+    <Compile Include="TransmissionLoss\CASS\CassRunFile.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelField.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelRadial.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossField.cs" />
@@ -234,7 +235,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Simulation\" />
-    <Folder Include="TransmissionLoss\CASS\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
