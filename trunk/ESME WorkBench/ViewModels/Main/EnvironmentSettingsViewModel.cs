@@ -190,11 +190,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_databasePath == value) return;
                 _databasePath = value;
                 Populate();
-                //var popThread = new Thread(Populate)
-                //                {
-                //                    IsBackground = true
-                //                };
-                //popThread.Start();
                 NotifyPropertyChanged(DatabasePathChangedEventArgs);
             }
         }
@@ -202,9 +197,6 @@ namespace ESMEWorkBench.ViewModels.Main
         static readonly PropertyChangedEventArgs DatabasePathChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentSettingsViewModel>(x => x.DatabasePath);
         string _databasePath;
 
-        /// <summary>
-        ///   This runs on a background thread
-        /// </summary>
         void Populate()
         {
             if ((DatabasePath == null) || (!Directory.Exists(DatabasePath))) return;

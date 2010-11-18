@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -7,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Permissions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -21,7 +19,6 @@ using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
-using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.Data
 {
@@ -272,12 +269,10 @@ namespace ESMEWorkBench.Data
                                     AnalysisPointLayer.MarkerImageUri = new Uri("pack://application:,,,/ESME WorkBench;component/Images/AQUA.png");
                                     if (AnalysisPoints != null)
                                     {
-                                        foreach (var ap in AnalysisPoints)
-                                            AddContextMenuToAnalysisPoint(ap);
+                                        foreach (var ap in AnalysisPoints) AddContextMenuToAnalysisPoint(ap);
                                     }
                                 }
-                                else
-                                    throw new ApplicationException("Experiment error: Analysis point layer already exists!");
+                                else throw new ApplicationException("Experiment error: Analysis point layer already exists!");
                             }
                         }
                     }
@@ -323,8 +318,7 @@ namespace ESMEWorkBench.Data
                     if (e.NewItems != null)
                     {
                         if (AnalysisPointLayer == null) return;
-                        foreach (var item in e.NewItems)
-                            AddContextMenuToAnalysisPoint((AnalysisPoint) item);
+                        foreach (var item in e.NewItems) AddContextMenuToAnalysisPoint((AnalysisPoint) item);
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -333,8 +327,7 @@ namespace ESMEWorkBench.Data
                     if (e.OldItems != null)
                     {
                         if (AnalysisPointLayer == null) return;
-                        foreach (var item in e.OldItems)
-                            AnalysisPointLayer.RemoveMarker(item);
+                        foreach (var item in e.OldItems) AnalysisPointLayer.RemoveMarker(item);
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
@@ -350,23 +343,23 @@ namespace ESMEWorkBench.Data
             var marker = AnalysisPointLayer.AddMarker(analysisPoint.EarthCoordinate, analysisPoint);
             marker.ContextMenu = new ContextMenu();
             marker.ContextMenu.Items.Add(new MenuItem
-            {
-                Header = "View...",
-                Command = ViewAnalysisPointCommand,
-                CommandParameter = analysisPoint,
-            });
+                                         {
+                                             Header = "View...",
+                                             Command = ViewAnalysisPointCommand,
+                                             CommandParameter = analysisPoint,
+                                         });
             marker.ContextMenu.Items.Add(new MenuItem
-            {
-                Header = "Recalculate...",
-                Command = RecalculateAnalysisPointCommand,
-                CommandParameter = analysisPoint,
-            });
+                                         {
+                                             Header = "Recalculate...",
+                                             Command = RecalculateAnalysisPointCommand,
+                                             CommandParameter = analysisPoint,
+                                         });
             marker.ContextMenu.Items.Add(new MenuItem
-            {
-                Header = "Delete",
-                Command = DeleteAnalysisPointCommand,
-                CommandParameter = analysisPoint,
-            });
+                                         {
+                                             Header = "Delete",
+                                             Command = DeleteAnalysisPointCommand,
+                                             CommandParameter = analysisPoint,
+                                         });
         }
 
         static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnalysisPoints);
@@ -440,8 +433,7 @@ namespace ESMEWorkBench.Data
                                                                                                          CanChangeLineWidth = true,
                                                                                                          LayerType = LayerType.Animal,
                                                                                                      };
-                                foreach (var animat in animatsInSpecies)
-                                    layer.Add(new OverlayPoint(animat.Location));
+                                foreach (var animat in animatsInSpecies) layer.Add(new OverlayPoint(animat.Location));
                                 layer.Done();
                                 if (MapLayers.IndexOf(layer) == -1) MapLayers.Add(layer);
                             }
@@ -459,6 +451,7 @@ namespace ESMEWorkBench.Data
             }
             NotifyPropertyChanged(MapLayersChangedEventArgs);
         }
+
         static readonly PropertyChangedEventArgs AnimalPopulationFilesChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnimalPopulationFiles);
         ObservableCollection<string> _animalPopulationFiles;
 
@@ -478,7 +471,7 @@ namespace ESMEWorkBench.Data
         }
 
         static readonly PropertyChangedEventArgs BellhopRangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopRangeCellSize);
-        double _bellhopRangeCellSize;
+        double _bellhopRangeCellSize = 50.0;
 
         #endregion
 
@@ -496,10 +489,9 @@ namespace ESMEWorkBench.Data
         }
 
         static readonly PropertyChangedEventArgs BellhopDepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopDepthCellSize);
-        double _bellhopDepthCellSize;
+        double _bellhopDepthCellSize = 50.0;
 
         #endregion
-
 
         #region public ulong NextObjectID { get; set; }
 
@@ -573,11 +565,12 @@ namespace ESMEWorkBench.Data
 
         [XmlIgnore]
         public Environment2DData Bathymetry { get; private set; }
-        
+
         [XmlIgnore]
+
         #region public string LocalStorageRoot { get; set; }
 
-        public string LocalStorageRoot
+            public string LocalStorageRoot
         {
             get
             {
@@ -606,9 +599,10 @@ namespace ESMEWorkBench.Data
         #endregion
 
         [XmlIgnore]
+
         #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; set; }
 
-        public ObservableCollection<TransmissionLossField> TransmissionLossFields
+            public ObservableCollection<TransmissionLossField> TransmissionLossFields
         {
             get { return _transmissionLossFields; }
             set
@@ -628,10 +622,11 @@ namespace ESMEWorkBench.Data
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null) foreach (var newItem in e.NewItems.Cast<TransmissionLossField>())
-                    {
-                        Console.WriteLine("Added tlf: " + newItem.Name);
-                    }
+                    if (e.NewItems != null)
+                        foreach (var newItem in e.NewItems.Cast<TransmissionLossField>())
+                        {
+                            Console.WriteLine("Added tlf: " + newItem.Name);
+                        }
                     break;
                 case NotifyCollectionChangedAction.Move:
                     break;
@@ -711,10 +706,10 @@ namespace ESMEWorkBench.Data
 
 
         public void InitializeIfViewModelsReady() { if (_mainViewModelInitialized && _mapViewModelInitialized && _layerListViewModelInitialized) Initialize(); }
-        
+
         void Initialize()
         {
-           // if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent));
+            // if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent));
             if (CurrentScale != 0) MediatorMessage.Send(MediatorMessage.SetCurrentScale, CurrentScale);
             if (AnalysisPointLayer == null)
                 AnalysisPointLayer = new MarkerLayerViewModel
@@ -758,8 +753,7 @@ namespace ESMEWorkBench.Data
             AddScenarioFileCommand(ScenarioFileName);
             IsChanged = false;
             MediatorMessage.Send(MediatorMessage.SetExperiment, this);
-            foreach (var transmissionLossField in TransmissionLossFields)
-                MatchTransmissionLossFieldToAnalysisPoints(transmissionLossField);
+            foreach (var transmissionLossField in TransmissionLossFields) MatchTransmissionLossFieldToAnalysisPoints(transmissionLossField);
             if (_deleteAllSpeciesLayersOnInitialize)
             {
                 var layersToRemove = MapLayers.Where(layer => layer.LayerType == LayerType.Animal).ToList();
@@ -770,19 +764,18 @@ namespace ESMEWorkBench.Data
 
         void TransmissionLossFieldFileChanged(object sender, FileSystemEventArgs e)
         {
-            if ((e.ChangeType & WatcherChangeTypes.Created) == WatcherChangeTypes.Created) { }
-            if ((e.ChangeType & WatcherChangeTypes.Deleted) == WatcherChangeTypes.Deleted) { }
-            if ((e.ChangeType & WatcherChangeTypes.Changed) == WatcherChangeTypes.Changed) { ProcessTransmissionLossFieldFile(e.FullPath);}
-            if ((e.ChangeType & WatcherChangeTypes.Renamed) == WatcherChangeTypes.Renamed) { }
-            if ((e.ChangeType & WatcherChangeTypes.All) == WatcherChangeTypes.All) { }
+            if ((e.ChangeType & WatcherChangeTypes.Created) == WatcherChangeTypes.Created) {}
+            if ((e.ChangeType & WatcherChangeTypes.Deleted) == WatcherChangeTypes.Deleted) {}
+            if ((e.ChangeType & WatcherChangeTypes.Changed) == WatcherChangeTypes.Changed)
+            {
+                ProcessTransmissionLossFieldFile(e.FullPath);
+            }
+            if ((e.ChangeType & WatcherChangeTypes.Renamed) == WatcherChangeTypes.Renamed) {}
+            if ((e.ChangeType & WatcherChangeTypes.All) == WatcherChangeTypes.All) {}
             //Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
         }
 
-        void ProcessTransmissionLossFieldFiles(string directoryName)
-        {
-            foreach (var file in Directory.GetFiles(directoryName, "*.tlf"))
-                ProcessTransmissionLossFieldFile(file);
-        }
+        void ProcessTransmissionLossFieldFiles(string directoryName) { foreach (var file in Directory.GetFiles(directoryName, "*.tlf")) ProcessTransmissionLossFieldFile(file); }
 
         void ProcessTransmissionLossFieldFile(string fileName)
         {
@@ -794,7 +787,7 @@ namespace ESMEWorkBench.Data
 
         void MatchTransmissionLossFieldToAnalysisPoints(TransmissionLossField transmissionLossField)
         {
-            foreach (var analysisPoint in AnalysisPoints.Where(analysisPoint => transmissionLossField.EarthCoordinate.Equals(analysisPoint.EarthCoordinate))) 
+            foreach (var analysisPoint in AnalysisPoints.Where(analysisPoint => transmissionLossField.EarthCoordinate.Equals(analysisPoint.EarthCoordinate)))
             {
                 analysisPoint.TransmissionLossFields.Add(transmissionLossField);
                 Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.EarthCoordinate.Latitude_degrees, analysisPoint.EarthCoordinate.Longitude_degrees));
@@ -859,10 +852,7 @@ namespace ESMEWorkBench.Data
 
         public SimpleCommand<object, AnalysisPoint> ViewAnalysisPointCommand
         {
-            get
-            {
-                return _viewAnalysisPointCommand ?? (_viewAnalysisPointCommand = new SimpleCommand<object, AnalysisPoint>(analysisPoint => MediatorMessage.Send(MediatorMessage.ViewAnalysisPoint, analysisPoint))); 
-            }
+            get { return _viewAnalysisPointCommand ?? (_viewAnalysisPointCommand = new SimpleCommand<object, AnalysisPoint>(analysisPoint => MediatorMessage.Send(MediatorMessage.ViewAnalysisPoint, analysisPoint))); }
         }
 
         SimpleCommand<object, AnalysisPoint> _viewAnalysisPointCommand;

@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using Cinch;
 using ESME.Model;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
@@ -64,6 +65,8 @@ namespace ESMEWorkBench.ViewModels.Main
                                                    };
                 try
                 {
+                    var cassRunFile = CassRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings, _experiment.NemoFile.Scenario.TimeFrame);
+                    cassRunFile.Save(Path.GetDirectoryName(_experiment.FileName));
                     var bellhopRunFile = BellhopRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
                     analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
                     analysisPointViewModel.BellhopRunFiles.Add(bellhopRunFile);
