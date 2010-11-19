@@ -45,6 +45,9 @@ namespace ESMEWorkBench
         public const string SetSelectedTransmissionLossFieldName = "SetSelectedTransmissionLossFieldNameMessage";
         public const string ResetSelectedField = "ResetSelectedFieldMessage";
         public const string AcousticOptions = "AcousticOptionsMessage";
+        public const string SetTransmissionLossBathymetry = "SetTransmissionLossBathymetryMessage";
+        public const string RequestTransmissionLossBathymetry = "RequestTransmissionLossBathymetryMessage";
+        public const string TransmissionLossRadialEarthCoordinate = "TransmissionLossRadialEarthCoordinateMessage";
 
         public const string CurrentScaleChanged = "CurrentScaleChangedMessage";
         public const string CurrentExtentChanged = "CurrentExtentChangedMessage";

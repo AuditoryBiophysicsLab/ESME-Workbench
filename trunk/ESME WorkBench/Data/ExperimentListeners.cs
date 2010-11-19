@@ -200,5 +200,11 @@ namespace ESMEWorkBench.Data
             var mapExtent = new RectangleShape(west, north, east, south);
             MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
         }
+
+        [MediatorMessageSink(MediatorMessage.RequestTransmissionLossBathymetry)]
+        void RequestTransmissionLossBathymetry(bool dummy)
+        {
+            MediatorMessage.Send(MediatorMessage.SetTransmissionLossBathymetry,Bathymetry);
+        }
     }
 }

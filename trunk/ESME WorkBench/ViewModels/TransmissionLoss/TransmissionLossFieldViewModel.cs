@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using Cinch;
 using ESME.TransmissionLoss;
+using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 
@@ -69,8 +70,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 _selectedRadial = value;
                 NotifyPropertyChanged(SelectedRadialChangedEventArgs);
+
+                MediatorMessage.Send(MediatorMessage.TransmissionLossRadialEarthCoordinate, new EarthCoordinate(_transmissionLossField.Latitude,_transmissionLossField.Longitude));
                 MediatorMessage.Send(MediatorMessage.TransmissionLossRadialChanged, TransmissionLossField.Radials[_selectedRadial - 1]);
                 MediatorMessage.Send(MediatorMessage.SetSelectedRadialBearing, TransmissionLossField.Radials[_selectedRadial - 1].BearingFromSource);
+                
                 //TransmissionLossRadialViewModel.TransmissionLossRadial = TransmissionLossField.Radials[_selectedRadial - 1];
             }
         }
