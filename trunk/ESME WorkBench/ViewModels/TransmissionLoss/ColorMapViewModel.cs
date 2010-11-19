@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -70,6 +71,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 _curMaxValue = value;
                 _curRange = _curMaxValue - _curMinValue;
                 NotifyPropertyChanged(CurMaxValueChangedEventArgs);
+                Debug.WriteLine("New CurMax equals" + _curMaxValue);
             }
         }
 
@@ -82,6 +84,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 _curMinValue = value;
                 _curRange = _curMaxValue - _curMinValue;
                 NotifyPropertyChanged(CurMinValueChangedEventArgs);
+                Debug.WriteLine("New CurMin equals" + _curMinValue);
             }
         }
 
