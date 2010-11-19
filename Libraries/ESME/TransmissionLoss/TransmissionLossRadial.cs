@@ -158,7 +158,7 @@ namespace ESME.TransmissionLoss
                     sw.Write(Depths[i] + ",,");
                     for (var j = 0; j < Ranges.Length; j++)
                     {
-                        sw.Write(TransmissionLoss[Depths.Length -i -1, j] + ","); //todo: verify dimension match.
+                        sw.Write(TransmissionLoss[i, j] + ","); //todo: verify dimension match.
                     } 
                     sw.WriteLine(); // Terminate the line
                 } // for i
