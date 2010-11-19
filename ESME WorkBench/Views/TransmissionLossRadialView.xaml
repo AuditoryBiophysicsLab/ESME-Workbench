@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="clr-namespace:ESMEWorkBench.Controls"
              xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
              mef:ViewModelLocator.ViewModel="TransmissionLossRadialViewModel"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
@@ -52,8 +54,32 @@
 			                   EndValue="{Binding RangeMax}"
 			                   TickValueFormat="0" />
         </DockPanel>
-        <Image Source="{Binding WriteableBitmap}"
-		       Stretch="Fill"           
-               />
+        
+        <Grid>
+            
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SizeChanged">
+                    <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Image Source="{Binding WriteableBitmap}"
+		       Stretch="Fill"
+               Grid.Column="0"
+               Grid.Row="0"
+          />
+            <Canvas Grid.Row="0" Grid.Column="0" x:Name="OverlayCanvas">
+                <Canvas.RenderTransform>
+                    <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"/>
+                </Canvas.RenderTransform>
+                <Path Stroke="White" StrokeThickness="5" Data="{Binding BottomProfileGeometry}"/>
+            </Canvas>
+
+        </Grid>
     </DockPanel>
 </UserControl>
