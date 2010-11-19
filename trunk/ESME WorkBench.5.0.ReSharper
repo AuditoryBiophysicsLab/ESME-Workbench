@@ -121,6 +121,9 @@
       <Abbreviation Text="PSM" />
       <Abbreviation Text="WPF" />
       <Abbreviation Text="MMMBS" />
+      <Abbreviation Text="SPL" />
+      <Abbreviation Text="CSV" />
+      <Abbreviation Text="GUI" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
