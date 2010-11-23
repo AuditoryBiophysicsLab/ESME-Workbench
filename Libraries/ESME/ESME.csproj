@@ -155,6 +155,8 @@
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\CASS\CassRunFile.cs" />
+    <Compile Include="TransmissionLoss\RAM\Ram.cs" />
+    <Compile Include="TransmissionLoss\RAM\RamRunFile.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelField.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelRadial.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossField.cs" />
@@ -191,7 +193,7 @@
     <Compile Include="Model\AcousticProperties.cs" />
     <Compile Include="Model\Animat.cs" />
     <Compile Include="Model\Bathymetry.cs" />
-    <Compile Include="Model\BellhopRunFile.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\BellhopRunFile.cs" />
     <Compile Include="Model\DisplayLayers.cs" />
     <Compile Include="Model\EnvironmentInformation.cs" />
     <Compile Include="Model\Exceptions.cs" />

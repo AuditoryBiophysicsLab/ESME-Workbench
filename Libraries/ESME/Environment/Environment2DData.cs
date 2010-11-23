@@ -63,14 +63,45 @@ namespace ESME.Environment
             Values = null;
         }
 
+        public static Environment2DData ReadChrtrBinaryFile(string fileName)
+        {
+            using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                var west = stream.ReadSingle();
+                var east = stream.ReadSingle();
+                var south = stream.ReadSingle();
+                var north = stream.ReadSingle();
+                var gridSpacing = stream.ReadSingle();
+                var width = stream.ReadInt32();
+                var height = stream.ReadInt32();
+                var endian = stream.ReadUInt32();
+                if (endian != 0x00010203) throw new Model.FileFormatException("Invalid CHRTR Binary file format - endian is incorrect");
+                var minDepth = stream.ReadSingle();
+                var maxDepth = stream.ReadSingle();
+                var paddingWidth = (width - 10) * 4;
+                var padding = stream.ReadBytes(paddingWidth);
+                var depths = new float[height, width];
+                for (var lon = 0; lon < width; lon++)
+                    for (var lat = 0; lat < height; lat++)
+                    {
+                        depths[lat, lon] = stream.ReadSingle();
+                        if (depths[lat, lon] == 1e16f) depths[lat, lon] = float.NaN;
+                    }
+                return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
+            }
+        }
+
         #region Public constructors
 
-        public Environment2DData(string fileName, float[,] values, double[] latitudes, double[] longitudes, float minElevation, float maxElevation) : this()
+        public Environment2DData(double north, double south, double east, double west, float gridSpacing, float[,] values, float minElevation, float maxElevation) : this()
         {
-            Filename = fileName;
-
-            MinCoordinate = new EarthCoordinate(latitudes[0], Longitudes[0]);
-            MaxCoordinate = new EarthCoordinate(latitudes[latitudes.Length - 1], longitudes[longitudes.Length - 1]);
+            MinCoordinate = new EarthCoordinate(south, west);
+            MaxCoordinate = new EarthCoordinate(north, east);
+            Longitudes = new double[values.GetLength(0)];
+            Latitudes = new double[values.GetLength(1)];
+            for (var lon = 0; lon < Longitudes.Length; lon++) Longitudes[lon] = west + (lon * gridSpacing);
+            for (var lat = 0; lat < Latitudes.Length; lat++) Latitudes[lat] = south + (lat * gridSpacing);
+            Values = values;
         }
 
         public Environment2DData(string fileName, string layerName, float north, float west, float south, float east)

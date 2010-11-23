@@ -5,6 +5,7 @@ using System.Linq;
 using Cinch;
 using ESME.Model;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.Bellhop;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {

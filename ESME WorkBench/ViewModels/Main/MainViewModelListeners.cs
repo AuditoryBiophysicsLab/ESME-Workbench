@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using Cinch;
 using ESME.Model;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
