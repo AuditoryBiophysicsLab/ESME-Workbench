@@ -8,10 +8,9 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using ESME.Environment;
-using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.Bellhop;
+using ESME.Model;
 
-namespace ESME.Model
+namespace ESME.TransmissionLoss.Bellhop
 {
     [XmlRoot(Namespace = "http://esme.bu.edu/support/schemas/ESME_Experiment.xsd", ElementName = "BellhopRunFile", IsNullable = false)]
     public class BellhopRunFile : IHasIDField

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using ESME.Model;
 using ESME.NEMO;
+using ESME.TransmissionLoss.Bellhop;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 

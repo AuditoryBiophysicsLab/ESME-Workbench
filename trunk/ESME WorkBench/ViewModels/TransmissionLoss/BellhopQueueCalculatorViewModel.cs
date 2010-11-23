@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Model;
+using ESME.TransmissionLoss.Bellhop;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
