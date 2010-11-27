@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -38,7 +39,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_rangeMin == value) return;
                 _rangeMin = value;
                 NotifyPropertyChanged(RangeMinChangedEventArgs);
-                CenterX = (RangeMax - RangeMin)/2;
+                //CenterX = (RangeMax - RangeMin) / 2;
             }
         }
 
@@ -57,12 +58,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_rangeMax == value) return;
                 _rangeMax = value;
                 NotifyPropertyChanged(RangeMaxChangedEventArgs);
-                CenterX = (RangeMax - RangeMin)/2;
+                //CenterX = (RangeMax - RangeMin) / 2;
             }
         }
 
         #endregion
-
+        
         #region public float DepthMin { get; set; }
 
         static readonly PropertyChangedEventArgs DepthMinChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.DepthMin);
@@ -76,7 +77,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_depthMin == value) return;
                 _depthMin = value;
                 NotifyPropertyChanged(DepthMinChangedEventArgs);
-                CenterY = (DepthMax - DepthMin)/2;
+                //CenterY = (DepthMax - DepthMin) / 2;
             }
         }
 
@@ -95,79 +96,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_depthMax == value) return;
                 _depthMax = value;
                 NotifyPropertyChanged(DepthMaxChangedEventArgs);
-                CenterY = (DepthMax - DepthMin)/2;
-            }
-        }
-
-        #endregion
-
-        #region public double CenterX { get; set; }
-
-        static readonly PropertyChangedEventArgs CenterXChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.CenterX);
-        double _centerX;
-
-        public double CenterX
-        {
-            get { return _centerX; }
-            set
-            {
-                if (_centerX == value) return;
-                _centerX = value;
-                NotifyPropertyChanged(CenterXChangedEventArgs);
-            }
-        }
-
-        #endregion
-
-        #region public double CenterY { get; set; }
-
-        static readonly PropertyChangedEventArgs CenterYChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.CenterY);
-        double _centerY;
-
-        public double CenterY
-        {
-            get { return _centerY; }
-            set
-            {
-                if (_centerY == value) return;
-                _centerY = value;
-                NotifyPropertyChanged(CenterYChangedEventArgs);
-            }
-        }
-
-        #endregion
-
-        #region public double ScaleX { get; set; }
-
-        static readonly PropertyChangedEventArgs ScaleXChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.ScaleX);
-        double _scaleX;
-
-        public double ScaleX
-        {
-            get { return _scaleX; }
-            set
-            {
-                if (_scaleX == value) return;
-                _scaleX = value;
-                NotifyPropertyChanged(ScaleXChangedEventArgs);
-            }
-        }
-
-        #endregion
-
-        #region public double ScaleY { get; set; }
-
-        static readonly PropertyChangedEventArgs ScaleYChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.ScaleY);
-        double _scaleY;
-
-        public double ScaleY
-        {
-            get { return _scaleY; }
-            set
-            {
-                if (_scaleY == value) return;
-                _scaleY = value;
-                NotifyPropertyChanged(ScaleYChangedEventArgs);
+               // CenterY = (DepthMax - DepthMin) / 2;
             }
         }
 
@@ -201,11 +130,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate
                                                                                                  {
-                                                                                                      _actualControlHeight = ((TransmissionLossRadialView) _viewAwareStatus.View).OverlayCanvas.ActualHeight;
-                                                                                                      _actualControlWidth = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualWidth;
+                                                                                                     _actualControlHeight = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualHeight;
+                                                                                                     _actualControlWidth = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualWidth;
 
-                                                                                                     ScaleX = _actualControlWidth / (RangeMax - RangeMin);
-                                                                                                     ScaleY = _actualControlHeight / (DepthMax - DepthMin);
+                                                                                                     //ScaleX = _actualControlWidth / (RangeMax - RangeMin);
+                                                                                                    // ScaleY = _actualControlHeight / (DepthMax - DepthMin);
                                                                                                  }));
             }
         }
@@ -278,7 +207,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 Debug.WriteLine("TransmissionLossRadialViewModel: Initializing transmission loss radial");
                 TransmissionLossRadial = transmissionLossRadial;
-                if (_bathymetry != null) CalculateBottomProfileGeometry();
+                //if (_bathymetry == null) 
+                MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
             }
             else
             {
@@ -295,7 +225,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 TransmissionLossRadial = _tempRadial;
                 Debug.WriteLine("TransmissionLossRadialViewModel: Deferred initialization of transmission loss field radial");
-                if (_bathymetry != null) CalculateBottomProfileGeometry();
+                //if(_bathymetry == null)
+                if (_actualControlHeight < 1) Thread.Sleep(1);
+
+                MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
+                
             }
         }
 
@@ -325,8 +259,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             if (encoder == null) return;
 
 
-            var theView = ((TransmissionLossRadialView) _viewAwareStatus.View);
-            var bmp = new RenderTargetBitmap((int) theView.ActualWidth, (int) theView.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+            var theView = ((TransmissionLossRadialView)_viewAwareStatus.View);
+            var bmp = new RenderTargetBitmap((int)theView.ActualWidth, (int)theView.ActualHeight, 96, 96, PixelFormats.Pbgra32);
             bmp.Render(theView);
             encoder.Frames.Add(BitmapFrame.Create(bmp));
             using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
@@ -344,15 +278,15 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _writeableBitmap.Lock();
             unsafe
             {
-                var curOffset = (int) _writeableBitmap.BackBuffer;
+                var curOffset = (int)_writeableBitmap.BackBuffer;
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        *((int*) curOffset) = _colorMapViewModel.Lookup(TransmissionLossRadial.TransmissionLoss[y, x]).ToArgb();
-                        curOffset += sizeof (Int32);
+                        *((int*)curOffset) = _colorMapViewModel.Lookup(TransmissionLossRadial.TransmissionLoss[y, x]).ToArgb();
+                        curOffset += sizeof(Int32);
                     }
                 }
             }
@@ -443,17 +377,20 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         {
             var transect = new Transect("", _location, _transmissionLossRadial.BearingFromSource, _transmissionLossRadial.Ranges.Last());
             var profile = new BottomProfile(_transmissionLossRadial.Ranges.Length, transect, _bathymetry);
-            var depths = profile.Profile.Select(depth => depth*(_actualControlHeight/profile.MaxDepth)).ToList();
-            var pixelsPerRange = (_actualControlWidth/_transmissionLossRadial.Ranges.Length);
+            
+            var depths = profile.Profile.Select(depth => depth * (_actualControlHeight / profile.MaxDepth)).ToList();
+            var pixelsPerRange = (_actualControlWidth / _transmissionLossRadial.Ranges.Length);
 
             var sb = new StringBuilder();
             sb.Append(string.Format("M 0,{0} ", depths[0]));
             for (int index = 0; index < depths.Count; index++)
             {
                 var depth = depths[index];
-                sb.Append(string.Format("L {0},{1} ",index*pixelsPerRange, depth));
+                sb.Append(string.Format("L {0},{1} ", index * pixelsPerRange, depth));
+
             }
             BottomProfileGeometry = sb.ToString();
+            
         }
 
         #endregion

@@ -61,6 +61,9 @@
                 <i:EventTrigger EventName="SizeChanged">
                     <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
                 </i:EventTrigger>
+                <i:EventTrigger EventName="Loaded">
+                    <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}"/>
+                </i:EventTrigger>
             </i:Interaction.Triggers>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -74,10 +77,10 @@
                Grid.Row="0"
           />
             <Canvas Grid.Row="0" Grid.Column="0" x:Name="OverlayCanvas">
-                <Canvas.RenderTransform>
+               <!-- <Canvas.RenderTransform>
                     <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"/>
-                </Canvas.RenderTransform>
-                <Path Stroke="White" StrokeThickness="5" Data="{Binding BottomProfileGeometry}"/>
+                </Canvas.RenderTransform> -->
+                <Path Stroke="BlanchedAlmond" StrokeThickness="3" Data="{Binding BottomProfileGeometry}"/>
             </Canvas>
 
         </Grid>
