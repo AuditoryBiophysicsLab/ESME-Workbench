@@ -30,16 +30,7 @@
                     </StackPanel>                  
                     
                 </DockPanel>                
-                <Views:TransmissionLossRadialView x:Name="RadialView">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="SizeChanged">
-                            <cinch:EventToCommandTrigger Command="{Binding RadialSizeChangedCommand}" />
-                        </i:EventTrigger>
-                        <i:EventTrigger EventName="Loaded">
-                            <cinch:EventToCommandTrigger Command="{Binding RadialSizeChangedCommand}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </Views:TransmissionLossRadialView>
+                <Views:TransmissionLossRadialView x:Name="RadialView"/>
             </DockPanel>
         </TabItem>
         <TabItem Header="Horizontal"
