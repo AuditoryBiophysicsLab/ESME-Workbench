@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"             
              xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
              xmlns:Views="clr-namespace:ESMEWorkBench.Views"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
              mef:ViewModelLocator.ViewModel="TransmissionLossFieldViewModel"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
@@ -28,7 +30,16 @@
                     </StackPanel>                  
                     
                 </DockPanel>                
-                <Views:TransmissionLossRadialView x:Name="RadialView" />
+                <Views:TransmissionLossRadialView x:Name="RadialView">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SizeChanged">
+                            <cinch:EventToCommandTrigger Command="{Binding RadialSizeChangedCommand}" />
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="Loaded">
+                            <cinch:EventToCommandTrigger Command="{Binding RadialSizeChangedCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Views:TransmissionLossRadialView>
             </DockPanel>
         </TabItem>
         <TabItem Header="Horizontal"
