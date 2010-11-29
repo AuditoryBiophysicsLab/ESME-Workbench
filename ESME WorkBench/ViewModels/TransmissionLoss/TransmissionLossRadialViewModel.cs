@@ -130,11 +130,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate
                                                                                                  {
-                                                                                                     _actualControlHeight = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualHeight;
-                                                                                                     _actualControlWidth = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualWidth;
-
-                                                                                                     //ScaleX = _actualControlWidth / (RangeMax - RangeMin);
-                                                                                                    // ScaleY = _actualControlHeight / (DepthMax - DepthMin);
+                                                                                                     if(_bathymetry == null) MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
+                                                                                                     else
+                                                                                                     {
+                                                                                                         if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();
+                                                                                                     }
+                                                                                                    
                                                                                                  }));
             }
         }
@@ -375,26 +376,33 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         void CalculateBottomProfileGeometry()
         {
-            var transect = new Transect("", _location, _transmissionLossRadial.BearingFromSource, _transmissionLossRadial.Ranges.Last());
-            var profile = new BottomProfile(_transmissionLossRadial.Ranges.Length, transect, _bathymetry);
-            
-            var depths = profile.Profile.Select(depth => depth * (_actualControlHeight / profile.MaxDepth)).ToList();
-            var pixelsPerRange = (_actualControlWidth / _transmissionLossRadial.Ranges.Length);
+            if (_viewAwareStatus == null) return;
+            var actualControlHeight = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualHeight;
+            var actualControlWidth = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualWidth;
+            if (actualControlHeight == 0 || actualControlWidth == 0) return;
 
+            var transect = new Transect("", _location, _transmissionLossRadial.BearingFromSource, _transmissionLossRadial.Ranges.Last());
+            
+            var profile = new BottomProfile(_transmissionLossRadial.Ranges.Length, transect, _bathymetry);
+            var depths = profile.Profile.Select(depth => depth * (actualControlHeight / _transmissionLossRadial.Depths.Last())).ToList();
+            var pixelsPerRange = (actualControlWidth / _transmissionLossRadial.Ranges.Length);
             var sb = new StringBuilder();
+
             sb.Append(string.Format("M 0,{0} ", depths[0]));
-            for (int index = 0; index < depths.Count; index++)
+            for (var index = 0; index < depths.Count; index++)
             {
                 var depth = depths[index];
                 sb.Append(string.Format("L {0},{1} ", index * pixelsPerRange, depth));
 
             }
+            sb.Append(string.Format("L {0},{1} ", depths.Count * pixelsPerRange, depths.Last()));
+
             BottomProfileGeometry = sb.ToString();
             
         }
 
         #endregion
-
+        
         #region Nested type: VoidDelegate
 
         delegate void VoidDelegate();

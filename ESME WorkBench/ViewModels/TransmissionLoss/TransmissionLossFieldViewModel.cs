@@ -80,6 +80,17 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
         int _selectedRadial;
 
+        #region RadialSizeChangedCommand
+
+        public SimpleCommand<object, object> RadialSizeChangedCommand
+        {
+            get { return _radialSizeChanged ?? (_radialSizeChanged = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry);})); }
+        }
+
+        SimpleCommand<object, object> _radialSizeChanged;
+
+        #endregion
+
 
         #region public double SelectedRadialBearing { get; set; }
 
