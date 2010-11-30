@@ -83,6 +83,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_curMinValue == value) return;
                 _curMinValue = value;
                 _curRange = _curMaxValue - _curMinValue;
+
                 NotifyPropertyChanged(CurMinValueChangedEventArgs);
                 Debug.WriteLine("New CurMin equals" + _curMinValue);
             }
