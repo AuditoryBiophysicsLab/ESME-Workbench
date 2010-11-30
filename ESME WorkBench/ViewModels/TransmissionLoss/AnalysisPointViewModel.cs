@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Cinch;
@@ -93,10 +94,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         public SimpleCommand<object, object> TreeViewSelectionChangedCommand
         {
-            get { return _treeViewSelectionChanged ?? (_treeViewSelectionChanged = new SimpleCommand<object, object>(delegate
+            get { return _treeViewSelectionChanged ?? (_treeViewSelectionChanged = new SimpleCommand<object,object>(delegate(object cinchArgs)
                                                                                                                      {
+                                                                                                                         var args = (RoutedPropertyChangedEventArgs<object>)((EventToCommandArgs) cinchArgs).EventArgs;
                                                                                                                          if (TransmissionLossFieldListItems.Count == 0) return;
-                                                                                                                         var selectedItem = ((TransmissionLossFieldListItemViewModel)_treeView.SelectedItem) ?? TransmissionLossFieldListItems[0];
+                                                                                                                         var selectedItem = ((TransmissionLossFieldListItemViewModel)args.NewValue) ?? TransmissionLossFieldListItems[0];
                                                                                                                          MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged,selectedItem.TransmissionLossField);
 
                                                                                                                      })); }

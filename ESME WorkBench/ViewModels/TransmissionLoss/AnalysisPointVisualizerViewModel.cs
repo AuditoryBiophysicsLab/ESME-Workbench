@@ -111,7 +111,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         public SimpleCommand<object, object> CloseWindowCommand
         {
-            get { return _closeWindow ?? (_closeWindow = new SimpleCommand<object, object>(delegate { ((AnalysisPointVisualizerView)_viewAwareStatus.View).Close(); })); }
+            get { return _closeWindow ?? (_closeWindow = new SimpleCommand<object, object>(delegate
+                                                                                           {
+                                                                                               ((AnalysisPointVisualizerView)_viewAwareStatus.View).Close();
+
+                                                                                           })); }
         }
 
         #endregion
