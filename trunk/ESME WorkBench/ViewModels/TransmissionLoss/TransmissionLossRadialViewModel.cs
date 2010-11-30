@@ -384,6 +384,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             var transect = new Transect("", _location, _transmissionLossRadial.BearingFromSource, _transmissionLossRadial.Ranges.Last());
             
             var profile = new BottomProfile(_transmissionLossRadial.Ranges.Length, transect, _bathymetry);
+            //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
             var depths = profile.Profile.Select(depth => depth * (actualControlHeight / _transmissionLossRadial.Depths.Last())).ToList();
             var pixelsPerRange = (actualControlWidth / _transmissionLossRadial.Ranges.Length);
             var sb = new StringBuilder();
