@@ -91,8 +91,9 @@ namespace ESMEWorkBench.Controls
 
         void CurMaximumPropertyChanged(DependencyPropertyChangedEventArgs args)
         {
-            if ((double) args.NewValue > Maximum) CurrentMaximum = Maximum;
-            else if (CurrentMinimum >= ((double) args.NewValue - _steps.Last().Y)) CurrentMinimum = (double) args.NewValue - _steps.Last().Y;
+            if ((double)args.NewValue > Maximum) CurrentMaximum = Maximum;
+            // else if (CurrentMinimum >= ((double) args.NewValue - _steps.Last().Y)) CurrentMinimum = (double) args.NewValue - _steps.Last().Y;
+            else if (CurrentMinimum >= ((double)args.NewValue - _steps.Last().Y)) return;
             else CurRangePropertiesChanged();
         }
 
@@ -123,8 +124,9 @@ namespace ESMEWorkBench.Controls
 
         void CurMinimumPropertyChanged(DependencyPropertyChangedEventArgs args)
         {
-            if ((double) args.NewValue < Minimum) CurrentMinimum = Minimum;
-            else if (CurrentMaximum <= ((double) args.NewValue + _steps.Last().Y)) CurrentMaximum = (double) args.NewValue + _steps.Last().Y;
+            if ((double)args.NewValue < Minimum) CurrentMinimum = Minimum;
+            //else if (CurrentMaximum <= ((double) args.NewValue + _steps.Last().Y)) CurrentMaximum = (double) args.NewValue + _steps.Last().Y;
+            else if (CurrentMaximum <= ((double)args.NewValue + _steps.Last().Y)) return;
             else CurRangePropertiesChanged();
         }
 
