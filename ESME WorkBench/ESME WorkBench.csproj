@@ -150,10 +150,12 @@
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\BellhopRadialCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelRadialViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldListItemViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialCalculatorViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>
     </Compile>
@@ -279,7 +281,7 @@
     <Compile Include="ViewModels\Ribbon\TabDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\TextBoxDataViewModel.cs" />
     <Compile Include="ViewModels\Ribbon\ToggleButtonDataViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\BellhopFieldCalculatorViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\ColorMapViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossJobViewModel.cs" />

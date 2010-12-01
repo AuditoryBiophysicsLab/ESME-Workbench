@@ -144,14 +144,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         readonly Dispatcher _dispatcher;
         readonly IViewAwareStatus _viewAwareStatus;
-        BottomProfile _bottomProfile;
         bool _iAmInitialized;
         bool _isRendered;
         TransmissionLossRadial _tempRadial;
         WriteableBitmap _writeableBitmap;
         EarthCoordinate _location;
-        double _actualControlHeight;
-        double _actualControlWidth;
 
 
         [ImportingConstructor]
@@ -226,9 +223,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 TransmissionLossRadial = _tempRadial;
                 Debug.WriteLine("TransmissionLossRadialViewModel: Deferred initialization of transmission loss field radial");
-                //if(_bathymetry == null)
-                if (_actualControlHeight < 1) Thread.Sleep(1);
-
                 MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
                 
             }
@@ -271,8 +265,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         {
             if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
 
-            int width = TransmissionLossRadial.Ranges.Length;
-            int height = TransmissionLossRadial.Depths.Length;
+            var width = TransmissionLossRadial.Ranges.Length;
+            var height = TransmissionLossRadial.Depths.Length;
 
             if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
 
