@@ -148,11 +148,11 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine("Vertical Transmission Loss (dB)");
                 sw.Write(",Range (m),");
 
-                for (int i = 0; i < Ranges.Length; i++) sw.Write(Ranges[i] + ","); //write out the X axis values.
+                foreach (var t in Ranges) sw.Write(t + ","); //write out the X axis values.
                 sw.WriteLine(); // Terminate the line
                 sw.WriteLine("Depth (m)");
                 // Write the slice data
-                for (int i = 0; i < Depths.Length; i++)
+                for (var i = 0; i < Depths.Length; i++)
                 {
                     // Write out the Y axis value
                     sw.Write(Depths[i] + ",,");
