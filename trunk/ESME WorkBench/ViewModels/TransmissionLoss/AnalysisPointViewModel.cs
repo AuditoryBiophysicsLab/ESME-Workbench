@@ -44,7 +44,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         void InitializeTreeViewModel()
         {
             if (TransmissionLossFieldListItems.Count > 0) TransmissionLossFieldListItems.Clear();
-            foreach (TransmissionLossField field in _analysisPoint.TransmissionLossFields) TransmissionLossFieldListItems.Add(new TransmissionLossFieldListItemViewModel(field));
+            foreach (var field in _analysisPoint.TransmissionLossFields) TransmissionLossFieldListItems.Add(new TransmissionLossFieldListItemViewModel(field));
         }
 
         void RegisterMediator()

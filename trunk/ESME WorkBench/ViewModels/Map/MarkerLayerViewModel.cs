@@ -60,5 +60,10 @@ namespace ESMEWorkBench.ViewModels.Map
                 break;
             }
         }
+
+        public void Clear()
+        {
+            _markerOverlay.Markers.Clear();
+        }
     }
 }

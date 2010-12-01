@@ -32,14 +32,14 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 throw;
             }
             _outputDirectory = outputDirectory;
-            BellhopFieldCalculatorViewModels = new ObservableCollection<BellhopFieldCalculatorViewModel>();
+            BellhopFieldCalculatorViewModels = new ObservableCollection<TransmissionLossFieldCalculatorViewModel>();
         }
 
         #endregion
 
         #region public ObservableCollection<BellhopFieldCalculatorViewModel> BellhopFieldCalculatorViewModels { get; set; }
 
-        public ObservableCollection<BellhopFieldCalculatorViewModel> BellhopFieldCalculatorViewModels
+        public ObservableCollection<TransmissionLossFieldCalculatorViewModel> BellhopFieldCalculatorViewModels
         {
             get { return _bellhopFieldCalculatorViewModels; }
             set
@@ -53,7 +53,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
 
         static readonly PropertyChangedEventArgs BellhopFieldCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<BellhopQueueCalculatorViewModel>(x => x.BellhopFieldCalculatorViewModels);
-        ObservableCollection<BellhopFieldCalculatorViewModel> _bellhopFieldCalculatorViewModels;
+        ObservableCollection<TransmissionLossFieldCalculatorViewModel> _bellhopFieldCalculatorViewModels;
 
         void BellhopFieldCalculatorViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -61,12 +61,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 case NotifyCollectionChangedAction.Add:
                     if (e.NewItems != null)
-                        foreach (var newItem in e.NewItems.Cast<BellhopFieldCalculatorViewModel>()) {}
+                        foreach (var newItem in e.NewItems.Cast<TransmissionLossFieldCalculatorViewModel>()) {}
                     break;
                 case NotifyCollectionChangedAction.Move:
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    if (e.OldItems != null) foreach (var oldItem in e.OldItems.Cast<BellhopFieldCalculatorViewModel>()) {}
+                    if (e.OldItems != null) foreach (var oldItem in e.OldItems.Cast<TransmissionLossFieldCalculatorViewModel>()) {}
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     break;
@@ -121,12 +121,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        [MediatorMessageSink(MediatorMessage.QueueBellhopJob)]
+        [MediatorMessageSink(MediatorMessage.QueueTransmissionLossJob)]
         void QueueBellhopJob(BellhopRunFile bellhopRunFile)
         {
-            BellhopFieldCalculatorViewModels.Add(new BellhopFieldCalculatorViewModel(_dispatcher)
+            BellhopFieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(_dispatcher)
             {
-                BellhopRunFile = bellhopRunFile,
+                TransmissionLossRunFile = bellhopRunFile,
             });
         }
 

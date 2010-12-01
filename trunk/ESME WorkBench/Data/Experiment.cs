@@ -333,6 +333,7 @@ namespace ESMEWorkBench.Data
                 case NotifyCollectionChangedAction.Replace:
                     break;
                 case NotifyCollectionChangedAction.Reset:
+                    AnalysisPointLayer.Clear();
                     break;
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
@@ -570,7 +571,7 @@ namespace ESMEWorkBench.Data
 
         #region public string LocalStorageRoot { get; set; }
 
-            public string LocalStorageRoot
+        public string LocalStorageRoot
         {
             get
             {
@@ -793,6 +794,21 @@ namespace ESMEWorkBench.Data
                 Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.EarthCoordinate.Latitude_degrees, analysisPoint.EarthCoordinate.Longitude_degrees));
                 return;
             }
+        }
+
+        public void ClearAnalysisPoints()
+        {
+            MediatorMessage.Send(MediatorMessage.CancelCurrentTransmissionLossCalculation, true);
+            var files = Directory.GetFiles(LocalStorageRoot, "*.tlf");
+            foreach (var file in files)
+                File.Delete(file);
+            files = Directory.GetFiles(LocalStorageRoot, "*.bellhop");
+            foreach (var file in files)
+                File.Delete(file);
+            files = Directory.GetFiles(LocalStorageRoot, "*.ram");
+            foreach (var file in files)
+                File.Delete(file);
+            AnalysisPoints.Clear();
         }
 
         void InitializeEnvironment(bool isFromInitialize)

@@ -3,9 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Cinch;
-using ESME.Model;
 using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.Bellhop;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
@@ -16,7 +14,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         public AnalysisPointCalculationPreviewViewModel()
         {
             TransmissionLossJobViewModels = new ObservableCollection<TransmissionLossJobViewModel>();
-            BellhopRunFiles = new ObservableCollection<BellhopRunFile>();
+            TransmissionLossRunFiles = new ObservableCollection<TransmissionLossRunFile>();
         }
 
         #endregion
@@ -61,24 +59,24 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public ObservableCollection<BellhopRunFile> BellhopRunFiles { get; set; }
+        #region public ObservableCollection<TransmissionLossRunFile> TransmissionLossRunFiles { get; set; }
 
-        public ObservableCollection<BellhopRunFile> BellhopRunFiles
+        public ObservableCollection<TransmissionLossRunFile> TransmissionLossRunFiles
         {
-            get { return _bellhopRunFiles; }
+            get { return _transmissionLossRunFiles; }
             set
             {
-                if (_bellhopRunFiles == value) return;
-                if (_bellhopRunFiles != null) _bellhopRunFiles.CollectionChanged -= BellhopRunFilesCollectionChanged;
-                _bellhopRunFiles = value;
-                if (_bellhopRunFiles != null) _bellhopRunFiles.CollectionChanged += BellhopRunFilesCollectionChanged;
-                NotifyPropertyChanged(BellhopRunFilesChangedEventArgs);
+                if (_transmissionLossRunFiles == value) return;
+                if (_transmissionLossRunFiles != null) _transmissionLossRunFiles.CollectionChanged -= TransmissionLossRunFilesCollectionChanged;
+                _transmissionLossRunFiles = value;
+                if (_transmissionLossRunFiles != null) _transmissionLossRunFiles.CollectionChanged += TransmissionLossRunFilesCollectionChanged;
+                NotifyPropertyChanged(TransmissionLossRunFilesChangedEventArgs);
             }
         }
 
-        void BellhopRunFilesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(BellhopRunFilesChangedEventArgs); }
-        static readonly PropertyChangedEventArgs BellhopRunFilesChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointCalculationPreviewViewModel>(x => x.BellhopRunFiles);
-        ObservableCollection<BellhopRunFile> _bellhopRunFiles;
+        void TransmissionLossRunFilesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(TransmissionLossRunFilesChangedEventArgs); }
+        static readonly PropertyChangedEventArgs TransmissionLossRunFilesChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointCalculationPreviewViewModel>(x => x.TransmissionLossRunFiles);
+        ObservableCollection<TransmissionLossRunFile> _transmissionLossRunFiles;
 
         #endregion
 

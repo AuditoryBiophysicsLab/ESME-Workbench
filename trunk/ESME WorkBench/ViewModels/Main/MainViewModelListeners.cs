@@ -9,6 +9,7 @@ using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
+using ESME.TransmissionLoss.RAM;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
@@ -68,9 +69,12 @@ namespace ESMEWorkBench.ViewModels.Main
                 {
                     var cassRunFile = CassRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings, _experiment.NemoFile.Scenario.TimeFrame);
                     cassRunFile.Save(Path.GetDirectoryName(_experiment.FileName));
-                    var bellhopRunFile = BellhopRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
+                    var ramRunFile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.RAM, transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
+                    ramRunFile.Save(_experiment.LocalStorageRoot);
+                    var bellhopRunFile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.Bellhop, transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
+                    bellhopRunFile.Save(_experiment.LocalStorageRoot);
                     analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
-                    analysisPointViewModel.BellhopRunFiles.Add(bellhopRunFile);
+                    analysisPointViewModel.TransmissionLossRunFiles.Add(bellhopRunFile);
                 }
                 catch (BathymetryOutOfBoundsException)
                 {
@@ -101,8 +105,8 @@ namespace ESMEWorkBench.ViewModels.Main
             var backgroundWorker = new BackgroundWorker();
             backgroundWorker.DoWork += delegate
                                         {
-                                            foreach (var bellhopRunFile in analysisPointViewModel.BellhopRunFiles) 
-                                                _dispatcher.BeginInvoke(new MediatorSendDelegate(MediatorMessage.Send), DispatcherPriority.Background, MediatorMessage.QueueBellhopJob, bellhopRunFile);
+                                            foreach (var bellhopRunFile in analysisPointViewModel.TransmissionLossRunFiles) 
+                                                _dispatcher.BeginInvoke(new MediatorSendDelegate(MediatorMessage.Send), DispatcherPriority.Background, MediatorMessage.QueueTransmissionLossJob, bellhopRunFile);
                                         };
             backgroundWorker.RunWorkerAsync();
 
