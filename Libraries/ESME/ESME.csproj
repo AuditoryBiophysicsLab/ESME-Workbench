@@ -149,22 +149,30 @@
     <Compile Include="ShipTrack\Generator.cs" />
     <Compile Include="ShipTrack\ShipTrackProperties.cs" />
     <Compile Include="ShipTrack\Waypoint.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
     <Compile Include="TransmissionLoss\Bellhop\RadialCalculator.cs" />
     <Compile Include="TransmissionLoss\AnalysisPoint.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
     <Compile Include="TransmissionLoss\CASS\CassRunFile.cs" />
-    <Compile Include="TransmissionLoss\RAM\Ram.cs" />
+    <Compile Include="TransmissionLoss\RAM\Ram.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TransmissionLoss\RAM\RamRunFile.cs" />
+    <Compile Include="TransmissionLoss\RAM\RamRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelField.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelRadial.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossAlgorithm.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossField.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRadial.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossProcess.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="TransmissionLoss\TransmissionLossJob.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossRunFile.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossRunFileRadial.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TransmissionLoss\Resources\CreateTLDatabase.sql" />
