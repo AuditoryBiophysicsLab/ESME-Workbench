@@ -50,7 +50,7 @@ namespace ESME.TransmissionLoss.Bellhop
                 }
                 sw.WriteLine("{0:F} {1:F} /", maxCalculationDepthMeters, ExtrapolateSSP(depth1, speed1, depth2, speed2, maxCalculationDepthMeters));
                 sw.WriteLine("'A*', 0.0"); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)
-                sw.WriteLine("{0:F} {1:F} {2:F} {3:F} {4:F} {5:F} /", maxCalculationDepthMeters, sediment.CompressionWaveSpeed_metersSec, sediment.ShearWaveSpeed_metersSec, sediment.Density_gramsCC, sediment.CompressionWaveCoefficient, sediment.ShearWaveCoefficient);
+                sw.WriteLine("{0:F} {1:F} {2:F} {3:F} {4:F} {5:F} /", maxCalculationDepthMeters, sediment.CompressionWaveSpeed, 0, sediment.Density, sediment.CompressionWaveCoefficient, 0);
                 // Source and Receiver Depths and Ranges
                 sw.WriteLine("1    !NSD"); // Number of Source Depths
                 sw.WriteLine("  {0:F} / ! source_depth", Math.Max(1, transmissionLossJob.AcousticProperties.SourceDepth)); // source depth
