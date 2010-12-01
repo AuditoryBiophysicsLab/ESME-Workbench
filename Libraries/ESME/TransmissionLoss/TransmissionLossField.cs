@@ -94,7 +94,7 @@ namespace ESME.TransmissionLoss
             throw new ApplicationException(string.Format("Error looking up value in TransmissionLossField: This field does not contain bearing {0}, range {1}, depth {2}", bearing, range, depth));
         }
 
-        public TransmissionLossField(BellhopRunFile runFile)
+        public TransmissionLossField(TransmissionLossRunFile runFile)
         {
             Name = runFile.Name ?? "";
             Metadata = runFile.Metadata ?? "";
