@@ -135,7 +135,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
 
         [MediatorMessageSink(MediatorMessage.SaveRadialAsCSV)]
-        void SaveRadialAsCSV(string fileName) { TransmissionLossField.Radials[SelectedRadial].SaveAsCSV(fileName, TransmissionLossField); }
+        void SaveRadialAsCSV(string fileName) { TransmissionLossField.Radials[SelectedRadial-1].SaveAsCSV(fileName, TransmissionLossField); }
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossFieldChanged)]
         void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField)
