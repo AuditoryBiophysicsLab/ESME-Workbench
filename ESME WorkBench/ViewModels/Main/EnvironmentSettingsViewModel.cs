@@ -147,10 +147,8 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                    _experiment.ClearAnalysisPoints();
                                                                                                   
                                                                                                }
-
-
                                                                                            }
-
+                                                                                           CloseActivePopUpCommand.Execute(true);
                                                                                        })); }
         }
 
