@@ -26,7 +26,10 @@ C3MBRandom::C3MBRandom()
 	mysrand(0);
 	instanceCnt++;
 }
-C3MBRandom::~C3MBRandom(){}
+C3MBRandom::~C3MBRandom()
+{
+	--instanceCnt;
+}
 
 int C3MBRandom::advance_random()
 /* Create next batch of 55 random numbers */

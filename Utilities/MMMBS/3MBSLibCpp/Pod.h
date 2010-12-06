@@ -101,6 +101,7 @@ public:
 	//void InitializeRun(POD_RUNPARAMS RunParam, DWORD *UniqueID, ANIMATSTATE *animatStateArray);
 	void DeinitializeRun();
 	void InitializeRun(const USERPARAMS *pUserSce,
+			C3MBRandom **mbRndPtrArr,
 			DWORD StartTime,
 			CSpeciesModel *pSpeMdl,
 			DWORD *UniqueID,

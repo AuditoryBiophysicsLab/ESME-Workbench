@@ -55,11 +55,11 @@ void CSpecies::DeinitializeRun()
 
 void CSpecies::InitializeRun(
 	const USERPARAMS *pUserSce,
+	C3MBRandom **mbRndPtrArr,
 	DWORD StartTime,
 	DWORD *UniqueID,
 	ANIMATSTATE *animatStateArray,
 	SCEPARMSSPECIESGROUP *pSpeGroupParamsArray,
-	C3MBRandom *pRandomRef,
 	CBathymetry *pBathymetry)
 {
 	int i;
@@ -67,7 +67,6 @@ void CSpecies::InitializeRun(
 	int listLen;
 
 	pSpeGrpPrms = &pSpeGroupParamsArray[m_speciesModel.m_speciesModel.description.group];
-	m_speciesModel.OverrideRandomInstance(pRandomRef);
 
 	// Intialize the pods that are associated with this species.
 	listLen = m_podList.Length();
@@ -75,6 +74,7 @@ void CSpecies::InitializeRun(
 	{
 		m_podList.Get(i)->InitializeRun(
 			pUserSce,
+			mbRndPtrArr,
 			StartTime,
 			&m_speciesModel,
 			UniqueID,
@@ -89,6 +89,7 @@ void CSpecies::InitializeRun(
 	{
 		m_individualList.Get(i)->InitializeRun(
 			pUserSce,
+			mbRndPtrArr,
 			StartTime,
 			&m_speciesModel,
 			UniqueID,

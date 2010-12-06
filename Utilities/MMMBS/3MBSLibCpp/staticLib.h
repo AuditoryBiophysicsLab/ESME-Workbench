@@ -144,7 +144,6 @@ public:
 
 
 private:
-	C3MBRandom m_3MBRandom;
 	int InsidePolygon(COORD *polygon, int N, COORD p);
 
 public:

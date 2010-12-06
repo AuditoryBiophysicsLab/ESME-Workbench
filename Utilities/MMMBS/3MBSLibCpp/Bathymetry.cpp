@@ -31,10 +31,6 @@ BATHYVALUE CBathymetry::GetValueAtCoordinate(double Latitude, double Longitude, 
 
 	if(pLastVisitedSectorRef == NULL)
 		pLastVisitedSectorRef = &m_lastVisitedSector;
-	// Note that slope heading is also retrieved in thsi function.  It is passed in as a
-	// reference to the GetValueAtCoordinateSansExtrapolation() function.  Not the best
-	// way to have implemented it...
-	//bv.slope = m_slopeHeading.GetValueAtCoordinate(Latitude, Longitude, &m_lastVisitedSector, &bv.slopeHeading);
 	bv.slope = m_slopeHeading.GetValueAtCoordinateSansExtrapolation(Latitude, Longitude, pLastVisitedSectorRef, &bv.slopeHeading);
 	bv.depth = CEnvironmentData::GetValueAtCoordinate(Latitude, Longitude, &m_lastVisitedSector, NULL);
 	return bv;

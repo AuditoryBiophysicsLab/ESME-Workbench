@@ -5,7 +5,7 @@
 
 extern HWND g_hwndBathy;
 extern HWND g_hDlgSeed;
-extern C3MBRandom g_3mbRandom;
+C3MBRandom g_3mbRandom;
 extern C3mbStaticsLib staticLib;
 
 // Functions kept internal to this module.
@@ -1059,12 +1059,11 @@ void UpdateEnvBitmapDlg(BATHYBITMAP_WIN_PARAM *pGdata)
 	BOOL bDebugDefined = FALSE;
 	BOOL bSndSrcActive = FALSE;
 
-	
-
 #ifdef _DEBUG
 	bDebugDefined = TRUE;
 #endif
 
+	
 	for(i=0; i<numSpe; i++)
 	{
 		if(CBitmapEnvFunctions::SpeciesIsASoundSourceModel(i) == FALSE)
@@ -1291,9 +1290,9 @@ void UpdateEnvBitmapDlg(BATHYBITMAP_WIN_PARAM *pGdata)
 	// Add acoustic source button.
 	EnableWindow(GetDlgItem(g_hDlgSeed, IDC_BUTTON_ENVDLG_FIRSANIMATACSTSRCE), bEnable && !bSndSrcSpePresent);
 	// Add species button.
-	EnableWindow(GetDlgItem(g_hDlgSeed, IDC_BUTTON_ENVDLG_SPEC_ADD), anyEnvLoaded);
+	EnableWindow(GetDlgItem(g_hDlgSeed, IDC_BUTTON_ENVDLG_SPEC_ADD), bEnable);
 	// Delete species (and acoutics source) button
-	EnableWindow(GetDlgItem(g_hDlgSeed, IDC_BUTTON_ENVDLG_SPEC_REMOVE), anyEnvLoaded && numSpe != 0);
+	EnableWindow(GetDlgItem(g_hDlgSeed, IDC_BUTTON_ENVDLG_SPEC_REMOVE), bEnable && numSpe != 0);
 
 
 	// Delete Individuals button
@@ -1307,7 +1306,7 @@ void UpdateEnvBitmapDlg(BATHYBITMAP_WIN_PARAM *pGdata)
 	// "Populants" group box: "Seed Types" group box:
 	//----------------------------------------------------//
 	// "Add Individuals" radio box
-	bDebugDefined = FALSE;
+	//bDebugDefined = FALSE;
 
 	bEnable = (usageState == SEED_SCENARIO_STATE) && (anyEnvLoaded);
 	bEnable &= (activeLB.lstbox == SPECIES_LB || (bDebugDefined && (addType == ADD_POD_MEMBER) && activeLB.lstbox == POD_LB));

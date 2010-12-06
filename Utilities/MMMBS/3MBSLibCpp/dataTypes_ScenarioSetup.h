@@ -77,6 +77,7 @@ typedef struct OutputConfig
 typedef struct Seeding
 {
 	BOOL useCurrentTick; // 39 // If TRUE, seeds random-based functions with the current system tick.
+	BOOL independentAnimatRandomGen;			// added 12/02/10.
 	DWORD value; // 40 // If 'useCurrentTick' is FALSE, seeds random-based functions with the value stored.
 }SEEDING;
 

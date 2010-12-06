@@ -64,7 +64,7 @@ void UpdateCalculations(CScenario *Sce, HWND hwndParent, USERPARAMS *pUserParams
 
 	// IDC_STATIC_TOTALBYTESPER_ITERATIONS (repeat of total bytes per outputted iteration)
 	val = (popSize*mallcInf.animatStateSize + mallcInf.acousticSrcStateSize);
-	sprintf_s(szBuff1, sizeof(szBuff1), "output file size:%d*", val);
+	sprintf_s(szBuff1, sizeof(szBuff1), "approx output file size:%d*", val);
 	sprintf_s(szBuff2, sizeof(szBuff2), "%s%d =", szBuff1, Sce->GetSaveStatesCount());
 	SetDlgItemText(hwndParent, IDC_STATIC_TEXTX10, szBuff2);
 
@@ -73,7 +73,7 @@ void UpdateCalculations(CScenario *Sce, HWND hwndParent, USERPARAMS *pUserParams
 //	val = (popSize*mallcInf.animatStateSize + mallcInf.acousticSrcStateSize)* Sce->GetSaveStatesCount();
 	val = (popSize*mallcInf.animatStateSize + mallcInf.acousticSrcStateSize);
 	val2 = val*Sce->GetSaveStatesCount();
-	staticLib.MemoryValueToString(val2, szBuff2, sizeof(szBuff2));
+	staticLib.MemoryValueToString_f(val2, szBuff2, sizeof(szBuff2));
 	sprintf_s(szBuff3, sizeof(szBuff3), "%I64d", val2);
 	//sprintf_s(szBuff1, sizeof(szBuff1), "%s", szBuff2);
 	//sprintf_s(szBuff1, sizeof(szBuff1), "%d, %s", 5, szBuff2);
@@ -432,6 +432,10 @@ LRESULT CALLBACK ScenarioConfigProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 //			fi.szDefExt = szOutputDefExt;
 //			fi.hwnd = hDlg;
 
+			if(userParms.output.enabled == FALSE)
+				SetDlgItemText(hDlg, IDC_BUTTON_STATE_NONE, "Enable Output");
+
+
 			if(*params->outputFolderSet == FALSE)
 				GetCurrentDirectory(params->outputFolderBufferSize, params->szOutputFolder);
 
@@ -455,6 +459,13 @@ LRESULT CALLBACK ScenarioConfigProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				CheckRadioButton(hDlg, IDC_RANDOM_SEED_AUTO, IDC_RANDOM_SEED_SET, IDC_RANDOM_SEED_SET);
 				EnableWindow(GetDlgItem(hDlg, IDC_RANDOM_SET_SEED_VALUE), TRUE);
 			}
+
+			// The independent random number generation for animats.
+			if(userParms.seed.independentAnimatRandomGen)
+				CheckDlgButton(hDlg, IDC_ORTHOGONAL_RANDOM_VARS, BST_CHECKED);
+			else
+				CheckDlgButton(hDlg, IDC_ORTHOGONAL_RANDOM_VARS, BST_UNCHECKED);
+
 
 			//--------------------------------------------------------------------------//
 			// The Acoustic Source Default Values MULTISOUNDSOURCEALLOWED, 
@@ -683,6 +694,10 @@ LRESULT CALLBACK ScenarioConfigProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				CheckRadioButton(hDlg, IDC_RANDOM_SEED_AUTO, IDC_RANDOM_SEED_SET, IDC_RANDOM_SEED_AUTO);
 				userParms.seed.useCurrentTick = TRUE;
 				EnableWindow(GetDlgItem(hDlg, IDC_RANDOM_SET_SEED_VALUE), FALSE);
+				break;
+
+			case IDC_ORTHOGONAL_RANDOM_VARS:
+				userParms.seed.independentAnimatRandomGen = !userParms.seed.independentAnimatRandomGen;
 				break;
 
 			case IDC_RANDOM_SEED_SET:

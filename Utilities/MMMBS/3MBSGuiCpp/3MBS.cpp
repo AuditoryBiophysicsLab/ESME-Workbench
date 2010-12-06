@@ -42,7 +42,7 @@
 
 
 GLOBALDATA *gdata;
-C3MBRandom g_3mbRandom;
+//C3MBRandoxm g_3mbRandoxm;
 C3mbStaticsLib staticLib;
 
 /*----------------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		GDATA.lpCmdLineScenarioFile = lpCmdLine;
 
 	// make sure the randomizer is seeded.
-	g_3mbRandom.mysrand(0);
+	//g_3mbRandoxm.mysrand(0);
 
 	// So the appplication's icon appears in the task bar.
 //	MYICON = (HICON)LoadImage(hInstance, MAKEINTRESOURCE(IDI_MY3MBSDOLPN),IMAGE_ICON,
@@ -1411,21 +1411,33 @@ void UpdateScenarioGUI(GLOBALDATA *gdata)
 	else
 	{
 		SetDlgItemInt(gdata->hwin, IDC_STATIC_NUM_SAVEDSTATES, gdata->sce.GetSaveStatesCount(), FALSE);
-		gdata->sce.CalculateRequiredDiskSpace(&dwrdBinStorage, &dwrdTxtStorage);
-		binStorage = dwrdBinStorage;
-		txtStorage = (double)dwrdTxtStorage;
+		bVal1 = gdata->sce.CalculateRequiredDiskSpace(&dwrdBinStorage, &dwrdTxtStorage);
+		if(bVal1 == TRUE)
+		{
+			binStorage = dwrdBinStorage;
+			txtStorage = (double)dwrdTxtStorage;
+		}
+		else
+		{
+			// Thread was locked too long so repost.
+			txtStorage = 0;
+			binStorage = 0;
+			PostMessage(gdata->hwin, WM_UPDATE_GUI, 0, 0);
+		}
 	}
 	//-----------------------------------------------------------------------------------------------------//
-
+	
 	//-----------------------------------------------------------------------------------------------------//
 	// Binary Storage
 	//sprintf_s(szBuff, sizeof(szBuff), "%.2f", fVal);
-	staticLib.MemoryValueToString(binStorage, szBuff, sizeof(szBuff));
+	staticLib.MemoryValueToString_f(binStorage, szBuff, sizeof(szBuff));
+//	staticLib.MemoryValueToString(binStorage, szBuff, sizeof(szBuff));
 	SetDlgItemText(gdata->hwin, IDC_STATIC_BINOUT_SPAC, szBuff);
 	//SetDlgItemText(gdata->hwin, IDC_STATIC_BINUNIT, unit[i]);
 	SetDlgItemText(gdata->hwin, IDC_STATIC_BINUNIT, "");
 
-	staticLib.MemoryValueToString((DWORDLONG)txtStorage, szBuff, sizeof(szBuff));
+	staticLib.MemoryValueToString_f((DWORDLONG)txtStorage, szBuff, sizeof(szBuff));
+	//staticLib.MemoryValueToString((DWORDLONG)txtStorage, szBuff, sizeof(szBuff));
 	SetDlgItemText(gdata->hwin, IDC_STATIC_TXTOUT_SPAC, szBuff);
 
 	if(gdata->textOutputConfig.enabled == FALSE)

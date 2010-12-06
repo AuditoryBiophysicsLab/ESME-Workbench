@@ -21,6 +21,7 @@ namespace mbs
 
 		bool durationLess; //36
 		bool seedWithCurrentTick; // Random number seeding. TRUE:seeded w/current tick count. FALSE: seeded w/seedValue (Change name to currentTickSeeding to match ESME script.)
+		bool indpdentAnimatRandomGen; 
 		mbsDISTCALC distCalcMethod;
 		//bool outputText;			 // Post-simulation: TRUE: output text.  FALSE:don't output text.
 		//bool splitTextOutput;	 // Specifies splitting text output file into multiple file (TRUE) or one (FALSE) (change name to splitTextFiles to match ESME script).

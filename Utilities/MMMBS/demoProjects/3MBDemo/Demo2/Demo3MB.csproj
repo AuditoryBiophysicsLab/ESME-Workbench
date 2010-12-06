@@ -87,10 +87,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\3MBSLib.dll</HintPath>
     </Reference>
-    <Reference Include="3MBWrapperClass, Version=1.0.3735.11360, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\3MBSWrapperClass\Release\3MBWrapperClass.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -127,6 +123,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\3MBSWrapperClass\3mbsClrInterface.vcxproj">
+      <Project>{748066FE-0DD9-4DD7-8EB8-C2B71E186A5F}</Project>
+      <Name>3MBWrapperClass</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1352,6 +1352,7 @@ void mbs::C3mbs::SetConfiguration(mbsCONFIG Configuration)
 
 	// Set to passed in values.
 	c.seed.useCurrentTick = Configuration.seedWithCurrentTick; //39
+	c.seed.independentAnimatRandomGen = Configuration.indpdentAnimatRandomGen;
 	c.seed.value = Configuration.seedValue; //40
 
 	c.maintainFirstAnimatState = FALSE;
@@ -1431,6 +1432,9 @@ mbs::mbsCONFIG mbs::C3mbs::GetConfiguration()
 	if(c.seed.useCurrentTick == TRUE) // 39
 		m.seedWithCurrentTick = true;
 
+	if(c.seed.independentAnimatRandomGen == TRUE)
+		m.indpdentAnimatRandomGen = true;
+
 	m.seedValue = c.seed.value; //40
 
 
@@ -1483,7 +1487,7 @@ mbs::mbsHHMMSS mbs::C3mbs::GetStartTime()
 	md.sec = d.sec;
 	return md;
 }
-void mbs::C3mbs::CalculateRequiredDiskSpace(DWORD *BinStorage, DWORD *TextStorage)
+BOOL mbs::C3mbs::CalculateRequiredDiskSpace(DWORD *BinStorage, DWORD *TextStorage)
 {
 	DWORDLONG d;
 #pragma message("NEEDS UPDATING: mbs::C3mbs::CalculateRequiredDiskSpace(DWORD *BinStorage, DWORD *TextStorage)")

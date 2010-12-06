@@ -132,10 +132,10 @@ private:
 	BOOL m_abort;
 	CirThread m_runThread;
 
-	TCHAR m_szFileName[SIZE_256];
-	TCHAR m_szFileTitle[SIZE_256];
-	TCHAR m_szFilePath[SIZE_256]; // The path the extrated files are saved to associated with a run.
-	TCHAR m_szFileTrakFileSubPath[SIZE_256]; // The created sub folder associated with a run that holds all of the animat track files.
+	TCHAR m_szFileName[BUFFERED_MAX_PATH];
+	TCHAR m_szFileTitle[BUFFERED_MAX_PATH];
+	TCHAR m_szFilePath[BUFFERED_MAX_PATH]; // The path the extrated files are saved to associated with a run.
+	TCHAR m_szFileTrakFileSubPath[BUFFERED_MAX_PATH]; // The created sub folder associated with a run that holds all of the animat track files.
 	BOOL m_splitTextOutput;	 // Specifies splitting text output file into multiple file (TRUE) or one (FALSE) (change name to splitTextFiles to match ESME script).
 	int	m_iterationsPerFile; // itererations per file if splitting the text output into mulitple files is enabled.
 	BOOL m_displayMode;

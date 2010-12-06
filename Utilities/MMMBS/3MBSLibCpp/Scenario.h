@@ -169,7 +169,7 @@ typedef struct ProgressMonitoring
 typedef struct AnimatFileNaming	
 {
 	TCHAR	fileName[BUFFERED_MAX_PATH];
-	TCHAR	fileTitle[SIZE_256]; // this should be changed to BUFFERED_MAX_PATH
+	TCHAR	fileTitle[BUFFERED_MAX_PATH]; // this should be changed to BUFFERED_MAX_PATH.  Changed on 11/3/2010
 }ANIMATFILENAMING;
 
 //--------------------------------------------------------------------------------------//
@@ -367,7 +367,7 @@ public: // Member Functions
 	int GetDurationSeconds();/**/ //code//
 	void SetStartTime(HHMMSS StartTime);/**/ //code//
 	HHMMSS GetStartTime();/**/ //code//
-	void CalculateRequiredDiskSpace(DWORDLONG *BinStorage, DWORDLONG *TextStorage);
+	BOOL CalculateRequiredDiskSpace(DWORDLONG *BinStorage, DWORDLONG *TextStorage);
 
 	//-------------------//
 	// Environmental Data

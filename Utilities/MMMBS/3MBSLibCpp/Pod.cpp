@@ -70,6 +70,7 @@ void CPod::DeinitializeRun()
 }
 
 void CPod::InitializeRun(const USERPARAMS *pUserSce,
+						 C3MBRandom **mbRndPtrArr,
 						 DWORD StartTime,
 						 CSpeciesModel *pSpeMdl,
 						 DWORD *UniqueID,
@@ -87,7 +88,8 @@ void CPod::InitializeRun(const USERPARAMS *pUserSce,
 	for(i=0; i<listLen; i++)
 	{
 		(m_animatList.Get(i))->InitializeRun(pUserSce,
-											StartTime,
+											 mbRndPtrArr,
+											 StartTime,
 											 pSpeMdl,
 											 UniqueID,
 											 animatStateArray,

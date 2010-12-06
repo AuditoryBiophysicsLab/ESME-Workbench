@@ -625,7 +625,7 @@ size_t SizeOf_SEEDING()
 	SEEDING u;
 	memset(&u, 0, sizeof(u)); // quiet compiler warning
 	size_t s = 0;
-	s += sizeof(u.useCurrentTick) + sizeof(u.value);
+	s += sizeof(u.useCurrentTick) + sizeof(u.value) + sizeof(u.independentAnimatRandomGen);
 	return s;
 }
 size_t SizeOf_USERPARAMS()

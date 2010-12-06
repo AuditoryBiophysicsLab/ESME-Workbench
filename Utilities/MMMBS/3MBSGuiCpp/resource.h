@@ -339,6 +339,8 @@
 #define IDC_OUTPUT_TEXT                 1164
 #define IDC_LON_NEG                     1165
 #define IDC_OUTPUT_BINARY               1165
+#define IDC_OUTPUT_TEXT2                1165
+#define IDC_ORTHOGONAL_RANDOM_VARS      1165
 #define IDC_CHECK_AE_TRAVEL             1166
 #define IDC_CHECK_AE_DIRECTION          1167
 #define IDC_CHECK_AE_DIVING             1168

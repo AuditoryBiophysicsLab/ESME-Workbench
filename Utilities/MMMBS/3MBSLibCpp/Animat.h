@@ -77,14 +77,11 @@ public:
 	CAnimat();
 	virtual ~CAnimat();
 
-private:
-	C3mbStaticsLib m_staticLib;
-public:
-
 	//--------------------//
 	// Simulation Routines
 	//--------------------//
 	void InitializeRun(const USERPARAMS *pUserSce,	//
+			C3MBRandom **mbRndPtrArr,
 			DWORD StartTime,						// Starting time of day in seconds
 			CSpeciesModel *pSpeMdl,					// A pointer to the species model that governs this animat's movments and behavior
 			DWORD *UniqueID,						// This animat's unique identification in the scenario among all animats and sound sources
@@ -99,7 +96,6 @@ public:
 
 	// All Env Attractor functions need work.
 	void SetTempEnvAttractor(double Lat, double Lon, double Value);
-	//void SetDepthEnvAttractor(double Lat, double Lon, double Value);
 	void SetAcoustics(double Lat, double Lon, double Value);
 	void Update(DWORD *pAnimatNumber);
 	double CalculateRisk(SCEPARMSSPECIESGROUP *pSpeciesGroupParams, double RecievedLeveldB);
@@ -119,13 +115,14 @@ public:
 	INHABITINF GetInhabitantSpecific(); // Retrieves an animals floating point coordinates.
 
 
-	BOOL IsAcousticSource();
+	//BOOL IsAcousticSource();
 	//BOOL IsAverting();
 	BOOL IsBeached();
 
 	int GetUniqueID();
 
 private:
+	C3mbStaticsLib m_staticLib;
 	CAnimatStatics m_classAnimatStatics;
 	int m_uniqueId;
 	double m_fRiskThreshold; // 
@@ -144,7 +141,6 @@ private:
 	DISTCALC m_distCalcMethod;  // Uses either lat/lon or planar geometry.
 	BOOL m_focalCoordSet;
 	BOOL m_tempEnvAttCoordSet;
-	//BOOL m_depthEnvAttCoordSet;
 	//BOOL m_acousticExpSet;
 	BOOL m_bathyDepthSet; // this is for bathymetry depths set by external application such as ESME.
 	double m_initialBathyDepth;
