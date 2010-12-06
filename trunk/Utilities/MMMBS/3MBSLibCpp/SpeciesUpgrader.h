@@ -69,10 +69,6 @@ public:
 
 
 	RESLT ReadV8(HANDLE Hd, __int64 SpecesFileLocation, SPECIES_MDL* pV8); // added
-
-private:
-	C3MBRandom m_3MBRandom; // Not actually needed but is requred for CSpecies instantiation.
-
 };
 
 

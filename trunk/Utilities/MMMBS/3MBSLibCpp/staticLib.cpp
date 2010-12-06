@@ -937,25 +937,6 @@ COORD_DEPTH C3mbStaticsLib::GetDefaultCoordinates()
 }
 
 
-#if 0
-void C3mbStaticsLib::DistributeAnimalsAround(COORD_DEPTH Coord, ANIMAT_LIST *AnimatList, double MeanDistance, double StdDistance)
-{
-	int i;
-	COORD_DEPTH coord;
-
-	// Assign the first animat directly to the coordinate.
-	*AnimatList->Get(0) = Coord;
-
-	// Place the remainder animats about the first animat.
-	for(i=1; i<AnimatList->Length(); i++)
-	{
-		coord = RandomLatLonAboutFocal(Coord.lat, Coord.lon, MeanDistance, StdDistance);
-		*AnimatList->Get(i) = coord;
-	}
-}
-#endif
-
-
 // Determine the bearing of "to" relative to "from"
 ///////////////////////////////////////////////////////////////////////////
 DISTANGL C3mbStaticsLib::DetermineBearing(COORDINATE From, COORDINATE To)
@@ -1208,56 +1189,61 @@ COORDINATE C3mbStaticsLib::ContinueOtherSideOfScreenLatLon(COORDINATE Current, B
 // Lat and Lon calculation without validation
 COORDINATE C3mbStaticsLib::RandomLatLon(BATHYEXTREMES BathyEx, C3MBRandom *p3MBRandomRef)
 {
-	COORDINATE cd = {0};
+	COORDINATE cd;
 
-	C3MBRandom *MBRandomRef = p3MBRandomRef;
-	if(MBRandomRef == NULL)
-		MBRandomRef = &m_3MBRandom;
+	// Input assertions
+	_ASSERT(p3MBRandomRef);
 
-	double rangeLat = BathyEx.xMax-BathyEx.xMin;
-	double rangeLon = BathyEx.yMax-BathyEx.yMin;
+	// Initialize variables.
+	memset(&cd, 0, sizeof(COORDINATE));
 
-	cd.lat = BathyEx.xMin + rangeLat * MBRandomRef->myrand();
-	cd.lon = BathyEx.yMin + rangeLon * MBRandomRef->myrand();
+	if(!p3MBRandomRef)
+		return cd;
+
+	cd.lat = BathyEx.xMin + (BathyEx.xMax-BathyEx.xMin) * p3MBRandomRef->myrand();
+	cd.lon = BathyEx.yMin + (BathyEx.yMax-BathyEx.yMin) * p3MBRandomRef->myrand();
 
 	return cd;
 }
 COORDINATE C3mbStaticsLib::RandomLatLon(ENVMINMAX BathyEx, C3MBRandom *p3MBRandomRef)
 {
-	COORDINATE cd = {0};
+	COORDINATE cd;
 
-	C3MBRandom *MBRandomRef = p3MBRandomRef;
-	if(MBRandomRef == NULL)
-		MBRandomRef = &m_3MBRandom;
+	// Input assertions
+	_ASSERT(p3MBRandomRef);
 
-	double rangeLat = BathyEx.xMax-BathyEx.xMin;
-	double rangeLon = BathyEx.yMax-BathyEx.yMin;
+	// Initialize variables.
+	memset(&cd, 0, sizeof(COORDINATE));
 
-	cd.lat = BathyEx.xMin + rangeLat * MBRandomRef->myrand();
-	cd.lon = BathyEx.yMin + rangeLon * MBRandomRef->myrand();
+	if(!p3MBRandomRef)
+		return cd;
 
+	cd.lat = BathyEx.xMin + (BathyEx.xMax-BathyEx.xMin) * p3MBRandomRef->myrand();
+	cd.lon = BathyEx.yMin + (BathyEx.yMax-BathyEx.yMin) * p3MBRandomRef->myrand();
 	return cd;
 }
 
 COORD_DEPTH C3mbStaticsLib::RandomLatLonAboutFocal(double Lat, double Lon, double AveDistMeters, double StdDevDistMeters, C3MBRandom *p3MBRandomRef)
 {
-	double	   bear;
-	double	   bearDeg;
-	double	   meters;
-	double	   temp_x, temp_y;
-	double	   lat, lon, rads;
+	double	    bear;
+	double	    bearDeg;
+	double	    meters;
+	double	    temp_x, temp_y;
+	double	    lat, lon, rads;
 	COORD_DEPTH coord;
 
-	C3MBRandom *MBRandomRef = p3MBRandomRef;
-	if(MBRandomRef == NULL)
-		MBRandomRef = &m_3MBRandom;
+	// Input assertions
+	_ASSERT(p3MBRandomRef);
 
-
+	// Initialize variables.
 	memset(&coord, 0, sizeof(COORD_DEPTH));
 
-	bear	= MBRandomRef->myrand()*2*PI;
+	if(!p3MBRandomRef)
+		return coord;
+
+	bear	= p3MBRandomRef->myrand()*2*PI;
 	bearDeg = bear*180/PI;
-	meters	= MBRandomRef->noise(AveDistMeters, StdDevDistMeters);
+	meters	= p3MBRandomRef->noise(AveDistMeters, StdDevDistMeters);
 	lon		= (PI / 180) * (-Lon);
 	lat		= (PI / 180) * (Lat);
 	rads	= (PI / (180 * 60)) * (meters / 1852);
@@ -1268,8 +1254,8 @@ COORD_DEPTH C3mbStaticsLib::RandomLatLonAboutFocal(double Lat, double Lon, doubl
 
 	// latitude
 	coord.lat = (180/PI)*(asin(sin(lat) * cos(rads) + cos(lat)*sin(rads)*cos(bear)));
-	// longitude
 	coord.lon = -(180/PI) * ((temp_y - (temp_x * floor(temp_y / temp_x))) - PI);
+
 	return coord;
 }
 

@@ -20,7 +20,6 @@
 //////////////////////////////////////////////////////////////////////
 CScenario::CScenario()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	_ASSERTE(sizeof(TAKESTATS)%16 == 0);
 	_ASSERTE(sizeof(TAKE)%16 == 0);
 
@@ -225,14 +224,11 @@ CScenario::CScenario()
 	//------------------------//
 
 	memset(&m_state.acousticSrc, 0, sizeof(ACST_SRC_STATE));
-#endif//NOCSENARIOFUNCTIONS
-
 }
 
 
 CScenario::~CScenario()
 {
-#ifndef NOCSENARIOFUNCTIONS
 
 	m_abort = TRUE;
 	fflush(NULL);
@@ -247,14 +243,11 @@ CScenario::~CScenario()
 	ClearScenario();
 	
 	m_mbsActiveMutex.Close();
-#endif//NOCSENARIOFUNCTIONS
-
 }
 
 
 BOOL CScenario::VerifySoundSourceListPlacement()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	int i;
 	int listLen = m_speciesList.Length();
 
@@ -272,15 +265,12 @@ BOOL CScenario::VerifySoundSourceListPlacement()
 		if(GetSpeciesAtIndex(i)->GetSpeciesType() == SOUNDSOURCE)
 			return FALSE;
 	}
-#endif//NOCSENARIOFUNCTIONS
-
 	return TRUE;
 }
 
 
 BOOL CScenario::VerifySoundSourceModelsLoadedCount()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	int i;
 	DWORD cnt = 0;
 	int listLen = m_speciesList.Length();
@@ -295,14 +285,12 @@ BOOL CScenario::VerifySoundSourceModelsLoadedCount()
 	// Return TRUE if counts match
 	if(cnt == m_mbSce.numAcstSrcTypes)
 		return TRUE;
-#endif//NOCSENARIOFUNCTIONS
 	return FALSE;
 }
 
 
 BOOL CScenario::VerifyTotalSoundSourceCount()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	int i;
 	DWORD count = 0;
 	CSpecies *pSpe = NULL;
@@ -322,14 +310,11 @@ BOOL CScenario::VerifyTotalSoundSourceCount()
 
 	if(count == m_mbSce.totalNumAcstcSrcs)
 		return TRUE;
-#endif//NOCSENARIOFUNCTIONS
 	return FALSE;
 }
 
 BOOL CScenario::SpeciesIsASoundSourceModel(int Nth)
 {
-#ifndef NOCSENARIOFUNCTIONS
-
 	_ASSERT(VerifySoundSourceListPlacement());
 	_ASSERT(VerifySoundSourceModelsLoadedCount());
 	_ASSERT(VerifyTotalSoundSourceCount());
@@ -337,19 +322,16 @@ BOOL CScenario::SpeciesIsASoundSourceModel(int Nth)
 
 	if(GetSpeciesAtIndex(Nth)->GetSpeciesType() == SOUNDSOURCE)
 		return TRUE;
-#endif//NOCSENARIOFUNCTIONS
 	return FALSE;
 }
 
 int CScenario::GetSoundSourceTypeCount()
 {
 	int total = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	// Assertion only runs in debug...
 	_ASSERT(VerifySoundSourceListPlacement());
 	_ASSERT(VerifySoundSourceModelsLoadedCount());
 	total = m_mbSce.numAcstSrcTypes;
-#endif//NOCSENARIOFUNCTIONS
 	return total;
 }
 
@@ -359,14 +341,12 @@ int CScenario::GetSoundSourceTypeCount()
 int CScenario::GetTotalSoundSourceCount()
 {
 	int total = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	// Assertion only runs in debug...
 	_ASSERT(VerifySoundSourceListPlacement());
 	_ASSERT(VerifySoundSourceModelsLoadedCount());
 	_ASSERT(VerifyTotalSoundSourceCount());
 
 	total = m_mbSce.totalNumAcstcSrcs;
-#endif//NOCSENARIOFUNCTIONS
 	return total;
 }
 
@@ -376,7 +356,6 @@ int CScenario::GetTotalSoundSourceCount()
 int CScenario::GetNthSoundSourceModelCount(int Nth)
 {
 	int totalAnimatCnt = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	int soundSourceTypeCount = GetSoundSourceTypeCount();
 	CSpecies *pSpe = NULL;
 	LinkedList <int> list;
@@ -397,14 +376,12 @@ int CScenario::GetNthSoundSourceModelCount(int Nth)
 		return 0; // better error handling needed here.
 	
 	totalAnimatCnt = pSpe->GetTotalAnimatCount();
-#endif//NOCSENARIOFUNCTIONS
 	return totalAnimatCnt;
 }
 
 
 BOOL CScenario::SoundSourceSpeciesPresent()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	int i;
 	CSpecies *pSpe;
 	int listLen = m_speciesList.Length();
@@ -415,7 +392,6 @@ BOOL CScenario::SoundSourceSpeciesPresent()
 		if(pSpe->GetSpeciesType() == SOUNDSOURCE)
 			return TRUE;
 	}
-#endif//NOCSENARIOFUNCTIONS
 	return FALSE;
 }
 
@@ -423,12 +399,10 @@ BOOL CScenario::SoundSourceSpeciesPresent()
 ANIMATSTATE CScenario::RetrieveFirstAnimatStateAtIndex(DWORD Index)
 {
 	ANIMATSTATE as = {0};
-#ifndef NOCSENARIOFUNCTIONS
 
 	if(m_firstAnimatStateHoldArray == NULL /*|| Index >= m_animatStateHoldArrayLength*/)
 		return as;
 	as = m_firstAnimatStateHoldArray[Index];
-#endif//NOCSENARIOFUNCTIONS
 	return as;
 }
 
@@ -440,7 +414,6 @@ ANIMATSTATE CScenario::RetrieveFirstAnimatStateAtIndex(DWORD Index)
 RESLT CScenario::VerifyScenarioRunSetup()
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	DWORD i;
 	int j;
 	int numPods;
@@ -490,24 +463,18 @@ RESLT CScenario::VerifyScenarioRunSetup()
 			res = POPLIMITEXCEEDED_ERROR;
 	}
 	m_speciesList.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
 
 RESLT CScenario::InitializeRun()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	if(m_exit == TRUE)
 		return OK;
-
-	//printf("0x%x:InitializeRun():entry\n", this);
-
 
 	// Since this is called by an external thread lock the active mutex.
 	m_mbsActiveMutex.Lock(INFINITE);
 	m_state.errorStatus = OK;
-	//printf("InitializeRun() post Mutex lock (GOOD)\n");
 
 	// InitializeRun() may be called only when the scenario isn't running
 	if(m_state.activity != __RUN_FINISHED)
@@ -516,7 +483,6 @@ RESLT CScenario::InitializeRun()
 		m_mbsActiveMutex.Unlock();
 		return ALREADYRUNNING_ERROR;
 	}
-	//printf("InitializeRun() 3MB is Idle (GOOD)\n");
 
 	// Can only be at this point in the code if m_throttleIterations equals zero.  The
 	// code needs to have been written properly for m_runState_old to be set to either
@@ -526,35 +492,24 @@ RESLT CScenario::InitializeRun()
 	// aborted and finished)
 	_ASSERTE(m_throttleIterations == 0);
 
-
 	// Properly written code will have m_runThread.m_thread1Running set to FALSE here.
 	_ASSERTE(m_runThread.m_thread1Running == FALSE);
 
+	// Launch the _RunScenario() class method in thread 1.
 	m_throttleIterations = 0;
+	m_runThread.StartThread1();
 
-	//printf("0x%x:InitializeRun():launching _RunScenario() thread\n", this);
-	m_runThread.StartThread1(); // ultimately launches _RunScenario().
-	//printf("0x%x:InitializeRun():launched _RunScenario() thread\n", this);
-
-	// Don't release the mutex until the thread has indicated it is running.
+	// Release "MBS active mutex" after the thread has indicated it is running then
+	// acknowledge receipt that thread 1 (for _RunScenario() method) is running.
 	while(m_runThread.m_thread1Running == FALSE || m_state.activity == __RUN_FINISHED)
-	{
 		Sleep(1);
-//		if(m_runThread.m_thread1Running == FALSE)
-//			printf("InitializeRun() Waiting on Thread To Launch (OK)\n");
-//		if(m_state.activity == __RUN_FINISHED)
-//			printf("InitializeRun() Waiting on Activity to not be idle (OK)\n");
-	}
 	m_mbsActiveMutex.Unlock();
-
 	m_runThread.m_thread1RunningACK = TRUE;
-	//printf("0x%x:InitializeRun():end returning OK\n", this);
-#endif//NOCSENARIOFUNCTIONS
+
 	return OK;
 }
 RESLT CScenario::StepRun(int NumIterations)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	char sz[SIZE_128];
 	static int lastIteration = 0;
 	if(m_exit == TRUE)
@@ -611,16 +566,13 @@ RESLT CScenario::StepRun(int NumIterations)
 	m_mbsPausedMutex.Unlock();
 
 	lastIteration = m_state.currentIteration;
-#endif//NOCSENARIOFUNCTIONS
 	return OK;
 }
 
 RESLT CScenario::FinishRun()
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	res = StepRun(-1);
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
@@ -700,17 +652,14 @@ RESLT CScenario::FinishRun()
 *******************************************************************************/
 void CScenario::RunThread1()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_state.activity = ___SCE_INIT;
 	_RunScenario();
 	//m_state.activity = __x_IDLE;
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
 RESLT CScenario::GenerateTitleAndFileName(ANIMATFILENAMING **BinaryFile, ANIMATFILENAMING **AcstExpTracking)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	ANIMATFILENAMING *binFile = NULL;
 	ANIMATFILENAMING *aeTracking = NULL;
 
@@ -762,8 +711,6 @@ RESLT CScenario::GenerateTitleAndFileName(ANIMATFILENAMING **BinaryFile, ANIMATF
 		"%s\\%s%s",
 		m_mbSce.user.szOutputDir,
 		aeTracking->fileTitle, MMMBS_OUTPUT_EXT);
-#endif//NOCSENARIOFUNCTIONS
-
 	return OK;
 }
 
@@ -772,28 +719,18 @@ FM_MEMALLOCINF CScenario::GetMemoryAllocationDetails(USERPARAMS *pUser)
 	SCENARIOPARAMS sce;
 	FM_MEMALLOCINF fileMgrMemAlloc = {0};
 
-#ifndef NOCSENARIOFUNCTIONS
 	sce = m_mbSce;
 	if(pUser != NULL)
 		sce.user = *pUser;
 	fileMgrMemAlloc = m_fileMgr.GetMemoryAllocationDetails(sce);
-#endif//NOCSENARIOFUNCTIONS
 	return fileMgrMemAlloc;
 }
 
-#if 0
-typedef struct AcousticSourceSummary
-{
-	double outputLevel; // dB
-	DWORD dutyPeriod;
-	DWORD startIteration;
-	int animatIndex;
-}ACOUSTICSRCESUMMARY;
-#endif
+
 void CScenario::_RunScenario()
 {
-#ifndef NOCSENARIOFUNCTIONS
-	SCENARIOPARAMS sce = m_mbSce; // local reference that isn't allowed to make modifications. (see about making this a const)
+	SCENARIOPARAMS sce = m_mbSce;	// local copy of the scenario params that can be modified as needed for the
+									// current run.
 	ANIMATSTATE *animatStateArray = NULL;
 	DWORD i, j;
 	int	throttleIteration;
@@ -801,43 +738,26 @@ void CScenario::_RunScenario()
 	ANIMATFILENAMING *acstInputTrackingFileStrings = NULL;
 	FM_BUFFERSTATE fmBuffState;
 	SPECIESANIMATSTATEBUFFER *speciesAnimatState = NULL; // reference to location of animat states in the buffer by species.
-	C3MBRandom mbRandom;
 	DWORD lastSleep;
 	DWORD currentTickCount;
 
 	SCEACTIVITY prevSceAct;
 	// acoustic aversion testing acoustic aversion
 	double *acstcExprCalc = NULL;
-///	double aeTestValue;
 	DISTANGL da;
 	double radius;
-	//COORD_DEPTH *aeCoord = NULL;
 	COORD_DEPTH *aeCoord = NULL;
-//	INHABITINF inHabimatInf;
 	LinkedList <ACOUSTICSRCEINF> acstcSrcList;
 	ACOUSTICSRCEINF *acsticSrcSum;
-	//int acsticSrceIndex;
-	//int speListLen;
-	//int acstcSrcLen;
-#if 0
-	// put into an external time tracking thread
-	DWORD lastTick;
-	lastTick = GetTickCount(); // was elsewhere in the code...
-	double msPerIterationAve;
-	DWORD nextWindowUpdate;
-	DWORD startTick;
-	double fSecsRem;
-	DWORD currentTick; // these go away!
-	double elapsedMs;
 
-	startTick = GetTickCount();
-	nextWindowUpdate = startTick; // update estimate every 1/2 second.
-#endif
+	//C3MBRandom   mbRandom;
+	C3MBRandom  *mbRndArr;
+	C3MBRandom **mbRndPtrArr;
 
 
-	//printf("0x%x:thread_RunScenario():entry\n", this);
-
-	//_ASSERT(0);
+	// Take Statistics
+	TAKESTATS *speTakes = NULL; // Dynamically allocated to the number of species in the scenario.
+	TAKE sceTakes = {0};	// contains a TAKESTATS struct for the entire animat and an array of TAKESTATS for the species groups.
 
 	// Crucial: If scenaio's duration is not specified there can be no binary output
 	if(sce.user.durationless == TRUE)
@@ -845,17 +765,8 @@ void CScenario::_RunScenario()
 
 	SCERESETTAKES resets = {0};
 
-	//-------------------------------------------------------------------------------------//
-	// Stat Ananlysis Variables
-	//-----------------------//
-	TAKESTATS *speTakes = NULL; // Array dynamically allocated to the number of
-		// species in the scenario.
-	TAKE sceTakes = {0}; // Contains a TAKESTATS structs for entire animat
-		// population and and array for the species groups.
-	//-------------------------------------------------------------------------------------//
 
 	// Update the State
-	//printf("0x%x:thread_RunScenario(): m_state.activity = ___SCE_INIT\n", this);
 	m_state.activity = ___SCE_INIT;
 	prevSceAct = m_state.activity;
 
@@ -881,28 +792,16 @@ void CScenario::_RunScenario()
 	// Indicate the simulation thread is running so the call to RunScenario() may release
 	// its hold on the mutex and return.
 	m_runThread.m_thread1Running = TRUE;
-	//Sleep(10);
 
 	currentTickCount = lastSleep = GetTickCount();
 
-	// Seed the random class instance.
-	
-	if(sce.user.seed.useCurrentTick)
-		sce.user.seed.value = GetTickCount();
-
-	mbRandom.mysrand(sce.user.seed.value);
-	//printf("0x%x:thread_RunScenario(): randomizer = %d\n", this, sce.user.seed.value);
-
-	while(m_runThread.m_thread1RunningACK == FALSE)
+	// Make sure the routine that launched this thread to acknowledge receipt that this
+	// thread is running.  Upon acknowldegement reset the acknowledgement to FALSE
+	// (just as a matter of setting up for the next time), lock the "mbs active" mutex,
+	// then set up the scenario.
+	while(m_runThread.m_thread1RunningACK != TRUE)
 		Sleep(10);
 	m_runThread.m_thread1RunningACK = FALSE;
-
-	// Wait on the mutex which the user thread will currently have a hold on at this
-	// point.
-	// Multiple threads running the simulation are prevented because m_runState_old got set
-	// to INITIALIZING in the user called function RunScenario(), and the only way
-	// possible for a thread to launch is if m_runState_old is either set to FINISHED
-	// or RUNPAUSED
 	m_mbsActiveMutex.Lock();
 
 
@@ -925,17 +824,13 @@ void CScenario::_RunScenario()
 	}
 
 	if(m_state.errorStatus != OK)
-	{
-		//printf("0x%x:thread_RunScenario(): error status =%s\n", this, m_staticLib.MbsResultToString(m_state.errorStatus, szMessageBuffer, sizeof(szMessageBuffer)));
 		return;
-	}
 
-	// Handle acoustic sources.
+	// If a sound source species was loaded in modify the local copy of the scenario
+	// parameters to indicate so.
 	if(SoundSourceSpeciesPresent() == TRUE)
 		sce.user.acousticAnimatActive = TRUE;
 
-	//acsticSrceIndex = 0;
-	//speListLen = m_speciesList.Length();
 	_ASSERT(m_mbSce.numSpecies == (DWORD)m_speciesList.Length());
 	for(i=0; i<(DWORD)m_mbSce.numSpecies && m_state.errorStatus == OK; i++)
 	{
@@ -943,7 +838,6 @@ void CScenario::_RunScenario()
 		{
 			for(j=0; j<(DWORD)((CSpecies *)m_speciesList.Get(i))->GetTotalAnimatCount(); j++)
 			{
-				//inHabimatInf = m_speciesList.Get(i)->GetAnimatCurrentCoord(j);
 				acsticSrcSum = acstcSrcList.Add();
 				*acsticSrcSum = (m_speciesList.Get(i)->GetAnimatCurrentCoord(j)).acstcSrc;			
 			}
@@ -958,7 +852,7 @@ void CScenario::_RunScenario()
 	}
 
 	// Allocate memory for acoustic exposure testing if testing is active.
-	if(SoundSourceSpeciesPresent() == TRUE /* sce.user.acousticAnimatActive == TRUE*/ && m_state.errorStatus == OK)
+	if(SoundSourceSpeciesPresent() == TRUE && m_state.errorStatus == OK)
 	{
 		if(NULL != (aeCoord = new COORD_DEPTH[sce.totalNumAnimats]))
 			memset(aeCoord, 0, sizeof(COORD_DEPTH) * sce.totalNumAnimats);
@@ -1037,8 +931,6 @@ void CScenario::_RunScenario()
 		//------------------------------//
 		if(m_state.errorStatus == OK)
 		{
-			//printf("0x%x:thread_RunScenario(): Initialzing File Manager\n", this);
-
 			m_state.errorStatus = m_fileMgr.InitializeRun(
 				binFileStrings->fileName,
 				acstInputTrackingFileStrings->fileName,
@@ -1057,7 +949,6 @@ void CScenario::_RunScenario()
 			// This is the only location in code where there state activity is set to ___ALLOCOUTPUTBUFF
 			m_state.activity = ___ALLOCOUTPUTBUFF;
 			Sleep(1000); // investigate if this in any way helps make recently deallocated memory
-			//printf("0x%x:thread_RunScenario(): Allocating I/O Buffer\n", this);
 			m_state.errorStatus = m_fileMgr.AllocateFileIOBuffer(sce, FALSE);
 		}
 
@@ -1069,20 +960,69 @@ void CScenario::_RunScenario()
 	// Species Initialization
 	//-----------------------//
 	m_state.activity = ___SCE_INITANIMATS;
-	//printf("0x%x:thread_RunScenario(): ___SCE_INITANIMATS\n", this);
 	m_state.currentAnimat = 0;
+
+
+	/*
+	// Seed the random class instance.
+	if(sce.user.seed.useCurrentTick)
+		sce.user.seed.value = GetTickCount();
+	mbRandom.mysrand(sce.user.seed.value);
+
+	*/
+
+	mbRndPtrArr = new C3MBRandom *[sce.totalNumAnimats];
+	if(sce.user.seed.independentAnimatRandomGen)
+	{
+		/* Each animat gets its own random number generator with it's own unique seed value.  Only the acoustic source ever gets
+		 * a seed value of zero.  Animats start at seed value of 1 which is incremented for each animat or additional sound
+		 * sources after the first. */
+		mbRndArr = new C3MBRandom[sce.totalNumAnimats];
+		sce.user.seed.value = 0;
+		if(sce.totalNumAcstcSrcs == 0)
+			sce.user.seed.value = 1;
+
+		for(i=0; i<sce.totalNumAnimats; i++)
+		{
+			(mbRndArr + i)->mysrand((double)sce.user.seed.value);
+			sce.user.seed.value++;
+
+			// Copy the address of the random generator instances into the array of pointers to random generator addresses.
+			*(mbRndPtrArr + i) = (mbRndArr + i);
+		}
+	}
+	else
+	{
+		// Each animat shares a random number generator.
+		mbRndArr = new C3MBRandom[1];
+
+		if(sce.user.seed.useCurrentTick)
+			sce.user.seed.value = GetTickCount();
+		(mbRndArr + 0)->mysrand((double)sce.user.seed.value);
+
+		for(i=0; i<sce.totalNumAnimats; i++)
+		{
+			// Copy the address of the random generator instances into the array of pointers to random generator addresses.
+			*(mbRndPtrArr + i) = mbRndArr;
+		}
+	}
+
+
 	m_speciesList.Lock();
 	for(i=0; i<sce.numSpecies && m_abort == FALSE && m_state.errorStatus == OK; i++)
 	{
 		(m_speciesList.Get(i))->InitializeRun(
 			&sce.user,
+			mbRndPtrArr,
 			sce.startTime,
 			&m_state.currentAnimat,
 			animatStateArray,
 			sce.speciesGroup,
-			&mbRandom,
 			&m_envData.bathymetry);
 	}
+
+	delete [] mbRndPtrArr;
+	mbRndPtrArr = NULL;
 
 	if(m_firstAnimatStateHoldArray != NULL)
 	{
@@ -1107,7 +1047,7 @@ void CScenario::_RunScenario()
 		{
 			fmBuffState = m_fileMgr.GetBufferStatus();
 			m_state.activity = ___SCE_RUNBUFFERFLUSH;
-			//printf("0x%x:thread_RunScenario(): ___SCE_RUNBUFFERFLUSH\n", this);
+
 			while(m_fileMgr.IsFlushingBuffer() == TRUE)
 			{
 				Sleep(10);
@@ -1142,7 +1082,6 @@ void CScenario::_RunScenario()
 	// Indicate the thread is iterating.  This is the first of only two locations in the
 	// code where the activity is set to SCE_RUNITERATING
 	m_state.activity = ___SCE_RUNITERATING;
-	//printf("0x%x:thread_RunScenario(): ___SCE_RUNITERATING\n", this);
 	prevSceAct = m_state.activity;
 
 	//----------------------------------------------------------------------------------//
@@ -1150,14 +1089,6 @@ void CScenario::_RunScenario()
 	throttleIteration = m_throttleIterations;
 	m_state.currentIteration++;
 	static BOOL printed = FALSE;
-/*
-	printf("0x%x:thread_RunScenario(): entering iteration loop\n", this);
-	printf("                           current iteration: %d\n", m_state.currentIteration);
-	printf("                           durationless:      %d\n", sce.user.durationless);
-	printf("                           duration:          %d\n", sce.duration);
-	printf("                           throttleIteration  %d\n", throttleIteration);
-	printf("                           RESULT:            %s\n", m_staticLib.MbsResultToString(m_state.errorStatus, szMessageBuffer, sizeof(szMessageBuffer)));
-*/
 	while((m_state.currentIteration <= sce.duration || sce.user.durationless == TRUE) && m_state.errorStatus == OK)
 	{
 		// This while loop is for throttleing
@@ -1173,10 +1104,7 @@ void CScenario::_RunScenario()
 			// in the code where the state activity is set to ___SCE_PAUSED.
 			m_state.activity = ___SCE_PAUSED;
 			if(prevSceAct != m_state.activity)
-			{
-				//printf("0x%x:thread_RunScenario(): ___SCE_PAUSED\n", this);
 				prevSceAct = m_state.activity;
-			}
 
 			//--------------------------------------------------------------------------//
 			
@@ -1228,10 +1156,7 @@ void CScenario::_RunScenario()
 		// locations in code where the activity is set to SCE_RUNITERATING
 		m_state.activity = ___SCE_RUNITERATING;
 		if(prevSceAct != m_state.activity)
-		{
-			//printf("0x%x:thread_RunScenario(): ___SCE_RUNITERATING\n", this);
 			prevSceAct = m_state.activity;
-		}
 		//------------------------------------------------------------------------------//
 
 		//------------------------------------------------------------------------------//
@@ -1310,21 +1235,7 @@ void CScenario::_RunScenario()
 		//-------------------//
 		_ASSERT(m_mbSce.numSpecies == (DWORD)m_speciesList.Length());
 		for(i=0; i <m_mbSce.numSpecies  && m_abort == FALSE && m_state.errorStatus == OK; i++)
-		{
 			m_speciesList.Get(i)->Update(&m_state.currentAnimat);
-#if 0
-			if(currentTickCount - lastSleep > 1500)
-			{
-				Sleep(1);
-				currentTickCount = lastSleep = GetTickCount();
-			}
-			else
-			{
-				currentTickCount = GetTickCount();
-			}
-#endif
-		}
-
 
 		if(m_firstAnimatStateHoldArray != NULL)
 		{
@@ -1483,12 +1394,6 @@ void CScenario::_RunScenario()
 	m_state.currentIteration = 0;
 //	m_state.startTick = 0;
 	m_throttleIterations = 0;
-
-#if 0
-	// m_state.percentDone is moved.
-	if(m_abort == FALSE)
-		m_state.percentDone = 100;
-#endif
 	//----------------------------------------------------------------------------------//
 
 	// This is one of two locations in the code where the activity is set to RUN_FINISHED.  The
@@ -1504,22 +1409,21 @@ void CScenario::_RunScenario()
 	// Post simulation assertions.
 	_ASSERTE(m_runThread.m_thread1Running == FALSE); 
 	_ASSERTE(m_runThread.m_thread3Running == FALSE);
-#endif//NOCSENARIOFUNCTIONS
 
-	//printf("_RunScenario() exiting\n");
+	delete [] mbRndArr;
+	mbRndArr = NULL;
+
 
 }
 
 
 BOOL CScenario::AcousticSourcePings(DWORD CurrentIteration, ACOUSTICSRCEINF AcstcSrc)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	if(CurrentIteration < AcstcSrc.beginIteration || AcstcSrc.dutyPeriod == 0)
 		return FALSE;
 	
 	if((CurrentIteration - AcstcSrc.beginIteration) % AcstcSrc.dutyPeriod != 0)
 		return FALSE;
-#endif//NOCSENARIOFUNCTIONS
 
 	return TRUE;
 }
@@ -1527,11 +1431,9 @@ BOOL CScenario::AcousticSourcePings(DWORD CurrentIteration, ACOUSTICSRCEINF Acst
 	// For command prompt
 RESLT CScenario::ExtractBinaryDataToText(TCHAR *szFileName)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	// Keep compiler warning quiet until this function implemented
 	szFileName = szFileName;
 	//CFileExtracter ext;
-#endif//NOCSENARIOFUNCTIONS
 
 	return OK;
 	// For command prompt
@@ -1542,9 +1444,7 @@ CWorkingList *CScenario::GetWorkingList(int StartTime, int Duration)
 {
 	CWorkingList *pWorkingList = NULL;
 
-#ifndef NOCSENARIOFUNCTIONS
 	pWorkingList = m_fileMgr.GetWorkingList(StartTime, Duration, &m_mbSce.intrvlOutptLim);
-#endif//NOCSENARIOFUNCTIONS
 	return pWorkingList;
 }
 
@@ -1557,7 +1457,6 @@ CWorkingList *CScenario::GetWorkingList(int StartTime, int Duration)
 // ..
 RESLT CScenario::SetOutputDirectory(TCHAR *Directory)
 {
-#ifndef NOCSENARIOFUNCTIONS
 
 	//int valu;
 	int strLen = strlen(Directory);
@@ -1584,7 +1483,6 @@ RESLT CScenario::SetOutputDirectory(TCHAR *Directory)
 	FindClose(hdl);
 	
 	strncpy_s(m_mbSce.user.szOutputDir, sizeof(m_mbSce.user.szOutputDir), Directory, strlen(Directory));
-#endif//NOCSENARIOFUNCTIONS
 
 	return OK;
 }
@@ -1593,23 +1491,18 @@ RESLT CScenario::SetOutputDirectory(TCHAR *Directory)
 // Remove this later... for now it doesn't do anything and is kept as an example.
 void CScenario::RunThread2()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	_runUpdateThread();
-#endif//NOCSENARIOFUNCTIONS
 }
 
 // Remove this later... for now it doesn't do anything and is kept as an example.
 void CScenario::_runUpdateThread()
 {
-#ifndef NOCSENARIOFUNCTIONS
-
 	m_runThread.m_thread2Running = TRUE;
 	while(m_exit == FALSE)
 	{
 		Sleep(200);
 	}
 	m_runThread.m_thread2Running = FALSE;
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
@@ -1636,17 +1529,13 @@ void CScenario::_runUpdateThread()
 *******************************************************************************/
 void CScenario::AbortRun()
 {	
-#ifndef NOCSENARIOFUNCTIONS
 	m_abort = TRUE;
-#endif//NOCSENARIOFUNCTIONS
 }
 
 void CScenario::Exit()
 {	
-#ifndef NOCSENARIOFUNCTIONS
 	m_exit = TRUE;
 	m_abort = TRUE;
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
@@ -1695,9 +1584,7 @@ void CScenario::Exit()
 RESLT CScenario::AddSpecies(OPENFILENAME *ofn, int *Index)
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	res = AddSpecies(ofn->lpstrFile, Index);
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
@@ -1706,7 +1593,6 @@ RESLT CScenario::AddSpecies(OPENFILENAME *ofn, int *Index)
 RESLT CScenario::AddSpecies(TCHAR *FileName, int *Index)
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	int i, index;
 	CSpecies *spe;
 
@@ -1770,17 +1656,14 @@ RESLT CScenario::AddSpecies(TCHAR *FileName, int *Index)
 	if(Index != NULL)
 		*Index = index;
 
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
 int CScenario::GetSpeciesCount()
 {
 	int cnt = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	_ASSERT(m_mbSce.numSpecies == (DWORD)m_speciesList.Length());
 	cnt = m_mbSce.numSpecies;
-#endif//NOCSENARIOFUNCTIONS
 	return cnt;
 }
 
@@ -1788,23 +1671,19 @@ int CScenario::GetPodCount()
 {
 	DWORD i;
 	int count=0;
-#ifndef NOCSENARIOFUNCTIONS
 	_ASSERT(m_mbSce.numSpecies == (DWORD)m_speciesList.Length());
 
 	// Get a total count of pods in all species.
 	for(i=0; i<m_mbSce.numSpecies && m_exit==FALSE; i++)
 		count += (m_speciesList.Get(i))->GetNumberOfPods();
-#endif//NOCSENARIOFUNCTIONS
 	return count;
 }
 
 int CScenario::GetPodCount(int SpeciesIndex)
 {
 	int cnt = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	cnt = (m_speciesList.Get(SpeciesIndex))->GetNumberOfPods();
-#endif//NOCSENARIOFUNCTIONS
 	return cnt;
 }
 
@@ -1814,21 +1693,17 @@ int CScenario::GetIndivdualCount()
 {
 	DWORD i;
 	int count=0;
-#ifndef NOCSENARIOFUNCTIONS
 	_ASSERT(m_mbSce.numSpecies == (DWORD)m_speciesList.Length());
 	for(i=0; i<m_mbSce.numSpecies; i++)
 		count += (m_speciesList.Get(i))->GetNumberOfIndividuals();
-#endif//NOCSENARIOFUNCTIONS
 	return count;
 }
 
 int CScenario::GetIndivdualCount(int SpeciesIndex)
 {
 	int cnt = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	cnt = (m_speciesList.Get(SpeciesIndex))->GetNumberOfIndividuals();
-#endif//NOCSENARIOFUNCTIONS
 	return cnt;
 }
 
@@ -1837,7 +1712,6 @@ int CScenario::GetAnimatCount()
 {
 	int ret = 0;
 
-#ifndef NOCSENARIOFUNCTIONS
 #ifdef _DEBUG
 	DWORD i = 0;
 	int count = 0;
@@ -1853,8 +1727,6 @@ int CScenario::GetAnimatCount()
 	}
 #endif
 	ret =  m_mbSce.totalNumAnimats;
-#endif//NOCSENARIOFUNCTIONS
-
 	return ret;
 }
 
@@ -1862,7 +1734,6 @@ int CScenario::GetAnimatCount()
 int CScenario::UpdateTotalAnimatCount()
 {
 	int ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	DWORD i;
 	CSpecies *spe;
 
@@ -1887,7 +1758,6 @@ int CScenario::UpdateTotalAnimatCount()
 			m_mbSce.totalNumAcstcSrcs += spe->GetTotalAnimatCount();
 	}
 	ret = m_mbSce.totalNumAnimats;
-#endif//NOCSENARIOFUNCTIONS
 
 	return ret;
 }
@@ -1895,40 +1765,32 @@ int CScenario::UpdateTotalAnimatCount()
 
 BOOL CScenario::SetSpeciesAtIndexAsSoundSource(int Index)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	CSpecies *pSpe = NULL;
 	if(Index < 0 || Index >= m_speciesList.Length())
 		return FALSE;
 	pSpe = m_speciesList.Get(AsserteSpeciesIndex(Index));
 	pSpe->SetAsSoundSource();
-#endif//NOCSENARIOFUNCTIONS
 	return TRUE;
 }
 
 CSpecies *CScenario::GetSpeciesAtIndex(int Index)
 {
 	CSpecies *spe = NULL;
-#ifndef NOCSENARIOFUNCTIONS
 	spe = m_speciesList.Get(AsserteSpeciesIndex(Index));
-#endif//NOCSENARIOFUNCTIONS
 	return spe;
 }
 
 int CScenario::GetAnimatCount(int SpeciesIndex)
 {
 	int cnt = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	cnt = GetSpeciesAtIndex(SpeciesIndex)->GetTotalAnimatCount();
-#endif//NOCSENARIOFUNCTIONS
 	return cnt;
 }
 
 int CScenario::GetPodMemberCount(int SpeciesIndex, int PodIndex)
 {
 	int cnt = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	cnt = GetSpeciesAtIndex(SpeciesIndex)->GetNumberAnimatsInPod(PodIndex);
-#endif//NOCSENARIOFUNCTIONS
 	return cnt;
 }
 
@@ -1938,7 +1800,6 @@ int CScenario::GetPodMemberCount(int SpeciesIndex, int PodIndex)
 RESLT CScenario::ResetAcousticSourceInf()
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	ACOUSTICSRCEINF *asInf;
 	int i,j;
 	DWORD cnt;
@@ -2004,14 +1865,12 @@ RESLT CScenario::ResetAcousticSourceInf()
 	res = m_fileMgr.ResetAcousticSourceInf(asInf, m_mbSce.totalNumAcstcSrcs);
 
 	delete [] asInf;
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
 RESLT CScenario::AddPod(int SpeciesIndex, PODLEADERTYPE LeaderType, double FocalDistance, int BufferLength, INHABITINF *InitialCond)
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	if(OK != (res = GetSpeciesAtIndex(SpeciesIndex)->AddPod(LeaderType, FocalDistance, BufferLength, InitialCond)))
 		return res;
@@ -2024,14 +1883,12 @@ RESLT CScenario::AddPod(int SpeciesIndex, PODLEADERTYPE LeaderType, double Focal
 	if(SpeciesIsASoundSourceModel(SpeciesIndex) && m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
 RESLT CScenario::AddPodMembers(int SpeciesIndex, int PodIndex, INHABITINF *InitialCond, int AnimatCount)
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	if(OK != (res = GetSpeciesAtIndex(SpeciesIndex)->AddPodMembers(PodIndex, InitialCond, AnimatCount)))
 		return res;
@@ -2044,14 +1901,12 @@ RESLT CScenario::AddPodMembers(int SpeciesIndex, int PodIndex, INHABITINF *Initi
 	if(SpeciesIsASoundSourceModel(SpeciesIndex) && m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
 RESLT CScenario::AddPodMember(int SpeciesIndex, int PodIndex, INHABITINF InitialCond)
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	if(OK != (res = m_speciesList.Get(AsserteSpeciesIndex(SpeciesIndex))->AddPodMembers(PodIndex, &InitialCond, 1)))
 		return res;
 	UpdateTotalAnimatCount();
@@ -2063,7 +1918,6 @@ RESLT CScenario::AddPodMember(int SpeciesIndex, int PodIndex, INHABITINF Initial
 	if(SpeciesIsASoundSourceModel(SpeciesIndex) && m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
@@ -2071,7 +1925,6 @@ RESLT CScenario::AddPodMember(int SpeciesIndex, int PodIndex, INHABITINF Initial
 RESLT CScenario::AddIndividuals(int SpeciesIndex, INHABITINF *InitialCond, int AnimatCount)
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	if(OK != (res = (m_speciesList.Get(AsserteSpeciesIndex(SpeciesIndex)))->AddIndividuals(InitialCond, AnimatCount)))
 		return res;
 	UpdateTotalAnimatCount();
@@ -2083,14 +1936,12 @@ RESLT CScenario::AddIndividuals(int SpeciesIndex, INHABITINF *InitialCond, int A
 	if(SpeciesIsASoundSourceModel(SpeciesIndex) && m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
 RESLT CScenario::AddIndividual(int SpeciesIndex, INHABITINF InitialCond)
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	if(OK != (res = GetSpeciesAtIndex(AsserteSpeciesIndex(SpeciesIndex))->AddIndividuals(&InitialCond, 1)))
 		return res;
 	UpdateTotalAnimatCount();
@@ -2102,14 +1953,12 @@ RESLT CScenario::AddIndividual(int SpeciesIndex, INHABITINF InitialCond)
 	if(SpeciesIsASoundSourceModel(SpeciesIndex) && m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
 
 void CScenario::DeletePod(int SpeciesIndex, int PodIndex)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	(m_speciesList.Get(AsserteSpeciesIndex(SpeciesIndex)))->DeletePod(PodIndex);
 	UpdateTotalAnimatCount();
 	ResetAcousticSourceInf();
@@ -2120,12 +1969,10 @@ void CScenario::DeletePod(int SpeciesIndex, int PodIndex)
 	if(SpeciesIsASoundSourceModel(SpeciesIndex) && m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 }
 
 void CScenario::DeleteIndividual(int SpeciesIndex, int IndividualIndex)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	(m_speciesList.Get(AsserteSpeciesIndex(SpeciesIndex)))->DeleteIndividual(IndividualIndex);
 	UpdateTotalAnimatCount();
 	ResetAcousticSourceInf();
@@ -2136,22 +1983,17 @@ void CScenario::DeleteIndividual(int SpeciesIndex, int IndividualIndex)
 	if(SpeciesIsASoundSourceModel(SpeciesIndex) && m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 }
 
 void CScenario::DeleteIndividuals(int SpeciesIndex)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	(m_speciesList.Get(AsserteSpeciesIndex(SpeciesIndex)))->DeleteAllIndividuals();
 	UpdateTotalAnimatCount();
 	ResetAcousticSourceInf();
-#endif//NOCSENARIOFUNCTIONS
-
 }
 
 void CScenario::DeletePods(int SpeciesIndex)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	(m_speciesList.Get(AsserteSpeciesIndex(SpeciesIndex)))->DeleteAllPods();
 	UpdateTotalAnimatCount();
 	ResetAcousticSourceInf();
@@ -2162,12 +2004,10 @@ void CScenario::DeletePods(int SpeciesIndex)
 	if(SpeciesIsASoundSourceModel(SpeciesIndex) && m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 }
 
 void CScenario::DeletePodMember(int SpeciesIndex, int PodIndex, int AnimatIndex)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	(m_speciesList.Get(AsserteSpeciesIndex(SpeciesIndex)))->DeletePodMember(PodIndex, AnimatIndex);
 	UpdateTotalAnimatCount();
 	ResetAcousticSourceInf();
@@ -2178,56 +2018,45 @@ void CScenario::DeletePodMember(int SpeciesIndex, int PodIndex, int AnimatIndex)
 	if(SpeciesIsASoundSourceModel(SpeciesIndex) && m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
 COORD_DEPTH CScenario::GetPodFocalCoordinate(int SpeciesIndex, int PodIndex)
 {
 	COORD_DEPTH cd = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	cd = (m_speciesList.Get(SpeciesIndex))->GetPodFocalCoordinate(PodIndex);
-#endif//NOCSENARIOFUNCTIONS
 	return cd;
 }
 
 double CScenario::GetPodLeaderFocalDistance(int SpeciesIndex, int PodIndex)
 {
 	double dbl = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	dbl = (m_speciesList.Get(SpeciesIndex))->GetPodLeaderFocalDistance(PodIndex);
-#endif//NOCSENARIOFUNCTIONS
 	return dbl;
 }
 
 void CScenario::SetPodLeaderFocalDistance(int SpeciesIndex, int PodIndex, double FocalDistance)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	(m_speciesList.Get(SpeciesIndex))->SetPodLeaderFocalDistance(PodIndex, FocalDistance);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
 double CScenario::GetShoreFollowingDepth(int SpeciesIndex)
 {
 	double ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	ret = (m_speciesList.Get(SpeciesIndex))->GetShoreFollowingDepth();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 double CScenario::GetMinimumSeededingDepth(int SpeciesIndex)
 {
 	double ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	ret = (m_speciesList.Get(SpeciesIndex))->GetMinimumSeedingDepth();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2235,56 +2064,44 @@ double CScenario::GetMinimumSeededingDepth(int SpeciesIndex)
 PODLEADERTYPE CScenario::GetPodLeaderType(int SpeciesIndex, int PodIndex)
 {
 	PODLEADERTYPE ret = ANIMAT;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	ret = (m_speciesList.Get(SpeciesIndex))->GetPodLeaderType(PodIndex);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 void CScenario::SetPodLeaderType(int SpeciesIndex, int PodIndex, PODLEADERTYPE Type)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	(m_speciesList.Get(SpeciesIndex))->SetPodLeaderType(PodIndex, Type);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 DWORD CScenario::GetNumberOfBehaviorsModeledInScenario()
 {
 	DWORD num = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	DWORD i;
 	_ASSERT(m_mbSce.numSpecies == (DWORD)m_speciesList.Length());
 	for(i=0; i<m_mbSce.numSpecies; i++)
 		num += GetNumberOfBehaviorsModeledInSpecies(i);
-#endif//NOCSENARIOFUNCTIONS
 	return num;
 }
 
 DWORD CScenario::GetNumberOfBehaviorsModeledInSpecies(int SpeciesIndex)
 {
 	DWORD ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	ret = (m_speciesList.Get(SpeciesIndex))->GetNumBehaviorsModeled();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 void CScenario::GetCopyOfBehaviorNamesModeledInSpecies(int SpeciesIndex, BEHAVIOR_NAME *CopyBuffer, DWORD BufferSize)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	(m_speciesList.Get(SpeciesIndex))->CopyBehaviorNames(CopyBuffer, SZ_BEHAVIOR_LEN, BufferSize);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 void CScenario::EnableEsmeAcousticExposureSetTracking()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_mbSce.enableAcstSrcTracking = TRUE;
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -2315,10 +2132,8 @@ void CScenario::EnableEsmeAcousticExposureSetTracking()
 *******************************************************************************/
 void CScenario::SetSpeciesDisplayTitle(int Index, TCHAR *Title)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(Index);
 	m_speciesList.Get(Index)->SetDisplayTitle(Title);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -2347,11 +2162,9 @@ void CScenario::SetSpeciesDisplayTitle(int Index, TCHAR *Title)
 *******************************************************************************/
 void CScenario::GetSpeciesDisplayTitle(int Index, TCHAR *Buff, DWORD BufferSize)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(Index);
 	memset(Buff, 0, BufferSize);
 	m_speciesList.Get(Index)->GetDisplayTitle(Buff, BufferSize);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
@@ -2380,7 +2193,6 @@ void CScenario::GetSpeciesDisplayTitle(int Index, TCHAR *Buff, DWORD BufferSize)
 *******************************************************************************/
 void CScenario::DeleteSpecies(int Index)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	CSpecies *spe;
 	AsserteSpeciesIndex(Index);
 	BOOL updateSaveIteraionCnt = FALSE;
@@ -2406,13 +2218,11 @@ void CScenario::DeleteSpecies(int Index)
 	if(updateSaveIteraionCnt == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
 void CScenario::DeleteSpecies()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	DWORD i;
 	_ASSERT(m_mbSce.numSpecies == (DWORD)m_speciesList.Length());
 
@@ -2428,7 +2238,6 @@ void CScenario::DeleteSpecies()
 	if(m_mbSce.acousticPingCycleOutputLimit == TRUE)
 		m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
@@ -2452,7 +2261,6 @@ void CScenario::DeleteSpecies()
 *******************************************************************************/
 void CScenario::SetConfiguration(USERPARAMS Configuration)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_mbSce.user = Configuration;
 
 	// Override specific user configuration values that are no longer user cnfigurable.
@@ -2464,7 +2272,6 @@ void CScenario::SetConfiguration(USERPARAMS Configuration)
 		m_mbSce.user.acousticAnimatActive = FALSE; // this is needed for post scenario processing
 	else
 		m_mbSce.user.acousticAnimatActive = TRUE;
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -2490,9 +2297,7 @@ void CScenario::SetConfiguration(USERPARAMS Configuration)
 USERPARAMS CScenario::GetConfiguration()
 {
 	USERPARAMS ret = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_mbSce.user;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2521,26 +2326,21 @@ USERPARAMS CScenario::GetConfiguration()
 *******************************************************************************/
 void CScenario::SetDuration(HHMMSS Duration)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_mbSce.duration = m_staticLib.Time_ToSeconds(Duration);
 	SetDuration(m_mbSce.duration);
-#endif//NOCSENARIOFUNCTIONS
 }
 void CScenario::SetDuration(int Seconds)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	if(Seconds < 0)
 		Seconds = 0;
 	m_mbSce.duration = Seconds;
 	ResetAcousticSourceInf();
 	m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 int CScenario::SetAcousticSrceLimitOutput(BOOL Limit)
 {
 	int ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	m_mbSce.acousticPingCycleOutputLimit = Limit;
 
 	// Sets the acoustic properties of each sound source populated in the scenario to
@@ -2548,25 +2348,20 @@ int CScenario::SetAcousticSrceLimitOutput(BOOL Limit)
 	// or unset so it can determine the save states to file.
 	ResetAcousticSourceInf();
 	ret = m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 BOOL CScenario::GetAcousticSrceLimitOutput()
 {
 	BOOL ret = FALSE;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_mbSce.acousticPingCycleOutputLimit;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 BOOL CScenario::CSVFileLoaded()
 {
 	BOOL ret = FALSE;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_fileMgr.CSVFileLoaded();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2574,49 +2369,39 @@ BOOL CScenario::CSVFileLoaded()
 RESLT CScenario::ReadCSVListFromFile(TCHAR *szFileName)
 {
 	RESLT res = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	if(OK != (res = m_fileMgr.ReadCSVListFromFile(szFileName)))
 		return res;
 	m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
-#endif//NOCSENARIOFUNCTIONS
 	return OK;
 }
 
 // Tells the scenario to clear the list of specific time states save to file.
 void CScenario::ClearCSVList()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_fileMgr.ClearCSVList();
 	m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 void CScenario::SetItervalLimitOutput(BOOL Enable, DWORD Start, DWORD Interval)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_mbSce.intrvlOutptLim.enabled = Enable;
 	m_mbSce.intrvlOutptLim.start = Start;
 	m_mbSce.intrvlOutptLim.interval = Interval;
 	m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
 void CScenario::GetItervalLimitOutput(BOOL *pEnable, DWORD *pStart, DWORD *pInterval)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	*pEnable = m_mbSce.intrvlOutptLim.enabled;
 	*pStart = m_mbSce.intrvlOutptLim.start;
 	*pInterval = m_mbSce.intrvlOutptLim.interval;
-#endif//NOCSENARIOFUNCTIONS
 }
 
 BOOL CScenario::IntervalLimitOutputEnabled()
 {
 	BOOL ret = FALSE;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_mbSce.intrvlOutptLim.enabled;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2644,9 +2429,7 @@ BOOL CScenario::IntervalLimitOutputEnabled()
 HHMMSS CScenario::GetDuration()
 {
 	HHMMSS ret = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_staticLib.Time_ToHrMinSec(m_mbSce.duration);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2654,9 +2437,7 @@ HHMMSS CScenario::GetDuration()
 int CScenario::GetDurationSeconds()
 {
 	int ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_mbSce.duration;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2684,10 +2465,8 @@ int CScenario::GetDurationSeconds()
 *******************************************************************************/
 void CScenario::SetStartTime(HHMMSS StartTime)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_mbSce.startTime = m_staticLib.Time_To24HrClockSeconds(StartTime);	
 	m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -2713,9 +2492,7 @@ void CScenario::SetStartTime(HHMMSS StartTime)
 HHMMSS CScenario::GetStartTime()
 {
 	HHMMSS ret = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	ret =  m_staticLib.Time_ToHrMinSec(m_mbSce.startTime);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2723,7 +2500,6 @@ HHMMSS CScenario::GetStartTime()
 
 RESLT CScenario::SeedingCoordinateIsValid(UINT SpeciesIndex, double Lat, double Lon)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	BOOL bVal;
 	BATHYVALUE bathyValue;
 	ENVMINMAX envMinMax;
@@ -2764,7 +2540,6 @@ RESLT CScenario::SeedingCoordinateIsValid(UINT SpeciesIndex, double Lat, double 
 	shoreFollowingDepth = GetShoreFollowingDepth(SpeciesIndex);
 	if(bathyValue.depth > shoreFollowingDepth)
 		return INVALID_SPECIES_SEEEDING_DEPTH;
-#endif//NOCSENARIOFUNCTIONS
 	return OK;
 }
 
@@ -2794,27 +2569,23 @@ RESLT CScenario::SeedingCoordinateIsValid(UINT SpeciesIndex, double Lat, double 
 RESLT CScenario::LoadBathymetryFromTextFile(OPENFILENAME *Ofn)
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	TCHAR szBuff[SIZE_16];
 	BOOL isText = FALSE;
 	m_staticLib.GetExtension(Ofn->lpstrFileTitle, szBuff, TCHARBFLEN(szBuff));
 	if(strcmp(szBuff, ".txt") == 0)
 		isText = TRUE;
 	ret =  m_envData.bathymetry.LoadFromTextFile(Ofn, isText);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 RESLT CScenario::LoadBathymetryFromTextFile(TCHAR *FileName)
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	TCHAR szBuff[SIZE_16];
 	BOOL isText = FALSE;
 	m_staticLib.GetExtension(FileName, szBuff, TCHARBFLEN(szBuff));
 	if(strcmp(szBuff, ".txt") == 0)
 		isText = TRUE;
 	ret =  m_envData.bathymetry.LoadFromTextFile(FileName, isText);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2840,9 +2611,7 @@ RESLT CScenario::LoadBathymetryFromTextFile(TCHAR *FileName)
 *******************************************************************************/
 void CScenario::ClearBathymetry()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_envData.bathymetry.ClearData();
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -2869,9 +2638,7 @@ void CScenario::ClearBathymetry()
 BOOL CScenario::BathymetryLoaded()
 {
 	BOOL ret = FALSE;
-#ifndef NOCSENARIOFUNCTIONS
 	ret =  m_envData.bathymetry.IsDataLoaded();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2900,9 +2667,7 @@ BOOL CScenario::BathymetryLoaded()
 *******************************************************************************/
 void CScenario::GetBathymetryFileName(TCHAR *FileNameBuffer, int BufferLength)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_envData.bathymetry.GetFileName(FileNameBuffer, BufferLength);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -2930,7 +2695,6 @@ void CScenario::GetBathymetryFileName(TCHAR *FileNameBuffer, int BufferLength)
 RESLT CScenario::LoadSalinityFromTextFile(OPENFILENAME *Ofn)
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	TCHAR szBuff[SIZE_16];
 	BOOL isText = FALSE;
 	m_staticLib.GetExtension(Ofn->lpstrFileTitle, szBuff, TCHARBFLEN(szBuff));
@@ -2938,13 +2702,11 @@ RESLT CScenario::LoadSalinityFromTextFile(OPENFILENAME *Ofn)
 		isText = TRUE;
 
 	ret =  m_envData.salinity.LoadFromTextFile(Ofn, isText);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 RESLT CScenario::LoadSalinityFromTextFile(TCHAR *FileName)
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	TCHAR szBuff[SIZE_16];
 	BOOL isText = FALSE;
 	m_staticLib.GetExtension(FileName, szBuff, TCHARBFLEN(szBuff));
@@ -2952,7 +2714,6 @@ RESLT CScenario::LoadSalinityFromTextFile(TCHAR *FileName)
 		isText = TRUE;
 
 	ret =  m_envData.salinity.LoadFromTextFile(FileName, isText);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -2978,9 +2739,7 @@ RESLT CScenario::LoadSalinityFromTextFile(TCHAR *FileName)
 *******************************************************************************/
 void CScenario::ClearSalinity()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_envData.salinity.ClearData();
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -3007,9 +2766,7 @@ void CScenario::ClearSalinity()
 BOOL CScenario::SalinityLoaded()
 {
 	BOOL ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	ret =  m_envData.salinity.IsDataLoaded();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -3038,9 +2795,7 @@ BOOL CScenario::SalinityLoaded()
 *******************************************************************************/
 void CScenario::GetSalinityFileName(TCHAR *FileNameBuffer, int BufferLength)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_envData.salinity.GetFileName(FileNameBuffer, BufferLength);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -3068,7 +2823,6 @@ void CScenario::GetSalinityFileName(TCHAR *FileNameBuffer, int BufferLength)
 RESLT CScenario::LoadTemperatureFromTextFile(OPENFILENAME *Ofn)
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	TCHAR szBuff[SIZE_16];
 	BOOL isText = FALSE;
 	m_staticLib.GetExtension(Ofn->lpstrFileTitle, szBuff, TCHARBFLEN(szBuff));
@@ -3076,13 +2830,11 @@ RESLT CScenario::LoadTemperatureFromTextFile(OPENFILENAME *Ofn)
 		isText = TRUE;
 
 	ret =  m_envData.temperature.LoadFromTextFile(Ofn, isText);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 RESLT CScenario::LoadTemperatureFromTextFile(TCHAR *FileName)
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	TCHAR szBuff[SIZE_16];
 	BOOL isText = FALSE;
 	m_staticLib.GetExtension(FileName, szBuff, TCHARBFLEN(szBuff));
@@ -3090,7 +2842,6 @@ RESLT CScenario::LoadTemperatureFromTextFile(TCHAR *FileName)
 		isText = TRUE;
 
 	ret =  m_envData.temperature.LoadFromTextFile(FileName,isText);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 /*******************************************************************************
@@ -3114,9 +2865,7 @@ RESLT CScenario::LoadTemperatureFromTextFile(TCHAR *FileName)
 *******************************************************************************/
 void CScenario::ClearTemperature()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_envData.temperature.ClearData();
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -3143,16 +2892,13 @@ void CScenario::ClearTemperature()
 BOOL CScenario::TemperatureLoaded()
 {
 	BOOL ret = FALSE;
-#ifndef NOCSENARIOFUNCTIONS
 	ret =  m_envData.temperature.IsDataLoaded();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 
 void CScenario::ClearScenario()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	DeleteSpecies();
 	ClearTemperature();
 	ClearSalinity();
@@ -3188,7 +2934,6 @@ void CScenario::ClearScenario()
 	m_throttleIterations = 0; // zero means it isn't iterating
 
 	memset(&m_state.acousticSrc, 0, sizeof(ACST_SRC_STATE));
-#endif//NOCSENARIOFUNCTIONS
 }
 
 /*******************************************************************************
@@ -3215,9 +2960,7 @@ void CScenario::ClearScenario()
 *******************************************************************************/
 void CScenario::GetTemperatureFileName(TCHAR *FileNameBuffer, int BufferLength)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_envData.temperature.GetFileName(FileNameBuffer, BufferLength);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
@@ -3243,7 +2986,6 @@ void CScenario::GetTemperatureFileName(TCHAR *FileNameBuffer, int BufferLength)
 *******************************************************************************/
 RESLT CScenario::LoadFromBinFile(TCHAR *FileName)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	RESLT res;
 	// Verify nothing is already loaded.
 	ClearScenario();
@@ -3255,7 +2997,6 @@ RESLT CScenario::LoadFromBinFile(TCHAR *FileName)
 	}
 	ResetAcousticSourceInf();
 	m_mbSce.numSaveIterations = m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim);
-#endif//NOCSENARIOFUNCTIONS
 	return OK;
 }
 
@@ -3283,29 +3024,25 @@ RESLT CScenario::LoadFromBinFile(TCHAR *FileName)
 RESLT CScenario::SaveToBinFile(TCHAR *FileName)
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_fileMgr.SaveScenario(FileName, &m_mbSce, &m_envData, &m_speciesList);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 
 void CScenario::SetScenarioTitle(char *Title)
 {	
-#ifndef NOCSENARIOFUNCTIONS
 	char szPath[SIZE_256];
 	//char szFileName[SIZE_256];
 	char szFileTitle[SIZE_256];
 	m_staticLib.GetPathAndFileTitleFromFileName(Title, szPath, sizeof(szPath), szFileTitle, sizeof(szFileTitle));
 	strncpy_s(m_mbSce.user.szScenarioTitle, sizeof(m_mbSce.user.szScenarioTitle), szFileTitle, SIZE_128);
 	m_staticLib.RemoveExtension(m_mbSce.user.szScenarioTitle);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 
-void CScenario::CalculateRequiredDiskSpace(DWORDLONG *BinStorage, DWORDLONG *TextStorage)
+BOOL CScenario::CalculateRequiredDiskSpace(DWORDLONG *BinStorage, DWORDLONG *TextStorage)
 {
-#ifndef NOCSENARIOFUNCTIONS
+	BOOL bVal = TRUE;
 	BINARYSETUP b;
 	DWORDLONG headerBytes;
 
@@ -3313,7 +3050,9 @@ void CScenario::CalculateRequiredDiskSpace(DWORDLONG *BinStorage, DWORDLONG *Tex
 //	_ASSERT(m_mbSce.numSpecies == m_speciesList.Length());
 
 	// Protect member variables from being modified while this function is active.
-	m_mbsActiveMutex.Lock();
+	bVal = m_mbsActiveMutex.Lock(100);
+	if(bVal == FALSE)
+		return FALSE;
 
 	b = m_fileManagerStatic.DetermineBinarySetup(m_mbSce, &m_envData, &m_speciesList);
 
@@ -3322,38 +3061,32 @@ void CScenario::CalculateRequiredDiskSpace(DWORDLONG *BinStorage, DWORDLONG *Tex
 	headerBytes = sizeof(TXTHEADER1) + sizeof(TXTHEADER2) + sizeof(TXTHEADER1)*(m_mbSce.numSaveIterations);
 	*TextStorage = headerBytes * (DWORDLONG)GetAnimatCount();
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
+	return TRUE;
 }
 
 
 
 void CScenario::CommandPromptOutput(TCHAR *sz)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	printf(sz);
-#endif//NOCSENARIOFUNCTIONS
 }
 
 CBathymetry *CScenario::GetBathymetryClassRef()
 {
 	CBathymetry *ret = NULL;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = &m_envData.bathymetry;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 double CScenario::SetBaythyConstantDepth(double Depth)
 {
 	double res = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	if(Depth >= ANIMAT_BEACHES_DEPTH_DEFAULT)
 		Depth = ANIMAT_BEACHES_DEPTH_DEFAULT;
 
 	res = m_envData.bathymetry.SetConstantValue(Depth);
 
 	_ASSERT(m_envData.bathymetry.ConstantValueIsSet() == TRUE);
-#endif//NOCSENARIOFUNCTIONS
 	return res;
 }
 
@@ -3361,76 +3094,59 @@ double CScenario::SetBaythyConstantDepth(double Depth)
 BATHYVALUE CScenario::GetBathymetryDepth(double lat, double lon)
 {
 	BATHYVALUE ret = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_envData.bathymetry.GetValueAtCoordinate(lat, lon);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 ENVDATAPOINTCOUNT CScenario::GetBathymetryDataPointCounts()
 {
 	ENVDATAPOINTCOUNT ret = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_envData.bathymetry.GetDataPointCounts(FALSE);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 BATHYEXTREMES CScenario::GetBathymetryExtremes()
 {
 	BATHYEXTREMES ret = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_envData.bathymetry.GetExtremes();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 double CScenario::GetTotalBathySufaceAreaMeters()
 {
 	double ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_envData.bathymetry.GetTotalSufaceAreaMeters();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 double CScenario::GetBathymetryLandSufaceAreaMeters()
 {	
 	double ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_envData.bathymetry.GetLandSufaceAreaMeters();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 double CScenario::GetBathymetryWaterSufaceAreaMeters()
 {
 	double ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_envData.bathymetry.GetWaterSurfaceAreaMeters();
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 int CScenario::AsserteSpeciesIndex(int SpeciesIndex)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	_ASSERTE(SpeciesIndex >= 0 && SpeciesIndex <m_speciesList.Length());
-#endif//NOCSENARIOFUNCTIONS
 	return SpeciesIndex;
 }
 
 INHABITINF CScenario::GetPodMemberInitialCoordinate(int SpeciesIndex, int PodIndex, int PodMemberIndex)
 {
 	INHABITINF coord = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	m_mbsActiveMutex.Lock();
 	coord = (m_speciesList.Get(SpeciesIndex))->GetPodMemberInitialCoordinate(PodIndex, PodMemberIndex);
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return coord;
 }
 
 INHABITINF *CScenario::GetPodInitialCoordinates(int SpeciesIndex, int PodIndex, INHABITINF *IC)
 {
 	INHABITINF *ic = IC;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 
 	m_mbsActiveMutex.Lock();
@@ -3438,7 +3154,6 @@ INHABITINF *CScenario::GetPodInitialCoordinates(int SpeciesIndex, int PodIndex, 
 		ic = new INHABITINF[(m_speciesList.Get(SpeciesIndex))->GetNumberAnimatsInPod(PodIndex)];
 	(m_speciesList.Get(SpeciesIndex))->GetAllPodMemberInitialCoordinates(PodIndex, IC);
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return ic;
 }
 
@@ -3446,20 +3161,17 @@ INHABITINF *CScenario::GetPodInitialCoordinates(int SpeciesIndex, int PodIndex, 
 INHABITINF CScenario::GetIndividualInitialCoordinate(int SpeciesIndex, int IndividualIndex)
 {
 	INHABITINF coord = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 
 	m_mbsActiveMutex.Lock();
 	coord = (m_speciesList.Get(SpeciesIndex))->GetIndividualInitialCoordinate(IndividualIndex);
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return coord;
 }
 
 INHABITINF *CScenario::GetIndividualInitialCoordinates(int SpeciesIndex, INHABITINF *IC)
 {
 	INHABITINF *ic = IC;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 
 	m_mbsActiveMutex.Lock();
@@ -3467,7 +3179,6 @@ INHABITINF *CScenario::GetIndividualInitialCoordinates(int SpeciesIndex, INHABIT
 		ic = new INHABITINF[(m_speciesList.Get(SpeciesIndex))->GetNumberOfIndividuals()];
 	(m_speciesList.Get(SpeciesIndex))->GetAllIndividualInitialCoordinates(ic);
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return ic;
 }
 
@@ -3475,13 +3186,11 @@ INHABITINF *CScenario::GetIndividualInitialCoordinates(int SpeciesIndex, INHABIT
 INHABITINF CScenario::GetIndividualCoordinate(int SpeciesIndex, int IndividualIndex)
 {
 	INHABITINF coord = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 
 	m_mbsActiveMutex.Lock();
 	coord = (m_speciesList.Get(SpeciesIndex))->GetIndividualCoordinate(IndividualIndex); 
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return coord;
 }
 
@@ -3490,7 +3199,6 @@ INHABITINF CScenario::GetIndividualCoordinate(int SpeciesIndex, int IndividualIn
 // Caller must deallocate returned buffer!!!
 INHABITINF *CScenario::GetIndividualCoordinates(int SpeciesIndex, INHABITINF *CoordBuffer)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 
 	m_mbsActiveMutex.Lock();
@@ -3498,21 +3206,18 @@ INHABITINF *CScenario::GetIndividualCoordinates(int SpeciesIndex, INHABITINF *Co
 		CoordBuffer = new INHABITINF[(m_speciesList.Get(SpeciesIndex))->GetNumberOfIndividuals()];
 	(m_speciesList.Get(SpeciesIndex))->GetAllIndividualCurrentCoordinates(CoordBuffer);
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return CoordBuffer;
 }
 
 INHABITINF CScenario::GetPodMemberCoordinate(int SpeciesIndex, int PodIndex, int PodMemberIndex)
 {
 	INHABITINF coord = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 
 	// Prevent multiple threads from accessing and modifiying the Species linked list.
 	m_mbsActiveMutex.Lock();
 	coord = (m_speciesList.Get(SpeciesIndex))->GetPodMemberCoordinate(PodIndex, PodMemberIndex);
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return coord;
 }
 
@@ -3522,7 +3227,6 @@ INHABITINF CScenario::GetPodMemberCoordinate(int SpeciesIndex, int PodIndex, int
 INHABITINF *CScenario::GetPodMemberCoordinates(int SpeciesIndex, int PodIndex, INHABITINF *CoordBuffer)
 {
 	INHABITINF *coord = CoordBuffer;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 
 	// Prevent multiple threads from accessing and modifiying the Species linked list.
@@ -3531,7 +3235,6 @@ INHABITINF *CScenario::GetPodMemberCoordinates(int SpeciesIndex, int PodIndex, I
 		coord = new INHABITINF[(m_speciesList.Get(SpeciesIndex))->GetNumberAnimatsInPod(PodIndex)];
 	(m_speciesList.Get(SpeciesIndex))->GetAllPodMemberCurrentCoordinates(PodIndex, CoordBuffer);
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return coord;
 }
 
@@ -3541,7 +3244,6 @@ INHABITINF *CScenario::GetPodMemberCoordinates(int SpeciesIndex, int PodIndex, I
 // manage and deallocate.
 INHABITINF *CScenario::GetAnimatPopulationInitialCoordinates(INHABITINF *IC)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	DWORD i;
 	int startIndex = 0;
 	CSpecies *pSpe;
@@ -3565,7 +3267,6 @@ INHABITINF *CScenario::GetAnimatPopulationInitialCoordinates(INHABITINF *IC)
 		}
 	}
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return IC;
 }
 
@@ -3574,7 +3275,6 @@ INHABITINF *CScenario::GetAnimatPopulationInitialCoordinates(INHABITINF *IC)
 // Calling applicaiton must deallocate returned buffer
 COORD_DEPTH *CScenario::GetAnimatPopulationCurrentCoordinates(COORD_DEPTH *CoordBuffer)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	int i;
 	INHABITINF *pIn = NULL;
 
@@ -3596,7 +3296,6 @@ COORD_DEPTH *CScenario::GetAnimatPopulationCurrentCoordinates(COORD_DEPTH *Coord
 		CoordBuffer[i] = pIn[i].coord;
 
 	delete [] pIn;
-#endif//NOCSENARIOFUNCTIONS
 	return CoordBuffer;
 }
 
@@ -3605,7 +3304,6 @@ COORD_DEPTH *CScenario::GetAnimatPopulationCurrentCoordinates(COORD_DEPTH *Coord
 // Caller must deallocate returned buffer!!!
 INHABITINF *CScenario::GetAnimatPopulationCurrentCoordinates(INHABITINF *CoordBuffer)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	DWORD i;
 	DWORD startIndex = 0;
 	CSpecies *pSpe;
@@ -3636,14 +3334,12 @@ INHABITINF *CScenario::GetAnimatPopulationCurrentCoordinates(INHABITINF *CoordBu
 	}
 
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return CoordBuffer;
 }
 
 
 void CScenario::SetAnimatAcousticExposure(double SourceLat, double SourceLon, double *Array)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	DWORD i;
 	DWORD startIndex = 0;
 	CSpecies *pSpe;
@@ -3686,7 +3382,6 @@ void CScenario::SetAnimatAcousticExposure(double SourceLat, double SourceLon, do
 		m_fileMgr.AcousticDataToFile(m_state.runClock, SourceLat, SourceLon, m_mbSce.totalNumAnimats, Array);
 
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 }
 
 void CScenario::SetAnimatBathymetry(double *Array)
@@ -3733,7 +3428,6 @@ void CScenario::SetAnimatBathymetry(double *Array)
 // The entire animat population of a single species was requested.
 INHABITINF *CScenario::GetAnimatInitialCoordinates(int SpeciesIndex, int BufferLength, INHABITINF *IC)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	int numAnimats;
 
 	// Protect member variables from being modified while this function is active.
@@ -3756,15 +3450,12 @@ INHABITINF *CScenario::GetAnimatInitialCoordinates(int SpeciesIndex, int BufferL
 
 	(m_speciesList.Get(SpeciesIndex))->GetAllAnimatInitialCoordinates(IC);
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return IC;
 }
 
 
 INHABITINF *CScenario::GetAnimatCurrentCoordinates(int SpeciesIndex, int BufferLength, INHABITINF *CoordBuffer)
 {
-#ifndef NOCSENARIOFUNCTIONS
-
 	int numAnimats;
 
 	// Protect member variables from being modified while this function is active.
@@ -3788,7 +3479,6 @@ INHABITINF *CScenario::GetAnimatCurrentCoordinates(int SpeciesIndex, int BufferL
 
 	(m_speciesList.Get(SpeciesIndex))->GetAllAnimatCurrentCoordinates(CoordBuffer);
 	m_mbsActiveMutex.Unlock();
-#endif//NOCSENARIOFUNCTIONS
 	return CoordBuffer;
 }
 
@@ -3796,10 +3486,8 @@ INHABITINF *CScenario::GetAnimatCurrentCoordinates(int SpeciesIndex, int BufferL
 // binary file.
 BOOL CScenario::IsActive()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	if(m_state.activity == __RUN_FINISHED)
 		return FALSE;
-#endif//NOCSENARIOFUNCTIONS
 	return TRUE;
 }
 
@@ -3808,7 +3496,6 @@ BOOL CScenario::IsActive()
 
 RUNSTATE CScenario::GetRunState_old()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	// This goes away
 	SCESTATE state = GetState();
 
@@ -3831,7 +3518,6 @@ RUNSTATE CScenario::GetRunState_old()
 	}
 
 	_ASSERT(0); // should never get here.
-#endif//NOCSENARIOFUNCTIONS
 	return UNKNOWN;
 }
 
@@ -3840,7 +3526,6 @@ SCESTATE CScenario::GetState()
 {
 	SCESTATE s;
 	memset(&s, 0, sizeof(s));
-#ifndef NOCSENARIOFUNCTIONS
 
 	// Static when scenario is running
 	s.activity = m_state.activity;
@@ -3855,7 +3540,6 @@ SCESTATE CScenario::GetState()
 	memcpy(&s.acousticSrc, &m_state.acousticSrc, sizeof(ACST_SRC_STATE));
 
 	s.bufferState = m_fileMgr.GetBufferStatus();
-#endif//NOCSENARIOFUNCTIONS
 	return s;
 }
 
@@ -3865,7 +3549,6 @@ RESLT CScenario::CompareFileOutput(TCHAR *FileName1, TCHAR *FileName2)
 {
 	// Get the path and file name of the input file.
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	HANDLE hd1;
 	HANDLE hd2;
 	hd1 = CreateFile(FileName1, GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, 0);
@@ -3882,15 +3565,12 @@ RESLT CScenario::CompareFileOutput(TCHAR *FileName1, TCHAR *FileName2)
 	ret = CompareFileOutput(hd1, hd2);
 	CloseHandle(hd1);
 	CloseHandle(hd2);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 RESLT CScenario::CompareFileOutput(HANDLE Hd1, HANDLE Hd2)
 {
-	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
-
+	RESLT	 ret = OK;
 	int		 numSpecies;
 	int		 numAnimals;
 	int		 numIterationsEachAnimal;
@@ -4068,30 +3748,23 @@ RESLT CScenario::CompareFileOutput(HANDLE Hd1, HANDLE Hd2)
 	if(ast2 != NULL)		delete [] ast2;
 	if(clusterInf2 != NULL) delete [] clusterInf2;
 	if(ansm2 != NULL)		delete [] ansm2;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 void CScenario::ResetRunCount()
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_state.runNumber = 1;
-#endif//NOCSENARIOFUNCTIONS
 }
 
 void CScenario::SetRunCount(DWORD RunCount)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	m_state.runNumber = RunCount;
-#endif//NOCSENARIOFUNCTIONS
 }
 
 DWORD CScenario::GetRunCount()
 {
 	DWORD ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_state.runNumber;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -4100,10 +3773,8 @@ DWORD CScenario::GetRunCount()
 RESLT CScenario::SpeciesToText(int SpeciesIndex, FILE *fd)
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	ret = (m_speciesList.Get(SpeciesIndex))->ModelToText(fd);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -4111,10 +3782,8 @@ RESLT CScenario::SpeciesToText(int SpeciesIndex, FILE *fd)
 RESLT CScenario::SpeciesToText(int SpeciesIndex, TCHAR *FileName)
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	AsserteSpeciesIndex(SpeciesIndex);
 	ret = (m_speciesList.Get(SpeciesIndex))->ModelToText(FileName);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -4122,7 +3791,6 @@ RESLT CScenario::SpeciesToText(int SpeciesIndex, TCHAR *FileName)
 RESLT CScenario::ScenarioToText(TCHAR *FileName)
 {
 	RESLT result = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	FILE *fd;
 
 	if(m_exit == TRUE)
@@ -4133,7 +3801,6 @@ RESLT CScenario::ScenarioToText(TCHAR *FileName)
 		return OPENFILEWRITE_ERROR;
 	result = ScenarioToText(fd);
 	fclose(fd);
-#endif//NOCSENARIOFUNCTIONS
 	return result;
 }
 
@@ -4183,7 +3850,6 @@ RESLT CScenario::ScenarioToText(FILE *fd)
 
 RESLT CScenario::RunParamsToTextFile(FILE *fd)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	HHMMSS hhmmss;
 	int i,j,k;
 	int speciesCount = GetSpeciesCount();
@@ -4337,7 +4003,6 @@ RESLT CScenario::RunParamsToTextFile(FILE *fd)
 	}
 	if(-1 == fprintf(fd, "------------------------------------------------------------------------------------------------\n\n\n"))
 		return FILEWRITE_ERROR;
-#endif//NOCSENARIOFUNCTIONS
 	return OK;
 }
 
@@ -4345,9 +4010,7 @@ RESLT CScenario::RunParamsToTextFile(FILE *fd)
 RESLT CScenario::GetErrorStatus()
 {
 	RESLT ret = OK;
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_state.errorStatus;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -4362,19 +4025,15 @@ RESLT CScenario::GetErrorStatus()
 USERPARAMS CScenario::GetCurrentScenarioParams()
 {
 	USERPARAMS ret = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	ret = m_mbSce.user;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
 int CScenario::GetSaveStatesCount()
 {
 	int ret = 0;
-#ifndef NOCSENARIOFUNCTIONS
 	_ASSERT(m_mbSce.numSaveIterations == (DWORD)m_fileMgr.GetStateSaveToFileCount(m_mbSce.startTime, m_mbSce.duration, &m_mbSce.intrvlOutptLim));
 	ret = m_mbSce.numSaveIterations;
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
 
@@ -4390,7 +4049,6 @@ int CScenario::GetSaveStatesCount()
 void CScenario::UpdateStatisticalCalculations(TAKE *SceTakes, TAKESTATS *SpeTakes, SCERESETTAKES *PrevTakes,
 											  SPECIESANIMATSTATEBUFFER *SpeAnimatBuffer)
 {
-#ifndef NOCSENARIOFUNCTIONS
 	int i, j;
 
 	// These local vars are here to make lines of code shorter and easier to read
@@ -4641,9 +4299,6 @@ void CScenario::UpdateStatisticalCalculations(TAKE *SceTakes, TAKESTATS *SpeTake
 	//-------------------------------------------------------------------------------------//
 	memcpy(&m_SceTakesCopy, SceTakes, sizeof(TAKE));
 	memcpy(m_SpeTakesCopy, SpeTakes, sizeof(TAKESTATS)*m_speciesList.Length());
-	
-//	TAKESTATS *m_SpeTakesCopy;
-#endif//NOCSENARIOFUNCTIONS
 
 }
 
@@ -4651,9 +4306,6 @@ void CScenario::UpdateStatisticalCalculations(TAKE *SceTakes, TAKESTATS *SpeTake
 SCENARIOPARAMS CScenario::GetScenarioParamsCopy(void)
 {
 	SCENARIOPARAMS ret = {0};
-#ifndef NOCSENARIOFUNCTIONS
 	ret = SCENARIOPARAMS(m_mbSce);
-#endif//NOCSENARIOFUNCTIONS
 	return ret;
 }
-

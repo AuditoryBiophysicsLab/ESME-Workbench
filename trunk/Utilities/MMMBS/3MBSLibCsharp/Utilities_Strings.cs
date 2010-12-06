@@ -6,15 +6,36 @@ namespace MMMBSLib
 {
     public class CStringUtil
     {
+
+        public static string SzEnforceUnsignedIntFmt(string Sz)
+        {
+            int i;
+            if(Sz.Length < 1)
+                return "";
+
+            // The entire string starting at the end
+            for(i=Sz.Length-1; i>=0; i--)
+                if(Sz[i] < 48 || Sz[i] > 57 || Sz[i] == '-')
+                    Sz = Sz.Remove(i, 1);
+
+            // Remove uneeded leading zeros.
+            while(Sz.Length > 1 && Sz[0] == '0')
+                Sz = Sz.Remove(0, 1);
+
+            return Sz;
+        }
+
         public static string SzEnforceIntFmt(string Sz)
         {
             if(Sz.Length < 1)
                 return "";
 
+            // The entire string except for the first character starting at the end
             for(int i=Sz.Length-1; i>0; i--)
                 if(Sz[i] < 48 || Sz[i] > 57)
                     Sz = Sz.Remove(i, 1);
 
+            // The first character
             if((Sz[0] < 48 || Sz[0] > 57) && Sz[0] != '-')
                 Sz = Sz.Remove(0, 1);
 
@@ -23,8 +44,12 @@ namespace MMMBSLib
 
         public static string SzEnforceDoubleFmt(string Sz)
         {
-            Boolean decFound = false;
-            int i=0;
+            Boolean decimalFound;
+            int     i;
+
+
+            decimalFound = false;
+            i=0;
 
             if(Sz.Length < 1)
                 return "";
@@ -34,9 +59,9 @@ namespace MMMBSLib
             {
                 if(Sz[i] == 46)
                 {
-                    if(decFound == true)
+                    if(decimalFound == true)
                         Sz = Sz.Remove(i, 1);
-                    decFound = true;
+                    decimalFound = true;
                 }
             }
 

@@ -347,11 +347,14 @@ namespace MBSGUI
             this.DiveProfileGroupBox = new System.Windows.Forms.GroupBox();
             this.DiveTimeScaleGroupBox = new System.Windows.Forms.GroupBox();
             this.DiveDepthScaleGroupBox = new System.Windows.Forms.GroupBox();
-            this.AdditionalHoursButton = new System.Windows.Forms.Button();
             this.DepthInputButton = new System.Windows.Forms.Button();
             this.ToggleTargetDepthDisplayButton = new System.Windows.Forms.Button();
             this.ToggleBathymetryDisplayButton = new System.Windows.Forms.Button();
-            this.ResetHoursButton = new System.Windows.Forms.Button();
+            this.DurationHoursTextBox = new System.Windows.Forms.TextBox();
+            this.label28 = new System.Windows.Forms.Label();
+            this.ConfirmDurationButton = new System.Windows.Forms.Button();
+            this.label29 = new System.Windows.Forms.Label();
+            this.RandomizerTextBox = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -374,7 +377,7 @@ namespace MBSGUI
             // DoneButton
             // 
             this.DoneButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.DoneButton.Location = new System.Drawing.Point(918, 557);
+            this.DoneButton.Location = new System.Drawing.Point(918, 577);
             this.DoneButton.Name = "DoneButton";
             this.DoneButton.Size = new System.Drawing.Size(75, 25);
             this.DoneButton.TabIndex = 99;
@@ -3234,16 +3237,16 @@ namespace MBSGUI
             // 
             // DateLabel
             // 
-            this.DateLabel.Location = new System.Drawing.Point(508, 79);
+            this.DateLabel.Location = new System.Drawing.Point(492, 79);
             this.DateLabel.Name = "DateLabel";
-            this.DateLabel.Size = new System.Drawing.Size(73, 13);
+            this.DateLabel.Size = new System.Drawing.Size(59, 13);
             this.DateLabel.TabIndex = 258;
             this.DateLabel.Text = "12/31/07";
             this.DateLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // UniqueIDLabel
             // 
-            this.UniqueIDLabel.Location = new System.Drawing.Point(508, 98);
+            this.UniqueIDLabel.Location = new System.Drawing.Point(492, 98);
             this.UniqueIDLabel.Name = "UniqueIDLabel";
             this.UniqueIDLabel.Size = new System.Drawing.Size(75, 13);
             this.UniqueIDLabel.TabIndex = 257;
@@ -3253,7 +3256,7 @@ namespace MBSGUI
             // label17
             // 
             this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label17.Location = new System.Drawing.Point(435, 79);
+            this.label17.Location = new System.Drawing.Point(419, 79);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(73, 13);
             this.label17.TabIndex = 255;
@@ -3262,9 +3265,9 @@ namespace MBSGUI
             // 
             // TimeLabel
             // 
-            this.TimeLabel.Location = new System.Drawing.Point(579, 79);
+            this.TimeLabel.Location = new System.Drawing.Point(554, 79);
             this.TimeLabel.Name = "TimeLabel";
-            this.TimeLabel.Size = new System.Drawing.Size(59, 13);
+            this.TimeLabel.Size = new System.Drawing.Size(53, 13);
             this.TimeLabel.TabIndex = 259;
             this.TimeLabel.Text = "24:47:59";
             this.TimeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -3272,7 +3275,7 @@ namespace MBSGUI
             // label19
             // 
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(468, 98);
+            this.label19.Location = new System.Drawing.Point(452, 98);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(40, 13);
             this.label19.TabIndex = 260;
@@ -3282,7 +3285,7 @@ namespace MBSGUI
             // SpeciesVersopmLabel
             // 
             this.SpeciesVersopmLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SpeciesVersopmLabel.Location = new System.Drawing.Point(349, 114);
+            this.SpeciesVersopmLabel.Location = new System.Drawing.Point(333, 114);
             this.SpeciesVersopmLabel.Name = "SpeciesVersopmLabel";
             this.SpeciesVersopmLabel.Size = new System.Drawing.Size(159, 13);
             this.SpeciesVersopmLabel.TabIndex = 262;
@@ -3291,7 +3294,7 @@ namespace MBSGUI
             // 
             // SaveVerLabel
             // 
-            this.SaveVerLabel.Location = new System.Drawing.Point(508, 114);
+            this.SaveVerLabel.Location = new System.Drawing.Point(492, 114);
             this.SaveVerLabel.Name = "SaveVerLabel";
             this.SaveVerLabel.Size = new System.Drawing.Size(33, 13);
             this.SaveVerLabel.TabIndex = 263;
@@ -3417,28 +3420,13 @@ namespace MBSGUI
             this.DiveDepthScaleGroupBox.TabStop = false;
             this.DiveDepthScaleGroupBox.Visible = false;
             // 
-            // AdditionalHoursButton
-            // 
-            this.AdditionalHoursButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.IndianRed;
-            this.AdditionalHoursButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.RosyBrown;
-            this.AdditionalHoursButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.AdditionalHoursButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.AdditionalHoursButton.Location = new System.Drawing.Point(535, 557);
-            this.AdditionalHoursButton.Name = "AdditionalHoursButton";
-            this.AdditionalHoursButton.Size = new System.Drawing.Size(118, 38);
-            this.AdditionalHoursButton.TabIndex = 273;
-            this.AdditionalHoursButton.TabStop = false;
-            this.AdditionalHoursButton.Text = "Additional Hours: 0";
-            this.AdditionalHoursButton.UseVisualStyleBackColor = true;
-            this.AdditionalHoursButton.Click += new System.EventHandler(this.AdditionalHoursButton_Click);
-            // 
             // DepthInputButton
             // 
             this.DepthInputButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.DepthInputButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DepthInputButton.Location = new System.Drawing.Point(783, 558);
+            this.DepthInputButton.Location = new System.Drawing.Point(505, 558);
             this.DepthInputButton.Name = "DepthInputButton";
-            this.DepthInputButton.Size = new System.Drawing.Size(118, 36);
+            this.DepthInputButton.Size = new System.Drawing.Size(118, 38);
             this.DepthInputButton.TabIndex = 276;
             this.DepthInputButton.Text = "Bathy Depth: -5000";
             this.DepthInputButton.UseVisualStyleBackColor = true;
@@ -3462,32 +3450,80 @@ namespace MBSGUI
             this.ToggleBathymetryDisplayButton.UseVisualStyleBackColor = true;
             this.ToggleBathymetryDisplayButton.Click += new System.EventHandler(this.ToggleBathymetryDisplayButton_Click);
             // 
-            // ResetHoursButton
+            // DurationHoursTextBox
             // 
-            this.ResetHoursButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.IndianRed;
-            this.ResetHoursButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.RosyBrown;
-            this.ResetHoursButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.ResetHoursButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ResetHoursButton.Location = new System.Drawing.Point(657, 558);
-            this.ResetHoursButton.Name = "ResetHoursButton";
-            this.ResetHoursButton.Size = new System.Drawing.Size(118, 38);
-            this.ResetHoursButton.TabIndex = 279;
-            this.ResetHoursButton.TabStop = false;
-            this.ResetHoursButton.Text = "Reset Hours";
-            this.ResetHoursButton.UseVisualStyleBackColor = true;
-            this.ResetHoursButton.Click += new System.EventHandler(this.ResetHoursButton_Click);
+            this.DurationHoursTextBox.BackColor = System.Drawing.SystemColors.Info;
+            this.DurationHoursTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.DurationHoursTextBox.Location = new System.Drawing.Point(771, 556);
+            this.DurationHoursTextBox.Name = "DurationHoursTextBox";
+            this.DurationHoursTextBox.Size = new System.Drawing.Size(31, 20);
+            this.DurationHoursTextBox.TabIndex = 280;
+            this.DurationHoursTextBox.Text = "200";
+            this.DurationHoursTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.DurationHoursTextBox.TextChanged += new System.EventHandler(this.DurationHoursTextBox_TextChanged);
+            this.DurationHoursTextBox.Leave += new System.EventHandler(this.DurationHoursTextBox_Leave);
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(629, 560);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(137, 13);
+            this.label28.TabIndex = 281;
+            this.label28.Text = "Duration ( hours, 168 max ):";
+            this.label28.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // ConfirmDurationButton
+            // 
+            this.ConfirmDurationButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.IndianRed;
+            this.ConfirmDurationButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.RosyBrown;
+            this.ConfirmDurationButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ConfirmDurationButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ConfirmDurationButton.Location = new System.Drawing.Point(808, 556);
+            this.ConfirmDurationButton.Name = "ConfirmDurationButton";
+            this.ConfirmDurationButton.Size = new System.Drawing.Size(52, 40);
+            this.ConfirmDurationButton.TabIndex = 282;
+            this.ConfirmDurationButton.TabStop = false;
+            this.ConfirmDurationButton.Text = "Update";
+            this.ConfirmDurationButton.UseVisualStyleBackColor = true;
+            this.ConfirmDurationButton.Click += new System.EventHandler(this.ConfirmDurationButton_Click);
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(672, 583);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(94, 13);
+            this.label29.TabIndex = 284;
+            this.label29.Text = "Randomizer Seed:";
+            this.label29.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // RandomizerTextBox
+            // 
+            this.RandomizerTextBox.BackColor = System.Drawing.SystemColors.Info;
+            this.RandomizerTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.RandomizerTextBox.Location = new System.Drawing.Point(771, 579);
+            this.RandomizerTextBox.Name = "RandomizerTextBox";
+            this.RandomizerTextBox.Size = new System.Drawing.Size(31, 20);
+            this.RandomizerTextBox.TabIndex = 283;
+            this.RandomizerTextBox.Text = "200";
+            this.RandomizerTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.RandomizerTextBox.TextChanged += new System.EventHandler(this.RandomizerTextBox_TextChanged);
+            this.RandomizerTextBox.Leave += new System.EventHandler(this.RandomizerTextBox_Leave);
             // 
             // FormSpeciesDefinition
             // 
-            this.AcceptButton = this.DoneButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1005, 612);
-            this.Controls.Add(this.ResetHoursButton);
+            this.Controls.Add(this.label29);
+            this.Controls.Add(this.RandomizerTextBox);
+            this.Controls.Add(this.ConfirmDurationButton);
+            this.Controls.Add(this.label28);
+            this.Controls.Add(this.DurationHoursTextBox);
             this.Controls.Add(this.ToggleBathymetryDisplayButton);
             this.Controls.Add(this.ToggleTargetDepthDisplayButton);
             this.Controls.Add(this.DepthInputButton);
-            this.Controls.Add(this.AdditionalHoursButton);
             this.Controls.Add(this.DiveTimeScaleGroupBox);
             this.Controls.Add(this.DiveDepthScaleGroupBox);
             this.Controls.Add(this.MovementGoupBox);
@@ -3854,10 +3890,13 @@ namespace MBSGUI
         private System.Windows.Forms.GroupBox DiveTimeScaleGroupBox;
         private System.Windows.Forms.GroupBox DiveDepthScaleGroupBox;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button AdditionalHoursButton;
         private System.Windows.Forms.Button DepthInputButton;
         private System.Windows.Forms.Button ToggleTargetDepthDisplayButton;
         private System.Windows.Forms.Button ToggleBathymetryDisplayButton;
-        private System.Windows.Forms.Button ResetHoursButton;
+        private System.Windows.Forms.TextBox DurationHoursTextBox;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Button ConfirmDurationButton;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.TextBox RandomizerTextBox;
     }
 }

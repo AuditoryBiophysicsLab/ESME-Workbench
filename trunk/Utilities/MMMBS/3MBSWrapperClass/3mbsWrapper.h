@@ -185,7 +185,7 @@ namespace mbs {
 		int	GetDurationSeconds();
 		void SetStartTime(mbsHHMMSS StartTime);
 		mbsHHMMSS GetStartTime();
-		void CalculateRequiredDiskSpace(DWORD *BinStorage, DWORD *TextStorage);
+		BOOL CalculateRequiredDiskSpace(DWORD *BinStorage, DWORD *TextStorage);
 		mbs::mbsRESULT LoadScenario(String ^FileName);
 		mbs::mbsRESULT SaveScenario(String ^FileName);
 

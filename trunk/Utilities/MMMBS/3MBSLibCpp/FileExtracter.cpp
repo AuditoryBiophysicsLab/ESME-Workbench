@@ -1281,13 +1281,13 @@ TCHAR *CFileExtracter::BuildAnimatTextFileTitle(TCHAR *szAnimatFileTitle,
 	SPECIESBINOUTINF *speBinOut;
 	TCHAR *ind = "ind";
 	TCHAR *pod = "pod";
-	TCHAR szBuff[SIZE_256];
+	TCHAR szBuff[BUFFERED_MAX_PATH];
 
 	_ASSERT(szAnimatFileTitle != NULL);
 	strcpy_s(szAnimatFileTitle, BuffSize, szSceFileTitle);
 
 	m_staticLib.RemoveExtension(szAnimatFileTitle);
-	sprintf_s(szBuff, SIZE_256, "%05d.%03d_%s", AnimatNum, OffScreenCount, szAnimatFileTitle);
+	sprintf_s(szBuff, sizeof(szBuff), "%05d.%03d_%s", AnimatNum, OffScreenCount, szAnimatFileTitle);
 
 	// See if species and animat associations to species was included in the binary output file.
 	if(Setup->bin.headerInf.speInfAndAnimatAsscn == FALSE)
@@ -1310,14 +1310,19 @@ TCHAR *CFileExtracter::BuildAnimatTextFileTitle(TCHAR *szAnimatFileTitle,
 	{
 		// Individuals
 		// Build a name for this animat's text file.
+
 		if(strlen(Sce->spe[speMembership].inf.fileTitle) > 0)
 		{
+			//szBuff[0] = 0;
 			sprintf_s(szAnimatFileTitle, BuffSize, "%s_%s%02d_%s%03d",
 				szBuff,
 				Sce->spe[speMembership].inf.fileTitle,
 				speMembership+1,
 				ind,
 				Sce->ansm[AnimatNum].pod_id+1);
+
+			_ASSERT(BuffSize >= strlen(szBuff));
+			//strncpy_s(szAnimatFileTitle, BuffSize, szBuff, BuffSize-1);
 		}
 		else
 		{
@@ -1367,8 +1372,38 @@ TCHAR *CFileExtracter::BuildAnimatTextFileName(TCHAR *szAnimatFileName,
 										 const TCHAR *szAnimatFileTitle,
 										 const TCHAR *szOutputFilePath)
 {
-	sprintf_s(szAnimatFileName, BuffSize, "%s\\%s", szOutputFilePath, szAnimatFileTitle);
+	char szCurrentDirectory[MAX_PATH];
+	char szFileTitleCopy[MAX_PATH];
+	size_t localPathLen; // Lenth of the folder being created to store the extracted files into.
+	size_t titleLen; // The length of the file title being created
+	size_t currentDirLen; // Current directory length.
+	size_t fileLen;
+	int index = 0;
+	const DWORD MAXPATH = MAX_PATH;
+
+	strcpy_s(szFileTitleCopy, szAnimatFileTitle);
+
+	GetCurrentDirectory(MAXPATH, szCurrentDirectory);
+	currentDirLen = strlen(szCurrentDirectory);
+	localPathLen = strlen(szOutputFilePath);
+	titleLen = strlen(szFileTitleCopy);
+
+	fileLen = currentDirLen + localPathLen + titleLen + 2 + 4; // 2 for the two additional "\" and 4 for the ".trk"
+
+	// Not sure why I needed the -1 but didn't work without it.
+	while(fileLen > MAXPATH-1)
+	{
+		index++;
+		fileLen--;
+		titleLen = strlen(szFileTitleCopy);
+		szFileTitleCopy[titleLen-1] = 0;
+	}
+
+
+	sprintf_s(szAnimatFileName, BuffSize, "%s\\%s", szOutputFilePath, szFileTitleCopy);
 	strcat_s(szAnimatFileName, BuffSize, ".trk");
+
+	fileLen = currentDirLen + strlen(szAnimatFileName) + 1; // plus 1 for "\"
 	return szAnimatFileName;
 }
 
@@ -1829,9 +1864,6 @@ RESLT CFileExtracter::PrintPostRunStatsResults()
 
 	// Scenario Results by species
 	if(rwres > 0) rwres = fprintf(fd, "%s%s\n", TXTSTATS2000, TXTSTATS3000);
-
-	//if(sceParams.user.acousticAnimatActive == TRUE)
-	//	if(rwres > 0) rwres = fprintf(fd, TXTSTATS3010);
 
 	//------------------//
 	// Takes By Species

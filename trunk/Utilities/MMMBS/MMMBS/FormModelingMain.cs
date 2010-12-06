@@ -17,25 +17,29 @@ namespace MBSGUI
 {
     public partial class FormSpeciesDefinition: Form
     {
-
         //-----------------//
         // Member Variables
         //-----------------//
-        private uint INITIALDURATION = (uint)(3600);//3599; // for 1 hour of saved iterations.
-        public static double DEFAULT_BATHYMETRY_DEPTH = /*-532.203390*/ -5000;
+        private const uint SECS_PER_HOUR = 3600;
+        private const uint INIT_HRS_PER_BEHAVIOR = 1;
+        private const uint MAXIMUM_DURATION_HOURS = 168;
+        private const int DEFAULT_RANDOMIZER_SEED = 0;
+        public const double DEFAULT_BATHYMETRY_DEPTH = -5000;
 
-
-        private uint m_duration;
         private double m_bathyDepth;
         private C3mbs m_mmmbs = new C3mbs();
+
 
         private ANIMATSTATEDATABITMAP[] m_data;
         private DATA_EXTREMES_SPE_BITMAP m_dataExtremes;
         private mbsANIMAT_STATE[] m_stateArray;
 
+        // Both duration values are needed because these are in hours while the 3MB's duration is in seconds.
+        private uint m_durationHrsUser;         /* Duration run time set by the user. */
+        private uint m_durationLastActual;      /* Duration run time last used. */
+        //private Boolean m_durationSetOK;        /* . */
 
-        //private Point[] m_points_dive;
-        //private Point[] m_points_move;
+        private uint m_seedUser;                /* Randomizer seed set by the user. */
 
 
         // Color for front rectangle
@@ -63,33 +67,19 @@ namespace MBSGUI
         string m_szFileName;
         bool m_fileNamed;
         bool m_fileEverWasNamed;
-        //Boolean m_initializing;
         //Boolean m_modified = false;
         string m_szTitleBar;
 
-        private uint m_additionalSimHours = 0;
+        //private uint m_additionalSimHours = 0;
 
         //CDiveTimeScaleBitMap m_diveTimeScaleBitmap;
         CBitmapModelingMain m_bitmapMgr;
-
-        private void AdditionalHoursButton_Click(object sender, EventArgs e)
-        {
-            m_additionalSimHours = (m_additionalSimHours + 1)%40;
-            AdditionalHoursButton.Text = "Additional Hours " + m_additionalSimHours;
-            Run3MB(false, false);
-        }
-
-        private void ResetHoursButton_Click(object sender, EventArgs e)
-        {
-            m_additionalSimHours = 0;
-            AdditionalHoursButton.Text = "Additional Hours " + m_additionalSimHours;
-            Run3MB(false, false);
-        }
 
         public FormSpeciesDefinition()
         {
             int speciesNameListCount = m_speMdl.GetSpeciesNameListCount();
             m_speciesSelTooStrip = new ToolStripMenuItem[speciesNameListCount];
+
             // bitmap related initializations
             InitializeComponent();
             CopyNormalButtons();
@@ -101,6 +91,7 @@ namespace MBSGUI
         {
             //CDepthSpan spanRef;
             m_mmmbs = new C3mbs();
+            //mbsCONFIG config;
 
             //--------------------------------------------------------------------------//
             // Set up the intial species model.
@@ -116,10 +107,6 @@ namespace MBSGUI
                 "." + String.Format("{0:00}", m_speMdl.speciesCurrentSubVer) + " - Biomimetica";
 
 
-            m_additionalSimHours = 0;
-            AdditionalHoursButton.Text = "Additional Hours " + m_additionalSimHours;
-
-
             // A new species model is being created.  A default normal behavior will be
             // automatically added.  Change its name.
             //beh = m_speMdl.GetBehaviorDuplicate(0);
@@ -128,28 +115,34 @@ namespace MBSGUI
             SpeciesVersopmLabel.Text = "species version:";
             SaveVerLabel.Text = "" + m_speMdl.speciesCurrentSuperVer + "." + String.Format("{0:00}", m_speMdl.speciesCurrentSubVer);
 
-
             UpdateEntireForm();
 
-            // Bitmap related
-            m_duration = INITIALDURATION;
             m_bathyDepth = DEFAULT_BATHYMETRY_DEPTH;
 
-            //m_numIterations = (int)INITIALDURATION;
-            InitializeBitMapVars();
+            /* Set the initial scenario duration (hours). */
+            m_durationHrsUser = INIT_HRS_PER_BEHAVIOR * (uint)m_speMdl.BehaviorCount;
+            m_durationLastActual = m_durationHrsUser;
+            DurationHoursTextBox.Text = "" + m_durationLastActual;
+
+            /* Set the initial seed value for the scenario randomizer. */
+            //config = m_mmmbs.GetConfiguration();
+            m_seedUser = DEFAULT_RANDOMIZER_SEED;
+            RandomizerTextBox.Text = "" + DEFAULT_RANDOMIZER_SEED;
+
+            InitializeBitMapVars(m_durationHrsUser*SECS_PER_HOUR + 1);
             ToggleTargetDepthDisplayButton.BackColor = m_bitmapMgr.TargetDepthColor;
             ToggleBathymetryDisplayButton.BackColor = m_bitmapMgr.BathyColor;
 
             DepthInputButton.Text = "Bathy Depth:" + String.Format("{0:00}", m_bathyDepth);
 
+            ConfirmDurationButton.Enabled = false;
 
-            //Save();
             Run3MB(false, false);
         }
 
-        public void InitializeBitMapVars()
+        public void InitializeBitMapVars(uint Length)
         {
-            m_data = new ANIMATSTATEDATABITMAP[m_duration+1];
+            m_data = new ANIMATSTATEDATABITMAP[Length];
 
             Rectangle[] r = new Rectangle[4];
 
@@ -178,6 +171,202 @@ namespace MBSGUI
             m_bitmapMgr = new CBitmapModelingMain(this, r[0], r[1], r[2], r[3]);
         }
 
+        private void DurationHoursTextBox_TextChanged(object sender, EventArgs e)
+        {
+            int durationHrs;    /* Duration the user entered. */
+            string sz;             /* The resulting string when forced into a unsigned integer format. */
+
+            /* Remove all non-integer characters (including negative sign) from the user-modified string. */
+            sz = CStringUtil.SzEnforceUnsignedIntFmt(DurationHoursTextBox.Text);
+
+            /* TEST 0: CHECK FOR IMPROPER USER-ENTERED STRING FORMAT FOR AN UNSIGNED INTEGER. (not allowed)*/
+            /* If the user-modified string's format was incorrect (had non-ingetral values) reset the text box's
+             * text and return.  This function will be called again because of the text box's string being set. */  
+            if(DurationHoursTextBox.Text != sz)
+            {
+                DurationHoursTextBox.Text = sz;
+                return;
+            }
+
+            /* TEST 1: CHECK IF THE USER CLEARED OUT THE STRING ENTIRELY (allowed during user editing, must be verified
+             * after user has finished editing).
+             * 
+             * If the user simply cleared all characters (string length equals 0) then disable the run button.  The user
+             * is permitted to do this so an empty text box must be hanled here by disabling the run button.  Note that
+             * TEST 1 in the the _Leave() function associated with this text box places a value back into this text box
+             * should this text box loose foucus.  */
+            if(DurationHoursTextBox.Text.Length == 0)
+            {
+                ConfirmDurationButton.Enabled = false;
+                return;
+            }
+
+            /* Get the duration from the string value. */
+            durationHrs = CStringUtil.SzToIntOrMin0(sz);
+
+
+            /* TEST 2: CHECK IF THE USER EXCEEDED BOUNDARIES (allowed during user editing, must be verified
+             * after user has finished editing).
+             * 
+             * If the user endtered a duration less than or greater than allowed disable the run button.  This user is
+             * permitted to do this while editing so this condition must be hanled by disabling the run button here
+             * then testing for it should this text box loose focus.
+             * See TEST 2 in the the _Leave() function associated with this text box that places a valid value back 
+             * into this text box should it loose focus.  */
+            if(durationHrs > MAXIMUM_DURATION_HOURS || durationHrs == 0)
+            {
+                ConfirmDurationButton.Enabled = false;
+                return;
+            }
+
+
+            /* The user entered proper values for the duration so call the function that determines if the run button
+             * may be enabled. */
+            m_durationHrsUser = (uint)durationHrs;
+            UpdateRunButtonState();
+        }
+
+        // Handles situations where the Duration text box looses focus.
+        private void DurationHoursTextBox_Leave(object sender, EventArgs e)
+        {
+            int durationHrs;    /* Duration the user entered. */
+            string sz;          /* The resulting string when forced into a unsigned integer format. */
+
+            /* TEST 1: HANDLE THE EMPTY TEXT BOX. */
+            /* If the user cleared out all text then replace it with the current set duration hours then check if the
+             * run button should be enabled or not and return. (It can be enabled if the value set in another text box,
+             * currently ONLY the randomizer value text box, was recently modifed but the scenario not yet run.  */
+            if(DurationHoursTextBox.Text.Length == 0)
+            {
+                DurationHoursTextBox.Text = "" + m_durationLastActual;
+                UpdateRunButtonState();
+                return;
+            }
+
+
+            /* Convert the text box text to an unsigned integer format text.  If the user entered a zero then replace
+             * it with the last valid duration used.  All other entry parsing for bad entries will have already been
+             * handled. */
+            sz = CStringUtil.SzEnforceUnsignedIntFmt(DurationHoursTextBox.Text);
+
+            /* Get the duration from the string value. */
+            durationHrs = CStringUtil.SzToIntOrMin0(sz);
+
+            /* TEST 2: VERIFY THE DURATION IS WITHIN PERMITTED LIMITS. */
+            /* If the user-entered duration is too long or too short then set the duration back to the last one used.*/
+            if(durationHrs == 0)
+            {
+                DurationHoursTextBox.Text = "" + m_durationLastActual;
+                ConfirmDurationButton.Enabled = false;
+                return;
+            }
+            else if(durationHrs > MAXIMUM_DURATION_HOURS)
+            {
+                DurationHoursTextBox.Text = "" + MAXIMUM_DURATION_HOURS;
+                return;
+            }
+
+            // Check if the run button may be enabled.
+            UpdateRunButtonState();
+        }
+
+        private void RandomizerTextBox_TextChanged(object sender, EventArgs e)
+        {
+            int seed;    /* Randomizer seed value the user entered. */
+            string sz;   /* The resulting string when forced into a unsigned integer format. */
+
+            /* Remove all non-integer characters (including negative sign) from the user-modified string. */
+            sz = CStringUtil.SzEnforceUnsignedIntFmt(RandomizerTextBox.Text);
+
+            /* TEST 0: CHECK FOR IMPROPER USER-ENTERED STRING FORMAT FOR AN UNSIGNED INTEGER. (not allowed)*/
+            /* If the user-modified string's format was incorrect (had non-ingetral values) reset the text box's
+             * text and return.  This function will be called again because of the text box's string being set. */
+            if(RandomizerTextBox.Text != sz)
+            {
+                RandomizerTextBox.Text = sz;
+                return;
+            }
+
+            /* TEST 1: CHECK IF THE USER CLEARED OUT THE STRING ENTIRELY (allowed during user editing, must be verified
+             * after user has finished editing).
+             * 
+             * If the user simply cleared all characters (string length equals 0) then disable the run button.  The user
+             * is permitted to do this so an empty text box must be hanled here by disabling the run button.  Note that
+             * TEST 1 in the the _Leave() function associated with this text box places a value back into this text box
+             * should this text box loose focus.  */
+            if(RandomizerTextBox.Text.Length == 0)
+            {
+                ConfirmDurationButton.Enabled = false;
+                return;
+            }
+
+            /* Get the seed value from the string value. */
+            seed = CStringUtil.SzToIntOrMin0(sz);
+
+
+            /* The user entered proper values for the seeding so call the function that determines if the run button
+             * may be enabled. */
+            m_seedUser = (uint)seed;
+            UpdateRunButtonState();
+        }
+
+        private void RandomizerTextBox_Leave(object sender, EventArgs e)
+        {
+            int seed;           /* seed randomizer value the user entered. */
+            string sz;          /* The resulting string when forced into a unsigned integer format. */
+            mbsCONFIG config;   /* 3MB configuration.  Will hold the current randomizer value for the 3MB. */
+
+
+            /* TEST 1: HANDLE THE EMPTY TEXT BOX. */
+            /* If the user cleared out all text then replace it with the current set duration hours then check if the
+             * run button should be enabled or not and return. (It can be enabled if the value set in another text box,
+             * currently ONLY the randomizer value text box, was recently modifed but the scenario not yet run.  */
+            if(RandomizerTextBox.Text.Length == 0)
+            {
+                config = m_mmmbs.GetConfiguration();
+                RandomizerTextBox.Text = "" + config.seedValue;
+                UpdateRunButtonState();
+                return;
+            }
+
+            /* Convert the text box text to an unsigned integer format text.  If the user entered a zero then replace
+             * it with the last valid duration used.  All other entry parsing for bad entries will have already been
+             * handled. */
+            sz = CStringUtil.SzEnforceUnsignedIntFmt(RandomizerTextBox.Text);
+
+            /* Get the duration from the string value. */
+            seed = CStringUtil.SzToIntOrMin0(sz);
+
+            // Check if the run button may be enabled.
+            UpdateRunButtonState();
+        }
+
+        /* The only function that may enable the confirm button. */
+        private void UpdateRunButtonState()
+        {
+            mbsCONFIG config;   /* A 3mb Configuration struct. */
+            
+            /* Get the current configuration.*/
+            config = m_mmmbs.GetConfiguration();
+
+            /* If either the current seed value (found in the config struct) doesn't match the user's set seed value or
+             * the duration set by the user doesn't match the last duration used enable the confirm button so the user
+             * may launch the scenario. Otherwise disable the confirm button. */
+            if(m_seedUser != config.seedValue || m_durationHrsUser != m_durationLastActual)
+                ConfirmDurationButton.Enabled = true;
+            else
+                ConfirmDurationButton.Enabled = false;
+        }
+
+
+        private void ConfirmDurationButton_Click(object sender, EventArgs e)
+        {
+            mbsCONFIG config;   /* A 3mb Configuration struct. */
+            m_durationLastActual = m_durationHrsUser;
+            ConfirmDurationButton.Enabled = false;
+            Run3MB(false, false);
+        }
+
         void Run3MB(Boolean MaintainDataExtremes, Boolean MaintainScaling)
         {
             // Record if, prior to running the model, the model needed to be saved.
@@ -187,6 +376,7 @@ namespace MBSGUI
             mbsPosition position;
             mbsPosition[] positionArray = new mbsPosition[1];
             mbsRESULT result;
+            uint duration;
 
             position.latitude = 0;
             position.longitude = 0;
@@ -207,8 +397,8 @@ namespace MBSGUI
             }
 
             m_mmmbs.ClearScenario();
-            m_duration = (uint)INITIALDURATION * ((uint)m_speMdl.BehaviorCount) + m_additionalSimHours * 3600;
-            m_stateArray = new mbsANIMAT_STATE[m_duration + 1];
+            duration = m_durationLastActual * SECS_PER_HOUR;
+            m_stateArray = new mbsANIMAT_STATE[duration + 1];
 
             if(mbsRESULT.OK != (result = m_mmmbs.AddSpecies(speFileName)))
                 return;
@@ -220,21 +410,15 @@ namespace MBSGUI
             if(mbsRESULT.OK != (result = m_mmmbs.AddIndividualAnimat(0, position)))
                 return;
 
-            m_mmmbs.SetDuration((int)m_duration);
+            m_mmmbs.SetDuration((int)duration);
 
             mbsCONFIG config = m_mmmbs.GetConfiguration();
             config.enabled = false; // binary ouput disengaged.
             config.maintainFirstAnimatState = true;
-            //config.distCalcMethod = mbsDISTCALC.PLANAR_GEOMETRY;
-            //config.diveRate = true;
+            config.seedValue = m_seedUser;
             m_mmmbs.SetConfiguration(config);
             m_mmmbs.SetBaythyConstantDepth(m_bathyDepth);
 
-            //----------------------------------------------//
-            // Testing and Debugging
-            // m_mmmbs.ClearScenario();
-            //return;
-            //----------------------------------------------//
 
             // Run the entire scenario.  
             if(mbsRESULT.OK != (result = m_mmmbs.RunScenarioEntireDuration())) // 3mbsWrapper.cpp
@@ -256,7 +440,7 @@ namespace MBSGUI
 
 
             // retrieve the animats preserved states
-            for(i=0; i<m_duration+1; i++)
+            for(i=0; i<duration+1; i++)
             {
                 m_stateArray[i] = m_mmmbs.RetrieveFirstAnimatStateAtIndex((uint)i);
             }
@@ -744,7 +928,6 @@ namespace MBSGUI
                 m_speMdl.InitBehSpanMgr = (CInitialBehaviorSpanMgr)dlg.NrmlBehTransMdl;
                 UpdateModifiedStatus();
                 Run3MB(false, false);
-                //Run3MB(true, true);
             }
             this.BringToFront();
         }
@@ -794,7 +977,6 @@ namespace MBSGUI
             dlg.ShowDialog();
             this.BringToFront();
             UpdateModifiedStatus();
-            //Run3MB();
         }
 
 
@@ -911,7 +1093,9 @@ namespace MBSGUI
             DialogResult result = dlg.ShowDialog();
             this.BringToFront();
             if(result == DialogResult.Cancel)
+            {
                 return;
+            }
 
             m_fileNamed = true;
             m_fileEverWasNamed = true;
@@ -936,10 +1120,17 @@ namespace MBSGUI
                 msgBox.ShowDialog(this);
                 return;
             }
-            m_additionalSimHours = 0;
-            m_bathyDepth = DEFAULT_BATHYMETRY_DEPTH;
-            AdditionalHoursButton.Text = "Additional Hours " + m_additionalSimHours;
+            //m_additionalSimHours = 0;
             m_speMdl = mdl;
+            m_durationHrsUser = INIT_HRS_PER_BEHAVIOR * (uint)m_speMdl.BehaviorCount;
+            m_durationLastActual = m_durationHrsUser;
+
+            DurationHoursTextBox.Text = "" + m_durationHrsUser;
+
+            m_seedUser = DEFAULT_RANDOMIZER_SEED;
+            RandomizerTextBox.Text = "" + DEFAULT_RANDOMIZER_SEED;
+
+            m_bathyDepth = DEFAULT_BATHYMETRY_DEPTH;
             UpdateEntireForm();
             Run3MB(false, false);
         }
@@ -984,7 +1175,6 @@ namespace MBSGUI
         // Bitmap related
         private void FormSpeciesDefinition_MouseDown(object sender, MouseEventArgs e)
         {
-
             if(m_bitmapMgr.MouseEventWithinDiveProfileDataBitmap(e) == true)
             {
                 if(e.Button == MouseButtons.Left)
@@ -1425,6 +1615,5 @@ namespace MBSGUI
             m_bitmapMgr.DisplayBathy = !m_bitmapMgr.DisplayBathy;
             Invalidate();
         }
-
     }
 }

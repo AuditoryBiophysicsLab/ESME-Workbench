@@ -124,11 +124,11 @@ public:
 	void DeinitializeRun();
 	void InitializeRun(
 		const USERPARAMS *pUserSce,
+		C3MBRandom **mbRndPtrArr,
 		DWORD StartTime,
 		DWORD *UniqueID,
 		ANIMATSTATE *animatStateArray,
 		SCEPARMSSPECIESGROUP *pSpeGroupParamsArray,
-		C3MBRandom *pRandomRef,
 		CBathymetry *pBathymetry);
 
 	int SetAcousticExposureAllAnimats(double Lat, double Lon, double *dbBuffer);

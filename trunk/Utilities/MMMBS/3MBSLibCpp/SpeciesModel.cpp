@@ -34,8 +34,6 @@ CSpeciesModel::CSpeciesModel()
 	_ASSERT(sizeof(SPECIESBINOUTINF)%16 == 0);
 	_ASSERT(sizeof(SPECIES_MDL)%16 == 0);
 	ClearMemberVariables();
-	m_C3MBRandomDefault.mysrand(0);
-	m_pC3MBRandomRef = &m_C3MBRandomDefault;
 }
 
 CSpeciesModel::~CSpeciesModel()
@@ -43,10 +41,6 @@ CSpeciesModel::~CSpeciesModel()
 	ClearMemberVariables();
 }
 
-void CSpeciesModel::OverrideRandomInstance(C3MBRandom *pC3MBRandomRef)
-{
-	m_pC3MBRandomRef = pC3MBRandomRef;
-}
 
 
 /*----------------------------------------------------------------------------------------
@@ -141,8 +135,6 @@ void  CSpeciesModel::ClearMemberVariables()
 	}
 	free(m_speciesModel.p.behavior);
 	memset(&m_speciesModel, 0, sizeof(SPECIES_MDL));
-
-	m_pC3MBRandomRef = NULL;
 }
 
 BOOL CSpeciesModel::DefaultMemberVariables() // change to two functions, clear and default.
@@ -703,26 +695,16 @@ void CSpeciesModel::CopyModel(CSpeciesModel *pCpyMdl, const CSpeciesModel *pMdl)
 }
 
 
-//////////////////////////
-void CSpeciesModel::RunInitialBehaviorControlTest(MATRIX *M)
-{
-	int i;
-	SNGLBEHTRANSTRUCT beh = {0};
-	const int numTrials = 5;
-
-	// run the test
-	InitialBehaviorControlTest(&beh, M, numTrials);
-	
-	// deallocate memory associated with the test.
-	for(i=0; i<M->rowCnt; i++)
-		delete [] beh.cnt[i];
-	delete beh.cnt;
-}
 
 
 void CSpeciesModel::InitialBehaviorControlTest(SNGLBEHTRANSTRUCT *pBehTrans, MATRIX *M, int NumTrials)
 {
-	int i, j, clkStart;
+	int i;
+	int j;
+	int clkStart;
+	C3MBRandom Random;
+
+	Random.mysrand(0);
 
 	// Initialize the SNGLBEHTRANSTRUCT struct
 	pBehTrans->cnt = new CNTBIN* [M->rowCnt]; // one for each transitional period
@@ -745,7 +727,7 @@ void CSpeciesModel::InitialBehaviorControlTest(SNGLBEHTRANSTRUCT *pBehTrans, MAT
 		for(j=0; j<NumTrials; j++)
 		{
 			// Behavior transition returns -1 if no transition occurs.
-			pBehTrans->cnt[i][j].trans = IntialBehavior(clkStart, M);
+			pBehTrans->cnt[i][j].trans = IntialBehavior(clkStart, &Random, M);
 			pBehTrans->cnt[i][j].sec = 0; // holds no meaning for this test.
 		}
 	}
@@ -753,64 +735,67 @@ void CSpeciesModel::InitialBehaviorControlTest(SNGLBEHTRANSTRUCT *pBehTrans, MAT
 //////////////////
 
 // returns the index of the starting behavior.
-int CSpeciesModel::IntialBehavior(int AbsClock, MATRIX *Md)
+int CSpeciesModel::IntialBehavior(int AbsClock, C3MBRandom *pRefRand, MATRIX *Md)
 {
-	double clk = (double)m_staticLib.Time_To24HrClockSeconds(AbsClock)/3600; // time of day in seconds.
-	int timeRow, behvCol; // row, column
-	double dice = m_pC3MBRandomRef->myrand();
-	double start, end; // time of day, in seconds
+	double clk;       /* time of day in seconds. */
+	int    timeRow;   /* row */
+	int    behvCol;   /* column */
+	double dice;
+	double start;     /* time of day in seconds. */
+	double end;       /* time of day in seconds. */
 
-	// Match the timeRow of day with the appropriate start_matrix row
+	/* Input assertions. */
+	_ASSERT(pRefRand);
+
+	/* Initialize Variables. */
+	clk = (double)m_staticLib.Time_To24HrClockSeconds(AbsClock)/3600.0; 
+	dice = pRefRand->myrand();
+
+	/* Match the timeRow of day with the appropriate start_matrix row. */
 	timeRow = 0;
 	while(timeRow+1 < Md->rowCnt)
 	{
 		start = Md->p.ppa[timeRow][0];
 		end = Md->p.ppa[timeRow][1];
 
-		if(((start < end) && (start <= clk) && (clk <= end)) || ((end < start) && (end <= clk) && (clk <= start)))
+		if( ( (start < end) && (start <= clk) && (clk <= end) ) || ( (end < start) && (end <= clk) && (clk <= start) ) )
 			break;
 		timeRow++;
 	}
 
-	// Determine the initial behavior (changed to 0-based).
-	// Using behvCol+5 in the if statement because of the potential that the last column
-	// may have incorrect data (something greater than 1 for example) so this forces the
-	// finally selected behavior to be the last possible comlumn.
+	/* Determine the 0-indexed initial behavior. */
 	behvCol = 2;
-	while((behvCol+2 < Md->colCnt == TRUE) &&
-		((Md->p.ppa[timeRow][behvCol]<dice && dice<=Md->p.ppa[timeRow][behvCol+1]) == FALSE))
+	while( (behvCol+2 < Md->colCnt ) && ( !(Md->p.ppa[timeRow][behvCol] < dice && dice <= Md->p.ppa[timeRow][behvCol+1]) ) )
 		behvCol++;
 	return behvCol-2;
-}
-
-void CSpeciesModel::TestBehaviorTransitionControlTest(MATRIX *M, int BehaviorIndex)
-{
-	int i;
-	SNGLBEHTRANSTRUCT beh = {0};
-	const int numTrials = 5;
-
-	// run the test
-	RunBehaviorTransitionControlTest(&beh, M, BehaviorIndex, numTrials);
-	
-	// deallocate memory associated with the test.
-	for(i=0; i<M->rowCnt; i++)
-		delete [] beh.cnt[i];
-	delete beh.cnt;
 }
 
 
 void CSpeciesModel::RunBehaviorTransitionControlTest(SNGLBEHTRANSTRUCT *pBehTrans, MATRIX *M, int BehaviorIndex, int NumTrials)
 {
-	int i, j, clkStart;
-	int newState;
+	int           i;
+	int           j;
+	int           clkStart;
+	int           newState;
 	TRANSITNSTATE transState;
-	int loopCnt;
+	int           loopCnt;
+	C3MBRandom    random;        /* 3mb random class instance used for random number generation.  This method is permitted to have
+							    * it's own instance because it is not called upon during scenario runs. */
 
-	// Initialize the SNGLBEHTRANSTRUCT struct
+	/* Input Assertions. */
+	_ASSERT(pBehTrans);
+	_ASSERT(M);
+	_ASSERT(BehaviorIndex >= 0);
+	_ASSERT(NumTrials >= 1);
+
+	/* Initialize local variables. */
+	random.mysrand(0);
+
+	/* Initialize the SNGLBEHTRANSTRUCT struct passed in. */
 	pBehTrans->cnt = new CNTBIN* [M->rowCnt]; // one for each transitional period
 	for(i=0; i<M->rowCnt; i++)
 	{
-		pBehTrans->cnt[i] = new CNTBIN[NumTrials]; // one for each tiral.
+		pBehTrans->cnt[i] = new CNTBIN[NumTrials]; // one for each trial.
 		memset(pBehTrans->cnt[i], 0, sizeof(CNTBIN)*NumTrials);
 	}
 
@@ -818,20 +803,19 @@ void CSpeciesModel::RunBehaviorTransitionControlTest(SNGLBEHTRANSTRUCT *pBehTran
 	// j indexes the trial being run on the ith transitional period.
 	for(i=0; i<M->rowCnt; i++)
 	{
-		// index zero of the behavior transition matrix as a function of time holds the
-		// starting clock time of a transition.  Time is in fractions of hours so mulitply
-		// by 3660 to get seconds.
+		/* index zero of the behavior transition matrix as a function of time holds the starting clock time of a transition.
+		 * Time is in fractions of hours so mulitply by 3660 to get seconds. */
 		clkStart = (int)floor(M->p.ppa[i][0]*3660);
 		memset(pBehTrans->cnt[i], 0, sizeof(CNTBIN)*NumTrials);
 
 		for(j=0; j<NumTrials; j++)
 		{
 			transState.timeLapsed =0;
-			transState.endDice = m_pC3MBRandomRef->myrand();
+			transState.endDice = random.myrand();
 
 			// Behavior transition returns -1 if no transition occurs.
 			loopCnt = 0;
-			while(-1 == (newState = BehaviorTransition(T50_K_TERM, &transState, M, clkStart))) // TODO: comback to and remove the T50_K_TERM
+			while(-1 == (newState = BehaviorTransition(T50_K_TERM, &transState, M, &random, clkStart))) // TODO: comback to and remove the T50_K_TERM
 			{
 				// Ensure no infinite loop by give up to two days without a translation (craziness!).
 				if(transState.timeLapsed > NUMSECSPERDAY*2 || loopCnt++ >= 100000)
@@ -887,7 +871,7 @@ void CSpeciesModel::RunBehaviorTransitionControlTest(SNGLBEHTRANSTRUCT *pBehTran
 *					 the index of the new behavior if one does.
 *
 *****************************************************************************************/
-int CSpeciesModel::BehaviorTransition(BEHTRANS_TERM_MODEL ModelType, const TRANSITNSTATE *Bs, const MATRIX *pM, int AbsClock)
+int CSpeciesModel::BehaviorTransition(BEHTRANS_TERM_MODEL ModelType, const TRANSITNSTATE *Bs, const MATRIX *pM, C3MBRandom *pRefRand, int AbsClock)
 {
 	// Get a local constant reference to the behavior model.  Making it constant prevents this routine from altering
 	// anything in the model. 
@@ -968,7 +952,7 @@ int CSpeciesModel::BehaviorTransition(BEHTRANS_TERM_MODEL ModelType, const TRANS
 	// Determine the next behavior.
 
 	// Draw a random number
-	dice = m_pC3MBRandomRef->myrand();
+	dice = pRefRand->myrand();
 
 	// Make a "friendlier" transition matrix for determining the next behavior in the
 	// sequence.
@@ -1043,31 +1027,31 @@ void CSpeciesModel::CopyMatrix(ELEMENT *pCpyM, const ELEMENT *pM)
 * CORRESPONDING FUNCTION IN ORIGINAL 3MB PROGRAM, IF ANY
 *
 *******************************************************************************/
-double CSpeciesModel::RateModel(const RANDOM *R)
+double CSpeciesModel::RateModel(const RANDOM *R, C3MBRandom *pRefRand)
 {
 	int loopCount = 0;
 	double r = -1.0;
 	// If rate of travel is terminated, calculate the new rate of travel
 	while(r < 0.0 && loopCount++ < 100)
-		r = (m_pC3MBRandomRef->myrand() * (R->max - R->min)) + R->min;
+		r = (pRefRand->myrand() * (R->max - R->min)) + R->min;
 
 	if(r < 0.00)
 		r = 1.0;
 	return r;
 }
-double CSpeciesModel::RateModel(const GAUSS *R)
+double CSpeciesModel::RateModel(const GAUSS *R, C3MBRandom *pRefRand)
 {
 	int loopCount = 0;
 	double r = -1.0;
 	while(r < 0.0 && loopCount++ < 100)
-		r = m_pC3MBRandomRef->noise(R->mean, R->std);
+		r = pRefRand->noise(R->mean, R->std);
 	if(r < 0.00)
 		r = 1.0;
 	return r;
 }
-double CSpeciesModel::RateModel(const RATEVCTRMDLPARAM *R)
+double CSpeciesModel::RateModel(const RATEVCTRMDLPARAM *R, C3MBRandom *pRefRand)
 {
-	double dice = m_pC3MBRandomRef->myrand();
+	double dice = pRefRand->myrand();
 	int rateCol;
 
 	// Randomly determine the upper and lower rate bounds.
@@ -1079,19 +1063,19 @@ double CSpeciesModel::RateModel(const RATEVCTRMDLPARAM *R)
 
 	// Calculate the new rate. rateCol+1 takes uppper rate bound into account, myRand()
 	// the lower bount.
-	return fabs((rateCol-m_pC3MBRandomRef->myrand()) * R->step.a);
+	return fabs((rateCol-pRefRand->myrand()) * R->step.a);
 }
-double CSpeciesModel::RateModel(const RATEMDL *R)
+double CSpeciesModel::RateModel(const RATEMDL *R, C3MBRandom *pRefRand)
 {
 	// Calculate new rate.
 	switch(R->modelType)
 	{
 	case VECTOR:
-		return RateModel(&R->vm);
+		return RateModel(&R->vm, pRefRand);
 	case UNIFORM:
-		return RateModel(&R->rnd);
+		return RateModel(&R->rnd, pRefRand);
 	case GAUSSIAN:
-		return RateModel(&R->gauss);
+		return RateModel(&R->gauss, pRefRand);
 	}
 	return 0;
 }
@@ -1155,18 +1139,40 @@ double CSpeciesModel::GetMaxRate(const GAUSS *R)
 * CRW_WithDirectionalBias() in horizontal_movement.cpp.
 *
 *******************************************************************************/
-double CSpeciesModel::Direction(const RANDOMWALK *M)
+double CSpeciesModel::Direction(const RANDOMWALK *M, C3MBRandom *pRefRand)
 {
-	// Quiet compiler warning.
-	RANDOMWALK m = *M;
-	m.termCoeff = m.termCoeff;
-	return m_staticLib.KeepWithin360(m_pC3MBRandomRef->myrand() * 360);
+	double fVal;    /* Holds a randomly generated number and retun value */
+	RANDOMWALK m;   /* Random walk model.  Not needed here, but used to keep compiler warning quite about the RANDOMWALK param
+					 * passed in that is also not needed but is passed in to keep the signature of all Direction Model-related
+					 * functions the same. */
+
+	/* Assert input(s) and handle cases when not correct. */
+	_ASSERT(M);
+	_ASSERT(pRefRand);
+	if(M)
+		memcpy(&m, M, sizeof(RANDOMWALK));
+
+	fVal = pRefRand->myrand();
+	fVal *= 360.0;
+	fVal = m_staticLib.KeepWithin360(fVal);
+	return fVal;
 }
-double CSpeciesModel::Direction(const CORRANDWALK *M, double Bearing)
+double CSpeciesModel::Direction(const CORRANDWALK *M, double Bearing, C3MBRandom *pRefRand)
 {
-	return m_staticLib.KeepWithin360(Bearing + m_pC3MBRandomRef->noise(0, M->perturbation));
+	double fVal;    /* Holds a randomly generated number. */
+
+	/* Assert input(s) and handle cases when not correct. */
+	_ASSERT(M);
+	_ASSERT(pRefRand);
+	if(!M || !pRefRand)
+		return 0;
+
+	fVal = pRefRand->noise(0, M->perturbation);
+	fVal += Bearing;
+	fVal = m_staticLib.KeepWithin360(fVal);
+	return fVal;
 }
-double CSpeciesModel::Direction(const CORRANDWALKDB *M, double Bearing)
+double CSpeciesModel::Direction(const CORRANDWALKDB *M, double Bearing, C3MBRandom *pRefRand)
 {
 	double left, right;		// degree arc, to the right or left, between current bearing and
 	double pert;	// a change in direction applied to the current bearing.
@@ -1175,7 +1181,7 @@ double CSpeciesModel::Direction(const CORRANDWALKDB *M, double Bearing)
 	int loopCnt;
 
 	// Calculate the change in arc (direction of turn not yet decided)
-	pert = fabs(m_pC3MBRandomRef->noise(0, M->perturbation));
+	pert = fabs(pRefRand->noise(0, M->perturbation));
 
 	// Determine which is closer, left or right turn
 	right = left = 0.0;
@@ -1211,14 +1217,14 @@ double CSpeciesModel::Direction(const CORRANDWALKDB *M, double Bearing)
 
 	// Draw a random number and determine if the turn is to the left
 	// (condition met) or to the right (condition not met)
-	if(m_pC3MBRandomRef->myrand() <= prob_turn_left) 
+	if(pRefRand->myrand() <= prob_turn_left) 
 		pert *= -1;
 
 	// Calculate bearing
 	return m_staticLib.KeepWithin360(Bearing + pert);
 }
 
-double CSpeciesModel::Direction(const DIRVCTRMDLPARAM *M, const DIRECTIONAL_MODEL_TYPE Type, double Bearing)
+double CSpeciesModel::Direction(const DIRVCTRMDLPARAM *M, const DIRECTIONAL_MODEL_TYPE Type, double Bearing, C3MBRandom *pRefRand)
 {
 	double dice;
 	double temp_sum = 0;	// summation of the probTurningArray array used in calculating
@@ -1260,7 +1266,7 @@ double CSpeciesModel::Direction(const DIRVCTRMDLPARAM *M, const DIRECTIONAL_MODE
 		probTurningArray[j] = probTurningArray[j-1] + probTurningArray[j] / temp_sum ;
 
 	// Determine the arc within which the change of direction will occur
-	dice = m_pC3MBRandomRef->myrand();
+	dice = pRefRand->myrand();
 	for(index=1; index < M->direction.colCnt; index++)
 	{
 		if((probTurningArray[index-1] < dice) && (dice <= probTurningArray[index]))
@@ -1269,22 +1275,22 @@ double CSpeciesModel::Direction(const DIRVCTRMDLPARAM *M, const DIRECTIONAL_MODE
 
 	// Determine the new bearing, bearing equals old bearing plus a change.
 	delete [] probTurningArray;
-	return m_staticLib.KeepWithin360(Bearing - 180 + (index - m_pC3MBRandomRef->myrand()) * divisor);
+	return m_staticLib.KeepWithin360(Bearing - 180 + (index - pRefRand->myrand()) * divisor);
 }
 
-double CSpeciesModel::Direction(const DIRCTNMDL *Dp, const DIRECTIONSTATE *Ds)
+double CSpeciesModel::Direction(const DIRCTNMDL *Dp, const DIRECTIONSTATE *Ds, C3MBRandom *pRefRand)
 {
 	switch(Dp->modelType)
 	{
 	case VECTOR_MODEL_DIRECTIONAL_NO_BIASING:
 	case VECTOR_MODEL_DIRECTIONAL_WITH_VECTOR_MODEL_BIASING:
-		return Direction(&Dp->vm, Dp->modelType, Ds->bearing);
+		return Direction(&Dp->vm, Dp->modelType, Ds->bearing, pRefRand);
 	case RANDOM_WALK:
-		return Direction(&Dp->rndWalk);
+		return Direction(&Dp->rndWalk, pRefRand);
 	case CORRELATED_RANDOM_WALK:
-		return Direction(&Dp->crRndWalk, Ds->bearing);
+		return Direction(&Dp->crRndWalk, Ds->bearing, pRefRand);
 	case CORRELATED_RANDOM_WALK_WITH_DIR_BIASING:
-		return Direction(&Dp->crRndWalkDb, Ds->bearing);
+		return Direction(&Dp->crRndWalkDb, Ds->bearing, pRefRand);
 	}
 	return 0;
 }
@@ -1318,7 +1324,7 @@ double CSpeciesModel::Direction(const DIRCTNMDL *Dp, const DIRECTIONSTATE *Ds)
 *	FindDepthNextDive(), in file vertical_movement.cpp
 *
 *******************************************************************************/
-double CSpeciesModel::DepthModel(const RANDOM *D)
+double CSpeciesModel::DepthModel(const RANDOM *D, C3MBRandom *pRefRand)
 {
 	double d = 1;
 	int loopCnt = 0;
@@ -1327,7 +1333,7 @@ double CSpeciesModel::DepthModel(const RANDOM *D)
 		maxDepth = -maxDepth;
 
 	while(d > 0.0 && loopCnt++ < 10000)
-		d = (-1) * m_pC3MBRandomRef->myrand() * maxDepth;
+		d = (-1) * pRefRand->myrand() * maxDepth;
 
 	if(loopCnt >= 10000)
 		d = -1*maxDepth;
@@ -1335,14 +1341,14 @@ double CSpeciesModel::DepthModel(const RANDOM *D)
 	return d;
 }
 	
-double CSpeciesModel::DepthModel(const GAUSS *D)
+double CSpeciesModel::DepthModel(const GAUSS *D, C3MBRandom *pRefRand)
 {
-	return (-1) * fabs(m_pC3MBRandomRef->noise(D->mean, D->std));			
+	return (-1) * fabs(pRefRand->noise(D->mean, D->std));			
 }
-double CSpeciesModel::DepthModel(const VCTRMDLPARAM *D)
+double CSpeciesModel::DepthModel(const VCTRMDLPARAM *D, C3MBRandom *pRefRand)
 {
 	int depthCol;
-	double dice = m_pC3MBRandomRef->myrand();
+	double dice = pRefRand->myrand();
 
 	for(depthCol = 1; depthCol < D->vector.colCnt; depthCol++)
 	{
@@ -1351,19 +1357,19 @@ double CSpeciesModel::DepthModel(const VCTRMDLPARAM *D)
 	}
 	
 	// Get a random number then calculate the new depth.
-	return (-1)*fabs((depthCol-m_pC3MBRandomRef->myrand()) * D->step.a);
+	return (-1)*fabs((depthCol-pRefRand->myrand()) * D->step.a);
 }
 
-double CSpeciesModel::DepthModel(const DEPTHPARAM *D)
+double CSpeciesModel::DepthModel(const DEPTHPARAM *D, C3MBRandom *pRefRand)
 {
 	switch(D->modelType)
 	{
 	case VECTOR:
-		return DepthModel(&D->vm);
+		return DepthModel(&D->vm, pRefRand);
 	case UNIFORM:
-		return DepthModel(&D->rnd);
+		return DepthModel(&D->rnd, pRefRand);
 	case GAUSSIAN:
-		return DepthModel(&D->gauss);
+		return DepthModel(&D->gauss, pRefRand);
 	}
 	return 0;
 }
@@ -1394,13 +1400,13 @@ double CSpeciesModel::DepthModel(const DEPTHPARAM *D)
 *	SurfaceIntervalVectorModel() and GaussianRandomSurfaceInterval().
 *
 *******************************************************************************/
-int CSpeciesModel::SurfaceInterval(const GAUSS *S)
+int CSpeciesModel::SurfaceInterval(const GAUSS *S, C3MBRandom *pRefRand)
 {
 	double si = -1.0;
 	int loopCnt = 0;
 
 	while (si < 0.0 && loopCnt++ < 10000)
-		si = m_pC3MBRandomRef->noise(S->mean, S->std);
+		si = pRefRand->noise(S->mean, S->std);
 
 	if(loopCnt >= 10000)
 		si = 1;
@@ -1408,7 +1414,7 @@ int CSpeciesModel::SurfaceInterval(const GAUSS *S)
 	return (int)floor(si);
 }
 
-int CSpeciesModel::SurfaceInterval(const VCTRMDLPARAM *S)
+int CSpeciesModel::SurfaceInterval(const VCTRMDLPARAM *S, C3MBRandom *pRefRand)
 {
 	int c; // row and column
 	double dice; // a random number
@@ -1416,7 +1422,7 @@ int CSpeciesModel::SurfaceInterval(const VCTRMDLPARAM *S)
 	int cnt=0; // avoid infinite loops.
 
 	do{
-		dice = m_pC3MBRandomRef->myrand();
+		dice = pRefRand->myrand();
 		c = 1;
 		while(c < S->vector.colCnt-1)
 		{
@@ -1425,21 +1431,21 @@ int CSpeciesModel::SurfaceInterval(const VCTRMDLPARAM *S)
 			c++;
 		}
 		// Calculate the number of seconds.
-		si = (c - m_pC3MBRandomRef->myrand()) * S->step.a;
+		si = (c - pRefRand->myrand()) * S->step.a;
 	}while(si < 0.0 && cnt++ < 100);
 
 	return (int)floor(fabs(si));
 }
 
-int CSpeciesModel::SurfaceInterval(const SURFINTRVLPARAM *Sp)
+int CSpeciesModel::SurfaceInterval(const SURFINTRVLPARAM *Sp, C3MBRandom *pRefRand)
 {
 
 	switch(Sp->modelType)
 	{
 	case VECTOR:
-		return SurfaceInterval(&Sp->vm);
+		return SurfaceInterval(&Sp->vm, pRefRand);
 	case GAUSSIAN:
-		return SurfaceInterval(&Sp->gauss);
+		return SurfaceInterval(&Sp->gauss, pRefRand);
 	case UNIFORM:
 		_ASSERTE(Sp->modelType != UNIFORM);
 		return 0;
@@ -1469,33 +1475,33 @@ int CSpeciesModel::SurfaceInterval(const SURFINTRVLPARAM *Sp)
 *	TimeReversedVectorModel()
 *
 *******************************************************************************/
-int CSpeciesModel::ReversalDuration(const REVERSAL_RND *Rp)
+int CSpeciesModel::ReversalDuration(const REVERSAL_RND *Rp, C3MBRandom *pRefRand)
 {
 	int loopCount = 0;
 	double time = -1;
 
 	while(time <= 0 && loopCount++ < 100)
-		time = m_pC3MBRandomRef->noise(Rp->time.mean, Rp->time.std);
+		time = pRefRand->noise(Rp->time.mean, Rp->time.std);
 
 	if(time <= 0)
 		time = 1;
 
 	return (int)time;
 }
-int CSpeciesModel::ReversalDuration(const REVERSAL_GAUSS *Rp)
+int CSpeciesModel::ReversalDuration(const REVERSAL_GAUSS *Rp, C3MBRandom *pRefRand)
 {
 	int loopCount = 0;
 	double time = -1;
 
 	while(time <= 0 && loopCount++ < 100)
-		time = m_pC3MBRandomRef->noise(Rp->time.mean, Rp->time.std);
+		time = pRefRand->noise(Rp->time.mean, Rp->time.std);
 
 	if(time <= 0)
 		time = 1;
 
 	return (int)time;
 }
-int CSpeciesModel::ReversalDuration(const REVVCTRMDLPARAM *Rp)
+int CSpeciesModel::ReversalDuration(const REVVCTRMDLPARAM *Rp, C3MBRandom *pRefRand)
 {
 	int c=0;
 	double dice;
@@ -1505,13 +1511,13 @@ int CSpeciesModel::ReversalDuration(const REVVCTRMDLPARAM *Rp)
 
 	while(time <= 0 && cnt++ < 100)
 	{
-		dice = m_pC3MBRandomRef->myrand();
+		dice = pRefRand->myrand();
 		for(c=1; c<Rp->time.colCnt; c++)
 		{
 			if((Rp->time.p.pa[c-1] < dice) && (dice <= Rp->time.p.pa[c]))
 				break;
 		}
-		time = (c - m_pC3MBRandomRef->myrand()) * Rp->timeStep.a;
+		time = (c - pRefRand->myrand()) * Rp->timeStep.a;
 	}
 
 	time = fabs(time);
@@ -1522,7 +1528,7 @@ int CSpeciesModel::ReversalDuration(const REVVCTRMDLPARAM *Rp)
 	return retTime;
 }
 
-int CSpeciesModel::ReversalDuration(const REVERSAL_DEF *Rp)
+int CSpeciesModel::ReversalDuration(const REVERSAL_DEF *Rp, C3MBRandom *pRefRand)
 {
 	if(Rp->reverses == FALSE)
 		return 0;
@@ -1530,11 +1536,11 @@ int CSpeciesModel::ReversalDuration(const REVERSAL_DEF *Rp)
 	switch(Rp->modelType)
 	{
 	case VECTOR:
-		return ReversalDuration(&Rp->vm);
+		return ReversalDuration(&Rp->vm, pRefRand);
 	case GAUSSIAN:
-		return ReversalDuration(&Rp->gauss);
+		return ReversalDuration(&Rp->gauss, pRefRand);
 	case UNIFORM:
-		return ReversalDuration(&Rp->rnd);
+		return ReversalDuration(&Rp->rnd, pRefRand);
 	}
 	return 0;
 }
@@ -1568,46 +1574,79 @@ int CSpeciesModel::ReversalDuration(const REVERSAL_DEF *Rp)
 *	ReversalVectorModel(), UniformRandomReversal(), and 
 *	GaussianRandomReversal() from vertical_movement.cpp
 *******************************************************************************/
-int CSpeciesModel::NumberOfReversals(const REVERSAL_GAUSS *R)
+int CSpeciesModel::NumberOfReversals(const REVERSAL_GAUSS *R, C3MBRandom *pRefRand)
 {
-	int numRev = 0;
-	int loopCnt = 0;
+	int numRev;
+	int loopCnt;
+	double dice;
 
-	if(m_pC3MBRandomRef->myrand() >= R->probOfReversal)
+	/* Assert input(s) and handle bad instances of it. */
+	_ASSERT(R);
+	_ASSERT(pRefRand);
+	if(!R || !pRefRand)
 		return 0;
+
+	dice = pRefRand->myrand();
+	if(dice >= R->probOfReversal)
+		return 0;
+
+	numRev = 0;
+	loopCnt = 0;
 	while(numRev <= 0 && loopCnt++ < 100) 
-		numRev = (int)m_pC3MBRandomRef->noise(R->count.mean, R->count.std);
+		numRev = (int)pRefRand->noise(R->count.mean, R->count.std);
 
 	if(numRev == 0)
 		numRev = 1;
+
 	return numRev;
 }
-int CSpeciesModel::NumberOfReversals(const REVERSAL_RND *R)
+int CSpeciesModel::NumberOfReversals(const REVERSAL_RND *R, C3MBRandom *pRefRand)
 {
-	int numRev = 0;
-	if(m_pC3MBRandomRef->myrand() >= R->probOfReversal)
-		return 0;
-	numRev = m_pC3MBRandomRef->rnd(R->count.min, R->count.max);
-	return abs(numRev);
-}
-int CSpeciesModel::NumberOfReversals(const REVVCTRMDLPARAM *R)
-{
-	double dice = m_pC3MBRandomRef->myrand();			// a random number
-	int c=0;				//column
-	if(m_pC3MBRandomRef->myrand() >= R->probOfReversal.a)
+	int numRev;   /* The determined number of reversals. */
+	double dice;  /* Holds a randomly determined number. */
+
+	/* Assert input(s) and handle bad instances of it. */
+	_ASSERT(R);
+	_ASSERT(pRefRand);
+	if(!R || !pRefRand)
 		return 0;
 
+	dice = pRefRand->myrand();
+	if(dice >= R->probOfReversal)
+		return 0;
+
+	numRev = pRefRand->rnd(R->count.min, R->count.max);
+	numRev = abs(numRev);
+	return numRev;
+}
+int CSpeciesModel::NumberOfReversals(const REVVCTRMDLPARAM *R, C3MBRandom *pRefRand)
+{
+	double dice;  /* Holds a randomly determined number. */
+	int c;		  /* column */
+
+	/* Assert input(s) and handle bad instances of it. */
+	_ASSERT(R);
+	_ASSERT(pRefRand);
+	if(!R || !pRefRand)
+		return 0;
+
+
+	dice = pRefRand->myrand();
+	if(dice >= R->probOfReversal.a)
+		return 0;
+
+	dice = pRefRand->myrand();
 	for(c=1; c<R->count.colCnt; c++)
 	{
 		if(R->count.p.pa[c-1] < dice && dice <= R->count.p.pa[c])
 			break;
 	}
 	// Mention this to Dorian.
+#pragma message("Ask Dorian about this: c * 2.  SpeciesModel.cpp, NumberOfReversals(), around line 1645")
 	return c * 2;
 }
-int CSpeciesModel::NumberOfReversals(const REVERSAL_DEF *Rp)
+int CSpeciesModel::NumberOfReversals(const REVERSAL_DEF *Rp, C3MBRandom *pRefRand)
 {
-
 	// If reversal modeling not being used just return (the switch has already been set to false), otherwise, fill in
 	// and determine needed information.
 	if(Rp->reverses == FALSE)
@@ -1616,11 +1655,11 @@ int CSpeciesModel::NumberOfReversals(const REVERSAL_DEF *Rp)
 	switch(Rp->modelType)
 	{
 	case VECTOR:
-		return NumberOfReversals(&Rp->vm);
+		return NumberOfReversals(&Rp->vm, pRefRand);
 	case GAUSSIAN:
-		return NumberOfReversals(&Rp->gauss);
+		return NumberOfReversals(&Rp->gauss, pRefRand);
 	case UNIFORM:
-		return NumberOfReversals(&Rp->rnd);
+		return NumberOfReversals(&Rp->rnd, pRefRand);
 	}
 	return 0;
 }

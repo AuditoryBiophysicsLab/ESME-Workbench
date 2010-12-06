@@ -185,6 +185,7 @@ DWORD WINAPI ScenarioThread(LPVOID lpParameter)
 	DWORD totAniCnt;
 	DWORD duration;
 	BOOL windowPreviouslyDisabled;
+	SCEACTIVITY sceAct;
 
 	//int remSecs = 0;
 	//HHMMSS hhmmss;
@@ -227,14 +228,17 @@ DWORD WINAPI ScenarioThread(LPVOID lpParameter)
 
 		// Continuously poll the extraction process and update the GUI until either the
 		// user aborts or the scenario process finishes.
-		while(gdata->sceRunThreadInf.exit == FALSE && gdata->sce.GetState().activity != __RUN_FINISHED)
+		sceAct = gdata->sce.GetState().activity;
+		while(gdata->sceRunThreadInf.exit == FALSE && sceAct != __RUN_FINISHED)
 		{
 			UpdateRunScenario(gdata, totAniCnt, duration);
+#if 0
 			windowPreviouslyDisabled = EnableWindow(gdata->hwin, TRUE);
 			if(windowPreviouslyDisabled != FALSE)
 				windowPreviouslyDisabled = FALSE;
-
+#endif
 			Sleep(25);
+			sceAct = gdata->sce.GetState().activity;
 		}
 
 		// If the user aborted the simulation then signal the simulation process to abort
@@ -468,7 +472,7 @@ RESLT MyGetOpenSaveFileName(BOOL Save, FILE_INFO *FI, HWND hWnd, const TCHAR *sz
 
 	// Initialize local variables and zero out the passed in FILE_INFO struct
 	memset(&ofn, 0, sizeof(OPENFILENAME));
-	memset(FI, 0, sizeof(FILE_INFO));
+	//memset(FI, 0, sizeof(FILE_INFO));
 
 	InitOFN(&ofn, hWnd, szFil, szExt, FI->szFileName, FI->szTitleName);
 

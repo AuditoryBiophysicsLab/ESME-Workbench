@@ -55,10 +55,10 @@ RAWENVIRONMENTALDATA CEnvironmentData::GetSlopeHeadingFromCrossProduct(RESLT *pR
 	slpHead.Ylen = m_nYlen-1;
 	slpHead.Vlen = slpHead.Xlen * slpHead.Ylen;
 
-	slpHead.X = new double[slpHead.Xlen];
-	slpHead.Y = new double[slpHead.Ylen];
-	slpHead.V1 = new double[slpHead.Vlen];
-	slpHead.V2 = new double[slpHead.Vlen];
+	slpHead.X = new double[slpHead.Xlen];	// Latitude of calculated slope and heading data points.
+	slpHead.Y = new double[slpHead.Ylen];   // Longitude of calculated slope and heading data points.
+	slpHead.V1 = new double[slpHead.Vlen];  // Used for calculated slope data point.
+	slpHead.V2 = new double[slpHead.Vlen];  // Used for calculated heading data point.
 
 	if(slpHead.X == NULL || slpHead.Y == NULL || slpHead.V1 == NULL || slpHead.V2 == NULL)
 		*pRes = MEMALLOC_ERROR;
@@ -232,8 +232,8 @@ RAWENVIRONMENTALDATA CEnvironmentData::GetSlopeHeadingFromCrossProduct(RESLT *pR
 			ptNE.lon = m_fY[y+1];
 			ptNE.depth = m_fV1[(x+1)*m_nYlen + (y+1)];
 		
-			slpHead.X[x] = ptSW.lat;// + (ptNW.lat - ptSW.lat)/2;
-			slpHead.Y[y] = ptSW.lon;// + (ptSE.lon - ptSW.lon)/2;
+			slpHead.X[x] = ptSW.lat;
+			slpHead.Y[y] = ptSW.lon;
 			slpHead.V1[x*slpHead.Ylen + y] = slope;
 			slpHead.V2[x*slpHead.Ylen + y] = heading;
 
@@ -1237,8 +1237,20 @@ FindDimensionIndexSansInterpolation(double Location, double *DimensionArray, int
 	else
 	{
 		i=0;
-		while(i<ArrayLen && FALSE == (DimensionArray[i] <= loc && loc < DimensionArray[i]+delta))
+		while(i<ArrayLen)
+		{
+			if(i < ArrayLen-2)
+			{
+				if(TRUE == (DimensionArray[i] <= loc && loc < DimensionArray[i+1]))
+					break;
+			}
+			else
+			{
+				if(TRUE == (DimensionArray[i] <= loc && loc < DimensionArray[i]+delta))
+					break;
+			}
 			i++;
+		}
 		if(i >= ArrayLen)
 			return -1;
 	}
@@ -1503,6 +1515,7 @@ GetValueAtCoordinateSansExtrapolation(double X, double Y, double Z, ENVDATA_INDE
 	// Begin the search starting near the last sector
 	//************************************************************************************//
 	x1 = FindDimensionIndexSansInterpolation(X, m_fX, m_nXlen);
+
 	y1 = FindDimensionIndexSansInterpolation(Y, m_fY, m_nYlen);
 
 	//------------------------------------------------------------------------------------//

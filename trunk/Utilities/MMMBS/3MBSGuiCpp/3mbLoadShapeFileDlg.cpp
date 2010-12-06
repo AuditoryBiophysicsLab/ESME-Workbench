@@ -26,7 +26,7 @@ LRESULT CALLBACK LoadShapeFileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LP
 	static SHAPE_FILE_THREAD_PARAM s_thread = {0};
 	static USERCHOICELISTS s_userChoiceLists;
 	static SHAPEFILE_LISTBOX_INDICES s_listBoxes;
-	static BOOL s_mbSpeFileMatched = FALSE;
+	static BOOL s_mbSpeFileMatched = FALSE; // Indicates if a species file match was found in the database with an actual 3mb species file on disk.  Has to do with shape files.
 	static FILE_INFO s_speFileInf = {0};
 	static double s_mean = 14.22, s_std = 7.59;
 	static BOOL pdfParamsValid = TRUE;;

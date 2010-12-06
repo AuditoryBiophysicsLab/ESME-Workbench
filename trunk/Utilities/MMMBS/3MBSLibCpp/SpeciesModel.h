@@ -42,8 +42,6 @@ public:
 
 private:
 	C3mbStaticsLib m_staticLib;
-	C3MBRandom m_C3MBRandomDefault;
-
 public:
 
 	//-----------------//
@@ -51,12 +49,10 @@ public:
 	//-----------------//
 	SPECIES_MDL m_speciesModel;
 	BOOL m_needSave;
-	C3MBRandom *m_pC3MBRandomRef;
 
 	//---------------------------------------------//
 	// memory deallocation
 	//---------------------------------------------//
-	void  OverrideRandomInstance(C3MBRandom *pC3MBRandomRef);
 	void  ClearMemberVariables();
 	BOOL  DefaultMemberVariables();
 
@@ -76,51 +72,49 @@ public:
 	double GetMaxRate(const RANDOM *R);
 	double GetMaxRate(const GAUSS *R);
 
-	double RateModel(const RATEMDL *R);
-	double RateModel(const RATEVCTRMDLPARAM *R);
-	double RateModel(const RANDOM *R);
-	double RateModel(const GAUSS *R);
+	double RateModel(const RATEMDL *RpRefRand, C3MBRandom *pRefRand);
+	double RateModel(const RATEVCTRMDLPARAM *R, C3MBRandom *pRefRand);
+	double RateModel(const RANDOM *R, C3MBRandom *pRefRand);
+	double RateModel(const GAUSS *R, C3MBRandom *pRefRand);
 	BOOL RateTerminates(const RANDOM *Rp, const RATESTATE *Rs);
 	BOOL RateTerminates(const GAUSS *Rp, const RATESTATE *Rs);
 	BOOL RateTerminates(const RATEVCTRMDLPARAM *Rp, const RATESTATE *Rs);
 	BOOL RateTerminates(const RATEMDL *Rp, const RATESTATE *Rs);
 
-	int IntialBehavior(int AbsClock, MATRIX *Md);
+	int IntialBehavior(int AbsClock, C3MBRandom *pRefRand, MATRIX *Md);
 
 	// Behavior transiton functions //
-private:
-	void TestBehaviorTransitionControlTest(MATRIX *M, int BehaviorIndex);
-	void RunInitialBehaviorControlTest(MATRIX *M);
+	
 public:
 	void RunBehaviorTransitionControlTest(SNGLBEHTRANSTRUCT *pBehTrans, MATRIX *M, int BehaviorIndex, int NumTrials);
 	void InitialBehaviorControlTest(SNGLBEHTRANSTRUCT *pBehTrans, MATRIX *M, int NumTrials);
-	int BehaviorTransition(BEHTRANS_TERM_MODEL ModelType, const TRANSITNSTATE *Bs, const MATRIX *Btm, int AbsClock);
+	int BehaviorTransition(BEHTRANS_TERM_MODEL ModelType, const TRANSITNSTATE *Bs, const MATRIX *Btm, C3MBRandom *pRefRand, int AbsClock);
 
-	double DepthModel(const DEPTHPARAM *D);
-	double DepthModel(const RANDOM *D);
-	double DepthModel(const GAUSS *D);
-	double DepthModel(const VCTRMDLPARAM *D);
+	double DepthModel(const DEPTHPARAM *D, C3MBRandom *pRefRand);
+	double DepthModel(const RANDOM *D, C3MBRandom *pRefRand);
+	double DepthModel(const GAUSS *D, C3MBRandom *pRefRand);
+	double DepthModel(const VCTRMDLPARAM *D, C3MBRandom *pRefRand);
 
-	int NumberOfReversals(const REVERSAL_DEF *Rp);
-	int NumberOfReversals(const REVVCTRMDLPARAM *R);
-	int NumberOfReversals(const REVERSAL_GAUSS *R);
-	int NumberOfReversals(const REVERSAL_RND *R);
+	int NumberOfReversals(const REVERSAL_DEF *Rp, C3MBRandom *pRefRand);
+	int NumberOfReversals(const REVVCTRMDLPARAM *R, C3MBRandom *pRefRand);
+	int NumberOfReversals(const REVERSAL_GAUSS *R, C3MBRandom *pRefRand);
+	int NumberOfReversals(const REVERSAL_RND *R, C3MBRandom *pRefRand);
 
 	BOOL DirectionTerminates(const DIRCTNMDL *Dp, const DIRECTIONSTATE *Ds);
-	double Direction(const DIRCTNMDL *Dp, const DIRECTIONSTATE *Ds);
-	double Direction(const RANDOMWALK *M);
-	double Direction(const CORRANDWALK *M, double Bearing);
-	double Direction(const CORRANDWALKDB *M, double Bearing);
-	double Direction(const DIRVCTRMDLPARAM *M, const DIRECTIONAL_MODEL_TYPE Type, double Bearing);
+	double Direction(const DIRCTNMDL *Dp, const DIRECTIONSTATE *Ds, C3MBRandom *pRefRand);
+	double Direction(const RANDOMWALK *M, C3MBRandom *pRefRand);
+	double Direction(const CORRANDWALK *M, double Bearing, C3MBRandom *pRefRand);
+	double Direction(const CORRANDWALKDB *M, double Bearing, C3MBRandom *pRefRand);
+	double Direction(const DIRVCTRMDLPARAM *M, const DIRECTIONAL_MODEL_TYPE Type, double Bearing, C3MBRandom *pRefRand);
 
-	int SurfaceInterval(const SURFINTRVLPARAM *Sp);
-	int SurfaceInterval(const GAUSS *S);
-	int SurfaceInterval(const VCTRMDLPARAM *S);
+	int SurfaceInterval(const SURFINTRVLPARAM *Sp, C3MBRandom *pRefRand);
+	int SurfaceInterval(const GAUSS *S, C3MBRandom *pRefRand);
+	int SurfaceInterval(const VCTRMDLPARAM *S, C3MBRandom *pRefRand);
 
-	int ReversalDuration(const REVERSAL_DEF *Rp);
-	int ReversalDuration(const REVERSAL_RND *Rp);
-	int ReversalDuration(const REVERSAL_GAUSS *Rp);
-	int ReversalDuration(const REVVCTRMDLPARAM *Rp);
+	int ReversalDuration(const REVERSAL_DEF *Rp, C3MBRandom *pRefRand);
+	int ReversalDuration(const REVERSAL_RND *Rp, C3MBRandom *pRefRand);
+	int ReversalDuration(const REVERSAL_GAUSS *Rp, C3MBRandom *pRefRand);
+	int ReversalDuration(const REVVCTRMDLPARAM *Rp, C3MBRandom *pRefRand);
 
 	//SUBMODEL_VECTOR_STATUS GetSubModelVectorStatus(BEHTRANSMDL* Mdl, MATRIX *Initial);
 	//SUBMODEL_VECTOR_STATUS GetSubModelVectorStatus(BEHAVIOR_MODEL_GETSREPLACEd *Mdl);

@@ -13,7 +13,7 @@ HWND g_hwndDepthScale = NULL;
 HWND g_hwndSlopeScale = NULL;
 HWND g_hDlgSeed = NULL;
 BOOL g_bBlockNextMouseClick = FALSE;
-extern C3MBRandom g_3mbRandom;
+//extern C3MBRandoxm g_3mbRandoxm;
 extern C3mbStaticsLib staticLib;
 
 
@@ -108,8 +108,8 @@ LRESULT CALLBACK BathyBitmapDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	double dVal;
 	int nVal;
 	RESLT res;
-	TCHAR szBuff1[SIZE_128] = {0};
-	TCHAR szBuff2[SIZE_128] = {0};
+	TCHAR szBuff1[SIZE_1024] = {0};
+	TCHAR szBuff2[SIZE_1024] = {0};
 	int speciesAddIndex;
 	int	numAnimats, numPods, podSize;
 	int listBoxCount;

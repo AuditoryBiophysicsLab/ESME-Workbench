@@ -12,7 +12,7 @@
 // super.sub (2 decimal places) 
 // starting version 5.4 bottom following has horizontal travel rates
 #define MMBSLIB_VERSION_SUPER  8
-#define MMBSLIB_VERSION_SUB     6
+#define MMBSLIB_VERSION_SUB     8
 #define MMMBLIB_SPECIES_VERSION_SUPER 8
 #define MMMBLIB_SPECIES_VERSION_SUB 5
 #define MMMBLIB_BINOUTPUT_VERSION_SUPER 1 // String will have 3 decimal places.
@@ -99,6 +99,10 @@ A release increments 1's value
 */
 
 const double PI = 3.14159265358979;
+const double DEG_TO_RAD_FACTOR = PI/180.0;
+const double RAD_TO_DEG_FACTOR = 180.0/PI;
+const double _2PI = 2*PI;
+const double METERS_TRAVELED_TO_RADIANDS_TRAVLED = PI / (180 * 60 * 1852);
 
 #define SIZE_2		  2
 #define SIZE_3		  3

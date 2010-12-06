@@ -80,7 +80,6 @@ namespace MBSGUI
         public void SetDisplayData(ANIMATSTATEDATABITMAP[] StateData, DATA_EXTREMES_SPE_BITMAP DataExtremes,
             DATA_EXTREMES_SPE_BITMAP MovementDataExtremes, Boolean MaintainScaling)
         {
-
             // If parameter 'StateData' is null verify it's corresponding member variable isn't.
             if(StateData == null)
                 Debug.Assert(m_stateData != null);

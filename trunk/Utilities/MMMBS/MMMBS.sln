@@ -1,10 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{19C671A5-1436-42DC-8F9B-A5F2B6DB6B83}"
-	ProjectSection(SolutionItems) = preProject
-		0All\0All.vcproj = 0All\0All.vcproj
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3MBSValidationCpp", "3MBSValidation\3MBSValidation.vcxproj", "{ABE8A5D1-43B8-4546-9EE5-2AC53B04DAC0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3MBConsoleCpp", "3MBSConsoleCpp\3MBSc.vcxproj", "{74103254-9979-408B-8D8E-B506F0E35292}"
@@ -39,8 +34,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BathyMaker", "BathyMaker\BathyMaker.vcxproj", "{0EE7DE18-B251-440C-B3DF-6470B6C6CD34}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3MBAutoTest", "3MBAutoTest\3MBAutoTest.vcxproj", "{F2E5DA5D-9427-4E22-BAE4-184FDFC53FC3}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "0All", "0All\0All.vcxproj", "{00EF61FE-3772-4F79-8F1D-674BC12912E9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo3MB", "demoProjects\3MBDemo\Demo2\Demo3MB.csproj", "{096F2F32-7330-438F-9B60-AF5EA8440226}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -245,20 +238,6 @@ Global
 		{F2E5DA5D-9427-4E22-BAE4-184FDFC53FC3}.Release|Win32.Build.0 = Release|Win32
 		{F2E5DA5D-9427-4E22-BAE4-184FDFC53FC3}.Release|x64.ActiveCfg = Release|Win32
 		{F2E5DA5D-9427-4E22-BAE4-184FDFC53FC3}.Release|x86.ActiveCfg = Release|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Debug|Win32.ActiveCfg = Debug|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Debug|Win32.Build.0 = Debug|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Debug|x64.ActiveCfg = Debug|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Debug|x86.ActiveCfg = Debug|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Release|Any CPU.ActiveCfg = Release|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Release|Win32.ActiveCfg = Release|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Release|Win32.Build.0 = Release|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Release|x64.ActiveCfg = Release|Win32
-		{00EF61FE-3772-4F79-8F1D-674BC12912E9}.Release|x86.ActiveCfg = Release|Win32
 		{096F2F32-7330-438F-9B60-AF5EA8440226}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{096F2F32-7330-438F-9B60-AF5EA8440226}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{096F2F32-7330-438F-9B60-AF5EA8440226}.Debug|Mixed Platforms.ActiveCfg = Debug|x86

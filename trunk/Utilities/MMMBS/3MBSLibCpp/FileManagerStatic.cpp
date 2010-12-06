@@ -178,12 +178,16 @@ _fSCENARIOPARAMS CFileManagerStatic::ConvertScenarioFormat(const SCENARIOPARAMS 
 
 		if(Sce.user.acousticAnimatActive == TRUE)
 			sce.sceSetupBoolParams |= SCEBOOL_ACOUSTICANIMATACTIVE; // 37
-
+		
 		if(Sce.user.distCalcMethod == LAT_LON)
 			sce.sceSetupBoolParams |= SCEBOOL_DISTSTANCECALCMETHOD; // 38
 
 		if(Sce.user.seed.useCurrentTick == TRUE)
 			sce.sceSetupBoolParams |= SCEBOOL_USECURRENTTICK; // 39
+
+		if(Sce.user.seed.independentAnimatRandomGen == TRUE)
+			sce.sceSetupBoolParams |= SCEBOOL_INDEPENDENT_ANIMAT_RND_GEN; // ???
+
 	}// _fSCENARIOPARAMS.sceSetupBoolParams from SCENARIOPARAMS members ends
 
 	sce.seedValue = Sce.user.seed.value; // 40
@@ -380,6 +384,10 @@ SCENARIOPARAMS CFileManagerStatic::ConvertScenarioFormat(const _fSCENARIOPARAMS 
 
 		if(Sce.sceSetupBoolParams & SCEBOOL_USECURRENTTICK)
 			sce.user.seed.useCurrentTick = TRUE; // 39
+
+		if(Sce.sceSetupBoolParams & SCEBOOL_INDEPENDENT_ANIMAT_RND_GEN)
+			sce.user.seed.independentAnimatRandomGen = TRUE; // ???
+
 	}//SCENARIOPARAMS members from _fSCENARIOPARAMS.sceSetupBoolParams begins
 
 	sce.acousticPingCycleOutputLimit = Sce.acstSrceLimitOutput;
