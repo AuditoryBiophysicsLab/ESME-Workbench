@@ -86,13 +86,19 @@
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Create a new experiment"
 					                             Command="{Binding NewExperimentCommand}" />
-					<r:RibbonApplicationMenuItem Header="Info"
+                    <r:RibbonApplicationMenuItem Header="Info"
 					                             ImageSource="..\Images\LargeIcons\about-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Information about the current experiment"
 					                             Command="{Binding AboutCommand}" />
-					<r:RibbonSeparator />
-					<r:RibbonApplicationMenuItem Header="Options"
+                    <r:RibbonSeparator />
+                    <r:RibbonApplicationMenuItem Header="Test"
+					                             ImageSource="..\Images\LargeIcons\Yahoo-Widget-Engine-icon.png"
+					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
+					                             ToolTipDescription="Dave's test command"
+					                             Command="{Binding DavesTestCommand}" />
+                    <r:RibbonSeparator />
+                    <r:RibbonApplicationMenuItem Header="Options"
 					                             ImageSource="..\Images\LargeIcons\gear-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Edit application options and settings"
