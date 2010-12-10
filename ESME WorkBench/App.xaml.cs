@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Windows;
 using Cinch;
+using ESME.Views;
 using ESMEWorkBench.Properties;
 #if DEBUG
 using System.Diagnostics;
@@ -64,7 +65,8 @@ namespace ESMEWorkBench
 
                 CinchBootStrapper.Initialise(new List<Assembly>
                                              {
-                                                 typeof (App).Assembly
+                                                 typeof (App).Assembly,
+                                                 typeof (TestView).Assembly,
                                              });
             }
             catch (Exception e)

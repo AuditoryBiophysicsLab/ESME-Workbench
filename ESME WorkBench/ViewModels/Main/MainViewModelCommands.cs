@@ -456,6 +456,17 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region DavesTestCommand
+
+        public SimpleCommand<object, object> DavesTestCommand
+        {
+            get { return _davesTest ?? (_davesTest = new SimpleCommand<object, object>((obj) => MediatorMessage.Send(MediatorMessage.DavesTestCommand, true))); }
+        }
+
+        SimpleCommand<object, object> _davesTest;
+
+        #endregion
+
         #endregion
     }
 }

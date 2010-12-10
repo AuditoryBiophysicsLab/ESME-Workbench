@@ -177,5 +177,15 @@ namespace ESMEWorkBench.ViewModels.Main
             var acousticOptions = new AcousticEngineParameterViewModel(_experiment);
             _visualizerService.ShowDialog("AcousticEngineParameterConfigurationView", acousticOptions);
         }
+
+        [MediatorMessageSink(MediatorMessage.DavesTestCommand)]
+        void DavesTestCommandHandler(bool dummy)
+        {
+            var testViewModel = new ESME.Views.TestViewModel
+                                {
+                                    TestString = "Set from ESME"
+                                };
+            _visualizerService.ShowDialog("TestView", testViewModel);
+        }
     }
 }

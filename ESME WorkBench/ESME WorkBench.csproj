@@ -616,6 +616,10 @@
     <None Include="External References\GeoAPI.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ESME.Controls\ESME.Views.csproj">
+      <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
+      <Name>ESME.Views</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Libraries\ESME\ESME.csproj">
       <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
       <Name>ESME</Name>

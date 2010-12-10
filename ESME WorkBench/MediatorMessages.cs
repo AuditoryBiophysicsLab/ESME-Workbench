@@ -89,6 +89,8 @@ namespace ESMEWorkBench
         public const string CreateMMMBSBathymetryFileCommand = "CreateMMMBSBathymetryFileCommandMessage";
         public const string AddAnimatPopulationFileCommand = "AddAnimatPopulationFileCommandMessage";
 
+        public const string DavesTestCommand = "DavesTestCommandMessage";
+
         public const string ApplicationClosing = "ApplicationClosingMessage";
 
         public static void Send<T>(string key, T message) 

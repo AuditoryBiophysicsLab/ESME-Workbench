@@ -3,7 +3,7 @@
 namespace ESMEWorkBench.Views
 {
     /// <summary>
-    ///   Interaction logic for ScenarioEnvironmentView.xaml
+    ///   Interaction logic for EnvironmentSettingsView.xaml
     /// </summary>
     [PopupNameToViewLookupKeyMetadata("EnvironmentSettingsView", typeof(EnvironmentSettingsView))]
     public partial class EnvironmentSettingsView
