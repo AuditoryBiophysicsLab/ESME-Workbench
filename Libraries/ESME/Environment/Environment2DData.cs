@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows.Media;
 using ESME.Overlay;
 using HRC.Navigation;
+using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Environment
 {
@@ -63,116 +64,6 @@ namespace ESME.Environment
             Values = null;
         }
 
-        public static Environment2DData ReadChrtrBinaryFile(string fileName)
-        {
-            using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
-            {
-                var west = stream.ReadSingle();
-                var east = stream.ReadSingle();
-                var south = stream.ReadSingle();
-                var north = stream.ReadSingle();
-                var gridSpacing = stream.ReadSingle();
-                var width = stream.ReadInt32();
-                var height = stream.ReadInt32();
-                var endian = stream.ReadUInt32();
-                if (endian != 0x00010203) throw new Model.FileFormatException("Invalid CHRTR Binary file format - endian is incorrect");
-                var minDepth = stream.ReadSingle();
-                var maxDepth = stream.ReadSingle();
-                var paddingWidth = (width - 10) * 4;
-                var padding = stream.ReadBytes(paddingWidth);
-                var depths = new float[height, width];
-                for (var lon = 0; lon < width; lon++)
-                    for (var lat = 0; lat < height; lat++)
-                    {
-                        depths[lat, lon] = stream.ReadSingle();
-                        if (depths[lat, lon] == 1e16f) depths[lat, lon] = float.NaN;
-                    }
-                return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
-            }
-        }
-
-        #region Public constructors
-
-        public Environment2DData(double north, double south, double east, double west, float gridSpacing, float[,] values, float minElevation, float maxElevation) : this()
-        {
-            MinCoordinate = new EarthCoordinate(south, west);
-            MaxCoordinate = new EarthCoordinate(north, east);
-            Longitudes = new double[values.GetLength(0)];
-            Latitudes = new double[values.GetLength(1)];
-            for (var lon = 0; lon < Longitudes.Length; lon++) Longitudes[lon] = west + (lon * gridSpacing);
-            for (var lat = 0; lat < Latitudes.Length; lat++) Latitudes[lat] = south + (lat * gridSpacing);
-            Values = values;
-        }
-
-        public Environment2DData(string fileName, string layerName, float north, float west, float south, float east)
-        {
-            Filename = fileName;
-            if (Path.GetExtension(fileName) != ".eeb") throw new FileFormatException(string.Format("environment2DData: Unknown file type \"{0}\"", Path.GetFileName(fileName)));
-            var file = DataFile.Open(fileName);
-
-            var layer = file[layerName];
-            if (layer == null) throw new FileFormatException(string.Format("environment2DData: Specified environment file \"{0}\"does not contain a environment2DData layer", fileName));
-
-            Longitudes = layer.LongitudeAxis.DoubleValuesBetween(west, east);
-            Latitudes = layer.LatitudeAxis.DoubleValuesBetween(south, north);
-            var lonIndices = layer.LongitudeAxis.IndicesBetween(west, east);
-            var latIndices = layer.LatitudeAxis.IndicesBetween(south, north);
-
-            MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
-            MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
-            MinValue = float.MaxValue;
-            MaxValue = float.MinValue;
-            Values = layer.Get2DData(latIndices[0], latIndices[latIndices.Length - 1], lonIndices[0], lonIndices[lonIndices.Length - 1]);
-            for (var row = 0; row < Values.GetLength(0); row++)
-                for (var col = 0; col < Values.GetLength(1); col++)
-                {
-                    MinValue = Math.Min(MinValue, Values[row, col]);
-                    MaxValue = Math.Max(MaxValue, Values[row, col]);
-                }
-        }
-
-        public Environment2DData(string fileName) : this()
-        {
-            Filename = fileName;
-            if (Path.GetExtension(fileName) == ".eeb")
-            {
-                //float[, ,] array;
-                //float curValue;
-                var file = DataFile.Open(fileName);
-                foreach (var layer in file.Layers)
-                {
-                    if (layer.Name != "environment2DData") continue;
-                    Latitudes = layer.LatitudeAxis.UnwrappedValues;
-                    Longitudes = layer.LongitudeAxis.UnwrappedValues;
-                    //array = layer.DataArray.Data;
-
-                    MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
-                    MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
-
-                    MinValue = float.MaxValue;
-                    MaxValue = float.MinValue;
-
-                    Values = layer.Get2DData(0, layer.RowCount - 1, layer.RowCount, 0, layer.ColumnCount - 1, layer.ColumnCount);
-                    for (var row = 0; row < Values.GetLength(0); row++)
-                        for (var col = 0; col < Values.GetLength(1); col++)
-                        {
-                            MinValue = Math.Min(MinValue, Values[row, col]);
-                            MaxValue = Math.Max(MaxValue, Values[row, col]);
-                        }
-                }
-            }
-            else
-            {
-                using (var stream = new BinaryReader(new FileStream(fileName, FileMode.Open)))
-                {
-                    Load(stream);
-                }
-            }
-            Filename = fileName;
-        }
-
-        #endregion
-
         public OverlayLineSegments BoundingBox
         {
             get
@@ -189,6 +80,34 @@ namespace ESME.Environment
 
                 var shape = new OverlayLineSegments(bathyBox, Colors.Black, 1, LineStyle.Solid);
                 return shape;
+            }
+        }
+
+        public static Environment2DData ReadChrtrBinaryFile(string fileName)
+        {
+            using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                float west = stream.ReadSingle();
+                float east = stream.ReadSingle();
+                float south = stream.ReadSingle();
+                float north = stream.ReadSingle();
+                float gridSpacing = stream.ReadSingle();
+                int width = stream.ReadInt32();
+                int height = stream.ReadInt32();
+                uint endian = stream.ReadUInt32();
+                if (endian != 0x00010203) throw new FileFormatException("Invalid CHRTR Binary file format - endian is incorrect");
+                float minDepth = stream.ReadSingle();
+                float maxDepth = stream.ReadSingle();
+                int paddingWidth = (width - 10)*4;
+                byte[] padding = stream.ReadBytes(paddingWidth);
+                var depths = new float[height,width];
+                for (int lon = 0; lon < width; lon++)
+                    for (int lat = 0; lat < height; lat++)
+                    {
+                        depths[lat, lon] = stream.ReadSingle();
+                        if (depths[lat, lon] == 1e16f) depths[lat, lon] = float.NaN;
+                    }
+                return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
             }
         }
 
@@ -234,12 +153,12 @@ namespace ESME.Environment
             MaxCoordinate.Write(stream);
 
             stream.Write(Longitudes.Length);
-            foreach (var lon in Longitudes) stream.Write(lon);
+            foreach (double lon in Longitudes) stream.Write(lon);
 
             stream.Write(Latitudes.Length);
-            foreach (var lat in Latitudes) stream.Write(lat);
+            foreach (double lat in Latitudes) stream.Write(lat);
 
-            for (var lat = 0; lat < Latitudes.Length; lat++) for (var lon = 0; lon < Longitudes.Length; lon++) stream.Write(Values[lat, lon]);
+            for (int lat = 0; lat < Latitudes.Length; lat++) for (int lon = 0; lon < Longitudes.Length; lon++) stream.Write(Values[lat, lon]);
         }
 
         /// <summary>
@@ -253,9 +172,7 @@ namespace ESME.Environment
         {
             using (var stream = new StreamWriter(File.Create(fileName)))
             {
-                for (var lat = 0; lat < Latitudes.Length; lat++)
-                    for (var lon = 0; lon < Longitudes.Length; lon++)
-                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor * Values[lat, lon]));
+                for (int lat = 0; lat < Latitudes.Length; lat++) for (int lon = 0; lon < Longitudes.Length; lon++) stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor*Values[lat, lon]));
             }
         }
 
@@ -277,8 +194,8 @@ namespace ESME.Environment
         {
             if (ContainsCoordinate(coordinate))
             {
-                var latIndex = LookupIndex(coordinate.Latitude_degrees, Latitudes);
-                var longIndex = LookupIndex(coordinate.Longitude_degrees, Longitudes);
+                int latIndex = LookupIndex(coordinate.Latitude_degrees, Latitudes);
+                int longIndex = LookupIndex(coordinate.Longitude_degrees, Longitudes);
                 if ((latIndex >= 0) && (longIndex >= 0))
                 {
                     value = Values[latIndex, longIndex];
@@ -305,8 +222,8 @@ namespace ESME.Environment
         {
             if (ContainsCoordinate(coordinate))
             {
-                var latIndex = LookupIndex(coordinate.Latitude_degrees, Latitudes);
-                var longIndex = LookupIndex(coordinate.Longitude_degrees, Longitudes);
+                int latIndex = LookupIndex(coordinate.Latitude_degrees, Latitudes);
+                int longIndex = LookupIndex(coordinate.Longitude_degrees, Longitudes);
                 if ((latIndex >= 0) && (longIndex >= 0))
                 {
                     value = Values[latIndex, longIndex];
@@ -322,11 +239,139 @@ namespace ESME.Environment
         // value is not found within the array in this fashion, -1 is returned.
         static int LookupIndex(double value, IList<double> array)
         {
-            for (var index = 0; index < array.Count - 1; index++)
+            for (int index = 0; index < array.Count - 1; index++)
             {
                 if ((array[index] <= value) && (value <= array[index + 1])) return index;
             }
             return -1; // value not found within the array
         }
+
+#if false
+        internal static Environment2DData ReadSMGCFile(string fileName)
+        {//INCOMPLETE
+            using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                var checkBit1 = stream.ReadSingle();
+                var checkBit2 = stream.ReadSingle();
+                if ((checkBit1 != 99.0) || (checkBit2 != 380.0)) throw new FileFormatException("Invalid SMGC File check bits.");
+                var count = 0;
+                var reclen = new List<int>();
+                var sampleSize = new List<int>();
+                var min = new List<int>();
+                var max = new List<int>();
+                var mean = new List<int>();
+                var std = new List<int>();
+                var median = new List<int>();
+                var mode = new List<int>();
+                var h = new List<int[]>();
+                while (stream.BaseStream.Position != stream.BaseStream.Length)
+                {
+                    reclen.Add(stream.ReadInt32()); //add the record length
+                    if (reclen[count] != 0)
+                    {
+                        sampleSize.Add(stream.ReadInt32());
+                        min.Add(stream.ReadInt32());
+                        max.Add(stream.ReadInt32());
+                        mean.Add(stream.ReadInt32());
+                        std.Add(stream.ReadInt32());
+                        median.Add(stream.ReadInt32());
+                        mode.Add(stream.ReadInt32());
+                        var hh = new int[(reclen[count] / 4) - 7];
+                        for (var i = 0; i < hh.Length; i++)
+                        {
+                            hh[i] = stream.ReadInt32();
+                        }
+                        h.Add(hh);
+                    }
+                    count++;
+                }
+                //now convert each one to its correct precision by multiplying to get a float.  or something. 
+
+                //return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
+            }
+        } 
+#endif
+       
+        #region Public constructors
+
+        public Environment2DData(double north, double south, double east, double west, float gridSpacing, float[,] values, float minElevation, float maxElevation) : this()
+        {
+            MinCoordinate = new EarthCoordinate(south, west);
+            MaxCoordinate = new EarthCoordinate(north, east);
+            Longitudes = new double[values.GetLength(0)];
+            Latitudes = new double[values.GetLength(1)];
+            for (int lon = 0; lon < Longitudes.Length; lon++) Longitudes[lon] = west + (lon*gridSpacing);
+            for (int lat = 0; lat < Latitudes.Length; lat++) Latitudes[lat] = south + (lat*gridSpacing);
+            Values = values;
+        }
+
+        public Environment2DData(string fileName, string layerName, float north, float west, float south, float east)
+        {
+            Filename = fileName;
+            if (Path.GetExtension(fileName) != ".eeb") throw new System.IO.FileFormatException(string.Format("environment2DData: Unknown file type \"{0}\"", Path.GetFileName(fileName)));
+            DataFile file = DataFile.Open(fileName);
+
+            DataLayer layer = file[layerName];
+            if (layer == null) throw new System.IO.FileFormatException(string.Format("environment2DData: Specified environment file \"{0}\"does not contain a environment2DData layer", fileName));
+
+            Longitudes = layer.LongitudeAxis.DoubleValuesBetween(west, east);
+            Latitudes = layer.LatitudeAxis.DoubleValuesBetween(south, north);
+            int[] lonIndices = layer.LongitudeAxis.IndicesBetween(west, east);
+            int[] latIndices = layer.LatitudeAxis.IndicesBetween(south, north);
+
+            MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
+            MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
+            MinValue = float.MaxValue;
+            MaxValue = float.MinValue;
+            Values = layer.Get2DData(latIndices[0], latIndices[latIndices.Length - 1], lonIndices[0], lonIndices[lonIndices.Length - 1]);
+            for (int row = 0; row < Values.GetLength(0); row++)
+                for (int col = 0; col < Values.GetLength(1); col++)
+                {
+                    MinValue = Math.Min(MinValue, Values[row, col]);
+                    MaxValue = Math.Max(MaxValue, Values[row, col]);
+                }
+        }
+
+        public Environment2DData(string fileName) : this()
+        {
+            Filename = fileName;
+            if (Path.GetExtension(fileName) == ".eeb")
+            {
+                //float[, ,] array;
+                //float curValue;
+                DataFile file = DataFile.Open(fileName);
+                foreach (DataLayer layer in file.Layers)
+                {
+                    if (layer.Name != "environment2DData") continue;
+                    Latitudes = layer.LatitudeAxis.UnwrappedValues;
+                    Longitudes = layer.LongitudeAxis.UnwrappedValues;
+                    //array = layer.DataArray.Data;
+
+                    MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
+                    MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
+
+                    MinValue = float.MaxValue;
+                    MaxValue = float.MinValue;
+
+                    Values = layer.Get2DData(0, layer.RowCount - 1, layer.RowCount, 0, layer.ColumnCount - 1, layer.ColumnCount);
+                    for (int row = 0; row < Values.GetLength(0); row++)
+                        for (int col = 0; col < Values.GetLength(1); col++)
+                        {
+                            MinValue = Math.Min(MinValue, Values[row, col]);
+                            MaxValue = Math.Max(MaxValue, Values[row, col]);
+                        }
+                }
+            }
+            else
+            {
+                using (var stream = new BinaryReader(new FileStream(fileName, FileMode.Open)))
+                {
+                    Load(stream);
+                }
+            }
+            Filename = fileName;
+        }
+
+        #endregion
     }
 }
