@@ -21,6 +21,7 @@ namespace dbtester
         {
             //DBDBTest();
             //BSTTest();
+            SMGCTest();
 
         }
 
@@ -74,8 +75,16 @@ namespace dbtester
         static void SMGCTest()
         {
             var foo = new SMGC()
-                      {};
+                      {
+                          DatabasePath = @"C:\Users\Graham Voysey\Desktop\SMGC\alldata\",
+                          ExtractionProgramPath = @"C:\Users\Graham Voysey\Desktop\SMGC\Disc 1\src\smgc_extract.exe",
+                          MinMonth = 1,
+                          MaxMonth = 4,
+                          };
 
+            string outfilename = @"C:\tests\dbtests\smgc.txt";
+            foo.ExtractArea(outfilename, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
+        
         }
     }
 }

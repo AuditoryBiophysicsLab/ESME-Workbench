@@ -9,22 +9,24 @@ namespace ESME.Environment.NAVO
 {
     public class SMGC : NAVODataSource
     {
-        public int MinMonth { get; private set; }
-        public int MaxMonth { get; private set; }
+        public int MinMonth { get;  set; }
+        public int MaxMonth { get;  set; }
 
         public SMGC()
         {
-            if (!DatabasePath.EndsWith("\\")) DatabasePath = DatabasePath + "\\"; //database path has to end with a trailing slash here.  For SMGC, it's a directory, not a file.
-            System.Environment.SetEnvironmentVariable("SMGC_DATA_NORTH",DatabasePath);
-            System.Environment.SetEnvironmentVariable("SMGC_DATA_SOUTH", DatabasePath);
+
+           
         }
 
         public override void ExtractArea(string filename, double north, double south, double east, double west)
         {
+            if (!DatabasePath.EndsWith("\\")) DatabasePath = DatabasePath + "\\"; //database path has to end with a trailing slash here.  For SMGC, it's a directory, not a file.
+            System.Environment.SetEnvironmentVariable("SMGC_DATA_NORTH", DatabasePath);
+            System.Environment.SetEnvironmentVariable("SMGC_DATA_SOUTH", DatabasePath);
             CommandArgs = string.Format(" -lat {0}/{1} -lon {2}/{3} -mon {4}/{5} -par 17/1", south, north, west, east, MinMonth, MaxMonth); // '-par 17/1' extracts wind speed statistical data.  don't ask. 
             var result = Execute();
             //result now contains the entire output of SMGC, i think, since it dumps data to STDOUT... so let's save it to disk in the right place. 
-            File.WriteAllText(filename, result);
+            qFile.WriteAllText(filename, result);
 
         }
 
@@ -41,7 +43,8 @@ namespace ESME.Environment.NAVO
                 {
                     for (int j = index + 1; j < resarray.Length; j++)
                     {
-                        if (resarray[j].Equals("")) break;
+                        if (resarray[j].Equals("")) 
+                            break;
                         string[] resline = resarray[j].Split('\t');
                         month.Add(resline[2]);
                         location.Add(new EarthCoordinate(Double.Parse(resline[0]),Double.Parse(resline[1])));
