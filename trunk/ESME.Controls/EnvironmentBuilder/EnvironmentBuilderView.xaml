@@ -1,0 +1,11 @@
+﻿<Window x:Class="ESME.Views.EnvironmentBuilderView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EnvironmentBuilderWindow" Height="300" Width="300">
+    <TabControl>
+        <TabItem Header="DBDB" />
+        <TabItem Header="BST" />
+        <TabItem Header="SMGC" IsEnabled="False" />
+        <TabItem Header="GDEM" IsEnabled="False" />
+    </TabControl>
+</Window>
