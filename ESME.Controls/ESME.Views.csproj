@@ -73,10 +73,24 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnvironmentBuilder\DBDBView.xaml.cs">
+      <DependentUpon>DBDBView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
+      <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TestViewModel.cs" />
+    <Page Include="EnvironmentBuilder\DBDBView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="TestView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

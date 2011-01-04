@@ -26,7 +26,7 @@ namespace ESME.Environment.NAVO
             CommandArgs = string.Format(" -lat {0}/{1} -lon {2}/{3} -mon {4}/{5} -par 17/1", south, north, west, east, MinMonth, MaxMonth); // '-par 17/1' extracts wind speed statistical data.  don't ask. 
             var result = Execute();
             //result now contains the entire output of SMGC, i think, since it dumps data to STDOUT... so let's save it to disk in the right place. 
-            qFile.WriteAllText(filename, result);
+            File.WriteAllText(filename, result);
 
         }
 
