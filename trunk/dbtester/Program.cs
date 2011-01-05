@@ -20,7 +20,7 @@ namespace dbtester
         public static void Main(string[] args)
         {
             //DBDBTest();
-            //BSTTest();
+           // BSTTest();
             SMGCTest();
 
         }
@@ -77,9 +77,10 @@ namespace dbtester
             var foo = new SMGC()
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\SMGC\alldata\",
-                          ExtractionProgramPath = @"C:\Users\Graham Voysey\Desktop\SMGC\Disc 1\src\smgc_extract.exe",
+                          ExtractionProgramPath = @"C:\Projects\ESME Deliverables\trunk\Debug\SMGCExtract.exe",
                           MinMonth = 1,
                           MaxMonth = 4,
+                          WorkingDirectory = @"C:\Users\Graham Voysey\Desktop\",
                           };
 
             string outfilename = @"C:\tests\dbtests\smgc.txt";
