@@ -294,7 +294,7 @@ namespace ESME.Environment
        
         #region Public constructors
 
-        public Environment2DData(double north, double south, double east, double west, float gridSpacing, float[,] values, float minElevation, float maxElevation) : this()
+        public Environment2DData(double north, double south, double east, double west, float gridSpacing, float[,] values, float minValue, float maxValue) : this()
         {
             MinCoordinate = new EarthCoordinate(south, west);
             MaxCoordinate = new EarthCoordinate(north, east);

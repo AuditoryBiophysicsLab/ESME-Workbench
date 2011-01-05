@@ -1,12 +1,13 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using System.Threading;
 
 namespace ESME.Environment.NAVO
 {
     public abstract class NAVODataSource
     {
-        public string ExtractionProgramPath { get;  set; }
-        public string DatabasePath { get;  set; } //change back to protected set?
+        public string ExtractionProgramPath { get; set; }
+        public string DatabasePath { get; set; } //change back to protected set?
         public string CommandArgs { get; protected set; }
         public Environment2DData ExtractedArea { get; protected set; }
         public string WorkingDirectory { get; set; }
@@ -29,7 +30,7 @@ namespace ESME.Environment.NAVO
                           {
                               StartInfo = new ProcessStartInfo(ExtractionProgramPath)
                                           {
-                                              CreateNoWindow = true,
+                                              CreateNoWindow = false,
                                               UseShellExecute = false,
                                               RedirectStandardInput = false,
                                               RedirectStandardOutput = true,
@@ -40,8 +41,13 @@ namespace ESME.Environment.NAVO
                           };
             process.Start();
             process.PriorityClass = ProcessPriorityClass.BelowNormal;
-            while (!process.HasExited) Thread.Sleep(100);
-            return process.StandardOutput.ReadToEnd();
+            var output = new StringBuilder();
+            while (!process.HasExited)
+            {
+                output.Append(process.StandardOutput.ReadToEnd());
+                Thread.Sleep(100);
+            }
+            return output.ToString();
         }
     }
 }
