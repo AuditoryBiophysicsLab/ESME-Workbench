@@ -1,0 +1,32 @@
+﻿<Window x:Class="ESME.Views.EnvironmentBuilder.EnvironmentalBuilderConfigurationView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctl="clr-namespace:ESME.Views.Controls"
+        Title="EnvironmentalBuilderConfigurationView"
+        Height="300"
+        Width="300">
+    <DockPanel LastChildFill="True">
+	<TabControl>
+		<TabItem Header="Database Locations"
+		         HorizontalContentAlignment="Stretch"
+		         VerticalContentAlignment="Stretch">
+			<StackPanel Orientation="Vertical"
+			            Width="Auto"
+			            Height="Auto">
+				<ctl:FileOrDirectorySetting Caption="GDEM"
+				                            IsDirectoryBrowser="True"
+				                            FileName="{Binding AppSettings.GDEMDirectory}" />
+				<ctl:FileOrDirectorySetting Caption="SMGC"
+				                            IsDirectoryBrowser="True"
+				                            FileName="{Binding AppSettings.SMGCDirectory}" />
+                <ctl:FileOrDirectorySetting Caption="BST"
+				                            IsDirectoryBrowser="True"
+				                            FileName="{Binding AppSettings.BSTDirectory}" />
+                <ctl:FileOrDirectorySetting Caption="DBDB"
+				                            IsDirectoryBrowser="True"
+				                            FileName="{Binding AppSettings.DBDBDirectory}" />
+			</StackPanel>
+		</TabItem>
+	</TabControl>
+    </DockPanel>
+</Window>
