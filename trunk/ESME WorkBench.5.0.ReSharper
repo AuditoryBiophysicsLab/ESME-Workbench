@@ -129,6 +129,7 @@
       <Abbreviation Text="DBDB" />
       <Abbreviation Text="BST" />
       <Abbreviation Text="SMGC" />
+      <Abbreviation Text="GDEM" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
