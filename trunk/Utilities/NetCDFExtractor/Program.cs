@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Xml.Serialization;
 using ESME.Environment;
 using NetCDF;
+using HRC.Navigation;
 
 namespace ImportNetCDF
 {
@@ -20,6 +23,11 @@ namespace ImportNetCDF
             string outputFileName;
             string outputLayerType;
             string timePeriod;
+            string north;
+            string south;
+            string east;
+            string west;
+            string outputDataFileName;
             bool force = false;
 
             if (args.Length < 1)
@@ -27,9 +35,9 @@ namespace ImportNetCDF
                 Usage();
                 return;
             }
-            string netCDFFileName = lonVarName = latVarName = depthVarName = dataVarName = missingValueAttName = scaleFactorAttName = offsetValueAttName = outputFileName = outputLayerType = timePeriod = "";
+            string netCDFFileName = lonVarName = latVarName = depthVarName = dataVarName = missingValueAttName = scaleFactorAttName = offsetValueAttName = outputFileName = outputLayerType = timePeriod = north= south = east = west = outputDataFileName ="";
             for (var i = 0; i < args.Length; i++)
-            {//more args: north, south, east, west,
+            {//more args: north, south, east, west, outputFileName
                 switch (args[i])
                 {
                     case "-in":
@@ -109,7 +117,7 @@ namespace ImportNetCDF
 
             if ((force) || (!File.Exists(outputFileName)))
             {
-                ImportNetCDF(netCDFFileName, dataVarName, lonVarName, latVarName, depthVarName, missingValueAttName, scaleFactorAttName, offsetValueAttName, outputFileName, outputLayerType, timePeriod);
+                ImportNetCDF(netCDFFileName, dataVarName, lonVarName, latVarName, depthVarName, missingValueAttName, scaleFactorAttName, offsetValueAttName, outputFileName, outputDataFileName, outputLayerType, timePeriod);
             }
             else
             {
@@ -119,7 +127,7 @@ namespace ImportNetCDF
             Console.WriteLine(test.ToString());
         }
 
-        static void ImportNetCDF(string netCDFFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string dataFileName, string dataLayerName, string timePeriod)
+        static void ImportNetCDF(string netCDFFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string dataFileName, string outputDataFileName,  string dataLayerName, string timePeriod)
         {
             var myFile = new NcFile(netCDFFileName);
             myFile.LoadAllData();
@@ -213,8 +221,11 @@ namespace ImportNetCDF
                         if (dataVar is NcVarFloat) sourceData[0] = dataVar.GetFloat(lat, lon);
                         else if (dataVar is NcVarShort) sourceData[0] = dataVar.GetShort(lat, lon);
                     }
-                    destPoint.Data = sourceData; 
-                    //todo: output sourceData to output file here. 
+                    destPoint.Data = sourceData;
+                    var outputData = new SerializedOutput()
+                                 {};
+                    OutputToDataFile(outputData, outputDataFileName);
+                    //todo: output sourceData to output file here. one temperature file, one sal , one speed (all 3D data/lat;lon;[depth,value])
                 }
                 Console.Write(@"{0} % complete              \r", (int) (progress*100));
                 progress += progress_step;
@@ -224,6 +235,30 @@ namespace ImportNetCDF
             Console.WriteLine(@"done");
         }
 
+        static void OutputToDataFile(SerializedOutput data, string outputDataFileName)
+        {
+            var serializer = new XmlSerializer(typeof(SerializedOutput));
+            TextWriter writer = new StreamWriter(outputDataFileName);
+            serializer.Serialize(writer,data);
+        }
+
+        internal class SerializedOutput//:SerializableData 
+        {
+            //other header things here, before DataPoints.
+            public List<DataPointg> DataPoints { get; set; }
+        }
+
+        internal class DataPointg
+        {
+            public EarthCoordinate EarthCoordinate { set; get; }
+            public List<DepthValuePair> Data { get; set; }
+        }
+
+        internal class DepthValuePair
+        {
+            public float Depth { get; set; }
+            public float Value { get; set; }
+        }
         static void Usage()
         {
             Console.WriteLine(

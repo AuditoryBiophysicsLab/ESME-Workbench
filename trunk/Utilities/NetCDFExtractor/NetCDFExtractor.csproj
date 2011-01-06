@@ -105,6 +105,10 @@
       <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
       <Name>ESME</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Libraries\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libraries\NetCDF\NetCDF_Wrapper.csproj">
       <Project>{AC11645F-AFD3-4DDE-9E2F-E1F2FEB22A55}</Project>
       <Name>NetCDF_Wrapper</Name>

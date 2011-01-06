@@ -42,15 +42,17 @@ namespace ESME.Environment.NAVO
             var lats = new List<double>();
             var lons = new List<double>();
             var points = new Dictionary<string, double>();
-            
+            //split the string up into lines
             var resarray = result.Split('\n');
             for (int index = 0; index < resarray.Length; index++)
             {
                 string line = resarray[index].Trim();
+                //if the line has hyphens in it..
                 if (line.Contains("---"))
                 {
                     var rawspeeds = new double[(MaxMonth - MinMonth)+1];
                     var count = 0;
+                    //then take the next lines of data and extract windspeed and positions from them.
                     for (int j = index + 1; j <= (index + (MaxMonth-MinMonth)+1); j++)
                     {
                         if (resarray[j].Equals("")) 
@@ -65,6 +67,7 @@ namespace ESME.Environment.NAVO
                     var meanspeed = rawspeeds.Sum() / rawspeeds.Length;
                     lats.Add(lat);
                     lons.Add(lon);
+                    //then add these uniques to the dictionary
                     points.Add(string.Format("{0:#.00000},{1:#.00000}",lat, lon), meanspeed);
                 }
             }
@@ -84,6 +87,7 @@ namespace ESME.Environment.NAVO
                 }
             }
             const float dataResolution = 1; //will change if SMGC ever gets better (but right now it's 1 degree resolution)
+            //and finally, make a useful thing out of them. 
             ExtractedArea = new Environment2DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), dataResolution, dataArray, 0, 0);
         }
 
