@@ -124,6 +124,11 @@
       <Abbreviation Text="SPL" />
       <Abbreviation Text="CSV" />
       <Abbreviation Text="GUI" />
+      <Abbreviation Text="CDF" />
+      <Abbreviation Text="CD" />
+      <Abbreviation Text="DBDB" />
+      <Abbreviation Text="BST" />
+      <Abbreviation Text="SMGC" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>

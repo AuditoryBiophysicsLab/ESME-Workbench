@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCDF_Wrapper", "Libraries
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCDFExtractor", "Utilities\NetCDFExtractor\NetCDFExtractor.csproj", "{1758077A-336A-4C13-B8F9-6B581B616D8A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbtester", "dbtester\dbtester.csproj", "{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -157,6 +159,18 @@ Global
 		{1758077A-336A-4C13-B8F9-6B581B616D8A}.Release|x64.Build.0 = Release|x64
 		{1758077A-336A-4C13-B8F9-6B581B616D8A}.Release|x86.ActiveCfg = Release|x86
 		{1758077A-336A-4C13-B8F9-6B581B616D8A}.Release|x86.Build.0 = Release|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Debug|x64.ActiveCfg = Debug|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Debug|x86.ActiveCfg = Debug|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Debug|x86.Build.0 = Debug|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Release|Any CPU.ActiveCfg = Release|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Release|Mixed Platforms.Build.0 = Release|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Release|x64.ActiveCfg = Release|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Release|x86.ActiveCfg = Release|x86
+		{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

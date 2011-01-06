@@ -19,8 +19,8 @@ namespace dbtester
 
         public static void Main(string[] args)
         {
-            //DBDBTest();
-           // BSTTest();
+            DBDBTest();
+            BSTTest();
             SMGCTest();
 
         }

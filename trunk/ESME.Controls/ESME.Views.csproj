@@ -60,6 +60,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -73,19 +74,35 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
+      <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EnvironmentBuilder\BSTView.xaml.cs">
       <DependentUpon>BSTView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\DBDBView.xaml.cs">
       <DependentUpon>DBDBView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EnvironmentBuilder\EnvironmentalBuilderConfigurationView.xaml.cs">
+      <DependentUpon>EnvironmentalBuilderConfigurationView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EnvironmentBuilder\GDEMView.xaml.cs">
+      <DependentUpon>GDEMView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EnvironmentBuilder\SMGCView.xaml.cs">
+      <DependentUpon>SMGCView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TestViewModel.cs" />
+    <Page Include="Controls\FileOrDirectorySetting.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="EnvironmentBuilder\BSTView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -94,7 +111,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="EnvironmentBuilder\EnvironmentalBuilderConfigurationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\GDEMView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\SMGCView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
