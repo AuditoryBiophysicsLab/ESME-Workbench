@@ -22,8 +22,12 @@
         <TabItem Header="BST">
             <Views:BSTView/>
         </TabItem>
-        <TabItem Header="SMGC" IsEnabled="False" />
-        <TabItem Header="GDEM" IsEnabled="False" />
+        <TabItem Header="SMGC">
+            <Views:SMGCView/>
+        </TabItem>
+        <TabItem Header="GDEM">
+            <Views:GDEMView/>
+        </TabItem>
         </TabControl>
     </DockPanel>
 
