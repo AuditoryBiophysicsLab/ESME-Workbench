@@ -123,6 +123,7 @@
     <Compile Include="Services\HRCColorPickerService.cs" />
     <Compile Include="Services\HRCOpenFileService.cs" />
     <Compile Include="Services\HRCSaveFileService.cs" />
+    <Compile Include="Utility\AppEventLog.cs" />
     <Compile Include="Utility\AssemblyTricks.cs" />
     <Compile Include="Utility\BackgroundThreadInfo.cs">
       <SubType>UserControl</SubType>
@@ -142,6 +143,7 @@
     </Compile>
     <Compile Include="Utility\NotifyIcon.cs" />
     <Compile Include="Utility\NotifyIcon.Interop.cs" />
+    <Compile Include="Utility\SerializableData.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Utility\BackgroundThreadInfo.resx">
