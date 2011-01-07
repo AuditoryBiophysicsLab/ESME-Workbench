@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
@@ -19,26 +20,20 @@ using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESMEWorkBench.Data
 {
     [Serializable]
     public partial class Experiment : SerializableData<Experiment>
     {
-        public static Type[] ReferencedTypes
-        {
-            get
-            {
-                return _referencedTypes ?? (_referencedTypes = new[]
-                                                               {
-                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel)
-                                                               });
-            }
-        }
-
         static Type[] _referencedTypes;
+        static readonly PropertyChangedEventArgs TransmissionLossFieldsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.TransmissionLossFields);
 
         #region public string Comments { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Comments);
+        [XmlIgnore] string _comments;
 
         [XmlElement]
         public string Comments
@@ -52,12 +47,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Comments);
-        [XmlIgnore] string _comments;
-
         #endregion
 
         #region public string Author { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs AuthorChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Author);
+        [XmlIgnore] string _author;
 
         [XmlElement]
         public string Author
@@ -71,12 +66,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs AuthorChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Author);
-        [XmlIgnore] string _author;
-
         #endregion
 
         #region public DateTime Created { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs CreatedChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Created);
+        [XmlIgnore] DateTime _created;
 
         [XmlElement]
         public DateTime Created
@@ -90,12 +85,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs CreatedChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Created);
-        [XmlIgnore] DateTime _created;
-
         #endregion
 
         #region public DateTime LastModified { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs LastModifiedChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.LastModified);
+        [XmlIgnore] DateTime _lastModified;
 
         [XmlElement]
         public DateTime LastModified
@@ -109,12 +104,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs LastModifiedChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.LastModified);
-        [XmlIgnore] DateTime _lastModified;
-
         #endregion
 
         #region public string ModifiedBy { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs ModifiedByChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.ModifiedBy);
+        [XmlIgnore] string _modifiedBy;
 
         [XmlElement]
         public string ModifiedBy
@@ -128,12 +123,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs ModifiedByChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.ModifiedBy);
-        [XmlIgnore] string _modifiedBy;
-
         #endregion
 
         #region public string WindSpeedFileName { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs WindSpeedFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.WindSpeedFileName);
+        [XmlIgnore] string _windSpeedFileName;
 
         [XmlElement]
         public string WindSpeedFileName
@@ -147,12 +142,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs WindSpeedFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.WindSpeedFileName);
-        [XmlIgnore] string _windSpeedFileName;
-
         #endregion
 
         #region public string SoundSpeedFileName { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs SoundSpeedFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SoundSpeedFileName);
+        [XmlIgnore] string _soundSpeedFileName;
 
         [XmlElement]
         public string SoundSpeedFileName
@@ -167,12 +162,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs SoundSpeedFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SoundSpeedFileName);
-        [XmlIgnore] string _soundSpeedFileName;
-
         #endregion
 
         #region public string BottomTypeFileName { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs BottomTypeFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BottomTypeFileName);
+        [XmlIgnore] string _bottomTypeFileName;
 
         [XmlElement]
         public string BottomTypeFileName
@@ -187,12 +182,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs BottomTypeFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BottomTypeFileName);
-        [XmlIgnore] string _bottomTypeFileName;
-
         #endregion
 
         #region public string BathymetryFileName { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs BathymetryFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BathymetryFileName);
+        [XmlIgnore] string _bathymetryFileName;
 
         [XmlElement]
         public string BathymetryFileName
@@ -207,12 +202,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs BathymetryFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BathymetryFileName);
-        [XmlIgnore] string _bathymetryFileName;
-
         #endregion
 
         #region public string ScenarioFileName { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs ScenarioFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.ScenarioFileName);
+        [XmlIgnore] string _scenarioFileName;
 
         [XmlElement]
         public string ScenarioFileName
@@ -228,15 +223,15 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs ScenarioFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.ScenarioFileName);
-        [XmlIgnore] string _scenarioFileName;
-
         [XmlIgnore]
         public NemoFile NemoFile { get; private set; }
 
         #endregion
 
         #region public ObservableCollection<MapLayerViewModel> MapLayers { get; set; }
+
+        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.MapLayers);
+        ObservableCollection<MapLayerViewModel> _mapLayers;
 
         public ObservableCollection<MapLayerViewModel> MapLayers
         {
@@ -289,12 +284,12 @@ namespace ESMEWorkBench.Data
             NotifyPropertyChanged(MapLayersChangedEventArgs);
         }
 
-        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.MapLayers);
-        ObservableCollection<MapLayerViewModel> _mapLayers;
-
         #endregion
 
         #region public ObservableCollection<AnalysisPoint> AnalysisPoints { get; set; }
+
+        static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnalysisPoints);
+        ObservableCollection<AnalysisPoint> _analysisPoints;
 
         public ObservableCollection<AnalysisPoint> AnalysisPoints
         {
@@ -363,9 +358,6 @@ namespace ESMEWorkBench.Data
                                          });
         }
 
-        static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnalysisPoints);
-        ObservableCollection<AnalysisPoint> _analysisPoints;
-
         public TransmissionLossField NearestMatchingTransmissionLoss(NemoMode nemoMode, EarthCoordinate location)
         {
             TransmissionLossField nearestMatch = null;
@@ -382,6 +374,9 @@ namespace ESMEWorkBench.Data
         #endregion
 
         #region public ObservableCollection<string> AnimalPopulationFiles { get; set; }
+
+        static readonly PropertyChangedEventArgs AnimalPopulationFilesChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnimalPopulationFiles);
+        ObservableCollection<string> _animalPopulationFiles;
 
         public ObservableCollection<string> AnimalPopulationFiles
         {
@@ -453,12 +448,12 @@ namespace ESMEWorkBench.Data
             NotifyPropertyChanged(MapLayersChangedEventArgs);
         }
 
-        static readonly PropertyChangedEventArgs AnimalPopulationFilesChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AnimalPopulationFiles);
-        ObservableCollection<string> _animalPopulationFiles;
-
         #endregion
 
         #region public double BellhopRangeCellSize { get; set; }
+
+        static readonly PropertyChangedEventArgs BellhopRangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopRangeCellSize);
+        double _bellhopRangeCellSize = 50.0;
 
         public double BellhopRangeCellSize
         {
@@ -471,12 +466,12 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs BellhopRangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopRangeCellSize);
-        double _bellhopRangeCellSize = 50.0;
-
         #endregion
 
         #region public double BellhopDepthCellSize { get; set; }
+
+        static readonly PropertyChangedEventArgs BellhopDepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopDepthCellSize);
+        double _bellhopDepthCellSize = 50.0;
 
         public double BellhopDepthCellSize
         {
@@ -489,12 +484,13 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs BellhopDepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopDepthCellSize);
-        double _bellhopDepthCellSize = 50.0;
-
         #endregion
 
         #region public ulong NextObjectID { get; set; }
+
+        static readonly PropertyChangedEventArgs NextObjectIDChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.NextObjectID);
+        ulong _nextObjectID = 1;
+        bool _nextObjectIDSetLocked;
 
         public ulong NextObjectID
         {
@@ -515,36 +511,49 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs NextObjectIDChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.NextObjectID);
-        ulong _nextObjectID = 1;
-        bool _nextObjectIDSetLocked;
-
         #endregion
+
+        bool _deleteAllSpeciesLayersOnInitialize;
+        [XmlIgnore] bool _isInitialized;
+        ObservableCollection<TransmissionLossField> _transmissionLossFields;
+
+        public Experiment()
+        {
+            try
+            {
+                Mediator.Instance.Register(this);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("***********\nExperiment: Mediator registration failed: " + ex.Message + "\n***********");
+                throw;
+            }
+            Author = Environment.UserName;
+            Created = DateTime.Now;
+            PropertyChanged += delegate(object s, PropertyChangedEventArgs e) { if (e.PropertyName != "IsChanged") IsChanged = true; };
+            CurrentExtent = "POLYGON((-173.84765625 123.442822265625,169.98046875 123.442822265625,169.98046875 -165.555615234375,-173.84765625 -165.555615234375,-173.84765625 123.442822265625))";
+            CurrentScale = 147647947.5;
+            PropertyChanged += LocalPropertyChanged;
+            TransmissionLossFields = new ObservableCollection<TransmissionLossField>();
+            AnimalPopulationFiles = new ObservableCollection<string>();
+        }
+
+        public static Type[] ReferencedTypes
+        {
+            get
+            {
+                return _referencedTypes ?? (_referencedTypes = new[]
+                                                               {
+                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel)
+                                                               });
+            }
+        }
 
         [XmlIgnore]
         public AnimatInterface AnimatInterface { get; set; }
 
         [XmlIgnore]
         public MarkerLayerViewModel AnalysisPointLayer { get; private set; }
-
-        #region public bool IsChanged { get; set; }
-
-        [XmlIgnore]
-        public bool IsChanged
-        {
-            get { return _isChanged; }
-            set
-            {
-                if (_isChanged == value) return;
-                _isChanged = value;
-                NotifyPropertyChanged(IsChangedChangedEventArgs);
-            }
-        }
-
-        [XmlIgnore] static readonly PropertyChangedEventArgs IsChangedChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.IsChanged);
-        [XmlIgnore] bool _isChanged;
-
-        #endregion
 
         [XmlElement]
         public string CurrentExtent { get; set; }
@@ -571,7 +580,7 @@ namespace ESMEWorkBench.Data
 
         #region public string LocalStorageRoot { get; set; }
 
-        public string LocalStorageRoot
+            public string LocalStorageRoot
         {
             get
             {
@@ -615,8 +624,29 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs TransmissionLossFieldsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.TransmissionLossFields);
-        ObservableCollection<TransmissionLossField> _transmissionLossFields;
+        #endregion
+
+        [XmlIgnore]
+        FileSystemWatcher FileSystemWatcher { get; set; }
+
+        #region public bool IsChanged { get; set; }
+
+        [XmlIgnore] static readonly PropertyChangedEventArgs IsChangedChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.IsChanged);
+        [XmlIgnore] bool _isChanged;
+
+        [XmlIgnore]
+        public bool IsChanged
+        {
+            get { return _isChanged; }
+            set
+            {
+                if (_isChanged == value) return;
+                _isChanged = value;
+                NotifyPropertyChanged(IsChangedChangedEventArgs);
+            }
+        }
+
+        #endregion
 
         void TransmissionLossFieldsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -642,35 +672,6 @@ namespace ESMEWorkBench.Data
             NotifyPropertyChanged(TransmissionLossFieldsChangedEventArgs);
         }
 
-        #endregion
-
-        [XmlIgnore]
-        FileSystemWatcher FileSystemWatcher { get; set; }
-
-        [XmlIgnore] bool _isInitialized;
-        bool _deleteAllSpeciesLayersOnInitialize;
-
-        public Experiment()
-        {
-            try
-            {
-                Mediator.Instance.Register(this);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("***********\nExperiment: Mediator registration failed: " + ex.Message + "\n***********");
-                throw;
-            }
-            Author = Environment.UserName;
-            Created = DateTime.Now;
-            PropertyChanged += delegate(object s, PropertyChangedEventArgs e) { if (e.PropertyName != "IsChanged") IsChanged = true; };
-            CurrentExtent = "POLYGON((-173.84765625 123.442822265625,169.98046875 123.442822265625,169.98046875 -165.555615234375,-173.84765625 -165.555615234375,-173.84765625 123.442822265625))";
-            CurrentScale = 147647947.5;
-            PropertyChanged += LocalPropertyChanged;
-            TransmissionLossFields = new ObservableCollection<TransmissionLossField>();
-            AnimalPopulationFiles = new ObservableCollection<string>();
-        }
-
         static void LocalPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -690,9 +691,12 @@ namespace ESMEWorkBench.Data
 
         public void SaveAs(string fileName)
         {
+            var oldRoot = new DirectoryInfo(LocalStorageRoot);
             LastModified = DateTime.Now;
             ModifiedBy = Environment.UserName;
             SaveAs(fileName, ReferencedTypes);
+            var newRoot = new DirectoryInfo(LocalStorageRoot);
+            CopyAll(oldRoot, newRoot);
             IsChanged = false;
         }
 
@@ -702,6 +706,22 @@ namespace ESMEWorkBench.Data
             {
                 FileSystemWatcher.EnableRaisingEvents = false;
                 FileSystemWatcher = null;
+            }
+        }
+
+        static void CopyAll(DirectoryInfo source, DirectoryInfo target)
+        {
+            // Check if the target directory exists, if not, create it.
+            if (Directory.Exists(target.FullName) == false) Directory.CreateDirectory(target.FullName);
+
+            // Copy each file into it’s new directory.
+            foreach (var fi in source.GetFiles()) fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
+
+            // Copy each subdirectory using recursion.
+            foreach (var diSourceSubDir in source.GetDirectories())
+            {
+                var nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
+                CopyAll(diSourceSubDir, nextTargetSubDir);
             }
         }
 
@@ -761,6 +781,7 @@ namespace ESMEWorkBench.Data
                 foreach (var layer in layersToRemove) MapLayers.Remove(layer);
             }
             _isInitialized = true;
+            CommandManager.InvalidateRequerySuggested();
         }
 
         void TransmissionLossFieldFileChanged(object sender, FileSystemEventArgs e)
@@ -800,14 +821,11 @@ namespace ESMEWorkBench.Data
         {
             MediatorMessage.Send(MediatorMessage.CancelCurrentTransmissionLossCalculation, true);
             var files = Directory.GetFiles(LocalStorageRoot, "*.tlf");
-            foreach (var file in files)
-                File.Delete(file);
+            foreach (var file in files) File.Delete(file);
             files = Directory.GetFiles(LocalStorageRoot, "*.bellhop");
-            foreach (var file in files)
-                File.Delete(file);
+            foreach (var file in files) File.Delete(file);
             files = Directory.GetFiles(LocalStorageRoot, "*.ram");
-            foreach (var file in files)
-                File.Delete(file);
+            foreach (var file in files) File.Delete(file);
             AnalysisPoints.Clear();
         }
 
@@ -866,34 +884,34 @@ namespace ESMEWorkBench.Data
 
         #region ViewAnalysisPointCommand
 
+        SimpleCommand<object, AnalysisPoint> _viewAnalysisPointCommand;
+
         public SimpleCommand<object, AnalysisPoint> ViewAnalysisPointCommand
         {
             get { return _viewAnalysisPointCommand ?? (_viewAnalysisPointCommand = new SimpleCommand<object, AnalysisPoint>(analysisPoint => MediatorMessage.Send(MediatorMessage.ViewAnalysisPoint, analysisPoint))); }
         }
 
-        SimpleCommand<object, AnalysisPoint> _viewAnalysisPointCommand;
-
         #endregion
 
         #region RecalculateAnalysisPointCommand
+
+        SimpleCommand<object, object> _recalculateAnalysisPoint;
 
         public SimpleCommand<object, object> RecalculateAnalysisPointCommand
         {
             get { return _recalculateAnalysisPoint ?? (_recalculateAnalysisPoint = new SimpleCommand<object, object>(analysisPoint => MediatorMessage.Send(MediatorMessage.CalculateAnalysisPoint, analysisPoint))); }
         }
 
-        SimpleCommand<object, object> _recalculateAnalysisPoint;
-
         #endregion
 
         #region DeleteAnalysisPointCommand
+
+        SimpleCommand<object, AnalysisPoint> _deleteAnalysisPointCommand;
 
         public SimpleCommand<object, AnalysisPoint> DeleteAnalysisPointCommand
         {
             get { return _deleteAnalysisPointCommand ?? (_deleteAnalysisPointCommand = new SimpleCommand<object, AnalysisPoint>(ap => MediatorMessage.Send(MediatorMessage.DeleteAnalysisPoint, ap))); }
         }
-
-        SimpleCommand<object, AnalysisPoint> _deleteAnalysisPointCommand;
 
         #endregion
     }

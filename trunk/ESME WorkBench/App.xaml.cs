@@ -5,12 +5,14 @@ using System.Windows;
 using Cinch;
 using ESME.Views;
 using ESMEWorkBench.Properties;
+using HRC.Utility;
 #if DEBUG
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
+
 #endif
 
 namespace ESMEWorkBench
@@ -20,18 +22,22 @@ namespace ESMEWorkBench
     /// </summary>
     public partial class App
     {
+        public static AppEventLog AppLog { get; private set; }
 #if DEBUG
         public static readonly string Logfile, DumpFile;
 
         static App()
         {
             //MessageBox.Show("App starting up - static constructor");
+            AppLog = new AppEventLog("ESME WorkBench");
             Logfile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_app_log.txt");
             if (OSInfo.OperatingSystemName != "XP")
             {
                 DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_crash.mdmp");
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
             }
+            AppLog.Debug(EventLogEntryType.Information, "Starting");
             using (var sw = new StreamWriter(Logfile, false))
                 sw.WriteLine("{0} Application starting up", DateTime.Now);
         }
