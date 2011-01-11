@@ -177,6 +177,7 @@ namespace ImportNetCDF
             depthVar = myFile.Variables[depthVarName];
             dataVar = myFile.Variables[dataVarName];
 
+            // todo: Filter these according to if the lats and lons are within the selected ranges.  Depths do not get filtered.
             lons = new float[myFile.Variables[lonVarName].ElementCount];
             for (i = 0; i < lons.Length; i++) lons[i] = myFile.Variables[lonVarName].GetFloat(i);
             lats = new float[myFile.Variables[latVarName].ElementCount];
