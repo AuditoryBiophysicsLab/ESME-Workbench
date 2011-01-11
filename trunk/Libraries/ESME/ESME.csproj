@@ -121,6 +121,7 @@
     <Compile Include="Environment\NAVO\DBDB.cs" />
     <Compile Include="Environment\NAVO\GDEM.cs" />
     <Compile Include="Environment\NAVO\NAVODataSource.cs" />
+    <Compile Include="Environment\NAVO\SerializedOutput.cs" />
     <Compile Include="Environment\NAVO\SMGC.cs" />
     <Compile Include="Environment\NAVO\tester.cs" />
     <Compile Include="Environment\Transect.cs" />

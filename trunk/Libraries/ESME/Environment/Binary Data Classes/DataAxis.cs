@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace ESME.Environment
 {
@@ -132,7 +133,11 @@ namespace ESME.Environment
 
         public int this[float value]
         {
-            get { return _axis.Find(x => x.Value >= value).Index; }
+            get
+            {
+                if (value < -360 || value > 360) throw new IndexOutOfRangeException("The requested value is out of range.");
+                return _axis.Find(x => x.Value >= value).Index;
+            }
         }
 
         public AxisMap[] Map
