@@ -29,7 +29,7 @@ namespace ESME.Environment.NAVO
             var result = Execute();
             //result now contains the entire output of SMGC, i think, since it dumps data to STDOUT... so let's save it to disk in the right place. 
             File.WriteAllText(filename, result);
-            ParseSMGC(result);
+            ExtractedArea = ParseSMGC(result);
 
         }
         /// <summary>
@@ -37,7 +37,7 @@ namespace ESME.Environment.NAVO
         /// </summary>
         /// <param name="result">a string containing the total SMGC output</param>
         /// <returns>a populated Environment2DData object with windspeeds per latitude/longitude.</returns>
-        void ParseSMGC(string result)
+        Environment2DData ParseSMGC(string result)
         {
             var lats = new List<double>();
             var lons = new List<double>();
@@ -88,7 +88,7 @@ namespace ESME.Environment.NAVO
             }
             const float dataResolution = 1; //will change if SMGC ever gets better (but right now it's 1 degree resolution)
             //and finally, make a useful thing out of them. 
-            ExtractedArea = new Environment2DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), dataResolution, dataArray, 0, 0);
+            return new Environment2DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), dataResolution, dataArray, 0, 0);
         }
 
         public override bool ValidateDataSource() { return true; } //SMGC provides no data validation routines 
