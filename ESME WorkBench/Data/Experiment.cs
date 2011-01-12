@@ -691,12 +691,17 @@ namespace ESMEWorkBench.Data
 
         public void SaveAs(string fileName)
         {
-            var oldRoot = new DirectoryInfo(LocalStorageRoot);
+            var oldRoot = LocalStorageRoot;
             LastModified = DateTime.Now;
             ModifiedBy = Environment.UserName;
             SaveAs(fileName, ReferencedTypes);
-            var newRoot = new DirectoryInfo(LocalStorageRoot);
-            CopyAll(oldRoot, newRoot);
+            var newRoot = LocalStorageRoot;
+            if (oldRoot != newRoot)
+            {
+                var oldRootInfo = new DirectoryInfo(oldRoot);
+                var newRootInfo = new DirectoryInfo(newRoot);
+                CopyAll(oldRootInfo, newRootInfo);
+            }
             IsChanged = false;
         }
 

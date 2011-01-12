@@ -280,7 +280,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                     {
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        *((int*)curOffset) = _colorMapViewModel.Lookup(TransmissionLossRadial.TransmissionLoss[y, x]).ToArgb();
+                        var curColor = _colorMapViewModel.Lookup(TransmissionLossRadial.TransmissionLoss[y, x]);
+                        *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
                         curOffset += sizeof(Int32);
                     }
                 }
