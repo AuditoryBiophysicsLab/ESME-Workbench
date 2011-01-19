@@ -691,17 +691,9 @@ namespace ESMEWorkBench.Data
 
         public void SaveAs(string fileName)
         {
-            var oldRoot = LocalStorageRoot;
             LastModified = DateTime.Now;
             ModifiedBy = Environment.UserName;
             SaveAs(fileName, ReferencedTypes);
-            var newRoot = LocalStorageRoot;
-            if (oldRoot != newRoot)
-            {
-                var oldRootInfo = new DirectoryInfo(oldRoot);
-                var newRootInfo = new DirectoryInfo(newRoot);
-                CopyAll(oldRootInfo, newRootInfo);
-            }
             IsChanged = false;
         }
 
@@ -714,7 +706,7 @@ namespace ESMEWorkBench.Data
             }
         }
 
-        static void CopyAll(DirectoryInfo source, DirectoryInfo target)
+        public static void CopyAllPrivateFiles(DirectoryInfo source, DirectoryInfo target)
         {
             // Check if the target directory exists, if not, create it.
             if (Directory.Exists(target.FullName) == false) Directory.CreateDirectory(target.FullName);
@@ -726,7 +718,7 @@ namespace ESMEWorkBench.Data
             foreach (var diSourceSubDir in source.GetDirectories())
             {
                 var nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
-                CopyAll(diSourceSubDir, nextTargetSubDir);
+                CopyAllPrivateFiles(diSourceSubDir, nextTargetSubDir);
             }
         }
 
