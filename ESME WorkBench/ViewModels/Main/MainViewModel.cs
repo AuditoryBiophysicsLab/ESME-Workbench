@@ -347,8 +347,16 @@ namespace ESMEWorkBench.ViewModels.Main
 
         bool SaveExperimentAs()
         {
+            var oldRoot = _experiment.LocalStorageRoot;
             if (!SaveExperimentDialog()) return false;
+            var newRoot = _experiment.LocalStorageRoot;
             _experiment.Save();
+            if (oldRoot != newRoot)
+            {
+                var oldRootInfo = new DirectoryInfo(oldRoot);
+                var newRootInfo = new DirectoryInfo(newRoot);
+                Experiment.CopyAllPrivateFiles(oldRootInfo, newRootInfo);
+            }
             DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
             return true;
         }
