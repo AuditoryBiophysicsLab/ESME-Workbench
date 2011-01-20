@@ -19,9 +19,10 @@ namespace dbtester
 
         public static void Main(string[] args)
         {
-            DBDBTest();
-            BSTTest();
-            SMGCTest();
+            //DBDBTest();
+           // BSTTest();
+           // SMGCTest();
+            GDEMTest();
 
         }
 
@@ -86,6 +87,21 @@ namespace dbtester
             string outfilename = @"C:\tests\dbtests\smgc.txt";
             foo.ExtractArea(outfilename, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
         
+        }
+
+        static void GDEMTest()
+        {
+            var foo = new GDEM
+                      {
+                          DatabasePath = @"C:\Users\Graham Voysey\Desktop\GDEM-V\uncompressed\",
+                          ExtractionProgramPath = @"C:\Projects\ESME Deliverables\trunk\Utilities\NetCDFExtractor\bin\x86\Debug\ImportNetCDF.exe",
+                          WorkingDirectory = "",
+                          MinMonth = 1,
+                          MaxMonth = 4,
+                      };
+
+            string outfilename = @"C:\tests\dbtests\gdem.txt";
+            foo.ExtractArea(outfilename, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
         }
     }
 }
