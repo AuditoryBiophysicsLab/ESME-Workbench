@@ -131,6 +131,7 @@
       <Abbreviation Text="SMGC" />
       <Abbreviation Text="GDEM" />
       <Abbreviation Text="YXZ" />
+      <Abbreviation Text="NAVO" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
