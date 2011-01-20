@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace ESME.Environment
 {
@@ -41,7 +40,7 @@ namespace ESME.Environment
             var axisLength = stream.ReadUInt16();
             _axis = new List<AxisMap>(axisLength);
             for (i = 0; i < axisLength; i++) _axis.Add(new AxisMap(stream));
-            CheckAxis();
+            CheckAndRepairAxis();
         }
 
         /// <summary>
@@ -64,7 +63,7 @@ namespace ESME.Environment
         /// <param name = "endValue"></param>
         public DataAxis(DataAxis source, float startValue, float endValue)
         {
-            if (!source.ContainsRange(startValue, endValue)) throw new ArgumentOutOfRangeException("DataAxis: Source axis does not contain the requested range");
+            if (!source.ContainsRange(startValue, endValue)) throw new ArgumentOutOfRangeException(@"DataAxis: Source axis does not contain the requested range");
             var lower = Math.Min(startValue, endValue);
             var higher = Math.Max(startValue, endValue);
 
@@ -79,7 +78,7 @@ namespace ESME.Environment
 
         public void Normalize(float minValue, float maxValue)
         {
-            if (maxValue <= minValue) throw new ArgumentOutOfRangeException("Normalize: MaxValue must be greater than MinValue");
+            if (maxValue <= minValue) throw new ArgumentOutOfRangeException(@"Normalize: MaxValue must be greater than MinValue");
             var range = maxValue - minValue;
             foreach (var cur in _axis)
             {
@@ -100,11 +99,20 @@ namespace ESME.Environment
 
         #endregion
 
-        void CheckAxis()
+        void CheckAndRepairAxis()
         {
             int i;
 
-            for (i = 0; i < _axis.Count - 2; i++) if (_axis[i].Value >= _axis[i + 1].Value) throw new ApplicationException("Axis: Axis values must be in ascending order");
+            for (i = 0; i < _axis.Count - 2; i++)
+            {
+                while (_axis[i].Value <= -360f) _axis[i].Value += 360f;
+                _axis[i].Value %= 360f;
+                if (_axis[i].Value >= _axis[i + 1].Value)
+                {
+                    _axis[i + 1].Value += 360f;
+                    if (_axis[i].Value >= _axis[i + 1].Value) throw new ApplicationException("Axis: Axis values must be in ascending order");
+                }
+            }
         }
 
         /// <summary>
