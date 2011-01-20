@@ -4,9 +4,8 @@ using System.IO;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Environment.NAVO;
-using NetCDF;
 using HRC.Navigation;
-using HRC.Utility;
+using NetCDF;
 
 namespace ImportNetCDF
 {
@@ -37,10 +36,11 @@ namespace ImportNetCDF
                 Usage();
                 return;
             }
-            string netCDFFileName = lonVarName = latVarName = depthVarName = dataVarName = missingValueAttName = scaleFactorAttName = offsetValueAttName = outputFileName = outputLayerType = timePeriod = outputDataFileName ="";
+            string netCDFFileName = lonVarName = latVarName = depthVarName = dataVarName = missingValueAttName = scaleFactorAttName = offsetValueAttName = outputFileName = outputLayerType = timePeriod = outputDataFileName = "";
             north = south = east = west = float.NaN;
-            for (var i = 0; i < args.Length; i++)
-            {//more args: north, south, east, west, outputFileName
+            for (int i = 0; i < args.Length; i++)
+            {
+//more args: north, south, east, west, outputFileName
                 switch (args[i])
                 {
                     case "-in":
@@ -95,8 +95,8 @@ namespace ImportNetCDF
                     case "-dataout":
                         outputDataFileName = args[++i];
                         break;
-                        
-                    
+
+
                     case "-force":
                         force = true;
                         break;
@@ -105,6 +105,7 @@ namespace ImportNetCDF
                         return;
                 }
             }
+            timePeriod = "spring"; //todo
             if ((netCDFFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (dataVarName == "") || (dataVarName == "") || (timePeriod == ""))
             {
                 Usage();
@@ -134,7 +135,7 @@ namespace ImportNetCDF
 
             outputFileName = Path.Combine(outputPath, outputFileName);
 
-            
+
             if ((force) || (!File.Exists(outputFileName)))
             {
                 ImportNetCDF(netCDFFileName, dataVarName, lonVarName, latVarName, depthVarName, missingValueAttName, scaleFactorAttName, offsetValueAttName, outputFileName, outputDataFileName, outputLayerType, timePeriod, north, south, east, west);
@@ -147,7 +148,7 @@ namespace ImportNetCDF
             Console.WriteLine(test.ToString());
         }
 
-        static void ImportNetCDF(string netCDFFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string dataFileName, string outputDataFileName,  string dataLayerName, string timePeriod, float north, float south, float east, float west)
+        static void ImportNetCDF(string netCDFFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string dataFileName, string outputDataFileName, string dataLayerName, string timePeriod, float north, float south, float east, float west)
         {
             var myFile = new NcFile(netCDFFileName);
             myFile.LoadAllData();
@@ -223,59 +224,51 @@ namespace ImportNetCDF
             var sourceData = new float[depthCount];
             var serializedOutput = new SerializedOutput
                                    {
-                                       DataPoints = new List<EnvironmentalDataPoint>()
+                                       DataPoints = new List<EnvironmentalDataPoint>(),
+                                       DepthAxis = new List<float>(),
                                    };
-            
+            serializedOutput.DepthAxis.AddRange(dataLayer.DepthAxis.Values);
 
             for (lon = dataLayer.LongitudeAxis[west]; lon <= dataLayer.LongitudeAxis[east]; lon++)
             {
                 destPoint.ColumnIndex = lon;
-                for (lat = dataLayer.LatitudeAxis[south]; lat <= dataLayer.LatitudeAxis[north]; lat++)
+                //for (lat = dataLayer.LatitudeAxis[south]; lat <= dataLayer.LatitudeAxis[north]; lat++)
+                for (lat = dataLayer.LatitudeAxis[north]; lat <= dataLayer.LatitudeAxis[south]; lat++)
                 {
                     destPoint.RowIndex = lat;
                     var curDataPoint = new EnvironmentalDataPoint
-                    {
-                        EarthCoordinate = new EarthCoordinate(dataLayer.LatitudeAxis[lat], dataLayer.LongitudeAxis[lon]),
-                        Data = new List<DepthValuePair>(),
-                    };
+                                       {
+                                           EarthCoordinate = new EarthCoordinate(dataLayer.LatitudeAxis[lat], dataLayer.LongitudeAxis[lon]),
+                                           Data = new List<float>(),
+                                       };
                     if (depthVarName != String.Empty)
                     {
                         for (depth = 0; depth < depthCount; depth++)
                         {
-                            var curValue = dataVar.GetShort(depth, lat, lon);
+                            short curValue = dataVar.GetShort(depth, lat, lon);
 
-                            if (curValue != missingValue)
-                                curDataPoint.Data.Add(new DepthValuePair
-                                                      {
-                                                          Depth = dataLayer.DepthAxis[depth],
-                                                          Value = ((curValue)*scaleFactor) + addOffset
-                                                      });
+                            if (curValue != missingValue) curDataPoint.Data.Add(((curValue)*scaleFactor) + addOffset);
                         }
                     }
                     else
                     {
                         if (dataVar is NcVarFloat)
                         {
-                            curDataPoint.Data.Add(new DepthValuePair
-                            {
-                                Value = dataVar.GetFloat(lat, lon),
-                            });
+                            curDataPoint.Data.Add(dataVar.GetFloat(lat, lon));
                         }
                         else if (dataVar is NcVarShort)
                         {
-                            curDataPoint.Data.Add(new DepthValuePair
-                            {
-                                Value = dataVar.GetShort(lat, lon),
-                            });
+                            curDataPoint.Data.Add(dataVar.GetShort(lat, lon));
                         }
                     }
                     serializedOutput.DataPoints.Add(curDataPoint);
 
                     destPoint.Data = sourceData;
+
                     
-                    OutputToDataFile(serializedOutput, outputDataFileName);
                     //todo
                 }
+                OutputToDataFile(serializedOutput, outputDataFileName);
                 Console.Write(@"{0} % complete              \r", (int) (progress*100));
                 progress += progress_step;
             }
@@ -284,17 +277,16 @@ namespace ImportNetCDF
             Console.WriteLine(@"done");
         }
 
-         static void OutputToDataFile(SerializedOutput data, string outputDataFileName)
+        static void OutputToDataFile(SerializedOutput data, string outputDataFileName)
         {
-            var serializer = new XmlSerializer(typeof(SerializedOutput));
+            var serializer = new XmlSerializer(typeof (SerializedOutput));
             TextWriter writer = new StreamWriter(outputDataFileName);
-            serializer.Serialize(writer,data);
+            serializer.Serialize(writer, data);
         }
 
         static void Usage()
         {
-            Console.WriteLine(
-// ReSharper disable LocalizableElement
+            Console.WriteLine( // ReSharper disable LocalizableElement
                 "Usage: {0} -input <netCDFFileName>\n" + "                    -data <DataVariable>\n" + "                    -lon <LongitudeVariable>\n" + "                    -lat <LatitudeVariable>\n" + "                   [-depth <DepthVariable>]\n" + "                   [-missingvalue <MissingValueAttribute>]\n" + "                   [-scalefactor <ScaleFactorAttribute>]\n" + "                   [-offset <OffsetValueAttribute>]\n" + "                   [-output <OutputFileName>]\n" +
                 "                    -layertype <OutputLayerType>\n" + "                    -period <TimePeriod>\n" + "                   [-force]\n" + "\n" + "Where: <netCDFFileName> is the full path to an UNCOMPRESSED NetCDF file,\n" + "       typically provided by OAML for the GDEM-V and the DBDB-V datasets.\n" + "\n" + "       <DataVariable> is the name of the NetCDF variable that contains the\n" + "       'payload' data.\n" + "\n" +
                 "       <LongitudeVariable> is the name of the NetCDF variable that contains the\n" + "       array of longitudes present in the payload data\n" + "\n" + "       <LatitudeVariable> is the name of the NetCDF variable that contains the\n" + "       array of latitudes present in the payload data\n" + "\n" + "       <DepthVariable> is the name of the NetCDF variable that contains the\n" + "       array of depths present in the payload data.  Only required for 3-D data\n" +
@@ -303,7 +295,7 @@ namespace ImportNetCDF
                 "       If <OutputFileName> is not specified, <netCDFFileName> will be used\n" + "       with a .eeb extension in place of the source file extension.\n" + "\n" + "       <OutputLayerType> is one of a list of types supported by this utility.\n" + "       Legal values for <OutputLayerType> are as follows:\n" + "       wind, soundspeed, bathymetry, bottomtype, temperature, salinity,\n" + "       temperature_std_dev, salinity_std_dev\n" + "\n" +
                 "       The value specified should match the data in the file being imported, or\n" + "       the output of this utility will be unpredictable.\n" + "\n" + "       <TimePeriod> is the time period represented by the data in the file\n" + "       Some examples of time periods would be the names of months or seasons.\n" + "\n" + "       -force will force the utility to re-import the input file if the\n" +
                 "       output file already exists.  Normally in this situation, no action would\n" + "       be taken.\n" + "", "ImportNetCDF");
-// ReSharper restore LocalizableElement
+            // ReSharper restore LocalizableElement
         }
     }
 }

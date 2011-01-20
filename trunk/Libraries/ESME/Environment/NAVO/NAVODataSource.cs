@@ -9,7 +9,7 @@ namespace ESME.Environment.NAVO
         public string ExtractionProgramPath { get; set; }
         public string DatabasePath { get; set; } //change back to protected set?
         public string CommandArgs { get; protected set; }
-        public Environment2DData ExtractedArea { get; protected set; }
+        public EnvironmentData ExtractedArea { get; protected set; }
         public string WorkingDirectory { get; set; }
 
         /// <summary>
