@@ -27,6 +27,8 @@ namespace HRC.Utility
         [XmlIgnore]
         public string FileName { get; set; }
 
+        Stream _fileStream;
+
         #region Load/Save
 
         public void CopyFrom(T that)
@@ -38,6 +40,21 @@ namespace HRC.Utility
             // Copy all properties from that to this)
             foreach (var property in typeof(T).GetProperties())
                 property.SetValue(this, property.GetValue(that, null), null);
+        }
+
+        /// <summary>
+        /// TRUE if the file should be kept open after reading and/or writing.
+        /// Setting this to TRUE will have the side effect of making the file unavailable to be 
+        /// read or written by any other application while the current app has the file open.
+        /// </summary>
+        public bool CloseAfterReadWrite { get; set; }
+
+        /// <summary>
+        /// Close the file if it's open.  If not open, no exception will be thrown
+        /// </summary>
+        public void Close()
+        {
+            
         }
 
         /// <summary>
