@@ -130,6 +130,7 @@
       <Abbreviation Text="BST" />
       <Abbreviation Text="SMGC" />
       <Abbreviation Text="GDEM" />
+      <Abbreviation Text="YXZ" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
