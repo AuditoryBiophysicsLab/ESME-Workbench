@@ -42,7 +42,7 @@ namespace ESME.Environment.NAVO
 
         public override void ExtractArea(string filename, double north, double south, double east, double west)
         {
-            var contents = string.Format("area {0} {1} {2} {3} {4} {5}.CHRTR", west, east, north, south, SelectedResolution, Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)));
+            var contents = string.Format("area {0} {1} {2} {3} {4} {5}.CHRTR", west, east, south, north, SelectedResolution, Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)));
             var scriptfile = Path.GetTempFileName();
             File.WriteAllText(scriptfile, contents);
 

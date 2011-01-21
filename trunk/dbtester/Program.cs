@@ -21,29 +21,27 @@ namespace dbtester
 
         public static void Main(string[] args)
         {
-            //DBDBTest();
-           // BSTTest();
-           // SMGCTest();
+            DBDBTest();
+            BSTTest();
+            SMGCTest();
             GDEMTest();
-
         }
 
         static void DBDBTest()
         {
+            Console.WriteLine(@"Now testing DBDB extraction routines ...");
             var foo = new DBDB
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\DBDB-V\data\dbdbv5_level0c.h5",
                           ExtractionProgramPath = @"C:\Users\Graham Voysey\Desktop\DBDB-V\bin\Windows\dbv5_command.exe",
                       };
 
-            string outfilename = @"C:\tests\dbtests\dbdb.txt";
-            var test = Path.GetDirectoryName(outfilename);
-            var testp = Path.Combine(Path.GetDirectoryName(outfilename), Path.GetFileNameWithoutExtension(outfilename));
+            const string outfilename = @"C:\tests\dbtests\dbdb.txt";
             foo.GetAllResolutions();
             if (foo.Resolutions != null)
             {
-                Console.WriteLine(@"DBDB: Available Resolutions");
-                foreach (string resolution in foo.Resolutions)
+                Console.WriteLine(@" DBDB: Available Resolutions");
+                foreach (var resolution in foo.Resolutions)
                 {
                     Console.WriteLine(resolution);
                 }
@@ -51,21 +49,23 @@ namespace dbtester
             Console.WriteLine();
             foo.SelectedResolution = (2.0).ToString();
             foo.ExtractArea(outfilename, Testpoints[0][0].Latitude_degrees, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
+            Console.WriteLine(@"Done!");
         }
 
         static void BSTTest()
         {
+            Console.WriteLine(@"Now testing BST extraction routines ...");
             var foo = new BST
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\BST\Sediments2.0_QAV_Analysis\Sediments\Version2.0\databases\hfevav2.h5",
                           ExtractionProgramPath = @"C:\Users\Graham Voysey\Desktop\BST\Sediments2.0_QAV_Analysis\Sediments\Version2.0\tools\Windows\with_hdf5_1.6\extract.exe",
                       };
-            string outfilename = @"C:\tests\dbtests\bst.txt";
+            const string outfilename = @"C:\tests\dbtests\bst.txt";
             foo.GetAllResolutions();
             if (foo.Resolutions != null)
             {
-                Console.WriteLine(@"BST: Available Resolutions");
-                foreach (string resolution in foo.Resolutions)
+                Console.WriteLine(@" BST: Available Resolutions");
+                foreach (var resolution in foo.Resolutions)
                 {
                     Console.WriteLine(resolution);
                 }
@@ -73,26 +73,30 @@ namespace dbtester
             Console.WriteLine();
             foo.SelectedResolution = "5.0000";
             foo.ExtractArea(outfilename, Testpoints[0][0].Latitude_degrees, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
+            Console.WriteLine(@"Done!");
         }
 
         static void SMGCTest()
         {
-            var foo = new SMGC()
+            Console.WriteLine(@"Now testing SMGC extraction routines ...");
+            var foo = new SMGC
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\SMGC\alldata\",
                           ExtractionProgramPath = @"C:\Projects\ESME Deliverables\trunk\Debug\SMGCExtract.exe",
                           MinMonth = 1,
                           MaxMonth = 4,
                           WorkingDirectory = @"C:\Users\Graham Voysey\Desktop\",
-                          };
+                          GridSpacing = 1,
+                      };
 
-            string outfilename = @"C:\tests\dbtests\smgc.txt";
+            const string outfilename = @"C:\tests\dbtests\smgc.txt";
             foo.ExtractArea(outfilename, Testpoints[0][0].Latitude_degrees, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
-        
+            Console.WriteLine(@"Done!");
         }
 
         static void GDEMTest()
         {
+            Console.WriteLine(@"Now testing GDEM extraction routines ...");
             var foo = new GDEM
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\GDEM-V\uncompressed\",
@@ -103,29 +107,28 @@ namespace dbtester
                           GridSpacing = 0.25f,
                       };
 
-            string outfilename = @"C:\tests\dbtests\gdem.txt";
+            const string outfilename = @"C:\tests\dbtests\gdem.txt";
             foo.ExtractArea(outfilename, Testpoints[0][0].Latitude_degrees, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
-            var eebFileName = Path.Combine(Path.GetDirectoryName(outfilename),Path.GetFileNameWithoutExtension(outfilename))+".eeb";
+
+            var eebFileName = Path.Combine(Path.GetDirectoryName(outfilename), Path.GetFileNameWithoutExtension(outfilename)) + ".eeb";
             var eebFile = DataFile.Create(eebFileName);
             var extractedArea = ((Environment3DData) foo.ExtractedArea);
-            var eebLayer = new DataLayer("soundspeed", "spring", "various", "", new DataAxis("latitude", extractedArea.Latitudes.Select(x => (float)x).ToArray()), new DataAxis("longitude", extractedArea.Longitudes.Select(x => (float)x).ToArray()), new DataAxis("depth", extractedArea.Depths.Select(x => (float)x).ToArray()));
+            var eebLayer = new DataLayer("soundspeed", "spring", "various", "", new DataAxis("latitude", extractedArea.Latitudes.Select(x => (float) x).ToArray()), new DataAxis("longitude", extractedArea.Longitudes.Select(x => (float) x).ToArray()), new DataAxis("depth", extractedArea.Depths.Select(x => (float) x).ToArray()));
             eebFile.Layers.Add(eebLayer);
             var dataPoint = new DataPoint(eebLayer);
             var dataValues = new float[extractedArea.Depths.Length];
-            //todo: Loop through lat and lon indices and set dataPoint to each point in extractedArea.Values[,]
+            //Loop through lat and lon indices and set dataPoint to each point in extractedArea.Values[,]
             for (var lonIndex = 0; lonIndex < extractedArea.Values.GetLength(0); lonIndex++)
                 for (var latIndex = 0; latIndex < extractedArea.Values.GetLength(1); latIndex++)
                 {
                     var curOutputPoint = extractedArea.Values[lonIndex, latIndex];
-                    if (curOutputPoint != null)
-                    {
-                        for (var depIndex = 0; depIndex < extractedArea.Depths.Length; depIndex++)
-                            dataValues[depIndex] = curOutputPoint.Count > depIndex ? curOutputPoint[depIndex] : float.NaN;
-                        dataPoint.Data = dataValues;
-                    }
+                    if (curOutputPoint == null) continue;
+                    for (var depIndex = 0; depIndex < extractedArea.Depths.Length; depIndex++) dataValues[depIndex] = curOutputPoint.Count > depIndex ? curOutputPoint[depIndex] : float.NaN;
+                    dataPoint.Data = dataValues;
                 }
             Console.WriteLine(string.Format("GDEM : Data extracted to {0}", eebFileName));
             eebFile.Close();
+            Console.WriteLine(@"Done!");
         }
     }
 }

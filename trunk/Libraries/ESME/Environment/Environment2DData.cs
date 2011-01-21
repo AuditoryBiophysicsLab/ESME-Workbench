@@ -418,7 +418,8 @@ namespace ESME.Environment
                     for (int depthIndex = 0; depthIndex < that.Values[lonIndex, latIndex].Count; depthIndex++)
                     {
                         var thatValue = that.Values[lonIndex, latIndex][depthIndex];
-                        if (Values[lonIndex, latIndex] == null) Values[lonIndex, latIndex] = new List<AverageDatum>();
+                        if (Values[lonIndex, latIndex] == null) 
+                          Values[lonIndex, latIndex] = new List<AverageDatum>();
                         if (Values[lonIndex, latIndex].Count <= depthIndex) Values[lonIndex, latIndex].Add(new AverageDatum(thatValue));
                         else Values[lonIndex, latIndex][depthIndex].Add(thatValue);
                     }
