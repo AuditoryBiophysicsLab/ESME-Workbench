@@ -110,7 +110,8 @@ namespace ESME.Environment
                 if (_axis[i].Value >= _axis[i + 1].Value)
                 {
                     _axis[i + 1].Value += 360f;
-                    if (_axis[i].Value >= _axis[i + 1].Value) throw new ApplicationException("Axis: Axis values must be in ascending order");
+                    if (_axis[i].Value >= _axis[i + 1].Value) 
+                        throw new ApplicationException("Axis: Axis values must be in ascending order");
                 }
             }
         }
