@@ -12,7 +12,7 @@ namespace ESME.Environment.NAVO
         //the available resolutions of the database for the user to select.  will look like "0.05min"
         public List<string> Resolutions { get; private set; }
         //the selected resolution to be extracted.  Will look like "0.05".
-        public string SelectedResolution { get;  set; }
+        public string SelectedResolution { get; set; }
 
         #endregion
 
@@ -20,16 +20,16 @@ namespace ESME.Environment.NAVO
         {
             Resolutions = new List<string>();
             CommandArgs = string.Format("resolutions \"{0}\"", DatabasePath);
-            string result = Execute().Trim();
-            string[] resarray = result.Split('\n');
-            for (int index = 0; index < resarray.Length; index++)
+            var result = Execute().Trim();
+            var resarray = result.Split('\n');
+            for (var index = 0; index < resarray.Length; index++)
             {
-                string line = resarray[index].Trim();
+                var line = resarray[index].Trim();
                 if (line.Contains("Available resolutions:"))
                 {
-                    for (int j = index + 1; j < resarray.Length; j++)
+                    for (var j = index + 1; j < resarray.Length; j++)
                     {
-                        string resline = resarray[j].Trim();
+                        var resline = resarray[j].Trim();
                         if (resline.Equals("")) break;
                         Resolutions.Add(resline);
                     }
@@ -45,14 +45,13 @@ namespace ESME.Environment.NAVO
             //extract the area and look for success or failure in the output string.
             var result = Execute();
             var resarray = result.Split('\n');
-            foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DBDB: "+line);
+            foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DBDB: " + line);
 
             //return the extracted data from file as Environment2DData
             ExtractedArea = Environment2DData.ReadChrtrBinaryFile(Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + ".CHRTR");
-           
         }
 
 
-        public override bool ValidateDataSource() { return true; } //DBDB provides no test data. 
+        public override bool ValidateDataSource() { return false; } //DBDB provides no test data. 
     }
 }

@@ -134,7 +134,7 @@ namespace ESME.Environment
             // The following is from http://resource.npl.co.uk/acoustics/techguides/soundseawater/content.html
             double thyh0Z, curDepth, k_Z_Theta, h_Z_45, h_Z_Theta, P_Z_Theta;
             double gTheta = 9.7803 * (1 + 5.3e-3 * sinSquaredTheta);
- 
+
             for (int depth = 0; depth < DepthVector_Meters.Length; depth++)
             {
                 curDepth = DepthVector_Meters[depth];
@@ -263,7 +263,7 @@ namespace ESME.Environment
         {
             DataFile sourceSspFile, AverageSoundSpeed;
             DataLayer sourceSspLayer, AverageSspLayer;
-           
+
             float CurProgressRatio = 0f;
             string ConcatenatedSspFilesString = "";
 
@@ -318,7 +318,7 @@ namespace ESME.Environment
                 Console.WriteLine(ConcatenatedSspFilesString);
 
                 sourceSspFile = DataFile.Open(SourceSSFFiles[sourcefile]);
-                sourceSspLayer =  sourceSspFile.Layers[0];
+                sourceSspLayer = sourceSspFile.Layers[0];
                 for (int depth = 0; depth < sourceSspLayer.DepthAxis.Length; depth++)
                 {
                     if (sourceSspLayer.DepthAxis[depth] != AverageSoundSpeed.Layers[0].DepthAxis[depth])

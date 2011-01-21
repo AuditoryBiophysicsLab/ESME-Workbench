@@ -106,7 +106,7 @@ namespace ImportNetCDF
                         return;
                 }
             }
-            timePeriod = "spring"; //todo
+            timePeriod = "no_time_gv"; //todo
             if ((netCDFFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (dataVarName == "") || (dataVarName == "") || (timePeriod == ""))
             {
                 Usage();
