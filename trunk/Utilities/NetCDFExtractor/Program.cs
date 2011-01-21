@@ -6,6 +6,7 @@ using ESME.Environment;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 using NetCDF;
+using System.Linq;
 
 namespace ImportNetCDF
 {
@@ -159,8 +160,8 @@ namespace ImportNetCDF
             int latCount,
                 lonCount,
                 depthCount;
-            int lat,
-                lon,
+            int latIndex,
+                lonIndex,
                 depth,
                 i;
             float scaleFactor,
@@ -179,10 +180,33 @@ namespace ImportNetCDF
             dataVar = myFile.Variables[dataVarName];
 
             // todo: Filter these according to if the lats and lons are within the selected ranges.  Depths do not get filtered.
+
             lons = new float[myFile.Variables[lonVarName].ElementCount];
             for (i = 0; i < lons.Length; i++) lons[i] = myFile.Variables[lonVarName].GetFloat(i);
             lats = new float[myFile.Variables[latVarName].ElementCount];
             for (i = 0; i < lats.Length; i++) lats[i] = myFile.Variables[latVarName].GetFloat(i);
+
+            if (east < 0) east += 360;
+            if (west < 0) west += 360;
+
+            var lonMap = new List<AxisMap>();
+            var latMap = new List<AxisMap>();
+            for (i = 0; i < lons.Length; i++)
+            {
+                var temp = myFile.Variables[lonVarName].GetFloat(i);
+                if ((temp >= west) && (temp <= east)) 
+                    lonMap.Add(new AxisMap(temp,i));
+            }
+            for (i = 0; i < lats.Length; i++)
+            {
+                var temp = myFile.Variables[latVarName].GetFloat(i);
+                if (temp >= south && temp <= north) latMap.Add(new AxisMap(temp, i));
+            }
+
+            var selectedLons = lonMap.Select(x => x.Value).ToArray();
+            var selectedLats = latMap.Select(x => x.Value).ToArray();
+
+
 
             Console.Write(@"Initializing output file {0} ... ", Path.GetFileName(dataFileName));
             DataFile dataFile = DataFile.Create(dataFileName);
@@ -191,19 +215,19 @@ namespace ImportNetCDF
                 depthCount = (int) myFile.Variables[depthVarName].Dimensions[0].Size;
                 depths = new float[depthCount];
                 for (depth = 0; depth < depthCount; depth++) depths[depth] = myFile.Variables[depthVarName].GetFloat(depth);
-                dataLayer = new DataLayer(dataLayerName, timePeriod, netCDFFileName, String.Format("Converted from {0} on {1}", netCDFFileName, DateTime.Now), new DataAxis("Latitude", lats), new DataAxis("Longitude", lons), new DataAxis("Depth", depths));
+                dataLayer = new DataLayer(dataLayerName, timePeriod, netCDFFileName, String.Format("Converted from {0} on {1}", netCDFFileName, DateTime.Now), new DataAxis("Latitude", selectedLats), new DataAxis("Longitude", selectedLons), new DataAxis("Depth", depths));
             }
             else
             {
                 depthCount = 1;
                 depths = new float[1];
-                dataLayer = new DataLayer(dataLayerName, timePeriod, netCDFFileName, String.Format("Converted from {0} on {1}", netCDFFileName, DateTime.Now), new DataAxis("Latitude", lats), new DataAxis("Longitude", lons), null);
+                dataLayer = new DataLayer(dataLayerName, timePeriod, netCDFFileName, String.Format("Converted from {0} on {1}", netCDFFileName, DateTime.Now), new DataAxis("Latitude", selectedLats), new DataAxis("Longitude", selectedLons), null);
             }
             dataFile.Layers.Add(dataLayer);
             Console.WriteLine(@"done");
 
-            latCount = (int) myFile.Variables[latVarName].Dimensions[0].Size;
-            lonCount = (int) myFile.Variables[lonVarName].Dimensions[0].Size;
+            latCount = (int) selectedLats.Length;
+            lonCount = (int) selectedLons.Length;
 
             //float[,] CurLatitude = new float[dataLayer.LatitudeAxis.Count, depthCount];
 
@@ -229,23 +253,27 @@ namespace ImportNetCDF
                                    };
             serializedOutput.DepthAxis.AddRange(dataLayer.DepthAxis.Values);
 
-            for (lon = dataLayer.LongitudeAxis[west]; lon <= dataLayer.LongitudeAxis[east]; lon++)
+            for (lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
-                destPoint.ColumnIndex = lon;
+                var lon = lonMap[lonIndex].Value;
+                var lonSourceIndex = lonMap[lonIndex].Index;
+                destPoint.ColumnIndex = lonIndex;
                 //for (lat = dataLayer.LatitudeAxis[south]; lat <= dataLayer.LatitudeAxis[north]; lat++)
-                for (lat = dataLayer.LatitudeAxis[north]; lat <= dataLayer.LatitudeAxis[south]; lat++)
+                for (latIndex = 0; latIndex < latCount; latIndex++)
                 {
-                    destPoint.RowIndex = lat;
+                    var lat = latMap[latIndex].Value;
+                    var latSourceIndex = latMap[latIndex].Index;
+                    destPoint.RowIndex = latIndex;
                     var curDataPoint = new EnvironmentalDataPoint
                                        {
-                                           EarthCoordinate = new EarthCoordinate(dataLayer.LatitudeAxis[lat], dataLayer.LongitudeAxis[lon]),
+                                           EarthCoordinate = new EarthCoordinate(lat, lon),
                                            Data = new List<float>(),
                                        };
                     if (depthVarName != String.Empty)
                     {
                         for (depth = 0; depth < depthCount; depth++)
                         {
-                            short curValue = dataVar.GetShort(depth, lat, lon);
+                            short curValue = dataVar.GetShort(depth, latSourceIndex, lonSourceIndex);
 
                             if (curValue != missingValue) curDataPoint.Data.Add(((curValue)*scaleFactor) + addOffset);
                         }
@@ -254,11 +282,11 @@ namespace ImportNetCDF
                     {
                         if (dataVar is NcVarFloat)
                         {
-                            curDataPoint.Data.Add(dataVar.GetFloat(lat, lon));
+                            curDataPoint.Data.Add(dataVar.GetFloat(latSourceIndex, lonSourceIndex));
                         }
                         else if (dataVar is NcVarShort)
                         {
-                            curDataPoint.Data.Add(dataVar.GetShort(lat, lon));
+                            curDataPoint.Data.Add(dataVar.GetShort(latSourceIndex, lonSourceIndex));
                         }
                     }
                     serializedOutput.DataPoints.Add(curDataPoint);
@@ -268,11 +296,12 @@ namespace ImportNetCDF
                     
                     //todo
                 }
-                OutputToDataFile(serializedOutput, outputDataFileName);
+                
                 Console.Write(@"{0} % complete              \r", (int) (progress*100));
                 progress += progress_step;
             }
             Console.Write(@"Saving imported data ... ");
+            OutputToDataFile(serializedOutput, outputDataFileName);
             dataFile.Close();
             Console.WriteLine(@"done");
         }

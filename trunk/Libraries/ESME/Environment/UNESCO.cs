@@ -67,14 +67,15 @@ namespace ESME.Environment
         /// <returns></returns>
         public static float[] SoundSpeed(EarthCoordinate Location, ref float[] DepthVector_Meters, ref float[] TemperatureVector_C, ref float[] SalinityVector_ppt)
         {
-            float[] results = new float[DepthVector_Meters.Length];
+            if (TemperatureVector_C.Length != SalinityVector_ppt.Length) throw new ApplicationException("UNESCO.SoundSpeed: Unable to calculate sound speed if temperature and salinity vectors are of unequal length");
+            float[] results = new float[TemperatureVector_C.Length];
             double[] Pressure_Bar = UNESCO.DepthToPressure_Bar(Location.Latitude_radians, ref DepthVector_Meters);
             double DTP, BTP, ATP, CwTP, cSTP;
             double p, p2, p3;
             double t, t2, t3, t4, t5;
             double s, s32, s2;
-      
-            for (int depth = 0; depth < DepthVector_Meters.Length; depth++)
+
+            for (int depth = 0; depth < results.Length; depth++)
             {
                 p = Pressure_Bar[depth];
                 t = TemperatureVector_C[depth];
