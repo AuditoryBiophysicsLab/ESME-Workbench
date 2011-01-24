@@ -25,6 +25,7 @@ namespace dbtester
             BSTTest();
             SMGCTest();
             GDEMTest();
+            Console.ReadLine();
         }
 
         static void DBDBTest()
@@ -108,7 +109,9 @@ namespace dbtester
                       };
 
             const string outfilename = @"C:\tests\dbtests\gdem.txt";
+            Console.WriteLine(@" Extracting data ...");
             foo.ExtractArea(outfilename, Testpoints[0][0].Latitude_degrees, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
+            Console.WriteLine(@"    done!");
 
             var eebFileName = Path.Combine(Path.GetDirectoryName(outfilename), Path.GetFileNameWithoutExtension(outfilename)) + ".eeb";
             var eebFile = DataFile.Create(eebFileName);

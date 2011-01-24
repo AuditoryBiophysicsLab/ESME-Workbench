@@ -12,6 +12,7 @@ namespace ESME.Environment.NAVO
         public EnvironmentData ExtractedArea { get; protected set; }
         public string WorkingDirectory { get; set; }
         public float GridSpacing { get; set; }
+        public string TimePeriod { get; set; }
 
         /// <summary>
         /// 
