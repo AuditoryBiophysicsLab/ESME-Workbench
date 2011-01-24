@@ -131,6 +131,7 @@ namespace ESME.Environment.NAVO
                 var dataString = Path.GetFileNameWithoutExtension(file) + "-" + dataType + ".xml" ;
                 var dataFilePath = Path.Combine(outputPath, dataString);
                 var tempOut = Path.GetTempFileName(); //todo : remove the need for this entirely.
+                if(File.Exists(dataFilePath)) File.Delete(dataFilePath);
 
                 //extract temperature data into a XML file
                 //for sanity:
