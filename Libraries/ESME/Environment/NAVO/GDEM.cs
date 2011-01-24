@@ -130,7 +130,6 @@ namespace ESME.Environment.NAVO
             {
                 var dataString = Path.GetFileNameWithoutExtension(file) + "-" + dataType + ".xml" ;
                 var dataFilePath = Path.Combine(outputPath, dataString);
-                var tempOut = Path.GetTempFileName(); //todo : remove the need for this entirely.
                 if(File.Exists(dataFilePath)) File.Delete(dataFilePath);
 
                 //extract temperature data into a XML file
@@ -141,9 +140,8 @@ namespace ESME.Environment.NAVO
                 const string missingParamName = "missing_value";
                 const string scaleParamName = "scale_factor";
                 const string offsetParamName = "add_offset";
-                CommandArgs = string.Format("-force -in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11} -out \"{12}\" -dataout \"{13}\"", file, lonParamName, latParamName, north, south, east, west, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, tempOut, dataFilePath);
+                CommandArgs = string.Format("-in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11}  -dataout \"{12}\"", file, lonParamName, latParamName, north, south, east, west, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, dataFilePath);
                 Execute();
-                File.Delete(tempOut);
 
                 //read it back in
                 var serializer = new XmlSerializer(typeof(SerializedOutput));
