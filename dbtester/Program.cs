@@ -21,10 +21,11 @@ namespace dbtester
 
         public static void Main(string[] args)
         {
-          //  DBDBTest();
-          //  BSTTest();
-          //  SMGCTest();
+            DBDBTest();
+            BSTTest();
+            SMGCTest();
             GDEMTest();
+            Console.WriteLine(@"press enter to exit.");
             Console.ReadLine();
         }
 
@@ -120,7 +121,7 @@ namespace dbtester
             eebFile.Layers.Add(eebLayer);
             var dataPoint = new DataPoint(eebLayer);
             var dataValues = new float[extractedArea.Depths.Length];
-            //Loop through lat and lon indices and set dataPoint to each point in extractedArea.Values[,]
+
             for (var lonIndex = 0; lonIndex < extractedArea.Values.GetLength(0); lonIndex++)
                 for (var latIndex = 0; latIndex < extractedArea.Values.GetLength(1); latIndex++)
                 {

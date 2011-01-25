@@ -14,11 +14,11 @@ using System.Windows.Shapes;
 namespace ESME.Views.EnvironmentBuilder
 {
     /// <summary>
-    /// Interaction logic for EnvironmentalBuilderConfigurationView.xaml
+    /// Interaction logic for EnvironmentBuilderConfigurationView.xaml
     /// </summary>
-    public partial class EnvironmentalBuilderConfigurationView : Window
+    public partial class EnvironmentBuilderConfigurationView : Window
     {
-        public EnvironmentalBuilderConfigurationView()
+        public EnvironmentBuilderConfigurationView()
         {
             InitializeComponent();
         }

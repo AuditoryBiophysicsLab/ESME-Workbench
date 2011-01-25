@@ -322,5 +322,53 @@ namespace ESMEWorkBench.Properties {
                 this["TransmissionLayersWidth"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GDEMDirectory {
+            get {
+                return ((string)(this["GDEMDirectory"]));
+            }
+            set {
+                this["GDEMDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SMGCDirectory {
+            get {
+                return ((string)(this["SMGCDirectory"]));
+            }
+            set {
+                this["SMGCDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BSTDirectory {
+            get {
+                return ((string)(this["BSTDirectory"]));
+            }
+            set {
+                this["BSTDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DBDBDirectory {
+            get {
+                return ((string)(this["DBDBDirectory"]));
+            }
+            set {
+                this["DBDBDirectory"] = value;
+            }
+        }
     }
 }

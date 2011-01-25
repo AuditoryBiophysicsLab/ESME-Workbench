@@ -145,7 +145,12 @@
     <Compile Include="ViewModels\Map\MapLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapShape.cs" />
     <Compile Include="ViewModels\Map\MapShapeLayer.cs" />
+    <Compile Include="ViewModels\NAVODataSources\BSTViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\DBDBViewModel.cs" />
+    <Compile Include="ViewModels\NAVODataSources\EnvironmentBuilderConfigurationViewModel.cs" />
+    <Compile Include="ViewModels\NAVODataSources\EnvironmentBuilderViewModel.cs" />
+    <Compile Include="ViewModels\NAVODataSources\GDEMViewModel.cs" />
+    <Compile Include="ViewModels\NAVODataSources\SMGCViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
