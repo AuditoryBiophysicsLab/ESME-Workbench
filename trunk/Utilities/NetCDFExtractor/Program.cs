@@ -14,26 +14,25 @@ namespace ImportNetCDF
     {
         static void Main(string[] args)
         {
-            string lonVarName;
-            string latVarName;
-            string depthVarName;
-            string dataVarName;
-            string missingValueAttName;
-            string scaleFactorAttName;
-            string offsetValueAttName;
-            float north;
-            float south;
-            float east;
-            float west;
-            string outputDataFileName;
+            var lonVarName = "";
+            var latVarName = "";
+            var depthVarName = "";
+            var dataVarName = "";
+            var missingValueAttName = "";
+            var scaleFactorAttName = "";
+            var offsetValueAttName = "";
+            var outputDataFileName = "";
+            var netCDFFileName = "";
+            var north = float.NaN;
+            var south = float.NaN;
+            var east = float.NaN;
+            var west = float.NaN;
 
             if (args.Length < 1)
             {
                 Usage();
                 return;
             }
-            var netCDFFileName = lonVarName = latVarName = depthVarName = dataVarName = missingValueAttName = scaleFactorAttName = offsetValueAttName = outputDataFileName = "";
-            north = south = east = west = float.NaN;
             for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
@@ -92,7 +91,7 @@ namespace ImportNetCDF
                 }
             }
 
-            if ((netCDFFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (dataVarName == "") || (dataVarName == ""))
+            if ((netCDFFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (depthVarName == "") || (missingValueAttName == "") || (scaleFactorAttName == "") || (offsetValueAttName == ""))
             {
                 Usage();
                 return;
@@ -108,56 +107,42 @@ namespace ImportNetCDF
         static void ImportNetCDF(string netCDFFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string outputDataFileName, float north, float south, float east, float west)
         {
             var myFile = new NcFile(netCDFFileName);
-
-            int latCount,
-                lonCount,
-                depthCount;
-
-            int latIndex,
-                lonIndex,
-                depth,
-                i;
-            float scaleFactor,
-                  addOffset;
-            short missingValue = 0;
-            float[] lats,
-                    lons,
-                    depths;
-            float progress,
-                  progress_step;
+            int depthCount, lonIndex, depth;
+            short missingValue;
+            float[] depths;
 
             myFile.LoadAllData();
 
-            NcVar lonVar = myFile.Variables[lonVarName];
-            NcVar latVar = myFile.Variables[latVarName];
-            NcVar depthVar = myFile.Variables[depthVarName];
-            NcVar dataVar = myFile.Variables[dataVarName];
+            var lonVar = myFile.Variables[lonVarName];
+            var latVar = myFile.Variables[latVarName];
+            var depthVar = myFile.Variables[depthVarName];
+            var dataVar = myFile.Variables[dataVarName];
 
             // todo: Filter these according to if the lats and lons are within the selected ranges.  Depths do not get filtered.
-            lons = new float[lonVar.ElementCount];
-            for (i = 0; i < lons.Length; i++) lons[i] = lonVar.GetFloat(i);
-            lats = new float[latVar.ElementCount];
-            for (i = 0; i < lats.Length; i++) lats[i] = latVar.GetFloat(i);
+            var lons = new float[lonVar.ElementCount];
+            for (var i = 0; i < lons.Length; i++) lons[i] = lonVar.GetFloat(i);
+            var lats = new float[latVar.ElementCount];
+            for (var i = 0; i < lats.Length; i++) lats[i] = latVar.GetFloat(i);
 
-            //todo: FIX. 
+            //todo: FIX. This is a *hack*. 
             if (east < 0) east += 360;
             if (west < 0) west += 360;
 
             var lonMap = new List<AxisMap>();
             var latMap = new List<AxisMap>();
-            for (i = 0; i < lons.Length; i++)
+            for (var i = 0; i < lons.Length; i++)
             {
-                float temp = lonVar.GetFloat(i);
+                var temp = lonVar.GetFloat(i);
                 if ((temp >= west) && (temp <= east)) lonMap.Add(new AxisMap(temp, i));
             }
-            for (i = 0; i < lats.Length; i++)
+            for (var i = 0; i < lats.Length; i++)
             {
-                float temp = latVar.GetFloat(i);
+                var temp = latVar.GetFloat(i);
                 if (temp >= south && temp <= north) latMap.Add(new AxisMap(temp, i));
             }
 
-            float[] selectedLons = lonMap.Select(x => x.Value).ToArray();
-            float[] selectedLats = latMap.Select(x => x.Value).ToArray();
+            var selectedLons = lonMap.Select(x => x.Value).ToArray();
+            var selectedLats = latMap.Select(x => x.Value).ToArray();
 
 
             Console.Write(@"Initializing output file {0} ... ", Path.GetFileName(outputDataFileName));
@@ -175,11 +160,11 @@ namespace ImportNetCDF
             }
 
 
-            latCount = selectedLats.Length;
-            lonCount = selectedLons.Length;
+            var latCount = selectedLats.Length;
+            var lonCount = selectedLons.Length;
 
-            scaleFactor = 1.0f;
-            addOffset = 0.0f;
+            var scaleFactor = 1.0f;
+            var addOffset = 0.0f;
             if (!short.TryParse(missingValueAttName, out missingValue))
             {
                 if (missingValueAttName != String.Empty) missingValue = dataVar.Attributes[missingValueAttName].GetShort(0);
@@ -188,8 +173,8 @@ namespace ImportNetCDF
             if (offsetValueAttName != String.Empty) addOffset = dataVar.Attributes[offsetValueAttName].GetFloat(0);
 
             Console.WriteLine(@"Importing source file {0}...", Path.GetFileName(netCDFFileName));
-            progress = 0f;
-            progress_step = 1f/lonCount;
+            var progress = 0f;
+            var progressStep = 1f/lonCount;
 
             var serializedOutput = new SerializedOutput
                                    {
@@ -200,12 +185,12 @@ namespace ImportNetCDF
 
             for (lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
-                float lon = lonMap[lonIndex].Value;
-                int lonSourceIndex = lonMap[lonIndex].Index;
-                for (latIndex = 0; latIndex < latCount; latIndex++)
+                var lon = lonMap[lonIndex].Value;
+                var lonSourceIndex = lonMap[lonIndex].Index;
+                for (var latIndex = 0; latIndex < latCount; latIndex++)
                 {
-                    float lat = latMap[latIndex].Value;
-                    int latSourceIndex = latMap[latIndex].Index;
+                    var lat = latMap[latIndex].Value;
+                    var latSourceIndex = latMap[latIndex].Index;
                     var curDataPoint = new EnvironmentalDataPoint
                                        {
                                            EarthCoordinate = new EarthCoordinate(lat, lon),
@@ -215,7 +200,7 @@ namespace ImportNetCDF
                     {
                         for (depth = 0; depth < depthCount; depth++)
                         {
-                            short curValue = dataVar.GetShort(depth, latSourceIndex, lonSourceIndex);
+                            var curValue = dataVar.GetShort(depth, latSourceIndex, lonSourceIndex);
 
                             if (curValue != missingValue) curDataPoint.Data.Add(((curValue)*scaleFactor) + addOffset);
                         }
@@ -235,7 +220,7 @@ namespace ImportNetCDF
                 }
 
                 Console.Write(@"{0} % complete              \r", (int) (progress*100));
-                progress += progress_step;
+                progress += progressStep;
             }
             Console.Write(@"Saving imported data ... ");
             OutputToDataFile(serializedOutput, outputDataFileName);
