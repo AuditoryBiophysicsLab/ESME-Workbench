@@ -117,16 +117,16 @@ namespace ImportNetCDF
             var latVar = myFile.Variables[latVarName];
             var depthVar = myFile.Variables[depthVarName];
             var dataVar = myFile.Variables[dataVarName];
-
-            // todo: Filter these according to if the lats and lons are within the selected ranges.  Depths do not get filtered.
+            
             var lons = new float[lonVar.ElementCount];
             for (var i = 0; i < lons.Length; i++) lons[i] = lonVar.GetFloat(i);
             var lats = new float[latVar.ElementCount];
             for (var i = 0; i < lats.Length; i++) lats[i] = latVar.GetFloat(i);
-
-            //todo: FIX. This is a *hack*. 
-            if (east < 0) east += 360;
-            if (west < 0) west += 360;
+            
+            if (lons.First() > west) west += 360;
+            if (lons.Last() < west) west -= 360;
+            if (lons.First() > east) east += 360;
+            if (lons.Last() < east) east -= 360;
 
             var lonMap = new List<AxisMap>();
             var latMap = new List<AxisMap>();
@@ -140,7 +140,6 @@ namespace ImportNetCDF
                 var temp = latVar.GetFloat(i);
                 if (temp >= south && temp <= north) latMap.Add(new AxisMap(temp, i));
             }
-
             var selectedLons = lonMap.Select(x => x.Value).ToArray();
             var selectedLats = latMap.Select(x => x.Value).ToArray();
 
@@ -181,7 +180,7 @@ namespace ImportNetCDF
                                        DataPoints = new List<EnvironmentalDataPoint>(),
                                        DepthAxis = new List<float>(),
                                    };
-            serializedOutput.DepthAxis.AddRange(depths.ToList()); //todo: yes?
+            serializedOutput.DepthAxis.AddRange(depths.ToList()); 
 
             for (lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
@@ -202,7 +201,7 @@ namespace ImportNetCDF
                         {
                             var curValue = dataVar.GetShort(depth, latSourceIndex, lonSourceIndex);
 
-                            if (curValue != missingValue) curDataPoint.Data.Add(((curValue)*scaleFactor) + addOffset);
+                            if (curValue != missingValue) curDataPoint.Data.Add(((curValue) * scaleFactor) + addOffset);
                         }
                     }
                     else
@@ -219,7 +218,7 @@ namespace ImportNetCDF
                     serializedOutput.DataPoints.Add(curDataPoint);
                 }
 
-                Console.Write(@"{0} % complete              \r", (int) (progress*100));
+                Console.Write(@"{0} % complete              \r", (int)(progress * 100));
                 progress += progressStep;
             }
             Console.Write(@"Saving imported data ... ");

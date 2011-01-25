@@ -14,6 +14,7 @@ namespace ESME.Environment.NAVO
 
         public override void ExtractArea(string filename, double north, double south, double east, double west)
         {
+            if((west >= east) || (south >= north)) throw new ApplicationException("GIS parameters are out of range. West must be less than east, and south must be less than north.");
             //Determine which netCDF files we need to read.
             var ncFileList = Directory.EnumerateFiles(DatabasePath, "*.nc");
             var ncTemps = new List<string>();
