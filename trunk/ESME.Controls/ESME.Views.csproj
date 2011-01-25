@@ -83,8 +83,8 @@
     <Compile Include="EnvironmentBuilder\DBDBView.xaml.cs">
       <DependentUpon>DBDBView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EnvironmentBuilder\EnvironmentalBuilderConfigurationView.xaml.cs">
-      <DependentUpon>EnvironmentalBuilderConfigurationView.xaml</DependentUpon>
+    <Compile Include="EnvironmentBuilder\EnvironmentBuilderConfigurationView.xaml.cs">
+      <DependentUpon>EnvironmentBuilderConfigurationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
@@ -111,7 +111,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EnvironmentBuilder\EnvironmentalBuilderConfigurationView.xaml">
+    <Page Include="EnvironmentBuilder\EnvironmentBuilderConfigurationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
