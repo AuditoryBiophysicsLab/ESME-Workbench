@@ -21,9 +21,9 @@ namespace dbtester
 
         public static void Main(string[] args)
         {
-            DBDBTest();
-            BSTTest();
-            SMGCTest();
+          //  DBDBTest();
+          //  BSTTest();
+          //  SMGCTest();
             GDEMTest();
             Console.ReadLine();
         }

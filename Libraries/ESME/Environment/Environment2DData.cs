@@ -367,10 +367,10 @@ namespace ESME.Environment
         public float Value { get; set; }
         public int Count { get; set; }
 
-        public void Add(float newValue) 
+        public void Add(float newValue)
         {
             Value += newValue;
-            Count++; 
+            Count++;
         }
 
         public void Average()
@@ -378,16 +378,16 @@ namespace ESME.Environment
             if (Count > 0) Value /= Count;
         }
 
-        public AverageDatum() 
-        { 
+        public AverageDatum()
+        {
             Value = 0;
-            Count = 0; 
+            Count = 0;
         }
 
         public AverageDatum(float value)
-        { 
+        {
             Value = value;
-            Count = 1; 
+            Count = 1;
         }
     }
 
@@ -412,15 +412,16 @@ namespace ESME.Environment
             if (Depths.Length < that.Depths.Length) Array.Copy(that.Depths, Depths, that.Depths.Length);
             //VerifyArrays(Depths, that.Depths, "depth");)
 
-            for (int lonIndex = 0; lonIndex < Values.GetUpperBound(0); lonIndex++)
-                for (int latIndex = 0; latIndex < Values.GetUpperBound(1); latIndex++)
+            for (int lonIndex = 0; lonIndex < Values.GetLength(0); lonIndex++)
+                for (int latIndex = 0; latIndex < Values.GetLength(1); latIndex++)
                 {
+                    if (Values[lonIndex, latIndex] == null)
+                        Values[lonIndex, latIndex] = new List<AverageDatum>();
                     for (int depthIndex = 0; depthIndex < that.Values[lonIndex, latIndex].Count; depthIndex++)
                     {
                         var thatValue = that.Values[lonIndex, latIndex][depthIndex];
-                        if (Values[lonIndex, latIndex] == null) 
-                          Values[lonIndex, latIndex] = new List<AverageDatum>();
-                        if (Values[lonIndex, latIndex].Count <= depthIndex) Values[lonIndex, latIndex].Add(new AverageDatum(thatValue));
+                        if (Values[lonIndex, latIndex].Count <= depthIndex)
+                            Values[lonIndex, latIndex].Add(new AverageDatum(thatValue));
                         else Values[lonIndex, latIndex][depthIndex].Add(thatValue);
                     }
                 }
