@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 
@@ -17,12 +18,9 @@ namespace ESME.Environment.NAVO
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="filename">output file name (in appropriate native-to-source format)</param>
-        /// <param name="north"></param>
-        /// <param name="south"></param>
-        /// <param name="east"></param>
-        /// <param name="west"></param>
-        public abstract void ExtractArea(string filename, double north, double south, double east, double west);
+        /// <param name="packet"></param>
+        //public abstract void ExtractArea(string filename, double north, double south, double east, double west);
+        public abstract void ExtractArea(NAVOExtractionPacket packet);
 
         public abstract bool ValidateDataSource();
 
@@ -50,6 +48,23 @@ namespace ESME.Environment.NAVO
                 Thread.Sleep(100);
             }
             return output.ToString();
+        }
+
+
+    }
+
+    public class NAVOExtractionPacket
+    {
+        public string Filename;
+        public double North;
+        public double South;
+        public double East;
+        public double West;
+
+        public NAVOExtractionPacket()
+        {
+            //if (Filename == null) throw new ApplicationException("NAVO Data Source: a file name must be specified");
+           // if ((West >= East) || (South >= North)) throw new ApplicationException("GIS parameters are out of range. West must be less than east, and south must be less than north.");
         }
     }
 }

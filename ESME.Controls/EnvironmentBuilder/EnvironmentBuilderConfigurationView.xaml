@@ -2,31 +2,67 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ctl="clr-namespace:ESME.Views.Controls"
+        xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
         Title="EnvironmentBuilderConfigurationView"
-        Height="300"
-        Width="300">
+        mef:ViewModelLocator.ViewModel="EnvironmentBuilderConfigurationViewModel"
+        Height="400"
+        Width="500">
     <DockPanel LastChildFill="True">
-	<TabControl>
-		<TabItem Header="Database Locations"
+        <DockPanel LastChildFill="False"
+		           Margin="10"
+		           DockPanel.Dock="Bottom">
+            <Button Width="75"
+			        Margin="10 0 0 0"
+			        IsCancel="True"
+			        Content="Cancel"
+			        DockPanel.Dock="Right" />
+            <Button Width="75"
+			        IsDefault="True"
+			        Content="OK"
+			        DockPanel.Dock="Right"
+			        Command="{Binding OkCommand}" />
+        </DockPanel>
+        <TabControl>
+            <TabItem Header="Database Locations"
 		         HorizontalContentAlignment="Stretch"
 		         VerticalContentAlignment="Stretch">
-			<StackPanel Orientation="Vertical"
+                <StackPanel Orientation="Vertical"
 			            Width="Auto"
 			            Height="Auto">
-				<ctl:FileOrDirectorySetting Caption="GDEM"
+                    <ctl:FileOrDirectorySetting Caption="GDEM-V"
 				                            IsDirectoryBrowser="True"
 				                            FileName="{Binding AppSettings.GDEMDirectory}" />
-				<ctl:FileOrDirectorySetting Caption="SMGC"
+                    <ctl:FileOrDirectorySetting Caption="SMGC"
 				                            IsDirectoryBrowser="True"
 				                            FileName="{Binding AppSettings.SMGCDirectory}" />
-                <ctl:FileOrDirectorySetting Caption="BST"
+                    <ctl:FileOrDirectorySetting Caption="BST"
 				                            IsDirectoryBrowser="True"
 				                            FileName="{Binding AppSettings.BSTDirectory}" />
-                <ctl:FileOrDirectorySetting Caption="DBDB"
+                    <ctl:FileOrDirectorySetting Caption="DBDB"
 				                            IsDirectoryBrowser="True"
-				                            FileName="{Binding AppSettings.DBDBDirectory}" />
-			</StackPanel>                
+				                            FileName="{Binding AppSettings.DBDBDirectory}" />                    
+                </StackPanel>
             </TabItem>
-	</TabControl>
+            <TabItem Header="Database Extraction Tool Locations"
+                     HorizontalContentAlignment="Stretch"
+                     VerticalContentAlignment="Stretch">
+                <StackPanel Orientation="Vertical"
+			            Width="Auto"
+			            Height="Auto">
+                    <ctl:FileOrDirectorySetting Caption="GDEM Extractor"
+				                            IsDirectoryBrowser="False"
+				                            FileName="{Binding AppSettings.GDEMEXEDirectory}" />
+                    <ctl:FileOrDirectorySetting Caption="SMGC Extractor"
+				                            IsDirectoryBrowser="False"
+				                            FileName="{Binding AppSettings.SMGCEXEDirectory}" />
+                    <ctl:FileOrDirectorySetting Caption="BST Extractor"
+				                            IsDirectoryBrowser="False"
+				                            FileName="{Binding AppSettings.BSTEXEDirectory}" />
+                    <ctl:FileOrDirectorySetting Caption="DBDB Extractor"
+				                            IsDirectoryBrowser="False"
+				                            FileName="{Binding AppSettings.DBDBEXEDirectory}" />
+                </StackPanel>
+            </TabItem>
+        </TabControl>
     </DockPanel>
 </Window>

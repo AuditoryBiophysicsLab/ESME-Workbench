@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="ESME.Views.EnvironmentBuilder.ExtractionTimesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+             mef:ViewModelLocator.ViewModel="ExtractionTimesViewModel"
+             mc:Ignorable="d"
+             d:DesignHeight="300"
+             d:DesignWidth="300">
+	<StackPanel Orientation="Vertical">
+		<TextBlock Text="Spring Starts"
+		           Margin="2" />
+		<ComboBox ItemsSource="{Binding Months}"
+		          SelectedItem="{Binding AppSettings.SpringStartMonth}"
+		          ToolTip="The beginning month of a 3-month season" >
+		</ComboBox>
+        <TextBlock Text="Summer Starts"
+		           Margin="2" />
+		<ComboBox ItemsSource="{Binding Months}"
+		          SelectedItem="{Binding AppSettings.SummerStartMonth}"
+		          ToolTip="The beginning month of a 3-month season">
+		</ComboBox>
+        <TextBlock Text="Fall Starts"
+		           Margin="2" />
+		<ComboBox ItemsSource="{Binding Months}"
+		          SelectedItem="{Binding AppSettings.FallStartMonth}"
+		          ToolTip="The beginning month of a 3-month season">
+		</ComboBox>
+        <TextBlock Text="Winter Starts"
+		           Margin="2" />
+		<ComboBox ItemsSource="{Binding Months}"
+		          SelectedItem="{Binding AppSettings.WinterStartMonth}"
+		          ToolTip="The beginning month of a 3-month season">
+		</ComboBox>
+
+        <TextBlock Text="Cold Season Starts"
+		           Margin="2" />
+		<ComboBox ItemsSource="{Binding Months}"
+		          SelectedItem="{Binding AppSettings.ColdSeasonStartMonth}"
+		          ToolTip="The beginning month of a 6-month season">
+		</ComboBox>
+        <TextBlock Text="Warm Season Starts"
+		           Margin="2" />
+		<ComboBox ItemsSource="{Binding Months}"
+		          SelectedItem="{Binding AppSettings.WarmSeasonStartMonth}"
+		          ToolTip="The beginning month of a 6-month season">
+		</ComboBox>
+	</StackPanel>
+</UserControl>

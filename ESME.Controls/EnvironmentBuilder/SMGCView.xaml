@@ -6,16 +6,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <StackPanel Orientation="Vertical">
-        <TextBlock Text="Season" Margin="2"/>
-        <ComboBox ItemsSource="{Binding Foo }" 
-                          SelectedItem="{Binding Bar}"                          
-                          ToolTip="Choose a season">
-        </ComboBox>
+
         <DockPanel LastChildFill="False">
             <Button Width="100"
 			        Margin="10 0 0 0"
 			        Content="Validate Database"
-			        DockPanel.Dock="Right"
+                    Command="{Binding ValidateDatabaseCommand}"
+			        DockPanel.Dock="Bottom"
                     IsEnabled="False"/>
         </DockPanel>
     </StackPanel>
