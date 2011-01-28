@@ -98,7 +98,7 @@ namespace ESME.Environment
         public abstract void Save(BinaryWriter stream);
         public abstract void Load(BinaryReader stream);
 
-        static List<Color> _colorMap = new List<Color>
+        static readonly List<Color> ColorMap = new List<Color>
                                        {
                                            Color.FromArgb(255, 0, 0, 143),
                                            Color.FromArgb(255, 0, 0, 147),
@@ -357,14 +357,14 @@ namespace ESME.Environment
 
         private static Color Lookup(float value, float minValue, float maxValue, float dataRange)
         {
-            if (value >= maxValue) return _colorMap.Last();
-            if (value <= minValue) return _colorMap.First();
+            if (value >= maxValue) return ColorMap.Last();
+            if (value <= minValue) return ColorMap.First();
 
             if (dataRange != 0.0)
             {
                 double fraction = (value - minValue) / dataRange;
-                var index = (int)(fraction * _colorMap.Count);
-                return _colorMap[index];
+                var index = (int)(fraction * ColorMap.Count);
+                return ColorMap[index];
             }
             return Colors.Black;
         }
@@ -482,22 +482,22 @@ namespace ESME.Environment
         {
             using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
-                float west = stream.ReadSingle();
-                float east = stream.ReadSingle();
-                float south = stream.ReadSingle();
-                float north = stream.ReadSingle();
-                float gridSpacing = stream.ReadSingle() / 60f;    // Source is in minutes, we need degrees
-                int width = stream.ReadInt32();
-                int height = stream.ReadInt32();
-                uint endian = stream.ReadUInt32();
+                var west = stream.ReadSingle();
+                var east = stream.ReadSingle();
+                var south = stream.ReadSingle();
+                var north = stream.ReadSingle();
+                var gridSpacing = stream.ReadSingle() / 60f;    // Source is in minutes, we need degrees
+                var width = stream.ReadInt32();
+                var height = stream.ReadInt32();
+                var endian = stream.ReadUInt32();
                 if (endian != 0x00010203) throw new FileFormatException("Invalid CHRTR Binary file format - endian is incorrect");
-                float minDepth = stream.ReadSingle();
-                float maxDepth = stream.ReadSingle();
-                int paddingWidth = (width - 10) * 4;
-                byte[] padding = stream.ReadBytes(paddingWidth);
+                var maxDepth = -stream.ReadSingle();
+                var minDepth = -stream.ReadSingle();
+                var paddingWidth = (width - 10) * 4;
+                stream.ReadBytes(paddingWidth);
                 var depths = new float[height, width];
-                for (int lat = 0; lat < height; lat++)
-                    for (int lon = 0; lon < width; lon++)
+                for (var lat = 0; lat < height; lat++)
+                    for (var lon = 0; lon < width; lon++)
                     {
                         var curSample = stream.ReadSingle();
                         depths[lat, lon] = curSample == 1e16f ? float.NaN : -curSample;

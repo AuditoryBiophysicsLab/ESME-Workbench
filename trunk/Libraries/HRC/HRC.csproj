@@ -58,6 +58,7 @@
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -132,6 +133,7 @@
       <DependentUpon>BackgroundThreadInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="Utility\BitFields.cs" />
+    <Compile Include="Utility\Colormap.cs" />
     <Compile Include="Utility\EmbeddedResources.cs" />
     <Compile Include="Utility\ExtensionMethods.cs" />
     <Compile Include="Utility\ImprovedBackgroundWorker.cs" />
@@ -172,7 +174,11 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\haxby.map" />
+    <EmbeddedResource Include="Resources\jet.map" />
+    <EmbeddedResource Include="Resources\summer.map" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -141,10 +141,12 @@
     <Compile Include="ViewModels\Main\MainViewModelListeners.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\Main\SimulationViewModel.cs" />
+    <Compile Include="ViewModels\Map\GeoRasterLayer.cs" />
     <Compile Include="ViewModels\Map\MarkerLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapShape.cs" />
     <Compile Include="ViewModels\Map\MapShapeLayer.cs" />
+    <Compile Include="ViewModels\Map\RasterMapLayer.cs" />
     <Compile Include="ViewModels\NAVODataSources\BSTViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\DBDBViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\EnvironmentBuilderConfigurationViewModel.cs" />
