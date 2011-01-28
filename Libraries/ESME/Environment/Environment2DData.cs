@@ -57,12 +57,19 @@ namespace ESME.Environment
             {
                 var bathyBox = new[]
                                {
+                                   //edit: Modified this routine to take the horizontal and vertical resolution into account
+                                   //      It now places the bounding box such that the lines are coincident with the edges of
+                                   //      the edge samples of the selected data (extends by half the horizontal/vertical resolution)
                                    //northeast corner:                   
-                                   new EarthCoordinate(MaxCoordinate.Latitude_degrees, MaxCoordinate.Longitude_degrees), //southeast corner: 
-                                   new EarthCoordinate(MinCoordinate.Latitude_degrees, MaxCoordinate.Longitude_degrees), //southwest corner: 
-                                   new EarthCoordinate(MinCoordinate.Latitude_degrees, MinCoordinate.Longitude_degrees), //northwest corner: 
-                                   new EarthCoordinate(MaxCoordinate.Latitude_degrees, MinCoordinate.Longitude_degrees), //northeast corner again to close the loop.
-                                   new EarthCoordinate(MaxCoordinate.Latitude_degrees, MaxCoordinate.Longitude_degrees),
+                                   new EarthCoordinate(MaxCoordinate.Latitude_degrees + (VerticalResolution / 2), MaxCoordinate.Longitude_degrees + (HorizontalResolution / 2)), 
+                                   //southeast corner: 
+                                   new EarthCoordinate(MinCoordinate.Latitude_degrees - (VerticalResolution / 2), MaxCoordinate.Longitude_degrees + (HorizontalResolution / 2)), 
+                                   //southwest corner: 
+                                   new EarthCoordinate(MinCoordinate.Latitude_degrees - (VerticalResolution / 2), MinCoordinate.Longitude_degrees - (HorizontalResolution / 2)), 
+                                   //northwest corner: 
+                                   new EarthCoordinate(MaxCoordinate.Latitude_degrees + (VerticalResolution / 2), MinCoordinate.Longitude_degrees - (HorizontalResolution / 2)), 
+                                   //northeast corner again to close the loop.
+                                   new EarthCoordinate(MaxCoordinate.Latitude_degrees + (VerticalResolution / 2), MaxCoordinate.Longitude_degrees + (HorizontalResolution / 2)), 
                                };
 
                 var shape = new OverlayLineSegments(bathyBox, Colors.Black, 1, LineStyle.Solid);
@@ -76,6 +83,16 @@ namespace ESME.Environment
             {
                 Save(stream);
             }
+        }
+
+        public double HorizontalResolution
+        {
+            get { return Math.Abs(Longitudes[1] - Longitudes[0]); }
+        }
+
+        public double VerticalResolution
+        {
+            get { return Math.Abs(Latitudes[1] - Latitudes[0]); }
         }
 
         public abstract void Save(BinaryWriter stream);
@@ -352,12 +369,13 @@ namespace ESME.Environment
             return Colors.Black;
         }
 
+        // data[lats,lons]
         protected static Bitmap ToBitmap(float[,] data)
         {
             if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
 
-            var width = data.GetLength(0);
-            var height = data.GetLength(1);
+            var height = data.GetLength(0);
+            var width = data.GetLength(1);
             var minMaxSource = data.Cast<float>();
             var dataMin = minMaxSource.Min();
             var dataMax = minMaxSource.Max();
@@ -374,7 +392,7 @@ namespace ESME.Environment
                     {
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        var curColor = Lookup(data[y, x], dataMin, dataMax, dataRange);
+                        var curColor = Lookup(data[height - 1 - y, x], dataMin, dataMax, dataRange);
                         *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
                         curOffset += sizeof(Int32);
                     }
@@ -382,8 +400,9 @@ namespace ESME.Environment
             }
             writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
             writeableBitmap.Unlock();
-
-            return new Bitmap(data.GetLength(0), data.GetLength(1), 4 * width, PixelFormat.Format32bppArgb, writeableBitmap.BackBuffer);    
+            var result = new Bitmap(width, height, 4 * width, PixelFormat.Format32bppArgb, writeableBitmap.BackBuffer);
+            result.Save(@"C:\Users\Dave Anderson\Desktop\test_bathymetry.jpg", ImageFormat.Jpeg);
+            return result;
         }
 
 
@@ -467,7 +486,7 @@ namespace ESME.Environment
                 float east = stream.ReadSingle();
                 float south = stream.ReadSingle();
                 float north = stream.ReadSingle();
-                float gridSpacing = stream.ReadSingle();
+                float gridSpacing = stream.ReadSingle() / 60f;    // Source is in minutes, we need degrees
                 int width = stream.ReadInt32();
                 int height = stream.ReadInt32();
                 uint endian = stream.ReadUInt32();
@@ -477,11 +496,11 @@ namespace ESME.Environment
                 int paddingWidth = (width - 10) * 4;
                 byte[] padding = stream.ReadBytes(paddingWidth);
                 var depths = new float[height, width];
-                for (int lon = 0; lon < width; lon++)
-                    for (int lat = 0; lat < height; lat++)
+                for (int lat = 0; lat < height; lat++)
+                    for (int lon = 0; lon < width; lon++)
                     {
-                        depths[lat, lon] = stream.ReadSingle();
-                        if (depths[lat, lon] == 1e16f) depths[lat, lon] = float.NaN;
+                        var curSample = stream.ReadSingle();
+                        depths[lat, lon] = curSample == 1e16f ? float.NaN : -curSample;
                     }
                 return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
             }
@@ -582,8 +601,8 @@ namespace ESME.Environment
             MaxCoordinate = new EarthCoordinate(north, east);
             MinValue = minValue;
             MaxValue = maxValue;
-            Longitudes = new double[values.GetLength(0)];
-            Latitudes = new double[values.GetLength(1)];
+            Longitudes = new double[values.GetLength(1)];
+            Latitudes = new double[values.GetLength(0)];
             for (int lon = 0; lon < Longitudes.Length; lon++) Longitudes[lon] = west + (lon * gridSpacing);
             for (int lat = 0; lat < Latitudes.Length; lat++) Latitudes[lat] = south + (lat * gridSpacing);
             Values = values;
