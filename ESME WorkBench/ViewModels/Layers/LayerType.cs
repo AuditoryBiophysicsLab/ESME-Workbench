@@ -12,6 +12,7 @@
         SoundSpeed,
         BottomType,
         Bathymetry,
+        BathymetryRaster,
         AnalysisPoint,
         Animal,
     }

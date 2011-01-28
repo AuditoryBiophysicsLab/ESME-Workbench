@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -486,6 +487,35 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public float OpAreaBufferZoneSize { get; set; }
+        /// <summary>
+        /// Size of the buffer zone around operational area bounding box that will be used to extract environmental data
+        /// from the selected environmental data source
+        /// Units: Degrees
+        /// Default value: 2.0
+        /// </summary>
+        public float OpAreaBufferZoneSize
+        {
+            get { return _opAreaBufferZoneSize; }
+            set
+            {
+                if (_opAreaBufferZoneSize == value) return;
+                _opAreaBufferZoneSize = value;
+                NotifyPropertyChanged(OpAreaBufferZoneSizeChangedEventArgs);
+                // TODO: If/when this value changes, we will need to do the following
+                //     - Compute the new bounding box we will be using
+                //     - Verify that all AnalysisPoints are completely contained inside the new bounding box, including the endpoints of every radial
+                //     - If that verification fails, throw an exception containing descriptive error text about exactly what has failed
+                //     - Re-extract the environmental data from the selected environmental data source
+                //     - Re-initialize the environmental data
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OpAreaBufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.OpAreaBufferZoneSize);
+        float _opAreaBufferZoneSize = 2.0f;
+
+        #endregion
+
         #region public ulong NextObjectID { get; set; }
 
         static readonly PropertyChangedEventArgs NextObjectIDChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.NextObjectID);
@@ -544,7 +574,7 @@ namespace ESMEWorkBench.Data
             {
                 return _referencedTypes ?? (_referencedTypes = new[]
                                                                {
-                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel)
+                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel), typeof(RasterMapLayer),
                                                                });
             }
         }
@@ -580,7 +610,7 @@ namespace ESMEWorkBench.Data
 
         #region public string LocalStorageRoot { get; set; }
 
-            public string LocalStorageRoot
+        public string LocalStorageRoot
         {
             get
             {
@@ -697,13 +727,14 @@ namespace ESMEWorkBench.Data
             IsChanged = false;
         }
 
-        public void Close()
+        public new void Close()
         {
             if (FileSystemWatcher != null)
             {
                 FileSystemWatcher.EnableRaisingEvents = false;
                 FileSystemWatcher = null;
             }
+            base.Close();
         }
 
         public static void CopyAllPrivateFiles(DirectoryInfo source, DirectoryInfo target)
@@ -842,26 +873,28 @@ namespace ESMEWorkBench.Data
                         else boundingBox.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
                     }
             }
-            var north = (float) boundingBox.Bottom + 2;
-            var west = (float) boundingBox.Left - 2;
-            var south = (float) boundingBox.Top - 2;
-            var east = (float) boundingBox.Right + 2;
+
+            var north = (float)boundingBox.Bottom + OpAreaBufferZoneSize;
+            var west = (float)boundingBox.Left - OpAreaBufferZoneSize;
+            var south = (float)boundingBox.Top - OpAreaBufferZoneSize;
+            var east = (float)boundingBox.Right + OpAreaBufferZoneSize;
 
             if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName))) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", north, west, south, east);
             if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName))) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", north, west, south, east);
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", north, west, south, east);
+            //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
             if (Bathymetry != null)
             {
                 const string bathyBoundsName = "Bathymetry: Boundary";
-                var boundLayerExists = false;
-                foreach (var bathyLayer in MapLayers.Where(curLayer => curLayer.Name == bathyBoundsName).Cast<OverlayShapeMapLayer>())
+                var boundsLayerExists = false;
+                foreach (var bathyBoundsLayer in MapLayers.Where(curLayer => curLayer.Name == bathyBoundsName).Cast<OverlayShapeMapLayer>())
                 {
-                    bathyLayer.Add(Bathymetry.BoundingBox);
-                    bathyLayer.Done();
-                    boundLayerExists = true;
+                    bathyBoundsLayer.Add(Bathymetry.BoundingBox);
+                    bathyBoundsLayer.Done();
+                    boundsLayerExists = true;
                 }
-                if (!boundLayerExists)
+                if (!boundsLayerExists)
                 {
                     var layer = new OverlayShapeMapLayer
                                 {
@@ -875,6 +908,35 @@ namespace ESMEWorkBench.Data
                     layer.Add(Bathymetry.BoundingBox);
                     layer.Done();
                     MapLayers.Add(layer);
+
+
+                    var colormap = new DualColormap(Colormap.Summer, Colormap.Haxby)
+                                   {
+                                       Threshold = 0,
+                                   };
+                    var bitmap = colormap.ToBitmap(Bathymetry.Values, Bathymetry.MinValue, Bathymetry.MaxValue < 0 ? Bathymetry.MaxValue : 8000);
+                    //bitmap.Save(@"C:\Users\Dave Anderson\Desktop\test_bathymetry.jpg", ImageFormat.Jpeg);
+
+                    var memoryStream = new MemoryStream();
+                    bitmap.Save(memoryStream, ImageFormat.Bmp);
+
+                    var rasterLayer = new RasterMapLayer
+                                      {
+                                          Name = "Bathymetry: Bitmap",
+                                          CanBeReordered = true,
+                                          CanChangeLineColor = false,
+                                          CanChangeLineWidth = false,
+                                          CanBeRemoved = false,
+                                          LayerType = LayerType.BathymetryRaster,
+                                          PixelSize = (float)Bathymetry.HorizontalResolution,
+                                          North = (float)Bathymetry.Latitudes.Last(),
+                                          South = (float)Bathymetry.Latitudes.First(),
+                                          East = (float)Bathymetry.Longitudes.Last(),
+                                          West = (float)Bathymetry.Longitudes.First(),
+                                          RasterStream = memoryStream,
+                                          //RasterFilename = @"C:\Users\Dave Anderson\Desktop\bathymetric_small.jpg",
+                                      };
+                    MapLayers.Add(rasterLayer);
                 }
             }
         }
