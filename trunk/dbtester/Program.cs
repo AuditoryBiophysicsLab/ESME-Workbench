@@ -12,19 +12,26 @@ namespace dbtester
     {
         static readonly List<EarthCoordinate3D[]> Testpoints = new List<EarthCoordinate3D[]>
                                                                {
-                                                                   new[]
+                                                                   #if false
+		new[]
                                                                    {
                                                                        new EarthCoordinate3D(31.828, -78.685, 0), //north east
                                                                        new EarthCoordinate3D(28.795, -80.410, 0), // south west
-                                                                   },
+                                                                   },  
+	#endif
+                                                                   new[]
+                                                                   {
+                                                                       new EarthCoordinate3D(33,-77.2195,0),
+                                                                       new EarthCoordinate3D(27.36,-81.8,0), 
+    }
                                                                };
 
         public static void Main(string[] args)
         {
-            DBDBTest();
-            BSTTest();
-            SMGCTest();
-            GDEMTest();
+            //DBDBTest();
+            //BSTTest();
+            //SMGCTest();
+            //GDEMTest();
             Console.WriteLine(@"press enter to exit.");
             Console.ReadLine();
         }
@@ -49,8 +56,16 @@ namespace dbtester
                 }
             }
             Console.WriteLine();
-            foo.SelectedResolution = (2.0).ToString();
-            foo.ExtractArea(outfilename, Testpoints[0][0].Latitude_degrees, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
+            foo.SelectedResolution = (0.05).ToString();
+            var packet = new NAVOExtractionPacket
+                         {
+                             Filename = outfilename,
+                             North = Testpoints[0][0].Latitude_degrees,
+                             South = Testpoints[0][1].Latitude_degrees,
+                             East = Testpoints[0][0].Longitude_degrees,
+                             West = Testpoints[0][1].Longitude_degrees,
+                         };
+            foo.ExtractArea(packet);
             Console.WriteLine(@"Done!");
         }
 
@@ -74,7 +89,15 @@ namespace dbtester
             }
             Console.WriteLine();
             foo.SelectedResolution = "5.0000";
-            foo.ExtractArea(outfilename, Testpoints[0][0].Latitude_degrees, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
+            var packet = new NAVOExtractionPacket
+            {
+                Filename = outfilename,
+                North = Testpoints[0][0].Latitude_degrees,
+                South = Testpoints[0][1].Latitude_degrees,
+                East = Testpoints[0][0].Longitude_degrees,
+                West = Testpoints[0][1].Longitude_degrees,
+            };
+            foo.ExtractArea(packet);
             Console.WriteLine(@"Done!");
         }
 
@@ -92,7 +115,15 @@ namespace dbtester
                       };
 
             const string outfilename = @"C:\tests\dbtests\smgc.txt";
-            foo.ExtractArea(outfilename, Testpoints[0][0].Latitude_degrees, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
+            var packet = new NAVOExtractionPacket
+            {
+                Filename = outfilename,
+                North = Testpoints[0][0].Latitude_degrees,
+                South = Testpoints[0][1].Latitude_degrees,
+                East = Testpoints[0][0].Longitude_degrees,
+                West = Testpoints[0][1].Longitude_degrees,
+            };
+            foo.ExtractArea(packet);
             Console.WriteLine(@"Done!");
         }
 
@@ -111,13 +142,21 @@ namespace dbtester
 
             const string outfilename = @"C:\tests\dbtests\gdem.txt";
             Console.WriteLine(@" Extracting data ...");
-            foo.ExtractArea(outfilename, Testpoints[0][0].Latitude_degrees, Testpoints[0][1].Latitude_degrees, Testpoints[0][0].Longitude_degrees, Testpoints[0][1].Longitude_degrees);
+            var packet = new NAVOExtractionPacket
+            {
+                Filename = outfilename,
+                North = Testpoints[0][0].Latitude_degrees,
+                South = Testpoints[0][1].Latitude_degrees,
+                East = Testpoints[0][0].Longitude_degrees,
+                West = Testpoints[0][1].Longitude_degrees,
+            };
+            foo.ExtractArea(packet);
             Console.WriteLine(@"    done!");
 
             var eebFileName = Path.Combine(Path.GetDirectoryName(outfilename), Path.GetFileNameWithoutExtension(outfilename)) + ".eeb";
             var eebFile = DataFile.Create(eebFileName);
-            var extractedArea = ((Environment3DData) foo.ExtractedArea);
-            var eebLayer = new DataLayer("soundspeed", "spring", "various", "", new DataAxis("latitude", extractedArea.Latitudes.Select(x => (float) x).ToArray()), new DataAxis("longitude", extractedArea.Longitudes.Select(x => (float) x).ToArray()), new DataAxis("depth", extractedArea.Depths.Select(x => (float) x).ToArray()));
+            var extractedArea = ((Environment3DData)foo.ExtractedArea);
+            var eebLayer = new DataLayer("soundspeed", "spring", "various", "", new DataAxis("latitude", extractedArea.Latitudes.Select(x => (float)x).ToArray()), new DataAxis("longitude", extractedArea.Longitudes.Select(x => (float)x).ToArray()), new DataAxis("depth", extractedArea.Depths.Select(x => (float)x).ToArray()));
             eebFile.Layers.Add(eebLayer);
             var dataPoint = new DataPoint(eebLayer);
             var dataValues = new float[extractedArea.Depths.Length];

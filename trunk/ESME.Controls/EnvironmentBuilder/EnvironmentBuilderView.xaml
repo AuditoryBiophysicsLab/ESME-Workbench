@@ -2,33 +2,57 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Views="clr-namespace:ESME.Views.EnvironmentBuilder"
-        Title="EnvironmentBuilderWindow" Height="300" Width="300">
-    <DockPanel LastChildFill="True">
-        <Menu Name="EnvironmentBuilderViewFileMenu"
-                  DockPanel.Dock="Top"
-			      HorizontalAlignment="Stretch"
-			      BorderBrush="Black"
-			      BorderThickness="1">
-            <MenuItem Header="_Options">
-                <MenuItem Header="Database Options"
-					          Command="{Binding }"
-					          InputGestureText="Ctrl+O" />                
-            </MenuItem>
-        </Menu>
-        <TabControl>
-        <TabItem Header="DBDB">
-            <Views:DBDBView/>
-        </TabItem>
-        <TabItem Header="BST">
-            <Views:BSTView/>
-        </TabItem>
-        <TabItem Header="SMGC">
-            <Views:SMGCView/>
-        </TabItem>
-        <TabItem Header="GDEM">
-            <Views:GDEMView/>
-        </TabItem>
-        </TabControl>
-    </DockPanel>
+        xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+        Title="EnvironmentBuilderWindow"
+        mef:ViewModelLocator.ViewModel="EnvironmentBuilderViewModel"
+        Height="423"
+        Width="300">
+	<DockPanel LastChildFill="True">
+		<Menu Name="EnvironmentBuilderViewFileMenu"
+		      DockPanel.Dock="Top"
+		      HorizontalAlignment="Stretch"
+		      BorderBrush="Black"
+		      BorderThickness="1">
+			<MenuItem Header="_Options">
+				<MenuItem Header="Database Options"
+				          Command="{Binding LaunchEnvironmentConfigurationViewCommand}"
+				          InputGestureText="Ctrl+O" />
+			</MenuItem>
+		</Menu>
+		<DockPanel LastChildFill="False"
+		           Margin="10"
+		           DockPanel.Dock="Bottom">
+			<Button Width="75"
+			        Margin="10 0 0 0"
+			        IsCancel="True"
+			        Content="Cancel"
+			        DockPanel.Dock="Right" />			
+			<Button Width="90"
+			        IsDefault="True"
+			        Content="Extract All Data"
+			        DockPanel.Dock="Right"
+			        Command="{Binding ExtractAllCommand}" />
+
+		</DockPanel>
+		<TabControl>
+			<TabItem Header="Time">
+				<Views:ExtractionTimesView />
+			</TabItem>
+			<TabItem Header="BST">
+				<Views:BSTView />
+			</TabItem>
+			<TabItem Header="DBDB">
+				<Views:DBDBView />
+			</TabItem>
+			<TabItem Header="GDEM">
+				<Views:GDEMView />
+			</TabItem>
+			<TabItem Header="SMGC">
+				<Views:SMGCView />
+			</TabItem>
+
+		</TabControl>
+
+	</DockPanel>
 
 </Window>

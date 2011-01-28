@@ -370,5 +370,125 @@ namespace ESMEWorkBench.Properties {
                 this["DBDBDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GDEMEXEDirectory {
+            get {
+                return ((string)(this["GDEMEXEDirectory"]));
+            }
+            set {
+                this["GDEMEXEDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SMGCEXEDirectory {
+            get {
+                return ((string)(this["SMGCEXEDirectory"]));
+            }
+            set {
+                this["SMGCEXEDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BSTEXEDirectory {
+            get {
+                return ((string)(this["BSTEXEDirectory"]));
+            }
+            set {
+                this["BSTEXEDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DBDBEXEDirectory {
+            get {
+                return ((string)(this["DBDBEXEDirectory"]));
+            }
+            set {
+                this["DBDBEXEDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SpringStartMonth {
+            get {
+                return ((string)(this["SpringStartMonth"]));
+            }
+            set {
+                this["SpringStartMonth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SummerStartMonth {
+            get {
+                return ((string)(this["SummerStartMonth"]));
+            }
+            set {
+                this["SummerStartMonth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FallStartMonth {
+            get {
+                return ((string)(this["FallStartMonth"]));
+            }
+            set {
+                this["FallStartMonth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string WinterStartMonth {
+            get {
+                return ((string)(this["WinterStartMonth"]));
+            }
+            set {
+                this["WinterStartMonth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ColdSeasonStartMonth {
+            get {
+                return ((string)(this["ColdSeasonStartMonth"]));
+            }
+            set {
+                this["ColdSeasonStartMonth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string WarmSeasonStartMonth {
+            get {
+                return ((string)(this["WarmSeasonStartMonth"]));
+            }
+            set {
+                this["WarmSeasonStartMonth"] = value;
+            }
+        }
     }
 }

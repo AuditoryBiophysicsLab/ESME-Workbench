@@ -89,6 +89,9 @@
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EnvironmentBuilder\ExtractionTimesView.xaml.cs">
+      <DependentUpon>ExtractionTimesView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EnvironmentBuilder\GDEMView.xaml.cs">
       <DependentUpon>GDEMView.xaml</DependentUpon>
     </Compile>
@@ -116,6 +119,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\ExtractionTimesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

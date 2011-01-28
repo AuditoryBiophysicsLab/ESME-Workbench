@@ -40,8 +40,15 @@ namespace ESME.Environment.NAVO
             File.Delete(scriptfile);
         }
 
-        public override void ExtractArea(string filename, double north, double south, double east, double west)
+        //public override void ExtractArea(string filename, double north, double south, double east, double west)
+        public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
+            var filename = Path.Combine(Path.GetDirectoryName(extractionPacket.Filename), Path.GetFileNameWithoutExtension(extractionPacket.Filename) + "-BST");
+            
+            var north = extractionPacket.North;
+            var south = extractionPacket.South;
+            var east = extractionPacket.East;
+            var west = extractionPacket.West;
             var contents = string.Format("area {0} {1} {2} {3} {4} {5}.CHRTR", west, east, south, north, SelectedResolution, Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)));
             var scriptfile = Path.GetTempFileName();
             File.WriteAllText(scriptfile, contents);

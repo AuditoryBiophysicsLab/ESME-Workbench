@@ -10,8 +10,13 @@ namespace ESME.Environment.NAVO
         public int MinMonth { get; set; }
         public int MaxMonth { get; set; }
 
-        public override void ExtractArea(string filename, double north, double south, double east, double west)
+        public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
+            var filename = Path.Combine(Path.GetDirectoryName(extractionPacket.Filename), Path.GetFileNameWithoutExtension(extractionPacket.Filename) + "-SMGC.txt");
+            var north = extractionPacket.North;
+            var south = extractionPacket.South;
+            var east = extractionPacket.East;
+            var west = extractionPacket.West;
             if (!DatabasePath.EndsWith("\\")) DatabasePath = DatabasePath + "\\"; //database path has to end with a trailing slash here.  For SMGC, it's a directory, not a file.
             System.Environment.SetEnvironmentVariable("SMGC_DATA_NORTH", DatabasePath);
             System.Environment.SetEnvironmentVariable("SMGC_DATA_SOUTH", DatabasePath);
@@ -73,7 +78,8 @@ namespace ESME.Environment.NAVO
                 {
                     var lon = uniqueLons[lonIndex];
                     var key = string.Format("{0:#.00000},{1:#.00000}", lat, lon);
-                    dataArray[lonIndex, latIndex] = (float) points[key];
+                    double outval;
+                    dataArray[lonIndex, latIndex] = points.TryGetValue(key, out outval) ? (float)outval : float.NaN;
                 }
             }
             

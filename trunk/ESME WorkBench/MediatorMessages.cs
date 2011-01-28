@@ -93,6 +93,18 @@ namespace ESMEWorkBench
 
         public const string ApplicationClosing = "ApplicationClosingMessage";
 
+        //navy environment builder stuff
+        public const string EnvironmentBuilderDatabasesSpecified = "EnvironmentBuilderDatabasesSpecifiedMessage";
+        public const string ExtractBST = "ExtractBSTMessage";
+        public const string BSTExtracted = "BSTExtractedMessage";
+        public const string ExtractDBDB = "ExtractDBDBMessage";
+        public const string DBDBExtracted = "DBDBExtractedMessage";
+        public const string ExtractGDEM = "ExtractGDEMMessage";
+        public const string GDEMExtracted = "GDEMExtractedMessage";
+        public const string ExtractSMGC = "ExtractSMGCMessage";
+        public const string SMGCExtracted = "SMGCExtractedMessage";
+        public const string SeasonsDefined = "SeasonsDefinedMessage";
+
         public static void Send<T>(string key, T message) 
         {
             try

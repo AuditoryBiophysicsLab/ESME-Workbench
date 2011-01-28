@@ -4,10 +4,15 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Cinch;
+using ESME.Environment.NAVO;
+using MEFedMVVM.ViewModelLocator;
+
 namespace ESMEWorkBench.ViewModels.NAVODataSources
 {
-    public class DBDBViewModel : ViewModelBase
+    [ExportViewModel("DBDBViewModel")]
+    public class DBDBViewModel : NAVODataSourceViewModel
     {
+        DBDB _dbdb = new DBDB();
         #region public string SelectedResolution { get; set; }
 
         public string SelectedResolution
@@ -44,7 +49,25 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         #endregion
 
+        public DBDBViewModel()
+        {
+            if (Resolutions != null) return;
+            SetDatabasePaths(_dbdb);
+            GetResolutions();
+        }
         
+        void GetResolutions()
+        {
+            _dbdb.GetAllResolutions();
+            Resolutions = _dbdb.Resolutions;
+        }
 
+        [MediatorMessageSink(MediatorMessage.ExtractDBDB)]
+        void ExtractData(NAVOExtractionPacket packet)
+        {
+            _dbdb.ExtractArea(packet);
+            ExtractedArea = _dbdb.ExtractedArea;
+            MediatorMessage.Send(MediatorMessage.DBDBExtracted);
+        }
     }
 }
