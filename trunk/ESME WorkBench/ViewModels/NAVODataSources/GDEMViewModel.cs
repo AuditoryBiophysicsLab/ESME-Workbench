@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Cinch;
+﻿using Cinch;
 using ESME.Environment.NAVO;
+using ESMEWorkBench.Properties;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.NAVODataSources
 {
     [ExportViewModel("GDEMViewModel")]
-    class GDEMViewModel : NAVODataSourceViewModel
+    internal class GDEMViewModel : NAVODataSourceViewModel
     {
-        GDEM _gdem = new GDEM();
-        public GDEMViewModel()
+        readonly GDEM _gdem = new GDEM();
+        public GDEMViewModel() { _gdem.GridSpacing = 0.25f; }
+
+        [MediatorMessageSink(MediatorMessage.EnvironmentBuilderDatabasesSpecified)]
+        public void SetDatabasePaths()
         {
-            SetDatabasePaths(_gdem);
-            _gdem.GridSpacing = 0.25f;
-            
+            _gdem.DatabasePath = Settings.Default.GDEMDirectory;
+            _gdem.ExtractionProgramPath = Settings.Default.GDEMEXEDirectory;
         }
+
 
         [MediatorMessageSink(MediatorMessage.ExtractGDEM)]
         void ExtractData(NAVOExtractionPacket packet)
@@ -26,6 +26,5 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             ExtractedArea = _gdem.ExtractedArea;
             MediatorMessage.Send(MediatorMessage.GDEMExtracted);
         }
-
     }
 }

@@ -1,59 +1,51 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Views.EnvironmentBuilder;
+using ESMEWorkBench.Properties;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.NAVODataSources
 {
     [ExportViewModel("EnvironmentBuilderConfigurationViewModel")]
-    class EnvironmentBuilderConfigurationViewModel
+    internal class EnvironmentBuilderConfigurationViewModel
     {
-        IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
         bool _iAmInitialized;
-        public EnvironmentBuilderConfigurationViewModel()
-        {
-            RegisterMediator();
-        }
-        
+        IViewAwareStatus _viewAwareStatus;
+        public EnvironmentBuilderConfigurationViewModel() { RegisterMediator(); }
+
         #region OkCommand
+
+        SimpleCommand<object, object> _ok;
 
         public SimpleCommand<object, object> OkCommand
         {
-            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate
-                                                                         {
-                                                                             //if all the database locations have been filled in, etc, then the user can click. 
-                                                                             return Directory.Exists(Properties.Settings.Default.GDEMDirectory) && Directory.Exists(Properties.Settings.Default.SMGCDirectory) &&Directory.Exists(Properties.Settings.Default.BSTDirectory) &&Directory.Exists(Properties.Settings.Default.DBDBDirectory)
-                                                                                    && File.Exists(Properties.Settings.Default.GDEMEXEDirectory) && File.Exists(Properties.Settings.Default.SMGCEXEDirectory) && File.Exists(Properties.Settings.Default.BSTEXEDirectory) && File.Exists(Properties.Settings.Default.DBDBEXEDirectory);
-                                                                         },
-                                                                         delegate
-                                                                         {
-                                                                             //fire off a message, and close the window.
-                                                                             MediatorMessage.Send(MediatorMessage.EnvironmentBuilderDatabasesSpecified);
-                                                                             ((EnvironmentBuilderConfigurationView)_viewAwareStatus.View).Close();
-                                                                         }));
+            get
+            {
+                return _ok ?? (_ok = new SimpleCommand<object, object>(delegate
+                                                                       {
+                                                                           //if all the database locations have been filled in, etc, then the user can click. 
+                                                                           return Directory.Exists(Settings.Default.GDEMDirectory) && Directory.Exists(Settings.Default.SMGCDirectory) && Directory.Exists(Settings.Default.BSTDirectory) && Directory.Exists(Settings.Default.DBDBDirectory) && File.Exists(Settings.Default.GDEMEXEDirectory) && File.Exists(Settings.Default.SMGCEXEDirectory) && File.Exists(Settings.Default.BSTEXEDirectory) && File.Exists(Settings.Default.DBDBEXEDirectory);
+                                                                       }, delegate
+                                                                          {
+                                                                              //fire off a message, and close the window.
+                                                                              MediatorMessage.Send(MediatorMessage.EnvironmentBuilderDatabasesSpecified);
+                                                                              ((EnvironmentBuilderConfigurationView) _viewAwareStatus.View).Close();
+                                                                          }));
             }
-
         }
-
-        SimpleCommand<object, object> _ok;
 
         #endregion
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
             _viewAwareStatus = viewAwareStatusService;
-            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+            _dispatcher = ((Window) _viewAwareStatus.View).Dispatcher;
             _iAmInitialized = true;
-
-           
         }
 
         void RegisterMediator()

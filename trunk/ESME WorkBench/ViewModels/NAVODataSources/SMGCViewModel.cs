@@ -1,23 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Cinch;
+﻿using Cinch;
 using ESME.Environment.NAVO;
+using ESMEWorkBench.Properties;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.NAVODataSources
 {
     [ExportViewModel("SMGCViewModel")]
-    class SMGCViewModel: NAVODataSourceViewModel
+    internal class SMGCViewModel : NAVODataSourceViewModel
     {
-        SMGC _smgc = new SMGC();
+        readonly SMGC _smgc = new SMGC();
 
-        public SMGCViewModel()
+        public SMGCViewModel() { _smgc.GridSpacing = 1; }
+
+        [MediatorMessageSink(MediatorMessage.EnvironmentBuilderDatabasesSpecified)]
+        public void SetDatabasePaths()
         {
-            SetDatabasePaths(_smgc);
-            _smgc.GridSpacing = 1;
-            
+            _smgc.DatabasePath = Settings.Default.SMGCDirectory;
+            _smgc.ExtractionProgramPath = Settings.Default.SMGCEXEDirectory;
         }
 
         [MediatorMessageSink(MediatorMessage.ExtractSMGC)]

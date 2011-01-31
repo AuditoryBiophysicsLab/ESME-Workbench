@@ -881,8 +881,8 @@ namespace ESMEWorkBench.Data
 
             if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName))) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", north, west, south, east);
             if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName))) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", north, west, south, east);
-            //if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", north, west, south, east);
-            Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
+            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", north, west, south, east);
+            //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
             if (Bathymetry != null)
             {
