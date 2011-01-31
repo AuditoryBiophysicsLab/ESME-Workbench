@@ -42,7 +42,7 @@
 				<Views:BSTView />
 			</TabItem>
 			<TabItem Header="DBDB">
-				<Views:DBDBView />
+				<Views:DBDBView />                
 			</TabItem>
 			<TabItem Header="GDEM">
 				<Views:GDEMView />

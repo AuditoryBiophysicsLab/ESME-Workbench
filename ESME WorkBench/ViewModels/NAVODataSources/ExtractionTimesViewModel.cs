@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.NAVODataSources
 {
     [ExportViewModel("ExtractionTimesViewModel")]
-    class ExtractionTimesViewModel : ViewModelBase
+    internal class ExtractionTimesViewModel : ViewModelBase
     {
         #region public List<string> Months { get; set; }
+
+        static readonly PropertyChangedEventArgs MonthsChangedEventArgs = ObservableHelper.CreateArgs<ExtractionTimesViewModel>(x => x.Months);
+        List<string> _months;
 
         public List<string> Months
         {
@@ -23,9 +23,6 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                 NotifyPropertyChanged(MonthsChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs MonthsChangedEventArgs = ObservableHelper.CreateArgs<ExtractionTimesViewModel>(x => x.Months);
-        List<string> _months;
 
         #endregion
 
@@ -49,7 +46,5 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
         }
 
         //mediator message sink method here, source is view OK command exiting cleanly.  If that's true, then send mediator messages to database viewmodels about their Min/Max Months.
-        
-
     }
 }

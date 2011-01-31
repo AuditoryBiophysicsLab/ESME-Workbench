@@ -51,11 +51,15 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         public DBDBViewModel()
         {
-            if (Resolutions != null) return;
-            SetDatabasePaths(_dbdb);
-            GetResolutions();
         }
-        
+
+        [MediatorMessageSink(MediatorMessage.EnvironmentBuilderDatabasesSpecified)]
+        public void SetDatabasePaths()
+        {
+            _dbdb.DatabasePath = Properties.Settings.Default.DBDBDirectory;
+            _dbdb.ExtractionProgramPath = Properties.Settings.Default.DBDBEXEDirectory;
+        }
+
         void GetResolutions()
         {
             _dbdb.GetAllResolutions();

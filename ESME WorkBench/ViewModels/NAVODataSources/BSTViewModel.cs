@@ -1,21 +1,19 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
 using Cinch;
-using ESME.Environment;
 using ESME.Environment.NAVO;
+using ESMEWorkBench.Properties;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.NAVODataSources
 {
     [ExportViewModel("BSTViewModel")]
-    class BSTViewModel : NAVODataSourceViewModel
+    internal class BSTViewModel : NAVODataSourceViewModel
     {
-        
-
         #region public List<string> Resolutions { get; set; }
+
+        static readonly PropertyChangedEventArgs ResolutionsChangedEventArgs = ObservableHelper.CreateArgs<BSTViewModel>(x => x.Resolutions);
+        List<string> _resolutions;
 
         public List<string> Resolutions
         {
@@ -28,12 +26,12 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             }
         }
 
-        static readonly PropertyChangedEventArgs ResolutionsChangedEventArgs = ObservableHelper.CreateArgs<BSTViewModel>(x => x.Resolutions);
-        List<string> _resolutions;
-
         #endregion
 
         #region public string SelectedResolution { get; set; }
+
+        static readonly PropertyChangedEventArgs SelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<BSTViewModel>(x => x.SelectedResolution);
+        string _selectedResolution;
 
         public string SelectedResolution
         {
@@ -46,21 +44,17 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<BSTViewModel>(x => x.SelectedResolution);
-        string _selectedResolution;
-
         #endregion
 
-        BST _bst = new BST();
+        readonly BST _bst = new BST();
 
-        public BSTViewModel()
+        [MediatorMessageSink(MediatorMessage.EnvironmentBuilderDatabasesSpecified)]
+        public void SetDatabasePaths()
         {
-            if (Resolutions != null) return;
-            SetDatabasePaths(_bst);
-            _bst.GetAllResolutions();
-            Resolutions = _bst.Resolutions;
+            _bst.DatabasePath = Settings.Default.BSTDirectory;
+            _bst.ExtractionProgramPath = Settings.Default.BSTEXEDirectory;
         }
-        
+
         [MediatorMessageSink(MediatorMessage.ExtractBST)]
         void ExtractData(NAVOExtractionPacket packet)
         {
@@ -68,6 +62,5 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             ExtractedArea = _bst.ExtractedArea;
             MediatorMessage.Send(MediatorMessage.BSTExtracted);
         }
-
     }
 }

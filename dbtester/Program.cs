@@ -28,10 +28,10 @@ namespace dbtester
 
         public static void Main(string[] args)
         {
-            //DBDBTest();
-            //BSTTest();
-            //SMGCTest();
-            //GDEMTest();
+            DBDBTest();
+            BSTTest();
+            SMGCTest();
+            GDEMTest();
             Console.WriteLine(@"press enter to exit.");
             Console.ReadLine();
         }
@@ -65,6 +65,7 @@ namespace dbtester
                              East = Testpoints[0][0].Longitude_degrees,
                              West = Testpoints[0][1].Longitude_degrees,
                          };
+            Console.WriteLine(@"Extracting area to " + Path.GetDirectoryName(outfilename) +@"...");
             foo.ExtractArea(packet);
             Console.WriteLine(@"Done!");
         }
@@ -97,6 +98,7 @@ namespace dbtester
                 East = Testpoints[0][0].Longitude_degrees,
                 West = Testpoints[0][1].Longitude_degrees,
             };
+            Console.WriteLine(@"Extracting area to " + Path.GetDirectoryName(outfilename) + @"...");
             foo.ExtractArea(packet);
             Console.WriteLine(@"Done!");
         }
@@ -123,6 +125,7 @@ namespace dbtester
                 East = Testpoints[0][0].Longitude_degrees,
                 West = Testpoints[0][1].Longitude_degrees,
             };
+            Console.WriteLine(@"Extracting area to " + Path.GetDirectoryName(outfilename) + @"...");
             foo.ExtractArea(packet);
             Console.WriteLine(@"Done!");
         }
@@ -150,6 +153,7 @@ namespace dbtester
                 East = Testpoints[0][0].Longitude_degrees,
                 West = Testpoints[0][1].Longitude_degrees,
             };
+            Console.WriteLine(@"Extracting area to " + Path.GetDirectoryName(outfilename) + @"...");
             foo.ExtractArea(packet);
             Console.WriteLine(@"    done!");
 
