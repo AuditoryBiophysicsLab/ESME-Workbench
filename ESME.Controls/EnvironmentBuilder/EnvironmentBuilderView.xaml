@@ -26,18 +26,18 @@
 			        Margin="10 0 0 0"
 			        IsCancel="True"
 			        Content="Cancel"
-			        DockPanel.Dock="Right" />			
+			        DockPanel.Dock="Right" 
+                    Command="{Binding CancelCommand}"/>			
 			<Button Width="90"
 			        IsDefault="True"
 			        Content="Extract All Data"
 			        DockPanel.Dock="Right"
-			        Command="{Binding ExtractAllCommand}" />
+			        Command="{Binding NAVODataSources.ExtractAreasCommand}" />
 
 		</DockPanel>
+        <!--
 		<TabControl>
-			<TabItem Header="Time">
-				<Views:ExtractionTimesView />
-			</TabItem>
+			
 			<TabItem Header="BST">
 				<Views:BSTView />
 			</TabItem>
@@ -51,7 +51,28 @@
 				<Views:SMGCView />
 			</TabItem>
 
-		</TabControl>
+		</TabControl> -->
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Bottom Sediment Database Resolution" Margin="2"/>
+            <ComboBox ItemsSource="{Binding NAVODataSources.BST.Resolutions}" 
+                          SelectedItem="{Binding NAVODataSources.BST.SelectedResolution}"                          
+                          ToolTip="Database resolution in arc-minutes">
+            </ComboBox>
+            
+            <TextBlock Text="Bathymetry Database Resolution" Margin="2 20 2 2"/>
+            <ComboBox ItemsSource="{Binding NAVODataSources.DBDB.Resolutions}" 
+                          SelectedItem="{Binding NAVODataSources.DBDB.SelectedResolution}"                          
+                          ToolTip="Database resolution in arc-minutes">
+
+            </ComboBox>
+            <TextBlock Text="Month or Season" Margin="2 20 2 2"/>
+            <ComboBox ItemsSource="{Binding Months}" 
+                          SelectedItem="{Binding SelectedTimePeriod}"                          
+                          ToolTip="The month or season to extract.">
+
+            </ComboBox>
+        </StackPanel>
+        
 
 	</DockPanel>
 

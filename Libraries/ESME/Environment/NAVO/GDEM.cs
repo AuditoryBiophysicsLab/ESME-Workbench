@@ -9,8 +9,8 @@ namespace ESME.Environment.NAVO
 {
     public class GDEM : NAVODataSource
     {
-        public int MinMonth { get; set; }
-        public int MaxMonth { get; set; }
+        public int StartMonth { get; set; }
+        public int EndMonth { get; set; }
 
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
@@ -33,7 +33,7 @@ namespace ESME.Environment.NAVO
                 if (thisFile.StartsWith("s"))
                 {
                     var thisMonth = Int32.Parse(thisFile.TrimStart("sgdemv3s".ToCharArray()));
-                    if (thisMonth >= MinMonth && thisMonth <= MaxMonth)
+                    if (thisMonth >= StartMonth && thisMonth <= EndMonth)
                     {
                         ncSalts.Add(file);
                     }
@@ -41,7 +41,7 @@ namespace ESME.Environment.NAVO
                 if (thisFile.StartsWith("t"))
                 {
                     var thisMonth = Int32.Parse(thisFile.TrimStart("tgdemv3s".ToCharArray()));
-                    if (thisMonth >= MinMonth && thisMonth <= MaxMonth)
+                    if (thisMonth >= StartMonth && thisMonth <= EndMonth)
                     {
                         ncTemps.Add(file);
                     }

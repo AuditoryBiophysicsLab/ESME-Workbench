@@ -12,38 +12,38 @@
 		<TextBlock Text="Spring Starts"
 		           Margin="2" />
 		<ComboBox ItemsSource="{Binding Months}"
-		          SelectedItem="{Binding AppSettings.SpringStartMonth}"
+		          SelectedItem="{Binding AppSettings.NAVOConfiguration.SpringStartMonth}"
 		          ToolTip="The beginning month of a 3-month season" >
 		</ComboBox>
         <TextBlock Text="Summer Starts"
 		           Margin="2" />
 		<ComboBox ItemsSource="{Binding Months}"
-		          SelectedItem="{Binding AppSettings.SummerStartMonth}"
+		          SelectedItem="{Binding AppSettings.NAVOConfiguration.SummerStartMonth}"
 		          ToolTip="The beginning month of a 3-month season">
 		</ComboBox>
         <TextBlock Text="Fall Starts"
 		           Margin="2" />
 		<ComboBox ItemsSource="{Binding Months}"
-		          SelectedItem="{Binding AppSettings.FallStartMonth}"
+		          SelectedItem="{Binding AppSettings.NAVOConfiguration.FallStartMonth}"
 		          ToolTip="The beginning month of a 3-month season">
 		</ComboBox>
         <TextBlock Text="Winter Starts"
 		           Margin="2" />
 		<ComboBox ItemsSource="{Binding Months}"
-		          SelectedItem="{Binding AppSettings.WinterStartMonth}"
+		          SelectedItem="{Binding AppSettings.NAVOConfiguration.WinterStartMonth}"
 		          ToolTip="The beginning month of a 3-month season">
 		</ComboBox>
 
         <TextBlock Text="Cold Season Starts"
 		           Margin="2" />
 		<ComboBox ItemsSource="{Binding Months}"
-		          SelectedItem="{Binding AppSettings.ColdSeasonStartMonth}"
+		          SelectedItem="{Binding AppSettings.NAVOConfiguration.ColdSeasonStartMonth}"
 		          ToolTip="The beginning month of a 6-month season">
 		</ComboBox>
         <TextBlock Text="Warm Season Starts"
 		           Margin="2" />
 		<ComboBox ItemsSource="{Binding Months}"
-		          SelectedItem="{Binding AppSettings.WarmSeasonStartMonth}"
+		          SelectedItem="{Binding AppSettings.NAVOConfiguration.WarmSeasonStartMonth}"
 		          ToolTip="The beginning month of a 6-month season">
 		</ComboBox>
 	</StackPanel>

@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using Cinch;
 using ESME.Environment.NAVO;
@@ -51,13 +53,22 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         public DBDBViewModel()
         {
+            try
+            {
+                Mediator.Instance.Register(this);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("***********\nDBDBViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                throw;
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.EnvironmentBuilderDatabasesSpecified)]
         public void SetDatabasePaths()
         {
-            _dbdb.DatabasePath = Properties.Settings.Default.DBDBDirectory;
-            _dbdb.ExtractionProgramPath = Properties.Settings.Default.DBDBEXEDirectory;
+            _dbdb.DatabasePath = Globals.AppSettings.NAVOConfiguration.DBDBDirectory;
+            _dbdb.ExtractionProgramPath = Globals.AppSettings.NAVOConfiguration.DBDBEXEPath;
         }
 
         void GetResolutions()

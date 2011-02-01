@@ -1,4 +1,6 @@
-﻿using Cinch;
+﻿using System;
+using System.Diagnostics;
+using Cinch;
 using ESME.Environment.NAVO;
 using ESMEWorkBench.Properties;
 using MEFedMVVM.ViewModelLocator;
@@ -9,13 +11,26 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
     internal class GDEMViewModel : NAVODataSourceViewModel
     {
         readonly GDEM _gdem = new GDEM();
-        public GDEMViewModel() { _gdem.GridSpacing = 0.25f; }
+        public GDEMViewModel()
+        {
+            try
+            {
+                Mediator.Instance.Register(this);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("***********\nGDEMViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                throw;
+            } 
+            _gdem.GridSpacing = 0.25f;
+        }
+
 
         [MediatorMessageSink(MediatorMessage.EnvironmentBuilderDatabasesSpecified)]
         public void SetDatabasePaths()
         {
-            _gdem.DatabasePath = Settings.Default.GDEMDirectory;
-            _gdem.ExtractionProgramPath = Settings.Default.GDEMEXEDirectory;
+            _gdem.DatabasePath = Globals.AppSettings.NAVOConfiguration.GDEMDirectory;
+            _gdem.ExtractionProgramPath = Globals.AppSettings.NAVOConfiguration.GDEMEXEPath;
         }
 
 

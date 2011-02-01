@@ -28,10 +28,10 @@ namespace dbtester
 
         public static void Main(string[] args)
         {
-            DBDBTest();
+            //DBDBTest();
             BSTTest();
-            SMGCTest();
-            GDEMTest();
+            //SMGCTest();
+            //GDEMTest();
             Console.WriteLine(@"press enter to exit.");
             Console.ReadLine();
         }
@@ -110,8 +110,8 @@ namespace dbtester
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\SMGC\alldata\",
                           ExtractionProgramPath = @"C:\Projects\ESME Deliverables\trunk\Debug\SMGCExtract.exe",
-                          MinMonth = 1,
-                          MaxMonth = 4,
+                          StartMonth = 1,
+                          EndMonth = 4,
                           WorkingDirectory = @"C:\Users\Graham Voysey\Desktop\",
                           GridSpacing = 1,
                       };
@@ -138,8 +138,8 @@ namespace dbtester
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\GDEM-V\uncompressed\",
                           ExtractionProgramPath = @"C:\Projects\ESME Deliverables\trunk\Utilities\NetCDFExtractor\bin\x86\Debug\ImportNetCDF.exe",
                           WorkingDirectory = "",
-                          MinMonth = 1,
-                          MaxMonth = 4,
+                          StartMonth = 1,
+                          EndMonth = 4,
                           GridSpacing = 0.25f,
                       };
 

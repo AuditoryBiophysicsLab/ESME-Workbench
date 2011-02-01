@@ -97,6 +97,11 @@
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Dave's test command"
 					                             Command="{Binding DavesTestCommand}" />
+                    <r:RibbonApplicationMenuItem Header="NAVO"
+					                             ImageSource="..\Images\LargeIcons\Yahoo-Widget-Engine-icon.png"
+					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
+					                             ToolTipDescription="NAVO"
+					                             Command="{Binding NAVOEnvironmentBuilderCommand}" />
                     <r:RibbonSeparator />
                     <r:RibbonApplicationMenuItem Header="Options"
 					                             ImageSource="..\Images\LargeIcons\gear-icon.png"

@@ -39,7 +39,16 @@ namespace HRC.Utility
 
             // Copy all properties from that to this)
             foreach (var property in typeof(T).GetProperties())
-                property.SetValue(this, property.GetValue(that, null), null);
+            {
+                try
+                {
+                    property.SetValue(this, property.GetValue(that, null), null);
+                }
+                catch
+                {
+                    //todo: dave to make this better. by checking if property has a setter or not. see AppSettings.Reload();
+                }
+            }
         }
 
         /// <summary>
@@ -54,7 +63,7 @@ namespace HRC.Utility
         /// </summary>
         public void Close()
         {
-            
+
         }
 
         /// <summary>

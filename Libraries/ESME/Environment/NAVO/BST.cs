@@ -1,14 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using Cinch;
 
 namespace ESME.Environment.NAVO
 {
     public class BST : NAVODataSource
     {
-        public List<string> Resolutions { get; private set; }
-        public string SelectedResolution { get; set; }
+        #region public List<string> Resolutions { get; set; }
+
+        public List<string> Resolutions
+        {
+            get { return _resolutions; }
+            set
+            {
+                if (_resolutions == value) return;
+                _resolutions = value;
+                NotifyPropertyChanged(ResolutionsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ResolutionsChangedEventArgs = ObservableHelper.CreateArgs<BST>(x => x.Resolutions);
+        List<string> _resolutions;
+
+        #endregion
+
+        #region public string SelectedResolution { get; set; }
+
+        public string SelectedResolution
+        {
+            get { return _selectedResolution; }
+            set
+            {
+                if (_selectedResolution == value) return;
+                _selectedResolution = value;
+                NotifyPropertyChanged(SelectedResolutionChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<BST>(x => x.SelectedResolution);
+        string _selectedResolution;
+
+        #endregion
+
 
         public void GetAllResolutions()
         {
@@ -49,7 +85,7 @@ namespace ESME.Environment.NAVO
             var south = extractionPacket.South;
             var east = extractionPacket.East;
             var west = extractionPacket.West;
-            var contents = string.Format("area {0} {1} {2} {3} {4} {5}.CHRTR", west, east, south, north, SelectedResolution, Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)));
+            var contents = string.Format("area {0} {1} {2} {3} {4} \"{5}.chb\"", west, east, south, north, SelectedResolution, Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)));
             var scriptfile = Path.GetTempFileName();
             File.WriteAllText(scriptfile, contents);
 
@@ -58,7 +94,7 @@ namespace ESME.Environment.NAVO
             //have a look at result and throw an error if needed.
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("error"))) throw new ApplicationException("BST: " + line); //hope this is sufficient..
-            ExtractedArea = Environment2DData.ReadChrtrBinaryFile(Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + ".CHRTR");
+            ExtractedArea = Environment2DData.ReadChrtrBinaryFile(Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + ".chb");
             File.Delete(scriptfile);
         }
 
