@@ -53,11 +53,16 @@ namespace ESME.Environment.NAVO
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern int GetShortPathName(String pathName, StringBuilder shortName, int cbShortName);
+        private static extern int GetShortPathName(
+                   [MarshalAs(UnmanagedType.LPTStr)]
+                   string path,
+                   [MarshalAs(UnmanagedType.LPTStr)]
+                   StringBuilder shortPath,
+                   int shortPathLength);
         public static string GetShortPathName(string longPath)
         {
             var sb = new StringBuilder(300);
-            var result = GetShortPathName(longPath, sb, 300);
+            var result = GetShortPathName(longPath, sb, sb.Capacity);
             var error = Marshal.GetLastWin32Error().ToString();
             return sb.ToString();
         }
