@@ -2,10 +2,11 @@
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using Cinch;
 
 namespace ESME.Environment.NAVO
 {
-    public abstract class NAVODataSource
+    public abstract class NAVODataSource: ViewModelBase
     {
         public string ExtractionProgramPath { get; set; }
         public string DatabasePath { get; set; } //change back to protected set?
@@ -13,7 +14,7 @@ namespace ESME.Environment.NAVO
         public EnvironmentData ExtractedArea { get; protected set; }
         public string WorkingDirectory { get; set; }
         public float GridSpacing { get; set; }
-        public string TimePeriod { get; set; }
+        public NAVOTimePeriod TimePeriod { get; set; }
 
         /// <summary>
         /// 
@@ -30,7 +31,7 @@ namespace ESME.Environment.NAVO
                           {
                               StartInfo = new ProcessStartInfo(ExtractionProgramPath)
                                           {
-                                              CreateNoWindow = false,
+                                              CreateNoWindow = true,
                                               UseShellExecute = false,
                                               RedirectStandardInput = false,
                                               RedirectStandardOutput = true,
@@ -55,16 +56,35 @@ namespace ESME.Environment.NAVO
 
     public class NAVOExtractionPacket
     {
-        public string Filename;
-        public double North;
-        public double South;
-        public double East;
-        public double West;
+        public string Filename { get; set; }
+        public double North { get; set; }
+        public double South { get; set; }
+        public double East { get; set; }
+        public double West { get; set; }
+        public NAVOTimePeriod TimePeriod { get; set; }
 
-        public NAVOExtractionPacket()
-        {
-            //if (Filename == null) throw new ApplicationException("NAVO Data Source: a file name must be specified");
-           // if ((West >= East) || (South >= North)) throw new ApplicationException("GIS parameters are out of range. West must be less than east, and south must be less than north.");
-        }
     }
+
+    public enum NAVOTimePeriod
+    {
+        January,
+        February,
+        March,
+        April,
+        May,
+        June,
+        July,
+        August,
+        September,
+        October,
+        November,
+        December,
+        Spring,
+        Summer,
+        Fall,
+        Winter,
+        Cold,
+        Warm,
+    }
+
 }

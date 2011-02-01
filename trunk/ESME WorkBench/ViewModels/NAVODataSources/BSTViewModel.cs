@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using Cinch;
 using ESME.Environment.NAVO;
 using ESMEWorkBench.Properties;
@@ -47,12 +49,12 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
         #endregion
 
         readonly BST _bst = new BST();
-
+        
         [MediatorMessageSink(MediatorMessage.EnvironmentBuilderDatabasesSpecified)]
         public void SetDatabasePaths()
         {
-            _bst.DatabasePath = Settings.Default.BSTDirectory;
-            _bst.ExtractionProgramPath = Settings.Default.BSTEXEDirectory;
+            _bst.DatabasePath = Globals.AppSettings.NAVOConfiguration.BSTDirectory;
+            _bst.ExtractionProgramPath = Globals.AppSettings.NAVOConfiguration.BSTEXEPath;
         }
 
         [MediatorMessageSink(MediatorMessage.ExtractBST)]

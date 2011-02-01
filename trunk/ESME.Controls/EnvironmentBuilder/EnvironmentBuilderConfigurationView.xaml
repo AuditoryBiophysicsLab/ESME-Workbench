@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ctl="clr-namespace:ESME.Views.Controls"
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+        xmlns:Views="clr-namespace:ESME.Views.EnvironmentBuilder"
         Title="EnvironmentBuilderConfigurationView"
         mef:ViewModelLocator.ViewModel="EnvironmentBuilderConfigurationViewModel"
         Height="400"
@@ -23,6 +24,7 @@
 			        Command="{Binding OkCommand}" />
         </DockPanel>
         <TabControl>
+            
             <TabItem Header="Database Locations"
 		         HorizontalContentAlignment="Stretch"
 		         VerticalContentAlignment="Stretch">
@@ -31,16 +33,16 @@
 			            Height="Auto">
                     <ctl:FileOrDirectorySetting Caption="GDEM-V"
 				                            IsDirectoryBrowser="True"
-				                            FileName="{Binding AppSettings.GDEMDirectory}" />
+				                            FileName="{Binding AppSettings.NAVOConfiguration.GDEMDirectory}" />
                     <ctl:FileOrDirectorySetting Caption="SMGC"
 				                            IsDirectoryBrowser="True"
-				                            FileName="{Binding AppSettings.SMGCDirectory}" />
+				                            FileName="{Binding AppSettings.NAVOConfiguration.SMGCDirectory}" />
                     <ctl:FileOrDirectorySetting Caption="BST"
-				                            IsDirectoryBrowser="True"
-				                            FileName="{Binding AppSettings.BSTDirectory}" />
+				                            IsDirectoryBrowser="False"
+				                            FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory}" />
                     <ctl:FileOrDirectorySetting Caption="DBDB"
-				                            IsDirectoryBrowser="True"
-				                            FileName="{Binding AppSettings.DBDBDirectory}" />                    
+				                            IsDirectoryBrowser="False"
+				                            FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory}" />                    
                 </StackPanel>
             </TabItem>
             <TabItem Header="Database Extraction Tool Locations"
@@ -48,20 +50,20 @@
                      VerticalContentAlignment="Stretch">
                 <StackPanel Orientation="Vertical"
 			            Width="Auto"
-			            Height="Auto">
-                    <ctl:FileOrDirectorySetting Caption="GDEM Extractor"
-				                            IsDirectoryBrowser="False"
-				                            FileName="{Binding AppSettings.GDEMEXEDirectory}" />
+			            Height="Auto">                    
                     <ctl:FileOrDirectorySetting Caption="SMGC Extractor"
 				                            IsDirectoryBrowser="False"
-				                            FileName="{Binding AppSettings.SMGCEXEDirectory}" />
+				                            FileName="{Binding AppSettings.NAVOConfiguration.SMGCEXEPath}" />
                     <ctl:FileOrDirectorySetting Caption="BST Extractor"
 				                            IsDirectoryBrowser="False"
-				                            FileName="{Binding AppSettings.BSTEXEDirectory}" />
+				                            FileName="{Binding AppSettings.NAVOConfiguration.BSTEXEPath}" />
                     <ctl:FileOrDirectorySetting Caption="DBDB Extractor"
 				                            IsDirectoryBrowser="False"
-				                            FileName="{Binding AppSettings.DBDBEXEDirectory}" />
+				                            FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath}" />
                 </StackPanel>
+            </TabItem>
+            <TabItem Header="Seasons">
+                <Views:ExtractionTimesView />
             </TabItem>
         </TabControl>
     </DockPanel>

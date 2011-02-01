@@ -30,7 +30,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         public SimpleCommand<object, object> ValidateDatabaseCommand
         {
-            get { return _validateDatabase ?? (_validateDatabase = new SimpleCommand<object, object>(delegate { Mediator.Instance.NotifyColleagues("ValidateDatabaseCommandMessage"); })); }
+            get { return _validateDatabase ?? (_validateDatabase = new SimpleCommand<object, object>(delegate { })); }
         }
 
         #endregion

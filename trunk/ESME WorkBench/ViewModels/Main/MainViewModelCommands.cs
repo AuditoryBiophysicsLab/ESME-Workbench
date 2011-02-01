@@ -7,6 +7,7 @@ using Cinch;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
+using ESMEWorkBench.ViewModels.NAVODataSources;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -464,6 +465,28 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _davesTest;
+
+        #endregion
+
+        #region NAVOEnvironmentBuilderCommand
+
+        public SimpleCommand<object, object> NAVOEnvironmentBuilderCommand
+        {
+            get { return _nAVOEnvironmentBuilder ?? (_nAVOEnvironmentBuilder = new SimpleCommand<object, object>(delegate
+                                                                                                                 {
+                                                                                                                     var environmentBuilderViewModel =  new EnvironmentBuilderViewModel(_visualizerService, Globals.AppSettings, _experiment);
+                                                                                                                     var result = _visualizerService.ShowDialog("EnvironmentBuilderView",environmentBuilderViewModel);
+                                                                                                                     if (result.HasValue && result.Value)
+                                                                                                                     {
+                                                                                                                         
+                                                                                                                     }
+
+                                                                                                                     
+
+                                                                                                                 })); }
+        }
+
+        SimpleCommand<object, object> _nAVOEnvironmentBuilder;
 
         #endregion
 
