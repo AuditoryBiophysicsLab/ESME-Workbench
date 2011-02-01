@@ -6,7 +6,7 @@ using Cinch;
 
 namespace HRC.Utility
 {
-#if false
+#if true
     public abstract class MediatorBase
     {
         public static void Send<T>(string key, T message)
@@ -84,7 +84,6 @@ namespace HRC.Utility
 
         public static HRCMediator Instance { get; private set; }
         readonly Dictionary<string, Dictionary<object, List<WeakAction>>> _registeredScopes = new Dictionary<string, Dictionary<object, List<WeakAction>>>();
-        readonly Dictionary<object, List<WeakAction>> _registeredHandlers = new Dictionary<object, List<WeakAction>>();
 
         #endregion
 
@@ -100,33 +99,43 @@ namespace HRC.Utility
         /// <summary>
         ///   Performs the actual registration of a target
         /// </summary>
+        /// <param name="scope">Scope of the handler being registered</param>
         /// <param name = "key">Key to store in dictionary</param>
         /// <param name = "actionType">Delegate type</param>
         /// <param name = "handler">Method</param>
         void RegisterHandler(string scope, object key, Type actionType, Delegate handler)
         {
             var action = new WeakAction(handler.Target, actionType, handler.Method);
-
-            lock (_registeredHandlers)
+            lock (_registeredScopes)
             {
-                List<WeakAction> wr;
-                if (_registeredHandlers.TryGetValue(key, out wr))
+                Dictionary<object, List<WeakAction>> scopeResult;
+                if (_registeredScopes.TryGetValue(scope, out scopeResult))
                 {
-                    if (wr.Count > 0)
+                    if (scopeResult.Count > 0)
                     {
-                        var wa = wr[0];
-                        if (wa.ActionType != actionType && !wa.ActionType.IsAssignableFrom(actionType)) throw new ArgumentException("Invalid key passed to RegisterHandler - existing handler has incompatible parameter type");
-                    }
+                        lock (scopeResult)
+                        {
+                            List<WeakAction> wr;
+                            if (scopeResult.TryGetValue(key, out wr))
+                            {
+                                if (wr.Count > 0)
+                                {
+                                    var wa = wr[0];
+                                    if (wa.ActionType != actionType && !wa.ActionType.IsAssignableFrom(actionType)) throw new ArgumentException("Invalid key passed to RegisterHandler - existing handler has incompatible parameter type");
+                                }
 
-                    wr.Add(action);
-                }
-                else
-                {
-                    wr = new List<WeakAction>
-                         {
-                             action
-                         };
-                    _registeredHandlers.Add(key, wr);
+                                wr.Add(action);
+                            }
+                            else
+                            {
+                                wr = new List<WeakAction>
+                                     {
+                                         action
+                                     };
+                                scopeResult.Add(key, wr);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -134,19 +143,25 @@ namespace HRC.Utility
         /// <summary>
         ///   Performs the unregistration from a target
         /// </summary>
+        /// <param name="scope">Scope of the handler being unregistered</param>
         /// <param name = "key">Key to store in dictionary</param>
         /// <param name = "actionType">Delegate type</param>
         /// <param name = "handler">Method</param>
-        void UnregisterHandler(object key, Type actionType, Delegate handler)
+        void UnregisterHandler(string scope, object key, Type actionType, Delegate handler)
         {
-            lock (_registeredHandlers)
+            lock (_registeredScopes)
             {
-                List<WeakAction> wr;
-                if (_registeredHandlers.TryGetValue(key, out wr))
+                Dictionary<object, List<WeakAction>> scopeResult;
+                if (!_registeredScopes.TryGetValue(scope, out scopeResult)) return;
+                lock (scopeResult)
                 {
-                    wr.RemoveAll(wa => handler == wa.GetMethod() && actionType == wa.ActionType);
+                    List<WeakAction> wr;
+                    if (scopeResult.TryGetValue(key, out wr))
+                    {
+                        wr.RemoveAll(wa => handler == wa.GetMethod() && actionType == wa.ActionType);
 
-                    if (wr.Count == 0) _registeredHandlers.Remove(key);
+                        if (wr.Count == 0) scopeResult.Remove(key);
+                    }
                 }
             }
         }
@@ -155,29 +170,43 @@ namespace HRC.Utility
         ///   This method broadcasts a message to all message targets for a given
         ///   message key and passes a parameter.
         /// </summary>
+        /// <param name="scope">Scope of the handler being notified</param>
         /// <param name = "key">Message key</param>
         /// <param name = "message">Message parameter</param>
         /// <returns>True/False if any handlers were invoked.</returns>
-        bool NotifyColleagues(object key, object message)
+        bool NotifyColleagues(string scope, object key, object message)
         {
-            List<WeakAction> wr;
-            lock (_registeredHandlers)
+            List<WeakAction> wr = null;
+            lock (_registeredScopes)
             {
-                if (!_registeredHandlers.TryGetValue(key, out wr)) return false;
+                Dictionary<object, List<WeakAction>> scopeResult;
+                if (_registeredScopes.TryGetValue(scope, out scopeResult))
+                {
+                    lock (scopeResult)
+                    {
+                        if (!scopeResult.TryGetValue(key, out wr)) return false;
+                    }
+                }
             }
 
-            foreach (var cb in wr)
+            if (wr != null)
             {
-                var action = cb.GetMethod();
+                foreach (var action in wr.Select(cb => cb.GetMethod()).Where(action => action != null)) 
+                    action.DynamicInvoke(message);
 
-                if (action != null) action.DynamicInvoke(message);
+                lock (_registeredScopes)
+                {
+                    Dictionary<object, List<WeakAction>> scopeResult;
+                    if (_registeredScopes.TryGetValue(scope, out scopeResult))
+                    {
+                        lock (scopeResult)
+                        {
+                            wr.RemoveAll(wa => wa.HasBeenCollected);
+                        }
+                    }
+
+                }
             }
-
-            lock (_registeredHandlers)
-            {
-                wr.RemoveAll(wa => wa.HasBeenCollected);
-            }
-
             return true;
         }
 
@@ -186,11 +215,12 @@ namespace HRC.Utility
         #region Public Properties/Methods
 
         /// <summary>
-        ///   This registers a Type with the mediator.  Any methods decorated with <seealso cref = "MediatorMessageSinkAttribute" /> will be 
+        ///   This registers a Type with the mediator.  Any methods decorated with <seealso cref = "HRCMediatorMessageSinkAttribute" /> will be 
         ///   registered as target method handlers for the given message key.
         /// </summary>
+        /// <param name="scope"></param>
         /// <param name = "view">Object to register</param>
-        public void Register(object view)
+        public void Register(string scope, object view)
         {
             // Look at all instance/static methods on this object type.
             foreach (var mi in view.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
@@ -205,8 +235,7 @@ namespace HRC.Utility
                     var actionType = typeof (Action<>).MakeGenericType(pi[0].ParameterType);
                     var key = (mha.MessageKey) ?? actionType;
 
-                    if (mi.IsStatic) RegisterHandler(key, actionType, Delegate.CreateDelegate(actionType, mi));
-                    else RegisterHandler(key, actionType, Delegate.CreateDelegate(actionType, view, mi.Name));
+                    RegisterHandler(scope, key, actionType, mi.IsStatic ? Delegate.CreateDelegate(actionType, mi) : Delegate.CreateDelegate(actionType, view, mi.Name));
                 }
             }
         }
@@ -214,8 +243,9 @@ namespace HRC.Utility
         /// <summary>
         ///   This method unregisters a type from the message mediator.
         /// </summary>
+        /// <param name="scope"></param>
         /// <param name = "view">Object to unregister</param>
-        public void Unregister(object view)
+        public void Unregister(string scope, object view)
         {
             foreach (var mi in view.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
             {
@@ -228,8 +258,7 @@ namespace HRC.Utility
                     var actionType = typeof (Action<>).MakeGenericType(pi[0].ParameterType);
                     var key = (mha.MessageKey) ?? actionType;
 
-                    if (mi.IsStatic) UnregisterHandler(key, actionType, Delegate.CreateDelegate(actionType, mi));
-                    else UnregisterHandler(key, actionType, Delegate.CreateDelegate(actionType, view, mi.Name));
+                    UnregisterHandler(scope, key, actionType, mi.IsStatic ? Delegate.CreateDelegate(actionType, mi) : Delegate.CreateDelegate(actionType, view, mi.Name));
                 }
             }
         }
@@ -237,55 +266,45 @@ namespace HRC.Utility
         /// <summary>
         ///   This registers a specific method as a message handler for a specific type.
         /// </summary>
+        /// <param name="scope"></param>
         /// <param name = "key">Message key</param>
         /// <param name = "handler">Handler method</param>
-        public void RegisterHandler<T>(string key, Action<T> handler) { RegisterHandler(key, handler.GetType(), handler); }
-
-        /// <summary>
-        ///   This registers a specific method as a message handler for a specific type.
-        /// </summary>
-        /// <param name = "handler">Handler method</param>
-        public void RegisterHandler<T>(Action<T> handler) { RegisterHandler(typeof (Action<T>), handler.GetType(), handler); }
+        public void RegisterHandler<T>(string scope, string key, Action<T> handler) { RegisterHandler(scope, key, handler.GetType(), handler); }
 
         /// <summary>
         ///   This unregisters a method as a handler.
         /// </summary>
+        /// <param name="scope"></param>
         /// <param name = "key">Message key</param>
         /// <param name = "handler">Handler</param>
-        public void UnregisterHandler<T>(string key, Action<T> handler) { UnregisterHandler(key, handler.GetType(), handler); }
-
-        /// <summary>
-        ///   This unregisters a method as a handler for a specific type
-        /// </summary>
-        /// <param name = "handler">Handler</param>
-        public void UnregisterHandler<T>(Action<T> handler) { UnregisterHandler(typeof (Action<T>), handler.GetType(), handler); }
+        public void UnregisterHandler<T>(string scope, string key, Action<T> handler) { UnregisterHandler(scope, key, handler.GetType(), handler); }
 
         /// <summary>
         ///   This method broadcasts a message to all message targets for a given
         ///   message key and passes a parameter.
         /// </summary>
+        /// <param name="scope"></param>
         /// <param name = "key">Message key</param>
         /// <param name = "message">Message parameter</param>
         /// <returns>True/False if any handlers were invoked.</returns>
-        public bool NotifyColleagues<T>(string key, T message) { return NotifyColleagues((object) key, message); }
+        public bool NotifyColleagues<T>(string scope, string key, T message) { return NotifyColleagues(scope, (object) key, message); }
 
         /// <summary>
         ///   This method broadcasts a message to all message targets for a given parameter type.
         ///   If a derived type is passed, any handlers for interfaces or base types will also be
         ///   invoked.
         /// </summary>
+        /// <param name="scope"></param>
         /// <param name = "message">Message parameter</param>
         /// <returns>True/False if any handlers were invoked.</returns>
-        public bool NotifyColleagues<T>(T message)
+        public bool NotifyColleagues<T>(string scope, T message)
         {
             var actionType = typeof (Action<>).MakeGenericType(typeof (T));
-            var keyList = from key in _registeredHandlers.Keys
+            var keyList = from key in _registeredScopes[scope].Keys
                           where key is Type && ((Type) key).IsAssignableFrom(actionType)
                           select key;
-            var rc = false;
-            foreach (var key in keyList) rc |= NotifyColleagues(key, message);
 
-            return rc;
+            return keyList.Aggregate(false, (current, key) => current | NotifyColleagues(scope, key, message));
         }
 
         /// <summary>
@@ -293,12 +312,13 @@ namespace HRC.Utility
         ///   message key and passes a parameter.  The message targets are all called
         ///   asynchronously and any resulting exceptions are ignored.
         /// </summary>
+        /// <param name="scope"></param>
         /// <param name = "key">Message key</param>
         /// <param name = "message">Message parameter</param>
-        public void NotifyColleaguesAsync<T>(string key, T message)
+        public void NotifyColleaguesAsync<T>(string scope, string key, T message)
         {
             Func<string, T, bool> smaFunc = NotifyColleagues;
-            smaFunc.BeginInvoke(key, message, ia =>
+            smaFunc.BeginInvoke(scope, message, ia =>
                                               {
                                                   try
                                                   {
@@ -306,26 +326,6 @@ namespace HRC.Utility
                                                   }
                                                   catch {}
                                               }, null);
-        }
-
-        /// <summary>
-        ///   This method broadcasts a message to all message targets for a given parameter type.
-        ///   If a derived type is passed, any handlers for interfaces or base types will also be
-        ///   invoked.  The message targets are all called asynchronously and any resulting exceptions
-        ///   are ignored.
-        /// </summary>
-        /// <param name = "message">Message parameter</param>
-        public void NotifyColleaguesAsync<T>(T message)
-        {
-            Func<T, bool> smaFunc = NotifyColleagues;
-            smaFunc.BeginInvoke(message, ia =>
-                                         {
-                                             try
-                                             {
-                                                 smaFunc.EndInvoke(ia);
-                                             }
-                                             catch {}
-                                         }, null);
         }
 
         #endregion
