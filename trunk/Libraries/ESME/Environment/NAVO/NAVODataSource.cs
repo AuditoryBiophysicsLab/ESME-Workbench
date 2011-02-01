@@ -57,7 +57,8 @@ namespace ESME.Environment.NAVO
         public static string GetShortPathName(string longPath)
         {
             var sb = new StringBuilder(300);
-            GetShortPathName(longPath, sb, 300);
+            var result = GetShortPathName(longPath, sb, 300);
+            var error = Marshal.GetLastWin32Error().ToString();
             return sb.ToString();
         }
     }
