@@ -36,6 +36,7 @@ namespace ESMEWorkBench.ViewModels.Map
                     using (var sr = new StreamReader(projectionFile)) projection = sr.ReadToEnd();
                 }
                 var newLayer = new ShapeFileFeatureLayer(_shapefileName);
+#if true
                 if (AreaStyle == null)
                 {
                     newLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyles.County1;
@@ -46,6 +47,7 @@ namespace ESMEWorkBench.ViewModels.Map
                     newLayer.ZoomLevelSet.ZoomLevel01.DefaultAreaStyle = AreaStyle;
                     newLayer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
                 }
+#endif
                 newLayer.RequireIndex = false;
                 if (projection != null)
                     newLayer.FeatureSource.Projection = new ManagedProj4Projection
