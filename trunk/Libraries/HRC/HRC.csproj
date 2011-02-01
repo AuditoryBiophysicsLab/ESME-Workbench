@@ -137,6 +137,7 @@
     <Compile Include="Utility\EmbeddedResources.cs" />
     <Compile Include="Utility\ExtensionMethods.cs" />
     <Compile Include="Utility\ImprovedBackgroundWorker.cs" />
+    <Compile Include="Utility\MediatorBase.cs" />
     <Compile Include="Utility\MultiProgressDialog.cs">
       <SubType>Form</SubType>
     </Compile>
