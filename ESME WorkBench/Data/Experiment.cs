@@ -580,6 +580,18 @@ namespace ESMEWorkBench.Data
         }
 
         [XmlIgnore]
+        public float North { get; private set; }
+
+        [XmlIgnore]
+        public float South { get; private set; }
+
+        [XmlIgnore]
+        public float East { get; private set; }
+
+        [XmlIgnore]
+        public float West { get; private set; }
+
+        [XmlIgnore]
         public AnimatInterface AnimatInterface { get; set; }
 
         [XmlIgnore]
@@ -874,16 +886,16 @@ namespace ESMEWorkBench.Data
                     }
             }
 
-            var north = (float)boundingBox.Bottom + OpAreaBufferZoneSize;
-            var west = (float)boundingBox.Left - OpAreaBufferZoneSize;
-            var south = (float)boundingBox.Top - OpAreaBufferZoneSize;
-            var east = (float)boundingBox.Right + OpAreaBufferZoneSize;
+            North = (float)boundingBox.Bottom + OpAreaBufferZoneSize;
+            West = (float)boundingBox.Left - OpAreaBufferZoneSize;
+            South = (float)boundingBox.Top - OpAreaBufferZoneSize;
+            East = (float)boundingBox.Right + OpAreaBufferZoneSize;
 
-            if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName))) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", north, west, south, east);
-            if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName))) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", north, west, south, east);
-            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", north, west, south, east);
+            if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName))) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", North, West, South, East);
+            if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName))) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", North, West, South, East);
+            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", North, West, South, East);
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
-            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, north, west, south, east);
+            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, North, West, South, East);
             if (Bathymetry != null)
             {
                 const string bathyBoundsName = "Bathymetry: Boundary";
@@ -908,21 +920,29 @@ namespace ESMEWorkBench.Data
                     layer.Add(Bathymetry.BoundingBox);
                     layer.Done();
                     MapLayers.Add(layer);
+                }
 
+                const string bathyBitmapName = "Bathymetry: Bitmap";
+                var bitmapLayerExists = false;
+                var colormap = new DualColormap(Colormap.Summer, Colormap.Jet)
+                {
+                    Threshold = 0,
+                };
+                var bitmap = colormap.ToBitmap(Bathymetry.Values, Bathymetry.MinValue, Bathymetry.MaxValue < 0 ? Bathymetry.MaxValue : 8000);
+                //bitmap.Save(@"C:\Users\Dave Anderson\Desktop\test_bathymetry.jpg", ImageFormat.Jpeg);
 
-                    var colormap = new DualColormap(Colormap.Summer, Colormap.Jet)
-                                   {
-                                       Threshold = 0,
-                                   };
-                    var bitmap = colormap.ToBitmap(Bathymetry.Values, Bathymetry.MinValue, Bathymetry.MaxValue < 0 ? Bathymetry.MaxValue : 8000);
-                    //bitmap.Save(@"C:\Users\Dave Anderson\Desktop\test_bathymetry.jpg", ImageFormat.Jpeg);
-
-                    var memoryStream = new MemoryStream();
-                    bitmap.Save(memoryStream, ImageFormat.Bmp);
-
+                var memoryStream = new MemoryStream();
+                bitmap.Save(memoryStream, ImageFormat.Bmp);
+                foreach (var bathyBitmapLayer in MapLayers.Where(curLayer => curLayer.Name == bathyBitmapName).Cast<RasterMapLayer>())
+                {
+                    bathyBitmapLayer.RasterStream = memoryStream;
+                    bitmapLayerExists = true;
+                }
+                if (!bitmapLayerExists)
+                {
                     var rasterLayer = new RasterMapLayer
                                       {
-                                          Name = "Bathymetry: Bitmap",
+                                          Name = bathyBitmapName,
                                           CanBeReordered = true,
                                           CanChangeLineColor = false,
                                           CanChangeLineWidth = false,
@@ -937,6 +957,8 @@ namespace ESMEWorkBench.Data
                                           //RasterFilename = @"C:\Users\Dave Anderson\Desktop\bathymetric_small.jpg",
                                       };
                     MapLayers.Add(rasterLayer);
+                    //Also send the layer to the back.
+                    MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, rasterLayer);
                 }
             }
         }
