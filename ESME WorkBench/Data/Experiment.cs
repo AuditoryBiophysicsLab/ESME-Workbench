@@ -790,11 +790,10 @@ namespace ESMEWorkBench.Data
                             {
                                 new ShapefileMapLayer
                                 {
-                                    LineColor = Colors.Tan,
-                                    AreaColor = Colors.LightGreen,
+                                    LineColor = Colors.Green,
                                     CanBeRemoved = false,
                                     CanBeReordered = true,
-                                    CanChangeAreaColor = true,
+                                    CanChangeAreaColor = false,
                                     CanChangeLineColor = true,
                                     ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
                                     Name = "Base Map",
@@ -892,10 +891,99 @@ namespace ESMEWorkBench.Data
             East = (float)boundingBox.Right + OpAreaBufferZoneSize;
 
             if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName))) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", North, West, South, East);
+            if (WindSpeed != null)
+            {
+                const string windName = "Wind";
+                var layerExists = false;
+                foreach (var windLayer in MapLayers.Where(curLayer => curLayer.Name == windName).Cast<OverlayShapeMapLayer>())
+                {
+                    for (var lonIndex = 0; lonIndex < BottomType.Longitudes.Length; lonIndex++)
+                        for (var latIndex = 0; latIndex < BottomType.Longitudes.Length; latIndex++)
+                            windLayer.Add(new OverlayPoint(new EarthCoordinate(WindSpeed.Latitudes[latIndex], WindSpeed.Longitudes[lonIndex])));
+                    windLayer.Done();
+                    layerExists = true;
+                }
+                if (!layerExists)
+                {
+                    var windLayer = new OverlayShapeMapLayer
+                    {
+                        Name = windName,
+                        CanBeReordered = true,
+                        CanChangeLineColor = true,
+                        CanChangeLineWidth = true,
+                        CanBeRemoved = false,
+                        LayerType = LayerType.WindSpeed,
+                    };
+                    for (var lonIndex = 0; lonIndex < WindSpeed.Longitudes.Length; lonIndex++)
+                        for (var latIndex = 0; latIndex < WindSpeed.Longitudes.Length; latIndex++)
+                            windLayer.Add(new OverlayPoint(new EarthCoordinate(WindSpeed.Latitudes[latIndex], WindSpeed.Longitudes[lonIndex])));
+                    windLayer.Done();
+                    MapLayers.Add(windLayer);
+                }
+            }
+
             if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName))) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", North, West, South, East);
+            if (BottomType != null)
+            {
+                const string bottomTypeName = "Bottom Type";
+                var bottomTypeLayerExists = false;
+                foreach (var bottomTypeLayer in MapLayers.Where(curLayer => curLayer.Name == bottomTypeName).Cast<OverlayShapeMapLayer>())
+                {
+                    for (var lonIndex = 0; lonIndex < BottomType.Longitudes.Length; lonIndex++)
+                        for (var latIndex = 0; latIndex < BottomType.Longitudes.Length; latIndex++)
+                            bottomTypeLayer.Add(new OverlayPoint(new EarthCoordinate(BottomType.Latitudes[latIndex], BottomType.Longitudes[lonIndex])));
+                    bottomTypeLayer.Done();
+                    bottomTypeLayerExists = true;
+                }
+                if (!bottomTypeLayerExists)
+                {
+                    var bottomTypeLayer = new OverlayShapeMapLayer
+                    {
+                        Name = bottomTypeName,
+                        CanBeReordered = true,
+                        CanChangeLineColor = true,
+                        CanChangeLineWidth = true,
+                        CanBeRemoved = false,
+                        LayerType = LayerType.BottomType,
+                    };
+                    for (var lonIndex = 0; lonIndex < BottomType.Longitudes.Length; lonIndex++)
+                        for (var latIndex = 0; latIndex < BottomType.Longitudes.Length; latIndex++)
+                            bottomTypeLayer.Add(new OverlayPoint(new EarthCoordinate(BottomType.Latitudes[latIndex], BottomType.Longitudes[lonIndex])));
+                    bottomTypeLayer.Done();
+                    MapLayers.Add(bottomTypeLayer);
+                }
+            }
+
+            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, North, West, South, East);
+            if (SoundSpeedField != null)
+            {
+                const string soundSpeedName = "Sound Speed";
+                var soundSpeedLayerExists = false;
+                foreach (var soundSpeedLayer in MapLayers.Where(curLayer => curLayer.Name == soundSpeedName).Cast<OverlayShapeMapLayer>())
+                {
+                    foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile.Location));
+                    soundSpeedLayer.Done();
+                    soundSpeedLayerExists = true;
+                }
+                if (!soundSpeedLayerExists)
+                {
+                    var soundSpeedLayer = new OverlayShapeMapLayer
+                    {
+                        Name = soundSpeedName,
+                        CanBeReordered = true,
+                        CanChangeLineColor = true,
+                        CanChangeLineWidth = true,
+                        CanBeRemoved = false,
+                        LayerType = LayerType.SoundSpeed,
+                    };
+                    foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile.Location));
+                    soundSpeedLayer.Done();
+                    MapLayers.Add(soundSpeedLayer);
+                }
+            }
+
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", North, West, South, East);
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
-            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, North, West, South, East);
             if (Bathymetry != null)
             {
                 const string bathyBoundsName = "Bathymetry: Boundary";

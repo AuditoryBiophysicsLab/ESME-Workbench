@@ -122,7 +122,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
             _wpfMap.CurrentScaleChanged += (s, e) => { if (_experiment != null) _experiment.CurrentScale = e.CurrentScale; };
             _wpfMap.CurrentExtentChanged += (s, e) => { if (_experiment != null) _experiment.CurrentExtent = e.CurrentExtent.GetWellKnownText(); };
-            _wpfMap.BackgroundOverlay.BackgroundBrush = new GeoSolidBrush(GeoColor.StandardColors.DarkGray);
+            _wpfMap.BackgroundOverlay.BackgroundBrush = new GeoSolidBrush(GeoColor.StandardColors.Black);
 #if true
             AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
             AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
