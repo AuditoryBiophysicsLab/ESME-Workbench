@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Cinch;
@@ -51,7 +52,14 @@ namespace ESME.Environment.NAVO
             return output.ToString();
         }
 
-
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern int GetShortPathName(String pathName, StringBuilder shortName, int cbShortName);
+        public static string GetShortPathName(string longPath)
+        {
+            var sb = new StringBuilder(300);
+            GetShortPathName(longPath, sb, 300);
+            return sb.ToString();
+        }
     }
 
     public class NAVOExtractionPacket
