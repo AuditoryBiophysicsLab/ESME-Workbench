@@ -110,6 +110,11 @@ namespace ESME.Environment.NAVO
 
         internal NAVOConfiguration Configuration { get; set; }
 
+        static readonly int[] MonthMap = new []
+                                         {
+                                             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6
+                                         };
+
 
         void InterpretTimes(NAVODataSource dataSource)
         {
@@ -131,8 +136,8 @@ namespace ESME.Environment.NAVO
                     dataSource.EndMonth = (int) ExtractionPacket.TimePeriod;
                     break;
                 case NAVOTimePeriod.Spring:
-                    dataSource.StartMonth = (int) Configuration.SpringStartMonth;
-                    dataSource.EndMonth = (int) Configuration.SpringStartMonth + 3; //really?
+                    dataSource.StartMonth = MonthMap[(int) Configuration.SpringStartMonth];
+                    dataSource.EndMonth =  MonthMap[(int) Configuration.SpringStartMonth + 3]; //really?
                     break;
                 case NAVOTimePeriod.Summer:
                     dataSource.StartMonth = (int) Configuration.SummerStartMonth;

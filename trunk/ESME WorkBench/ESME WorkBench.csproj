@@ -141,7 +141,6 @@
     <Compile Include="ViewModels\Main\MainViewModelListeners.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\Main\SimulationViewModel.cs" />
-    <Compile Include="ViewModels\Map\GeoRasterLayer.cs" />
     <Compile Include="ViewModels\Map\MarkerLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapShape.cs" />
@@ -245,9 +244,7 @@
     <Compile Include="ViewModels\Layers\LayerType.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
-    <Compile Include="ViewModels\Layers\RasterLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\OverlayFileMapLayer.cs" />
-    <Compile Include="ViewModels\Layers\ShapeLayerViewModel.cs" />
     <Compile Include="ViewModels\Main\EnvironmentSettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModelCommands.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
@@ -256,7 +253,6 @@
     </Compile>
     <Compile Include="ViewModels\Main\MainViewModel.cs" />
     <Compile Include="ViewModels\Layers\OffsetProjection.cs" />
-    <Compile Include="ViewModels\Layers\RadarRasterSource.cs" />
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\VirtualToggleButton.cs" />
     <Compile Include="ViewModels\Map\MapViewModel.cs" />
