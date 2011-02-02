@@ -32,7 +32,7 @@
 			        IsDefault="True"
 			        Content="Extract All Data"
 			        DockPanel.Dock="Right"
-			        Command="{Binding NAVODataSources.ExtractAreasCommand}" />
+			        Command="{Binding ExtractAllCommand}" />
 
 		</DockPanel>
         <!--

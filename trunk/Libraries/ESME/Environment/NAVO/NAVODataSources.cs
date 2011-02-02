@@ -11,10 +11,9 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Environment.NAVO
 {
-    public class NAVODataSources : ViewModelBase, IViewStatusAwareInjectionAware
+    public class NAVODataSources : ViewModelBase
     {
-        IViewAwareStatus _viewAwareStatus;
-        Dispatcher _dispatcher;
+        
         public NAVODataSources(NAVOConfiguration configurations, NAVOExtractionPacket extractionPacket)
         {
             try
@@ -80,16 +79,20 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        #region IViewStatusAwareInjectionAware Members
-
-        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
+        
+        public void ExtractAreas()
         {
-            _viewAwareStatus = viewAwareStatusService;
-            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+            BST.TimePeriod = SelectedPeriod;
+            DBDB.TimePeriod = SelectedPeriod;
+            GDEM.TimePeriod = SelectedPeriod;
+            SMGC.TimePeriod = SelectedPeriod;
+            InterpretTimes(GDEM);
+            InterpretTimes(SMGC);
+            BST.ExtractArea(ExtractionPacket);
+            DBDB.ExtractArea(ExtractionPacket);
+            GDEM.ExtractArea(ExtractionPacket);
+            SMGC.ExtractArea(ExtractionPacket);
         }
-
-        #endregion
-
         #region ExtractAreasCommand
 
         SimpleCommand<object, object> _extractAreas;
@@ -110,7 +113,7 @@ namespace ESME.Environment.NAVO
                                                                                                DBDB.ExtractArea(ExtractionPacket);
                                                                                                GDEM.ExtractArea(ExtractionPacket);
                                                                                                SMGC.ExtractArea(ExtractionPacket);
-                                                                                              // ((EnvironmentBuilderView)_viewAwareStatus.View).Close();
+                                                                                              
                                                                                            }));
             }
         }

@@ -226,10 +226,10 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                 return _extractAll ?? (_extractAll = new SimpleCommand<object, object>(delegate
                                                                                        {
                                                                                            AppSettings.Save(); //remember the new values. 
-                                                                                           //set the times
                                                                                            
                                                                                            //extract data from all data sources.
-                                                                                           
+                                                                                           NAVODataSources.ExtractAreas();
+                                                                                           //close the view.
                                                                                            ((EnvironmentBuilderView)_viewAwareStatus.View).Close();
                                                                                        }));
             }
