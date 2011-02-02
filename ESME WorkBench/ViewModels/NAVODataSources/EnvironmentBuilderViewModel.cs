@@ -19,7 +19,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
         readonly IUIVisualizerService _visualizerService;
         Dispatcher _dispatcher;
         IViewAwareStatus _viewAwareStatus;
-
+        public Experiment Experiment { get; set; }
 
         public EnvironmentBuilderViewModel(IUIVisualizerService visualizerService, AppSettings appSettings, Experiment experiment)
         {
@@ -35,15 +35,6 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             _visualizerService = visualizerService;
             AppSettings = appSettings;
             Experiment = experiment;
-            var area = new NAVOExtractionPacket
-            {
-                Filename = Path.Combine(Experiment.LocalStorageRoot, "temp.xml"),
-                North = Experiment.North,
-                South = Experiment.South,
-                East = Experiment.East,
-                West = Experiment.West,
-            };
-            NAVODataSources = new ESME.Environment.NAVO.NAVODataSources(Globals.AppSettings.NAVOConfiguration, area);
             Months = new List<NAVOTimePeriod>
                      {
                          NAVOTimePeriod.January,
@@ -65,7 +56,37 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                          NAVOTimePeriod.Cold,
                          NAVOTimePeriod.Warm,
                      };
+            ExtractionAreaPacket= new NAVOExtractionPacket
+            {
+                Filename = Path.Combine(Experiment.LocalStorageRoot, Path.GetFileNameWithoutExtension(Experiment.ScenarioFileName).Replace(" ","")+".xml"),
+                North = Experiment.North,
+                South = Experiment.South,
+                East = Experiment.East,
+                West = Experiment.West,
+                TimePeriod = SelectedTimePeriod,
+            };
+            
+            NAVODataSources = new ESME.Environment.NAVO.NAVODataSources(Globals.AppSettings.NAVOConfiguration, ExtractionAreaPacket);
+           
         }
+
+        #region public NAVOExtractionPacket ExtractionAreaPacket { get; set; }
+
+        public NAVOExtractionPacket ExtractionAreaPacket
+        {
+            get { return _extractionAreaPacket; }
+            set
+            {
+                if (_extractionAreaPacket == value) return;
+                _extractionAreaPacket = value;
+                NotifyPropertyChanged(ExtractionAreaPacketChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExtractionAreaPacketChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.ExtractionAreaPacket);
+        NAVOExtractionPacket _extractionAreaPacket;
+
+        #endregion
 
         #region public AppSettings AppSettings { get; set; }
 
@@ -139,6 +160,41 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         #endregion
 
+        #region public NAVOTimePeriod StartTime { get; set; }
+
+        public NAVOTimePeriod StartTime
+        {
+            get { return _startTime; }
+            set
+            {
+                if (_startTime == value) return;
+                _startTime = value;
+                NotifyPropertyChanged(StartTimeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs StartTimeChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.StartTime);
+        NAVOTimePeriod _startTime;
+
+        #endregion
+
+        #region public NAVOTimePeriod EndTime { get; set; }
+
+        public NAVOTimePeriod EndTime
+        {
+            get { return _endTime; }
+            set
+            {
+                if (_endTime == value) return;
+                _endTime = value;
+                NotifyPropertyChanged(EndTimeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs EndTimeChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.EndTime);
+        NAVOTimePeriod _endTime;
+
+        #endregion
 
         #region LaunchEnvironmentConfigurationViewCommand
 
@@ -174,7 +230,6 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                                                                                            
                                                                                            //extract data from all data sources.
                                                                                            
-                                                                                           
                                                                                            ((EnvironmentBuilderView)_viewAwareStatus.View).Close();
                                                                                        }));
             }
@@ -199,8 +254,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
         }
 
         #endregion
-
-        public Experiment Experiment { get; set; }
+        
 
         #region IViewStatusAwareInjectionAware Members
 
@@ -212,23 +266,51 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         #endregion
 
-        void SetTimes() { MediatorMessage.Send(MediatorMessage.SeasonsDefined); }
-
-        //new mediator message sink for actually extracitng area -- will wind up also getting called when some idiot changes the boundaries.
-        void ExtractArea()
+        void InterpretTimes()
         {
-            var area = new NAVOExtractionPacket
-                       {
-                           Filename = Path.Combine(Experiment.LocalStorageRoot, "temp.xml"),
-                           North = Experiment.North,
-                           South = Experiment.South,
-                           East = Experiment.East,
-                           West = Experiment.West,
-                       };
-            MediatorMessage.Send(MediatorMessage.ExtractBST, area);
-            MediatorMessage.Send(MediatorMessage.ExtractDBDB, area);
-            MediatorMessage.Send(MediatorMessage.ExtractGDEM, area);
-            MediatorMessage.Send(MediatorMessage.ExtractSMGC, area);
+            switch (SelectedTimePeriod)
+            {
+                case NAVOTimePeriod.January:
+                case NAVOTimePeriod.February:
+                case NAVOTimePeriod.March:
+                case NAVOTimePeriod.April:
+                case NAVOTimePeriod.May:
+                case NAVOTimePeriod.June:
+                case NAVOTimePeriod.July:
+                case NAVOTimePeriod.August:
+                case NAVOTimePeriod.September:
+                case NAVOTimePeriod.October:
+                case NAVOTimePeriod.November:
+                case NAVOTimePeriod.December:
+                    StartTime = SelectedTimePeriod;
+                    EndTime = SelectedTimePeriod;
+                    break;
+                case NAVOTimePeriod.Spring:
+                    StartTime = Globals.AppSettings.NAVOConfiguration.SpringStartMonth;
+                    EndTime = Globals.AppSettings.NAVOConfiguration.SpringStartMonth + 3; //really?
+                    break;
+                case NAVOTimePeriod.Summer:
+                    StartTime = Globals.AppSettings.NAVOConfiguration.SummerStartMonth;
+                    EndTime = Globals.AppSettings.NAVOConfiguration.SummerStartMonth + 3;
+                    break;
+                case NAVOTimePeriod.Fall:
+                    StartTime = Globals.AppSettings.NAVOConfiguration.FallStartMonth;
+                    EndTime = Globals.AppSettings.NAVOConfiguration.FallStartMonth + 3;
+                    break;
+                case NAVOTimePeriod.Winter:
+                    StartTime = Globals.AppSettings.NAVOConfiguration.WinterStartMonth;
+                    EndTime = Globals.AppSettings.NAVOConfiguration.WinterStartMonth + 3;
+                    break;
+                case NAVOTimePeriod.Cold:
+                    StartTime = Globals.AppSettings.NAVOConfiguration.ColdSeasonStartMonth;
+                    EndTime = Globals.AppSettings.NAVOConfiguration.ColdSeasonStartMonth + 3;
+                    break;
+                case NAVOTimePeriod.Warm:
+                    StartTime = Globals.AppSettings.NAVOConfiguration.WarmSeasonStartMonth;
+                    EndTime = Globals.AppSettings.NAVOConfiguration.WarmSeasonStartMonth + 3;
+                    break;
+            }
+
         }
     }
 }
