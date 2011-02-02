@@ -7,9 +7,6 @@ namespace ESME.Environment.NAVO
 {
     public class SMGC : NAVODataSource
     {
-        public int StartMonth { get; set; }
-        public int EndMonth { get; set; }
-
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
             var filename = Path.Combine(Path.GetDirectoryName(extractionPacket.Filename), Path.GetFileNameWithoutExtension(extractionPacket.Filename) + "-SMGC.txt");

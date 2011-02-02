@@ -16,6 +16,9 @@ namespace ESME.Environment.NAVO
         public string WorkingDirectory { get; set; }
         public float GridSpacing { get; set; }
         public NAVOTimePeriod TimePeriod { get; set; }
+        public int StartMonth { get; set; }
+        public int EndMonth { get; set; }
+
 
         /// <summary>
         /// 
@@ -60,13 +63,15 @@ namespace ESME.Environment.NAVO
         public double South { get; set; }
         public double East { get; set; }
         public double West { get; set; }
+        public NAVOTimePeriod StartTime { get; set; }
+        public NAVOTimePeriod EndTime { get; set; }
         public NAVOTimePeriod TimePeriod { get; set; }
 
     }
 
     public enum NAVOTimePeriod
     {
-        January,
+        January = 1,
         February,
         March,
         April,

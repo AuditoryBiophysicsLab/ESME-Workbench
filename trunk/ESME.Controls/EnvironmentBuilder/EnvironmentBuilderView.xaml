@@ -67,7 +67,7 @@
             </ComboBox>
             <TextBlock Text="Month or Season" Margin="2 20 2 2"/>
             <ComboBox ItemsSource="{Binding Months}" 
-                          SelectedItem="{Binding SelectedTimePeriod}"                          
+                          SelectedItem="{Binding NAVODataSources.SelectedPeriod}"                          
                           ToolTip="The month or season to extract.">
 
             </ComboBox>
