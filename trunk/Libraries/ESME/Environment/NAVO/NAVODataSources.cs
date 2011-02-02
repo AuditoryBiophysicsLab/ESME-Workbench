@@ -3,12 +3,18 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Windows;
+using System.Windows.Threading;
 using Cinch;
+using MEFedMVVM.ViewModelLocator;
+
 
 namespace ESME.Environment.NAVO
 {
-    public class NAVODataSources : ViewModelBase
+    public class NAVODataSources : ViewModelBase, IViewStatusAwareInjectionAware
     {
+        IViewAwareStatus _viewAwareStatus;
+        Dispatcher _dispatcher;
         public NAVODataSources(NAVOConfiguration configurations, NAVOExtractionPacket extractionPacket)
         {
             try
@@ -74,6 +80,16 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
+        #region IViewStatusAwareInjectionAware Members
+
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
+        {
+            _viewAwareStatus = viewAwareStatusService;
+            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+        }
+
+        #endregion
+
         #region ExtractAreasCommand
 
         SimpleCommand<object, object> _extractAreas;
@@ -94,6 +110,7 @@ namespace ESME.Environment.NAVO
                                                                                                DBDB.ExtractArea(ExtractionPacket);
                                                                                                GDEM.ExtractArea(ExtractionPacket);
                                                                                                SMGC.ExtractArea(ExtractionPacket);
+                                                                                              // ((EnvironmentBuilderView)_viewAwareStatus.View).Close();
                                                                                            }));
             }
         }
@@ -132,32 +149,32 @@ namespace ESME.Environment.NAVO
                 case NAVOTimePeriod.October:
                 case NAVOTimePeriod.November:
                 case NAVOTimePeriod.December:
-                    dataSource.StartMonth = (int) ExtractionPacket.TimePeriod;
-                    dataSource.EndMonth = (int) ExtractionPacket.TimePeriod;
+                    dataSource.StartMonth = (int)dataSource.TimePeriod;
+                    dataSource.EndMonth = (int)dataSource.TimePeriod;
                     break;
                 case NAVOTimePeriod.Spring:
                     dataSource.StartMonth = MonthMap[(int) Configuration.SpringStartMonth];
-                    dataSource.EndMonth =  MonthMap[(int) Configuration.SpringStartMonth + 3]; //really?
+                    dataSource.EndMonth =  MonthMap[(int) Configuration.SpringStartMonth + 3]; 
                     break;
                 case NAVOTimePeriod.Summer:
-                    dataSource.StartMonth = (int) Configuration.SummerStartMonth;
-                    dataSource.EndMonth = (int) Configuration.SummerStartMonth + 3;
+                    dataSource.StartMonth = MonthMap[(int) Configuration.SummerStartMonth];
+                    dataSource.EndMonth = MonthMap[(int) Configuration.SummerStartMonth + 3];
                     break;
                 case NAVOTimePeriod.Fall:
-                    dataSource.StartMonth = (int) Configuration.FallStartMonth;
-                    dataSource.EndMonth = (int) Configuration.FallStartMonth + 3;
+                    dataSource.StartMonth = MonthMap[(int) Configuration.FallStartMonth];
+                    dataSource.EndMonth = MonthMap[(int) Configuration.FallStartMonth + 3];
                     break;
                 case NAVOTimePeriod.Winter:
-                    dataSource.StartMonth = (int) Configuration.WinterStartMonth;
-                    dataSource.EndMonth = (int) Configuration.WinterStartMonth + 3;
+                    dataSource.StartMonth = MonthMap[(int) Configuration.WinterStartMonth];
+                    dataSource.EndMonth = MonthMap[(int) Configuration.WinterStartMonth + 3];
                     break;
                 case NAVOTimePeriod.Cold:
-                    dataSource.StartMonth = (int) Configuration.ColdSeasonStartMonth;
-                    dataSource.EndMonth = (int) Configuration.ColdSeasonStartMonth + 3;
+                    dataSource.StartMonth = MonthMap[(int) Configuration.ColdSeasonStartMonth];
+                    dataSource.EndMonth = MonthMap[(int) Configuration.ColdSeasonStartMonth + 6];
                     break;
                 case NAVOTimePeriod.Warm:
-                    dataSource.StartMonth = (int) Configuration.WarmSeasonStartMonth;
-                    dataSource.EndMonth = (int) Configuration.WarmSeasonStartMonth + 3;
+                    dataSource.StartMonth = MonthMap[(int) Configuration.WarmSeasonStartMonth];
+                    dataSource.EndMonth = MonthMap[(int) Configuration.WarmSeasonStartMonth + 6];
                     break;
             }
         }
