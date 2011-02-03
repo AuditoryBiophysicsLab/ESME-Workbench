@@ -22,16 +22,6 @@ namespace ESME.Model
             SoundSpeedProfiles = new List<SoundSpeedProfile>();
         }
 
-        public void Save(string fileName)
-        {
-            Save(fileName, new[] { typeof(SoundSpeedProfile) });
-        }
-
-        public static SoundSpeedField Load(string fileName)
-        {
-            return Load(fileName, new[] { typeof(SoundSpeedProfile) });
-        }
-
         public SoundSpeedField(string environmentFileName)
         {
             var file = DataFile.Open(environmentFileName);
@@ -64,6 +54,11 @@ namespace ESME.Model
                                         select new SoundSpeedProfile(TimePeriod, point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
 
             foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
+        }
+
+        public void Initialize()
+        {
+            
         }
 
         public SoundSpeedProfile ExtendSSP(SoundSpeedProfile shallowSSP, float requiredDepth)
@@ -112,6 +107,17 @@ namespace ESME.Model
                 return query.Count() > 0 ? query.First() : SoundSpeedProfile.Empty;
             }
         }
+
+        public void Save(string fileName)
+        {
+            Save(fileName, new[] { typeof(SoundSpeedProfile) });
+        }
+
+        public static SoundSpeedField Load(string fileName)
+        {
+            return Load(fileName, new[] { typeof(SoundSpeedProfile) });
+        }
+
     }
 
     public class ReaderSSF
