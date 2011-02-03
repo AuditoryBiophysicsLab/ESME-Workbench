@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 using ESME.Environment;
 using HRC.Navigation;
 using HRC.Utility;
@@ -11,13 +12,25 @@ namespace ESME.Model
 {
     public class SoundSpeedField : SerializableData<SoundSpeedField>
     {
-        public string TimePeriod { get; private set; }
-        public SoundSpeedProfile[] SoundSpeedProfiles { get; private set; }
+        public string TimePeriod { get; set; }
+        public List<SoundSpeedProfile> SoundSpeedProfiles { get; set; }
+        [XmlIgnore]
         public SoundSpeedProfile DeepestSSP { get; private set; }
 
-        public SoundSpeedField() { }
+        public SoundSpeedField()
+        {
+            SoundSpeedProfiles = new List<SoundSpeedProfile>();
+        }
 
+        public void Save(string fileName)
+        {
+            Save(fileName, new[] { typeof(SoundSpeedProfile) });
+        }
 
+        public static SoundSpeedField Load(string fileName)
+        {
+            return Load(fileName, new[] { typeof(SoundSpeedProfile) });
+        }
 
         public SoundSpeedField(string environmentFileName)
         {
@@ -28,13 +41,12 @@ namespace ESME.Model
             var layer = file["soundspeed"];
             if (layer == null) throw new System.IO.FileFormatException(string.Format("SoundSpeedField: Specified environment file \"{0}\"does not contain a soundspeed layer", environmentFileName));
             TimePeriod = layer.TimePeriod;
-            var profiles = new List<SoundSpeedProfile>();
-            profiles.AddRange(from row in layer.Rows
-                              from point in row.Points
-                              select new SoundSpeedProfile(TimePeriod, point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
-            foreach (var profile in profiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
+            SoundSpeedProfiles = new List<SoundSpeedProfile>();
+            SoundSpeedProfiles.AddRange(from row in layer.Rows
+                                        from point in row.Points
+                                        select new SoundSpeedProfile(TimePeriod, point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
+            foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
 
-            SoundSpeedProfiles = profiles.ToArray();
         }
 
         public SoundSpeedField(string environmentFileName, float north, float west, float south, float east)
@@ -46,14 +58,12 @@ namespace ESME.Model
             var layer = file["soundspeed"];
             if (layer == null) throw new System.IO.FileFormatException(string.Format("SoundSpeedField: Specified environment file \"{0}\"does not contain a soundspeed layer", environmentFileName));
             TimePeriod = layer.TimePeriod;
-            var profiles = new List<SoundSpeedProfile>();
-            profiles.AddRange(from row in layer.GetRows(south, north)
-                              from point in row.GetPoints(west, east)
-                              select new SoundSpeedProfile(TimePeriod, point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
+            SoundSpeedProfiles = new List<SoundSpeedProfile>();
+            SoundSpeedProfiles.AddRange(from row in layer.GetRows(south, north)
+                                        from point in row.GetPoints(west, east)
+                                        select new SoundSpeedProfile(TimePeriod, point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
 
-            foreach (var profile in profiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
-
-            SoundSpeedProfiles = profiles.ToArray();
+            foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
         }
 
         public SoundSpeedProfile ExtendSSP(SoundSpeedProfile shallowSSP, float requiredDepth)
@@ -85,7 +95,7 @@ namespace ESME.Model
             return extendedSSP;
         }
 
-        public SoundSpeedField(string timePeriod, SoundSpeedProfile[] soundSpeedProfiles)
+        public SoundSpeedField(string timePeriod, List<SoundSpeedProfile> soundSpeedProfiles)
         {
             TimePeriod = timePeriod;
             SoundSpeedProfiles = soundSpeedProfiles;
@@ -149,7 +159,7 @@ namespace ESME.Model
 
                 if (soundSpeedProfiles.Count == 0) throw new Exception("No Sound Speed Profiles found that match expected file naming convention.");
 
-                var soundSpeedFieldProperties = new SoundSpeedField(date, soundSpeedProfiles.ToArray());
+                var soundSpeedFieldProperties = new SoundSpeedField(date, soundSpeedProfiles);
 
                 ssfPath = ssfPath + ".txt";
                 using (var streamWriter = new StreamWriter(ssfPath, false, Encoding.ASCII))
@@ -183,7 +193,7 @@ namespace ESME.Model
             }
         }
 
-        static SoundSpeedProfile[] ReadFile(string ssfPath, string date)
+        static List<SoundSpeedProfile> ReadFile(string ssfPath, string date)
         {
             var profilesList = new List<SoundSpeedProfile>();
 
@@ -237,7 +247,7 @@ namespace ESME.Model
 
                 if (profilesList.Count == 0) throw new Exception("There were no valid sound speed profiles found.");
 
-                return profilesList.ToArray();
+                return profilesList;
             }
         }
     }

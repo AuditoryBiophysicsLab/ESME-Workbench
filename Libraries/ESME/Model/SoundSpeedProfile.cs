@@ -10,11 +10,11 @@ namespace ESME.Model
     {
         #region Public Properties
 
-        public string TimePeriod { get; internal set; }
-        public EarthCoordinate Location { get; internal set; }
-        public float[] Depths { get; internal set; }
-        public float[] SoundSpeeds { get; internal set; }
-        public float MaxDepth { get; internal set; }
+        public string TimePeriod { get; set; }
+        public EarthCoordinate Location { get; set; }
+        public float[] Depths { get; set; }
+        public float[] SoundSpeeds { get; set; }
+        public float MaxDepth { get; set; }
 
         #endregion
 
