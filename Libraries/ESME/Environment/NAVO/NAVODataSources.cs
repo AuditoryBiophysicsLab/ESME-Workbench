@@ -3,17 +3,17 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Windows;
-using System.Windows.Threading;
 using Cinch;
-using MEFedMVVM.ViewModelLocator;
-
 
 namespace ESME.Environment.NAVO
 {
     public class NAVODataSources : ViewModelBase
     {
-        
+        static readonly int[] MonthMap = new[]
+                                         {
+                                             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6
+                                         };
+
         public NAVODataSources(NAVOConfiguration configurations, NAVOExtractionPacket extractionPacket)
         {
             try
@@ -28,7 +28,7 @@ namespace ESME.Environment.NAVO
 
             ExtractionPacket = extractionPacket;
             Configuration = configurations;
-            
+
 
             BST = new BST
                   {
@@ -45,7 +45,7 @@ namespace ESME.Environment.NAVO
             GDEM = new GDEM
                    {
                        DatabasePath = configurations.GDEMDirectory,
-                       ExtractionProgramPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "ImportNetCDF.exe"),////todo: installer needs to put this in the right place.
+                       ExtractionProgramPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "ImportNetCDF.exe"), ////todo: installer needs to put this in the right place.
                        TimePeriod = SelectedPeriod,
                        GridSpacing = 0.25f,
                    };
@@ -79,7 +79,13 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        
+        public BST BST { get; private set; }
+        public DBDB DBDB { get; private set; }
+        public GDEM GDEM { get; private set; }
+        public SMGC SMGC { get; private set; }
+        internal NAVOExtractionPacket ExtractionPacket { get; set; }
+        internal NAVOConfiguration Configuration { get; set; }
+
         public void ExtractAreas()
         {
             BST.TimePeriod = SelectedPeriod;
@@ -93,48 +99,6 @@ namespace ESME.Environment.NAVO
             GDEM.ExtractArea(ExtractionPacket);
             SMGC.ExtractArea(ExtractionPacket);
         }
-        #region ExtractAreasCommand
-
-        SimpleCommand<object, object> _extractAreas;
-
-        public SimpleCommand<object, object> ExtractAreasCommand
-        {
-            get
-            {
-                return _extractAreas ?? (_extractAreas = new SimpleCommand<object, object>(delegate
-                                                                                           {
-                                                                                               BST.TimePeriod = SelectedPeriod;
-                                                                                               DBDB.TimePeriod = SelectedPeriod;
-                                                                                               GDEM.TimePeriod = SelectedPeriod;
-                                                                                               SMGC.TimePeriod = SelectedPeriod;
-                                                                                               InterpretTimes(GDEM);
-                                                                                               InterpretTimes(SMGC);
-                                                                                               BST.ExtractArea(ExtractionPacket);
-                                                                                               DBDB.ExtractArea(ExtractionPacket);
-                                                                                               GDEM.ExtractArea(ExtractionPacket);
-                                                                                               SMGC.ExtractArea(ExtractionPacket);
-                                                                                              
-                                                                                           }));
-            }
-        }
-
-        #endregion
-
-        public BST BST { get; private set; }
-        public DBDB DBDB { get; private set; }
-        public GDEM GDEM { get; private set; }
-        public SMGC SMGC { get; private set; }
-        internal NAVOExtractionPacket ExtractionPacket { get; set; }
-        internal NAVOTimePeriod StartTime { get; set; }
-        internal NAVOTimePeriod EndTime { get; set; }
-
-        internal NAVOConfiguration Configuration { get; set; }
-
-        static readonly int[] MonthMap = new []
-                                         {
-                                             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6
-                                         };
-
 
         void InterpretTimes(NAVODataSource dataSource)
         {
@@ -152,12 +116,12 @@ namespace ESME.Environment.NAVO
                 case NAVOTimePeriod.October:
                 case NAVOTimePeriod.November:
                 case NAVOTimePeriod.December:
-                    dataSource.StartMonth = (int)dataSource.TimePeriod;
-                    dataSource.EndMonth = (int)dataSource.TimePeriod;
+                    dataSource.StartMonth = (int) dataSource.TimePeriod;
+                    dataSource.EndMonth = (int) dataSource.TimePeriod;
                     break;
                 case NAVOTimePeriod.Spring:
                     dataSource.StartMonth = MonthMap[(int) Configuration.SpringStartMonth];
-                    dataSource.EndMonth =  MonthMap[(int) Configuration.SpringStartMonth + 3]; 
+                    dataSource.EndMonth = MonthMap[(int) Configuration.SpringStartMonth + 3];
                     break;
                 case NAVOTimePeriod.Summer:
                     dataSource.StartMonth = MonthMap[(int) Configuration.SummerStartMonth];

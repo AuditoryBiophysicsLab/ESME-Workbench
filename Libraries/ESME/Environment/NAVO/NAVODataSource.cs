@@ -1,20 +1,18 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using Cinch;
 
 namespace ESME.Environment.NAVO
 {
-    public abstract class NAVODataSource: ViewModelBase
+    public abstract class NAVODataSource : ViewModelBase
     {
         public string ExtractionProgramPath { get; set; }
         public string DatabasePath { get; set; } //change back to protected set?
         public string CommandArgs { get; protected set; }
         public EnvironmentData ExtractedArea { get; protected set; }
         public string WorkingDirectory { get; set; }
-        public float GridSpacing { get; set; }
+        public float GridSpacing { get; set; }  //in degrees.
         public NAVOTimePeriod TimePeriod { get; set; }
         public int StartMonth { get; set; }
         public int EndMonth { get; set; }
@@ -66,7 +64,6 @@ namespace ESME.Environment.NAVO
         public NAVOTimePeriod StartTime { get; set; }
         public NAVOTimePeriod EndTime { get; set; }
         public NAVOTimePeriod TimePeriod { get; set; }
-
     }
 
     public enum NAVOTimePeriod
@@ -90,5 +87,4 @@ namespace ESME.Environment.NAVO
         Cold,
         Warm,
     }
-
 }
