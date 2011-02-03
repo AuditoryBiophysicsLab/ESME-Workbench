@@ -980,6 +980,8 @@ namespace ESMEWorkBench.Data
                     soundSpeedLayer.Done();
                     MapLayers.Add(soundSpeedLayer);
                 }
+                //SoundSpeedField.Save(Path.Combine(LocalStorageRoot, "ssf.xml"));
+                //var testSSF = SoundSpeedField.Load(Path.Combine(LocalStorageRoot, "ssf.xml"));
             }
 
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", North, West, South, East);
