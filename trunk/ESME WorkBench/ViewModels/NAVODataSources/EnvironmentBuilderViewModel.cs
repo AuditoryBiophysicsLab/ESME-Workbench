@@ -58,7 +58,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                      };
             ExtractionAreaPacket= new NAVOExtractionPacket
             {
-                Filename = Path.Combine(Experiment.LocalStorageRoot, Path.GetFileNameWithoutExtension(Experiment.ScenarioFileName).Replace(" ","")+".xml"),
+                Filename = Path.Combine(Experiment.LocalStorageRoot, Path.GetFileNameWithoutExtension(Experiment.ScenarioFileName).Replace(" ","")+".xml"), //required because if the experiment name has spaces in it, BST and DBDB will barf.
                 North = Experiment.North,
                 South = Experiment.South,
                 East = Experiment.East,
@@ -226,7 +226,6 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                 return _extractAll ?? (_extractAll = new SimpleCommand<object, object>(delegate
                                                                                        {
                                                                                            AppSettings.Save(); //remember the new values. 
-                                                                                           
                                                                                            //extract data from all data sources.
                                                                                            NAVODataSources.ExtractAreas();
                                                                                            //close the view.

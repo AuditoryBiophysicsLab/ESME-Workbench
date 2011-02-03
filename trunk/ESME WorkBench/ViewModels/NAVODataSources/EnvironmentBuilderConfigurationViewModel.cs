@@ -1,13 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Views.EnvironmentBuilder;
 using ESMEWorkBench.Data;
-using ESMEWorkBench.Properties;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.NAVODataSources
@@ -15,11 +13,13 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
     [ExportViewModel("EnvironmentBuilderConfigurationViewModel")]
     internal class EnvironmentBuilderConfigurationViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
-        IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
-
+        IViewAwareStatus _viewAwareStatus;
 
         #region public AppSettings AppSettings { get; set; }
+
+        static readonly PropertyChangedEventArgs AppSettingsChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderConfigurationViewModel>(x => x.AppSettings);
+        AppSettings _appSettings;
 
         public AppSettings AppSettings
         {
@@ -31,9 +31,6 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                 NotifyPropertyChanged(AppSettingsChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs AppSettingsChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderConfigurationViewModel>(x => x.AppSettings);
-        AppSettings _appSettings;
 
         #endregion
 
@@ -61,17 +58,16 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             {
                 return _ok ?? (_ok = new SimpleCommand<object, object>(delegate
                                                                        {
-
                                                                            //if all the database locations have been filled in, etc, then the user can click. 
 
-                                                                           return true;// (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.GDEMDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.SMGCDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.BSTDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.GDEMEXEPath) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.SMGCEXEPath) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.BSTEXEPath) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath));
-
+                                                                           return true;
+                                                                               // (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.GDEMDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.SMGCDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.BSTDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.GDEMEXEPath) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.SMGCEXEPath) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.BSTEXEPath) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath));
                                                                        }, delegate
                                                                           {
                                                                               //fire off a message, and close the window.
                                                                               AppSettings.Save();
                                                                               MediatorMessage.Send(MediatorMessage.EnvironmentBuilderDatabasesSpecified);
-                                                                              ((EnvironmentBuilderConfigurationView)_viewAwareStatus.View).Close();
+                                                                              ((EnvironmentBuilderConfigurationView) _viewAwareStatus.View).Close();
                                                                           }));
             }
         }
@@ -80,19 +76,23 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         #region CancelCommand
 
+        SimpleCommand<object, object> _cancel;
+
         public SimpleCommand<object, object> CancelCommand
         {
             get { return _cancel ?? (_cancel = new SimpleCommand<object, object>(delegate { AppSettings.Reload(); })); }
         }
 
-        SimpleCommand<object, object> _cancel;
-
         #endregion
+
+        #region IViewStatusAwareInjectionAware Members
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
             _viewAwareStatus = viewAwareStatusService;
-            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+            _dispatcher = ((Window) _viewAwareStatus.View).Dispatcher;
         }
+
+        #endregion
     }
 }
