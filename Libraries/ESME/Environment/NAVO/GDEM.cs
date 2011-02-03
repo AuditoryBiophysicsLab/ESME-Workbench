@@ -9,7 +9,12 @@ namespace ESME.Environment.NAVO
 {
     public class GDEM : NAVODataSource
     {
-        
+
+
+        static readonly string[] ShortMonthNames = new[]
+                                                  {
+                                                      "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
+                                                  };
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
             var filename = Path.Combine(Path.GetDirectoryName(extractionPacket.Filename), Path.GetFileNameWithoutExtension(extractionPacket.Filename) + "-GDEM");
@@ -20,30 +25,25 @@ namespace ESME.Environment.NAVO
 
             
             //Determine which netCDF files we need to read.
-            var ncFileList = Directory.EnumerateFiles(DatabasePath, "*.nc");
             var ncTemps = new List<string>();
             var ncSalts = new List<string>();
 
-            foreach (var file in ncFileList)
+            var monthList = new List<int>();
+            for (var curMonth = 0; curMonth < MonthsDuration; curMonth++ ) monthList.Add(NAVODataSources.MonthMap[StartMonth + curMonth]);
+            foreach (var curMonth in monthList)
             {
-                var thisFile = Path.GetFileNameWithoutExtension(file);
-                //i feel dirty now.
-                if (thisFile.StartsWith("s"))
-                {
-                    var thisMonth = Int32.Parse(thisFile.TrimStart("sgdemv3s".ToCharArray()));
-                    if (thisMonth >= StartMonth && thisMonth <= EndMonth)
-                    {
-                        ncSalts.Add(file);
-                    }
-                }
-                if (thisFile.StartsWith("t"))
-                {
-                    var thisMonth = Int32.Parse(thisFile.TrimStart("tgdemv3s".ToCharArray()));
-                    if (thisMonth >= StartMonth && thisMonth <= EndMonth)
-                    {
-                        ncTemps.Add(file);
-                    }
-                }
+                var originalSalinityFilename = Path.Combine(DatabasePath, "sgdemv3s" + string.Format("{0:00}", curMonth) + ".nc");
+                var originalTemperatureFilename = Path.Combine(DatabasePath, "tgdemv3s" + string.Format("{0:00}", curMonth) + ".nc");
+                var nuwcSalinityFilename = Path.Combine(DatabasePath, ShortMonthNames[curMonth] + "_s.nc");
+                var nuwcTemperatureFilename = Path.Combine(DatabasePath, ShortMonthNames[curMonth] + "_t.nc");
+
+                if (File.Exists(originalSalinityFilename)) ncSalts.Add(originalSalinityFilename);
+                else if (File.Exists(nuwcSalinityFilename)) ncSalts.Add(nuwcSalinityFilename);
+                else throw new FileNotFoundException("Could not find requested salinity file " + originalSalinityFilename);
+
+                if (File.Exists(originalTemperatureFilename)) ncTemps.Add(originalTemperatureFilename);
+                else if (File.Exists(nuwcTemperatureFilename)) ncTemps.Add(nuwcTemperatureFilename);
+                else throw new FileNotFoundException("Could not find requested temperature file " + originalTemperatureFilename);
             }
 
             //extract average temperature and salinity from the right files for the season

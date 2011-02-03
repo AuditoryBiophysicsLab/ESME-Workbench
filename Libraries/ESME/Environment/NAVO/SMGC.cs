@@ -15,37 +15,54 @@ namespace ESME.Environment.NAVO
             var east = extractionPacket.East;
             var west = extractionPacket.West;
             if (!DatabasePath.EndsWith("\\")) DatabasePath = DatabasePath + "\\"; //database path has to end with a trailing slash here.  For SMGC, it's a directory, not a file.
-            System.Environment.SetEnvironmentVariable("SMGC_DATA_NORTH", DatabasePath);
-            System.Environment.SetEnvironmentVariable("SMGC_DATA_SOUTH", DatabasePath);
+
+            var northPath = DatabasePath;
+            var southPath = DatabasePath;
+            if (Directory.Exists(Path.Combine(DatabasePath, "north"))) northPath = (Path.Combine(DatabasePath, @"north\"));
+            if (Directory.Exists(Path.Combine(DatabasePath, "south"))) southPath = (Path.Combine(DatabasePath, @"south\"));
+
+            System.Environment.SetEnvironmentVariable("SMGC_DATA_NORTH", northPath);
+            System.Environment.SetEnvironmentVariable("SMGC_DATA_SOUTH", southPath);
             CommandArgs = string.Format("-lat {0}/{1} -lon {2}/{3} -mon {4}/{5} -par 17/1", south, north, west, east, StartMonth, EndMonth); // '-par 17/1' extracts wind speed statistical data.  don't ask. 
             var result = Execute();
             //result now contains the entire output of SMGC, i think, since it dumps data to STDOUT... so let's save it to disk in the right place. 
-            File.WriteAllText(filename, result);
-            ExtractedArea = ParseSMGC(result);
+            using (var writer = new StreamWriter(filename))
+            {
+                writer.WriteLine("StartMonth=" + StartMonth);
+                writer.WriteLine("EndMonth=" + EndMonth);
+                writer.WriteLine("GridSpacing=" + GridSpacing);
+                writer.Write(result);
+            }
+            //File.WriteAllText(filename, result);
+            ExtractedArea = ParseSMGC(filename);
         }
 
         /// <summary>
         /// Parser for SMGC raw wind speed output. 
         /// </summary>
-        /// <param name="result">a string containing the total SMGC output</param>
+        /// <param name="fileName">The filename containing the SMGC output</param>
         /// <returns>a populated Environment2DData object with windspeeds per latitude/longitude.</returns>
-        Environment2DData ParseSMGC(string result)
+        public static Environment2DData ParseSMGC(string fileName)
         {
+            var resarray = File.ReadAllLines(fileName);
             var lats = new List<double>();
             var lons = new List<double>();
             var points = new Dictionary<string, double>();
             //split the string up into lines
-            var resarray = result.Split('\n');
+            var startMonth = int.Parse(resarray[0].Split('=')[1]);
+            var endMonth = int.Parse(resarray[1].Split('=')[1]);
+            var gridSpacing = int.Parse(resarray[2].Split('=')[1]);
+
             for (var index = 0; index < resarray.Length; index++)
             {
                 var line = resarray[index].Trim();
                 //if the line has hyphens in it..
                 if (line.Contains("---"))
                 {
-                    var rawspeeds = new double[(EndMonth - StartMonth) + 1];
+                    var rawspeeds = new double[(endMonth - startMonth) + 1];
                     var count = 0;
                     //then take the next lines of data and extract windspeed and positions from them.
-                    for (var j = index + 1; j <= (index + (EndMonth - StartMonth) + 1); j++)
+                    for (var j = index + 1; j <= (index + (endMonth - startMonth) + 1); j++)
                     {
                         if (resarray[j].Equals("")) break;
                         var resline = resarray[j].Split('\t');
@@ -81,7 +98,7 @@ namespace ESME.Environment.NAVO
             }
             
             //and finally, make a useful thing out of them. 
-            return new Environment2DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), GridSpacing, dataArray, 0, 0);
+            return new Environment2DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), gridSpacing, dataArray, 0, 0);
         }
 
         public override bool ValidateDataSource() { return false; } //SMGC provides no data validation routines 

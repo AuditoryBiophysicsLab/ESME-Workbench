@@ -5,14 +5,19 @@ using System.Linq;
 using System.Text;
 using ESME.Environment;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Model
 {
-    public class SoundSpeedField
+    public class SoundSpeedField : SerializableData<SoundSpeedField>
     {
         public string TimePeriod { get; private set; }
         public SoundSpeedProfile[] SoundSpeedProfiles { get; private set; }
         public SoundSpeedProfile DeepestSSP { get; private set; }
+
+        public SoundSpeedField() { }
+
+
 
         public SoundSpeedField(string environmentFileName)
         {

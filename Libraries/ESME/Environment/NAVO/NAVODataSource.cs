@@ -16,6 +16,7 @@ namespace ESME.Environment.NAVO
         public NAVOTimePeriod TimePeriod { get; set; }
         public int StartMonth { get; set; }
         public int EndMonth { get; set; }
+        public int MonthsDuration { get; set; }
 
 
         /// <summary>
