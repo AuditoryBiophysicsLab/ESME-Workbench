@@ -118,30 +118,37 @@ namespace ESME.Environment.NAVO
                 case NAVOTimePeriod.December:
                     dataSource.StartMonth = (int) dataSource.TimePeriod;
                     dataSource.EndMonth = (int) dataSource.TimePeriod;
+                    dataSource.MonthsDuration = 1;
                     break;
                 case NAVOTimePeriod.Spring:
                     dataSource.StartMonth = MonthMap[(int) Configuration.SpringStartMonth];
                     dataSource.EndMonth = MonthMap[(int) Configuration.SpringStartMonth + 3];
+                    dataSource.MonthsDuration = 3;
                     break;
                 case NAVOTimePeriod.Summer:
                     dataSource.StartMonth = MonthMap[(int) Configuration.SummerStartMonth];
                     dataSource.EndMonth = MonthMap[(int) Configuration.SummerStartMonth + 3];
+                    dataSource.MonthsDuration = 3;
                     break;
                 case NAVOTimePeriod.Fall:
                     dataSource.StartMonth = MonthMap[(int) Configuration.FallStartMonth];
                     dataSource.EndMonth = MonthMap[(int) Configuration.FallStartMonth + 3];
+                    dataSource.MonthsDuration = 3;
                     break;
                 case NAVOTimePeriod.Winter:
                     dataSource.StartMonth = MonthMap[(int) Configuration.WinterStartMonth];
                     dataSource.EndMonth = MonthMap[(int) Configuration.WinterStartMonth + 3];
+                    dataSource.MonthsDuration = 3;
                     break;
                 case NAVOTimePeriod.Cold:
                     dataSource.StartMonth = MonthMap[(int) Configuration.ColdSeasonStartMonth];
                     dataSource.EndMonth = MonthMap[(int) Configuration.ColdSeasonStartMonth + 6];
+                    dataSource.MonthsDuration = 6;
                     break;
                 case NAVOTimePeriod.Warm:
                     dataSource.StartMonth = MonthMap[(int) Configuration.WarmSeasonStartMonth];
                     dataSource.EndMonth = MonthMap[(int) Configuration.WarmSeasonStartMonth + 6];
+                    dataSource.MonthsDuration = 6;
                     break;
             }
         }
