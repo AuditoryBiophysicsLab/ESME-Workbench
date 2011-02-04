@@ -17,7 +17,7 @@ namespace ESME.Environment.NAVO
         public int StartMonth { get; set; }
         public int EndMonth { get; set; }
         public int MonthsDuration { get; set; }
-
+        public string OutputFilename { get; set; }
 
         /// <summary>
         /// 

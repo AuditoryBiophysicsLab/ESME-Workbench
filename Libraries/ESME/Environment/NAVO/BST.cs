@@ -89,13 +89,13 @@ namespace ESME.Environment.NAVO
         //public override void ExtractArea(string filename, double north, double south, double east, double west)
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(extractionPacket.Filename, string.Format("{0}-BST.chb", extractionPacket.TimePeriod));
-            WorkingDirectory = Path.GetDirectoryName(filename);
+            OutputFilename = Path.Combine(extractionPacket.Filename, string.Format("{0}-BST.chb", extractionPacket.TimePeriod));
+            WorkingDirectory = Path.GetDirectoryName(OutputFilename);
             var north = extractionPacket.North;
             var south = extractionPacket.South;
             var east = extractionPacket.East;
             var west = extractionPacket.West;
-            var contents = string.Format("area {0} {1} {2} {3} {4} {5}", west, east, south, north, SelectedResolution, Path.GetFileName(filename));
+            var contents = string.Format("area {0} {1} {2} {3} {4} {5}", west, east, south, north, SelectedResolution, Path.GetFileName(OutputFilename));
             var scriptfile = Path.GetTempFileName();
             File.WriteAllText(scriptfile, contents);
 
@@ -104,7 +104,7 @@ namespace ESME.Environment.NAVO
             //have a look at result and throw an error if needed.
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("error"))) throw new ApplicationException("BST: " + line); //hope this is sufficient..
-            ExtractedArea = Parse(filename);
+            ExtractedArea = Parse(OutputFilename);
             File.Delete(scriptfile);
         }
         public static Environment2DData Parse(string filename)

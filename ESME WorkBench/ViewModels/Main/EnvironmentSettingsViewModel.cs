@@ -131,16 +131,16 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(x =>
                                                                                        {
                                                                                            if (((_experiment.WindSpeedFileName != null) && (_experiment.WindSpeedFileName != WindSpeedData.SelectedItem.FilePath)) ||
-                                                                                               ((_experiment.SoundSpeedFileName != null) && (_experiment.SoundSpeedFileName != WindSpeedData.SelectedItem.FilePath)) ||
-                                                                                               ((_experiment.BottomTypeFileName != null) && (_experiment.BottomTypeFileName != WindSpeedData.SelectedItem.FilePath)) ||
-                                                                                               ((_experiment.BathymetryFileName != null) && (_experiment.BathymetryFileName != WindSpeedData.SelectedItem.FilePath)))
+                                                                                               ((_experiment.SoundSpeedFileName != null) && (_experiment.SoundSpeedFileName != SoundSpeedData.SelectedItem.FilePath)) ||
+                                                                                               ((_experiment.BottomTypeFileName != null) && (_experiment.BottomTypeFileName != BottomTypeData.SelectedItem.FilePath)) ||
+                                                                                               ((_experiment.BathymetryFileName != null) && (_experiment.BathymetryFileName != BathymetryData.SelectedItem.FilePath)))
                                                                                            {
                                                                                                if (_messageBoxService.ShowOkCancel("Changing the environment settings for this experiment will cause all precomputed transmission loss fields to become invalid and therefore they will be deleted.  Really change the environmental settings?", CustomDialogIcons.Exclamation) == CustomDialogResults.OK)
                                                                                                {
-                                                                                                   if (_experiment.WindSpeedFileName != null) WindSpeedEnvironmentFile = _experiment.WindSpeedFileName;
-                                                                                                   if (_experiment.SoundSpeedFileName != null) SoundSpeedEnvironmentFile = _experiment.SoundSpeedFileName;
-                                                                                                   if (_experiment.BottomTypeFileName != null) BottomTypeEnvironmentFile = _experiment.BottomTypeFileName;
-                                                                                                   if (_experiment.BathymetryFileName != null) BathymetryEnvironmentFile = _experiment.BathymetryFileName;
+                                                                                                   _experiment.WindSpeedFileName = WindSpeedData.SelectedItem.FilePath;
+                                                                                                   _experiment.SoundSpeedFileName = SoundSpeedData.SelectedItem.FilePath;
+                                                                                                   _experiment.BottomTypeFileName = BottomTypeData.SelectedItem.FilePath;
+                                                                                                   _experiment.BathymetryFileName = BathymetryData.SelectedItem.FilePath;
 
                                                                                                    CloseActivePopUpCommand.Execute(true);
 

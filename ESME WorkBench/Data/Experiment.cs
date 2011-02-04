@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
+using ESME.Environment.NAVO;
 using ESME.Model;
 using ESME.NEMO;
 using ESME.Overlay;
@@ -140,6 +141,7 @@ namespace ESMEWorkBench.Data
                 if (_windSpeedFileName == value) return;
                 _windSpeedFileName = value;
                 NotifyPropertyChanged(WindSpeedFileNameChangedEventArgs);
+                InitializeEnvironment(false);
             }
         }
 
@@ -890,15 +892,20 @@ namespace ESMEWorkBench.Data
             South = (float)boundingBox.Top - OpAreaBufferZoneSize;
             East = (float)boundingBox.Right + OpAreaBufferZoneSize;
 
-            if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName))) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", North, West, South, East);
+            if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName)))
+            {
+                if (WindSpeedFileName.EndsWith(".eeb")) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", North, West, South, East);
+                else if (WindSpeedFileName.EndsWith(".txt")) WindSpeed = SMGC.Parse(WindSpeedFileName);
+            }
+
             if (WindSpeed != null)
             {
                 const string windName = "Wind";
                 var layerExists = false;
                 foreach (var windLayer in MapLayers.Where(curLayer => curLayer.Name == windName).Cast<OverlayShapeMapLayer>())
                 {
-                    for (var lonIndex = 0; lonIndex < BottomType.Longitudes.Length; lonIndex++)
-                        for (var latIndex = 0; latIndex < BottomType.Longitudes.Length; latIndex++)
+                    for (var lonIndex = 0; lonIndex < WindSpeed.Longitudes.Length; lonIndex++)
+                        for (var latIndex = 0; latIndex < WindSpeed.Latitudes.Length; latIndex++)
                             windLayer.Add(new OverlayPoint(new EarthCoordinate(WindSpeed.Latitudes[latIndex], WindSpeed.Longitudes[lonIndex])));
                     windLayer.Done();
                     layerExists = true;
@@ -915,14 +922,18 @@ namespace ESMEWorkBench.Data
                         LayerType = LayerType.WindSpeed,
                     };
                     for (var lonIndex = 0; lonIndex < WindSpeed.Longitudes.Length; lonIndex++)
-                        for (var latIndex = 0; latIndex < WindSpeed.Longitudes.Length; latIndex++)
+                        for (var latIndex = 0; latIndex < WindSpeed.Latitudes.Length; latIndex++)
                             windLayer.Add(new OverlayPoint(new EarthCoordinate(WindSpeed.Latitudes[latIndex], WindSpeed.Longitudes[lonIndex])));
                     windLayer.Done();
                     MapLayers.Add(windLayer);
                 }
             }
 
-            if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName))) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", North, West, South, East);
+            if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName)))
+            {
+                if (BottomTypeFileName.EndsWith(".eeb")) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", North, West, South, East);
+                else if (BottomTypeFileName.EndsWith(".chb")) BottomType = BST.Parse(BottomTypeFileName);
+            }
             if (BottomType != null)
             {
                 const string bottomTypeName = "Bottom Type";
@@ -930,7 +941,7 @@ namespace ESMEWorkBench.Data
                 foreach (var bottomTypeLayer in MapLayers.Where(curLayer => curLayer.Name == bottomTypeName).Cast<OverlayShapeMapLayer>())
                 {
                     for (var lonIndex = 0; lonIndex < BottomType.Longitudes.Length; lonIndex++)
-                        for (var latIndex = 0; latIndex < BottomType.Longitudes.Length; latIndex++)
+                        for (var latIndex = 0; latIndex < BottomType.Latitudes.Length; latIndex++)
                             bottomTypeLayer.Add(new OverlayPoint(new EarthCoordinate(BottomType.Latitudes[latIndex], BottomType.Longitudes[lonIndex])));
                     bottomTypeLayer.Done();
                     bottomTypeLayerExists = true;
@@ -947,14 +958,18 @@ namespace ESMEWorkBench.Data
                         LayerType = LayerType.BottomType,
                     };
                     for (var lonIndex = 0; lonIndex < BottomType.Longitudes.Length; lonIndex++)
-                        for (var latIndex = 0; latIndex < BottomType.Longitudes.Length; latIndex++)
+                        for (var latIndex = 0; latIndex < BottomType.Latitudes.Length; latIndex++)
                             bottomTypeLayer.Add(new OverlayPoint(new EarthCoordinate(BottomType.Latitudes[latIndex], BottomType.Longitudes[lonIndex])));
                     bottomTypeLayer.Done();
                     MapLayers.Add(bottomTypeLayer);
                 }
             }
 
-            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName))) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, North, West, South, East);
+            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
+            {
+                if (SoundSpeedFileName.EndsWith(".eeb")) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, North, West, South, East);
+                else if (SoundSpeedFileName.EndsWith(".xml")) SoundSpeedField = null; // TODO: Write this code
+            }
             if (SoundSpeedField != null)
             {
                 const string soundSpeedName = "Sound Speed";
@@ -984,7 +999,11 @@ namespace ESMEWorkBench.Data
                 //var testSSF = SoundSpeedField.Load(Path.Combine(LocalStorageRoot, "ssf.xml"));
             }
 
-            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName))) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", North, West, South, East);
+            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
+            {
+                if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", North, West, South, East);
+                else if (BathymetryFileName.EndsWith(".chb")) Bathymetry = DBDB.Parse(BathymetryFileName);
+            }
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
             if (Bathymetry != null)
             {
