@@ -322,6 +322,7 @@ namespace ESME.Model
             SoundSpeedProfiles = new List<SoundSpeedProfile>();
             foreach (var profile in serializedOutput.DataPoints)
                 SoundSpeedProfiles.Add(new SoundSpeedProfile(profile, serializedOutput.DepthAxis));
+            foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
         }
 
         public SoundSpeedField(string environmentFileName)
