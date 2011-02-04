@@ -11,9 +11,13 @@ namespace ESME.Environment.NAVO
                                                   {
                                                       "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
                                                   };
+
+        public string TemperatureSourceFilename { get; set; }
+        public string SalinitySourceFilename { get; set; }
+
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            OutputFilename = Path.Combine(extractionPacket.Filename, string.Format("GDEM-{0}",extractionPacket.TimePeriod));
+            OutputFilename = Path.Combine(extractionPacket.Filename, string.Format("{0}-soundspeed.xml", extractionPacket.TimePeriod));
             var north = extractionPacket.North;
             var south = extractionPacket.South;
             var east = extractionPacket.East;
@@ -45,9 +49,11 @@ namespace ESME.Environment.NAVO
 
             //extract average temperature and salinity from the right files for the season
             var averageTemp = AveragedGDEMOutput(ncTemps, "water_temp", filepath, north, south, east, west);
-            averageTemp.Save(Path.Combine(extractionPacket.Filename, string.Format("{0}-average-water-temp.xml", extractionPacket.TimePeriod)), null);
+            TemperatureSourceFilename = Path.Combine(extractionPacket.Filename, string.Format("{0}-average-water-temp.xml", extractionPacket.TimePeriod));
+            averageTemp.Save(TemperatureSourceFilename, null);
             var averageSalinity = AveragedGDEMOutput(ncSalts, "salinity", filepath, north, south, east, west);
-            averageSalinity.Save(Path.Combine(extractionPacket.Filename, string.Format("{0}-average-salinity.xml", extractionPacket.TimePeriod)), null);
+            SalinitySourceFilename = Path.Combine(extractionPacket.Filename, string.Format("{0}-average-salinity.xml", extractionPacket.TimePeriod));
+            averageSalinity.Save(SalinitySourceFilename, null);
             //sanity check: are averageTemps and averageSalinity in the same place?
             AreEqual(averageTemp.DepthAxis.ToArray(), averageSalinity.DepthAxis.ToArray());
             AreEqual(averageTemp.Latitudes.ToArray(), averageSalinity.Latitudes.ToArray());
@@ -127,7 +133,7 @@ namespace ESME.Environment.NAVO
                         soundSpeedField.DataPoints.Add(soundSpeedData);
                     }
                 }
-            soundSpeedField.Save(Path.Combine(extractionPacket.Filename, string.Format("{0}-soundspeed.xml", extractionPacket.TimePeriod)), null);
+            soundSpeedField.Save(OutputFilename, null);
         }
 
         public override bool ValidateDataSource() { return false; }

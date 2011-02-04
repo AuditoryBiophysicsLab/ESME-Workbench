@@ -4,10 +4,9 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Media;
 using System.Xml.Serialization;
 using ESME.Environment;
-using ESME.Overlay;
+using ESME.Environment.NAVO;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -317,6 +316,14 @@ namespace ESME.Model
             SoundSpeedProfiles = new List<SoundSpeedProfile>();
         }
 
+        public SoundSpeedField(SerializedOutput serializedOutput, string timePeriod)
+        {
+            TimePeriod = timePeriod;
+            SoundSpeedProfiles = new List<SoundSpeedProfile>();
+            foreach (var profile in serializedOutput.DataPoints)
+                SoundSpeedProfiles.Add(new SoundSpeedProfile(profile, serializedOutput.DepthAxis));
+        }
+
         public SoundSpeedField(string environmentFileName)
         {
             var file = DataFile.Open(environmentFileName);
@@ -329,7 +336,7 @@ namespace ESME.Model
             SoundSpeedProfiles = new List<SoundSpeedProfile>();
             SoundSpeedProfiles.AddRange(from row in layer.Rows
                                         from point in row.Points
-                                        select new SoundSpeedProfile(TimePeriod, point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
+                                        select new SoundSpeedProfile(point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
             foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
         }
 
@@ -345,7 +352,7 @@ namespace ESME.Model
             SoundSpeedProfiles = new List<SoundSpeedProfile>();
             SoundSpeedProfiles.AddRange(from row in layer.GetRows(south, north)
                                         from point in row.GetPoints(west, east)
-                                        select new SoundSpeedProfile(TimePeriod, point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
+                                        select new SoundSpeedProfile(point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
 
             foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
         }
@@ -395,7 +402,7 @@ namespace ESME.Model
             get
             {
                 var query = from p in SoundSpeedProfiles
-                            orderby p.Location.GetDistanceTo_Meters(location) ascending
+                            orderby p.GetDistanceTo_Meters(location) ascending
                             select p;
 
                 return query.Count() > 0 ? query.First() : SoundSpeedProfile.Empty;
@@ -454,7 +461,7 @@ namespace ESME.Model
 
                     double latitude,
                            longitude;
-                    if (file.Length > 0 && nameArray.Length == 2 && double.TryParse(nameArray[0], out latitude) && double.TryParse(nameArray[1], out longitude)) soundSpeedProfiles.Add(SoundSpeedProfile.Read(date, latitude, longitude, ssfPath));
+                    if (file.Length > 0 && nameArray.Length == 2 && double.TryParse(nameArray[0], out latitude) && double.TryParse(nameArray[1], out longitude)) soundSpeedProfiles.Add(SoundSpeedProfile.Read(latitude, longitude, ssfPath));
                 }
 
                 if (soundSpeedProfiles.Count == 0) throw new Exception("No Sound Speed Profiles found that match expected file naming convention.");
@@ -466,7 +473,7 @@ namespace ESME.Model
                 {
                     foreach (var profile in soundSpeedFieldProperties.SoundSpeedProfiles)
                     {
-                        streamWriter.WriteLine("Lat:  " + profile.Location.Latitude_degrees.ToString("0.00##") + " Lon:  " + profile.Location.Longitude_degrees.ToString("0.00##") + " Valid Days: 1-365");
+                        streamWriter.WriteLine("Lat:  " + profile.Latitude_degrees.ToString("0.00##") + " Lon:  " + profile.Longitude_degrees.ToString("0.00##") + " Valid Days: 1-365");
                         streamWriter.WriteLine("Points in profile: " + profile.Depths.Length + " Min depth: " + profile.Depths[0].ToString("0.0") + " Max depth: " + profile.Depths[profile.Depths.Length - 1] + " Version: ESME 1.0 Distribution Statement A: Approved for public release. Distribution unlimited");
 
                         for (var i = 0; i < profile.Depths.Length; i++) streamWriter.WriteLine(profile.Depths[i].ToString("###0.0") + "\t00.000\t00.000\t" + profile.SoundSpeeds[i].ToString("###0.000"));
@@ -536,7 +543,7 @@ namespace ESME.Model
                     {
                         var depthVector = depthList.ToArray();
                         var speedVector = speedList.ToArray();
-                        profilesList.Add(new SoundSpeedProfile(date, earthCoordinate, depthVector, speedVector));
+                        profilesList.Add(new SoundSpeedProfile(earthCoordinate, depthVector, speedVector));
 
                         earthCoordinate = null;
                         points = 0;

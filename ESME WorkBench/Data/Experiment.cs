@@ -147,6 +147,42 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public string TemperatureFileName { get; set; }
+
+        public string TemperatureFileName
+        {
+            get { return _temperatureFileName; }
+            set
+            {
+                if (_temperatureFileName == value) return;
+                _temperatureFileName = value;
+                NotifyPropertyChanged(TemperatureFileNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TemperatureFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.TemperatureFileName);
+        string _temperatureFileName;
+
+        #endregion
+
+        #region public string SalinityFileName { get; set; }
+
+        public string SalinityFileName
+        {
+            get { return _salinityFileName; }
+            set
+            {
+                if (_salinityFileName == value) return;
+                _salinityFileName = value;
+                NotifyPropertyChanged(SalinityFileNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SalinityFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SalinityFileName);
+        string _salinityFileName;
+
+        #endregion
+
         #region public string SoundSpeedFileName { get; set; }
 
         [XmlIgnore] static readonly PropertyChangedEventArgs SoundSpeedFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SoundSpeedFileName);
@@ -514,7 +550,7 @@ namespace ESMEWorkBench.Data
         }
 
         static readonly PropertyChangedEventArgs OpAreaBufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.OpAreaBufferZoneSize);
-        float _opAreaBufferZoneSize = 2.0f;
+        float _opAreaBufferZoneSize = 2.5f;
 
         #endregion
 
@@ -968,7 +1004,13 @@ namespace ESMEWorkBench.Data
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
             {
                 if (SoundSpeedFileName.EndsWith(".eeb")) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, North, West, South, East);
-                else if (SoundSpeedFileName.EndsWith(".xml")) SoundSpeedField = null; // TODO: Write this code
+                else if (SoundSpeedFileName.EndsWith(".xml")) 
+                {
+                    var rawTemperature = SerializedOutput.Load(TemperatureFileName, null);
+                    var rawSalinity = SerializedOutput.Load(SalinityFileName, null);
+                    var rawSoundSpeeds = SerializedOutput.Load(SoundSpeedFileName, null);
+                    SoundSpeedField = new SoundSpeedField(rawSoundSpeeds, NemoFile.Scenario.TimeFrame);
+                }
             }
             if (SoundSpeedField != null)
             {
@@ -976,7 +1018,7 @@ namespace ESMEWorkBench.Data
                 var soundSpeedLayerExists = false;
                 foreach (var soundSpeedLayer in MapLayers.Where(curLayer => curLayer.Name == soundSpeedName).Cast<OverlayShapeMapLayer>())
                 {
-                    foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile.Location));
+                    foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
                     soundSpeedLayer.Done();
                     soundSpeedLayerExists = true;
                 }
@@ -991,7 +1033,7 @@ namespace ESMEWorkBench.Data
                         CanBeRemoved = false,
                         LayerType = LayerType.SoundSpeed,
                     };
-                    foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile.Location));
+                    foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
                     soundSpeedLayer.Done();
                     MapLayers.Add(soundSpeedLayer);
                 }

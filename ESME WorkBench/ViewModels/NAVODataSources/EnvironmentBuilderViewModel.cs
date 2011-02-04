@@ -232,31 +232,22 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                                                                                            //extract data from all data sources.
                                                                                            NAVODataSources.ExtractAreas();
                                                                                            //close the view.
-                                                                                           if (((_experiment.WindSpeedFileName != null) && (_experiment.WindSpeedFileName != NAVODataSources.SMGC.OutputFilename)) ||
-                                                                                               ((_experiment.SoundSpeedFileName != null) && (_experiment.SoundSpeedFileName != NAVODataSources.GDEM.OutputFilename)) ||
-                                                                                               ((_experiment.BottomTypeFileName != null) && (_experiment.BottomTypeFileName != NAVODataSources.BST.OutputFilename)) ||
+                                                                                           if (((_experiment.WindSpeedFileName != null) && (_experiment.WindSpeedFileName != NAVODataSources.SMGC.OutputFilename)) || ((_experiment.SoundSpeedFileName != null) && (_experiment.SoundSpeedFileName != NAVODataSources.GDEM.OutputFilename)) || ((_experiment.BottomTypeFileName != null) && (_experiment.BottomTypeFileName != NAVODataSources.BST.OutputFilename)) ||
                                                                                                ((_experiment.BathymetryFileName != null) && (_experiment.BathymetryFileName != NAVODataSources.DBDB.OutputFilename)))
                                                                                            {
-                                                                                               if (_messageBoxService.ShowOkCancel("Changing the environment settings for this experiment will cause all precomputed transmission loss fields to become invalid and therefore they will be deleted.  Really change the environmental settings?", CustomDialogIcons.Exclamation) == CustomDialogResults.OK)
+                                                                                               if (_messageBoxService.ShowOkCancel("Changing the environment settings for this experiment will cause all precomputed transmission loss fields to become invalid and therefore they will be deleted.  Really change the environmental settings?", CustomDialogIcons.Exclamation) == CustomDialogResults.Cancel)
                                                                                                {
-                                                                                                   _experiment.WindSpeedFileName = NAVODataSources.SMGC.OutputFilename;
-                                                                                                   _experiment.SoundSpeedFileName = NAVODataSources.GDEM.OutputFilename;
-                                                                                                   _experiment.BottomTypeFileName = NAVODataSources.BST.OutputFilename;
-                                                                                                   _experiment.BathymetryFileName = NAVODataSources.DBDB.OutputFilename;
-
-                                                                                                   CloseActivePopUpCommand.Execute(true);
-
-                                                                                                   _experiment.ClearAnalysisPoints();
+                                                                                                   CloseActivePopUpCommand.Execute(false);
                                                                                                    return;
                                                                                                }
+                                                                                               _experiment.ClearAnalysisPoints();
                                                                                            }
-                                                                                           else
-                                                                                           {
-                                                                                               _experiment.WindSpeedFileName = NAVODataSources.SMGC.OutputFilename;
-                                                                                               _experiment.SoundSpeedFileName = NAVODataSources.GDEM.OutputFilename;
-                                                                                               _experiment.BottomTypeFileName = NAVODataSources.BST.OutputFilename;
-                                                                                               _experiment.BathymetryFileName = NAVODataSources.DBDB.OutputFilename;
-                                                                                           }
+                                                                                           _experiment.WindSpeedFileName = NAVODataSources.SMGC.OutputFilename;
+                                                                                           _experiment.SoundSpeedFileName = NAVODataSources.GDEM.OutputFilename;
+                                                                                           _experiment.TemperatureFileName = NAVODataSources.GDEM.TemperatureSourceFilename;
+                                                                                           _experiment.SalinityFileName = NAVODataSources.GDEM.SalinitySourceFilename;
+                                                                                           _experiment.BottomTypeFileName = NAVODataSources.BST.OutputFilename;
+                                                                                           _experiment.BathymetryFileName = NAVODataSources.DBDB.OutputFilename;
                                                                                            CloseActivePopUpCommand.Execute(true);
 
                                                                                            //((EnvironmentBuilderView)_viewAwareStatus.View).Close();
