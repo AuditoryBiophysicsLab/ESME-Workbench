@@ -413,7 +413,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (Globals.AppSettings.UseOAMLDataSources)
             {
-                var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_visualizerService, Globals.AppSettings, _experiment);
+                var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_visualizerService, _messageBoxService, Globals.AppSettings, _experiment);
                 var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
                 if (result.HasValue && result.Value)
                 {

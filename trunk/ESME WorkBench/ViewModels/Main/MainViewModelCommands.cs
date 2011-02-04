@@ -476,7 +476,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get { return _nAVOEnvironmentBuilder ?? (_nAVOEnvironmentBuilder = new SimpleCommand<object, object>(delegate
                                                                                                                  {
-                                                                                                                     var environmentBuilderViewModel =  new EnvironmentBuilderViewModel(_visualizerService, Globals.AppSettings, _experiment);
+                                                                                                                     var environmentBuilderViewModel =  new EnvironmentBuilderViewModel(_visualizerService, _messageBoxService, Globals.AppSettings, _experiment);
                                                                                                                      var result = _visualizerService.ShowDialog("EnvironmentBuilderView",environmentBuilderViewModel);
                                                                                                                      if (result.HasValue && result.Value)
                                                                                                                      {

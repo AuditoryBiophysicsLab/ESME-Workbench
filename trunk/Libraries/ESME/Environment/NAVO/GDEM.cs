@@ -13,7 +13,7 @@ namespace ESME.Environment.NAVO
                                                   };
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(extractionPacket.Filename, string.Format("GDEM-{0}",extractionPacket.TimePeriod));
+            OutputFilename = Path.Combine(extractionPacket.Filename, string.Format("GDEM-{0}",extractionPacket.TimePeriod));
             var north = extractionPacket.North;
             var south = extractionPacket.South;
             var east = extractionPacket.East;
@@ -24,7 +24,7 @@ namespace ESME.Environment.NAVO
             var ncTemps = new List<string>();
             var ncSalts = new List<string>();
 
-            var filepath = Path.GetDirectoryName(filename);
+            var filepath = Path.GetDirectoryName(OutputFilename);
             var monthList = new List<int>();
             for (var curMonth = 0; curMonth < MonthsDuration; curMonth++ ) monthList.Add(NAVODataSources.MonthMap[StartMonth + curMonth]);
             foreach (var curMonth in monthList)

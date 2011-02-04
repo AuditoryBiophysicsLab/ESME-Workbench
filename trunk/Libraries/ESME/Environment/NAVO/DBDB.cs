@@ -77,26 +77,24 @@ namespace ESME.Environment.NAVO
 
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(extractionPacket.Filename, string.Format("{0}-DBDB.chb", extractionPacket.TimePeriod));
-            WorkingDirectory = Path.GetDirectoryName(filename);
+            OutputFilename = Path.Combine(extractionPacket.Filename, string.Format("{0}-DBDB.chb", extractionPacket.TimePeriod));
+            WorkingDirectory = Path.GetDirectoryName(OutputFilename);
             var north = extractionPacket.North;
             var south = extractionPacket.South;
             var east = extractionPacket.East;
             var west = extractionPacket.West;
             //from documentation, area extractions for DBDB are of the form <dbv5_command path> area <database path> <finest_resolution> <coarsest resolution> nearest 0 meters G <south west north east> 
-            CommandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3} {4} {5} {6} {7} CHB=\"{8}\"", DatabasePath, Resolutions[0], Resolutions[Resolutions.Count - 1], south, west, north, east, SelectedResolution, Path.GetFileName(filename));
+            CommandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3} {4} {5} {6} {7} CHB=\"{8}\"", DatabasePath, Resolutions[0], Resolutions[Resolutions.Count - 1], south, west, north, east, SelectedResolution, Path.GetFileName(OutputFilename));
             //extract the area and look for success or failure in the output string.
             var result = Execute();
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DBDB: " + line);
 
             //return the extracted data from file as Environment2DData
-            ExtractedArea = Parse(filename);
+            ExtractedArea = Parse(OutputFilename);
         }
-        public static Environment2DData Parse(string filename)
-        {
-            return Environment2DData.ReadChrtrBinaryFile(filename);
-        }
+
+        public static Environment2DData Parse(string filename) { return Environment2DData.ReadChrtrBinaryFile(filename); }
 
         public override bool ValidateDataSource() { return false; } //DBDB provides no test data. 
     }

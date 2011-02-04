@@ -9,7 +9,7 @@ namespace ESME.Environment.NAVO
     {
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(extractionPacket.Filename, string.Format("{0}-SMGC.txt", extractionPacket.TimePeriod));
+            OutputFilename = Path.Combine(extractionPacket.Filename, string.Format("{0}-SMGC.txt", extractionPacket.TimePeriod));
             var north = extractionPacket.North;
             var south = extractionPacket.South;
             var east = extractionPacket.East;
@@ -26,7 +26,7 @@ namespace ESME.Environment.NAVO
             CommandArgs = string.Format("-lat {0}/{1} -lon {2}/{3} -mon {4}/{5} -par 17/1", south, north, west, east, StartMonth, EndMonth); // '-par 17/1' extracts wind speed statistical data.  don't ask. 
             var result = Execute();
             //result now contains the entire output of SMGC, i think, since it dumps data to STDOUT... so let's save it to disk in the right place. 
-            using (var writer = new StreamWriter(filename))
+            using (var writer = new StreamWriter(OutputFilename))
             {
                 writer.WriteLine("StartMonth=" + StartMonth);
                 writer.WriteLine("EndMonth=" + EndMonth);
@@ -35,7 +35,7 @@ namespace ESME.Environment.NAVO
                 writer.Write(result);
             }
             //File.WriteAllText(filename, result);
-            ExtractedArea = Parse(filename);
+            ExtractedArea = Parse(OutputFilename);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace ESME.Environment.NAVO
                     var rawspeeds = new double[monthDuration];
                     var count = 0;
                     //then take the next lines of data and extract windspeed and positions from them.
-                    for (var j = index + 1; j <= (index + (endMonth - startMonth) + 1); j++)
+                    for (var j = index + 1; j <= (index + monthDuration); j++)
                     {
                         if (resarray[j].Equals("")) break;
                         var resline = resarray[j].Split('\t');
