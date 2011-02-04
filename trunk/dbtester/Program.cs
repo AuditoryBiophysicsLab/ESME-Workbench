@@ -29,9 +29,12 @@ namespace dbtester
         public static void Main(string[] args)
         {
             //DBDBTest();
-            BSTTest();
+            //BSTTest();
             //SMGCTest();
             //GDEMTest();
+
+            
+           var result =  SMGC.Parse(@"C:\tests\Winter-SMGC.txt");
             Console.WriteLine(@"press enter to exit.");
             Console.ReadLine();
         }
