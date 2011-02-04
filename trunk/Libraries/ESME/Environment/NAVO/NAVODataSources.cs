@@ -144,6 +144,7 @@ namespace ESME.Environment.NAVO
             DBDB.TimePeriod = SelectedPeriod;
             GDEM.TimePeriod = SelectedPeriod;
             SMGC.TimePeriod = SelectedPeriod;
+            ExtractionPacket.TimePeriod = SelectedPeriod;
             InterpretTimes(GDEM);
             InterpretTimes(SMGC);
             BST.ExtractArea(ExtractionPacket);

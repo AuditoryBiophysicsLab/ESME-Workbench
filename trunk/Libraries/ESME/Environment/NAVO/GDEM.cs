@@ -19,7 +19,7 @@ namespace ESME.Environment.NAVO
                                                   };
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(Path.GetDirectoryName(extractionPacket.Filename), Path.GetFileNameWithoutExtension(extractionPacket.Filename) + "-GDEM");
+            var filename = Path.Combine(extractionPacket.Filename, string.Format("GDEM-{0}",extractionPacket.TimePeriod));
             var north = extractionPacket.North;
             var south = extractionPacket.South;
             var east = extractionPacket.East;
@@ -170,11 +170,15 @@ namespace ESME.Environment.NAVO
                 const string missingParamName = "missing_value";
                 const string scaleParamName = "scale_factor";
                 const string offsetParamName = "add_offset";
-                CommandArgs = string.Format("-in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11}  -dataout \"{12}\"", file, lonParamName, latParamName, north, south, east, west, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, dataFilePath);
+                CommandArgs = string.Format("-in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11}  -dataout \"{12}\""
+                    , file, lonParamName, latParamName, north, south, east, west, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, dataFilePath);
                 Execute();
 
                 //read it back in
                 var dataOutput = SerializedOutput.Load(dataFilePath, null);
+
+                //delete it, 
+               // File.Delete(dataFilePath);
                 //and add the values to the list
 
                 var results = ExtractValues(dataOutput);
@@ -187,7 +191,7 @@ namespace ESME.Environment.NAVO
             if (accumulator == null) throw new ApplicationException(string.Format("no {0} data was extracted.", dataType));
             //then average them. 
             if (ncFilenames.Count > 1) accumulator.Average();
-
+           // accumulator.Save();
             return accumulator;
         }
     }

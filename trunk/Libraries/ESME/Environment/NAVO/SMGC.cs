@@ -9,7 +9,7 @@ namespace ESME.Environment.NAVO
     {
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(Path.GetDirectoryName(extractionPacket.Filename), Path.GetFileNameWithoutExtension(extractionPacket.Filename) + "-SMGC.txt");
+            var filename = Path.Combine(extractionPacket.Filename, string.Format("SMGC-{0}.txt",extractionPacket.TimePeriod));
             var north = extractionPacket.North;
             var south = extractionPacket.South;
             var east = extractionPacket.East;
@@ -34,7 +34,7 @@ namespace ESME.Environment.NAVO
                 writer.Write(result);
             }
             //File.WriteAllText(filename, result);
-            ExtractedArea = ParseSMGC(filename);
+            ExtractedArea = Parse(filename);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace ESME.Environment.NAVO
         /// </summary>
         /// <param name="fileName">The filename containing the SMGC output</param>
         /// <returns>a populated Environment2DData object with windspeeds per latitude/longitude.</returns>
-        public static Environment2DData ParseSMGC(string fileName)
+        public static Environment2DData Parse(string fileName)
         {
             var resarray = File.ReadAllLines(fileName);
             var lats = new List<double>();
