@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -10,21 +9,21 @@ namespace ESME.Environment.NAVO
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
             OutputFilename = Path.Combine(extractionPacket.Filename, string.Format("{0}-SMGC.txt", extractionPacket.TimePeriod));
-            var north = extractionPacket.North;
-            var south = extractionPacket.South;
-            var east = extractionPacket.East;
-            var west = extractionPacket.West;
+            double north = extractionPacket.North;
+            double south = extractionPacket.South;
+            double east = extractionPacket.East;
+            double west = extractionPacket.West;
             if (!DatabasePath.EndsWith("\\")) DatabasePath = DatabasePath + "\\"; //database path has to end with a trailing slash here.  For SMGC, it's a directory, not a file.
 
-            var northPath = DatabasePath;
-            var southPath = DatabasePath;
+            string northPath = DatabasePath;
+            string southPath = DatabasePath;
             if (Directory.Exists(Path.Combine(DatabasePath, "north"))) northPath = (Path.Combine(DatabasePath, @"north\"));
             if (Directory.Exists(Path.Combine(DatabasePath, "south"))) southPath = (Path.Combine(DatabasePath, @"south\"));
 
             System.Environment.SetEnvironmentVariable("SMGC_DATA_NORTH", northPath);
             System.Environment.SetEnvironmentVariable("SMGC_DATA_SOUTH", southPath);
             CommandArgs = string.Format("-lat {0}/{1} -lon {2}/{3} -mon {4}/{5} -par 17/1", south, north, west, east, StartMonth, EndMonth); // '-par 17/1' extracts wind speed statistical data.  don't ask. 
-            var result = Execute();
+            string result = Execute();
             //result now contains the entire output of SMGC, i think, since it dumps data to STDOUT... so let's save it to disk in the right place. 
             using (var writer = new StreamWriter(OutputFilename))
             {
@@ -45,23 +44,23 @@ namespace ESME.Environment.NAVO
         /// <returns>a populated Environment2DData object with windspeeds per latitude/longitude.</returns>
         public static Environment2DData Parse(string fileName)
         {
-            var resarray = File.ReadAllLines(fileName).ToList();
+            List<string> resarray = File.ReadAllLines(fileName).ToList();
             var lats = new List<double>();
             var lons = new List<double>();
             //  var averagevalues = new List<double>();
             var rawvalues = new List<List<string>>();
             var points = new Dictionary<string, double>();
             //split the string up into lines
-            var startMonth = int.Parse(resarray[0].Split('=')[1]);
-            var endMonth = int.Parse(resarray[1].Split('=')[1]);
-            var monthDuration = int.Parse(resarray[2].Split('=')[1]);
-            var gridSpacing = int.Parse(resarray[3].Split('=')[1]);
+            int startMonth = int.Parse(resarray[0].Split('=')[1]);
+            int endMonth = int.Parse(resarray[1].Split('=')[1]);
+            int monthDuration = int.Parse(resarray[2].Split('=')[1]);
+            int gridSpacing = int.Parse(resarray[3].Split('=')[1]);
 
-            var curLineIndex = 0;
-            var curGroupIndex = 0;
+            int curLineIndex = 0;
+            int curGroupIndex = 0;
             while (curLineIndex < resarray.Count)
             {
-                var thisline = resarray[curLineIndex++].Trim();
+                string thisline = resarray[curLineIndex++].Trim();
                 if (curLineIndex >= resarray.Count) break;
                 //if the line starts with 'Lat', add it plus everything up to the next blank line to rawvalues[i].
                 if (thisline.StartsWith("Lat"))
@@ -80,17 +79,16 @@ namespace ESME.Environment.NAVO
 
             foreach (var curGroup in rawvalues)
             {
-                var lat = double.NaN;
-                var lon = double.NaN;
+                double lat = double.NaN;
+                double lon = double.NaN;
                 var monthspeed = new List<double>();
-                foreach (var curLine in curGroup)
+                foreach (string curLine in curGroup)
                 {
                     if (!curLine.StartsWith("Lat") && !curLine.StartsWith("---") && !string.IsNullOrEmpty(curLine))
                     {
-                        var dataline = curLine.Split('\t');
+                        string[] dataline = curLine.Split('\t');
 
-                        if (double.TryParse(dataline[0], out lat) && double.TryParse(dataline[1], out lon))
-                            monthspeed.Add(double.Parse(dataline[7]));
+                        if (double.TryParse(dataline[0], out lat) && double.TryParse(dataline[1], out lon)) monthspeed.Add(double.Parse(dataline[7]));
                         else throw new InvalidDataException("unexpected data in SMGC");
                     }
                 }
@@ -102,49 +100,22 @@ namespace ESME.Environment.NAVO
                     points.Add(string.Format("{0:#.00000},{1:#.00000}", lat, lon), monthspeed.Average());
                 }
             }
-#if false
-            for (var index = 0; index < resarray.Length; index++)
-            {
-                var line = resarray[index].Trim();
-                //if the line has hyphens in it..
-                if (line.Contains("---"))
-                {
-                    var rawspeeds = new double[monthDuration];
-                    var count = 0;
-                    //then take the next lines of data and extract windspeed and positions from them.
-                    for (var j = index + 1; j <= (index + monthDuration); j++)
-                    {
-                        if (resarray[j].Equals("")) break;
-                        var resline = resarray[j].Split('\t');
-                        rawspeeds[count] = Double.Parse(resline[7]);
-                        count++;
-                    }
-                    var latline = resarray[index + 1].Split('\t');
-                    var lat = Double.Parse(latline[0]);
-                    var lon = Double.Parse(latline[1]);
-                    var meanspeed = rawspeeds.Sum() / rawspeeds.Length;
-                    lats.Add(lat);
-                    lons.Add(lon);
-                    //then add these uniques to the dictionary
-                    points.Add(string.Format("{0:#.00000},{1:#.00000}", lat, lon), meanspeed);
-                }
-            } 
-#endif
-            var uniqueLats = lats.Distinct().ToList();
-            var uniqueLons = lons.Distinct().ToList();
+
+            List<double> uniqueLats = lats.Distinct().ToList();
+            List<double> uniqueLons = lons.Distinct().ToList();
             uniqueLats.Sort();
             uniqueLons.Sort();
 
-            var dataArray = new float[uniqueLons.Count, uniqueLats.Count];
-            for (var latIndex = 0; latIndex < uniqueLats.Count; latIndex++)
+            var dataArray = new float[uniqueLons.Count,uniqueLats.Count];
+            for (int latIndex = 0; latIndex < uniqueLats.Count; latIndex++)
             {
-                var lat = uniqueLats[latIndex];
-                for (var lonIndex = 0; lonIndex < uniqueLons.Count; lonIndex++)
+                double lat = uniqueLats[latIndex];
+                for (int lonIndex = 0; lonIndex < uniqueLons.Count; lonIndex++)
                 {
-                    var lon = uniqueLons[lonIndex];
-                    var key = string.Format("{0:#.00000},{1:#.00000}", lat, lon);
+                    double lon = uniqueLons[lonIndex];
+                    string key = string.Format("{0:#.00000},{1:#.00000}", lat, lon);
                     double outval;
-                    dataArray[lonIndex, latIndex] = points.TryGetValue(key, out outval) ? (float)outval : float.NaN;
+                    dataArray[lonIndex, latIndex] = points.TryGetValue(key, out outval) ? (float) outval : float.NaN;
                 }
             }
 
