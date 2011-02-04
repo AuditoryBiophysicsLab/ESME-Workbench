@@ -8,6 +8,7 @@
   <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
   <?define ESMEPath="C:\Projects\ESME Deliverables\ESME WorkBench\bin\x86\Release"?>
+  <?define ESMEViewsPath="C:\Projects\ESME Deliverables\ESME.Controls\bin\x86\Release"?>
   <?define BellhopPath="C:\Projects\ESME Deliverables\Utilities\Bellhop"?>
   <?define MMMBSPath="C:\Projects\ESME Deliverables\Utilities\MMMBS\demoProjects"?>
   <?define ImportNetCDFPath="C:\Projects\ESME Deliverables\Utilities\NetCDFExtractor\bin\x86\Release"?>
@@ -72,9 +73,12 @@
             <File Id="ESME_WorkBench.exe.config" 
                   Name="ESME WorkBench.exe.config" 
                   Source="$(var.ESMEPath)\ESME WorkBench.exe.config" />
-            <File Id="ESME.dll" 
-                  Name="ESME.dll" 
+            <File Id="ESME.dll"
+                  Name="ESME.dll"
                   Source="$(var.ESMEPath)\ESME.dll" />
+            <File Id="ESME.Views.dll"
+                  Name="ESME.Views.dll"
+                  Source="$(var.ESMEViewsPath)\ESME.Views.dll" />
             <File Id="HRC.dll"
                   Name="HRC.dll"
                   Source="$(var.ESMEPath)\HRC.dll" />
