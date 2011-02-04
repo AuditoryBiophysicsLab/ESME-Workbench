@@ -74,14 +74,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\Users\Graham Voysey\Desktop\SMGC\Disc 1\src\readme.txt" />
+    <ClCompile Include="GetSMGCFile.c" />
+    <ClCompile Include="smgc_extract.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Users\Graham Voysey\Desktop\SMGC\Disc 1\src\smgc_extract.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\Users\Graham Voysey\Desktop\SMGC\Disc 1\src\GetSMGCFile.c" />
-    <ClCompile Include="..\..\..\..\Users\Graham Voysey\Desktop\SMGC\Disc 1\src\smgc_extract.c" />
+    <ClInclude Include="smgc_extract.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
