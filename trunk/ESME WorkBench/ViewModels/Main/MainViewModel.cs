@@ -402,7 +402,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (Globals.AppSettings.UseOAMLDataSources)
                 {
-                    return ((_experiment != null) && (_experiment.NemoFile != null) && Globals.AppSettings.NAVOConfiguration.IsValid);
+                    return ((_experiment != null) && (_experiment.NemoFile != null) && (_experiment.FileName != null) && Globals.AppSettings.NAVOConfiguration.IsValid);
                 }
 
                 return ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory)) && (_experiment != null) && (_experiment.NemoFile != null));
