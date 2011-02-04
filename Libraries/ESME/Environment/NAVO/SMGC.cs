@@ -45,9 +45,11 @@ namespace ESME.Environment.NAVO
         /// <returns>a populated Environment2DData object with windspeeds per latitude/longitude.</returns>
         public static Environment2DData Parse(string fileName)
         {
-            var resarray = File.ReadAllLines(fileName);
+            var resarray = File.ReadAllLines(fileName).ToList();
             var lats = new List<double>();
             var lons = new List<double>();
+            //  var averagevalues = new List<double>();
+            var rawvalues = new List<List<string>>();
             var points = new Dictionary<string, double>();
             //split the string up into lines
             var startMonth = int.Parse(resarray[0].Split('=')[1]);
@@ -55,6 +57,52 @@ namespace ESME.Environment.NAVO
             var monthDuration = int.Parse(resarray[2].Split('=')[1]);
             var gridSpacing = int.Parse(resarray[3].Split('=')[1]);
 
+            var curLineIndex = 0;
+            var curGroupIndex = 0;
+            while (curLineIndex < resarray.Count)
+            {
+                var thisline = resarray[curLineIndex++].Trim();
+                if (curLineIndex >= resarray.Count) break;
+                //if the line starts with 'Lat', add it plus everything up to the next blank line to rawvalues[i].
+                if (thisline.StartsWith("Lat"))
+                {
+                    var curGroup = new List<string>();
+                    curGroup.Add(thisline.Trim());
+                    while (!string.IsNullOrEmpty(thisline = resarray[curLineIndex++]))
+                    {
+                        if (curLineIndex >= resarray.Count) break;
+                        curGroup.Add(thisline.Trim());
+                    }
+                    rawvalues.Add(curGroup);
+                    //if (curLineIndex >= resarray.Count) break;
+                }
+            }
+
+            foreach (var curGroup in rawvalues)
+            {
+                var lat = double.NaN;
+                var lon = double.NaN;
+                var monthspeed = new List<double>();
+                foreach (var curLine in curGroup)
+                {
+                    if (!curLine.StartsWith("Lat") && !curLine.StartsWith("---") && !string.IsNullOrEmpty(curLine))
+                    {
+                        var dataline = curLine.Split('\t');
+
+                        if (double.TryParse(dataline[0], out lat) && double.TryParse(dataline[1], out lon))
+                            monthspeed.Add(double.Parse(dataline[7]));
+                        else throw new InvalidDataException("unexpected data in SMGC");
+                    }
+                }
+                if (!double.IsNaN(lat) && !double.IsNaN(lon) && (monthspeed.Count > 0))
+                {
+                    lats.Add(lat);
+                    lons.Add(lon);
+                    //averagevalues.Add(monthspeed.Average());
+                    points.Add(string.Format("{0:#.00000},{1:#.00000}", lat, lon), monthspeed.Average());
+                }
+            }
+#if false
             for (var index = 0; index < resarray.Length; index++)
             {
                 var line = resarray[index].Trim();
@@ -74,19 +122,20 @@ namespace ESME.Environment.NAVO
                     var latline = resarray[index + 1].Split('\t');
                     var lat = Double.Parse(latline[0]);
                     var lon = Double.Parse(latline[1]);
-                    var meanspeed = rawspeeds.Sum()/rawspeeds.Length;
+                    var meanspeed = rawspeeds.Sum() / rawspeeds.Length;
                     lats.Add(lat);
                     lons.Add(lon);
                     //then add these uniques to the dictionary
                     points.Add(string.Format("{0:#.00000},{1:#.00000}", lat, lon), meanspeed);
                 }
-            }
+            } 
+#endif
             var uniqueLats = lats.Distinct().ToList();
             var uniqueLons = lons.Distinct().ToList();
             uniqueLats.Sort();
             uniqueLons.Sort();
 
-            var dataArray = new float[uniqueLons.Count,uniqueLats.Count];
+            var dataArray = new float[uniqueLons.Count, uniqueLats.Count];
             for (var latIndex = 0; latIndex < uniqueLats.Count; latIndex++)
             {
                 var lat = uniqueLats[latIndex];
@@ -98,7 +147,7 @@ namespace ESME.Environment.NAVO
                     dataArray[lonIndex, latIndex] = points.TryGetValue(key, out outval) ? (float)outval : float.NaN;
                 }
             }
-            
+
             //and finally, make a useful thing out of them. 
             return new Environment2DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), gridSpacing, dataArray, 0, 0);
         }
