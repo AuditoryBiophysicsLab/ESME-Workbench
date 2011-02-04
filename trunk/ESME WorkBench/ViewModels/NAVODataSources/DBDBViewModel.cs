@@ -71,11 +71,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             _dbdb.ExtractionProgramPath = Globals.AppSettings.NAVOConfiguration.DBDBEXEPath;
         }
 
-        void GetResolutions()
-        {
-            _dbdb.GetAllResolutions();
-            Resolutions = _dbdb.Resolutions;
-        }
+       
 
         [MediatorMessageSink(MediatorMessage.ExtractDBDB)]
         void ExtractData(NAVOExtractionPacket packet)

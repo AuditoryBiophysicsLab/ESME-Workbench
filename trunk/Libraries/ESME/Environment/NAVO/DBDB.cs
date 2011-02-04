@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -9,21 +11,28 @@ namespace ESME.Environment.NAVO
 {
     public class DBDB : NAVODataSource
     {
-        #region public List<string> Resolutions { get; set; }
+        public DBDB() { Resolutions = new ObservableCollection<string>(); }
 
-        public List<string> Resolutions
+        #region public ObservableCollection<string> Resolutions { get; set; }
+
+        public ObservableCollection<string> Resolutions
         {
             get { return _resolutions; }
             set
             {
                 if (_resolutions == value) return;
+                if (_resolutions != null) _resolutions.CollectionChanged -= ResolutionsCollectionChanged;
                 _resolutions = value;
+                if (_resolutions != null) _resolutions.CollectionChanged += ResolutionsCollectionChanged;
                 NotifyPropertyChanged(ResolutionsChangedEventArgs);
+
+                
             }
         }
 
+        void ResolutionsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(ResolutionsChangedEventArgs); SelectedResolution = Resolutions.Last(); }
         static readonly PropertyChangedEventArgs ResolutionsChangedEventArgs = ObservableHelper.CreateArgs<DBDB>(x => x.Resolutions);
-        List<string> _resolutions;
+        ObservableCollection<string> _resolutions;
 
         #endregion
 
@@ -47,7 +56,6 @@ namespace ESME.Environment.NAVO
 
         public void GetAllResolutions()
         {
-            Resolutions = new List<string>();
             CommandArgs = string.Format("resolutions \"{0}\"", DatabasePath);
             var result = Execute().Trim();
             var resarray = result.Split('\n');

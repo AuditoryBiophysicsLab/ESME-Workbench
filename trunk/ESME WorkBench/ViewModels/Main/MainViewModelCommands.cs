@@ -184,7 +184,9 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> ShowEnvironmentSettingsCommand
         {
-            get { return _showEnvironmentSettings ?? (_showEnvironmentSettings = new SimpleCommand<object, object>(arg => ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory)) && (_experiment != null) && (_experiment.NemoFile != null)), obj => ShowEnvironmentSettingsView())); }
+            get { return _showEnvironmentSettings ?? (_showEnvironmentSettings = new SimpleCommand<object, object>(
+                arg => CanShowEnvironmentSettings, 
+                obj => ShowEnvironmentSettingsView())); }
         }
 
         SimpleCommand<object, object> _showEnvironmentSettings;

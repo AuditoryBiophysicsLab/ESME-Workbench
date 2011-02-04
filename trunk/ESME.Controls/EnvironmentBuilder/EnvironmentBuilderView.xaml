@@ -8,7 +8,7 @@
         Height="423"
         Width="300">
 	<DockPanel LastChildFill="True">
-		<Menu Name="EnvironmentBuilderViewFileMenu"
+		<!--<Menu Name="EnvironmentBuilderViewFileMenu"
 		      DockPanel.Dock="Top"
 		      HorizontalAlignment="Stretch"
 		      BorderBrush="Black"
@@ -18,7 +18,7 @@
 				          Command="{Binding LaunchEnvironmentConfigurationViewCommand}"
 				          InputGestureText="Ctrl+O" />
 			</MenuItem>
-		</Menu>
+		</Menu> -->
 		<DockPanel LastChildFill="False"
 		           Margin="10"
 		           DockPanel.Dock="Bottom">
@@ -66,7 +66,7 @@
 
             </ComboBox>
             <TextBlock Text="Month or Season" Margin="2 20 2 2"/>
-            <ComboBox ItemsSource="{Binding Months}" 
+            <ComboBox ItemsSource="{Binding NAVODataSources.Months}" 
                           SelectedItem="{Binding NAVODataSources.SelectedPeriod}"                          
                           ToolTip="The month or season to extract.">
 

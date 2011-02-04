@@ -134,6 +134,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                 if (_months == value) return;
                 _months = value;
                 NotifyPropertyChanged(MonthsChangedEventArgs);
+                SelectedTimePeriod = Months[0];
             }
         }
 

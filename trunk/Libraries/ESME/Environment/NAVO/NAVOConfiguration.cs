@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Cinch;
@@ -25,7 +26,7 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs SpringStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SpringStartMonth);
-        NAVOTimePeriod _springStartMonth;
+        NAVOTimePeriod _springStartMonth = NAVOTimePeriod.March;
 
         #endregion
 
@@ -43,7 +44,7 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs SummerStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SummerStartMonth);
-        NAVOTimePeriod _summerStartMonth;
+        NAVOTimePeriod _summerStartMonth = NAVOTimePeriod.June;
 
         #endregion
 
@@ -61,7 +62,7 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs FallStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.FallStartMonth);
-        NAVOTimePeriod _fallStartMonth;
+        NAVOTimePeriod _fallStartMonth = NAVOTimePeriod.September;
 
         #endregion
 
@@ -79,7 +80,7 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs WinterStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.WinterStartMonth);
-        NAVOTimePeriod _winterStartMonth;
+        NAVOTimePeriod _winterStartMonth = NAVOTimePeriod.December;
 
         #endregion
 
@@ -97,7 +98,7 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs ColdSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.ColdSeasonStartMonth);
-        NAVOTimePeriod _coldSeasonStartMonth;
+        NAVOTimePeriod _coldSeasonStartMonth = NAVOTimePeriod.December;
 
         #endregion
 
@@ -115,7 +116,7 @@ namespace ESME.Environment.NAVO
         }
 
         static readonly PropertyChangedEventArgs WarmSeasonStartMonthChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.WarmSeasonStartMonth);
-        NAVOTimePeriod _warmSeasonStartMonth;
+        NAVOTimePeriod _warmSeasonStartMonth = NAVOTimePeriod.June;
 
         #endregion
 
@@ -300,7 +301,17 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-
+        public bool IsValid
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(BSTDirectory) && !string.IsNullOrEmpty(DBDBDirectory) && !string.IsNullOrEmpty(GDEMDirectory) && !string.IsNullOrEmpty(SMGCDirectory))
+                    if (File.Exists(BSTDirectory) && File.Exists(DBDBDirectory) && Directory.Exists(GDEMDirectory) && Directory.Exists(SMGCDirectory))
+                        if (!string.IsNullOrEmpty(BSTEXEPath) && !string.IsNullOrEmpty(DBDBEXEPath) && !string.IsNullOrEmpty(SMGCEXEPath))
+                            if (File.Exists(BSTEXEPath) && File.Exists(DBDBEXEPath) && File.Exists(SMGCEXEPath)) return true;
+                return false;
+            }
+        }
 
 
     }

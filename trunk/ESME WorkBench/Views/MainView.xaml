@@ -92,7 +92,7 @@
 					                             ToolTipDescription="Information about the current experiment"
 					                             Command="{Binding AboutCommand}" />
                     <r:RibbonSeparator />
-                    <r:RibbonApplicationMenuItem Header="Test"
+                    <!--<r:RibbonApplicationMenuItem Header="Test"
 					                             ImageSource="..\Images\LargeIcons\Yahoo-Widget-Engine-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Dave's test command"
@@ -102,7 +102,7 @@
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="NAVO"
 					                             Command="{Binding NAVOEnvironmentBuilderCommand}" />
-                    <r:RibbonSeparator />
+                    <r:RibbonSeparator /> -->
                     <r:RibbonApplicationMenuItem Header="Options"
 					                             ImageSource="..\Images\LargeIcons\gear-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"

@@ -222,17 +222,13 @@ namespace ImportNetCDF
                 progress += progressStep;
             }
             Console.Write(@"Saving imported data ... ");
-            OutputToDataFile(serializedOutput, outputDataFileName);
+            serializedOutput.Save(outputDataFileName, null);
+            
 
             Console.WriteLine(@"done");
         }
 
-        static void OutputToDataFile(SerializedOutput data, string outputDataFileName)
-        {
-            var serializer = new XmlSerializer(typeof (SerializedOutput));
-            TextWriter writer = new StreamWriter(outputDataFileName);
-            serializer.Serialize(writer, data);
-        }
+        
 
         static void Usage()
         {

@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
+using ESME.Model;
 using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
     public class GDEM : NAVODataSource
     {
+        public SoundSpeedField SoundSpeedField { get; private set; }
 
 
         static readonly string[] ShortMonthNames = new[]
@@ -60,6 +62,7 @@ namespace ESME.Environment.NAVO
             var longitudes = averageSalinity.Longitudes;
             
             //combine and get ssp.
+#if false
             var soundSpeeds = new Environment3DData(latitudes.Last(), latitudes.First(), longitudes.Last(), longitudes.First(), GridSpacing, depths, new List<float>[longitudes.Length, latitudes.Length]);
             for (var latIndex = 0; latIndex < latitudes.Length; latIndex++)
             {
@@ -75,8 +78,30 @@ namespace ESME.Environment.NAVO
                         soundSpeeds.Values[lonIndex, latIndex] = UNESCO.SoundSpeed(location, ref depths, ref temps, ref sals).ToList();
                     }
                 }
+            } 
+#endif
+
+            var soundSpeedField = new SoundSpeedField();
+            for (var latIndex = 0; latIndex < latitudes.Length; latIndex++)
+            {
+                var lat = latitudes[latIndex];
+                for (var lonIndex = 0; lonIndex < longitudes.Length; lonIndex++)
+                {
+                    var lon = longitudes[lonIndex];
+                    var location = new EarthCoordinate(lat, lon);
+                    if ((averageTemps.Values[lonIndex, latIndex] != null) && (averageSalinity.Values[lonIndex, latIndex] != null))
+                    {
+                        var temps = averageTemps.Values[lonIndex, latIndex].Select(x => x.Value).ToArray();
+                        var sals = averageSalinity.Values[lonIndex, latIndex].Select(x => x.Value).ToArray();
+                        var speeds = UNESCO.SoundSpeed(location, ref depths, ref temps, ref sals).ToList();
+                        var soundSpeedProfile = new SoundSpeedProfile(TimePeriod.ToString(), location, depths, speeds);
+                        soundSpeedField.SoundSpeedProfiles.Add(soundSpeedProfile);
+                    }
+                }
             }
-            ExtractedArea = soundSpeeds;
+            soundSpeedField.Initialize();//only once.
+            SoundSpeedField = soundSpeedField;
+            SoundSpeedField.Save(filename+"-soundspeeds.xml");
         }
 
         public override bool ValidateDataSource() { return false; }
@@ -149,10 +174,7 @@ namespace ESME.Environment.NAVO
                 Execute();
 
                 //read it back in
-                var serializer = new XmlSerializer(typeof(SerializedOutput));
-                var reader = new StreamReader(dataFilePath);
-                var dataOutput = (SerializedOutput)serializer.Deserialize(reader);
-
+                var dataOutput = SerializedOutput.Load(dataFilePath, null);
                 //and add the values to the list
 
                 var results = ExtractValues(dataOutput);
