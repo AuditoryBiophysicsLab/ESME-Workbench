@@ -557,6 +557,9 @@ namespace ESMEWorkBench.ViewModels.Map
                     case LayerType.OpArea:
                     case LayerType.Bathymetry:
                     case LayerType.Animal:
+                    case LayerType.SoundSpeed:
+                    case LayerType.BottomType:
+                    case LayerType.WindSpeed:
                         return Visibility.Visible;
                 }
             }
@@ -588,6 +591,9 @@ namespace ESMEWorkBench.ViewModels.Map
                     default:
                         return false;
                     case LayerType.Animal:
+                    case LayerType.SoundSpeed:
+                    case LayerType.BottomType:
+                    case LayerType.WindSpeed:
                         return true;
                 }
             }

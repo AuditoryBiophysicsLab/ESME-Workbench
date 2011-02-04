@@ -67,8 +67,8 @@ namespace ESMEWorkBench.ViewModels.Main
                                                    };
                 try
                 {
-                    var cassRunFile = CassRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings, _experiment.NemoFile.Scenario.TimeFrame);
-                    cassRunFile.Save(Path.GetDirectoryName(_experiment.FileName));
+                    //var cassRunFile = CassRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings, _experiment.NemoFile.Scenario.TimeFrame);
+                    //cassRunFile.Save(Path.GetDirectoryName(_experiment.FileName));
                     var ramRunFile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.RAM, transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
                     ramRunFile.Save(_experiment.LocalStorageRoot);
                     var bellhopRunFile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.Bellhop, transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
