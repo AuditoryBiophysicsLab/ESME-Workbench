@@ -89,7 +89,7 @@ namespace ESME.Environment.NAVO
         //public override void ExtractArea(string filename, double north, double south, double east, double west)
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(Path.GetDirectoryName(extractionPacket.Filename), Path.GetFileNameWithoutExtension(extractionPacket.Filename) + "-BST.chb");
+            var filename = Path.Combine(extractionPacket.Filename , "BST.chb");
             WorkingDirectory = Path.GetDirectoryName(filename);
             var north = extractionPacket.North;
             var south = extractionPacket.South;
@@ -104,8 +104,12 @@ namespace ESME.Environment.NAVO
             //have a look at result and throw an error if needed.
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("error"))) throw new ApplicationException("BST: " + line); //hope this is sufficient..
-            ExtractedArea = Environment2DData.ReadChrtrBinaryFile(filename);
+            ExtractedArea = Parse(filename);
             File.Delete(scriptfile);
+        }
+        public static Environment2DData Parse(string filename)
+        {
+            return Environment2DData.ReadChrtrBinaryFile(filename);
         }
 
         public override bool ValidateDataSource()

@@ -77,7 +77,7 @@ namespace ESME.Environment.NAVO
 
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(Path.GetDirectoryName(extractionPacket.Filename),Path.GetFileNameWithoutExtension(extractionPacket.Filename) + "-DBDB.chb");
+            var filename = Path.Combine(extractionPacket.Filename, "DBDB.chb");
             WorkingDirectory = Path.GetDirectoryName(filename);
             var north = extractionPacket.North;
             var south = extractionPacket.South;
@@ -91,7 +91,11 @@ namespace ESME.Environment.NAVO
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DBDB: " + line);
 
             //return the extracted data from file as Environment2DData
-            ExtractedArea = Environment2DData.ReadChrtrBinaryFile(filename);
+            ExtractedArea = Parse(filename);
+        }
+        public static Environment2DData Parse(string filename)
+        {
+            return Environment2DData.ReadChrtrBinaryFile(filename);
         }
 
         public override bool ValidateDataSource() { return false; } //DBDB provides no test data. 

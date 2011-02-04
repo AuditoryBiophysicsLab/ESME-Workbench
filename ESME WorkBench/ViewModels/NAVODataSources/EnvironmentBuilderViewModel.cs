@@ -58,12 +58,12 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                      };
             ExtractionAreaPacket= new NAVOExtractionPacket
             {
-                Filename = Path.Combine(Experiment.LocalStorageRoot, Path.GetFileNameWithoutExtension(Experiment.ScenarioFileName).Replace(" ","")+".xml"), //required because if the experiment name has spaces in it, BST and DBDB will barf.
+                Filename = Experiment.LocalStorageRoot,
                 North = Experiment.North,
                 South = Experiment.South,
                 East = Experiment.East,
                 West = Experiment.West,
-                TimePeriod = SelectedTimePeriod,
+                //TimePeriod = SelectedTimePeriod,
             };
             
             NAVODataSources = new ESME.Environment.NAVO.NAVODataSources(Globals.AppSettings.NAVOConfiguration, ExtractionAreaPacket);
