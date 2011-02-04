@@ -8,9 +8,10 @@
   <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
   <?define ESMEPath="C:\Projects\ESME Deliverables\ESME WorkBench\bin\x86\Release"?>
-  <?define ESMEPath="C:\Projects\ESME Deliverables\ESME WorkBench\bin\x86\Release"?>
+  <?define BellhopPath="C:\Projects\ESME Deliverables\Utilities\Bellhop"?>
+  <?define MMMBSPath="C:\Projects\ESME Deliverables\Utilities\MMMBS\demoProjects"?>
   <?define ImportNetCDFPath="C:\Projects\ESME Deliverables\Utilities\NetCDFExtractor\bin\x86\Release"?>
-  <?define SMGCExtractPath="C:\Projects\ESME Deliverables\SMGCExtract\Release"?>
+  <?define SMGCExtractPath="C:\Projects\ESME Deliverables\Utilities\SMGCExtract\Release"?>
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define ReleaseNotesPath="C:\Projects\ESME Deliverables\Release Notes"?>
   <Product Id="$(var.ProductCode)" 
@@ -103,7 +104,7 @@
             <!-- Bellhop acoustic simulator -->
             <File Id="bellhop.exe"
                   Name="bellhop.exe"
-                  Source="$(var.ESMEPath)\bellhop.exe" />
+                  Source="$(var.BellhopPath)\bellhop.exe" />
 
             <!-- ThinkGeo GIS assemblies -->
             <File Id="MapSuiteCore.dll" 
@@ -166,7 +167,7 @@
                   Source="$(var.ESMEPath)\RibbonControlsLibrary.dll" />
           </Component>
           
-          <Merge Id="vc100" Language="1033" src="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x86.msm" DiskId="1" />
+          <Merge Id="vc100" Language="1033" SourceFile="$(var.MergeModulesPath)\Microsoft_VC100_CRT_x86.msm" DiskId="1" />
           
           <Component Id="ESME_Shortcuts" Guid="5D033776-4F54-44F9-BC3E-28D174AFA5AF">
             <RegistryKey Root="HKCU" Key="Software\[Manufacturer]\[ProductName]">
