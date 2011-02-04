@@ -77,7 +77,7 @@ namespace ESME.Environment.NAVO
 
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(extractionPacket.Filename, "DBDB.chb");
+            var filename = Path.Combine(extractionPacket.Filename, string.Format("{0}-DBDB.chb", extractionPacket.TimePeriod));
             WorkingDirectory = Path.GetDirectoryName(filename);
             var north = extractionPacket.North;
             var south = extractionPacket.South;

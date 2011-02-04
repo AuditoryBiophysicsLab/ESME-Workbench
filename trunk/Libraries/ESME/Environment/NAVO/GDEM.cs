@@ -2,20 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
-using ESME.Model;
-using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
     public class GDEM : NAVODataSource
     {
-        public SoundSpeedField SoundSpeedField { get; private set; }
-
-
         static readonly string[] ShortMonthNames = new[]
                                                   {
-                                                      "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
+                                                      "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
                                                   };
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
@@ -30,6 +24,7 @@ namespace ESME.Environment.NAVO
             var ncTemps = new List<string>();
             var ncSalts = new List<string>();
 
+            var filepath = Path.GetDirectoryName(filename);
             var monthList = new List<int>();
             for (var curMonth = 0; curMonth < MonthsDuration; curMonth++ ) monthList.Add(NAVODataSources.MonthMap[StartMonth + curMonth]);
             foreach (var curMonth in monthList)
@@ -49,20 +44,21 @@ namespace ESME.Environment.NAVO
             }
 
             //extract average temperature and salinity from the right files for the season
-            var filepath = Path.GetDirectoryName(filename);
-            var averageTemps = AveragedGDEMOutput(ncTemps, "water_temp", filepath, north, south, east, west);
+            var averageTemp = AveragedGDEMOutput(ncTemps, "water_temp", filepath, north, south, east, west);
+            averageTemp.Save(Path.Combine(extractionPacket.Filename, string.Format("{0}-average-water-temp.xml", extractionPacket.TimePeriod)), null);
             var averageSalinity = AveragedGDEMOutput(ncSalts, "salinity", filepath, north, south, east, west);
+            averageSalinity.Save(Path.Combine(extractionPacket.Filename, string.Format("{0}-average-salinity.xml", extractionPacket.TimePeriod)), null);
             //sanity check: are averageTemps and averageSalinity in the same place?
-            AreEqual(averageTemps.Depths, averageSalinity.Depths);
-            AreEqual(averageTemps.Latitudes, averageSalinity.Latitudes);
-            AreEqual(averageTemps.Longitudes, averageSalinity.Longitudes);
+            AreEqual(averageTemp.DepthAxis.ToArray(), averageSalinity.DepthAxis.ToArray());
+            AreEqual(averageTemp.Latitudes.ToArray(), averageSalinity.Latitudes.ToArray());
+            AreEqual(averageTemp.Longitudes, averageSalinity.Longitudes);
             //if so, it doesn't matter which one's GIS data we use. 
-            var depths = averageSalinity.Depths.Select(x => (float)x).ToArray();
+            var depths = averageSalinity.DepthAxis.ToArray();
             var latitudes = averageSalinity.Latitudes;
             var longitudes = averageSalinity.Longitudes;
-            
-            //combine and get ssp.
+
 #if false
+    //combine and get ssp.
             var soundSpeeds = new Environment3DData(latitudes.Last(), latitudes.First(), longitudes.Last(), longitudes.First(), GridSpacing, depths, new List<float>[longitudes.Length, latitudes.Length]);
             for (var latIndex = 0; latIndex < latitudes.Length; latIndex++)
             {
@@ -79,7 +75,6 @@ namespace ESME.Environment.NAVO
                     }
                 }
             } 
-#endif
 
             var soundSpeedField = new SoundSpeedField();
             for (var latIndex = 0; latIndex < latitudes.Length; latIndex++)
@@ -89,7 +84,7 @@ namespace ESME.Environment.NAVO
                 {
                     var lon = longitudes[lonIndex];
                     var location = new EarthCoordinate(lat, lon);
-                    if ((averageTemps.Values[lonIndex, latIndex] != null) && (averageSalinity.Values[lonIndex, latIndex] != null))
+                    if ((averageTemp.Values[lonIndex, latIndex] != null) && (averageSalinity.Values[lonIndex, latIndex] != null))
                     {
                         var temps = averageTemps.Values[lonIndex, latIndex].Select(x => x.Value).ToArray();
                         var sals = averageSalinity.Values[lonIndex, latIndex].Select(x => x.Value).ToArray();
@@ -102,33 +97,65 @@ namespace ESME.Environment.NAVO
             soundSpeedField.Initialize();//only once.
             SoundSpeedField = soundSpeedField;
             SoundSpeedField.Save(filename+"-soundspeeds.xml");
+#endif
+            var soundSpeedField = new SerializedOutput();
+            soundSpeedField.DepthAxis.AddRange(averageTemp.DepthAxis);
+            var depthArray = (from depth in averageTemp.DepthAxis
+                              select (float) depth).ToArray();
+            foreach (var latitude in latitudes)
+                foreach (var longitude in longitudes)
+                {
+                    var curLat = latitude;
+                    var curLon = longitude;
+                    var temperatureData = averageTemp.DataPoints.Find(x => x.Latitude_degrees == curLat && x.Longitude_degrees == curLon);
+                    var salinityData = averageSalinity.DataPoints.Find(x => x.Latitude_degrees == curLat && x.Longitude_degrees == curLon);
+                    var soundSpeedData = new EnvironmentalDataPoint
+                                         {
+                                             Latitude_degrees = curLat,
+                                             Longitude_degrees = curLon,
+                                         };
+                    if ((temperatureData != null) && (salinityData != null))
+                    {
+                        var curPointDepths = new float[Math.Max(temperatureData.Data.Count, salinityData.Data.Count)];
+                        Array.Copy(depthArray, curPointDepths, curPointDepths.Length);
+                        var curPointTemps = (from temperature in temperatureData.Data
+                                             select (float) temperature).ToArray();
+                        var curPointSalinities = (from salinity in salinityData.Data
+                                                  select (float) salinity).ToArray();
+                        var curPointSoundSpeeds = UNESCO.SoundSpeed(temperatureData, ref curPointDepths, ref curPointTemps, ref curPointSalinities);
+                        soundSpeedData.Data.AddRange(from soundSpeed in curPointSoundSpeeds select (double)soundSpeed);
+                        soundSpeedField.DataPoints.Add(soundSpeedData);
+                    }
+                }
+            soundSpeedField.Save(Path.Combine(extractionPacket.Filename, string.Format("{0}-soundspeed.xml", extractionPacket.TimePeriod)), null);
         }
 
         public override bool ValidateDataSource() { return false; }
 
-        internal void AreEqual(double[] arrayOne, double[] arrayTwo)
+        internal void AreEqual<T>(IEnumerable<T> arrayOne, IEnumerable<T> arrayTwo)
         {
-            if(arrayOne.Where((value,i) => value != arrayTwo[i]).Any()) throw new ApplicationException("arrays are not equal.");
+            var result = arrayOne.Except(arrayTwo); // Produces the set difference of two sequences.
+            if (result.Count() != 0) throw new ApplicationException("arrays are not equal.");
         }
 
         internal Environment3DData ExtractValues(SerializedOutput data)
         {
-            var points = new Dictionary<string, List<float>>();
+            var points = new Dictionary<string, List<double>>();
             var lats = new List<double>();
             var lons = new List<double>();
             var depths = data.DepthAxis;
 
             foreach (var point in data.DataPoints.Where(point => point.Data != null)) {
-                points.Add(string.Format("{0:#.00000},{1:#.00000}", point.EarthCoordinate.Latitude_degrees, point.EarthCoordinate.Longitude_degrees), point.Data);
-                lats.Add(point.EarthCoordinate.Latitude_degrees);
-                lons.Add(point.EarthCoordinate.Longitude_degrees);
+                points.Add(string.Format("{0:#.00000},{1:#.00000}", point.Latitude_degrees, point.Longitude_degrees), point.Data);
+                lats.Add(point.Latitude_degrees);
+                lons.Add(point.Longitude_degrees);
             }
             var uniqueLats = lats.Distinct().ToList();
             var uniqueLons = lons.Distinct().ToList();
             uniqueLats.Sort();
             uniqueLons.Sort();
 
-            var dataArray = new List<float>[uniqueLons.Count, uniqueLats.Count];
+            var dataArray = new List<double>[uniqueLons.Count, uniqueLats.Count];
             for (var latIndex = 0; latIndex < uniqueLats.Count; latIndex++)
             {
                 var lat = uniqueLats[latIndex];
@@ -153,9 +180,10 @@ namespace ESME.Environment.NAVO
         /// <param name="east"></param>
         /// <param name="west"></param>
         /// <returns></returns>
-        internal Environment3DAverager AveragedGDEMOutput(List<string> ncFilenames, string dataType, string outputPath, double north, double south, double east, double west)
+        internal SerializedOutput AveragedGDEMOutput(List<string> ncFilenames, string dataType, string outputPath, double north, double south, double east, double west)
         {
             Environment3DAverager accumulator = null;
+            var depthAxisAggregator = new List<float>();
             foreach (var file in ncFilenames)
             {
                 var dataString = Path.GetFileNameWithoutExtension(file) + "-" + dataType + ".xml" ;
@@ -178,21 +206,39 @@ namespace ESME.Environment.NAVO
                 var dataOutput = SerializedOutput.Load(dataFilePath, null);
 
                 //delete it, 
-               // File.Delete(dataFilePath);
+                //File.Delete(dataFilePath);
                 //and add the values to the list
 
                 var results = ExtractValues(dataOutput);
                 var depthAxis = results.Depths.Select(x => (float)x).ToArray();
+                depthAxisAggregator.AddRange(depthAxis);
                 var data = new List<AverageDatum>[results.Longitudes.Length, results.Latitudes.Length];
-                if (accumulator == null) accumulator = new Environment3DAverager(results.Latitudes.Last(), results.Latitudes.First(), results.Longitudes.Last(), results.Longitudes.First(), GridSpacing, depthAxis, data);
+                if (accumulator == null) accumulator = new Environment3DAverager(results.Latitudes.Last(), results.Latitudes.First(), results.Longitudes.Last(), results.Longitudes.First(), GridSpacing, results.Depths, data);
                 //and sum them.
                 accumulator.Add(results);
             }
             if (accumulator == null) throw new ApplicationException(string.Format("no {0} data was extracted.", dataType));
+
             //then average them. 
             if (ncFilenames.Count > 1) accumulator.Average();
-           // accumulator.Save();
-            return accumulator;
+            // accumulator.Save();
+            var result = new SerializedOutput();
+            result.DepthAxis.AddRange(accumulator.Depths);
+            for (var lonIndex = 0; lonIndex < accumulator.Values.GetLength(0); lonIndex++)
+                for (var latIndex = 0; latIndex < accumulator.Values.GetLength(1); latIndex++)
+                {
+                    var dataValues = from location in accumulator.Values[lonIndex, latIndex]
+                                     select (double)location.Value;
+                    var dataPoint = new EnvironmentalDataPoint
+                                    {
+                                        Latitude_degrees = accumulator.Latitudes[latIndex],
+                                        Longitude_degrees = accumulator.Longitudes[lonIndex],
+                                    };
+                    dataPoint.Data.AddRange(dataValues.ToList());
+                    result.DataPoints.Add(dataPoint);
+                }
+
+            return result;
         }
     }
 }

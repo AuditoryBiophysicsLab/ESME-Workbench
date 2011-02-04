@@ -9,7 +9,7 @@ namespace ESME.Environment.NAVO
     {
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(extractionPacket.Filename, string.Format("SMGC-{0}.txt",extractionPacket.TimePeriod));
+            var filename = Path.Combine(extractionPacket.Filename, string.Format("{0}-SMGC.txt", extractionPacket.TimePeriod));
             var north = extractionPacket.North;
             var south = extractionPacket.South;
             var east = extractionPacket.East;
@@ -30,6 +30,7 @@ namespace ESME.Environment.NAVO
             {
                 writer.WriteLine("StartMonth=" + StartMonth);
                 writer.WriteLine("EndMonth=" + EndMonth);
+                writer.WriteLine("MonthDuration=" + MonthsDuration);
                 writer.WriteLine("GridSpacing=" + GridSpacing);
                 writer.Write(result);
             }
@@ -51,7 +52,8 @@ namespace ESME.Environment.NAVO
             //split the string up into lines
             var startMonth = int.Parse(resarray[0].Split('=')[1]);
             var endMonth = int.Parse(resarray[1].Split('=')[1]);
-            var gridSpacing = int.Parse(resarray[2].Split('=')[1]);
+            var monthDuration = int.Parse(resarray[2].Split('=')[1]);
+            var gridSpacing = int.Parse(resarray[3].Split('=')[1]);
 
             for (var index = 0; index < resarray.Length; index++)
             {
@@ -59,7 +61,7 @@ namespace ESME.Environment.NAVO
                 //if the line has hyphens in it..
                 if (line.Contains("---"))
                 {
-                    var rawspeeds = new double[(endMonth - startMonth) + 1];
+                    var rawspeeds = new double[monthDuration];
                     var count = 0;
                     //then take the next lines of data and extract windspeed and positions from them.
                     for (var j = index + 1; j <= (index + (endMonth - startMonth) + 1); j++)
