@@ -1,34 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using ESME.Environment.NAVO;
 using HRC.Navigation;
 
 namespace ESME.Model
 {
-    public class SoundSpeedProfile
+    public class SoundSpeedProfile : EarthCoordinate
     {
         #region Public Properties
 
-        public string TimePeriod { get; set; }
-        public EarthCoordinate Location { get; set; }
         public float[] Depths { get; set; }
         public float[] SoundSpeeds { get; set; }
         public float MaxDepth { get; set; }
 
         #endregion
 
-        internal static readonly UInt32 Magic = 0xe1071103;
+        internal static readonly UInt32 Magic = 0xe1074103;
 
         #region Public Constructors
 
         public SoundSpeedProfile() { }
 
-        public SoundSpeedProfile(string timePeriod, EarthCoordinate location, IList<float> depths, IList<float> soundSpeeds)
+        public SoundSpeedProfile(EarthCoordinate location, IList<float> depths, IList<float> soundSpeeds)
+            : base(location)
         {
-            TimePeriod = timePeriod;
-            Location = location;
-
             var speedList = new List<float>();
             var depthList = new List<float>();
             for (var i = 0; i < soundSpeeds.Count; i++)
@@ -42,12 +40,24 @@ namespace ESME.Model
             MaxDepth = Depths.Length == 0 ? 0 : Depths[Depths.Length - 1];
         }
 
+        public SoundSpeedProfile(EnvironmentalDataPoint dataPoint, List<double> depthAxis)
+            : base(dataPoint)
+        {
+            SoundSpeeds = (from speed in dataPoint.Data
+                           select (float)speed).ToArray();
+            Depths = new float[SoundSpeeds.Length];
+            if (Depths.Length == 0) return;
+            var floatDepths = (from depth in depthAxis
+                               select (float) depth).ToArray();
+            Array.ConstrainedCopy(floatDepths, 0, Depths, 0, Depths.Length);
+            MaxDepth = Depths.Last();
+        }
+
         public SoundSpeedProfile(BinaryReader stream)
+            : base(stream)
         {
             int i;
             if (stream.ReadUInt32() != Magic) throw new FormatException("Format error reading SoundSpeedProfile from file");
-            TimePeriod = stream.ReadString();
-            Location = new EarthCoordinate(stream);
             Depths = new float[stream.ReadInt32()];
             for (i = 0; i < Depths.Length; i++) Depths[i] = stream.ReadSingle();
             SoundSpeeds = new float[stream.ReadInt32()];
@@ -58,11 +68,11 @@ namespace ESME.Model
         #endregion
 
         public void Save(BinaryWriter stream)
+        
         {
             int i;
+            base.Write(stream);
             stream.Write(Magic);
-            stream.Write(TimePeriod);
-            Location.Write(stream);
             stream.Write(Depths.Length);
             for (i = 0; i < Depths.Length; i++) stream.Write(Depths[i]);
             stream.Write(SoundSpeeds.Length);
@@ -71,13 +81,11 @@ namespace ESME.Model
 
         public static readonly SoundSpeedProfile Empty = new SoundSpeedProfile
                                                          {
-                                                             TimePeriod = string.Empty,
-                                                             Location = null,
                                                              Depths = null,
                                                              SoundSpeeds = null,
                                                          };
 
-        static SoundSpeedProfile Read(string date, string sspPath)
+        static SoundSpeedProfile Read(string sspPath)
         {
             var depthList = new List<float>();
             var soundspeedList = new List<float>();
@@ -116,15 +124,15 @@ namespace ESME.Model
                 }
             }
 
-            return new SoundSpeedProfile(date, new EarthCoordinate(latitude, longitude), depthList.ToArray(), soundspeedList.ToArray());
+            return new SoundSpeedProfile(new EarthCoordinate(latitude, longitude), depthList.ToArray(), soundspeedList.ToArray());
         }
 
-        public static SoundSpeedProfile Read(string date, double latitude, double longitude, string ssfPath)
+        public static SoundSpeedProfile Read(double latitude, double longitude, string ssfPath)
         {
             var directoryInfo = new DirectoryInfo(ssfPath);
             var fileInfo = directoryInfo.GetFiles("*" + latitude.ToString("###.0000") + "x" + longitude.ToString("###.0000") + "*");
 
-            return fileInfo.Length == 1 ? Read(date, fileInfo[0].FullName) : Empty;
+            return fileInfo.Length == 1 ? Read(fileInfo[0].FullName) : Empty;
         }
     }
 }
