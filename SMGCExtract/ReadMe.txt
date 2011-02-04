@@ -1,40 +1,34 @@
-========================================================================
-    CONSOLE APPLICATION : SMGCExtract Project Overview
-========================================================================
 
-AppWizard has created this SMGCExtract application for you.
+This directory contains source code for the Surface Marine Gridded 
+Climatology (SMGC) version 2.0 extraction software.
 
-This file contains a summary of what you will find in each of the files that
-make up your SMGCExtract application.
+This code was written and compiled under Linux but should compile 
+under windows with some minor modifications.  A linux binary is 
+provided with the SMGC2.0 distribution.
+
+To build the binary executable type "make" at the unix command prompt
+and then copy the executable to a location on your path (e.g. /usr/local/bin).
+
+Set the following environment variables in the system wide shell
+environment (e.g. /etc/profile)
+
+	export SMGC_DATA_NORTH=/smgc2/north/
+	export SMGC_DATA_SOUTH=/smgc2/south/
+
+This assumes all the datafiles for the northern hemisphere are in 
+"/smgc2/north" and all the datafiles for the southern hemisphere 
+are in "/smgc2/south".  Even if all the datafiles (north and south) are in
+one location (e.g. /smgc/data) you must still set the environment
+variables like so:
+
+	export SMGC_DATA_NORTH=/smgc/data/
+	export SMGC_DATA_SOUTH=/smgc/data/
+
+DO NOT FORGET TO INCLUDE THE TRAILING BACKSLASH!
 
 
-SMGCExtract.vcxproj
-    This is the main project file for VC++ projects generated using an Application Wizard.
-    It contains information about the version of Visual C++ that generated the file, and
-    information about the platforms, configurations, and project features selected with the
-    Application Wizard.
 
-SMGCExtract.vcxproj.filters
-    This is the filters file for VC++ projects generated using an Application Wizard. 
-    It contains information about the association between the files in your project 
-    and the filters. This association is used in the IDE to show grouping of files with
-    similar extensions under a specific node (for e.g. ".cpp" files are associated with the
-    "Source Files" filter).
 
-SMGCExtract.cpp
-    This is the main application source file.
 
-/////////////////////////////////////////////////////////////////////////////
-Other standard files:
 
-StdAfx.h, StdAfx.cpp
-    These files are used to build a precompiled header (PCH) file
-    named SMGCExtract.pch and a precompiled types file named StdAfx.obj.
 
-/////////////////////////////////////////////////////////////////////////////
-Other notes:
-
-AppWizard uses "TODO:" comments to indicate parts of the source code you
-should add to or customize.
-
-/////////////////////////////////////////////////////////////////////////////
