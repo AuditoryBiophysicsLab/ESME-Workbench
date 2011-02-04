@@ -45,9 +45,9 @@ void swap_long (long *);
 
 int main (int argc, char *argv[])
 {
-  char *text,string[100],*file;
+  char *text,string[100];
 
-  register int j,n,m,k,p,q,lat,lon,icnt,p2,p3;  /* loop indices */
+  register int j,n,m,k,p,lat,lon,icnt,p2,p3;  /* loop indices */
    
   long int   pval, nxt, NBytRec, result, BinNum, Bin1, Bin2, Bin3, Count;
   float      BinVal, BinV1, BinV2, BinV3;
@@ -75,7 +75,7 @@ int main (int argc, char *argv[])
   int ilat,ilon;
 
   long int lat0,lon0,latN,lonN,lonNx,lon0x;
-  long int FSize,Nread;
+  long int Nread;
 
   FILE *fpin;
 
