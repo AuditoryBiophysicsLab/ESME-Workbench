@@ -7,8 +7,10 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
+using ESME.Environment.NAVO;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.NAVODataSources;
 using ESMEWorkBench.ViewModels.RecentFiles;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
@@ -292,7 +294,7 @@ namespace ESMEWorkBench.ViewModels.Main
                         _messageBoxService.ShowError("Error opening experiment: " + e.Message);
                         return;
                     }
-                    MediatorMessage.Send(MediatorMessage.SetExperiment, (Experiment) null);
+                    MediatorMessage.Send(MediatorMessage.SetExperiment, (Experiment)null);
                     _experiment = newExperiment;
                     DecoratedExperimentName = Path.GetFileName(_experiment.FileName);
                     HookPropertyChanged(_experiment);
@@ -394,16 +396,40 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             return true;
         }
+        bool CanShowEnvironmentSettings
+        {
+            get
+            {
+                if (Globals.AppSettings.UseOAMLDataSources)
+                {
+                    return ((_experiment != null) && (_experiment.NemoFile != null) && Globals.AppSettings.NAVOConfiguration.IsValid);
+                }
 
+                return ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory)) && (_experiment != null) && (_experiment.NemoFile != null));
+
+            }
+        }
         void ShowEnvironmentSettingsView()
         {
-            var environmentSettingsViewModel = new EnvironmentSettingsViewModel(Globals.AppSettings.EnvironmentDatabaseDirectory, _experiment, _messageBoxService);
-            var result = _visualizerService.ShowDialog("EnvironmentSettingsView", environmentSettingsViewModel);
-            if (!result.HasValue || !result.Value) return;
-            _experiment.BathymetryFileName = environmentSettingsViewModel.BathymetryData.SelectedItem.Name;
-            _experiment.BottomTypeFileName = environmentSettingsViewModel.BottomTypeData.SelectedItem.Name;
-            _experiment.SoundSpeedFileName = environmentSettingsViewModel.SoundSpeedData.SelectedItem.Name;
-            _experiment.WindSpeedFileName = environmentSettingsViewModel.WindSpeedData.SelectedItem.Name;
+            if (Globals.AppSettings.UseOAMLDataSources)
+            {
+                var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_visualizerService, Globals.AppSettings, _experiment);
+                var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
+                if (result.HasValue && result.Value)
+                {
+
+                }
+            }
+            else
+            {
+                var environmentSettingsViewModel = new EnvironmentSettingsViewModel(Globals.AppSettings.EnvironmentDatabaseDirectory, _experiment, _messageBoxService);
+                var result = _visualizerService.ShowDialog("EnvironmentSettingsView", environmentSettingsViewModel);
+                if (!result.HasValue || !result.Value) return;
+                _experiment.BathymetryFileName = environmentSettingsViewModel.BathymetryData.SelectedItem.Name;
+                _experiment.BottomTypeFileName = environmentSettingsViewModel.BottomTypeData.SelectedItem.Name;
+                _experiment.SoundSpeedFileName = environmentSettingsViewModel.SoundSpeedData.SelectedItem.Name;
+                _experiment.WindSpeedFileName = environmentSettingsViewModel.WindSpeedData.SelectedItem.Name;
+            }
         }
 
         #region public RecentFileDescriptor RecentFilesSelectedItem { get; set; }

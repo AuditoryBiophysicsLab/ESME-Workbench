@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -11,23 +13,29 @@ namespace ESME.Environment.NAVO
 {
     public class BST : NAVODataSource
     {
-        #region public List<string> Resolutions { get; set; }
+        public BST() { Resolutions = new ObservableCollection<string>(); }
+        #region public ObservableCollection<string> Resolutions { get; set; }
 
-        public List<string> Resolutions
+        public ObservableCollection<string> Resolutions
         {
             get { return _resolutions; }
             set
             {
                 if (_resolutions == value) return;
+                if (_resolutions != null) _resolutions.CollectionChanged -= ResolutionsCollectionChanged;
                 _resolutions = value;
+                if (_resolutions != null) _resolutions.CollectionChanged += ResolutionsCollectionChanged;
                 NotifyPropertyChanged(ResolutionsChangedEventArgs);
             }
         }
 
+        void ResolutionsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(ResolutionsChangedEventArgs); SelectedResolution = Resolutions.First(); }
         static readonly PropertyChangedEventArgs ResolutionsChangedEventArgs = ObservableHelper.CreateArgs<BST>(x => x.Resolutions);
-        List<string> _resolutions;
+        ObservableCollection<string> _resolutions;
 
         #endregion
+
+        
 
         #region public string SelectedResolution { get; set; }
 
@@ -50,7 +58,7 @@ namespace ESME.Environment.NAVO
 
         public void GetAllResolutions()
         {
-            Resolutions = new List<string>();
+            
             const string contents = "set";
             var scriptfile = Path.GetTempFileName();
             File.WriteAllText(scriptfile, contents);

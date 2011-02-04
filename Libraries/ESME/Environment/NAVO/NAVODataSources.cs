@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -29,6 +32,27 @@ namespace ESME.Environment.NAVO
             ExtractionPacket = extractionPacket;
             Configuration = configurations;
 
+            Months = new List<NAVOTimePeriod>
+                     {
+                         NAVOTimePeriod.January,
+                         NAVOTimePeriod.February,
+                         NAVOTimePeriod.March,
+                         NAVOTimePeriod.April,
+                         NAVOTimePeriod.May,
+                         NAVOTimePeriod.June,
+                         NAVOTimePeriod.July,
+                         NAVOTimePeriod.August,
+                         NAVOTimePeriod.September,
+                         NAVOTimePeriod.October,
+                         NAVOTimePeriod.November,
+                         NAVOTimePeriod.December,
+                         NAVOTimePeriod.Spring,
+                         NAVOTimePeriod.Summer,
+                         NAVOTimePeriod.Fall,
+                         NAVOTimePeriod.Winter,
+                         NAVOTimePeriod.Cold,
+                         NAVOTimePeriod.Warm,
+                     };
 
             BST = new BST
                   {
@@ -61,6 +85,8 @@ namespace ESME.Environment.NAVO
             DBDB.GetAllResolutions();
         }
 
+        
+
         #region public NAVOTimePeriod SelectedPeriod { get; set; }
 
         static readonly PropertyChangedEventArgs SelectedPeriodChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.SelectedPeriod);
@@ -79,12 +105,38 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
+        
+
         public BST BST { get; private set; }
         public DBDB DBDB { get; private set; }
         public GDEM GDEM { get; private set; }
         public SMGC SMGC { get; private set; }
         internal NAVOExtractionPacket ExtractionPacket { get; set; }
         internal NAVOConfiguration Configuration { get; set; }
+
+        #region public List<NAVOTimePeriod> Months { get; set; }
+
+        public List<NAVOTimePeriod> Months
+        {
+            get { return _months; }
+            set
+            {
+                if (_months == value) return;
+                _months = value;
+                NotifyPropertyChanged(MonthsChangedEventArgs);
+                SelectedPeriod = Months[0];
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MonthsChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.Months);
+        List<NAVOTimePeriod> _months;
+
+        #endregion
+
+
+
+       
+
 
         public void ExtractAreas()
         {
