@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -85,8 +83,6 @@ namespace ESME.Environment.NAVO
             DBDB.GetAllResolutions();
         }
 
-        
-
         #region public NAVOTimePeriod SelectedPeriod { get; set; }
 
         static readonly PropertyChangedEventArgs SelectedPeriodChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.SelectedPeriod);
@@ -104,8 +100,6 @@ namespace ESME.Environment.NAVO
         }
 
         #endregion
-
-        
 
         public BST BST { get; private set; }
         public DBDB DBDB { get; private set; }
@@ -132,11 +126,6 @@ namespace ESME.Environment.NAVO
         List<NAVOTimePeriod> _months;
 
         #endregion
-
-
-
-       
-
 
         public void ExtractAreas()
         {

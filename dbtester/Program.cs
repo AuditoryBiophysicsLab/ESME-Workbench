@@ -163,15 +163,15 @@ namespace dbtester
             var eebLayer = new DataLayer("soundspeed", "spring", "various", "", new DataAxis("latitude", extractedArea.Latitudes.Select(x => (float)x).ToArray()), new DataAxis("longitude", extractedArea.Longitudes.Select(x => (float)x).ToArray()), new DataAxis("depth", extractedArea.Depths.Select(x => (float)x).ToArray()));
             eebFile.Layers.Add(eebLayer);
             var dataPoint = new DataPoint(eebLayer);
-            var dataValues = new float[extractedArea.Depths.Length];
+            var dataValues = new double[extractedArea.Depths.Length];
 
             for (var lonIndex = 0; lonIndex < extractedArea.Values.GetLength(0); lonIndex++)
                 for (var latIndex = 0; latIndex < extractedArea.Values.GetLength(1); latIndex++)
                 {
                     var curOutputPoint = extractedArea.Values[lonIndex, latIndex];
                     if (curOutputPoint == null) continue;
-                    for (var depIndex = 0; depIndex < extractedArea.Depths.Length; depIndex++) dataValues[depIndex] = curOutputPoint.Count > depIndex ? curOutputPoint[depIndex] : float.NaN;
-                    dataPoint.Data = dataValues;
+                    for (var depIndex = 0; depIndex < extractedArea.Depths.Length; depIndex++) dataValues[depIndex] = curOutputPoint.Count > depIndex ? curOutputPoint[depIndex] : double.NaN;
+                    dataPoint.Data = dataValues.Cast<float>().ToArray();
                 }
             Console.WriteLine(string.Format("GDEM : Data extracted to {0}", eebFileName));
             eebFile.Close();

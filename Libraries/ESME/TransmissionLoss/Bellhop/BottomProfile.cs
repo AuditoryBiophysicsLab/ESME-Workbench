@@ -11,7 +11,7 @@ namespace ESME.TransmissionLoss.Bellhop
     {
         const UInt32 Magic = 0x2bf6f6e5;
 
-        public BottomProfile(int numberOfPointsInTransect, Transect transect, Environment2DData environment2DData)
+        public BottomProfile(int numberOfPointsInTransect, Transect transect, Environment.Environment2DData environment2DData)
         {
             MaxDepth = double.MinValue;
             Profile = new double[numberOfPointsInTransect];

@@ -109,7 +109,7 @@ namespace ImportNetCDF
             var myFile = new NcFile(netCDFFileName);
             int depthCount, lonIndex, depth;
             short missingValue;
-            float[] depths;
+            double[] depths;
 
             myFile.LoadAllData();
 
@@ -149,13 +149,13 @@ namespace ImportNetCDF
             if (depthVarName != String.Empty)
             {
                 depthCount = (int) depthVar.Dimensions[0].Size;
-                depths = new float[depthCount];
+                depths = new double[depthCount];
                 for (depth = 0; depth < depthCount; depth++) depths[depth] = depthVar.GetFloat(depth);
             }
             else
             {
                 depthCount = 1;
-                depths = new float[1];
+                depths = new double[1];
             }
 
 
@@ -175,11 +175,7 @@ namespace ImportNetCDF
             var progress = 0f;
             var progressStep = 1f/lonCount;
 
-            var serializedOutput = new SerializedOutput
-                                   {
-                                       DataPoints = new List<EnvironmentalDataPoint>(),
-                                       DepthAxis = new List<float>(),
-                                   };
+            var serializedOutput = new SerializedOutput();
             serializedOutput.DepthAxis.AddRange(depths.ToList()); 
 
             for (lonIndex = 0; lonIndex < lonCount; lonIndex++)
@@ -192,8 +188,8 @@ namespace ImportNetCDF
                     var latSourceIndex = latMap[latIndex].Index;
                     var curDataPoint = new EnvironmentalDataPoint
                                        {
-                                           EarthCoordinate = new EarthCoordinate(lat, lon),
-                                           Data = new List<float>(),
+                                           Latitude_degrees = lat,
+                                           Longitude_degrees = lon,
                                        };
                     if (depthVarName != String.Empty)
                     {

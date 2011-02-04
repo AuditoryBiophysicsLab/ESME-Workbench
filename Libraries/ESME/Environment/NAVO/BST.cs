@@ -89,7 +89,7 @@ namespace ESME.Environment.NAVO
         //public override void ExtractArea(string filename, double north, double south, double east, double west)
         public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         {
-            var filename = Path.Combine(extractionPacket.Filename , "BST.chb");
+            var filename = Path.Combine(extractionPacket.Filename, string.Format("{0}-BST.chb", extractionPacket.TimePeriod));
             WorkingDirectory = Path.GetDirectoryName(filename);
             var north = extractionPacket.North;
             var south = extractionPacket.South;

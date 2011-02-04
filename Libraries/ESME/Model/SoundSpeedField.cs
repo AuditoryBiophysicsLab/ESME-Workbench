@@ -1,15 +1,310 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Media;
 using System.Xml.Serialization;
 using ESME.Environment;
+using ESME.Overlay;
 using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.Model
 {
+#if false
+    public class EnvironmentDataPoint<T> : EarthCoordinate
+    {
+        public T Value { get; set; }
+    }
+
+    public class DepthValueList : EarthCoordinate
+    {
+        public List<float> Depths { get; set; }
+        public List<float> Values { get; set; }
+        public DepthValueList() { }
+        public DepthValueList(IEnumerable<float> depths, IEnumerable<float> values)
+        {
+            if (depths.Count() < values.Count()) throw new IndexOutOfRangeException("DepthValueList: Depth array must be of equal or greater length than Value array");
+            Depths = new List<float>();
+            Depths.AddRange(depths);
+            Values = new List<float>();
+            Values.AddRange(values);
+            if (Depths.Count > Values.Count) 
+                Depths.RemoveRange(Values.Count, Depths.Count - Values.Count);
+        }
+
+        public float MaxDepth
+        {
+            get { return Depths.Max(); }
+        }
+    }
+
+    public class EnvironmentDataField<T> : SerializableData<EnvironmentDataField<T>> where T : EarthCoordinate
+    {
+        public EarthCoordinateList<T> Values { get; set; }
+    }
+
+    public class EarthCoordinateList<T> : List<T> where T: EarthCoordinate
+    {
+        #region Public properties
+
+        /// <summary>
+        ///   List of latitudes (in degrees) for which we have values
+        /// </summary>
+        public IEnumerable<double> Latitudes
+        {
+            get
+            {
+                var result = from value in this
+                             select value.Latitude_degrees;
+                result.Distinct().ToList().Sort();
+                return result;
+            }
+        }
+
+        /// <summary>
+        ///   List of longitudes (in degrees) for which we have values
+        /// </summary>
+        public IEnumerable<double> Longitudes
+        {
+            get
+            {
+                var result = from value in this
+                             select value.Longitude_degrees;
+                result.Distinct().ToList().Sort();
+                return result;
+            }
+        }
+
+        /// <summary>
+        ///   Corner of the data set that has the minimum lat and lon values
+        /// </summary>
+        public EarthCoordinate MinCoordinate { get { return new EarthCoordinate(Latitudes.First(), Longitudes.First()); } }
+
+        /// <summary>
+        ///   Corner of the data set that has the maximum lat and lon values
+        /// </summary>
+        public EarthCoordinate MaxCoordinate { get { return new EarthCoordinate(Latitudes.Last(), Longitudes.Last()); } }
+
+        public double HorizontalResolution
+        {
+            get
+            {
+                var lonList = Longitudes.ToList();
+                return Math.Abs(lonList[1] - lonList[0]);
+            }
+        }
+
+        public double VerticalResolution
+        {
+            get
+            {
+                var latList = Longitudes.ToList();
+                return Math.Abs(latList[1] - latList[0]);
+            }
+        }
+
+        public OverlayLineSegments BoundingBox
+        {
+            get
+            {
+                var max = MaxCoordinate;
+                var min = MinCoordinate;
+                var vertRes = VerticalResolution;
+                var horizRes = HorizontalResolution;
+                var bathyBox = new[]
+                               {
+                                   //edit: Modified this routine to take the horizontal and vertical resolution into account
+                                   //      It now places the bounding box such that the lines are coincident with the edges of
+                                   //      the edge samples of the selected data (extends by half the horizontal/vertical resolution)
+                                   //northeast corner:                   
+                                   new EarthCoordinate(max.Latitude_degrees + (vertRes/2), max.Longitude_degrees + (horizRes/2)), //southeast corner: 
+                                   new EarthCoordinate(min.Latitude_degrees - (vertRes/2), max.Longitude_degrees + (horizRes/2)), //southwest corner: 
+                                   new EarthCoordinate(min.Latitude_degrees - (vertRes/2), min.Longitude_degrees - (horizRes/2)), //northwest corner: 
+                                   new EarthCoordinate(max.Latitude_degrees + (vertRes/2), min.Longitude_degrees - (horizRes/2)), //northeast corner again to close the loop.
+                                   new EarthCoordinate(max.Latitude_degrees + (vertRes/2), max.Longitude_degrees + (horizRes/2)),
+                               };
+
+                var shape = new OverlayLineSegments(bathyBox, Colors.Black, 1, LineStyle.Solid);
+                return shape;
+            }
+        }
+
+        #endregion
+
+        protected EarthCoordinate ClosestPointTo(EarthCoordinate desiredLocation)
+        {
+            var distances = from value in this
+                            select new
+                            {
+                                Value = value,
+                                Distance = value.GetDistanceTo_Meters(desiredLocation)
+                            };
+            var result = from distance in distances
+                         orderby distance.Distance
+                         select distance;
+            return result.First().Value;
+        }
+
+        public bool ContainsCoordinate(EarthCoordinate coordinate)
+        {
+            var min = MinCoordinate;
+            var max = MaxCoordinate;
+            return (min.Longitude_degrees <= coordinate.Longitude_degrees) && (coordinate.Longitude_degrees <= max.Longitude_degrees) && (min.Latitude_degrees <= coordinate.Latitude_degrees) && (coordinate.Latitude_degrees <= max.Latitude_degrees);
+        }
+
+        public EarthCoordinate[,] ValueArray
+        {
+            get
+            {
+                var lons = Longitudes.ToArray();
+                var lats = Latitudes.ToArray();
+                var result = new EarthCoordinate[lons.Length, lats.Length];
+                for (var latIndex = 0; latIndex < lats.Length; latIndex++)
+                    for (var lonIndex = 0; lonIndex < lons.Length; lonIndex++)
+                    {
+                        var lat = lats[latIndex];
+                        var lon = lons[lonIndex];
+                        var selectedPoint = Find(t => t.Latitude_degrees == lat && t.Longitude_degrees == lon);
+                        if (selectedPoint == null) throw new DataException("ValueArray: This data set is not a rectangular array");
+                        result[lonIndex, latIndex] = selectedPoint;
+                    }
+                return result;
+            }
+        }
+    }
+
+    public class NewEnvironment2DData : EnvironmentDataField<EnvironmentDataPoint<float>>
+    {
+        public EnvironmentDataPoint<float> ClosestPointTo(EarthCoordinate desiredLocation) { return (EnvironmentDataPoint<float>) Values.ClosestPointTo(desiredLocation); }
+
+        public float[,] ValueArray
+        {
+            get 
+            { 
+                var lons = Values.Longitudes.ToArray();
+                var lats = Values.Latitudes.ToArray();
+                var result = new float[lons.Length,lats.Length];
+                for (var latIndex = 0; latIndex < lats.Length; latIndex++)
+                    for (var lonIndex = 0; lonIndex < lons.Length; lonIndex++)
+                    {
+                        var lat = lats[latIndex];
+                        var lon = lons[lonIndex];
+                        var selectedPoint = Values.Find(t => t.Latitude_degrees == lat && t.Longitude_degrees == lon);
+                        if (selectedPoint == null) throw new DataException("ValueArray: This data set is not a rectangular array");
+                        result[lonIndex, latIndex] = selectedPoint.Value;
+                    }
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Look up a value in the current data set.
+        /// </summary>
+        /// <param name="coordinate">
+        /// The coordinate to search the data set for
+        /// </param>
+        /// <param name="value">
+        /// The value at the requested coordinate
+        /// </param>
+        /// <returns>
+        /// If the requested coordinate is contained in the data set, the function return value is 'true', 'false' otherwise
+        /// </returns>
+        protected virtual bool Lookup(EarthCoordinate coordinate, ref EnvironmentDataPoint<float> value)
+        {
+            var selectedIndex = Values.FindIndex(t => t.Latitude_degrees == coordinate.Latitude_degrees && t.Longitude_degrees == coordinate.Longitude_degrees);
+            if (selectedIndex != -1)
+            {
+                value = Values[selectedIndex];
+                return true;
+            }
+            return false;
+
+        }
+        public static NewEnvironment2DData ReadChrtrBinaryFile(string fileName)
+        {
+            var result = new NewEnvironment2DData();
+            using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                var west = stream.ReadSingle();
+                var east = stream.ReadSingle();
+                var south = stream.ReadSingle();
+                var north = stream.ReadSingle();
+                var gridSpacing = stream.ReadSingle() / 60f; // Source is in minutes, we need degrees
+                var width = stream.ReadInt32();
+                var height = stream.ReadInt32();
+                var endian = stream.ReadUInt32();
+                if (endian != 0x00010203) throw new FileFormatException("Invalid CHRTR Binary file format - endian is incorrect");
+                var maxDepth = -stream.ReadSingle();
+                var minDepth = -stream.ReadSingle();
+                var paddingWidth = (width - 10) * 4;
+                stream.ReadBytes(paddingWidth);
+                var depths = new float[height, width];
+                for (var lat = 0; lat < height; lat++)
+                    for (var lon = 0; lon < width; lon++)
+                    {
+                        var curSample = stream.ReadSingle();
+                        result.Values.Add(new EnvironmentDataPoint<float>
+                                          {
+                                              Latitude_degrees = south + (lat * gridSpacing),
+                                              Longitude_degrees = west + (lon * gridSpacing),
+                                              Value = curSample == 1e16f ? float.NaN : -curSample,
+                                          });
+                    }
+                return result;
+            }
+        }
+
+    }
+
+    public class Environment3DData : EnvironmentDataField<List<EnvironmentDataPoint<DepthValueList>>>
+    {
+        public new EnvironmentDataPoint<DepthValueList> ClosestPointTo(EarthCoordinate desiredLocation) { return (EnvironmentDataPoint<DepthValueList>)base.ClosestPointTo(desiredLocation); }
+
+        public float[,] ValueArray(int depthIndex)
+        {
+            var lons = Longitudes.ToArray();
+            var lats = Latitudes.ToArray();
+            var result = new float[lons.Length,lats.Length];
+            for (var latIndex = 0; latIndex < lats.Length; latIndex++)
+                for (var lonIndex = 0; lonIndex < lons.Length; lonIndex++)
+                {
+                    var lat = lats[latIndex];
+                    var lon = lons[lonIndex];
+                    var selectedPoint = Values.Find(t => t.Latitude_degrees == lat && t.Longitude_degrees == lon);
+                    if (selectedPoint == null) throw new DataException("ValueArray: This data set is not a rectangular array");
+                    result[lonIndex, latIndex] = selectedPoint.Value.Values[depthIndex];
+                }
+            return result;
+        }
+
+        /// <summary>
+        /// Look up a value in the current data set.
+        /// </summary>
+        /// <param name="coordinate">
+        /// The coordinate to search the data set for
+        /// </param>
+        /// <param name="value">
+        /// The value at the requested coordinate
+        /// </param>
+        /// <returns>
+        /// If the requested coordinate is contained in the data set, the function return value is 'true', 'false' otherwise
+        /// </returns>
+        protected virtual bool Lookup(EarthCoordinate coordinate, ref EnvironmentDataPoint<DepthValueList> value)
+        {
+            var selectedIndex = Values.FindIndex(t => t.Latitude_degrees == coordinate.Latitude_degrees && t.Longitude_degrees == coordinate.Longitude_degrees);
+            if (selectedIndex != -1)
+            {
+                value = Values[selectedIndex];
+                return true;
+            }
+            return false;
+        }
+    }
+#endif
+
     public class SoundSpeedField : SerializableData<SoundSpeedField>
     {
         public string TimePeriod { get; set; }
@@ -36,7 +331,6 @@ namespace ESME.Model
                                         from point in row.Points
                                         select new SoundSpeedProfile(TimePeriod, point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
             foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
-
         }
 
         public SoundSpeedField(string environmentFileName, float north, float west, float south, float east)
