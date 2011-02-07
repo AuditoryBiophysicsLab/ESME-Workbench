@@ -10,42 +10,57 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <GroupBox Grid.Column="0" Header="Months">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Button Width="75">Select All</Button>
-                    <Button Width="75">Select None</Button>
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Width="75"
+                                Margin="5">
+                            Select All
+                        </Button>
+                        <Button Width="75"
+                                Margin="5">
+                            Select None
+                        </Button>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <CheckBox IsChecked="{Binding January}">January</CheckBox>
+                        <CheckBox IsChecked="{Binding February}">February</CheckBox>
+                        <CheckBox IsChecked="{Binding March}">March</CheckBox>
+                        <CheckBox IsChecked="{Binding April}">April</CheckBox>
+                        <CheckBox IsChecked="{Binding May}">May</CheckBox>
+                        <CheckBox IsChecked="{Binding June}">June</CheckBox>
+                        <CheckBox IsChecked="{Binding July}">July</CheckBox>
+                        <CheckBox IsChecked="{Binding August}">August</CheckBox>
+                        <CheckBox IsChecked="{Binding September}">September</CheckBox>
+                        <CheckBox IsChecked="{Binding October}">October</CheckBox>
+                        <CheckBox IsChecked="{Binding November}">November</CheckBox>
+                        <CheckBox IsChecked="{Binding December}">December</CheckBox>
+                    </StackPanel>
                 </StackPanel>
-                <CheckBox IsChecked="{Binding January}">January</CheckBox>
-                <CheckBox>February</CheckBox>
-                <CheckBox>March</CheckBox>
-                <CheckBox>April</CheckBox>
-                <CheckBox>May</CheckBox>
-                <CheckBox>June</CheckBox>
-                <CheckBox>July</CheckBox>
-                <CheckBox>August</CheckBox>
-                <CheckBox>September</CheckBox>
-                <CheckBox>October</CheckBox>
-                <CheckBox>November</CheckBox>
-                <CheckBox>December</CheckBox>
-            </StackPanel>
+            </DockPanel>
         </GroupBox>
         <GroupBox Grid.Column="1" Header="Seasons">
             <DockPanel>
                 <StackPanel Orientation="Horizontal"
                             DockPanel.Dock="Top">
-                    <Button Width="75">Select All</Button>
-                    <Button Width="75">Select None</Button>
+                    <Button Width="75"
+                                Margin="5">
+                        Select All
+                    </Button>
+                    <Button Width="75"
+                                Margin="5">
+                        Select None
+                    </Button>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Top">
-                    <CheckBox>Spring</CheckBox>
-                    <CheckBox>Summer</CheckBox>
-                    <CheckBox>Fall</CheckBox>
-                    <CheckBox>Winter</CheckBox>
-                    <CheckBox>Warm</CheckBox>
-                    <CheckBox>Cold</CheckBox>
+                    <CheckBox IsChecked="{Binding Spring}">Spring</CheckBox>
+                    <CheckBox IsChecked="{Binding Summer}">Summer</CheckBox>
+                    <CheckBox IsChecked="{Binding Fall}">Fall</CheckBox>
+                    <CheckBox IsChecked="{Binding Winter}">Winter</CheckBox>
+                    <CheckBox IsChecked="{Binding Warm}">Warm</CheckBox>
+                    <CheckBox IsChecked="{Binding Cold}">Cold</CheckBox>
                 </StackPanel>
                 <Button DockPanel.Dock="Bottom"
-                        Height="22"
                         VerticalAlignment="Bottom">
                     Season definitions...
                 </Button>
