@@ -40,7 +40,7 @@ namespace ESME.Model
             MaxDepth = Depths.Length == 0 ? 0 : Depths[Depths.Length - 1];
         }
 
-        public SoundSpeedProfile(EnvironmentalDataPoint dataPoint, List<double> depthAxis)
+        public SoundSpeedProfile(EnvironmentalDataPoint dataPoint, IEnumerable<double> depthAxis)
             : base(dataPoint)
         {
             SoundSpeeds = (from speed in dataPoint.Data
@@ -77,6 +77,46 @@ namespace ESME.Model
             for (i = 0; i < Depths.Length; i++) stream.Write(Depths[i]);
             stream.Write(SoundSpeeds.Length);
             for (i = 0; i < SoundSpeeds.Length; i++) stream.Write(SoundSpeeds[i]);
+        }
+
+        public void Extend(float maxDepth, float newSoundSpeed)
+        {
+            if (maxDepth < Depths.Last()) throw new ApplicationException(string.Format("SoundSpeedProfile.Extend: Given depth {0} is less than current maximum depth {1}", maxDepth, Depths.Last()));
+            var oldDepths = new List<float>(Depths)
+                            {
+                                maxDepth
+                            };
+            var oldSSP = new List<float>(SoundSpeeds)
+                          {
+                              newSoundSpeed,
+                          };
+            Depths = oldDepths.ToArray();
+            SoundSpeeds = oldSSP.ToArray();
+        }
+
+        public void Extend(SoundSpeedProfile deepestSSP)
+        {
+            if(deepestSSP.MaxDepth > MaxDepth)
+            {
+                if (SoundSpeeds.Length == 0)
+                {
+                    Depths = new List<float>(deepestSSP.Depths).ToArray();
+                    SoundSpeeds = new List<float>(deepestSSP.SoundSpeeds).ToArray();
+                }
+                else
+                {
+
+                    var thisSpeed = SoundSpeeds.Last();
+                    var thatSpeed = deepestSSP.SoundSpeeds[SoundSpeeds.Length - 1];
+
+                    var ssDiff = thatSpeed - thisSpeed;
+                    Depths = new List<float>(deepestSSP.Depths).ToArray();
+                    var speeds = new List<float>(SoundSpeeds);
+                    for (var speedIndex = SoundSpeeds.Length; speedIndex < deepestSSP.SoundSpeeds.Length; speedIndex++) speeds.Add(deepestSSP.SoundSpeeds[speedIndex] - ssDiff);
+                    SoundSpeeds = speeds.ToArray();
+                }
+            }
+
         }
 
         public static readonly SoundSpeedProfile Empty = new SoundSpeedProfile
