@@ -7,8 +7,8 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.NAVODataSources
 {
-    [ExportViewModel("ExtractionTimesViewModel")]
-    internal class ExtractionTimesViewModel : ViewModelBase
+    [ExportViewModel("SeasonConfigurationViewModel")]
+    internal class SeasonConfigurationViewModel : ViewModelBase
     {
         #region public List<NAVOTimePeriod> Months { get; set; }
 
@@ -23,7 +23,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             }
         }
 
-        static readonly PropertyChangedEventArgs MonthsChangedEventArgs = ObservableHelper.CreateArgs<ExtractionTimesViewModel>(x => x.Months);
+        static readonly PropertyChangedEventArgs MonthsChangedEventArgs = ObservableHelper.CreateArgs<SeasonConfigurationViewModel>(x => x.Months);
         List<NAVOTimePeriod> _months;
 
         #endregion
@@ -41,13 +41,13 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             }
         }
 
-        static readonly PropertyChangedEventArgs AppSettingsChangedEventArgs = ObservableHelper.CreateArgs<ExtractionTimesViewModel>(x => x.AppSettings);
+        static readonly PropertyChangedEventArgs AppSettingsChangedEventArgs = ObservableHelper.CreateArgs<SeasonConfigurationViewModel>(x => x.AppSettings);
         AppSettings _appSettings;
 
         #endregion
 
 
-        public ExtractionTimesViewModel()
+        public SeasonConfigurationViewModel()
         {
             Months = new List<NAVOTimePeriod>
                      {

@@ -150,7 +150,7 @@
     <Compile Include="ViewModels\NAVODataSources\DBDBViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\EnvironmentBuilderConfigurationViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\EnvironmentBuilderViewModel.cs" />
-    <Compile Include="ViewModels\NAVODataSources\ExtractionTimesViewModel.cs" />
+    <Compile Include="ViewModels\NAVODataSources\SeasonConfigurationViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\GDEMViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\NAVODataSourceViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\SMGCViewModel.cs" />

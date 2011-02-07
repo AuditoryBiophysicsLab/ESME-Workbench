@@ -94,7 +94,7 @@
 			</TabItem>
 			<TabItem Header="Seasons"
                      IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
-				<Views:ExtractionTimesView />
+				<Views:SeasonConfigurationView />
 			</TabItem>
 		</TabControl>
 	</DockPanel>
