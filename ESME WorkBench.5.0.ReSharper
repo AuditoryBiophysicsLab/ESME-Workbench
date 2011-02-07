@@ -132,6 +132,7 @@
       <Abbreviation Text="GDEM" />
       <Abbreviation Text="YXZ" />
       <Abbreviation Text="NAVO" />
+      <Abbreviation Text="UNESCO" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>

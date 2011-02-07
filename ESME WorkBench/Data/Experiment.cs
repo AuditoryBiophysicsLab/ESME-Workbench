@@ -1006,10 +1006,16 @@ namespace ESMEWorkBench.Data
                 if (SoundSpeedFileName.EndsWith(".eeb")) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, North, West, South, East);
                 else if (SoundSpeedFileName.EndsWith(".xml")) 
                 {
-                    var rawTemperature = SerializedOutput.Load(TemperatureFileName, null);
-                    var rawSalinity = SerializedOutput.Load(SalinityFileName, null);
                     var rawSoundSpeeds = SerializedOutput.Load(SoundSpeedFileName, null);
-                    SoundSpeedField = new SoundSpeedField(rawSoundSpeeds, NemoFile.Scenario.TimeFrame);
+                    SoundSpeedField = new SoundSpeedField(rawSoundSpeeds, NemoFile.Scenario.TimeFrame)
+                                      {
+                                          TemperatureData = SerializedOutput.Load(TemperatureFileName, null),
+                                          SalinityData = SerializedOutput.Load(SalinityFileName, null),
+                                      };
+                    if (Bathymetry != null)
+                    {
+                        SoundSpeedField.ExtendProfilesToDepth(Bathymetry.MaxValue);
+                    }
                 }
             }
             if (SoundSpeedField != null)
@@ -1044,7 +1050,12 @@ namespace ESMEWorkBench.Data
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
             {
                 if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", North, West, South, East);
-                else if (BathymetryFileName.EndsWith(".chb")) Bathymetry = DBDB.Parse(BathymetryFileName);
+                else if (BathymetryFileName.EndsWith(".chb"))
+                {
+                    Bathymetry = DBDB.Parse(BathymetryFileName);
+                    if (SoundSpeedField != null)
+                        SoundSpeedField.ExtendProfilesToDepth(Math.Abs(Bathymetry.MaxValue));
+                }
             }
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
             if (Bathymetry != null)

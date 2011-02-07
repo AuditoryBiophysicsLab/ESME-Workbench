@@ -68,7 +68,13 @@ namespace ESME.Environment
         public static float[] SoundSpeed(EarthCoordinate Location, ref float[] DepthVector_Meters, ref float[] TemperatureVector_C, ref float[] SalinityVector_ppt)
         {
             if (TemperatureVector_C.Length != SalinityVector_ppt.Length) throw new ApplicationException("UNESCO.SoundSpeed: Unable to calculate sound speed if temperature and salinity vectors are of unequal length");
-            float[] results = new float[TemperatureVector_C.Length];
+            var results = new float[TemperatureVector_C.Length];
+#if true
+            for (var depth = 0; depth < results.Length; depth++)
+            {
+                results[depth] = SoundSpeed(Location, DepthVector_Meters[depth], TemperatureVector_C[depth], SalinityVector_ppt[depth]);
+            }
+#else
             double[] Pressure_Bar = UNESCO.DepthToPressure_Bar(Location.Latitude_radians, ref DepthVector_Meters);
             double DTP, BTP, ATP, CwTP, cSTP;
             double p, p2, p3;
@@ -107,52 +113,77 @@ namespace ESME.Environment
                 cSTP = CwTP + (ATP * s) + (BTP * s32) + (DTP * s2);
                 results[depth] = (float)cSTP;
             }
+#endif
             return results;
         }
+
+        public static float SoundSpeed(EarthCoordinate location, float depth, float temperature, float salinity)
+        {
+            var p = DepthToPressure_Bar(location.Latitude_radians, depth);
+            if ((double.IsNaN(p)) || (double.IsNaN(temperature)) || (double.IsNaN(salinity)))
+                return float.NaN;
+
+            var p2 = p*p;
+            var p3 = p2*p;
+            var t2 = temperature*temperature;
+            var t3 = t2*temperature;
+            var t4 = t3*temperature;
+            var t5 = t4*temperature;
+            var s2 = salinity*salinity;
+            var s32 = Math.Pow(salinity, 1.5);
+            var dtp = D_00 + (D_10*p);
+            var btp = B_00 + (B_01*temperature) + ((B_10 + (B_11*temperature))*p);
+            var atp = ((A_00 + (A_01*temperature) + (A_02*t2) + (A_03*t3) + (A_04*t4))) + ((A_10 + (A_11*temperature) + (A_12*t2) + (A_13*t3) + (A_14*t4))*p) + ((A_20 + (A_21*temperature) + (A_22*t2) + (A_23*t3))*p2) + ((A_30 + (A_31*temperature) + (A_32*t2))*p3);
+            var cwTp = ((C_00 + (C_01*temperature) + (C_02*t2) + (C_03*t3) + (C_04*t4) + (C_05*t5))) + ((C_10 + (C_11*temperature) + (C_12*t2) + (C_13*t3) + (C_14*t4))*p) + ((C_20 + (C_21*temperature) + (C_22*t2) + (C_23*t3) + (C_24*t4))*p2) + ((C_30 + (C_31*temperature) + (C_32*t2))*p3);
+            var cStp = cwTp + (atp*salinity) + (btp*s32) + (dtp*s2);
+            return (float) cStp;
+        }
+
         #endregion
 
         #region Depth to Pressure calculation
+
         /// <summary>
         /// Returns a pressure vector (in Bar) which corresponds to the depth vector supplied
         /// Formula given by Peter Hulton of NUWC ("Hulton, Peter H CIV NUWC NWPT" peter.hulton@navy.mil) in an email on 25 Mar 2009, 09:31 AM to da@bu.edu
         /// </summary>
-        /// <param name="DepthVector_Meters">An array of depths, in meters, to convert to pressures</param>
-        /// <returns></returns>
-        public static double[] DepthToPressure_Bar(double Latitude_Radians, ref float[] DepthVector_Meters)
+        /// <param name="latitude">Latideu of depth measurements, IN RADIANS</param>
+        /// <param name="depths">An array of depths, in meters, to convert to pressures</param>
+        /// <returns>Pressures corresponding to depths, in bar.</returns>
+        public static double[] DepthToPressure_Bar(double latitude, ref float[] depths)
         {
-            // Stuff for Hulton algorithm
-            double[] results = new double[DepthVector_Meters.Length];
-            double sinTheta = Math.Sin(Latitude_Radians);
-            double sinSquaredTheta = sinTheta * sinTheta;
-#if false
-            double c1 = (5.92 + (5.25 * sinTheta * sinTheta)) * 1e-3;
-            double c2 = 1.0 - c1;
-            double c3 = Math.Pow(8.84, -6.0);
-            const double c4 = 4.42e-6;
-            double p;
-#endif
-            // The following is from http://resource.npl.co.uk/acoustics/techguides/soundseawater/content.html
-            double thyh0Z, curDepth, k_Z_Theta, h_Z_45, h_Z_Theta, P_Z_Theta;
-            double gTheta = 9.7803 * (1 + 5.3e-3 * sinSquaredTheta);
+            var results = new double[depths.Length];
 
-            for (int depth = 0; depth < DepthVector_Meters.Length; depth++)
+            for (var depth = 0; depth < depths.Length; depth++)
             {
-                curDepth = DepthVector_Meters[depth];
-#if false
-                // Stuff for Hulton algorithm
-                p = ((1.0 - c1) - Math.Sqrt((c2 * c2) - c3 * curDepth)) / c4;
-                results[depth] = p / 10;
-#else
-                // The following is from http://resource.npl.co.uk/acoustics/techguides/soundseawater/content.html
-                thyh0Z = 1e-2 * curDepth / (curDepth + 100) + 6.2e-6 * curDepth;
-                k_Z_Theta = (gTheta - 2e-5 * curDepth) / (9.80612 - 2e-5 * curDepth);
-                h_Z_45 = 1.00818e-2 * curDepth + 2.465e-8 * curDepth * curDepth - 1.25e-13 * curDepth * curDepth * curDepth + 2.8e-19 * curDepth * curDepth * curDepth * curDepth;
-                h_Z_Theta = h_Z_45 * k_Z_Theta;
-                P_Z_Theta = h_Z_Theta - thyh0Z;
-                results[depth] = P_Z_Theta * 10; // Multiply by 10 because the formula outputs pressure in MPa, and 1 MPa = 10 bar.
-#endif
+                results[depth] = DepthToPressure_Bar(latitude, depths[depth]);
             }
             return results;
+        }
+
+        /// <summary>
+        /// Converts a depth in meters to a pressure, in bar
+        /// </summary>
+        /// <param name="latitude">Latitude of the depth measurement, IN RADIANS!!!</param>
+        /// <param name="depth">Depth to convert, in meters</param>
+        /// <returns>Pressure, in bar</returns>
+        public static double DepthToPressure_Bar(double latitude, double depth)
+        {
+            var sinTheta = Math.Sin(latitude);
+            var sinSquaredTheta = sinTheta * sinTheta;
+            var gTheta = 9.7803 * (1 + 5.3e-3 * sinSquaredTheta);
+            var depth2 = depth * depth;
+            var depth3 = depth2 * depth;
+            var depth4 = depth3 * depth;
+
+            // The following is from http://resource.npl.co.uk/acoustics/techguides/soundseawater/content.html
+            var thyh0Z = 1e-2 * depth / (depth + 100) + 6.2e-6 * depth;
+            var kZTheta = (gTheta - 2e-5 * depth) / (9.80612 - 2e-5 * depth);
+            var hZ45 = 1.00818e-2 * depth + 2.465e-8 * depth2 - 1.25e-13 * depth3 + 2.8e-19 * depth4;
+            var hZTheta = hZ45 * kZTheta;
+            var pZTheta = hZTheta - thyh0Z;
+            return pZTheta * 10; // Multiply by 10 because the formula outputs pressure in MPa, and 1 MPa = 10 bar.
+
         }
         #endregion
 
