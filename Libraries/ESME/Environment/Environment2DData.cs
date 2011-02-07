@@ -446,8 +446,8 @@ namespace ESME.Environment
 
         internal void Average()
         {
-            for (var lonIndex = 0; lonIndex < Values.GetUpperBound(0); lonIndex++)
-                for (var latIndex = 0; latIndex < Values.GetUpperBound(1); latIndex++)
+            for (var lonIndex = 0; lonIndex < Values.GetLength(0); lonIndex++)
+                for (var latIndex = 0; latIndex < Values.GetLength(1); latIndex++)
                 {
                     for (var depthIndex = 0; depthIndex < Values[lonIndex, latIndex].Count; depthIndex++)
                     {

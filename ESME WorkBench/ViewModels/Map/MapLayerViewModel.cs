@@ -832,8 +832,6 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return _isChecked; }
             set
             {
-                if (value == _isChecked) return;
-
                 _isChecked = value;
 
                 try
@@ -841,6 +839,9 @@ namespace ESMEWorkBench.ViewModels.Map
                     LayerOverlay.IsVisible = _isChecked;
                 }
                 catch (NullReferenceException) {}
+
+                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
 
                 NotifyPropertyChanged(IsCheckedChangedEventArgs);
             }

@@ -181,6 +181,10 @@ namespace ImportNetCDF
             for (lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
                 var lon = lonMap[lonIndex].Value;
+                var wrappedLon = lon;
+                while (wrappedLon > 180) wrappedLon -= 360;
+                while (wrappedLon < -180) wrappedLon += 360;
+
                 var lonSourceIndex = lonMap[lonIndex].Index;
                 for (var latIndex = 0; latIndex < latCount; latIndex++)
                 {
@@ -189,7 +193,7 @@ namespace ImportNetCDF
                     var curDataPoint = new EnvironmentalDataPoint
                                        {
                                            Latitude_degrees = lat,
-                                           Longitude_degrees = lon,
+                                           Longitude_degrees = wrappedLon,
                                        };
                     if (depthVarName != String.Empty)
                     {

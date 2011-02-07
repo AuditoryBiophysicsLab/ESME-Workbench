@@ -98,6 +98,9 @@
     <Compile Include="EnvironmentBuilder\SMGCView.xaml.cs">
       <DependentUpon>SMGCView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EnvironmentBuilder\TimePeriodSelectionView.xaml.cs">
+      <DependentUpon>TimePeriodSelectionView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>
@@ -131,6 +134,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvironmentBuilder\SMGCView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\TimePeriodSelectionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

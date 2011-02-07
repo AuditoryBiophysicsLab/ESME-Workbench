@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HRC.Navigation;
 using HRC.Utility;
@@ -45,7 +46,9 @@ namespace ESME.Environment.NAVO
 
         //other header things here, before DataPoints.
         public List<EnvironmentalDataPoint> DataPoints { get; set; }
+
         public List<double> DepthAxis { get; set; }
+
     }
 
     public class EnvironmentalDataPoint : EarthCoordinate
