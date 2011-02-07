@@ -89,8 +89,8 @@
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EnvironmentBuilder\ExtractionTimesView.xaml.cs">
-      <DependentUpon>ExtractionTimesView.xaml</DependentUpon>
+    <Compile Include="EnvironmentBuilder\SeasonConfigurationView.xaml.cs">
+      <DependentUpon>SeasonConfigurationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\GDEMView.xaml.cs">
       <DependentUpon>GDEMView.xaml</DependentUpon>
@@ -125,7 +125,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EnvironmentBuilder\ExtractionTimesView.xaml">
+    <Page Include="EnvironmentBuilder\SeasonConfigurationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

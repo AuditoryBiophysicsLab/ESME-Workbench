@@ -61,7 +61,8 @@
                     <CheckBox IsChecked="{Binding Cold}">Cold</CheckBox>
                 </StackPanel>
                 <Button DockPanel.Dock="Bottom"
-                        VerticalAlignment="Bottom">
+                        VerticalAlignment="Bottom"
+                        Margin="5">
                     Season definitions...
                 </Button>
             </DockPanel>
