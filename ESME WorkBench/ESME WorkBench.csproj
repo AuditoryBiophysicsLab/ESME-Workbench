@@ -154,6 +154,7 @@
     <Compile Include="ViewModels\NAVODataSources\GDEMViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\NAVODataSourceViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\SMGCViewModel.cs" />
+    <Compile Include="ViewModels\NAVODataSources\TimePeriodSelectionViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
