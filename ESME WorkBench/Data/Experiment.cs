@@ -23,6 +23,7 @@ using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.Data
 {
@@ -828,10 +829,11 @@ namespace ESMEWorkBench.Data
                             {
                                 new ShapefileMapLayer
                                 {
-                                    LineColor = Colors.Green,
+                                    LineColor = Colors.Beige,
+                                    AreaStyle = AreaStyles.Country2,
                                     CanBeRemoved = false,
                                     CanBeReordered = true,
-                                    CanChangeAreaColor = false,
+                                    CanChangeAreaColor = true,
                                     CanChangeLineColor = true,
                                     ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
                                     Name = "Base Map",
@@ -962,6 +964,7 @@ namespace ESMEWorkBench.Data
                             windLayer.Add(new OverlayPoint(new EarthCoordinate(WindSpeed.Latitudes[latIndex], WindSpeed.Longitudes[lonIndex])));
                     windLayer.Done();
                     MapLayers.Add(windLayer);
+                    windLayer.IsChecked = false;
                 }
             }
 
@@ -996,6 +999,7 @@ namespace ESMEWorkBench.Data
                         bottomTypeLayer.Add(new OverlayPoint(sample));
                     bottomTypeLayer.Done();
                     MapLayers.Add(bottomTypeLayer);
+                    bottomTypeLayer.IsChecked = false;
                 }
             }
 
