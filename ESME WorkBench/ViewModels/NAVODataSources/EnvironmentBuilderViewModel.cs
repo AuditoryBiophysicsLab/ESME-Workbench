@@ -38,34 +38,8 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             _messageBoxService = messageBoxService;
             AppSettings = appSettings;
             _experiment = experiment;
-            ExtractionAreaPacket= new NAVOExtractionPacket
-            {
-                Filename = _experiment.LocalStorageRoot,
-                North = _experiment.North,
-                South = _experiment.South,
-                East = _experiment.East,
-                West = _experiment.West,
-            };
             ExtractButtonText = "Initializing...";
         }
-
-        #region public NAVOExtractionPacket ExtractionAreaPacket { get; set; }
-
-        public NAVOExtractionPacket ExtractionAreaPacket
-        {
-            get { return _extractionAreaPacket; }
-            set
-            {
-                if (_extractionAreaPacket == value) return;
-                _extractionAreaPacket = value;
-                NotifyPropertyChanged(ExtractionAreaPacketChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ExtractionAreaPacketChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.ExtractionAreaPacket);
-        NAVOExtractionPacket _extractionAreaPacket;
-
-        #endregion
 
         #region public AppSettings AppSettings { get; set; }
 
@@ -189,6 +163,16 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                         NAVODataSources.SelectedTimePeriods = selectedTimePeriods;
                         NAVODataSources.ExtractDataInBackground(delegate
                                                                 {
+                                                                    if (selectedTimePeriods.Count > 0)
+                                                                    {
+                                                                        var timePeriod = selectedTimePeriods[0];
+                                                                        _experiment.WindSpeedFileName = NAVODataSources.WindFilename(timePeriod);
+                                                                        _experiment.SoundSpeedFileName = NAVODataSources.SoundspeedFilename(timePeriod);
+                                                                        _experiment.TemperatureFileName = NAVODataSources.TemperatureFilename(timePeriod);
+                                                                        _experiment.SalinityFileName = NAVODataSources.SalinityFilename(timePeriod);
+                                                                        _experiment.SedimentFileName = NAVODataSources.SedimentFilename(timePeriod);
+                                                                        _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename(timePeriod);
+                                                                    }
                                                                     CloseActivePopUpCommand.Execute(true);
                                                                     ExtractingData = false;
                                                                 });
