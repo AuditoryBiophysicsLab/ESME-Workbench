@@ -20,8 +20,10 @@ namespace ESME.Environment.NAVO
         public static string DatabasePath { get; set; }
         public static string ExtractionProgramPath { get; set; }
 
-        static string OutputFileBaseName(string outputPath, int monthIndex) { return Path.Combine(outputPath, ((NAVOTimePeriod) monthIndex).ToString()); }
+        static string OutputFileBaseName(string outputPath, int monthIndex) { return Path.Combine(outputPath, ((NAVOTimePeriod)monthIndex).ToString()); }
+        static string OutputFileBaseName(string outputPath, NAVOTimePeriod timePeriod) { return Path.Combine(outputPath, timePeriod.ToString()); }
         static string OutputFileName(string outputPath, int monthIndex, string dataType) { return OutputFileBaseName(outputPath, monthIndex) + "-" + dataType + ".xml"; }
+        static string OutputFileName(string outputPath, NAVOTimePeriod timePeriod, string dataType) { return OutputFileBaseName(outputPath, timePeriod) + "-" + dataType + ".xml"; }
 
         static string SalinityFile(int monthIndex)
         {
@@ -52,6 +54,10 @@ namespace ESME.Environment.NAVO
             ExtractAreaFromMonthFile(SalinityFile(monthIndex), OutputFileName(outputPath, monthIndex, SalinityVariableName), SalinityVariableName, north, south, east, west);
             ExtractAreaFromMonthFile(TemperatureFile(monthIndex), OutputFileName(outputPath, monthIndex, TemperatureVariableName), TemperatureVariableName, north, south, east, west);
         }
+
+        public static string SalinityFilename(string outputPath, NAVOTimePeriod timePeriod) { return OutputFileName(outputPath, timePeriod, SalinityVariableName); }
+        public static string TemperatureFilename(string outputPath, NAVOTimePeriod timePeriod) { return OutputFileName(outputPath, timePeriod, TemperatureVariableName); }
+        public static string SoundspeedFilename(string outputPath, NAVOTimePeriod timePeriod) { return OutputFileName(outputPath, timePeriod, SoundspeedVariableName); }
 
         static void ExtractAreaFromMonthFile(string sourceFileName, string outputFileName, string dataType, double north, double south, double east, double west)
         {
