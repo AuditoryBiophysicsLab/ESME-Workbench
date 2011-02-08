@@ -8,9 +8,6 @@
         <DockPanel.RenderTransformOrigin>
             0.5,0.5
         </DockPanel.RenderTransformOrigin>
-        <DockPanel.RenderTransform>
-            <ScaleTransform ScaleY="-1" />
-        </DockPanel.RenderTransform>
         <Border BorderBrush="Black" 
                 BorderThickness="0" 
                 x:Name="topMargin" 

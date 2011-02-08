@@ -106,6 +106,7 @@ namespace ESMEWorkBench.Controls
             else topMargin.Height = 0;
             if (botHeight >= 0) botMargin.Height = ActualHeight*(CurrentMinimum - Minimum)/_fullRange;
             else botMargin.Height = 0;
+            //botMargin.Height = 0;
         }
 
         #endregion
@@ -184,11 +185,12 @@ namespace ESMEWorkBench.Controls
                 //FullRange / ActualHeightInPixels -> DeltaValuePP
                 //XMove changes min, max by DeltaValuePP /2
                 //YMove changes min/max by +/-DeltaValuePP
-                double deltaValuePerPixel = _fullRange/ActualHeight;
-                double yDeltaValue = (_previousPoint.Y - e.GetPosition(this).Y)*deltaValuePerPixel;
-                double xDeltaValue = (e.GetPosition(this).X - _previousPoint.X)*deltaValuePerPixel;
-                CurrentMaximum = CurrentMaximum + xDeltaValue/2 - yDeltaValue;
-                CurrentMinimum = CurrentMinimum - xDeltaValue/2 - yDeltaValue;
+                var deltaValuePerPixel = _fullRange/ActualHeight;
+                var yDeltaValue = (_previousPoint.Y - e.GetPosition(this).Y)*deltaValuePerPixel;
+                var xDeltaValue = (e.GetPosition(this).X - _previousPoint.X)*deltaValuePerPixel;
+                var netMouseMove = (xDeltaValue / 2) - yDeltaValue;
+                CurrentMaximum = CurrentMaximum - netMouseMove;
+                CurrentMinimum = CurrentMinimum - netMouseMove;
             }
             _previousPoint = e.GetPosition(this);
         }

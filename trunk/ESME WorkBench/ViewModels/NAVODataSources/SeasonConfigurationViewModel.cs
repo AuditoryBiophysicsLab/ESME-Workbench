@@ -46,7 +46,6 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         #endregion
 
-
         public SeasonConfigurationViewModel()
         {
             Months = new List<NAVOTimePeriod>
@@ -66,7 +65,5 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                      };
             AppSettings = Globals.AppSettings; //todo
         }
-
-        
     }
 }

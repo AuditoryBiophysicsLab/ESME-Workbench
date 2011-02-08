@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using Cinch;
 
 namespace ESME.Environment.NAVO
 {
-    public class BST : NAVODataSource
+    public class BottomSedimentTypeDatabase : ViewModelBase
     {
-        public BST() { Resolutions = new ObservableCollection<string>(); }
+        public BottomSedimentTypeDatabase() { Resolutions = new ObservableCollection<string>(); }
+
+        public static string DatabasePath { get; set; }
+        public static string ExtractionProgramPath { get; set; }
+
         #region public ObservableCollection<string> Resolutions { get; set; }
 
         public ObservableCollection<string> Resolutions
@@ -30,12 +31,10 @@ namespace ESME.Environment.NAVO
         }
 
         void ResolutionsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(ResolutionsChangedEventArgs); SelectedResolution = Resolutions.First(); }
-        static readonly PropertyChangedEventArgs ResolutionsChangedEventArgs = ObservableHelper.CreateArgs<BST>(x => x.Resolutions);
+        static readonly PropertyChangedEventArgs ResolutionsChangedEventArgs = ObservableHelper.CreateArgs<BottomSedimentTypeDatabase>(x => x.Resolutions);
         ObservableCollection<string> _resolutions;
 
         #endregion
-
-        
 
         #region public string SelectedResolution { get; set; }
 
@@ -50,24 +49,22 @@ namespace ESME.Environment.NAVO
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<BST>(x => x.SelectedResolution);
+        static readonly PropertyChangedEventArgs SelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<BottomSedimentTypeDatabase>(x => x.SelectedResolution);
         string _selectedResolution;
 
         #endregion
 
-
-        public void GetAllResolutions()
+        public void Initialize()
         {
-            
             const string contents = "set";
             var scriptfile = Path.GetTempFileName();
             File.WriteAllText(scriptfile, contents);
 
-            CommandArgs = string.Format("\"{0}\" \"{1}\"", DatabasePath, scriptfile);
+            var commandArgs = string.Format("\"{0}\" \"{1}\"", DatabasePath, scriptfile);
 
-            var result = Execute().Trim();
+            var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, null).Trim();
             var resarray = result.Split('\n');
-            if (!resarray[0].Contains("1.0")) throw new ApplicationException("BST database extraction utility version is not 1.0; parser should be checked/rewritten");
+            if (!resarray[0].Contains("1.0")) throw new ApplicationException("Bottom Sediment Type Database extraction utility version is not 1.0; parser should be checked/rewritten");
             for (var index = 0; index < resarray.Length; index++)
             {
                 var line = resarray[index].Trim();
@@ -80,44 +77,24 @@ namespace ESME.Environment.NAVO
                         Resolutions.Add(resline.Split('-')[1].Trim()); //?  dear LORD is this ugly and brittle.
                     }
                 }
-                if (line.Contains("could not be opened")) throw new ApplicationException("BST:  " + line);
+                if (line.Contains("could not be opened")) throw new ApplicationException("BottomSedimentTypeDatabase: Error reading available resolutions: " + line);
             }
 
             File.Delete(scriptfile);
         }
 
-        //public override void ExtractArea(string filename, double north, double south, double east, double west)
-        public override void ExtractArea(NAVOExtractionPacket extractionPacket)
+        public static void ExtractArea(string outputDirectory, string selectedResolution, double north, double south, double east, double west)
         {
-            OutputFilename = Path.Combine(extractionPacket.Filename, string.Format("{0}-BST.chb", extractionPacket.TimePeriod));
-            WorkingDirectory = Path.GetDirectoryName(OutputFilename);
-            var north = extractionPacket.North;
-            var south = extractionPacket.South;
-            var east = extractionPacket.East;
-            var west = extractionPacket.West;
-            var contents = string.Format("area {0} {1} {2} {3} {4} {5}", west, east, south, north, SelectedResolution, Path.GetFileName(OutputFilename));
+            var contents = string.Format("area {0} {1} {2} {3} {4} {5}", west, east, south, north, selectedResolution, string.Format("sediment-{0}.chb", selectedResolution));
             var scriptfile = Path.GetTempFileName();
             File.WriteAllText(scriptfile, contents);
 
-            CommandArgs = string.Format("\"{0}\" \"{1}\"", DatabasePath, scriptfile);
-            var result = Execute();
+            var commandArgs = string.Format("\"{0}\" \"{1}\"", DatabasePath, scriptfile);
+            var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputDirectory).Trim();
             //have a look at result and throw an error if needed.
             var resarray = result.Split('\n');
-            foreach (var line in resarray.Where(line => line.Contains("error"))) throw new ApplicationException("BST: " + line); //hope this is sufficient..
-            ExtractedArea = Parse(OutputFilename);
+            foreach (var line in resarray.Where(line => line.Contains("error"))) throw new ApplicationException("BottomSedimentTypeDatabase: Error extracting requested area: " + line); //hope this is sufficient..
             File.Delete(scriptfile);
-        }
-        public static Environment2DData Parse(string filename)
-        {
-            return Environment2DData.ReadChrtrBinaryFile(filename);
-        }
-
-        public override bool ValidateDataSource()
-        {
-            //Test Case 1: Kattegat Area
-
-            
-            return false;
         }
     }
 }

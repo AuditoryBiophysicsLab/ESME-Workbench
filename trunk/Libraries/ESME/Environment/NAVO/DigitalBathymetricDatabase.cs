@@ -9,10 +9,13 @@ using Cinch;
 
 namespace ESME.Environment.NAVO
 {
-    public class DBDB : NAVODataSource
+    public class DigitalBathymetricDatabase : ViewModelBase
     {
-        public DBDB() { Resolutions = new ObservableCollection<string>(); }
+        public DigitalBathymetricDatabase() { Resolutions = new ObservableCollection<string>(); }
 
+        public static string DatabasePath { get; set; }
+        public static string ExtractionProgramPath { get; set; }
+        
         #region public ObservableCollection<string> Resolutions { get; set; }
 
         public ObservableCollection<string> Resolutions
@@ -31,7 +34,7 @@ namespace ESME.Environment.NAVO
         }
 
         void ResolutionsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(ResolutionsChangedEventArgs); SelectedResolution = Resolutions.Last(); }
-        static readonly PropertyChangedEventArgs ResolutionsChangedEventArgs = ObservableHelper.CreateArgs<DBDB>(x => x.Resolutions);
+        static readonly PropertyChangedEventArgs ResolutionsChangedEventArgs = ObservableHelper.CreateArgs<DigitalBathymetricDatabase>(x => x.Resolutions);
         ObservableCollection<string> _resolutions;
 
         #endregion
@@ -49,15 +52,15 @@ namespace ESME.Environment.NAVO
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<DBDB>(x => x.SelectedResolution);
+        static readonly PropertyChangedEventArgs SelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<DigitalBathymetricDatabase>(x => x.SelectedResolution);
         string _selectedResolution;
 
         #endregion
 
-        public void GetAllResolutions()
+        public void Initialize()
         {
-            CommandArgs = string.Format("resolutions \"{0}\"", DatabasePath);
-            var result = Execute().Trim();
+            var commandArgs = string.Format("resolutions \"{0}\"", DatabasePath);
+            var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, null).Trim();
             var resarray = result.Split('\n');
             for (var index = 0; index < resarray.Length; index++)
             {
@@ -71,31 +74,19 @@ namespace ESME.Environment.NAVO
                         Resolutions.Add(resline);
                     }
                 }
-                if (line.Contains("ERROR:")) throw new ApplicationException("DBDB " + line);
+                if (line.Contains("ERROR:")) throw new ApplicationException("DigitalBathymetricDatabase: Error reading available resolutions: " + line);
             }
         }
 
-        public override void ExtractArea(NAVOExtractionPacket extractionPacket)
+        //public override void ExtractArea(NAVOExtractionPacket extractionPacket)
+        public static void ExtractArea(string outputDirectory, string selectedResolution, double north, double south, double east, double west, IList<string> resolutions)
         {
-            OutputFilename = Path.Combine(extractionPacket.Filename, string.Format("{0}-DBDB.chb", extractionPacket.TimePeriod));
-            WorkingDirectory = Path.GetDirectoryName(OutputFilename);
-            var north = extractionPacket.North;
-            var south = extractionPacket.South;
-            var east = extractionPacket.East;
-            var west = extractionPacket.West;
             //from documentation, area extractions for DBDB are of the form <dbv5_command path> area <database path> <finest_resolution> <coarsest resolution> nearest 0 meters G <south west north east> 
-            CommandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3} {4} {5} {6} {7} CHB=\"{8}\"", DatabasePath, Resolutions[0], Resolutions[Resolutions.Count - 1], south, west, north, east, SelectedResolution, Path.GetFileName(OutputFilename));
+            var commandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3} {4} {5} {6} {7} CHB=\"{8}\"", DatabasePath, resolutions.First(), resolutions.Last(), south, west, north, east, selectedResolution, string.Format("bathymetry-{0}.chb", selectedResolution));
             //extract the area and look for success or failure in the output string.
-            var result = Execute();
+            var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputDirectory);
             var resarray = result.Split('\n');
-            foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DBDB: " + line);
-
-            //return the extracted data from file as Environment2DData
-            ExtractedArea = Parse(OutputFilename);
+            foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
         }
-
-        public static Environment2DData Parse(string filename) { return Environment2DData.ReadChrtrBinaryFile(filename); }
-
-        public override bool ValidateDataSource() { return false; } //DBDB provides no test data. 
     }
 }
