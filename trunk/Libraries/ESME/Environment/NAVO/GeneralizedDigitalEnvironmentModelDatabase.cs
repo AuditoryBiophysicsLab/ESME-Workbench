@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace ESME.Environment.NAVO
 {
-    public class GeneralizedDigitalEnvironmentModelDatabase
+    public static class GeneralizedDigitalEnvironmentModelDatabase
     {
         static readonly string[] ShortMonthNames = new[]
                                                   {

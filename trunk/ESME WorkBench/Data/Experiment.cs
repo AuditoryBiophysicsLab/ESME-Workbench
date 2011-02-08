@@ -203,19 +203,19 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        #region public string BottomTypeFileName { get; set; }
+        #region public string SedimentFileName { get; set; }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs BottomTypeFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BottomTypeFileName);
-        [XmlIgnore] string _bottomTypeFileName;
+        [XmlIgnore] static readonly PropertyChangedEventArgs BottomTypeFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SedimentFileName);
+        [XmlIgnore] string _sedimentFileName;
 
         [XmlElement]
-        public string BottomTypeFileName
+        public string SedimentFileName
         {
-            get { return _bottomTypeFileName; }
+            get { return _sedimentFileName; }
             set
             {
-                if (_bottomTypeFileName == value) return;
-                _bottomTypeFileName = value;
+                if (_sedimentFileName == value) return;
+                _sedimentFileName = value;
                 NotifyPropertyChanged(BottomTypeFileNameChangedEventArgs);
                 InitializeEnvironment(false);
             }
@@ -651,7 +651,7 @@ namespace ESMEWorkBench.Data
         public SoundSpeedField SoundSpeedField { get; private set; }
 
         [XmlIgnore]
-        public Environment2DData BottomType { get; private set; }
+        public Sediment Sediment { get; private set; }
 
         [XmlIgnore]
         public Environment2DData Bathymetry { get; private set; }
@@ -965,20 +965,19 @@ namespace ESMEWorkBench.Data
                 }
             }
 
-            if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName)))
+            if ((SedimentFileName != null) && (File.Exists(SedimentFileName)))
             {
-                if (BottomTypeFileName.EndsWith(".eeb")) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", North, West, South, East);
-                else if (BottomTypeFileName.EndsWith(".chb")) BottomType = Environment2DData.ReadChrtrBinaryFile(BottomTypeFileName);
+                if (SedimentFileName.EndsWith(".eeb")) Sediment = Sediment.ReadESMEEnvironmentBinaryFile(SedimentFileName, North, South, East, West);
+                else if (SedimentFileName.EndsWith(".chb")) Sediment = Sediment.ReadChrtrBinaryFile(SedimentFileName);
             }
-            if (BottomType != null)
+            if (Sediment != null)
             {
                 const string bottomTypeName = "Bottom Type";
                 var bottomTypeLayerExists = false;
                 foreach (var bottomTypeLayer in MapLayers.Where(curLayer => curLayer.Name == bottomTypeName).Cast<OverlayShapeMapLayer>())
                 {
-                    for (var lonIndex = 0; lonIndex < BottomType.Longitudes.Length; lonIndex++)
-                        for (var latIndex = 0; latIndex < BottomType.Latitudes.Length; latIndex++)
-                            bottomTypeLayer.Add(new OverlayPoint(new EarthCoordinate(BottomType.Latitudes[latIndex], BottomType.Longitudes[lonIndex])));
+                    foreach (var sample in Sediment.SedimentSamples)
+                        bottomTypeLayer.Add(new OverlayPoint(sample));
                     bottomTypeLayer.Done();
                     bottomTypeLayerExists = true;
                 }
@@ -993,9 +992,8 @@ namespace ESMEWorkBench.Data
                         CanBeRemoved = false,
                         LayerType = LayerType.BottomType,
                     };
-                    for (var lonIndex = 0; lonIndex < BottomType.Longitudes.Length; lonIndex++)
-                        for (var latIndex = 0; latIndex < BottomType.Latitudes.Length; latIndex++)
-                            bottomTypeLayer.Add(new OverlayPoint(new EarthCoordinate(BottomType.Latitudes[latIndex], BottomType.Longitudes[lonIndex])));
+                    foreach (var sample in Sediment.SedimentSamples)
+                        bottomTypeLayer.Add(new OverlayPoint(sample));
                     bottomTypeLayer.Done();
                     MapLayers.Add(bottomTypeLayer);
                 }
@@ -1007,15 +1005,9 @@ namespace ESMEWorkBench.Data
                 else if (SoundSpeedFileName.EndsWith(".xml")) 
                 {
                     var rawSoundSpeeds = SerializedOutput.Load(SoundSpeedFileName, null);
-                    SoundSpeedField = new SoundSpeedField(rawSoundSpeeds, NemoFile.Scenario.TimeFrame)
-                                      {
-                                          TemperatureData = SerializedOutput.Load(TemperatureFileName, null),
-                                          SalinityData = SerializedOutput.Load(SalinityFileName, null),
-                                      };
+                    SoundSpeedField = new SoundSpeedField(rawSoundSpeeds, NemoFile.Scenario.TimeFrame);
                     if (Bathymetry != null)
-                    {
-                        SoundSpeedField.ExtendProfilesToDepth(Bathymetry.MaxValue);
-                    }
+                        SoundSpeedField.ExtendProfilesToDepth(Bathymetry.MaxValue, SerializedOutput.Load(TemperatureFileName, null), SerializedOutput.Load(SalinityFileName, null));
                 }
             }
             if (SoundSpeedField != null)
@@ -1052,9 +1044,9 @@ namespace ESMEWorkBench.Data
                 if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", North, West, South, East);
                 else if (BathymetryFileName.EndsWith(".chb"))
                 {
-                    Bathymetry = Environment2DData.ReadChrtrBinaryFile(BathymetryFileName);
+                    Bathymetry = Environment2DData.ReadChrtrBinaryFile(BathymetryFileName, -1);
                     if (SoundSpeedField != null)
-                        SoundSpeedField.ExtendProfilesToDepth(Math.Abs(Bathymetry.MaxValue));
+                        SoundSpeedField.ExtendProfilesToDepth(Math.Abs(Bathymetry.MaxValue), SerializedOutput.Load(TemperatureFileName, null), SerializedOutput.Load(SalinityFileName, null));
                 }
             }
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");

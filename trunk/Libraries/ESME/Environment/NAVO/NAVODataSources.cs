@@ -5,7 +5,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
+using System.Windows.Threading;
 using Cinch;
+using ESME.TransmissionLoss.CASS;
 
 namespace ESME.Environment.NAVO
 {
@@ -16,7 +19,11 @@ namespace ESME.Environment.NAVO
                                                       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6
                                                   };
 
-        public NAVODataSources(NAVOConfiguration configurations, NAVOExtractionPacket extractionPacket)
+        IViewAwareStatus _viewAwareStatus;
+        Dispatcher _dispatcher;
+
+        //public NAVODataSources(Globals.AppSettings.NAVOConfiguration, _experiment.LocalStorageRoot, _experiment.North, _experiment.South, _experiment.East, _experiment.West, _experiment.NemoFile.Scenario.SimAreaName, _dispatcher);
+        public NAVODataSources(NAVOConfiguration configurations, Dispatcher dispatcher, string localStorageRoot, float north, float south, float east, float west, string simAreaName)
         {
             try
             {
@@ -27,9 +34,14 @@ namespace ESME.Environment.NAVO
                 Debug.WriteLine("***********\nNAVODataSources: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
-
-            ExtractionPacket = extractionPacket;
             Configuration = configurations;
+            _dispatcher = dispatcher;
+            _localStorageRoot = localStorageRoot;
+            _north = north;
+            _south = south;
+            _east = east;
+            _west = west;
+            _simAreaName = simAreaName;
 
             SurfaceMarineGriddedClimatologyDatabase.DatabasePath = configurations.SMGCDirectory;
             SurfaceMarineGriddedClimatologyDatabase.ExtractionProgramPath = configurations.SMGCEXEPath;
@@ -56,51 +68,155 @@ namespace ESME.Environment.NAVO
 
         public BottomSedimentTypeDatabase BottomSedimentTypeDatabase { get; private set; }
         public DigitalBathymetricDatabase DigitalBathymetricDatabase { get; private set; }
-        public SurfaceMarineGriddedClimatologyDatabase SurfaceMarineGriddedClimatologyDatabase { get; private set; }
-        internal NAVOExtractionPacket ExtractionPacket { get; set; }
+
+        readonly string _localStorageRoot;
+        readonly float _north;
+        readonly float _south;
+        readonly float _east;
+        readonly float _west;
+        readonly string _simAreaName;
+
         internal NAVOConfiguration Configuration { get; set; }
 
-        public void ExtractAreas(IEnumerable<NAVOTimePeriod> timePeriods)
+        void ExtractAreas(object sender, DoWorkEventArgs args)
         {
+            var backgroundWorker = (BackgroundWorker) sender;
+
             var selectedMonthIndices = new List<int>();
-            foreach (var timePeriod in timePeriods)
+            foreach (var timePeriod in SelectedTimePeriods)
                 selectedMonthIndices.AddRange(GetMonthIndices(timePeriod));
             var uniqueMonths = selectedMonthIndices.Distinct().ToList();
             uniqueMonths.Sort();
+
+            var totalExtractionStepCount = (float)(uniqueMonths.Count + (SelectedTimePeriods.Count() * 2) + 2);
+            foreach (var monthIndices in SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1)) 
+                totalExtractionStepCount++;
+
+            var currentExtractionStep = 0;
+
             foreach (var month in uniqueMonths)
             {
-                Status = "Extracting temperature and salinity data for " + (NAVOTimePeriod) month;
-                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(ExtractionPacket.Filename, ExtractionPacket.North, ExtractionPacket.South, ExtractionPacket.East, ExtractionPacket.West, month);
+                Status = "Extracting temperature and salinity data for " + (NAVOTimePeriod)month;
+                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(_localStorageRoot, _north, _south, _east, _west, month);
+                if (backgroundWorker.CancellationPending) return;
+                ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
 
-            foreach (var timePeriod in timePeriods)
+            foreach (var timePeriod in SelectedTimePeriods)
             {
                 var monthIndices = GetMonthIndices(timePeriod);
                 if (monthIndices.Count() <= 1) continue;
                 Status = "Creating average temperature and salinity data for " + timePeriod;
-                GeneralizedDigitalEnvironmentModelDatabase.AverageMonthlyData(ExtractionPacket.Filename, monthIndices, timePeriod);
+                GeneralizedDigitalEnvironmentModelDatabase.AverageMonthlyData(_localStorageRoot, monthIndices, timePeriod);
+                if (backgroundWorker.CancellationPending) return;
+                ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
 
-            foreach (var timePeriod in timePeriods)
+            foreach (var timePeriod in SelectedTimePeriods)
             {
                 Status = "Creating sound speed data for " + timePeriod;
-                GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(ExtractionPacket.Filename, timePeriod);
+                GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(_localStorageRoot, timePeriod);
+                if (backgroundWorker.CancellationPending) return;
+                ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";
-            BottomSedimentTypeDatabase.ExtractArea(ExtractionPacket.Filename, BottomSedimentTypeDatabase.SelectedResolution, ExtractionPacket.North, ExtractionPacket.South, ExtractionPacket.East, ExtractionPacket.West);
+            BottomSedimentTypeDatabase.ExtractArea(_localStorageRoot, BottomSedimentTypeDatabase.SelectedResolution, _north, _south, _east, _west);
+            if (backgroundWorker.CancellationPending) return;
+            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
             Status = "Extracting bathymetry data for selected area";
-            DigitalBathymetricDatabase.ExtractArea(ExtractionPacket.Filename, DigitalBathymetricDatabase.SelectedResolution, ExtractionPacket.North, ExtractionPacket.South, ExtractionPacket.East, ExtractionPacket.West, DigitalBathymetricDatabase.Resolutions);
+            DigitalBathymetricDatabase.ExtractArea(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution, _north, _south, _east, _west, DigitalBathymetricDatabase.Resolutions);
+            if (backgroundWorker.CancellationPending) return;
+            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
-            foreach (var timePeriod in timePeriods)
+            foreach (var timePeriod in SelectedTimePeriods)
             {
                 var monthIndices = GetMonthIndices(timePeriod);
                 Status = "Extracting wind data for " + timePeriod;
-                SurfaceMarineGriddedClimatologyDatabase.ExtractArea(ExtractionPacket.Filename, timePeriod, monthIndices.First(), monthIndices.Last(), monthIndices.Count(), ExtractionPacket.North, ExtractionPacket.South, ExtractionPacket.East, ExtractionPacket.West);
+                SurfaceMarineGriddedClimatologyDatabase.ExtractArea(_localStorageRoot, timePeriod, monthIndices.First(), monthIndices.Last(), monthIndices.Count(), _north, _south, _east, _west);
+                if (backgroundWorker.CancellationPending) return;
+                ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
+            }
+
+            CASSFiles.GenerateSimAreaData(_simAreaName, _localStorageRoot, _north, _south, _east, _west);
+        }
+
+        public IEnumerable<NAVOTimePeriod> SelectedTimePeriods { get; set; }
+
+        #region public int ProgressPercent { get; set; }
+
+        public int ProgressPercent
+        {
+            get { return _progressPercent; }
+            set
+            {
+                if (_progressPercent == value) return;
+                _progressPercent = value;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ProgressPercentChangedEventArgs));
             }
         }
+
+        static readonly PropertyChangedEventArgs ProgressPercentChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.ProgressPercent);
+        int _progressPercent;
+
+        #endregion
+
+        #region public Visibility IsVisible { get; set; }
+
+        public Visibility IsVisible
+        {
+            get { return _isVisible; }
+            set
+            {
+                if (_isVisible == value) return;
+                _isVisible = value;
+                NotifyPropertyChanged(IsVisibleChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsVisibleChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.IsVisible);
+        Visibility _isVisible = Visibility.Collapsed;
+
+        #endregion
+
+        #region public bool IsStarted { get; set; }
+
+        public bool IsStarted
+        {
+            get { return _isStarted; }
+            set
+            {
+                if (_isStarted == value) return;
+                _isStarted = value;
+                IsVisible = _isStarted ? Visibility.Visible : Visibility.Collapsed;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(IsStartedChangedEventArgs));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsStartedChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.IsStarted);
+        bool _isStarted;
+
+        #endregion
+
+        #region public bool IsCompleted { get; set; }
+
+        public bool IsCompleted
+        {
+            get { return _isCompleted; }
+            set
+            {
+                if (_isCompleted == value) return;
+                _isCompleted = value;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(IsCompletedChangedEventArgs));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsCompletedChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.IsCompleted);
+        bool _isCompleted;
+
+        #endregion
 
         #region public string Status { get; set; }
 
@@ -111,7 +227,39 @@ namespace ESME.Environment.NAVO
             {
                 if (_status == value) return;
                 _status = value;
-                NotifyPropertyChanged(StatusChangedEventArgs);
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(StatusChangedEventArgs));
+            }
+        }
+
+        public void CancelExtraction()
+        {
+            if (_backgroundWorker.IsBusy)
+            {
+                _backgroundWorker.CancelAsync();
+                Status = "Canceling, please wait...";
+            }
+        }
+
+        BackgroundWorker _backgroundWorker;
+        public void ExtractDataInBackground(RunWorkerCompletedEventHandler runWorkerCompletedEventHandler)
+        {
+            lock (this)
+            {
+                if (IsStarted) return;
+                IsStarted = true;
+                _backgroundWorker = new BackgroundWorker
+                                    {
+                                        WorkerSupportsCancellation = true,
+                                        WorkerReportsProgress = true,
+                                    };
+                _backgroundWorker.DoWork += ExtractAreas;
+                _backgroundWorker.RunWorkerCompleted += delegate
+                                                        {
+                                                            IsCompleted = true;
+                                                            ProgressPercent = 0;
+                                                        };
+                if (runWorkerCompletedEventHandler != null) _backgroundWorker.RunWorkerCompleted += runWorkerCompletedEventHandler;
+                _backgroundWorker.RunWorkerAsync();
             }
         }
 
@@ -175,6 +323,12 @@ namespace ESME.Environment.NAVO
                     yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 5];
                     yield break;
             }
+        }
+
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
+        {
+            _viewAwareStatus = viewAwareStatusService;
+            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
         }
     }
 }

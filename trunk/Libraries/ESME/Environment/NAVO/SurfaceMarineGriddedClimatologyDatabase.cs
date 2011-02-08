@@ -5,7 +5,7 @@ using Cinch;
 
 namespace ESME.Environment.NAVO
 {
-    public class SurfaceMarineGriddedClimatologyDatabase : ViewModelBase
+    public static class SurfaceMarineGriddedClimatologyDatabase
     {
         static string _databasePath;
         public static string DatabasePath
