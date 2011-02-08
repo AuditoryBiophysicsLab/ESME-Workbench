@@ -93,6 +93,7 @@ namespace ESME.Platform
                             {
                                 if (curTrackdef.OverlayFile.Shapes.Count() != 1) throw new PlatformMovementException(string.Format("Specified overlay file {0} is unsuitable for use as a bounding region.\nReason(s): Overlay file contains multiple shapes, therefore the bounding shape is undefined", curTrackdef.OverlayFile.FileName));
                                 curTrackBoundingRegion = curTrackdef.OverlayFile.Shapes[0];
+#if false
                                 if (!curTrackBoundingRegion.IsUsableAsPerimeter)
                                 {
                                     var reasons = new StringBuilder();
@@ -101,6 +102,7 @@ namespace ESME.Platform
                                     if (reasons.Length != 0) reasons.Remove(reasons.Length - 2, 2); // Remove the trailing ", "
                                     throw new PlatformMovementException(string.Format("Specified overlay file {0} is unsuitable for use as a bounding region.\nReason(s): {1}", curTrackdef.OverlayFile.FileName, reasons));
                                 }
+#endif
                                 if (!curTrackBoundingRegion.Contains(curLocation)) throw new PlatformMovementException(string.Format("Specified start location ({0:0.####}, {1:0.####}) is not contained within the trackdef bounding region", curLocation.Latitude_degrees, curLocation.Longitude_degrees));
                             }
                             else
