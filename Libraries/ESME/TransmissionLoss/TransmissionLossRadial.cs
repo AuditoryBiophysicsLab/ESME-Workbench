@@ -157,9 +157,7 @@ namespace ESME.TransmissionLoss
                     // Write out the Y axis value
                     sw.Write(Depths[i] + ",,");
                     for (var j = 0; j < Ranges.Length; j++)
-                    {
                         sw.Write(TransmissionLoss[i, j] + ","); 
-                    } 
                     sw.WriteLine(); // Terminate the line
                 } // for i
                 sw.WriteLine();
@@ -174,6 +172,8 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine("Depth (m)," + transmissionLossField.SourceDepth);
                 sw.WriteLine("High Frequency (Hz)," + transmissionLossField.HighFrequency);
                 sw.WriteLine("Low Frequency (Hz)," + transmissionLossField.LowFrequency);
+                sw.WriteLine("Depression/elevation angle (deg)" + transmissionLossField.DepressionElevationAngle);
+                sw.WriteLine("Vertical beam width (deg)" + transmissionLossField.VerticalBeamWidth);
                 var radialEnd = new EarthCoordinate(transmissionLossField.Latitude, transmissionLossField.Longitude);
                 radialEnd.Move(BearingFromSource, transmissionLossField.Radius);
                 sw.WriteLine("Receiver Latitude," + radialEnd.Latitude_degrees);

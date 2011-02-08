@@ -3,10 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Views="clr-namespace:ESME.Views.EnvironmentBuilder"
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
-        Title="EnvironmentBuilderWindow"
+        Title="Environment data selection"
         mef:ViewModelLocator.ViewModel="EnvironmentBuilderViewModel"
-        Height="475"
-        Width="380">
+        mc:Ignorable="d"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Height="499"
+        Width="385">
 	<DockPanel LastChildFill="True">
 		<!--<Menu Name="EnvironmentBuilderViewFileMenu"
 		      DockPanel.Dock="Top"
@@ -19,23 +22,24 @@
 				          InputGestureText="Ctrl+O" />
 			</MenuItem>
 		</Menu> -->
+		<TextBlock DockPanel.Dock="Bottom"
+		           Text="{Binding Status}" />
 		<DockPanel LastChildFill="False"
 		           Margin="10"
 		           DockPanel.Dock="Bottom">
-			<Button Width="75"
+			<Button Width="90"
 			        Margin="10 0 0 0"
 			        IsCancel="True"
 			        Content="Cancel"
-			        DockPanel.Dock="Right" 
-                    Command="{Binding CancelCommand}"/>			
+			        DockPanel.Dock="Right"
+			        Command="{Binding CancelCommand}" />
 			<Button Width="90"
 			        IsDefault="True"
 			        Content="Extract All Data"
 			        DockPanel.Dock="Right"
 			        Command="{Binding ExtractAllCommand}" />
-
 		</DockPanel>
-        <!--
+		<!--
 		<TabControl>
 			
 			<TabItem Header="BST">
@@ -52,29 +56,29 @@
 			</TabItem>
 
 		</TabControl> -->
-        <StackPanel Orientation="Vertical">
-            <TextBlock Text="Bottom Sediment Database Resolution" Margin="2"/>
-            <ComboBox ItemsSource="{Binding NAVODataSources.BST.Resolutions}" 
-                          SelectedItem="{Binding NAVODataSources.BST.SelectedResolution}"                          
-                          ToolTip="Database resolution in arc-minutes">
-            </ComboBox>
-            
-            <TextBlock Text="Bathymetry Database Resolution" Margin="2 20 2 2"/>
-            <ComboBox ItemsSource="{Binding NAVODataSources.DBDB.Resolutions}" 
-                          SelectedItem="{Binding NAVODataSources.DBDB.SelectedResolution}"                          
-                          ToolTip="Database resolution in arc-minutes">
+		<StackPanel Orientation="Vertical">
+			<TextBlock Text="Bottom Sediment Database Resolution"
+			           Margin="2" />
+			<ComboBox ItemsSource="{Binding NAVODataSources.BottomSedimentTypeDatabase.Resolutions}"
+			          SelectedItem="{Binding NAVODataSources.BottomSedimentTypeDatabase.SelectedResolution}"
+			          ToolTip="Database resolution in arc-minutes">
+			</ComboBox>
 
-            </ComboBox>
-            <!--<TextBlock Text="Month or Season" Margin="2 20 2 2"/>
+			<TextBlock Text="Bathymetry Database Resolution"
+			           Margin="2 20 2 2" />
+			<ComboBox ItemsSource="{Binding NAVODataSources.DigitalBathymetricDatabase.Resolutions}"
+			          SelectedItem="{Binding NAVODataSources.DigitalBathymetricDatabase.SelectedResolution}"
+			          ToolTip="Database resolution in arc-minutes">
+			</ComboBox>
+			<!--<TextBlock Text="Month or Season" Margin="2 20 2 2"/>
             <ComboBox ItemsSource="{Binding NAVODataSources.Months}" 
                           SelectedItem="{Binding NAVODataSources.SelectedPeriod}"                          
                           ToolTip="The month or season to extract.">
 
             </ComboBox> -->
-            <TextBlock Margin="2 20 2 2 "/>
-            <Views:TimePeriodSelectionView></Views:TimePeriodSelectionView>
-        </StackPanel>
-        
+			<TextBlock Margin="2 20 2 2 " />
+			<Views:TimePeriodSelectionView x:Name="TimePeriodSelectionView" />
+		</StackPanel>
 
 	</DockPanel>
 

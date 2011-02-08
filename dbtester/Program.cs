@@ -34,7 +34,7 @@ namespace dbtester
             //GDEMTest();
 
             
-           var result =  SMGC.Parse(@"C:\tests\Winter-SMGC.txt");
+           var result =  SurfaceMarineGriddedClimatologyDatabase.Parse(@"C:\tests\Winter-SMGC.txt");
             Console.WriteLine(@"press enter to exit.");
             Console.ReadLine();
         }
@@ -42,7 +42,7 @@ namespace dbtester
         static void DBDBTest()
         {
             Console.WriteLine(@"Now testing DBDB extraction routines ...");
-            var foo = new DBDB
+            var foo = new DigitalBathymetricDatabase
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\DBDB-V\data\dbdbv5_level0c.h5",
                           ExtractionProgramPath = @"C:\Users\Graham Voysey\Desktop\DBDB-V\bin\Windows\dbv5_command.exe",
@@ -76,7 +76,7 @@ namespace dbtester
         static void BSTTest()
         {
             Console.WriteLine(@"Now testing BST extraction routines ...");
-            var foo = new BST
+            var foo = new BottomSedimentTypeDatabase
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\BST\Sediments2.0_QAV_Analysis\Sediments\Version2.0\databases\hfevav2.h5",
                           ExtractionProgramPath = @"C:\Users\Graham Voysey\Desktop\BST\Sediments2.0_QAV_Analysis\Sediments\Version2.0\tools\Windows\with_hdf5_1.6\extract.exe",
@@ -109,7 +109,7 @@ namespace dbtester
         static void SMGCTest()
         {
             Console.WriteLine(@"Now testing SMGC extraction routines ...");
-            var foo = new SMGC
+            var foo = new SurfaceMarineGriddedClimatologyDatabase
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\SMGC\alldata\",
                           ExtractionProgramPath = @"C:\Projects\ESME Deliverables\trunk\Debug\SMGCExtract.exe",
@@ -136,7 +136,7 @@ namespace dbtester
         static void GDEMTest()
         {
             Console.WriteLine(@"Now testing GDEM extraction routines ...");
-            var foo = new GDEM
+            var foo = new GeneralizedDigitalEnvironmentModelDatabase
                       {
                           DatabasePath = @"C:\Users\Graham Voysey\Desktop\GDEM-V\uncompressed\",
                           ExtractionProgramPath = @"C:\Projects\ESME Deliverables\trunk\Utilities\NetCDFExtractor\bin\x86\Debug\ImportNetCDF.exe",

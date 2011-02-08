@@ -92,10 +92,10 @@
 					                            FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath}" />
 				</StackPanel>
 			</TabItem>
-			<!-- <TabItem Header="Seasons"
+			<TabItem Header="Seasons"
                      IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
 				<Views:SeasonConfigurationView />
-			</TabItem>-->
+			</TabItem>
 		</TabControl>
 	</DockPanel>
 </Window>

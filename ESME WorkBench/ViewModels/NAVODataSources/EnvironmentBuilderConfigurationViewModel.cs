@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Views.EnvironmentBuilder;
 using ESMEWorkBench.Data;
 using MEFedMVVM.ViewModelLocator;
 
@@ -66,8 +65,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                                                                           {
                                                                               //fire off a message, and close the window.
                                                                               AppSettings.Save();
-                                                                              MediatorMessage.Send(MediatorMessage.EnvironmentBuilderDatabasesSpecified);
-                                                                              ((EnvironmentBuilderConfigurationView) _viewAwareStatus.View).Close();
+                                                                              CloseActivePopUpCommand.Execute(true);
                                                                           }));
             }
         }
@@ -80,7 +78,14 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         public SimpleCommand<object, object> CancelCommand
         {
-            get { return _cancel ?? (_cancel = new SimpleCommand<object, object>(delegate { AppSettings.Reload(); })); }
+            get
+            {
+                return _cancel ?? (_cancel = new SimpleCommand<object, object>(delegate
+                                                                               {
+                                                                                   AppSettings.Reload();
+                                                                                   CloseActivePopUpCommand.Execute(false);
+                                                                               }));
+            }
         }
 
         #endregion

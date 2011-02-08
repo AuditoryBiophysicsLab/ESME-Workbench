@@ -27,18 +27,18 @@
                         </Button>
                     </StackPanel>
                     <StackPanel DockPanel.Dock="Top">
-                        <CheckBox IsChecked="{Binding January}">January</CheckBox>
-                        <CheckBox IsChecked="{Binding February}">February</CheckBox>
-                        <CheckBox IsChecked="{Binding March}">March</CheckBox>
-                        <CheckBox IsChecked="{Binding April}">April</CheckBox>
-                        <CheckBox IsChecked="{Binding May}">May</CheckBox>
-                        <CheckBox IsChecked="{Binding June}">June</CheckBox>
-                        <CheckBox IsChecked="{Binding July}">July</CheckBox>
-                        <CheckBox IsChecked="{Binding August}">August</CheckBox>
-                        <CheckBox IsChecked="{Binding September}">September</CheckBox>
-                        <CheckBox IsChecked="{Binding October}">October</CheckBox>
-                        <CheckBox IsChecked="{Binding November}">November</CheckBox>
-                        <CheckBox IsChecked="{Binding December}">December</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[January].IsChecked}">January</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[February].IsChecked}">February</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[March].IsChecked}">March</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[April].IsChecked}">April</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[May].IsChecked}">May</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[June].IsChecked}">June</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[July].IsChecked}">July</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[August].IsChecked}">August</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[September].IsChecked}">September</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[October].IsChecked}">October</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[November].IsChecked}">November</CheckBox>
+                        <CheckBox IsChecked="{Binding MonthCheckboxes[December].IsChecked}">December</CheckBox>
                     </StackPanel>
                 </StackPanel>
             </DockPanel>
@@ -59,12 +59,12 @@
                     </Button>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Top">
-                    <CheckBox IsChecked="{Binding Spring}">Spring</CheckBox>
-                    <CheckBox IsChecked="{Binding Summer}">Summer</CheckBox>
-                    <CheckBox IsChecked="{Binding Fall}">Fall</CheckBox>
-                    <CheckBox IsChecked="{Binding Winter}">Winter</CheckBox>
-                    <CheckBox IsChecked="{Binding Warm}">Warm</CheckBox>
-                    <CheckBox IsChecked="{Binding Cold}">Cold</CheckBox>
+                    <CheckBox IsChecked="{Binding SeasonCheckboxes[Spring].IsChecked}">Spring</CheckBox>
+                    <CheckBox IsChecked="{Binding SeasonCheckboxes[Summer].IsChecked}">Summer</CheckBox>
+                    <CheckBox IsChecked="{Binding SeasonCheckboxes[Fall].IsChecked}">Fall</CheckBox>
+                    <CheckBox IsChecked="{Binding SeasonCheckboxes[Winter].IsChecked}">Winter</CheckBox>
+                    <CheckBox IsChecked="{Binding SeasonCheckboxes[Warm].IsChecked}">Warm</CheckBox>
+                    <CheckBox IsChecked="{Binding SeasonCheckboxes[Cold].IsChecked}">Cold</CheckBox>
                 </StackPanel>
                 <Button DockPanel.Dock="Bottom"
                         VerticalAlignment="Bottom"

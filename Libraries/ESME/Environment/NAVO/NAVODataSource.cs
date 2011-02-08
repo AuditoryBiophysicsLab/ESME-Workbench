@@ -55,6 +55,35 @@ namespace ESME.Environment.NAVO
         }
     }
 
+    public static class NAVOExtractionProgram
+    {
+        public static string Execute(string extractionProgramPath, string commandArgs, string workingDirectory)
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo(extractionProgramPath)
+                {
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardInput = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    Arguments = commandArgs,
+                    WorkingDirectory = workingDirectory,
+                },
+            };
+            process.Start();
+            process.PriorityClass = ProcessPriorityClass.BelowNormal;
+            var output = new StringBuilder();
+            while (!process.HasExited)
+            {
+                output.Append(process.StandardOutput.ReadToEnd());
+                Thread.Sleep(100);
+            }
+            return output.ToString();
+        }
+    }
+
     public class NAVOExtractionPacket
     {
         public string Filename { get; set; }

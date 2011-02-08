@@ -14,6 +14,10 @@
              Background="White">
 	
 	<DockPanel x:Name="RadialView">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Height="22">
+            <TextBlock Text="{Binding ColorMapViewModel.CurMinValue, StringFormat=CurMin: {0.000}}" />
+            <TextBlock Text="{Binding ColorMapViewModel.CurMaxValue, StringFormat=CurMax: {0.000}}" />
+        </StackPanel>
 		<DockPanel DockPanel.Dock="Left">
 			<DockPanel>
 				<TextBlock DockPanel.Dock="Bottom"
@@ -28,11 +32,11 @@
 		</DockPanel>
 		<DockPanel DockPanel.Dock="Right">
 			<DockPanel Width="80">
-				<TextBlock DockPanel.Dock="Bottom"
+                <TextBlock DockPanel.Dock="Bottom"
 				           MinHeight="{Binding ElementName=RangeAxis, Path=ActualHeight}" />
 				<DockPanel LastChildFill="False"
 				           Margin="5 0 0 0">
-					<controls:DataAxis AxisLocation="Left"
+                    <controls:DataAxis AxisLocation="Left"
 					                   DockPanel.Dock="Right"
 					                   AxisLabel="Transmission Loss (dB)"
 					                   StartValue="{Binding ColorMapViewModel.MaxValue}"

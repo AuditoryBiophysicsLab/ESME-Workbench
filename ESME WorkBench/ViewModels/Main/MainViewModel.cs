@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Environment.NAVO;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.NAVODataSources;

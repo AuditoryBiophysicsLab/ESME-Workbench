@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
@@ -21,6 +22,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
         IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBoxService;
         readonly Experiment _experiment;
+        TimePeriodSelectionViewModel _timePeriodSelectionViewModel;
 
         public EnvironmentBuilderViewModel(IUIVisualizerService visualizerService, IMessageBoxService messageBoxService, AppSettings appSettings, Experiment experiment)
         {
@@ -112,17 +114,17 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         public ESME.Environment.NAVO.NAVODataSources NAVODataSources
         {
-            get { return _nAVODataSources; }
+            get { return _navoDataSources; }
             set
             {
-                if (_nAVODataSources == value) return;
-                _nAVODataSources = value;
+                if (_navoDataSources == value) return;
+                _navoDataSources = value;
                 NotifyPropertyChanged(NAVODataSourcesChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs NAVODataSourcesChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.NAVODataSources);
-        ESME.Environment.NAVO.NAVODataSources _nAVODataSources;
+        ESME.Environment.NAVO.NAVODataSources _navoDataSources;
 
         #endregion
 
@@ -226,32 +228,36 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
         {
             get
             {
-                return _extractAll ?? (_extractAll = new SimpleCommand<object, object>(delegate
-                                                                                       {
-                                                                                           AppSettings.Save(); //remember the new values. 
-                                                                                           //extract data from all data sources.
-                                                                                           NAVODataSources.ExtractAreas();
-                                                                                           //close the view.
-                                                                                           if (((_experiment.WindSpeedFileName != null) && (_experiment.WindSpeedFileName != NAVODataSources.SMGC.OutputFilename)) || ((_experiment.SoundSpeedFileName != null) && (_experiment.SoundSpeedFileName != NAVODataSources.GDEM.OutputFilename)) || ((_experiment.BottomTypeFileName != null) && (_experiment.BottomTypeFileName != NAVODataSources.BST.OutputFilename)) ||
-                                                                                               ((_experiment.BathymetryFileName != null) && (_experiment.BathymetryFileName != NAVODataSources.DBDB.OutputFilename)))
-                                                                                           {
-                                                                                               if (_messageBoxService.ShowOkCancel("Changing the environment settings for this experiment will cause all precomputed transmission loss fields to become invalid and therefore they will be deleted.  Really change the environmental settings?", CustomDialogIcons.Exclamation) == CustomDialogResults.Cancel)
-                                                                                               {
-                                                                                                   CloseActivePopUpCommand.Execute(false);
-                                                                                                   return;
-                                                                                               }
-                                                                                               _experiment.ClearAnalysisPoints();
-                                                                                           }
-                                                                                           _experiment.WindSpeedFileName = NAVODataSources.SMGC.OutputFilename;
-                                                                                           _experiment.SoundSpeedFileName = NAVODataSources.GDEM.OutputFilename;
-                                                                                           _experiment.TemperatureFileName = NAVODataSources.GDEM.TemperatureSourceFilename;
-                                                                                           _experiment.SalinityFileName = NAVODataSources.GDEM.SalinitySourceFilename;
-                                                                                           _experiment.BottomTypeFileName = NAVODataSources.BST.OutputFilename;
-                                                                                           _experiment.BathymetryFileName = NAVODataSources.DBDB.OutputFilename;
-                                                                                           CloseActivePopUpCommand.Execute(true);
+                return _extractAll ?? (_extractAll = new SimpleCommand<object, object>(
+                    delegate { return (((_timePeriodSelectionViewModel != null) && (_timePeriodSelectionViewModel.MonthCheckboxes != null) && (_timePeriodSelectionViewModel.MonthCheckboxes.SelectedTimePeriods.Count() > 0)) ||
+                                       ((_timePeriodSelectionViewModel != null) && (_timePeriodSelectionViewModel.SeasonCheckboxes != null) && (_timePeriodSelectionViewModel.SeasonCheckboxes.SelectedTimePeriods.Count() > 0))); }, 
+                    delegate
+                    {
+                        AppSettings.Save(); //remember the new values. 
+                        var selectedTimePeriods = new List<NAVOTimePeriod>();
+                        if (_timePeriodSelectionViewModel != null)
+                        {
+                            if (_timePeriodSelectionViewModel.MonthCheckboxes != null)
+                                selectedTimePeriods.AddRange(_timePeriodSelectionViewModel.MonthCheckboxes.SelectedTimePeriods);
+                            if (_timePeriodSelectionViewModel.SeasonCheckboxes != null)
+                                selectedTimePeriods.AddRange(_timePeriodSelectionViewModel.SeasonCheckboxes.SelectedTimePeriods);
+                        }
+                        if (selectedTimePeriods.Count < 1) return;
+                        //extract data from all data sources.
+                        NAVODataSources.ExtractAreas(selectedTimePeriods);
+                        //close the view.
+#if false
+                        _experiment.WindSpeedFileName = NAVODataSources.SMGC.OutputFilename;
+                        _experiment.SoundSpeedFileName = NAVODataSources.GDEM.OutputFilename;
+                        _experiment.TemperatureFileName = NAVODataSources.GDEM.TemperatureSourceFilename;
+                        _experiment.SalinityFileName = NAVODataSources.GDEM.SalinitySourceFilename;
+                        _experiment.BottomTypeFileName = NAVODataSources.BST.OutputFilename;
+                        _experiment.BathymetryFileName = NAVODataSources.DBDB.OutputFilename;
+#endif
+                        CloseActivePopUpCommand.Execute(true);
 
-                                                                                           //((EnvironmentBuilderView)_viewAwareStatus.View).Close();
-                                                                                       }));
+                        //((EnvironmentBuilderView)_viewAwareStatus.View).Close();
+                    }));
             }
         }
 
@@ -332,5 +338,9 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             }
 
         }
+
+        [MediatorMessageSink(MediatorMessage.RegisterTimePeriodSelectionViewModel)]
+        void RegisterTimePeriodSelectionViewModel(TimePeriodSelectionViewModel timePeriodSelectionViewModel) { _timePeriodSelectionViewModel = timePeriodSelectionViewModel; }
+
     }
 }

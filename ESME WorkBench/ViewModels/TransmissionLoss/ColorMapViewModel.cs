@@ -110,13 +110,13 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         public Color Lookup(double value)
         {
-            if (value >= _curMaxValue) return _lastColor;
-            if (value <= _curMinValue) return _firstColor;
+            if (value >= _curMaxValue) return _firstColor;
+            if (value <= _curMinValue) return _lastColor;
             if (_curRange == 0.0) _curRange = _curMaxValue - _curMinValue;
 
             if (_curRange != 0.0)
             {
-                double fraction = (value - _curMinValue)/_curRange;
+                double fraction = 1.0 - (value - _curMinValue) / _curRange;
                 var index = (int) (fraction*_colorCount);
                 return Colors[index];
             }

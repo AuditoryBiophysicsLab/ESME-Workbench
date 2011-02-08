@@ -931,7 +931,7 @@ namespace ESMEWorkBench.Data
             if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName)))
             {
                 if (WindSpeedFileName.EndsWith(".eeb")) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", North, West, South, East);
-                else if (WindSpeedFileName.EndsWith(".txt")) WindSpeed = SMGC.Parse(WindSpeedFileName);
+                else if (WindSpeedFileName.EndsWith(".txt")) WindSpeed = SurfaceMarineGriddedClimatologyDatabase.Parse(WindSpeedFileName);
             }
 
             if (WindSpeed != null)
@@ -968,7 +968,7 @@ namespace ESMEWorkBench.Data
             if ((BottomTypeFileName != null) && (File.Exists(BottomTypeFileName)))
             {
                 if (BottomTypeFileName.EndsWith(".eeb")) BottomType = new Environment2DData(BottomTypeFileName, "bottomtype", North, West, South, East);
-                else if (BottomTypeFileName.EndsWith(".chb")) BottomType = BST.Parse(BottomTypeFileName);
+                else if (BottomTypeFileName.EndsWith(".chb")) BottomType = Environment2DData.ReadChrtrBinaryFile(BottomTypeFileName);
             }
             if (BottomType != null)
             {
@@ -1052,7 +1052,7 @@ namespace ESMEWorkBench.Data
                 if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", North, West, South, East);
                 else if (BathymetryFileName.EndsWith(".chb"))
                 {
-                    Bathymetry = DBDB.Parse(BathymetryFileName);
+                    Bathymetry = Environment2DData.ReadChrtrBinaryFile(BathymetryFileName);
                     if (SoundSpeedField != null)
                         SoundSpeedField.ExtendProfilesToDepth(Math.Abs(Bathymetry.MaxValue));
                 }

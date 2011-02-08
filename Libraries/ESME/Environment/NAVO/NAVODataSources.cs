@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Cinch;
 
@@ -11,9 +12,9 @@ namespace ESME.Environment.NAVO
     public class NAVODataSources : ViewModelBase
     {
         internal static readonly int[] MonthMap = new[]
-                                         {
-                                             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6
-                                         };
+                                                  {
+                                                      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6
+                                                  };
 
         public NAVODataSources(NAVOConfiguration configurations, NAVOExtractionPacket extractionPacket)
         {
@@ -30,121 +31,98 @@ namespace ESME.Environment.NAVO
             ExtractionPacket = extractionPacket;
             Configuration = configurations;
 
-            Months = new List<NAVOTimePeriod>
-                     {
-                         NAVOTimePeriod.January,
-                         NAVOTimePeriod.February,
-                         NAVOTimePeriod.March,
-                         NAVOTimePeriod.April,
-                         NAVOTimePeriod.May,
-                         NAVOTimePeriod.June,
-                         NAVOTimePeriod.July,
-                         NAVOTimePeriod.August,
-                         NAVOTimePeriod.September,
-                         NAVOTimePeriod.October,
-                         NAVOTimePeriod.November,
-                         NAVOTimePeriod.December,
-                         NAVOTimePeriod.Spring,
-                         NAVOTimePeriod.Summer,
-                         NAVOTimePeriod.Fall,
-                         NAVOTimePeriod.Winter,
-                         NAVOTimePeriod.Cold,
-                         NAVOTimePeriod.Warm,
-                     };
+            SurfaceMarineGriddedClimatologyDatabase.DatabasePath = configurations.SMGCDirectory;
+            SurfaceMarineGriddedClimatologyDatabase.ExtractionProgramPath = configurations.SMGCEXEPath;
 
-            BST = new BST
-                  {
-                      DatabasePath = configurations.BSTDirectory,
-                      ExtractionProgramPath = configurations.BSTEXEPath,
-                      TimePeriod = SelectedPeriod,
-                  };
-            DBDB = new DBDB
-                   {
-                       DatabasePath = configurations.DBDBDirectory,
-                       ExtractionProgramPath = configurations.DBDBEXEPath,
-                       TimePeriod = SelectedPeriod,
-                   };
-            GDEM = new GDEM
-                   {
-                       DatabasePath = configurations.GDEMDirectory,
-                       ExtractionProgramPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "ImportNetCDF.exe"), ////todo: installer needs to put this in the right place.
-                       TimePeriod = SelectedPeriod,
-                       GridSpacing = 0.25f,
-                   };
-            SMGC = new SMGC
-                   {
-                       DatabasePath = configurations.SMGCDirectory,
-                       ExtractionProgramPath = configurations.SMGCEXEPath,
-                       TimePeriod = SelectedPeriod,
-                       GridSpacing = 1,
-                   };
+            DigitalBathymetricDatabase.DatabasePath = configurations.DBDBDirectory;
+            DigitalBathymetricDatabase.ExtractionProgramPath = configurations.DBDBEXEPath;
+            DigitalBathymetricDatabase = new DigitalBathymetricDatabase();
+            DigitalBathymetricDatabase.Initialize();
 
-            BST.GetAllResolutions();
-            DBDB.GetAllResolutions();
+            BottomSedimentTypeDatabase.DatabasePath = configurations.BSTDirectory;
+            BottomSedimentTypeDatabase.ExtractionProgramPath = configurations.BSTEXEPath;
+
+            BottomSedimentTypeDatabase = new BottomSedimentTypeDatabase();
+            BottomSedimentTypeDatabase.Initialize();
+
+            var assemblyLocation = Assembly.GetCallingAssembly().Location;
+            if (assemblyLocation == null) throw new ApplicationException("Assembly can't be null!");
+            var extractionPath = Path.GetDirectoryName(assemblyLocation);
+            if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
+            ////todo: installer needs to put this in the right place.
+            GeneralizedDigitalEnvironmentModelDatabase.ExtractionProgramPath = Path.Combine(extractionPath, "ImportNetCDF.exe");
+            GeneralizedDigitalEnvironmentModelDatabase.DatabasePath = configurations.GDEMDirectory;
         }
 
-        #region public NAVOTimePeriod SelectedPeriod { get; set; }
-
-        static readonly PropertyChangedEventArgs SelectedPeriodChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.SelectedPeriod);
-        NAVOTimePeriod _selectedPeriod;
-
-        public NAVOTimePeriod SelectedPeriod
-        {
-            get { return _selectedPeriod; }
-            set
-            {
-                if (_selectedPeriod == value) return;
-                _selectedPeriod = value;
-                NotifyPropertyChanged(SelectedPeriodChangedEventArgs);
-            }
-        }
-
-        #endregion
-
-        public BST BST { get; private set; }
-        public DBDB DBDB { get; private set; }
-        public GDEM GDEM { get; private set; }
-        public SMGC SMGC { get; private set; }
+        public BottomSedimentTypeDatabase BottomSedimentTypeDatabase { get; private set; }
+        public DigitalBathymetricDatabase DigitalBathymetricDatabase { get; private set; }
+        public SurfaceMarineGriddedClimatologyDatabase SurfaceMarineGriddedClimatologyDatabase { get; private set; }
         internal NAVOExtractionPacket ExtractionPacket { get; set; }
         internal NAVOConfiguration Configuration { get; set; }
 
-        #region public List<NAVOTimePeriod> Months { get; set; }
-
-        public List<NAVOTimePeriod> Months
+        public void ExtractAreas(IEnumerable<NAVOTimePeriod> timePeriods)
         {
-            get { return _months; }
-            set
+            var selectedMonthIndices = new List<int>();
+            foreach (var timePeriod in timePeriods)
+                selectedMonthIndices.AddRange(GetMonthIndices(timePeriod));
+            var uniqueMonths = selectedMonthIndices.Distinct().ToList();
+            uniqueMonths.Sort();
+            foreach (var month in uniqueMonths)
             {
-                if (_months == value) return;
-                _months = value;
-                NotifyPropertyChanged(MonthsChangedEventArgs);
-                SelectedPeriod = Months[0];
+                Status = "Extracting temperature and salinity data for " + (NAVOTimePeriod) month;
+                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(ExtractionPacket.Filename, ExtractionPacket.North, ExtractionPacket.South, ExtractionPacket.East, ExtractionPacket.West, month);
+            }
+
+            foreach (var timePeriod in timePeriods)
+            {
+                var monthIndices = GetMonthIndices(timePeriod);
+                if (monthIndices.Count() <= 1) continue;
+                Status = "Creating average temperature and salinity data for " + timePeriod;
+                GeneralizedDigitalEnvironmentModelDatabase.AverageMonthlyData(ExtractionPacket.Filename, monthIndices, timePeriod);
+            }
+
+            foreach (var timePeriod in timePeriods)
+            {
+                Status = "Creating sound speed data for " + timePeriod;
+                GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(ExtractionPacket.Filename, timePeriod);
+            }
+
+            // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
+            Status = "Extracting sediment data for selected area";
+            BottomSedimentTypeDatabase.ExtractArea(ExtractionPacket.Filename, BottomSedimentTypeDatabase.SelectedResolution, ExtractionPacket.North, ExtractionPacket.South, ExtractionPacket.East, ExtractionPacket.West);
+
+            Status = "Extracting bathymetry data for selected area";
+            DigitalBathymetricDatabase.ExtractArea(ExtractionPacket.Filename, DigitalBathymetricDatabase.SelectedResolution, ExtractionPacket.North, ExtractionPacket.South, ExtractionPacket.East, ExtractionPacket.West, DigitalBathymetricDatabase.Resolutions);
+
+            foreach (var timePeriod in timePeriods)
+            {
+                var monthIndices = GetMonthIndices(timePeriod);
+                Status = "Extracting wind data for " + timePeriod;
+                SurfaceMarineGriddedClimatologyDatabase.ExtractArea(ExtractionPacket.Filename, timePeriod, monthIndices.First(), monthIndices.Last(), monthIndices.Count(), ExtractionPacket.North, ExtractionPacket.South, ExtractionPacket.East, ExtractionPacket.West);
             }
         }
 
-        static readonly PropertyChangedEventArgs MonthsChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.Months);
-        List<NAVOTimePeriod> _months;
+        #region public string Status { get; set; }
+
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                if (_status == value) return;
+                _status = value;
+                NotifyPropertyChanged(StatusChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs StatusChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.Status);
+        string _status;
 
         #endregion
 
-        public void ExtractAreas()
+        IEnumerable<int> GetMonthIndices(NAVOTimePeriod timePeriod)
         {
-            BST.TimePeriod = SelectedPeriod;
-            DBDB.TimePeriod = SelectedPeriod;
-            GDEM.TimePeriod = SelectedPeriod;
-            SMGC.TimePeriod = SelectedPeriod;
-            ExtractionPacket.TimePeriod = SelectedPeriod;
-            InterpretTimes(GDEM);
-            InterpretTimes(SMGC);
-            BST.ExtractArea(ExtractionPacket);
-            DBDB.ExtractArea(ExtractionPacket);
-            GDEM.ExtractArea(ExtractionPacket);
-            SMGC.ExtractArea(ExtractionPacket);
-        }
-
-        void InterpretTimes(NAVODataSource dataSource)
-        {
-            switch (dataSource.TimePeriod)
+            switch (timePeriod)
             {
                 case NAVOTimePeriod.January:
                 case NAVOTimePeriod.February:
@@ -158,40 +136,44 @@ namespace ESME.Environment.NAVO
                 case NAVOTimePeriod.October:
                 case NAVOTimePeriod.November:
                 case NAVOTimePeriod.December:
-                    dataSource.StartMonth = (int) dataSource.TimePeriod;
-                    dataSource.EndMonth = (int) dataSource.TimePeriod;
-                    dataSource.MonthsDuration = 1;
-                    break;
+                    yield return (int) timePeriod;
+                    yield break;
                 case NAVOTimePeriod.Spring:
-                    dataSource.MonthsDuration = 3;
-                    dataSource.StartMonth = MonthMap[(int) Configuration.SpringStartMonth];
-                    dataSource.EndMonth = MonthMap[(int)Configuration.SpringStartMonth + dataSource.MonthsDuration - 1];
-                    break;
+                    yield return MonthMap[(int) Configuration.SpringStartMonth];
+                    yield return MonthMap[(int) Configuration.SpringStartMonth + 1];
+                    yield return MonthMap[(int) Configuration.SpringStartMonth + 2];
+                    yield break;
                 case NAVOTimePeriod.Summer:
-                    dataSource.MonthsDuration = 3;
-                    dataSource.StartMonth = MonthMap[(int) Configuration.SummerStartMonth];
-                    dataSource.EndMonth = MonthMap[(int)Configuration.SummerStartMonth + dataSource.MonthsDuration - 1];
-                    break;
+                    yield return MonthMap[(int) Configuration.SummerStartMonth];
+                    yield return MonthMap[(int) Configuration.SummerStartMonth + 1];
+                    yield return MonthMap[(int) Configuration.SummerStartMonth + 2];
+                    yield break;
                 case NAVOTimePeriod.Fall:
-                    dataSource.MonthsDuration = 3;
-                    dataSource.StartMonth = MonthMap[(int) Configuration.FallStartMonth];
-                    dataSource.EndMonth = MonthMap[(int)Configuration.FallStartMonth + dataSource.MonthsDuration - 1];
-                    break;
+                    yield return MonthMap[(int) Configuration.FallStartMonth];
+                    yield return MonthMap[(int) Configuration.FallStartMonth + 1];
+                    yield return MonthMap[(int) Configuration.FallStartMonth + 2];
+                    yield break;
                 case NAVOTimePeriod.Winter:
-                    dataSource.MonthsDuration = 3;
-                    dataSource.StartMonth = MonthMap[(int) Configuration.WinterStartMonth];
-                    dataSource.EndMonth = MonthMap[(int)Configuration.WinterStartMonth + dataSource.MonthsDuration - 1];
-                    break;
+                    yield return MonthMap[(int) Configuration.WinterStartMonth];
+                    yield return MonthMap[(int) Configuration.WinterStartMonth + 1];
+                    yield return MonthMap[(int) Configuration.WinterStartMonth + 2];
+                    yield break;
                 case NAVOTimePeriod.Cold:
-                    dataSource.MonthsDuration = 6;
-                    dataSource.StartMonth = MonthMap[(int) Configuration.ColdSeasonStartMonth];
-                    dataSource.EndMonth = MonthMap[(int)Configuration.ColdSeasonStartMonth + dataSource.MonthsDuration - 1];
-                    break;
+                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth];
+                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 1];
+                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 2];
+                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 3];
+                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 4];
+                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 5];
+                    yield break;
                 case NAVOTimePeriod.Warm:
-                    dataSource.MonthsDuration = 6;
-                    dataSource.StartMonth = MonthMap[(int) Configuration.WarmSeasonStartMonth];
-                    dataSource.EndMonth = MonthMap[(int)Configuration.WarmSeasonStartMonth + dataSource.MonthsDuration - 1];
-                    break;
+                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth];
+                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 1];
+                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 2];
+                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 3];
+                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 4];
+                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 5];
+                    yield break;
             }
         }
     }
