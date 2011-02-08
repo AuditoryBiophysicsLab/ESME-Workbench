@@ -95,6 +95,9 @@
     <Compile Include="EnvironmentBuilder\GDEMView.xaml.cs">
       <DependentUpon>GDEMView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EnvironmentBuilder\SeasonConfigurationWindowView.xaml.cs">
+      <DependentUpon>SeasonConfigurationWindowView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EnvironmentBuilder\SMGCView.xaml.cs">
       <DependentUpon>SMGCView.xaml</DependentUpon>
     </Compile>
@@ -130,6 +133,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvironmentBuilder\GDEMView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\SeasonConfigurationWindowView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

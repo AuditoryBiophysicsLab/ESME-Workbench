@@ -5,8 +5,8 @@
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
         Title="EnvironmentBuilderWindow"
         mef:ViewModelLocator.ViewModel="EnvironmentBuilderViewModel"
-        Height="423"
-        Width="300">
+        Height="475"
+        Width="380">
 	<DockPanel LastChildFill="True">
 		<!--<Menu Name="EnvironmentBuilderViewFileMenu"
 		      DockPanel.Dock="Top"
@@ -65,12 +65,14 @@
                           ToolTip="Database resolution in arc-minutes">
 
             </ComboBox>
-            <TextBlock Text="Month or Season" Margin="2 20 2 2"/>
+            <!--<TextBlock Text="Month or Season" Margin="2 20 2 2"/>
             <ComboBox ItemsSource="{Binding NAVODataSources.Months}" 
                           SelectedItem="{Binding NAVODataSources.SelectedPeriod}"                          
                           ToolTip="The month or season to extract.">
 
-            </ComboBox>
+            </ComboBox> -->
+            <TextBlock Margin="2 20 2 2 "/>
+            <Views:TimePeriodSelectionView></Views:TimePeriodSelectionView>
         </StackPanel>
         
 

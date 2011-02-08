@@ -45,6 +45,6 @@
 		<ComboBox ItemsSource="{Binding Months}"
 		          SelectedItem="{Binding AppSettings.NAVOConfiguration.WarmSeasonStartMonth}"
 		          ToolTip="The beginning month of a 6-month season">
-		</ComboBox>
+		</ComboBox>     
 	</StackPanel>
 </UserControl>
