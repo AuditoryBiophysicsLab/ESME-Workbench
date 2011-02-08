@@ -23,6 +23,8 @@ namespace ESME.Environment.NAVO
 
         public const float GridSpacing = 1.0f;
 
+        public static string WindFilename(string outputPath, NAVOTimePeriod timePeriod) { return Path.Combine(outputPath, string.Format("{0}-wind.txt", timePeriod)); }
+
         //public static void ExtractArea(NAVOExtractionPacket extractionPacket)
         public static void ExtractArea(string outputDirectory, NAVOTimePeriod timePeriod, int startMonth, int endMonth, int monthsDuration, double north, double south, double east, double west)
         {

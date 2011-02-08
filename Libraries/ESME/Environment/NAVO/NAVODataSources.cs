@@ -145,6 +145,13 @@ namespace ESME.Environment.NAVO
 
         public IEnumerable<NAVOTimePeriod> SelectedTimePeriods { get; set; }
 
+        public string TemperatureFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.TemperatureFilename(_localStorageRoot, timePeriod); }
+        public string SalinityFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SalinityFilename(_localStorageRoot, timePeriod); }
+        public string SoundspeedFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(_localStorageRoot, timePeriod); }
+        public string WindFilename(NAVOTimePeriod timePeriod) { return SurfaceMarineGriddedClimatologyDatabase.WindFilename(_localStorageRoot, timePeriod); }
+        public string SedimentFilename(NAVOTimePeriod timePeriod) { return BottomSedimentTypeDatabase.SedimentFilename(_localStorageRoot, BottomSedimentTypeDatabase.SelectedResolution); }
+        public string BathymetryFilename(NAVOTimePeriod timePeriod) { return DigitalBathymetricDatabase.BathymetryFilename(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution); }
+
         #region public int ProgressPercent { get; set; }
 
         public int ProgressPercent

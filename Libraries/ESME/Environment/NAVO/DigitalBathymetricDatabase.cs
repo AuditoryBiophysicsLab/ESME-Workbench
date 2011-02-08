@@ -57,6 +57,8 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
+        public static string BathymetryFilename(string outputPath, string selectedResolution) { return Path.Combine(outputPath, string.Format("bathymetry-{0}.chb", selectedResolution)); }
+        
         public void Initialize()
         {
             var commandArgs = string.Format("resolutions \"{0}\"", DatabasePath);

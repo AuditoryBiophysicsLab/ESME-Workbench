@@ -83,6 +83,8 @@ namespace ESME.Environment.NAVO
             File.Delete(scriptfile);
         }
 
+        public static string SedimentFilename(string outputPath, string selectedResolution) { return Path.Combine(outputPath, string.Format("sediment-{0}.chb", selectedResolution)); }
+
         public static void ExtractArea(string outputDirectory, string selectedResolution, double north, double south, double east, double west)
         {
             var contents = string.Format("area {0} {1} {2} {3} {4} {5}", west, east, south, north, selectedResolution, string.Format("sediment-{0}.chb", selectedResolution));
