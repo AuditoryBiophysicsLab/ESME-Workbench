@@ -124,7 +124,7 @@ namespace ESME.Environment
         /// <returns>
         /// If the requested coordinate is contained in the data set, the function return value is 'true', 'false' otherwise
         /// </returns>
-        protected virtual bool Lookup(EarthCoordinate coordinate, ref T value)
+        public virtual bool Lookup(EarthCoordinate coordinate, ref T value)
         {
             if (ContainsCoordinate(coordinate))
             {
@@ -139,6 +139,23 @@ namespace ESME.Environment
             return false;
         }
 
+        public virtual bool ClosestTo(EarthCoordinate coordinate, ref T value)
+        {
+            if (ContainsCoordinate(coordinate))
+            {
+                var closestCoordinate = new EarthCoordinate(Latitudes.First(), Longitudes.First());
+                foreach (var curCoordinate in Latitudes.SelectMany(latitude => Longitudes, (latitude, longitude) => new EarthCoordinate(latitude, longitude)).Where(curCoordinate => coordinate.GetDistanceTo_Meters(closestCoordinate) > coordinate.GetDistanceTo_Meters(curCoordinate)))
+                    closestCoordinate = curCoordinate;
+                var latIndex = LookupIndex(closestCoordinate.Latitude_degrees, Latitudes);
+                var lonIndex = LookupIndex(closestCoordinate.Longitude_degrees, Longitudes);
+                if ((latIndex >= 0) && (lonIndex >= 0))
+                {
+                    value = Values[latIndex, lonIndex];
+                    return true;
+                }
+            }
+            return false;
+        }
         #endregion
     }
 
@@ -244,29 +261,31 @@ namespace ESME.Environment
 
         #endregion
 
-        public static Environment2DData ReadChrtrBinaryFile(string fileName)
+        public static Environment2DData ReadChrtrBinaryFile(string fileName, float scaleFactor)
         {
             using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
-                float west = stream.ReadSingle();
-                float east = stream.ReadSingle();
-                float south = stream.ReadSingle();
-                float north = stream.ReadSingle();
-                float gridSpacing = stream.ReadSingle()/60f; // Source is in minutes, we need degrees
-                int width = stream.ReadInt32();
-                int height = stream.ReadInt32();
-                uint endian = stream.ReadUInt32();
+                var west = stream.ReadSingle();
+                var east = stream.ReadSingle();
+                var south = stream.ReadSingle();
+                var north = stream.ReadSingle();
+                var gridSpacing = stream.ReadSingle()/60f; // Source is in minutes, we need degrees
+                var width = stream.ReadInt32();
+                var height = stream.ReadInt32();
+                var endian = stream.ReadUInt32();
                 if (endian != 0x00010203) throw new FileFormatException("Invalid CHRTR Binary file format - endian is incorrect");
-                float maxDepth = -stream.ReadSingle();
-                float minDepth = -stream.ReadSingle();
-                int paddingWidth = (width - 10)*4;
+                var maxDepth = stream.ReadSingle() * scaleFactor;
+                var minDepth = stream.ReadSingle()* scaleFactor;
+                var paddingWidth = (width - 10)*4;
                 stream.ReadBytes(paddingWidth);
                 var depths = new float[height,width];
-                for (int lat = 0; lat < height; lat++)
-                    for (int lon = 0; lon < width; lon++)
+                for (var lat = 0; lat < height; lat++)
+                    for (var lon = 0; lon < width; lon++)
                     {
-                        float curSample = stream.ReadSingle();
-                        depths[lat, lon] = curSample == 1e16f ? float.NaN : -curSample;
+                        var curSample = stream.ReadSingle();
+                        //if ((curSample > 999) || (curSample < 1)) 
+                        //    System.Diagnostics.Debugger.Break();
+                        depths[lat, lon] = curSample == 1e16f ? float.NaN : curSample * scaleFactor;
                     }
                 return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
             }
@@ -303,12 +322,14 @@ namespace ESME.Environment
             MaxCoordinate.Write(stream);
 
             stream.Write(Longitudes.Length);
-            foreach (double lon in Longitudes) stream.Write(lon);
+            foreach (var lon in Longitudes) stream.Write(lon);
 
             stream.Write(Latitudes.Length);
-            foreach (double lat in Latitudes) stream.Write(lat);
+            foreach (var lat in Latitudes) stream.Write(lat);
 
-            for (int lat = 0; lat < Latitudes.Length; lat++) for (int lon = 0; lon < Longitudes.Length; lon++) stream.Write(Values[lat, lon]);
+            for (var lat = 0; lat < Latitudes.Length; lat++) 
+                for (var lon = 0; lon < Longitudes.Length; lon++) 
+                    stream.Write(Values[lat, lon]);
         }
 
         /// <summary>
@@ -322,7 +343,9 @@ namespace ESME.Environment
         {
             using (var stream = new StreamWriter(File.Create(fileName)))
             {
-                for (int lat = 0; lat < Latitudes.Length; lat++) for (int lon = 0; lon < Longitudes.Length; lon++) stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor*Values[lat, lon]));
+                for (var lat = 0; lat < Latitudes.Length; lat++) 
+                    for (var lon = 0; lon < Longitudes.Length; lon++) 
+                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor*Values[lat, lon]));
             }
         }
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -308,6 +307,7 @@ namespace ESME.Model
     {
         public string TimePeriod { get; set; }
         public List<SoundSpeedProfile> SoundSpeedProfiles { get; set; }
+
         [XmlIgnore]
         public SoundSpeedProfile DeepestSSP { get; private set; }
 
@@ -324,22 +324,46 @@ namespace ESME.Model
                 SoundSpeedProfiles.Add(new SoundSpeedProfile(profile, serializedOutput.DepthAxis));
             foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
         }
-
-        [XmlIgnore]
-        public SerializedOutput TemperatureData { get; set; }
-        [XmlIgnore]
-        public SerializedOutput SalinityData { get; set; }
-
-        public void ExtendProfilesToDepth(float maxDepth)
+        /// <summary>
+        ///   List of latitudes (in degrees) for which we have values
+        /// </summary>
+        public IEnumerable<double> Latitudes
         {
-            if ((TemperatureData == null) || (SalinityData == null)) 
+            get
+            {
+                var latList = from value in SoundSpeedProfiles
+                             select value.Latitude_degrees;
+                var result = latList.Distinct().ToList();
+                result.Sort();
+                return result;
+            }
+        }
+
+        /// <summary>
+        ///   List of longitudes (in degrees) for which we have values
+        /// </summary>
+        public IEnumerable<double> Longitudes
+        {
+            get
+            {
+                var lonList = from value in SoundSpeedProfiles
+                              select value.Longitude_degrees;
+                var result = lonList.Distinct().ToList();
+                result.Sort();
+                return result;
+            }
+        }
+
+        public void ExtendProfilesToDepth(float maxDepth, SerializedOutput temperatureData, SerializedOutput salinityData)
+        {
+            if ((temperatureData == null) || (salinityData == null)) 
                 throw new ApplicationException("SoundSpeedField: Unable to extend to max bathymetry depth.  Temperature and salinity data are missing.");
 
             if (maxDepth > DeepestSSP.MaxDepth)
             {
 
-                var temps = new SoundSpeedField(TemperatureData, TimePeriod);
-                var sals = new SoundSpeedField(SalinityData, TimePeriod);
+                var temps = new SoundSpeedField(temperatureData, TimePeriod);
+                var sals = new SoundSpeedField(salinityData, TimePeriod);
                 var deepestTemperature = temps[DeepestSSP];
                 var deepestSalinity = sals[DeepestSSP];
                 var tempD = deepestTemperature.SoundSpeeds[DeepestSSP.SoundSpeeds.Length - 1];
@@ -387,11 +411,6 @@ namespace ESME.Model
                                         select new SoundSpeedProfile(point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
 
             foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
-        }
-
-        public void Initialize()
-        {
-            
         }
 
         public SoundSpeedProfile ExtendSSP(SoundSpeedProfile shallowSSP, float requiredDepth)

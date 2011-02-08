@@ -124,6 +124,7 @@
     <Compile Include="Environment\Binary Data Classes\DataLayerList.cs" />
     <Compile Include="Environment\Binary Data Classes\DataString.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
+    <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
     <Compile Include="Environment\NAVO\DigitalBathymetricDatabase.cs" />
     <Compile Include="Environment\NAVO\GeneralizedDigitalEnvironmentModelDatabase.cs" />
     <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
@@ -131,6 +132,7 @@
     <Compile Include="Environment\NAVO\NAVODataSources.cs" />
     <Compile Include="Environment\NAVO\SerializedOutput.cs" />
     <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />
+    <Compile Include="Environment\Sediment.cs" />
     <Compile Include="Environment\Transect.cs" />
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Model\AnimatInterface.cs" />
@@ -170,7 +172,7 @@
     <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
-    <Compile Include="TransmissionLoss\CASS\CassRunFile.cs" />
+    <Compile Include="TransmissionLoss\CASS\CassFiles.cs" />
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -47,7 +47,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                     WorkingDirectory = workingDirectory
                 },
             };
-            bellhopProcess.PropertyChanged += (sender, e) => { if (e.PropertyName == "ProgressPercent") ProgressPercent = ((TransmissionLossProcess) sender).ProgressPercent; };
+            bellhopProcess.PropertyChanged += (sender, e) => { if (e.PropertyName == "ProgressPercent") 
+                ProgressPercent = Math.Max(ProgressPercent, ((TransmissionLossProcess) sender).ProgressPercent); };
             bellhopProcess.OutputDataReceived += OutputDataRecieved;
             bellhopProcess.Start();
             bellhopProcess.PriorityClass = ProcessPriorityClass.BelowNormal;

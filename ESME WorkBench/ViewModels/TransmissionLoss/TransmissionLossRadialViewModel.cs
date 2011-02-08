@@ -389,7 +389,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 var depth = depths[index];
                 sb.Append(string.Format("L {0},{1} ", index * pixelsPerRange, depth));
-
             }
             sb.Append(string.Format("L {0},{1} ", depths.Count * pixelsPerRange, depths.Last()));
 

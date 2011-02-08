@@ -425,7 +425,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 var result = _visualizerService.ShowDialog("EnvironmentSettingsView", environmentSettingsViewModel);
                 if (!result.HasValue || !result.Value) return;
                 _experiment.BathymetryFileName = environmentSettingsViewModel.BathymetryData.SelectedItem.Name;
-                _experiment.BottomTypeFileName = environmentSettingsViewModel.BottomTypeData.SelectedItem.Name;
+                _experiment.SedimentFileName = environmentSettingsViewModel.BottomTypeData.SelectedItem.Name;
                 _experiment.SoundSpeedFileName = environmentSettingsViewModel.SoundSpeedData.SelectedItem.Name;
                 _experiment.WindSpeedFileName = environmentSettingsViewModel.WindSpeedData.SelectedItem.Name;
             }
