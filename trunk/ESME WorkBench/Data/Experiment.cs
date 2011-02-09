@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -1086,14 +1087,31 @@ namespace ESMEWorkBench.Data
                 {
                     Threshold = 0,
                 };
-                var bitmap = colormap.ToBitmap(Bathymetry.Values, Bathymetry.MinValue, Bathymetry.MaxValue < 0 ? Bathymetry.MaxValue : 8000);
-                //bitmap.Save(@"C:\Users\Dave Anderson\Desktop\test_bathymetry.jpg", ImageFormat.Jpeg);
+                var bathysize = Math.Max(Bathymetry.Values.GetLength(0), Bathymetry.Values.GetLength(1));
+                var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
+                Bitmap displayBitmap;
+                float horizontalResolution;
+                if (bathysize > screenSize)
+                {
+                    var scaleFactor = screenSize/bathysize;
+                    var decimatedValues = Decimator2D.Decimate(Bathymetry.Values, (int)(Bathymetry.Values.GetLength(0) *scaleFactor), (int)(Bathymetry.Values.GetLength(1) * scaleFactor));
+                    horizontalResolution = (float)(Bathymetry.HorizontalResolution / ((double)decimatedValues.GetLength(0) / Bathymetry.Values.GetLength(0)));
+                    displayBitmap = colormap.ToBitmap(decimatedValues, Bathymetry.MinValue, Bathymetry.MaxValue < 0 ? Bathymetry.MaxValue : 8000);
+                }
+                else
+                {
+                    displayBitmap = colormap.ToBitmap(Bathymetry.Values, Bathymetry.MinValue, Bathymetry.MaxValue < 0 ? Bathymetry.MaxValue : 8000);
+                    horizontalResolution = (float) Bathymetry.HorizontalResolution;
+                }
+          //      displayBitmap.Save(Path.Combine(LocalStorageRoot,"test.jpg"), ImageFormat.Jpeg);
+                displayBitmap.Save(Path.Combine(LocalStorageRoot, "bathy.bmp"), ImageFormat.Bmp);
 
-                var memoryStream = new MemoryStream();
-                bitmap.Save(memoryStream, ImageFormat.Bmp);
+               // var memoryStream = new MemoryStream();
+                //displayBitmap.Save(memoryStream, ImageFormat.Bmp);
                 foreach (var bathyBitmapLayer in MapLayers.Where(curLayer => curLayer.Name == bathyBitmapName).Cast<RasterMapLayer>())
                 {
-                    bathyBitmapLayer.RasterStream = memoryStream;
+                    //bathyBitmapLayer.RasterStream = memoryStream;
+                    bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
                     bitmapLayerExists = true;
                 }
                 if (!bitmapLayerExists)
@@ -1106,13 +1124,13 @@ namespace ESMEWorkBench.Data
                                           CanChangeLineWidth = false,
                                           CanBeRemoved = false,
                                           LayerType = LayerType.BathymetryRaster,
-                                          PixelSize = (float)Bathymetry.HorizontalResolution,
+                                          PixelSize = horizontalResolution,
                                           North = (float)Bathymetry.Latitudes.Last(),
                                           South = (float)Bathymetry.Latitudes.First(),
                                           East = (float)Bathymetry.Longitudes.Last(),
                                           West = (float)Bathymetry.Longitudes.First(),
-                                          RasterStream = memoryStream,
-                                          //RasterFilename = @"C:\Users\Dave Anderson\Desktop\bathymetric_small.jpg",
+                                          //RasterStream = memoryStream,
+                                          RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp"),
                                       };
                     MapLayers.Add(rasterLayer);
                     //Also send the layer to the back.
