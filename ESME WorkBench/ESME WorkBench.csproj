@@ -149,7 +149,6 @@
     <Compile Include="ViewModels\NAVODataSources\EnvironmentBuilderConfigurationViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\EnvironmentBuilderViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\SeasonConfigurationViewModel.cs" />
-    <Compile Include="ViewModels\NAVODataSources\NAVODataSourceViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\SeasonConfigurationWindowViewModel.cs" />
     <Compile Include="ViewModels\NAVODataSources\TimePeriodSelectionViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />

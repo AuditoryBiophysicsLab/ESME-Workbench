@@ -354,8 +354,32 @@ namespace ESME.Model
             }
         }
 
-        public void ExtendProfilesToDepth(float maxDepth, SerializedOutput temperatureData, SerializedOutput salinityData)
+        public IEnumerable<float> Depths
         {
+            get
+            {
+                var depths = new List<float>();
+                foreach (var profile in SoundSpeedProfiles)
+                    depths.AddRange(profile.Depths);
+
+                var result = depths.Distinct().ToList();
+                result.Sort();
+                return result;
+            }
+        }
+
+        public static explicit operator SerializedOutput(SoundSpeedField ssf)
+        {
+            var result = new SerializedOutput();
+            result.DepthAxis.AddRange(from depth in ssf.Depths
+                                      select (double) depth);
+            foreach (var profile in ssf.SoundSpeedProfiles)
+                result.DataPoints.Add((EnvironmentalDataPoint)profile);
+            return result;
+        }
+
+        public void ExtendProfilesToDepth(float maxDepth, SerializedOutput temperatureData, SerializedOutput salinityData)
+    {
             if ((temperatureData == null) || (salinityData == null)) 
                 throw new ApplicationException("SoundSpeedField: Unable to extend to max bathymetry depth.  Temperature and salinity data are missing.");
 
