@@ -88,16 +88,38 @@ namespace ESME.Environment.NAVO
             var uniqueMonths = selectedMonthIndices.Distinct().ToList();
             uniqueMonths.Sort();
 
-            var totalExtractionStepCount = (float)(uniqueMonths.Count + (SelectedTimePeriods.Count() * 2) + 2);
-            foreach (var monthIndices in SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1)) 
+            // uniqueMonths * 3 because we're counting Temp, and Salinity extraction, and Soundspeed creation as independent steps.
+            // SelectedTimePeriods.Count() * 2 is for averaging the soundspeed fields AND extracting the windspeed data
+            // and the extra 2 is for extracting bathymetry and sediment data which are time invariant
+            var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + (SelectedTimePeriods.Count() * 2) + 2);
+            foreach (var monthIndices in SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1))
                 totalExtractionStepCount++;
 
             var currentExtractionStep = 0;
+
+            Status = "Extracting bathymetry data for selected area";
+            DigitalBathymetricDatabase.ExtractArea(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution, _north, _south, _east, _west, DigitalBathymetricDatabase.Resolutions);
+            if (backgroundWorker.CancellationPending) return;
+            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
+            var bathymetry = Environment2DData.ReadChrtrBinaryFile(DigitalBathymetricDatabase.BathymetryFilename(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution), -1);
+            var maxDepth = bathymetry.MinValue;
+
+            // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
+            Status = "Extracting sediment data for selected area";
+            BottomSedimentTypeDatabase.ExtractArea(_localStorageRoot, BottomSedimentTypeDatabase.SelectedResolution, _north, _south, _east, _west);
+            if (backgroundWorker.CancellationPending) return;
+            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
             foreach (var month in uniqueMonths)
             {
                 Status = "Extracting temperature and salinity data for " + (NAVOTimePeriod)month;
                 GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(_localStorageRoot, _north, _south, _east, _west, month);
+                if (backgroundWorker.CancellationPending) return;
+                currentExtractionStep += 2;
+                ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
+
+                Status = "Creating sound speed data for " + (NAVOTimePeriod)month;
+                GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(_localStorageRoot, (NAVOTimePeriod)month, maxDepth);
                 if (backgroundWorker.CancellationPending) return;
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
@@ -106,30 +128,11 @@ namespace ESME.Environment.NAVO
             {
                 var monthIndices = GetMonthIndices(timePeriod);
                 if (monthIndices.Count() <= 1) continue;
-                Status = "Creating average temperature and salinity data for " + timePeriod;
+                Status = "Creating average soundspeed data for " + timePeriod;
                 GeneralizedDigitalEnvironmentModelDatabase.AverageMonthlyData(_localStorageRoot, monthIndices, timePeriod);
                 if (backgroundWorker.CancellationPending) return;
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
-
-            foreach (var timePeriod in SelectedTimePeriods)
-            {
-                Status = "Creating sound speed data for " + timePeriod;
-                GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(_localStorageRoot, timePeriod);
-                if (backgroundWorker.CancellationPending) return;
-                ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
-            }
-
-            // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
-            Status = "Extracting sediment data for selected area";
-            BottomSedimentTypeDatabase.ExtractArea(_localStorageRoot, BottomSedimentTypeDatabase.SelectedResolution, _north, _south, _east, _west);
-            if (backgroundWorker.CancellationPending) return;
-            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
-
-            Status = "Extracting bathymetry data for selected area";
-            DigitalBathymetricDatabase.ExtractArea(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution, _north, _south, _east, _west, DigitalBathymetricDatabase.Resolutions);
-            if (backgroundWorker.CancellationPending) return;
-            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
             foreach (var timePeriod in SelectedTimePeriods)
             {
@@ -140,7 +143,8 @@ namespace ESME.Environment.NAVO
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
 
-            CASSFiles.GenerateSimAreaData(_simAreaName, _localStorageRoot, _north, _south, _east, _west);
+            foreach (var timePeriod in SelectedTimePeriods)
+                CASSFiles.GenerateSimAreaData(_simAreaName, _localStorageRoot, timePeriod.ToString(), _north, _south, _east, _west);
         }
 
         public IEnumerable<NAVOTimePeriod> SelectedTimePeriods { get; set; }

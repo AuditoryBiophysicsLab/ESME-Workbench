@@ -119,6 +119,17 @@ namespace ESME.Model
 
         }
 
+        public static explicit operator EnvironmentalDataPoint(SoundSpeedProfile ssp)
+        {
+            var result = new EnvironmentalDataPoint
+                         {
+                             Latitude_degrees = ssp.Latitude_degrees,
+                             Longitude_degrees = ssp.Longitude_degrees
+                         };
+            result.Data.AddRange(from speed in ssp.SoundSpeeds select (double)speed);
+            return result;
+        }
+
         public static readonly SoundSpeedProfile Empty = new SoundSpeedProfile
                                                          {
                                                              Depths = null,

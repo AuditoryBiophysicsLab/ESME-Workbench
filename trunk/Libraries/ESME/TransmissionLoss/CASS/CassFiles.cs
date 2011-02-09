@@ -11,14 +11,12 @@ namespace ESME.TransmissionLoss.CASS
 {
     public static class CASSFiles
     {
-        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, float north, float south, float east, float west)
+        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, string timePeriodName, float north, float south, float east, float west)
         {
             var bathyFiles = Directory.GetFiles(extractedDataPath, "bathymetry-*.chb");
             var sedimentFiles = Directory.GetFiles(extractedDataPath, "sediment-*.chb");
-            var windFiles = Directory.GetFiles(extractedDataPath, "*-wind.txt");
-            var soundspeedFiles = Directory.GetFiles(extractedDataPath, "*-soundspeed.xml");
-            //var salinityFiles = Directory.GetFiles(extractedDataPath, "*-salinity.xml");
-            //var watertempFiles = Directory.GetFiles(extractedDataPath, "*-water_temp.xml");
+            var windFile = Path.Combine(extractedDataPath, string.Format("{0}-wind.txt", timePeriodName));
+            var soundspeedFile = Path.Combine(extractedDataPath, string.Format("{0}-soundspeed.xml", timePeriodName));
 
             Environment2DData bathymetry = null;
             var selectedBathyFile = LargestFileInList(bathyFiles);
@@ -32,43 +30,21 @@ namespace ESME.TransmissionLoss.CASS
             if (selectedSedimentFile.EndsWith(".eeb")) sediment = Sediment.ReadESMEEnvironmentBinaryFile(selectedSedimentFile, north, south, east, west);
             else if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.ReadChrtrBinaryFile(selectedSedimentFile);
 
-            if (windFiles.Length == 0) throw new ApplicationException("No wind files were found, the operation cannot proceed");
-            var windTimePeriods = (from windFile in windFiles
-                                   select Path.GetFileNameWithoutExtension(windFile)
-                                   into fileName where fileName != null select fileName.Split(new[]
-                                                                                              {
-                                                                                                  '-'
-                                                                                              })[0].ToLower()).ToList();
+            Environment2DData wind = null;
+            if (windFile.EndsWith(".eeb")) wind = new Environment2DData(windFile, "windspeed", north, west, south, east);
+            else if (windFile.EndsWith(".txt")) wind = SurfaceMarineGriddedClimatologyDatabase.Parse(windFile);
+            if (wind == null) throw new ApplicationException("Error reading wind data");
 
-            if (soundspeedFiles.Length == 0) throw new ApplicationException("No soundspeed files were found, the operation cannot proceed");
-            var soundspeedTimePeriods = (from soundspeedFile in soundspeedFiles
-                                         select Path.GetFileNameWithoutExtension(soundspeedFile)
-                                         into fileName where fileName != null select fileName.Split(new[]
-                                                                                                    {
-                                                                                                        '-'
-                                                                                                    })[0].ToLower()).ToList();
-
-            var allTimePeriods = new List<string>();
-            allTimePeriods.AddRange(windTimePeriods);
-            allTimePeriods.AddRange(soundspeedTimePeriods);
-
-            foreach (var timePeriod in allTimePeriods.Distinct())
+            SoundSpeedField soundSpeedField = null;
+            if (soundspeedFile.EndsWith(".eeb")) soundSpeedField = new SoundSpeedField(soundspeedFile, north, west, south, east);
+            else if (soundspeedFile.EndsWith(".xml"))
             {
-                var windFileName = Path.Combine(extractedDataPath, timePeriod + "-wind.txt");
-                var soundspeedFileName = Path.Combine(extractedDataPath, timePeriod + "-soundspeed.xml");
-                var watertempFileName = Path.Combine(extractedDataPath, timePeriod + "-water_temp.xml");
-                var salinityFileName = Path.Combine(extractedDataPath, timePeriod + "-salinity.xml");
-                var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriod.ToLower() + ".dat");
-                try
-                {
-                    CheckWriteEnvironmentFile(timePeriod, environmentFileName, bathymetry, sediment, windFileName, soundspeedFileName, watertempFileName, salinityFileName, north, south, east, west);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(@"Error creating CASS environmental data for " + timePeriod + @":");
-                    Console.WriteLine(ex.Message);
-                }
+                var rawSoundSpeeds = SerializedOutput.Load(soundspeedFile, null);
+                soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriodName);
             }
+            
+            var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriodName.ToLower() + ".dat");
+            WriteEnvironmentFile(environmentFileName, bathymetry, sediment, soundSpeedField, wind);
         }
 
         static string LargestFileInList(IEnumerable<string> files)
@@ -78,11 +54,9 @@ namespace ESME.TransmissionLoss.CASS
             foreach (var file in files)
             {
                 var curFileInfo = new FileInfo(file);
-                if (curFileInfo.Length > largestFileSize)
-                {
-                    largestFileSize = curFileInfo.Length;
-                    largestFileName = file;
-                }
+                if (curFileInfo.Length <= largestFileSize) continue;
+                largestFileSize = curFileInfo.Length;
+                largestFileName = file;
             }
             return largestFileName;
         }
@@ -99,31 +73,6 @@ namespace ESME.TransmissionLoss.CASS
                 bathyFile.WriteLine("EOT");
             }
 #endif
-        }
-
-        static void CheckWriteEnvironmentFile(string timePeriodName, string environmentFileName, Environment2DData bathymetry, Sediment sediment, string windFileName, string soundspeedFileName, string watertempFileName, string salinityFileName, float north, float south, float east, float west)
-        {
-            if (string.IsNullOrEmpty(environmentFileName) || string.IsNullOrEmpty(windFileName) || string.IsNullOrEmpty(soundspeedFileName) || string.IsNullOrEmpty(watertempFileName) || string.IsNullOrEmpty(salinityFileName) || (bathymetry == null) || (sediment == null)) 
-                throw new ApplicationException("One or more files were not specified.");
-            var environmentPath = Path.GetDirectoryName(environmentFileName);
-            if (string.IsNullOrEmpty(environmentPath)) throw new ApplicationException("Invalid path provided for environment file");
-            if (!Directory.Exists(environmentPath) || !File.Exists(windFileName) || !File.Exists(soundspeedFileName) || !File.Exists(watertempFileName) || !File.Exists(salinityFileName))
-                throw new ApplicationException("One or more files were not found");
-            Environment2DData wind = null;
-            if (windFileName.EndsWith(".eeb")) wind = new Environment2DData(windFileName, "windspeed", north, west, south, east);
-            else if (windFileName.EndsWith(".txt")) wind = SurfaceMarineGriddedClimatologyDatabase.Parse(windFileName);
-            if (wind == null) throw new ApplicationException("Error reading wind data");
-
-            SoundSpeedField soundSpeedField = null;
-            if (soundspeedFileName.EndsWith(".eeb")) soundSpeedField = new SoundSpeedField(soundspeedFileName, north, west, south, east);
-            else if (soundspeedFileName.EndsWith(".xml"))
-            {
-                var rawSoundSpeeds = SerializedOutput.Load(soundspeedFileName, null);
-                soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriodName);
-                soundSpeedField.ExtendProfilesToDepth(bathymetry.MaxValue, SerializedOutput.Load(watertempFileName, null), SerializedOutput.Load(salinityFileName, null));
-            }
-
-            WriteEnvironmentFile(environmentFileName, bathymetry, sediment, soundSpeedField, wind);
         }
 
         public static void WriteEnvironmentFile(string environmentFileName, Environment2DData bathymetry, Sediment sedimentType, SoundSpeedField soundSpeedField, Environment2DData windSpeed)
@@ -155,7 +104,7 @@ namespace ESME.TransmissionLoss.CASS
                             else break;
                         envFile.WriteLine("EOT");
                         envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
-                        float bottomTypeIndex = 0;
+                        //float bottomTypeIndex = 0;
                         //envFile.WriteLine(sedimentType.ClosestTo(location, ref bottomTypeIndex) ? BottomSedimentTypeTable.Lookup((int)bottomTypeIndex).ToUpper() : "UNKNOWN");
                         float windSpeedValue = 0;
                         envFile.WriteLine("WIND SPEED                            = {0} KNOTS", windSpeed.ClosestTo(location, ref windSpeedValue) ? windSpeedValue : 0.0f);
