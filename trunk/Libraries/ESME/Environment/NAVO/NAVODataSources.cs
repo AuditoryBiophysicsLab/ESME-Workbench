@@ -118,7 +118,7 @@ namespace ESME.Environment.NAVO
                 currentExtractionStep += 2;
                 ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
 
-                Status = "Creating sound speed data for " + (NAVOTimePeriod)month;
+                Status = "Calculating sound speed data for " + (NAVOTimePeriod)month;
                 GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(_localStorageRoot, (NAVOTimePeriod)month, maxDepth);
                 if (backgroundWorker.CancellationPending) return;
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
@@ -128,11 +128,24 @@ namespace ESME.Environment.NAVO
             {
                 var monthIndices = GetMonthIndices(timePeriod);
                 if (monthIndices.Count() <= 1) continue;
-                Status = "Creating average soundspeed data for " + timePeriod;
+                Status = "Calculating average soundspeed data for " + timePeriod;
                 GeneralizedDigitalEnvironmentModelDatabase.AverageMonthlyData(_localStorageRoot, monthIndices, timePeriod);
                 if (backgroundWorker.CancellationPending) return;
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
+
+            var soundspeedFiles = Directory.GetFiles(_localStorageRoot, "*-soundspeed.xml").ToList();
+            foreach (var timePeriod in SelectedTimePeriods)
+            {
+                var keeperSoundspeedFile = SoundspeedFilename(timePeriod);
+                foreach (var soundspeedFile in soundspeedFiles.Where(soundspeedFile => soundspeedFile == keeperSoundspeedFile)) 
+                {
+                    soundspeedFiles.Remove(soundspeedFile);
+                    break;
+                }
+            }
+            foreach (var soundspeedFile in soundspeedFiles)
+                File.Delete(soundspeedFile);
 
             foreach (var timePeriod in SelectedTimePeriods)
             {
