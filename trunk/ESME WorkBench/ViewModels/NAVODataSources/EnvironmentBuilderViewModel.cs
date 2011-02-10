@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.NAVO;
@@ -21,7 +24,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
         IViewAwareStatus _viewAwareStatus;
         readonly IMessageBoxService _messageBoxService;
         readonly Experiment _experiment;
-        static TimePeriodSelectionViewModel _timePeriodSelectionViewModel;
+        bool _extractionCanceled;
 
         public EnvironmentBuilderViewModel(IUIVisualizerService visualizerService, IMessageBoxService messageBoxService, AppSettings appSettings, Experiment experiment)
         {
@@ -41,6 +44,209 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             ExtractButtonText = "Initializing...";
         }
 
+        #region LaunchSeasonConfigurationViewCommand
+
+        SimpleCommand<object, object> _launchSeasonConfigurationView;
+
+        public SimpleCommand<object, object> LaunchSeasonConfigurationViewCommand
+        {
+            get
+            {
+                return _launchSeasonConfigurationView ?? (_launchSeasonConfigurationView = new SimpleCommand<object, object>(delegate
+                {
+                    var popupViewModel = new SeasonConfigurationWindowViewModel();
+                    _visualizerService.ShowDialog("SeasonConfigurationWindowView", popupViewModel);
+                }));
+            }
+        }
+
+        #endregion
+
+        #region SelectAllMonthsCommand
+
+        SimpleCommand<object, object> _selectAllMonths;
+
+        public SimpleCommand<object, object> SelectAllMonthsCommand
+        {
+            get { return _selectAllMonths ?? (_selectAllMonths = new SimpleCommand<object, object>(delegate { foreach (var month in MonthCheckboxes) month.IsChecked = true; })); }
+        }
+
+        #endregion
+
+        #region UnselectAllMonthsCommand
+
+        SimpleCommand<object, object> _unselectAllMonths;
+
+        public SimpleCommand<object, object> UnselectAllMonthsCommand
+        {
+            get { return _unselectAllMonths ?? (_unselectAllMonths = new SimpleCommand<object, object>(delegate { foreach (var month in MonthCheckboxes) month.IsChecked = false; })); }
+        }
+
+        #endregion
+
+        #region SelectAllSeasonsCommand
+
+        SimpleCommand<object, object> _selectAllSeasons;
+
+        public SimpleCommand<object, object> SelectAllSeasonsCommand
+        {
+            get { return _selectAllSeasons ?? (_selectAllSeasons = new SimpleCommand<object, object>(delegate { foreach (var month in SeasonCheckboxes) month.IsChecked = true; })); }
+        }
+
+        #endregion
+
+        #region UnselectAllSeasonsCommand
+
+        SimpleCommand<object, object> _unselectAllSeasons;
+
+        public SimpleCommand<object, object> UnselectAllSeasonsCommand
+        {
+            get { return _unselectAllSeasons ?? (_unselectAllSeasons = new SimpleCommand<object, object>(delegate { foreach (var month in SeasonCheckboxes) month.IsChecked = false; })); }
+        }
+
+        #endregion
+
+        #region public ObservableCollection<NAVOTimePeriod> SelectedPeriods { get; set; }
+
+        static readonly PropertyChangedEventArgs SelectedPeriodsChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.SelectedPeriods);
+        ObservableCollection<NAVOTimePeriod> _selectedPeriods;
+
+        public ObservableCollection<NAVOTimePeriod> SelectedPeriods
+        {
+            get { return _selectedPeriods; }
+            set
+            {
+                if (_selectedPeriods == value) return;
+                if (_selectedPeriods != null) _selectedPeriods.CollectionChanged -= SelectedPeriodsCollectionChanged;
+                _selectedPeriods = value;
+                if (_selectedPeriods != null) _selectedPeriods.CollectionChanged += SelectedPeriodsCollectionChanged;
+                NotifyPropertyChanged(SelectedPeriodsChangedEventArgs);
+            }
+        }
+
+        void SelectedPeriodsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(SelectedPeriodsChangedEventArgs); }
+
+        #endregion
+
+        #region public CheckboxSettings MonthCheckboxes { get; set; }
+
+        public CheckboxSettings MonthCheckboxes
+        {
+            get { return _monthCheckboxes; }
+            set
+            {
+                if (_monthCheckboxes == value) return;
+                if (_monthCheckboxes != null) _monthCheckboxes.CollectionChanged -= MonthCheckboxesCollectionChanged;
+                _monthCheckboxes = value;
+                if (_monthCheckboxes != null) _monthCheckboxes.CollectionChanged += MonthCheckboxesCollectionChanged;
+                NotifyPropertyChanged(MonthCheckboxesChangedEventArgs);
+            }
+        }
+
+        void MonthCheckboxesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(MonthCheckboxesChangedEventArgs); }
+        static readonly PropertyChangedEventArgs MonthCheckboxesChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.MonthCheckboxes);
+        static CheckboxSettings _monthCheckboxes = new CheckboxSettings
+                                                   {
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.January
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.February
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.March
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.April
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.May
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.June
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.July
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.August
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.September
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.October
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.November
+                                                       },
+                                                       new CheckboxSetting
+                                                       {
+                                                           TimePeriod = NAVOTimePeriod.December
+                                                       },
+                                                   };
+
+        #endregion
+
+        #region public CheckboxSettings SeasonCheckboxes { get; set; }
+
+        public CheckboxSettings SeasonCheckboxes
+        {
+            get { return _seasonCheckboxes; }
+            set
+            {
+                if (_seasonCheckboxes == value) return;
+                if (_seasonCheckboxes != null) _seasonCheckboxes.CollectionChanged -= SeasonCheckboxesCollectionChanged;
+                _seasonCheckboxes = value;
+                if (_seasonCheckboxes != null) _seasonCheckboxes.CollectionChanged += SeasonCheckboxesCollectionChanged;
+                NotifyPropertyChanged(SeasonCheckboxesChangedEventArgs);
+            }
+        }
+
+        void SeasonCheckboxesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(SeasonCheckboxesChangedEventArgs); }
+        static readonly PropertyChangedEventArgs SeasonCheckboxesChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.SeasonCheckboxes);
+
+        CheckboxSettings _seasonCheckboxes = new CheckboxSettings
+                                             {
+                                                 new CheckboxSetting
+                                                 {
+                                                     TimePeriod = NAVOTimePeriod.Spring
+                                                 },
+                                                 new CheckboxSetting
+                                                 {
+                                                     TimePeriod = NAVOTimePeriod.Summer
+                                                 },
+                                                 new CheckboxSetting
+                                                 {
+                                                     TimePeriod = NAVOTimePeriod.Fall
+                                                 },
+                                                 new CheckboxSetting
+                                                 {
+                                                     TimePeriod = NAVOTimePeriod.Winter
+                                                 },
+                                                 new CheckboxSetting
+                                                 {
+                                                     TimePeriod = NAVOTimePeriod.Warm
+                                                 },
+                                                 new CheckboxSetting
+                                                 {
+                                                     TimePeriod = NAVOTimePeriod.Cold
+                                                 },
+                                             };
+
+        #endregion
+        
         #region public AppSettings AppSettings { get; set; }
 
         static readonly PropertyChangedEventArgs AppSettingsChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.AppSettings);
@@ -114,21 +320,39 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         #endregion
 
-        #region public bool ExtractingData { get; set; }
+        #region public bool NotExtractingData { get; set; }
 
-        public bool ExtractingData
+        public bool NotExtractingData
         {
-            get { return _extractingData; }
+            get { return _notExtractingData; }
             set
             {
-                if (_extractingData == value) return;
-                _extractingData = value;
+                if (_notExtractingData == value) return;
+                _notExtractingData = value;
                 NotifyPropertyChanged(ExtractingDataChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ExtractingDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.ExtractingData);
-        bool _extractingData = false;
+        static readonly PropertyChangedEventArgs ExtractingDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.NotExtractingData);
+        bool _notExtractingData = true;
+
+        #endregion
+
+        #region public bool ExportCASSData { get; set; }
+
+        public bool ExportCASSData
+        {
+            get { return _exportCASSData; }
+            set
+            {
+                if (_exportCASSData == value) return;
+                _exportCASSData = value;
+                NotifyPropertyChanged(ExportCASSDataChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExportCASSDataChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.ExportCASSData);
+        bool _exportCASSData;
 
         #endregion
 
@@ -143,26 +367,26 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                 return _extractAll ?? (_extractAll = new SimpleCommand<object, object>(
                     delegate
                     {
-                        return  ((NAVODataSources != null) && (!ExtractingData) && 
-                                (((_timePeriodSelectionViewModel != null) && (_timePeriodSelectionViewModel.MonthCheckboxes != null) && (_timePeriodSelectionViewModel.MonthCheckboxes.SelectedTimePeriods.Count() > 0)) ||
-                                 ((_timePeriodSelectionViewModel != null) && (_timePeriodSelectionViewModel.SeasonCheckboxes != null) && (_timePeriodSelectionViewModel.SeasonCheckboxes.SelectedTimePeriods.Count() > 0)))); }, 
+                        return  ((NAVODataSources != null) && (NotExtractingData) && 
+                                 ((MonthCheckboxes.SelectedTimePeriods.Count() > 0) || (SeasonCheckboxes.SelectedTimePeriods.Count() > 0))); }, 
                     delegate
                     {
-                        AppSettings.Save(); //remember the new values. 
                         var selectedTimePeriods = new List<NAVOTimePeriod>();
-                        if (_timePeriodSelectionViewModel != null)
-                        {
-                            if (_timePeriodSelectionViewModel.MonthCheckboxes != null)
-                                selectedTimePeriods.AddRange(_timePeriodSelectionViewModel.MonthCheckboxes.SelectedTimePeriods);
-                            if (_timePeriodSelectionViewModel.SeasonCheckboxes != null)
-                                selectedTimePeriods.AddRange(_timePeriodSelectionViewModel.SeasonCheckboxes.SelectedTimePeriods);
-                        }
+                        if (MonthCheckboxes != null)
+                            selectedTimePeriods.AddRange(MonthCheckboxes.SelectedTimePeriods);
+                        if (SeasonCheckboxes != null)
+                            selectedTimePeriods.AddRange(SeasonCheckboxes.SelectedTimePeriods);
                         if (selectedTimePeriods.Count < 1) return;
                         //extract data from all data sources.
                         //NAVODataSources.ExtractAreas(selectedTimePeriods);
                         NAVODataSources.SelectedTimePeriods = selectedTimePeriods;
+                        NAVODataSources.ExportCASSData = ExportCASSData;
                         NAVODataSources.ExtractDataInBackground(delegate
                                                                 {
+                                                                    NotExtractingData = true;
+                                                                    ExtractButtonText = "Extract";
+                                                                    CommandManager.InvalidateRequerySuggested();
+                                                                    if (_extractionCanceled) return;
                                                                     if (selectedTimePeriods.Count > 0)
                                                                     {
                                                                         var timePeriod = selectedTimePeriods[0];
@@ -173,22 +397,13 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                                                                         _experiment.SedimentFileName = NAVODataSources.SedimentFilename(timePeriod);
                                                                         _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename(timePeriod);
                                                                     }
+                                                                    AppSettings.Save(); //remember the new values. 
                                                                     CloseActivePopUpCommand.Execute(true);
-                                                                    ExtractingData = false;
                                                                 });
-                        ExtractingData = true;
+                        NotExtractingData = false;
                         ExtractButtonText = "Extracting...";
+                        _extractionCanceled = false;
                         //close the view.
-#if false
-                        _experiment.WindSpeedFileName = NAVODataSources.SMGC.OutputFilename;
-                        _experiment.SoundSpeedFileName = NAVODataSources.GDEM.OutputFilename;
-                        _experiment.TemperatureFileName = NAVODataSources.GDEM.TemperatureSourceFilename;
-                        _experiment.SalinityFileName = NAVODataSources.GDEM.SalinitySourceFilename;
-                        _experiment.BottomTypeFileName = NAVODataSources.BST.OutputFilename;
-                        _experiment.BathymetryFileName = NAVODataSources.DBDB.OutputFilename;
-#endif
-
-                        //((EnvironmentBuilderView)_viewAwareStatus.View).Close();
                     }));
             }
         }
@@ -205,34 +420,87 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
             {
                 return _cancel ?? (_cancel = new SimpleCommand<object, object>(delegate
                                                                                {
-                                                                                   if (ExtractingData)
+                                                                                   if (!NotExtractingData)
                                                                                    {
                                                                                        NAVODataSources.CancelExtraction();
+                                                                                       _extractionCanceled = true;
                                                                                    }
-                                                                                   AppSettings.Reload(); //invalidate all changes.
-                                                                                   CloseActivePopUpCommand.Execute(false);
+                                                                                   else
+                                                                                   {
+                                                                                       AppSettings.Reload(); //invalidate all changes.
+                                                                                       CloseActivePopUpCommand.Execute(false);
+                                                                                   }
                                                                                }));
             }
         }
 
         #endregion
         
-
         #region IViewStatusAwareInjectionAware Members
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
             _viewAwareStatus = viewAwareStatusService;
             _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-            //NAVODataSources = new ESME.Environment.NAVO.NAVODataSources(Globals.AppSettings.NAVOConfiguration, ExtractionAreaPacket, _dispatcher);
             NAVODataSources = new ESME.Environment.NAVO.NAVODataSources(Globals.AppSettings.NAVOConfiguration, _dispatcher, _experiment.LocalStorageRoot, _experiment.North, _experiment.South, _experiment.East, _experiment.West, Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName));
             ExtractButtonText = "Extract";
         }
 
         #endregion
-
-        [MediatorMessageSink(MediatorMessage.RegisterTimePeriodSelectionViewModel)]
-        void RegisterTimePeriodSelectionViewModel(TimePeriodSelectionViewModel timePeriodSelectionViewModel) { _timePeriodSelectionViewModel = timePeriodSelectionViewModel; }
-
     }
+
+    public class CheckboxSettings : ObservableCollection<CheckboxSetting>
+    {
+        public CheckboxSetting this[string caption]
+        {
+            get
+            {
+                foreach (var setting in this.Where(setting => setting.Caption == caption))
+                    return setting;
+                throw new IndexOutOfRangeException("CheckboxSettings: Specified setting \"" + caption + "\" not found");
+            }
+        }
+
+        public bool IsAtLeastOneChecked { get { return this.Aggregate(false, (current, setting) => current | setting.IsChecked); } }
+
+        public IEnumerable<NAVOTimePeriod> SelectedTimePeriods
+        {
+            get { return this.Where(setting => setting.IsChecked).Select(setting => setting.TimePeriod); }
+        }
+    }
+
+    public class CheckboxSetting : ViewModelBase
+    {
+        public CheckboxSetting() { IsChecked = false; }
+
+        #region public string Caption { get; set; }
+
+        public string Caption
+        {
+            get { return TimePeriod.ToString(); }
+        }
+
+        #endregion
+
+        public NAVOTimePeriod TimePeriod { get; set; }
+
+        #region public bool IsChecked { get; set; }
+
+        public bool IsChecked
+        {
+            get { return _isChecked; }
+            set
+            {
+                if (_isChecked == value) return;
+                _isChecked = value;
+                NotifyPropertyChanged(IsCheckedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs = ObservableHelper.CreateArgs<CheckboxSetting>(x => x.IsChecked);
+        bool _isChecked;
+
+        #endregion
+    }
+
 }
