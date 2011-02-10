@@ -1103,15 +1103,16 @@ namespace ESMEWorkBench.Data
                     displayBitmap = colormap.ToBitmap(Bathymetry.Values, Bathymetry.MinValue, Bathymetry.MaxValue < 0 ? Bathymetry.MaxValue : 8000);
                     horizontalResolution = (float) Bathymetry.HorizontalResolution;
                 }
-          //      displayBitmap.Save(Path.Combine(LocalStorageRoot,"test.jpg"), ImageFormat.Jpeg);
                 displayBitmap.Save(Path.Combine(LocalStorageRoot, "bathy.bmp"), ImageFormat.Bmp);
 
-               // var memoryStream = new MemoryStream();
-                //displayBitmap.Save(memoryStream, ImageFormat.Bmp);
                 foreach (var bathyBitmapLayer in MapLayers.Where(curLayer => curLayer.Name == bathyBitmapName).Cast<RasterMapLayer>())
                 {
-                    //bathyBitmapLayer.RasterStream = memoryStream;
                     bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
+                    bathyBitmapLayer.PixelSize = horizontalResolution;
+                    bathyBitmapLayer.North = (float)Bathymetry.Latitudes.Last();
+                    bathyBitmapLayer.South = (float)Bathymetry.Latitudes.First();
+                    bathyBitmapLayer.East = (float)Bathymetry.Longitudes.Last();
+                    bathyBitmapLayer.West = (float)Bathymetry.Longitudes.First();
                     bitmapLayerExists = true;
                 }
                 if (!bitmapLayerExists)
@@ -1129,7 +1130,6 @@ namespace ESMEWorkBench.Data
                                           South = (float)Bathymetry.Latitudes.First(),
                                           East = (float)Bathymetry.Longitudes.Last(),
                                           West = (float)Bathymetry.Longitudes.First(),
-                                          //RasterStream = memoryStream,
                                           RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp"),
                                       };
                     MapLayers.Add(rasterLayer);
