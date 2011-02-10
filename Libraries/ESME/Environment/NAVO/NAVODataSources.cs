@@ -92,6 +92,8 @@ namespace ESME.Environment.NAVO
             // SelectedTimePeriods.Count() * 2 is for averaging the soundspeed fields AND extracting the windspeed data
             // and the extra 2 is for extracting bathymetry and sediment data which are time invariant
             var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + (SelectedTimePeriods.Count() * 2) + 2);
+            if (ExportCASSData) totalExtractionStepCount += SelectedTimePeriods.Count();
+
             foreach (var monthIndices in SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1))
                 totalExtractionStepCount++;
 
@@ -156,8 +158,14 @@ namespace ESME.Environment.NAVO
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
 
-            foreach (var timePeriod in SelectedTimePeriods)
-                CASSFiles.GenerateSimAreaData(_simAreaName, _localStorageRoot, timePeriod.ToString(), _north, _south, _east, _west);
+            if (ExportCASSData)
+            {
+                foreach (var timePeriod in SelectedTimePeriods)
+                {
+                    Status = "Exporting CASS format data for" + timePeriod;
+                    CASSFiles.GenerateSimAreaData(_simAreaName, _localStorageRoot, timePeriod.ToString(), _north, _south, _east, _west);
+                }
+            }
         }
 
         public IEnumerable<NAVOTimePeriod> SelectedTimePeriods { get; set; }
@@ -212,7 +220,6 @@ namespace ESME.Environment.NAVO
             get { return _isStarted; }
             set
             {
-                if (_isStarted == value) return;
                 _isStarted = value;
                 IsVisible = _isStarted ? Visibility.Visible : Visibility.Collapsed;
                 _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(IsStartedChangedEventArgs));
@@ -221,24 +228,6 @@ namespace ESME.Environment.NAVO
 
         static readonly PropertyChangedEventArgs IsStartedChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.IsStarted);
         bool _isStarted;
-
-        #endregion
-
-        #region public bool IsCompleted { get; set; }
-
-        public bool IsCompleted
-        {
-            get { return _isCompleted; }
-            set
-            {
-                if (_isCompleted == value) return;
-                _isCompleted = value;
-                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(IsCompletedChangedEventArgs));
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsCompletedChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.IsCompleted);
-        bool _isCompleted;
 
         #endregion
 
@@ -271,6 +260,7 @@ namespace ESME.Environment.NAVO
             {
                 if (IsStarted) return;
                 IsStarted = true;
+                ProgressPercent = 0;
                 _backgroundWorker = new BackgroundWorker
                                     {
                                         WorkerSupportsCancellation = true,
@@ -279,8 +269,8 @@ namespace ESME.Environment.NAVO
                 _backgroundWorker.DoWork += ExtractAreas;
                 _backgroundWorker.RunWorkerCompleted += delegate
                                                         {
-                                                            IsCompleted = true;
-                                                            ProgressPercent = 0;
+                                                            IsStarted = false;
+                                                            ProgressPercent = 100;
                                                         };
                 if (runWorkerCompletedEventHandler != null) _backgroundWorker.RunWorkerCompleted += runWorkerCompletedEventHandler;
                 _backgroundWorker.RunWorkerAsync();
@@ -289,6 +279,24 @@ namespace ESME.Environment.NAVO
 
         static readonly PropertyChangedEventArgs StatusChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.Status);
         string _status;
+
+        #endregion
+
+        #region public bool ExportCASSData { get; set; }
+
+        public bool ExportCASSData
+        {
+            get { return _exportCASSData; }
+            set
+            {
+                if (_exportCASSData == value) return;
+                _exportCASSData = value;
+                NotifyPropertyChanged(ExportCASSDataChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExportCASSDataChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.ExportCASSData);
+        bool _exportCASSData;
 
         #endregion
 
