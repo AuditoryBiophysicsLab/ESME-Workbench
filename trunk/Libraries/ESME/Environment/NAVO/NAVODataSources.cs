@@ -162,7 +162,7 @@ namespace ESME.Environment.NAVO
             {
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
-                    Status = "Exporting CASS format data for" + timePeriod;
+                    Status = "Exporting CASS format data for " + timePeriod;
                     CASSFiles.GenerateSimAreaData(_simAreaName, _localStorageRoot, timePeriod.ToString(), _north, _south, _east, _west);
                 }
             }

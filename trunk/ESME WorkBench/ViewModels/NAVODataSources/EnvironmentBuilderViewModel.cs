@@ -377,8 +377,6 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                         if (SeasonCheckboxes != null)
                             selectedTimePeriods.AddRange(SeasonCheckboxes.SelectedTimePeriods);
                         if (selectedTimePeriods.Count < 1) return;
-                        //extract data from all data sources.
-                        //NAVODataSources.ExtractAreas(selectedTimePeriods);
                         NAVODataSources.SelectedTimePeriods = selectedTimePeriods;
                         NAVODataSources.ExportCASSData = ExportCASSData;
                         NAVODataSources.ExtractDataInBackground(delegate
@@ -392,8 +390,6 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
                                                                         var timePeriod = selectedTimePeriods[0];
                                                                         _experiment.WindSpeedFileName = NAVODataSources.WindFilename(timePeriod);
                                                                         _experiment.SoundSpeedFileName = NAVODataSources.SoundspeedFilename(timePeriod);
-                                                                        _experiment.TemperatureFileName = NAVODataSources.TemperatureFilename(timePeriod);
-                                                                        _experiment.SalinityFileName = NAVODataSources.SalinityFilename(timePeriod);
                                                                         _experiment.SedimentFileName = NAVODataSources.SedimentFilename(timePeriod);
                                                                         _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename(timePeriod);
                                                                     }

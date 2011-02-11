@@ -54,7 +54,10 @@ namespace ESMEWorkBench.ViewModels.RecentFiles
         {
             if (List.Count > 0) List.Clear();
             foreach (var recent in Persister.RecentFiles(MaxNumberOfFiles))
-                List.Add(new RecentFileDescriptor(recent));
+            {
+                if (File.Exists(recent))
+                    List.Add(new RecentFileDescriptor(recent));
+            }
         }
 
         public void RemoveFile(string filepath)
@@ -83,5 +86,6 @@ namespace ESMEWorkBench.ViewModels.RecentFiles
         #endregion
         public string LongName { get; private set; }
         public string ShortName { get; private set; }
+        public bool IsChecked { get; set; }
     }
 }

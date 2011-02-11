@@ -104,8 +104,8 @@ namespace ESME.TransmissionLoss.CASS
                             else break;
                         envFile.WriteLine("EOT");
                         envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
-                        //float bottomTypeIndex = 0;
-                        //envFile.WriteLine(sedimentType.ClosestTo(location, ref bottomTypeIndex) ? BottomSedimentTypeTable.Lookup((int)bottomTypeIndex).ToUpper() : "UNKNOWN");
+                        float bottomTypeIndex;
+                        //envFile.WriteLine(sedimentType.ClosestTo(location, out bottomTypeIndex) ? BottomSedimentTypeTable.Lookup((int)bottomTypeIndex).ToUpper() : "UNKNOWN");
                         float windSpeedValue = 0;
                         envFile.WriteLine("WIND SPEED                            = {0} KNOTS", windSpeed.ClosestTo(location, ref windSpeedValue) ? windSpeedValue : 0.0f);
                         envFile.WriteLine();

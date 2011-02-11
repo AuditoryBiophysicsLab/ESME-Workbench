@@ -143,45 +143,10 @@ namespace ESMEWorkBench.Data
                 if (_windSpeedFileName == value) return;
                 _windSpeedFileName = value;
                 NotifyPropertyChanged(WindSpeedFileNameChangedEventArgs);
+                WindSpeed = null;
                 InitializeEnvironment(false);
             }
         }
-
-        #endregion
-
-        #region public string TemperatureFileName { get; set; }
-
-        public string TemperatureFileName
-        {
-            get { return _temperatureFileName; }
-            set
-            {
-                if (_temperatureFileName == value) return;
-                _temperatureFileName = value;
-                NotifyPropertyChanged(TemperatureFileNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs TemperatureFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.TemperatureFileName);
-        string _temperatureFileName;
-
-        #endregion
-
-        #region public string SalinityFileName { get; set; }
-
-        public string SalinityFileName
-        {
-            get { return _salinityFileName; }
-            set
-            {
-                if (_salinityFileName == value) return;
-                _salinityFileName = value;
-                NotifyPropertyChanged(SalinityFileNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SalinityFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SalinityFileName);
-        string _salinityFileName;
 
         #endregion
 
@@ -199,6 +164,7 @@ namespace ESMEWorkBench.Data
                 if (_soundSpeedFileName == value) return;
                 _soundSpeedFileName = value;
                 NotifyPropertyChanged(SoundSpeedFileNameChangedEventArgs);
+                SoundSpeedField = null;
                 InitializeEnvironment(false);
             }
         }
@@ -219,6 +185,7 @@ namespace ESMEWorkBench.Data
                 if (_sedimentFileName == value) return;
                 _sedimentFileName = value;
                 NotifyPropertyChanged(BottomTypeFileNameChangedEventArgs);
+                Sediment = null;
                 InitializeEnvironment(false);
             }
         }
@@ -239,6 +206,7 @@ namespace ESMEWorkBench.Data
                 if (_bathymetryFileName == value) return;
                 _bathymetryFileName = value;
                 NotifyPropertyChanged(BathymetryFileNameChangedEventArgs);
+                Bathymetry = null;
                 InitializeEnvironment(false);
             }
         }
@@ -916,15 +884,9 @@ namespace ESMEWorkBench.Data
             if (NemoFile == null) return;
             var boundingBox = new Rect();
             if (NemoFile.Scenario.OverlayFile != null) boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
-            else
-            {
-                foreach (var platform in NemoFile.Scenario.Platforms)
-                    foreach (var trackdef in platform.Trackdefs)
-                    {
-                        if ((boundingBox.Width == 0) && (boundingBox.Height == 0)) boundingBox = trackdef.OverlayFile.Shapes[0].BoundingBox;
-                        else boundingBox.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
-                    }
-            }
+            else foreach (var trackdef in NemoFile.Scenario.Platforms.SelectMany(platform => platform.Trackdefs))
+                    if ((boundingBox.Width == 0) && (boundingBox.Height == 0)) boundingBox = trackdef.OverlayFile.Shapes[0].BoundingBox;
+                    else boundingBox.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
 
             North = (float)boundingBox.Bottom + OpAreaBufferZoneSize;
             West = (float)boundingBox.Left - OpAreaBufferZoneSize;
@@ -940,18 +902,10 @@ namespace ESMEWorkBench.Data
             if (WindSpeed != null)
             {
                 const string windName = "Wind";
-                var layerExists = false;
-                foreach (var windLayer in MapLayers.Where(curLayer => curLayer.Name == windName).Cast<OverlayShapeMapLayer>())
+                var windLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == windName);
+                if (windLayer == null)
                 {
-                    for (var lonIndex = 0; lonIndex < WindSpeed.Longitudes.Length; lonIndex++)
-                        for (var latIndex = 0; latIndex < WindSpeed.Latitudes.Length; latIndex++)
-                            windLayer.Add(new OverlayPoint(new EarthCoordinate(WindSpeed.Latitudes[latIndex], WindSpeed.Longitudes[lonIndex])));
-                    windLayer.Done();
-                    layerExists = true;
-                }
-                if (!layerExists)
-                {
-                    var windLayer = new OverlayShapeMapLayer
+                    windLayer = new OverlayShapeMapLayer
                     {
                         Name = windName,
                         CanBeReordered = true,
@@ -960,48 +914,13 @@ namespace ESMEWorkBench.Data
                         CanBeRemoved = false,
                         LayerType = LayerType.WindSpeed,
                     };
-                    for (var lonIndex = 0; lonIndex < WindSpeed.Longitudes.Length; lonIndex++)
-                        for (var latIndex = 0; latIndex < WindSpeed.Latitudes.Length; latIndex++)
-                            windLayer.Add(new OverlayPoint(new EarthCoordinate(WindSpeed.Latitudes[latIndex], WindSpeed.Longitudes[lonIndex])));
-                    windLayer.Done();
                     MapLayers.Add(windLayer);
                     windLayer.IsChecked = false;
                 }
-            }
-
-            if ((SedimentFileName != null) && (File.Exists(SedimentFileName)))
-            {
-                if (SedimentFileName.EndsWith(".eeb")) Sediment = Sediment.ReadESMEEnvironmentBinaryFile(SedimentFileName, North, South, East, West);
-                else if (SedimentFileName.EndsWith(".chb")) Sediment = Sediment.ReadChrtrBinaryFile(SedimentFileName);
-            }
-            if (Sediment != null)
-            {
-                const string bottomTypeName = "Bottom Type";
-                var bottomTypeLayerExists = false;
-                foreach (var bottomTypeLayer in MapLayers.Where(curLayer => curLayer.Name == bottomTypeName).Cast<OverlayShapeMapLayer>())
-                {
-                    foreach (var sample in Sediment.SedimentSamples)
-                        bottomTypeLayer.Add(new OverlayPoint(sample));
-                    bottomTypeLayer.Done();
-                    bottomTypeLayerExists = true;
-                }
-                if (!bottomTypeLayerExists)
-                {
-                    var bottomTypeLayer = new OverlayShapeMapLayer
-                    {
-                        Name = bottomTypeName,
-                        CanBeReordered = true,
-                        CanChangeLineColor = true,
-                        CanChangeLineWidth = true,
-                        CanBeRemoved = false,
-                        LayerType = LayerType.BottomType,
-                    };
-                    foreach (var sample in Sediment.SedimentSamples)
-                        bottomTypeLayer.Add(new OverlayPoint(sample));
-                    bottomTypeLayer.Done();
-                    MapLayers.Add(bottomTypeLayer);
-                    bottomTypeLayer.IsChecked = false;
-                }
+                foreach (var lon in WindSpeed.Longitudes)
+                    foreach (var lat in WindSpeed.Latitudes)
+                        windLayer.Add(new OverlayPoint(new EarthCoordinate(lat, lon)));
+                windLayer.Done();
             }
 
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
@@ -1011,37 +930,28 @@ namespace ESMEWorkBench.Data
                 {
                     var rawSoundSpeeds = SerializedOutput.Load(SoundSpeedFileName, null);
                     SoundSpeedField = new SoundSpeedField(rawSoundSpeeds, NemoFile.Scenario.TimeFrame);
-                    if (Bathymetry != null)
-                        SoundSpeedField.ExtendProfilesToDepth(Bathymetry.MaxValue, SerializedOutput.Load(TemperatureFileName, null), SerializedOutput.Load(SalinityFileName, null));
                 }
             }
             if (SoundSpeedField != null)
             {
                 const string soundSpeedName = "Sound Speed";
-                var soundSpeedLayerExists = false;
-                foreach (var soundSpeedLayer in MapLayers.Where(curLayer => curLayer.Name == soundSpeedName).Cast<OverlayShapeMapLayer>())
+                var soundSpeedLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == soundSpeedName);
+                if (soundSpeedLayer == null)
                 {
-                    foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
-                    soundSpeedLayer.Done();
-                    soundSpeedLayerExists = true;
-                }
-                if (!soundSpeedLayerExists)
-                {
-                    var soundSpeedLayer = new OverlayShapeMapLayer
+                    soundSpeedLayer = new OverlayShapeMapLayer
                     {
                         Name = soundSpeedName,
                         CanBeReordered = true,
                         CanChangeLineColor = true,
                         CanChangeLineWidth = true,
                         CanBeRemoved = false,
-                        LayerType = LayerType.SoundSpeed,
+                        LayerType = LayerType.WindSpeed,
                     };
-                    foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
-                    soundSpeedLayer.Done();
                     MapLayers.Add(soundSpeedLayer);
+                    soundSpeedLayer.IsChecked = true;
                 }
-                //SoundSpeedField.Save(Path.Combine(LocalStorageRoot, "ssf.xml"));
-                //var testSSF = SoundSpeedField.Load(Path.Combine(LocalStorageRoot, "ssf.xml"));
+                foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
+                soundSpeedLayer.Done();
             }
 
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
@@ -1050,39 +960,30 @@ namespace ESMEWorkBench.Data
                 else if (BathymetryFileName.EndsWith(".chb"))
                 {
                     Bathymetry = Environment2DData.ReadChrtrBinaryFile(BathymetryFileName, -1);
-                    if (SoundSpeedField != null)
-                        SoundSpeedField.ExtendProfilesToDepth(Math.Abs(Bathymetry.MaxValue), SerializedOutput.Load(TemperatureFileName, null), SerializedOutput.Load(SalinityFileName, null));
                 }
             }
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
             if (Bathymetry != null)
             {
                 const string bathyBoundsName = "Bathymetry: Boundary";
-                var boundsLayerExists = false;
-                foreach (var bathyBoundsLayer in MapLayers.Where(curLayer => curLayer.Name == bathyBoundsName).Cast<OverlayShapeMapLayer>())
+                var bathyBoundsLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == bathyBoundsName);
+                if (bathyBoundsLayer == null)
                 {
-                    bathyBoundsLayer.Add(Bathymetry.BoundingBox);
-                    bathyBoundsLayer.Done();
-                    boundsLayerExists = true;
+                    bathyBoundsLayer = new OverlayShapeMapLayer
+                    {
+                        Name = bathyBoundsName,
+                        CanBeReordered = true,
+                        CanChangeLineColor = true,
+                        CanChangeLineWidth = true,
+                        CanBeRemoved = false,
+                        LayerType = LayerType.WindSpeed,
+                    };
+                    MapLayers.Add(bathyBoundsLayer);
                 }
-                if (!boundsLayerExists)
-                {
-                    var layer = new OverlayShapeMapLayer
-                                {
-                                    Name = bathyBoundsName,
-                                    CanBeReordered = true,
-                                    CanChangeLineColor = true,
-                                    CanChangeLineWidth = true,
-                                    CanBeRemoved = false,
-                                    LayerType = LayerType.Bathymetry,
-                                };
-                    layer.Add(Bathymetry.BoundingBox);
-                    layer.Done();
-                    MapLayers.Add(layer);
-                }
+                bathyBoundsLayer.Add(Bathymetry.BoundingBox);
+                bathyBoundsLayer.Done();
 
                 const string bathyBitmapName = "Bathymetry: Bitmap";
-                var bitmapLayerExists = false;
                 var colormap = new DualColormap(Colormap.Summer, Colormap.Jet)
                 {
                     Threshold = 0,
@@ -1104,38 +1005,33 @@ namespace ESMEWorkBench.Data
                     horizontalResolution = (float) Bathymetry.HorizontalResolution;
                 }
                 displayBitmap.Save(Path.Combine(LocalStorageRoot, "bathy.bmp"), ImageFormat.Bmp);
-
-                foreach (var bathyBitmapLayer in MapLayers.Where(curLayer => curLayer.Name == bathyBitmapName).Cast<RasterMapLayer>())
+                var bathyBitmapLayer = (RasterMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == bathyBitmapName);
+                if (bathyBitmapLayer == null)
                 {
-                    bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
-                    bathyBitmapLayer.PixelSize = horizontalResolution;
-                    bathyBitmapLayer.North = (float)Bathymetry.Latitudes.Last();
-                    bathyBitmapLayer.South = (float)Bathymetry.Latitudes.First();
-                    bathyBitmapLayer.East = (float)Bathymetry.Longitudes.Last();
-                    bathyBitmapLayer.West = (float)Bathymetry.Longitudes.First();
-                    bitmapLayerExists = true;
+                    bathyBitmapLayer = new RasterMapLayer
+                    {
+                        Name = bathyBitmapName,
+                        CanBeReordered = true,
+                        CanChangeLineColor = false,
+                        CanChangeLineWidth = false,
+                        CanBeRemoved = false,
+                        LayerType = LayerType.BathymetryRaster,
+                        RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp"),
+                        PixelSize = horizontalResolution,
+                        North = (float)Bathymetry.Latitudes.Last(),
+                        South = (float)Bathymetry.Latitudes.First(),
+                        East = (float)Bathymetry.Longitudes.Last(),
+                        West = (float)Bathymetry.Longitudes.First(),
+                    };
+                    MapLayers.Add(bathyBitmapLayer);
+                    MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
                 }
-                if (!bitmapLayerExists)
-                {
-                    var rasterLayer = new RasterMapLayer
-                                      {
-                                          Name = bathyBitmapName,
-                                          CanBeReordered = true,
-                                          CanChangeLineColor = false,
-                                          CanChangeLineWidth = false,
-                                          CanBeRemoved = false,
-                                          LayerType = LayerType.BathymetryRaster,
-                                          PixelSize = horizontalResolution,
-                                          North = (float)Bathymetry.Latitudes.Last(),
-                                          South = (float)Bathymetry.Latitudes.First(),
-                                          East = (float)Bathymetry.Longitudes.Last(),
-                                          West = (float)Bathymetry.Longitudes.First(),
-                                          RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp"),
-                                      };
-                    MapLayers.Add(rasterLayer);
-                    //Also send the layer to the back.
-                    MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, rasterLayer);
-                }
+                bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
+                bathyBitmapLayer.PixelSize = horizontalResolution;
+                bathyBitmapLayer.North = (float)Bathymetry.Latitudes.Last();
+                bathyBitmapLayer.South = (float)Bathymetry.Latitudes.First();
+                bathyBitmapLayer.East = (float)Bathymetry.Longitudes.Last();
+                bathyBitmapLayer.West = (float)Bathymetry.Longitudes.First();
             }
         }
 

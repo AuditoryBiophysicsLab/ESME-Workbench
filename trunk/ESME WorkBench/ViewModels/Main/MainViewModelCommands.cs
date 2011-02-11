@@ -127,7 +127,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
                                                                                                      {
                                                                                                          var ea = (CancelEventArgs) vcArgs.EventArgs;
-                                                                                                         if ((_experiment == null) || (!_experiment.IsChanged)) return;
                                                                                                          if (UserCanceledBecauseExperimentUnsaved())
                                                                                                          {
                                                                                                              ea.Cancel = true;
