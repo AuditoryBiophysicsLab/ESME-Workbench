@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -7,7 +9,7 @@ namespace ESME.Environment
 {
     public class Sediment : SerializableData<Sediment>
     {
-        public Sediment() { SedimentSamples = new List<SedimentSample>();}
+        public Sediment() { SedimentSamples = new List<SedimentSample>(); }
 
         public List<SedimentSample> SedimentSamples { get; set; }
 
@@ -72,13 +74,30 @@ namespace ESME.Environment
         }
 #endif
 
+        public bool ClosestTo(EarthCoordinate coordinate, out SedimentSample value)
+        {
+            if ((SedimentSamples == null) || (SedimentSamples.Count == 0)) throw new ApplicationException("No sediment data available");
+            value = SedimentSamples[0];
+            var closestDistance = coordinate.GetDistanceTo_Meters(value);
+            foreach (var sample in SedimentSamples)
+                if (coordinate.GetDistanceTo_Meters(value) < closestDistance) 
+                    value = sample;
+            return true;
+        }
+
+        public bool ClosestTo(EarthCoordinate coordinate, out float value)
+        {
+            SedimentSample sample;
+            var result = ClosestTo(coordinate, out sample);
+            value = sample.Value;
+            return result;
+        }
+
         public static Sediment ReadESMEEnvironmentBinaryFile(string fileName, float north, float south, float east, float west)
         {
             var source = new Environment2DData(fileName, "bottomtype", north, west, south, east);
             var result = new Sediment();
-            for (var latIndex = 0; latIndex < source.Latitudes.Length; latIndex++)
-                for (var lonIndex = 0; lonIndex < source.Longitudes.Length; lonIndex++)
-                    result.SedimentSamples.Add(new SedimentSample(source.Latitudes[latIndex], source.Longitudes[lonIndex], source.Values[latIndex, lonIndex]));
+            for (var latIndex = 0; latIndex < source.Latitudes.Length; latIndex++) for (var lonIndex = 0; lonIndex < source.Longitudes.Length; lonIndex++) result.SedimentSamples.Add(new SedimentSample(source.Latitudes[latIndex], source.Longitudes[lonIndex], source.Values[latIndex, lonIndex]));
             return result;
         }
     }

@@ -20,36 +20,36 @@
                 Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
                 mc:Ignorable="d">
 	<r:RibbonWindow.Resources>
-        <app:GridLengthConverter x:Key="gridLengthConverter" />
+		<app:GridLengthConverter x:Key="gridLengthConverter" />
 	</r:RibbonWindow.Resources>
 	<r:RibbonWindow.InputBindings>
 		<KeyBinding Command="{Binding CancelCurrentCommand}"
 		            Key="Escape" />
-        <KeyBinding Command="{Binding SaveExperimentCommand}"
-                    Modifiers="Control"
-                    Key="S" />
-        <KeyBinding Command="{Binding OpenExperimentCommand}"
-                    Modifiers="Control"
-                    Key="O" />
-        <KeyBinding Command="{Binding NewExperimentCommand}"
-                    Modifiers="Control"
-                    Key="N" />
-    </r:RibbonWindow.InputBindings>
+		<KeyBinding Command="{Binding SaveExperimentCommand}"
+		            Modifiers="Control"
+		            Key="S" />
+		<KeyBinding Command="{Binding OpenExperimentCommand}"
+		            Modifiers="Control"
+		            Key="O" />
+		<KeyBinding Command="{Binding NewExperimentCommand}"
+		            Modifiers="Control"
+		            Key="N" />
+	</r:RibbonWindow.InputBindings>
 	<i:Interaction.Triggers>
-		<i:EventTrigger EventName="Closing">
-			<cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
-		</i:EventTrigger>
-	</i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 	<DockPanel LastChildFill="True">
 		<StatusBar DockPanel.Dock="Bottom">
 			<StatusBarItem>
 				<StackPanel Orientation="Horizontal">
 					<TextBlock Text="{Binding MouseEarthCoordinate.Latitude_degrees, StringFormat=Lat: {0:0.000000}}" />
-                    <TextBlock Text=" " />
-                    <TextBlock Text="{Binding MouseEarthCoordinate.Longitude_degrees, StringFormat=Lon: {0:0.000000}}" />
-                    <TextBlock Text=" " />
-                    <TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
-                </StackPanel>
+					<TextBlock Text=" " />
+					<TextBlock Text="{Binding MouseEarthCoordinate.Longitude_degrees, StringFormat=Lon: {0:0.000000}}" />
+					<TextBlock Text=" " />
+					<TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
+				</StackPanel>
 			</StatusBarItem>
 		</StatusBar>
 		<r:Ribbon x:Name="Ribbon"
@@ -57,20 +57,20 @@
 		          SelectedIndex="0">
 			<r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
-                    <r:RibbonApplicationMenuItem Header="Save Experiment"
-                                                 InputGestureText="Ctrl+S"
+					<r:RibbonApplicationMenuItem Header="Save Experiment"
+					                             InputGestureText="Ctrl+S"
 					                             ImageSource="..\Images\LargeIcons\save-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Save the current experiment"
 					                             Command="{Binding SaveExperimentCommand}" />
-                    <r:RibbonApplicationMenuItem Header="Save Experiment As"
-                                                 InputGestureText="Alt+S"
+					<r:RibbonApplicationMenuItem Header="Save Experiment As"
+					                             InputGestureText="Alt+S"
 					                             ImageSource="..\Images\LargeIcons\save-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Save the current experiment with a new file name"
 					                             Command="{Binding SaveExperimentAsCommand}" />
-                    <r:RibbonApplicationMenuItem Header="Open Experiment"
-                                                 InputGestureText="Ctrl+O"
+					<r:RibbonApplicationMenuItem Header="Open Experiment"
+					                             InputGestureText="Ctrl+O"
 					                             ImageSource="..\Images\LargeIcons\open-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Open a previously saved experiment from an experiment file"
@@ -81,18 +81,18 @@
 					                             ToolTipDescription="Close the current experiment"
 					                             Command="{Binding NewExperimentCommand}" />
 					<r:RibbonApplicationMenuItem Header="New Experiment"
-                                                 InputGestureText="Ctrl+N"
+					                             InputGestureText="Ctrl+N"
 					                             ImageSource="..\Images\LargeIcons\new-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Create a new experiment"
 					                             Command="{Binding NewExperimentCommand}" />
-                    <r:RibbonApplicationMenuItem Header="Info"
+					<r:RibbonApplicationMenuItem Header="Info"
 					                             ImageSource="..\Images\LargeIcons\about-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Information about the current experiment"
 					                             Command="{Binding AboutCommand}" />
-                    <r:RibbonSeparator />
-                    <!--<r:RibbonApplicationMenuItem Header="Test"
+					<r:RibbonSeparator />
+					<!--<r:RibbonApplicationMenuItem Header="Test"
 					                             ImageSource="..\Images\LargeIcons\Yahoo-Widget-Engine-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Dave's test command"
@@ -103,7 +103,7 @@
 					                             ToolTipDescription="NAVO"
 					                             Command="{Binding NAVOEnvironmentBuilderCommand}" />
                     <r:RibbonSeparator /> -->
-                    <r:RibbonApplicationMenuItem Header="Options"
+					<r:RibbonApplicationMenuItem Header="Options"
 					                             ImageSource="..\Images\LargeIcons\gear-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Edit application options and settings"
@@ -120,52 +120,57 @@
 					                             ToolTipDescription="Close the ESME WorkBench"
 					                             Command="Close" />
 					<r:RibbonApplicationMenu.AuxiliaryPaneContent>
-                        <r:RibbonGallery ScrollViewer.VerticalScrollBarVisibility="Auto" 
-                                         SelectedItem="{Binding RecentFilesSelectedItem}"
-                                         CanUserFilter="False">
-							<r:RibbonGalleryCategory
-                                                     ItemsSource="{Binding RecentFiles.List}"
-							                         Background="Transparent">
-                                <r:RibbonGalleryCategory.Header>
-                                    <TextBlock Background="LightGray" FontWeight="Bold" Text="Recent Files" />
-                                </r:RibbonGalleryCategory.Header>
-								<r:RibbonGalleryCategory.ItemsPanel>
-									<ItemsPanelTemplate>
-                                        <StackPanel Orientation="Vertical"
-										            IsItemsHost="True">
-                                        </StackPanel>
-                                    </ItemsPanelTemplate>
-								</r:RibbonGalleryCategory.ItemsPanel>
-                                <r:RibbonGalleryCategory.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding ShortName}"/>
-                                    </DataTemplate>
-                                </r:RibbonGalleryCategory.ItemTemplate>
-                                <r:RibbonGalleryCategory.Style>
-                                    <Style>
-                                        
-                                    </Style>
-                                </r:RibbonGalleryCategory.Style>
-							</r:RibbonGalleryCategory>
-						</r:RibbonGallery>
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="5" />
+								<RowDefinition Height="*" />
+							</Grid.RowDefinitions>
+							<r:RibbonSeparator Grid.Row="0"
+							                   Label="Recent Experiments" />
+							<r:RibbonGallery ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                             Grid.Row="2"
+							                 SelectedItem="{Binding RecentFilesSelectedItem}"
+							                 CanUserFilter="False">
+								<r:RibbonGalleryCategory ItemsSource="{Binding RecentFiles.List}"
+								                         Background="Transparent">
+									<r:RibbonGalleryCategory.ItemsPanel>
+										<ItemsPanelTemplate>
+											<StackPanel Orientation="Vertical"
+											            IsItemsHost="True">
+											</StackPanel>
+										</ItemsPanelTemplate>
+									</r:RibbonGalleryCategory.ItemsPanel>
+									<r:RibbonGalleryCategory.ItemTemplate>
+										<DataTemplate>
+											<TextBlock Text="{Binding ShortName}" />
+										</DataTemplate>
+									</r:RibbonGalleryCategory.ItemTemplate>
+									<r:RibbonGalleryCategory.Style>
+										<Style>
+										</Style>
+									</r:RibbonGalleryCategory.Style>
+								</r:RibbonGalleryCategory>
+							</r:RibbonGallery>
+						</Grid>
 					</r:RibbonApplicationMenu.AuxiliaryPaneContent>
 				</r:RibbonApplicationMenu>
 			</r:Ribbon.ApplicationMenu>
 			<r:RibbonTab KeyTip="E"
 			             Header="Experiment">
 				<r:RibbonGroup Header="Map Data">
-                  <!-- <r:RibbonButton Label="Refresh"
+					<!-- <r:RibbonButton Label="Refresh"
 					                SmallImageSource="..\Images\SmallIcons\Button-Refresh-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\Button-Refresh-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Refresh the map display"
 					                Command="{Binding RefreshMapCommand}" /> -->
-                    <r:RibbonButton Label="Shapefile"
+					<r:RibbonButton Label="Shapefile"
 					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add an ESRI Shapefile to the map"
 					                Command="{Binding AddShapefileCommand}" />
-                    <r:RibbonButton Label="Overlay"
+					<r:RibbonButton Label="Overlay"
 					                SmallImageSource="..\Images\SmallIcons\AddFile.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a NUWC Overlay file to the map"
@@ -183,19 +188,19 @@
 					                  Command="{Binding ToggleGridOverlayDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowGrid, Mode=TwoWay}"
 					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
-                    <r:RibbonCheckBox Label="Pan &amp; Zoom"
+					<r:RibbonCheckBox Label="Pan &amp; Zoom"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Shows and hides the pan/zoom control overlay on the map"
 					                  Command="{Binding TogglePanZoomDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowPanZoom, Mode=TwoWay}"
 					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
-                    <r:RibbonCheckBox Label="Scale Bar"
+					<r:RibbonCheckBox Label="Scale Bar"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Shows and hides the scale bar overlay on the map"
 					                  Command="{Binding ToggleScaleBarDisplayCommand}"
 					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowScaleBar, Mode=TwoWay}"
 					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
-                </r:RibbonGroup>
+				</r:RibbonGroup>
 				<r:RibbonGroup Header="Sounds">
 					<r:RibbonButton Label="Analysis Point"
 					                LargeImageSource="..\Images\LargeIcons\bullet-2-icon.png"
@@ -214,43 +219,43 @@
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new quick look point to the experiment"
-                                    Command="{Binding QuickLookCommand}" />
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Scenario">
-                    <r:RibbonButton Label="Open"
+					                Command="{Binding QuickLookCommand}" />
+				</r:RibbonGroup>
+				<r:RibbonGroup Header="Scenario">
+					<r:RibbonButton Label="Open"
 					                LargeImageSource="..\Images\LargeIcons\open-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\open-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Associate a scenario file with the current experiment"
 					                Command="{Binding AddScenarioFileCommand}" />
-                    <r:RibbonButton Label="Edit"
+					<r:RibbonButton Label="Edit"
 					                LargeImageSource="..\Images\LargeIcons\application-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\application-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launch the scenario editor"
 					                Command="{Binding LaunchScenarioEditorCommand}" />
-                    <r:RibbonButton Label="Run"
+					<r:RibbonButton Label="Run"
 					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Run the scenario"
 					                Command="{Binding RunExperimentCommand}" />
-                    <r:RibbonButton Label="Zoom to Scenario"
+					<r:RibbonButton Label="Zoom to Scenario"
 					                LargeImageSource="..\Images\LargeIcons\Magnifying-Glass-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\Magnifying-Glass-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Resets the map position to the current scenario"
 					                Command="{Binding ResetScenarioZoomLevelCommand}" />
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Environment">
-                    <r:RibbonButton Label="Settings"
+				</r:RibbonGroup>
+				<r:RibbonGroup Header="Environment">
+					<r:RibbonButton Label="Settings"
 					                LargeImageSource="..\Images\LargeIcons\Distance-learning.png"
 					                SmallImageSource="..\Images\SmallIcons\Distance-learning.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Configure the environmental data to be used for the experiment"
+					                ToolTipDescription="Select or change the environmental data to be used for this experiment. A scenario file must be selected AND the experiment must be saved before environmental data can be selected."
 					                Command="{Binding ShowEnvironmentSettingsCommand}" />
-                </r:RibbonGroup>
-            </r:RibbonTab>
+				</r:RibbonGroup>
+			</r:RibbonTab>
 			<r:RibbonTab KeyTip="S"
 			             Header="Scenario">
 				<r:RibbonGroup Header="Scenario File">
@@ -287,7 +292,7 @@
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="A"
 			             Header="Animals">
-                <!--
+				<!--
 				<r:RibbonGroup Header="Species">
 					<r:RibbonButton Label="Add Species"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -337,14 +342,14 @@
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
                 -->
-                <r:RibbonGroup Header="Populate">
-                    <r:RibbonButton Label="Launch MMMBS"
+				<r:RibbonGroup Header="Populate">
+					<r:RibbonButton Label="Launch MMMBS"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator"
 					                SmallImageSource="..\Images\SmallIcons\application-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\application-icon.png"
 					                Command="{Binding LaunchMMMBSCommand}" />
-                    <!--
+					<!--
                     <r:RibbonButton Label="Launch SpeciesBuilder"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator's Species File Editor"
@@ -352,45 +357,45 @@
 					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
 					                Command="{Binding LaunchMMMBSpeciesBuilderCommand}" />
                     -->
-                    <r:RibbonButton Label="Load population"
+					<r:RibbonButton Label="Load population"
 					                SmallImageSource="..\Images\SmallIcons\Button-Add-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\Button-Add-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add an Animal Population File to the experiment"
 					                Command="{Binding AddAnimalPopulationFileCommand}" />
-                    <r:RibbonButton Label="Create Bathymetry File"
+					<r:RibbonButton Label="Create Bathymetry File"
 					                SmallImageSource="..\Images\SmallIcons\save-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\save-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS"
 					                Command="{Binding CreateMMMBSBathymetryFileCommand}" />
-                </r:RibbonGroup>
-            </r:RibbonTab>
+				</r:RibbonGroup>
+			</r:RibbonTab>
 			<r:RibbonTab KeyTip="C"
 			             Header="Acoustics">
-                <r:RibbonGroup Header="Simulator">
-                    <r:RibbonButton Label="Show Queue"
+				<r:RibbonGroup Header="Simulator">
+					<r:RibbonButton Label="Show Queue"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Database-Process-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\Database-Process-icon.png"
 					                ToolTipDescription="Displays the current work queue for acoustic simulation"
 					                Command="{Binding DisabledCommand}" />
-                    <r:RibbonButton Label="Options"
+					<r:RibbonButton Label="Options"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\gear-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\gear-icon.png"
 					                ToolTipDescription="View or change acoustic simulation options"
 					                Command="{Binding AcousticOptionsCommand}" />
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Analysis Points">
-                    <r:RibbonButton Label="Inspect"
+				</r:RibbonGroup>
+				<r:RibbonGroup Header="Analysis Points">
+					<r:RibbonButton Label="Inspect"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Database-Inspect-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\Database-Inspect-icon.png"
 					                ToolTipDescription="Inspect an analysis point"
 					                Command="{Binding DisabledCommand}" />
-                </r:RibbonGroup>
-                <!--
+				</r:RibbonGroup>
+				<!--
                 <r:RibbonGroup Header="Analysis Points">
                     <r:RibbonButton Label="Add"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -465,34 +470,34 @@
 				</r:RibbonGroup>
 			</r:RibbonTab>
 		</r:Ribbon>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
-			                  MinWidth="100" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*"
-			                  MinWidth="500" />
-            </Grid.ColumnDefinitions>
-            <GroupBox Grid.Column="0"
-		          Header="Layers">
-                <Controls:LayerTreeView/>
-            </GroupBox>
-            <GridSplitter Name="GridSplitter"
-		              Grid.Column="1"
-		              Width="2"
-		              Background="Black"
-		              HorizontalAlignment="Center"
-		              Margin="5,0,5,0"
-		              VerticalAlignment="Stretch"
-		              ResizeBehavior="BasedOnAlignment"
-		              ResizeDirection="Columns" />
-            <Controls:MapView Grid.Column="2" />
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="Drop">
-                    <ia:CallMethodAction TargetObject="{Binding}"
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
+				                  MinWidth="100" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*"
+				                  MinWidth="500" />
+			</Grid.ColumnDefinitions>
+			<GroupBox Grid.Column="0"
+			          Header="Layers">
+				<Controls:LayerTreeView />
+			</GroupBox>
+			<GridSplitter Name="GridSplitter"
+			              Grid.Column="1"
+			              Width="2"
+			              Background="Black"
+			              HorizontalAlignment="Center"
+			              Margin="5,0,5,0"
+			              VerticalAlignment="Stretch"
+			              ResizeBehavior="BasedOnAlignment"
+			              ResizeDirection="Columns" />
+			<Controls:MapView Grid.Column="2" />
+			<i:Interaction.Triggers>
+				<i:EventTrigger EventName="Drop">
+					<ia:CallMethodAction TargetObject="{Binding}"
 					                     MethodName="FilesDropped" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </Grid>
+				</i:EventTrigger>
+			</i:Interaction.Triggers>
+		</Grid>
 	</DockPanel>
 </r:RibbonWindow>

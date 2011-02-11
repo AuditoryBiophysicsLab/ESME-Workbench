@@ -435,12 +435,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public RecentFileDescriptor RecentFilesSelectedItem
         {
-            get { return _recentFilesSelectedItem; }
+            get { return null; }
             set
             {
                 _recentFilesSelectedItem = value;
                 if (_recentFilesSelectedItem == null) return;
-                NotifyPropertyChanged(RecentFilesSelectedItemChangedEventArgs);
                 try
                 {
                     LoadExperimentFile(_recentFilesSelectedItem.LongName);

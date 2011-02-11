@@ -5,11 +5,6 @@
     /// </summary>
     public partial class MainView
     {
-        public MainView()
-        {
-            InitializeComponent();
-
-            // Insert code required on object creation below this point.
-        }
+        public MainView() { InitializeComponent(); }
     }
 }
