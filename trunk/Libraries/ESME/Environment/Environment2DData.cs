@@ -16,12 +16,12 @@ namespace ESME.Environment
         /// <summary>
         ///   List of latitudes (in degrees) for which we have values
         /// </summary>
-        public double[] Latitudes { get; internal set; }
+        public List<double> Latitudes { get; internal set; }
 
         /// <summary>
         ///   List of longitudes (in degrees) for which we have values
         /// </summary>
-        public double[] Longitudes { get; internal set; }
+        public List<double> Longitudes { get; internal set; }
 
         /// <summary>
         ///   Corner of the data set that has the minimum lat and lon values
@@ -41,8 +41,8 @@ namespace ESME.Environment
         {
             MinCoordinate = null;
             MaxCoordinate = null;
-            Latitudes = null;
-            Longitudes = null;
+            Latitudes = new List<double>();
+            Longitudes = new List<double>();
         }
 
         public OverlayLineSegments BoundingBox
@@ -103,7 +103,7 @@ namespace ESME.Environment
         }
     }
 
-    public abstract class EnvironmentData<T> : EnvironmentData
+    public abstract class EnvironmentData<T> : EnvironmentData 
     {
         #region Public properties
 
@@ -156,6 +156,7 @@ namespace ESME.Environment
             }
             return false;
         }
+
         #endregion
     }
 
@@ -185,10 +186,8 @@ namespace ESME.Environment
             MaxCoordinate = new EarthCoordinate(north, east);
             MinValue = minValue;
             MaxValue = maxValue;
-            Longitudes = new double[values.GetLength(1)];
-            Latitudes = new double[values.GetLength(0)];
-            for (int lon = 0; lon < Longitudes.Length; lon++) Longitudes[lon] = west + (lon*gridSpacing);
-            for (int lat = 0; lat < Latitudes.Length; lat++) Latitudes[lat] = south + (lat*gridSpacing);
+            for (var lon = 0; lon < values.GetLength(1); lon++) Longitudes.Add(west + (lon * gridSpacing));
+            for (var lat = 0; lat < values.GetLength(0); lat++) Latitudes.Add(south + (lat * gridSpacing));
             Values = values;
         }
 
@@ -201,18 +200,18 @@ namespace ESME.Environment
             DataLayer layer = file[layerName];
             if (layer == null) throw new System.IO.FileFormatException(string.Format("Environment2DData: Specified environment file \"{0}\"does not contain a environment2DData layer", fileName));
 
-            Longitudes = layer.LongitudeAxis.DoubleValuesBetween(west, east);
-            Latitudes = layer.LatitudeAxis.DoubleValuesBetween(south, north);
+            Longitudes.AddRange(layer.LongitudeAxis.DoubleValuesBetween(west, east));
+            Latitudes.AddRange(layer.LatitudeAxis.DoubleValuesBetween(south, north));
             int[] lonIndices = layer.LongitudeAxis.IndicesBetween(west, east);
             int[] latIndices = layer.LatitudeAxis.IndicesBetween(south, north);
 
             MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
-            MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
+            MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Count - 1], Longitudes[Longitudes.Count - 1]);
             MinValue = float.MaxValue;
             MaxValue = float.MinValue;
             Values = layer.Get2DData(latIndices[0], latIndices[latIndices.Length - 1], lonIndices[0], lonIndices[lonIndices.Length - 1]);
-            for (int row = 0; row < Values.GetLength(0); row++)
-                for (int col = 0; col < Values.GetLength(1); col++)
+            for (var row = 0; row < Values.GetLength(0); row++)
+                for (var col = 0; col < Values.GetLength(1); col++)
                 {
                     MinValue = Math.Min(MinValue, Values[row, col]);
                     MaxValue = Math.Max(MaxValue, Values[row, col]);
@@ -230,12 +229,12 @@ namespace ESME.Environment
                 foreach (DataLayer layer in file.Layers)
                 {
                     if (layer.Name != "environment2DData") continue;
-                    Latitudes = layer.LatitudeAxis.UnwrappedValues;
-                    Longitudes = layer.LongitudeAxis.UnwrappedValues;
+                    Latitudes.AddRange(layer.LatitudeAxis.UnwrappedValues);
+                    Longitudes.AddRange(layer.LongitudeAxis.UnwrappedValues);
                     //array = layer.DataArray.Data;
 
                     MinCoordinate = new EarthCoordinate(Latitudes[0], Longitudes[0]);
-                    MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Length - 1], Longitudes[Longitudes.Length - 1]);
+                    MaxCoordinate = new EarthCoordinate(Latitudes[Latitudes.Count - 1], Longitudes[Longitudes.Count - 1]);
 
                     MinValue = float.MaxValue;
                     MaxValue = float.MinValue;
@@ -278,7 +277,7 @@ namespace ESME.Environment
                 var minDepth = stream.ReadSingle()* scaleFactor;
                 var paddingWidth = (width - 10)*4;
                 stream.ReadBytes(paddingWidth);
-                var depths = new float[height,width];
+                var depths = new float[height, width];
                 for (var lat = 0; lat < height; lat++)
                     for (var lon = 0; lon < width; lon++)
                     {
@@ -301,14 +300,16 @@ namespace ESME.Environment
             MinCoordinate = new EarthCoordinate(stream);
             MaxCoordinate = new EarthCoordinate(stream);
 
-            Longitudes = new double[stream.ReadInt32()];
-            for (int lon = 0; lon < Longitudes.Length; lon++) Longitudes[lon] = stream.ReadDouble();
+            var lonCount = stream.ReadInt32();
+            for (var lon = 0; lon < lonCount; lon++) Longitudes.Add(stream.ReadDouble());
 
-            Latitudes = new double[stream.ReadInt32()];
-            for (int lat = 0; lat < Latitudes.Length; lat++) Latitudes[lat] = stream.ReadDouble();
+            var latCount = stream.ReadInt32();
+            for (var lat = 0; lat < latCount; lat++) Latitudes.Add(stream.ReadDouble());
 
-            Values = new float[Latitudes.Length,Longitudes.Length];
-            for (int lat = 0; lat < Latitudes.Length; lat++) for (int lon = 0; lon < Longitudes.Length; lon++) Values[lat, lon] = stream.ReadSingle();
+            Values = new float[latCount, lonCount];
+            for (int lat = 0; lat < latCount; lat++) 
+                for (int lon = 0; lon < lonCount; lon++) 
+                    Values[lat, lon] = stream.ReadSingle();
         }
 
         public override void Save(BinaryWriter stream)
@@ -321,14 +322,14 @@ namespace ESME.Environment
             MinCoordinate.Write(stream);
             MaxCoordinate.Write(stream);
 
-            stream.Write(Longitudes.Length);
+            stream.Write(Longitudes.Count);
             foreach (var lon in Longitudes) stream.Write(lon);
 
-            stream.Write(Latitudes.Length);
+            stream.Write(Latitudes.Count);
             foreach (var lat in Latitudes) stream.Write(lat);
 
-            for (var lat = 0; lat < Latitudes.Length; lat++) 
-                for (var lon = 0; lon < Longitudes.Length; lon++) 
+            for (var lat = 0; lat < Latitudes.Count; lat++) 
+                for (var lon = 0; lon < Longitudes.Count; lon++) 
                     stream.Write(Values[lat, lon]);
         }
 
@@ -343,8 +344,8 @@ namespace ESME.Environment
         {
             using (var stream = new StreamWriter(File.Create(fileName)))
             {
-                for (var lat = 0; lat < Latitudes.Length; lat++) 
-                    for (var lon = 0; lon < Longitudes.Length; lon++) 
+                for (var lat = 0; lat < Latitudes.Count; lat++) 
+                    for (var lon = 0; lon < Longitudes.Count; lon++) 
                         stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor*Values[lat, lon]));
             }
         }
@@ -366,6 +367,58 @@ namespace ESME.Environment
             value = float.NaN;
             return Lookup(coordinate, ref value);
         }
+
+        public float this[EarthCoordinate location]
+        {
+            get
+            {
+                int latStartIndex;
+                var latEndIndex = latStartIndex = Latitudes.IndexOf(location.Latitude_degrees);
+                if (latStartIndex == -1)
+                {
+                    var southLats = Latitudes.FindAll(y => y <= location.Latitude_degrees);
+                    if (southLats.Count() > 0) latStartIndex = Latitudes.IndexOf(southLats.Last());
+                }
+                if (latEndIndex == -1)
+                {
+                    var northLats = Latitudes.FindAll(y => y >= location.Latitude_degrees);
+                    if (northLats.Count() > 0) latEndIndex = Latitudes.IndexOf(northLats.First());
+                }
+                if (latStartIndex == -1) latStartIndex = latEndIndex;
+                if (latEndIndex == -1) latEndIndex = latStartIndex;
+
+                int lonStartIndex;
+                var lonEndIndex = lonStartIndex = Longitudes.IndexOf(location.Longitude_degrees);
+                if (lonStartIndex == -1)
+                {
+                    var westLons = Longitudes.FindAll(x => x <= location.Longitude_degrees);
+                    if (westLons.Count() > 0) lonStartIndex = Longitudes.IndexOf(westLons.Last());
+                }
+                if (lonEndIndex == -1)
+                {
+                    var eastLons = Latitudes.FindAll(x => x >= location.Longitude_degrees);
+                    if (eastLons.Count() > 0) lonEndIndex = Longitudes.IndexOf(eastLons.First());
+                }
+                if (lonStartIndex == -1) lonStartIndex = lonEndIndex;
+                if (lonEndIndex == -1) lonEndIndex = lonStartIndex;
+
+                var searchList = new List<EarthCoordinate<float>>();
+                for (var latIndex = latStartIndex; latIndex <= latEndIndex; latIndex++)
+                    for (var lonIndex = lonStartIndex; lonIndex <= lonEndIndex; lonIndex++)
+                        searchList.Add(new EarthCoordinate<float>(Latitudes[latIndex], Longitudes[lonIndex], Values[latIndex, lonIndex]));
+                var closestSample = searchList.First();
+                var closestDistance = location.GetDistanceTo_Meters(closestSample);
+                foreach (var curSample in searchList)
+                {
+                    var curDistance = location.GetDistanceTo_Meters(curSample);
+                    if (curDistance >= closestDistance) continue;
+                    closestDistance = curDistance;
+                    closestSample = curSample;
+                }
+                return closestSample.Data;
+            }
+        }
+
     }
 
     public abstract class Environment3DData<T> : EnvironmentData<List<T>>
@@ -375,7 +428,7 @@ namespace ESME.Environment
         /// <summary>
         ///   List of Depths (in meters) for which we have values
         /// </summary>
-        public double[] Depths { get; internal set; }
+        public List<double> Depths { get; internal set; }
 
         #endregion
 
@@ -385,12 +438,12 @@ namespace ESME.Environment
         {
             MinCoordinate = new EarthCoordinate(south, west);
             MaxCoordinate = new EarthCoordinate(north, east);
-            Longitudes = new double[values.GetLength(0)];
-            Latitudes = new double[values.GetLength(1)];
-            Depths = new double[depths.Count];
-            for (int lon = 0; lon < Longitudes.Length; lon++) Longitudes[lon] = west + (lon*gridSpacing);
-            for (int lat = 0; lat < Latitudes.Length; lat++) Latitudes[lat] = south + (lat*gridSpacing);
-            for (int dep = 0; dep < Depths.Length; dep++) Depths[dep] = depths[dep];
+            Longitudes = new List<double>();
+            Latitudes = new List<double>();
+            Depths = new List<double>();
+            for (var lon = 0; lon < values.GetLength(0); lon++) Longitudes.Add(west + (lon*gridSpacing));
+            for (var lat = 0; lat < values.GetLength(1); lat++) Latitudes.Add(south + (lat*gridSpacing));
+            Depths.AddRange(depths);
             Values = values;
         }
 
@@ -438,7 +491,11 @@ namespace ESME.Environment
             VerifyArrays(Latitudes, that.Latitudes, "latitude");
             VerifyArrays(Longitudes, that.Longitudes, "longitude");
             // Make sure the Depths array is copied from the longest Depths array we are presented with
-            if (Depths.Length < that.Depths.Length) Array.Copy(that.Depths, Depths, that.Depths.Length);
+            if (Depths.Count < that.Depths.Count)
+            {
+                that.Depths.Clear();
+                that.Depths.AddRange(Depths);
+            }
             //VerifyArrays(Depths, that.Depths, "depth");)
 
             for (var lonIndex = 0; lonIndex < Values.GetLength(0); lonIndex++)
@@ -494,17 +551,17 @@ namespace ESME.Environment
             MinCoordinate = new EarthCoordinate(stream);
             MaxCoordinate = new EarthCoordinate(stream);
 
-            Longitudes = new double[stream.ReadInt32()];
-            for (var lon = 0; lon < Longitudes.Length; lon++) Longitudes[lon] = stream.ReadDouble();
+            var lonCount = stream.ReadInt32();
+            for (var lon = 0; lon < lonCount; lon++) Longitudes.Add(stream.ReadDouble());
 
-            Latitudes = new double[stream.ReadInt32()];
-            for (var lat = 0; lat < Latitudes.Length; lat++) Latitudes[lat] = stream.ReadDouble();
+            var latCount = stream.ReadInt32();
+            for (var lat = 0; lat < latCount; lat++) Latitudes.Add(stream.ReadDouble());
 
-            Depths = new double[stream.ReadInt32()];
-            for (var dep = 0; dep < Depths.Length; dep++) Depths[dep] = stream.ReadDouble();
+            var depCount = stream.ReadInt32();
+            for (var dep = 0; dep < depCount; dep++) Depths.Add(stream.ReadDouble());
 
-            for (var lat = 0; lat < Latitudes.Length; lat++)
-                for (var lon = 0; lon < Longitudes.Length; lon++)
+            for (var lat = 0; lat < Latitudes.Count; lat++)
+                for (var lon = 0; lon < Longitudes.Count; lon++)
                 {
                     var curData = Depths.Select(t => (double)stream.ReadSingle()).Where(curValue => !double.IsNaN(curValue)).ToList();
                     Values[lat, lon] = curData;
@@ -518,20 +575,21 @@ namespace ESME.Environment
             MinCoordinate.Write(stream);
             MaxCoordinate.Write(stream);
 
-            stream.Write(Longitudes.Length);
+            stream.Write(Longitudes.Count);
             foreach (var lon in Longitudes) stream.Write(lon);
 
-            stream.Write(Latitudes.Length);
+            stream.Write(Latitudes.Count);
             foreach (var lat in Latitudes) stream.Write(lat);
 
-            stream.Write(Depths.Length);
+            stream.Write(Depths.Count);
             foreach (var dep in Depths) stream.Write(dep);
 
-            for (var lat = 0; lat < Latitudes.Length; lat++)
-                for (var lon = 0; lon < Longitudes.Length; lon++)
+            for (var lat = 0; lat < Latitudes.Count; lat++)
+                for (var lon = 0; lon < Longitudes.Count; lon++)
                 {
                     var curValue = Values[lat, lon];
-                    for (var dep = 0; dep < Depths.Length; dep++) stream.Write(curValue.Count < dep ? curValue[dep] : float.NaN);
+                    for (var dep = 0; dep < Depths.Count; dep++) 
+                        stream.Write(curValue.Count < dep ? curValue[dep] : float.NaN);
                 }
         }
 

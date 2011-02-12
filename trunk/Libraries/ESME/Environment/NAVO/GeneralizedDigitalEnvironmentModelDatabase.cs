@@ -100,7 +100,7 @@ namespace ESME.Environment.NAVO
                 var results = ExtractValues(dataOutput);
                 var depthAxis = results.Depths.Select(x => (float)x).ToArray();
                 depthAxisAggregator.AddRange(depthAxis);
-                var data = new List<AverageDatum>[results.Longitudes.Length, results.Latitudes.Length];
+                var data = new List<AverageDatum>[results.Longitudes.Count, results.Latitudes.Count];
                 if (accumulator == null) accumulator = new Environment3DAverager(results.Latitudes.Last(), results.Latitudes.First(), results.Longitudes.Last(), results.Longitudes.First(), GridSpacing, results.Depths, data);
                 //and sum them.
                 accumulator.Add(results);
