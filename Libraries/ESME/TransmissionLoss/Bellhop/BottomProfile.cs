@@ -75,19 +75,19 @@ namespace ESME.TransmissionLoss.Bellhop
             }
         }
 
-        public static double TwoDBilinearApproximation(double[] latitudes, double[] longitudes, float[,] elevations, EarthCoordinate point)
+        public static double TwoDBilinearApproximation(List<double> latitudes, List<double> longitudes, float[,] elevations, EarthCoordinate point)
         {
-            if (latitudes.Length != elevations.GetLength(0)) 
+            if (latitudes.Count != elevations.GetLength(0)) 
                 throw new ApplicationException("TwoDBilinearApproximation: Latitudes length must be the same as dimension 0 of Elevations");
-            if (longitudes.Length != elevations.GetLength(1)) 
+            if (longitudes.Count != elevations.GetLength(1)) 
                 throw new ApplicationException("TwoDBilinearApproximation: Longitudes length must be the same as dimension 1 of Elevations");
 
-            if ((point.Latitude_degrees < latitudes[0]) || (point.Latitude_degrees > latitudes[latitudes.Length - 1]) || (point.Longitude_degrees < longitudes[0]) || (point.Longitude_degrees > longitudes[longitudes.Length - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
-            for (var i = 0; i < latitudes.Length - 1; i++)
+            if ((point.Latitude_degrees < latitudes[0]) || (point.Latitude_degrees > latitudes[latitudes.Count - 1]) || (point.Longitude_degrees < longitudes[0]) || (point.Longitude_degrees > longitudes[longitudes.Count - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
+            for (var i = 0; i < latitudes.Count - 1; i++)
             {
                 // Latitudes go from south to north, so a southern latitudes come before northern ones
                 if ((latitudes[i] > point.Latitude_degrees) || (point.Latitude_degrees > latitudes[i + 1])) continue;
-                for (var j = 0; j < longitudes.Length - 1; j++)
+                for (var j = 0; j < longitudes.Count - 1; j++)
                 {
                     // Longitudes go from west to east, so western longitudes come before eastern ones
                     if ((longitudes[j] > point.Longitude_degrees) || (point.Longitude_degrees > longitudes[j + 1])) continue;

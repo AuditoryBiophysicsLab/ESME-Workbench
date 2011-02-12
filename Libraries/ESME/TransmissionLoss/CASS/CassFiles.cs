@@ -27,8 +27,9 @@ namespace ESME.TransmissionLoss.CASS
             Sediment sediment = null;
             var selectedSedimentFile = LargestFileInList(sedimentFiles);
             if (selectedSedimentFile == null) throw new ApplicationException("No sediment files were found, the operation cannot proceed");
-            if (selectedSedimentFile.EndsWith(".eeb")) sediment = Sediment.ReadESMEEnvironmentBinaryFile(selectedSedimentFile, north, south, east, west);
-            else if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.ReadChrtrBinaryFile(selectedSedimentFile);
+            //if (selectedSedimentFile.EndsWith(".eeb")) sediment = Sediment.ReadESMEEnvironmentBinaryFile(selectedSedimentFile, north, south, east, west);
+            //else if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.ReadChrtrBinaryFile(selectedSedimentFile);
+            if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.ReadChrtrBinaryFile(selectedSedimentFile);
 
             Environment2DData wind = null;
             if (windFile.EndsWith(".eeb")) wind = new Environment2DData(windFile, "windspeed", north, west, south, east);
@@ -104,10 +105,9 @@ namespace ESME.TransmissionLoss.CASS
                             else break;
                         envFile.WriteLine("EOT");
                         envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
-                        float bottomTypeIndex;
-                        //envFile.WriteLine(sedimentType.ClosestTo(location, out bottomTypeIndex) ? BottomSedimentTypeTable.Lookup((int)bottomTypeIndex).ToUpper() : "UNKNOWN");
-                        float windSpeedValue = 0;
-                        envFile.WriteLine("WIND SPEED                            = {0} KNOTS", windSpeed.ClosestTo(location, ref windSpeedValue) ? windSpeedValue : 0.0f);
+                        var sedimentSample = sedimentType[location];
+                        envFile.WriteLine(sedimentSample.SedimentType.HasValue ? BottomSedimentTypeTable.Lookup(sedimentSample.SedimentType.Value).ToUpper() : "UNKNOWN");
+                        envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", windSpeed[location]);
                         envFile.WriteLine();
                     }
             }
