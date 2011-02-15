@@ -173,6 +173,7 @@
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
     <Compile Include="TransmissionLoss\CASS\CassFiles.cs" />
+    <Compile Include="TransmissionLoss\CASS\CASSPacket.cs" />
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>
     </Compile>
