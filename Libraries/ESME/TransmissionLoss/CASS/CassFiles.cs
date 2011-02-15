@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
@@ -43,7 +44,7 @@ namespace ESME.TransmissionLoss.CASS
                 var rawSoundSpeeds = SerializedOutput.Load(soundspeedFile, null);
                 soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriodName);
             }
-            
+
             var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriodName.ToLower() + ".dat");
             WriteEnvironmentFile(environmentFileName, bathymetry, sediment, soundSpeedField, wind);
         }
@@ -112,6 +113,93 @@ namespace ESME.TransmissionLoss.CASS
                         envFile.WriteLine();
                     }
             }
+        }
+
+        public static List<CASSPacket> ReadEnvironmentFile(string environmentFileName)
+        {
+            var resarray = File.ReadAllLines(environmentFileName).ToList();
+            var rawvalues = new List<List<string>>();
+            var curLineIndex = 0;
+            //make packets
+            while (curLineIndex < resarray.Count)
+            {
+                var thisline = resarray[curLineIndex++].Trim();
+                if (curLineIndex >= resarray.Count) break;
+                //if the line starts with 'ENVIRONMENT LATITUDE', add it plus everything up to the next blank line to rawvalues[i].
+                if (thisline.StartsWith("ENVIRONMENT LATITUDE"))
+                {
+                    var curGroup = new List<string>
+                                   {
+                                       thisline.Trim()
+                                   };
+                    while (!string.IsNullOrEmpty(thisline = resarray[curLineIndex++]))
+                    {
+                        if (curLineIndex >= resarray.Count) break;
+                        curGroup.Add(thisline.Trim());
+                    }
+                    rawvalues.Add(curGroup);
+                }
+            }
+
+
+            var result = new List<CASSPacket>();
+            foreach (var packet in rawvalues)
+            {
+                var retpacket = new CASSPacket
+                                {
+                                    Filename = environmentFileName
+                                };
+                double lat,
+                       lon;
+                if (!double.TryParse(packet[0].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[3], out lat)) throw new DataMisalignedException("");
+                if (!double.TryParse(packet[1].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[3], out lon)) throw new DataMisalignedException("");
+                retpacket.Location = new EarthCoordinate(lat, lon);
+                var curGroupLineIndex = 0;
+                while (curGroupLineIndex < packet.Count)
+                {
+                    var curLine = packet[curGroupLineIndex++].Trim();
+                    if (curLine.StartsWith("M"))
+                    {
+                        var index = curGroupLineIndex;
+                        var depths = new List<double>();
+                        var speeds = new List<double>();
+                        while (!packet[index].Contains("EOT"))
+                        {
+                            double depth,
+                                   speed;
+                            if (!double.TryParse(packet[index].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0], out depth) ||
+                                !double.TryParse(packet[index].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[1], out speed)) throw new DataException("");
+                            depths.Add(depth);
+                            speeds.Add(speed);
+                            index++;
+                        }
+                        retpacket.Depths = depths;
+                        retpacket.Soundspeeds = speeds;
+                    }
+                    if (curLine.StartsWith("BOTTOM REFLECTION"))
+                    {
+                        var bottom = packet[curGroupLineIndex++];
+                        if (bottom.Contains("WIND SPEED"))
+                        {
+                            double wind;
+                            if (!double.TryParse(bottom.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
+                            retpacket.WindSpeed = wind;
+                        }
+                        else
+                        {
+                            retpacket.BottomType = bottom;
+                            var speed = packet[curGroupLineIndex];
+                            double wind;
+                            if (!double.TryParse(speed.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
+                            retpacket.WindSpeed = wind;
+
+                        }
+
+                    }
+                }
+                result.Add(retpacket);
+            }
+            return result;
         }
     }
 }
