@@ -314,6 +314,7 @@ namespace ESME.Model
         public SoundSpeedField()
         {
             SoundSpeedProfiles = new List<SoundSpeedProfile>();
+            foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
         }
 
         public SoundSpeedField(SerializedOutput serializedOutput, string timePeriod)

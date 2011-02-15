@@ -27,8 +27,6 @@ namespace HRC.Utility
         [XmlIgnore]
         public string FileName { get; set; }
 
-        Stream _fileStream;
-
         #region Load/Save
 
         public void CopyFrom(T that)

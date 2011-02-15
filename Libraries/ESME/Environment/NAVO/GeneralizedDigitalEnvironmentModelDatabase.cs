@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ESME.Model;
+using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
@@ -100,21 +101,19 @@ namespace ESME.Environment.NAVO
                 var results = ExtractValues(dataOutput);
                 var depthAxis = results.Depths.Select(x => (float)x).ToArray();
                 depthAxisAggregator.AddRange(depthAxis);
-                var data = new List<AverageDatum>[results.Longitudes.Count, results.Latitudes.Count];
-                if (accumulator == null) accumulator = new Environment3DAverager(results.Latitudes.Last(), results.Latitudes.First(), results.Longitudes.Last(), results.Longitudes.First(), GridSpacing, results.Depths, data);
-                //and sum them.
-                accumulator.Add(results);
+                if (accumulator == null) accumulator = results;
+                else accumulator.Add(results);
             }
             if (accumulator == null) throw new ApplicationException("AverageMonthData: No data was averaged");
             accumulator.Average();
             var result = new SerializedOutput();
             result.DepthAxis.AddRange(accumulator.Depths);
-            for (var lonIndex = 0; lonIndex < accumulator.Values.GetLength(0); lonIndex++)
-                for (var latIndex = 0; latIndex < accumulator.Values.GetLength(1); latIndex++)
+            for (var lonIndex = 0; lonIndex < accumulator.FieldData.GetLength(0); lonIndex++)
+                for (var latIndex = 0; latIndex < accumulator.FieldData.GetLength(1); latIndex++)
                 {
-                    var dataValues = from location in accumulator.Values[lonIndex, latIndex]
+                    var dataValues = from location in accumulator.FieldData[lonIndex, latIndex].Data
                                      select location.Value;
-                    var dataPoint = new EnvironmentalDataPoint
+                    var dataPoint = new EnvironmentalDataPoint()
                     {
                         Latitude_degrees = accumulator.Latitudes[latIndex],
                         Longitude_degrees = accumulator.Longitudes[lonIndex],
@@ -176,36 +175,14 @@ namespace ESME.Environment.NAVO
             ((SerializedOutput)ssf).Save(soundspeedFilename, null);
         }
 
-        private static Environment3DData ExtractValues(SerializedOutput data)
+        private static Environment3DAverager ExtractValues(SerializedOutput data)
         {
-            var points = new Dictionary<string, List<double>>();
-            var lats = new List<double>();
-            var lons = new List<double>();
+            //var points = new Dictionary<string, List<double>>();
             var depths = data.DepthAxis;
-
-            foreach (var point in data.DataPoints.Where(point => point.Data != null))
-            {
-                points.Add(string.Format("{0:#.00000},{1:#.00000}", point.Latitude_degrees, point.Longitude_degrees), point.Data);
-                lats.Add(point.Latitude_degrees);
-                lons.Add(point.Longitude_degrees);
-            }
-            var uniqueLats = lats.Distinct().ToList();
-            var uniqueLons = lons.Distinct().ToList();
-            uniqueLats.Sort();
-            uniqueLons.Sort();
-
-            var dataArray = new List<double>[uniqueLons.Count, uniqueLats.Count];
-            for (var latIndex = 0; latIndex < uniqueLats.Count; latIndex++)
-            {
-                var lat = uniqueLats[latIndex];
-                for (var lonIndex = 0; lonIndex < uniqueLons.Count; lonIndex++)
-                {
-                    var lon = uniqueLons[lonIndex];
-                    var key = string.Format("{0:#.00000},{1:#.00000}", lat, lon);
-                    dataArray[lonIndex, latIndex] = points[key];
-                }
-            }
-            return new Environment3DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), GridSpacing, depths, dataArray);
+            var averageData = (from point in data.DataPoints
+                               where point.Data != null
+                               select new EarthCoordinate<List<AverageDatum>>(point.Latitude_degrees, point.Longitude_degrees, point.Data.Select(datum => new AverageDatum(datum)).ToList())).ToList();
+            return new Environment3DAverager(depths, averageData);
         }
     }
 }

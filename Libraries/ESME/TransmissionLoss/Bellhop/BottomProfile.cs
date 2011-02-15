@@ -11,7 +11,7 @@ namespace ESME.TransmissionLoss.Bellhop
     {
         const UInt32 Magic = 0x2bf6f6e5;
 
-        public BottomProfile(int numberOfPointsInTransect, Transect transect, Environment.Environment2DData environment2DData)
+        public BottomProfile(int numberOfPointsInTransect, Transect transect, Environment2DData environment2DData)
         {
             MaxDepth = double.MinValue;
             Profile = new double[numberOfPointsInTransect];
@@ -20,7 +20,7 @@ namespace ESME.TransmissionLoss.Bellhop
             var currentPoint = transect.StartPoint;
             for (var i = 0; i < numberOfPointsInTransect; i++)
             {
-                Profile[i] = Math.Abs(TwoDBilinearApproximation(environment2DData.Latitudes, environment2DData.Longitudes, environment2DData.Values, currentPoint));
+                Profile[i] = Math.Abs(TwoDBilinearApproximation(environment2DData, currentPoint));
                 if (MaxDepth < Profile[i])
                 {
                     MaxDepth = Profile[i];
@@ -75,31 +75,26 @@ namespace ESME.TransmissionLoss.Bellhop
             }
         }
 
-        public static double TwoDBilinearApproximation(List<double> latitudes, List<double> longitudes, float[,] elevations, EarthCoordinate point)
+        public static double TwoDBilinearApproximation(Environment2DData elevations, EarthCoordinate point)
         {
-            if (latitudes.Count != elevations.GetLength(0)) 
-                throw new ApplicationException("TwoDBilinearApproximation: Latitudes length must be the same as dimension 0 of Elevations");
-            if (longitudes.Count != elevations.GetLength(1)) 
-                throw new ApplicationException("TwoDBilinearApproximation: Longitudes length must be the same as dimension 1 of Elevations");
-
-            if ((point.Latitude_degrees < latitudes[0]) || (point.Latitude_degrees > latitudes[latitudes.Count - 1]) || (point.Longitude_degrees < longitudes[0]) || (point.Longitude_degrees > longitudes[longitudes.Count - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
-            for (var i = 0; i < latitudes.Count - 1; i++)
+            if ((point.Latitude_degrees < elevations.Latitudes[0]) || (point.Latitude_degrees > elevations.Latitudes[elevations.Latitudes.Count - 1]) || (point.Longitude_degrees < elevations.Longitudes[0]) || (point.Longitude_degrees > elevations.Longitudes[elevations.Longitudes.Count - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
+            for (var i = 0; i < elevations.Latitudes.Count - 1; i++)
             {
-                // Latitudes go from south to north, so a southern latitudes come before northern ones
-                if ((latitudes[i] > point.Latitude_degrees) || (point.Latitude_degrees > latitudes[i + 1])) continue;
-                for (var j = 0; j < longitudes.Count - 1; j++)
+                // elevations.Latitudes go from south to north, so a southern elevations.Latitudes come before northern ones
+                if ((elevations.Latitudes[i] > point.Latitude_degrees) || (point.Latitude_degrees > elevations.Latitudes[i + 1])) continue;
+                for (var j = 0; j < elevations.Longitudes.Count - 1; j++)
                 {
-                    // Longitudes go from west to east, so western longitudes come before eastern ones
-                    if ((longitudes[j] > point.Longitude_degrees) || (point.Longitude_degrees > longitudes[j + 1])) continue;
+                    // elevations.Longitudes go from west to east, so western elevations.Longitudes come before eastern ones
+                    if ((elevations.Longitudes[j] > point.Longitude_degrees) || (point.Longitude_degrees > elevations.Longitudes[j + 1])) continue;
                     var north = i + 1;
                     var south = i;
                     var east = j + 1;
                     var west = j;
                     return BilinearRecursive(point, // Point to interpolate
-                                             new EarthCoordinate3D(latitudes[north], longitudes[east], elevations[north, east]), // northeast corner
-                                             new EarthCoordinate3D(latitudes[north], longitudes[west], elevations[north, west]), // northwest corner
-                                             new EarthCoordinate3D(latitudes[south], longitudes[east], elevations[south, east]), // southeast corner
-                                             new EarthCoordinate3D(latitudes[south], longitudes[west], elevations[south, west]) // southwest corner
+                                             new EarthCoordinate3D(elevations.Latitudes[north], elevations.Longitudes[east], elevations.FieldData[east, north].Data), // northeast corner
+                                             new EarthCoordinate3D(elevations.Latitudes[north], elevations.Longitudes[west], elevations.FieldData[north, west].Data), // northwest corner
+                                             new EarthCoordinate3D(elevations.Latitudes[south], elevations.Longitudes[east], elevations.FieldData[south, east].Data), // southeast corner
+                                             new EarthCoordinate3D(elevations.Latitudes[south], elevations.Longitudes[west], elevations.FieldData[south, west].Data) // southwest corner
                         );
                 } // for j
             } // for i

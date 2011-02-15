@@ -1,84 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class Sediment
+    public class Sediment : Environment2DData<SedimentSample>
     {
-        private Sediment()
+        private Sediment(IEnumerable<SedimentSample> data) : base(data) { }
+
+        public static Sediment FromSedimentCHB(string fileName)
         {
-            Latitudes = new List<double>();
-            Longitudes = new List<double>();
-        }
-
-        public List<double> Latitudes { get; private set; }
-        public List<double> Longitudes { get; private set; }
-
-        public SedimentSample[,] SedimentSamples { get; private set; }
-
-        // Return the nearest sample to the given location
-        public SedimentSample this[EarthCoordinate location]
-        {
-            get
-            {
-                int latStartIndex;
-                var latEndIndex = latStartIndex = Latitudes.IndexOf(location.Latitude_degrees);
-                if (latStartIndex == -1)
-                {
-                    var southLats = Latitudes.FindAll(y => y <= location.Latitude_degrees);
-                    if (southLats.Count() > 0) latStartIndex = Latitudes.IndexOf(southLats.Last());
-                }
-                if (latEndIndex == -1)
-                {
-                    var northLats = Latitudes.FindAll(y => y >= location.Latitude_degrees);
-                    if (northLats.Count() > 0) latEndIndex = Latitudes.IndexOf(northLats.First());
-                }
-                if (latStartIndex == -1) latStartIndex = latEndIndex;
-                if (latEndIndex == -1) latEndIndex = latStartIndex;
-
-                int lonStartIndex;
-                var lonEndIndex = lonStartIndex = Longitudes.IndexOf(location.Longitude_degrees);
-                if (lonStartIndex == -1)
-                {
-                    var westLons = Longitudes.FindAll(x => x <= location.Longitude_degrees);
-                    if (westLons.Count() > 0) lonStartIndex = Longitudes.IndexOf(westLons.Last());
-                }
-                if (lonEndIndex == -1)
-                {
-                    var eastLons = Latitudes.FindAll(x => x >= location.Longitude_degrees);
-                    if (eastLons.Count() > 0) lonEndIndex = Longitudes.IndexOf(eastLons.First());
-                }
-                if (lonStartIndex == -1) lonStartIndex = lonEndIndex;
-                if (lonEndIndex == -1) lonEndIndex = lonStartIndex;
-
-                var searchList = new List<SedimentSample>();
-                for (var latIndex = latStartIndex; latIndex <= latEndIndex; latIndex++) 
-                    for (var lonIndex = lonStartIndex; lonIndex <= lonEndIndex; lonIndex++) 
-                        searchList.Add(SedimentSamples[lonIndex, latIndex]);
-                var closestSample = searchList.First();
-                var closestDistance = location.GetDistanceTo_Meters(closestSample);
-                foreach (var curSample in searchList)
-                {
-                    var curDistance = location.GetDistanceTo_Meters(curSample);
-                    if (curDistance >= closestDistance) continue;
-                    closestDistance = curDistance;
-                    closestSample = curSample;
-                }
-                return closestSample;
-            }
-        }
-
-        public static Sediment ReadChrtrBinaryFile(string fileName)
-        {
-            var result = new Sediment();
+            var data = new List<SedimentSample>();
             using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 var west = stream.ReadSingle();
-                var east = stream.ReadSingle();
+                // east (unused)
+                stream.ReadSingle(); 
                 var south = stream.ReadSingle();
-                var north = stream.ReadSingle();
+                // north (unused)
+                stream.ReadSingle(); 
                 var gridSpacing = stream.ReadSingle() / 60f; // Source is in minutes, we need degrees
                 var width = stream.ReadInt32();
                 var height = stream.ReadInt32();
@@ -88,7 +30,6 @@ namespace ESME.Environment
                 var maxValue = stream.ReadSingle();
                 var paddingWidth = (width - 10) * 4;
                 stream.ReadBytes(paddingWidth);
-                result.SedimentSamples = new SedimentSample[width, height];
                 for (var lat = 0; lat < height; lat++)
                 {
                     var latitude = south + (lat * gridSpacing);
@@ -96,15 +37,12 @@ namespace ESME.Environment
                     {
                         var longitude = west + (lon * gridSpacing);
                         var curSampleValue = stream.ReadSingle();
-                        var curSample = new SedimentSample(latitude, lat, longitude, lon);
-                        if ((minValue <= curSampleValue) && (curSampleValue <= maxValue)) curSample.SedimentType = curSampleValue;
-                        result.SedimentSamples[lon, lat] = curSample;
+                        var newSample = new SedimentSample(latitude, lat, longitude, lon);
+                        if ((minValue <= curSampleValue) && (curSampleValue <= maxValue)) newSample.Data = curSampleValue;
+                        data.Add(newSample);
                     }
                 }
-                for (var lat = 0; lat < height; lat++)
-                    result.Latitudes.Add(south + (lat * gridSpacing));
-                for (var lon = 0; lon < width; lon++)
-                    result.Longitudes.Add(west + (lon * gridSpacing));
+                var result = new Sediment(data);
                 result.FillTheDamnHoles();
                 return result;
             }
@@ -117,12 +55,12 @@ namespace ESME.Environment
             while (thereIsAtLeastOneHole)
             {
                 thereIsAtLeastOneHole = false;
-                for (var lat = 0; lat < SedimentSamples.GetLength(1); lat++)
+                for (var lat = 0; lat < FieldData.GetLength(1); lat++)
                 {
-                    for (var lon = 0; lon < SedimentSamples.GetLength(0); lon++)
+                    for (var lon = 0; lon < FieldData.GetLength(0); lon++)
                     {
-                        if (!SedimentSamples[lon, lat].SedimentType.HasValue) 
-                            if (!FillOneDamnHole(SedimentSamples[lon, lat])) 
+                        if (!FieldData[lon, lat].Data.HasValue)
+                            if (!FillOneDamnHole(FieldData[lon, lat])) 
                                 thereIsAtLeastOneHole = true;
                     }
                 }
@@ -149,7 +87,7 @@ namespace ESME.Environment
 
                 if (actualValues.Count() > 0)
                 {
-                    curSample.SedimentType = actualValues.First();
+                    curSample.Data = actualValues.First();
                     return true;
                 }
             }
@@ -167,11 +105,11 @@ namespace ESME.Environment
 
                 if (actualValues.Count() > 0)
                 {
-                    curSample.SedimentType = actualValues.First();
+                    curSample.Data = actualValues.First();
                     return true;
                 }
 
-                curSample.SedimentType = possibleValues.Max();
+                curSample.Data = possibleValues.Max();
                 return true;
             }
             // If no values were found, then don't put anything in the current cell, for now.
@@ -181,11 +119,13 @@ namespace ESME.Environment
         private bool TryGetValue(int lonIndex, int latIndex, out float value)
         {
             value = 0;
-            if ((lonIndex < 0) || (lonIndex >= SedimentSamples.GetLength(0))) return false;
-            if ((latIndex < 0) || (latIndex >= SedimentSamples.GetLength(1))) return false;
-            if (!SedimentSamples[lonIndex, latIndex].SedimentType.HasValue) return false;
-            value = SedimentSamples[lonIndex, latIndex].SedimentType.Value;
-            return true;
+            if ((lonIndex < 0) || (lonIndex >= FieldData.GetLength(0))) return false;
+            if ((latIndex < 0) || (latIndex >= FieldData.GetLength(1))) return false;
+
+            if (FieldData[lonIndex, latIndex] == null) return false;
+            var curValue = FieldData[lonIndex, latIndex].Data;
+            value = curValue.HasValue ? curValue.Value : 0;
+            return curValue.HasValue;
         }
 
 #if false
@@ -245,19 +185,28 @@ namespace ESME.Environment
             return result;
         }
 #endif
+        public override void Save(BinaryWriter stream) { throw new NotImplementedException(); }
     }
 
-    public class SedimentSample : EarthCoordinate
+    public class SedimentSample : EarthCoordinate<float?>, IComparable<SedimentSample>
     {
         internal SedimentSample(double latitude, int latIndex, double longitude, int lonIndex)
             : base(latitude, longitude)
         {
             LonIndex = lonIndex;
             LatIndex = latIndex;
-            SedimentType = null;
+            Data = null;
         }
-        public float? SedimentType { get; internal set; }
-        internal int LonIndex { get; set; }
-        internal int LatIndex { get; set; }
+
+        internal int LatIndex { get; private set; }
+        internal int LonIndex { get; private set; }
+
+        public int CompareTo(SedimentSample other)
+        {
+            if ((Data == null) || (other.Data == null)) throw new ApplicationException("SedimentSample: Can't compare samples when one has null data");
+            if (!Data.HasValue) throw new ApplicationException("SedimentSample: Can't compare samples when my data value has not been");
+            if (!other.Data.HasValue) throw new ApplicationException("SedimentSample: Can't compare samples when the other data value has not been set");
+            return Data.Value.CompareTo(other.Data.Value);
+        }
     }
 }

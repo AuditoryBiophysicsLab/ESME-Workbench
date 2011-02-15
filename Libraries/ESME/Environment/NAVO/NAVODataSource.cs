@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading;
 using Cinch;
+using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
@@ -10,7 +11,7 @@ namespace ESME.Environment.NAVO
         public string ExtractionProgramPath { get; set; }
         public string DatabasePath { get; set; } //change back to protected set?
         public string CommandArgs { get; protected set; }
-        public EnvironmentData ExtractedArea { get; protected set; }
+        public Environment2DData<EarthCoordinate<float>> ExtractedArea { get; protected set; }
         public string WorkingDirectory { get; set; }
         public float GridSpacing { get; set; }  //in degrees.
         public NAVOTimePeriod TimePeriod { get; set; }

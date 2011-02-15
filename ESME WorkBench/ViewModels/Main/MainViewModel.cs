@@ -157,8 +157,13 @@ namespace ESMEWorkBench.ViewModels.Main
                 _mouseEarthCoordinate = value;
                 if (_experiment.Bathymetry != null)
                 {
-                    float mouseDepth;
-                    if (_experiment.Bathymetry.Lookup(_mouseEarthCoordinate, out mouseDepth)) MouseDepth = mouseDepth;
+                    EarthCoordinate<float> mouseDepth;
+                    if (_experiment.Bathymetry.Contains(_mouseEarthCoordinate))
+                    {
+                        mouseDepth = _experiment.Bathymetry[_mouseEarthCoordinate];
+                        if (mouseDepth != null) MouseDepth = mouseDepth.Data;
+                        else MouseDepth = null;
+                    }
                     else MouseDepth = null;
                 }
                 NotifyPropertyChanged(MouseEarthCoordinateChangedEventArgs);

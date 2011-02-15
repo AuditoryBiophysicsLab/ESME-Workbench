@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using HRC.Navigation;
 using Color = System.Windows.Media.Color;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
@@ -159,24 +160,26 @@ namespace HRC.Utility
         public float Threshold { get; set; }
 
         // data[lats,lons]
-        public Bitmap ToBitmap(float[,] data, float minValue, float maxValue)
+        public Bitmap ToBitmap<T>(T[,] data, float minValue, float maxValue) 
+            where T : EarthCoordinate<float> 
         {
             if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
 
-            var height = data.GetLength(0);
-            var width = data.GetLength(1);
+            var height = data.GetLength(1);
+            var width = data.GetLength(0);
             var writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
 
             writeableBitmap.Lock();
             unsafe
             {
+                Color curColor;
                 var curOffset = (int)writeableBitmap.BackBuffer;
                 for (var y = 0; y < height; y++)
                 {
                     for (var x = 0; x < width; x++)
                     {
-                        var curValue = data[height - 1 - y, x];
-                        var curColor = curValue <= Threshold ? BelowThresholdColormap.Lookup(curValue, minValue, Threshold, Threshold - minValue) : AboveThresholdColormap.Lookup(curValue, Threshold, maxValue, maxValue - Threshold);
+                        var curValue = data[x, height - 1 - y].Data;
+                        curColor = curValue <= Threshold ? BelowThresholdColormap.Lookup(curValue, minValue, Threshold, Threshold - minValue) : AboveThresholdColormap.Lookup(curValue, Threshold, maxValue, maxValue - Threshold);
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
                         *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
@@ -189,7 +192,7 @@ namespace HRC.Utility
             return new Bitmap(width, height, 4 * width, PixelFormat.Format32bppArgb, writeableBitmap.BackBuffer);
         }
 
-        public Bitmap ToBitmap(float[,] data)
+        public Bitmap ToBitmap(EarthCoordinate<float>[,] data)
         {
             if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
 

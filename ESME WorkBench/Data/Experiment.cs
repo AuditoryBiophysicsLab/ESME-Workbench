@@ -895,7 +895,7 @@ namespace ESMEWorkBench.Data
 
             if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName)))
             {
-                if (WindSpeedFileName.EndsWith(".eeb")) WindSpeed = new Environment2DData(WindSpeedFileName, "windspeed", North, West, South, East);
+                if (WindSpeedFileName.EndsWith(".eeb")) WindSpeed = Environment2DData.FromEEB(WindSpeedFileName, "windspeed", North, West, South, East);
                 else if (WindSpeedFileName.EndsWith(".txt")) WindSpeed = SurfaceMarineGriddedClimatologyDatabase.Parse(WindSpeedFileName);
             }
 
@@ -956,10 +956,10 @@ namespace ESMEWorkBench.Data
 
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
             {
-                if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = new Environment2DData(BathymetryFileName, "bathymetry", North, West, South, East);
+                if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = Environment2DData.FromEEB(BathymetryFileName, "bathymetry", North, West, South, East);
                 else if (BathymetryFileName.EndsWith(".chb"))
                 {
-                    Bathymetry = Environment2DData.ReadChrtrBinaryFile(BathymetryFileName, -1);
+                    Bathymetry = Environment2DData.FromCHB(BathymetryFileName, -1);
                 }
             }
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
@@ -988,21 +988,21 @@ namespace ESMEWorkBench.Data
                 {
                     Threshold = 0,
                 };
-                var bathysize = Math.Max(Bathymetry.Values.GetLength(0), Bathymetry.Values.GetLength(1));
+                var bathysize = Math.Max(Bathymetry.Longitudes.Count, Bathymetry.Latitudes.Count);
                 var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
                 Bitmap displayBitmap;
                 float horizontalResolution;
                 if (bathysize > screenSize)
                 {
                     var scaleFactor = screenSize/bathysize;
-                    var decimatedValues = Decimator2D.Decimate(Bathymetry.Values, (int)(Bathymetry.Values.GetLength(0) *scaleFactor), (int)(Bathymetry.Values.GetLength(1) * scaleFactor));
-                    horizontalResolution = (float)(Bathymetry.HorizontalResolution / ((double)decimatedValues.GetLength(0) / Bathymetry.Values.GetLength(0)));
-                    displayBitmap = colormap.ToBitmap(decimatedValues, Bathymetry.MinValue, Bathymetry.MaxValue < 0 ? Bathymetry.MaxValue : 8000);
+                    var decimatedValues = Decimator2D.Decimate(Bathymetry.FieldData, (int)(Bathymetry.Longitudes.Count * scaleFactor), (int)(Bathymetry.Latitudes.Count * scaleFactor));
+                    horizontalResolution = (float)(Bathymetry.LongitudinalResolution / ((double)decimatedValues.GetLength(0) / Bathymetry.Longitudes.Count));
+                    displayBitmap = colormap.ToBitmap(decimatedValues, Bathymetry.Minimum.Data, Bathymetry.Maximum.Data < 0 ? Bathymetry.Maximum.Data : 8000);
                 }
                 else
                 {
-                    displayBitmap = colormap.ToBitmap(Bathymetry.Values, Bathymetry.MinValue, Bathymetry.MaxValue < 0 ? Bathymetry.MaxValue : 8000);
-                    horizontalResolution = (float) Bathymetry.HorizontalResolution;
+                    displayBitmap = colormap.ToBitmap(Bathymetry.FieldData, Bathymetry.Minimum.Data, Bathymetry.Maximum.Data < 0 ? Bathymetry.Maximum.Data : 8000);
+                    horizontalResolution = (float) Bathymetry.LongitudinalResolution;
                 }
                 displayBitmap.Save(Path.Combine(LocalStorageRoot, "bathy.bmp"), ImageFormat.Bmp);
                 var bathyBitmapLayer = (RasterMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == bathyBitmapName);

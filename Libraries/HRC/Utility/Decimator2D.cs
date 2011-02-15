@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace HRC.Utility
 {
     public static class Decimator2D
     {
-        public static float[,] Decimate(float[,] source, int outputWidth, int outputHeight)
+        public static T[,] Decimate<T>(T[,] source, int outputWidth, int outputHeight)
         {
             if (outputWidth > source.GetLength(0) || outputHeight > source.GetLength(1)) throw new DataMisalignedException("Cannot decimate to a larger area.");
-            var result = new float[outputWidth, outputHeight];
+            var result = new T[outputWidth, outputHeight];
             var sourceWidth = source.GetLength(0);
             var sourceHeight = source.GetLength(1);
             var widthStep = (double)sourceWidth / outputWidth;
