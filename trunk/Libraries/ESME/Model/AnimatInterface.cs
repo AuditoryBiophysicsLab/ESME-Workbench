@@ -2,6 +2,8 @@
 using System.IO;
 using System.Threading;
 using ESME.Environment;
+using ESME.Model;
+using HRC.Navigation;
 using mbs;
 
 namespace ESME.Model
@@ -92,7 +94,7 @@ namespace ESME.Model
         /// <param name = "simulationDuration"></param>
         /// <param name = "simulationTimeStep"></param>
         /// <returns></returns>
-        public static AnimatInterface Create(string animatScenarioFile, string speciesDirectory, string bathymetryFile, string animatLogFilePath, string mmmbsOutputDirectory, TimeSpan simulationDuration, TimeSpan simulationTimeStep)
+        public static AnimatInterface Create(string animatScenarioFile, string speciesDirectory, Environment2DData bathymetry, string animatLogFilePath, string mmmbsOutputDirectory, TimeSpan simulationDuration, TimeSpan simulationTimeStep)
         {
             var mbs = new C3mbs();
             mbsRESULT mbsResult;
@@ -126,7 +128,7 @@ namespace ESME.Model
                          {
                              AnimatList = new AnimatList(new SpeciesList(speciesDirectory)),
                              AnimatLogFilePath = animatLogFilePath,
-                             Bathymetry = new Environment2DData(bathymetryFile),
+                             Bathymetry = bathymetry,
                              SimulationDuration = simulationDuration,
                              TimeStep = simulationTimeStep,
                          };
@@ -479,13 +481,11 @@ namespace ESME.Model
             {
                 curAnimat = AnimatList[i];
                 // Make sure the animat is still contained in the current bathymetry dataset, and if so get the depth at the animat's current position
-                float bathymetryDepthMeters;
-                var animatIsWithinBathymetry = Bathymetry.Lookup(curAnimat.Location, out bathymetryDepthMeters);
-
-                if (animatIsWithinBathymetry)
+                EarthCoordinate<float> bathymetryDepthMeters;
+                if (Bathymetry.Lookup(curAnimat.Location, out bathymetryDepthMeters))
                 {
                     // Update the depth at the animat's current position
-                    _mbsBathymetry[i] = bathymetryDepthMeters;
+                    _mbsBathymetry[i] = bathymetryDepthMeters.Data;
                 }
             } // for (animats)
             if (mbsRESULT.OK != (result = _mmmbs.SetAnimatBathymetry(_mbsBathymetry)))

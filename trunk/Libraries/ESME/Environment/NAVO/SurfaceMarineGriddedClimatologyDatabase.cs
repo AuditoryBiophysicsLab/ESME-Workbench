@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Cinch;
+using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
@@ -60,6 +61,7 @@ namespace ESME.Environment.NAVO
             var resarray = File.ReadAllLines(fileName).ToList();
             var lats = new List<double>();
             var lons = new List<double>();
+            var data = new List<EarthCoordinate<float>>();
             //  var averagevalues = new List<double>();
             var rawvalues = new List<List<string>>();
             var points = new Dictionary<string, double>();
@@ -105,32 +107,11 @@ namespace ESME.Environment.NAVO
                     else throw new InvalidDataException("unexpected data in SMGC");
                 }
                 if (double.IsNaN(lat) || double.IsNaN(lon) || (monthspeed.Count <= 0)) continue;
-                lats.Add(lat);
-                lons.Add(lon);
-                //averagevalues.Add(monthspeed.Average());
-                points.Add(string.Format("{0:#.00000},{1:#.00000}", lat, lon), monthspeed.Average());
+                data.Add(new EarthCoordinate<float>(lat, lon, (float)monthspeed.Average()));
             }
-
-            var uniqueLats = lats.Distinct().ToList();
-            var uniqueLons = lons.Distinct().ToList();
-            uniqueLats.Sort();
-            uniqueLons.Sort();
-
-            var dataArray = new float[uniqueLons.Count,uniqueLats.Count];
-            for (var latIndex = 0; latIndex < uniqueLats.Count; latIndex++)
-            {
-                var lat = uniqueLats[latIndex];
-                for (var lonIndex = 0; lonIndex < uniqueLons.Count; lonIndex++)
-                {
-                    var lon = uniqueLons[lonIndex];
-                    var key = string.Format("{0:#.00000},{1:#.00000}", lat, lon);
-                    double outval;
-                    dataArray[lonIndex, latIndex] = points.TryGetValue(key, out outval) ? (float) outval : float.NaN;
-                }
-            }
-
+            return new Environment2DData(data);
             //and finally, make a useful thing out of them. 
-            return new Environment2DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), gridSpacing, dataArray, 0, 0);
+            //return new Environment2DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), gridSpacing, dataArray, 0, 0);
         }
     }
 }

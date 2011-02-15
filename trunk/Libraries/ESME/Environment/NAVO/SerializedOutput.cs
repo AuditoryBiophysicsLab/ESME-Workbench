@@ -51,10 +51,8 @@ namespace ESME.Environment.NAVO
 
     }
 
-    public class EnvironmentalDataPoint : EarthCoordinate
+    public class EnvironmentalDataPoint : EarthCoordinate<List<double>>
     {
         public EnvironmentalDataPoint() { Data = new List<double>(); }
-
-        public List<double> Data { get; set; }
     }
 }

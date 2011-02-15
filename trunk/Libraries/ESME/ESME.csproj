@@ -216,7 +216,6 @@
     <Compile Include="Interfaces.cs" />
     <Compile Include="Model\AcousticProperties.cs" />
     <Compile Include="Model\Animat.cs" />
-    <Compile Include="Model\Bathymetry.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFile.cs" />
     <Compile Include="Model\DisplayLayers.cs" />
     <Compile Include="Model\EnvironmentInformation.cs" />

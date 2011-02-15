@@ -9,41 +9,21 @@ using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Environment
 {
-    public abstract class EnvironmentData
+    public abstract class Environment2DData<TCoordinate> : GenericGeoField<TCoordinate> 
+        where TCoordinate : EarthCoordinate
     {
-        #region Public properties
+        protected Environment2DData(IEnumerable<TCoordinate> data) : base(data) { }
 
-        /// <summary>
-        ///   List of latitudes (in degrees) for which we have values
-        /// </summary>
-        public List<double> Latitudes { get; internal set; }
-
-        /// <summary>
-        ///   List of longitudes (in degrees) for which we have values
-        /// </summary>
-        public List<double> Longitudes { get; internal set; }
-
-        /// <summary>
-        ///   Corner of the data set that has the minimum lat and lon values
-        /// </summary>
-        public EarthCoordinate MinCoordinate { get; internal set; }
-
-        /// <summary>
-        ///   Corner of the data set that has the maximum lat and lon values
-        /// </summary>
-        public EarthCoordinate MaxCoordinate { get; internal set; }
-
-        public string Filename { get; internal set; }
-
-        #endregion
-
-        protected EnvironmentData()
+        public void Save(string filename)
         {
-            MinCoordinate = null;
-            MaxCoordinate = null;
-            Latitudes = new List<double>();
-            Longitudes = new List<double>();
+            using (var stream = new BinaryWriter(new FileStream(filename, FileMode.Create)))
+            {
+                Save(stream);
+            }
         }
+
+        public abstract void Save(BinaryWriter stream);
+        #region Public properties
 
         public OverlayLineSegments BoundingBox
         {
@@ -55,62 +35,17 @@ namespace ESME.Environment
                                    //      It now places the bounding box such that the lines are coincident with the edges of
                                    //      the edge samples of the selected data (extends by half the horizontal/vertical resolution)
                                    //northeast corner:                   
-                                   new EarthCoordinate(MaxCoordinate.Latitude_degrees + (VerticalResolution/2), MaxCoordinate.Longitude_degrees + (HorizontalResolution/2)), //southeast corner: 
-                                   new EarthCoordinate(MinCoordinate.Latitude_degrees - (VerticalResolution/2), MaxCoordinate.Longitude_degrees + (HorizontalResolution/2)), //southwest corner: 
-                                   new EarthCoordinate(MinCoordinate.Latitude_degrees - (VerticalResolution/2), MinCoordinate.Longitude_degrees - (HorizontalResolution/2)), //northwest corner: 
-                                   new EarthCoordinate(MaxCoordinate.Latitude_degrees + (VerticalResolution/2), MinCoordinate.Longitude_degrees - (HorizontalResolution/2)), //northeast corner again to close the loop.
-                                   new EarthCoordinate(MaxCoordinate.Latitude_degrees + (VerticalResolution/2), MaxCoordinate.Longitude_degrees + (HorizontalResolution/2)),
+                                   new EarthCoordinate(NorthEast.Latitude_degrees + (LatitudinalResolution/2), NorthEast.Longitude_degrees + (LongitudinalResolution/2)), // northeast corner
+                                   new EarthCoordinate(SouthWest.Latitude_degrees - (LatitudinalResolution/2), NorthEast.Longitude_degrees + (LongitudinalResolution/2)), // southeast corner                                   new EarthCoordinate(SouthWest.Latitude_degrees - (LatitudinalResolution/2), SouthWest.Longitude_degrees - (LongitudinalResolution/2)), // southwest corner: 
+                                   new EarthCoordinate(SouthWest.Latitude_degrees - (LatitudinalResolution/2), SouthWest.Longitude_degrees - (LongitudinalResolution/2)), // southwest corner                                   new EarthCoordinate(SouthWest.Latitude_degrees - (LatitudinalResolution/2), SouthWest.Longitude_degrees - (LongitudinalResolution/2)), // southwest corner: 
+                                   new EarthCoordinate(NorthEast.Latitude_degrees + (LatitudinalResolution/2), SouthWest.Longitude_degrees - (LongitudinalResolution/2)), // northwest corner
+                                   new EarthCoordinate(NorthEast.Latitude_degrees + (LatitudinalResolution/2), NorthEast.Longitude_degrees + (LongitudinalResolution/2)), // northeast corner again to close the loop.
                                };
 
                 var shape = new OverlayLineSegments(bathyBox, Colors.Black, 1, LineStyle.Solid);
                 return shape;
             }
         }
-
-        public double HorizontalResolution
-        {
-            get { return Math.Abs(Longitudes[1] - Longitudes[0]); }
-        }
-
-        public double VerticalResolution
-        {
-            get { return Math.Abs(Latitudes[1] - Latitudes[0]); }
-        }
-
-        public void Save(string filename)
-        {
-            using (var stream = new BinaryWriter(new FileStream(filename, FileMode.Create)))
-            {
-                Save(stream);
-            }
-        }
-
-        public abstract void Save(BinaryWriter stream);
-        public abstract void Load(BinaryReader stream);
-
-        public bool ContainsCoordinate(EarthCoordinate coordinate) { return (MinCoordinate.Longitude_degrees <= coordinate.Longitude_degrees) && (coordinate.Longitude_degrees <= MaxCoordinate.Longitude_degrees) && (MinCoordinate.Latitude_degrees <= coordinate.Latitude_degrees) && (coordinate.Latitude_degrees <= MaxCoordinate.Latitude_degrees); }
-
-        // lookup a value in a latitude or longitude array.  the array is presumed to be sorted in ascending order (lowest values first)
-        // and if the value being sought is contained within the interval between index N and index N+1, then N will be returned.  if the
-        // value is not found within the array in this fashion, -1 is returned.
-        protected static int LookupIndex(double value, IList<double> array)
-        {
-            for (int index = 0; index < array.Count - 1; index++)
-            {
-                if ((array[index] <= value) && (value <= array[index + 1])) return index;
-            }
-            return -1; // value not found within the array
-        }
-    }
-
-    public abstract class EnvironmentData<T> : EnvironmentData 
-    {
-        #region Public properties
-
-        /// <summary>
-        ///   Values of all points in the data set
-        /// </summary>
-        public T[,] Values { get; internal set; }
 
         /// <summary>
         /// Look up a value in the current data set.
@@ -124,33 +59,35 @@ namespace ESME.Environment
         /// <returns>
         /// If the requested coordinate is contained in the data set, the function return value is 'true', 'false' otherwise
         /// </returns>
-        public virtual bool Lookup(EarthCoordinate coordinate, ref T value)
+        public virtual bool Lookup(EarthCoordinate coordinate, out TCoordinate value)
         {
-            if (ContainsCoordinate(coordinate))
+            value = null;
+            if (Contains(coordinate))
             {
-                int latIndex = LookupIndex(coordinate.Latitude_degrees, Latitudes);
-                int lonIndex = LookupIndex(coordinate.Longitude_degrees, Longitudes);
+                var latIndex = Latitudes.IndexOf(coordinate.Latitude_degrees);
+                var lonIndex = Longitudes.IndexOf(coordinate.Longitude_degrees);
                 if ((latIndex >= 0) && (lonIndex >= 0))
                 {
-                    value = Values[latIndex, lonIndex];
+                    value = FieldData[latIndex, lonIndex];
                     return true;
                 }
             }
             return false;
         }
 
-        public virtual bool ClosestTo(EarthCoordinate coordinate, ref T value)
+        public virtual bool ClosestTo(EarthCoordinate coordinate, out TCoordinate value)
         {
-            if (ContainsCoordinate(coordinate))
+            value = null;
+            if (Contains(coordinate))
             {
                 var closestCoordinate = new EarthCoordinate(Latitudes.First(), Longitudes.First());
                 foreach (var curCoordinate in Latitudes.SelectMany(latitude => Longitudes, (latitude, longitude) => new EarthCoordinate(latitude, longitude)).Where(curCoordinate => coordinate.GetDistanceTo_Meters(closestCoordinate) > coordinate.GetDistanceTo_Meters(curCoordinate)))
                     closestCoordinate = curCoordinate;
-                var latIndex = LookupIndex(closestCoordinate.Latitude_degrees, Latitudes);
-                var lonIndex = LookupIndex(closestCoordinate.Longitude_degrees, Longitudes);
+                var latIndex = Latitudes.IndexOf(coordinate.Latitude_degrees);
+                var lonIndex = Longitudes.IndexOf(coordinate.Longitude_degrees);
                 if ((latIndex >= 0) && (lonIndex >= 0))
                 {
-                    value = Values[latIndex, lonIndex];
+                    value = FieldData[lonIndex, latIndex];
                     return true;
                 }
             }
@@ -160,26 +97,130 @@ namespace ESME.Environment
         #endregion
     }
 
-    public sealed class Environment2DData : EnvironmentData<float>
+    public class Environment2DData : Environment2DData<EarthCoordinate<float>>
     {
         #region Public properties
 
-        /// <summary>
-        ///   Lowest value in the data set.
-        /// </summary>
-        public float MinValue { get; internal set; }
-
-        /// <summary>
-        ///   Highest value in the data set
-        /// </summary>
-        public float MaxValue { get; internal set; }
+        public string Filename { get; protected set; }
 
         #endregion
 
-        const UInt32 Magic = 0x728dcde6;
+        const UInt32 Magic = 0x748dcde6;
 
         #region Public constructors
 
+        public Environment2DData(IEnumerable<EarthCoordinate<float>> data) : base(data)
+        {
+            FillTheDamnHoles();
+        }
+
+        public EarthCoordinate<float> Minimum
+        {
+            get
+            {
+                EarthCoordinate<float> curMinPoint = null;
+                foreach (var datum in FieldData)
+                {
+                    if (curMinPoint == null) curMinPoint = datum;
+                    else if (datum.Data < curMinPoint.Data) curMinPoint = datum;
+                }
+                return curMinPoint;
+            }
+        }
+
+        public EarthCoordinate<float> Maximum
+        {
+            get
+            {
+                EarthCoordinate<float> curMaxPoint = null;
+                foreach (var datum in FieldData)
+                {
+                    if (curMaxPoint == null) curMaxPoint = datum;
+                    else if (datum.Data > curMaxPoint.Data) curMaxPoint = datum;
+                }
+                return curMaxPoint;
+            }
+        }
+
+        private void FillTheDamnHoles()
+        {
+            var thereIsAtLeastOneHole = true;
+            var passCount = 0;
+            while (thereIsAtLeastOneHole)
+            {
+                thereIsAtLeastOneHole = false;
+                for (var lat = 0; lat < FieldData.GetLength(1); lat++)
+                {
+                    for (var lon = 0; lon < FieldData.GetLength(0); lon++)
+                    {
+                        if (FieldData[lon, lat] == null)
+                            if (!FillOneDamnHole(lon, lat))
+                                thereIsAtLeastOneHole = true;
+                    }
+                }
+                passCount++;
+            }
+            System.Diagnostics.Debug.WriteLine("FillTheDamnHoles: Sample holes filled after " + passCount + " passes.");
+        }
+
+
+        private bool FillOneDamnHole(int lonIndex, int latIndex)
+        {
+            float nearbyValue;
+            var possibleValues = new List<float>();
+
+            // See if there's a value to the south, north, west and east first.  Those are the closest to the current point.
+            if (TryGetValue(lonIndex - 1, latIndex, out nearbyValue)) possibleValues.Add(nearbyValue);
+            if (TryGetValue(lonIndex + 1, latIndex, out nearbyValue)) possibleValues.Add(nearbyValue);
+            if (TryGetValue(lonIndex, latIndex - 1, out nearbyValue)) possibleValues.Add(nearbyValue);
+            if (TryGetValue(lonIndex, latIndex + 1, out nearbyValue)) possibleValues.Add(nearbyValue);
+            if (possibleValues.Count > 0)
+            {
+                var actualValues = from value in possibleValues
+                                   where value >= 0
+                                   select value;
+
+                if (actualValues.Count() > 0)
+                {
+                    FieldData[lonIndex, latIndex] = new EarthCoordinate<float>(Latitudes[latIndex], Longitudes[lonIndex], actualValues.First());
+                    return true;
+                }
+            }
+
+            // If nothing was found above, try the southwest, southeast, northwest and northeast corners
+            if (TryGetValue(lonIndex - 1, latIndex - 1, out nearbyValue)) possibleValues.Add(nearbyValue);
+            if (TryGetValue(lonIndex - 1, latIndex + 1, out nearbyValue)) possibleValues.Add(nearbyValue);
+            if (TryGetValue(lonIndex - 1, latIndex - 1, out nearbyValue)) possibleValues.Add(nearbyValue);
+            if (TryGetValue(lonIndex + 1, latIndex + 1, out nearbyValue)) possibleValues.Add(nearbyValue);
+            if (possibleValues.Count > 0)
+            {
+                var actualValues = from value in possibleValues
+                                   where value >= 0
+                                   select value;
+
+                if (actualValues.Count() > 0)
+                {
+                    FieldData[lonIndex, latIndex] = new EarthCoordinate<float>(Longitudes[lonIndex], Latitudes[latIndex], actualValues.First());
+                    return true;
+                }
+            }
+            // If no values were found, then don't put anything in the current cell, for now.
+            return false;
+        }
+
+        private bool TryGetValue(int lonIndex, int latIndex, out float value)
+        {
+            value = 0;
+            if ((lonIndex < 0) || (lonIndex >= FieldData.GetLength(0))) return false;
+            if ((latIndex < 0) || (latIndex >= FieldData.GetLength(1))) return false;
+
+            if (FieldData[lonIndex, latIndex] == null) return false;
+            value = FieldData[lonIndex, latIndex].Data;
+            return true;
+        }
+
+#if false
+        // Deprecated on 14 Feb 2011 by Dave Anderson
         public Environment2DData(double north, double south, double east, double west, float gridSpacing, float[,] values, float minValue, float maxValue)
         {
             MinCoordinate = new EarthCoordinate(south, west);
@@ -188,18 +229,28 @@ namespace ESME.Environment
             MaxValue = maxValue;
             for (var lon = 0; lon < values.GetLength(1); lon++) Longitudes.Add(west + (lon * gridSpacing));
             for (var lat = 0; lat < values.GetLength(0); lat++) Latitudes.Add(south + (lat * gridSpacing));
-            Values = values;
+            FieldData = values;
         }
+#endif
 
-        public Environment2DData(string fileName, string layerName, float north, float west, float south, float east)
+        public static Environment2DData FromEEB(string fileName, string layerName, float north, float west, float south, float east)
         {
-            Filename = fileName;
             if (Path.GetExtension(fileName) != ".eeb") throw new System.IO.FileFormatException(string.Format("Environment2DData: Unknown file type \"{0}\"", Path.GetFileName(fileName)));
-            DataFile file = DataFile.Open(fileName);
+            var file = DataFile.Open(fileName);
 
-            DataLayer layer = file[layerName];
+            var layer = file[layerName];
             if (layer == null) throw new System.IO.FileFormatException(string.Format("Environment2DData: Specified environment file \"{0}\"does not contain a environment2DData layer", fileName));
 
+            var data = new List<EarthCoordinate<float>>();
+            foreach (var row in layer.GetRows(south, north))
+                data.AddRange(from point in row.Points
+                              where (point.EarthCoordinate.Longitude_degrees >= west) && (point.EarthCoordinate.Longitude_degrees <= east)
+                              select new EarthCoordinate<float>(point.EarthCoordinate.Latitude_degrees, point.EarthCoordinate.Longitude_degrees, point.Data[0]));
+            return new Environment2DData(data)
+                   {
+                       Filename = fileName
+                   };
+#if false
             Longitudes.AddRange(layer.LongitudeAxis.DoubleValuesBetween(west, east));
             Latitudes.AddRange(layer.LatitudeAxis.DoubleValuesBetween(south, north));
             int[] lonIndices = layer.LongitudeAxis.IndicesBetween(west, east);
@@ -216,8 +267,10 @@ namespace ESME.Environment
                     MinValue = Math.Min(MinValue, Values[row, col]);
                     MaxValue = Math.Max(MaxValue, Values[row, col]);
                 }
+#endif
         }
 
+#if false
         public Environment2DData(string fileName)
         {
             Filename = fileName;
@@ -257,10 +310,11 @@ namespace ESME.Environment
             }
             Filename = fileName;
         }
+#endif
 
         #endregion
 
-        public static Environment2DData ReadChrtrBinaryFile(string fileName, float scaleFactor)
+        public static Environment2DData FromCHB(string fileName, float scaleFactor)
         {
             using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
@@ -277,60 +331,50 @@ namespace ESME.Environment
                 var minDepth = stream.ReadSingle()* scaleFactor;
                 var paddingWidth = (width - 10)*4;
                 stream.ReadBytes(paddingWidth);
-                var depths = new float[height, width];
+                //var depths = new float[height, width];
+                var depths = new List<EarthCoordinate<float>>();
                 for (var lat = 0; lat < height; lat++)
                     for (var lon = 0; lon < width; lon++)
                     {
                         var curSample = stream.ReadSingle();
+                        depths.Add(new EarthCoordinate<float>(south + (gridSpacing * lat), west + (gridSpacing * lon), curSample == 1e16f ? float.NaN : curSample * scaleFactor));
                         //if ((curSample > 999) || (curSample < 1)) 
                         //    System.Diagnostics.Debugger.Break();
-                        depths[lat, lon] = curSample == 1e16f ? float.NaN : curSample * scaleFactor;
+                        //depths[lat, lon] = curSample == 1e16f ? float.NaN : curSample * scaleFactor;
                     }
-                return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
+                return new Environment2DData(depths);
+                //return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
             }
         }
 
-        public override void Load(BinaryReader stream)
+        public static Environment2DData Load(BinaryReader stream)
         {
             if (stream.ReadUInt32() != Magic) throw new FormatException("Attempted to read invalid data into environment2DData");
-
-            MinValue = stream.ReadSingle();
-            MaxValue = stream.ReadSingle();
-
-            MinCoordinate = new EarthCoordinate(stream);
-            MaxCoordinate = new EarthCoordinate(stream);
+            var data = new List<EarthCoordinate<float>>();
 
             var lonCount = stream.ReadInt32();
-            for (var lon = 0; lon < lonCount; lon++) Longitudes.Add(stream.ReadDouble());
-
             var latCount = stream.ReadInt32();
-            for (var lat = 0; lat < latCount; lat++) Latitudes.Add(stream.ReadDouble());
 
-            Values = new float[latCount, lonCount];
-            for (int lat = 0; lat < latCount; lat++) 
-                for (int lon = 0; lon < lonCount; lon++) 
-                    Values[lat, lon] = stream.ReadSingle();
+            for (var lat = 0; lat < latCount; lat++) 
+                for (var lon = 0; lon < lonCount; lon++) 
+                    data.Add(new EarthCoordinate<float>(stream.ReadDouble(), stream.ReadDouble(), stream.ReadSingle()));
+            return new Environment2DData(data);
         }
 
         public override void Save(BinaryWriter stream)
         {
             stream.Write(Magic);
 
-            stream.Write(MinValue);
-            stream.Write(MaxValue);
-
-            MinCoordinate.Write(stream);
-            MaxCoordinate.Write(stream);
-
             stream.Write(Longitudes.Count);
-            foreach (var lon in Longitudes) stream.Write(lon);
-
             stream.Write(Latitudes.Count);
-            foreach (var lat in Latitudes) stream.Write(lat);
 
-            for (var lat = 0; lat < Latitudes.Count; lat++) 
-                for (var lon = 0; lon < Longitudes.Count; lon++) 
-                    stream.Write(Values[lat, lon]);
+            for (var lon = 0; lon < Longitudes.Count; lon++)
+                for (var lat = 0; lat < Latitudes.Count; lat++)
+                {
+                    stream.Write(FieldData[lon, lat].Latitude_degrees);
+                    stream.Write(FieldData[lon, lat].Longitude_degrees);
+                    stream.Write(FieldData[lon, lat].Data);
+                }
         }
 
         /// <summary>
@@ -344,110 +388,11 @@ namespace ESME.Environment
         {
             using (var stream = new StreamWriter(File.Create(fileName)))
             {
-                for (var lat = 0; lat < Latitudes.Count; lat++) 
-                    for (var lon = 0; lon < Longitudes.Count; lon++) 
-                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor*Values[lat, lon]));
+                for (var lon = 0; lon < Longitudes.Count; lon++)
+                    for (var lat = 0; lat < Latitudes.Count; lat++)
+                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor * FieldData[lon, lat].Data));
             }
         }
-
-        /// <summary>
-        /// Look up a value in the current data set.
-        /// </summary>
-        /// <param name="coordinate">
-        /// The coordinate to search the data set for
-        /// </param>
-        /// <param name="value">
-        /// The value at the requested coordinate
-        /// </param>
-        /// <returns>
-        /// If the requested coordinate is contained in the data set, the function return value is 'true', 'false' otherwise
-        /// </returns>
-        public bool Lookup(EarthCoordinate coordinate, out float value)
-        {
-            value = float.NaN;
-            return Lookup(coordinate, ref value);
-        }
-
-        public float this[EarthCoordinate location]
-        {
-            get
-            {
-                int latStartIndex;
-                var latEndIndex = latStartIndex = Latitudes.IndexOf(location.Latitude_degrees);
-                if (latStartIndex == -1)
-                {
-                    var southLats = Latitudes.FindAll(y => y <= location.Latitude_degrees);
-                    if (southLats.Count() > 0) latStartIndex = Latitudes.IndexOf(southLats.Last());
-                }
-                if (latEndIndex == -1)
-                {
-                    var northLats = Latitudes.FindAll(y => y >= location.Latitude_degrees);
-                    if (northLats.Count() > 0) latEndIndex = Latitudes.IndexOf(northLats.First());
-                }
-                if (latStartIndex == -1) latStartIndex = latEndIndex;
-                if (latEndIndex == -1) latEndIndex = latStartIndex;
-
-                int lonStartIndex;
-                var lonEndIndex = lonStartIndex = Longitudes.IndexOf(location.Longitude_degrees);
-                if (lonStartIndex == -1)
-                {
-                    var westLons = Longitudes.FindAll(x => x <= location.Longitude_degrees);
-                    if (westLons.Count() > 0) lonStartIndex = Longitudes.IndexOf(westLons.Last());
-                }
-                if (lonEndIndex == -1)
-                {
-                    var eastLons = Latitudes.FindAll(x => x >= location.Longitude_degrees);
-                    if (eastLons.Count() > 0) lonEndIndex = Longitudes.IndexOf(eastLons.First());
-                }
-                if (lonStartIndex == -1) lonStartIndex = lonEndIndex;
-                if (lonEndIndex == -1) lonEndIndex = lonStartIndex;
-
-                var searchList = new List<EarthCoordinate<float>>();
-                for (var latIndex = latStartIndex; latIndex <= latEndIndex; latIndex++)
-                    for (var lonIndex = lonStartIndex; lonIndex <= lonEndIndex; lonIndex++)
-                        searchList.Add(new EarthCoordinate<float>(Latitudes[latIndex], Longitudes[lonIndex], Values[latIndex, lonIndex]));
-                var closestSample = searchList.First();
-                var closestDistance = location.GetDistanceTo_Meters(closestSample);
-                foreach (var curSample in searchList)
-                {
-                    var curDistance = location.GetDistanceTo_Meters(curSample);
-                    if (curDistance >= closestDistance) continue;
-                    closestDistance = curDistance;
-                    closestSample = curSample;
-                }
-                return closestSample.Data;
-            }
-        }
-
-    }
-
-    public abstract class Environment3DData<T> : EnvironmentData<List<T>>
-    {
-        #region Public properties
-
-        /// <summary>
-        ///   List of Depths (in meters) for which we have values
-        /// </summary>
-        public List<double> Depths { get; internal set; }
-
-        #endregion
-
-        #region Public constructors
-
-        protected Environment3DData(double north, double south, double east, double west, float gridSpacing, IList<double> depths, List<T>[,] values)
-        {
-            MinCoordinate = new EarthCoordinate(south, west);
-            MaxCoordinate = new EarthCoordinate(north, east);
-            Longitudes = new List<double>();
-            Latitudes = new List<double>();
-            Depths = new List<double>();
-            for (var lon = 0; lon < values.GetLength(0); lon++) Longitudes.Add(west + (lon*gridSpacing));
-            for (var lat = 0; lat < values.GetLength(1); lat++) Latitudes.Add(south + (lat*gridSpacing));
-            Depths.AddRange(depths);
-            Values = values;
-        }
-
-        #endregion
     }
 
     public class AverageDatum
@@ -476,11 +421,18 @@ namespace ESME.Environment
         public void Average() { if (Count > 0) Value /= Count; }
     }
 
-    public sealed class Environment3DAverager : Environment3DData<AverageDatum>
+    public sealed class Environment3DAverager : Environment2DData<EarthCoordinate<List<AverageDatum>>>
     {
-        public Environment3DAverager(double north, double south, double east, double west, float gridSpacing, IList<double> depths, List<AverageDatum>[,] values) : base(north, south, east, west, gridSpacing, depths, values) { }
+        public Environment3DAverager(IEnumerable<double> depths, IEnumerable<EarthCoordinate<List<AverageDatum>>> data) : base(data)
+        {
+            Depths = new List<double>();
+            Depths.AddRange(depths.Distinct());
+            Depths.Sort();
+        }
 
-        internal void Add(Environment3DData that)
+        public List<double> Depths { get; internal set; }
+
+        internal void Add(Environment3DAverager that)
         {
             // Verify that this.Latitudes[] that.Latitudes[] (same with Longitudes[]) are the same length AND have the same contents
             // use VerifyArrays, below
@@ -498,15 +450,15 @@ namespace ESME.Environment
             }
             //VerifyArrays(Depths, that.Depths, "depth");)
 
-            for (var lonIndex = 0; lonIndex < Values.GetLength(0); lonIndex++)
-                for (var latIndex = 0; latIndex < Values.GetLength(1); latIndex++)
+            for (var lonIndex = 0; lonIndex < FieldData.GetLength(0); lonIndex++)
+                for (var latIndex = 0; latIndex < FieldData.GetLength(1); latIndex++)
                 {
-                    if (Values[lonIndex, latIndex] == null) Values[lonIndex, latIndex] = new List<AverageDatum>();
-                    for (var depthIndex = 0; depthIndex < that.Values[lonIndex, latIndex].Count; depthIndex++)
+                    if (FieldData[lonIndex, latIndex] == null) FieldData[lonIndex, latIndex].Data = new List<AverageDatum>();
+                    for (var depthIndex = 0; depthIndex < that.FieldData[lonIndex, latIndex].Data.Count; depthIndex++)
                     {
-                        var thatValue = that.Values[lonIndex, latIndex][depthIndex];
-                        if (Values[lonIndex, latIndex].Count <= depthIndex) Values[lonIndex, latIndex].Add(new AverageDatum(thatValue));
-                        else Values[lonIndex, latIndex][depthIndex].Add(thatValue);
+                        var thatValue = that.FieldData[lonIndex, latIndex].Data[depthIndex].Value;
+                        if (FieldData[lonIndex, latIndex].Data.Count <= depthIndex) FieldData[lonIndex, latIndex].Data.Add(new AverageDatum(thatValue));
+                        else FieldData[lonIndex, latIndex].Data[depthIndex].Add(thatValue);
                     }
                 }
         }
@@ -526,27 +478,29 @@ namespace ESME.Environment
 
         internal void Average()
         {
-            for (var lonIndex = 0; lonIndex < Values.GetLength(0); lonIndex++)
-                for (var latIndex = 0; latIndex < Values.GetLength(1); latIndex++)
+            for (var lonIndex = 0; lonIndex < FieldData.GetLength(0); lonIndex++)
+                for (var latIndex = 0; latIndex < FieldData.GetLength(1); latIndex++)
                 {
-                    for (var depthIndex = 0; depthIndex < Values[lonIndex, latIndex].Count; depthIndex++)
+                    for (var depthIndex = 0; depthIndex < FieldData[lonIndex, latIndex].Data.Count; depthIndex++)
                     {
-                        Values[lonIndex, latIndex][depthIndex].Average();
+                        FieldData[lonIndex, latIndex].Data[depthIndex].Average();
                     }
                 }
         }
 
         public override void Save(BinaryWriter stream) { throw new NotImplementedException(); }
-        public override void Load(BinaryReader stream) { throw new NotImplementedException(); }
+        public static void Load(BinaryReader stream) { throw new NotImplementedException(); }
     }
 
-    public sealed class Environment3DData : Environment3DData<double>
+    public sealed class Environment3DData : Environment2DData<EarthCoordinate<List<double>>>
     {
-        const UInt32 Magic = 0x3d8dcde6;
+        const UInt32 Magic = 0x3dadcde6;
 
-        public override void Load(BinaryReader stream)
+        public List<double> Depths { get; set; }
+#if false
+        public static Environment3DData Load(BinaryReader stream)
         {
-            if (stream.ReadUInt32() != Magic) throw new FormatException("Attempted to read invalid data into environment2DData");
+            if (stream.ReadUInt32() != Magic) throw new FormatException("Attempted to read invalid data into environment3DData");
 
             MinCoordinate = new EarthCoordinate(stream);
             MaxCoordinate = new EarthCoordinate(stream);
@@ -592,28 +546,33 @@ namespace ESME.Environment
                         stream.Write(curValue.Count < dep ? curValue[dep] : float.NaN);
                 }
         }
-
-        /// <summary>
-        /// Look up a value in the current data set.
-        /// </summary>
-        /// <param name="coordinate">
-        /// The coordinate to search the data set for
-        /// </param>
-        /// <param name="value">
-        /// The value at the requested coordinate
-        /// </param>
-        /// <returns>
-        /// If the requested coordinate is contained in the data set, the function return value is 'true', 'false' otherwise
-        /// </returns>
-        public bool Lookup(EarthCoordinate coordinate, out List<double> value)
+#endif
+        public override void Save(BinaryWriter stream)
         {
-            value = null;
-            return Lookup(coordinate, ref value);
+            throw new NotImplementedException();
         }
 
         #region Public constructors
 
-        public Environment3DData(double north, double south, double east, double west, float gridSpacing, IList<double> depths, List<double>[,] values) : base(north, south, east, west, gridSpacing, depths, values) { }
+        public Environment3DData(IEnumerable<double> depths, IEnumerable<EarthCoordinate<List<double>>> data) : base(data)
+        {
+            Depths = new List<double>();
+            Depths.AddRange(depths.Distinct());
+            Depths.Sort();
+        }
+
+#if false
+        public Environment3DData(double north, double south, double east, double west, float gridSpacing, IEnumerable<double> depths, List<double>[,] values) 
+        {
+            MinCoordinate = new EarthCoordinate(south, west);
+            MaxCoordinate = new EarthCoordinate(north, east);
+            Depths = new List<double>();
+            for (var lon = 0; lon < values.GetLength(0); lon++) Longitudes.Add(west + (lon * gridSpacing));
+            for (var lat = 0; lat < values.GetLength(1); lat++) Latitudes.Add(south + (lat * gridSpacing));
+            Depths.AddRange(depths);
+            Values = values;
+        }
+#endif
 
         #endregion
     }

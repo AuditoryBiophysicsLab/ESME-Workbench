@@ -144,7 +144,7 @@ namespace ImportNetCDF
             var selectedLats = latMap.Select(x => x.Value).ToArray();
 
 
-            Console.Write(@"Initializing output file {0} ... ", Path.GetFileName(outputDataFileName));
+            Console.WriteLine(@"Initializing output file {0}...", Path.GetFileName(outputDataFileName));
 
             if (depthVarName != String.Empty)
             {
@@ -218,10 +218,10 @@ namespace ImportNetCDF
                     serializedOutput.DataPoints.Add(curDataPoint);
                 }
 
-                Console.Write(@"{0} % complete              \r", (int)(progress * 100));
+                //Console.WriteLine(@"{0} % complete", (int)(progress * 100));
                 progress += progressStep;
             }
-            Console.Write(@"Saving imported data ... ");
+            Console.WriteLine(@"Saving imported data ... ");
             serializedOutput.Save(outputDataFileName, null);
             
 

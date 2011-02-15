@@ -21,18 +21,18 @@ namespace ESME.TransmissionLoss.CASS
             Environment2DData bathymetry = null;
             var selectedBathyFile = LargestFileInList(bathyFiles);
             if (selectedBathyFile == null) throw new ApplicationException("No bathymetry files were found, the operation cannot proceed");
-            if (selectedBathyFile.EndsWith(".eeb")) bathymetry = new Environment2DData(selectedBathyFile, "bathymetry", north, west, south, east);
-            else if (selectedBathyFile.EndsWith(".chb")) bathymetry = Environment2DData.ReadChrtrBinaryFile(selectedBathyFile, -1);
+            if (selectedBathyFile.EndsWith(".eeb")) bathymetry = Environment2DData.FromEEB(selectedBathyFile, "bathymetry", north, west, south, east);
+            else if (selectedBathyFile.EndsWith(".chb")) bathymetry = Environment2DData.FromCHB(selectedBathyFile, -1);
 
             Sediment sediment = null;
             var selectedSedimentFile = LargestFileInList(sedimentFiles);
             if (selectedSedimentFile == null) throw new ApplicationException("No sediment files were found, the operation cannot proceed");
             //if (selectedSedimentFile.EndsWith(".eeb")) sediment = Sediment.ReadESMEEnvironmentBinaryFile(selectedSedimentFile, north, south, east, west);
             //else if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.ReadChrtrBinaryFile(selectedSedimentFile);
-            if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.ReadChrtrBinaryFile(selectedSedimentFile);
+            if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.FromSedimentCHB(selectedSedimentFile);
 
             Environment2DData wind = null;
-            if (windFile.EndsWith(".eeb")) wind = new Environment2DData(windFile, "windspeed", north, west, south, east);
+            if (windFile.EndsWith(".eeb")) wind = Environment2DData.FromEEB(windFile, "windspeed", north, west, south, east);
             else if (windFile.EndsWith(".txt")) wind = SurfaceMarineGriddedClimatologyDatabase.Parse(windFile);
             if (wind == null) throw new ApplicationException("Error reading wind data");
 
@@ -106,8 +106,9 @@ namespace ESME.TransmissionLoss.CASS
                         envFile.WriteLine("EOT");
                         envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
                         var sedimentSample = sedimentType[location];
-                        envFile.WriteLine(sedimentSample.SedimentType.HasValue ? BottomSedimentTypeTable.Lookup(sedimentSample.SedimentType.Value).ToUpper() : "UNKNOWN");
-                        envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", windSpeed[location]);
+                        var curSedimentValue = sedimentSample.Data;
+                        envFile.WriteLine(curSedimentValue.HasValue ? BottomSedimentTypeTable.Lookup(curSedimentValue.Value).ToUpper() : "UNKNOWN");
+                        envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", windSpeed[location].Data);
                         envFile.WriteLine();
                     }
             }

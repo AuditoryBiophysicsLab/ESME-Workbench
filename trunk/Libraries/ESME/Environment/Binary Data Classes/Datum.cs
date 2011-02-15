@@ -7,36 +7,36 @@ namespace ESME.Environment
 {
     public class Datum
     {
-        protected Datum(DataLayer DataLayer, long RowIndex, long ColumnIndex)
+        protected Datum(DataLayer dataLayer, long rowIndex, long columnIndex)
         {
-            _dataLayer = DataLayer;
-            _rowIndex = RowIndex;
-            _columnIndex = ColumnIndex;
+            _dataLayer = dataLayer;
+            _rowIndex = rowIndex;
+            _columnIndex = columnIndex;
             _rowStep = _columnStep = 0;
 
-            if (RowIndex > -1)
+            if (rowIndex > -1)
             {
-                if (DataLayer.RowCount <= RowIndex)
+                if (dataLayer.RowCount <= rowIndex)
                     throw new IndexOutOfRangeException(String.Format("Requested row index ({0}) out of range in DataLayer \"{1}\" ({2} rows, {3} cols) in DataFile \"{4}\"",
-                        RowIndex, DataLayer.Name, DataLayer.RowCount, DataLayer.ColumnCount, DataLayer.DataFile.FileName));
-                _latitude = DataLayer.LatitudeAxis[(int)RowIndex];
-                _rowStep = DataLayer.ColumnCount * DataLayer.DepthCount * sizeof(float);
+                        rowIndex, dataLayer.Name, dataLayer.RowCount, dataLayer.ColumnCount, dataLayer.DataFile.FileName));
+                _latitude = dataLayer.LatitudeAxis[(int)rowIndex];
+                _rowStep = dataLayer.ColumnCount * dataLayer.DepthCount * sizeof(float);
             }
             else
                 _latitude = float.NaN;
 
-            if (ColumnIndex > -1)
+            if (columnIndex > -1)
             {
-                if (DataLayer.ColumnCount <= ColumnIndex)
+                if (dataLayer.ColumnCount <= columnIndex)
                     throw new IndexOutOfRangeException(String.Format("Requested column index ({0}) out of range in DataLayer \"{1}\" ({2} rows, {3} cols) in DataFile \"{4}\"",
-                        ColumnIndex, DataLayer.Name, DataLayer.RowCount, DataLayer.ColumnCount, DataLayer.DataFile.FileName));
-                _longitude = DataLayer.LongitudeAxis[(int)ColumnIndex];
-                _columnStep = DataLayer.DepthCount * sizeof(float);
+                        columnIndex, dataLayer.Name, dataLayer.RowCount, dataLayer.ColumnCount, dataLayer.DataFile.FileName));
+                _longitude = dataLayer.LongitudeAxis[(int)columnIndex];
+                _columnStep = dataLayer.DepthCount * sizeof(float);
             }
             else
                 _longitude = float.NaN;
 
-            _dataStartOffset = DataLayer.DataStartOffset;
+            _dataStartOffset = dataLayer.DataStartOffset;
         }
 
         protected long _rowIndex, _columnIndex, _rowStep, _columnStep, _dataStartOffset;
