@@ -2,7 +2,7 @@
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.NAVODataSources
+namespace ESMEWorkBench.ViewModels.NAVO
 {
     [ExportViewModel("SeasonConfigurationWindowViewModel")]
     internal class SeasonConfigurationWindowViewModel : ViewModelBase

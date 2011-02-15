@@ -50,6 +50,7 @@ namespace ESME.Environment.NAVO
             DigitalBathymetricDatabase.ExtractionProgramPath = configurations.DBDBEXEPath;
             DigitalBathymetricDatabase = new DigitalBathymetricDatabase();
             DigitalBathymetricDatabase.Initialize();
+            DigitalBathymetricDatabase.PropertyChanged += (s, e) => { if (e.PropertyName == "SelectedResolution") UpdateResolutionStatement(); };
 
             BottomSedimentTypeDatabase.DatabasePath = configurations.BSTDirectory;
             BottomSedimentTypeDatabase.ExtractionProgramPath = configurations.BSTEXEPath;
@@ -64,7 +65,73 @@ namespace ESME.Environment.NAVO
             ////todo: installer needs to put this in the right place.
             GeneralizedDigitalEnvironmentModelDatabase.ExtractionProgramPath = Path.Combine(extractionPath, "ImportNetCDF.exe");
             GeneralizedDigitalEnvironmentModelDatabase.DatabasePath = configurations.GDEMDirectory;
+
+            LatitudeSpan = _north - _south;
+            LongitudeSpan = _east - _west;
+            UpdateResolutionStatement();
         }
+
+        void UpdateResolutionStatement()
+        {
+            var resString = DigitalBathymetricDatabase.SelectedResolution.Remove(DigitalBathymetricDatabase.SelectedResolution.Length - 3, 3);
+            var resMinutes = double.Parse(resString);
+            var samplesPerDegree = 60 / resMinutes;
+            BathymetryResolutionStatement = string.Format("Extraction area: {0:0.###}deg (lon) by {1:0.###}deg (lat)\nEstimated point count {2:#,#} x {3:#,#} = {4:#,#}", LongitudeSpan, LatitudeSpan, LongitudeSpan * samplesPerDegree, LatitudeSpan * samplesPerDegree, LongitudeSpan * LatitudeSpan * samplesPerDegree * samplesPerDegree);
+        }
+
+        #region public double LatitudeSpan { get; set; }
+
+        public double LatitudeSpan
+        {
+            get { return _latitudeSpan; }
+            set
+            {
+                if (_latitudeSpan == value) return;
+                _latitudeSpan = value;
+                NotifyPropertyChanged(LatitudeSpanChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LatitudeSpanChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.LatitudeSpan);
+        double _latitudeSpan;
+
+        #endregion
+
+        #region public double LongitudeSpan { get; set; }
+
+        public double LongitudeSpan
+        {
+            get { return _longitudeSpan; }
+            set
+            {
+                if (_longitudeSpan == value) return;
+                _longitudeSpan = value;
+                NotifyPropertyChanged(LongitudeSpanChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LongitudeSpanChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.LongitudeSpan);
+        double _longitudeSpan;
+
+        #endregion
+
+        #region public string BathymetryResolutionStatement { get; set; }
+
+        public string BathymetryResolutionStatement
+        {
+            get { return _bathymetryResolutionStatement; }
+            set
+            {
+                if (_bathymetryResolutionStatement == value) return;
+                _bathymetryResolutionStatement = value;
+                NotifyPropertyChanged(BathymetryResolutionStatementChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BathymetryResolutionStatementChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.BathymetryResolutionStatement);
+        string _bathymetryResolutionStatement;
+
+        #endregion
 
         public BottomSedimentTypeDatabase BottomSedimentTypeDatabase { get; private set; }
         public DigitalBathymetricDatabase DigitalBathymetricDatabase { get; private set; }

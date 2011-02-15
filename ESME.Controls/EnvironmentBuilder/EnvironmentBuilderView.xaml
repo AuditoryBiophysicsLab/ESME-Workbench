@@ -23,6 +23,8 @@
 		          IsEnabled="{Binding NotExtractingData}"
 		          ToolTip="Database resolution in arc-minutes">
 		</ComboBox>
+        <TextBlock Text="{Binding NAVODataSources.BathymetryResolutionStatement}" 
+                   Margin="5"/>
         <Grid IsEnabled="{Binding NotExtractingData}">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition />
@@ -104,7 +106,7 @@
 			           Text="{Binding NAVODataSources.Status}"
 			           Margin="5 5 5 2" />
 			<ProgressBar Maximum="100"
-			             Minimum="0"
+			             Minimum="-5"
 			             Height="22"
 			             Margin="5 0 5 0 "
 			             Value="{Binding NAVODataSources.ProgressPercent}" />

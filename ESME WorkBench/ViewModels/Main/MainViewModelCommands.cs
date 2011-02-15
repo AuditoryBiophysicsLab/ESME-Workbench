@@ -7,7 +7,7 @@ using Cinch;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
-using ESMEWorkBench.ViewModels.NAVODataSources;
+using ESMEWorkBench.ViewModels.NAVO;
 
 namespace ESMEWorkBench.ViewModels.Main
 {

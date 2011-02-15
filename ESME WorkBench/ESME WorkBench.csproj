@@ -146,10 +146,10 @@
     <Compile Include="ViewModels\Map\MapShape.cs" />
     <Compile Include="ViewModels\Map\MapShapeLayer.cs" />
     <Compile Include="ViewModels\Map\RasterMapLayer.cs" />
-    <Compile Include="ViewModels\NAVODataSources\EnvironmentBuilderConfigurationViewModel.cs" />
-    <Compile Include="ViewModels\NAVODataSources\EnvironmentBuilderViewModel.cs" />
-    <Compile Include="ViewModels\NAVODataSources\SeasonConfigurationViewModel.cs" />
-    <Compile Include="ViewModels\NAVODataSources\SeasonConfigurationWindowViewModel.cs" />
+    <Compile Include="ViewModels\NAVO\EnvironmentBuilderConfigurationViewModel.cs" />
+    <Compile Include="ViewModels\NAVO\EnvironmentBuilderViewModel.cs" />
+    <Compile Include="ViewModels\NAVO\SeasonConfigurationViewModel.cs" />
+    <Compile Include="ViewModels\NAVO\SeasonConfigurationWindowViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />

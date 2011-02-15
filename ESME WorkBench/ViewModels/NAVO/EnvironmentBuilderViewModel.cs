@@ -14,7 +14,7 @@ using ESME.Environment.NAVO;
 using ESMEWorkBench.Data;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.NAVODataSources
+namespace ESMEWorkBench.ViewModels.NAVO
 {
     [ExportViewModel("EnvironmentBuilderViewModel")]
     public class EnvironmentBuilderViewModel : ViewModelBase, IViewStatusAwareInjectionAware
@@ -267,7 +267,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
 
         #region public NAVODataSources NAVODataSources { get; set; }
 
-        public ESME.Environment.NAVO.NAVODataSources NAVODataSources
+        public NAVODataSources NAVODataSources
         {
             get { return _navoDataSources; }
             set
@@ -279,7 +279,7 @@ namespace ESMEWorkBench.ViewModels.NAVODataSources
         }
 
         static readonly PropertyChangedEventArgs NAVODataSourcesChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.NAVODataSources);
-        ESME.Environment.NAVO.NAVODataSources _navoDataSources;
+        NAVODataSources _navoDataSources;
 
         #endregion
 

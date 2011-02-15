@@ -9,7 +9,7 @@ using System.Windows.Threading;
 using Cinch;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.NAVODataSources;
+using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.RecentFiles;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
