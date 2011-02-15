@@ -7,7 +7,7 @@ using Cinch;
 using ESMEWorkBench.Data;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.NAVODataSources
+namespace ESMEWorkBench.ViewModels.NAVO
 {
     [ExportViewModel("EnvironmentBuilderConfigurationViewModel")]
     internal class EnvironmentBuilderConfigurationViewModel : ViewModelBase, IViewStatusAwareInjectionAware
