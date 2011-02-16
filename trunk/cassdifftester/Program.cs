@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using ESME.TransmissionLoss;
@@ -14,41 +15,46 @@ namespace cassdifftester
             const string esmeinfile = @"C:\Users\Graham Voysey\Desktop\cass\esme_env_january.dat";
             const string nuwcinfile = @"C:\Users\Graham Voysey\Desktop\cass\env_january.dat";
 
-            var eResult = CASSFiles.ReadEnvironmentFile(esmeinfile);
-            var nResult = CASSFiles.ReadEnvironmentFile(nuwcinfile);
+            var esmeResult = (from packet in CASSFiles.ReadEnvironmentFile(esmeinfile)
+                              orderby packet.Location.Latitude_degrees, packet.Location.Longitude_degrees
+                              select packet).ToList();
 
-            //var newEsmeResult = esmeResult.OrderBy(x => x.Location.Latitude_degrees).ToList();
-            //var newNuwcResult = nuwcResult.OrderBy(x => x.Location.Latitude_degrees).ToList();
+            var nuwcResult = (from packet in CASSFiles.ReadEnvironmentFile(nuwcinfile)
+                              orderby packet.Location.Latitude_degrees, packet.Location.Longitude_degrees
+                              select packet).ToList();
+#if false
+            //inner join: return all elements of esmeResult that contain a location present in nuwcResult
+            var joinedResult = (from nuwcPacket in nuwcResult
+                                join esmePacket in esmeResult on nuwcPacket.Location equals esmePacket.Location into result
+                                from packets in result
+                                select packets).ToList();
 
-            var esmeResult = from packet in eResult
-                             orderby packet.Location.Latitude_degrees , packet.Location.Longitude_degrees 
-                             select packet;
+
             
+#endif
 
-            var nuwcResult = from packet in nResult
-                             orderby packet.Location.Latitude_degrees, packet.Location.Longitude_degrees
-                             select packet;
-
-
-            if (esmeResult.Count().Equals(nuwcResult.Count()))
+            var joinedResult = from esme in esmeResult
+                               from nuwc in nuwcResult
+                               where (esme.Location.Equals(nuwc.Location))
+                               orderby nuwc.Location.Latitude_degrees , nuwc.Location.Longitude_degrees
+                               select esme;
+            //there are less nuwc results than esme results; our bounding box is bigger.
+            foreach (var cassPacket in nuwcResult)
             {
-                for (var i = 0; i < nuwcResult.Count(); i++)
+                //for each nuwc result, find all esme results that have the same location
+                var thisPacket = cassPacket;
+                var matchingLocations = esmeResult.Where(packet => thisPacket.Location.Equals(packet.Location)).ToList();
+                foreach (var matchingLocation in matchingLocations)
                 {
-                    //var cassPacket = nuwcResult[i];
-                    //if (!cassPacket.IsEqual(esmeResult[i])) Console.WriteLine(@"Not Equal on packet " + i); 
+                    for (var i = 0; i < thisPacket.Soundspeeds.Count; i++)
+                    {
+                        if(!thisPacket.Soundspeeds[i].Equals(matchingLocation.Soundspeeds[i])) throw new DataException("");
+                    }
+                    
                 }
-                
             }
-            else Console.WriteLine(@"unequal number of packets.");
-
-
-
-
-        }
-
-        static void CompareCASSPacket(CASSPacket thisPacket, CASSPacket thatpacket)
-        {
-            
         }
     }
+
+
 }
