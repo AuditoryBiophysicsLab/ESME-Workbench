@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.CASS
 {
-    public class CASSPacket
+    public class CASSPacket:IEquatable<CASSPacket>
     {
         public EarthCoordinate Location;
         public List<double> Depths;
@@ -13,7 +14,7 @@ namespace ESME.TransmissionLoss.CASS
         public double WindSpeed;
         public string Filename;
 
-        public bool IsEqual(CASSPacket that)
+        public bool Equals(CASSPacket that)
         {
             if (!Location.Equals(that.Location)) return false;
             if (!BottomType.Equals(that.BottomType)) return false;
@@ -41,5 +42,8 @@ namespace ESME.TransmissionLoss.CASS
             return sb.ToString();
     
         }
+
+        
     }
+    
 }
