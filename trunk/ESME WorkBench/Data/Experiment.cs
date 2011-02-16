@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -25,6 +26,8 @@ using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
+using Color = System.Windows.Media.Color;
+using LineStyle = ESME.Overlay.LineStyle;
 
 namespace ESMEWorkBench.Data
 {
@@ -322,7 +325,11 @@ namespace ESMEWorkBench.Data
                     if (e.NewItems != null)
                     {
                         if (AnalysisPointLayer == null) return;
-                        foreach (var item in e.NewItems) AddContextMenuToAnalysisPoint((AnalysisPoint) item);
+                        foreach (var item in e.NewItems)
+                        {
+                            var newPoint = (AnalysisPoint) item;
+                            AddContextMenuToAnalysisPoint(newPoint);
+                        }
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -815,6 +822,7 @@ namespace ESMEWorkBench.Data
             {
                 var backgroundWorker = new BackgroundWorker();
                 backgroundWorker.DoWork += delegate { ProcessTransmissionLossFieldFiles(LocalStorageRoot); };
+                backgroundWorker.RunWorkerCompleted += delegate { UpdateAnalysisPointDisplay(); };
                 backgroundWorker.RunWorkerAsync();
             }
             MapLayerViewModel.Layers = MapLayers;
@@ -830,6 +838,47 @@ namespace ESMEWorkBench.Data
             }
             _isInitialized = true;
             CommandManager.InvalidateRequerySuggested();
+        }
+
+        void UpdateAnalysisPointDisplay()
+        {
+            if (AnalysisPointLayer == null) return;
+            foreach (var curPoint in AnalysisPoints)
+            {
+                var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.EarthCoordinate.Latitude_degrees, curPoint.EarthCoordinate.Longitude_degrees);
+                var analysisPointLayer = (OverlayShapeMapLayer) MapLayers.FirstOrDefault(curLayer => curLayer.Name == analysisPointName);
+                if (analysisPointLayer == null)
+                {
+                    analysisPointLayer = new OverlayShapeMapLayer
+                                         {
+                                             Name = analysisPointName,
+                                             CanBeReordered = true,
+                                             CanChangeLineColor = true,
+                                             CanChangeLineWidth = true,
+                                             CanBeRemoved = false,
+                                             LayerType = LayerType.OverlayFile,
+                                         };
+                    MapLayers.Add(analysisPointLayer);
+                }
+                var startPoint = curPoint.EarthCoordinate;
+                var modePoints = new List<EarthCoordinate>();
+                for (var modeNumber = 0; modeNumber < curPoint.TransmissionLossFields.Count; modeNumber++)
+                {
+                    var radius = curPoint.TransmissionLossFields[modeNumber].Radius;
+                    modePoints.Clear();
+                    modePoints.Add(startPoint);
+                    for (var radialNumber = 0; radialNumber < curPoint.RadialCount; radialNumber++)
+                    {
+                        var endPoint = new EarthCoordinate(startPoint);
+                        endPoint.Move(curPoint.RadialBearing + ((360.0 / curPoint.RadialCount) * radialNumber), radius);
+                        modePoints.Add(endPoint);
+                        modePoints.Add(startPoint);
+                    }
+                    analysisPointLayer.Add(new OverlayLineSegments(modePoints.ToArray(), Colors.Red, 5, LineStyle.Solid));
+                    analysisPointLayer.Done();
+                }
+            }
+
         }
 
         void TransmissionLossFieldFileChanged(object sender, FileSystemEventArgs e)
