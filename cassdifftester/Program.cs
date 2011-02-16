@@ -15,30 +15,21 @@ namespace cassdifftester
             const string esmeinfile = @"C:\Users\Graham Voysey\Desktop\cass\esme_env_january.dat";
             const string nuwcinfile = @"C:\Users\Graham Voysey\Desktop\cass\env_january.dat";
 
-            var esmeResult = (from packet in CASSFiles.ReadEnvironmentFile(esmeinfile)
-                              orderby packet.Location.Latitude_degrees, packet.Location.Longitude_degrees
-                              select packet).ToList();
+            var esmeResult = from packet in CASSFiles.ReadEnvironmentFile(esmeinfile)
+                              orderby packet.Location.Latitude_degrees , packet.Location.Longitude_degrees
+                              select packet;
 
             var nuwcResult = (from packet in CASSFiles.ReadEnvironmentFile(nuwcinfile)
-                              orderby packet.Location.Latitude_degrees, packet.Location.Longitude_degrees
+                              orderby packet.Location.Latitude_degrees , packet.Location.Longitude_degrees
                               select packet).ToList();
-#if false
-            //inner join: return all elements of esmeResult that contain a location present in nuwcResult
-            var joinedResult = (from nuwcPacket in nuwcResult
-                                join esmePacket in esmeResult on nuwcPacket.Location equals esmePacket.Location into result
-                                from packets in result
-                                select packets).ToList();
 
-
-            
-#endif
-
-            var joinedResult = from esme in esmeResult
+            var joinedResult = (from esme in esmeResult
                                from nuwc in nuwcResult
                                where (esme.Location.Equals(nuwc.Location))
                                orderby nuwc.Location.Latitude_degrees , nuwc.Location.Longitude_degrees
-                               select esme;
-            //there are less nuwc results than esme results; our bounding box is bigger.
+                               select esme).ToList();
+            if (joinedResult.Count < nuwcResult.Count) Console.WriteLine(string.Format("{0} records were extracted from NUWC source, but only {1} location matches were found. {2} locations were not matched.", nuwcResult.Count, joinedResult.Count, nuwcResult.Count - joinedResult.Count));
+            //there are less nuwc results than esme results; our bounding box is bigger.);)
             foreach (var cassPacket in nuwcResult)
             {
                 //for each nuwc result, find all esme results that have the same location
