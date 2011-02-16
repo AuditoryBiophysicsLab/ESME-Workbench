@@ -109,7 +109,7 @@ namespace ESME.TransmissionLoss.CASS
                         var sedimentSample = sedimentType[location];
                         var curSedimentValue = sedimentSample.Data;
                         envFile.WriteLine(curSedimentValue.HasValue ? BottomSedimentTypeTable.Lookup(curSedimentValue.Value).ToUpper() : "UNKNOWN");
-                        envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", windSpeed[location].Data);
+                        envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", windSpeed[location].Data * 1.94384449);
                         envFile.WriteLine();
                     }
             }
