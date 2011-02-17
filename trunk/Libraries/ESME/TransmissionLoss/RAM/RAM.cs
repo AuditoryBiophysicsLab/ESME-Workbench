@@ -60,22 +60,22 @@ namespace ESME.TransmissionLoss.RAM
         public static string GetRadialConfiguration(TransmissionLossJob transmissionLossJob, SoundSpeedProfile ssp, BottomProfile bottomProfile, SedimentType sediment, float maxCalculationDepthMeters, int rangeCellCount, int depthCellCount)
         {
             const float c0 = 1500f;
-            var lambda = c0 / transmissionLossJob.AcousticProperties.HighFrequency;
+            var lambda = c0 / transmissionLossJob.SoundSource.AcousticProperties.HighFrequency;
             var dz = lambda / 10;
             var dr = dz * 5f;
             var zmplt = bottomProfile.MaxDepth + dz;
-            var rangeStep = transmissionLossJob.Radius / rangeCellCount;
+            var rangeStep = transmissionLossJob.SoundSource.Radius / rangeCellCount;
             using (var sw = new StringWriter())
             {
                 sw.WriteLine("RAM_GEO_MAT");
                 //fprintf(fid,'%4.4f %4.4f %4.4f\n', [FREQ ZS ZR]);
-                sw.WriteLine("{0:F4} {1:F4} {2:F4}", transmissionLossJob.AcousticProperties.HighFrequency, transmissionLossJob.AcousticProperties.SourceDepth, dz);
+                sw.WriteLine("{0:F4} {1:F4} {2:F4}", transmissionLossJob.SoundSource.AcousticProperties.HighFrequency, transmissionLossJob.SoundSource.AcousticProperties.SourceDepth, dz);
                 //fprintf(fid,'%4.7f %4.8f %i\n', [RMAX DR NDR]);
-                sw.WriteLine("{0:F7} {1:F8} {2:D}", transmissionLossJob.Radius, dr, 1);
+                sw.WriteLine("{0:F7} {1:F8} {2:D}", transmissionLossJob.SoundSource.Radius, dr, 1);
                 //fprintf(fid,'%4.7f %4.7f %i %4.7f\n', [ZMAX DZ NDZ ZMPLT]);
                 sw.WriteLine("{0:F7} {1:F7} {2:D} {3:F7}", maxCalculationDepthMeters, dz, 1, zmplt);
                 //fprintf(fid,'%4.2f %i %i %i \n', [CO NPADE NS RS]);
-                sw.WriteLine("{0:F2} {1:D} {2:D} {3:D}", c0, 6, 0, transmissionLossJob.Radius);
+                sw.WriteLine("{0:F2} {1:D} {2:D} {3:D}", c0, 6, 0, transmissionLossJob.SoundSource.Radius);
                 sw.WriteLine();
 
                 if (bottomProfile.Profile.Length != rangeCellCount) throw new IndexOutOfRangeException("Ram: Generating a radial configuration requires that the number of range cells be equal to the number of points in the bottom profile");

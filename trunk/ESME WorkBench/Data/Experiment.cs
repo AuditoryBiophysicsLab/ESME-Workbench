@@ -352,7 +352,7 @@ namespace ESMEWorkBench.Data
 
         void AddContextMenuToAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            var marker = AnalysisPointLayer.AddMarker(analysisPoint.EarthCoordinate, analysisPoint);
+            var marker = AnalysisPointLayer.AddMarker(analysisPoint, analysisPoint);
             marker.ContextMenu = new ContextMenu();
             marker.ContextMenu.Items.Add(new MenuItem
                                          {
@@ -845,7 +845,7 @@ namespace ESMEWorkBench.Data
             if (AnalysisPointLayer == null) return;
             foreach (var curPoint in AnalysisPoints)
             {
-                var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.EarthCoordinate.Latitude_degrees, curPoint.EarthCoordinate.Longitude_degrees);
+                var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude_degrees, curPoint.Longitude_degrees);
                 var analysisPointLayer = (OverlayShapeMapLayer) MapLayers.FirstOrDefault(curLayer => curLayer.Name == analysisPointName);
                 if (analysisPointLayer == null)
                 {
@@ -860,21 +860,18 @@ namespace ESMEWorkBench.Data
                                          };
                     MapLayers.Add(analysisPointLayer);
                 }
-                var startPoint = curPoint.EarthCoordinate;
-                var modePoints = new List<EarthCoordinate>();
-                for (var modeNumber = 0; modeNumber < curPoint.TransmissionLossFields.Count; modeNumber++)
+                var sourcePoints = new List<EarthCoordinate>();
+                foreach (var soundSource in curPoint.SoundSources)
                 {
-                    var radius = curPoint.TransmissionLossFields[modeNumber].Radius;
-                    modePoints.Clear();
-                    modePoints.Add(startPoint);
-                    for (var radialNumber = 0; radialNumber < curPoint.RadialCount; radialNumber++)
+                    sourcePoints.Add(curPoint);
+                    foreach (var radialBearing in soundSource.RadialBearings)
                     {
-                        var endPoint = new EarthCoordinate(startPoint);
-                        endPoint.Move(curPoint.RadialBearing + ((360.0 / curPoint.RadialCount) * radialNumber), radius);
-                        modePoints.Add(endPoint);
-                        modePoints.Add(startPoint);
+                        var endPoint = new EarthCoordinate(curPoint);
+                        endPoint.Move(radialBearing, soundSource.Radius);
+                        sourcePoints.Add(endPoint);
+                        sourcePoints.Add(curPoint);
                     }
-                    analysisPointLayer.Add(new OverlayLineSegments(modePoints.ToArray(), Colors.Red, 5, LineStyle.Solid));
+                    analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5, LineStyle.Solid));
                     analysisPointLayer.Done();
                 }
             }
@@ -906,10 +903,10 @@ namespace ESMEWorkBench.Data
 
         void MatchTransmissionLossFieldToAnalysisPoints(TransmissionLossField transmissionLossField)
         {
-            foreach (var analysisPoint in AnalysisPoints.Where(analysisPoint => transmissionLossField.EarthCoordinate.Equals(analysisPoint.EarthCoordinate)))
+            foreach (var analysisPoint in AnalysisPoints.Where(analysisPoint => transmissionLossField.EarthCoordinate.Equals(analysisPoint)))
             {
                 analysisPoint.TransmissionLossFields.Add(transmissionLossField);
-                Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.EarthCoordinate.Latitude_degrees, analysisPoint.EarthCoordinate.Longitude_degrees));
+                Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.Latitude_degrees, analysisPoint.Longitude_degrees));
                 return;
             }
         }

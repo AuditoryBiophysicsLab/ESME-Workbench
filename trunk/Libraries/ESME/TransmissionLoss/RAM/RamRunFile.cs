@@ -38,7 +38,11 @@ namespace ESME.TransmissionLoss.RAM
         {
             var ms = new MemoryStream();
             var serializer = new XmlSerializer(GetType(), ReferencedTypes);
-            var settings = new XmlWriterSettings {Encoding = Encoding.UTF8, Indent = true,};
+            var settings = new XmlWriterSettings
+                           {
+                               Encoding = Encoding.UTF8,
+                               Indent = true,
+                           };
             var writer = XmlWriter.Create(ms, settings);
 
             serializer.Serialize(writer, this);
@@ -48,7 +52,7 @@ namespace ESME.TransmissionLoss.RAM
         public static RamRunFile Deserialize(string xmlString)
         {
             var reader = new StringReader(xmlString);
-            var serializer = new XmlSerializer(typeof(RamRunFile), ReferencedTypes);
+            var serializer = new XmlSerializer(typeof (RamRunFile), ReferencedTypes);
             var runfile = (RamRunFile) serializer.Deserialize(reader);
             return runfile;
         }
@@ -66,29 +70,38 @@ namespace ESME.TransmissionLoss.RAM
         /// <returns></returns>
         public static RamRunFile Create(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, TransmissionLossSettings transmissionLossSettings)
         {
-            var rangeCellCount = (int) Math.Round((transmissionLossJob.Radius / transmissionLossSettings.RangeCellSize)) + 1;
+            var rangeCellCount = (int) Math.Round((transmissionLossJob.SoundSource.Radius / transmissionLossSettings.RangeCellSize)) + 1;
 
-            var ramRunFile = new RamRunFile {TransmissionLossJob = transmissionLossJob,};
+            var ramRunFile = new RamRunFile
+                             {
+                                 TransmissionLossJob = transmissionLossJob,
+                             };
 
-            var bottomProfiles = new BottomProfile[transmissionLossJob.AnalysisPoint.RadialCount];
-            var soundSpeedProfiles = new SoundSpeedProfile[transmissionLossJob.AnalysisPoint.RadialCount];
-            var bearings = new float[transmissionLossJob.AnalysisPoint.RadialCount];
+            var radialCount = transmissionLossJob.SoundSource.RadialBearings.Count;
+            var bottomProfiles = new BottomProfile[radialCount];
+            var soundSpeedProfiles = new SoundSpeedProfile[radialCount];
+            var bearings = new float[radialCount];
             var maxCalculationDepthMeters = float.MinValue;
-            var bearingStep = 360.0f / transmissionLossJob.AnalysisPoint.RadialCount;
-            for (var i = 0; i < transmissionLossJob.AnalysisPoint.RadialCount; i++)
+            var bearingStep = 360.0f / radialCount;
+            for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
-                bearings[i] = bearingStep * i + transmissionLossJob.AnalysisPoint.RadialBearing;
-                var curTransect = new Transect(null, transmissionLossJob.AnalysisPoint.EarthCoordinate, bearings[i], transmissionLossJob.Radius);
-                bottomProfiles[i] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
-                maxCalculationDepthMeters = Math.Max((float) bottomProfiles[i].MaxDepth, maxCalculationDepthMeters);
-                soundSpeedProfiles[i] = environmentInformation.SoundSpeedField[curTransect.MidPoint];
+                var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
+                var curTransect = new Transect(null, transmissionLossJob.SoundSource, radialBearing, transmissionLossJob.SoundSource.Radius);
+                bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, environmentInformation.Bathymetry);
+                maxCalculationDepthMeters = Math.Max((float) bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
+                soundSpeedProfiles[bearingIndex] = environmentInformation.SoundSpeedField[curTransect.MidPoint];
             }
 
             var depthCellCount = (int) Math.Round((maxCalculationDepthMeters / transmissionLossSettings.DepthCellSize)) + 1;
-            for (var i = 0; i < transmissionLossJob.AnalysisPoint.RadialCount; i++)
+            for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
-                var ramConfig = Ram.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[i], bottomProfiles[i], environmentInformation.Sediment, maxCalculationDepthMeters, rangeCellCount, depthCellCount);
-                ramRunFile.TransmissionLossRunFileRadials.Add(new RamRunFileRadial {BearingFromSourceDegrees = bearings[i], Configuration = ramConfig,});
+                var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
+                var ramConfig = Ram.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], bottomProfiles[bearingIndex], environmentInformation.Sediment, maxCalculationDepthMeters, rangeCellCount, depthCellCount);
+                ramRunFile.TransmissionLossRunFileRadials.Add(new RamRunFileRadial
+                                                              {
+                                                                  BearingFromSourceDegrees = radialBearing,
+                                                                  Configuration = ramConfig,
+                                                              });
             }
             ramRunFile.IDField = transmissionLossJob.IDField;
             return ramRunFile;

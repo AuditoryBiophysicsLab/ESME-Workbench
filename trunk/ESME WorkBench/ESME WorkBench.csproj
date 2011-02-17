@@ -152,6 +152,7 @@
     <Compile Include="ViewModels\NAVO\SeasonConfigurationWindowViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\AnalysisPointSettingsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />

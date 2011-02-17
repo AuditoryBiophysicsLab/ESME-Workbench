@@ -44,13 +44,13 @@ namespace ESME.Model
 
         #region IEquatable<AcousticProperties> Members
 
-        bool IEquatable<AcousticProperties>.Equals(AcousticProperties that)
+        bool IEquatable<AcousticProperties>.Equals(AcousticProperties other)
         {
-            if (SourceDepth != that.SourceDepth) return false;
-            if (VerticalBeamWidth != that.VerticalBeamWidth) return false;
-            if (DepressionElevationAngle != that.DepressionElevationAngle) return false;
-            if (LowFrequency != that.LowFrequency) return false;
-            if (HighFrequency != that.HighFrequency) return false;
+            if (SourceDepth != other.SourceDepth) return false;
+            if (VerticalBeamWidth != other.VerticalBeamWidth) return false;
+            if (DepressionElevationAngle != other.DepressionElevationAngle) return false;
+            if (LowFrequency != other.LowFrequency) return false;
+            if (HighFrequency != other.HighFrequency) return false;
             return true;
         }
 

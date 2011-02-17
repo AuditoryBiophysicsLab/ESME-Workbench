@@ -184,29 +184,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public LabeledDataWrapper<float> RadialBearing { get; private set; }
-
-        static readonly PropertyChangedEventArgs RadialBearingChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialBearing);
-        LabeledDataWrapper<float> _radialBearing;
-
-        public LabeledDataWrapper<float> RadialBearing
-        {
-            get { return _radialBearing; }
-            private set
-            {
-                if (_radialBearing == value) return;
-                _radialBearing = value;
-                _radialBearing.ValidationRules.Add(new SimpleRule("DataValue", "RadialBearing must be in the range -180 to +180", domObj =>
-                                                                                                                                  {
-                                                                                                                                      var obj = (DataWrapper<float>) domObj;
-                                                                                                                                      return ((obj.DataValue < -180) || (180 < obj.DataValue));
-                                                                                                                                  }));
-                NotifyPropertyChanged(RadialBearingChangedEventArgs);
-            }
-        }
-
-        #endregion
-
         #region public LabeledDataWrapper<float> Radius { get; private set; }
 
         static readonly PropertyChangedEventArgs RadiusChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.Radius);
@@ -225,29 +202,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                                                                                 return (obj.DataValue <= 0);
                                                                                                             }));
                 NotifyPropertyChanged(RadiusChangedEventArgs);
-            }
-        }
-
-        #endregion
-
-        #region public LabeledDataWrapper<int> RadialCount { get; private set; }
-
-        static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossJobViewModel>(x => x.RadialCount);
-        LabeledDataWrapper<int> _radialCount;
-
-        public LabeledDataWrapper<int> RadialCount
-        {
-            get { return _radialCount; }
-            private set
-            {
-                if (_radialCount == value) return;
-                _radialCount = value;
-                _radialCount.ValidationRules.Add(new SimpleRule("DataValue", "RadialCount must be greater than zero", domObj =>
-                                                                                                                      {
-                                                                                                                          var obj = (DataWrapper<int>) domObj;
-                                                                                                                          return (obj.DataValue <= 0);
-                                                                                                                      }));
-                NotifyPropertyChanged(RadialCountChangedEventArgs);
             }
         }
 
@@ -390,18 +344,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                        {
                                            Label = "Depression/Elevation Angle (deg)"
                                        };
-            RadialBearing = new LabeledDataWrapper<float>(this, RadialBearingChangedEventArgs)
-                            {
-                                Label = "First radial bearing (deg)"
-                            };
             Radius = new LabeledDataWrapper<float>(this, RadiusChangedEventArgs)
                      {
                          Label = "Field radius (m)",
                      };
-            RadialCount = new LabeledDataWrapper<int>(this, RadialCountChangedEventArgs)
-                          {
-                              Label = "Radial count",
-                          };
 
             #endregion
 
@@ -412,9 +358,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             HighFrequency.DataValue = nemoMode.HighFrequency;
             VerticalBeamWidth.DataValue = nemoMode.VerticalBeamWidth;
             DepressionElevationAngle.DataValue = nemoMode.DepressionElevationAngle;
-            RadialBearing.DataValue = 0;
             Radius.DataValue = nemoMode.Radius;
-            RadialCount.DataValue = radialCount;
             SourceLevel = nemoMode.SourceLevel;
             _maxCalculationDepth = maxCalculationDepth;
 
@@ -427,26 +371,22 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 return new TransmissionLossJob
                        {
-                           AcousticProperties = new AcousticProperties
-                                                {
-                                                    SourceDepth = SourceDepth.DataValue,
-                                                    VerticalBeamWidth = VerticalBeamWidth.DataValue,
-                                                    DepressionElevationAngle = DepressionElevationAngle.DataValue,
-                                                    LowFrequency = LowFrequency.DataValue,
-                                                    HighFrequency = HighFrequency.DataValue,
-                                                },
-                           AnalysisPoint = new AnalysisPoint
-                                           {
-                                               IDField = 1,
-                                               EarthCoordinate = new EarthCoordinate(Latitude.DataValue, Longitude.DataValue),
-                                               RadialBearing = RadialBearing.DataValue,
-                                               RadialCount = RadialCount.DataValue,
-                                           },
-                           Radius = (int) Radius.DataValue,
+                           SoundSource = new SoundSource
+                                         {
+                                             AcousticProperties = new AcousticProperties
+                                                                  {
+                                                                      SourceDepth = SourceDepth.DataValue,
+                                                                      VerticalBeamWidth = VerticalBeamWidth.DataValue,
+                                                                      DepressionElevationAngle = DepressionElevationAngle.DataValue,
+                                                                      LowFrequency = LowFrequency.DataValue,
+                                                                      HighFrequency = HighFrequency.DataValue,
+                                                                  },
+                                             Radius = (int) Radius.DataValue,
+                                             SourceLevel = SourceLevel,
+                                         },
                            MaxDepth = _maxCalculationDepth,
                            Name = Name,
                            Metadata = Metadata,
-                           SourceLevel = SourceLevel,
                            IDField = IDField,
                        };
             }
