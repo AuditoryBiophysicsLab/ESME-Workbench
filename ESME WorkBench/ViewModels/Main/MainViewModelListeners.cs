@@ -48,9 +48,8 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 AnalysisPoint = new AnalysisPoint
                 {
-                    EarthCoordinate = MouseEarthCoordinate,
-                    RadialBearing = 0,
-                    RadialCount = 16,
+                    Latitude_degrees = MouseEarthCoordinate.Latitude_degrees,
+                    Longitude_degrees = MouseEarthCoordinate.Longitude_degrees,
                 }
             };
 
@@ -76,7 +75,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
                     analysisPointViewModel.TransmissionLossRunFiles.Add(bellhopRunFile);
                 }
-                catch (BathymetryOutOfBoundsException)
+                catch (BathymetryOutOfBoundsException ex)
                 {
                     _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("Unable to add analysis point.\nDid you click outside the bounds of the simulation area?"));
                     _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));

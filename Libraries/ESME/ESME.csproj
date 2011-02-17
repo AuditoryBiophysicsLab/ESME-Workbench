@@ -181,6 +181,7 @@
     <Compile Include="TransmissionLoss\RAM\RamRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelField.cs" />
     <Compile Include="TransmissionLoss\SoundPressureLevelRadial.cs" />
+    <Compile Include="TransmissionLoss\SoundSource.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossAlgorithm.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossField.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRadial.cs" />

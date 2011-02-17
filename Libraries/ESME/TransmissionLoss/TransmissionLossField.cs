@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using ESME.Model;
 using ESME.NEMO;
-using ESME.TransmissionLoss.Bellhop;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 
@@ -98,17 +97,17 @@ namespace ESME.TransmissionLoss
         {
             Name = runFile.Name ?? "";
             Metadata = runFile.Metadata ?? "";
-            SourceLevel = runFile.TransmissionLossJob.SourceLevel;
-            Latitude = (float) runFile.TransmissionLossJob.AnalysisPoint.EarthCoordinate.Latitude_degrees;
-            Longitude = (float) runFile.TransmissionLossJob.AnalysisPoint.EarthCoordinate.Longitude_degrees;
+            SourceLevel = runFile.TransmissionLossJob.SoundSource.SourceLevel;
+            Latitude = (float)runFile.TransmissionLossJob.SoundSource.Latitude_degrees;
+            Longitude = (float)runFile.TransmissionLossJob.SoundSource.Longitude_degrees;
             EarthCoordinate = new EarthCoordinate(Latitude, Longitude);
-            SourceDepth = runFile.TransmissionLossJob.AcousticProperties.SourceDepth;
-            VerticalBeamWidth = runFile.TransmissionLossJob.AcousticProperties.VerticalBeamWidth;
-            DepressionElevationAngle = runFile.TransmissionLossJob.AcousticProperties.DepressionElevationAngle;
-            LowFrequency = runFile.TransmissionLossJob.AcousticProperties.LowFrequency;
-            HighFrequency = runFile.TransmissionLossJob.AcousticProperties.HighFrequency;
+            SourceDepth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.SourceDepth;
+            VerticalBeamWidth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth;
+            DepressionElevationAngle = runFile.TransmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle;
+            LowFrequency = runFile.TransmissionLossJob.SoundSource.AcousticProperties.LowFrequency;
+            HighFrequency = runFile.TransmissionLossJob.SoundSource.AcousticProperties.HighFrequency;
             MaxCalculationDepth = runFile.TransmissionLossJob.MaxDepth;
-            Radius = runFile.TransmissionLossJob.Radius;
+            Radius = runFile.TransmissionLossJob.SoundSource.Radius;
             IDField = runFile.IDField;
             //Depths = runFile.
             //Ranges = runFile.

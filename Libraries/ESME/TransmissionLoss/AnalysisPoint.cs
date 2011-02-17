@@ -7,31 +7,39 @@ using HRC.Navigation;
 
 namespace ESME.TransmissionLoss
 {
-    public class AnalysisPoint : IEquatable<AnalysisPoint>, IHasIDField
+    public class AnalysisPoint : EarthCoordinate, IEquatable<AnalysisPoint>, IHasIDField
     {
         public AnalysisPoint()
         {
             TransmissionLossJobs = new ObservableCollection<TransmissionLossJob>();
             TransmissionLossFields = new ObservableCollection<TransmissionLossField>();
+            SoundSources = new ObservableCollection<SoundSource>();
         }
-        /// <summary>
-        ///   EarthCoordinate of the analysis point
-        /// </summary>
-        public EarthCoordinate EarthCoordinate { get; set; }
 
-        /// <summary>
-        ///   Bearing of the lowest-numbered radial from this point.  All radials will be evenly spaced starting with this bearing
-        /// </summary>
-        public float RadialBearing { get; set; }
+        #region public public ObservableCollection<SoundSource> SoundSources { get; set; }
 
-        /// <summary>
-        ///   How many radials will be calculated for all active modes at this analysis point
-        /// </summary>
-        public int RadialCount { get; set; }
+        public ObservableCollection<SoundSource> SoundSources
+        {
+            get { return _soundSources; }
+            set
+            {
+                if (_soundSources == value) return;
+                if (_soundSources != null) _soundSources.CollectionChanged -= SoundSourcesCollectionChanged;
+                _soundSources = value;
+                if (_soundSources != null) _soundSources.CollectionChanged += SoundSourcesCollectionChanged;
+            }
+        }
+
+        void SoundSourcesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
+        ObservableCollection<SoundSource> _soundSources = new ObservableCollection<SoundSource>();
+
+        #endregion
+
+        [XmlIgnore]
 
         #region public ObservableCollection<TransmissionLossJob> TransmissionLossJobs { get; set; }
 
-        public ObservableCollection<TransmissionLossJob> TransmissionLossJobs
+            public ObservableCollection<TransmissionLossJob> TransmissionLossJobs
         {
             get { return _transmissionLossJobs; }
             set
@@ -43,20 +51,19 @@ namespace ESME.TransmissionLoss
             }
         }
 
-        void TransmissionLossJobsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-        }
+        void TransmissionLossJobsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
         ObservableCollection<TransmissionLossJob> _transmissionLossJobs = new ObservableCollection<TransmissionLossJob>();
 
         #endregion
 
         [XmlIgnore]
-        #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; set; }
 
-        public ObservableCollection<TransmissionLossField> TransmissionLossFields
+        #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; private set; }
+
+            public ObservableCollection<TransmissionLossField> TransmissionLossFields
         {
             get { return _transmissionLossFields; }
-            set
+            private set
             {
                 if (_transmissionLossFields == value) return;
                 if (_transmissionLossFields != null) _transmissionLossFields.CollectionChanged -= TransmissionLossFieldsCollectionChanged;
@@ -65,20 +72,19 @@ namespace ESME.TransmissionLoss
             }
         }
 
-        void TransmissionLossFieldsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-        }
+        void TransmissionLossFieldsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
         ObservableCollection<TransmissionLossField> _transmissionLossFields;
 
         #endregion
-        
+
         #region IEquatable<AnalysisPoint> Members
 
-        bool IEquatable<AnalysisPoint>.Equals(AnalysisPoint that)
+        bool IEquatable<AnalysisPoint>.Equals(AnalysisPoint other)
         {
-            if (!EarthCoordinate.Equals(that.EarthCoordinate)) return false;
-            if (RadialBearing != that.RadialBearing) return false;
-            return RadialCount == that.RadialCount;
+            if (!Equals(other)) return false;
+            if (SoundSources.Count != other.SoundSources.Count) return false;
+            for (var sourceIndex = 0; sourceIndex < SoundSources.Count; sourceIndex++) if (!SoundSources[sourceIndex].Equals(other.SoundSources[sourceIndex])) return false;
+            return true;
         }
 
         #endregion
