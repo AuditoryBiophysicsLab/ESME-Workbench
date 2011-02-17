@@ -134,7 +134,7 @@ namespace HRC.Navigation
                 }
                 if (lonEndIndex == -1)
                 {
-                    var eastLons = Latitudes.FindAll(x => x >= longitude);
+                    var eastLons = Longitudes.FindAll(x => x >= longitude);
                     if (eastLons.Count() > 0) lonEndIndex = Longitudes.IndexOf(eastLons.First());
                 }
                 if (lonStartIndex == -1) lonStartIndex = lonEndIndex;
