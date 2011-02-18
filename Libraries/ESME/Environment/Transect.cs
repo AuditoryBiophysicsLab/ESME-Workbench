@@ -1,45 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using HRC.Navigation;
+﻿using HRC.Navigation;
 
 namespace ESME.Environment
 {
-    public class Transect
+    public class Transect : EarthCoordinate
     {
-        private EarthCoordinate mStartPoint, mEndPoint, mMidPoint;
-        private string mName;
-        private double mLength_meters;
-        private double mBearing_degrees;
+        readonly EarthCoordinate _endPoint;
+        readonly EarthCoordinate _midPoint;
 
-        public Transect(string Name, EarthCoordinate StartPoint, EarthCoordinate EndPoint)
+        public Transect(string name, EarthCoordinate startPoint, EarthCoordinate endPoint) : base(startPoint)
         {
-            mName = Name;
-            mStartPoint = new EarthCoordinate(StartPoint);
-            mEndPoint = EndPoint;
-            mLength_meters = mStartPoint.GetDistanceTo_Meters(mEndPoint);
-            mBearing_degrees = mStartPoint.GetBearingTo_Degrees(mEndPoint);
-            mMidPoint = new EarthCoordinate(StartPoint);
-            mMidPoint.Move(mBearing_degrees, mLength_meters / 2);
+            Name = name;
+            _endPoint = endPoint;
+            Length = GetDistanceTo_Meters(_endPoint);
+            Bearing = GetBearingTo_Degrees(_endPoint);
+            _midPoint = new EarthCoordinate(startPoint);
+            _midPoint.Move(Bearing, Length / 2);
         }
 
-        public Transect(string Name, EarthCoordinate StartPoint, double BearingAngle_degrees, double Length_meters)
+        public Transect(string name, EarthCoordinate startPoint, double bearing, double length) : base(startPoint)
         {
-            mName = Name;
-            mStartPoint = new EarthCoordinate(StartPoint);
-            mEndPoint = new EarthCoordinate(mStartPoint, BearingAngle_degrees, Length_meters);
-            mLength_meters = Length_meters;
-            mBearing_degrees = BearingAngle_degrees;
-            mMidPoint = new EarthCoordinate(StartPoint);
-            mMidPoint.Move(mBearing_degrees, mLength_meters / 2);
+            Name = name;
+            _endPoint = new EarthCoordinate(this, bearing, length);
+            Length = length;
+            Bearing = bearing;
+            _midPoint = new EarthCoordinate(startPoint);
+            _midPoint.Move(Bearing, Length / 2);
         }
 
-        public double Bearing_degrees { get { return mBearing_degrees; } }
-        public double Length_meters { get { return mLength_meters; } }
-        public string Name { get { return mName; } }
-        public EarthCoordinate StartPoint { get { return new EarthCoordinate(mStartPoint); } }
-        public EarthCoordinate EndPoint { get { return new EarthCoordinate(mEndPoint); } }
-        public EarthCoordinate MidPoint { get { return new EarthCoordinate(mMidPoint); } }
+        /// <summary>
+        /// Bearing from StartPoint to EndPoint, in degrees true
+        /// </summary>
+        public double Bearing { get; private set; }
+
+        /// <summary>
+        /// Distance in meters from StartPoint to EndPoint
+        /// </summary>
+        public double Length { get; private set; }
+
+        /// <summary>
+        /// Name of the transect
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Start point of the transect
+        /// </summary>
+        public EarthCoordinate StartPoint { get { return new EarthCoordinate(this); } }
+
+        /// <summary>
+        /// End point of the transect
+        /// </summary>
+        public EarthCoordinate EndPoint { get { return new EarthCoordinate(_endPoint); } }
+
+        /// <summary>
+        /// Mid point of the transect
+        /// </summary>
+        public EarthCoordinate MidPoint { get { return new EarthCoordinate(_midPoint); } }
     }
 }

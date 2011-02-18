@@ -80,9 +80,7 @@ namespace ESME.TransmissionLoss.RAM
             var radialCount = transmissionLossJob.SoundSource.RadialBearings.Count;
             var bottomProfiles = new BottomProfile[radialCount];
             var soundSpeedProfiles = new SoundSpeedProfile[radialCount];
-            var bearings = new float[radialCount];
             var maxCalculationDepthMeters = float.MinValue;
-            var bearingStep = 360.0f / radialCount;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];

@@ -373,6 +373,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                        {
                            SoundSource = new SoundSource
                                          {
+                                             Latitude_degrees = Latitude.DataValue,
+                                             Longitude_degrees = Longitude.DataValue,
+                                             Name = Name,
                                              AcousticProperties = new AcousticProperties
                                                                   {
                                                                       SourceDepth = SourceDepth.DataValue,

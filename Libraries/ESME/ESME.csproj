@@ -162,9 +162,6 @@
     <Compile Include="Platform\Exceptions.cs" />
     <Compile Include="Platform\PlatformState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ShipTrack\Generator.cs" />
-    <Compile Include="ShipTrack\ShipTrackProperties.cs" />
-    <Compile Include="ShipTrack\Waypoint.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
     <Compile Include="TransmissionLoss\Bellhop\RadialCalculator.cs" />
@@ -229,7 +226,6 @@
     <Compile Include="Model\Globals.cs" />
     <Compile Include="Model\ProgressTracking.cs" />
     <Compile Include="Model\SedimentType.cs" />
-    <Compile Include="Model\OldAnalysisPoint.cs" />
     <Compile Include="Model\SoundSpeedField.cs" />
     <Compile Include="Model\SoundSpeedProfile.cs" />
     <Compile Include="Model\Species.cs" />
@@ -239,7 +235,6 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="Model\Tester.cs" />
-    <Compile Include="Model\OldTransmissionLossField.cs" />
     <Compile Include="NEMO\NemoBase.cs" />
     <Compile Include="NEMO\NemoFile.cs" />
     <Compile Include="NEMO\NemoPSM.cs" />

@@ -92,9 +92,9 @@ namespace ESME.TransmissionLoss.Bellhop
                     var west = j;
                     return BilinearRecursive(point, // Point to interpolate
                                              new EarthCoordinate3D(elevations.Latitudes[north], elevations.Longitudes[east], elevations.FieldData[east, north].Data), // northeast corner
-                                             new EarthCoordinate3D(elevations.Latitudes[north], elevations.Longitudes[west], elevations.FieldData[north, west].Data), // northwest corner
-                                             new EarthCoordinate3D(elevations.Latitudes[south], elevations.Longitudes[east], elevations.FieldData[south, east].Data), // southeast corner
-                                             new EarthCoordinate3D(elevations.Latitudes[south], elevations.Longitudes[west], elevations.FieldData[south, west].Data) // southwest corner
+                                             new EarthCoordinate3D(elevations.Latitudes[north], elevations.Longitudes[west], elevations.FieldData[west, north].Data), // northwest corner
+                                             new EarthCoordinate3D(elevations.Latitudes[south], elevations.Longitudes[east], elevations.FieldData[east, south].Data), // southeast corner
+                                             new EarthCoordinate3D(elevations.Latitudes[south], elevations.Longitudes[west], elevations.FieldData[west, south].Data) // southwest corner
                         );
                 } // for j
             } // for i
