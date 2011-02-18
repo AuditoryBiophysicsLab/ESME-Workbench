@@ -16,6 +16,7 @@ namespace ESME.TransmissionLoss
             RadialBearings = new List<float>();
             for (var radialBearing = 0.0f; radialBearing < 360.0f; radialBearing += RadialBearingStep) RadialBearings.Add(radialBearing);
             SoundSourceID = Path.GetRandomFileName();
+            ShouldBeCalculated = true;
         }
 
         /// <summary>
@@ -24,7 +25,7 @@ namespace ESME.TransmissionLoss
         public AcousticProperties AcousticProperties { get; set; }
 
         /// <summary>
-        /// Source Level in dB SPL re: 1uPa
+        ///   Source Level in dB SPL re: 1uPa
         /// </summary>
         public float SourceLevel { get; set; }
 
@@ -43,14 +44,27 @@ namespace ESME.TransmissionLoss
         /// </summary>
         public string SoundSourceID { get; set; }
 
-        public bool Equals(SoundSource other) 
+        /// <summary>
+        ///   Optional name of this sound source.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// True if the user wants this sound source to be calculated, false otherwise.  Default value is true
+        /// </summary>
+        public bool ShouldBeCalculated { get; set; }
+
+        #region IEquatable<SoundSource> methods
+
+        public bool Equals(SoundSource other)
         {
-            if (!Equals(other)) return false;
+            if (!base.Equals(other)) return false;  // Compare as an EarthCoordinate first
             if (!AcousticProperties.Equals(other.AcousticProperties)) return false;
             if (RadialBearings.Count != other.RadialBearings.Count) return false;
-            for (var bearingIndex = 0; bearingIndex < RadialBearings.Count; bearingIndex++)
-                if (RadialBearings[bearingIndex] != other.RadialBearings[bearingIndex]) return false;
+            for (var bearingIndex = 0; bearingIndex < RadialBearings.Count; bearingIndex++) if (RadialBearings[bearingIndex] != other.RadialBearings[bearingIndex]) return false;
             return true;
         }
+
+        #endregion
     }
 }

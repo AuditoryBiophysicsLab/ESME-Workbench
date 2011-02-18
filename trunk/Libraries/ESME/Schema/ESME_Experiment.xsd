@@ -106,7 +106,7 @@
                         </xs:restriction>
                       </xs:simpleType>
                     </xs:element>
-                    <xs:element name="Bearing_degrees"
+                    <xs:element name="Bearing"
                                 type="xs:double" />
                     <xs:element name="HorizontalHalfAngle_degrees"
                                 type="xs:double" />

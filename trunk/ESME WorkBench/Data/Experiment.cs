@@ -26,7 +26,6 @@ using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
-using Color = System.Windows.Media.Color;
 using LineStyle = ESME.Overlay.LineStyle;
 
 namespace ESMEWorkBench.Data
@@ -527,7 +526,7 @@ namespace ESMEWorkBench.Data
         }
 
         static readonly PropertyChangedEventArgs OpAreaBufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.OpAreaBufferZoneSize);
-        float _opAreaBufferZoneSize = 0f;
+        float _opAreaBufferZoneSize = 2.5f;
 
         #endregion
 
@@ -633,9 +632,9 @@ namespace ESMEWorkBench.Data
         [XmlIgnore]
         public Environment2DData Bathymetry { get; private set; }
 
-        [XmlIgnore]
-
         #region public string LocalStorageRoot { get; set; }
+
+        [XmlIgnore]
 
         public string LocalStorageRoot
         {
@@ -665,11 +664,11 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        [XmlIgnore]
-
         #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; set; }
 
-            public ObservableCollection<TransmissionLossField> TransmissionLossFields
+        [XmlIgnore]
+
+        public ObservableCollection<TransmissionLossField> TransmissionLossFields
         {
             get { return _transmissionLossFields; }
             set

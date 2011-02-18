@@ -66,6 +66,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                    };
                 try
                 {
+                    analysisPointViewModel.AnalysisPoint.SoundSources.Add(transmissionLossJobViewModel.TransmissionLossJob.SoundSource);
                     //var cassRunFile = CassRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings, _experiment.NemoFile.Scenario.TimeFrame);
                     //cassRunFile.Save(Path.GetDirectoryName(_experiment.FileName));
                     var ramRunFile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.RAM, transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
@@ -77,17 +78,25 @@ namespace ESMEWorkBench.ViewModels.Main
                 }
                 catch (BathymetryOutOfBoundsException ex)
                 {
-                    _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("Unable to add analysis point.\nDid you click outside the bounds of the simulation area?"));
+                    _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("Unable to add analysis point.\nDid you click outside the bounds of the simulation area?\n\n" + ex.Message));
                     _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
                     return;
                 }
-                catch (BathymetryTooShallowException)
+                catch (BathymetryTooShallowException ex)
                 {
-                    _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("This area is too shallow to place an analysis point.  Pick a different area."));
+                    _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("This area is too shallow to place an analysis point.  Pick a different area.\n\n" + ex.Message));
                     _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
                     return;
                 }
             }
+            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPointViewModel.AnalysisPoint, _messageBoxService);
+            var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
+            if ((!settingsResult.HasValue) || (!settingsResult.Value))
+            {
+                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
+                return;
+            }
+
             var result = _visualizerService.ShowDialog("AnalysisPointCalculationPreviewView", analysisPointViewModel);
             if ((!result.HasValue) || (!result.Value))
             {

@@ -30,16 +30,15 @@ namespace ESME.TransmissionLoss
             }
         }
 
-        void SoundSourcesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
+        static void SoundSourcesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
         ObservableCollection<SoundSource> _soundSources = new ObservableCollection<SoundSource>();
 
         #endregion
 
+        #region public ObservableCollection<TransmissionLossJob> TransmissionLossJobs { get; set; }
         [XmlIgnore]
 
-        #region public ObservableCollection<TransmissionLossJob> TransmissionLossJobs { get; set; }
-
-            public ObservableCollection<TransmissionLossJob> TransmissionLossJobs
+        public ObservableCollection<TransmissionLossJob> TransmissionLossJobs
         {
             get { return _transmissionLossJobs; }
             set
@@ -51,16 +50,15 @@ namespace ESME.TransmissionLoss
             }
         }
 
-        void TransmissionLossJobsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
+        static void TransmissionLossJobsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
         ObservableCollection<TransmissionLossJob> _transmissionLossJobs = new ObservableCollection<TransmissionLossJob>();
 
         #endregion
 
+        #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; private set; }
         [XmlIgnore]
 
-        #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; private set; }
-
-            public ObservableCollection<TransmissionLossField> TransmissionLossFields
+        public ObservableCollection<TransmissionLossField> TransmissionLossFields
         {
             get { return _transmissionLossFields; }
             private set
@@ -72,7 +70,7 @@ namespace ESME.TransmissionLoss
             }
         }
 
-        void TransmissionLossFieldsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
+        static void TransmissionLossFieldsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
         ObservableCollection<TransmissionLossField> _transmissionLossFields;
 
         #endregion
@@ -83,7 +81,8 @@ namespace ESME.TransmissionLoss
         {
             if (!Equals(other)) return false;
             if (SoundSources.Count != other.SoundSources.Count) return false;
-            for (var sourceIndex = 0; sourceIndex < SoundSources.Count; sourceIndex++) if (!SoundSources[sourceIndex].Equals(other.SoundSources[sourceIndex])) return false;
+            for (var sourceIndex = 0; sourceIndex < SoundSources.Count; sourceIndex++) 
+                if (!SoundSources[sourceIndex].Equals(other.SoundSources[sourceIndex])) return false;
             return true;
         }
 
