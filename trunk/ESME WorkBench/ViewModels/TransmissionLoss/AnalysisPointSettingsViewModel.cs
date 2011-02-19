@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Diagnostics;
@@ -20,6 +22,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         {
             RegisterMediator();
             _messageBoxService = messageBoxService;
+            AvailableModes = new ObservableCollection<SoundSource>();
             AnalysisPoint = analysisPoint;
         }
 
@@ -32,6 +35,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 if (_analysisPoint == value) return;
                 _analysisPoint = value;
+                AvailableModes.Clear();
+                foreach (var soundSource in _analysisPoint.SoundSources) AvailableModes.Add(soundSource);
                 NotifyPropertyChanged(AnalysisPointChangedEventArgs);
             }
         }
@@ -40,6 +45,28 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         AnalysisPoint _analysisPoint;
 
         #endregion
+
+        #region public ObservableCollection<SoundSource> AvailableModes { get; set; }
+
+        public ObservableCollection<SoundSource> AvailableModes
+        {
+            get { return _availableModes; }
+            set
+            {
+                if (_availableModes == value) return;
+                if (_availableModes != null) _availableModes.CollectionChanged -= AvailableModesCollectionChanged;
+                _availableModes = value;
+                if (_availableModes != null) _availableModes.CollectionChanged += AvailableModesCollectionChanged;
+                NotifyPropertyChanged(AvailableModesChangedEventArgs);
+            }
+        }
+
+        void AvailableModesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(AvailableModesChangedEventArgs); }
+        static readonly PropertyChangedEventArgs AvailableModesChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.AvailableModes);
+        ObservableCollection<SoundSource> _availableModes;
+
+        #endregion
+
 
         #region public SoundSource SelectedMode { get; set; }
 

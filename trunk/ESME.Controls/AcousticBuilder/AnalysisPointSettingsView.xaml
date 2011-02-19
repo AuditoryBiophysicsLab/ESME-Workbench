@@ -51,7 +51,7 @@
 		</DockPanel>
 		<GroupBox DockPanel.Dock="Left"
 		          Header="Available Modes">
-			<ListBox ItemsSource="{Binding AnalysisPoint.SoundSources}"
+            <ListBox ItemsSource="{Binding AvailableModes}"
 			         SelectedItem="{Binding SelectedMode}"
 			         ToolTip="Checked modes will be calculated along with the rest of this analysis point, and will be usable in a subsequent scenario simulation.  Unchecked modes will not be calculated, and will not be used in simulations."
 			         ItemContainerStyle="{StaticResource RadialsViewItemStyle}">
