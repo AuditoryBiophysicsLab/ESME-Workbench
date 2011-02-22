@@ -112,7 +112,7 @@ namespace cassdifftester
                 double faildepth = 0;
                 if (soundspeedcounter == 0)
                 {
-                    outFile.AppendLine("Sound Speed Differences");
+                    outFile.AppendLine("Sound Speed First Differences");
                     outFile.AppendLine("Lat/Lon           \tDepth\tESME     \tNUWC");
                     outFile.AppendLine("------------------\t-----\t---------\t----");
                 }
