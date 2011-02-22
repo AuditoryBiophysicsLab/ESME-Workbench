@@ -397,7 +397,7 @@ namespace ESME.Model
 
                 var tempDiff = tempD1 - tempD;
                 var newTemp = tempD - tempDiff;
-                var soundSpeed = UNESCO.SoundSpeed(DeepestSSP, maxDepth, newTemp, salinity);
+                var soundSpeed = ChenMilleroLi.SoundSpeed(DeepestSSP, maxDepth, newTemp, salinity);
                 DeepestSSP.Extend(maxDepth, soundSpeed);
             }
             foreach (var profile in SoundSpeedProfiles)

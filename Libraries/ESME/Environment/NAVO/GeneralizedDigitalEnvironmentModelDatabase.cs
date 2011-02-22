@@ -166,7 +166,7 @@ namespace ESME.Environment.NAVO
                                          select (float)temperature).ToArray();
                     var curPointSalinities = (from salinity in salinityPoint.Data
                                               select (float)salinity).ToArray();
-                    var curPointSoundSpeeds = UNESCO.SoundSpeed(temperaturePoint, ref curPointDepths, ref curPointTemps, ref curPointSalinities);
+                    var curPointSoundSpeeds = ChenMilleroLi.SoundSpeed(temperaturePoint, ref curPointDepths, ref curPointTemps, ref curPointSalinities);
                     soundSpeedData.Data.AddRange(from soundSpeed in curPointSoundSpeeds select (double)soundSpeed);
                     soundSpeedField.DataPoints.Add(soundSpeedData);
                 }
