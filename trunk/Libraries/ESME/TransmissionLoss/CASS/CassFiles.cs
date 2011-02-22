@@ -90,8 +90,8 @@ namespace ESME.TransmissionLoss.CASS
                 envFile.WriteLine();
                 var latitudes = soundSpeedField.Latitudes.OrderByDescending(x => x);
                 var longitudes = soundSpeedField.Longitudes;
-                foreach (var latitude in latitudes)
-                    foreach (var longitude in longitudes)
+                foreach (var longitude in longitudes)
+                    foreach (var latitude in latitudes)
                     {
                         var location = new EarthCoordinate(latitude, longitude);
                         var ssp = soundSpeedField[location];

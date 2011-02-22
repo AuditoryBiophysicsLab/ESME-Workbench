@@ -125,6 +125,7 @@
     <Compile Include="Environment\Binary Data Classes\DataString.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
+    <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
     <Compile Include="Environment\NAVO\DigitalBathymetricDatabase.cs" />
     <Compile Include="Environment\NAVO\GeneralizedDigitalEnvironmentModelDatabase.cs" />
     <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
