@@ -1,25 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ESME.Overlay;
-using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
-using HRC.Navigation;
 
 namespace cassdifftester
 {
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {
+            var esmeinfile ="";
+            var nuwcinfile ="";
+            var outFileName = "";
 
-            string esmeinfile = "";//@"C:\Users\Graham Voysey\Desktop\cass\esme_env_january.dat";
-            string nuwcinfile = "";// @"C:\Users\Graham Voysey\Desktop\cass\env_january.dat";
-            string outFileName = "";
-            for (int i = 0; i < args.Length; i++)
+            for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
                 {
@@ -35,7 +31,6 @@ namespace cassdifftester
                     default:
                         return;
                 }
-
             }
 
             var esmeResult = (from packet in CASSFiles.ReadEnvironmentFile(esmeinfile)
@@ -51,26 +46,30 @@ namespace cassdifftester
                                 where (esme.Location.Equals(nuwc.Location))
                                 orderby nuwc.Location.Latitude_degrees, nuwc.Location.Longitude_degrees
                                 select new
-                                    {
-                                        esme,
-                                        nuwc
-                                    }).ToList();
+                                       {
+                                           esme,
+                                           nuwc
+                                       }).ToList();
             var outFile = new StringBuilder();
-            
+
             if (joinedResult.Count < esmeResult.Count)
             {
                 outFile.AppendLine(string.Format("{0} records were extracted from ESME source.  {1} location matches were found in NUWC source. {2} locations were not matched.", esmeResult.Count, joinedResult.Count, nuwcResult.Count - joinedResult.Count));
                 foreach (var esme in esmeResult)
                 {
                     var matched = false;
-                    foreach (var nuwc in nuwcResult.Where(nuwc => esme.Location.Equals(nuwc.Location)))
+                    var esme1 = esme;
+#pragma warning disable 168
+                    foreach (var nuwc in nuwcResult.Where(nuwc => esme1.Location.Equals(nuwc.Location)))
+#pragma warning restore 168
                     {
                         matched = true;
                     }
                     if (!matched) outFile.AppendLine(string.Format("esme location {0} is not a nuwc location.", esme.Location));
                 }
             }
-            else outFile.AppendLine(string.Format("All {0:000} esme records were matched on location\n", esmeResult.Count));
+            else outFile.AppendLine(string.Format("All {0:000} esme records were matched on location\n\n", esmeResult.Count));
+
 
             var bottomcounter = 0;
             foreach (var result in joinedResult.Where(result => result.nuwc.BottomType != result.esme.BottomType))
@@ -109,18 +108,15 @@ namespace cassdifftester
             {
                 double esmefailspeed = 0;
                 double nuwcfailspeed = 0;
-                double faildepth = 0;
-                if (soundspeedcounter == 0)
-                {
-                    outFile.AppendLine("Sound Speed First Differences");
-                    outFile.AppendLine("Lat/Lon           \tDepth\tESME     \tNUWC");
-                    outFile.AppendLine("------------------\t-----\t---------\t----");
-                }
+                double faildepth = -1;
+               
                 for (var i = 0; i < result.esme.Soundspeeds.Count; i++)
                 {
                     var esmespeed = result.esme.Soundspeeds[i];
                     var nuwcspeed = result.nuwc.Soundspeeds[i];
-                    if (esmespeed != nuwcspeed)
+                    //if (esmespeed != nuwcspeed)
+                    //if ((1 - (Math.Min(esmespeed, nuwcspeed) / Math.Max(esmespeed, nuwcspeed))) > 0.005)
+                    if(Math.Abs(esmespeed-nuwcspeed) > 0.005)
                     {
                         soundspeedcounter++;
                         esmefailspeed = esmespeed;
@@ -129,10 +125,14 @@ namespace cassdifftester
                         break;
                     }
                 }
-
+                if (faildepth > 0 && soundspeedcounter == 1)
+                {
+                    outFile.AppendLine("Sound Speed First Differences");
+                    outFile.AppendLine("Lat/Lon           \tDepth\tESME     \tNUWC");
+                    outFile.AppendLine("------------------\t-----\t---------\t----");
+                }
                 //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but nuwc is {2}", result.esme.Location, result.esme.Depths.Count, result.nuwc.Depths.Count));
-                outFile.AppendLine(string.Format("{0,-18}\t{1:0.0}\t{2:0.000}\t{3,-5}", result.esme.Location, faildepth, esmefailspeed, nuwcfailspeed));
-                
+                if(faildepth >= 0) outFile.AppendLine(string.Format("{0,-18}\t{1:0.0}\t{2:0.000}\t{3,-5}", result.esme.Location, faildepth, esmefailspeed, nuwcfailspeed));
             }
             outFile.AppendLine(soundspeedcounter == 0 ? "Soundspeeds match." : string.Format("{0:00} Soundspeeds differ", soundspeedcounter));
             outFile.AppendLine("");
@@ -157,6 +157,4 @@ namespace cassdifftester
             Console.ReadLine();
         }
     }
-
-
 }
