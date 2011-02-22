@@ -113,8 +113,8 @@ namespace cassdifftester
                 if (soundspeedcounter == 0)
                 {
                     outFile.AppendLine("Sound Speed Differences");
-                    outFile.AppendLine("Lat/Lon           \tDepth\tESME \tNUWC");
-                    outFile.AppendLine("------------------\t-----\t---- \t----");
+                    outFile.AppendLine("Lat/Lon           \tDepth\tESME     \tNUWC");
+                    outFile.AppendLine("------------------\t-----\t---------\t----");
                 }
                 for (var i = 0; i < result.esme.Soundspeeds.Count; i++)
                 {
@@ -126,12 +126,13 @@ namespace cassdifftester
                         esmefailspeed = esmespeed;
                         nuwcfailspeed = nuwcspeed;
                         faildepth = result.esme.Depths[i];
+                        break;
                     }
                 }
 
                 //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but nuwc is {2}", result.esme.Location, result.esme.Depths.Count, result.nuwc.Depths.Count));
                 outFile.AppendLine(string.Format("{0,-18}\t{1:0.0}\t{2:0.000}\t{3,-5}", result.esme.Location, faildepth, esmefailspeed, nuwcfailspeed));
-                soundspeedcounter++;
+                
             }
             outFile.AppendLine(soundspeedcounter == 0 ? "Soundspeeds match." : string.Format("{0:00} Soundspeeds differ", soundspeedcounter));
             outFile.AppendLine("");
