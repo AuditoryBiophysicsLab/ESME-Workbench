@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace HRC.Utility
 {
-    internal class SortableObservableCollection<T> : ObservableCollection<T>
+    public class SortableObservableCollection<T> : ObservableCollection<T>
     {
         public void Sort()
         {
