@@ -182,6 +182,28 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region ApplyToAllModesCommand
+
+        public SimpleCommand<object, object> ApplyToAllModesCommand
+        {
+            get
+            {
+                return _applyToAllModes ?? (_applyToAllModes = new SimpleCommand<object, object>(
+                    delegate
+                    {
+                        var result = _messageBoxService.ShowOkCancel("Are you sure you want to use this radial configuration\nfor all modes in this analysis point?", CustomDialogIcons.Question);
+                        if (result == CustomDialogResults.Yes)
+                        {
+                            // todo: Apply the changes to all modes
+                        }
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _applyToAllModes;
+
+        #endregion
+
         #region IViewStatusAwareInjectionAware
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
