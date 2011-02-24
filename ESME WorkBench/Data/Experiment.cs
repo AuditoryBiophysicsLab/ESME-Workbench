@@ -526,7 +526,7 @@ namespace ESMEWorkBench.Data
         }
 
         static readonly PropertyChangedEventArgs OpAreaBufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.OpAreaBufferZoneSize);
-        float _opAreaBufferZoneSize = 0;
+        float _opAreaBufferZoneSize = 2.5f;
 
         #endregion
 
