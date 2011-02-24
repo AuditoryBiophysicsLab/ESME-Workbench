@@ -251,7 +251,6 @@
     <Compile Include="ViewModels\Main\MainViewModel.cs" />
     <Compile Include="ViewModels\Layers\OffsetProjection.cs" />
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
-    <Compile Include="ViewModels\Layers\VirtualToggleButton.cs" />
     <Compile Include="ViewModels\Map\MapViewModel.cs" />
     <Compile Include="ViewModels\Main\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\Main\ProgramOptionsViewModel.cs" />
