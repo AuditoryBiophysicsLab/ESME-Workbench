@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -17,6 +18,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         readonly IMessageBoxService _messageBoxService;
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
+        int _selectedBearingIndex = -1;
 
         public AnalysisPointSettingsViewModel(AnalysisPoint analysisPoint, IMessageBoxService messageBoxService)
         {
@@ -87,6 +89,26 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region public float? DisplayedBearing { get; set; }
+
+        public float? DisplayedBearing
+        {
+            get { return _displayedBearing; }
+            set
+            {
+                if (_displayedBearing == value) return;
+                _displayedBearing = value;
+                NotifyPropertyChanged(DisplayedBearingChangedEventArgs);
+
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DisplayedBearingChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.DisplayedBearing);
+        float? _displayedBearing;
+
+        #endregion
+
+
         #region public float? SelectedBearing { get; set; }
 
         public float? SelectedBearing
@@ -97,6 +119,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_selectedBearing == value) return;
                 _selectedBearing = value;
                 NotifyPropertyChanged(SelectedBearingChangedEventArgs);
+                if (_selectedBearing.HasValue) _selectedBearingIndex = _selectedMode.RadialBearings.IndexOf(_selectedBearing.Value);
+                else _selectedBearingIndex = -1;
+                DisplayedBearing = _selectedBearing;
             }
         }
 
@@ -149,12 +174,16 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         public SimpleCommand<object, object> AddRadialCommand
         {
-            get 
-            { 
-                return _addRadialCommand ?? 
+            get
+            {
+                return _addRadialCommand ??
                     (_addRadialCommand = new SimpleCommand<object, object>(
-                        delegate { return IsItemSelected; }, 
-                        delegate { ; })); 
+                        delegate { return (_selectedBearingIndex==-1 && DisplayedBearing.HasValue && !SelectedMode.RadialBearings.Contains(DisplayedBearing.Value)); },
+                        delegate
+                        {
+                            //if the selected bearing is a float and does not already exist, add it. 
+                            if (DisplayedBearing != null) SelectedMode.RadialBearings.Add(DisplayedBearing.Value);
+                        }));
             }
         }
 
@@ -162,13 +191,59 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region UpdateRadialCommand
+
+        public SimpleCommand<object, object> UpdateRadialCommand
+        {
+            get
+            {
+                return _updateRadial ?? (_updateRadial = new SimpleCommand<object, object>(delegate
+                                                                                           {
+                                                                                               return (DisplayedBearing.HasValue && SelectedBearing.HasValue && DisplayedBearing.Value != SelectedBearing.Value && !SelectedMode.RadialBearings.Contains(DisplayedBearing.Value));
+                                                                                           },
+                      delegate
+                      {
+                          //if the selected bearing is a float, replace the old value with the new one.  
+
+                          SelectedMode.RadialBearings[_selectedBearingIndex] = DisplayedBearing.Value;
+                          //.sortbearings?
+                          var tmp = new List<float>();
+                          tmp.AddRange(SelectedMode.RadialBearings);
+                          //                              tmp[_selectedBearingIndex] = 
+                          tmp.Sort();
+                          SelectedMode.RadialBearings.Clear();
+                          foreach (var value in tmp)
+                          {
+                              SelectedMode.RadialBearings.Add(value);
+                          }
+
+
+                      }));
+            }
+        }
+
+        SimpleCommand<object, object> _updateRadial;
+
+        #endregion
+
+        #region CancelRadialEditCommand
+
+        public SimpleCommand<object, object> CancelRadialEditCommand
+        {
+            get { return _cancelRadialEdit ?? (_cancelRadialEdit = new SimpleCommand<object, object>(delegate { return DisplayedBearing.HasValue; }, delegate { SelectedBearing = null; })); }
+        }
+
+        SimpleCommand<object, object> _cancelRadialEdit;
+
+        #endregion
+
         #region RemoveRadialCommand
 
         public SimpleCommand<object, object> RemoveRadialCommand
         {
-            get 
-            { 
-                return _removeRadialCommand ?? 
+            get
+            {
+                return _removeRadialCommand ??
                     (_removeRadialCommand = new SimpleCommand<object, object>(
                         delegate { return IsItemSelected & SelectedBearing.HasValue; },
                         delegate
@@ -209,7 +284,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
             _viewAwareStatus = viewAwareStatusService;
-            _dispatcher = ((Window) _viewAwareStatus.View).Dispatcher;
+            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
         }
 
         #endregion

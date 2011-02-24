@@ -155,7 +155,7 @@
 							        Command="{Binding RemoveRadialCommand}" />
                             <TextBlock Text="Selected Radial Bearing" 
                                        Margin="5 10 5 2"/>
-                            <TextBox Text="{Binding SelectedBearing}"
+                            <TextBox Text="{Binding DisplayedBearing}"
 							         Margin="5 0 5 5" />
                             <DockPanel HorizontalAlignment="Right" 
                                        Margin="5 0 5 0">
