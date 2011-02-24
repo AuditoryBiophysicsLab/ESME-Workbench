@@ -16,6 +16,12 @@ namespace ESME.TransmissionLoss
             SoundSources = new ObservableCollection<SoundSource>();
         }
 
+        public AnalysisPoint(EarthCoordinate location) : this()
+        {
+            Latitude_degrees = location.Latitude_degrees;
+            Longitude_degrees = location.Longitude_degrees;
+        }
+
         #region public public ObservableCollection<SoundSource> SoundSources { get; set; }
 
         public ObservableCollection<SoundSource> SoundSources

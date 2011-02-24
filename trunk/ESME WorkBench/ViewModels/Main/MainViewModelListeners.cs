@@ -31,6 +31,7 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.SetupAndRunAnalysisPoint)]
         void SetupAndRunAnalysisPoint(bool dummy)
         {
+#if false
             var environmentInformation = new EnvironmentInformation
                                          {
                                              Bathymetry = _experiment.Bathymetry,
@@ -44,14 +45,14 @@ namespace ESMEWorkBench.ViewModels.Main
                                                RangeCellSize = (float)_experiment.BellhopRangeCellSize,
                                            };
 
+#endif
+            var analysisPoint = new AnalysisPoint(MouseEarthCoordinate);
+#if false
             var analysisPointViewModel = new AnalysisPointCalculationPreviewViewModel
             {
-                AnalysisPoint = new AnalysisPoint
-                {
-                    Latitude_degrees = MouseEarthCoordinate.Latitude_degrees,
-                    Longitude_degrees = MouseEarthCoordinate.Longitude_degrees,
-                }
+                AnalysisPoint = analysisPoint,
             };
+#endif
 
             var distinctModes = (from platform in _experiment.NemoFile.Scenario.Platforms
                                  from source in platform.Sources
@@ -59,6 +60,8 @@ namespace ESMEWorkBench.ViewModels.Main
                                  select mode).Distinct();
             foreach (var mode in distinctModes)
             {
+                analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode, 16));
+#if false
                 var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, mode, 16, 3000)
                                                    {
                                                        Name = string.Format("{0}", mode.PSMName),
@@ -88,15 +91,16 @@ namespace ESMEWorkBench.ViewModels.Main
                     _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
                     return;
                 }
+#endif
             }
-            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPointViewModel.AnalysisPoint, _messageBoxService);
+            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint, _messageBoxService);
             var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
             if ((!settingsResult.HasValue) || (!settingsResult.Value))
             {
                 MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
                 return;
             }
-
+#if false
             var result = _visualizerService.ShowDialog("AnalysisPointCalculationPreviewView", analysisPointViewModel);
             if ((!result.HasValue) || (!result.Value))
             {
@@ -117,6 +121,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                 _dispatcher.BeginInvoke(new MediatorSendDelegate(MediatorMessage.Send), DispatcherPriority.Background, MediatorMessage.QueueTransmissionLossJob, bellhopRunFile);
                                         };
             backgroundWorker.RunWorkerAsync();
+#endif
 
             MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
         }
