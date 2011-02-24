@@ -108,7 +108,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-
         #region public float? SelectedBearing { get; set; }
 
         public float? SelectedBearing

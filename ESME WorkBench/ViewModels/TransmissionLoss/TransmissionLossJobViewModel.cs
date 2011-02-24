@@ -311,7 +311,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         #endregion
 
         readonly int _maxCalculationDepth;
-
+        readonly EarthCoordinate _location;
+        readonly NemoMode _nemoMode;
+        readonly int _radialCount;
         public TransmissionLossJobViewModel(EarthCoordinate location, NemoMode nemoMode, int radialCount, int maxCalculationDepth)
         {
             #region Create DataWrappers
@@ -351,6 +353,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
             #endregion
 
+            _location = location;
+            _nemoMode = nemoMode;
+            _radialCount = radialCount;
             Latitude.DataValue = location.Latitude_degrees;
             Longitude.DataValue = location.Longitude_degrees;
             SourceDepth.DataValue = Math.Max(1, nemoMode.SourceDepth);
@@ -371,19 +376,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 return new TransmissionLossJob
                        {
-                           SoundSource = new SoundSource
+                           SoundSource = new SoundSource(_location, _nemoMode, _radialCount)
                                          {
-                                             Latitude_degrees = Latitude.DataValue,
-                                             Longitude_degrees = Longitude.DataValue,
                                              Name = Name,
-                                             AcousticProperties = new AcousticProperties
-                                                                  {
-                                                                      SourceDepth = SourceDepth.DataValue,
-                                                                      VerticalBeamWidth = VerticalBeamWidth.DataValue,
-                                                                      DepressionElevationAngle = DepressionElevationAngle.DataValue,
-                                                                      LowFrequency = LowFrequency.DataValue,
-                                                                      HighFrequency = HighFrequency.DataValue,
-                                                                  },
                                              Radius = (int) Radius.DataValue,
                                              SourceLevel = SourceLevel,
                                          },

@@ -1,4 +1,5 @@
 ﻿using System;
+using ESME.NEMO;
 
 namespace ESME.Model
 {
@@ -8,11 +9,20 @@ namespace ESME.Model
 
         public AcousticProperties(AcousticProperties that)
         {
-            DepressionElevationAngle = that.DepressionElevationAngle;
             SourceDepth = that.SourceDepth;
-            HighFrequency = that.HighFrequency;
-            LowFrequency = that.LowFrequency;
             VerticalBeamWidth = that.VerticalBeamWidth;
+            DepressionElevationAngle = that.DepressionElevationAngle;
+            LowFrequency = that.LowFrequency;
+            HighFrequency = that.HighFrequency;
+        }
+
+        public AcousticProperties(NemoMode nemoMode)
+        {
+            SourceDepth = Math.Max(1, nemoMode.SourceDepth);
+            VerticalBeamWidth = nemoMode.VerticalBeamWidth;
+            DepressionElevationAngle = nemoMode.DepressionElevationAngle;
+            LowFrequency = nemoMode.LowFrequency;
+            HighFrequency = nemoMode.HighFrequency;
         }
 
         /// <summary>

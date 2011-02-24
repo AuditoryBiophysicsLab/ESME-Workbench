@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -7,21 +6,33 @@ using System.IO;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Model;
+using ESME.NEMO;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.TransmissionLoss
 {
     public class SoundSource : EarthCoordinate, IEquatable<SoundSource>, INotifyPropertyChanged
     {
-        const int DefaultRadialCount = 16;
-        const float RadialBearingStep = 360.0f / DefaultRadialCount;
-
-        public SoundSource()
+        protected SoundSource()
         {
-            RadialBearings = new ObservableCollection<float>();
-            for (var radialBearing = 0.0f; radialBearing < 360.0f; radialBearing += RadialBearingStep) RadialBearings.Add(radialBearing);
-            SoundSourceID = Path.GetRandomFileName();
+            RadialBearings = new SortableObservableCollection<float>();
             ShouldBeCalculated = true;
+            SoundSourceID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+        }
+
+        public SoundSource(EarthCoordinate location, NemoMode nemoMode, int radialCount) : this()
+        {
+            Latitude_degrees = location.Latitude_degrees;
+            Longitude_degrees = location.Longitude_degrees;
+
+            AcousticProperties = new AcousticProperties(nemoMode);
+
+            var radialBearingStep = 360.0f / radialCount;
+            for (var radialBearing = 0.0f; radialBearing < 360.0f; radialBearing += radialBearingStep) RadialBearings.Add(radialBearing);
+            Radius = (int)nemoMode.Radius;
+            Name = nemoMode.PSMName;
+            SourceLevel = nemoMode.SourceLevel;
         }
 
         /// <summary>
@@ -34,13 +45,13 @@ namespace ESME.TransmissionLoss
         /// </summary>
         public float SourceLevel { get; set; }
 
-        #region public ObservableCollection<float> RadialBearings { get; set; }
+        #region public SortableObservableCollection<float> RadialBearings { get; set; }
 
         /// <summary>
         ///   List of radial bearings, in degrees
         /// </summary>
         [XmlElement]
-        public ObservableCollection<float> RadialBearings
+        public SortableObservableCollection<float> RadialBearings
         {
             get { return _radialBearings; }
             set
@@ -55,7 +66,7 @@ namespace ESME.TransmissionLoss
 
         void RadialBearingsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(RadialBearingsChangedEventArgs); }
         [XmlIgnore] static readonly PropertyChangedEventArgs RadialBearingsChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.RadialBearings);
-        [XmlIgnore] ObservableCollection<float> _radialBearings;
+        [XmlIgnore] SortableObservableCollection<float> _radialBearings;
 
         #endregion
 
