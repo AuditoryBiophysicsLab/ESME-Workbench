@@ -147,22 +147,33 @@
 						</ListBox>
 						<StackPanel DockPanel.Dock="Right"
 						            Orientation="Vertical"
-						            Width="150">
-							<Button Content="Add Radial"
-							        Width="110"
+						            Width="Auto">
+                            <Button Content="Remove Selected"
+							        Width="Auto"
 							        HorizontalAlignment="Left"
 							        Margin="5"
-							        Command="{Binding AddRadialCommand}" />
-							<Button Content="Remove Radial"
-							        Width="110"
-							        HorizontalAlignment="Left"
-							        Margin="5 0 5 5"
 							        Command="{Binding RemoveRadialCommand}" />
-							<TextBlock Margin="5 10 5 2">
-								Selected Radial Bearing
-							</TextBlock>
+                            <TextBlock Text="Selected Radial Bearing" 
+                                       Margin="5 10 5 2"/>
                             <TextBox Text="{Binding SelectedBearing}"
 							         Margin="5 0 5 5" />
+                            <DockPanel HorizontalAlignment="Right" 
+                                       Margin="5 0 5 0">
+                                <Button Content="Cancel"
+                                        DockPanel.Dock="Right"
+                                        Margin="5 0 0 0"
+                                        Width="60"
+                                        Command="{Binding CancelRadialEditCommand}" />
+                                <Button Content="Update"
+                                        DockPanel.Dock="Right"
+                                        Margin="5 0 0 0"
+                                        Width="60"
+                                        Command="{Binding UpdateRadialCommand}" />
+                                <Button Content="Add New"
+                                        DockPanel.Dock="Right"
+                                        Width="60"
+                                        Command="{Binding AddRadialCommand}" />
+                            </DockPanel>
 							<Button Content="Use for all modes"
 							        HorizontalAlignment="Left"
 							        Width="110"
