@@ -181,7 +181,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         delegate
                         {
                             //if the selected bearing is a float and does not already exist, add it. 
-                            if (DisplayedBearing != null) SelectedMode.RadialBearings.Add(DisplayedBearing.Value);
+                            if (DisplayedBearing != null)
+                            {
+                                SelectedMode.RadialBearings.Add(DisplayedBearing.Value);
+                                SelectedMode.RadialBearings.Sort();
+                            }
+                            
                         }));
             }
         }
@@ -204,19 +209,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                       {
                           //if the selected bearing is a float, replace the old value with the new one.  
 
-                          SelectedMode.RadialBearings[_selectedBearingIndex] = DisplayedBearing.Value;
-                          //.sortbearings?
-                          var tmp = new List<float>();
-                          tmp.AddRange(SelectedMode.RadialBearings);
-                          //                              tmp[_selectedBearingIndex] = 
-                          tmp.Sort();
-                          SelectedMode.RadialBearings.Clear();
-                          foreach (var value in tmp)
+                          if (DisplayedBearing != null)
                           {
-                              SelectedMode.RadialBearings.Add(value);
+                              SelectedMode.RadialBearings[_selectedBearingIndex] = DisplayedBearing.Value;
+                              SelectedMode.RadialBearings.Sort();
                           }
-
-
+                          
                       }));
             }
         }
@@ -229,7 +227,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         public SimpleCommand<object, object> CancelRadialEditCommand
         {
-            get { return _cancelRadialEdit ?? (_cancelRadialEdit = new SimpleCommand<object, object>(delegate { return DisplayedBearing.HasValue; }, delegate { SelectedBearing = null; })); }
+            get { return _cancelRadialEdit ?? (_cancelRadialEdit = new SimpleCommand<object, object>(delegate 
+                { return DisplayedBearing.HasValue; }, 
+                delegate { SelectedBearing = null; })); }
         }
 
         SimpleCommand<object, object> _cancelRadialEdit;
@@ -268,7 +268,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         var result = _messageBoxService.ShowOkCancel("Are you sure you want to use this radial configuration\nfor all modes in this analysis point?", CustomDialogIcons.Question);
                         if (result == CustomDialogResults.Yes)
                         {
-                            // todo: Apply the changes to all modes
+                            
                         }
                     }));
             }
