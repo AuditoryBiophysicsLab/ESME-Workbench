@@ -221,7 +221,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         void CheckProperPointSymbolTypeMenu()
         {
-            foreach (MenuItemViewModel child in _pointStyleMenu.Children)
+            foreach (var child in _pointStyleMenu.Children)
             {
                 child.IsChecked = child.PointSymbolType == _pointSymbolType;
             }
@@ -272,7 +272,7 @@ namespace ESMEWorkBench.ViewModels.Map
         #region public float LineWidth { get; set; }
 
         //float _lineWidth = (float)Math.Max(1, ((_random.NextDouble() * 9) + 1) / 2);
-        float _lineWidth = _random.Next(2, 10)/2.0f;
+        float _lineWidth = _random.Next(2, 10) / 2.0f;
 
         [XmlElement]
         public float LineWidth
@@ -291,8 +291,8 @@ namespace ESMEWorkBench.ViewModels.Map
 
         void CheckProperLineWidthMenu()
         {
-            foreach (MenuItemViewModel child in _lineWeightMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
-            foreach (MenuItemViewModel child in _symbolSizeMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
+            foreach (var child in _lineWeightMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
+            foreach (var child in _symbolSizeMenu.Children) child.IsChecked = child.LineWidth == _lineWidth;
         }
 
         #endregion
@@ -367,7 +367,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
             _lineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
                                                                                                   {
-                                                                                                      bool? result = ColorPickerService.ShowDialog();
+                                                                                                      var result = ColorPickerService.ShowDialog();
                                                                                                       if (!result.HasValue || !result.Value) return;
                                                                                                       LineColor = ColorPickerService.Color;
                                                                                                       MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
@@ -376,7 +376,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
             _areaColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeAreaColor, obj =>
                                                                                                   {
-                                                                                                      bool? result = ColorPickerService.ShowDialog();
+                                                                                                      var result = ColorPickerService.ShowDialog();
                                                                                                       if (!result.HasValue || !result.Value) return;
                                                                                                       AreaColor = ColorPickerService.Color;
                                                                                                       MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
@@ -430,9 +430,9 @@ namespace ESMEWorkBench.ViewModels.Map
             _orderMenu.Children.Add(_moveDownMenu);
             _orderMenu.Children.Add(_moveToBottomMenu);
 
-            for (float lineWidth = 1.0f; lineWidth <= 5; lineWidth += 0.5f)
+            for (var lineWidth = 1.0f; lineWidth <= 5; lineWidth += 0.5f)
             {
-                float width = lineWidth;
+                var width = lineWidth;
                 _lineWeightMenu.Children.Add(new MenuItemViewModel
                                              {
                                                  Header = string.Format("{0:0.0}", lineWidth),
@@ -447,9 +447,9 @@ namespace ESMEWorkBench.ViewModels.Map
                                              });
             }
 
-            for (int pointSize = 1; pointSize <= 10; pointSize++)
+            for (var pointSize = 1; pointSize <= 10; pointSize++)
             {
-                int size = pointSize;
+                var size = pointSize;
                 _symbolSizeMenu.Children.Add(new MenuItemViewModel
                                              {
                                                  Header = string.Format("{0}", pointSize),
@@ -464,9 +464,9 @@ namespace ESMEWorkBench.ViewModels.Map
                                              });
             }
 
-            foreach (MenuItemViewModel item in _pointStyleMenu.Children)
+            foreach (var item in _pointStyleMenu.Children)
             {
-                MenuItemViewModel item1 = item;
+                var item1 = item;
                 item.Command = new SimpleCommand<object, object>(obj =>
                                                                  {
                                                                      PointSymbolType = item1.PointSymbolType;

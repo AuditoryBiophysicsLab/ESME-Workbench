@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
+using System.Xml.Serialization;
+using Cinch;
 using ESME.Model;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss
 {
-    public class SoundSource : EarthCoordinate, IEquatable<SoundSource>
+    public class SoundSource : EarthCoordinate, IEquatable<SoundSource>, INotifyPropertyChanged
     {
         const int DefaultRadialCount = 16;
         const float RadialBearingStep = 360.0f / DefaultRadialCount;
 
         public SoundSource()
         {
-            RadialBearings = new List<float>();
+            RadialBearings = new ObservableCollection<float>();
             for (var radialBearing = 0.0f; radialBearing < 360.0f; radialBearing += RadialBearingStep) RadialBearings.Add(radialBearing);
             SoundSourceID = Path.GetRandomFileName();
             ShouldBeCalculated = true;
@@ -29,10 +34,30 @@ namespace ESME.TransmissionLoss
         /// </summary>
         public float SourceLevel { get; set; }
 
+        #region public ObservableCollection<float> RadialBearings { get; set; }
+
         /// <summary>
         ///   List of radial bearings, in degrees
         /// </summary>
-        public List<float> RadialBearings { get; set; }
+        [XmlElement]
+        public ObservableCollection<float> RadialBearings
+        {
+            get { return _radialBearings; }
+            set
+            {
+                if (_radialBearings == value) return;
+                if (_radialBearings != null) _radialBearings.CollectionChanged -= RadialBearingsCollectionChanged;
+                _radialBearings = value;
+                if (_radialBearings != null) _radialBearings.CollectionChanged += RadialBearingsCollectionChanged;
+                NotifyPropertyChanged(RadialBearingsChangedEventArgs);
+            }
+        }
+
+        void RadialBearingsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(RadialBearingsChangedEventArgs); }
+        [XmlIgnore] static readonly PropertyChangedEventArgs RadialBearingsChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.RadialBearings);
+        [XmlIgnore] ObservableCollection<float> _radialBearings;
+
+        #endregion
 
         /// <summary>
         ///   transmission loss radius, in meters.
@@ -66,5 +91,9 @@ namespace ESME.TransmissionLoss
         }
 
         #endregion
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+
     }
 }
