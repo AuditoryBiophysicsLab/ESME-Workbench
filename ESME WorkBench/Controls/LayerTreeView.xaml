@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
              xmlns:layers="clr-namespace:ESMEWorkBench.ViewModels.Layers"
+             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
              mef:ViewModelLocator.ViewModel="LayerListViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
@@ -31,9 +32,9 @@
 		       TargetType="ListBoxItem">
 			<Setter Property="KeyboardNavigation.AcceptsReturn"
 			        Value="True" />
-			<Setter Property="layers:VirtualToggleButton.IsVirtualToggleButton"
+			<Setter Property="views:VirtualToggleButton.IsVirtualToggleButton"
 			        Value="True" />
-			<Setter Property="layers:VirtualToggleButton.IsChecked"
+			<Setter Property="views:VirtualToggleButton.IsChecked"
 			        Value="{Binding IsChecked}" />
 			<Style.Triggers>
 				<Trigger Property="IsSelected"

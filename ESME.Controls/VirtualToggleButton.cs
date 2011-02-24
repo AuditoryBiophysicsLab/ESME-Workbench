@@ -2,7 +2,7 @@
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
-namespace ESMEWorkBench.ViewModels.Layers
+namespace ESME.Views
 {
     public static class VirtualToggleButton
     {
