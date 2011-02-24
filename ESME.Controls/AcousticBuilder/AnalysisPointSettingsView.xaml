@@ -163,12 +163,12 @@
 							</TextBlock>
                             <TextBox Text="{Binding SelectedBearing}"
 							         Margin="5 0 5 5" />
-							<Button Content="Apply to all modes"
+							<Button Content="Use for all modes"
 							        HorizontalAlignment="Left"
 							        Width="110"
 							        Margin="5 20 5 5"
-							        Command="{Binding AddRadialCommand}"
-							        ToolTip="Apply the current radial configuration to all modes in this analysis point" />
+							        Command="{Binding ApplyToAllModesCommand}"
+							        ToolTip="Use the current radial configuration for all modes in this analysis point" />
 						</StackPanel>
 					</DockPanel>
 				</GroupBox>
