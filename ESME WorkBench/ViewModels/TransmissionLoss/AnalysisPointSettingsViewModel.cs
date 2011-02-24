@@ -2,8 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Windows;
 using System.Diagnostics;
+using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
@@ -12,7 +12,7 @@ using MEFedMVVM.ViewModelLocator;
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
     [ExportViewModel("AnalysisPointSettingsViewModel")]
-    class AnalysisPointSettingsViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    internal class AnalysisPointSettingsViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         readonly IMessageBoxService _messageBoxService;
         IViewAwareStatus _viewAwareStatus;
@@ -24,6 +24,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _messageBoxService = messageBoxService;
             AvailableModes = new ObservableCollection<SoundSource>();
             AnalysisPoint = analysisPoint;
+            SelectedBearing = null;
         }
 
         #region public AnalysisPoint AnalysisPoint { get; set; }
@@ -67,7 +68,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-
         #region public SoundSource SelectedMode { get; set; }
 
         public SoundSource SelectedMode
@@ -76,9 +76,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             set
             {
                 if (_selectedMode == value) return;
-                IsItemSelected = _selectedMode != null;
                 _selectedMode = value;
                 NotifyPropertyChanged(SelectedModeChangedEventArgs);
+                IsItemSelected = _selectedMode != null;
             }
         }
 
@@ -87,9 +87,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public float SelectedBearing { get; set; }
+        #region public float? SelectedBearing { get; set; }
 
-        public float SelectedBearing
+        public float? SelectedBearing
         {
             get { return _selectedBearing; }
             set
@@ -101,7 +101,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
 
         static readonly PropertyChangedEventArgs SelectedBearingChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.SelectedBearing);
-        float _selectedBearing;
+        float? _selectedBearing;
 
         #endregion
 
@@ -123,12 +123,73 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region OkCommand
+
+        public SimpleCommand<object, object> OkCommand
+        {
+            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(delegate { CloseActivePopUpCommand.Execute(true); })); }
+        }
+
+        SimpleCommand<object, object> _okCommand;
+
+        #endregion
+
+        #region CancelCommand
+
+        public SimpleCommand<object, object> CancelCommand
+        {
+            get { return _cancelCommand ?? (_cancelCommand = new SimpleCommand<object, object>(delegate { CloseActivePopUpCommand.Execute(false); })); }
+        }
+
+        SimpleCommand<object, object> _cancelCommand;
+
+        #endregion
+
+        #region AddRadialCommand
+
+        public SimpleCommand<object, object> AddRadialCommand
+        {
+            get 
+            { 
+                return _addRadialCommand ?? 
+                    (_addRadialCommand = new SimpleCommand<object, object>(
+                        delegate { return IsItemSelected; }, 
+                        delegate { ; })); 
+            }
+        }
+
+        SimpleCommand<object, object> _addRadialCommand;
+
+        #endregion
+
+        #region RemoveRadialCommand
+
+        public SimpleCommand<object, object> RemoveRadialCommand
+        {
+            get 
+            { 
+                return _removeRadialCommand ?? 
+                    (_removeRadialCommand = new SimpleCommand<object, object>(
+                        delegate { return IsItemSelected & SelectedBearing.HasValue; },
+                        delegate
+                        {
+                            if (SelectedBearing.HasValue) SelectedMode.RadialBearings.Remove(SelectedBearing.Value);
+                        }));
+            }
+        }
+
+        SimpleCommand<object, object> _removeRadialCommand;
+
+        #endregion
+
         #region IViewStatusAwareInjectionAware
+
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
             _viewAwareStatus = viewAwareStatusService;
-            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+            _dispatcher = ((Window) _viewAwareStatus.View).Dispatcher;
         }
+
         #endregion
 
         #region Mediator Registration
