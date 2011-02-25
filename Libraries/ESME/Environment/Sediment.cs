@@ -131,10 +131,10 @@ namespace ESME.Environment
 #if false
         public virtual bool ClosestTo(EarthCoordinate coordinate, ref T value)
         {
-            var north = SedimentSamples[0].Latitude_degrees;
-            var south = SedimentSamples[0].Latitude_degrees;
-            var east = SedimentSamples[0].Longitude_degrees;
-            var west = SedimentSamples[0].Longitude_degrees;
+            var north = SedimentSamples[0].Latitude;
+            var south = SedimentSamples[0].Latitude;
+            var east = SedimentSamples[0].Longitude;
+            var west = SedimentSamples[0].Longitude;
             var minDistance = coordinate.GetDistanceTo_Meters(SedimentSamples[0]);
             foreach (var sample in SedimentSamples)
             {
@@ -145,8 +145,8 @@ namespace ESME.Environment
                 var closestCoordinate = new EarthCoordinate(Latitudes.First(), Longitudes.First());
                 foreach (var curCoordinate in Latitudes.SelectMany(latitude => Longitudes, (latitude, longitude) => new EarthCoordinate(latitude, longitude)).Where(curCoordinate => coordinate.GetDistanceTo_Meters(closestCoordinate) > coordinate.GetDistanceTo_Meters(curCoordinate)))
                     closestCoordinate = curCoordinate;
-                var latIndex = LookupIndex(closestCoordinate.Latitude_degrees, Latitudes);
-                var lonIndex = LookupIndex(closestCoordinate.Longitude_degrees, Longitudes);
+                var latIndex = LookupIndex(closestCoordinate.Latitude, Latitudes);
+                var lonIndex = LookupIndex(closestCoordinate.Longitude, Longitudes);
                 if ((latIndex >= 0) && (lonIndex >= 0))
                 {
                     value = Values[latIndex, lonIndex];

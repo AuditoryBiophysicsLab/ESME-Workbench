@@ -1,5 +1,5 @@
 ﻿INSERT INTO Transmission_Loss.TransmissionLoss 	(
-	idTransmissionLoss, Latitude_degrees, Longitude_degrees, 
+	idTransmissionLoss, Latitude, Longitude, 
 	Depth_meters,VerticalBeamWidth_degrees, VerticalLookAngle_degrees, 
 	LowFrequency_Hz, HighFrequency_Hz, BinaryFileName, 
 	CalculationStarted, CalculationFinished, RadialCount, 
@@ -8,7 +8,7 @@
 	@id, @lat, @lon, @dep, @vbw, @vla, @lof, @hif, @fil, @sta, 
 	@fin, @cnt, @rad, @rid, @did
 ) ON DUPLICATE KEY UPDATE
-	Latitude_degrees=@lat, Longitude_degrees=@lon, Depth_meters=@dep,
+	Latitude=@lat, Longitude=@lon, Depth_meters=@dep,
 	VerticalBeamWidth_degrees=@vbw, VerticalLookAngle_degrees=@vla, LowFrequency_Hz=@lof, 
 	HighFrequency_Hz=@hif, BinaryFileName=@fil, CalculationStarted=@sta, 
 	CalculationFinished=@fin, RadialCount=@cnt, Radius_meters=@rad,

@@ -56,7 +56,7 @@ namespace ESME.Model
             get
             {
                 var result = from value in this
-                             select value.Latitude_degrees;
+                             select value.Latitude;
                 result.Distinct().ToList().Sort();
                 return result;
             }
@@ -70,7 +70,7 @@ namespace ESME.Model
             get
             {
                 var result = from value in this
-                             select value.Longitude_degrees;
+                             select value.Longitude;
                 result.Distinct().ToList().Sort();
                 return result;
             }
@@ -118,11 +118,11 @@ namespace ESME.Model
                                    //      It now places the bounding box such that the lines are coincident with the edges of
                                    //      the edge samples of the selected data (extends by half the horizontal/vertical resolution)
                                    //northeast corner:                   
-                                   new EarthCoordinate(max.Latitude_degrees + (vertRes/2), max.Longitude_degrees + (horizRes/2)), //southeast corner: 
-                                   new EarthCoordinate(min.Latitude_degrees - (vertRes/2), max.Longitude_degrees + (horizRes/2)), //southwest corner: 
-                                   new EarthCoordinate(min.Latitude_degrees - (vertRes/2), min.Longitude_degrees - (horizRes/2)), //northwest corner: 
-                                   new EarthCoordinate(max.Latitude_degrees + (vertRes/2), min.Longitude_degrees - (horizRes/2)), //northeast corner again to close the loop.
-                                   new EarthCoordinate(max.Latitude_degrees + (vertRes/2), max.Longitude_degrees + (horizRes/2)),
+                                   new EarthCoordinate(max.Latitude + (vertRes/2), max.Longitude + (horizRes/2)), //southeast corner: 
+                                   new EarthCoordinate(min.Latitude - (vertRes/2), max.Longitude + (horizRes/2)), //southwest corner: 
+                                   new EarthCoordinate(min.Latitude - (vertRes/2), min.Longitude - (horizRes/2)), //northwest corner: 
+                                   new EarthCoordinate(max.Latitude + (vertRes/2), min.Longitude - (horizRes/2)), //northeast corner again to close the loop.
+                                   new EarthCoordinate(max.Latitude + (vertRes/2), max.Longitude + (horizRes/2)),
                                };
 
                 var shape = new OverlayLineSegments(bathyBox, Colors.Black, 1, LineStyle.Solid);
@@ -150,7 +150,7 @@ namespace ESME.Model
         {
             var min = MinCoordinate;
             var max = MaxCoordinate;
-            return (min.Longitude_degrees <= coordinate.Longitude_degrees) && (coordinate.Longitude_degrees <= max.Longitude_degrees) && (min.Latitude_degrees <= coordinate.Latitude_degrees) && (coordinate.Latitude_degrees <= max.Latitude_degrees);
+            return (min.Longitude <= coordinate.Longitude) && (coordinate.Longitude <= max.Longitude) && (min.Latitude <= coordinate.Latitude) && (coordinate.Latitude <= max.Latitude);
         }
 
         public EarthCoordinate[,] ValueArray
@@ -165,7 +165,7 @@ namespace ESME.Model
                     {
                         var lat = lats[latIndex];
                         var lon = lons[lonIndex];
-                        var selectedPoint = Find(t => t.Latitude_degrees == lat && t.Longitude_degrees == lon);
+                        var selectedPoint = Find(t => t.Latitude == lat && t.Longitude == lon);
                         if (selectedPoint == null) throw new DataException("ValueArray: This data set is not a rectangular array");
                         result[lonIndex, latIndex] = selectedPoint;
                     }
@@ -190,7 +190,7 @@ namespace ESME.Model
                     {
                         var lat = lats[latIndex];
                         var lon = lons[lonIndex];
-                        var selectedPoint = Values.Find(t => t.Latitude_degrees == lat && t.Longitude_degrees == lon);
+                        var selectedPoint = Values.Find(t => t.Latitude == lat && t.Longitude == lon);
                         if (selectedPoint == null) throw new DataException("ValueArray: This data set is not a rectangular array");
                         result[lonIndex, latIndex] = selectedPoint.Value;
                     }
@@ -212,7 +212,7 @@ namespace ESME.Model
         /// </returns>
         protected virtual bool Lookup(EarthCoordinate coordinate, ref EnvironmentDataPoint<float> value)
         {
-            var selectedIndex = Values.FindIndex(t => t.Latitude_degrees == coordinate.Latitude_degrees && t.Longitude_degrees == coordinate.Longitude_degrees);
+            var selectedIndex = Values.FindIndex(t => t.Latitude == coordinate.Latitude && t.Longitude == coordinate.Longitude);
             if (selectedIndex != -1)
             {
                 value = Values[selectedIndex];
@@ -246,8 +246,8 @@ namespace ESME.Model
                         var curSample = stream.ReadSingle();
                         result.Values.Add(new EnvironmentDataPoint<float>
                                           {
-                                              Latitude_degrees = south + (lat * gridSpacing),
-                                              Longitude_degrees = west + (lon * gridSpacing),
+                                              Latitude = south + (lat * gridSpacing),
+                                              Longitude = west + (lon * gridSpacing),
                                               Value = curSample == 1e16f ? float.NaN : -curSample,
                                           });
                     }
@@ -271,7 +271,7 @@ namespace ESME.Model
                 {
                     var lat = lats[latIndex];
                     var lon = lons[lonIndex];
-                    var selectedPoint = Values.Find(t => t.Latitude_degrees == lat && t.Longitude_degrees == lon);
+                    var selectedPoint = Values.Find(t => t.Latitude == lat && t.Longitude == lon);
                     if (selectedPoint == null) throw new DataException("ValueArray: This data set is not a rectangular array");
                     result[lonIndex, latIndex] = selectedPoint.Value.Values[depthIndex];
                 }
@@ -292,7 +292,7 @@ namespace ESME.Model
         /// </returns>
         protected virtual bool Lookup(EarthCoordinate coordinate, ref EnvironmentDataPoint<DepthValueList> value)
         {
-            var selectedIndex = Values.FindIndex(t => t.Latitude_degrees == coordinate.Latitude_degrees && t.Longitude_degrees == coordinate.Longitude_degrees);
+            var selectedIndex = Values.FindIndex(t => t.Latitude == coordinate.Latitude && t.Longitude == coordinate.Longitude);
             if (selectedIndex != -1)
             {
                 value = Values[selectedIndex];
