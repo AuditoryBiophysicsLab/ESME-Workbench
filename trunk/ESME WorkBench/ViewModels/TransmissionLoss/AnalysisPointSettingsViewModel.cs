@@ -312,9 +312,15 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                     delegate
                     {
                         var result = _messageBoxService.ShowOkCancel("Are you sure you want to use this radial configuration\nfor all modes in this analysis point?", CustomDialogIcons.Question);
-                        if (result == CustomDialogResults.Yes)
+                        if (result == CustomDialogResults.OK)
                         {
-                            
+                            foreach (var soundsource in _analysisPoint.SoundSources)
+                            {
+                                soundsource.RadialBearings.Clear();
+                                soundsource.RadialBearings.AddRange(AvailableBearings);
+                                soundsource.RadialBearings.Sort();
+                            }
+
                         }
                     }));
             }
