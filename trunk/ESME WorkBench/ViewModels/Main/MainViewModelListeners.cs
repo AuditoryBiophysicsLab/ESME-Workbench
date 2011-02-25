@@ -87,7 +87,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 }
 #endif
             }
-            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint, _messageBoxService);
+            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
             var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
             if ((!settingsResult.HasValue) || (!settingsResult.Value))
             {

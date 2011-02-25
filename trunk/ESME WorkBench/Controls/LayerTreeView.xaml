@@ -21,9 +21,11 @@
 			        Value="{Binding Icon}" />
 			<Setter Property="MenuItem.IsCheckable"
 			        Value="{Binding IsCheckable}" />
-			<Setter Property="MenuItem.IsChecked"
+            <Setter Property="MenuItem.IsChecked"
 			        Value="{Binding IsChecked}" />
-			<Setter Property="MenuItem.CommandParameter"
+            <Setter Property="MenuItem.Visibility"
+			        Value="{Binding Visibility}" />
+            <Setter Property="MenuItem.CommandParameter"
 			        Value="{Binding}" />
 		</Style>
 

@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Cinch;
-using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.NAVO;
@@ -488,6 +487,17 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _nAVOEnvironmentBuilder;
+
+        #endregion
+
+        #region ExportAnalysisPointsToCASSCommand
+
+        public SimpleCommand<object, object> ExportAnalysisPointsToCASSCommand
+        {
+            get { return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.ExportAnalysisPointsToCASS, true); })); }
+        }
+
+        SimpleCommand<object, object> _exportAnalysisPointsToCASS;
 
         #endregion
 

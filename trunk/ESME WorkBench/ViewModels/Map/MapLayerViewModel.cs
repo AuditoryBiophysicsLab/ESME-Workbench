@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
+using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Main;
 using HRC.Services;
@@ -19,9 +20,8 @@ namespace ESMEWorkBench.ViewModels.Map
         static Random _random;
 
         public static ObservableCollection<MapLayerViewModel> Layers;
-        static readonly PropertyChangedEventArgs LineColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorBrush);
-        static readonly PropertyChangedEventArgs AreaColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorBrush);
 
+        #region Menu Initializers
         readonly MenuItemViewModel _areaColorMenu = new MenuItemViewModel
                                                     {
                                                         Header = "Area Color",
@@ -127,10 +127,16 @@ namespace ESMEWorkBench.ViewModels.Map
                                                      Header = "Remove Layer",
                                                  };
 
+        readonly MenuItemViewModel _settingsMenu = new MenuItemViewModel
+                                                   {
+                                                       Header = "Settings...",
+                                                   };
+
         readonly MenuItemViewModel _symbolSizeMenu = new MenuItemViewModel
                                                      {
                                                          Header = "Symbol Size",
                                                      };
+        #endregion
 
         Brush _areaColorBrush;
         int _index = -1;
@@ -299,8 +305,6 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #region public Color AreaColor { get; set; }
 
-        Color _areaColor = RandomColor;
-
         [XmlElement]
         public Color AreaColor
         {
@@ -313,6 +317,9 @@ namespace ESMEWorkBench.ViewModels.Map
                 AreaColorBrush = new SolidColorBrush(_areaColor);
             }
         }
+
+        static readonly PropertyChangedEventArgs AreaColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AreaColorBrush);
+        Color _areaColor = RandomColor;
 
         #endregion
 
@@ -333,8 +340,6 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #region public Color LineColor { get; set; }
 
-        Color _lineColor = RandomColor;
-
         [XmlElement]
         public Color LineColor
         {
@@ -350,6 +355,28 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
+        static readonly PropertyChangedEventArgs LineColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorBrush);
+        Color _lineColor = RandomColor;
+
+        #endregion
+
+        #region public AnalysisPoint AnalysisPoint { get; set; }
+
+        [XmlIgnore]
+        public AnalysisPoint AnalysisPoint
+        {
+            get { return _analysisPoint; }
+            set
+            {
+                if (_analysisPoint == value) return;
+                _analysisPoint = value;
+                NotifyPropertyChanged(AnalysisPointChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AnalysisPoint);
+        AnalysisPoint _analysisPoint;
+
         #endregion
 
         static MapLayerViewModel() { _random = new Random(); }
@@ -363,7 +390,14 @@ namespace ESMEWorkBench.ViewModels.Map
             LineStyle = CreateLineStyle(LineColor, LineWidth);
             PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int) LineWidth);
 
+            // These settings are defaults, which are overriden as appropriate by specific layers
+            HasSettings = false;
+            CanBeRemoved = false;
+            CanBeReordered = true;
+
             _removeMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
+
+            _settingsMenu.Command = new SimpleCommand<object, object>(obj => HasSettings, obj => MediatorMessage.Send(MediatorMessage.EditAnalysisPoint, AnalysisPoint));
 
             _lineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
                                                                                                   {
@@ -407,8 +441,10 @@ namespace ESMEWorkBench.ViewModels.Map
             ContextMenu = new List<MenuItemViewModel>
                           {
                               _orderMenu,
-                              _removeMenu
+                              _removeMenu,
+                              _settingsMenu,
                           };
+
             LineColorPickerMenu = new List<MenuItemViewModel>
                                   {
                                       _lineColorMenu,
@@ -507,11 +543,10 @@ namespace ESMEWorkBench.ViewModels.Map
         [XmlIgnore]
         public Overlay Overlay { get; set; }
 
-        [XmlIgnore]
-
         #region public Brush LineColorBrush { get; set; }
 
-            public Brush LineColorBrush
+        [XmlIgnore]
+        public Brush LineColorBrush
         {
             get { return _lineColorBrush; }
             set
@@ -524,11 +559,10 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
-        [XmlIgnore]
-
         #region public Brush AreaColorBrush { get; set; }
 
-            public Brush AreaColorBrush
+        [XmlIgnore]
+        public Brush AreaColorBrush
         {
             get { return _areaColorBrush; }
             set
@@ -560,6 +594,7 @@ namespace ESMEWorkBench.ViewModels.Map
                     case LayerType.SoundSpeed:
                     case LayerType.BottomType:
                     case LayerType.WindSpeed:
+                    case LayerType.AnalysisPoint:
                         return Visibility.Visible;
                 }
             }
@@ -648,11 +683,31 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return _canBeReordered; }
             set
             {
+                _orderMenu.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
                 if (_canBeReordered == value) return;
                 _canBeReordered = value;
                 NotifyPropertyChanged(CanBeReorderedChangedEventArgs);
             }
         }
+
+        #endregion
+
+        #region public bool HasSettings { get; set; }
+
+        public bool HasSettings
+        {
+            get { return _hasSettings; }
+            set
+            {
+                _settingsMenu.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                if (_hasSettings == value) return;
+                _hasSettings = value;
+                NotifyPropertyChanged(HasSettingsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs HasSettingsChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.HasSettings);
+        bool _hasSettings;
 
         #endregion
 
@@ -666,6 +721,7 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return _canBeRemoved; }
             set
             {
+                _removeMenu.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
                 if (_canBeRemoved == value) return;
                 _canBeRemoved = value;
                 NotifyPropertyChanged(CanBeRemovedChangedEventArgs);

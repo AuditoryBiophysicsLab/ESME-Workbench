@@ -64,6 +64,8 @@ namespace ESMEWorkBench.ViewModels.Map
             foreach (var shape in overlayShapes) Add(shape);
         }
 
+        public void Clear() { if (_layer != null) _layer.InternalFeatures.Clear(); }
+
         public void Done()
         {
             if (_layer == null) return;

@@ -35,6 +35,7 @@ namespace ESMEWorkBench.Data
     {
         static Type[] _referencedTypes;
         static readonly PropertyChangedEventArgs TransmissionLossFieldsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.TransmissionLossFields);
+        public static IUIVisualizerService VisualizerService { get; set; }
 
         #region public string Comments { get; set; }
 
@@ -262,26 +263,7 @@ namespace ESMEWorkBench.Data
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null)
-                    {
-                        foreach (var item in e.NewItems)
-                        {
-                            var layer = (MapLayerViewModel) item;
-                            if (layer.LayerType == LayerType.AnalysisPoint)
-                            {
-                                if (AnalysisPointLayer == null)
-                                {
-                                    AnalysisPointLayer = (MarkerLayerViewModel) layer;
-                                    AnalysisPointLayer.MarkerImageUri = new Uri("pack://application:,,,/ESME WorkBench;component/Images/AQUA.png");
-                                    if (AnalysisPoints != null)
-                                    {
-                                        foreach (var ap in AnalysisPoints) AddContextMenuToAnalysisPoint(ap);
-                                    }
-                                }
-                                else throw new ApplicationException("Experiment error: Analysis point layer already exists!");
-                            }
-                        }
-                    }
+                    if (e.NewItems != null) {}
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     break;
@@ -323,35 +305,26 @@ namespace ESMEWorkBench.Data
                 case NotifyCollectionChangedAction.Add:
                     if (e.NewItems != null)
                     {
-                        if (AnalysisPointLayer == null) return;
-                        foreach (var item in e.NewItems)
-                        {
-                            var newPoint = (AnalysisPoint) item;
-                            AddContextMenuToAnalysisPoint(newPoint);
-                        }
+                        foreach (var newPoint in e.NewItems)
+                            DisplayAnalysisPoint((AnalysisPoint)newPoint);
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    if (e.OldItems != null)
-                    {
-                        if (AnalysisPointLayer == null) return;
-                        foreach (var item in e.OldItems) AnalysisPointLayer.RemoveMarker(item);
-                    }
+                    if (e.OldItems != null) {}
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     break;
                 case NotifyCollectionChangedAction.Reset:
-                    AnalysisPointLayer.Clear();
                     break;
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 
+#if false
         void AddContextMenuToAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            var marker = AnalysisPointLayer.AddMarker(analysisPoint, analysisPoint);
             marker.ContextMenu = new ContextMenu();
             marker.ContextMenu.Items.Add(new MenuItem
                                          {
@@ -372,6 +345,7 @@ namespace ESMEWorkBench.Data
                                              CommandParameter = analysisPoint,
                                          });
         }
+#endif
 
         public TransmissionLossField NearestMatchingTransmissionLoss(NemoMode nemoMode, EarthCoordinate location)
         {
@@ -608,9 +582,6 @@ namespace ESMEWorkBench.Data
         [XmlIgnore]
         public AnimatInterface AnimatInterface { get; set; }
 
-        [XmlIgnore]
-        public MarkerLayerViewModel AnalysisPointLayer { get; private set; }
-
         [XmlElement]
         public string CurrentExtent { get; set; }
 
@@ -786,17 +757,6 @@ namespace ESMEWorkBench.Data
         {
             // if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent));
             if (CurrentScale != 0) MediatorMessage.Send(MediatorMessage.SetCurrentScale, CurrentScale);
-            if (AnalysisPointLayer == null)
-                AnalysisPointLayer = new MarkerLayerViewModel
-                                     {
-                                         Name = "Analysis Points",
-                                         CanBeRemoved = false,
-                                         CanBeReordered = true,
-                                         CanChangeAreaColor = false,
-                                         CanChangeLineColor = false,
-                                         LayerType = LayerType.AnalysisPoint,
-                                         MarkerImageUri = new Uri("pack://application:,,,/ESME WorkBench;component/Images/AQUA.png"),
-                                     };
             if (MapLayers == null)
             {
                 var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -814,14 +774,12 @@ namespace ESMEWorkBench.Data
                                     Name = "Base Map",
                                     LayerType = LayerType.BaseMap,
                                 },
-                                AnalysisPointLayer,
                             };
             }
             if (FileName != null)
             {
                 var backgroundWorker = new BackgroundWorker();
                 backgroundWorker.DoWork += delegate { ProcessTransmissionLossFieldFiles(LocalStorageRoot); };
-                backgroundWorker.RunWorkerCompleted += delegate { UpdateAnalysisPointDisplay(); };
                 backgroundWorker.RunWorkerAsync();
             }
             MapLayerViewModel.Layers = MapLayers;
@@ -839,28 +797,32 @@ namespace ESMEWorkBench.Data
             CommandManager.InvalidateRequerySuggested();
         }
 
-        void UpdateAnalysisPointDisplay()
+        void DisplayAnalysisPoint(AnalysisPoint curPoint)
         {
-            if (AnalysisPointLayer == null) return;
-            foreach (var curPoint in AnalysisPoints)
+            var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude_degrees, curPoint.Longitude_degrees);
+            var analysisPointLayer = (OverlayShapeMapLayer) MapLayers.FirstOrDefault(curLayer => curLayer.Name == analysisPointName);
+            if (analysisPointLayer == null)
             {
-                var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude_degrees, curPoint.Longitude_degrees);
-                var analysisPointLayer = (OverlayShapeMapLayer) MapLayers.FirstOrDefault(curLayer => curLayer.Name == analysisPointName);
-                if (analysisPointLayer == null)
-                {
-                    analysisPointLayer = new OverlayShapeMapLayer
-                                         {
-                                             Name = analysisPointName,
-                                             CanBeReordered = true,
-                                             CanChangeLineColor = true,
-                                             CanChangeLineWidth = true,
-                                             CanBeRemoved = false,
-                                             LayerType = LayerType.OverlayFile,
-                                         };
-                    MapLayers.Add(analysisPointLayer);
-                }
-                var sourcePoints = new List<EarthCoordinate>();
-                foreach (var soundSource in curPoint.SoundSources)
+                analysisPointLayer = new OverlayShapeMapLayer
+                                     {
+                                         Name = analysisPointName,
+                                         LayerType = LayerType.AnalysisPoint,
+                                     };
+                MapLayers.Add(analysisPointLayer);
+            }
+            
+            analysisPointLayer.AnalysisPoint = curPoint;
+            analysisPointLayer.CanBeRemoved = true;
+            analysisPointLayer.CanBeReordered = true;
+            analysisPointLayer.HasSettings = true;
+            analysisPointLayer.CanChangeLineColor = true;
+            analysisPointLayer.CanChangeLineWidth = true;
+
+            var sourcePoints = new List<EarthCoordinate>();
+            analysisPointLayer.Clear();
+            foreach (var soundSource in curPoint.SoundSources)
+            {
+                if (soundSource.ShouldBeCalculated)
                 {
                     sourcePoints.Add(curPoint);
                     foreach (var radialBearing in soundSource.RadialBearings)
@@ -871,10 +833,10 @@ namespace ESMEWorkBench.Data
                         sourcePoints.Add(curPoint);
                     }
                     analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5, LineStyle.Solid));
-                    analysisPointLayer.Done();
                 }
+                analysisPointLayer.Done();
             }
-
+            MediatorMessage.Send(MediatorMessage.RefreshLayer, analysisPointLayer);
         }
 
         void TransmissionLossFieldFileChanged(object sender, FileSystemEventArgs e)
@@ -1108,7 +1070,7 @@ namespace ESMEWorkBench.Data
 
         public SimpleCommand<object, AnalysisPoint> DeleteAnalysisPointCommand
         {
-            get { return _deleteAnalysisPointCommand ?? (_deleteAnalysisPointCommand = new SimpleCommand<object, AnalysisPoint>(ap => MediatorMessage.Send(MediatorMessage.DeleteAnalysisPoint, ap))); }
+            get { return _deleteAnalysisPointCommand ?? (_deleteAnalysisPointCommand = new SimpleCommand<object, AnalysisPoint>(ap => MediatorMessage.Send(MediatorMessage.RemoveAnalysisPoint, ap))); }
         }
 
         #endregion

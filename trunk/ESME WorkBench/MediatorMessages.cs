@@ -18,7 +18,7 @@ namespace ESMEWorkBench
 
         public const string AddAnalysisPoint = "AddAnalysisPointMessage";
         public const string EditAnalysisPoint = "EditAnalysisPointMessage";
-        public const string DeleteAnalysisPoint = "DeleteAnalysisPointMessage";
+        public const string RemoveAnalysisPoint = "DeleteAnalysisPointMessage";
         public const string ViewAnalysisPoint = "ViewAnalysisPointMessage";
         public const string CalculateAnalysisPoint = "CalculateAnalysisPointMessage";
 
@@ -49,6 +49,7 @@ namespace ESMEWorkBench
         public const string RequestTransmissionLossBathymetry = "RequestTransmissionLossBathymetryMessage";
         public const string TransmissionLossRadialEarthCoordinate = "TransmissionLossRadialEarthCoordinateMessage";
         public const string CancelCurrentTransmissionLossCalculation = "CancelCurrentTransmissionLossCalculationMessage";
+        public const string ExportAnalysisPointsToCASS = "ExportAnalysisPointsToCASSMessage";
 
         public const string CurrentScaleChanged = "CurrentScaleChangedMessage";
         public const string CurrentExtentChanged = "CurrentExtentChangedMessage";
