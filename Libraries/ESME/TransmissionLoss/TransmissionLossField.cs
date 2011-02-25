@@ -98,8 +98,8 @@ namespace ESME.TransmissionLoss
             Name = runFile.Name ?? "";
             Metadata = runFile.Metadata ?? "";
             SourceLevel = runFile.TransmissionLossJob.SoundSource.SourceLevel;
-            Latitude = (float)runFile.TransmissionLossJob.SoundSource.Latitude_degrees;
-            Longitude = (float)runFile.TransmissionLossJob.SoundSource.Longitude_degrees;
+            Latitude = (float)runFile.TransmissionLossJob.SoundSource.Latitude;
+            Longitude = (float)runFile.TransmissionLossJob.SoundSource.Longitude;
             EarthCoordinate = new EarthCoordinate(Latitude, Longitude);
             SourceDepth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.SourceDepth;
             VerticalBeamWidth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth;

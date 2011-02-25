@@ -35,11 +35,11 @@ namespace ESME.Environment
                                    //      It now places the bounding box such that the lines are coincident with the edges of
                                    //      the edge samples of the selected data (extends by half the horizontal/vertical resolution)
                                    //northeast corner:                   
-                                   new EarthCoordinate(NorthEast.Latitude_degrees + (LatitudinalResolution/2), NorthEast.Longitude_degrees + (LongitudinalResolution/2)), // northeast corner
-                                   new EarthCoordinate(SouthWest.Latitude_degrees - (LatitudinalResolution/2), NorthEast.Longitude_degrees + (LongitudinalResolution/2)), // southeast corner                                   new EarthCoordinate(SouthWest.Latitude_degrees - (LatitudinalResolution/2), SouthWest.Longitude_degrees - (LongitudinalResolution/2)), // southwest corner: 
-                                   new EarthCoordinate(SouthWest.Latitude_degrees - (LatitudinalResolution/2), SouthWest.Longitude_degrees - (LongitudinalResolution/2)), // southwest corner                                   new EarthCoordinate(SouthWest.Latitude_degrees - (LatitudinalResolution/2), SouthWest.Longitude_degrees - (LongitudinalResolution/2)), // southwest corner: 
-                                   new EarthCoordinate(NorthEast.Latitude_degrees + (LatitudinalResolution/2), SouthWest.Longitude_degrees - (LongitudinalResolution/2)), // northwest corner
-                                   new EarthCoordinate(NorthEast.Latitude_degrees + (LatitudinalResolution/2), NorthEast.Longitude_degrees + (LongitudinalResolution/2)), // northeast corner again to close the loop.
+                                   new EarthCoordinate(NorthEast.Latitude + (LatitudinalResolution/2), NorthEast.Longitude + (LongitudinalResolution/2)), // northeast corner
+                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), NorthEast.Longitude + (LongitudinalResolution/2)), // southeast corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
+                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
+                                   new EarthCoordinate(NorthEast.Latitude + (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // northwest corner
+                                   new EarthCoordinate(NorthEast.Latitude + (LatitudinalResolution/2), NorthEast.Longitude + (LongitudinalResolution/2)), // northeast corner again to close the loop.
                                };
 
                 var shape = new OverlayLineSegments(bathyBox, Colors.Black, 1, LineStyle.Solid);
@@ -64,8 +64,8 @@ namespace ESME.Environment
             value = null;
             if (Contains(coordinate))
             {
-                var latIndex = Latitudes.IndexOf(coordinate.Latitude_degrees);
-                var lonIndex = Longitudes.IndexOf(coordinate.Longitude_degrees);
+                var latIndex = Latitudes.IndexOf(coordinate.Latitude);
+                var lonIndex = Longitudes.IndexOf(coordinate.Longitude);
                 if ((latIndex >= 0) && (lonIndex >= 0))
                 {
                     value = FieldData[latIndex, lonIndex];
@@ -81,10 +81,10 @@ namespace ESME.Environment
             if (Contains(coordinate))
             {
                 var closestCoordinate = new EarthCoordinate(Latitudes.First(), Longitudes.First());
-                foreach (var curCoordinate in Latitudes.SelectMany(latitude => Longitudes, (latitude, longitude) => new EarthCoordinate(latitude, longitude)).Where(curCoordinate => coordinate.GetDistanceTo_Meters(closestCoordinate) > coordinate.GetDistanceTo_Meters(curCoordinate)))
+                foreach (var curCoordinate in Latitudes.SelectMany(latitude => Longitudes, (latitude, longitude) => new EarthCoordinate(latitude, longitude)).Where(curCoordinate => coordinate.DistanceTo(closestCoordinate) > coordinate.DistanceTo(curCoordinate)))
                     closestCoordinate = curCoordinate;
-                var latIndex = Latitudes.IndexOf(coordinate.Latitude_degrees);
-                var lonIndex = Longitudes.IndexOf(coordinate.Longitude_degrees);
+                var latIndex = Latitudes.IndexOf(coordinate.Latitude);
+                var lonIndex = Longitudes.IndexOf(coordinate.Longitude);
                 if ((latIndex >= 0) && (lonIndex >= 0))
                 {
                     value = FieldData[lonIndex, latIndex];
@@ -244,8 +244,8 @@ namespace ESME.Environment
             var data = new List<EarthCoordinate<float>>();
             foreach (var row in layer.GetRows(south, north))
                 data.AddRange(from point in row.Points
-                              where (point.EarthCoordinate.Longitude_degrees >= west) && (point.EarthCoordinate.Longitude_degrees <= east)
-                              select new EarthCoordinate<float>(point.EarthCoordinate.Latitude_degrees, point.EarthCoordinate.Longitude_degrees, point.Data[0]));
+                              where (point.EarthCoordinate.Longitude >= west) && (point.EarthCoordinate.Longitude <= east)
+                              select new EarthCoordinate<float>(point.EarthCoordinate.Latitude, point.EarthCoordinate.Longitude, point.Data[0]));
             return new Environment2DData(data)
                    {
                        Filename = fileName
@@ -371,8 +371,8 @@ namespace ESME.Environment
             for (var lon = 0; lon < Longitudes.Count; lon++)
                 for (var lat = 0; lat < Latitudes.Count; lat++)
                 {
-                    stream.Write(FieldData[lon, lat].Latitude_degrees);
-                    stream.Write(FieldData[lon, lat].Longitude_degrees);
+                    stream.Write(FieldData[lon, lat].Latitude);
+                    stream.Write(FieldData[lon, lat].Longitude);
                     stream.Write(FieldData[lon, lat].Data);
                 }
         }

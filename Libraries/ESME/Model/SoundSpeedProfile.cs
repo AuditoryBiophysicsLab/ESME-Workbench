@@ -123,8 +123,8 @@ namespace ESME.Model
         {
             var result = new EnvironmentalDataPoint
                          {
-                             Latitude_degrees = ssp.Latitude_degrees,
-                             Longitude_degrees = ssp.Longitude_degrees
+                             Latitude = ssp.Latitude,
+                             Longitude = ssp.Longitude
                          };
             result.Data.AddRange(from speed in ssp.SoundSpeeds select (double)speed);
             return result;

@@ -26,7 +26,7 @@ namespace ESME.Environment
             if ((southLatitude < -90) || (southLatitude > 90)) throw new LatitudeOutOfRangeException("DataLayer: southLatitude must be between -90 and +90");
             if ((northLatitude < -90) || (northLatitude > 90)) throw new LatitudeOutOfRangeException("DataLayer: northLatitude must be between -90 and +90");
             if (southLatitude >= northLatitude) throw new LatitudeOutOfRangeException("DataLayer: southLatitude must be less than northLatitude");
-            return GetPoints(0, _dataLayer.ColumnCount, 1).Where(point => (southLatitude <= point.EarthCoordinate.Latitude_degrees) && (point.EarthCoordinate.Latitude_degrees <= northLatitude));
+            return GetPoints(0, _dataLayer.ColumnCount, 1).Where(point => (southLatitude <= point.EarthCoordinate.Latitude) && (point.EarthCoordinate.Latitude <= northLatitude));
         }
 
         public IEnumerable<DataPoint> Points

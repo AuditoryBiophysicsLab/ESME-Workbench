@@ -92,7 +92,7 @@ namespace ESME.Environment.NAVO
             var tempQuad = tempCu * temperature;
             var tempQuin = tempQuad * temperature;
 
-            var pressure = DepthToPressure(location.Latitude_radians, depth);
+            var pressure = DepthToPressure(location.LatitudeRadians, depth);
             var pressSq = pressure * pressure;
             var pressCu = pressSq * pressure;
 

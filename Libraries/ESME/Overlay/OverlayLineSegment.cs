@@ -29,9 +29,9 @@ namespace ESME.Overlay
         public override string ToString()
         {
             return String.Format(" Start: ({0}, {1})\n    End: ({2}, {3})\nLength: {4}m\nCourse: {5}deg",
-                                 this[0].Latitude_degrees, this[0].Longitude_degrees,
-                                 this[1].Latitude_degrees, this[1].Longitude_degrees,
-                                 this[0].GetDistanceTo_Meters(this[1]),
+                                 this[0].Latitude, this[0].Longitude,
+                                 this[1].Latitude, this[1].Longitude,
+                                 this[0].DistanceTo(this[1]),
                                  Course.Degrees);
         }
 
@@ -44,7 +44,7 @@ namespace ESME.Overlay
                     var retval = new StringBuilder();
                     retval.Append("LINESTRING(");
                     foreach (var coord in EarthCoordinates)
-                        retval.Append(string.Format("{0} {1}, ", coord.Latitude_degrees, coord.Longitude_degrees));
+                        retval.Append(string.Format("{0} {1}, ", coord.Latitude, coord.Longitude));
                     retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
                     retval.Append(")");
                     MyWellKnownText = retval.ToString();
@@ -74,8 +74,8 @@ namespace ESME.Overlay
             get
             {
                 return new EarthCoordinate(
-                    (this[0].Latitude_degrees + this[1].Latitude_degrees)/2.0,
-                    (this[0].Longitude_degrees + this[1].Longitude_degrees)/2.0);
+                    (this[0].Latitude + this[1].Latitude)/2.0,
+                    (this[0].Longitude + this[1].Longitude)/2.0);
             }
         }
 
@@ -152,7 +152,7 @@ namespace ESME.Overlay
         {
             if (IsVertical && that.IsVertical)
             {
-                if (EarthCoordinates[0].Longitude_degrees == that.EarthCoordinates[0].Longitude_degrees)
+                if (EarthCoordinates[0].Longitude == that.EarthCoordinates[0].Longitude)
                     return true;
             }
             if (IsParallelTo(that))
@@ -190,7 +190,7 @@ namespace ESME.Overlay
             IsVertical = IsHorizontal = false;
 
             // If both X values are NOT the same
-            if (this[0].Longitude_degrees != this[1].Longitude_degrees)
+            if (this[0].Longitude != this[1].Longitude)
             {
                 // Classic linear equation:
                 // y = m * x + b
@@ -198,10 +198,10 @@ namespace ESME.Overlay
                 // y - (m * x) = b
 
                 // We can compute the slope of the line
-                _m = (this[1].Latitude_degrees - this[0].Latitude_degrees)/
-                     (this[1].Longitude_degrees - this[0].Longitude_degrees);
+                _m = (this[1].Latitude - this[0].Latitude)/
+                     (this[1].Longitude - this[0].Longitude);
                 // and its' y-intercept
-                _b = this[0].Latitude_degrees - (_m*this[0].Longitude_degrees);
+                _b = this[0].Latitude - (_m*this[0].Longitude);
 
                 if (_m == 0.0)
                     IsHorizontal = true;
@@ -254,9 +254,9 @@ namespace ESME.Overlay
             // Now we will figure out exactly where.
 
             if (IsVertical)
-                return new EarthCoordinate(that.Y(this[0].Longitude_degrees), this[0].Longitude_degrees);
+                return new EarthCoordinate(that.Y(this[0].Longitude), this[0].Longitude);
             if (that.IsVertical)
-                return new EarthCoordinate(Y(that[0].Longitude_degrees), that[0].Longitude_degrees);
+                return new EarthCoordinate(Y(that[0].Longitude), that[0].Longitude);
             //if (this.IsHorizontal)
             //    return new PointF(that.X(this.Points[0].Y), this.Points[0].Y);
 
@@ -292,25 +292,25 @@ namespace ESME.Overlay
             // If the point's longitude is within the span of longitudes covered by this line segment
             if (IsVertical)
             {
-                var deltaLon = Math.Abs(this[0].Longitude_degrees - pointToTest.Longitude_degrees);
+                var deltaLon = Math.Abs(this[0].Longitude - pointToTest.Longitude);
                 if (deltaLon < 1e-6) verticalMatch = true;
             }
             else
             {
-                if (((this[0].Longitude_degrees <= pointToTest.Longitude_degrees) && (pointToTest.Longitude_degrees <= this[1].Longitude_degrees)) ||
-                    ((this[1].Longitude_degrees <= pointToTest.Longitude_degrees) && (pointToTest.Longitude_degrees <= this[0].Longitude_degrees))) 
+                if (((this[0].Longitude <= pointToTest.Longitude) && (pointToTest.Longitude <= this[1].Longitude)) ||
+                    ((this[1].Longitude <= pointToTest.Longitude) && (pointToTest.Longitude <= this[0].Longitude))) 
                     verticalMatch = true;
             }
             if (IsHorizontal)
             {
-                var deltaLat = Math.Abs(this[0].Latitude_degrees - pointToTest.Latitude_degrees);
+                var deltaLat = Math.Abs(this[0].Latitude - pointToTest.Latitude);
                 if (deltaLat < 1e-6) horizontalMatch = true;
             }
             else
             {
                 // If the point's latitude is within the span of latitudes covered by this line segment
-                if (((this[0].Latitude_degrees <= pointToTest.Latitude_degrees) && (pointToTest.Latitude_degrees <= this[1].Latitude_degrees)) || 
-                    ((this[1].Latitude_degrees <= pointToTest.Latitude_degrees) && (pointToTest.Latitude_degrees <= this[0].Latitude_degrees))) 
+                if (((this[0].Latitude <= pointToTest.Latitude) && (pointToTest.Latitude <= this[1].Latitude)) || 
+                    ((this[1].Latitude <= pointToTest.Latitude) && (pointToTest.Latitude <= this[0].Latitude))) 
                     horizontalMatch = true;
             }
             return verticalMatch && horizontalMatch; // The line segment does not contain the point

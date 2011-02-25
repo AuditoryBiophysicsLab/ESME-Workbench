@@ -121,7 +121,7 @@ namespace ESME.Environment
 
         public static float SoundSpeed(EarthCoordinate location, float depth, float temperature, float salinity)
         {
-            var p = DepthToPressure(location.Latitude_radians, depth);
+            var p = DepthToPressure(location.LatitudeRadians, depth);
             if ((double.IsNaN(p)) || (double.IsNaN(temperature)) || (double.IsNaN(salinity))) return float.NaN;
 
             var p2 = p * p;

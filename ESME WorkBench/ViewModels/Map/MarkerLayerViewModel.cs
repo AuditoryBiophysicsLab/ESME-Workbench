@@ -42,7 +42,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         public Marker AddMarker(EarthCoordinate location, object tag)
         {
-            var newMarker = new Marker(location.Longitude_degrees, location.Latitude_degrees)
+            var newMarker = new Marker(location.Longitude, location.Latitude)
                             {
                                 ImageSource = _imageSource,
                                 Tag = tag,

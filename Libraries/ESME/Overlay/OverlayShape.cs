@@ -85,8 +85,8 @@ namespace ESME.Overlay
 
         private void Move(EarthCoordinate newLocation)
         {
-            double bearingDegrees = EarthCoordinates[0].GetBearingTo_Degrees(newLocation);
-            double distanceMeters = EarthCoordinates[0].GetDistanceTo_Meters(newLocation);
+            double bearingDegrees = EarthCoordinates[0].BearingTo(newLocation);
+            double distanceMeters = EarthCoordinates[0].DistanceTo(newLocation);
 
             Move(bearingDegrees, distanceMeters);
         }
@@ -118,10 +118,10 @@ namespace ESME.Overlay
             var west = 180.0;
             foreach (var curPoint in EarthCoordinates)
             {
-                north = Math.Max(curPoint.Latitude_degrees, north);
-                south = Math.Min(curPoint.Latitude_degrees, south);
-                east = Math.Max(curPoint.Longitude_degrees, east);
-                west = Math.Min(curPoint.Longitude_degrees, west);
+                north = Math.Max(curPoint.Latitude, north);
+                south = Math.Min(curPoint.Latitude, south);
+                east = Math.Max(curPoint.Longitude, east);
+                west = Math.Min(curPoint.Longitude, west);
             }
             var width = Math.Abs(west - east);
             var height = Math.Abs(north - south);

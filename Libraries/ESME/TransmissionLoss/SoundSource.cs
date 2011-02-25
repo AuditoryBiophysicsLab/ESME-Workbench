@@ -20,8 +20,8 @@ namespace ESME.TransmissionLoss
 
         public SoundSource(EarthCoordinate location, NemoMode nemoMode, int radialCount) : this()
         {
-            Latitude_degrees = location.Latitude_degrees;
-            Longitude_degrees = location.Longitude_degrees;
+            Latitude = location.Latitude;
+            Longitude = location.Longitude;
 
             AcousticProperties = new AcousticProperties(nemoMode);
 

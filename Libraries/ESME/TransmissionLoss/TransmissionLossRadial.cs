@@ -176,8 +176,8 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine("Vertical beam width (deg)" + transmissionLossField.VerticalBeamWidth);
                 var radialEnd = new EarthCoordinate(transmissionLossField.Latitude, transmissionLossField.Longitude);
                 radialEnd.Move(BearingFromSource, transmissionLossField.Radius);
-                sw.WriteLine("Receiver Latitude," + radialEnd.Latitude_degrees);
-                sw.WriteLine("Receiver Longitude," + radialEnd.Longitude_degrees);
+                sw.WriteLine("Receiver Latitude," + radialEnd.Latitude);
+                sw.WriteLine("Receiver Longitude," + radialEnd.Longitude);
                 sw.WriteLine();
             } // using sw
         }

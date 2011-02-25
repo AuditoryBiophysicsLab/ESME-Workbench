@@ -22,7 +22,7 @@ namespace ESME.Environment.NAVO
             get
             {
                 var result = from value in DataPoints
-                             select value.Latitude_degrees;
+                             select value.Latitude;
                 var list = result.Distinct().ToList();
                 list.Sort();
                 return list;
@@ -37,7 +37,7 @@ namespace ESME.Environment.NAVO
             get
             {
                 var result = from value in DataPoints
-                             select value.Longitude_degrees;
+                             select value.Longitude;
                 var list = result.Distinct().ToList();
                 list.Sort();
                 return list;

@@ -103,7 +103,7 @@ namespace ESME.Platform
                                     throw new PlatformMovementException(string.Format("Specified overlay file {0} is unsuitable for use as a bounding region.\nReason(s): {1}", curTrackdef.OverlayFile.FileName, reasons));
                                 }
 #endif
-                                if (!curTrackBoundingRegion.Contains(curLocation)) throw new PlatformMovementException(string.Format("Specified start location ({0:0.####}, {1:0.####}) is not contained within the trackdef bounding region", curLocation.Latitude_degrees, curLocation.Longitude_degrees));
+                                if (!curTrackBoundingRegion.Contains(curLocation)) throw new PlatformMovementException(string.Format("Specified start location ({0:0.####}, {1:0.####}) is not contained within the trackdef bounding region", curLocation.Latitude, curLocation.Longitude));
                             }
                             else
                             {
@@ -151,7 +151,7 @@ namespace ESME.Platform
                                 });
 
                                 //curLocation.Compare(proposedLocation);
-                                proposedLocation.Elevation_meters = curLocation.Elevation_meters;
+                                proposedLocation.Elevation = curLocation.Elevation;
                                 curCourseDegrees = newCourseDegrees;
                                 curLocation = new EarthCoordinate3D(proposedLocation);
                                 if (!curTrackBoundingRegion.Contains(curLocation)) throw new PlatformMovementException("Reflected position is outside the bounding region");

@@ -115,8 +115,8 @@ namespace ESME.Environment.NAVO
                                      select location.Value;
                     var dataPoint = new EnvironmentalDataPoint()
                     {
-                        Latitude_degrees = accumulator.Latitudes[latIndex],
-                        Longitude_degrees = accumulator.Longitudes[lonIndex],
+                        Latitude = accumulator.Latitudes[latIndex],
+                        Longitude = accumulator.Longitudes[lonIndex],
                     };
                     dataPoint.Data.AddRange(dataValues.ToList());
                     result.DataPoints.Add(dataPoint);
@@ -152,12 +152,12 @@ namespace ESME.Environment.NAVO
                 {
                     var curLat = latitude;
                     var curLon = longitude;
-                    var temperaturePoint = temperatureField.DataPoints.Find(x => x.Latitude_degrees == curLat && x.Longitude_degrees == curLon);
-                    var salinityPoint = salinityField.DataPoints.Find(x => x.Latitude_degrees == curLat && x.Longitude_degrees == curLon);
+                    var temperaturePoint = temperatureField.DataPoints.Find(x => x.Latitude == curLat && x.Longitude == curLon);
+                    var salinityPoint = salinityField.DataPoints.Find(x => x.Latitude == curLat && x.Longitude == curLon);
                     var soundSpeedData = new EnvironmentalDataPoint
                     {
-                        Latitude_degrees = curLat,
-                        Longitude_degrees = curLon,
+                        Latitude = curLat,
+                        Longitude = curLon,
                     };
                     if ((temperaturePoint == null) || (salinityPoint == null)) continue;
                     var curPointDepths = new float[Math.Max(temperaturePoint.Data.Count, salinityPoint.Data.Count)];
@@ -181,7 +181,7 @@ namespace ESME.Environment.NAVO
             var depths = data.DepthAxis;
             var averageData = (from point in data.DataPoints
                                where point.Data != null
-                               select new EarthCoordinate<List<AverageDatum>>(point.Latitude_degrees, point.Longitude_degrees, point.Data.Select(datum => new AverageDatum(datum)).ToList())).ToList();
+                               select new EarthCoordinate<List<AverageDatum>>(point.Latitude, point.Longitude, point.Data.Select(datum => new AverageDatum(datum)).ToList())).ToList();
             return new Environment3DAverager(depths, averageData);
         }
     }

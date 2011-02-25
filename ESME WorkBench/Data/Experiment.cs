@@ -355,7 +355,7 @@ namespace ESMEWorkBench.Data
                     if (transmissionLossField.IsAcousticMatchFor(nemoMode))
                     {
                         if (nearestMatch == null) nearestMatch = transmissionLossField;
-                        else if (location.GetDistanceTo_Meters(nearestMatch.EarthCoordinate) > location.GetDistanceTo_Meters(transmissionLossField.EarthCoordinate)) nearestMatch = transmissionLossField;
+                        else if (location.DistanceTo(nearestMatch.EarthCoordinate) > location.DistanceTo(transmissionLossField.EarthCoordinate)) nearestMatch = transmissionLossField;
                     }
             return nearestMatch;
         }
@@ -799,7 +799,7 @@ namespace ESMEWorkBench.Data
 
         void DisplayAnalysisPoint(AnalysisPoint curPoint)
         {
-            var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude_degrees, curPoint.Longitude_degrees);
+            var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
             var analysisPointLayer = (OverlayShapeMapLayer) MapLayers.FirstOrDefault(curLayer => curLayer.Name == analysisPointName);
             if (analysisPointLayer == null)
             {
@@ -867,7 +867,7 @@ namespace ESMEWorkBench.Data
             foreach (var analysisPoint in AnalysisPoints.Where(analysisPoint => transmissionLossField.EarthCoordinate.Equals(analysisPoint)))
             {
                 analysisPoint.TransmissionLossFields.Add(transmissionLossField);
-                Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.Latitude_degrees, analysisPoint.Longitude_degrees));
+                Console.WriteLine(string.Format("Matched TL Field @({0}, {1}) to analysis point @({2}, {3})", transmissionLossField.Latitude, transmissionLossField.Longitude, analysisPoint.Latitude, analysisPoint.Longitude));
                 return;
             }
         }

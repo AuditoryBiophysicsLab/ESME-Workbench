@@ -11,8 +11,8 @@ namespace ESME.Environment
         {
             Name = name;
             _endPoint = endPoint;
-            Length = GetDistanceTo_Meters(_endPoint);
-            Bearing = GetBearingTo_Degrees(_endPoint);
+            Length = DistanceTo(_endPoint);
+            Bearing = BearingTo(_endPoint);
             _midPoint = new EarthCoordinate(startPoint);
             _midPoint.Move(Bearing, Length / 2);
         }

@@ -19,8 +19,8 @@ namespace ESME.TransmissionLoss
 
         public AnalysisPoint(EarthCoordinate location) : this()
         {
-            Latitude_degrees = location.Latitude_degrees;
-            Longitude_degrees = location.Longitude_degrees;
+            Latitude = location.Latitude;
+            Longitude = location.Longitude;
         }
 
         public List<SoundSource> SoundSources { get; set; }

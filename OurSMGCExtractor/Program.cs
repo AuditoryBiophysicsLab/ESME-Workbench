@@ -179,11 +179,11 @@ namespace OurSMGCExtractor
                         var curMonthDataFile = DataFiles[month - 1];
 
                         // figure out the row and column of the EEB files that corresponds to file.EarthCoordinate
-                        var row = (int) (file.EarthCoordinate.Latitude_degrees + 90.0f);
-                        var col = (int) (file.EarthCoordinate.Longitude_degrees + 180.0f);
+                        var row = (int) (file.EarthCoordinate.Latitude + 90.0f);
+                        var col = (int) (file.EarthCoordinate.Longitude + 180.0f);
 
                         //Console.WriteLine("Data for ({0:0}, {1:0}) Month {2}",
-                        //    file.EarthCoordinate.Latitude_degrees, file.EarthCoordinate.Longitude_degrees, month);
+                        //    file.EarthCoordinate.Latitude, file.EarthCoordinate.Longitude, month);
                         if (!float.IsNaN(curMonth.MeanWaveHeight))
                         {
                             //Console.WriteLine("  Wave Height = {0:0.0}", curMonth.MeanWaveHeight_m);

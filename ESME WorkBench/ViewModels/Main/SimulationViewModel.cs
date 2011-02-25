@@ -300,12 +300,12 @@ namespace ESMEWorkBench.ViewModels.Main
                                 // Loop through each animat and expose it if necessary
                                 foreach (var animat in animats)
                                 {
-                                    var animatRange = (float)(platformLocation.GetDistanceTo_Meters(animat.Location));
-                                    var animatBearing = (float)(platformLocation.GetBearingTo_Degrees(animat.Location));
+                                    var animatRange = (float)(platformLocation.DistanceTo(animat.Location));
+                                    var animatBearing = (float)(platformLocation.BearingTo(animat.Location));
                                     // If the animat is not within the radius, skip it.
                                     if ((animatRange <= beamRadius) && (horizontalBeamLimits.Contains(animatBearing)))
                                     {
-                                        var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) animat.Location.Elevation_meters);
+                                        var transmissionLoss = transmissionLossField.Lookup(animatBearing, animatRange, (float) animat.Location.Elevation);
                                         var soundPressureLevel = mode.SourceLevel - transmissionLoss;
                                         animat.CreateLevelBins(modeCount, 120, 6, 15);
                                         animat.RecordExposure(mode.PSMName, mode.ModeID, soundPressureLevel);

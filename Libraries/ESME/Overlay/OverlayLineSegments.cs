@@ -44,10 +44,10 @@ namespace ESME.Overlay
          
             foreach (var cursegment in _segments)
             {
-                North = Math.Max(North, cursegment.Location.Latitude_degrees);
-                East = Math.Max(East, cursegment.Location.Longitude_degrees);
-                South = Math.Min(South, cursegment.Location.Latitude_degrees);
-                West = Math.Min(West, cursegment.Location.Longitude_degrees);
+                North = Math.Max(North, cursegment.Location.Latitude);
+                East = Math.Max(East, cursegment.Location.Longitude);
+                South = Math.Min(South, cursegment.Location.Latitude);
+                West = Math.Min(West, cursegment.Location.Longitude);
             }
 
         }
@@ -130,7 +130,7 @@ namespace ESME.Overlay
                 if (!proposedCourseSegment.Contains(intersect) || !_segments[i].Contains(intersect)) continue;
                 proposedCourse.Reflect(Normals[i]);
                 var result = new EarthCoordinate(startLocation);
-                result.Move(proposedCourse, proposedEndLocation.GetDistanceTo_Meters(startLocation));
+                result.Move(proposedCourse, proposedEndLocation.DistanceTo(startLocation));
                 return result;
             }
 #if MATLAB_DEBUG_OUTPUT
@@ -192,8 +192,8 @@ namespace ESME.Overlay
                 return;
 
             // If the first point and the last point are identical, then this shape IS closed
-            if ((EarthCoordinates[0].Longitude_degrees == EarthCoordinates[EarthCoordinates.Count - 1].Longitude_degrees) &&
-                (EarthCoordinates[0].Latitude_degrees == EarthCoordinates[EarthCoordinates.Count - 1].Latitude_degrees))
+            if ((EarthCoordinates[0].Longitude == EarthCoordinates[EarthCoordinates.Count - 1].Longitude) &&
+                (EarthCoordinates[0].Latitude == EarthCoordinates[EarthCoordinates.Count - 1].Latitude))
                 IsClosed = true;
         }
 
@@ -213,18 +213,18 @@ namespace ESME.Overlay
                 // if (((V(i).y <= P.y) && (V(i+1).y > P.y)) ||    % an upward crossing
                 //     ((V(i).y > P.y) && (V(i+1).y <= P.y)))      % a downward crossing
                 //     vt = (P.y - V(i).y) / (V(i+1).y - V(i).y);  % compute the actual edge-ray intersect x-coordinate
-                if (((EarthCoordinates[i].Latitude_degrees <= coordinate.Latitude_degrees) &&
-                     (EarthCoordinates[i + 1].Latitude_degrees > coordinate.Latitude_degrees)) ||
-                    ((EarthCoordinates[i].Latitude_degrees > coordinate.Latitude_degrees) &&
-                     (EarthCoordinates[i + 1].Latitude_degrees <= coordinate.Latitude_degrees)))
+                if (((EarthCoordinates[i].Latitude <= coordinate.Latitude) &&
+                     (EarthCoordinates[i + 1].Latitude > coordinate.Latitude)) ||
+                    ((EarthCoordinates[i].Latitude > coordinate.Latitude) &&
+                     (EarthCoordinates[i + 1].Latitude <= coordinate.Latitude)))
                 {
-                    var vt = (coordinate.Latitude_degrees - EarthCoordinates[i].Latitude_degrees) /
-                                (EarthCoordinates[i + 1].Latitude_degrees - EarthCoordinates[i].Latitude_degrees);
+                    var vt = (coordinate.Latitude - EarthCoordinates[i].Latitude) /
+                                (EarthCoordinates[i + 1].Latitude - EarthCoordinates[i].Latitude);
                     // if (P.x < (V(i).x + vt * (V(i+1).x - V(i).x))) % P.x < intersect
                     //     cn = cn + 1;   % a valid crossing of y=P.y right of P.x
-                    if (coordinate.Longitude_degrees <
-                        (EarthCoordinates[i].Longitude_degrees +
-                         (vt * (EarthCoordinates[i + 1].Longitude_degrees - EarthCoordinates[i].Longitude_degrees))))
+                    if (coordinate.Longitude <
+                        (EarthCoordinates[i].Longitude +
+                         (vt * (EarthCoordinates[i + 1].Longitude - EarthCoordinates[i].Longitude))))
                         crossingNumber++;
                 }
             }
@@ -243,7 +243,7 @@ namespace ESME.Overlay
                     var retval = new StringBuilder();
                     retval.Append("LINESTRING(");
                     foreach (var coord in EarthCoordinates)
-                        retval.Append(string.Format("{0} {1}, ", coord.Longitude_degrees, coord.Latitude_degrees));
+                        retval.Append(string.Format("{0} {1}, ", coord.Longitude, coord.Latitude));
                     retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
                     retval.Append(")");
                     MyWellKnownText = retval.ToString();
