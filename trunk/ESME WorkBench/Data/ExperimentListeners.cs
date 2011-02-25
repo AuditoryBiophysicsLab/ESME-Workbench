@@ -9,6 +9,7 @@ using Cinch;
 using ESME.Environment;
 using ESME.Model;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
@@ -219,10 +220,14 @@ namespace ESMEWorkBench.Data
         void ExportAnalysisPointsToCASS(bool dummy)
         {
             if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0)) return;
-            foreach (var curPoint in AnalysisPoints)
-            {
-                
-            }
+            var timePeriods = new List<string>
+                              {
+                                  "Spring",
+                                  "Summer",
+                                  "Fall",
+                                  "Winter",
+                              };
+            CASSFiles.WriteCASSInputFiles(Globals.AppSettings.ScenarioDataDirectory, timePeriods, AnalysisPoints, NemoFile.Scenario, "bathy.txt");
         }
     }
 }

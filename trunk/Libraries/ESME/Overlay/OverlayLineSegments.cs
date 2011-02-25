@@ -87,7 +87,7 @@ namespace ESME.Overlay
             Console.WriteLine("Intersects=zeros({0}, 2);", Length);
             for (var i = 0; i < Length; i++)
             {
-                Console.WriteLine("Vertices({0},:)=[{1} {2}];", i + 1, this[i].Longitude_degrees, this[i].Latitude_degrees);
+                Console.WriteLine("Vertices({0},:)=[{1} {2}];", i + 1, this[i].Longitude, this[i].Latitude);
             }
         }
 #endif
@@ -116,8 +116,8 @@ namespace ESME.Overlay
             //end.Move(ProposedCourse.Degrees, 1000);
 #if MATLAB_DEBUG_OUTPUT
             Console.WriteLine("Course=zeros(2,2);\nCourse(1,:)=[{0} {1}];\nCourse(2,:)=[{2} {3}];",
-                startLocation.Longitude_degrees, startLocation.Latitude_degrees, 
-                proposedEndLocation.Longitude_degrees, proposedEndLocation.Latitude_degrees);
+                startLocation.Longitude, startLocation.Latitude, 
+                proposedEndLocation.Longitude, proposedEndLocation.Latitude);
 #endif
             var proposedCourse = new Course(startLocation, proposedEndLocation);
             var proposedCourseSegment = new OverlayLineSegment(startLocation, proposedEndLocation);
@@ -125,7 +125,7 @@ namespace ESME.Overlay
             {
                 var intersect = proposedCourseSegment.IntersectionPoint(_segments[i]);
 #if MATLAB_DEBUG_OUTPUT
-                Console.WriteLine("Intersects({0},:)=[{1} {2}];", i + 1, intersect.Longitude_degrees, intersect.Latitude_degrees);
+                Console.WriteLine("Intersects({0},:)=[{1} {2}];", i + 1, intersect.Longitude, intersect.Latitude);
 #endif
                 if (!proposedCourseSegment.Contains(intersect) || !_segments[i].Contains(intersect)) continue;
                 proposedCourse.Reflect(Normals[i]);

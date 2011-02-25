@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Model;
+using ESME.NEMO;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.CASS
@@ -75,6 +77,134 @@ namespace ESME.TransmissionLoss.CASS
                 bathyFile.WriteLine("EOT");
             }
 #endif
+        }
+
+        public static void WriteCASSInputFiles(string dataDirectoryPath, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoScenario nemoScenario, string cassBathymetryFileName)
+        {
+            foreach (var timePeriod in timePeriods)
+            {
+                var curSimAreaDataPath = Path.Combine(dataDirectoryPath, nemoScenario.SimAreaName);
+                var curPropagationPath = Path.Combine(curSimAreaDataPath, "Propagation");
+                var curTimePeriodPath = Path.Combine(curPropagationPath, timePeriod);
+                if (!Directory.Exists(curTimePeriodPath)) Directory.CreateDirectory(curTimePeriodPath);
+                foreach (var platform in nemoScenario.Platforms)
+                {
+                    var inputFileName = string.Format("base-cass-{0}-{1}-{2}.inp", platform.Name, platform.Id, timePeriod);
+                    var inputFilePath = Path.Combine(curTimePeriodPath, inputFileName);
+                    foreach (var source in platform.Sources)
+                    {
+                        var sourceToModes = new OneToMany<NemoSource, List<OneToMany<NemoMode, List<SoundSource>>>>(source);
+                        foreach (var mode in source.Modes)
+                        {
+                            var modeToSoundSources = new OneToMany<NemoMode, List<SoundSource>>(mode);
+                            sourceToModes.Many.Add(modeToSoundSources);
+                            foreach (var analysisPoint in analysisPoints)
+                            {
+                                foreach (var soundSource in analysisPoint.SoundSources)
+                                {
+                                    var psmFields = soundSource.Name.Split('|');
+                                    var soundSourcePlatform = psmFields[0];
+                                    var soundSourceSource = psmFields[1];
+                                    var soundSourceMode = psmFields[2];
+                                    if ((platform.Name.ToLower() == soundSourcePlatform.ToLower()) && 
+                                        (source.Name.ToLower() == soundSourceSource.ToLower()) && 
+                                        (mode.Name.ToLower() == soundSourceMode.ToLower()))
+                                    {
+                                        modeToSoundSources.Many.Add(soundSource);
+                                    }
+                                } // end loop over all sound sources in the current analysis point
+                            } // end loop over all analysis points
+                        } // end loop over modes in the current source
+                        using (var writer = new StreamWriter(inputFilePath))
+                        {
+                            writer.WriteLine("# analyst name: {0}", System.Environment.UserName);
+                            writer.WriteLine("# creation date: {0}", DateTime.Now);
+                            writer.WriteLine();
+                            writer.WriteLine("*System Parms");
+                            writer.WriteLine("Plot Files,n");
+                            writer.WriteLine("Binary Files,y");
+                            writer.WriteLine("Pressure Files,n");
+                            writer.WriteLine("Data Directory,{0}", dataDirectoryPath);
+                            writer.WriteLine("*End System Parms");
+                            writer.WriteLine();
+                            writer.WriteLine("*CASS Parms");
+                            writer.WriteLine("VOLUME ATTENUATION MODEL                ,FRANCOIS-GARRISON");
+                            writer.WriteLine("SURFACE REFLECTION COEFFICIENT MODEL    ,OAML");
+                            writer.WriteLine("MAXIMUM SURFACE REFLECTIONS             ,100");
+                            writer.WriteLine("MAXIMUM BOTTOM REFLECTIONS              ,100");
+                            writer.WriteLine("EIGENRAY MODEL                          ,GRAB-V3");
+                            writer.WriteLine("EIGENRAY ADDITION                       ,RANDOM");
+                            writer.WriteLine("EIGENRAY TOLERANCE                      ,0.01");
+                            writer.WriteLine("VERTICAL ANGLE MINIMUM                  ,-89.9 DEG");
+                            writer.WriteLine("VERTICAL ANGLE MAXIMUM                  ,+89.9 DEG");
+                            writer.WriteLine("VERTICAL ANGLE INCREMENT                ,0.1 DEG");
+                            writer.WriteLine("Reference System                        ,LAT-LON");
+                            writer.WriteLine("Source System                           ,LAT-LON");
+                            writer.WriteLine("*end Cass Parms");
+                            writer.WriteLine();
+                            writer.WriteLine();
+
+                            foreach (var mode in sourceToModes.Many)
+                            {
+                                writer.WriteLine("*Loadcase");
+                                writer.WriteLine("#Sim_Area_ID                             ");
+                                writer.WriteLine("Range Complex                           ,{0}", nemoScenario.SimAreaName);
+                                writer.WriteLine("Sim Area                                ,{0}", nemoScenario.SimAreaName);
+                                writer.WriteLine("Event Name                              ,{0}", nemoScenario.EventName);
+                                writer.WriteLine("Reference Location                      ,30.300 DEG, -80.100 DEG");
+                                writer.WriteLine("Enviro File                             ,env_{0}.dat", timePeriod);
+                                writer.WriteLine("Bathy File                              ,{0}", cassBathymetryFileName);
+                                writer.WriteLine("Water Depth                             ,0 M, 2000 M, 25 M");
+                                writer.WriteLine("Season                                  ,{0}", timePeriod);
+                                writer.Write("Radial Angles                           ");
+
+                                foreach (var radial in mode.Many[0].RadialBearings)
+                                    writer.Write(",{0}", radial);
+                                writer.WriteLine();
+
+                                writer.WriteLine("#PSM_ID                                  ");
+                                writer.WriteLine("Platform Name                           ,{0}", platform.Name);
+                                writer.WriteLine("Source Name                             ,{0}", source.Name);
+                                writer.WriteLine("Mode Name                               ,{0}", mode.One.Name);
+                                writer.WriteLine("Frequency                               ,{0:0.000} HZ", (mode.One.LowFrequency + mode.One.HighFrequency) / 2.0f);
+                                writer.WriteLine("DE Angle                                ,{0:0.000} DEG", mode.One.DepressionElevationAngle);
+                                writer.WriteLine("Vertical Beam                           ,{0:0.000} DEG", mode.One.VerticalBeamWidth);
+                                writer.WriteLine("Source Depth                            ,{0:0.000} M", mode.One.SourceDepth);
+                                writer.WriteLine("SOURCE LEVEL                            ,{0:0.000} DB", mode.One.SourceLevel);
+                                writer.WriteLine("Range Distance                          ,50 M, 100000 M, 50 M");
+
+                                foreach (var soundSource in mode.Many)
+                                    writer.WriteLine("Source Location                         ,{0:0.000} DEG, {1:0.000} DEG", soundSource.Latitude, soundSource.Longitude);
+                                writer.WriteLine("*end loadcase");
+                                writer.WriteLine();
+                            } // end of loop over all modes in the current source
+                        } // end of using block that writes the input file
+                    } // end loop over all sources on the current platform
+                } // end loop over all platforms in the scenario
+            } // end loop over all time periods we're generating CASS input files for
+        } // end of WriteCASSInputFiles
+
+        internal class OneToMany<TOne, TMany> where TMany : IList, new()
+        {
+            public OneToMany(TOne one)
+            {
+                One = one;
+                Many = new TMany();
+            }
+
+            internal TOne One { get; private set; }
+            internal TMany Many { get; private set; }
+        }
+
+        internal class PlatformSoundSourceCollection
+        {
+            public PlatformSoundSourceCollection(NemoPlatform nemoPlatform)
+            {
+                NemoPlatform = nemoPlatform;
+                SoundSources = new List<SoundSource>();
+            }
+            internal NemoPlatform NemoPlatform { get; private set; }
+            internal List<SoundSource> SoundSources { get; private set; }
         }
 
         public static void WriteEnvironmentFile(string environmentFileName, Environment2DData bathymetry, Sediment sedimentType, SoundSpeedField soundSpeedField, Environment2DData windSpeed)

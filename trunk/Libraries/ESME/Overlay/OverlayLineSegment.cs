@@ -100,17 +100,17 @@ namespace ESME.Overlay
             // If the lines do not overlap, and the bounding box of this point
             // contains the intersection point, then they DO intersect
             var intersectionPoint = IntersectionPoint(that);
-            //Console.WriteLine("Intersection point calculated to be ({0}, {1})", IntersectionPoint.Latitude_Degrees, IntersectionPoint.Longitude_Degrees);
+            //Console.WriteLine("Intersection point calculated to be ({0}, {1})", IntersectionPoint.Latitude, IntersectionPoint.Longitude);
             if ((intersectionPoint != null) && (BoundingBox.Contains((Point) intersectionPoint)))
                 return true;
-            //if (IntersectionPoint.Longitude_Degrees < BoundingBox.Left)
-            //    Console.WriteLine("Intersection point is LEFT of the bounding box by {0}", BoundingBox.Left - IntersectionPoint.Longitude_Degrees);
-            //if (IntersectionPoint.Longitude_Degrees > BoundingBox.Right)
-            //    Console.WriteLine("Intersection point is RIGHT of the bounding box by {0}", IntersectionPoint.Longitude_Degrees - BoundingBox.Right);
-            //if (IntersectionPoint.Latitude_Degrees > BoundingBox.Top)
-            //    Console.WriteLine("Intersection point is ABOVE the bounding box by {0}", IntersectionPoint.Latitude_Degrees - BoundingBox.Top);
-            //if (IntersectionPoint.Latitude_Degrees < BoundingBox.Bottom)
-            //    Console.WriteLine("Intersection point is BELOW the bounding box by {0}", BoundingBox.Bottom - IntersectionPoint.Latitude_Degrees);
+            //if (IntersectionPoint.Longitude < BoundingBox.Left)
+            //    Console.WriteLine("Intersection point is LEFT of the bounding box by {0}", BoundingBox.Left - IntersectionPoint.Longitude);
+            //if (IntersectionPoint.Longitude > BoundingBox.Right)
+            //    Console.WriteLine("Intersection point is RIGHT of the bounding box by {0}", IntersectionPoint.Longitude - BoundingBox.Right);
+            //if (IntersectionPoint.Latitude > BoundingBox.Top)
+            //    Console.WriteLine("Intersection point is ABOVE the bounding box by {0}", IntersectionPoint.Latitude - BoundingBox.Top);
+            //if (IntersectionPoint.Latitude < BoundingBox.Bottom)
+            //    Console.WriteLine("Intersection point is BELOW the bounding box by {0}", BoundingBox.Bottom - IntersectionPoint.Latitude);
             //}
             // If none of the above conditions were previously met, the segments DO NOT intersect
             return false;

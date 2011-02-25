@@ -44,9 +44,9 @@
 		<StatusBar DockPanel.Dock="Bottom">
 			<StatusBarItem>
 				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="{Binding MouseEarthCoordinate.Latitude_degrees, StringFormat=Lat: {0:0.000000}}" />
+					<TextBlock Text="{Binding MouseEarthCoordinate.Latitude, StringFormat=Lat: {0:0.000000}}" />
 					<TextBlock Text=" " />
-					<TextBlock Text="{Binding MouseEarthCoordinate.Longitude_degrees, StringFormat=Lon: {0:0.000000}}" />
+					<TextBlock Text="{Binding MouseEarthCoordinate.Longitude, StringFormat=Lon: {0:0.000000}}" />
 					<TextBlock Text=" " />
 					<TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
 				</StackPanel>

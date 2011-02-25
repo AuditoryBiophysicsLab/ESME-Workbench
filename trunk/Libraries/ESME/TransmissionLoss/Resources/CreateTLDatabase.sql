@@ -7,8 +7,8 @@ DROP TABLE IF EXISTS `Fields`;
 CREATE TABLE IF NOT EXISTS `Fields`(
   idField INT (10) UNSIGNED NOT NULL AUTO_INCREMENT,
   IsCalculated BIT (1) NOT NULL,
-  Latitude_degrees FLOAT NOT NULL,
-  Longitude_degrees FLOAT NOT NULL,
+  Latitude FLOAT NOT NULL,
+  Longitude FLOAT NOT NULL,
   SourceDepth_meters FLOAT NOT NULL,
   VerticalBeamWidth_degrees FLOAT NOT NULL,
   VerticalLookAngle_degrees FLOAT NOT NULL,

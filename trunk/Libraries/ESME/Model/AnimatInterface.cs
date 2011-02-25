@@ -367,8 +367,8 @@ namespace ESME.Model
                 {
                     _posArray[index] = new mbsPosition//todo
                                        {
-                                           latitude = AnimatList[index].Location.Latitude_degrees,
-                                           longitude = AnimatList[index].Location.Longitude_degrees,
+                                           latitude = AnimatList[index].Location.Latitude,
+                                           longitude = AnimatList[index].Location.Longitude,
                                            depth = -AnimatList[index].Location.Elevation_meters
                                        };
 
