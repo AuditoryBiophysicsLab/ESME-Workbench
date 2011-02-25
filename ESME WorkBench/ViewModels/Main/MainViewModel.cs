@@ -47,6 +47,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 throw;
             }
 
+            AnalysisPointSettingsViewModel.MessageBoxService = messageBoxService;
+            Experiment.VisualizerService = visualizerService;
+
             _viewAwareStatus = viewAwareStatus;
             _messageBoxService = messageBoxService;
             _openFileService = openFileService;

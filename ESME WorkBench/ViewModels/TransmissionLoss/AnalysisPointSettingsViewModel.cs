@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -16,15 +15,13 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     [ExportViewModel("AnalysisPointSettingsViewModel")]
     internal class AnalysisPointSettingsViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
-        readonly IMessageBoxService _messageBoxService;
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
         int _selectedBearingIndex = -1;
 
-        public AnalysisPointSettingsViewModel(AnalysisPoint analysisPoint, IMessageBoxService messageBoxService)
+        public AnalysisPointSettingsViewModel(AnalysisPoint analysisPoint)
         {
             RegisterMediator();
-            _messageBoxService = messageBoxService;
 
             AvailableModes = new ObservableCollection<SoundSource>();
             AvailableBearings = new ObservableCollection<float>();
@@ -32,6 +29,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             AnalysisPoint = analysisPoint;
             SelectedBearing = null;
         }
+
+        public static IMessageBoxService MessageBoxService { get; set; }
 
         #region public AnalysisPoint AnalysisPoint { get; set; }
 
@@ -184,6 +183,24 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
+        #region public bool AnalysisPointIsChanged { get; set; }
+
+        public bool AnalysisPointIsChanged
+        {
+            get { return _analysisPointIsChanged; }
+            set
+            {
+                if (_analysisPointIsChanged == value) return;
+                _analysisPointIsChanged = value;
+                NotifyPropertyChanged(AnalysisPointIsChangedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AnalysisPointIsChangedChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.AnalysisPointIsChanged);
+        bool _analysisPointIsChanged;
+
+        #endregion
+
         #region OkCommand
 
         public SimpleCommand<object, object> OkCommand
@@ -220,6 +237,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                             //if the selected bearing is a float and does not already exist, add it. 
                             if (DisplayedBearing != null)
                             {
+                                AnalysisPointIsChanged = true;
                                 SelectedMode.RadialBearings.Add(DisplayedBearing.Value);
                                 SelectedMode.RadialBearings.Sort();
                                 RefreshAvailableBearings();
@@ -249,6 +267,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
                           if (DisplayedBearing != null)
                           {
+                              AnalysisPointIsChanged = true;
                               SelectedMode.RadialBearings[_selectedBearingIndex] = DisplayedBearing.Value;
                               SelectedMode.RadialBearings.Sort();
                               RefreshAvailableBearings();
@@ -291,6 +310,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         {
                             if (SelectedBearing.HasValue)
                             {
+                                AnalysisPointIsChanged = true;
                                 SelectedMode.RadialBearings.Remove(SelectedBearing.Value);
                                 RefreshAvailableBearings();
                             }
@@ -311,9 +331,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 return _applyToAllModes ?? (_applyToAllModes = new SimpleCommand<object, object>(
                     delegate
                     {
-                        var result = _messageBoxService.ShowOkCancel("Are you sure you want to use this radial configuration\nfor all modes in this analysis point?", CustomDialogIcons.Question);
+                        var result = MessageBoxService.ShowOkCancel("Are you sure you want to use this radial configuration\nfor all modes in this analysis point?", CustomDialogIcons.Question);
                         if (result == CustomDialogResults.OK)
                         {
+                            AnalysisPointIsChanged = true;
                             foreach (var soundsource in _analysisPoint.SoundSources)
                             {
                                 soundsource.RadialBearings.Clear();

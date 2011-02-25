@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows;
 using Cinch;
 using ThinkGeo.MapSuite.Core;
 
@@ -115,6 +116,24 @@ namespace ESMEWorkBench.ViewModels.Main
 
         static readonly PropertyChangedEventArgs CommandParameterChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel>(x => x.CommandParameter);
         Object _commandParameter;
+
+        #endregion
+
+        #region public Visibility Visibility { get; set; }
+
+        public Visibility Visibility
+        {
+            get { return _visibility; }
+            set
+            {
+                if (_visibility == value) return;
+                _visibility = value;
+                NotifyPropertyChanged(VisibilityChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs VisibilityChangedEventArgs = ObservableHelper.CreateArgs<MenuItemViewModel>(x => x.Visibility);
+        Visibility _visibility = Visibility.Visible;
 
         #endregion
 

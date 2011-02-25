@@ -11,6 +11,7 @@ using ESME.Model;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
+using ESMEWorkBench.ViewModels.TransmissionLoss;
 using ThinkGeo.MapSuite.Core;
 using BehaviorModel = ESME.Platform.BehaviorModel;
 
@@ -90,9 +91,16 @@ namespace ESMEWorkBench.Data
         [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
         void EditAnalysisPoint(AnalysisPoint analysisPoint)
         {
+            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
+            var settingsResult = VisualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
+            if (settingsResult.HasValue && settingsResult.Value)
+            {
+                DisplayAnalysisPoint(analysisPoint);
+                if (analysisPointSettingsViewModel.AnalysisPointIsChanged) IsChanged = true;
+            }
         }
 
-        [MediatorMessageSink(MediatorMessage.DeleteAnalysisPoint)]
+        [MediatorMessageSink(MediatorMessage.RemoveAnalysisPoint)]
         void RemoveAnalysisPoint(AnalysisPoint analysisPoint)
         {
             AnalysisPoints.Remove(analysisPoint);
@@ -205,6 +213,16 @@ namespace ESMEWorkBench.Data
         void RequestTransmissionLossBathymetry(bool dummy)
         {
             MediatorMessage.Send(MediatorMessage.SetTransmissionLossBathymetry,Bathymetry);
+        }
+
+        [MediatorMessageSink(MediatorMessage.ExportAnalysisPointsToCASS)]
+        void ExportAnalysisPointsToCASS(bool dummy)
+        {
+            if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0)) return;
+            foreach (var curPoint in AnalysisPoints)
+            {
+                
+            }
         }
     }
 }

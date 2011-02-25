@@ -208,18 +208,26 @@
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new analysis point to the experiment"
 					                Command="{Binding AnalysisPointCommand}" />
-					<r:RibbonButton Label="Fixed Source"
+                    <!--
+                    <r:RibbonButton Label="Fixed Source"
 					                LargeImageSource="..\Images\LargeIcons\Sound.png"
 					                SmallImageSource="..\Images\SmallIcons\Sound.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new fixed sound source to the experiment"
 					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton Label="Quick Look"
+                    -->
+                    <r:RibbonButton Label="Export"
+					                LargeImageSource="..\Images\LargeIcons\export-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\export-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Export all Analysis Points as CASS jobs"
+					                Command="{Binding ExportAnalysisPointsToCASSCommand}" />
+                    <r:RibbonButton Label="Quick Look"
 					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new quick look point to the experiment"
-					                Command="{Binding QuickLookCommand}" />
+					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Scenario">
 					<r:RibbonButton Label="Open"

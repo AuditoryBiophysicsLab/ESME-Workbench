@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Cinch;
 using ESMEWorkBench.Data;
+using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using MEFedMVVM.ViewModelLocator;
 
@@ -103,7 +104,11 @@ namespace ESMEWorkBench.ViewModels.Main
         void SetLayerCollection(ObservableCollection<MapLayerViewModel> mapLayers) { MapLayers = mapLayers; }
 
         [MediatorMessageSink(MediatorMessage.RemoveLayer)]
-        void RemoveLayer(MapLayerViewModel layer) { MapLayers.Remove(layer); }
+        void RemoveLayer(MapLayerViewModel layer)
+        {
+            MapLayers.Remove(layer);
+            if (layer.LayerType == LayerType.AnalysisPoint) MediatorMessage.Send(MediatorMessage.RemoveAnalysisPoint, layer.AnalysisPoint);
+        }
 
         [MediatorMessageSink(MediatorMessage.LayersReordered)]
         void ReorderLayer(MapLayerViewModel layer) 
