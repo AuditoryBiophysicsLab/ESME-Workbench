@@ -81,6 +81,8 @@ namespace ESME.TransmissionLoss.CASS
 
         public static void WriteCASSInputFiles(string dataDirectoryPath, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoScenario nemoScenario, string cassBathymetryFileName)
         {
+            var simAreaFile = SimAreaCSV.ReadCSV(Path.Combine(dataDirectoryPath, "SimAreas.csv"));
+            var simAreaData = simAreaFile[nemoScenario.SimAreaName];
             foreach (var timePeriod in timePeriods)
             {
                 var curSimAreaDataPath = Path.Combine(dataDirectoryPath, nemoScenario.SimAreaName);
@@ -151,7 +153,7 @@ namespace ESME.TransmissionLoss.CASS
                                 writer.WriteLine("Range Complex                           ,{0}", nemoScenario.SimAreaName);
                                 writer.WriteLine("Sim Area                                ,{0}", nemoScenario.SimAreaName);
                                 writer.WriteLine("Event Name                              ,{0}", nemoScenario.EventName);
-                                writer.WriteLine("Reference Location                      ,30.300 DEG, -80.100 DEG");
+                                writer.WriteLine("Reference Location                      ,{0:0.000} DEG, {1:0.000} DEG", simAreaData.Latitude, simAreaData.Longitude);
                                 writer.WriteLine("Enviro File                             ,env_{0}.dat", timePeriod);
                                 writer.WriteLine("Bathy File                              ,{0}", cassBathymetryFileName);
                                 writer.WriteLine("Water Depth                             ,0 M, 2000 M, 25 M");
