@@ -15,7 +15,7 @@ namespace ESME.TransmissionLoss.Bellhop
         {
             MaxDepth = double.MinValue;
             Profile = new double[numberOfPointsInTransect];
-            Length = EarthCoordinate.DistanceBetween_Meters(transect.StartPoint, transect.EndPoint);
+            Length = EarthCoordinate.DistanceBetween(transect.StartPoint, transect.EndPoint);
             var delta = (transect.EndPoint - transect.StartPoint)/(numberOfPointsInTransect - 1);
             var currentPoint = transect.StartPoint;
             for (var i = 0; i < numberOfPointsInTransect; i++)
@@ -77,15 +77,15 @@ namespace ESME.TransmissionLoss.Bellhop
 
         public static double TwoDBilinearApproximation(Environment2DData elevations, EarthCoordinate point)
         {
-            if ((point.Latitude_degrees < elevations.Latitudes[0]) || (point.Latitude_degrees > elevations.Latitudes[elevations.Latitudes.Count - 1]) || (point.Longitude_degrees < elevations.Longitudes[0]) || (point.Longitude_degrees > elevations.Longitudes[elevations.Longitudes.Count - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
+            if ((point.Latitude < elevations.Latitudes[0]) || (point.Latitude > elevations.Latitudes[elevations.Latitudes.Count - 1]) || (point.Longitude < elevations.Longitudes[0]) || (point.Longitude > elevations.Longitudes[elevations.Longitudes.Count - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
             for (var i = 0; i < elevations.Latitudes.Count - 1; i++)
             {
                 // elevations.Latitudes go from south to north, so a southern elevations.Latitudes come before northern ones
-                if ((elevations.Latitudes[i] > point.Latitude_degrees) || (point.Latitude_degrees > elevations.Latitudes[i + 1])) continue;
+                if ((elevations.Latitudes[i] > point.Latitude) || (point.Latitude > elevations.Latitudes[i + 1])) continue;
                 for (var j = 0; j < elevations.Longitudes.Count - 1; j++)
                 {
                     // elevations.Longitudes go from west to east, so western elevations.Longitudes come before eastern ones
-                    if ((elevations.Longitudes[j] > point.Longitude_degrees) || (point.Longitude_degrees > elevations.Longitudes[j + 1])) continue;
+                    if ((elevations.Longitudes[j] > point.Longitude) || (point.Longitude > elevations.Longitudes[j + 1])) continue;
                     var north = i + 1;
                     var south = i;
                     var east = j + 1;
@@ -107,11 +107,11 @@ namespace ESME.TransmissionLoss.Bellhop
         {
             var zList = new List<double>();
 
-            if ((pointToInterpolate.Latitude_degrees < southeast.Latitude_degrees) || (northwest.Latitude_degrees < pointToInterpolate.Latitude_degrees) || (pointToInterpolate.Longitude_degrees < northwest.Longitude_degrees) || (southeast.Longitude_degrees < pointToInterpolate.Longitude_degrees)) throw new ApplicationException("BilinearRecursive: PointToInterpolate is not within the southeast to northwest region");
-            zList.Add(northeast.Elevation_meters);
-            zList.Add(northwest.Elevation_meters);
-            zList.Add(southeast.Elevation_meters);
-            zList.Add(southwest.Elevation_meters);
+            if ((pointToInterpolate.Latitude < southeast.Latitude) || (northwest.Latitude < pointToInterpolate.Latitude) || (pointToInterpolate.Longitude < northwest.Longitude) || (southeast.Longitude < pointToInterpolate.Longitude)) throw new ApplicationException("BilinearRecursive: PointToInterpolate is not within the southeast to northwest region");
+            zList.Add(northeast.Elevation);
+            zList.Add(northwest.Elevation);
+            zList.Add(southeast.Elevation);
+            zList.Add(southwest.Elevation);
             zList.Sort();
             var zMin = zList[0];
             var zMax = zList[3];
@@ -127,13 +127,13 @@ namespace ESME.TransmissionLoss.Bellhop
             // if the latitude is less than or equal to the middle latitude, then the point is in the south half
             // if the longitude is less than or equal to the middle longitude, then the point is in the southwest quadrant
             // if the longitude is greater than the middle longitude, then the point is in the southeast quadrant
-            if (pointToInterpolate.Latitude_degrees <= middle.Latitude_degrees)
-                return pointToInterpolate.Longitude_degrees <= middle.Longitude_degrees ? BilinearRecursive(pointToInterpolate, middle, west, south, southwest) : BilinearRecursive(pointToInterpolate, east, middle, southeast, south);
+            if (pointToInterpolate.Latitude <= middle.Latitude)
+                return pointToInterpolate.Longitude <= middle.Longitude ? BilinearRecursive(pointToInterpolate, middle, west, south, southwest) : BilinearRecursive(pointToInterpolate, east, middle, southeast, south);
 
             // if the latitude is greater than the middle latitude, then the point is in the north half
             // if the longitude is less than or equal to the middle longitude, then the point is in the northwest quadrant
             // if the longitude is greater than the middle longitude, then the point is in the northeast quadrant
-            return pointToInterpolate.Longitude_degrees <= middle.Longitude_degrees ? BilinearRecursive(pointToInterpolate, north, northwest, middle, west) : BilinearRecursive(pointToInterpolate, northeast, north, east, middle);
+            return pointToInterpolate.Longitude <= middle.Longitude ? BilinearRecursive(pointToInterpolate, north, northwest, middle, west) : BilinearRecursive(pointToInterpolate, northeast, north, east, middle);
         }
     }
 }

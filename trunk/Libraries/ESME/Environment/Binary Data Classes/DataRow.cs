@@ -27,7 +27,7 @@ namespace ESME.Environment
             if ((westLongitude < -180) || (westLongitude > 180)) throw new LongitudeOutOfRangeException("GetPoints: westLongitude must be between -180 and +180");
             if ((eastLongitude < -180) || (eastLongitude > 180)) throw new LongitudeOutOfRangeException("GetPoints: eastLongitude must be between -180 and +180");
             if (westLongitude >= eastLongitude) throw new LongitudeOutOfRangeException("GetPoints: westLongitude must be less than eastLongitude");
-            return GetPoints(0, _dataLayer.ColumnCount, 1).Where(point => (westLongitude <= point.EarthCoordinate.Longitude_degrees) && (point.EarthCoordinate.Longitude_degrees <= eastLongitude));
+            return GetPoints(0, _dataLayer.ColumnCount, 1).Where(point => (westLongitude <= point.EarthCoordinate.Longitude) && (point.EarthCoordinate.Longitude <= eastLongitude));
         }
 
         public IEnumerable<DataPoint> Points

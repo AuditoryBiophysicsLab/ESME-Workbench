@@ -33,7 +33,7 @@ namespace ESME.TransmissionLoss.CASS
         }
 
         public bool WithinDeltaOf(CASSPacket that) {
-            return Location.GetDistanceTo_Meters(that.Location) < 10000;
+            return Location.DistanceTo(that.Location) < 10000;
         }
 
         public string CompareTo(CASSPacket that)

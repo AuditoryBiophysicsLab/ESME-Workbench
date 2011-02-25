@@ -333,7 +333,7 @@ namespace ESME.Model
             get
             {
                 var latList = from value in SoundSpeedProfiles
-                             select value.Latitude_degrees;
+                             select value.Latitude;
                 var result = latList.Distinct().ToList();
                 result.Sort();
                 return result;
@@ -348,7 +348,7 @@ namespace ESME.Model
             get
             {
                 var lonList = from value in SoundSpeedProfiles
-                              select value.Longitude_degrees;
+                              select value.Longitude;
                 var result = lonList.Distinct().ToList();
                 result.Sort();
                 return result;
@@ -478,7 +478,7 @@ namespace ESME.Model
             get
             {
                 var query = from p in SoundSpeedProfiles
-                            orderby p.GetDistanceTo_Meters(location) ascending
+                            orderby p.DistanceTo(location) ascending
                             select p;
 
                 return query.Count() > 0 ? query.First() : SoundSpeedProfile.Empty;
@@ -549,7 +549,7 @@ namespace ESME.Model
                 {
                     foreach (var profile in soundSpeedFieldProperties.SoundSpeedProfiles)
                     {
-                        streamWriter.WriteLine("Lat:  " + profile.Latitude_degrees.ToString("0.00##") + " Lon:  " + profile.Longitude_degrees.ToString("0.00##") + " Valid Days: 1-365");
+                        streamWriter.WriteLine("Lat:  " + profile.Latitude.ToString("0.00##") + " Lon:  " + profile.Longitude.ToString("0.00##") + " Valid Days: 1-365");
                         streamWriter.WriteLine("Points in profile: " + profile.Depths.Length + " Min depth: " + profile.Depths[0].ToString("0.0") + " Max depth: " + profile.Depths[profile.Depths.Length - 1] + " Version: ESME 1.0 Distribution Statement A: Approved for public release. Distribution unlimited");
 
                         for (var i = 0; i < profile.Depths.Length; i++) streamWriter.WriteLine(profile.Depths[i].ToString("###0.0") + "\t00.000\t00.000\t" + profile.SoundSpeeds[i].ToString("###0.000"));

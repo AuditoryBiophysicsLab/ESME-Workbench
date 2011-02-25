@@ -48,8 +48,8 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine("Low Frequency (Hz)," + soundPressureLevelField.LowFrequency);
                 var radialEnd = new EarthCoordinate(soundPressureLevelField.Latitude, soundPressureLevelField.Longitude);
                 radialEnd.Move(BearingFromSource, soundPressureLevelField.Radius);
-                sw.WriteLine("Receiver Latitude," + radialEnd.Latitude_degrees);
-                sw.WriteLine("Receiver Longitude," + radialEnd.Longitude_degrees);
+                sw.WriteLine("Receiver Latitude," + radialEnd.Latitude);
+                sw.WriteLine("Receiver Longitude," + radialEnd.Longitude);
                 sw.WriteLine();
             } // using sw
         }

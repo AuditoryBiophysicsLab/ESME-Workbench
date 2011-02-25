@@ -209,7 +209,7 @@ namespace ESME.Model
                 mywriter.WriteLine("All Animat Starting Positions: ID/lat/long/depth ");
                 foreach (var animat in AnimatList)
                 {
-                    mywriter.WriteLine(string.Format("{0},{1},{2},{3}", animat.AnimatID, animat.Location.Latitude_degrees, animat.Location.Longitude_degrees, animat.Location.Elevation_meters));
+                    mywriter.WriteLine(string.Format("{0},{1},{2},{3}", animat.AnimatID, animat.Location.Latitude, animat.Location.Longitude, animat.Location.Elevation));
                 }
             }
         }
@@ -270,9 +270,9 @@ namespace ESME.Model
             {
                 _posArray[i] = new mbsPosition
                                {
-                                   latitude = AnimatList[i].Location.Latitude_degrees,
-                                   longitude = AnimatList[i].Location.Longitude_degrees,
-                                   depth = -AnimatList[i].Location.Elevation_meters
+                                   latitude = AnimatList[i].Location.Latitude,
+                                   longitude = AnimatList[i].Location.Longitude,
+                                   depth = -AnimatList[i].Location.Elevation
                                };
 
                 result = _mmmbs.AddIndividualAnimat(AnimatList[i].Species.Index, _posArray[i]);

@@ -39,10 +39,10 @@ namespace HRC.Navigation
         /// <returns>true if coordinate is contained within the bounding box of the field, false otherwise</returns>
         public bool Contains(EarthCoordinate coordinate)
         {
-            return (SouthWest.Longitude_degrees <= coordinate.Longitude_degrees) &&
-                   (coordinate.Longitude_degrees <= NorthEast.Longitude_degrees) &&
-                   (SouthWest.Latitude_degrees <= coordinate.Latitude_degrees) &&
-                   (coordinate.Latitude_degrees <= NorthEast.Latitude_degrees);
+            return (SouthWest.Longitude <= coordinate.Longitude) &&
+                   (coordinate.Longitude <= NorthEast.Longitude) &&
+                   (SouthWest.Latitude <= coordinate.Latitude) &&
+                   (coordinate.Latitude <= NorthEast.Latitude);
         }
     }
 
@@ -55,8 +55,8 @@ namespace HRC.Navigation
             var tmpLon = new List<double>();
             foreach (var datum in data)
             {
-                tmpLat.Add(datum.Latitude_degrees);
-                tmpLon.Add(datum.Longitude_degrees);
+                tmpLat.Add(datum.Latitude);
+                tmpLon.Add(datum.Longitude);
             }
             Latitudes = tmpLat.Distinct().ToList();
             Longitudes = tmpLon.Distinct().ToList();
@@ -65,8 +65,8 @@ namespace HRC.Navigation
             FieldData = new TEarthCoordinate[Longitudes.Count, Latitudes.Count];
             foreach (var datum in data)
             {
-                var lonIndex = Longitudes.IndexOf(datum.Longitude_degrees);
-                var latIndex = Latitudes.IndexOf(datum.Latitude_degrees);
+                var lonIndex = Longitudes.IndexOf(datum.Longitude);
+                var latIndex = Latitudes.IndexOf(datum.Latitude);
                 FieldData[lonIndex, latIndex] = datum;
             }
         }
@@ -108,9 +108,9 @@ namespace HRC.Navigation
             get
             {
                 int latStartIndex;
-                var latEndIndex = latStartIndex = Latitudes.IndexOf(location.Latitude_degrees);
-                var latitude = location.Latitude_degrees;
-                var longitude = location.Longitude_degrees;
+                var latEndIndex = latStartIndex = Latitudes.IndexOf(location.Latitude);
+                var latitude = location.Latitude;
+                var longitude = location.Longitude;
 
                 if (latStartIndex == -1)
                 {
@@ -129,7 +129,7 @@ namespace HRC.Navigation
                 var lonEndIndex = lonStartIndex = Longitudes.IndexOf(longitude);
                 if (lonStartIndex == -1)
                 {
-                    var westLons = Longitudes.FindAll(x => x <= location.Longitude_degrees);
+                    var westLons = Longitudes.FindAll(x => x <= location.Longitude);
                     if (westLons.Count() > 0) lonStartIndex = Longitudes.IndexOf(westLons.Last());
                 }
                 if (lonEndIndex == -1)
@@ -145,10 +145,10 @@ namespace HRC.Navigation
                     for (var lonIndex = lonStartIndex; lonIndex <= lonEndIndex; lonIndex++)
                         if (FieldData[lonIndex, latIndex] != null) searchList.Add(FieldData[lonIndex, latIndex]);
                 var closestSample = searchList.First();
-                var closestDistance = location.GetDistanceTo_Meters(closestSample);
+                var closestDistance = location.DistanceTo(closestSample);
                 foreach (var curSample in searchList)
                 {
-                    var curDistance = location.GetDistanceTo_Meters(curSample);
+                    var curDistance = location.DistanceTo(curSample);
                     if (curDistance >= closestDistance) continue;
                     closestDistance = curDistance;
                     closestSample = curSample;

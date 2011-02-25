@@ -46,7 +46,7 @@ namespace HRC.Navigation
                 }
                 return null;
             }
-            if (value is EarthCoordinate3D) return new EarthCoordinate(((EarthCoordinate) value).Latitude_degrees, ((EarthCoordinate) value).Longitude_degrees);
+            if (value is EarthCoordinate3D) return new EarthCoordinate(((EarthCoordinate) value).Latitude, ((EarthCoordinate) value).Longitude);
             if (value is PointF) return new EarthCoordinate(((PointF)value).Y, ((PointF)value).X);
             if (value is Point) return new EarthCoordinate(((Point)value).Y, ((Point)value).X);
 
@@ -56,10 +56,10 @@ namespace HRC.Navigation
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             var source = (EarthCoordinate) value;
-            if (destinationType == typeof (string)) return "(" + source.Latitude_degrees.ToString("##0.00##") + ", " + source.Longitude_degrees.ToString("##0.00##") + ")";
+            if (destinationType == typeof (string)) return "(" + source.Latitude.ToString("##0.00##") + ", " + source.Longitude.ToString("##0.00##") + ")";
             if (destinationType == typeof (EarthCoordinate3D)) return new EarthCoordinate3D(source);
-            if (destinationType == typeof (PointF)) return new PointF((float) source.Longitude_degrees, (float) source.Latitude_degrees);
-            if (destinationType == typeof(Point)) return new Point(source.Longitude_degrees, source.Latitude_degrees);
+            if (destinationType == typeof (PointF)) return new PointF((float) source.Longitude, (float) source.Latitude);
+            if (destinationType == typeof(Point)) return new Point(source.Longitude, source.Latitude);
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
@@ -113,9 +113,9 @@ namespace HRC.Navigation
                 switch (base.Name)
                 {
                     case "Latitude":
-                        return ec.Latitude_degrees;
+                        return ec.Latitude;
                     case "Longitude":
-                        return ec.Longitude_degrees;
+                        return ec.Longitude;
                     default:
                         throw new ArgumentException("EarthCoordinateTypeConverter.GetValue: Unknown property " + base.Name);
                 }
@@ -127,10 +127,10 @@ namespace HRC.Navigation
                 switch (base.Name)
                 {
                     case "Latitude":
-                        ec.Latitude_degrees = (double) value;
+                        ec.Latitude = (double) value;
                         break;
                     case "Longitude":
-                        ec.Longitude_degrees = (double) value;
+                        ec.Longitude = (double) value;
                         break;
                     default:
                         throw new ArgumentException("EarthCoordinateTypeConverter.GetValue: Unknown property " + base.Name);

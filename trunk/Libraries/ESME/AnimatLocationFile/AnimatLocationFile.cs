@@ -242,9 +242,9 @@ namespace ESME.AnimatLocationFile
             _writer.BaseStream.Seek(0, SeekOrigin.End);
             foreach (EarthCoordinate3D location in animatLocations)
             {
-                _writer.Write(location.Latitude_degrees);
-                _writer.Write(location.Longitude_degrees);
-                _writer.Write(location.Elevation_meters);
+                _writer.Write(location.Latitude);
+                _writer.Write(location.Longitude);
+                _writer.Write(location.Elevation);
             }
         }
 

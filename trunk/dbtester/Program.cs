@@ -63,10 +63,10 @@ namespace dbtester
             var packet = new NAVOExtractionPacket
                          {
                              Filename = outfilename,
-                             North = Testpoints[0][0].Latitude_degrees,
-                             South = Testpoints[0][1].Latitude_degrees,
-                             East = Testpoints[0][0].Longitude_degrees,
-                             West = Testpoints[0][1].Longitude_degrees,
+                             North = Testpoints[0][0].Latitude,
+                             South = Testpoints[0][1].Latitude,
+                             East = Testpoints[0][0].Longitude,
+                             West = Testpoints[0][1].Longitude,
                          };
             Console.WriteLine(@"Extracting area to " + Path.GetDirectoryName(outfilename) +@"...");
             foo.ExtractArea(packet);
@@ -96,10 +96,10 @@ namespace dbtester
             var packet = new NAVOExtractionPacket
             {
                 Filename = outfilename,
-                North = Testpoints[0][0].Latitude_degrees,
-                South = Testpoints[0][1].Latitude_degrees,
-                East = Testpoints[0][0].Longitude_degrees,
-                West = Testpoints[0][1].Longitude_degrees,
+                North = Testpoints[0][0].Latitude,
+                South = Testpoints[0][1].Latitude,
+                East = Testpoints[0][0].Longitude,
+                West = Testpoints[0][1].Longitude,
             };
             Console.WriteLine(@"Extracting area to " + Path.GetDirectoryName(outfilename) + @"...");
             foo.ExtractArea(packet);
@@ -123,10 +123,10 @@ namespace dbtester
             var packet = new NAVOExtractionPacket
             {
                 Filename = outfilename,
-                North = Testpoints[0][0].Latitude_degrees,
-                South = Testpoints[0][1].Latitude_degrees,
-                East = Testpoints[0][0].Longitude_degrees,
-                West = Testpoints[0][1].Longitude_degrees,
+                North = Testpoints[0][0].Latitude,
+                South = Testpoints[0][1].Latitude,
+                East = Testpoints[0][0].Longitude,
+                West = Testpoints[0][1].Longitude,
             };
             Console.WriteLine(@"Extracting area to " + Path.GetDirectoryName(outfilename) + @"...");
             foo.ExtractArea(packet);
@@ -151,10 +151,10 @@ namespace dbtester
             var packet = new NAVOExtractionPacket
             {
                 Filename = outfilename,
-                North = Testpoints[0][0].Latitude_degrees,
-                South = Testpoints[0][1].Latitude_degrees,
-                East = Testpoints[0][0].Longitude_degrees,
-                West = Testpoints[0][1].Longitude_degrees,
+                North = Testpoints[0][0].Latitude,
+                South = Testpoints[0][1].Latitude,
+                East = Testpoints[0][0].Longitude,
+                West = Testpoints[0][1].Longitude,
             };
             Console.WriteLine(@"Extracting area to " + Path.GetDirectoryName(outfilename) + @"...");
             foo.ExtractArea(packet);

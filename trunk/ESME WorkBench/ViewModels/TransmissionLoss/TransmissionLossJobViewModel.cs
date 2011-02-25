@@ -356,8 +356,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _location = location;
             _nemoMode = nemoMode;
             _radialCount = radialCount;
-            Latitude.DataValue = location.Latitude_degrees;
-            Longitude.DataValue = location.Longitude_degrees;
+            Latitude.DataValue = location.Latitude;
+            Longitude.DataValue = location.Longitude;
             SourceDepth.DataValue = Math.Max(1, nemoMode.SourceDepth);
             LowFrequency.DataValue = nemoMode.LowFrequency;
             HighFrequency.DataValue = nemoMode.HighFrequency;

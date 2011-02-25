@@ -38,7 +38,7 @@ namespace HRC.Utility
             float UnitsPerPixelY = g.GetUnitsPerPixelY();
             EarthCoordinate Offset = new EarthCoordinate(-Radius_pixels * UnitsPerPixelY, Radius_pixels * UnitsPerPixelX);
             EarthCoordinate TopLeft = center - Offset;
-            SizeF size = new SizeF((float)(Offset.Longitude_degrees * 2), (float)(Offset.Latitude_degrees * 2));
+            SizeF size = new SizeF((float)(Offset.Longitude * 2), (float)(Offset.Latitude * 2));
             RectangleF bounds = new RectangleF((PointF)TopLeft, size);
             if (LineColor != null)
             {
@@ -60,10 +60,10 @@ namespace HRC.Utility
         /// <param name="p2">Another corner of the current drawable area</param>
         public static void SetGeoCoordinates(this Graphics g, EarthCoordinate p1, EarthCoordinate p2)
         {
-            double North = Math.Max(p1.Latitude_degrees, p2.Latitude_degrees);
-            double South = Math.Min(p1.Latitude_degrees, p2.Latitude_degrees);
-            double West = Math.Min(p1.Longitude_degrees, p2.Longitude_degrees);
-            double East = Math.Max(p1.Longitude_degrees, p2.Longitude_degrees);
+            double North = Math.Max(p1.Latitude, p2.Latitude);
+            double South = Math.Min(p1.Latitude, p2.Latitude);
+            double West = Math.Min(p1.Longitude, p2.Longitude);
+            double East = Math.Max(p1.Longitude, p2.Longitude);
             double LatitudeCoverage = North - South;
             double LongitudeCoverage = East - West;
 
@@ -94,10 +94,10 @@ namespace HRC.Utility
             EarthCoordinate Offset = new EarthCoordinate(Radius_pixels * UnitsPerPixelY, Radius_pixels * UnitsPerPixelX);
             EarthCoordinate p1 = center + Offset;
             EarthCoordinate p2 = center - Offset;
-            float North = (float)Math.Max(p1.Latitude_degrees, p2.Latitude_degrees);
-            float South = (float)Math.Min(p1.Latitude_degrees, p2.Latitude_degrees);
-            float West = (float)Math.Min(p1.Longitude_degrees, p2.Longitude_degrees);
-            float East = (float)Math.Max(p1.Longitude_degrees, p2.Longitude_degrees);
+            float North = (float)Math.Max(p1.Latitude, p2.Latitude);
+            float South = (float)Math.Min(p1.Latitude, p2.Latitude);
+            float West = (float)Math.Min(p1.Longitude, p2.Longitude);
+            float East = (float)Math.Max(p1.Longitude, p2.Longitude);
             PointF[] Points = { new PointF(West, North), new PointF(East, North), new PointF(East, South), new PointF(West, South) };
             if (LineColor != null)
             {

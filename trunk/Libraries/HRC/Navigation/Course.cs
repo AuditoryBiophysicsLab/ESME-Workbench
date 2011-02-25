@@ -32,7 +32,7 @@ namespace HRC.Navigation
         /// <param name="finalPoint">Ending point of the course</param>
         public Course(EarthCoordinate initialPoint, EarthCoordinate finalPoint)
         {
-            _course = initialPoint.GetBearingTo_Degrees(finalPoint);
+            _course = initialPoint.BearingTo(finalPoint);
             Normalize();
         }
 

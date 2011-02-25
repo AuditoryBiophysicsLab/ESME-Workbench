@@ -33,17 +33,17 @@ namespace cassdifftester
             }
 
             var esmeResult = (from packet in CASSFiles.ReadEnvironmentFile(esmeinfile)
-                              orderby packet.Location.Latitude_degrees , packet.Location.Longitude_degrees
+                              orderby packet.Location.Latitude , packet.Location.Longitude
                               select packet).ToList();
 
             var nuwcResult = (from packet in CASSFiles.ReadEnvironmentFile(nuwcinfile)
-                              orderby packet.Location.Latitude_degrees , packet.Location.Longitude_degrees
+                              orderby packet.Location.Latitude , packet.Location.Longitude
                               select packet).ToList();
 
             var esmeMatchesNuwc = (from esme in esmeResult
                                    from nuwc in nuwcResult
                                    where (esme.Location.Equals(nuwc.Location))
-                                   orderby nuwc.Location.Latitude_degrees, nuwc.Location.Longitude_degrees
+                                   orderby nuwc.Location.Latitude, nuwc.Location.Longitude
                                    select new
                                    {
                                        esme,
@@ -52,7 +52,7 @@ namespace cassdifftester
             var nuwcMatchesEsme = (from nuwc in nuwcResult
                                    from esme in esmeResult
                                    where (nuwc.Location.Equals(esme.Location))
-                                   orderby nuwc.Location.Latitude_degrees , nuwc.Location.Longitude_degrees
+                                   orderby nuwc.Location.Latitude , nuwc.Location.Longitude
                                    select new
                                           {
                                               esme,

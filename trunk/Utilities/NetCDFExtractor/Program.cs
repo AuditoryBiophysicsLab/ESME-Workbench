@@ -192,8 +192,8 @@ namespace ImportNetCDF
                     var latSourceIndex = latMap[latIndex].Index;
                     var curDataPoint = new EnvironmentalDataPoint
                                        {
-                                           Latitude_degrees = lat,
-                                           Longitude_degrees = wrappedLon,
+                                           Latitude = lat,
+                                           Longitude = wrappedLon,
                                        };
                     if (depthVarName != String.Empty)
                     {
