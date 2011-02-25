@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Xml.Serialization;
@@ -13,7 +14,7 @@ namespace ESME.TransmissionLoss
         {
             TransmissionLossJobs = new ObservableCollection<TransmissionLossJob>();
             TransmissionLossFields = new ObservableCollection<TransmissionLossField>();
-            SoundSources = new ObservableCollection<SoundSource>();
+            SoundSources = new List<SoundSource>();
         }
 
         public AnalysisPoint(EarthCoordinate location) : this()
@@ -22,24 +23,7 @@ namespace ESME.TransmissionLoss
             Longitude_degrees = location.Longitude_degrees;
         }
 
-        #region public public ObservableCollection<SoundSource> SoundSources { get; set; }
-
-        public ObservableCollection<SoundSource> SoundSources
-        {
-            get { return _soundSources; }
-            set
-            {
-                if (_soundSources == value) return;
-                if (_soundSources != null) _soundSources.CollectionChanged -= SoundSourcesCollectionChanged;
-                _soundSources = value;
-                if (_soundSources != null) _soundSources.CollectionChanged += SoundSourcesCollectionChanged;
-            }
-        }
-
-        static void SoundSourcesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { }
-        ObservableCollection<SoundSource> _soundSources = new ObservableCollection<SoundSource>();
-
-        #endregion
+        public List<SoundSource> SoundSources { get; set; }
 
         #region public ObservableCollection<TransmissionLossJob> TransmissionLossJobs { get; set; }
         [XmlIgnore]

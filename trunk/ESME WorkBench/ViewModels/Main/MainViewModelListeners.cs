@@ -1,15 +1,9 @@
-﻿using System.ComponentModel;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 using Cinch;
-using ESME.Model;
 using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.Bellhop;
-using ESME.TransmissionLoss.CASS;
-using ESME.TransmissionLoss.RAM;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
@@ -100,6 +94,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
                 return;
             }
+            MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPoint);
 #if false
             var result = _visualizerService.ShowDialog("AnalysisPointCalculationPreviewView", analysisPointViewModel);
             if ((!result.HasValue) || (!result.Value))

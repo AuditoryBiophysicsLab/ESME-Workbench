@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
@@ -24,7 +25,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         {
             RegisterMediator();
             _messageBoxService = messageBoxService;
+
             AvailableModes = new ObservableCollection<SoundSource>();
+            AvailableBearings = new ObservableCollection<float>();
+            
             AnalysisPoint = analysisPoint;
             SelectedBearing = null;
         }
@@ -81,11 +85,44 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 _selectedMode = value;
                 NotifyPropertyChanged(SelectedModeChangedEventArgs);
                 IsItemSelected = _selectedMode != null;
+                RefreshAvailableBearings();
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedModeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.SelectedMode);
         SoundSource _selectedMode;
+
+        void RefreshAvailableBearings()
+        {
+            AvailableBearings.Clear();
+            if (_selectedMode != null) foreach (var bearing in _selectedMode.RadialBearings) AvailableBearings.Add(bearing);
+            SelectedBearing = null;
+            DisplayedBearing = null;
+        }
+
+        #endregion
+
+        #region public ObservableCollection<float> AvailableBearings { get; set; }
+
+        public ObservableCollection<float> AvailableBearings
+        {
+            get { return _availableBearings; }
+            set
+            {
+                if (_availableBearings == value) return;
+                if (_availableBearings != null) _availableBearings.CollectionChanged -= AvailableBearingsCollectionChanged;
+                _availableBearings = value;
+                if (_availableBearings != null) _availableBearings.CollectionChanged += AvailableBearingsCollectionChanged;
+                NotifyPropertyChanged(AvailableBearingsChangedEventArgs);
+            }
+        }
+
+        void AvailableBearingsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(AvailableBearingsChangedEventArgs);
+        }
+        static readonly PropertyChangedEventArgs AvailableBearingsChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.AvailableBearings);
+        ObservableCollection<float> _availableBearings;
 
         #endregion
 
@@ -185,6 +222,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                             {
                                 SelectedMode.RadialBearings.Add(DisplayedBearing.Value);
                                 SelectedMode.RadialBearings.Sort();
+                                RefreshAvailableBearings();
                             }
                             
                         }));
@@ -213,6 +251,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                           {
                               SelectedMode.RadialBearings[_selectedBearingIndex] = DisplayedBearing.Value;
                               SelectedMode.RadialBearings.Sort();
+                              RefreshAvailableBearings();
                           }
                           
                       }));
@@ -229,7 +268,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         {
             get { return _cancelRadialEdit ?? (_cancelRadialEdit = new SimpleCommand<object, object>(delegate 
                 { return DisplayedBearing.HasValue; }, 
-                delegate { SelectedBearing = null; })); }
+                delegate { 
+                    SelectedBearing = null;
+                    DisplayedBearing = null;
+                })); }
         }
 
         SimpleCommand<object, object> _cancelRadialEdit;
@@ -247,7 +289,11 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                         delegate { return IsItemSelected & SelectedBearing.HasValue; },
                         delegate
                         {
-                            if (SelectedBearing.HasValue) SelectedMode.RadialBearings.Remove(SelectedBearing.Value);
+                            if (SelectedBearing.HasValue)
+                            {
+                                SelectedMode.RadialBearings.Remove(SelectedBearing.Value);
+                                RefreshAvailableBearings();
+                            }
                         }));
             }
         }
@@ -275,6 +321,25 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
 
         SimpleCommand<object, object> _applyToAllModes;
+
+        #endregion
+
+        #region SelectedRadialTextChangedCommand
+
+        public SimpleCommand<object, object> SelectedRadialTextChangedCommand
+        {
+            get
+            {
+                return _selectedRadialTextChanged ?? (_selectedRadialTextChanged = new SimpleCommand<object, object>(delegate(object cinchArgs)
+                                                                                                                       {
+                                                                                                                           var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                                                                                                                           //var args = (TextChangedEventArgs)((EventToCommandArgs)cinchArgs).EventArgs;
+                                                                                                                           if (sender != null && !string.IsNullOrEmpty(sender.Text)) DisplayedBearing = float.Parse(sender.Text);
+                                                                                                                       }));
+            }
+        }
+
+        SimpleCommand<object, object> _selectedRadialTextChanged;
 
         #endregion
 
