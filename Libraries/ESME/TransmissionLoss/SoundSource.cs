@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Xml.Serialization;
-using Cinch;
+using System.Linq;
 using ESME.Model;
 using ESME.NEMO;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.TransmissionLoss
 {
@@ -16,7 +13,7 @@ namespace ESME.TransmissionLoss
     {
         protected SoundSource()
         {
-            RadialBearings = new SortableObservableCollection<float>();
+            RadialBearings = new List<float>();
             ShouldBeCalculated = true;
             SoundSourceID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
         }
@@ -30,7 +27,7 @@ namespace ESME.TransmissionLoss
 
             var radialBearingStep = 360.0f / radialCount;
             for (var radialBearing = 0.0f; radialBearing < 360.0f; radialBearing += radialBearingStep) RadialBearings.Add(radialBearing);
-            Radius = (int)nemoMode.Radius;
+            Radius = (int) nemoMode.Radius;
             Name = nemoMode.PSMName;
             SourceLevel = nemoMode.SourceLevel;
         }
@@ -45,30 +42,10 @@ namespace ESME.TransmissionLoss
         /// </summary>
         public float SourceLevel { get; set; }
 
-        #region public SortableObservableCollection<float> RadialBearings { get; set; }
-
         /// <summary>
         ///   List of radial bearings, in degrees
         /// </summary>
-        [XmlElement]
-        public SortableObservableCollection<float> RadialBearings
-        {
-            get { return _radialBearings; }
-            set
-            {
-                if (_radialBearings == value) return;
-                if (_radialBearings != null) _radialBearings.CollectionChanged -= RadialBearingsCollectionChanged;
-                _radialBearings = value;
-                if (_radialBearings != null) _radialBearings.CollectionChanged += RadialBearingsCollectionChanged;
-                NotifyPropertyChanged(RadialBearingsChangedEventArgs);
-            }
-        }
-
-        void RadialBearingsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(RadialBearingsChangedEventArgs); }
-        [XmlIgnore] static readonly PropertyChangedEventArgs RadialBearingsChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.RadialBearings);
-        [XmlIgnore] SortableObservableCollection<float> _radialBearings;
-
-        #endregion
+        public List<float> RadialBearings { get; set; }
 
         /// <summary>
         ///   transmission loss radius, in meters.
@@ -86,7 +63,7 @@ namespace ESME.TransmissionLoss
         public string Name { get; set; }
 
         /// <summary>
-        /// True if the user wants this sound source to be calculated, false otherwise.  Default value is true
+        ///   True if the user wants this sound source to be calculated, false otherwise.  Default value is true
         /// </summary>
         public bool ShouldBeCalculated { get; set; }
 
@@ -94,17 +71,15 @@ namespace ESME.TransmissionLoss
 
         public bool Equals(SoundSource other)
         {
-            if (!base.Equals(other)) return false;  // Compare as an EarthCoordinate first
+            if (!base.Equals(other)) return false; // Compare as an EarthCoordinate first
             if (!AcousticProperties.Equals(other.AcousticProperties)) return false;
             if (RadialBearings.Count != other.RadialBearings.Count) return false;
-            for (var bearingIndex = 0; bearingIndex < RadialBearings.Count; bearingIndex++) if (RadialBearings[bearingIndex] != other.RadialBearings[bearingIndex]) return false;
-            return true;
+            return !RadialBearings.Where((t, bearingIndex) => t != other.RadialBearings[bearingIndex]).Any();
         }
 
         #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
-
     }
 }

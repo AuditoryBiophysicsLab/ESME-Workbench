@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
         xmlns:views="clr-namespace:ESME.Views"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         Title="Analysis point settings"
         mef:ViewModelLocator.ViewModel="AnalysisPointSettingsViewModel"
         SizeToContent="WidthAndHeight">
@@ -142,38 +144,47 @@
 					<DockPanel>
 						<ListBox DockPanel.Dock="Left"
 						         Width="50"
-						         ItemsSource="{Binding SelectedMode.RadialBearings}"
+						         ItemsSource="{Binding AvailableBearings}"
 						         SelectedValue="{Binding SelectedBearing}">
 						</ListBox>
 						<StackPanel DockPanel.Dock="Right"
 						            Orientation="Vertical"
 						            Width="Auto">
-                            <Button Content="Remove Selected"
+							<Button Content="Remove Selected"
 							        Width="Auto"
 							        HorizontalAlignment="Left"
 							        Margin="5"
 							        Command="{Binding RemoveRadialCommand}" />
-                            <TextBlock Text="Selected Radial Bearing" 
-                                       Margin="5 10 5 2"/>
-                            <TextBox Text="{Binding DisplayedBearing}"
-							         Margin="5 0 5 5" />
-                            <DockPanel HorizontalAlignment="Right" 
-                                       Margin="5 0 5 0">
-                                <Button Content="Cancel"
-                                        DockPanel.Dock="Right"
-                                        Margin="5 0 0 0"
-                                        Width="60"
-                                        Command="{Binding CancelRadialEditCommand}" />
-                                <Button Content="Update"
-                                        DockPanel.Dock="Right"
-                                        Margin="5 0 0 0"
-                                        Width="60"
-                                        Command="{Binding UpdateRadialCommand}" />
-                                <Button Content="Add New"
-                                        DockPanel.Dock="Right"
-                                        Width="60"
-                                        Command="{Binding AddRadialCommand}" />
-                            </DockPanel>
+							<TextBlock Text="Selected Radial Bearing"
+							           Margin="5 10 5 2" />
+							<TextBox Text="{Binding DisplayedBearing}"
+							         Margin="5 0 5 5">
+								<i:Interaction.Behaviors>
+									<cinch:NumericTextBoxBehaviour />
+								</i:Interaction.Behaviors>
+								<i:Interaction.Triggers>
+									<i:EventTrigger EventName="TextChanged">
+										<cinch:EventToCommandTrigger Command="{Binding SelectedRadialTextChangedCommand}" />
+									</i:EventTrigger>
+								</i:Interaction.Triggers>
+							</TextBox>
+							<DockPanel HorizontalAlignment="Right"
+							           Margin="5 0 5 0">
+								<Button Content="Cancel"
+								        DockPanel.Dock="Right"
+								        Margin="5 0 0 0"
+								        Width="60"
+								        Command="{Binding CancelRadialEditCommand}" />
+								<Button Content="Update"
+								        DockPanel.Dock="Right"
+								        Margin="5 0 0 0"
+								        Width="60"
+								        Command="{Binding UpdateRadialCommand}" />
+								<Button Content="Add New"
+								        DockPanel.Dock="Right"
+								        Width="60"
+								        Command="{Binding AddRadialCommand}" />
+							</DockPanel>
 							<Button Content="Use for all modes"
 							        HorizontalAlignment="Left"
 							        Width="110"

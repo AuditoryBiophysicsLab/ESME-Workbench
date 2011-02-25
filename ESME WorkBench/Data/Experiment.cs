@@ -588,7 +588,7 @@ namespace ESMEWorkBench.Data
             {
                 return _referencedTypes ?? (_referencedTypes = new[]
                                                                {
-                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel), typeof(RasterMapLayer),
+                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel), typeof(RasterMapLayer), typeof(AnalysisPoint), typeof(SoundSource)
                                                                });
             }
         }
