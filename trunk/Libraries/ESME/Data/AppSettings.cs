@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Cinch;
 using ESME.Environment.NAVO;
 using HRC.Utility;
@@ -60,12 +61,23 @@ namespace ESME.Data
         public void Save() { Save(FileName, ReferencedTypes); }
 
         public void Reload() { Reload(ReferencedTypes); }
+
         public void SetDefaultCASSTemplates()
         {
             if (CASSTemplates.Count == 0)
             {
-                var newTemplate = new CASSTemplate
-                                  {};
+                CASSTemplates.Add(new CASSTemplate
+                {
+                    FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "base_template.cass"),
+                    IsEnabled = true,
+                    MatchString = "",
+                });
+                CASSTemplates.Add(new CASSTemplate
+                {
+                    FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "fathometer_template.cass"),
+                    IsEnabled = true,
+                    MatchString = "Fathometer",
+                });
             }
         }
 
