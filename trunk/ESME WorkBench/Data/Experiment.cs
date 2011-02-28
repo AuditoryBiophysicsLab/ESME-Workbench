@@ -615,8 +615,8 @@ namespace ESMEWorkBench.Data
                 var localStorageRoot = Path.Combine(Path.GetDirectoryName(FileName), Path.GetFileNameWithoutExtension(FileName));
                 if (!Directory.Exists(localStorageRoot))
                 {
-                    var directoryInfo = Directory.CreateDirectory(localStorageRoot);
-                    directoryInfo.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+                    Directory.CreateDirectory(localStorageRoot);
+                    File.WriteAllText(Path.Combine(localStorageRoot, "_README.TXT"), "This directory and all its contents are managed by the ESME WorkBench.\r\n\r\nMoving, deleting, renaming or otherwise changing the of this directory or any subdirectory WILL cause the ESME WorkBench to function improperly and/or to give invalid results.\r\n\r\nYOU HAVE BEEN WARNED!");
                 }
                 if (FileSystemWatcher == null)
                 {

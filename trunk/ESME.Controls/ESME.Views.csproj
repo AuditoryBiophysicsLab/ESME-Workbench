@@ -80,6 +80,7 @@
     <Compile Include="AcousticBuilder\AnalysisPointSettingsView.xaml.cs">
       <DependentUpon>AnalysisPointSettingsView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AcousticBuilder\AnalysisPointSettingsViewModel.cs" />
     <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
       <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
     </Compile>
@@ -111,6 +112,13 @@
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TestViewModel.cs" />
+    <Compile Include="TransmissionLoss\BellhopQueueCalculatorView.xaml.cs">
+      <DependentUpon>BellhopQueueCalculatorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
+    <Compile Include="TransmissionLoss\BellhopRadialCalculatorViewModel.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossFieldCalculatorViewModel.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossRadialCalculatorViewModel.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="AcousticBuilder\AnalysisPointSettingsView.xaml">
       <SubType>Designer</SubType>
@@ -156,6 +164,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="TransmissionLoss\BellhopQueueCalculatorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -181,6 +193,17 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\ESME\ESME.csproj">
+      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
+      <Name>ESME</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libraries\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

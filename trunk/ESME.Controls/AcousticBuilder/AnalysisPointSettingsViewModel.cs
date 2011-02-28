@@ -10,10 +10,10 @@ using Cinch;
 using ESME.TransmissionLoss;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.AcousticBuilder
 {
     [ExportViewModel("AnalysisPointSettingsViewModel")]
-    internal class AnalysisPointSettingsViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    public class AnalysisPointSettingsViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;

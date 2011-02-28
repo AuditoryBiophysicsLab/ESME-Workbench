@@ -152,7 +152,6 @@
     <Compile Include="ViewModels\NAVO\SeasonConfigurationWindowViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\AnalysisPointSettingsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
@@ -174,9 +173,6 @@
     <Compile Include="Views\AnalysisPointView.xaml.cs">
       <DependentUpon>AnalysisPointView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\BellhopCalculatorView.xaml.cs">
-      <DependentUpon>BellhopCalculatorView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\ColorBarView.xaml.cs">
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
@@ -190,10 +186,7 @@
     <Compile Include="Controls\MapView.xaml.cs">
       <DependentUpon>MapView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\Experiment.cs" />
-    <Compile Include="Data\WatchableReferenceDatum.cs" />
-    <Compile Include="Data\WatchableList.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="OSInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -206,9 +199,6 @@
     </Compile>
     <Compile Include="Views\EditableLabelValueListView.xaml.cs">
       <DependentUpon>EditableLabelValueListView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\BellhopQueueCalculatorView.xaml.cs">
-      <DependentUpon>BellhopQueueCalculatorView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\EnvironmentSettingsView.xaml.cs">
       <DependentUpon>EnvironmentSettingsView.xaml</DependentUpon>
@@ -320,10 +310,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\BellhopCalculatorView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Controls\ColorBarView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -341,10 +327,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\EditableLabelValueListView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\BellhopQueueCalculatorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Reflection;
-using System.Xml.Serialization;
+using System.Linq;
 using Cinch;
 using ESME.Environment.NAVO;
 using HRC.Utility;
@@ -14,9 +14,9 @@ namespace ESME.Data
     {
         static Type[] _referencedTypes;
 
-        [XmlIgnore] static string _appSettingsDirectory;
+        static string _appSettingsDirectory;
 
-        [XmlIgnore]
+
         public static string ApplicationName
         {
             get { return _appName; }
@@ -29,9 +29,10 @@ namespace ESME.Data
                 AppSettingsFile = Path.Combine(_appSettingsDirectory, "settings.xml");
             }
         }
-        [XmlIgnore] static string _appName;
 
-        [XmlIgnore]
+        static string _appName;
+
+
         public static string AppSettingsFile { get; private set; }
 
 
@@ -42,7 +43,7 @@ namespace ESME.Data
         }
 
         public AppSettings(AppSettings that) : this() { CopyFrom(that); }
-        [XmlIgnore]
+
         public static Type[] ReferencedTypes
         {
             get
@@ -54,22 +55,15 @@ namespace ESME.Data
             }
         }
 
-        public void Save()
-        {
-            Save(FileName,ReferencedTypes);
-        }
+        public void Save() { Save(FileName, ReferencedTypes); }
 
-        public void Reload()
-        {
-            Reload(ReferencedTypes);
-        }
+        public void Reload() { Reload(ReferencedTypes); }
 
         #region public string ScenarioEditorExecutablePath { get; set; }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs ScenarioEditorExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioEditorExecutablePath);
-        [XmlIgnore] string _scenarioEditorExecutablePath;
+        static readonly PropertyChangedEventArgs ScenarioEditorExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioEditorExecutablePath);
+        string _scenarioEditorExecutablePath;
 
-        [XmlElement]
         public string ScenarioEditorExecutablePath
         {
             get { return _scenarioEditorExecutablePath; }
@@ -85,10 +79,9 @@ namespace ESME.Data
 
         #region public string ScenarioDataDirectory { get; set; }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioDataDirectory);
-        [XmlIgnore] string _scenarioDataDirectory;
+        static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioDataDirectory);
+        string _scenarioDataDirectory;
 
-        [XmlElement]
         public string ScenarioDataDirectory
         {
             get { return _scenarioDataDirectory; }
@@ -104,10 +97,10 @@ namespace ESME.Data
 
         #region public string EnvironmentDatabaseDirectory { get; set; }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs EnvironmentDatabaseDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.EnvironmentDatabaseDirectory);
-        [XmlIgnore] string _environmentDatabaseDirectory;
+        static readonly PropertyChangedEventArgs EnvironmentDatabaseDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.EnvironmentDatabaseDirectory);
+        string _environmentDatabaseDirectory;
 
-        [XmlElement]
+
         public string EnvironmentDatabaseDirectory
         {
             get { return _environmentDatabaseDirectory; }
@@ -177,6 +170,43 @@ namespace ESME.Data
 
         #endregion
 
+        // This list is maintained by the ESME WorkBench.  When a new experiment is saved, the path to the experiment directory is added to this list
+        // Periodically, the VerifyExperimentsStillExist() method is called, which will prune directories that no longer exist.
+        #region public List<string> ExperimentFiles { get; set; }
 
+        public List<string> ExperimentFiles
+        {
+            get { return _experimentFiles; }
+            set
+            {
+                if (_experimentFiles == value) return;
+                _experimentFiles = value;
+                NotifyPropertyChanged(ExperimentDirectoriesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExperimentDirectoriesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ExperimentFiles);
+        List<string> _experimentFiles;
+
+        /// <summary>
+        /// Add the current experiment to the list for the Transmission Loss Calculator to keep track of
+        /// </summary>
+        /// <param name="curExperimentFile"></param>
+        public void AddExperiment(string curExperimentFile)
+        {
+            if (ExperimentFiles.Any(experimentFile => experimentFile == curExperimentFile)) return;
+            ExperimentFiles.Add(curExperimentFile);
+            Save();
+        }
+
+        public void VerifyExperimentsStillExist()
+        {
+            var tmpList = ExperimentFiles.Where(File.Exists).ToList();
+            ExperimentFiles.Clear();
+            ExperimentFiles.AddRange(tmpList);
+            Save();
+        }
+
+        #endregion
     }
 }

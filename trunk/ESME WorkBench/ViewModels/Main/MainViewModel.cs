@@ -15,6 +15,9 @@ using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
+using ESME.Views.AcousticBuilder;
+using ESME.Views.TransmissionLoss;
+
 
 namespace ESMEWorkBench.ViewModels.Main
 {
