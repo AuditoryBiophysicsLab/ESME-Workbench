@@ -117,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\AppSettings.cs" />
+    <Compile Include="Data\CASSTemplate.cs" />
     <Compile Include="Environment\Environment2DData.cs" />
     <Compile Include="Environment\Binary Data Classes\DataArray.cs" />
     <Compile Include="Environment\Binary Data Classes\DataAxis.cs" />
