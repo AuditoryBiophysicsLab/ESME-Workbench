@@ -7,31 +7,33 @@ using Cinch;
 using ESME.Environment.NAVO;
 using HRC.Utility;
 
-namespace ESMEWorkBench.Data
+namespace ESME.Data
 {
-#if false
     [Serializable]
     public class AppSettings : SerializableData<AppSettings>
     {
         static Type[] _referencedTypes;
 
-        [XmlIgnore] static readonly string AppSettingsDirectory;
-        [XmlIgnore] public static readonly string AppSettingsFile;
+        [XmlIgnore] static string _appSettingsDirectory;
 
-        static AppSettings()
+        [XmlIgnore]
+        public static string ApplicationName
         {
-            try
+            get { return _appName; }
+            set
             {
-                AppSettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().GetName().CodeBase));
+                if (_appName != null) throw new ApplicationException("AppSettings.ApplicationName: Cannot set this value more than once.");
+                _appName = value;
+                _appSettingsDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), _appName);
+                if (!Directory.Exists(_appSettingsDirectory)) Directory.CreateDirectory(_appSettingsDirectory);
+                AppSettingsFile = Path.Combine(_appSettingsDirectory, "settings.xml");
             }
-            catch (Exception)
-            {
-                AppSettingsDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            }
-            if (!Directory.Exists(AppSettingsDirectory)) Directory.CreateDirectory(AppSettingsDirectory);
-            AppSettingsFile = Path.Combine(AppSettingsDirectory, "settings.xml");
-
         }
+        [XmlIgnore] static string _appName;
+
+        [XmlIgnore]
+        public static string AppSettingsFile { get; private set; }
+
 
         public AppSettings()
         {
@@ -122,15 +124,15 @@ namespace ESMEWorkBench.Data
         #region public NAVOConfiguration NAVOConfiguration { get; set; }
 
         static readonly PropertyChangedEventArgs NAVOConfigurationChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.NAVOConfiguration);
-        NAVOConfiguration _nAVOConfiguration;
+        NAVOConfiguration _navoConfiguration;
 
         public NAVOConfiguration NAVOConfiguration
         {
-            get { return _nAVOConfiguration; }
+            get { return _navoConfiguration; }
             set
             {
-                if (_nAVOConfiguration == value) return;
-                _nAVOConfiguration = value;
+                if (_navoConfiguration == value) return;
+                _navoConfiguration = value;
                 NotifyPropertyChanged(NAVOConfigurationChangedEventArgs);
             }
         }
@@ -177,5 +179,4 @@ namespace ESMEWorkBench.Data
 
 
     }
-#endif
 }

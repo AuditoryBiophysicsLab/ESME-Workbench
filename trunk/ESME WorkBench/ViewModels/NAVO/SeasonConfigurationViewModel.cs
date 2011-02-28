@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using Cinch;
+using ESME.Data;
 using ESME.Environment.NAVO;
 using ESMEWorkBench.Data;
 using MEFedMVVM.ViewModelLocator;

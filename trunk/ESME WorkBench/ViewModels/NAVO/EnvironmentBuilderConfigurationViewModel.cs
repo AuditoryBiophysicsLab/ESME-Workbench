@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
+using ESME.Data;
 using ESMEWorkBench.Data;
 using MEFedMVVM.ViewModelLocator;
 
