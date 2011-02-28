@@ -41,14 +41,7 @@ namespace ESME.Data
         {
             FileName = AppSettingsFile;
             if (NAVOConfiguration == null) NAVOConfiguration = new NAVOConfiguration();
-            if (CASSTemplates == null) CASSTemplates = new ObservableCollection<CASSTemplate>()
-                                                       {
-                                                          new CASSTemplate(),
-                                                          new CASSTemplate(),
-                                                          new CASSTemplate(),
-                                                          new CASSTemplate(),
-                                                          new CASSTemplate(),
-                                                       };
+            if (CASSTemplates == null) CASSTemplates = new ObservableCollection<CASSTemplate>();
         }
 
         public AppSettings(AppSettings that) : this() { CopyFrom(that); }
@@ -67,6 +60,14 @@ namespace ESME.Data
         public void Save() { Save(FileName, ReferencedTypes); }
 
         public void Reload() { Reload(ReferencedTypes); }
+        public void SetDefaultCASSTemplates()
+        {
+            if (CASSTemplates.Count == 0)
+            {
+                var newTemplate = new CASSTemplate
+                                  {};
+            }
+        }
 
         #region public string ScenarioEditorExecutablePath { get; set; }
 
@@ -178,6 +179,18 @@ namespace ESME.Data
         bool _useESMEDataSources;
 
         #endregion
+
+        #region AddCASSTemplateCommand
+
+        public SimpleCommand<object, object> AddCASSTemplateCommand
+        {
+            get { return _addCASSTemplate ?? (_addCASSTemplate = new SimpleCommand<object, object>(delegate { CASSTemplates.Add(new CASSTemplate(){});})); }
+        }
+
+        SimpleCommand<object, object> _addCASSTemplate;
+
+        #endregion
+
 
         #region public ObservableCollection<CASSTemplate> CASSTemplates { get; set; }
 
