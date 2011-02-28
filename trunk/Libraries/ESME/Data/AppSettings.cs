@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -22,7 +24,6 @@ namespace ESME.Data
             get { return _appName; }
             set
             {
-                if (_appName != null) throw new ApplicationException("AppSettings.ApplicationName: Cannot set this value more than once.");
                 _appName = value;
                 _appSettingsDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), _appName);
                 if (!Directory.Exists(_appSettingsDirectory)) Directory.CreateDirectory(_appSettingsDirectory);
@@ -40,6 +41,14 @@ namespace ESME.Data
         {
             FileName = AppSettingsFile;
             if (NAVOConfiguration == null) NAVOConfiguration = new NAVOConfiguration();
+            if (CASSTemplates == null) CASSTemplates = new ObservableCollection<CASSTemplate>()
+                                                       {
+                                                          new CASSTemplate(),
+                                                          new CASSTemplate(),
+                                                          new CASSTemplate(),
+                                                          new CASSTemplate(),
+                                                          new CASSTemplate(),
+                                                       };
         }
 
         public AppSettings(AppSettings that) : this() { CopyFrom(that); }
@@ -169,6 +178,28 @@ namespace ESME.Data
         bool _useESMEDataSources;
 
         #endregion
+
+        #region public ObservableCollection<CASSTemplate> CASSTemplates { get; set; }
+
+        public ObservableCollection<CASSTemplate> CASSTemplates
+        {
+            get { return _cassTemplates; }
+            set
+            {
+                if (_cassTemplates == value) return;
+                if (_cassTemplates != null) _cassTemplates.CollectionChanged -= CASSTemplatesCollectionChanged;
+                _cassTemplates = value;
+                if (_cassTemplates != null) _cassTemplates.CollectionChanged += CASSTemplatesCollectionChanged;
+                NotifyPropertyChanged(CASSTemplatesChangedEventArgs);
+            }
+        }
+
+        void CASSTemplatesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(CASSTemplatesChangedEventArgs); }
+        static readonly PropertyChangedEventArgs CASSTemplatesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.CASSTemplates);
+        ObservableCollection<CASSTemplate> _cassTemplates;
+
+        #endregion
+
 
         // This list is maintained by the ESME WorkBench.  When a new experiment is saved, the path to the experiment directory is added to this list
         // Periodically, the VerifyExperimentsStillExist() method is called, which will prune directories that no longer exist.
