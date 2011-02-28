@@ -1,5 +1,6 @@
 ﻿using System;
 using Cinch;
+using ESME.Data;
 using ESMEWorkBench.Data;
 using MEFedMVVM.ViewModelLocator;
 

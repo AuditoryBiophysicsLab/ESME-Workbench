@@ -192,9 +192,6 @@
     </Compile>
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\Experiment.cs" />
-    <Compile Include="Data\OldExperimentData.cs" />
-    <Compile Include="Data\IApplicationData.cs" />
-    <Compile Include="Data\PersistentApplicationData.cs" />
     <Compile Include="Data\WatchableReferenceDatum.cs" />
     <Compile Include="Data\WatchableList.cs" />
     <Compile Include="Globals.cs" />

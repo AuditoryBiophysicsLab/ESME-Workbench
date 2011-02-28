@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Cinch;
+using ESME.Data;
 using ESMEWorkBench.Data;
 
 namespace ESMEWorkBench
@@ -13,6 +14,7 @@ namespace ESMEWorkBench
     {
         static Globals()
         {
+            AppSettings.ApplicationName = "ESME WorkBench";
             AppSettings = AppSettings.Load(AppSettings.AppSettingsFile, null);
         }
 
