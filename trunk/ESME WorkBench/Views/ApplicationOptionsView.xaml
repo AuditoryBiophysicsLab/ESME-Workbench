@@ -6,6 +6,35 @@
         Title="User Options"
         Height="500"
         Width="500">
+    <Window.Resources>
+        <DataTemplate x:Key="CASSTemplateTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="CheckCol"/>
+                    <ColumnDefinition SharedSizeGroup="PatternCol" />
+                    <ColumnDefinition SharedSizeGroup="FileCol"/>
+                    <ColumnDefinition SharedSizeGroup="EditCol"/>
+                </Grid.ColumnDefinitions>
+
+                <CheckBox Content="Enable" IsChecked="{Binding IsEnabled}" Grid.Column="0" Margin="5 0 0 0" VerticalAlignment="Bottom"/>
+                <StackPanel Orientation="Vertical" 
+                            Grid.Column="1" 
+                            IsEnabled="{Binding IsEnabled}"
+                            Margin="5 0 0 0">
+                    <Label Content="Mode Type:"/>
+                    <TextBox Text="{Binding MatchString}"/>
+                </StackPanel>
+                <ctl:FileOrDirectorySetting Grid.Column="2"
+                                            Caption="Template File"
+					                        IsDirectoryBrowser="False"
+					                        FileName="{Binding FileName}"
+                                            IsEnabled="{Binding IsEnabled}"
+                                            Margin="5 0 0 0"
+                                            />
+                <Button Content="Edit..." Command="{Binding EditTemplateCommand}" Grid.Column="3" Width="75" VerticalAlignment="Bottom" Height="22" Margin="5 0 0 0"/>
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
     <DockPanel LastChildFill="True">
         <DockPanel LastChildFill="False"
 		           Margin="10"
@@ -97,25 +126,16 @@
                 <Views:SeasonConfigurationView />
             </TabItem>
             <TabItem Header="CASS Options">
-                <Grid Height="50">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>                        
-                    </Grid.ColumnDefinitions>
-
-                    <CheckBox Content="Enable" IsChecked="{Binding AppSettings.CASSTemplates[0].IsEnabled}" Grid.Column="0"/>
-                    <TextBlock Text="Mode Type:" Grid.Column="1" IsEnabled="{Binding AppSettings.CASSTemplates[0].IsEnabled}"/>
-                    <TextBox Text="{Binding AppSettings.CASSTemplates[0].MatchString}" IsEnabled="{Binding AppSettings.CASSTemplates[0].IsEnabled}" Grid.Column="2"/>
-                    <ctl:FileOrDirectorySetting Grid.Column="3"
-                                                Caption="Template File"
-					                            IsDirectoryBrowser="False"
-					                            FileName="{Binding AppSettings.CASSTemplates[0].FileName}"
-                                                IsEnabled="{Binding AppSettings.CASSTemplates[0].IsEnabled}"/>
-                    <Button Content="Edit..." Command="{Binding AppSettings.CASSTemplates[0].EditTemplateCommand}"  IsEnabled="{Binding AppSettings.CASSTemplates[0].IsEnabled}" Grid.Column="4"/>
-                </Grid>
+                <DockPanel LastChildFill="True">
+                    <DockPanel DockPanel.Dock="Bottom" Height="Auto">
+                        <Button Content="Add Template" Command="{Binding AppSettings.AddCASSTemplateCommand}" Width="Auto" DockPanel.Dock="Right"/>
+                    </DockPanel>
+                    <ListBox ItemsSource="{Binding AppSettings.CASSTemplates}" 
+                             ItemTemplate="{StaticResource CASSTemplateTemplate}"
+                             Grid.IsSharedSizeScope="True"
+                             Height="Auto"
+                             />
+                </DockPanel>
             </TabItem>
         </TabControl>
     </DockPanel>
