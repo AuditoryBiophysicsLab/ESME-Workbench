@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using Cinch;
 using ESME.Data;
-using ESMEWorkBench.Data;
 
 namespace ESMEWorkBench
 {

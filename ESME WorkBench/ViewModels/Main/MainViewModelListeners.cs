@@ -8,6 +8,7 @@ using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
+using ESME.Views.AcousticBuilder;
 
 namespace ESMEWorkBench.ViewModels.Main
 {

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
-        Title="BellhopQueueCalculatorView" Height="300" Width="300" Visibility="Visible">
+        Title="ESME Transmission Loss Calculator" Height="300" Width="300" Visibility="Visible">
     <Window.Resources>
         <Style x:Key="RadialCalculatorStatusStyle"
 		       TargetType="TextBlock">

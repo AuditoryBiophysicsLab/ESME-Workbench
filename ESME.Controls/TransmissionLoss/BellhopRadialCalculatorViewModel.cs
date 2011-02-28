@@ -7,9 +7,8 @@ using System.Windows.Threading;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLoss
 {
-#if false
     public class BellhopRadialCalculatorViewModel : TransmissionLossRadialCalculatorViewModel
     {
         readonly BellhopRunFileRadial _bellhopRunFileRadial;
@@ -27,7 +26,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             Status = "Complete";
         }
 
-    #region Code that computes the radial by running bellhop and reading the output files it creates
+        #region Code that computes the radial by running bellhop and reading the output files it creates
 
         TransmissionLossRadial ComputeRadial(string bellhopConfiguration, string bottomProfile, float bearing)
         {
@@ -107,5 +106,4 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
     }
-#endif
 }

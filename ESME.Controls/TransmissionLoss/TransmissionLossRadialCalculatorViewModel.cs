@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLoss
 {
-#if false
     public abstract class TransmissionLossRadialCalculatorViewModel : ViewModelBase
     {
         readonly Dispatcher _dispatcher;
@@ -139,5 +135,4 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         #endregion
 
     }
-#endif
 }

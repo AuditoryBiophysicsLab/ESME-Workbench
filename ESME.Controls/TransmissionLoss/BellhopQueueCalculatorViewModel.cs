@@ -8,13 +8,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Model;
-using ESME.TransmissionLoss.Bellhop;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLoss
 {
-#if false
-    internal class BellhopQueueCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    public class BellhopQueueCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         #region public constructor
 
@@ -122,21 +119,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        [MediatorMessageSink(MediatorMessage.QueueTransmissionLossJob)]
-        void QueueBellhopJob(BellhopRunFile bellhopRunFile)
-        {
-            BellhopFieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(_dispatcher)
-            {
-                TransmissionLossRunFile = bellhopRunFile,
-            });
-        }
-
-        [MediatorMessageSink(MediatorMessage.ApplicationClosing)]
-        void ApplicationClosing(bool dummy)
-        {
-            CloseActivePopUpCommand.Execute(true);
-        }
-
         #region IViewStatusAwareInjectionAware Members
 
         IViewAwareStatus _viewAwareStatus;
@@ -153,6 +135,4 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
     }
-#endif
-
 }

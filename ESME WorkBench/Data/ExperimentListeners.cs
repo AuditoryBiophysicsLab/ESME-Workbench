@@ -6,14 +6,12 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using Cinch;
-using ESME.Environment;
-using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
 using ThinkGeo.MapSuite.Core;
+using ESME.Views.AcousticBuilder;
 using BehaviorModel = ESME.Platform.BehaviorModel;
 
 namespace ESMEWorkBench.Data

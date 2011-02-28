@@ -10,9 +10,8 @@ using Cinch;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLoss
 {
-#if false
     public class TransmissionLossFieldCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         IViewAwareStatus _viewAwareStatus;
@@ -242,5 +241,4 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
     }
-#endif
 }
