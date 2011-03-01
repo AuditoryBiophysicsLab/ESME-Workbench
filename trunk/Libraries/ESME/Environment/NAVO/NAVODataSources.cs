@@ -23,7 +23,7 @@ namespace ESME.Environment.NAVO
         Dispatcher _dispatcher;
 
         //public NAVODataSources(Globals.AppSettings.NAVOConfiguration, _experiment.LocalStorageRoot, _experiment.North, _experiment.South, _experiment.East, _experiment.West, _experiment.NemoFile.Scenario.SimAreaName, _dispatcher);
-        public NAVODataSources(NAVOConfiguration configurations, Dispatcher dispatcher, string localStorageRoot, float north, float south, float east, float west, string simAreaName)
+        public NAVODataSources(NAVOConfiguration configurations, Dispatcher dispatcher, string localStorageRoot, float north, float south, float east, float west, string simAreaPath)
         {
             try
             {
@@ -41,7 +41,7 @@ namespace ESME.Environment.NAVO
             _south = south;
             _east = east;
             _west = west;
-            _simAreaName = simAreaName;
+            _simAreaPath = simAreaPath;
 
             SurfaceMarineGriddedClimatologyDatabase.DatabasePath = configurations.SMGCDirectory;
             SurfaceMarineGriddedClimatologyDatabase.ExtractionProgramPath = configurations.SMGCEXEPath;
@@ -141,7 +141,7 @@ namespace ESME.Environment.NAVO
         readonly float _south;
         readonly float _east;
         readonly float _west;
-        readonly string _simAreaName;
+        readonly string _simAreaPath;
 
         internal NAVOConfiguration Configuration { get; set; }
 
@@ -232,10 +232,15 @@ namespace ESME.Environment.NAVO
 
             if (ExportCASSData)
             {
+                Status = "Exporting bathymetry data";
+                //var bathymetryFileName = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathy_" + DigitalBathymetricDatabase.SelectedResolution + ".txt");
+                var bathymetryFileName = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathymetry.txt");
+                CASSFiles.WriteBathymetryFile(bathymetryFileName, bathymetry);
+
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
                     Status = "Exporting CASS format data for " + timePeriod;
-                    CASSFiles.GenerateSimAreaData(_simAreaName, tempDirectory, timePeriod.ToString(), _north, _south, _east, _west);
+                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod.ToString(), bathymetry, _north, _south, _east, _west);
                     if (backgroundWorker.CancellationPending) return;
                     ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
                 }
