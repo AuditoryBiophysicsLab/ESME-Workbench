@@ -85,6 +85,7 @@ namespace ESMEWorkBench.Data
         {
             if (AnalysisPoints == null) AnalysisPoints = new ObservableCollection<AnalysisPoint>();
             AnalysisPoints.Add(analysisPoint);
+            Globals.AppSettings.AddExperiment(FileName);
         }
 
         [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
