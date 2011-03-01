@@ -1,11 +1,10 @@
 ﻿<Window x:Class="ESMEWorkBench.Views.ApplicationOptionsView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:ctl="clr-namespace:ESMEWorkBench.Controls"
         xmlns:Views="clr-namespace:ESME.Views.EnvironmentBuilder;assembly=ESME.Views"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         Title="User Options"
-        Height="500"
-        Width="500">
+        SizeToContent="WidthAndHeight">
     <Window.Resources>
         <DataTemplate x:Key="CASSTemplateTemplate">
             <Grid>
@@ -24,7 +23,7 @@
                     <Label Content="Mode Type:"/>
                     <TextBox Text="{Binding MatchString}"/>
                 </StackPanel>
-                <ctl:FileOrDirectorySetting Grid.Column="2"
+                <Controls:FileOrDirectorySetting Grid.Column="2"
                                             Caption="Template File"
 					                        IsDirectoryBrowser="False"
 					                        FileName="{Binding FileName}"
@@ -57,11 +56,11 @@
                 <StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-                    <ctl:FileOrDirectorySetting Caption="Scenario Editor executable files"
+                    <Controls:FileOrDirectorySetting Caption="Scenario Editor executable files"
 					                            FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
 					                            IsDirectoryBrowser="False"
 					                            FileName="{Binding AppSettings.ScenarioEditorExecutablePath}" />
-                    <ctl:FileOrDirectorySetting Caption="Scenario Editor data directory"
+                    <Controls:FileOrDirectorySetting Caption="Scenario Editor data directory"
 					                            IsDirectoryBrowser="True"
 					                            FileName="{Binding AppSettings.ScenarioDataDirectory}" />
                 </StackPanel>
@@ -75,7 +74,7 @@
 					          Margin="2 10 2 2">
                         Use Oceanographic and Atmospheric Master Library (OAML) data sources
                     </CheckBox>
-                    <ctl:FileOrDirectorySetting Caption="Environment database directory"
+                    <Controls:FileOrDirectorySetting Caption="Environment database directory"
 					                            IsEnabled="{Binding AppSettings.UseESMEDataSources}"
 					                            Margin="2 20 2 2"
 					                            IsDirectoryBrowser="True"
@@ -89,16 +88,16 @@
                 <StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-                    <ctl:FileOrDirectorySetting Caption="GDEM-V"
+                    <Controls:FileOrDirectorySetting Caption="GDEM-V"
 					                            IsDirectoryBrowser="True"
 					                            FileName="{Binding AppSettings.NAVOConfiguration.GDEMDirectory}" />
-                    <ctl:FileOrDirectorySetting Caption="SMGC"
+                    <Controls:FileOrDirectorySetting Caption="SMGC"
 					                            IsDirectoryBrowser="True"
 					                            FileName="{Binding AppSettings.NAVOConfiguration.SMGCDirectory}" />
-                    <ctl:FileOrDirectorySetting Caption="BST"
+                    <Controls:FileOrDirectorySetting Caption="BST"
 					                            IsDirectoryBrowser="False"
 					                            FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory}" />
-                    <ctl:FileOrDirectorySetting Caption="DBDB"
+                    <Controls:FileOrDirectorySetting Caption="DBDB"
 					                            IsDirectoryBrowser="False"
 					                            FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory}" />
                 </StackPanel>
@@ -110,13 +109,13 @@
                 <StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-                    <ctl:FileOrDirectorySetting Caption="SMGC Extractor"
+                    <Controls:FileOrDirectorySetting Caption="SMGC Extractor"
 					                            IsDirectoryBrowser="False"
 					                            FileName="{Binding AppSettings.NAVOConfiguration.SMGCEXEPath}" />
-                    <ctl:FileOrDirectorySetting Caption="BST Extractor"
+                    <Controls:FileOrDirectorySetting Caption="BST Extractor"
 					                            IsDirectoryBrowser="False"
 					                            FileName="{Binding AppSettings.NAVOConfiguration.BSTEXEPath}" />
-                    <ctl:FileOrDirectorySetting Caption="DBDB Extractor"
+                    <Controls:FileOrDirectorySetting Caption="DBDB Extractor"
 					                            IsDirectoryBrowser="False"
 					                            FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath}" />
                 </StackPanel>

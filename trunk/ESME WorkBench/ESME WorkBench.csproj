@@ -177,9 +177,6 @@
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DataAxis.cs" />
-    <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
-      <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\LayerTreeView.xaml.cs">
       <DependentUpon>LayerTreeView.xaml</DependentUpon>
     </Compile>
@@ -311,10 +308,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ColorBarView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Controls\FileOrDirectorySetting.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

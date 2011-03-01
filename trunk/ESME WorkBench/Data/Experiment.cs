@@ -15,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
+using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Model;
@@ -618,23 +619,41 @@ namespace ESMEWorkBench.Data
                     Directory.CreateDirectory(localStorageRoot);
                     File.WriteAllText(Path.Combine(localStorageRoot, "_README.TXT"), "This directory and all its contents are managed by the ESME WorkBench.\r\n\r\nMoving, deleting, renaming or otherwise changing the contents of this directory or any subdirectory WILL cause the ESME WorkBench to function improperly and/or to give invalid results.\r\n\r\nYOU HAVE BEEN WARNED!");
                 }
-                if (FileSystemWatcher == null)
-                {
-                    FileSystemWatcher = new FileSystemWatcher(localStorageRoot)
-                                        {
-                                            NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
-                                            Filter = "*.tlf",
-                                        };
-                    FileSystemWatcher.Changed += TransmissionLossFieldFileChanged;
-                    FileSystemWatcher.Deleted += TransmissionLossFieldFileChanged;
-                    FileSystemWatcher.EnableRaisingEvents = true;
-                }
+
                 return localStorageRoot;
             }
         }
 
         #endregion
 
+        #region public string TransmissionLossJobRoot { get; set; }
+
+        public string TransmissionLossJobRoot
+        {
+            get
+            {
+                var transmissionLossJobRoot = Path.Combine(LocalStorageRoot, "Transmission Loss\\Jobs");
+                if (!Directory.Exists(transmissionLossJobRoot)) Directory.CreateDirectory(transmissionLossJobRoot);
+                return transmissionLossJobRoot;
+            }
+        }
+
+        #endregion
+
+        #region public string TransmissionLossFileRoot { get; set; }
+
+        public string TransmissionLossFileRoot
+        {
+            get
+            {
+                var transmissionLossFileRoot = Path.Combine(LocalStorageRoot, "Transmission Loss\\Files");
+                if (!Directory.Exists(transmissionLossFileRoot)) Directory.CreateDirectory(transmissionLossFileRoot);
+                return transmissionLossFileRoot;
+            }
+        }
+
+        #endregion
+        
         #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; set; }
 
         [XmlIgnore]
@@ -755,7 +774,9 @@ namespace ESMEWorkBench.Data
 
         void Initialize()
         {
-            // if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent));
+            Globals.AppSettings.VerifyExperimentsStillExist();
+
+            // if (CurrentExtent != null) MediatorMessage.Send(MediatorMessage.SetCurrentExtent, new RectangleShape(CurrentExtent)););
             if (CurrentScale != 0) MediatorMessage.Send(MediatorMessage.SetCurrentScale, CurrentScale);
             if (MapLayers == null)
             {
@@ -887,6 +908,19 @@ namespace ESMEWorkBench.Data
         void InitializeEnvironment(bool isFromInitialize)
         {
             if (!isFromInitialize && !_isInitialized) return;
+
+            if (FileSystemWatcher != null) FileSystemWatcher.Dispose();
+            if (FileName != null)
+            {
+                FileSystemWatcher = new FileSystemWatcher(TransmissionLossFileRoot)
+                                    {
+                                        NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                                        Filter = "*.tlf",
+                                    };
+                FileSystemWatcher.Changed += TransmissionLossFieldFileChanged;
+                FileSystemWatcher.Deleted += TransmissionLossFieldFileChanged;
+                FileSystemWatcher.EnableRaisingEvents = true;
+            }
 
             if (NemoFile == null) return;
             var boundingBox = new Rect();
