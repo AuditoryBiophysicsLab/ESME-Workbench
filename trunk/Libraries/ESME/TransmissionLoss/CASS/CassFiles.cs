@@ -119,9 +119,10 @@ namespace ESME.TransmissionLoss.CASS
                             writer.WriteLine("# creation date: {0}", DateTime.Now);
                             writer.WriteLine();
                             writer.WriteLine("*System Parms");
-                            writer.WriteLine("Plot Files,n");
-                            writer.WriteLine("Binary Files,y");
-                            writer.WriteLine("Pressure Files,n");
+                            writer.WriteLine("Plot Files,{0}", appSettings.CASSSettings.GeneratePlotFiles ? "y" : "n");
+                            writer.WriteLine("Binary Files,{0}", appSettings.CASSSettings.GenerateBinaryFiles ? "y" : "n");
+                            writer.WriteLine("Pressure Files,{0}", appSettings.CASSSettings.GeneratePressureFiles ? "y" : "n");
+                            writer.WriteLine("Eigenray Files,{0}", appSettings.CASSSettings.GenerateEigenrayFiles ? "y" : "n");
                             writer.WriteLine("Data Directory,{0}", appSettings.ScenarioDataDirectory);
                             writer.WriteLine("*End System Parms");
                             writer.WriteLine();
@@ -152,7 +153,7 @@ namespace ESME.TransmissionLoss.CASS
                                 writer.WriteLine("Reference Location                      ,{0:0.000} DEG, {1:0.000} DEG", simAreaData.Latitude, simAreaData.Longitude);
                                 writer.WriteLine("Enviro File                             ,env_{0}.dat", timePeriod.ToLower());
                                 writer.WriteLine("Bathy File                              ,{0}", cassBathymetryFileName);
-                                writer.WriteLine("Water Depth                             ,0 M, 2000 M, 25 M");
+                                writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.CASSSettings.MaximumDepth, appSettings.CASSSettings.DepthStepSize);
                                 writer.WriteLine("Season                                  ,{0}", timePeriod);
                                 writer.Write("Radial Angles                           ");
 
@@ -164,12 +165,12 @@ namespace ESME.TransmissionLoss.CASS
                                 writer.WriteLine("Platform Name                           ,{0}", platform.Name);
                                 writer.WriteLine("Source Name                             ,{0}", source.Name);
                                 writer.WriteLine("Mode Name                               ,{0}", mode.One.Name);
-                                writer.WriteLine("Frequency                               ,{0:0.000} HZ", (mode.One.LowFrequency + mode.One.HighFrequency) / 2.0f);
+                                writer.WriteLine("Frequency                               ,{0:0.000} HZ", Math.Sqrt(mode.One.LowFrequency * mode.One.HighFrequency));
                                 writer.WriteLine("DE Angle                                ,{0:0.000} DEG", mode.One.DepressionElevationAngle);
                                 writer.WriteLine("Vertical Beam                           ,{0:0.000} DEG", mode.One.VerticalBeamWidth);
                                 writer.WriteLine("Source Depth                            ,{0:0.000} M", mode.One.SourceDepth);
                                 writer.WriteLine("SOURCE LEVEL                            ,{0:0.000} DB", mode.One.SourceLevel);
-                                writer.WriteLine("Range Distance                          ,50 M, 100000 M, 50 M");
+                                writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", appSettings.CASSSettings.RangeStepSize, mode.One.Radius);
 
                                 foreach (var soundSource in mode.Many)
                                     writer.WriteLine("Source Location                         ,{0:0.000} DEG, {1:0.000} DEG", soundSource.Latitude, soundSource.Longitude);
@@ -178,9 +179,9 @@ namespace ESME.TransmissionLoss.CASS
                             } // end of loop over all modes in the current source
                         } // end of using block that writes the input file
                         // Write the crufty batch file for the NUWC guys
-                        if (!string.IsNullOrEmpty(appSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSExecutablePath))
+                        if (!string.IsNullOrEmpty(appSettings.CASSSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.CASSSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSSettings.CASSExecutablePath))
                             using (var writer = new StreamWriter(batchFilePath))
-                                writer.WriteLine("start /wait {0} {1} {2} {3}", appSettings.PythonExecutablePath, appSettings.PythonScriptPath, inputFileName, appSettings.CASSExecutablePath);
+                                writer.WriteLine("start /wait \"{0}\" \"{1}\" \"{2}\" \"{3}\"", appSettings.CASSSettings.PythonExecutablePath, appSettings.CASSSettings.PythonScriptPath, inputFileName, appSettings.CASSSettings.CASSExecutablePath);
                     } // end loop over all sources on the current platform
                 } // end loop over all platforms in the scenario
             } // end loop over all time periods we're generating CASS input files for
@@ -272,7 +273,6 @@ namespace ESME.TransmissionLoss.CASS
                     rawvalues.Add(curGroup);
                 }
             }
-
 
             var result = new List<CASSPacket>();
             foreach (var packet in rawvalues)

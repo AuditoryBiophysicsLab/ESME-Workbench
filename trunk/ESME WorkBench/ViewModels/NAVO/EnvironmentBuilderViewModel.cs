@@ -45,24 +45,6 @@ namespace ESMEWorkBench.ViewModels.NAVO
             ExtractButtonText = "Initializing...";
         }
 
-        #region LaunchSeasonConfigurationViewCommand
-
-        SimpleCommand<object, object> _launchSeasonConfigurationView;
-
-        public SimpleCommand<object, object> LaunchSeasonConfigurationViewCommand
-        {
-            get
-            {
-                return _launchSeasonConfigurationView ?? (_launchSeasonConfigurationView = new SimpleCommand<object, object>(delegate
-                {
-                    var popupViewModel = new SeasonConfigurationWindowViewModel();
-                    _visualizerService.ShowDialog("SeasonConfigurationWindowView", popupViewModel);
-                }));
-            }
-        }
-
-        #endregion
-
         #region SelectAllMonthsCommand
 
         SimpleCommand<object, object> _selectAllMonths;
@@ -299,25 +281,6 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         static readonly PropertyChangedEventArgs ExtractButtonTextChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.ExtractButtonText);
         string _extractButtonText;
-
-        #endregion
-
-        #region LaunchEnvironmentConfigurationViewCommand
-
-        SimpleCommand<object, object> _launchEnvironmentConfigurationView;
-
-        public SimpleCommand<object, object> LaunchEnvironmentConfigurationViewCommand
-        {
-            get
-            {
-                return _launchEnvironmentConfigurationView ?? (_launchEnvironmentConfigurationView = new SimpleCommand<object, object>(delegate
-                                                                                                                                       {
-                                                                                                                                           var environmentBuilderConfigurationViewModel = new EnvironmentBuilderConfigurationViewModel(AppSettings);
-                                                                                                                                           bool? result = _visualizerService.ShowDialog("EnvironmentBuilderConfigurationView", environmentBuilderConfigurationViewModel);
-                                                                                                                                           if (result.HasValue && result.Value) { }
-                                                                                                                                       }));
-            }
-        }
 
         #endregion
 

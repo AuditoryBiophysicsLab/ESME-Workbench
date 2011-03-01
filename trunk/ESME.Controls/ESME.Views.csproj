@@ -90,20 +90,11 @@
     <Compile Include="EnvironmentBuilder\DBDBView.xaml.cs">
       <DependentUpon>DBDBView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EnvironmentBuilder\EnvironmentBuilderConfigurationView.xaml.cs">
-      <DependentUpon>EnvironmentBuilderConfigurationView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EnvironmentBuilder\SeasonConfigurationView.xaml.cs">
-      <DependentUpon>SeasonConfigurationView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="EnvironmentBuilder\GDEMView.xaml.cs">
       <DependentUpon>GDEMView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="EnvironmentBuilder\SeasonConfigurationWindowView.xaml.cs">
-      <DependentUpon>SeasonConfigurationWindowView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\SMGCView.xaml.cs">
       <DependentUpon>SMGCView.xaml</DependentUpon>
@@ -136,23 +127,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EnvironmentBuilder\EnvironmentBuilderConfigurationView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EnvironmentBuilder\SeasonConfigurationView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="EnvironmentBuilder\GDEMView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="EnvironmentBuilder\SeasonConfigurationWindowView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

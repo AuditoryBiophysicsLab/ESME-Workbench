@@ -41,8 +41,6 @@ namespace ESME.Data
         public AppSettings()
         {
             FileName = AppSettingsFile;
-            if (NAVOConfiguration == null) NAVOConfiguration = new NAVOConfiguration();
-            if (CASSTemplates == null) CASSTemplates = new ObservableCollection<CASSTemplate>();
         }
 
         public AppSettings(AppSettings that) : this() { CopyFrom(that); }
@@ -61,25 +59,6 @@ namespace ESME.Data
         public void Save() { Save(FileName, ReferencedTypes); }
 
         public void Reload() { Reload(ReferencedTypes); }
-
-        public void SetDefaultCASSTemplates()
-        {
-            if (CASSTemplates.Count == 0)
-            {
-                CASSTemplates.Add(new CASSTemplate
-                {
-                    FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "base_template.cass"),
-                    IsEnabled = true,
-                    MatchString = "",
-                });
-                CASSTemplates.Add(new CASSTemplate
-                {
-                    FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "fathometer_template.cass"),
-                    IsEnabled = true,
-                    MatchString = "Fathometer",
-                });
-            }
-        }
 
         #region public string ScenarioEditorExecutablePath { get; set; }
 
@@ -143,7 +122,7 @@ namespace ESME.Data
 
         public NAVOConfiguration NAVOConfiguration
         {
-            get { return _navoConfiguration; }
+            get { return _navoConfiguration ?? (_navoConfiguration = new NAVOConfiguration());}
             set
             {
                 if (_navoConfiguration == value) return;
@@ -192,89 +171,39 @@ namespace ESME.Data
 
         #endregion
 
-        #region public string PythonExecutablePath { get; set; }
+        #region public CASSSettings CASSSettings { get; set; }
 
-        public string PythonExecutablePath
+        public CASSSettings CASSSettings
         {
-            get { return _pythonExecutablePath; }
+            get { return _cassSettings ?? (_cassSettings = new CASSSettings()); }
             set
             {
-                if (_pythonExecutablePath == value) return;
-                _pythonExecutablePath = value;
-                NotifyPropertyChanged(PythonExecutablePathChangedEventArgs);
+                if (_cassSettings == value) return;
+                _cassSettings = value;
+                NotifyPropertyChanged(CASSSettingsChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs PythonExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.PythonExecutablePath);
-        string _pythonExecutablePath;
+        static readonly PropertyChangedEventArgs CASSSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.CASSSettings);
+        CASSSettings _cassSettings;
 
         #endregion
 
-        #region public string PythonScriptPath { get; set; }
+        #region public REFMSSettings REFMSSettings { get; set; }
 
-        public string PythonScriptPath
+        public REFMSSettings REFMSSettings
         {
-            get { return _pythonScriptPath; }
+            get { return _refmsSettings ?? (_refmsSettings = new REFMSSettings()); }
             set
             {
-                if (_pythonScriptPath == value) return;
-                _pythonScriptPath = value;
-                NotifyPropertyChanged(PythonScriptPathChangedEventArgs);
+                if (_refmsSettings == value) return;
+                _refmsSettings = value;
+                NotifyPropertyChanged(REFMSSettingsChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs PythonScriptPathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.PythonScriptPath);
-        string _pythonScriptPath;
-
-        #endregion
-
-        #region public string CASSExecutablePath { get; set; }
-
-        public string CASSExecutablePath
-        {
-            get { return _cASSExecutablePath; }
-            set
-            {
-                if (_cASSExecutablePath == value) return;
-                _cASSExecutablePath = value;
-                NotifyPropertyChanged(CASSExecutablePathChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs CASSExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.CASSExecutablePath);
-        string _cASSExecutablePath;
-
-        #endregion
-
-        #region AddCASSTemplateCommand
-
-        public SimpleCommand<object, object> AddCASSTemplateCommand
-        {
-            get { return _addCASSTemplate ?? (_addCASSTemplate = new SimpleCommand<object, object>(delegate { CASSTemplates.Add(new CASSTemplate(){});})); }
-        }
-
-        SimpleCommand<object, object> _addCASSTemplate;
-
-        #endregion
-
-        #region public ObservableCollection<CASSTemplate> CASSTemplates { get; set; }
-
-        public ObservableCollection<CASSTemplate> CASSTemplates
-        {
-            get { return _cassTemplates; }
-            set
-            {
-                if (_cassTemplates == value) return;
-                if (_cassTemplates != null) _cassTemplates.CollectionChanged -= CASSTemplatesCollectionChanged;
-                _cassTemplates = value;
-                if (_cassTemplates != null) _cassTemplates.CollectionChanged += CASSTemplatesCollectionChanged;
-                NotifyPropertyChanged(CASSTemplatesChangedEventArgs);
-            }
-        }
-
-        void CASSTemplatesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(CASSTemplatesChangedEventArgs); }
-        static readonly PropertyChangedEventArgs CASSTemplatesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.CASSTemplates);
-        ObservableCollection<CASSTemplate> _cassTemplates;
+        static readonly PropertyChangedEventArgs REFMSSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.REFMSSettings);
+        REFMSSettings _refmsSettings;
 
         #endregion
 
@@ -314,6 +243,383 @@ namespace ESME.Data
             ExperimentFiles.AddRange(tmpList);
             Save();
         }
+
+        #endregion
+    }
+
+    public class CASSSettings : INotifyPropertyChanged
+    {
+        public void SetDefaultCASSParameterFiles()
+        {
+            if (CASSParameterFiles.Count == 0)
+            {
+                CASSParameterFiles.Add(new CASSTemplate
+                {
+                    FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "base_template.cass"),
+                    IsEnabled = true,
+                    MatchString = "",
+                });
+                CASSParameterFiles.Add(new CASSTemplate
+                {
+                    FileName = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "fathometer_template.cass"),
+                    IsEnabled = true,
+                    MatchString = "Fathometer",
+                });
+            }
+        }
+
+        #region public bool GeneratePlotFiles { get; set; }
+
+        public bool GeneratePlotFiles
+        {
+            get { return _generatePlotFiles; }
+            set
+            {
+                if (_generatePlotFiles == value) return;
+                _generatePlotFiles = value;
+                NotifyPropertyChanged(GeneratePlotFilesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GeneratePlotFilesChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.GeneratePlotFiles);
+        bool _generatePlotFiles;
+
+        #endregion
+
+        #region public bool GenerateBinaryFiles { get; set; }
+
+        public bool GenerateBinaryFiles
+        {
+            get { return _generateBinaryFiles; }
+            set
+            {
+                if (_generateBinaryFiles == value) return;
+                _generateBinaryFiles = value;
+                NotifyPropertyChanged(GenerateBinaryFilesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GenerateBinaryFilesChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.GenerateBinaryFiles);
+        bool _generateBinaryFiles = true;
+
+        #endregion
+
+        #region public bool GeneratePressureFiles { get; set; }
+
+        public bool GeneratePressureFiles
+        {
+            get { return _generatePressureFiles; }
+            set
+            {
+                if (_generatePressureFiles == value) return;
+                _generatePressureFiles = value;
+                NotifyPropertyChanged(GeneratePressureFilesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GeneratePressureFilesChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.GeneratePressureFiles);
+        bool _generatePressureFiles;
+
+        #endregion
+
+        #region public bool GenerateEigenrayFiles { get; set; }
+
+        public bool GenerateEigenrayFiles
+        {
+            get { return _generateEigenrayFiles; }
+            set
+            {
+                if (_generateEigenrayFiles == value) return;
+                _generateEigenrayFiles = value;
+                NotifyPropertyChanged(GenerateEigenrayFilesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GenerateEigenrayFilesChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.GenerateEigenrayFiles);
+        bool _generateEigenrayFiles;
+
+        #endregion
+
+        #region public string PythonExecutablePath { get; set; }
+
+        public string PythonExecutablePath
+        {
+            get { return _pythonExecutablePath; }
+            set
+            {
+                if (_pythonExecutablePath == value) return;
+                _pythonExecutablePath = value;
+                NotifyPropertyChanged(PythonExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PythonExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.PythonExecutablePath);
+        string _pythonExecutablePath;
+
+        #endregion
+
+        #region public string PythonScriptPath { get; set; }
+
+        public string PythonScriptPath
+        {
+            get { return _pythonScriptPath; }
+            set
+            {
+                if (_pythonScriptPath == value) return;
+                _pythonScriptPath = value;
+                NotifyPropertyChanged(PythonScriptPathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PythonScriptPathChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.PythonScriptPath);
+        string _pythonScriptPath;
+
+        #endregion
+
+        #region public string CASSExecutablePath { get; set; }
+
+        public string CASSExecutablePath
+        {
+            get { return _cASSExecutablePath; }
+            set
+            {
+                if (_cASSExecutablePath == value) return;
+                _cASSExecutablePath = value;
+                NotifyPropertyChanged(CASSExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CASSExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.CASSExecutablePath);
+        string _cASSExecutablePath;
+
+        #endregion
+
+        #region public float MaximumDepth { get; set; }
+
+        public float MaximumDepth
+        {
+            get { return _maximumDepth; }
+            set
+            {
+                if (_maximumDepth == value) return;
+                _maximumDepth = value;
+                NotifyPropertyChanged(MaximumDepthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.MaximumDepth);
+        float _maximumDepth = 2000.0f;
+
+        #endregion
+
+        #region public float DepthStepSize { get; set; }
+
+        public float DepthStepSize
+        {
+            get { return _depthStepSize; }
+            set
+            {
+                if (_depthStepSize == value) return;
+                _depthStepSize = value;
+                NotifyPropertyChanged(DepthStepSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DepthStepSizeChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.DepthStepSize);
+        float _depthStepSize = 25.0f;
+
+        #endregion
+
+        #region public float RangeStepSize { get; set; }
+
+        public float RangeStepSize
+        {
+            get { return _rangeStepSize; }
+            set
+            {
+                if (_rangeStepSize == value) return;
+                _rangeStepSize = value;
+                NotifyPropertyChanged(RangeStepSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RangeStepSizeChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.RangeStepSize);
+        float _rangeStepSize = 25.0f;
+
+        #endregion
+
+        #region public ObservableCollection<CASSTemplate> CASSParameterFiles { get; set; }
+
+        public ObservableCollection<CASSTemplate> CASSParameterFiles
+        {
+            get { return _cassParameterFiles ?? (_cassParameterFiles = new ObservableCollection<CASSTemplate>()); }  
+            set
+            {
+                if (_cassParameterFiles == value) return;
+                if (_cassParameterFiles != null) _cassParameterFiles.CollectionChanged -= CASSParameterFilesCollectionChanged;
+                _cassParameterFiles = value;
+                if (_cassParameterFiles != null) _cassParameterFiles.CollectionChanged += CASSParameterFilesCollectionChanged;
+                NotifyPropertyChanged(CASSParameterFilesChangedEventArgs);
+            }
+        }
+
+        void CASSParameterFilesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(CASSParameterFilesChangedEventArgs); }
+        static readonly PropertyChangedEventArgs CASSParameterFilesChangedEventArgs = ObservableHelper.CreateArgs<CASSSettings>(x => x.CASSParameterFiles);
+        ObservableCollection<CASSTemplate> _cassParameterFiles;
+
+        #endregion
+
+        #region AddCASSParameterFileCommand
+
+        public SimpleCommand<object, object> AddCASSParameterFileCommand
+        {
+            get { return _addCASSParameterFile ?? (_addCASSParameterFile = new SimpleCommand<object, object>(delegate { CASSParameterFiles.Add(new CASSTemplate() { }); })); }
+        }
+
+        SimpleCommand<object, object> _addCASSParameterFile;
+
+        #endregion
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+
+        #endregion
+    }
+
+    public class REFMSSettings : INotifyPropertyChanged
+    {
+        #region public bool ScaleI { get; set; }
+
+        public bool ScaleI
+        {
+            get { return _scaleI; }
+            set
+            {
+                if (_scaleI == value) return;
+                _scaleI = value;
+                NotifyPropertyChanged(ScaleIChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ScaleIChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.ScaleI);
+        bool _scaleI;
+
+        #endregion
+
+        #region public float DefaultMinimumRange { get; set; }
+
+        public float DefaultMinimumRange
+        {
+            get { return _defaultMinimumRange; }
+            set
+            {
+                if (_defaultMinimumRange == value) return;
+                _defaultMinimumRange = value;
+                NotifyPropertyChanged(DefaultMinimumRangeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DefaultMinimumRangeChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.DefaultMinimumRange);
+        float _defaultMinimumRange = 50f;
+
+        #endregion
+
+        #region public float DefaultMaximumRange { get; set; }
+
+        public float DefaultMaximumRange
+        {
+            get { return _defaultMaximumRange; }
+            set
+            {
+                if (_defaultMaximumRange == value) return;
+                _defaultMaximumRange = value;
+                NotifyPropertyChanged(DefaultMaximumRangeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DefaultMaximumRangeChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.DefaultMaximumRange);
+        float _defaultMaximumRange = 5280f;
+
+        #endregion
+
+        #region public int DefaultNumberOfRangePoints { get; set; }
+
+        public int DefaultNumberOfRangePoints
+        {
+            get { return _defaultNumberOfRangePoints; }
+            set
+            {
+                if (_defaultNumberOfRangePoints == value) return;
+                _defaultNumberOfRangePoints = value;
+                NotifyPropertyChanged(DefaultNumberOfRangePointsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DefaultNumberOfRangePointsChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.DefaultNumberOfRangePoints);
+        int _defaultNumberOfRangePoints = 13;
+
+        #endregion
+
+        #region public float MinimumDepth { get; set; }
+
+        public float MinimumDepth
+        {
+            get { return _minimumDepth; }
+            set
+            {
+                if (_minimumDepth == value) return;
+                _minimumDepth = value;
+                NotifyPropertyChanged(MinimumDepthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MinimumDepthChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.MinimumDepth);
+        float _minimumDepth = 1.57f;
+
+        #endregion
+
+        #region public int NumberOfDepthPoints { get; set; }
+
+        public int NumberOfDepthPoints
+        {
+            get { return _numberOfDepthPoints; }
+            set
+            {
+                if (_numberOfDepthPoints == value) return;
+                _numberOfDepthPoints = value;
+                NotifyPropertyChanged(NumberOfDepthPointsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NumberOfDepthPointsChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.NumberOfDepthPoints);
+        int _numberOfDepthPoints = 16;
+
+        #endregion
+
+        #region public string REFMSExecutablePath { get; set; }
+
+        public string REFMSExecutablePath
+        {
+            get { return _rEFMSExecutablePath; }
+            set
+            {
+                if (_rEFMSExecutablePath == value) return;
+                _rEFMSExecutablePath = value;
+                NotifyPropertyChanged(REFMSExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs REFMSExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.REFMSExecutablePath);
+        string _rEFMSExecutablePath;
+
+        #endregion
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
 
         #endregion
     }
