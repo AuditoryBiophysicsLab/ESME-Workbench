@@ -61,15 +61,15 @@ namespace ESME.Data
 
         #endregion
 
-        #region EditTemplateCommand
+        #region EditParameterFileCommand
 
-        SimpleCommand<object, object> _editTemplate;
+        SimpleCommand<object, object> _editParameterFile;
 
-        public SimpleCommand<object, object> EditTemplateCommand
+        public SimpleCommand<object, object> EditParameterFileCommand
         {
             get
             {
-                return _editTemplate ?? (_editTemplate = new SimpleCommand<object, object>(delegate { return File.Exists(FileName); }, delegate
+                return _editParameterFile ?? (_editParameterFile = new SimpleCommand<object, object>(delegate { return File.Exists(FileName); }, delegate
                                                                                                                                        {
                                                                                                                                            new Process
                                                                                                                                            {

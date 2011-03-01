@@ -44,7 +44,7 @@ namespace ESME.Environment.NAVO
             _simAreaPath = simAreaPath;
 
             SurfaceMarineGriddedClimatologyDatabase.DatabasePath = configurations.SMGCDirectory;
-            SurfaceMarineGriddedClimatologyDatabase.ExtractionProgramPath = configurations.SMGCEXEPath;
+            SurfaceMarineGriddedClimatologyDatabase.ExtractionProgramPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "SMGCExtract.exe");
 
             DigitalBathymetricDatabase.DatabasePath = configurations.DBDBDirectory;
             DigitalBathymetricDatabase.ExtractionProgramPath = configurations.DBDBEXEPath;

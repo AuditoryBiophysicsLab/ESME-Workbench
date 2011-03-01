@@ -247,24 +247,6 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        #region public string SMGCEXEPath { get; set; }
-
-        public string SMGCEXEPath
-        {
-            get { return _sMGCEXEPath; }
-            set
-            {
-                if (_sMGCEXEPath == value) return;
-                _sMGCEXEPath = value;
-                NotifyPropertyChanged(SMGCEXEPathChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SMGCEXEPathChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SMGCEXEPath);
-        string _sMGCEXEPath;
-
-        #endregion
-
         #region public string BSTSelectedResolution { get; set; }
 
         public string BSTSelectedResolution
@@ -307,8 +289,8 @@ namespace ESME.Environment.NAVO
             {
                 if (!string.IsNullOrEmpty(BSTDirectory) && !string.IsNullOrEmpty(DBDBDirectory) && !string.IsNullOrEmpty(GDEMDirectory) && !string.IsNullOrEmpty(SMGCDirectory))
                     if (File.Exists(BSTDirectory) && File.Exists(DBDBDirectory) && Directory.Exists(GDEMDirectory) && Directory.Exists(SMGCDirectory))
-                        if (!string.IsNullOrEmpty(BSTEXEPath) && !string.IsNullOrEmpty(DBDBEXEPath) && !string.IsNullOrEmpty(SMGCEXEPath))
-                            if (File.Exists(BSTEXEPath) && File.Exists(DBDBEXEPath) && File.Exists(SMGCEXEPath)) return true;
+                        if (!string.IsNullOrEmpty(BSTEXEPath) && !string.IsNullOrEmpty(DBDBEXEPath))
+                            if (File.Exists(BSTEXEPath) && File.Exists(DBDBEXEPath)) return true;
                 return false;
             }
         }

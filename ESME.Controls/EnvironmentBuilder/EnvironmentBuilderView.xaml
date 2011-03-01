@@ -87,12 +87,6 @@
 						<CheckBox IsChecked="{Binding SeasonCheckboxes[Warm].IsChecked}">Warm</CheckBox>
 						<CheckBox IsChecked="{Binding SeasonCheckboxes[Cold].IsChecked}">Cold</CheckBox>
 					</StackPanel>
-					<Button DockPanel.Dock="Bottom"
-					        VerticalAlignment="Bottom"
-					        Margin="5"
-					        Command="{Binding LaunchSeasonConfigurationViewCommand}">
-						Season definitions...
-					</Button>
 				</DockPanel>
 			</GroupBox>
 		</Grid>
