@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Model;
@@ -14,18 +15,11 @@ namespace ESME.TransmissionLoss.CASS
 {
     public static class CASSFiles
     {
-        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, string timePeriodName, float north, float south, float east, float west)
+        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, string timePeriodName, Environment2DData bathymetry, float north, float south, float east, float west)
         {
-            var bathyFiles = Directory.GetFiles(extractedDataPath, "bathymetry-*.chb");
             var sedimentFiles = Directory.GetFiles(extractedDataPath, "sediment-*.chb");
             var windFile = Path.Combine(extractedDataPath, string.Format("{0}-wind.txt", timePeriodName));
             var soundspeedFile = Path.Combine(extractedDataPath, string.Format("{0}-soundspeed.xml", timePeriodName));
-
-            Environment2DData bathymetry = null;
-            var selectedBathyFile = LargestFileInList(bathyFiles);
-            if (selectedBathyFile == null) throw new ApplicationException("No bathymetry files were found, the operation cannot proceed");
-            if (selectedBathyFile.EndsWith(".eeb")) bathymetry = Environment2DData.FromEEB(selectedBathyFile, "bathymetry", north, west, south, east);
-            else if (selectedBathyFile.EndsWith(".chb")) bathymetry = Environment2DData.FromCHB(selectedBathyFile, -1);
 
             Sediment sediment = null;
             var selectedSedimentFile = LargestFileInList(sedimentFiles);
@@ -79,20 +73,22 @@ namespace ESME.TransmissionLoss.CASS
 #endif
         }
 
-        public static void WriteCASSInputFiles(string dataDirectoryPath, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoScenario nemoScenario, string cassBathymetryFileName)
+        public static void WriteCASSInputFiles(AppSettings appSettings, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoScenario nemoScenario, string cassBathymetryFileName)
         {
-            var simAreaFile = SimAreaCSV.ReadCSV(Path.Combine(dataDirectoryPath, "SimAreas.csv"));
+            var simAreaFile = SimAreaCSV.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"));
             var simAreaData = simAreaFile[nemoScenario.SimAreaName];
             foreach (var timePeriod in timePeriods)
             {
-                var curSimAreaDataPath = Path.Combine(dataDirectoryPath, nemoScenario.SimAreaName);
+                var curSimAreaDataPath = Path.Combine(appSettings.ScenarioDataDirectory, nemoScenario.SimAreaName);
                 var curPropagationPath = Path.Combine(curSimAreaDataPath, "Propagation");
                 var curTimePeriodPath = Path.Combine(curPropagationPath, timePeriod);
                 if (!Directory.Exists(curTimePeriodPath)) Directory.CreateDirectory(curTimePeriodPath);
                 foreach (var platform in nemoScenario.Platforms)
                 {
                     var inputFileName = string.Format("base-cass-{0}-{1}-{2}.inp", platform.Name, platform.Id, timePeriod);
+                    var batchFileName = string.Format("run_base-cass-{0}-{1}-{2}.bat", platform.Name, platform.Id, timePeriod);
                     var inputFilePath = Path.Combine(curTimePeriodPath, inputFileName);
+                    var batchFilePath = Path.Combine(curTimePeriodPath, batchFileName);
                     foreach (var source in platform.Sources)
                     {
                         var sourceToModes = new OneToMany<NemoSource, List<OneToMany<NemoMode, List<SoundSource>>>>(source);
@@ -126,7 +122,7 @@ namespace ESME.TransmissionLoss.CASS
                             writer.WriteLine("Plot Files,n");
                             writer.WriteLine("Binary Files,y");
                             writer.WriteLine("Pressure Files,n");
-                            writer.WriteLine("Data Directory,{0}", dataDirectoryPath);
+                            writer.WriteLine("Data Directory,{0}", appSettings.ScenarioDataDirectory);
                             writer.WriteLine("*End System Parms");
                             writer.WriteLine();
                             writer.WriteLine("*CASS Parms");
@@ -154,7 +150,7 @@ namespace ESME.TransmissionLoss.CASS
                                 writer.WriteLine("Sim Area                                ,{0}", nemoScenario.SimAreaName);
                                 writer.WriteLine("Event Name                              ,{0}", nemoScenario.EventName);
                                 writer.WriteLine("Reference Location                      ,{0:0.000} DEG, {1:0.000} DEG", simAreaData.Latitude, simAreaData.Longitude);
-                                writer.WriteLine("Enviro File                             ,env_{0}.dat", timePeriod);
+                                writer.WriteLine("Enviro File                             ,env_{0}.dat", timePeriod.ToLower());
                                 writer.WriteLine("Bathy File                              ,{0}", cassBathymetryFileName);
                                 writer.WriteLine("Water Depth                             ,0 M, 2000 M, 25 M");
                                 writer.WriteLine("Season                                  ,{0}", timePeriod);
@@ -181,6 +177,10 @@ namespace ESME.TransmissionLoss.CASS
                                 writer.WriteLine();
                             } // end of loop over all modes in the current source
                         } // end of using block that writes the input file
+                        // Write the crufty batch file for the NUWC guys
+                        if (!string.IsNullOrEmpty(appSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSExecutablePath))
+                            using (var writer = new StreamWriter(batchFilePath))
+                                writer.WriteLine("start /wait {0} {1} {2} {3}", appSettings.PythonExecutablePath, appSettings.PythonScriptPath, inputFileName, appSettings.CASSExecutablePath);
                     } // end loop over all sources on the current platform
                 } // end loop over all platforms in the scenario
             } // end loop over all time periods we're generating CASS input files for

@@ -192,6 +192,60 @@ namespace ESME.Data
 
         #endregion
 
+        #region public string PythonExecutablePath { get; set; }
+
+        public string PythonExecutablePath
+        {
+            get { return _pythonExecutablePath; }
+            set
+            {
+                if (_pythonExecutablePath == value) return;
+                _pythonExecutablePath = value;
+                NotifyPropertyChanged(PythonExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PythonExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.PythonExecutablePath);
+        string _pythonExecutablePath;
+
+        #endregion
+
+        #region public string PythonScriptPath { get; set; }
+
+        public string PythonScriptPath
+        {
+            get { return _pythonScriptPath; }
+            set
+            {
+                if (_pythonScriptPath == value) return;
+                _pythonScriptPath = value;
+                NotifyPropertyChanged(PythonScriptPathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PythonScriptPathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.PythonScriptPath);
+        string _pythonScriptPath;
+
+        #endregion
+
+        #region public string CASSExecutablePath { get; set; }
+
+        public string CASSExecutablePath
+        {
+            get { return _cASSExecutablePath; }
+            set
+            {
+                if (_cASSExecutablePath == value) return;
+                _cASSExecutablePath = value;
+                NotifyPropertyChanged(CASSExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CASSExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.CASSExecutablePath);
+        string _cASSExecutablePath;
+
+        #endregion
+
         #region AddCASSTemplateCommand
 
         public SimpleCommand<object, object> AddCASSTemplateCommand
@@ -202,7 +256,6 @@ namespace ESME.Data
         SimpleCommand<object, object> _addCASSTemplate;
 
         #endregion
-
 
         #region public ObservableCollection<CASSTemplate> CASSTemplates { get; set; }
 
@@ -224,7 +277,6 @@ namespace ESME.Data
         ObservableCollection<CASSTemplate> _cassTemplates;
 
         #endregion
-
 
         // This list is maintained by the ESME WorkBench.  When a new experiment is saved, the path to the experiment directory is added to this list
         // Periodically, the VerifyExperimentsStillExist() method is called, which will prune directories that no longer exist.

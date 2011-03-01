@@ -5,137 +5,171 @@
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         Title="User Options"
         SizeToContent="WidthAndHeight">
-    <Window.Resources>
-        <DataTemplate x:Key="CASSTemplateTemplate">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition SharedSizeGroup="CheckCol"/>
-                    <ColumnDefinition SharedSizeGroup="PatternCol" />
-                    <ColumnDefinition SharedSizeGroup="FileCol"/>
-                    <ColumnDefinition SharedSizeGroup="EditCol"/>
-                </Grid.ColumnDefinitions>
+	<Window.Resources>
+		<DataTemplate x:Key="CASSTemplateTemplate">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition SharedSizeGroup="CheckCol" />
+					<ColumnDefinition SharedSizeGroup="PatternCol" />
+					<ColumnDefinition SharedSizeGroup="FileCol" />
+					<ColumnDefinition SharedSizeGroup="EditCol" />
+				</Grid.ColumnDefinitions>
 
-                <CheckBox Content="Enable" IsChecked="{Binding IsEnabled}" Grid.Column="0" Margin="5 0 0 0" VerticalAlignment="Bottom"/>
-                <StackPanel Orientation="Vertical" 
-                            Grid.Column="1" 
-                            IsEnabled="{Binding IsEnabled}"
-                            Margin="5 0 0 0">
-                    <Label Content="Mode Type:"/>
-                    <TextBox Text="{Binding MatchString}"/>
-                </StackPanel>
-                <Controls:FileOrDirectorySetting Grid.Column="2"
-                                            Caption="Template File"
-					                        IsDirectoryBrowser="False"
-					                        FileName="{Binding FileName}"
-                                            IsEnabled="{Binding IsEnabled}"
-                                            Margin="5 0 0 0"
-                                            />
-                <Button Content="Edit..." Command="{Binding EditTemplateCommand}" Grid.Column="3" Width="75" VerticalAlignment="Bottom" Height="22" Margin="5 0 0 0"/>
-            </Grid>
-        </DataTemplate>
-    </Window.Resources>
-    <DockPanel LastChildFill="True">
-        <DockPanel LastChildFill="False"
+				<CheckBox Content="Enable"
+				          IsChecked="{Binding IsEnabled}"
+				          Grid.Column="0"
+				          Margin="5 0 0 0"
+				          VerticalAlignment="Bottom" />
+				<StackPanel Orientation="Vertical"
+				            Grid.Column="1"
+				            IsEnabled="{Binding IsEnabled}"
+				            Margin="5 0 0 0">
+					<Label Content="Mode Type:" />
+					<TextBox Text="{Binding MatchString}" />
+				</StackPanel>
+				<Controls:FileOrDirectorySetting Grid.Column="2"
+				                                 Caption="Template File"
+				                                 IsDirectoryBrowser="False"
+				                                 FileName="{Binding FileName}"
+				                                 IsEnabled="{Binding IsEnabled}"
+				                                 Margin="5 0 0 0" />
+				<Button Content="Edit..."
+				        Command="{Binding EditTemplateCommand}"
+				        Grid.Column="3"
+				        Width="75"
+				        VerticalAlignment="Bottom"
+				        Height="22"
+				        Margin="5 0 0 0" />
+			</Grid>
+		</DataTemplate>
+	</Window.Resources>
+	<DockPanel LastChildFill="True">
+		<DockPanel LastChildFill="False"
 		           Margin="10"
 		           DockPanel.Dock="Bottom">
-            <Button Width="75"
+			<Button Width="75"
 			        Margin="10 0 0 0"
 			        IsCancel="True"
 			        Content="Cancel"
 			        DockPanel.Dock="Right" />
-            <Button Width="75"
+			<Button Width="75"
 			        IsDefault="True"
 			        Content="OK"
 			        DockPanel.Dock="Right"
 			        Command="{Binding OkCommand}" />
-        </DockPanel>
-        <TabControl>
-            <TabItem Header="Scenario"
+		</DockPanel>
+		<TabControl>
+			<TabItem Header="Scenario"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
-                <StackPanel Orientation="Vertical"
+				<StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-                    <Controls:FileOrDirectorySetting Caption="Scenario Editor executable files"
-					                            FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
-					                            IsDirectoryBrowser="False"
-					                            FileName="{Binding AppSettings.ScenarioEditorExecutablePath}" />
-                    <Controls:FileOrDirectorySetting Caption="Scenario Editor data directory"
-					                            IsDirectoryBrowser="True"
-					                            FileName="{Binding AppSettings.ScenarioDataDirectory}" />
-                </StackPanel>
-            </TabItem>
-            <TabItem Header="Environment"
+					<Controls:FileOrDirectorySetting Caption="Scenario Editor executable files"
+					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
+					                                 IsDirectoryBrowser="False"
+					                                 FileName="{Binding AppSettings.ScenarioEditorExecutablePath}" />
+					<Controls:FileOrDirectorySetting Caption="Scenario Editor data directory"
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.ScenarioDataDirectory}" />
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Environment"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
-                <StackPanel Orientation="Vertical"
+				<StackPanel Orientation="Vertical"
 				            VerticalAlignment="Top">
-                    <CheckBox IsChecked="{Binding AppSettings.UseOAMLDataSources}"
+					<CheckBox IsChecked="{Binding AppSettings.UseOAMLDataSources}"
 					          Margin="2 10 2 2">
-                        Use Oceanographic and Atmospheric Master Library (OAML) data sources
-                    </CheckBox>
-                    <Controls:FileOrDirectorySetting Caption="Environment database directory"
-					                            IsEnabled="{Binding AppSettings.UseESMEDataSources}"
-					                            Margin="2 20 2 2"
-					                            IsDirectoryBrowser="True"
-					                            FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
-                </StackPanel>
-            </TabItem>
-            <TabItem Header="Database Locations"
+						Use Oceanographic and Atmospheric Master Library (OAML) data sources
+					</CheckBox>
+					<Controls:FileOrDirectorySetting Caption="Environment database directory"
+					                                 IsEnabled="{Binding AppSettings.UseESMEDataSources}"
+					                                 Margin="2 20 2 2"
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Database Locations"
 			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
-                <StackPanel Orientation="Vertical"
+				<StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-                    <Controls:FileOrDirectorySetting Caption="GDEM-V"
-					                            IsDirectoryBrowser="True"
-					                            FileName="{Binding AppSettings.NAVOConfiguration.GDEMDirectory}" />
-                    <Controls:FileOrDirectorySetting Caption="SMGC"
-					                            IsDirectoryBrowser="True"
-					                            FileName="{Binding AppSettings.NAVOConfiguration.SMGCDirectory}" />
-                    <Controls:FileOrDirectorySetting Caption="BST"
-					                            IsDirectoryBrowser="False"
-					                            FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory}" />
-                    <Controls:FileOrDirectorySetting Caption="DBDB"
-					                            IsDirectoryBrowser="False"
-					                            FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory}" />
-                </StackPanel>
-            </TabItem>
-            <TabItem Header="OAML Extraction Tool Locations"
+					<Controls:FileOrDirectorySetting Caption="GDEM-V"
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.NAVOConfiguration.GDEMDirectory}" />
+					<Controls:FileOrDirectorySetting Caption="SMGC"
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.NAVOConfiguration.SMGCDirectory}" />
+					<Controls:FileOrDirectorySetting Caption="BST"
+					                                 IsDirectoryBrowser="False"
+					                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory}" />
+					<Controls:FileOrDirectorySetting Caption="DBDB"
+					                                 IsDirectoryBrowser="False"
+					                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory}" />
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="OAML Extraction Tool Locations"
 			         HorizontalContentAlignment="Stretch"
-                     IsEnabled="{Binding AppSettings.UseOAMLDataSources}"
+			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}"
 			         VerticalContentAlignment="Stretch">
-                <StackPanel Orientation="Vertical"
+				<StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-                    <Controls:FileOrDirectorySetting Caption="SMGC Extractor"
-					                            IsDirectoryBrowser="False"
-					                            FileName="{Binding AppSettings.NAVOConfiguration.SMGCEXEPath}" />
-                    <Controls:FileOrDirectorySetting Caption="BST Extractor"
-					                            IsDirectoryBrowser="False"
-					                            FileName="{Binding AppSettings.NAVOConfiguration.BSTEXEPath}" />
-                    <Controls:FileOrDirectorySetting Caption="DBDB Extractor"
-					                            IsDirectoryBrowser="False"
-					                            FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath}" />
-                </StackPanel>
-            </TabItem>
-            <TabItem Header="Seasons"
-                     IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
-                <Views:SeasonConfigurationView />
-            </TabItem>
-            <TabItem Header="CASS Options">
-                <DockPanel LastChildFill="True">
-                    <DockPanel DockPanel.Dock="Bottom" Height="Auto">
-                        <Button Content="Add Template" Command="{Binding AppSettings.AddCASSTemplateCommand}" Width="Auto" DockPanel.Dock="Right"/>
-                    </DockPanel>
-                    <ListBox ItemsSource="{Binding AppSettings.CASSTemplates}" 
-                             ItemTemplate="{StaticResource CASSTemplateTemplate}"
-                             Grid.IsSharedSizeScope="True"
-                             Height="Auto"
-                             />
-                </DockPanel>
-            </TabItem>
-        </TabControl>
-    </DockPanel>
+					<Controls:FileOrDirectorySetting Caption="SMGC Extractor"
+					                                 IsDirectoryBrowser="False"
+					                                 FileName="{Binding AppSettings.NAVOConfiguration.SMGCEXEPath}" />
+					<Controls:FileOrDirectorySetting Caption="BST Extractor"
+					                                 IsDirectoryBrowser="False"
+					                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTEXEPath}" />
+					<Controls:FileOrDirectorySetting Caption="DBDB Extractor"
+					                                 IsDirectoryBrowser="False"
+					                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath}" />
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Seasons"
+			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
+				<Views:SeasonConfigurationView />
+			</TabItem>
+			<TabItem Header="CASS Options">
+				<DockPanel LastChildFill="True">
+					<GroupBox Header="CASS settings"
+					          DockPanel.Dock="Top">
+						<StackPanel Orientation="Vertical">
+							<Controls:FileOrDirectorySetting Caption="Python Executable"
+							                                 IsDirectoryBrowser="False"
+							                                 FileName="{Binding AppSettings.PythonExecutablePath}" />
+							<Controls:FileOrDirectorySetting Caption="Python Script to invoke"
+							                                 IsDirectoryBrowser="False"
+							                                 FileName="{Binding AppSettings.PythonScriptPath}" />
+							<Controls:FileOrDirectorySetting Caption="CASS executable"
+							                                 IsDirectoryBrowser="False"
+							                                 FileName="{Binding AppSettings.CASSExecutablePath}" />
+						</StackPanel>
+					</GroupBox>
+					<GroupBox Header="CASS Template Files (not currently implemented!)"
+					          DockPanel.Dock="Bottom"
+                              Margin="0 10 0 10"
+                              IsEnabled="False">
+						<DockPanel LastChildFill="True">
+							<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom"
+                                        HorizontalAlignment="Right">
+								<Button Content="Add Template"
+								        Command="{Binding AppSettings.AddCASSTemplateCommand}"
+								        Width="Auto"
+                                        Margin="5" />
+                            </StackPanel>
+							<ListBox ItemsSource="{Binding AppSettings.CASSTemplates}"
+							         ItemTemplate="{StaticResource CASSTemplateTemplate}"
+							         Grid.IsSharedSizeScope="True"
+							         Height="Auto"
+							         Padding="5" />
+						</DockPanel>
+					</GroupBox>
+				</DockPanel>
+			</TabItem>
+		</TabControl>
+	</DockPanel>
 </Window>

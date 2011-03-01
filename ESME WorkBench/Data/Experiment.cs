@@ -626,6 +626,20 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public string EnvironmentRoot { get; set; }
+
+        public string EnvironmentRoot
+        {
+            get
+            {
+                var environmentRoot = Path.Combine(LocalStorageRoot, "Environment");
+                if (!Directory.Exists(environmentRoot)) Directory.CreateDirectory(environmentRoot);
+                return environmentRoot;
+            }
+        }
+
+        #endregion
+
         #region public string TransmissionLossJobRoot { get; set; }
 
         public string TransmissionLossJobRoot
