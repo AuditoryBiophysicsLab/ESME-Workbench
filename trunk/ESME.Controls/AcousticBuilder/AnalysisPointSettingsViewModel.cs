@@ -25,12 +25,34 @@ namespace ESME.Views.AcousticBuilder
 
             AvailableModes = new ObservableCollection<SoundSource>();
             AvailableBearings = new ObservableCollection<float>();
+            //TempAvailableModes = new ObservableCollection<SoundSource>();
             
-            AnalysisPoint = analysisPoint;
+            //AnalysisPoint = analysisPoint;
+            TempAnalysisPoint = analysisPoint;
             SelectedBearing = null;
         }
 
         public static IMessageBoxService MessageBoxService { get; set; }
+
+        #region AnalysisPoint TempAnalysisPoint { get; set; }
+
+        AnalysisPoint TempAnalysisPoint
+        {
+            get { return _tempAnalysisPoint; }
+            set
+            {
+                if (_tempAnalysisPoint == value) return;
+                _tempAnalysisPoint = value;
+                AvailableModes.Clear();
+                foreach (var soundSource in _tempAnalysisPoint.SoundSources) AvailableModes.Add(soundSource);//TempAvailableModes.Add(soundSource);
+                NotifyPropertyChanged(TempAnalysisPointChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TempAnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.TempAnalysisPoint);
+        AnalysisPoint _tempAnalysisPoint;
+
+        #endregion
 
         #region public AnalysisPoint AnalysisPoint { get; set; }
 
@@ -205,7 +227,11 @@ namespace ESME.Views.AcousticBuilder
 
         public SimpleCommand<object, object> OkCommand
         {
-            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(delegate { CloseActivePopUpCommand.Execute(true); })); }
+            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(delegate
+                                                                                       {
+                                                                                           AnalysisPoint = TempAnalysisPoint; //todo
+                                                                                           CloseActivePopUpCommand.Execute(true);
+                                                                                       })); }
         }
 
         SimpleCommand<object, object> _okCommand;
@@ -216,7 +242,11 @@ namespace ESME.Views.AcousticBuilder
 
         public SimpleCommand<object, object> CancelCommand
         {
-            get { return _cancelCommand ?? (_cancelCommand = new SimpleCommand<object, object>(delegate { CloseActivePopUpCommand.Execute(false); })); }
+            get { return _cancelCommand ?? (_cancelCommand = new SimpleCommand<object, object>(delegate
+                                                                                               {
+                                                                                                   AnalysisPointIsChanged = false;
+                                                                                                   CloseActivePopUpCommand.Execute(false);
+                                                                                               })); }
         }
 
         SimpleCommand<object, object> _cancelCommand;
@@ -335,7 +365,7 @@ namespace ESME.Views.AcousticBuilder
                         if (result == CustomDialogResults.OK)
                         {
                             AnalysisPointIsChanged = true;
-                            foreach (var soundsource in _analysisPoint.SoundSources)
+                            foreach (var soundsource in _tempAnalysisPoint.SoundSources)
                             {
                                 soundsource.RadialBearings.Clear();
                                 soundsource.RadialBearings.AddRange(AvailableBearings);
