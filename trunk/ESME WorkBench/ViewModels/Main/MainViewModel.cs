@@ -204,7 +204,10 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region Drag/Drop
 
-        public bool IsAddScenarioFilePossible() { return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))); }
+        public bool IsAddScenarioFilePossible()
+        {
+            return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) && (_experiment.NemoFile == null));
+        }
 
         public void FilesDropped(Object sender, DragEventArgs e)
         {

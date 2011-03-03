@@ -380,7 +380,7 @@ namespace ESME.Model
         }
 
         public void ExtendProfilesToDepth(float maxDepth, SerializedOutput temperatureData, SerializedOutput salinityData)
-    {
+        {
             if ((temperatureData == null) || (salinityData == null)) 
                 throw new ApplicationException("SoundSpeedField: Unable to extend to max bathymetry depth.  Temperature and salinity data are missing.");
 
