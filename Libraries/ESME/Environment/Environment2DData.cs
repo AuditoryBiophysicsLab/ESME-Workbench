@@ -9,7 +9,7 @@ using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Environment
 {
-    public abstract class Environment2DData<TCoordinate> : GenericGeoField<TCoordinate> 
+    public abstract class Environment2DData<TCoordinate> : GenericGeoField<TCoordinate>
         where TCoordinate : EarthCoordinate
     {
         protected Environment2DData(IEnumerable<TCoordinate> data) : base(data) { }
@@ -109,7 +109,8 @@ namespace ESME.Environment
 
         #region Public constructors
 
-        public Environment2DData(IEnumerable<EarthCoordinate<float>> data) : base(data)
+        public Environment2DData(IEnumerable<EarthCoordinate<float>> data)
+            : base(data)
         {
             FillTheDamnHoles();
         }
@@ -322,14 +323,14 @@ namespace ESME.Environment
                 var east = stream.ReadSingle();
                 var south = stream.ReadSingle();
                 var north = stream.ReadSingle();
-                var gridSpacing = stream.ReadSingle()/60f; // Source is in minutes, we need degrees
+                var gridSpacing = stream.ReadSingle() / 60f; // Source is in minutes, we need degrees
                 var width = stream.ReadInt32();
                 var height = stream.ReadInt32();
                 var endian = stream.ReadUInt32();
                 if (endian != 0x00010203) throw new FileFormatException("Invalid CHRTR Binary file format - endian is incorrect");
                 var maxDepth = stream.ReadSingle() * scaleFactor;
-                var minDepth = stream.ReadSingle()* scaleFactor;
-                var paddingWidth = (width - 10)*4;
+                var minDepth = stream.ReadSingle() * scaleFactor;
+                var paddingWidth = (width - 10) * 4;
                 stream.ReadBytes(paddingWidth);
                 //var depths = new float[height, width];
                 var depths = new List<EarthCoordinate<float>>();
@@ -355,8 +356,8 @@ namespace ESME.Environment
             var lonCount = stream.ReadInt32();
             var latCount = stream.ReadInt32();
 
-            for (var lat = 0; lat < latCount; lat++) 
-                for (var lon = 0; lon < lonCount; lon++) 
+            for (var lat = 0; lat < latCount; lat++)
+                for (var lon = 0; lon < lonCount; lon++)
                     data.Add(new EarthCoordinate<float>(stream.ReadDouble(), stream.ReadDouble(), stream.ReadSingle()));
             return new Environment2DData(data);
         }
@@ -393,6 +394,16 @@ namespace ESME.Environment
                         stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor * FieldData[lon, lat].Data));
             }
         }
+
+        public void MMMBSSaveToYXZ(string fileName, float scaleFactor)
+        {
+            using (var stream = new StreamWriter(File.Create(fileName)))
+            {
+                for (var lat = 0; lat < Latitudes.Count; lat++)
+                    for (var lon = 0; lon < Longitudes.Count; lon++)
+                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor * FieldData[lon, lat].Data));
+            }
+        }
     }
 
     public class AverageDatum
@@ -423,7 +434,8 @@ namespace ESME.Environment
 
     public sealed class Environment3DAverager : Environment2DData<EarthCoordinate<List<AverageDatum>>>
     {
-        public Environment3DAverager(IEnumerable<double> depths, IEnumerable<EarthCoordinate<List<AverageDatum>>> data) : base(data)
+        public Environment3DAverager(IEnumerable<double> depths, IEnumerable<EarthCoordinate<List<AverageDatum>>> data)
+            : base(data)
         {
             Depths = new List<double>();
             Depths.AddRange(depths.Distinct());
@@ -554,7 +566,8 @@ namespace ESME.Environment
 
         #region Public constructors
 
-        public Environment3DData(IEnumerable<double> depths, IEnumerable<EarthCoordinate<List<double>>> data) : base(data)
+        public Environment3DData(IEnumerable<double> depths, IEnumerable<EarthCoordinate<List<double>>> data)
+            : base(data)
         {
             Depths = new List<double>();
             Depths.AddRange(depths.Distinct());
