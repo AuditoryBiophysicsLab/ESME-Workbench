@@ -389,16 +389,6 @@ namespace ESME.Environment
         {
             using (var stream = new StreamWriter(File.Create(fileName)))
             {
-                for (var lon = 0; lon < Longitudes.Count; lon++)
-                    for (var lat = 0; lat < Latitudes.Count; lat++)
-                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor * FieldData[lon, lat].Data));
-            }
-        }
-
-        public void MMMBSSaveToYXZ(string fileName, float scaleFactor)
-        {
-            using (var stream = new StreamWriter(File.Create(fileName)))
-            {
                 for (var lat = 0; lat < Latitudes.Count; lat++)
                     for (var lon = 0; lon < Longitudes.Count; lon++)
                         stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor * FieldData[lon, lat].Data));
