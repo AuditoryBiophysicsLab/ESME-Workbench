@@ -229,7 +229,7 @@ namespace ESME.Views.AcousticBuilder
         {
             get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(delegate
                                                                                        {
-                                                                                           AnalysisPoint = TempAnalysisPoint; //todo
+                                                                                           AnalysisPoint = TempAnalysisPoint;
                                                                                            CloseActivePopUpCommand.Execute(true);
                                                                                        })); }
         }

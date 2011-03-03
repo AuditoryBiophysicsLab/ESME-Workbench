@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using Cinch;
 using ESME.Model;
 using ESME.NEMO;
 using HRC.Navigation;
@@ -65,7 +66,26 @@ namespace ESME.TransmissionLoss
         /// <summary>
         ///   True if the user wants this sound source to be calculated, false otherwise.  Default value is true
         /// </summary>
-        public bool ShouldBeCalculated { get; set; }
+        //public bool ShouldBeCalculated { get; set; }
+
+        #region public bool ShouldBeCalculated { get; set; }
+
+        public bool ShouldBeCalculated
+        {
+            get { return _shouldBeCalculated; }
+            set
+            {
+                if (_shouldBeCalculated == value) return;
+                _shouldBeCalculated = value;
+                NotifyPropertyChanged(ShouldBeCalculatedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ShouldBeCalculatedChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.ShouldBeCalculated);
+        bool _shouldBeCalculated;
+
+        #endregion
+
 
         #region IEquatable<SoundSource> methods
 
