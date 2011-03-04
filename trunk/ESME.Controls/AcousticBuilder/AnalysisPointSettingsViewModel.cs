@@ -2,18 +2,21 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Cinch;
+using ESME.NEMO;
 using ESME.TransmissionLoss;
+using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.AcousticBuilder
 {
     [ExportViewModel("AnalysisPointSettingsViewModel")]
-    public class AnalysisPointSettingsViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    public class AnalysisPointSettingsViewModel : ViewModelBase, IViewStatusAwareInjectionAware, IDesignTimeAware
     {
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
@@ -29,6 +32,19 @@ namespace ESME.Views.AcousticBuilder
             
             //AnalysisPoint = analysisPoint;
             TempAnalysisPoint = analysisPoint;
+            SelectedBearing = null;
+        }
+        [ImportingConstructor]
+        public AnalysisPointSettingsViewModel()
+        {
+            RegisterMediator();
+
+            AvailableModes = new ObservableCollection<SoundSource>();
+            AvailableBearings = new ObservableCollection<float>();
+            //TempAvailableModes = new ObservableCollection<SoundSource>();
+
+            //AnalysisPoint = analysisPoint;
+            
             SelectedBearing = null;
         }
 
@@ -426,5 +442,25 @@ namespace ESME.Views.AcousticBuilder
         }
 
         #endregion
+
+        public void DesignTimeInitialization() 
+        {
+            AvailableModes.Add(new SoundSource(new EarthCoordinate(0,0),new NemoMode
+                                                                        {
+                                                                        HighFrequency = 1000,
+                                                                        LowFrequency = 100,
+                                                                        DepressionElevationAngle = 0,
+                                                                        SourceDepth = 10,
+                                                                        Name = "Design Test Mode",
+                                                                        VerticalBeamWidth = 90,
+                                                                        Radius = 100000,
+                                                                        },
+                                                                        4));
+            AvailableBearings.Add(0);
+            AvailableBearings.Add(90);
+            AvailableBearings.Add(180);
+            AvailableBearings.Add(360);
+
+        }
     }
 }

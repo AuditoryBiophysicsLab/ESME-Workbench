@@ -17,13 +17,14 @@ namespace ESME.NEMO
             Type = GetString("type");
         }
 
-        public string PSMName { get; private set; }
-        public string PSMId { get; private set; }
-        public string Name { get; private set; }
-        public string Id { get; private set; }
-        public DateTime StartTime { get; private set; }
-        public TimeSpan Duration { get; private set; }
-        public int Priority { get; private set; }
-        public string Type { get; private set; }
+        public NemoPSM() {  }
+        public string PSMName { get; set; }
+        public string PSMId { get; set; }
+        public string Name { get; set; }
+        public string Id { get; set; }
+        public DateTime StartTime { get; set; }
+        public TimeSpan Duration { get; set; }
+        public int Priority { get; set; }
+        public string Type { get; set; }
     }
 }
