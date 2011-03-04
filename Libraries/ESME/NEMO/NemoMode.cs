@@ -31,6 +31,8 @@ namespace ESME.NEMO
             _hashCode = PrimitiveConversion.ToInt(new NemoModeHashCode(this));
         }
 
+        public NemoMode() { }
+
         public void CalculateActiveTimeSteps(NemoScenario nemoScenario)
         {
             ActiveTimeSteps = new ActiveTimeSteps();
@@ -55,28 +57,28 @@ namespace ESME.NEMO
             }
         }
 
-        public int ModeID { get; private set; }
-        public string State { get; private set; }
-        public string Linked { get; private set; }
-        public float ActiveTime { get; private set; }
-        public float DepthOffset { get; private set; }
-        public float SourceLevel { get; private set; }
-        public float SourceDepth { get; private set; }
-        public float LowFrequency { get; private set; }
-        public float HighFrequency { get; private set; }
-        public TimeSpan PulseInterval { get; private set; }
-        public TimeSpan PulseLength { get; private set; }
-        public float HorizontalBeamWidth { get; private set; }
-        public float VerticalBeamWidth { get; private set; }
-        public float DepressionElevationAngle { get; private set; }
-        public float RelativeBeamAngle { get; private set; }
-        public float Radius { get; private set; }
-        public ActiveTimeSteps ActiveTimeSteps { get; private set; }
-        //public bool UsePlatformTimes { get; private set; }
-        //public string PropagationPath { get; private set; }
+        public int ModeID { get; set; }
+        public string State { get; set; }
+        public string Linked { get; set; }
+        public float ActiveTime { get; set; }
+        public float DepthOffset { get; set; }
+        public float SourceLevel { get; set; }
+        public float SourceDepth { get; set; }
+        public float LowFrequency { get; set; }
+        public float HighFrequency { get; set; }
+        public TimeSpan PulseInterval { get; set; }
+        public TimeSpan PulseLength { get; set; }
+        public float HorizontalBeamWidth { get; set; }
+        public float VerticalBeamWidth { get; set; }
+        public float DepressionElevationAngle { get; set; }
+        public float RelativeBeamAngle { get; set; }
+        public float Radius { get; set; }
+        public ActiveTimeSteps ActiveTimeSteps { get; set; }
+        //public bool UsePlatformTimes { get; set; }
+        //public string PropagationPath { get; set; }
 
         // Derived properties, for convenience
-        public DateTime EndTime { get; private set; }
+        public DateTime EndTime { get; set; }
 
         internal bool Contains(DateTime simulationTime)
         {
