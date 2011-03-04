@@ -63,11 +63,13 @@ namespace HRC.Navigation
             Latitudes.Sort();
             Longitudes.Sort();
             FieldData = new TEarthCoordinate[Longitudes.Count, Latitudes.Count];
+            var progress = 0;
             foreach (var datum in data)
             {
                 var lonIndex = Longitudes.IndexOf(datum.Longitude);
                 var latIndex = Latitudes.IndexOf(datum.Latitude);
                 FieldData[lonIndex, latIndex] = datum;
+                progress++;
             }
         }
 
