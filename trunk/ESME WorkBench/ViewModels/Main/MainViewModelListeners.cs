@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using Cinch;
+using ESME.Model;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
@@ -20,12 +22,14 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.SetupAndRunQuickLookPoint)]
         void SetupAndRunQuickLookPoint(bool dummy)
         {
-            
+
         }
 
         [MediatorMessageSink(MediatorMessage.SetupAndRunAnalysisPoint)]
         void SetupAndRunAnalysisPoint(bool dummy)
         {
+            try
+            {
 #if false
             var environmentInformation = new EnvironmentInformation
                                          {
@@ -41,7 +45,10 @@ namespace ESMEWorkBench.ViewModels.Main
                                            };
 
 #endif
-            var analysisPoint = new AnalysisPoint(MouseEarthCoordinate);
+                //todo check MouseEarthCoordinate: isonland, radialends can't be outside bathy.
+                if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
+                if(!_experiment.Bathymetry.BoundingBox.Contains(MouseEarthCoordinate)) throw new AnalysisPointLocationException("Analysis Points cannot be placed outside the bathymetry bounds.");
+                var analysisPoint = new AnalysisPoint(MouseEarthCoordinate);
 #if false
             var analysisPointViewModel = new AnalysisPointCalculationPreviewViewModel
             {
@@ -49,13 +56,13 @@ namespace ESMEWorkBench.ViewModels.Main
             };
 #endif
 
-            var distinctModes = (from platform in _experiment.NemoFile.Scenario.Platforms
-                                 from source in platform.Sources
-                                 from mode in source.Modes
-                                 select mode).Distinct();
-            foreach (var mode in distinctModes)
-            {
-                analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode, 16));
+                var distinctModes = (from platform in _experiment.NemoFile.Scenario.Platforms
+                                     from source in platform.Sources
+                                     from mode in source.Modes
+                                     select mode).Distinct();
+                foreach (var mode in distinctModes)
+                {
+                    analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode, 16));
 #if false
                 var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, mode, 16, 3000)
                                                    {
@@ -87,15 +94,18 @@ namespace ESMEWorkBench.ViewModels.Main
                     return;
                 }
 #endif
-            }
-            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
-            var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
-            if ((!settingsResult.HasValue) || (!settingsResult.Value))
-            {
-                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-                return;
-            }
-            MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPoint);
+                }
+                var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
+                var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
+                if ((!settingsResult.HasValue) || (!settingsResult.Value))
+                {
+                    MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
+                    return;
+                }
+                var maxRadial = analysisPoint.SoundSources.Where(s => s.ShouldBeCalculated).Aggregate(0, (current, soundSource) => Math.Max(current, soundSource.Radius));
+                for (var i = 0; i < 360; i += 90) if (!_experiment.Bathymetry.BoundingBox.Contains(new EarthCoordinate(MouseEarthCoordinate, i, maxRadial))) throw new AnalysisPointLocationException("One or more radial endpoints extends beyond the bounds of the bathymetry.");
+
+                MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPoint);
 #if false
             var result = _visualizerService.ShowDialog("AnalysisPointCalculationPreviewView", analysisPointViewModel);
             if ((!result.HasValue) || (!result.Value))
@@ -118,8 +128,15 @@ namespace ESMEWorkBench.ViewModels.Main
                                         };
             backgroundWorker.RunWorkerAsync();
 #endif
-
-            MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError("Error placing Analysis Point: " + e.Message);
+            }
+            finally
+            {
+                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
+            }
         }
 
         delegate void MediatorSendDelegate(string message, object param);
@@ -135,7 +152,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
             Settings.Default.LastBathymetryFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-            _experiment.Bathymetry.SaveToYXZ(_saveFileService.FileName, 1); 
+            _experiment.Bathymetry.SaveToYXZ(_saveFileService.FileName, 1);
         }
 
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]
@@ -172,7 +189,7 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.EnableGUI)]
         void EnableGUI(bool enable)
         {
-            ((Window) _viewAwareStatus.View).IsEnabled = enable;
+            ((Window)_viewAwareStatus.View).IsEnabled = enable;
         }
 
         [MediatorMessageSink(MediatorMessage.CalculateAnalysisPoint)]

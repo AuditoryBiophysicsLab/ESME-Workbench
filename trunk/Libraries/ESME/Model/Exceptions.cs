@@ -59,6 +59,14 @@ namespace ESME.Model
         public BathymetryTooShallowException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
+    public class AnalysisPointLocationException : ESMEModelException
+    {
+        public AnalysisPointLocationException() { }
+        public AnalysisPointLocationException(string message) : base(message) { }
+        public AnalysisPointLocationException(string message, Exception innerException) : base(message, innerException) { }
+        public AnalysisPointLocationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
+
     public class LongitudeOutOfRangeException : ESMEModelException
     {
         public LongitudeOutOfRangeException() { }
