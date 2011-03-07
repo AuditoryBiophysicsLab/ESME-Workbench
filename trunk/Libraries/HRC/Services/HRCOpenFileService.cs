@@ -72,6 +72,11 @@ namespace HRC.Services
             set { _ofd.InitialDirectory = value; }
         }
 
+        public string Title
+        {
+            get { return _ofd.Title; }
+            set { _ofd.Title = value; }
+        }
         #endregion
     }
     public interface IHRCOpenFileService
@@ -80,5 +85,6 @@ namespace HRC.Services
         string Filter { get; set; }
         string InitialDirectory { get; set; }
         bool? ShowDialog(Window owner);
+        string Title { get; set; }
     }
 }
