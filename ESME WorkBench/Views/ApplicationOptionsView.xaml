@@ -112,9 +112,13 @@
 							<Controls:FileOrDirectorySetting Caption="BST"
 							                                 Margin="0 5"
 							                                 IsDirectoryBrowser="False"
+                                                             DialogTitle="Choose the Bottom Sediment Type database file"
+                                                             FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory}" />
 							<Controls:FileOrDirectorySetting Caption="DBDB"
 							                                 IsDirectoryBrowser="False"
+                                                             DialogTitle="Choose the Digital Bathymetric Database file"
+                                                             FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory}" />
 						</StackPanel>
 					</GroupBox>

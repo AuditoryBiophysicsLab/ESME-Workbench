@@ -84,6 +84,12 @@ namespace HRC.Services
             set { _sfd.OverwritePrompt = value; }
         }
 
+        public string Title
+        {
+            get { return _sfd.Title; }
+            set { _sfd.Title = value; }
+        }
+
         #endregion
     }
     public interface IHRCSaveFileService
@@ -93,6 +99,7 @@ namespace HRC.Services
         string Filter { get; set; }
         string InitialDirectory { get; set; }
         bool? ShowDialog(Window owner);
+        string Title { get; set; }
     }
 
 }
