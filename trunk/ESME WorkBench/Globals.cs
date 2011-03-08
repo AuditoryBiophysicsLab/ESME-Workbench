@@ -13,7 +13,7 @@ namespace ESMEWorkBench
     {
         static Globals()
         {
-            AppSettings.ApplicationName = "ESME WorkBench";
+            AppSettings.ApplicationName = App.Name;
             AppSettings = AppSettings.Load(AppSettings.AppSettingsFile, null);
             AppSettings.CASSSettings.SetDefaultCASSParameterFiles();
         }
@@ -22,6 +22,9 @@ namespace ESMEWorkBench
 
         public static void DisplayException(IMessageBoxService messageBoxService, Exception ex, string format, params object[] args)
         {
+            Trace.WriteLine("ESME WorkBench encountered an exception: " + ex.Message);
+            Trace.WriteLine("Stack trace:");
+            Trace.WriteLine(ex.StackTrace);
             var sb = new StringBuilder(string.Format(format, args));
             sb.Append("\n");
             while (ex != null)
@@ -41,11 +44,6 @@ namespace ESMEWorkBench
                 ex = ex.InnerException;
             }
             messageBoxService.ShowError(sb.ToString());
-#if DEBUG
-            Debug.WriteLine(sb.ToString());
-            using (var sw = new StreamWriter(App.Logfile, true))
-                sw.WriteLine(sb.ToString());
-#endif
         }
 
         public static string Filter(this string s, Func<char, bool> trueIfKeep)
