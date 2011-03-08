@@ -182,7 +182,6 @@
     </Compile>
     <Compile Include="Data\Experiment.cs" />
     <Compile Include="Globals.cs" />
-    <Compile Include="OSInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>

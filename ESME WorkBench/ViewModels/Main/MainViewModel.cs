@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -11,12 +12,10 @@ using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.RecentFiles;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Views.AcousticBuilder;
-using ESME.Views.TransmissionLoss;
 
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -32,7 +31,7 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IUIVisualizerService _visualizerService;
         Experiment _experiment;
-        BellhopQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
+        //BellhopQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
         Dispatcher _dispatcher;
         #endregion
 
@@ -51,6 +50,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
 
             AnalysisPointSettingsViewModel.MessageBoxService = messageBoxService;
+            Experiment.MessageBoxService = messageBoxService;
             Experiment.VisualizerService = visualizerService;
 
             _viewAwareStatus = viewAwareStatus;
@@ -58,9 +58,9 @@ namespace ESMEWorkBench.ViewModels.Main
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
-            _viewAwareStatus.ViewLoaded += ViewLoaded;
+            //return;
             _viewAwareStatus.ViewUnloaded += ViewUnloaded;
-            Experiment.MessageBoxService = _messageBoxService;
+            _viewAwareStatus.ViewLoaded += ViewLoaded;
 
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
@@ -91,7 +91,7 @@ namespace ESMEWorkBench.ViewModels.Main
             //TestRecentFiles();
         }
 
-        void HookPropertyChanged(Experiment experiment)
+        void HookPropertyChanged(INotifyPropertyChanged experiment)
         {
             experiment.PropertyChanged += delegate(object s, PropertyChangedEventArgs e)
                                           {
