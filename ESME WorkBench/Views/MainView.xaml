@@ -263,6 +263,14 @@
 					                ToolTipDescription="Select or change the environmental data to be used for this experiment. A scenario file must be selected AND the experiment must be saved before environmental data can be selected."
 					                Command="{Binding ShowEnvironmentSettingsCommand}" />
 				</r:RibbonGroup>
+                <r:RibbonGroup Header="Simulation">
+                    <r:RibbonButton Label="Simulator"
+                                    LargeImageSource="..\Images\LargeIcons\alert-icon.png"
+                                    SmallImageSource="..\Images\SmallIcons\alert-icon.png"
+                                    ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Launch the NUWC Scenario Simulator"
+					                Command="{Binding LaunchScenarioSimulatorCommand}" />
+                </r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="S"
 			             Header="Scenario">
