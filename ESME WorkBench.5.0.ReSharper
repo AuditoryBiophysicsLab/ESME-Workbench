@@ -133,6 +133,9 @@
       <Abbreviation Text="YXZ" />
       <Abbreviation Text="NAVO" />
       <Abbreviation Text="UNESCO" />
+      <Abbreviation Text="CASS" />
+      <Abbreviation Text="REFMS" />
+      <Abbreviation Text="NUWC" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
