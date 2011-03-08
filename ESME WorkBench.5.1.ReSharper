@@ -1,0 +1,299 @@
+<Configuration>
+  <CodeStyleSettings>
+    <ExternalPath IsNull="False">
+    </ExternalPath>
+    <Sharing>SOLUTION</Sharing>
+    <CSharp>
+      <FormatSettings>
+        <ANONYMOUS_METHOD_DECLARATION_BRACES>NEXT_LINE</ANONYMOUS_METHOD_DECLARATION_BRACES>
+        <CASE_BLOCK_BRACES>NEXT_LINE</CASE_BLOCK_BRACES>
+        <EMPTY_BLOCK_STYLE>TOGETHER_SAME_LINE</EMPTY_BLOCK_STYLE>
+        <EXPLICIT_PRIVATE_MODIFIER>False</EXPLICIT_PRIVATE_MODIFIER>
+        <INDENT_NESTED_FIXED_STMT>True</INDENT_NESTED_FIXED_STMT>
+        <INDENT_NESTED_USINGS_STMT>True</INDENT_NESTED_USINGS_STMT>
+        <INITIALIZER_BRACES>NEXT_LINE</INITIALIZER_BRACES>
+        <KEEP_USER_LINEBREAKS>False</KEEP_USER_LINEBREAKS>
+        <MODIFIERS_ORDER IsNull="False">
+          <Item>public</Item>
+          <Item>protected</Item>
+          <Item>internal</Item>
+          <Item>private</Item>
+          <Item>new</Item>
+          <Item>abstract</Item>
+          <Item>virtual</Item>
+          <Item>override</Item>
+          <Item>sealed</Item>
+          <Item>static</Item>
+          <Item>readonly</Item>
+          <Item>extern</Item>
+          <Item>unsafe</Item>
+          <Item>volatile</Item>
+        </MODIFIERS_ORDER>
+        <PLACE_SIMPLE_INITIALIZER_ON_SINGLE_LINE>False</PLACE_SIMPLE_INITIALIZER_ON_SINGLE_LINE>
+        <PLACE_SIMPLE_LINQ_ON_SINGLE_LINE>False</PLACE_SIMPLE_LINQ_ON_SINGLE_LINE>
+        <PLACE_SIMPLE_METHOD_ON_SINGLE_LINE>True</PLACE_SIMPLE_METHOD_ON_SINGLE_LINE>
+        <SIMPLE_EMBEDDED_STATEMENT_STYLE>ON_SINGLE_LINE</SIMPLE_EMBEDDED_STATEMENT_STYLE>
+        <SPACE_AROUND_MULTIPLICATIVE_OP>True</SPACE_AROUND_MULTIPLICATIVE_OP>
+        <WRAP_BEFORE_FIRST_TYPE_PARAMETER_CONSTRAINT>True</WRAP_BEFORE_FIRST_TYPE_PARAMETER_CONSTRAINT>
+        <WRAP_FOR_STMT_HEADER_STYLE>WRAP_IF_LONG</WRAP_FOR_STMT_HEADER_STYLE>
+        <WRAP_LIMIT>500</WRAP_LIMIT>
+        <WRAP_MULTIPLE_DECLARATION_STYLE>CHOP_ALWAYS</WRAP_MULTIPLE_DECLARATION_STYLE>
+        <WRAP_MULTIPLE_TYPE_PARAMEER_CONSTRAINTS_STYLE>CHOP_ALWAYS</WRAP_MULTIPLE_TYPE_PARAMEER_CONSTRAINTS_STYLE>
+        <WRAP_OBJECT_AND_COLLECTION_INITIALIZER_STYLE>CHOP_ALWAYS</WRAP_OBJECT_AND_COLLECTION_INITIALIZER_STYLE>
+        <WRAP_TERNARY_EXPR_STYLE>WRAP_IF_LONG</WRAP_TERNARY_EXPR_STYLE>
+      </FormatSettings>
+      <UsingsSettings />
+      <Naming2>
+        <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
+        <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="TypesAndNamespaces" />
+        <PredefinedRule Inspect="True" Prefix="I" Suffix="" Style="AaBb" ElementKind="Interfaces" />
+        <PredefinedRule Inspect="True" Prefix="T" Suffix="" Style="AaBb" ElementKind="TypeParameters" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="MethodPropertyEvent" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="Locals" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="LocalConstants" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="Parameters" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PublicFields" />
+        <PredefinedRule Inspect="True" Prefix="_" Suffix="" Style="aaBb" ElementKind="PrivateInstanceFields" />
+        <PredefinedRule Inspect="True" Prefix="_" Suffix="" Style="aaBb" ElementKind="PrivateStaticFields" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="Constants" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PrivateConstants" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="StaticReadonly" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PrivateStaticReadonly" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="EnumMember" />
+        <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="Other" />
+      </Naming2>
+    </CSharp>
+    <VB>
+      <FormatSettings />
+      <ImportsSettings />
+      <Naming2>
+        <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
+        <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>
+      </Naming2>
+    </VB>
+    <Web>
+      <Naming2 />
+    </Web>
+    <Xaml>
+      <Naming2>
+        <UserRule Name="XAML_FIELD" Inspect="True" Prefix="_" Suffix="" Style="aaBb" />
+        <UserRule Name="NAMESPACE_ALIAS" Inspect="True" Prefix="" Suffix="" Style="AaBb" />
+        <UserRule Name="XAML_RESOURCE" Inspect="True" Prefix="" Suffix="" Style="AaBb" />
+      </Naming2>
+    </Xaml>
+    <XML>
+      <FormatSettings>
+        <MaxBlankLines>1</MaxBlankLines>
+        <TagAttributesFormat>FirstAttributeOnSingleLine</TagAttributesFormat>
+      </FormatSettings>
+    </XML>
+    <GenerateMemberBody />
+    <Naming2>
+      <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
+      <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="TypesAndNamespaces" />
+      <PredefinedRule Inspect="True" Prefix="I" Suffix="" Style="AaBb" ElementKind="Interfaces" />
+      <PredefinedRule Inspect="True" Prefix="T" Suffix="" Style="AaBb" ElementKind="TypeParameters" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="MethodPropertyEvent" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="Locals" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="LocalConstants" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="aaBb" ElementKind="Parameters" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PublicFields" />
+      <PredefinedRule Inspect="True" Prefix="_" Suffix="" Style="aaBb" ElementKind="PrivateInstanceFields" />
+      <PredefinedRule Inspect="True" Prefix="_" Suffix="" Style="aaBb" ElementKind="PrivateStaticFields" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="Constants" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PrivateConstants" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="StaticReadonly" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PrivateStaticReadonly" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="EnumMember" />
+      <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="Other" />
+      <Abbreviation Text="OS" />
+      <Abbreviation Text="MOS" />
+      <Abbreviation Text="NT" />
+      <Abbreviation Text="XP" />
+      <Abbreviation Text="ID" />
+      <Abbreviation Text="EP" />
+      <Abbreviation Text="DLL" />
+      <Abbreviation Text="SSP" />
+      <Abbreviation Text="IUI" />
+      <Abbreviation Text="UI" />
+      <Abbreviation Text="ESME" />
+      <Abbreviation Text="PSM" />
+      <Abbreviation Text="WPF" />
+      <Abbreviation Text="MMMBS" />
+      <Abbreviation Text="SPL" />
+      <Abbreviation Text="CSV" />
+      <Abbreviation Text="GUI" />
+      <Abbreviation Text="YXZ" />
+      <Abbreviation Text="RGB" />
+      <Abbreviation Text="HRC" />
+      <Abbreviation Text="OAML" />
+      <Abbreviation Text="SMGC" />
+      <Abbreviation Text="GDEM" />
+      <Abbreviation Text="NAVO" />
+      <Abbreviation Text="NUWC" />
+      <Abbreviation Text="CASS" />
+      <Abbreviation Text="CHB" />
+      <Abbreviation Text="HFEVA" />
+      <Abbreviation Text="SSF" />
+      <Abbreviation Text="UNESCO" />
+      <Abbreviation Text="LI" />
+      <Abbreviation Text="REFMS" />
+    </Naming2>
+  </CodeStyleSettings>
+  <SharedSolutionTemplateManager>
+    <LiveTemplates>
+      <Template uid="c17325a7-a73c-4d85-977b-8fd001048816" shortcut="vmc" description="" text="#region $COMMANDNAME$Command&#xD;&#xA;public SimpleCommand&lt;object, object&gt; $COMMANDNAME$Command&#xD;&#xA;{&#xD;&#xA;    get { return _$PRIVATE$ ?? (_$PRIVATE$ = new SimpleCommand&lt;object, object&gt;(delegate { Mediator.Instance.NotifyColleagues(&quot;$COMMANDNAME$CommandMessage&quot;); })); }&#xD;&#xA;}&#xD;&#xA;SimpleCommand&lt;object, object&gt; _$PRIVATE$;&#xD;&#xA;#endregion" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="Everywhere" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="COMMANDNAME" expression="" initialRange="1" />
+          <Variable name="PRIVATE" expression="decapitalize(COMMANDNAME)" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="f4c489cb-def7-49ad-a814-8c2d345fa4b7" shortcut="mmcd" description="" text="public const string $Message$ = &quot;$Message$Message&quot;;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="Message" expression="" initialRange="0" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="3f7cd8ae-f88b-43bc-ab3e-648bdea8565b" shortcut="mms" description="" text="MediatorMessage.Send(MediatorMessage" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="Everywhere" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables />
+        <CustomProperties />
+      </Template>
+      <Template uid="bfaf860c-b91d-4dd3-b13d-7c59581017bd" shortcut="vmpw" description="" text="#region public LabeledDataWrapper&lt;$TYPE$&gt; $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;public LabeledDataWrapper&lt;$TYPE$&gt; $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$; }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;		_$PRIVATE$.ValidationRules.Add(new SimpleRule(&quot;DataValue&quot;, &quot;Parameter error message&quot;, domObj =&gt;&#xD;&#xA;		{&#xD;&#xA;            var obj = (DataWrapper&lt;$TYPE$&gt;) domObj;&#xD;&#xA;            return ((obj.DataValue &lt; -90) || (90 &lt; obj.DataValue));&#xD;&#xA;        }));&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;LabeledDataWrapper&lt;$TYPE$&gt; _$PRIVATE$;&#xD;&#xA;$NAME$ = new LabeledDataWrapper&lt;$TYPE$&gt;(this, $NAME$ChangedEventArgs)&#xD;&#xA;{&#xD;&#xA;	Label = &quot;$LABEL$&quot;,&#xD;&#xA;};&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="TYPE" expression="" initialRange="0" />
+          <Variable name="NAME" expression="" initialRange="0" />
+          <Variable name="LABEL" expression="" initialRange="0" />
+          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
+          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="ba1abbe8-a3c7-47f2-a709-17277d8b18c6" shortcut="vml" description="" text="#region public ObservableCollection&lt;$TYPE$&gt; $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;public ObservableCollection&lt;$TYPE$&gt; $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$ ?? (_$PRIVATE$ = new ObservableCollection&lt;$TYPE$&gt;()); }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged -= $NAME$CollectionChanged;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged += $NAME$CollectionChanged;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;void $NAME$CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged($NAME$ChangedEventArgs); }&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;ObservableCollection&lt;$TYPE$&gt; _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="TYPE" expression="" initialRange="0" />
+          <Variable name="NAME" expression="" initialRange="0" />
+          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
+          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="8b3dc9c6-1c82-4a97-a1d5-79268a161f45" shortcut="xvml" description="" text="#region public ObservableCollection&lt;$TYPE$&gt; $NAME$ { get; set; }&#xD;&#xA;[XmlElement]&#xD;&#xA;public ObservableCollection&lt;$TYPE$&gt; $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$ ?? (_$PRIVATE$ = new ObservableCollection&lt;$TYPE$&gt;()); }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged -= $NAME$CollectionChanged;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;		if (_$PRIVATE$ != null) _$PRIVATE$.CollectionChanged += $NAME$CollectionChanged;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;void $NAME$CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged($NAME$ChangedEventArgs); }&#xD;&#xA;[XmlIgnore]&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;[XmlIgnore]&#xD;&#xA;ObservableCollection&lt;$TYPE$&gt; _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="TYPE" expression="" initialRange="0" />
+          <Variable name="NAME" expression="" initialRange="0" />
+          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
+          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="34f592e6-e426-4ad7-8140-b2d9a13f5529" shortcut="vmr" description="" text="#region public $TYPE$ $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;public $TYPE$ $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$ ?? (_$PRIVATE$ = new $TYPE$()); }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;$TYPE$ _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="TYPE" expression="" initialRange="0" />
+          <Variable name="NAME" expression="" initialRange="0" />
+          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
+          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="0aaed870-7399-4a41-966b-33f78f2bd5f2" shortcut="vmv" description="" text="#region public $TYPE$ $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;public $TYPE$ $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$; }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;$TYPE$ _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="TYPE" expression="" initialRange="0" />
+          <Variable name="NAME" expression="" initialRange="0" />
+          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
+          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="919088d1-b7ab-48cb-ba18-fd62e8ed6bc3" shortcut="xvmv" description="" text="#region public $TYPE$ $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;[XmlElement]&#xD;&#xA;public $TYPE$ $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$; }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;[XmlIgnore]&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;[XmlIgnore]&#xD;&#xA;$TYPE$ _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="TYPE" expression="" initialRange="0" />
+          <Variable name="NAME" expression="" initialRange="0" />
+          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
+          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+      <Template uid="f13f03ee-deb7-4ec5-8247-9dc46573cc9a" shortcut="xvmr" description="" text="#region public $TYPE$ $NAME$ { get; set; }&#xD;&#xA;&#xD;&#xA;[XmlElement]&#xD;&#xA;public $TYPE$ $NAME$&#xD;&#xA;{&#xD;&#xA;	get { return _$PRIVATE$ ?? (_$PRIVATE$ = new $TYPE$()); }&#xD;&#xA;    set&#xD;&#xA;    {&#xD;&#xA;		if (_$PRIVATE$ == value) return;&#xD;&#xA;		_$PRIVATE$ = value;&#xD;&#xA;        NotifyPropertyChanged($NAME$ChangedEventArgs);&#xD;&#xA;    }&#xD;&#xA;}&#xD;&#xA;[XmlIgnore]&#xD;&#xA;static readonly PropertyChangedEventArgs $NAME$ChangedEventArgs = ObservableHelper.CreateArgs&lt;$CLASS$&gt;(x =&gt; x.$NAME$);&#xD;&#xA;[XmlIgnore]&#xD;&#xA;$TYPE$ _$PRIVATE$;&#xD;&#xA;&#xD;&#xA;#endregion&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="TypeMember" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="TYPE" expression="" initialRange="0" />
+          <Variable name="NAME" expression="" initialRange="0" />
+          <Variable name="PRIVATE" expression="decapitalize(NAME)" initialRange="-1" />
+          <Variable name="CLASS" expression="typeName()" initialRange="-1" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+    </LiveTemplates>
+    <Surrounds>
+      <Template uid="0a82265f-a660-45c5-8733-8d570e5787a0" shortcut="" description="My Try-Catch" text="try {$SELECTION$} catch (Exception e) {&#xA;$SELSTART$throw new $EXCEPTION$(string.Format(&quot;$SELEND$&quot;),e);&#xA;}" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <CSharpContext context="Statement" minimumLanguageVersion="3.0" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="EXCEPTION" expression="" initialRange="0" />
+        </Variables>
+        <CustomProperties />
+      </Template>
+    </Surrounds>
+    <FileTemplates>
+      <Template uid="27677ffa-5bac-4402-80ae-22d4734f0f6c" shortcut="" description="Cinch ViewModel" text="using Cinch;&#xD;&#xA;&#xD;&#xA;namespace $NAMESPACE$&#xD;&#xA;{&#xD;&#xA;	public class $CLASS$ : ViewModelBase&#xD;&#xA;	{&#xD;&#xA;		$END$&#xD;&#xA;	}&#xD;&#xA;}&#xD;&#xA;" reformat="True" shortenQualifiedReferences="True">
+        <Context>
+          <ProjectLanguageContext language="All" />
+        </Context>
+        <Categories />
+        <Variables>
+          <Variable name="NAMESPACE" expression="fileDefaultNamespace()" initialRange="-1" />
+          <Variable name="CLASS" expression="getFileNameWithoutExtension()" initialRange="-1" />
+        </Variables>
+        <CustomProperties>
+          <Property key="FileName" value="ViewModel" />
+          <Property key="Extension" value="cs" />
+          <Property key="ValidateFileName" value="True" />
+        </CustomProperties>
+      </Template>
+    </FileTemplates>
+  </SharedSolutionTemplateManager>
+</Configuration>
