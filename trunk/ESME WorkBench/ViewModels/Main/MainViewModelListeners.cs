@@ -45,7 +45,6 @@ namespace ESMEWorkBench.ViewModels.Main
                                            };
 
 #endif
-                //todo check MouseEarthCoordinate: isonland, radialends can't be outside bathy.
                 if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
                 if(!_experiment.Bathymetry.BoundingBox.Contains(MouseEarthCoordinate)) throw new AnalysisPointLocationException("Analysis Points cannot be placed outside the bathymetry bounds.");
                 var analysisPoint = new AnalysisPoint(MouseEarthCoordinate);
