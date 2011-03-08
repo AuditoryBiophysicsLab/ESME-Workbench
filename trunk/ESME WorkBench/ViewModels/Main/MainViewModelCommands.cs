@@ -105,7 +105,7 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _launchScenarioSimulator ?? (_launchScenarioSimulator = new SimpleCommand<object, object>(
-                    delegate { return (Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath != null && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath)); },
+                    delegate { return ((Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath != null) && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath)); },
                     delegate
                     {
                         var numIterations = Globals.AppSettings.ScenarioSimulatorSettings.Iterations;
