@@ -7,203 +7,229 @@
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         Title="User Options"
         SizeToContent="WidthAndHeight">
-	<Window.Resources>
-		<DataTemplate x:Key="CASSTemplateTemplate">
-			<Grid>
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition SharedSizeGroup="CheckCol" />
-					<ColumnDefinition SharedSizeGroup="PatternCol" />
-					<ColumnDefinition SharedSizeGroup="FileCol" />
-					<ColumnDefinition SharedSizeGroup="EditCol" />
-				</Grid.ColumnDefinitions>
+    <Window.Resources>
+        <DataTemplate x:Key="CASSTemplateTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="CheckCol" />
+                    <ColumnDefinition SharedSizeGroup="PatternCol" />
+                    <ColumnDefinition SharedSizeGroup="FileCol" />
+                    <ColumnDefinition SharedSizeGroup="EditCol" />
+                </Grid.ColumnDefinitions>
 
-				<CheckBox Content="Enable"
+                <CheckBox Content="Enable"
 				          IsChecked="{Binding IsEnabled}"
 				          Grid.Column="0"
 				          Margin="5 0 0 0"
 				          VerticalAlignment="Bottom" />
-				<StackPanel Orientation="Vertical"
+                <StackPanel Orientation="Vertical"
 				            Grid.Column="1"
 				            IsEnabled="{Binding IsEnabled}"
 				            Margin="5 0 0 0">
-					<TextBlock Text="Mode name match" />
-					<TextBox Text="{Binding MatchString}" 
+                    <TextBlock Text="Mode name match" />
+                    <TextBox Text="{Binding MatchString}" 
                              ToolTip="The string that will be matched against each mode name.  * will match any mode.  The MOST SPECIFIC match found will be used"/>
-				</StackPanel>
-				<Controls:FileOrDirectorySetting Grid.Column="2"
+                </StackPanel>
+                <Controls:FileOrDirectorySetting Grid.Column="2"
 				                                 Caption="Parameter File"
 				                                 IsDirectoryBrowser="False"
 				                                 FileName="{Binding FileName}"
 				                                 IsEnabled="{Binding IsEnabled}"
 				                                 Margin="5 0 0 0" />
-				<Button Content="Edit..."
+                <Button Content="Edit..."
 				        Command="{Binding EditParameterFileCommand}"
 				        Grid.Column="3"
 				        Width="75"
 				        VerticalAlignment="Bottom"
 				        Height="22"
 				        Margin="5 0 0 0" />
-			</Grid>
-		</DataTemplate>
-	</Window.Resources>
-	<DockPanel LastChildFill="True">
-		<DockPanel LastChildFill="False"
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <DockPanel LastChildFill="False"
 		           Margin="10"
 		           DockPanel.Dock="Bottom">
-			<Button Width="75"
+            <Button Width="75"
 			        Margin="10 0 0 0"
 			        IsCancel="True"
 			        Content="Cancel"
 			        DockPanel.Dock="Right" />
-			<Button Width="75"
+            <Button Width="75"
 			        IsDefault="True"
 			        Content="OK"
 			        DockPanel.Dock="Right"
 			        Command="{Binding OkCommand}" />
-		</DockPanel>
-		<TabControl>
-			<TabItem Header="Scenario"
+        </DockPanel>
+        <TabControl>
+            <TabItem Header="Scenario"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
-				<StackPanel Orientation="Vertical"
+                <StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-					<Controls:FileOrDirectorySetting Caption="Scenario Editor executable files"
+                    <Controls:FileOrDirectorySetting Caption="Scenario Editor executable files"
 					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
 					                                 IsDirectoryBrowser="False"
 					                                 FileName="{Binding AppSettings.ScenarioEditorExecutablePath}" />
-					<Controls:FileOrDirectorySetting Caption="Scenario Editor data directory"
+                    <Controls:FileOrDirectorySetting Caption="Scenario Editor data directory"
 					                                 IsDirectoryBrowser="True"
 					                                 FileName="{Binding AppSettings.ScenarioDataDirectory}" />
-				</StackPanel>
-			</TabItem>
-			<TabItem Header="Environment"
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Simulator"
+                     HorizontalContentAlignment="Stretch"
+			         VerticalContentAlignment="Stretch">
+                <StackPanel Orientation="Vertical">
+                    <GroupBox Header="Runtime Options">
+                        <StackPanel Orientation="Vertical">
+                            <Controls:FileOrDirectorySetting Caption="Scenario Simulator Executable"
+							                                 Margin="0 5"
+							                                 IsDirectoryBrowser="False"
+							                                 FileName="{Binding AppSettings.ScenarioSimulatorSettings.ExecutablePath}" />
+                            <TextBlock Text="Number of Iterations" />
+                            <TextBox Text="{Binding AppSettings.ScenarioSimulatorSettings.Iterations}">
+                                <i:Interaction.Behaviors>
+                                    <cinch:NumericTextBoxBehaviour />
+                                </i:Interaction.Behaviors>
+                            </TextBox>
+                            <CheckBox IsChecked="{Binding AppSettings.ScenarioSimulatorSettings.IsRandomized}"
+					          Margin="5 10">
+                                Randomize Ship Tracks
+                            </CheckBox>
+                            
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+
+            </TabItem>
+            <TabItem Header="Environment"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
-				<StackPanel Orientation="Vertical"
+                <StackPanel Orientation="Vertical"
 				            VerticalAlignment="Top">
-					<CheckBox IsChecked="{Binding AppSettings.UseOAMLDataSources}"
+                    <CheckBox IsChecked="{Binding AppSettings.UseOAMLDataSources}"
 					          Margin="5 10">
-						Use Oceanographic and Atmospheric Master Library (OAML) data sources
-					</CheckBox>
-					<Controls:FileOrDirectorySetting Caption="Environment database directory"
+                        Use Oceanographic and Atmospheric Master Library (OAML) data sources
+                    </CheckBox>
+                    <Controls:FileOrDirectorySetting Caption="Environment database directory"
 					                                 IsEnabled="{Binding AppSettings.UseESMEDataSources}"
 					                                 Margin="5 20 5 10"
 					                                 IsDirectoryBrowser="True"
 					                                 FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
-				</StackPanel>
-			</TabItem>
-			<TabItem Header="OAML Databases"
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="OAML Databases"
 			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
-				<StackPanel Orientation="Vertical">
-					<GroupBox Header="Database Locations"
+                <StackPanel Orientation="Vertical">
+                    <GroupBox Header="Database Locations"
 					          Margin="5 10 5 5"
 					          Padding="5">
-						<StackPanel Orientation="Vertical">
-							<Controls:FileOrDirectorySetting Caption="GDEM-V"
+                        <StackPanel Orientation="Vertical">
+                            <Controls:FileOrDirectorySetting Caption="GDEM-V"
 							                                 Margin="0 5"
 							                                 IsDirectoryBrowser="True"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.GDEMDirectory}" />
-							<Controls:FileOrDirectorySetting Caption="SMGC"
+                            <Controls:FileOrDirectorySetting Caption="SMGC"
 							                                 IsDirectoryBrowser="True"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.SMGCDirectory}" />
-							<Controls:FileOrDirectorySetting Caption="BST"
+                            <Controls:FileOrDirectorySetting Caption="BST"
 							                                 Margin="0 5"
 							                                 IsDirectoryBrowser="False"
                                                              DialogTitle="Choose the Bottom Sediment Type database file"
                                                              FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory}" />
-							<Controls:FileOrDirectorySetting Caption="DBDB"
+                            <Controls:FileOrDirectorySetting Caption="DBDB"
 							                                 IsDirectoryBrowser="False"
                                                              DialogTitle="Choose the Digital Bathymetric Database file"
                                                              FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory}" />
-						</StackPanel>
-					</GroupBox>
-					<GroupBox Header="Required Extraction Tools"
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Required Extraction Tools"
 					          Margin="5 0 5 10"
 					          Padding="5">
-						<StackPanel Orientation="Vertical">
-							<Controls:FileOrDirectorySetting Caption="BST Extractor"
+                        <StackPanel Orientation="Vertical">
+                            <Controls:FileOrDirectorySetting Caption="BST Extractor"
 							                                 Margin="0 5"
 							                                 IsDirectoryBrowser="False"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTEXEPath}" />
-							<Controls:FileOrDirectorySetting Caption="DBDB Extractor"
+                            <Controls:FileOrDirectorySetting Caption="DBDB Extractor"
 							                                 IsDirectoryBrowser="False"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath}" />
-						</StackPanel>
+                        </StackPanel>
 
-					</GroupBox>
-				</StackPanel>
-			</TabItem>
-			<TabItem Header="Seasons"
+                    </GroupBox>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Seasons"
 			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
-				<StackPanel Orientation="Vertical">
-					<StackPanel Orientation="Vertical"
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Vertical"
 					            Margin="5">
-						<TextBlock Text="Spring Starts" />
-						<ComboBox ItemsSource="{Binding Months}"
+                        <TextBlock Text="Spring Starts" />
+                        <ComboBox ItemsSource="{Binding Months}"
 						          SelectedItem="{Binding AppSettings.NAVOConfiguration.SpringStartMonth}"
 						          ToolTip="The beginning month of a 3-month season" />
-					</StackPanel>
-					<StackPanel Orientation="Vertical"
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical"
 					            Margin="5 0">
-						<TextBlock Text="Summer Starts" />
-						<ComboBox ItemsSource="{Binding Months}"
+                        <TextBlock Text="Summer Starts" />
+                        <ComboBox ItemsSource="{Binding Months}"
 						          SelectedItem="{Binding AppSettings.NAVOConfiguration.SummerStartMonth}"
 						          ToolTip="The beginning month of a 3-month season" />
-					</StackPanel>
-					<StackPanel Orientation="Vertical"
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical"
 					            Margin="5">
-						<TextBlock Text="Fall Starts" />
-						<ComboBox ItemsSource="{Binding Months}"
+                        <TextBlock Text="Fall Starts" />
+                        <ComboBox ItemsSource="{Binding Months}"
 						          SelectedItem="{Binding AppSettings.NAVOConfiguration.FallStartMonth}"
 						          ToolTip="The beginning month of a 3-month season" />
-					</StackPanel>
-					<StackPanel Orientation="Vertical"
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical"
 					            Margin="5 0">
-						<TextBlock Text="Winter Starts" />
-						<ComboBox ItemsSource="{Binding Months}"
+                        <TextBlock Text="Winter Starts" />
+                        <ComboBox ItemsSource="{Binding Months}"
 						          SelectedItem="{Binding AppSettings.NAVOConfiguration.WinterStartMonth}"
 						          ToolTip="The beginning month of a 3-month season" />
 
-					</StackPanel>
-					<StackPanel Orientation="Vertical"
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical"
 					            Margin="5">
-						<TextBlock Text="Cold Season Starts" />
-						<ComboBox ItemsSource="{Binding Months}"
+                        <TextBlock Text="Cold Season Starts" />
+                        <ComboBox ItemsSource="{Binding Months}"
 						          SelectedItem="{Binding AppSettings.NAVOConfiguration.ColdSeasonStartMonth}"
 						          ToolTip="The beginning month of a 6-month season" />
 
-					</StackPanel>
-					<StackPanel Orientation="Vertical"
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical"
 					            Margin="5">
-						<TextBlock Text="Warm Season Starts" />
-						<ComboBox ItemsSource="{Binding Months}"
+                        <TextBlock Text="Warm Season Starts" />
+                        <ComboBox ItemsSource="{Binding Months}"
 						          SelectedItem="{Binding AppSettings.NAVOConfiguration.WarmSeasonStartMonth}"
 						          ToolTip="The beginning month of a 6-month season" />
 
-					</StackPanel>
+                    </StackPanel>
 
-				</StackPanel>
-			</TabItem>
-			<TabItem Header="CASS"
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="CASS"
 			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
-				<DockPanel LastChildFill="True">
-					<GroupBox Header="Options"
+                <DockPanel LastChildFill="True">
+                    <GroupBox Header="Options"
 					          Margin="5 5 5 0"
 					          Padding="5"
 					          DockPanel.Dock="Top">
-						<StackPanel Orientation="Vertical">
-							<CheckBox Content="Generate Plot Files"
+                        <StackPanel Orientation="Vertical">
+                            <CheckBox Content="Generate Plot Files"
 							          IsChecked="{Binding AppSettings.CASSSettings.GeneratePlotFiles}" />
-							<CheckBox Content="Generate Binary Files"
+                            <CheckBox Content="Generate Binary Files"
 							          IsChecked="{Binding AppSettings.CASSSettings.GenerateBinaryFiles}" />
-							<CheckBox Content="Generate Pressure Files"
+                            <CheckBox Content="Generate Pressure Files"
 							          IsChecked="{Binding AppSettings.CASSSettings.GeneratePressureFiles}" />
-							<CheckBox Content="Generate Eigenray Files"
+                            <CheckBox Content="Generate Eigenray Files"
 							          IsChecked="{Binding AppSettings.CASSSettings.GenerateEigenrayFiles}" />
                             <StackPanel Orientation="Vertical"
 						            Margin="0 10 0 5">
@@ -232,105 +258,105 @@
                                 </TextBox>
                             </StackPanel>
                         </StackPanel>
-					</GroupBox>
-					<GroupBox Header="Paths"
+                    </GroupBox>
+                    <GroupBox Header="Paths"
 					          Margin="5 0 5 5"
 					          Padding="5"
 					          DockPanel.Dock="Top">
-						<StackPanel Orientation="Vertical">
-							<Controls:FileOrDirectorySetting Caption="Python executable"
+                        <StackPanel Orientation="Vertical">
+                            <Controls:FileOrDirectorySetting Caption="Python executable"
 							                                 IsDirectoryBrowser="False"
 							                                 FileName="{Binding AppSettings.CASSSettings.PythonExecutablePath}" />
-							<Controls:FileOrDirectorySetting Caption="CASS executable"
+                            <Controls:FileOrDirectorySetting Caption="CASS executable"
 							                                 IsDirectoryBrowser="False"
 							                                 FileName="{Binding AppSettings.CASSSettings.CASSExecutablePath}" />
-							<Controls:FileOrDirectorySetting Caption="Python run script"
+                            <Controls:FileOrDirectorySetting Caption="Python run script"
 							                                 IsDirectoryBrowser="False"
 							                                 FileName="{Binding AppSettings.CASSSettings.PythonScriptPath}" />
-						</StackPanel>
-					</GroupBox>
-					<GroupBox Header="Parameter Files (not currently implemented!)"
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Parameter Files (not currently implemented!)"
 					          DockPanel.Dock="Bottom"
 					          Margin="5 0 5 10"
 					          Padding="5"
 					          IsEnabled="False">
-						<DockPanel LastChildFill="True">
-							<StackPanel Orientation="Horizontal"
+                        <DockPanel LastChildFill="True">
+                            <StackPanel Orientation="Horizontal"
 							            DockPanel.Dock="Bottom"
 							            HorizontalAlignment="Right">
-								<Button Content="Add Parameter File"
+                                <Button Content="Add Parameter File"
 								        Command="{Binding AppSettings.CASSSettings.AddCASSParameterFileCommand}"
 								        Width="Auto"
 								        Margin="5" />
-							</StackPanel>
+                            </StackPanel>
                             <ListBox ItemsSource="{Binding AppSettings.CASSSettings.CASSParameterFiles}"
 							         ItemTemplate="{StaticResource CASSTemplateTemplate}"
 							         Grid.IsSharedSizeScope="True"
 							         Height="Auto"
 							         Padding="5" />
-						</DockPanel>
-					</GroupBox>
-				</DockPanel>
-			</TabItem>
-			<TabItem Header="REFMS"
+                        </DockPanel>
+                    </GroupBox>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="REFMS"
 			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
-				<DockPanel LastChildFill="True">
-					<StackPanel Orientation="Vertical">
-						<CheckBox Content="SCALEI (check indicates yes)"
+                <DockPanel LastChildFill="True">
+                    <StackPanel Orientation="Vertical">
+                        <CheckBox Content="SCALEI (check indicates yes)"
 						          Margin="5"
 						          IsChecked="{Binding AppSettings.REFMSSettings.ScaleI}" />
-						<StackPanel Orientation="Vertical"
+                        <StackPanel Orientation="Vertical"
 						            Margin="5 0">
-							<TextBlock Text="Default minimum range (ft)" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMinimumRange}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-						</StackPanel>
-						<StackPanel Orientation="Vertical"
+                            <TextBlock Text="Default minimum range (ft)" />
+                            <TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMinimumRange}">
+                                <i:Interaction.Behaviors>
+                                    <cinch:NumericTextBoxBehaviour />
+                                </i:Interaction.Behaviors>
+                            </TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical"
 						            Margin="5">
-							<TextBlock Text="Default maximum range (ft)" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMaximumRange}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-						</StackPanel>
-						<StackPanel Orientation="Vertical"
+                            <TextBlock Text="Default maximum range (ft)" />
+                            <TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMaximumRange}">
+                                <i:Interaction.Behaviors>
+                                    <cinch:NumericTextBoxBehaviour />
+                                </i:Interaction.Behaviors>
+                            </TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical"
 						            Margin="5 0">
-							<TextBlock Text="Default number of range points" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultNumberOfRangePoints}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-						</StackPanel>
-						<StackPanel Orientation="Vertical"
+                            <TextBlock Text="Default number of range points" />
+                            <TextBox Text="{Binding AppSettings.REFMSSettings.DefaultNumberOfRangePoints}">
+                                <i:Interaction.Behaviors>
+                                    <cinch:NumericTextBoxBehaviour />
+                                </i:Interaction.Behaviors>
+                            </TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical"
 						            Margin="5 20 5 5">
-							<TextBlock Text="Minimum depth (ft)" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.MinimumDepth}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-						</StackPanel>
-						<StackPanel Orientation="Vertical"
+                            <TextBlock Text="Minimum depth (ft)" />
+                            <TextBox Text="{Binding AppSettings.REFMSSettings.MinimumDepth}">
+                                <i:Interaction.Behaviors>
+                                    <cinch:NumericTextBoxBehaviour />
+                                </i:Interaction.Behaviors>
+                            </TextBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical"
 						            Margin="5 0">
-							<TextBlock Text="Number of depth points" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.NumberOfDepthPoints}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
+                            <TextBlock Text="Number of depth points" />
+                            <TextBox Text="{Binding AppSettings.REFMSSettings.NumberOfDepthPoints}">
+                                <i:Interaction.Behaviors>
+                                    <cinch:NumericTextBoxBehaviour />
+                                </i:Interaction.Behaviors>
+                            </TextBox>
                         </StackPanel>
                         <Controls:FileOrDirectorySetting Caption="REFMS executable"
 							                             IsDirectoryBrowser="False"
                                                          Margin="5 20 5 10"
 							                             FileName="{Binding AppSettings.REFMSSettings.REFMSExecutablePath}" />
                     </StackPanel>
-				</DockPanel>
-			</TabItem>
-		</TabControl>
-	</DockPanel>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 </Window>

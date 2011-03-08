@@ -207,6 +207,24 @@ namespace ESME.Data
 
         #endregion
 
+        #region public ScenarioSimulatorSettings ScenarioSimulatorSettings { get; set; }
+
+        public ScenarioSimulatorSettings ScenarioSimulatorSettings
+        {
+            get { return _scenarioSimulatorSettings; }
+            set
+            {
+                if (_scenarioSimulatorSettings == value) return;
+                _scenarioSimulatorSettings = value;
+                NotifyPropertyChanged(ScenarioSimulatorSettingsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ScenarioSimulatorSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioSimulatorSettings);
+        ScenarioSimulatorSettings _scenarioSimulatorSettings;
+
+        #endregion
+
         // This list is maintained by the ESME WorkBench.  When a new experiment is saved, the path to the experiment directory is added to this list
         // Periodically, the VerifyExperimentsStillExist() method is called, which will prune directories that no longer exist.
         #region public List<string> ExperimentFiles { get; set; }
@@ -613,6 +631,70 @@ namespace ESME.Data
 
         static readonly PropertyChangedEventArgs REFMSExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.REFMSExecutablePath);
         string _rEFMSExecutablePath;
+
+        #endregion
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+
+        #endregion
+    }
+
+    public class ScenarioSimulatorSettings : INotifyPropertyChanged
+    {
+        #region public string ExecutablePath { get; set; }
+
+        public string ExecutablePath
+        {
+            get { return _executablePath; }
+            set
+            {
+                if (_executablePath == value) return;
+                _executablePath = value;
+                NotifyPropertyChanged(ExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ExecutablePath);
+        string _executablePath;
+
+        #endregion
+
+        #region public bool IsRandomized { get; set; }
+
+        public bool IsRandomized
+        {
+            get { return _isRandomized; }
+            set
+            {
+                if (_isRandomized == value) return;
+                _isRandomized = value;
+                NotifyPropertyChanged(IsRandomizedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsRandomizedChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.IsRandomized);
+        bool _isRandomized;
+
+        #endregion
+
+        #region public double Iterations { get; set; }
+
+        public double Iterations
+        {
+            get { return _iterations; }
+            set
+            {
+                if (_iterations == value) return;
+                _iterations = value;
+                NotifyPropertyChanged(IterationsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IterationsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.Iterations);
+        double _iterations;
 
         #endregion
 

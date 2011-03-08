@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text;
+using System.Threading;
 using Cinch;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
@@ -95,6 +97,55 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region LaunchScenarioSimulatorCommand
+
+        public SimpleCommand<object, object> LaunchScenarioSimulatorCommand
+        {
+            get
+            {
+                return _launchScenarioSimulator ?? (_launchScenarioSimulator = new SimpleCommand<object, object>(
+                    delegate { return true; },
+                    delegate
+                    {
+                        //var mbsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "3MB.exe");
+                        var sceSimPath = "";  //todo
+                        var numIterations = 1; // todo
+                        var isRandomized = false; //todo
+                        var commandArgs = "";
+                        commandArgs = string.Format(isRandomized ? "-b -n {0} -s \"{1}\"" : "-b -r -n {0} -s \"{1}\"", numIterations, _experiment.NemoFile.FileName);
+
+                        var process = new Process
+                                      {
+                                          StartInfo = new ProcessStartInfo(sceSimPath)
+                                                      {
+                                                          CreateNoWindow = true,
+                                                          UseShellExecute = false,
+                                                          RedirectStandardInput = false,
+                                                          RedirectStandardOutput = true,
+                                                          RedirectStandardError = true,
+                                                          Arguments = commandArgs,
+                                                      },
+                                      };
+                        process.Start();
+                        process.PriorityClass = ProcessPriorityClass.BelowNormal;
+                        var output = new StringBuilder();
+                        while (!process.HasExited)
+                        {
+                            output.Append(process.StandardOutput.ReadToEnd());
+                            Thread.Sleep(100);
+                        }
+                        //return output.ToString();
+        
+    
+                        
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _launchScenarioSimulator;
+
+        #endregion
+
         #region DisabledCommand
 
         public SimpleCommand<object, object> DisabledCommand
@@ -125,7 +176,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
                                                                                                      {
-                                                                                                         var ea = (CancelEventArgs) vcArgs.EventArgs;
+                                                                                                         var ea = (CancelEventArgs)vcArgs.EventArgs;
                                                                                                          if (UserCanceledBecauseExperimentUnsaved())
                                                                                                          {
                                                                                                              ea.Cancel = true;
@@ -182,9 +233,12 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> ShowEnvironmentSettingsCommand
         {
-            get { return _showEnvironmentSettings ?? (_showEnvironmentSettings = new SimpleCommand<object, object>(
-                arg => CanShowEnvironmentSettings, 
-                obj => ShowEnvironmentSettingsView())); }
+            get
+            {
+                return _showEnvironmentSettings ?? (_showEnvironmentSettings = new SimpleCommand<object, object>(
+                    arg => CanShowEnvironmentSettings,
+                    obj => ShowEnvironmentSettingsView()));
+            }
         }
 
         SimpleCommand<object, object> _showEnvironmentSettings;
@@ -348,7 +402,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> AcousticOptionsCommand
         {
-            get { return _acousticOptions ?? (_acousticOptions = new SimpleCommand<object, object>((obj)=>MediatorMessage.Send(MediatorMessage.AcousticOptions,true))); }
+            get { return _acousticOptions ?? (_acousticOptions = new SimpleCommand<object, object>((obj) => MediatorMessage.Send(MediatorMessage.AcousticOptions, true))); }
         }
 
         SimpleCommand<object, object> _acousticOptions;
@@ -472,18 +526,21 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> NAVOEnvironmentBuilderCommand
         {
-            get { return _nAVOEnvironmentBuilder ?? (_nAVOEnvironmentBuilder = new SimpleCommand<object, object>(delegate
-                                                                                                                 {
-                                                                                                                     var environmentBuilderViewModel =  new EnvironmentBuilderViewModel(_visualizerService, _messageBoxService, Globals.AppSettings, _experiment);
-                                                                                                                     var result = _visualizerService.ShowDialog("EnvironmentBuilderView",environmentBuilderViewModel);
-                                                                                                                     if (result.HasValue && result.Value)
-                                                                                                                     {
-                                                                                                                         
-                                                                                                                     }
+            get
+            {
+                return _nAVOEnvironmentBuilder ?? (_nAVOEnvironmentBuilder = new SimpleCommand<object, object>(delegate
+                                                                                                               {
+                                                                                                                   var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_visualizerService, _messageBoxService, Globals.AppSettings, _experiment);
+                                                                                                                   var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
+                                                                                                                   if (result.HasValue && result.Value)
+                                                                                                                   {
 
-                                                                                                                     
+                                                                                                                   }
 
-                                                                                                                 })); }
+
+
+                                                                                                               }));
+            }
         }
 
         SimpleCommand<object, object> _nAVOEnvironmentBuilder;
