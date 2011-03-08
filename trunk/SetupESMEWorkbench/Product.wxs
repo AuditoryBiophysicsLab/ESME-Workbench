@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
-  <?define ProductName = "ESME WorkBench 2010"?>
-  <?define OldProductVersion="1.4.0.0" ?>
-  <?define ProductVersion="2.1.1.0" ?>
+  <?define ProductName = "ESME WorkBench 2011"?>
+  <?define OldProductVersion="2.1.1.0" ?>
+  <?define ProductVersion="2.1.2.0" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
-  <?define ESMEPath="C:\Projects\ESME Deliverables\ESME WorkBench\bin\x86\Release"?>
-  <?define ESMEViewsPath="C:\Projects\ESME Deliverables\ESME.Controls\bin\x86\Release"?>
+  <?define ESMEPath="C:\Projects\ESME Deliverables\ESME WorkBench\bin\Release"?>
+  <?define ESMEViewsPath="C:\Projects\ESME Deliverables\ESME.Controls\bin\Release"?>
   <?define BellhopPath="C:\Projects\ESME Deliverables\Utilities\Bellhop"?>
   <?define MMMBSPath="C:\Projects\ESME Deliverables\Utilities\MMMBS\demoProjects"?>
   <?define ImportNetCDFPath="C:\Projects\ESME Deliverables\Utilities\NetCDFExtractor\bin\x86\Release"?>
@@ -22,15 +22,14 @@
            UpgradeCode="$(var.UpgradeCode)"
            Language="1033" 
            Codepage="1252">
-    <Package Description="ESME WorkBench 2010"
-             Comments="Deliverable for Phase 2, Iteration 1"
+    <Package Description="ESME WorkBench 2011"
+             Comments="Deliverable for 11 March 2011"
              Manufacturer="$(var.Manufacturer)" 
              InstallerVersion="300" 
              Languages="1033" 
              SummaryCodepage="1252"
              Compressed="yes" 
              AdminImage="no"
-             Platform="x86"
              ReadOnly="yes"
              ShortNames="no"
              InstallScope="perMachine"
@@ -83,11 +82,11 @@
                   Name="HRC.dll"
                   Source="$(var.ESMEPath)\HRC.dll" />
             <File Id="ReleaseNotes"
-                  Name="ESME Workbench 2010 Release Notes.pdf"
-                  Source="$(var.ReleaseNotesPath)\ESME Workbench 2010 Release Notes.pdf" />
+                  Name="ESME Workbench 2011 Release Notes.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench 2011 Release Notes.pdf" />
             <File Id="UserGuide"
-                  Name="ESME Workbench 2010 User Guide.pdf"
-                  Source="$(var.ReleaseNotesPath)\ESME Workbench 2010 User Guide.pdf" />
+                  Name="ESME Workbench 2011 User Manual.pdf"
+                  Source="$(var.ReleaseNotesPath)\ESME Workbench 2011 User Manual.pdf" />
 
             <!-- External executables -->
             
