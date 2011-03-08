@@ -78,6 +78,24 @@ namespace ESME.Data
 
         #endregion
 
+        #region public string ReportGeneratorExecutablePath { get; set; }
+
+        public string ReportGeneratorExecutablePath
+        {
+            get { return _reportGeneratorExecutablePath; }
+            set
+            {
+                if (_reportGeneratorExecutablePath == value) return;
+                _reportGeneratorExecutablePath = value;
+                NotifyPropertyChanged(ReportGeneratorExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ReportGeneratorExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ReportGeneratorExecutablePath);
+        string _reportGeneratorExecutablePath;
+
+        #endregion
+        
         #region public string ScenarioDataDirectory { get; set; }
 
         static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioDataDirectory);

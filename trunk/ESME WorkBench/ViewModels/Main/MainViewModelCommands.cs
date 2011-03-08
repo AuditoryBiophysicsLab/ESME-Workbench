@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using Cinch;
+using ESME.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.NAVO;
@@ -104,15 +105,13 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _launchScenarioSimulator ?? (_launchScenarioSimulator = new SimpleCommand<object, object>(
-                    delegate { return true; },
+                    delegate { return (Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath != null && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath)); },
                     delegate
                     {
-                        //var mbsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "3MB.exe");
-                        var sceSimPath = "";  //todo
-                        var numIterations = 1; // todo
-                        var isRandomized = false; //todo
-                        var commandArgs = "";
-                        commandArgs = string.Format(isRandomized ? "-b -n {0} -s \"{1}\"" : "-b -r -n {0} -s \"{1}\"", numIterations, _experiment.NemoFile.FileName);
+                        var sceSimPath = Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath;
+                        var numIterations = Globals.AppSettings.ScenarioSimulatorSettings.Iterations;
+                        var isRandomized = Globals.AppSettings.ScenarioSimulatorSettings.IsRandomized;
+                        var commandArgs = string.Format(isRandomized ? "-b -n {0} -s \"{1}\"" : "-b -r -n {0} -s \"{1}\"", numIterations, _experiment.NemoFile.FileName);
 
                         var process = new Process
                                       {
@@ -121,28 +120,58 @@ namespace ESMEWorkBench.ViewModels.Main
                                                           CreateNoWindow = true,
                                                           UseShellExecute = false,
                                                           RedirectStandardInput = false,
-                                                          RedirectStandardOutput = true,
+                                                          RedirectStandardOutput = false,
                                                           RedirectStandardError = true,
                                                           Arguments = commandArgs,
                                                       },
                                       };
                         process.Start();
                         process.PriorityClass = ProcessPriorityClass.BelowNormal;
-                        var output = new StringBuilder();
-                        while (!process.HasExited)
-                        {
-                            output.Append(process.StandardOutput.ReadToEnd());
-                            Thread.Sleep(100);
-                        }
+                        //  //var output = new StringBuilder();
+                        // while (!process.HasExited)
+                        // {
+                        //      output.Append(process.StandardOutput.ReadToEnd());
+                        //       Thread.Sleep(100);
+                        //     }
                         //return output.ToString();
-        
-    
-                        
                     }));
             }
         }
 
         SimpleCommand<object, object> _launchScenarioSimulator;
+
+        #endregion
+
+        #region LaunchNUWCReportGeneratorCommand
+
+        public SimpleCommand<object, object> LaunchNUWCReportGeneratorCommand
+        {
+            get
+            {
+                return _launchNUWCReportGenerator ?? (_launchNUWCReportGenerator = new SimpleCommand<object, object>(
+                    delegate { return (Globals.AppSettings.ReportGeneratorExecutablePath != null && File.Exists(Globals.AppSettings.ReportGeneratorExecutablePath)); },
+                    delegate
+                    {
+                        var path = Globals.AppSettings.ReportGeneratorExecutablePath;
+
+                        var process = new Process
+                        {
+                            StartInfo = new ProcessStartInfo(path)
+                            {
+                                CreateNoWindow = true,
+                                UseShellExecute = false,
+                                RedirectStandardInput = false,
+                                RedirectStandardOutput = false,
+                                RedirectStandardError = true,
+                            },
+                        };
+                        process.Start();
+                        process.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _launchNUWCReportGenerator;
 
         #endregion
 
