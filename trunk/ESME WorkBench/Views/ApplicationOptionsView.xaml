@@ -65,72 +65,55 @@
 			<TabItem Header="NAEMO"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
-                <StackPanel Orientation="Vertical"
+				<StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-                    <Controls:FileOrDirectorySetting Caption="Scenario Editor executable file"
+					<Controls:FileOrDirectorySetting Caption="Scenario Editor executable file"
 					                                 Margin="5"
 					                                 DialogTitle="Choose the Scenario Editor executable file"
 					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
 					                                 IsDirectoryBrowser="False"
 					                                 FileName="{Binding AppSettings.ScenarioEditorExecutablePath}" />
-                    
-                    <Controls:FileOrDirectorySetting Caption="Scenario data directory"
+
+					<Controls:FileOrDirectorySetting Caption="Scenario data directory"
 					                                 Margin="5 0"
 					                                 IsDirectoryBrowser="True"
 					                                 FileName="{Binding AppSettings.ScenarioDataDirectory}" />
 
-                    <Controls:FileOrDirectorySetting Caption="Report Generator executable file"                                                     
-                                                     Margin="5 0"
+					<Controls:FileOrDirectorySetting Caption="Report Generator executable file"
+					                                 Margin="5 0"
 					                                 IsDirectoryBrowser="False"
 					                                 DialogTitle="Choose the Report Generator executable file"
 					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
 					                                 FileName="{Binding AppSettings.ReportGeneratorExecutablePath}" />
 
-                    <Controls:FileOrDirectorySetting Caption="Scenario Simulator executable file"                                                     
-                                                     Margin="5 5 5 0"
+					<Controls:FileOrDirectorySetting Caption="Scenario Simulator executable file"
+					                                 Margin="5 5 5 0"
 					                                 IsDirectoryBrowser="False"
 					                                 DialogTitle="Choose the Scenario Simulator executable file"
 					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
 					                                 FileName="{Binding AppSettings.ScenarioSimulatorSettings.ExecutablePath}" />
-                    <GroupBox Header="Scenario Simulator Options"
-                              Margin="5"
-                              Padding="5">
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Number of Iterations" 
-                                       Margin="5 0"/>
-                            <TextBox Text="{Binding AppSettings.ScenarioSimulatorSettings.Iterations}"
-                                     Margin="5 0">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
-                            <CheckBox IsChecked="{Binding AppSettings.ScenarioSimulatorSettings.IsRandomized}"
+					<GroupBox Header="Scenario Simulator Options"
+					          Margin="5"
+					          Padding="5">
+						<StackPanel Orientation="Vertical">
+							<TextBlock Text="Number of Iterations"
+							           Margin="5 0" />
+							<TextBox Text="{Binding AppSettings.ScenarioSimulatorSettings.Iterations}"
+							         Margin="5 0">
+								<i:Interaction.Behaviors>
+									<cinch:NumericTextBoxBehaviour />
+								</i:Interaction.Behaviors>
+							</TextBox>
+							<CheckBox IsChecked="{Binding AppSettings.ScenarioSimulatorSettings.IsRandomized}"
 							          Margin="5 10">
-                                Randomize Ship Tracks
-                            </CheckBox>
-
-                        </StackPanel>
-                    </GroupBox>
-                </StackPanel>
-            </TabItem>
-			<TabItem Header="Environment"
-			         HorizontalContentAlignment="Stretch"
-			         VerticalContentAlignment="Stretch">
-				<StackPanel Orientation="Vertical"
-				            VerticalAlignment="Top">
-					<CheckBox IsChecked="{Binding AppSettings.UseOAMLDataSources}"
-					          Margin="5 10">
-						Use Oceanographic and Atmospheric Master Library (OAML) data sources
-					</CheckBox>
-					<Controls:FileOrDirectorySetting Caption="Environment database directory"
-					                                 IsEnabled="{Binding AppSettings.UseESMEDataSources}"
-					                                 Margin="5 20 5 10"
-					                                 IsDirectoryBrowser="True"
-					                                 FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
+								Randomize Ship Tracks
+							</CheckBox>
+						</StackPanel>
+					</GroupBox>
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="OAML Databases"
+			<TabItem Header="Environment"
 			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
@@ -174,6 +157,194 @@
 
 					</GroupBox>
 				</StackPanel>
+			</TabItem>
+			<TabItem Header="[Collapsed]"
+			         Visibility="Collapsed"
+			         HorizontalContentAlignment="Stretch"
+			         VerticalContentAlignment="Stretch">
+				<StackPanel Orientation="Vertical"
+				            VerticalAlignment="Top">
+					<CheckBox IsChecked="{Binding AppSettings.UseOAMLDataSources}"
+					          Margin="5 10">
+						Use Oceanographic and Atmospheric Master Library (OAML) data sources
+					</CheckBox>
+					<Controls:FileOrDirectorySetting Caption="Environment database directory"
+					                                 IsEnabled="{Binding AppSettings.UseESMEDataSources}"
+					                                 Margin="5 20 5 10"
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Acoustic Simulators">
+				<TabControl>
+					<TabItem Header="Bellhop">
+						<StackPanel Orientation="Vertical"
+                                    Margin="5 5 5 10">
+                            <StackPanel Orientation="Vertical"
+                                        Margin="0 0 0 5">
+                                <TextBlock Text="Range cell size (m)"/>
+                                <TextBox Text="{Binding AppSettings.BellhopSettings.RangeCellSize}">
+                                    <i:Interaction.Behaviors>
+                                        <cinch:NumericTextBoxBehaviour />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Depth cell size (m)"/>
+                                <TextBox Text="{Binding AppSettings.BellhopSettings.DepthCellSize}">
+                                    <i:Interaction.Behaviors>
+                                        <cinch:NumericTextBoxBehaviour />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
+                            </StackPanel>
+                        </StackPanel>
+					</TabItem>
+					<TabItem Header="RAM">
+                        <TextBlock>Not yet implemented</TextBlock>
+                    </TabItem>
+					<TabItem Header="CASS"
+					         Visibility="{Binding AppSettings.NavyOptionsVisibility}">
+						<DockPanel LastChildFill="True">
+							<GroupBox Header="Options"
+							          Margin="5 5 5 0"
+							          Padding="5"
+							          DockPanel.Dock="Top">
+								<StackPanel Orientation="Vertical">
+									<CheckBox Content="Generate Plot Files"
+									          IsChecked="{Binding AppSettings.CASSSettings.GeneratePlotFiles}" />
+									<CheckBox Content="Generate Binary Files"
+									          IsChecked="{Binding AppSettings.CASSSettings.GenerateBinaryFiles}" />
+									<CheckBox Content="Generate Pressure Files"
+									          IsChecked="{Binding AppSettings.CASSSettings.GeneratePressureFiles}" />
+									<CheckBox Content="Generate Eigenray Files"
+									          IsChecked="{Binding AppSettings.CASSSettings.GenerateEigenrayFiles}" />
+									<StackPanel Orientation="Vertical"
+									            Margin="0 10 0 5">
+										<TextBlock Text="Maximum depth (m)" />
+										<TextBox Text="{Binding AppSettings.CASSSettings.MaximumDepth}">
+											<i:Interaction.Behaviors>
+												<cinch:NumericTextBoxBehaviour />
+											</i:Interaction.Behaviors>
+										</TextBox>
+									</StackPanel>
+									<StackPanel Orientation="Vertical">
+										<TextBlock Text="Depth step size (m)" />
+										<TextBox Text="{Binding AppSettings.CASSSettings.DepthStepSize}">
+											<i:Interaction.Behaviors>
+												<cinch:NumericTextBoxBehaviour />
+											</i:Interaction.Behaviors>
+										</TextBox>
+									</StackPanel>
+									<StackPanel Orientation="Vertical"
+									            Margin="0 5 0 10">
+										<TextBlock Text="Range step size (m)" />
+										<TextBox Text="{Binding AppSettings.CASSSettings.RangeStepSize}">
+											<i:Interaction.Behaviors>
+												<cinch:NumericTextBoxBehaviour />
+											</i:Interaction.Behaviors>
+										</TextBox>
+									</StackPanel>
+								</StackPanel>
+							</GroupBox>
+							<GroupBox Header="Paths"
+							          Margin="5 0 5 5"
+							          Padding="5"
+							          DockPanel.Dock="Top">
+								<StackPanel Orientation="Vertical">
+									<Controls:FileOrDirectorySetting Caption="Python executable"
+									                                 IsDirectoryBrowser="False"
+									                                 FileName="{Binding AppSettings.CASSSettings.PythonExecutablePath}" />
+									<Controls:FileOrDirectorySetting Caption="CASS executable"
+									                                 IsDirectoryBrowser="False"
+									                                 FileName="{Binding AppSettings.CASSSettings.CASSExecutablePath}" />
+									<Controls:FileOrDirectorySetting Caption="Python run script"
+									                                 IsDirectoryBrowser="False"
+									                                 FileName="{Binding AppSettings.CASSSettings.PythonScriptPath}" />
+								</StackPanel>
+							</GroupBox>
+							<GroupBox Header="Parameter Files (not currently implemented!)"
+							          DockPanel.Dock="Bottom"
+							          Margin="5 0 5 10"
+							          Padding="5"
+							          IsEnabled="False">
+								<DockPanel LastChildFill="True">
+									<StackPanel Orientation="Horizontal"
+									            DockPanel.Dock="Bottom"
+									            HorizontalAlignment="Right">
+										<Button Content="Add Parameter File"
+										        Command="{Binding AppSettings.CASSSettings.AddCASSParameterFileCommand}"
+										        Width="Auto"
+										        Margin="5" />
+									</StackPanel>
+									<ListBox ItemsSource="{Binding AppSettings.CASSSettings.CASSParameterFiles}"
+									         ItemTemplate="{StaticResource CASSTemplateTemplate}"
+									         Grid.IsSharedSizeScope="True"
+									         Height="Auto"
+									         Padding="5" />
+								</DockPanel>
+							</GroupBox>
+						</DockPanel>
+					</TabItem>
+					<TabItem Header="REFMS"
+					         Visibility="{Binding AppSettings.NavyOptionsVisibility}">
+						<DockPanel LastChildFill="True">
+							<StackPanel Orientation="Vertical">
+								<CheckBox Content="SCALEI (check indicates yes)"
+								          Margin="5"
+								          IsChecked="{Binding AppSettings.REFMSSettings.ScaleI}" />
+								<StackPanel Orientation="Vertical"
+								            Margin="5 0">
+									<TextBlock Text="Default minimum range (ft)" />
+									<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMinimumRange}">
+										<i:Interaction.Behaviors>
+											<cinch:NumericTextBoxBehaviour />
+										</i:Interaction.Behaviors>
+									</TextBox>
+								</StackPanel>
+								<StackPanel Orientation="Vertical"
+								            Margin="5">
+									<TextBlock Text="Default maximum range (ft)" />
+									<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMaximumRange}">
+										<i:Interaction.Behaviors>
+											<cinch:NumericTextBoxBehaviour />
+										</i:Interaction.Behaviors>
+									</TextBox>
+								</StackPanel>
+								<StackPanel Orientation="Vertical"
+								            Margin="5 0">
+									<TextBlock Text="Default number of range points" />
+									<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultNumberOfRangePoints}">
+										<i:Interaction.Behaviors>
+											<cinch:NumericTextBoxBehaviour />
+										</i:Interaction.Behaviors>
+									</TextBox>
+								</StackPanel>
+								<StackPanel Orientation="Vertical"
+								            Margin="5 20 5 5">
+									<TextBlock Text="Minimum depth (ft)" />
+									<TextBox Text="{Binding AppSettings.REFMSSettings.MinimumDepth}">
+										<i:Interaction.Behaviors>
+											<cinch:NumericTextBoxBehaviour />
+										</i:Interaction.Behaviors>
+									</TextBox>
+								</StackPanel>
+								<StackPanel Orientation="Vertical"
+								            Margin="5 0">
+									<TextBlock Text="Number of depth points" />
+									<TextBox Text="{Binding AppSettings.REFMSSettings.NumberOfDepthPoints}">
+										<i:Interaction.Behaviors>
+											<cinch:NumericTextBoxBehaviour />
+										</i:Interaction.Behaviors>
+									</TextBox>
+								</StackPanel>
+								<Controls:FileOrDirectorySetting Caption="REFMS executable"
+								                                 IsDirectoryBrowser="False"
+								                                 Margin="5 20 5 10"
+								                                 FileName="{Binding AppSettings.REFMSSettings.REFMSExecutablePath}" />
+							</StackPanel>
+						</DockPanel>
+					</TabItem>
+				</TabControl>
 			</TabItem>
 			<TabItem Header="Seasons"
 			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
@@ -225,148 +396,6 @@
 					</StackPanel>
 
 				</StackPanel>
-			</TabItem>
-			<TabItem Header="CASS"
-			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
-				<DockPanel LastChildFill="True">
-					<GroupBox Header="Options"
-					          Margin="5 5 5 0"
-					          Padding="5"
-					          DockPanel.Dock="Top">
-						<StackPanel Orientation="Vertical">
-							<CheckBox Content="Generate Plot Files"
-							          IsChecked="{Binding AppSettings.CASSSettings.GeneratePlotFiles}" />
-							<CheckBox Content="Generate Binary Files"
-							          IsChecked="{Binding AppSettings.CASSSettings.GenerateBinaryFiles}" />
-							<CheckBox Content="Generate Pressure Files"
-							          IsChecked="{Binding AppSettings.CASSSettings.GeneratePressureFiles}" />
-							<CheckBox Content="Generate Eigenray Files"
-							          IsChecked="{Binding AppSettings.CASSSettings.GenerateEigenrayFiles}" />
-							<StackPanel Orientation="Vertical"
-							            Margin="0 10 0 5">
-								<TextBlock Text="Maximum depth (m)" />
-								<TextBox Text="{Binding AppSettings.CASSSettings.MaximumDepth}">
-									<i:Interaction.Behaviors>
-										<cinch:NumericTextBoxBehaviour />
-									</i:Interaction.Behaviors>
-								</TextBox>
-							</StackPanel>
-							<StackPanel Orientation="Vertical">
-								<TextBlock Text="Depth step size (m)" />
-								<TextBox Text="{Binding AppSettings.CASSSettings.DepthStepSize}">
-									<i:Interaction.Behaviors>
-										<cinch:NumericTextBoxBehaviour />
-									</i:Interaction.Behaviors>
-								</TextBox>
-							</StackPanel>
-							<StackPanel Orientation="Vertical"
-							            Margin="0 5 0 10">
-								<TextBlock Text="Range step size (m)" />
-								<TextBox Text="{Binding AppSettings.CASSSettings.RangeStepSize}">
-									<i:Interaction.Behaviors>
-										<cinch:NumericTextBoxBehaviour />
-									</i:Interaction.Behaviors>
-								</TextBox>
-							</StackPanel>
-						</StackPanel>
-					</GroupBox>
-					<GroupBox Header="Paths"
-					          Margin="5 0 5 5"
-					          Padding="5"
-					          DockPanel.Dock="Top">
-						<StackPanel Orientation="Vertical">
-							<Controls:FileOrDirectorySetting Caption="Python executable"
-							                                 IsDirectoryBrowser="False"
-							                                 FileName="{Binding AppSettings.CASSSettings.PythonExecutablePath}" />
-							<Controls:FileOrDirectorySetting Caption="CASS executable"
-							                                 IsDirectoryBrowser="False"
-							                                 FileName="{Binding AppSettings.CASSSettings.CASSExecutablePath}" />
-							<Controls:FileOrDirectorySetting Caption="Python run script"
-							                                 IsDirectoryBrowser="False"
-							                                 FileName="{Binding AppSettings.CASSSettings.PythonScriptPath}" />
-						</StackPanel>
-					</GroupBox>
-					<GroupBox Header="Parameter Files (not currently implemented!)"
-					          DockPanel.Dock="Bottom"
-					          Margin="5 0 5 10"
-					          Padding="5"
-					          IsEnabled="False">
-						<DockPanel LastChildFill="True">
-							<StackPanel Orientation="Horizontal"
-							            DockPanel.Dock="Bottom"
-							            HorizontalAlignment="Right">
-								<Button Content="Add Parameter File"
-								        Command="{Binding AppSettings.CASSSettings.AddCASSParameterFileCommand}"
-								        Width="Auto"
-								        Margin="5" />
-							</StackPanel>
-							<ListBox ItemsSource="{Binding AppSettings.CASSSettings.CASSParameterFiles}"
-							         ItemTemplate="{StaticResource CASSTemplateTemplate}"
-							         Grid.IsSharedSizeScope="True"
-							         Height="Auto"
-							         Padding="5" />
-						</DockPanel>
-					</GroupBox>
-				</DockPanel>
-			</TabItem>
-			<TabItem Header="REFMS"
-			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
-				<DockPanel LastChildFill="True">
-					<StackPanel Orientation="Vertical">
-						<CheckBox Content="SCALEI (check indicates yes)"
-						          Margin="5"
-						          IsChecked="{Binding AppSettings.REFMSSettings.ScaleI}" />
-						<StackPanel Orientation="Vertical"
-						            Margin="5 0">
-							<TextBlock Text="Default minimum range (ft)" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMinimumRange}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-						</StackPanel>
-						<StackPanel Orientation="Vertical"
-						            Margin="5">
-							<TextBlock Text="Default maximum range (ft)" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMaximumRange}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-						</StackPanel>
-						<StackPanel Orientation="Vertical"
-						            Margin="5 0">
-							<TextBlock Text="Default number of range points" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultNumberOfRangePoints}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-						</StackPanel>
-						<StackPanel Orientation="Vertical"
-						            Margin="5 20 5 5">
-							<TextBlock Text="Minimum depth (ft)" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.MinimumDepth}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-						</StackPanel>
-						<StackPanel Orientation="Vertical"
-						            Margin="5 0">
-							<TextBlock Text="Number of depth points" />
-							<TextBox Text="{Binding AppSettings.REFMSSettings.NumberOfDepthPoints}">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-						</StackPanel>
-						<Controls:FileOrDirectorySetting Caption="REFMS executable"
-						                                 IsDirectoryBrowser="False"
-						                                 Margin="5 20 5 10"
-						                                 FileName="{Binding AppSettings.REFMSSettings.REFMSExecutablePath}" />
-					</StackPanel>
-				</DockPanel>
 			</TabItem>
 		</TabControl>
 	</DockPanel>

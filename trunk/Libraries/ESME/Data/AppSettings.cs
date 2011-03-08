@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
+using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment.NAVO;
 using HRC.Utility;
@@ -163,10 +165,42 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs UseOAMLDataSourcesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.UseOAMLDataSources);
-        bool _useOAMLDataSources;
+        bool _useOAMLDataSources = true;
 
         #endregion
 
+        #region public bool IsNavyVersion { get; set; }
+
+        public bool IsNavyVersion
+        {
+            get { return _isNavyVersion; }
+            set
+            {
+                if (_isNavyVersion == value) return;
+                _isNavyVersion = value;
+                NotifyPropertyChanged(IsNavyVersionChangedEventArgs);
+                NotifyPropertyChanged(NavyOptionsVisibilityChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsNavyVersionChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.IsNavyVersion);
+        bool _isNavyVersion = true;
+
+        #region public Visibility NavyOptionsVisibility { get; set; }
+
+        [XmlElement]
+        public Visibility NavyOptionsVisibility
+        {
+            get { return _isNavyVersion ? Visibility.Visible : Visibility.Collapsed; }
+        }
+
+        [XmlIgnore]
+        static readonly PropertyChangedEventArgs NavyOptionsVisibilityChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.NavyOptionsVisibility);
+
+        #endregion
+
+        #endregion
+        
         #region public bool UseESMEDataSources { get; set; }
 
         public bool UseESMEDataSources
@@ -219,6 +253,42 @@ namespace ESME.Data
 
         static readonly PropertyChangedEventArgs REFMSSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.REFMSSettings);
         REFMSSettings _refmsSettings;
+
+        #endregion
+
+        #region public BellhopSettings BellhopSettings { get; set; }
+
+        public BellhopSettings BellhopSettings
+        {
+            get { return _bellhopSettings ?? (_bellhopSettings = new BellhopSettings()); }
+            set
+            {
+                if (_bellhopSettings == value) return;
+                _bellhopSettings = value;
+                NotifyPropertyChanged(BellhopSettingsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BellhopSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.BellhopSettings);
+        BellhopSettings _bellhopSettings;
+
+        #endregion
+
+        #region public RamSettings RamSettings { get; set; }
+
+        public RamSettings RamSettings
+        {
+            get { return _ramSettings ?? (_ramSettings = new RamSettings()); }
+            set
+            {
+                if (_ramSettings == value) return;
+                _ramSettings = value;
+                NotifyPropertyChanged(RamSettingsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RamSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.RamSettings);
+        RamSettings _ramSettings;
 
         #endregion
 
@@ -713,6 +783,62 @@ namespace ESME.Data
 
         #endregion
 
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+
+        #endregion
+    }
+
+    public class BellhopSettings : INotifyPropertyChanged
+    {
+        #region public float RangeCellSize { get; set; }
+
+        public float RangeCellSize
+        {
+            get { return _rangeCellSize; }
+            set
+            {
+                if (_rangeCellSize == value) return;
+                _rangeCellSize = value;
+                NotifyPropertyChanged(RangeCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.RangeCellSize);
+        float _rangeCellSize;
+
+        #endregion
+
+        #region public float DepthCellSize { get; set; }
+
+        public float DepthCellSize
+        {
+            get { return _depthCellSize; }
+            set
+            {
+                if (_depthCellSize == value) return;
+                _depthCellSize = value;
+                NotifyPropertyChanged(DepthCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.DepthCellSize);
+        float _depthCellSize;
+
+        #endregion
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+
+        #endregion
+    }
+
+    public class RamSettings : INotifyPropertyChanged
+    {
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;
