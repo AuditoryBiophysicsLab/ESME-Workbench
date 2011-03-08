@@ -19,7 +19,6 @@ namespace ESME.Data
 
         static string _appSettingsDirectory;
 
-
         public static string ApplicationName
         {
             get { return _appName; }
@@ -34,9 +33,7 @@ namespace ESME.Data
 
         static string _appName;
 
-
         public static string AppSettingsFile { get; private set; }
-
 
         public AppSettings()
         {
@@ -229,7 +226,7 @@ namespace ESME.Data
 
         public ScenarioSimulatorSettings ScenarioSimulatorSettings
         {
-            get { return _scenarioSimulatorSettings; }
+            get { return _scenarioSimulatorSettings ?? (_scenarioSimulatorSettings = new ScenarioSimulatorSettings()); }
             set
             {
                 if (_scenarioSimulatorSettings == value) return;
@@ -249,7 +246,7 @@ namespace ESME.Data
 
         public List<string> ExperimentFiles
         {
-            get { return _experimentFiles; }
+            get { return _experimentFiles ?? (_experimentFiles = new List<string>()); }
             set
             {
                 if (_experimentFiles == value) return;

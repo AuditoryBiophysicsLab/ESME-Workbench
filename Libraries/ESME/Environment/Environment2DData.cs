@@ -12,6 +12,7 @@ namespace ESME.Environment
     public abstract class Environment2DData<TCoordinate> : GenericGeoField<TCoordinate>
         where TCoordinate : EarthCoordinate
     {
+        protected Environment2DData(TCoordinate[,] data) : base(data) { }
         protected Environment2DData(IEnumerable<TCoordinate> data) : base(data) { }
 
         public void Save(string filename)
@@ -109,6 +110,10 @@ namespace ESME.Environment
 
         #region Public constructors
 
+        public Environment2DData(EarthCoordinate<float>[,] data) : base(data)
+        {
+            
+        }
         public Environment2DData(IEnumerable<EarthCoordinate<float>> data)
             : base(data)
         {
@@ -334,16 +339,21 @@ namespace ESME.Environment
                 stream.ReadBytes(paddingWidth);
                 //var depths = new float[height, width];
                 var depths = new List<EarthCoordinate<float>>();
+                var fieldData = new EarthCoordinate<float>[width,height];
                 for (var lat = 0; lat < height; lat++)
                     for (var lon = 0; lon < width; lon++)
                     {
                         var curSample = stream.ReadSingle();
-                        depths.Add(new EarthCoordinate<float>(south + (gridSpacing * lat), west + (gridSpacing * lon), curSample == 1e16f ? float.NaN : curSample * scaleFactor));
+                        var pt = new EarthCoordinate<float>(south + (gridSpacing * lat), west + (gridSpacing * lon), curSample == 1e16f ? float.NaN : curSample * scaleFactor);
+                        //depths.Add(pt);
+                        fieldData[lon, lat] = pt;
+
                         //if ((curSample > 999) || (curSample < 1)) 
                         //    System.Diagnostics.Debugger.Break();
                         //depths[lat, lon] = curSample == 1e16f ? float.NaN : curSample * scaleFactor;
                     }
-                return new Environment2DData(depths);
+                return new Environment2DData(fieldData);
+                //return new Environment2DData(depths);
                 //return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
             }
         }
