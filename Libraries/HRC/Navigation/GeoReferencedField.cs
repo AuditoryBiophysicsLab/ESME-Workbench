@@ -73,7 +73,16 @@ namespace HRC.Navigation
             }
         }
 
-        protected GenericGeoField(TEarthCoordinate[,] data) : this((IEnumerable<TEarthCoordinate>)data.GetEnumerator()) { }
+        protected GenericGeoField(TEarthCoordinate[,] data)
+        {
+            Latitudes = new List<double>();
+            Longitudes = new List<double>();
+            for (var lon = 0; lon < data.GetLength(0); lon++)
+                Longitudes.Add(data[lon, 0].Longitude);
+            for (var lat = 0; lat < data.GetLength(1); lat++)
+                Latitudes.Add(data[0, lat].Latitude);
+            FieldData = data;
+        }
 
         /// <summary>
         /// Array of EarthCoordinate-derived field values
