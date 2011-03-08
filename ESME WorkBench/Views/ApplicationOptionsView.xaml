@@ -62,28 +62,37 @@
 			        Command="{Binding OkCommand}" />
 		</DockPanel>
 		<TabControl>
-			<TabItem Header="Scenario"
+			<TabItem Header="NAEMO"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
-				<StackPanel Orientation="Vertical"
+                <StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-					<Controls:FileOrDirectorySetting Caption="Scenario Editor executable file"
+                    <Controls:FileOrDirectorySetting Caption="Scenario Editor executable file"
 					                                 Margin="5"
 					                                 DialogTitle="Choose the Scenario Editor executable file"
 					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
 					                                 IsDirectoryBrowser="False"
 					                                 FileName="{Binding AppSettings.ScenarioEditorExecutablePath}" />
-					<Controls:FileOrDirectorySetting Caption="Scenario Simulator executable file"
+                    
+                    <Controls:FileOrDirectorySetting Caption="Scenario data directory"
+					                                 Margin="5 0"
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.ScenarioDataDirectory}" />
+
+                    <Controls:FileOrDirectorySetting Caption="Report Generator executable file"                                                     
                                                      Margin="5 0"
+					                                 IsDirectoryBrowser="False"
+					                                 DialogTitle="Choose the Report Generator executable file"
+					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
+					                                 FileName="{Binding AppSettings.ReportGeneratorExecutablePath}" />
+
+                    <Controls:FileOrDirectorySetting Caption="Scenario Simulator executable file"                                                     
+                                                     Margin="5 5 5 0"
 					                                 IsDirectoryBrowser="False"
 					                                 DialogTitle="Choose the Scenario Simulator executable file"
 					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
 					                                 FileName="{Binding AppSettings.ScenarioSimulatorSettings.ExecutablePath}" />
-                    <Controls:FileOrDirectorySetting Caption="Scenario data directory"
-					                                 Margin="5 5 5 0"
-					                                 IsDirectoryBrowser="True"
-					                                 FileName="{Binding AppSettings.ScenarioDataDirectory}" />
                     <GroupBox Header="Scenario Simulator Options"
                               Margin="5"
                               Padding="5">
@@ -104,7 +113,7 @@
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>
-			</TabItem>
+            </TabItem>
 			<TabItem Header="Environment"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
