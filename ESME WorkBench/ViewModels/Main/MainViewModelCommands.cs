@@ -112,22 +112,14 @@ namespace ESMEWorkBench.ViewModels.Main
                         var isRandomized = Globals.AppSettings.ScenarioSimulatorSettings.IsRandomized;
                         var commandArgs = string.Format(isRandomized ? "-b -n {0} -s \"{1}\"" : "-b -r -n {0} -s \"{1}\"", numIterations, _experiment.NemoFile.FileName);
 
-                        var process = new Process
+                        new Process
                                       {
                                           StartInfo = 
                                                       {
                                                           FileName = Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath,
-                                                          CreateNoWindow = true,
-                                                          UseShellExecute = false,
-                                                          RedirectStandardInput = false,
-                                                          RedirectStandardOutput = false,
-                                                          RedirectStandardError = true,
                                                           Arguments = commandArgs,
                                                       },
-                                      };
-                        process.Start();
-                        process.PriorityClass = ProcessPriorityClass.BelowNormal;
-                      
+                                      }.Start();
                     }));
             }
         }
