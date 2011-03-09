@@ -807,7 +807,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.RangeCellSize);
-        float _rangeCellSize;
+        float _rangeCellSize = 25;
 
         #endregion
 
@@ -825,7 +825,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.DepthCellSize);
-        float _depthCellSize;
+        float _depthCellSize = 5;
 
         #endregion
 
