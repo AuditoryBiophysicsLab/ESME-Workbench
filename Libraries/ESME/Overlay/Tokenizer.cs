@@ -32,6 +32,7 @@ namespace ESME.Overlay
                             _tokens.Enqueue(new Token
                                                 {
                                                     Value = f,
+                                                    IsNumeric = true,
                                                     LineNumber = _lineReader.LineNumber,
                                                     LineReader = _lineReader
                                                 });
@@ -39,6 +40,7 @@ namespace ESME.Overlay
                             _tokens.Enqueue(new Token
                                                 {
                                                     Value = token,
+                                                    IsNumeric = false,
                                                     LineNumber = _lineReader.LineNumber,
                                                     LineReader = _lineReader
                                                 });
@@ -75,6 +77,7 @@ namespace ESME.Overlay
     internal class Token
     {
         public object Value { get; set; }
+        public bool IsNumeric { get; set; }
         public int LineNumber { get; set; }
         public LineReader LineReader { get; set; }
     }
