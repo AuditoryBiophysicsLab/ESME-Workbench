@@ -173,7 +173,7 @@ namespace ESME.Overlay
 
             if (lastPoint != null) resultPoints.Add(lastPoint);
 
-            while ((tokenizer.Peek() != null) && (tokenizer.Peek().Value is float))
+            while ((tokenizer.Peek() != null) )//&& (tokenizer.Peek().Value is float))
             {
                 EarthCoordinate curPoint;
                 switch (locationMode)
