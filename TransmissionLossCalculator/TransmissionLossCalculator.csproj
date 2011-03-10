@@ -57,6 +57,9 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>orbz_water.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cinch.WPF">
       <HintPath>..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
@@ -161,6 +164,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\NotificationAreaIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\orbz_water.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="orbz_water.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
