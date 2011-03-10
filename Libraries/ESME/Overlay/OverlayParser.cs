@@ -65,6 +65,9 @@ namespace ESME.Overlay
                                 if ((red == null) || (green == null) || (blue == null)) throw new ApplicationException("OverlayParser: Invalid color definition at line " + curToken.LineNumber);
                                 curColor = Color.FromArgb(255, (byte) red, (byte) green, (byte) blue);
                                 break;
+#if false
+                            // DA: Removed all support for color because NUWC decided to throw colors in new and interesting places in overlay files
+                            //     Color keywords are completely stripped out by the tokenizer
                             case OverlayKeywords.Red:
                                 curColor = Colors.Red;
                                 break;
@@ -89,6 +92,7 @@ namespace ESME.Overlay
                             case OverlayKeywords.Cyan:
                                 curColor = Colors.Cyan;
                                 break;
+#endif
                             case OverlayKeywords.Origin:
                                 tokenizer.DiscardToEndOfLine();
                                 break;
@@ -173,7 +177,7 @@ namespace ESME.Overlay
 
             if (lastPoint != null) resultPoints.Add(lastPoint);
 
-            while ((tokenizer.Peek() != null) )//&& (tokenizer.Peek().Value is float))
+            while ((tokenizer.Peek() != null) && (tokenizer.Peek().Value is float))
             {
                 EarthCoordinate curPoint;
                 switch (locationMode)
