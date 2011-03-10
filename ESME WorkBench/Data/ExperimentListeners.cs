@@ -221,7 +221,7 @@ namespace ESMEWorkBench.Data
             if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0)) return;
             var soundspeedFiles = Directory.GetFiles(EnvironmentRoot, "*-soundspeed.xml");
             var timePeriods = soundspeedFiles.Select(curFile => Path.GetFileName(curFile).Split('-')[0]).ToList();
-            CASSFiles.WriteCASSInputFiles(Globals.AppSettings, timePeriods, AnalysisPoints, NemoFile.Scenario, "bathymetry.txt");
+            CASSFiles.WriteCASSInputFiles(Globals.AppSettings, timePeriods, AnalysisPoints, NemoFile, "bathymetry.txt");
         }
     }
 }

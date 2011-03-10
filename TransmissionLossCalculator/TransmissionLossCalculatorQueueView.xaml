@@ -6,9 +6,12 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        xmlns:local="clr-namespace:TransmissionLossCalculator"
+        xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         mef:ViewModelLocator.ViewModel="TransmissionLossCalculatorQueueViewModel"
         Title="ESME Transmission Loss Calculator - Work Queue" 
+        Visibility="Hidden"
         Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
         Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
         Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
@@ -106,5 +109,18 @@
     <DockPanel LastChildFill="True">
         <TreeView ItemsSource="{Binding BellhopFieldCalculatorViewModels}"
                   ItemTemplate="{StaticResource BellhopQueueTreeViewTemplate}"/>
+        <local:NotificationAreaIcon Text="NotificationAreaApplication1"
+		                        Icon="Resources\NotificationAreaIcon.ico"
+		                        MouseDoubleClick="OnNotificationAreaIconDoubleClick">
+            <local:NotificationAreaIcon.MenuItems>
+                <forms:MenuItem Text="Open"
+				                Click="OnMenuItemOpenClick"
+				                DefaultItem="True" />
+                <forms:MenuItem Text="-" />
+                <forms:MenuItem Text="Exit"
+				                Click="OnMenuItemExitClick" />
+            </local:NotificationAreaIcon.MenuItems>
+        </local:NotificationAreaIcon>
+
     </DockPanel>
 </Window>

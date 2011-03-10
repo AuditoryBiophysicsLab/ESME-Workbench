@@ -73,14 +73,16 @@ namespace ESME.TransmissionLoss.CASS
 #endif
         }
 
-        public static void WriteCASSInputFiles(AppSettings appSettings, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoScenario nemoScenario, string cassBathymetryFileName)
+        public static void WriteCASSInputFiles(AppSettings appSettings, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName)
         {
+            
+            var nemoScenario = nemoFile.Scenario;
             var simAreaFile = SimAreaCSV.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"));
             var simAreaData = simAreaFile[nemoScenario.SimAreaName];
             foreach (var timePeriod in timePeriods)
             {
-                var curSimAreaDataPath = Path.Combine(appSettings.ScenarioDataDirectory, nemoScenario.SimAreaName);
-                var curPropagationPath = Path.Combine(curSimAreaDataPath, "Propagation");
+                var curScenarioDataPath = Path.GetDirectoryName(nemoFile.FileName);
+                var curPropagationPath = Path.Combine(curScenarioDataPath, "Propagation");
                 var curTimePeriodPath = Path.Combine(curPropagationPath, timePeriod);
                 if (!Directory.Exists(curTimePeriodPath)) Directory.CreateDirectory(curTimePeriodPath);
                 foreach (var platform in nemoScenario.Platforms)
