@@ -37,13 +37,29 @@ namespace ESME.Overlay
                                                     LineReader = _lineReader
                                                 });
                         else
-                            _tokens.Enqueue(new Token
-                                                {
-                                                    Value = token,
-                                                    IsNumeric = false,
-                                                    LineNumber = _lineReader.LineNumber,
-                                                    LineReader = _lineReader
-                                                });
+                        {
+                            switch (token.ToLower())
+                            {
+                                case OverlayKeywords.Red:
+                                case OverlayKeywords.Green:
+                                case OverlayKeywords.Purple:
+                                case OverlayKeywords.Yellow:
+                                case OverlayKeywords.White:
+                                case OverlayKeywords.Orange:
+                                case OverlayKeywords.Blue:
+                                case OverlayKeywords.Cyan:
+                                    break;
+                                default:
+                                    _tokens.Enqueue(new Token
+                                    {
+                                        Value = token,
+                                        IsNumeric = false,
+                                        LineNumber = _lineReader.LineNumber,
+                                        LineReader = _lineReader
+                                    });
+                                    break;
+                            }
+                        }
                     }
                     curLine = _lineReader.NextLine();
                 }
