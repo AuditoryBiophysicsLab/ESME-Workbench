@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Media;
 using System.Linq;
+using System.Windows.Media;
 using HRC.Navigation;
 
 namespace ESME.Overlay
 {
     public partial class OverlayFile
     {
-        private const float YardsToMeters = 0.9144f;
+        const float YardsToMeters = 0.9144f;
 
         public static OverlayShape[] Parse(string overlayFileName)
         {
-            Color curColor = Colors.Red;
+            var curColor = Colors.Red;
             var shapes = new List<OverlayShape>();
-            OverlayLocationMode locationMode = OverlayLocationMode.LatLong;
-            OverlayParseState curState = OverlayParseState.Initialization;
-            OverlayShape curShape;
+            var locationMode = OverlayLocationMode.LatLong;
+            var curState = OverlayParseState.Initialization;
             EarthCoordinate[] curPoints;
             EarthCoordinate lastPoint = null;
-            LineStyle curStyle = LineStyle.Solid;
+            var curStyle = LineStyle.Solid;
             var reader = new LineReader();
             var tokenizer = new Tokenizer();
 
@@ -34,7 +33,7 @@ namespace ESME.Overlay
                 switch (curState)
                 {
                     case OverlayParseState.Initialization:
-                        OverlayPositionMode positionMode = OverlayPositionMode.Absolute;
+                        var positionMode = OverlayPositionMode.Absolute;
                         switch (((string) curToken.Value).ToLower())
                         {
                             case OverlayKeywords.Move:
@@ -47,8 +46,7 @@ namespace ESME.Overlay
                                 break;
                             case OverlayKeywords.Relative:
                                 positionMode = OverlayPositionMode.Relative;
-                                if (positionMode == OverlayPositionMode.Relative)
-                                    throw new ApplicationException("Unimplemented position mode: Relative");
+                                if (positionMode == OverlayPositionMode.Relative) throw new ApplicationException("Unimplemented position mode: Relative");
                                 break;
                             case OverlayKeywords.DMS:
                                 locationMode = OverlayLocationMode.DMS;
@@ -60,15 +58,12 @@ namespace ESME.Overlay
                                 locationMode = OverlayLocationMode.XYPair;
                                 break;
                             case OverlayKeywords.Color:
-                                if (tokenizer.Count < 3)
-                                    throw new ApplicationException(
-                                        "OverlayParser.Parse: Not all color information are found\n");
+                                if (tokenizer.Count < 3) throw new ApplicationException("OverlayParser.Parse: Not all color information are found\n");
                                 var red = tokenizer.NextToken().Value as float?;
                                 var green = tokenizer.NextToken().Value as float?;
                                 var blue = tokenizer.NextToken().Value as float?;
-                                if ((red == null) || (green == null) || (blue == null))
-                                    throw new ApplicationException("fill me in");
-                                curColor = Color.FromArgb(255, (byte)red, (byte)green, (byte)blue);
+                                if ((red == null) || (green == null) || (blue == null)) throw new ApplicationException("OverlayParser: Invalid color definition at line " + curToken.LineNumber);
+                                curColor = Color.FromArgb(255, (byte) red, (byte) green, (byte) blue);
                                 break;
                             case OverlayKeywords.Red:
                                 curColor = Colors.Red;
@@ -113,16 +108,48 @@ namespace ESME.Overlay
                                 tokenizer.DiscardNext();
                                 break;
                             default:
-                                throw new FormatException("OverlayParser: Unknown token at line " + curToken.LineNumber +
-                                                          ": " + curToken.Value);
+                                throw new FormatException("OverlayParser: Unknown token at line " + curToken.LineNumber + ": " + curToken.Value);
                         } //Initialization Switch(curToken)
                         break; //break for the Initialization Case
 
                     case OverlayParseState.ShapeBuild:
                         float curSize;
                         int curLinenumber;
+                        OverlayShape curShape;
                         switch (curToken.Value as string)
                         {
+                            case OverlayKeywords.Color:
+                                if (tokenizer.Count < 3) throw new ApplicationException("OverlayParser.Parse: Not all color information are found\n");
+                                var red = tokenizer.NextToken().Value as float?;
+                                var green = tokenizer.NextToken().Value as float?;
+                                var blue = tokenizer.NextToken().Value as float?;
+                                if ((red == null) || (green == null) || (blue == null)) throw new ApplicationException("OverlayParser: Invalid color definition at line " + curToken.LineNumber);
+                                curColor = Color.FromArgb(255, (byte)red, (byte)green, (byte)blue);
+                                break;
+                            case OverlayKeywords.Red:
+                                curColor = Colors.Red;
+                                break;
+                            case OverlayKeywords.Green:
+                                curColor = Colors.Green;
+                                break;
+                            case OverlayKeywords.Purple:
+                                curColor = Colors.Purple;
+                                break;
+                            case OverlayKeywords.Yellow:
+                                curColor = Colors.Yellow;
+                                break;
+                            case OverlayKeywords.White:
+                                curColor = Colors.White;
+                                break;
+                            case OverlayKeywords.Orange:
+                                curColor = Colors.Orange;
+                                break;
+                            case OverlayKeywords.Blue:
+                                curColor = Colors.Blue;
+                                break;
+                            case OverlayKeywords.Cyan:
+                                curColor = Colors.Cyan;
+                                break;
                             case OverlayKeywords.Move:
                                 //Submit Shape and Points
                                 //continue in ShapeBuild
@@ -131,20 +158,18 @@ namespace ESME.Overlay
                                 break;
                             case OverlayKeywords.Lines:
                                 curLinenumber = curToken.LineNumber;
-                                if (curLinenumber == tokenizer.Peek().LineNumber)
-                                    curSize = (float) ((float?) tokenizer.NextToken().Value);
-                                else
-                                    curSize = 2f;
-                                curShape = new OverlayLineSegments(GetPoints(tokenizer, locationMode, lastPoint),
-                                                                   curColor, curSize, curStyle) {LineStyle = curStyle};
+                                if (curLinenumber == tokenizer.Peek().LineNumber) curSize = (float) ((float?) tokenizer.NextToken().Value);
+                                else curSize = 2f;
+                                curShape = new OverlayLineSegments(GetPoints(tokenizer, locationMode, lastPoint), curColor, curSize, curStyle)
+                                           {
+                                               LineStyle = curStyle
+                                           };
                                 shapes.Add(curShape);
                                 break;
                             case OverlayKeywords.Point:
                                 curLinenumber = curToken.LineNumber;
-                                if (curLinenumber == tokenizer.Peek().LineNumber)
-                                    curSize = (float) ((float?) tokenizer.NextToken().Value);
-                                else
-                                    curSize = 2;
+                                if (curLinenumber == tokenizer.Peek().LineNumber) curSize = (float) ((float?) tokenizer.NextToken().Value);
+                                else curSize = 2;
                                 curShape = new OverlayPoint(lastPoint, curColor, curSize);
                                 shapes.Add(curShape);
                                 break;
@@ -152,8 +177,10 @@ namespace ESME.Overlay
                                 //get radius
                                 //its the previous point
                                 curSize = (float) ((float?) tokenizer.NextToken().Value);
-                                curShape = new OverlayCircle(lastPoint, curColor, curStyle, curSize*YardsToMeters)
-                                               {LineStyle = curStyle};
+                                curShape = new OverlayCircle(lastPoint, curColor, curStyle, curSize * YardsToMeters)
+                                           {
+                                               LineStyle = curStyle
+                                           };
                                 shapes.Add(curShape);
                                 //SubmitShape(PositionMode);
                                 curState = OverlayParseState.Initialization;
@@ -162,8 +189,7 @@ namespace ESME.Overlay
                                 shapes.Add(new OverlayLabel(lastPoint, curColor, tokenizer.NextToken().Value as string));
                                 break;
                             default:
-                                throw new FormatException("OverlayParser: Unknown token at line " + curToken.LineNumber +
-                                                          ": " + curToken.Value);
+                                throw new FormatException("OverlayParser: Unknown token at line " + curToken.LineNumber + ": " + curToken.Value);
                         } //Switch for shape Build
                         break;
                     default:
@@ -173,13 +199,11 @@ namespace ESME.Overlay
             return shapes.ToArray();
         }
 
-        private static EarthCoordinate[] GetPoints(Tokenizer tokenizer, OverlayLocationMode locationMode,
-                                                   EarthCoordinate lastPoint)
+        static EarthCoordinate[] GetPoints(Tokenizer tokenizer, OverlayLocationMode locationMode, EarthCoordinate lastPoint)
         {
             var resultPoints = new List<EarthCoordinate>();
 
-            if (lastPoint != null)
-                resultPoints.Add(lastPoint);
+            if (lastPoint != null) resultPoints.Add(lastPoint);
 
             while ((tokenizer.Peek() != null) && (tokenizer.Peek().Value is float))
             {
@@ -187,75 +211,56 @@ namespace ESME.Overlay
                 switch (locationMode)
                 {
                     case OverlayLocationMode.XYPair:
-                        if (tokenizer.Count < 1)
-                            throw new ApplicationException(
-                                "OverlayParser.getInitialPoint: missing information for coordinates\n");
+                        if (tokenizer.Count < 1) throw new ApplicationException("OverlayParser.getInitialPoint: missing information for coordinates\n");
 
                         curPoint = GetValueInDegrees(tokenizer.NextToken(), tokenizer.NextToken());
                         resultPoints.Add(curPoint);
                         break;
                     case OverlayLocationMode.LatLong:
-                        if (tokenizer.Count < 1)
-                            throw new ApplicationException(
-                                "OverlayParser.getInitialPoint: missing information for coordinates\n");
+                        if (tokenizer.Count < 1) throw new ApplicationException("OverlayParser.getInitialPoint: missing information for coordinates\n");
 
                         curPoint = GetPoint(tokenizer.NextToken(), tokenizer.NextToken());
                         resultPoints.Add(curPoint);
                         break;
                     case OverlayLocationMode.DMS:
-                        if (tokenizer.Count < 2)
-                            throw new ApplicationException(
-                                "OverlayParser.getInitialPoint: missing information for coordinates\n");
+                        if (tokenizer.Count < 2) throw new ApplicationException("OverlayParser.getInitialPoint: missing information for coordinates\n");
 
                         curPoint = new EarthCoordinate(DecodeDMS(tokenizer), DecodeDMS(tokenizer));
                         resultPoints.Add(curPoint);
                         break;
                     default:
-                        throw new ApplicationException("OverlayParser.getPoints: Location Mode " + locationMode +
-                                                       " is unknown\n");
+                        throw new ApplicationException("OverlayParser.getPoints: Location Mode " + locationMode + " is unknown\n");
                 }
             }
             return resultPoints.ToArray();
         }
 
         /// <summary>
-        /// Creates an absolute point from a relative one (need info from NUWC)
+        ///   Creates an absolute point from a relative one (need info from NUWC)
         /// </summary>
-        /// <param name="x">X Offset, in YARDS, from the some location, need info from NUWC</param>
-        /// <param name="y">Y Offset, in YARDS, from the some location, need info from NUWC</param>
+        /// <param name = "x">X Offset, in YARDS, from the some location, need info from NUWC</param>
+        /// <param name = "y">Y Offset, in YARDS, from the some location, need info from NUWC</param>
         /// <returns>PointF with X as longitude, and Y as latitude</returns>
-        private static EarthCoordinate GetValueInDegrees(Token x, Token y)
+        static EarthCoordinate GetValueInDegrees(Token x, Token y)
         {
             //Dave will tell me to do this with EarthCoordinate Class
-            if ((x.Value == null) || (y.Value == null))
-                throw new ApplicationException(
-                    "OverlayParser.GetValueInDegrees: Values for Latitude or Longitude is not present in Overlay File " +
-                    x.LineReader.FileName + " at line " + x.LineNumber);
+            if ((x.Value == null) || (y.Value == null)) throw new ApplicationException("OverlayParser.GetValueInDegrees: Values for Latitude or Longitude is not present in Overlay File " + x.LineReader.FileName + " at line " + x.LineNumber);
             return new EarthCoordinate(0, 0);
         }
 
-        private static EarthCoordinate GetPoint(Token x, Token y)
+        static EarthCoordinate GetPoint(Token x, Token y)
         {
-            if ((x.Value == null) || (y.Value == null))
-                throw new ApplicationException(
-                    "OverlayParser.GetPoint: Values for Latitude or Longitude is not present in Overlay File " +
-                    x.LineReader.FileName + " at line " + x.LineNumber);
+            if ((x.Value == null) || (y.Value == null)) throw new ApplicationException("OverlayParser.GetPoint: Values for Latitude or Longitude is not present in Overlay File " + x.LineReader.FileName + " at line " + x.LineNumber);
             return new EarthCoordinate((double) ((float?) x.Value), (double) ((float?) y.Value));
         }
 
-        private static float DecodeDMS(Tokenizer tokenizer)
+        static float DecodeDMS(Tokenizer tokenizer)
         {
-            Token degrees = tokenizer.NextToken();
-            Token minutes = tokenizer.NextToken();
-            Token seconds = tokenizer.NextToken();
-            if ((degrees.Value as float? == null) || (minutes.Value as float? == null) ||
-                (seconds.Value as float? == null))
-                throw new ApplicationException(
-                    "OverlayParser-DMSCoordinate: Values for Latitude or Longitude is not present in overlay file at line " +
-                    degrees.LineNumber); //Might change
-            return
-                (float)
-                ((degrees.Value as float?) + ((minutes.Value as float?)/60f) + ((seconds.Value as float?)/3600f));
+            var degrees = tokenizer.NextToken();
+            var minutes = tokenizer.NextToken();
+            var seconds = tokenizer.NextToken();
+            if ((degrees.Value as float? == null) || (minutes.Value as float? == null) || (seconds.Value as float? == null)) throw new ApplicationException("OverlayParser-DMSCoordinate: Values for Latitude or Longitude is not present in overlay file at line " + degrees.LineNumber); //Might change
+            return (float) ((degrees.Value as float?) + ((minutes.Value as float?) / 60f) + ((seconds.Value as float?) / 3600f));
         }
     }
 
