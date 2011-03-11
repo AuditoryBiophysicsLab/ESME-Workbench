@@ -765,9 +765,9 @@ namespace ESME.Data
 
         #endregion
 
-        #region public double Iterations { get; set; }
+        #region public int Iterations { get; set; }
 
-        public double Iterations
+        public int Iterations
         {
             get { return _iterations; }
             set
@@ -779,7 +779,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs IterationsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.Iterations);
-        double _iterations;
+        int _iterations;
 
         #endregion
 
