@@ -108,18 +108,14 @@ namespace ESMEWorkBench.ViewModels.Main
                     delegate { return ((Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath != null) && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath) && _experiment.NemoFile !=null); },
                     delegate
                     {
-                        var numIterations = Globals.AppSettings.ScenarioSimulatorSettings.Iterations;
-                        var isRandomized = Globals.AppSettings.ScenarioSimulatorSettings.IsRandomized;
-                        var commandArgs = string.Format(isRandomized ? "-b -n {0} -s \"{1}\"" : "-b -r -n {0} -s \"{1}\"", numIterations, _experiment.NemoFile.FileName);
+                        var vm = new ScenarioSimulatorOptionsViewModel
+                                 {
+                                     IsRandomized = Globals.AppSettings.ScenarioSimulatorSettings.IsRandomized,
+                                     NemoFile = _experiment.NemoFile,
+                                     Iterations =Globals.AppSettings.ScenarioSimulatorSettings.Iterations,
 
-                        new Process
-                                      {
-                                          StartInfo = 
-                                                      {
-                                                          FileName = Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath,
-                                                          Arguments = commandArgs,
-                                                      },
-                                      }.Start();
+                                 };
+                        var result = _visualizerService.ShowDialog("ScenarioSimulatorOptionsView", vm);
                     }));
             }
         }

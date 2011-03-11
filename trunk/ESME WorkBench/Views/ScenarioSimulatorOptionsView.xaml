@@ -1,0 +1,40 @@
+﻿<Window x:Class="ESMEWorkBench.Views.ScenarioSimulatorOptionsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+        Title="Scenario Simulator Options"
+        Loaded="OnLoaded"
+        SizeToContent="WidthAndHeight">
+    <DockPanel LastChildFill="True">
+        <DockPanel LastChildFill="False"
+		           Margin="10"
+		           DockPanel.Dock="Bottom">
+            <Button Width="75"
+			        Margin="10 0 0 0"
+			        IsCancel="True"
+			        Content="Cancel"
+			        DockPanel.Dock="Right" />
+            <Button Width="75"
+			        IsDefault="True"
+			        Content="Run"
+			        DockPanel.Dock="Right"
+			        Command="{Binding RunCommand}" />
+        </DockPanel>
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Number of Monte Carlo Iterations"
+							           Margin="5 0" />
+            <TextBox Text="{Binding Iterations}"
+							         Margin="5 0">
+                <i:Interaction.Behaviors>
+                    <cinch:NumericTextBoxBehaviour />
+                </i:Interaction.Behaviors>
+            </TextBox>
+            <CheckBox IsChecked="{Binding IsRandomized}"
+							          Margin="5 10">
+                Randomize Ship Tracks
+            </CheckBox>
+        </StackPanel>
+    </DockPanel>
+
+</Window>
