@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using Cinch;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
@@ -222,6 +223,24 @@ namespace ESMEWorkBench.Data
             var soundspeedFiles = Directory.GetFiles(EnvironmentRoot, "*-soundspeed.xml");
             var timePeriods = soundspeedFiles.Select(curFile => Path.GetFileName(curFile).Split('-')[0]).ToList();
             CASSFiles.WriteCASSInputFiles(Globals.AppSettings, timePeriods, AnalysisPoints, NemoFile, "bathymetry.txt");
+        }
+
+        [MediatorMessageSink(MediatorMessage.ExportAnalysisPointsToBellhop)]
+        void ExportAnalysisPointsToBellhop(bool dummy)
+        {
+            if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0)) return;
+            var soundspeedFiles = Directory.GetFiles(EnvironmentRoot, "*-soundspeed.xml");
+            var timePeriods = soundspeedFiles.Select(curFile => Path.GetFileName(curFile).Split('-')[0]).ToList();
+            var bellhopFileManager = new TransmissionLossFileManager
+                                     {
+                                         TransmissionLossJobRoot = TransmissionLossJobRoot,
+                                         TransmissionLossFileRoot = TransmissionLossFileRoot,
+                                         TimePeriods = timePeriods,
+                                         AppSettings = Globals.AppSettings,
+                                         NemoFile = NemoFile,
+                                         Bathymetry = Bathymetry,
+                                     };
+            bellhopFileManager.FindNewJobs(AnalysisPoints);
         }
     }
 }

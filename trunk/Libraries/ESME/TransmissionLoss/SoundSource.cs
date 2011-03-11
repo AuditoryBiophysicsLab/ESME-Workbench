@@ -86,6 +86,23 @@ namespace ESME.TransmissionLoss
 
         #endregion
 
+        #region public TransmissionLossAlgorithm TransmissionLossAlgorithm { get; set; }
+
+        public TransmissionLossAlgorithm TransmissionLossAlgorithm
+        {
+            get { return _transmissionLossAlgorithm; }
+            set
+            {
+                if (_transmissionLossAlgorithm == value) return;
+                _transmissionLossAlgorithm = value;
+                NotifyPropertyChanged(TransmissionLossAlgorithmChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TransmissionLossAlgorithmChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.TransmissionLossAlgorithm);
+        TransmissionLossAlgorithm _transmissionLossAlgorithm;
+
+        #endregion
 
         #region IEquatable<SoundSource> methods
 

@@ -186,13 +186,13 @@
                       Directory="ProgramMenuDir"
                       Name="Release Notes"
                       WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]ESME Workbench 2010 Release Notes.pdf"
+                      Target="[INSTALLLOCATION]ESME Workbench 2011 Release Notes.pdf"
                       Advertise="no" />
             <Shortcut Id="UserGuide_Shortcut"
                       Directory="ProgramMenuDir"
                       Name="User Guide"
                       WorkingDirectory="INSTALLLOCATION"
-                      Target="[INSTALLLOCATION]ESME Workbench 2010 User Guide.pdf"
+                      Target="[INSTALLLOCATION]ESME Workbench 2011 User Manual.pdf"
                       Advertise="no" />
             <Shortcut Id="ESME_WorkBench_Desktop_Shortcut"
                       Directory="DesktopFolder"

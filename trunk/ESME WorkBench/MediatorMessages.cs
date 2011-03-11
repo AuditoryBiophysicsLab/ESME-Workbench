@@ -50,6 +50,7 @@ namespace ESMEWorkBench
         public const string TransmissionLossRadialEarthCoordinate = "TransmissionLossRadialEarthCoordinateMessage";
         public const string CancelCurrentTransmissionLossCalculation = "CancelCurrentTransmissionLossCalculationMessage";
         public const string ExportAnalysisPointsToCASS = "ExportAnalysisPointsToCASSMessage";
+        public const string ExportAnalysisPointsToBellhop = "ExportAnalysisPointsToBellhopMessage";
 
         public const string CurrentScaleChanged = "CurrentScaleChangedMessage";
         public const string CurrentExtentChanged = "CurrentExtentChangedMessage";
