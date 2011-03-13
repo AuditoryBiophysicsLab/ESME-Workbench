@@ -58,7 +58,8 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>orbz_water.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cinch.WPF">
@@ -91,14 +92,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="ControlTemplates\progressbar.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ControlTemplates\shared.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="TransmissionLossCalculatorQueueView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -151,10 +144,6 @@
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Libraries\NotifyIconWpf\NotifyIcon.WPF.csproj">
-      <Project>{7AC63864-7638-41C4-969C-D3197EF2BED9}</Project>
-      <Name>NotifyIcon.WPF</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
@@ -167,9 +156,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\orbz_water.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="orbz_water.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

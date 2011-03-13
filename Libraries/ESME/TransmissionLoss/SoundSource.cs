@@ -63,13 +63,11 @@ namespace ESME.TransmissionLoss
         /// </summary>
         public string Name { get; set; }
 
+        #region public bool ShouldBeCalculated { get; set; }
+
         /// <summary>
         ///   True if the user wants this sound source to be calculated, false otherwise.  Default value is true
         /// </summary>
-        //public bool ShouldBeCalculated { get; set; }
-
-        #region public bool ShouldBeCalculated { get; set; }
-
         public bool ShouldBeCalculated
         {
             get { return _shouldBeCalculated; }

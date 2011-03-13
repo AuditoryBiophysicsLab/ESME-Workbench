@@ -60,7 +60,7 @@
                           type="xs:string"
                           maxOccurs="1"
                           minOccurs="0" />
-              <xs:element name="WindSpeed_knots"
+              <xs:element name="WindSpeed"
                           maxOccurs="1"
                           minOccurs="0"
                           default="0">
