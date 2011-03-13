@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ESME.Environment;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.RAM;
@@ -57,6 +58,22 @@ namespace ESME.TransmissionLoss
                     throw new NotImplementedException(string.Format("Creating a TransmissionLossRunFile using an algorithm of {0} is not currently supported", transmissionLossAlgorithm));
             }
         }
+#if false
+        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm transmissionLossAlgorithm, SoundSource soundSource, Environment2DData bathymetry, Environment2DData bottomType, SoundSpeedField soundSpeedField, Environment2DData wind, TransmissionLossSettings transmissionLossSettings)
+        {
+            switch (transmissionLossAlgorithm)
+            {
+                case TransmissionLossAlgorithm.Bellhop:
+                    return BellhopRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
+                case TransmissionLossAlgorithm.RAM:
+                    return RamRunFile.Create(transmissionLossJob, environmentInformation, transmissionLossSettings);
+                case TransmissionLossAlgorithm.CASS:
+                case TransmissionLossAlgorithm.REFMS:
+                default:
+                    throw new NotImplementedException(string.Format("Creating a TransmissionLossRunFile using an algorithm of {0} is not currently supported", transmissionLossAlgorithm));
+            }
+        }
+#endif
 
         public abstract void Save(string path);
 

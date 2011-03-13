@@ -22,6 +22,8 @@ namespace TransmissionLossCalculator
         public static AppEventLog Log { get; private set; }
         public static readonly string Logfile, DumpFile;
         public const string Name = "ESME Transmission Loss Calculator";
+        Mutex _mutex;
+        const string AppGuidString = "{5B8DF70E-D10C-4901-B666-B43499366439}";
 
         static App()
         {
@@ -58,6 +60,21 @@ namespace TransmissionLossCalculator
                 Current.Shutdown();
                 return;
             }
+
+            // This block of code ensures that only one copy of this application will run on the local machine
+            try
+            {
+                _mutex = Mutex.OpenExisting(AppGuidString);
+
+                Current.Shutdown();
+                return;
+            }
+            catch (WaitHandleCannotBeOpenedException)
+            {
+                _mutex = new Mutex(true, AppGuidString);
+            }
+
+            // continue with initialization….
             try
             {
                 //ExperimentData.Test();

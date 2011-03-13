@@ -1,14 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using System.IO;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Schema;
 using System.Xml.Serialization;
-using HRC.Navigation;
 using ESME.Environment;
 using System.ComponentModel;
 
@@ -18,7 +10,12 @@ namespace ESME.Model
     {
         public string LocationName { get; set; }
         public string SoundSpeedFieldName { get; set; }
-        public float WindSpeed_knots { get; set; }
+
+        /// <summary>
+        /// Wind speed, in knots
+        /// </summary>
+        public float WindSpeed { get; set; }
+        
         public SedimentType Sediment { get; set; }
         public SedimentType Basement { get; set; }
         [XmlIgnore]
@@ -26,18 +23,18 @@ namespace ESME.Model
         [XmlIgnore]
         public Environment2DData Bathymetry { get; set; }
 
-        public EnvironmentInformation(string LocationName, string SoundSpeedFieldName, float WindSpeed_knots)
+        public EnvironmentInformation(string locationName, string soundSpeedFieldName, float windSpeed)
             : this()
         {
-            this.LocationName = LocationName;
-            this.SoundSpeedFieldName = SoundSpeedFieldName;
-            this.WindSpeed_knots = WindSpeed_knots;
+            LocationName = locationName;
+            SoundSpeedFieldName = soundSpeedFieldName;
+            WindSpeed = windSpeed;
         }
 
         public EnvironmentInformation()
         {
             LocationName = SoundSpeedFieldName = null;
-            WindSpeed_knots = 0f;
+            WindSpeed = 0f;
             Sediment = Basement = null;
             SoundSpeedField = null;
             Bathymetry = null;
@@ -55,7 +52,6 @@ namespace ESME.Model
         #endregion // IDataErrorInfo Members
 
         #region Validation
-
 
         /// <summary>
         /// Returns true if this object has no validation errors.
@@ -75,7 +71,7 @@ namespace ESME.Model
         static readonly string[] ValidatedProperties = 
         { 
             "LocationName", 
-            "WindSpeed_knots", 
+            "WindSpeed", 
             "Sediment",
         };
 
@@ -91,8 +87,8 @@ namespace ESME.Model
                 case "LocationName":
                     error = ValidateLocationName();
                     break;
-                case "WindSpeed_knots":
-                    error = ValidateWindSpeed_knots();
+                case "WindSpeed":
+                    error = ValidateWindSpeed();
                     break;
                 case "Sediment":
                     error = ValidateSediment();
@@ -109,29 +105,27 @@ namespace ESME.Model
         {
             if (IsStringMissing(LocationName))
                 return Strings.EnvironmentInformation_location_empty;
-            string LocationPath = Path.Combine(Globals.UserLocationsFolder, LocationName + ".eeb");
-            if (!File.Exists(LocationPath))
+            var locationPath = Path.Combine(Globals.UserLocationsFolder, LocationName + ".eeb");
+            if (!File.Exists(locationPath))
                 return Strings.EnvironmentInformation_location_not_found;
             else
             {
-                DataFile df = DataFile.Open(LocationPath);
+                DataFile df = DataFile.Open(locationPath);
                 this.SoundSpeedFieldName = df.Layers["soundspeed"].Name;
             }
             return null;
         }
 
-        string ValidateWindSpeed_knots()
+        string ValidateWindSpeed()
         {
-            if ((WindSpeed_knots < 0) || (WindSpeed_knots > 250))
+            if ((WindSpeed < 0) || (WindSpeed > 250))
                 return Strings.EnvironmentInformation_invalid_wind_speed;
             return null;
         }
 
         string ValidateSediment()
         {
-            if (Sediment == null)
-                return Strings.EnvironmentInformation_sediment_empty;
-            return null;
+            return Sediment == null ? Strings.EnvironmentInformation_sediment_empty : null;
         }
 
         static bool IsStringMissing(string value)
