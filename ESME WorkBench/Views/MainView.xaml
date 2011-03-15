@@ -302,7 +302,14 @@
                                     ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launch the NUWC Scenario Simulator"
 					                Command="{Binding LaunchScenarioSimulatorCommand}" />
-                   
+
+                    <r:RibbonButton Label="Log File Finder"
+                                    LargeImageSource="..\Images\LargeIcons\Button-Help-icon.png"
+                                    SmallImageSource="..\Images\SmallIcons\Button-Help-icon.png"
+                                    ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Choose a scenario log file to view...  "
+					                Command="{Binding ViewScenarioSimulatorLogDirCommand}" />
+
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Reports">
                     <r:RibbonButton Label="Report Generator"

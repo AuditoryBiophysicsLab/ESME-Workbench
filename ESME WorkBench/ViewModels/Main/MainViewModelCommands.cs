@@ -105,14 +105,14 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _launchScenarioSimulator ?? (_launchScenarioSimulator = new SimpleCommand<object, object>(
-                    delegate { return ((Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath != null) && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath) && _experiment.NemoFile !=null); },
+                    delegate { return ((Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath != null) && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath) && _experiment.NemoFile != null && _experiment.Bathymetry != null); },
                     delegate
                     {
                         var vm = new ScenarioSimulatorOptionsViewModel
                                  {
                                      IsRandomized = Globals.AppSettings.ScenarioSimulatorSettings.IsRandomized,
                                      NemoFile = _experiment.NemoFile,
-                                     Iterations =Globals.AppSettings.ScenarioSimulatorSettings.Iterations,
+                                     Iterations = Globals.AppSettings.ScenarioSimulatorSettings.Iterations,
 
                                  };
                         var result = _visualizerService.ShowDialog("ScenarioSimulatorOptionsView", vm);
@@ -121,6 +121,26 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _launchScenarioSimulator;
+
+        #endregion
+
+        #region ViewScenarioSimulatorLogDirCommand
+
+        public SimpleCommand<object, object> ViewScenarioSimulatorLogDirCommand
+        {
+            get
+            {
+                return _viewScenarioSimulatorLogDir ?? (_viewScenarioSimulatorLogDir = new SimpleCommand<object, object>(
+                    delegate { return ((_experiment.NemoFile != null) && Directory.Exists(Path.Combine(Path.GetDirectoryName(_experiment.NemoFile.FileName), "Reports"))); },
+                    delegate
+                    {
+                        Process.Start("explorer.exe", Path.Combine(Path.GetDirectoryName(_experiment.NemoFile.FileName), "Reports"));
+
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _viewScenarioSimulatorLogDir;
 
         #endregion
 
@@ -136,7 +156,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     {
                         new Process
                         {
-                            StartInfo = 
+                            StartInfo =
                             {
                                 FileName = Globals.AppSettings.ReportGeneratorExecutablePath,
                             },
