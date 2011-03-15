@@ -212,5 +212,28 @@ namespace ESMEWorkBench.ViewModels.Main
                                 };
             _visualizerService.ShowDialog("TestView", testViewModel);
         }
+#if false
+
+        bool IsExperimentNUWCSimulateable
+        {
+            get
+            {
+                //is the nemo file there?
+
+                //are the species files in the nemo file there?
+                foreach (var speciesgroup in _experiment.NemoFile.Scenario.Animals)
+                {
+                    foreach (var nemoAnimal in speciesgroup.Species)
+                    {
+                        if (!(File.Exists(Path.Combine(Path.Combine(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), "Species"), nemoAnimal.SpeciesFile))))
+                        {
+                            _messageBoxService.ShowError(string.Format("Could not find species file {0} : is the Scenario Data Directory properly set in NUWC scenario builder and simulator?",nemoAnimal.SpeciesFile));
+                        }
+
+                    }
+                }
+            }
+        }
+#endif
     }
 }
