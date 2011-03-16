@@ -20,7 +20,7 @@ namespace ESMEWorkBench
         {
             get
             {
-                return new System.DateTime(2011, 3, 16, 18, 54, 10, DateTimeKind.Local);
+                return new System.DateTime(2011, 3, 16, 19, 19, 43, DateTimeKind.Local);
             }
         }
         
@@ -36,7 +36,7 @@ namespace ESMEWorkBench
         {
             get
             {
-                return "1946:1949M";
+                return "1950M";
             }
         }
     }

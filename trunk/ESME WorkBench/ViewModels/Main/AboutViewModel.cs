@@ -30,6 +30,34 @@ namespace ESMEWorkBench.ViewModels.Main
             Initialize();
         }
 
+        #region public DateTime BuildDateTime { get; set; }
+
+        public DateTime BuildDateTime
+        {
+            get { return BuildInformation.BuildDateTime; }
+        }
+
+        #endregion
+
+        #region public string BuildEngineer { get; set; }
+
+        public string BuildEngineer
+        {
+            get { return BuildInformation.BuildEngineer; }
+        }
+
+        #endregion
+
+        #region public string SVNVersion { get; set; }
+
+        public string SVNVersion
+        {
+            get { return BuildInformation.SVNVersion; }
+        }
+
+        #endregion
+
+
         void Initialize()
         {
             Column1Items = new ObservableCollection<LabelValuePair>
