@@ -4,9 +4,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Threading;
 using Microsoft.CSharp;
-using Microsoft.VisualBasic;
 
 namespace ProjectBuildInfo
 {
@@ -115,27 +113,29 @@ namespace ProjectBuildInfo
             var buildDateTimeMember = new CodeMemberProperty
                                       {
                                           Name = "BuildDateTime",
-                                          Type = new CodeTypeReference(typeof(DateTime)),
+                                          Type = new CodeTypeReference(typeof (DateTime)),
                                           Attributes = MemberAttributes.Public | MemberAttributes.Static,
                                       };
-            var dateTimeExpression = string.Format("new DateTime({0}, {1}, {2}, {3}, {4}, {5}, DateTimeKind.Local)", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
             buildDateTimeMember.GetStatements.Add(new CodeMethodReturnStatement
                                                   {
-                                                      Expression = new CodePrimitiveExpression(dateTimeExpression)
+                                                      Expression = new CodeObjectCreateExpression(typeof (DateTime), new CodeExpression[]
+                                                                                                                     {
+                                                                                                                         new CodePrimitiveExpression(DateTime.Now.Year), new CodePrimitiveExpression(DateTime.Now.Month), new CodePrimitiveExpression(DateTime.Now.Day), new CodePrimitiveExpression(DateTime.Now.Hour), new CodePrimitiveExpression(DateTime.Now.Minute), new CodePrimitiveExpression(DateTime.Now.Second), new CodeSnippetExpression("DateTimeKind.Local")
+                                                                                                                     })
                                                   });
             newType.Members.Add(buildDateTimeMember);
 
             var buildEngineer = new CodeMemberProperty
-            {
-                Name = "BuildEngineer",
-                Type = new CodeTypeReference(typeof(string)),
-                Attributes = MemberAttributes.Public | MemberAttributes.Static,
-            };
+                                {
+                                    Name = "BuildEngineer",
+                                    Type = new CodeTypeReference(typeof (string)),
+                                    Attributes = MemberAttributes.Public | MemberAttributes.Static,
+                                };
 
             buildEngineer.GetStatements.Add(new CodeMethodReturnStatement
-            {
-                Expression = new CodePrimitiveExpression(Environment.UserName)
-            });
+                                            {
+                                                Expression = new CodePrimitiveExpression(Environment.UserName)
+                                            });
             newType.Members.Add(buildEngineer);
 
             if (!string.IsNullOrEmpty(svnVersionString))
@@ -143,7 +143,7 @@ namespace ProjectBuildInfo
                 var svnVersion = new CodeMemberProperty
                                  {
                                      Name = "SVNVersion",
-                                     Type = new CodeTypeReference(typeof(string)),
+                                     Type = new CodeTypeReference(typeof (string)),
                                      Attributes = MemberAttributes.Public | MemberAttributes.Static,
                                  };
 
@@ -171,7 +171,7 @@ namespace ProjectBuildInfo
                                                                              });
             tw1.Close();
         }
-
+#if false
         static void GenerateCode(CodeCompileUnit ccu, String codeprovider)
         {
             var cp = new CompilerParameters();
@@ -329,5 +329,6 @@ namespace ProjectBuildInfo
             //
             return compileUnit;
         }
+#endif
     }
 }
