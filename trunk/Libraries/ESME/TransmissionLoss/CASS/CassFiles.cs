@@ -61,7 +61,7 @@ namespace ESME.TransmissionLoss.CASS
 
         public static void WriteBathymetryFile(string bathymetryFileName, Environment2DData bathymetry)
         {
-            bathymetry.SaveToYXZ(bathymetryFileName, 1.0f);
+            bathymetry.SaveToYXZ(bathymetryFileName, -1.0f);
 #if false
             using (var bathyFile = new StreamWriter(bathymetryFileName, false))
             {
