@@ -108,7 +108,8 @@ namespace ProjectBuildInfo
             //
             var newType = new CodeTypeDeclaration(className)
                           {
-                              Attributes = MemberAttributes.Public | MemberAttributes.Static,
+                              TypeAttributes = TypeAttributes.Public,
+                              Attributes = MemberAttributes.Static,
                           };
 
             var buildDateTimeMember = new CodeMemberProperty
