@@ -22,9 +22,7 @@ namespace ESMEWorkBench
 
         public static void DisplayException(IMessageBoxService messageBoxService, Exception ex, string format, params object[] args)
         {
-            Trace.WriteLine("ESME WorkBench encountered an exception: " + ex.Message);
-            Trace.WriteLine("Stack trace:");
-            Trace.WriteLine(ex.StackTrace);
+            var originalException = ex;
             var sb = new StringBuilder(string.Format(format, args));
             sb.Append("\n");
             while (ex != null)
@@ -44,6 +42,15 @@ namespace ESMEWorkBench
                 ex = ex.InnerException;
             }
             messageBoxService.ShowError(sb.ToString());
+            Trace.WriteLine("Exception encountered: " + sb);
+            Trace.WriteLine("Exception stack trace:");
+            Trace.WriteLine(originalException.StackTrace);
+            if (originalException.InnerException != null)
+            {
+                Trace.WriteLine("Inner exception message: " + originalException.InnerException.Message);
+                Trace.WriteLine("Inner exception stack trace:");
+                Trace.WriteLine(originalException.InnerException.StackTrace);
+            }
         }
 
         public static string Filter(this string s, Func<char, bool> trueIfKeep)
