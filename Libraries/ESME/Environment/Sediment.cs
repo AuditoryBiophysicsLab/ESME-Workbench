@@ -29,6 +29,7 @@ namespace ESME.Environment
                 var minValue = stream.ReadSingle();
                 var maxValue = stream.ReadSingle();
                 var paddingWidth = (width - 10) * 4;
+                if (paddingWidth < 0) return null;
                 stream.ReadBytes(paddingWidth);
                 for (var lat = 0; lat < height; lat++)
                 {
