@@ -93,7 +93,7 @@ namespace ESME.Platform
                             {
                                 if (curTrackdef.OverlayFile.Shapes.Count() != 1) throw new PlatformMovementException(string.Format("Specified overlay file {0} is unsuitable for use as a bounding region.\nReason(s): Overlay file contains multiple shapes, therefore the bounding shape is undefined", curTrackdef.OverlayFile.FileName));
                                 curTrackBoundingRegion = curTrackdef.OverlayFile.Shapes[0];
-#if false
+#if true
                                 if (!curTrackBoundingRegion.IsUsableAsPerimeter)
                                 {
                                     var reasons = new StringBuilder();

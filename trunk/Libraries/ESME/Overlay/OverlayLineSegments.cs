@@ -127,6 +127,7 @@ namespace ESME.Overlay
 #if MATLAB_DEBUG_OUTPUT
                 Console.WriteLine("Intersects({0},:)=[{1} {2}];", i + 1, intersect.Longitude, intersect.Latitude);
 #endif
+                if (intersect == null) continue;
                 if (!proposedCourseSegment.Contains(intersect) || !_segments[i].Contains(intersect)) continue;
                 proposedCourse.Reflect(Normals[i]);
                 var result = new EarthCoordinate(startLocation);
