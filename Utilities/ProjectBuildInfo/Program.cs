@@ -1,9 +1,10 @@
 ﻿using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Security.Principal;
+using System.Threading;
 using Microsoft.CSharp;
 using Microsoft.VisualBasic;
 
@@ -16,6 +17,8 @@ namespace ProjectBuildInfo
             string namespaceName = null;
             string className = null;
             string outputFilename = null;
+            string svnVersionDirectory = null;
+            string svnVersionString = null;
             for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
@@ -26,8 +29,11 @@ namespace ProjectBuildInfo
                     case "-class":
                         className = args[++i];
                         break;
-                    case "-filename":
+                    case "-output":
                         outputFilename = args[++i];
+                        break;
+                    case "-svnversion":
+                        svnVersionDirectory = args[++i];
                         break;
                     default:
                         Usage();
@@ -35,12 +41,29 @@ namespace ProjectBuildInfo
                 }
             }
 
+            if (svnVersionDirectory != null)
+            {
+                var svnProcess = new Process
+                                 {
+                                     StartInfo = new ProcessStartInfo(@"C:\Program Files\SlikSvn\bin\svnversion.exe", "\"" + svnVersionDirectory + "\"")
+                                                 {
+                                                     CreateNoWindow = true,
+                                                     UseShellExecute = false,
+                                                     RedirectStandardInput = false,
+                                                     RedirectStandardOutput = true,
+                                                     RedirectStandardError = true,
+                                                 },
+                                 };
+                svnProcess.Start();
+                svnVersionString = svnProcess.StandardOutput.ReadToEnd().Trim();
+                svnProcess.WaitForExit();
+            }
             //CSharpCodeExample();
             //var ccu = GenerateCSharpCode();
             //GenerateCode(ccu, "CSHARP");
             try
             {
-                GenerateCode(namespaceName, className, outputFilename);
+                GenerateCode(namespaceName, className, svnVersionString, outputFilename);
             }
             catch (Exception e)
             {
@@ -51,9 +74,18 @@ namespace ProjectBuildInfo
             return 0;
         }
 
-        static void Usage() { Console.WriteLine("Usage: {0} -namespace <namespaceName> -filename <outputFilename>", Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location)); }
+        static void Usage()
+        {
+            Console.WriteLine("Usage: {0} -namespace <namespaceName> -class <className> [-svnversion <projectRootDirectory>] -output <outputFilename>", Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location));
+            Console.WriteLine("Where: <namespaceName> is the desired namespace for the generated code");
+            Console.WriteLine("       <className> is the desired static class name for the generated code");
+            Console.WriteLine("       <projectRootDirectory> (optional) is the root directory of the project");
+            Console.WriteLine("                              (usually $(ProjectDir) from inside Visual Studio)");
+            Console.WriteLine("                              If this is specified, the read-only property SVNVersion will be generated");
+            Console.WriteLine("       <outputFilename> is the filename that will contain the generated code");
+        }
 
-        static void GenerateCode(string namespaceName, string className, string outputFilename)
+        static void GenerateCode(string namespaceName, string className, string svnVersionString, string outputFilename)
         {
             if (string.IsNullOrEmpty(namespaceName) || string.IsNullOrEmpty(className) || string.IsNullOrEmpty(outputFilename)) throw new ApplicationException("Namespace and output filename must be provided");
 
@@ -71,7 +103,7 @@ namespace ProjectBuildInfo
             // namespace CodeDomSampleNS {
             //      using System;
             //
-            // codedomsamplenamespace.Imports.Add(new CodeNamespaceImport("System"));
+            codedomsamplenamespace.Imports.Add(new CodeNamespaceImport("System"));
 
             // Create a type inside the namespace - public class <className>
             //
@@ -83,26 +115,44 @@ namespace ProjectBuildInfo
             var buildDateTimeMember = new CodeMemberProperty
                                       {
                                           Name = "BuildDateTime",
+                                          Type = new CodeTypeReference(typeof(DateTime)),
                                           Attributes = MemberAttributes.Public | MemberAttributes.Static,
                                       };
-
+            var dateTimeExpression = string.Format("new DateTime({0}, {1}, {2}, {3}, {4}, {5}, DateTimeKind.Local)", DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
             buildDateTimeMember.GetStatements.Add(new CodeMethodReturnStatement
                                                   {
-                                                      Expression = new CodePrimitiveExpression(DateTime.Now.ToString())
+                                                      Expression = new CodePrimitiveExpression(dateTimeExpression)
                                                   });
             newType.Members.Add(buildDateTimeMember);
 
             var buildEngineer = new CodeMemberProperty
-                                {
-                                    Name = "BuildEngineer",
-                                    Attributes = MemberAttributes.Public | MemberAttributes.Static,
-                                };
+            {
+                Name = "BuildEngineer",
+                Type = new CodeTypeReference(typeof(string)),
+                Attributes = MemberAttributes.Public | MemberAttributes.Static,
+            };
 
             buildEngineer.GetStatements.Add(new CodeMethodReturnStatement
-                                                  {
-                                                      Expression = new CodePrimitiveExpression(Environment.UserName)
-                                                  });
+            {
+                Expression = new CodePrimitiveExpression(Environment.UserName)
+            });
             newType.Members.Add(buildEngineer);
+
+            if (!string.IsNullOrEmpty(svnVersionString))
+            {
+                var svnVersion = new CodeMemberProperty
+                                 {
+                                     Name = "SVNVersion",
+                                     Type = new CodeTypeReference(typeof(string)),
+                                     Attributes = MemberAttributes.Public | MemberAttributes.Static,
+                                 };
+
+                svnVersion.GetStatements.Add(new CodeMethodReturnStatement
+                                             {
+                                                 Expression = new CodePrimitiveExpression(svnVersionString)
+                                             });
+                newType.Members.Add(svnVersion);
+            }
 
             // Add the type to the namespace
             //
