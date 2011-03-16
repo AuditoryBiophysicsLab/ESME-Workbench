@@ -31,7 +31,8 @@ namespace ProjectBuildInfo
                         outputFilename = args[++i];
                         break;
                     case "-svnversion":
-                        svnVersionDirectory = args[++i];
+                        svnVersionDirectory = args[++i].Trim();
+                        if (svnVersionDirectory.EndsWith("\\")) svnVersionDirectory = svnVersionDirectory.Remove(svnVersionDirectory.Length - 1, 1);
                         break;
                     default:
                         Usage();
