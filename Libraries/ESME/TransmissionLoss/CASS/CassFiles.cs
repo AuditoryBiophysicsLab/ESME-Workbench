@@ -124,7 +124,7 @@ namespace ESME.TransmissionLoss.CASS
                             writer.WriteLine("Plot Files,{0}", appSettings.CASSSettings.GeneratePlotFiles ? "y" : "n");
                             writer.WriteLine("Binary Files,{0}", appSettings.CASSSettings.GenerateBinaryFiles ? "y" : "n");
                             writer.WriteLine("Pressure Files,{0}", appSettings.CASSSettings.GeneratePressureFiles ? "y" : "n");
-                            writer.WriteLine("Eigenray Files,{0}", appSettings.CASSSettings.GenerateEigenrayFiles ? "y" : "n");
+                            //writer.WriteLine("Eigenray Files,{0}", appSettings.CASSSettings.GenerateEigenrayFiles ? "y" : "n");
                             writer.WriteLine("Data Directory,{0}", appSettings.ScenarioDataDirectory);
                             writer.WriteLine("*End System Parms");
                             writer.WriteLine();

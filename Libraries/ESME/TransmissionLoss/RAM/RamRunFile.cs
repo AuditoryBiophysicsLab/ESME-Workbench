@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using ESME.Data;
 using ESME.Environment;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
@@ -68,9 +69,11 @@ namespace ESME.TransmissionLoss.RAM
         /// <param name = "environmentInformation"></param>
         /// <param name = "transmissionLossSettings"></param>
         /// <returns></returns>
-        public static RamRunFile Create(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, TransmissionLossSettings transmissionLossSettings)
+        public static RamRunFile Create(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
         {
-            var rangeCellCount = (int) Math.Round((transmissionLossJob.SoundSource.Radius / transmissionLossSettings.RangeCellSize)) + 1;
+            // todo: Later, change BellhopSettings to RAMSettings when we have some
+            // todo: May need changes to range and depth cell count to better reflect what RAM wants to see.
+            var rangeCellCount = (int)Math.Round((transmissionLossJob.SoundSource.Radius / appSettings.BellhopSettings.RangeCellSize)) + 1;
 
             var ramRunFile = new RamRunFile
                              {
@@ -90,7 +93,7 @@ namespace ESME.TransmissionLoss.RAM
                 soundSpeedProfiles[bearingIndex] = environmentInformation.SoundSpeedField[curTransect.MidPoint];
             }
 
-            var depthCellCount = (int) Math.Round((maxCalculationDepthMeters / transmissionLossSettings.DepthCellSize)) + 1;
+            var depthCellCount = (int)Math.Round((maxCalculationDepthMeters / appSettings.BellhopSettings.DepthCellSize)) + 1;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];

@@ -7,6 +7,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using Cinch;
+using ESME.Environment;
+using ESME.Environment.NAVO;
+using ESME.Model;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
@@ -232,6 +235,42 @@ namespace ESMEWorkBench.Data
             if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0)) return;
             var soundspeedFiles = Directory.GetFiles(EnvironmentRoot, "*-soundspeed.xml");
             var timePeriods = soundspeedFiles.Select(curFile => Path.GetFileName(curFile).Split('-')[0]).ToList();
+            var bottomTypeData = Environment2DData.FromCHB(SedimentFileName, 1);
+            foreach (var timePeriod in timePeriods)
+            {
+                var soundSpeedFile = string.Format("{0}-soundspeed.xml", timePeriod);
+                var windSpeedFile = string.Format("{0}-wind.txt", timePeriod);
+                var soundSpeedField = new SoundSpeedField( SerializedOutput.Load(soundSpeedFile, null), NemoFile.Scenario.TimeFrame);
+                var windSpeedField = SurfaceMarineGriddedClimatologyDatabase.Parse(windSpeedFile);
+                var environmentInfo = new EnvironmentInformation
+                                      {
+                                          LocationName = NemoFile.Scenario.SimAreaName,
+                                          SoundSpeedFieldName = timePeriod,
+                                          Bathymetry = Bathymetry,
+                                          BottomType = bottomTypeData,
+                                          WindSpeed = windSpeedField,
+                                          SoundSpeedField = soundSpeedField,
+                                      };
+                foreach (var analysisPoint in AnalysisPoints)
+                {
+                    foreach (var soundSource in analysisPoint.SoundSources)
+                    {
+                        var jobID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+                        var metadata = string.Format("Transmission loss calculation.\r\nScenario file: {0}\r\nAnalysis point coordinates: {1}\r\nMode name: {2}\r\nTime period: {3}\r\nAlgorithm: {4}", NemoFile.FileName, analysisPoint, soundSource.Name, timePeriod, TransmissionLossAlgorithm.Bellhop);
+                        var job = new TransmissionLossJob
+                                  {
+                                      SoundSource = soundSource,
+                                      Name = soundSource.SoundSourceID,
+                                      Metadata = metadata,
+                                      Filename = jobID,
+                                      MaxDepth = (int)Globals.AppSettings.CASSSettings.MaximumDepth,
+                                  };
+                        var runfile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.Bellhop, job, environmentInfo, Globals.AppSettings);
+                        runfile.Save(TransmissionLossJobRoot);
+                    }
+                }
+            }
+#if false
             var bellhopFileManager = new TransmissionLossFileManager
                                      {
                                          TransmissionLossJobRoot = TransmissionLossJobRoot,
@@ -242,6 +281,7 @@ namespace ESMEWorkBench.Data
                                          Bathymetry = Bathymetry,
                                      };
             bellhopFileManager.FindNewJobs(AnalysisPoints);
+#endif
         }
     }
 }
