@@ -138,8 +138,6 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        delegate void MediatorSendDelegate(string message, object param);
-
         [MediatorMessageSink(MediatorMessage.CreateMMMBSBathymetryFileCommand)]
         void CreateMMMBSBathymetryFile(bool dummy)
         {

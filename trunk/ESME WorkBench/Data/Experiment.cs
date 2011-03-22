@@ -175,7 +175,8 @@ namespace ESMEWorkBench.Data
 
         #region public string SedimentFileName { get; set; }
 
-        [XmlIgnore] static readonly PropertyChangedEventArgs BottomTypeFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SedimentFileName);
+        [XmlIgnore]
+        static readonly PropertyChangedEventArgs SedimentFileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SedimentFileName);
         [XmlIgnore] string _sedimentFileName;
 
         [XmlElement]
@@ -186,7 +187,7 @@ namespace ESMEWorkBench.Data
             {
                 if (_sedimentFileName == value) return;
                 _sedimentFileName = value;
-                NotifyPropertyChanged(BottomTypeFileNameChangedEventArgs);
+                NotifyPropertyChanged(SedimentFileNameChangedEventArgs);
                 Sediment = null;
                 InitializeEnvironment(false);
             }

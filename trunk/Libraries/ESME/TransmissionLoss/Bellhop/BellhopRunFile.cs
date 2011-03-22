@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Xml;
-using System.Xml.Schema;
 using System.Xml.Serialization;
+using ESME.Data;
 using ESME.Environment;
 using ESME.Model;
 
@@ -28,7 +25,7 @@ namespace ESME.TransmissionLoss.Bellhop
 
         public override void Save(string path)
         {
-            var fileWriter = new StreamWriter(RandomFileName(path, ".bellhop"), false);
+            var fileWriter = new StreamWriter(Path.Combine(path, Filename), false);
             fileWriter.Write(Serialize());
             fileWriter.Close();
         }
@@ -61,9 +58,9 @@ namespace ESME.TransmissionLoss.Bellhop
         [XmlIgnore]
         public string OriginalFilename { get; private set; }
 
-        public static BellhopRunFile Create(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, TransmissionLossSettings transmissionLossSettings)
+        public static BellhopRunFile Create(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
         {
-            var rangeCellCount = (int)Math.Round((transmissionLossJob.SoundSource.Radius / transmissionLossSettings.RangeCellSize)) + 1;
+            var rangeCellCount = (int)Math.Round((transmissionLossJob.SoundSource.Radius / appSettings.BellhopSettings.RangeCellSize)) + 1;
 
             var bellhopRunFile = new BellhopRunFile {TransmissionLossJob = transmissionLossJob,};
 
@@ -80,7 +77,7 @@ namespace ESME.TransmissionLoss.Bellhop
                 soundSpeedProfiles[bearingIndex] = environmentInformation.SoundSpeedField[curTransect.MidPoint];
             }
 
-            var depthCellCount = (int) Math.Round((maxCalculationDepthMeters / transmissionLossSettings.DepthCellSize)) + 1;
+            var depthCellCount = (int)Math.Round((maxCalculationDepthMeters / appSettings.BellhopSettings.DepthCellSize)) + 1;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
