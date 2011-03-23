@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -222,7 +223,7 @@ namespace ImportNetCDF
                 progress += progressStep;
             }
             Console.WriteLine(@"Saving imported data ... ");
-            serializedOutput.Save(outputDataFileName, null);
+            serializedOutput.Save(outputDataFileName, new[]{typeof(Point)});
             
 
             Console.WriteLine(@"done");

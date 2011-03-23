@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Cinch;
+using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
@@ -85,9 +86,9 @@ namespace ESME.Environment.NAVO
 
         public static string SedimentFilename(string outputPath, string selectedResolution) { return Path.Combine(outputPath, string.Format("sediment-{0}.chb", selectedResolution)); }
 
-        public static void ExtractArea(string outputDirectory, string selectedResolution, double north, double south, double east, double west)
+        public static void ExtractArea(string outputDirectory, string selectedResolution, GeoRect extractionArea)
         {
-            var contents = string.Format("area {0} {1} {2} {3} {4} {5}", west, east, south, north, selectedResolution, string.Format("sediment-{0}.chb", selectedResolution));
+            var contents = string.Format("area {0} {1} {2} {3} {4} {5}", extractionArea.West, extractionArea.East, extractionArea.South, extractionArea.North, selectedResolution, string.Format("sediment-{0}.chb", selectedResolution));
             var scriptfile = Path.GetTempFileName();
             File.WriteAllText(scriptfile, contents);
 

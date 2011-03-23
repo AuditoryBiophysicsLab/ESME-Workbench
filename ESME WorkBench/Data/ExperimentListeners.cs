@@ -240,7 +240,7 @@ namespace ESMEWorkBench.Data
             {
                 var soundSpeedFile = string.Format("{0}-soundspeed.xml", timePeriod);
                 var windSpeedFile = string.Format("{0}-wind.txt", timePeriod);
-                var soundSpeedField = new SoundSpeedField( SerializedOutput.Load(soundSpeedFile, null), NemoFile.Scenario.TimeFrame);
+                var soundSpeedField = new SoundSpeedField(SerializedOutput.Load(soundSpeedFile, GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes), NemoFile.Scenario.TimeFrame);
                 var windSpeedField = SurfaceMarineGriddedClimatologyDatabase.Parse(windSpeedFile);
                 var environmentInfo = new EnvironmentInformation
                                       {

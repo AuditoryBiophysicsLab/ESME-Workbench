@@ -30,17 +30,18 @@ namespace ESME.Environment
         {
             get
             {
+                var geoRect = GeoRect;
                 var bathyBox = new[]
                                {
                                    //edit: Modified this routine to take the horizontal and vertical resolution into account
                                    //      It now places the bounding box such that the lines are coincident with the edges of
                                    //      the edge samples of the selected data (extends by half the horizontal/vertical resolution)
                                    //northeast corner:                   
-                                   new EarthCoordinate(NorthEast.Latitude + (LatitudinalResolution/2), NorthEast.Longitude + (LongitudinalResolution/2)), // northeast corner
-                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), NorthEast.Longitude + (LongitudinalResolution/2)), // southeast corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
-                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
-                                   new EarthCoordinate(NorthEast.Latitude + (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // northwest corner
-                                   new EarthCoordinate(NorthEast.Latitude + (LatitudinalResolution/2), NorthEast.Longitude + (LongitudinalResolution/2)), // northeast corner again to close the loop.
+                                   new EarthCoordinate(geoRect.North + (LatitudinalResolution/2), geoRect.East + (LongitudinalResolution/2)), // northeast corner
+                                   new EarthCoordinate(geoRect.South - (LatitudinalResolution/2), geoRect.East + (LongitudinalResolution/2)), // southeast corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
+                                   new EarthCoordinate(geoRect.South - (LatitudinalResolution/2), geoRect.West - (LongitudinalResolution/2)), // southwest corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
+                                   new EarthCoordinate(geoRect.North + (LatitudinalResolution/2), geoRect.West - (LongitudinalResolution/2)), // northwest corner
+                                   new EarthCoordinate(geoRect.North + (LatitudinalResolution/2), geoRect.East + (LongitudinalResolution/2)), // northeast corner again to close the loop.
                                };
 
                 var shape = new OverlayLineSegments(bathyBox, Colors.Black, 1, LineStyle.Solid);
@@ -239,7 +240,7 @@ namespace ESME.Environment
         }
 #endif
 
-        public static Environment2DData FromEEB(string fileName, string layerName, float north, float west, float south, float east)
+        public static Environment2DData FromEEB(string fileName, string layerName, GeoRect extractionArea)
         {
             if (Path.GetExtension(fileName) != ".eeb") throw new System.IO.FileFormatException(string.Format("Environment2DData: Unknown file type \"{0}\"", Path.GetFileName(fileName)));
             var file = DataFile.Open(fileName);
@@ -248,9 +249,9 @@ namespace ESME.Environment
             if (layer == null) throw new System.IO.FileFormatException(string.Format("Environment2DData: Specified environment file \"{0}\"does not contain a environment2DData layer", fileName));
 
             var data = new List<EarthCoordinate<float>>();
-            foreach (var row in layer.GetRows(south, north))
+            foreach (var row in layer.GetRows((float)extractionArea.South, (float)extractionArea.North))
                 data.AddRange(from point in row.Points
-                              where (point.EarthCoordinate.Longitude >= west) && (point.EarthCoordinate.Longitude <= east)
+                              where (point.EarthCoordinate.Longitude >= extractionArea.West) && (point.EarthCoordinate.Longitude <= extractionArea.East)
                               select new EarthCoordinate<float>(point.EarthCoordinate.Latitude, point.EarthCoordinate.Longitude, point.Data[0]));
             return new Environment2DData(data)
                    {

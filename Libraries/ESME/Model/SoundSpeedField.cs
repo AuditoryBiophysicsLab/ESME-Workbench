@@ -421,7 +421,7 @@ namespace ESME.Model
             foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
         }
 
-        public SoundSpeedField(string environmentFileName, float north, float west, float south, float east)
+        public SoundSpeedField(string environmentFileName, GeoRect extractionArea)
         {
             var file = DataFile.Open(environmentFileName);
 
@@ -431,8 +431,8 @@ namespace ESME.Model
             if (layer == null) throw new System.IO.FileFormatException(string.Format("SoundSpeedField: Specified environment file \"{0}\"does not contain a soundspeed layer", environmentFileName));
             TimePeriod = layer.TimePeriod;
             SoundSpeedProfiles = new List<SoundSpeedProfile>();
-            SoundSpeedProfiles.AddRange(from row in layer.GetRows(south, north)
-                                        from point in row.GetPoints(west, east)
+            SoundSpeedProfiles.AddRange(from row in layer.GetRows((float)extractionArea.South, (float)extractionArea.North)
+                                        from point in row.GetPoints((float)extractionArea.West, (float)extractionArea.East)
                                         select new SoundSpeedProfile(point.EarthCoordinate, layer.DepthAxis.Values, point.Data));
 
             foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;

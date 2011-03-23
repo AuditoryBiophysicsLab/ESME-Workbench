@@ -116,6 +116,7 @@
     <Compile Include="Navigation\Course.cs" />
     <Compile Include="Navigation\EarthCoordinate.cs" />
     <Compile Include="Navigation\EarthCoordinate3DTypeConverter.cs" />
+    <Compile Include="Navigation\GeoRect.cs" />
     <Compile Include="Navigation\GeoReferencedField.cs" />
     <Compile Include="NetCDF\InterfaceDefinitions.cs" />
     <Compile Include="NetCDF\NetCDF.cs" />
