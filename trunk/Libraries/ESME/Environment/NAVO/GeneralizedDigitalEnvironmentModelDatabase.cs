@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows;
 using System.IO;
 using System.Linq;
 using ESME.Model;
@@ -13,6 +14,11 @@ namespace ESME.Environment.NAVO
                                                   {
                                                       "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
                                                   };
+
+        public static readonly Type[] ReferencedTypes = new[]
+                                                        {
+                                                            typeof (Point)
+                                                        };
 
         const string SalinityVariableName = "salinity";
         const string TemperatureVariableName = "water_temp";
@@ -51,17 +57,17 @@ namespace ESME.Environment.NAVO
         static string NUWCTemperatureFileName(int monthIndex) { return ShortMonthNames[monthIndex] + "_t.nc"; }
         static string NUWCSalinityFileName(int monthIndex) { return ShortMonthNames[monthIndex] + "_s.nc"; }
 
-        public static void ExtractAreaFromMonthFile(string outputPath, double north, double south, double east, double west, int monthIndex)
+        public static void ExtractAreaFromMonthFile(string outputPath, GeoRect extractionArea, int monthIndex)
         {
-            ExtractAreaFromMonthFile(SalinityFile(monthIndex), OutputFileName(outputPath, monthIndex, SalinityVariableName), SalinityVariableName, north, south, east, west);
-            ExtractAreaFromMonthFile(TemperatureFile(monthIndex), OutputFileName(outputPath, monthIndex, TemperatureVariableName), TemperatureVariableName, north, south, east, west);
+            ExtractAreaFromMonthFile(SalinityFile(monthIndex), OutputFileName(outputPath, monthIndex, SalinityVariableName), SalinityVariableName, extractionArea);
+            ExtractAreaFromMonthFile(TemperatureFile(monthIndex), OutputFileName(outputPath, monthIndex, TemperatureVariableName), TemperatureVariableName, extractionArea);
         }
 
         public static string SalinityFilename(string outputPath, NAVOTimePeriod timePeriod) { return OutputFileName(outputPath, timePeriod, SalinityVariableName); }
         public static string TemperatureFilename(string outputPath, NAVOTimePeriod timePeriod) { return OutputFileName(outputPath, timePeriod, TemperatureVariableName); }
         public static string SoundspeedFilename(string outputPath, NAVOTimePeriod timePeriod) { return OutputFileName(outputPath, timePeriod, SoundspeedVariableName); }
 
-        static void ExtractAreaFromMonthFile(string sourceFileName, string outputFileName, string dataType, double north, double south, double east, double west)
+        static void ExtractAreaFromMonthFile(string sourceFileName, string outputFileName, string dataType, GeoRect extractionArea)
         {
             if (File.Exists(outputFileName)) File.Delete(outputFileName);
 
@@ -74,7 +80,7 @@ namespace ESME.Environment.NAVO
             const string scaleParamName = "scale_factor";
             const string offsetParamName = "add_offset";
             var commandArgs = string.Format("-in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11}  -dataout \"{12}\"",
-                sourceFileName, lonParamName, latParamName, north, south, east, west, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, outputFileName);
+                sourceFileName, lonParamName, latParamName, extractionArea.North, extractionArea.South, extractionArea.East, extractionArea.West, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, outputFileName);
             NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, Path.GetDirectoryName(outputFileName));
         }
 
@@ -96,7 +102,7 @@ namespace ESME.Environment.NAVO
             var depthAxisAggregator = new List<float>();
             foreach (var monthFileName in monthFileNames)
             {
-                var dataOutput = SerializedOutput.Load(monthFileName, null);
+                var dataOutput = SerializedOutput.Load(monthFileName, ReferencedTypes);
 
                 var results = ExtractValues(dataOutput);
                 var depthAxis = results.Depths.Select(x => (float)x).ToArray();
@@ -121,7 +127,7 @@ namespace ESME.Environment.NAVO
                     dataPoint.Data.AddRange(dataValues.ToList());
                     result.DataPoints.Add(dataPoint);
                 }
-            result.Save(outputFileName, null);
+            result.Save(outputFileName, ReferencedTypes);
         }
 
         public static void CreateSoundSpeedFile(string outputPath, NAVOTimePeriod outputTimePeriod, float maxDepth)
@@ -136,11 +142,11 @@ namespace ESME.Environment.NAVO
 
         static void CreateSoundSpeedFile(string temperatureFilename, string salinityFilename, string soundspeedFilename, float maxDepth)
         {
-            var salinityField = SerializedOutput.Load(salinityFilename, null);
+            var salinityField = SerializedOutput.Load(salinityFilename, ReferencedTypes);
             var latitudes = salinityField.Latitudes;
             var longitudes = salinityField.Longitudes;
 
-            var temperatureField = SerializedOutput.Load(temperatureFilename, null);
+            var temperatureField = SerializedOutput.Load(temperatureFilename, ReferencedTypes);
             
             var soundSpeedField = new SerializedOutput();
             soundSpeedField.DepthAxis.AddRange(temperatureField.DepthAxis);
@@ -172,7 +178,7 @@ namespace ESME.Environment.NAVO
                 }
             var ssf = new SoundSpeedField(soundSpeedField, "");
             ssf.ExtendProfilesToDepth(Math.Abs(maxDepth), temperatureField, salinityField);
-            ((SerializedOutput)ssf).Save(soundspeedFilename, null);
+            ((SerializedOutput)ssf).Save(soundspeedFilename, ReferencedTypes);
         }
 
         private static Environment3DAverager ExtractValues(SerializedOutput data)

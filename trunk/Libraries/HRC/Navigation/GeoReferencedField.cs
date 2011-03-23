@@ -23,27 +23,16 @@ namespace HRC.Navigation
         public List<double> Longitudes { get; protected set; }
 
         /// <summary>
-        ///   Southwest corner of the field
+        /// The GeoRect that contains the field data
         /// </summary>
-        public virtual EarthCoordinate SouthWest { get { return new EarthCoordinate(Latitudes.First(), Longitudes.First()); } }
-
+        public virtual GeoRect GeoRect {get{return new GeoRect(Latitudes.Last(), Latitudes.First(), Longitudes.Last(), Longitudes.First());}}
+        
         /// <summary>
-        ///   Northeast corner of the field
-        /// </summary>
-        public virtual EarthCoordinate NorthEast { get { return new EarthCoordinate(Latitudes.Last(), Longitudes.Last()); } }
-
-        /// <summary>
-        /// 
+        /// Indicates whether the bounds of the field contains the specified EarthCoordinate.
         /// </summary>
         /// <param name="coordinate"></param>
-        /// <returns>true if coordinate is contained within the bounding box of the field, false otherwise</returns>
-        public bool Contains(EarthCoordinate coordinate)
-        {
-            return (SouthWest.Longitude <= coordinate.Longitude) &&
-                   (coordinate.Longitude <= NorthEast.Longitude) &&
-                   (SouthWest.Latitude <= coordinate.Latitude) &&
-                   (coordinate.Latitude <= NorthEast.Latitude);
-        }
+        /// <returns></returns>
+        public bool Contains(EarthCoordinate coordinate) { return GeoRect.Contains(coordinate); }
     }
 
     public class GenericGeoField<TEarthCoordinate> : GeoReferencedField
@@ -88,16 +77,6 @@ namespace HRC.Navigation
         /// Array of EarthCoordinate-derived field values
         /// </summary>
         public TEarthCoordinate[,] FieldData { get; protected set; }
-
-        /// <summary>
-        /// The data point at the southwest corner of the data set.  If no point actually occupies that corner, the nearest actual data point is returned.
-        /// </summary>
-        public override EarthCoordinate SouthWest { get { return this[base.SouthWest]; } }
-
-        /// <summary>
-        /// The data point at the northeast corner of the data set.  If no point actually occupies that corner, the nearest actual data point is returned.
-        /// </summary>
-        public override EarthCoordinate NorthEast { get { return this[base.NorthEast]; } }
 
         /// <summary>
         /// Gets the longitudinal resolution of the current dataset, in degrees

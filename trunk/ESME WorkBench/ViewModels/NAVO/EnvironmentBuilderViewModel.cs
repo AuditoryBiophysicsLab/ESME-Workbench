@@ -7,12 +7,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Data;
 using ESME.Environment.NAVO;
 using ESMEWorkBench.Data;
+using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.NAVO
@@ -44,6 +46,25 @@ namespace ESMEWorkBench.ViewModels.NAVO
             _experiment = experiment;
             ExtractButtonText = "Initializing...";
         }
+
+        #region public float BufferZoneSize { get; set; }
+
+        public float BufferZoneSize
+        {
+            get { return _bufferZoneSize; }
+            set
+            {
+                if (_bufferZoneSize == value) return;
+                _bufferZoneSize = value;
+                NotifyPropertyChanged(BufferZoneSizeChangedEventArgs);
+                NAVODataSources.ExtractionArea = GeoRect.Inflate(_experiment.OpArea, BufferZoneSize * 1000, BufferZoneSize * 1000);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.BufferZoneSize);
+        float _bufferZoneSize;
+
+        #endregion
 
         #region SelectAllMonthsCommand
 
@@ -320,6 +341,25 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
+        #region BufferZoneSizeTextChangedCommand
+
+        public SimpleCommand<object, object> BufferZoneSizeTextChangedCommand
+        {
+            get
+            {
+                return _bufferZoneSizeTextChanged ?? (_bufferZoneSizeTextChanged = new SimpleCommand<object, object>(delegate(object cinchArgs)
+                {
+                    var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                    //var args = (TextChangedEventArgs)((EventToCommandArgs)cinchArgs).EventArgs;
+                    if (sender != null && !string.IsNullOrEmpty(sender.Text)) BufferZoneSize = float.Parse(sender.Text);
+                }));
+            }
+        }
+
+        SimpleCommand<object, object> _bufferZoneSizeTextChanged;
+
+        #endregion
+
         #region ExtractAllCommand
 
         SimpleCommand<object, object> _extractAll;
@@ -341,6 +381,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                         if (SeasonCheckboxes != null)
                             selectedTimePeriods.AddRange(SeasonCheckboxes.SelectedTimePeriods);
                         if (selectedTimePeriods.Count < 1) return;
+
                         NAVODataSources.SelectedTimePeriods = selectedTimePeriods;
                         NAVODataSources.ExportCASSData = ExportCASSData;
                         NAVODataSources.ExtractDataInBackground(delegate
@@ -356,6 +397,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                                                         _experiment.SoundSpeedFileName = NAVODataSources.SoundspeedFilename(timePeriod);
                                                                         _experiment.SedimentFileName = NAVODataSources.SedimentFilename(timePeriod);
                                                                         _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename(timePeriod);
+                                                                        _experiment.SimArea = NAVODataSources.ExtractionArea;
                                                                     }
                                                                     AppSettings.Save(); //remember the new values. 
                                                                     CloseActivePopUpCommand.Execute(true);
@@ -402,7 +444,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
         {
             _viewAwareStatus = viewAwareStatusService;
             _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-            NAVODataSources = new ESME.Environment.NAVO.NAVODataSources(Globals.AppSettings.NAVOConfiguration, _dispatcher, _experiment.LocalStorageRoot, _experiment.North, _experiment.South, _experiment.East, _experiment.West, Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName));
+            NAVODataSources = new NAVODataSources(_experiment.OpArea, Globals.AppSettings.NAVOConfiguration, _dispatcher, _experiment.LocalStorageRoot, Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName));
             ExtractButtonText = "Extract";
         }
 

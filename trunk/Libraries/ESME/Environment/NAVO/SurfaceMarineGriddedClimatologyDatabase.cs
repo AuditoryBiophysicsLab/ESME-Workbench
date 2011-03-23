@@ -27,7 +27,7 @@ namespace ESME.Environment.NAVO
         public static string WindFilename(string outputPath, NAVOTimePeriod timePeriod) { return Path.Combine(outputPath, string.Format("{0}-wind.txt", timePeriod)); }
 
         //public static void ExtractArea(NAVOExtractionPacket extractionPacket)
-        public static void ExtractArea(string outputDirectory, NAVOTimePeriod timePeriod, int startMonth, int endMonth, int monthsDuration, double north, double south, double east, double west)
+        public static void ExtractArea(string outputDirectory, NAVOTimePeriod timePeriod, int startMonth, int endMonth, int monthsDuration, GeoRect extractionArea)
         {
             var outputFilename = Path.Combine(outputDirectory, string.Format("{0}-wind.txt", timePeriod));
 
@@ -38,7 +38,7 @@ namespace ESME.Environment.NAVO
 
             System.Environment.SetEnvironmentVariable("SMGC_DATA_NORTH", northPath);
             System.Environment.SetEnvironmentVariable("SMGC_DATA_SOUTH", southPath);
-            var commandArgs = string.Format("-lat {0}/{1} -lon {2}/{3} -mon {4}/{5} -par 17/1", south, north, west, east, startMonth, endMonth); // '-par 17/1' extracts wind speed statistical data.  don't ask. 
+            var commandArgs = string.Format("-lat {0}/{1} -lon {2}/{3} -mon {4}/{5} -par 17/1", extractionArea.South, extractionArea.North, extractionArea.West, extractionArea.East, startMonth, endMonth); // '-par 17/1' extracts wind speed statistical data.  don't ask. 
             var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputDirectory);
             //result now contains the entire output of SMGC, i think, since it dumps data to STDOUT... so let's save it to disk in the right place. 
             using (var writer = new StreamWriter(outputFilename))

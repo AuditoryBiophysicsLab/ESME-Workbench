@@ -504,6 +504,42 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public GeoRect OpArea { get; set; }
+
+        public GeoRect OpArea
+        {
+            get { return _opArea; }
+            set
+            {
+                if (_opArea == value) return;
+                _opArea = value;
+                NotifyPropertyChanged(OpAreaChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OpAreaChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.OpArea);
+        GeoRect _opArea;
+
+        #endregion
+
+        #region public GeoRect SimArea { get; set; }
+
+        public GeoRect SimArea
+        {
+            get { return _simArea; }
+            set
+            {
+                if (_simArea == value) return;
+                _simArea = value;
+                NotifyPropertyChanged(SimAreaChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SimAreaChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SimArea);
+        GeoRect _simArea;
+
+        #endregion
+
         #region public ulong NextObjectID { get; set; }
 
         static readonly PropertyChangedEventArgs NextObjectIDChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.NextObjectID);
@@ -562,22 +598,10 @@ namespace ESMEWorkBench.Data
             {
                 return _referencedTypes ?? (_referencedTypes = new[]
                                                                {
-                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel), typeof(RasterMapLayer), typeof(AnalysisPoint), typeof(SoundSource)
+                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel), typeof(RasterMapLayer), typeof(AnalysisPoint), typeof(SoundSource), typeof(GeoRect)
                                                                });
             }
         }
-
-        [XmlIgnore]
-        public float North { get; private set; }
-
-        [XmlIgnore]
-        public float South { get; private set; }
-
-        [XmlIgnore]
-        public float East { get; private set; }
-
-        [XmlIgnore]
-        public float West { get; private set; }
 
         [XmlIgnore]
         public AnimatInterface AnimatInterface { get; set; }
@@ -936,20 +960,16 @@ namespace ESMEWorkBench.Data
             }
 
             if (NemoFile == null) return;
-            var boundingBox = new Rect();
-            if (NemoFile.Scenario.OverlayFile != null) boundingBox = NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox;
-            else foreach (var trackdef in NemoFile.Scenario.Platforms.SelectMany(platform => platform.Trackdefs))
-                    if ((boundingBox.Width == 0) && (boundingBox.Height == 0)) boundingBox = trackdef.OverlayFile.Shapes[0].BoundingBox;
-                    else boundingBox.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
 
-            North = (float)boundingBox.Bottom + OpAreaBufferZoneSize;
-            West = (float)boundingBox.Left - OpAreaBufferZoneSize;
-            South = (float)boundingBox.Top - OpAreaBufferZoneSize;
-            East = (float)boundingBox.Right + OpAreaBufferZoneSize;
+            if (NemoFile.Scenario.OverlayFile != null) OpArea = new GeoRect(NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox);
+            else foreach (var trackdef in NemoFile.Scenario.Platforms.SelectMany(platform => platform.Trackdefs))
+                    if (OpArea == null) OpArea = new GeoRect(trackdef.OverlayFile.Shapes[0].BoundingBox);
+                    else OpArea.Union(trackdef.OverlayFile.Shapes[0].BoundingBox);
+            if (SimArea == null) SimArea = new GeoRect(OpArea);
 
             if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName)))
             {
-                if (WindSpeedFileName.EndsWith(".eeb")) WindSpeed = Environment2DData.FromEEB(WindSpeedFileName, "windspeed", North, West, South, East);
+                if (WindSpeedFileName.EndsWith(".eeb")) WindSpeed = Environment2DData.FromEEB(WindSpeedFileName, "windspeed", SimArea);
                 else if (WindSpeedFileName.EndsWith(".txt")) WindSpeed = SurfaceMarineGriddedClimatologyDatabase.Parse(WindSpeedFileName);
             }
 
@@ -979,10 +999,10 @@ namespace ESMEWorkBench.Data
 
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
             {
-                if (SoundSpeedFileName.EndsWith(".eeb")) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, North, West, South, East);
+                if (SoundSpeedFileName.EndsWith(".eeb")) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, SimArea);
                 else if (SoundSpeedFileName.EndsWith(".xml")) 
                 {
-                    var rawSoundSpeeds = SerializedOutput.Load(SoundSpeedFileName, null);
+                    var rawSoundSpeeds = SerializedOutput.Load(SoundSpeedFileName, GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes);
                     SoundSpeedField = new SoundSpeedField(rawSoundSpeeds, NemoFile.Scenario.TimeFrame);
                 }
             }
@@ -1010,7 +1030,7 @@ namespace ESMEWorkBench.Data
 
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
             {
-                if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = Environment2DData.FromEEB(BathymetryFileName, "bathymetry", North, West, South, East);
+                if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = Environment2DData.FromEEB(BathymetryFileName, "bathymetry", SimArea);
                 else if (BathymetryFileName.EndsWith(".chb"))
                 {
                     Bathymetry = Environment2DData.FromCHB(BathymetryFileName, -1);

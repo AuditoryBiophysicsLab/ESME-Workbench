@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss.CASS;
+using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
@@ -23,7 +24,7 @@ namespace ESME.Environment.NAVO
         Dispatcher _dispatcher;
 
         //public NAVODataSources(Globals.AppSettings.NAVOConfiguration, _experiment.LocalStorageRoot, _experiment.North, _experiment.South, _experiment.East, _experiment.West, _experiment.NemoFile.Scenario.SimAreaName, _dispatcher);
-        public NAVODataSources(NAVOConfiguration configurations, Dispatcher dispatcher, string localStorageRoot, float north, float south, float east, float west, string simAreaPath)
+        public NAVODataSources(GeoRect opArea, NAVOConfiguration configurations, Dispatcher dispatcher, string localStorageRoot, string simAreaPath)
         {
             try
             {
@@ -37,11 +38,8 @@ namespace ESME.Environment.NAVO
             Configuration = configurations;
             _dispatcher = dispatcher;
             _localStorageRoot = localStorageRoot;
-            _north = north;
-            _south = south;
-            _east = east;
-            _west = west;
             _simAreaPath = simAreaPath;
+            _extractionArea = opArea;
 
             SurfaceMarineGriddedClimatologyDatabase.DatabasePath = configurations.SMGCDirectory;
             SurfaceMarineGriddedClimatologyDatabase.ExtractionProgramPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "SMGCExtract.exe");
@@ -66,8 +64,6 @@ namespace ESME.Environment.NAVO
             GeneralizedDigitalEnvironmentModelDatabase.ExtractionProgramPath = Path.Combine(extractionPath, "ImportNetCDF.exe");
             GeneralizedDigitalEnvironmentModelDatabase.DatabasePath = configurations.GDEMDirectory;
 
-            LatitudeSpan = _north - _south;
-            LongitudeSpan = _east - _west;
             UpdateResolutionStatement();
         }
 
@@ -76,44 +72,28 @@ namespace ESME.Environment.NAVO
             var resString = DigitalBathymetricDatabase.SelectedResolution.Remove(DigitalBathymetricDatabase.SelectedResolution.Length - 3, 3);
             var resMinutes = double.Parse(resString);
             var samplesPerDegree = 60 / resMinutes;
-            BathymetryResolutionStatement = string.Format("Extraction area: {0:0.###}deg (lon) by {1:0.###}deg (lat)\nEstimated point count {2:#,#} x {3:#,#} = {4:#,#}", LongitudeSpan, LatitudeSpan, LongitudeSpan * samplesPerDegree, LatitudeSpan * samplesPerDegree, LongitudeSpan * LatitudeSpan * samplesPerDegree * samplesPerDegree);
+            BathymetryResolutionStatement = string.Format("Extraction area: {0:0.###}deg (lon) by {1:0.###}deg (lat)\nEstimated point count {2:#,#} x {3:#,#} = {4:#,#}", ExtractionArea.Width, ExtractionArea.Height, ExtractionArea.Width * samplesPerDegree, ExtractionArea.Height * samplesPerDegree, ExtractionArea.Width * ExtractionArea.Height * samplesPerDegree * samplesPerDegree);
         }
 
-        #region public double LatitudeSpan { get; set; }
+        #region public GeoRect ExtractionArea { get; set; }
 
-        public double LatitudeSpan
+        public GeoRect ExtractionArea
         {
-            get { return _latitudeSpan; }
+            get { return _extractionArea; }
             set
             {
-                if (_latitudeSpan == value) return;
-                _latitudeSpan = value;
-                NotifyPropertyChanged(LatitudeSpanChangedEventArgs);
+                if (_extractionArea == value) return;
+                _extractionArea = value;
+                NotifyPropertyChanged(ExtractionAreaChangedEventArgs);
+                UpdateResolutionStatement();
             }
         }
 
-        static readonly PropertyChangedEventArgs LatitudeSpanChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.LatitudeSpan);
-        double _latitudeSpan;
+        static readonly PropertyChangedEventArgs ExtractionAreaChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.ExtractionArea);
+        GeoRect _extractionArea;
 
         #endregion
 
-        #region public double LongitudeSpan { get; set; }
-
-        public double LongitudeSpan
-        {
-            get { return _longitudeSpan; }
-            set
-            {
-                if (_longitudeSpan == value) return;
-                _longitudeSpan = value;
-                NotifyPropertyChanged(LongitudeSpanChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs LongitudeSpanChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.LongitudeSpan);
-        double _longitudeSpan;
-
-        #endregion
 
         #region public string BathymetryResolutionStatement { get; set; }
 
@@ -137,10 +117,6 @@ namespace ESME.Environment.NAVO
         public DigitalBathymetricDatabase DigitalBathymetricDatabase { get; private set; }
 
         string _localStorageRoot;
-        readonly float _north;
-        readonly float _south;
-        readonly float _east;
-        readonly float _west;
         readonly string _simAreaPath;
 
         internal NAVOConfiguration Configuration { get; set; }
@@ -172,7 +148,7 @@ namespace ESME.Environment.NAVO
             var currentExtractionStep = 0;
 
             Status = "Extracting bathymetry data for selected area";
-            DigitalBathymetricDatabase.ExtractArea(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, _north, _south, _east, _west, DigitalBathymetricDatabase.Resolutions);
+            DigitalBathymetricDatabase.ExtractArea(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea, DigitalBathymetricDatabase.Resolutions);
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
@@ -180,14 +156,14 @@ namespace ESME.Environment.NAVO
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";
-            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, BottomSedimentTypeDatabase.SelectedResolution, _north, _south, _east, _west);
+            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, BottomSedimentTypeDatabase.SelectedResolution, ExtractionArea);
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
             foreach (var month in uniqueMonths)
             {
                 Status = "Extracting temperature and salinity data for " + (NAVOTimePeriod)month;
-                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, _north, _south, _east, _west, month);
+                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, ExtractionArea, month);
                 if (backgroundWorker.CancellationPending) return;
                 currentExtractionStep += 2;
                 ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
@@ -225,7 +201,7 @@ namespace ESME.Environment.NAVO
             {
                 var monthIndices = GetMonthIndices(timePeriod);
                 Status = "Extracting wind data for " + timePeriod;
-                SurfaceMarineGriddedClimatologyDatabase.ExtractArea(tempDirectory, timePeriod, monthIndices.First(), monthIndices.Last(), monthIndices.Count(), _north, _south, _east, _west);
+                SurfaceMarineGriddedClimatologyDatabase.ExtractArea(tempDirectory, timePeriod, monthIndices.First(), monthIndices.Last(), monthIndices.Count(), ExtractionArea);
                 if (backgroundWorker.CancellationPending) return;
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
@@ -240,7 +216,7 @@ namespace ESME.Environment.NAVO
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
                     Status = "Exporting CASS format data for " + timePeriod;
-                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod.ToString(), bathymetry, _north, _south, _east, _west);
+                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod.ToString(), bathymetry, ExtractionArea);
                     if (backgroundWorker.CancellationPending) return;
                     ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
                 }
