@@ -91,62 +91,70 @@ namespace ESME.TransmissionLoss.CASS
                     var batchFileName = string.Format("run_base-cass-{0}-{1}-{2}.bat", platform.Name, platform.Id, timePeriod);
                     var inputFilePath = Path.Combine(curTimePeriodPath, inputFileName);
                     var batchFilePath = Path.Combine(curTimePeriodPath, batchFileName);
-                    foreach (var source in platform.Sources)
-                    {
-                        var sourceToModes = new OneToMany<NemoSource, List<OneToMany<NemoMode, List<SoundSource>>>>(source);
-                        foreach (var mode in source.Modes)
-                        {
-                            var modeToSoundSources = new OneToMany<NemoMode, List<SoundSource>>(mode);
-                            sourceToModes.Many.Add(modeToSoundSources);
-                            foreach (var analysisPoint in analysisPoints)
-                            {
-                                foreach (var soundSource in analysisPoint.SoundSources)
-                                {
-                                    var psmFields = soundSource.Name.Split('|');
-                                    var soundSourcePlatform = psmFields[0];
-                                    var soundSourceSource = psmFields[1];
-                                    var soundSourceMode = psmFields[2];
-                                    if ((platform.Name.ToLower() == soundSourcePlatform.ToLower()) && 
-                                        (source.Name.ToLower() == soundSourceSource.ToLower()) && 
-                                        (mode.Name.ToLower() == soundSourceMode.ToLower()))
-                                    {
-                                        modeToSoundSources.Many.Add(soundSource);
-                                    }
-                                } // end loop over all sound sources in the current analysis point
-                            } // end loop over all analysis points
-                        } // end loop over modes in the current source
-                        using (var writer = new StreamWriter(inputFilePath))
-                        {
-                            writer.WriteLine("# analyst name: {0}", System.Environment.UserName);
-                            writer.WriteLine("# creation date: {0}", DateTime.Now);
-                            writer.WriteLine();
-                            writer.WriteLine("*System Parms");
-                            writer.WriteLine("Plot Files,{0}", appSettings.CASSSettings.GeneratePlotFiles ? "y" : "n");
-                            writer.WriteLine("Binary Files,{0}", appSettings.CASSSettings.GenerateBinaryFiles ? "y" : "n");
-                            writer.WriteLine("Pressure Files,{0}", appSettings.CASSSettings.GeneratePressureFiles ? "y" : "n");
-                            //writer.WriteLine("Eigenray Files,{0}", appSettings.CASSSettings.GenerateEigenrayFiles ? "y" : "n");
-                            writer.WriteLine("Data Directory,{0}", appSettings.ScenarioDataDirectory);
-                            writer.WriteLine("*End System Parms");
-                            writer.WriteLine();
-                            writer.WriteLine("*CASS Parms");
-                            writer.WriteLine("VOLUME ATTENUATION MODEL                ,FRANCOIS-GARRISON");
-                            writer.WriteLine("SURFACE REFLECTION COEFFICIENT MODEL    ,OAML");
-                            writer.WriteLine("MAXIMUM SURFACE REFLECTIONS             ,100");
-                            writer.WriteLine("MAXIMUM BOTTOM REFLECTIONS              ,100");
-                            writer.WriteLine("EIGENRAY MODEL                          ,GRAB-V3");
-                            writer.WriteLine("EIGENRAY ADDITION                       ,RANDOM");
-                            writer.WriteLine("EIGENRAY TOLERANCE                      ,0.01");
-                            writer.WriteLine("VERTICAL ANGLE MINIMUM                  ,-89.9 DEG");
-                            writer.WriteLine("VERTICAL ANGLE MAXIMUM                  ,+89.9 DEG");
-                            writer.WriteLine("VERTICAL ANGLE INCREMENT                ,0.1 DEG");
-                            writer.WriteLine("Reference System                        ,LAT-LON");
-                            writer.WriteLine("Source System                           ,LAT-LON");
-                            writer.WriteLine("*end Cass Parms");
-                            writer.WriteLine();
-                            writer.WriteLine();
+                    Console.WriteLine("For CASS File: {0}", inputFileName);
+                    int sourceCount = 0;
 
+                    using (var writer = new StreamWriter(inputFilePath))
+                    {
+                        Console.WriteLine("Writing CASS File: {0}", inputFileName);
+                        writer.WriteLine("# analyst name: {0}", System.Environment.UserName);
+                        writer.WriteLine("# creation date: {0}", DateTime.Now);
+                        writer.WriteLine();
+                        writer.WriteLine("*System Parms");
+                        writer.WriteLine("Plot Files,{0}", appSettings.CASSSettings.GeneratePlotFiles ? "y" : "n");
+                        writer.WriteLine("Binary Files,{0}", appSettings.CASSSettings.GenerateBinaryFiles ? "y" : "n");
+                        writer.WriteLine("Pressure Files,{0}", appSettings.CASSSettings.GeneratePressureFiles ? "y" : "n");
+                        //writer.WriteLine("Eigenray Files,{0}", appSettings.CASSSettings.GenerateEigenrayFiles ? "y" : "n");
+                        writer.WriteLine("Data Directory,{0}", appSettings.ScenarioDataDirectory);
+                        writer.WriteLine("*End System Parms");
+                        writer.WriteLine();
+                        writer.WriteLine("*CASS Parms");
+                        writer.WriteLine("VOLUME ATTENUATION MODEL                ,FRANCOIS-GARRISON");
+                        writer.WriteLine("SURFACE REFLECTION COEFFICIENT MODEL    ,OAML");
+                        writer.WriteLine("MAXIMUM SURFACE REFLECTIONS             ,100");
+                        writer.WriteLine("MAXIMUM BOTTOM REFLECTIONS              ,100");
+                        writer.WriteLine("EIGENRAY MODEL                          ,GRAB-V3");
+                        writer.WriteLine("EIGENRAY ADDITION                       ,RANDOM");
+                        writer.WriteLine("EIGENRAY TOLERANCE                      ,0.01");
+                        writer.WriteLine("VERTICAL ANGLE MINIMUM                  ,-89.9 DEG");
+                        writer.WriteLine("VERTICAL ANGLE MAXIMUM                  ,+89.9 DEG");
+                        writer.WriteLine("VERTICAL ANGLE INCREMENT                ,0.1 DEG");
+                        writer.WriteLine("Reference System                        ,LAT-LON");
+                        writer.WriteLine("Source System                           ,LAT-LON");
+                        writer.WriteLine("*end Cass Parms");
+                        writer.WriteLine();
+                        writer.WriteLine();
+
+                        foreach (var source in platform.Sources)
+                        {
+                            Console.WriteLine("  Found source: {0}", source.Name);
+                            var sourceToModes = new OneToMany<NemoSource, List<OneToMany<NemoMode, List<SoundSource>>>>(source);
+                            foreach (var mode in source.Modes)
+                            {
+                                Console.WriteLine("    Found mode: {0}", mode.Name);
+                                var modeToSoundSources = new OneToMany<NemoMode, List<SoundSource>>(mode);
+                                sourceToModes.Many.Add(modeToSoundSources);
+                                foreach (var analysisPoint in analysisPoints)
+                                {
+                                    foreach (var soundSource in analysisPoint.SoundSources)
+                                    {
+                                        var psmFields = soundSource.Name.Split('|');
+                                        var soundSourcePlatform = psmFields[0];
+                                        var soundSourceSource = psmFields[1];
+                                        var soundSourceMode = psmFields[2];
+                                        if ((platform.Name.ToLower() == soundSourcePlatform.ToLower()) && (source.Name.ToLower() == soundSourceSource.ToLower()) && (mode.Name.ToLower() == soundSourceMode.ToLower()) && (soundSource.ShouldBeCalculated))
+                                        {
+                                            modeToSoundSources.Many.Add(soundSource);
+                                            Console.WriteLine("      Found location: {0}", soundSource);
+                                        }
+                                    } // end loop over all sound sources in the current analysis point
+                                } // end loop over all analysis points
+                            } // end loop over modes in the current source
                             foreach (var mode in sourceToModes.Many)
                             {
+                                if (mode.Many.Count() == 0) break;
+                                Console.WriteLine("  Writing loadcase for source: {0}  mode: {1}", source.Name, mode.One.Name);
+
                                 writer.WriteLine("*Loadcase");
                                 writer.WriteLine("#Sim_Area_ID                             ");
                                 writer.WriteLine("Range Complex                           ,{0}", nemoScenario.SimAreaName);
@@ -159,8 +167,7 @@ namespace ESME.TransmissionLoss.CASS
                                 writer.WriteLine("Season                                  ,{0}", timePeriod);
                                 writer.Write("Radial Angles                           ");
 
-                                foreach (var radial in mode.Many[0].RadialBearings)
-                                    writer.Write(",{0}", radial);
+                                foreach (var radial in mode.Many[0].RadialBearings) writer.Write(",{0}", radial);
                                 writer.WriteLine();
 
                                 writer.WriteLine("#PSM_ID                                  ");
@@ -175,16 +182,20 @@ namespace ESME.TransmissionLoss.CASS
                                 writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", appSettings.CASSSettings.RangeStepSize, mode.One.Radius);
 
                                 foreach (var soundSource in mode.Many)
+                                {
                                     writer.WriteLine("Source Location                         ,{0:0.000} DEG, {1:0.000} DEG", soundSource.Latitude, soundSource.Longitude);
+                                    sourceCount++;
+                                }
+
                                 writer.WriteLine("*end loadcase");
                                 writer.WriteLine();
                             } // end of loop over all modes in the current source
-                        } // end of using block that writes the input file
-                        // Write the crufty batch file for the NUWC guys
-                        if (!string.IsNullOrEmpty(appSettings.CASSSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.CASSSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSSettings.CASSExecutablePath))
-                            using (var writer = new StreamWriter(batchFilePath))
-                                writer.WriteLine("start /wait \"{0}\" \"{1}\" \"{2}\" \"{3}\"", appSettings.CASSSettings.PythonExecutablePath, appSettings.CASSSettings.PythonScriptPath, inputFileName, appSettings.CASSSettings.CASSExecutablePath);
-                    } // end loop over all sources on the current platform
+
+                            // Write the crufty batch file for the NUWC guys);
+                        } // end loop over all sources on the current platform
+                    } // end of using block that writes the input file
+                    if (sourceCount == 0) File.Delete(inputFilePath);
+                    if (!string.IsNullOrEmpty(appSettings.CASSSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.CASSSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSSettings.CASSExecutablePath)) using (var writer = new StreamWriter(batchFilePath)) writer.WriteLine("start /wait \"{0}\" \"{1}\" \"{2}\" \"{3}\"", appSettings.CASSSettings.PythonExecutablePath, appSettings.CASSSettings.PythonScriptPath, inputFileName, appSettings.CASSSettings.CASSExecutablePath);
                 } // end loop over all platforms in the scenario
             } // end loop over all time periods we're generating CASS input files for
         } // end of WriteCASSInputFiles
