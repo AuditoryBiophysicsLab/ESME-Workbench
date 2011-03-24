@@ -627,10 +627,35 @@ namespace ESMEWorkBench.Data
         [XmlIgnore]
         public Environment2DData Bathymetry { get; private set; }
 
+        #region public bool CanSaveAs { get; set; }
+        [XmlIgnore]
+        public bool CanSaveAs
+        {
+            get
+            {
+                if ((FileName == null) || string.IsNullOrEmpty(ScenarioFileName)) return false;
+                return true;
+            }
+        }
+
+        #endregion
+
+        #region public bool CanSave { get; set; }
+        [XmlIgnore]
+        public bool CanSave
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(ScenarioFileName)) return false;
+                return true;
+            }
+        }
+
+        #endregion
+
         #region public string LocalStorageRoot { get; set; }
 
         [XmlIgnore]
-
         public string LocalStorageRoot
         {
             get
@@ -865,6 +890,7 @@ namespace ESMEWorkBench.Data
                                      {
                                          Name = analysisPointName,
                                          LayerType = LayerType.AnalysisPoint,
+                                         LineWidth = 1,
                                      };
                 MapLayers.Add(analysisPointLayer);
             }

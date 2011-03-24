@@ -3,10 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 using Cinch;
-using ESME.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.NAVO;
@@ -272,7 +269,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> SaveExperimentCommand
         {
-            get { return _saveExperiment ?? (_saveExperiment = new SimpleCommand<object, object>(obj => SaveExperiment())); }
+            get { return _saveExperiment ?? (_saveExperiment = new SimpleCommand<object, object>(arg => _experiment.CanSave, obj => SaveExperiment())); }
         }
 
         SimpleCommand<object, object> _saveExperiment;
@@ -283,7 +280,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> SaveExperimentAsCommand
         {
-            get { return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(obj => SaveExperimentAs())); }
+            get { return _saveExperimentAs ?? (_saveExperimentAs = new SimpleCommand<object, object>(arg => _experiment.CanSaveAs, obj => SaveExperimentAs())); }
         }
 
         SimpleCommand<object, object> _saveExperimentAs;
