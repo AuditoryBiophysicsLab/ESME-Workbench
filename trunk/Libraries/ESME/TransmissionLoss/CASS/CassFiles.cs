@@ -254,7 +254,9 @@ namespace ESME.TransmissionLoss.CASS
                         envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
                         var sedimentSample = sedimentType[location];
                         var curSedimentValue = sedimentSample.Data;
-                        envFile.WriteLine(curSedimentValue.HasValue ? BottomSedimentTypeTable.Lookup(curSedimentValue.Value).ToUpper() : "UNKNOWN");
+                        var sedimentTypeName = curSedimentValue.HasValue ? BottomSedimentTypeTable.Lookup(curSedimentValue.Value).ToUpper() : "UNKNOWN";
+                        if (sedimentTypeName == "LAND") sedimentTypeName = "SAND";
+                        envFile.WriteLine(sedimentTypeName);
                         envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", windSpeed[location].Data * 1.94384449);
                         envFile.WriteLine();
                     }
