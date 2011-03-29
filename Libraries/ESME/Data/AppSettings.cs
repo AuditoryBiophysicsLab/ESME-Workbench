@@ -44,6 +44,15 @@ namespace ESME.Data
 
         public AppSettings(AppSettings that) : this() { CopyFrom(that); }
 
+        public void SetDefaults()
+        {
+            if (string.IsNullOrEmpty(ScenarioEditorExecutablePath)) ScenarioEditorExecutablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "scenario-builder.jar");
+            if (string.IsNullOrEmpty(ReportGeneratorExecutablePath)) ReportGeneratorExecutablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "post-processor.jar");
+            if (ScenarioSimulatorSettings != null) ScenarioSimulatorSettings.SetDefaults();
+            if (CASSSettings != null) CASSSettings.SetDefaults();
+            if (NAVOConfiguration != null) NAVOConfiguration.SetDefaults();
+        }
+
         public static Type[] ReferencedTypes
         {
             get
@@ -352,7 +361,7 @@ namespace ESME.Data
 
     public class CASSSettings : INotifyPropertyChanged
     {
-        public void SetDefaultCASSParameterFiles()
+        public void SetDefaults()
         {
             if (CASSParameterFiles.Count == 0)
             {
@@ -729,6 +738,11 @@ namespace ESME.Data
 
     public class ScenarioSimulatorSettings : INotifyPropertyChanged
     {
+        public void SetDefaults()
+        {
+            if (string.IsNullOrEmpty(ExecutablePath)) ExecutablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "scene-sim.jar");
+        }
+
         #region public string ExecutablePath { get; set; }
 
         public string ExecutablePath
@@ -779,7 +793,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs IterationsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.Iterations);
-        int _iterations;
+        int _iterations = 1;
 
         #endregion
 

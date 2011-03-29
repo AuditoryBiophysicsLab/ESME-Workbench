@@ -383,7 +383,10 @@ namespace ESMEWorkBench.ViewModels.Map
 
         public MapLayerViewModel()
         {
-            LayerOverlay = new LayerOverlay();
+            LayerOverlay = new LayerOverlay
+                           {
+                               TileType = TileType.HybridTile,
+                           };
             LineColorBrush = new SolidColorBrush(_lineColor);
             AreaColorBrush = new SolidColorBrush(_areaColor);
             AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);

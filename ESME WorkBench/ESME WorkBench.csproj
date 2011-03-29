@@ -145,7 +145,6 @@
     <Compile Include="ViewModels\Map\MarkerLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapShape.cs" />
-    <Compile Include="ViewModels\Map\MapShapeLayer.cs" />
     <Compile Include="ViewModels\Map\RasterMapLayer.cs" />
     <Compile Include="ViewModels\NAVO\EnvironmentBuilderViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ScenarioSimulatorOptionsViewModel.cs" />

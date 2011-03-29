@@ -7,14 +7,15 @@
   <?define Manufacturer="Boston University"?>
   <?define ProductCode="{C2113C4A-86D3-4BA8-AED4-30976D5539A6}"?>
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
-  <?define ESMEPath="C:\Projects\ESME Deliverables\ESME WorkBench\bin\Release"?>
-  <?define ESMEViewsPath="C:\Projects\ESME Deliverables\ESME.Controls\bin\Release"?>
-  <?define BellhopPath="C:\Projects\ESME Deliverables\Utilities\Bellhop"?>
-  <?define MMMBSPath="C:\Projects\ESME Deliverables\Utilities\MMMBS\demoProjects"?>
-  <?define ImportNetCDFPath="C:\Projects\ESME Deliverables\Utilities\NetCDFExtractor\bin\x86\Release"?>
-  <?define SMGCExtractPath="C:\Projects\ESME Deliverables\Utilities\SMGCExtract\Release"?>
+  <?define ESMERoot="C:\Projects\ESME Deliverables"?>
+  <?define ESMEPath="$(var.ESMERoot)\ESME WorkBench\bin\Release"?>
+  <?define ESMEViewsPath="$(var.ESMERoot)\ESME.Controls\bin\Release"?>
+  <?define BellhopPath="$(var.ESMERoot)\Utilities\Bellhop"?>
+  <?define MMMBSPath="$(var.ESMERoot)\Utilities\MMMBS\demoProjects"?>
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
-  <?define ReleaseNotesPath="C:\Projects\ESME Deliverables\Release Notes"?>
+  <?define ReleaseNotesPath="$(var.ESMERoot)\Release Notes"?>
+  <?define ExtractionProgramsPath="$(var.ESMERoot)\Utilities\OAML Extractors"?>
+  <?define NAEMOToolsPath="$(var.ESMERoot)\Utilities\NAEMO Tools"?>
   <Product Id="$(var.ProductCode)" 
            Name="$(var.ProductName)" 
            Version="$(var.ProductVersion)" 
@@ -87,27 +88,68 @@
             <File Id="UserGuide"
                   Name="ESME Workbench 2011 User Manual.pdf"
                   Source="$(var.ReleaseNotesPath)\ESME Workbench 2011 User Manual.pdf" />
+            <File Id="WebsiteLink"
+                  Name="ESME.url"
+                  Source="$(var.ESMERoot)\ESME.url" />
 
             <!-- External executables -->
-            
-            <!-- SMGC Database Extractor -->
+
+            <!-- OAML extraction programs -->
+            <!-- SMGC extraction program -->
             <File Id="SMGCExtract.exe"
                   Name="SMGCExtract.exe"
-                  Source="$(var.SMGCExtractPath)\SMGCExtract.exe" />
+                  Source="$(var.ExtractionProgramsPath)\SMGCExtract.exe" />
+            <!-- BST extraction program -->
+            <File Id="extract.exe"
+                  Name="extract.exe"
+                  Source="$(var.ExtractionProgramsPath)\extract.exe" />
+            <!-- DBDB-V extraction program -->
+            <File Id="dbv5_command.exe"
+                  Name="dbv5_command.exe"
+                  Source="$(var.ExtractionProgramsPath)\dbv5_command.exe" />
             <!-- GDEM Database Extractor (NetCDF format) -->
             <File Id="ImportNetCDF.exe"
                   Name="ImportNetCDF.exe"
-                  Source="$(var.ImportNetCDFPath)\ImportNetCDF.exe" />
+                  Source="$(var.ExtractionProgramsPath)\ImportNetCDF.exe" />
             <File Id="netcdf.dll"
                   Name="netcdf.dll"
-                  Source="$(var.ImportNetCDFPath)\netcdf.dll" />
+                  Source="$(var.ExtractionProgramsPath)\netcdf.dll" />
             <File Id="NetCDF_Wrapper.dll"
                   Name="NetCDF_Wrapper.dll"
-                  Source="$(var.ImportNetCDFPath)\NetCDF_Wrapper.dll" />
+                  Source="$(var.ExtractionProgramsPath)\NetCDF_Wrapper.dll" />
+            <!-- End OAML extraction programs -->
+
             <!-- Bellhop acoustic simulator -->
             <File Id="bellhop.exe"
                   Name="bellhop.exe"
                   Source="$(var.BellhopPath)\bellhop.exe" />
+
+            <!-- NAEMO Tools -->
+            <File Id="log4j.xml"
+                  Name="log4j.xml"
+                  Source="$(var.NAEMOToolsPath)\log4j.xml" />
+            <File Id="scenlog4j.xml"
+                  Name="scen-log4j.xml"
+                  Source="$(var.NAEMOToolsPath)\scen-log4j.xml" />
+            <File Id="simlog4j.xml"
+                  Name="sim-log4j.xml"
+                  Source="$(var.NAEMOToolsPath)\sim-log4j.xml" />
+            <File Id="log4j.xmlNemo2.l4j.ini"
+                  Name="Nemo2.l4j.ini"
+                  Source="$(var.NAEMOToolsPath)\Nemo2.l4j.ini" />
+            <File Id="postprocesslog4j.xml"
+                  Name="post-process-log4j.xml"
+                  Source="$(var.NAEMOToolsPath)\post-process-log4j.xml" />
+            <File Id="postprocessor.jar"
+                  Name="post-processor.jar"
+                  Source="$(var.NAEMOToolsPath)\post-processor.jar" />
+            <File Id="scenariobuilder.jar"
+                  Name="scenario-builder.jar"
+                  Source="$(var.NAEMOToolsPath)\scenario-builder.jar" />
+            <File Id="scenesim.jar"
+                  Name="scene-sim.jar"
+                  Source="$(var.NAEMOToolsPath)\scene-sim.jar" />
+            <!-- End external executables -->
 
             <!-- ThinkGeo GIS assemblies -->
             <File Id="MapSuiteCore.dll" 
@@ -193,6 +235,12 @@
                       Name="User Guide"
                       WorkingDirectory="INSTALLLOCATION"
                       Target="[INSTALLLOCATION]ESME Workbench 2011 User Manual.pdf"
+                      Advertise="no" />
+            <Shortcut Id="WebLink_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Visit the ESME Website to download environmental data"
+                      WorkingDirectory="INSTALLLOCATION"
+                      Target="[INSTALLLOCATION]ESME.url"
                       Advertise="no" />
             <Shortcut Id="ESME_WorkBench_Desktop_Shortcut"
                       Directory="DesktopFolder"
