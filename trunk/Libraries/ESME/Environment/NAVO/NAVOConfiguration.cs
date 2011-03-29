@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Reflection;
 using Cinch;
 using HRC.Utility;
 
@@ -12,6 +10,12 @@ namespace ESME.Environment.NAVO
     [Serializable]
     public class NAVOConfiguration : SerializableData<NAVOConfiguration>
     {
+        public void SetDefaults()
+        {
+            if (string.IsNullOrEmpty(BSTEXEPath)) BSTEXEPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "extract.exe");
+            if (string.IsNullOrEmpty(DBDBEXEPath)) BSTEXEPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "dbv5_command.exe");
+        }
+
         #region public NAVOTimePeriod SpringStartMonth { get; set; }
 
         public NAVOTimePeriod SpringStartMonth

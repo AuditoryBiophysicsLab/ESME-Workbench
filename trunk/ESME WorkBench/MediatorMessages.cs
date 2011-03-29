@@ -26,7 +26,6 @@ namespace ESMEWorkBench
         public const string EnableGUI = "EnableGUIMessage";
 
         public const string SetLayerCollection = "SetLayerCollectionMessage";
-        public const string LayerAdded = "LayerAddedMessage";
 
         public const string LayerListViewModelInitialized = "LayerListViewModelInitializedMessage";
         public const string MapViewModelInitialized = "MapViewModelInitializedMessage";
@@ -67,7 +66,6 @@ namespace ESMEWorkBench
         public const string RefreshMap = "RefreshMapMessage";
         public const string RefreshLayer = "RefreshLayerMessage";
 
-        public const string AddMapLayer = "AddMapLayerMessage";
         public const string AddListLayer = "AddListLayerMessage";
         public const string RemoveLayer = "RemoveLayerMessage";
         public const string MapLayerIndexQuery = "MapLayerIndexQueryMessage";

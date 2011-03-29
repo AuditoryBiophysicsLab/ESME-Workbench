@@ -287,7 +287,7 @@
 					                LargeImageSource="..\Images\LargeIcons\Button-Add-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add an Animal Population File to the experiment"
-					                Command="{Binding AddAnimalPopulationFileCommand}" />
+					                Command="{Binding DisabledCommand}" />
                     <r:RibbonButton Label="Create Bathymetry File"
 					                SmallImageSource="..\Images\SmallIcons\save-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\save-icon.png"

@@ -75,7 +75,6 @@ namespace ESME.TransmissionLoss.CASS
 
         public static void WriteCASSInputFiles(AppSettings appSettings, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName)
         {
-            
             var nemoScenario = nemoFile.Scenario;
             var simAreaFile = SimAreaCSV.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"));
             var simAreaData = simAreaFile[nemoScenario.SimAreaName];
@@ -195,7 +194,7 @@ namespace ESME.TransmissionLoss.CASS
                         } // end loop over all sources on the current platform
                     } // end of using block that writes the input file
                     if (sourceCount == 0) File.Delete(inputFilePath);
-                    if (!string.IsNullOrEmpty(appSettings.CASSSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.CASSSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSSettings.CASSExecutablePath)) using (var writer = new StreamWriter(batchFilePath)) writer.WriteLine("start /wait \"{0}\" \"{1}\" \"{2}\" \"{3}\"", appSettings.CASSSettings.PythonExecutablePath, appSettings.CASSSettings.PythonScriptPath, inputFileName, appSettings.CASSSettings.CASSExecutablePath);
+                    else if (!string.IsNullOrEmpty(appSettings.CASSSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.CASSSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSSettings.CASSExecutablePath)) using (var writer = new StreamWriter(batchFilePath)) writer.WriteLine("start /wait \"{0}\" \"{1}\" \"{2}\" \"{3}\"", appSettings.CASSSettings.PythonExecutablePath, appSettings.CASSSettings.PythonScriptPath, inputFileName, appSettings.CASSSettings.CASSExecutablePath);
                 } // end loop over all platforms in the scenario
             } // end loop over all time periods we're generating CASS input files for
         } // end of WriteCASSInputFiles

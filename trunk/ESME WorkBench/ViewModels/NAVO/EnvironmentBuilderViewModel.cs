@@ -55,7 +55,14 @@ namespace ESMEWorkBench.ViewModels.NAVO
             set
             {
                 if (_bufferZoneSize == value) return;
+                if (value < 0) 
+                {
+                    _messageBoxService.ShowError("Buffer zone size may not be negative");
+                    NotifyPropertyChanged(BufferZoneSizeChangedEventArgs);
+                    return;
+                }
                 _bufferZoneSize = value;
+
                 NotifyPropertyChanged(BufferZoneSizeChangedEventArgs);
                 NAVODataSources.ExtractionArea = GeoRect.Inflate(_experiment.OpArea, BufferZoneSize * 1000, BufferZoneSize * 1000);
             }

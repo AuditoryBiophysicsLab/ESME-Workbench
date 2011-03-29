@@ -15,7 +15,7 @@ namespace ESMEWorkBench
         {
             AppSettings.ApplicationName = App.Name;
             AppSettings = AppSettings.Load(AppSettings.AppSettingsFile, null);
-            AppSettings.CASSSettings.SetDefaultCASSParameterFiles();
+            AppSettings.SetDefaults();
         }
 
         public static AppSettings AppSettings { get; set; }

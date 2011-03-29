@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -11,7 +10,6 @@ using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Model;
 using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
