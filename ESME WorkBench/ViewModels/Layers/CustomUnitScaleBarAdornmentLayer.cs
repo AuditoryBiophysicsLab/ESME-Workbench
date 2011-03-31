@@ -57,7 +57,7 @@ namespace ESMEWorkBench.ViewModels.Layers
                 var barLength = ((_unitRoundValue*_meterToUnit)*_width)/fullBarLength;
 
                 //Draw the line of the scale bar according to the adjusted length.
-                var pen = new GeoPen(GeoColor.StandardColors.Black, 1F);
+                var pen = new GeoPen(GeoColor.StandardColors.White, 1F);
                 canvas.DrawLine(new[]
                                 {
                                     new ScreenPointF(xpos, ypos - 10), new ScreenPointF(xpos, ypos), new ScreenPointF((float) barLength + xpos, ypos), new ScreenPointF((float) barLength + xpos, ypos - 10)

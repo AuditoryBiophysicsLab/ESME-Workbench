@@ -134,7 +134,7 @@ namespace ESMEWorkBench.ViewModels.Map
                                                        //Ratio of meters to specified units
                                                        MeterToUnit = 1000,
                                                        GeoFont = new GeoFont(localizedName, 10),
-                                                       GeoSolidBrush = new GeoSolidBrush(GeoColor.StandardColors.Black),
+                                                       GeoSolidBrush = new GeoSolidBrush(GeoColor.StandardColors.White),
                                                    };
             AdornmentOverlay.Layers.Add("Scale", customUnitScaleBarAdornmentLayer);
 
