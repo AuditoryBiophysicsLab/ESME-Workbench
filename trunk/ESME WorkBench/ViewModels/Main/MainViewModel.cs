@@ -417,9 +417,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 {
                     return ((_experiment != null) && (_experiment.NemoFile != null) && (_experiment.FileName != null) && Globals.AppSettings.NAVOConfiguration.IsValid);
                 }
-
                 return ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory)) && (_experiment != null) && (_experiment.NemoFile != null));
-
             }
         }
         void ShowEnvironmentSettingsView()
