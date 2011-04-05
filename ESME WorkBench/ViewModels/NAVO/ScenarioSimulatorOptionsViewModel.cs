@@ -82,7 +82,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     {
                         var numIterations = Iterations;
                         var isRandomized = IsRandomized;
-                        var commandArgs = string.Format(isRandomized ? "-b -n {0} -s \"{1}\"" : "-b -r -n {0} -s \"{1}\"", numIterations, NemoFile.FileName);
+                        var commandArgs = string.Format(isRandomized ? "-b -r -n {0} -s \"{1}\"" : "-b -n {0} -s \"{1}\"", numIterations, NemoFile.FileName);
 
                         new Process
                         {
