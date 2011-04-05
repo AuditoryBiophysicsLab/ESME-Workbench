@@ -105,7 +105,7 @@
 									<cinch:NumericTextBoxBehaviour />
 								</i:Interaction.Behaviors>
 							</TextBox>
-							<CheckBox IsChecked="{Binding AppSettings.ScenarioSimulatorSettings.IsRandomized}"
+                            <CheckBox IsChecked="{Binding AppSettings.ScenarioSimulatorSettings.IsRandomized}"
 							          Margin="5 10">
 								Randomize Ship Tracks
 							</CheckBox>
