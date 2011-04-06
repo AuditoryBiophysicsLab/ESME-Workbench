@@ -58,7 +58,8 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        public static string BathymetryFilename(string outputPath, string selectedResolution) { return Path.Combine(outputPath, string.Format("bathymetry-{0}.chb", selectedResolution)); }
+        public static string BathymetryCHBFilename(string outputPath, string selectedResolution) { return Path.Combine(outputPath, string.Format("bathymetry-{0}.chb", selectedResolution)); }
+        public static string BathymetryYXZFilename(string outputPath, string selectedResolution) { return Path.Combine(outputPath, string.Format("bathymetry-{0}.yxz", selectedResolution)); }
         
         public void Initialize()
         {
@@ -85,7 +86,7 @@ namespace ESME.Environment.NAVO
         public static void ExtractArea(string outputDirectory, string selectedResolution, GeoRect extractionArea, IList<string> resolutions)
         {
             //from documentation, area extractions for DBDB are of the form <dbv5_command path> area <database path> <finest_resolution> <coarsest resolution> nearest 0 meters G <south west north east> 
-            var commandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3} {4} {5} {6} {7} CHB=\"{8}\"", DatabasePath, resolutions.First(), resolutions.Last(), extractionArea.South, extractionArea.West, extractionArea.North, extractionArea.East, selectedResolution, string.Format("bathymetry-{0}.chb", selectedResolution));
+            var commandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3} {4} {5} {6} {7} YXZ=\"{8}\"", DatabasePath, resolutions.First(), resolutions.Last(), extractionArea.South, extractionArea.West, extractionArea.North, extractionArea.East, selectedResolution, string.Format("bathymetry-{0}.yxz", selectedResolution));
             //extract the area and look for success or failure in the output string.
             var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputDirectory);
             var resarray = result.Split('\n');

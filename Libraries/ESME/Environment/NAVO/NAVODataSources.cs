@@ -151,7 +151,8 @@ namespace ESME.Environment.NAVO
             DigitalBathymetricDatabase.ExtractArea(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea, DigitalBathymetricDatabase.Resolutions);
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
-            var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
+            //var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryCHBFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
+            var bathymetry = Environment2DData.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var maxDepth = bathymetry.Minimum.Data;
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
@@ -210,8 +211,9 @@ namespace ESME.Environment.NAVO
             {
                 Status = "Exporting bathymetry data";
                 //var bathymetryFileName = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathy_" + DigitalBathymetricDatabase.SelectedResolution + ".txt");
-                var bathymetryFileName = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathymetry.txt");
-                CASSFiles.WriteBathymetryFile(bathymetryFileName, bathymetry);
+                var cassBathymetryFile = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathymetry.txt");
+                File.Copy(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), cassBathymetryFile, true);
+                //CASSFiles.WriteBathymetryFile(cassBathymetryFile, bathymetry);
 
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
@@ -245,8 +247,8 @@ namespace ESME.Environment.NAVO
         public string SoundspeedFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(_localStorageRoot, timePeriod); }
         public string SoundspeedFilename(string directoryName, NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(directoryName, timePeriod); }
         public string WindFilename(NAVOTimePeriod timePeriod) { return SurfaceMarineGriddedClimatologyDatabase.WindFilename(_localStorageRoot, timePeriod); }
-        public string SedimentFilename(NAVOTimePeriod timePeriod) { return BottomSedimentTypeDatabase.SedimentFilename(_localStorageRoot, BottomSedimentTypeDatabase.SelectedResolution); }
-        public string BathymetryFilename(NAVOTimePeriod timePeriod) { return DigitalBathymetricDatabase.BathymetryFilename(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution); }
+        public string SedimentFilename { get { return BottomSedimentTypeDatabase.SedimentFilename(_localStorageRoot, BottomSedimentTypeDatabase.SelectedResolution); } }
+        public string BathymetryFilename { get { return DigitalBathymetricDatabase.BathymetryYXZFilename(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution); } }
 
         #region public int ProgressPercent { get; set; }
 

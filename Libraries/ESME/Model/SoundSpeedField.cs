@@ -391,9 +391,9 @@ namespace ESME.Model
                 var sals = new SoundSpeedField(salinityData, TimePeriod);
                 var deepestTemperature = temps[DeepestSSP];
                 var deepestSalinity = sals[DeepestSSP];
-                var tempD = deepestTemperature.SoundSpeeds[DeepestSSP.SoundSpeeds.Length - 1];
+                var tempD = deepestTemperature.SoundSpeeds.Last();
                 var tempD1 = deepestTemperature.SoundSpeeds[DeepestSSP.SoundSpeeds.Length - 2];
-                var salinity = deepestSalinity.SoundSpeeds[DeepestSSP.SoundSpeeds.Length - 1];
+                var salinity = deepestSalinity.SoundSpeeds.Last();
 
                 var tempDiff = tempD1 - tempD;
                 var newTemp = tempD - tempDiff;

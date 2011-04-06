@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -25,6 +26,7 @@ using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
+using Microsoft.VisualBasic;
 using LineStyle = ESME.Overlay.LineStyle;
 
 namespace ESMEWorkBench.Data
@@ -972,6 +974,13 @@ namespace ESMEWorkBench.Data
         {
             if (!isFromInitialize && !_isInitialized) return;
 
+#if false
+            // Graham - here's how to get the physical memory size for the current system
+            var info = new Microsoft.VisualBasic.Devices.ComputerInfo();
+            var bytes = info.TotalPhysicalMemory;
+            var megs = bytes >> 20;
+#endif
+
             if (FileSystemWatcher != null) FileSystemWatcher.Dispose();
             if (FileName != null)
             {
@@ -1058,9 +1067,9 @@ namespace ESMEWorkBench.Data
             {
                 if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = Environment2DData.FromEEB(BathymetryFileName, "bathymetry", SimArea);
                 else if (BathymetryFileName.EndsWith(".chb"))
-                {
                     Bathymetry = Environment2DData.FromCHB(BathymetryFileName, -1);
-                }
+                else if (BathymetryFileName.EndsWith(".yxz"))
+                    Bathymetry = Environment2DData.FromYXZ(BathymetryFileName, -1);
             }
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
             if (Bathymetry != null)
