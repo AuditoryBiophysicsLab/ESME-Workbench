@@ -340,7 +340,7 @@ namespace ESME.Environment
                 stream.ReadBytes(paddingWidth);
                 //var depths = new float[height, width];
                 var depths = new List<EarthCoordinate<float>>();
-                var fieldData = new EarthCoordinate<float>[width,height];
+                var fieldData = new EarthCoordinate<float>[width, height];
                 for (var lat = 0; lat < height; lat++)
                     for (var lon = 0; lon < width; lon++)
                     {
@@ -356,6 +356,23 @@ namespace ESME.Environment
                 return new Environment2DData(fieldData);
                 //return new Environment2DData(depths);
                 //return new Environment2DData(north, south, east, west, gridSpacing, depths, minDepth, maxDepth);
+            }
+        }
+
+        public static Environment2DData FromYXZ(string fileName, float scaleFactor)
+        {
+            char[] separators = {' '};
+            using (var stream = new StreamReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                var fieldData = new List<EarthCoordinate<float>>();
+                var curLine = stream.ReadLine();
+                while (curLine != null)
+                {
+                    var fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+                    fieldData.Add(new EarthCoordinate<float>(double.Parse(fields[0]), double.Parse(fields[1]), float.Parse(fields[2]) * scaleFactor));
+                    curLine = stream.ReadLine();
+                }
+                return new Environment2DData(fieldData);
             }
         }
 
@@ -402,7 +419,7 @@ namespace ESME.Environment
             {
                 for (var lat = 0; lat < Latitudes.Count; lat++)
                     for (var lon = 0; lon < Longitudes.Count; lon++)
-                        stream.WriteLine(string.Format("{0:##.######} {1:###.######} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor * FieldData[lon, lat].Data));
+                        stream.WriteLine(string.Format("{0:##.####} {1:###.####} {2:#.###}", Latitudes[lat], Longitudes[lon], scaleFactor * FieldData[lon, lat].Data));
             }
         }
     }

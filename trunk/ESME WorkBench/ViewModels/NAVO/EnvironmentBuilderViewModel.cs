@@ -402,8 +402,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                                                         var timePeriod = selectedTimePeriods[0];
                                                                         _experiment.WindSpeedFileName = NAVODataSources.WindFilename(timePeriod);
                                                                         _experiment.SoundSpeedFileName = NAVODataSources.SoundspeedFilename(timePeriod);
-                                                                        _experiment.SedimentFileName = NAVODataSources.SedimentFilename(timePeriod);
-                                                                        _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename(timePeriod);
+                                                                        _experiment.SedimentFileName = NAVODataSources.SedimentFilename;
+                                                                        _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename;
                                                                         _experiment.SimArea = NAVODataSources.ExtractionArea;
                                                                     }
                                                                     AppSettings.Save(); //remember the new values. 
