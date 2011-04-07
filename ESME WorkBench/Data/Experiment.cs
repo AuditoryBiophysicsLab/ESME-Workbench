@@ -15,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
+using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Model;
@@ -539,6 +540,24 @@ namespace ESMEWorkBench.Data
 
         static readonly PropertyChangedEventArgs SimAreaChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SimArea);
         GeoRect _simArea;
+
+        #endregion
+
+        #region public ScenarioSimulatorSettings ScenarioSimulatorSettings { get; set; }
+
+        public ScenarioSimulatorSettings ScenarioSimulatorSettings
+        {
+            get { return _scenarioSimulatorSettings; }
+            set
+            {
+//                if (_scenarioSimulatorSettings == value) return;
+                _scenarioSimulatorSettings = value;
+                NotifyPropertyChanged(ScenarioSimulatorSettingsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ScenarioSimulatorSettingsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.ScenarioSimulatorSettings);
+        ScenarioSimulatorSettings _scenarioSimulatorSettings;
 
         #endregion
 

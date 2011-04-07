@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Cinch;
+using ESME.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.NAVO;
@@ -107,12 +108,15 @@ namespace ESMEWorkBench.ViewModels.Main
                     {
                         var vm = new ScenarioSimulatorOptionsViewModel
                                  {
-                                     IsRandomized = Globals.AppSettings.ScenarioSimulatorSettings.IsRandomized,
+                                     ScenarioSimulatorSettings = _experiment.ScenarioSimulatorSettings ?? Globals.AppSettings.ScenarioSimulatorSettings,
                                      NemoFile = _experiment.NemoFile,
-                                     Iterations = Globals.AppSettings.ScenarioSimulatorSettings.Iterations,
-
                                  };
+
                         var result = _visualizerService.ShowDialog("ScenarioSimulatorOptionsView", vm);
+                        if (result.HasValue && result.Value)
+                        {
+                            _experiment.ScenarioSimulatorSettings = vm.ScenarioSimulatorSettings;
+                        }
                     }));
             }
         }

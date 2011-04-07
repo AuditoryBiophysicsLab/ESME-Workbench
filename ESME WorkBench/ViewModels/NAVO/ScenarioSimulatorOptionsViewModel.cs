@@ -1,54 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Cinch;
+using ESME.Data;
 using ESME.NEMO;
 
 namespace ESMEWorkBench.ViewModels.NAVO
 {
     public class ScenarioSimulatorOptionsViewModel : ViewModelBase
     {
-        #region public bool IsRandomized { get; set; }
+        #region public ScenarioSimulatorSettings ScenarioSimulatorSettings { get; set; }
 
-        public bool IsRandomized
+        static readonly PropertyChangedEventArgs ScenarioSimulatorSettingsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorOptionsViewModel>(x => x.ScenarioSimulatorSettings);
+        ScenarioSimulatorSettings _scenarioSimulatorSettings;
+
+        public ScenarioSimulatorSettings ScenarioSimulatorSettings
         {
-            get { return _isRandomized; }
+            get { return _scenarioSimulatorSettings; }
             set
             {
-                if (_isRandomized == value) return;
-                _isRandomized = value;
-                NotifyPropertyChanged(IsRandomizedChangedEventArgs);
+                if (_scenarioSimulatorSettings == value) return;
+
+                _scenarioSimulatorSettings = value;
+
+                NotifyPropertyChanged(ScenarioSimulatorSettingsChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs IsRandomizedChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorOptionsViewModel>(x => x.IsRandomized);
-        bool _isRandomized;
-
-        #endregion
-
-        #region public int Iterations { get; set; }
-
-        public int Iterations
-        {
-            get { return _iterations; }
-            set
-            {
-                if (_iterations == value) return;
-                _iterations = value;
-                NotifyPropertyChanged(IterationsChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IterationsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorOptionsViewModel>(x => x.Iterations);
-        int _iterations;
 
         #endregion
 
         #region public NemoFile NemoFile { get; set; }
+
+        static readonly PropertyChangedEventArgs NemoFileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorOptionsViewModel>(x => x.NemoFile);
+        NemoFile _nemoFile;
 
         public NemoFile NemoFile
         {
@@ -61,13 +46,11 @@ namespace ESMEWorkBench.ViewModels.NAVO
             }
         }
 
-        static readonly PropertyChangedEventArgs NemoFileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorOptionsViewModel>(x => x.NemoFile);
-        NemoFile _nemoFile;
-
         #endregion
 
-
         #region RunCommand
+
+        SimpleCommand<object, object> _run;
 
         public SimpleCommand<object, object> RunCommand
         {
@@ -78,29 +61,31 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     return ((Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath != null)
                         && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath) && NemoFile != null);
                 },
-                    delegate
+                delegate
+                {
+                    string commandArgs = string.Format("-Dlog4j.configuration=\"{3}\" -Dsim.output.level={4} {2} -r -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? "-b" : "", ScenarioSimulatorSettings.JavaConfigurationFile,ScenarioSimulatorSettings.LogLevel);
+
+                    new Process
                     {
-                        var numIterations = Iterations;
-                        var isRandomized = IsRandomized;
-                        var commandArgs = string.Format(isRandomized ? "-b -r -n {0} -s \"{1}\"" : "-b -n {0} -s \"{1}\"", numIterations, NemoFile.FileName);
+                        StartInfo =
+                            {
+                                FileName = Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath,
+                                Arguments = commandArgs,
+                            },
+                    }.Start();
 
-                        new Process
-                        {
-                            StartInfo =
-                                {
-                                    FileName = Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath,
-                                    Arguments = commandArgs,
-                                },
-                        }.Start();
-
-                        CloseActivePopUpCommand.Execute(true);
-                    }));
+                    CloseActivePopUpCommand.Execute(true);
+                }));
             }
         }
 
-        SimpleCommand<object, object> _run;
-
         #endregion
 
+        string CommandArgs()
+        {
+            var sb = new StringBuilder();
+            
+            return sb.ToString();
+        }
     }
 }

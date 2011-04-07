@@ -797,6 +797,199 @@ namespace ESME.Data
 
         #endregion
 
+        #region public bool OptimizeBuffer { get; set; }
+
+        public bool OptimizeBuffer
+        {
+            get { return _optimizeBuffer; }
+            set
+            {
+                if (_optimizeBuffer == value) return;
+                _optimizeBuffer = value;
+                NotifyPropertyChanged(OptimizeBufferChangedEventArgs);
+                NotifyPropertyChanged(NotOptimizeBufferChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OptimizeBufferChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.OptimizeBuffer);
+        bool _optimizeBuffer;
+
+        #endregion
+
+        #region public bool NotOptimizeBuffer { get; set; }
+
+        public bool NotOptimizeBuffer
+        {
+            get { return !_optimizeBuffer; }
+        }
+
+        static readonly PropertyChangedEventArgs NotOptimizeBufferChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.NotOptimizeBuffer);
+        
+        #endregion
+
+
+        #region public int OutputBufferSize { get; set; }
+
+        public int OutputBufferSize
+        {
+            get { return _outputBufferSize; }
+            set
+            {
+                if (_outputBufferSize == value) return;
+                _outputBufferSize = value;
+                NotifyPropertyChanged(OutputBufferSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OutputBufferSizeChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.OutputBufferSize);
+        int _outputBufferSize;
+
+        #endregion
+
+        #region public string JavaConfigurationFile { get; set; }
+
+        public string JavaConfigurationFile
+        {
+            get { return _javaConfigurationFile; }
+            set
+            {
+                if (_javaConfigurationFile == value) return;
+                _javaConfigurationFile = value;
+                NotifyPropertyChanged(JavaConfigurationFileChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs JavaConfigurationFileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.JavaConfigurationFile);
+        string _javaConfigurationFile;
+
+        #endregion
+
+        #region public int DecibelCutoff { get; set; }
+
+        public int DecibelCutoff
+        {
+            get { return _decibelCutoff; }
+            set
+            {
+                if (_decibelCutoff == value) return;
+                _decibelCutoff = value;
+                NotifyPropertyChanged(DecibelCutoffChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DecibelCutoffChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.DecibelCutoff);
+        int _decibelCutoff;
+
+        #endregion
+
+        #region public int LogLevel { get; set; }
+
+        public int LogLevel
+        {
+            get { return _logLevel; }
+            set
+            {
+                if (_logLevel == value) return;
+                _logLevel = value;
+                NotifyPropertyChanged(LogLevelChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LogLevelChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.LogLevel);
+        int _logLevel;
+
+        #endregion
+
+        #region public int ParallelSimulations { get; set; }
+
+        public int ParallelSimulations
+        {
+            get { return _parallelSimulations; }
+            set
+            {
+                if (_parallelSimulations == value) return;
+                _parallelSimulations = value;
+                NotifyPropertyChanged(ParallelSimulationsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ParallelSimulationsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ParallelSimulations);
+        int _parallelSimulations;
+
+        #endregion
+
+        #region public int SpeciesFileSize { get; set; }
+
+        public int SpeciesFileSize
+        {
+            get { return _speciesFileSize; }
+            set
+            {
+                if (_speciesFileSize == value) return;
+                _speciesFileSize = value;
+                NotifyPropertyChanged(SpeciesFileSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SpeciesFileSizeChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.SpeciesFileSize);
+        int _speciesFileSize;
+
+        #endregion
+
+        #region public int CASSFileSize { get; set; }
+
+        public int CASSFileSize
+        {
+            get { return _cASSFileSize; }
+            set
+            {
+                if (_cASSFileSize == value) return;
+                _cASSFileSize = value;
+                NotifyPropertyChanged(CASSFileSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CASSFileSizeChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.CASSFileSize);
+        int _cASSFileSize;
+
+        #endregion
+
+        #region public bool ReadAllMammals { get; set; }
+
+        public bool ReadAllMammals
+        {
+            get { return _readAllMammals; }
+            set
+            {
+                if (_readAllMammals == value) return;
+                _readAllMammals = value;
+                NotifyPropertyChanged(ReadAllMammalsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ReadAllMammalsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ReadAllMammals);
+        bool _readAllMammals;
+
+        #endregion
+
+        #region public bool ClipOutsideFootprint { get; set; }
+
+        public bool ClipOutsideFootprint
+        {
+            get { return _clipOutsideFootprint; }
+            set
+            {
+                if (_clipOutsideFootprint == value) return;
+                _clipOutsideFootprint = value;
+                NotifyPropertyChanged(ClipOutsideFootprintChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ClipOutsideFootprintChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ClipOutsideFootprint);
+        bool _clipOutsideFootprint;
+
+        #endregion
+
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;
