@@ -386,7 +386,6 @@ namespace ESME.Model
 
             if (maxDepth > DeepestSSP.MaxDepth)
             {
-
                 var temps = new SoundSpeedField(temperatureData, TimePeriod);
                 var sals = new SoundSpeedField(salinityData, TimePeriod);
                 var deepestTemperature = temps[DeepestSSP];

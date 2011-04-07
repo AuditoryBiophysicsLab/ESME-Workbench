@@ -106,13 +106,14 @@ namespace ESME.Model
                 else
                 {
 
-                    var thisSpeed = SoundSpeeds.Last();
-                    var thatSpeed = deepestSSP.SoundSpeeds[SoundSpeeds.Length - 1];
+                    var shallowSpeed = SoundSpeeds.Last();
+                    var deepSpeedAtSameDepth = deepestSSP.SoundSpeeds[SoundSpeeds.Length - 1];
 
-                    var ssDiff = thatSpeed - thisSpeed;
+                    var ssDiff = deepSpeedAtSameDepth - shallowSpeed;
                     Depths = new List<float>(deepestSSP.Depths).ToArray();
                     var speeds = new List<float>(SoundSpeeds);
-                    for (var speedIndex = SoundSpeeds.Length; speedIndex < deepestSSP.SoundSpeeds.Length; speedIndex++) speeds.Add(deepestSSP.SoundSpeeds[speedIndex] - ssDiff);
+                    for (var speedIndex = SoundSpeeds.Length; speedIndex < deepestSSP.SoundSpeeds.Length; speedIndex++) 
+                        speeds.Add(deepestSSP.SoundSpeeds[speedIndex] - ssDiff);
                     SoundSpeeds = speeds.ToArray();
                 }
             }
