@@ -63,7 +63,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 },
                 delegate
                 {
-                   // string commandArgs = string.Format("-Dlog4j.configuration=\"{3}\" -Dsim.output.level={4} {2} -r -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? "-b" : "", ScenarioSimulatorSettings.JavaConfigurationFile,ScenarioSimulatorSettings.LogLevel);
+                    // string commandArgs = string.Format("-Dlog4j.configuration=\"{3}\" -Dsim.output.level={4} {2} -r -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? "-b" : "", ScenarioSimulatorSettings.JavaConfigurationFile,ScenarioSimulatorSettings.LogLevel);
 
                     new Process
                     {
@@ -90,12 +90,16 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
             var sb = new StringBuilder();
             sb.Append(string.Format("-Xmx{0}m", megs)); // maximum memory on computer
-            if (!string.IsNullOrEmpty(ScenarioSimulatorSettings.JavaConfigurationFile)) sb.Append(string.Format(" -Dlog4j.configuration={0} -Dsim.output.level={1}", ScenarioSimulatorSettings.JavaConfigurationFile, ScenarioSimulatorSettings.LogLevel)); // location of xml config file, log level
-            sb.Append(string.Format(" -Dsim.receive.cutoff={0} -Dsim.species.cached={1} -Dsim.area.clip={2} -Dsim.species.filebuffer={3}",ScenarioSimulatorSettings.DecibelCutoff,ScenarioSimulatorSettings.ReadAllMammals.ToString().ToLower(),ScenarioSimulatorSettings.ClipOutsideFootprint.ToString().ToLower(),ScenarioSimulatorSettings.SpeciesFileSize)); // all animat configuration parameters
-            sb.Append(ScenarioSimulatorSettings.OptimizeBuffer ? " -Dsim.filebuffer.adapt=true" : string.Format(" -Dsim.output.filebuffer={0}", ScenarioSimulatorSettings.OutputBufferSize));  //output buffer options
-            sb.Append(string.Format(" -Dnemo.sim.count={0}", ScenarioSimulatorSettings.ParallelSimulations)); // parallel sims
-            sb.Append(string.Format(" -Dsim.cass.filebuffer={0}", ScenarioSimulatorSettings.CASSFileSize)); // cass file buffer.
-            sb.Append(string.Format(" -b {2} -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? "-r" : "")); 
+            if (!string.IsNullOrEmpty(ScenarioSimulatorSettings.JavaConfigurationFile)) sb.Append(string.Format(" -Dlog4j.configuration={0}", ScenarioSimulatorSettings.JavaConfigurationFile)); // location of xml config file
+            if (ScenarioSimulatorSettings.LogLevel > 0) sb.Append(string.Format(" -Dsim.output.level={0}", ScenarioSimulatorSettings.LogLevel)); // log level
+            if (ScenarioSimulatorSettings.DecibelCutoff > 0) sb.Append(string.Format(" -Dsim.receive.cutoff={0}", ScenarioSimulatorSettings.DecibelCutoff)); //db cutoff
+            sb.Append(string.Format(" -Dsim.species.cached={0} -Dsim.area.clip={1}", ScenarioSimulatorSettings.ReadAllMammals.ToString().ToLower(), ScenarioSimulatorSettings.ClipOutsideFootprint.ToString().ToLower()));// cache all species, clip? 
+            if (ScenarioSimulatorSettings.SpeciesFileSize > 0) sb.Append(string.Format(" -Dsim.species.filebuffer={0}", ScenarioSimulatorSettings.SpeciesFileSize)); // species file size
+
+            sb.Append(ScenarioSimulatorSettings.OptimizeBuffer ? " -Dsim.filebuffer.adapt=true" : (ScenarioSimulatorSettings.OutputBufferSize > 0 ? string.Format(" -Dsim.output.filebuffer={0}", ScenarioSimulatorSettings.OutputBufferSize) : string.Format("")));  //output buffer options
+            if (ScenarioSimulatorSettings.ParallelSimulations > 0) sb.Append(string.Format(" -Dnemo.sim.count={0}", ScenarioSimulatorSettings.ParallelSimulations)); // parallel sims
+            if (ScenarioSimulatorSettings.CASSFileSize > 0) sb.Append(string.Format(" -Dsim.cass.filebuffer={0}", ScenarioSimulatorSettings.CASSFileSize)); // cass file buffer.
+            sb.Append(string.Format(" -b {2} -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? "-r" : ""));
             return sb.ToString();
         }
     }
