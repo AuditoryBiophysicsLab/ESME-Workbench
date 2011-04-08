@@ -10,175 +10,182 @@ namespace cassdifftester
     {
         static void Main(string[] args)
         {
-            var esmeinfile = "";
-            var nuwcinfile = "";
-            var outFileName = "";
+            string esmeInputFile = null;
+            string nemoInputFile = null;
+            string outputFile = null;
 
             for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
                 {
                     case "-esme":
-                        esmeinfile = args[++i];
+                        esmeInputFile = args[++i];
                         break;
-                    case "-nuwc":
-                        nuwcinfile = args[++i];
+                    case "-nemo":
+                        nemoInputFile = args[++i];
                         break;
                     case "-out":
-                        outFileName = args[++i];
+                        outputFile = args[++i];
                         break;
                     default:
                         return;
                 }
             }
 
-            var esmeResult = (from packet in CASSFiles.ReadEnvironmentFile(esmeinfile)
+            if (string.IsNullOrEmpty(esmeInputFile) || string.IsNullOrEmpty(nemoInputFile) || string.IsNullOrEmpty(outputFile))
+            {
+                Usage();
+                return;
+            }
+
+            if (!File.Exists(esmeInputFile))
+            {
+                Console.WriteLine(@"Specified ESME input file not found");
+                Usage();
+                return;
+            }
+
+            if (!File.Exists(nemoInputFile))
+            {
+                Console.WriteLine(@"Specified NEMO input file not found");
+                Usage();
+                return;
+            }
+
+            var esmeResult = (from packet in CASSFiles.ReadEnvironmentFile(esmeInputFile)
                               orderby packet.Location.Latitude , packet.Location.Longitude
                               select packet).ToList();
 
-            var nuwcResult = (from packet in CASSFiles.ReadEnvironmentFile(nuwcinfile)
+            var nemoResult = (from packet in CASSFiles.ReadEnvironmentFile(nemoInputFile)
                               orderby packet.Location.Latitude , packet.Location.Longitude
                               select packet).ToList();
 
-            var esmeMatchesNuwc = (from esme in esmeResult
-                                   from nuwc in nuwcResult
-                                   where (esme.Location.Equals(nuwc.Location))
-                                   orderby nuwc.Location.Latitude, nuwc.Location.Longitude
+            var esmeMatchesNemo = (from esme in esmeResult
+                                   from nemo in nemoResult
+                                   where (esme.Location.Equals(nemo.Location))
+                                   orderby nemo.Location.Latitude, nemo.Location.Longitude
                                    select new
                                    {
                                        esme,
-                                       nuwc
+                                       nemo
                                    }).ToList();
-            var nuwcMatchesEsme = (from nuwc in nuwcResult
+            var nemoMatchesEsme = (from nemo in nemoResult
                                    from esme in esmeResult
-                                   where (nuwc.Location.Equals(esme.Location))
-                                   orderby nuwc.Location.Latitude , nuwc.Location.Longitude
+                                   where (nemo.Location.Equals(esme.Location))
+                                   orderby nemo.Location.Latitude , nemo.Location.Longitude
                                    select new
                                           {
                                               esme,
-                                              nuwc
+                                              nemo
                                           }).ToList();
             var outFile = new StringBuilder();
 
             outFile.AppendLine(string.Format("ESME file contains {0} records", esmeResult.Count));
-            outFile.AppendLine(string.Format("NUWC file contains {0} records", nuwcResult.Count));
-            if (esmeMatchesNuwc.Count < esmeResult.Count)
+            outFile.AppendLine(string.Format("NEMO file contains {0} records", nemoResult.Count));
+            if (esmeMatchesNemo.Count < esmeResult.Count)
             {
-                outFile.AppendLine(string.Format("ESME locations matched {0} locations in NUWC file. {1} locations were not matched.", esmeMatchesNuwc.Count, esmeResult.Count - esmeMatchesNuwc.Count));
+                outFile.AppendLine(string.Format("ESME locations matched {0} locations in NEMO file. {1} locations were not matched.", esmeMatchesNemo.Count, esmeResult.Count - esmeMatchesNemo.Count));
                 foreach (var esme in esmeResult)
                 {
                     var matched = false;
-                    var esme1 = esme;
-#pragma warning disable 168
-                    foreach (var nuwc in nuwcResult.Where(nuwc => esme1.Location.Equals(nuwc.Location)))
-#pragma warning restore 168
+                    foreach (var nemo in nemoResult.Where(nemo => esme.Location.Equals(nemo.Location)))
                     {
                         matched = true;
                     }
-                    if (!matched) outFile.AppendLine(string.Format("ESME location {0} is not in the NUWC file", esme.Location));
+                    if (!matched) outFile.AppendLine(string.Format("ESME location {0} is not in the NEMO file", esme.Location));
                 }
             }
             else
-                outFile.AppendLine("All ESME records matched NUWC locations");
-            if (nuwcMatchesEsme.Count < nuwcResult.Count)
+                outFile.AppendLine("All ESME records matched NEMO locations");
+            if (nemoMatchesEsme.Count < nemoResult.Count)
             {
-                outFile.AppendLine(string.Format("NUWC locations matched {0} locations in ESME file. {1} locations were not matched.", nuwcMatchesEsme.Count, nuwcResult.Count - nuwcMatchesEsme.Count));
-                foreach (var nuwc in nuwcResult)
+                outFile.AppendLine(string.Format("NEMO locations matched {0} locations in ESME file. {1} locations were not matched.", nemoMatchesEsme.Count, nemoResult.Count - nemoMatchesEsme.Count));
+                foreach (var nemo in nemoResult)
                 {
                     var matched = false;
-                    var nuwc1 = nuwc;
-#pragma warning disable 168
-                    foreach (var esme in esmeResult.Where(esme => nuwc1.Location.Equals(esme.Location)))
-#pragma warning restore 168
+                    foreach (var esme in esmeResult.Where(esme => nemo.Location.Equals(esme.Location)))
                     {
                         matched = true;
                     }
-                    if (!matched) outFile.AppendLine(string.Format("NUWC location {0} is not in the ESME file", nuwc.Location));
+                    if (!matched) outFile.AppendLine(string.Format("NEMO location {0} is not in the ESME file", nemo.Location));
                 }
             }
             else
-                outFile.AppendLine("All ESME records matched NUWC locations");
+                outFile.AppendLine("All ESME records matched NEMO locations");
             outFile.AppendLine();
 
             var bottomcounter = 0;
-            foreach (var result in esmeMatchesNuwc.Where(result => result.nuwc.BottomType != result.esme.BottomType))
+            outFile.AppendLine("Bottom Type Differences");
+            outFile.AppendLine("    Location       ESME                 NEMO                ");
+            outFile.AppendLine("------------------ -------------------- --------------------");
+            foreach (var result in esmeMatchesNemo.Where(result => result.nemo.BottomType != result.esme.BottomType))
             {
-                if (bottomcounter == 0)
-                {
-                    outFile.AppendLine("Bottom Type Differences");
-                    outFile.AppendLine("    Location       ESME                 NUWC                ");
-                    outFile.AppendLine("------------------ -------------------- --------------------");
-                }
-                //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but nuwc is {2}", result.esme.Location, result.esme.BottomType, result.nuwc.BottomType));
-                outFile.AppendLine(string.Format("{0,-18} {1,-20} {2,-20}", result.esme.Location, result.esme.BottomType, result.nuwc.BottomType));
+                //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but NEMO is {2}", result.esme.Location, result.esme.BottomType, result.NEMO.BottomType));
+                outFile.AppendLine(string.Format("{0,-18} {1,-20} {2,-20}", result.esme.Location, result.esme.BottomType, result.nemo.BottomType));
                 bottomcounter++;
             }
-            outFile.AppendLine(bottomcounter == 0 ? "Bottom Types match." : string.Format("{0} differences found", bottomcounter));
+            outFile.AppendLine(string.Format("{0} differences found", bottomcounter));
             outFile.AppendLine("");
 
             var depthcounter = 0;
-            foreach (var result in esmeMatchesNuwc.Where(result => result.nuwc.Depths.Count != result.esme.Depths.Count))
+            outFile.AppendLine("Depth Vector Length Differences");
+            outFile.AppendLine("    Location       ESME NEMO");
+            outFile.AppendLine("------------------ ---- ----");
+            foreach (var result in esmeMatchesNemo.Where(result => result.nemo.Depths.Count != result.esme.Depths.Count))
             {
-                if (depthcounter == 0)
-                {
-                    outFile.AppendLine("Depth Length Differences");
-                    outFile.AppendLine("    Location       ESME NUWC");
-                    outFile.AppendLine("------------------ ---- ----");
-                }
-                //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but nuwc is {2}", result.esme.Location, result.esme.Depths.Count, result.nuwc.Depths.Count));
-                outFile.AppendLine(string.Format("{0,-18} {1,4} {2,4}", result.esme.Location, result.esme.Depths.Count, result.nuwc.Depths.Count));
+                //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but NEMO is {2}", result.esme.Location, result.esme.Depths.Count, result.NEMO.Depths.Count));
+                outFile.AppendLine(string.Format("{0,-18} {1,4} {2,4}", result.esme.Location, result.esme.Depths.Count, result.nemo.Depths.Count));
                 depthcounter++;
             }
-            outFile.AppendLine(depthcounter == 0 ? "Depths match." : string.Format("{0} differences found", depthcounter));
+            outFile.AppendLine(string.Format("{0} differences found", depthcounter));
             outFile.AppendLine("");
 
             var soundspeedcounter = 0;
-            foreach (var result in esmeMatchesNuwc)
+            const double maxDiff = 0.1;
+            outFile.AppendLine("First Sound Speed Differences > " + maxDiff);
+            outFile.AppendLine("    Location       Depth      ESME      NEMO     Diff   Diff %");
+            outFile.AppendLine("------------------ ----- --------- --------- -------- --------");
+            foreach (var result in esmeMatchesNemo)
             {
                 for (var i = 0; i < result.esme.Soundspeeds.Count; i++)
                 {
                     var esmespeed = result.esme.Soundspeeds[i];
-                    var nuwcspeed = result.nuwc.Soundspeeds[i];
-                    var diff = esmespeed - nuwcspeed;
-                    var pct = (1.0 - (esmespeed / nuwcspeed)) * 100.0;
-                    //if (esmespeed != nuwcspeed)
-                    //if ((1 - (Math.Min(esmespeed, nuwcspeed) / Math.Max(esmespeed, nuwcspeed))) > 0.005)
-                    const double maxDiff = 0.1;
-                    if (Math.Abs(esmespeed - nuwcspeed) > maxDiff)
+                    var nemospeed = result.nemo.Soundspeeds[i];
+                    var diff = esmespeed - nemospeed;
+                    var pct = (1.0 - (esmespeed / nemospeed)) * 100.0;
+                    //if (esmespeed != NEMOspeed)
+                    //if ((1 - (Math.Min(esmespeed, NEMOspeed) / Math.Max(esmespeed, NEMOspeed))) > 0.005)
+                    if (Math.Abs(esmespeed - nemospeed) > maxDiff)
                     {
-                        if (soundspeedcounter == 0)
-                        {
-                            outFile.AppendLine("Sound Speed First Differences > " + maxDiff);
-                            outFile.AppendLine("    Location       Depth      ESME      NUWC     Diff   Diff %");
-                            outFile.AppendLine("------------------ ----- --------- --------- -------- --------");
-                        }
-                        outFile.AppendLine(string.Format("{0,-18} {1,5:0.0} {2,9:0.000} {3,9:0.000} {4,8:0.000} {5,8:0.00000}", result.esme.Location, result.esme.Depths[i], esmespeed, nuwcspeed, diff, pct));
+                        outFile.AppendLine(string.Format("{0,-18} {1,5:0.0} {2,9:0.000} {3,9:0.000} {4,8:0.000} {5,8:0.00000}", result.esme.Location, result.esme.Depths[i], esmespeed, nemospeed, diff, pct));
                         soundspeedcounter++;
                         break;
                     }
                 }
             }
-            outFile.AppendLine(soundspeedcounter == 0 ? "Soundspeeds match." : string.Format("{0} differences found", soundspeedcounter));
+            outFile.AppendLine(string.Format("{0} differences found", soundspeedcounter));
             outFile.AppendLine("");
 
             var windspeedcounter = 0;
-            foreach (var result in esmeMatchesNuwc.Where(result => (result.nuwc.WindSpeed != result.esme.WindSpeed) && (result.esme.Location.Equals(result.nuwc.Location))))
+            outFile.AppendLine("Wind Speed Differences");
+            outFile.AppendLine("Lat/Lon               ESME    NEMO");
+            outFile.AppendLine("------------------ ------- -------");
+            foreach (var result in esmeMatchesNemo.Where(result => (result.nemo.WindSpeed != result.esme.WindSpeed) && (result.esme.Location.Equals(result.nemo.Location))))
             {
-                if (windspeedcounter == 0)
-                {
-                    outFile.AppendLine("Wind Speed Differences");
-                    outFile.AppendLine("Lat/Lon               ESME    NUWC");
-                    outFile.AppendLine("------------------ ------- -------");
-                }
-                //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but nuwc is {2}", result.esme.Location, result.esme.Depths.Count, result.nuwc.Depths.Count));
-                outFile.AppendLine(string.Format("{0,-18} {1,7} {2,7}", result.esme.Location, result.esme.WindSpeed, result.nuwc.WindSpeed));
+                //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but NEMO is {2}", result.esme.Location, result.esme.Depths.Count, result.NEMO.Depths.Count));
+                outFile.AppendLine(string.Format("{0,-18} {1,7} {2,7}", result.esme.Location, result.esme.WindSpeed, result.nemo.WindSpeed));
                 windspeedcounter++;
             }
-            outFile.AppendLine(depthcounter == 0 ? "Wind Speeds match." : string.Format("{0} differences found", windspeedcounter));
-            File.WriteAllText(outFileName, outFile.ToString());
-            Console.WriteLine("Comparison Data written to file " + outFileName);
+            outFile.AppendLine(string.Format("{0} differences found", windspeedcounter));
+            File.WriteAllText(outputFile, outFile.ToString());
+            Console.WriteLine("Comparison Data written to file " + outputFile);
             Console.Write(outFile);
             //Console.ReadLine();
+        }
+
+        static void Usage()
+        {
+            Console.WriteLine("Usage: cassdifftester -esme <ESME_created_env_file> -nemo <NEMO_created_env_file> -out <outputFilename>");
         }
     }
 }
