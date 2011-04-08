@@ -14,7 +14,7 @@ namespace ESME.Model
 
         public float[] Depths { get; set; }
         public float[] SoundSpeeds { get; set; }
-        public float MaxDepth { get { return Depths == null ? 0 : Depths.Last(); } }
+        public float MaxDepth { get { return ((Depths == null) || (Depths.Length == 0)) ? 0 : Depths.Last(); } }
 
         #endregion
 
