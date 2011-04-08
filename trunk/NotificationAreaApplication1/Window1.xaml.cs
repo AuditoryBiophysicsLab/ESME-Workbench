@@ -10,8 +10,8 @@ namespace NotificationAreaApplication1
     /// </summary>
     public partial class Window1 : Window
     {
-        WindowState lastWindowState;
-        bool shouldClose;
+        WindowState _lastWindowState;
+        bool _shouldClose;
 
         public Window1()
         {
@@ -20,16 +20,14 @@ namespace NotificationAreaApplication1
 
         protected override void OnStateChanged(EventArgs e)
         {
-            lastWindowState = WindowState;
+            _lastWindowState = WindowState;
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (!shouldClose)
-            {
-                e.Cancel = true;
-                Hide();
-            }
+            if (_shouldClose) return;
+            e.Cancel = true;
+            Hide();
         }
 
         private void OnNotificationAreaIconDoubleClick(object sender, MouseButtonEventArgs e)
@@ -48,19 +46,13 @@ namespace NotificationAreaApplication1
         private void Open()
         {
             Show();
-            WindowState = lastWindowState;
+            WindowState = _lastWindowState;
         }
 
         private void OnMenuItemExitClick(object sender, EventArgs e)
         {
-            shouldClose = true;
+            _shouldClose = true;
             Close();
         }
-
-        private void button1_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Hello World");
-        }
-
     }
 }
