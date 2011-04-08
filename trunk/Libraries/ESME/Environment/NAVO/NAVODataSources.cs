@@ -153,7 +153,7 @@ namespace ESME.Environment.NAVO
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             //var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryCHBFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var bathymetry = Environment2DData.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
-            var maxDepth = bathymetry.Minimum.Data;
+            var maxDepth = bathymetry.Minimum;
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";

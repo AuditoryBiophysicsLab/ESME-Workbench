@@ -325,6 +325,24 @@ namespace ESME.Model
                 SoundSpeedProfiles.Add(new SoundSpeedProfile(profile, serializedOutput.DepthAxis));
             foreach (var profile in SoundSpeedProfiles) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
         }
+
+        public SoundSpeedField(SerializedOutput serializedOutput, string timePeriod, EarthCoordinate deepestPoint)
+        {
+            TimePeriod = timePeriod;
+            SoundSpeedProfiles = new List<SoundSpeedProfile>();
+            foreach (var profile in serializedOutput.DataPoints)
+                SoundSpeedProfiles.Add(new SoundSpeedProfile(profile, serializedOutput.DepthAxis));
+            var minDistance = double.MaxValue;
+            foreach (var profile in SoundSpeedProfiles)
+            {
+                if (DeepestSSP == null) DeepestSSP = profile;
+                if (profile.DistanceTo(deepestPoint) >= minDistance) continue;
+                if (profile.MaxDepth < DeepestSSP.MaxDepth) continue;
+                minDistance = profile.DistanceTo(deepestPoint);
+                DeepestSSP = profile;
+            }
+        }
+
         /// <summary>
         ///   List of latitudes (in degrees) for which we have values
         /// </summary>
@@ -384,24 +402,14 @@ namespace ESME.Model
             if ((temperatureData == null) || (salinityData == null)) 
                 throw new ApplicationException("SoundSpeedField: Unable to extend to max bathymetry depth.  Temperature and salinity data are missing.");
 
-            if (maxDepth > DeepestSSP.MaxDepth)
-            {
-                var temps = new SoundSpeedField(temperatureData, TimePeriod);
-                var sals = new SoundSpeedField(salinityData, TimePeriod);
-                var deepestTemperature = temps[DeepestSSP];
-                var deepestSalinity = sals[DeepestSSP];
-                var tempD = deepestTemperature.SoundSpeeds.Last();
-                var tempD1 = deepestTemperature.SoundSpeeds[DeepestSSP.SoundSpeeds.Length - 2];
-                var salinity = deepestSalinity.SoundSpeeds.Last();
+            var temperatureField = new SoundSpeedField(temperatureData, TimePeriod);
+            var salinityField = new SoundSpeedField(salinityData, TimePeriod);
 
-                var tempDiff = tempD1 - tempD;
-                var newTemp = tempD - tempDiff;
-                var soundSpeed = ChenMilleroLi.SoundSpeed(DeepestSSP, maxDepth, newTemp, salinity);
-                DeepestSSP.Extend(maxDepth, soundSpeed);
-            }
-            foreach (var profile in SoundSpeedProfiles)
-                if (profile != DeepestSSP)
-                    profile.Extend(DeepestSSP);
+            if (maxDepth > DeepestSSP.MaxDepth)
+                DeepestSSP.Extend(maxDepth, temperatureField[DeepestSSP], salinityField[DeepestSSP]);
+            
+            foreach (var profile in SoundSpeedProfiles.Where(profile => profile != DeepestSSP)) 
+                profile.Extend(DeepestSSP);
         }
 
         public SoundSpeedField(string environmentFileName)

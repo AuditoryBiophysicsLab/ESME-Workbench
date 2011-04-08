@@ -130,17 +130,17 @@ namespace ESME.Environment.NAVO
             result.Save(outputFileName, ReferencedTypes);
         }
 
-        public static void CreateSoundSpeedFile(string outputPath, NAVOTimePeriod outputTimePeriod, float maxDepth)
+        public static void CreateSoundSpeedFile(string outputPath, NAVOTimePeriod outputTimePeriod, EarthCoordinate<float> deepestPoint)
         {
             var temperatureFileName = OutputFileName(outputPath, (int)outputTimePeriod, TemperatureVariableName);
             var salinityFileName = OutputFileName(outputPath, (int)outputTimePeriod, SalinityVariableName);
             var soundspeedFileName = OutputFileName(outputPath, (int)outputTimePeriod, SoundspeedVariableName);
-            CreateSoundSpeedFile(temperatureFileName, salinityFileName, soundspeedFileName, maxDepth);
+            CreateSoundSpeedFile(temperatureFileName, salinityFileName, soundspeedFileName, deepestPoint);
             File.Delete(temperatureFileName);
             File.Delete(salinityFileName);
         }
 
-        static void CreateSoundSpeedFile(string temperatureFilename, string salinityFilename, string soundspeedFilename, float maxDepth)
+        static void CreateSoundSpeedFile(string temperatureFilename, string salinityFilename, string soundspeedFilename, EarthCoordinate<float> deepestPoint)
         {
             var salinityField = SerializedOutput.Load(salinityFilename, ReferencedTypes);
             var latitudes = salinityField.Latitudes;
@@ -176,8 +176,8 @@ namespace ESME.Environment.NAVO
                     soundSpeedData.Data.AddRange(from soundSpeed in curPointSoundSpeeds select (double)soundSpeed);
                     soundSpeedField.DataPoints.Add(soundSpeedData);
                 }
-            var ssf = new SoundSpeedField(soundSpeedField, "");
-            ssf.ExtendProfilesToDepth(Math.Abs(maxDepth), temperatureField, salinityField);
+            var ssf = new SoundSpeedField(soundSpeedField, "", deepestPoint);
+            ssf.ExtendProfilesToDepth(Math.Abs(deepestPoint.Data), temperatureField, salinityField);
             ((SerializedOutput)ssf).Save(soundspeedFilename, ReferencedTypes);
         }
 
