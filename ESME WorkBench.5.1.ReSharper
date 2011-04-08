@@ -140,6 +140,11 @@
       <Abbreviation Text="UNESCO" />
       <Abbreviation Text="LI" />
       <Abbreviation Text="REFMS" />
+      <Abbreviation Text="DMS" />
+      <Abbreviation Text="XY" />
+      <Abbreviation Text="TLF" />
+      <Abbreviation Text="TL" />
+      <Abbreviation Text="EEB" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
