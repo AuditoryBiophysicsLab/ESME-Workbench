@@ -911,7 +911,7 @@ namespace ESMEWorkBench.Data
                                      {
                                          Name = analysisPointName,
                                          LayerType = LayerType.AnalysisPoint,
-                                         //LineWidth = 1,
+                                         LineWidth = 1,
                                      };
                 MapLayers.Add(analysisPointLayer);
             }
