@@ -827,7 +827,6 @@ namespace ESME.Data
         
         #endregion
 
-
         #region public int OutputBufferSize { get; set; }
 
         public int OutputBufferSize
