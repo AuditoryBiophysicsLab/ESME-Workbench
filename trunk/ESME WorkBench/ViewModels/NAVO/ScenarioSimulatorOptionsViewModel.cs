@@ -58,8 +58,11 @@ namespace ESMEWorkBench.ViewModels.NAVO
             {
                 return _run ?? (_run = new SimpleCommand<object, object>(delegate
                 {
-                    return ((Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath != null)
-                        && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath) && NemoFile != null);
+                    return ((Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath != null)
+                        && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath) 
+                        && (Globals.AppSettings.JavaExecutablePath !=null) 
+                        && File.Exists(Globals.AppSettings.JavaExecutablePath) 
+                        && NemoFile != null);
                 },
                 delegate
                 {
@@ -69,8 +72,9 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     {
                         StartInfo =
                             {
-                                FileName = Globals.AppSettings.ScenarioSimulatorSettings.ExecutablePath,
+                                FileName = Globals.AppSettings.JavaExecutablePath,
                                 Arguments = CommandArgs(),
+                                CreateNoWindow = true,
                             },
                     }.Start();
 
@@ -89,17 +93,18 @@ namespace ESMEWorkBench.ViewModels.NAVO
             var megs = bytes >> 20;
 
             var sb = new StringBuilder();
-            sb.Append(string.Format("-Xmx{0}m", megs)); // maximum memory on computer
-            if (!string.IsNullOrEmpty(ScenarioSimulatorSettings.JavaConfigurationFile)) sb.Append(string.Format(" -Dlog4j.configuration={0}", ScenarioSimulatorSettings.JavaConfigurationFile)); // location of xml config file
+            
+           // sb.Append(string.Format("-Xmx{0}m", megs)); // maximum memory on computer.  Omitted for now)
+            if (!string.IsNullOrEmpty(ScenarioSimulatorSettings.JavaConfigurationFile)) sb.Append(string.Format(" -Dlog4j.configuration=\"{0}\"", ScenarioSimulatorSettings.JavaConfigurationFile)); // location of xml config file
             if (ScenarioSimulatorSettings.LogLevel > 0) sb.Append(string.Format(" -Dsim.output.level={0}", ScenarioSimulatorSettings.LogLevel)); // log level
             if (ScenarioSimulatorSettings.DecibelCutoff > 0) sb.Append(string.Format(" -Dsim.receive.cutoff={0}", ScenarioSimulatorSettings.DecibelCutoff)); //db cutoff
             sb.Append(string.Format(" -Dsim.species.cached={0} -Dsim.area.clip={1}", ScenarioSimulatorSettings.ReadAllMammals.ToString().ToLower(), ScenarioSimulatorSettings.ClipOutsideFootprint.ToString().ToLower()));// cache all species, clip? 
             if (ScenarioSimulatorSettings.SpeciesFileSize > 0) sb.Append(string.Format(" -Dsim.species.filebuffer={0}", ScenarioSimulatorSettings.SpeciesFileSize)); // species file size
-
             sb.Append(ScenarioSimulatorSettings.OptimizeBuffer ? " -Dsim.filebuffer.adapt=true" : (ScenarioSimulatorSettings.OutputBufferSize > 0 ? string.Format(" -Dsim.output.filebuffer={0}", ScenarioSimulatorSettings.OutputBufferSize) : string.Format("")));  //output buffer options
             if (ScenarioSimulatorSettings.ParallelSimulations > 0) sb.Append(string.Format(" -Dnemo.sim.count={0}", ScenarioSimulatorSettings.ParallelSimulations)); // parallel sims
             if (ScenarioSimulatorSettings.CASSFileSize > 0) sb.Append(string.Format(" -Dsim.cass.filebuffer={0}", ScenarioSimulatorSettings.CASSFileSize)); // cass file buffer.
-            sb.Append(string.Format(" -b {2} -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? "-r" : ""));
+            sb.Append(string.Format(" -jar \"{0}\"", ScenarioSimulatorSettings.ScenarioExecutablePath));
+            sb.Append(string.Format(" -b{2} -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? " -r" : ""));
             return sb.ToString();
         }
     }
