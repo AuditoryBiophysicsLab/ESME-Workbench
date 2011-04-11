@@ -989,7 +989,7 @@ namespace ESMEWorkBench.Data
             AnalysisPoints.Clear();
         }
 
-        void InitializeEnvironment(bool isFromInitialize)
+        public void InitializeEnvironment(bool isFromInitialize)
         {
             if (!isFromInitialize && !_isInitialized) return;
 
@@ -1045,6 +1045,7 @@ namespace ESMEWorkBench.Data
                     MapLayers.Add(windLayer);
                     windLayer.IsChecked = false;
                 }
+                windLayer.Clear();
                 foreach (var lon in WindSpeed.Longitudes)
                     foreach (var lat in WindSpeed.Latitudes)
                         windLayer.Add(new OverlayPoint(new EarthCoordinate(lat, lon)));
@@ -1078,6 +1079,7 @@ namespace ESMEWorkBench.Data
                     MapLayers.Add(soundSpeedLayer);
                     soundSpeedLayer.IsChecked = true;
                 }
+                soundSpeedLayer.Clear();
                 foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
                 soundSpeedLayer.Done();
             }
@@ -1108,6 +1110,7 @@ namespace ESMEWorkBench.Data
                     };
                     MapLayers.Add(bathyBoundsLayer);
                 }
+                bathyBoundsLayer.Clear();
                 bathyBoundsLayer.Add(Bathymetry.BoundingBox);
                 bathyBoundsLayer.Done();
 
@@ -1144,15 +1147,8 @@ namespace ESMEWorkBench.Data
                         CanChangeLineWidth = false,
                         CanBeRemoved = false,
                         LayerType = LayerType.BathymetryRaster,
-                        RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp"),
-                        PixelSize = horizontalResolution,
-                        North = (float)Bathymetry.Latitudes.Last(),
-                        South = (float)Bathymetry.Latitudes.First(),
-                        East = (float)Bathymetry.Longitudes.Last(),
-                        West = (float)Bathymetry.Longitudes.First(),
                     };
                     MapLayers.Add(bathyBitmapLayer);
-                    MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
                 }
                 bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
                 bathyBitmapLayer.PixelSize = horizontalResolution;
@@ -1161,6 +1157,7 @@ namespace ESMEWorkBench.Data
                 bathyBitmapLayer.East = (float)Bathymetry.Longitudes.Last();
                 bathyBitmapLayer.West = (float)Bathymetry.Longitudes.First();
             }
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 
         #region ViewAnalysisPointCommand

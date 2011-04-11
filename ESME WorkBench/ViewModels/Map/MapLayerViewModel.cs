@@ -385,7 +385,7 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             LayerOverlay = new LayerOverlay
                            {
-                               TileType = TileType.HybridTile,
+                               TileType = TileType.SingleTile,
                            };
             LineColorBrush = new SolidColorBrush(_lineColor);
             AreaColorBrush = new SolidColorBrush(_areaColor);

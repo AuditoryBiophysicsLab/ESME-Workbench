@@ -428,7 +428,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
                 if (result.HasValue && result.Value)
                 {
-
+                    _experiment.InitializeEnvironment(false);
                 }
             }
             else

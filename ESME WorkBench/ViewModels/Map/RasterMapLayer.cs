@@ -42,7 +42,6 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return _rasterFilename; }
             set
             {
-                if (_rasterFilename == value) return;
                 _rasterFilename = value;
                 var fi = new FileInfo(_rasterFilename);
                 _fileBuffer = new byte[fi.Length];
