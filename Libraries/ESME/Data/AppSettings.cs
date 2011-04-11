@@ -68,6 +68,24 @@ namespace ESME.Data
 
         public void Reload() { Reload(ReferencedTypes); }
 
+        #region public string JavaExecutablePath { get; set; }
+
+        public string JavaExecutablePath
+        {
+            get { return _javaExecutablePath; }
+            set
+            {
+                if (_javaExecutablePath == value) return;
+                _javaExecutablePath = value;
+                NotifyPropertyChanged(JavaExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs JavaExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.JavaExecutablePath);
+        string _javaExecutablePath;
+
+        #endregion
+
         #region public string ScenarioEditorExecutablePath { get; set; }
 
         static readonly PropertyChangedEventArgs ScenarioEditorExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioEditorExecutablePath);
@@ -740,24 +758,24 @@ namespace ESME.Data
     {
         public void SetDefaults()
         {
-            if (string.IsNullOrEmpty(ExecutablePath)) ExecutablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "scene-sim.jar");
+            if (string.IsNullOrEmpty(ScenarioExecutablePath)) ScenarioExecutablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "scene-sim.jar");
         }
 
-        #region public string ExecutablePath { get; set; }
+        #region public string ScenarioExecutablePath { get; set; }
 
-        public string ExecutablePath
+        public string ScenarioExecutablePath
         {
-            get { return _executablePath; }
+            get { return _scenarioExecutablePath; }
             set
             {
-                if (_executablePath == value) return;
-                _executablePath = value;
+                if (_scenarioExecutablePath == value) return;
+                _scenarioExecutablePath = value;
                 NotifyPropertyChanged(ExecutablePathChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ExecutablePath);
-        string _executablePath;
+        static readonly PropertyChangedEventArgs ExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ScenarioExecutablePath);
+        string _scenarioExecutablePath;
 
         #endregion
 

@@ -4,6 +4,7 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
+        xmlns:Views="clr-namespace:ESMEWorkBench.Views"
         Title="Scenario Simulator Options"
         Loaded="OnLoaded"
         SizeToContent="WidthAndHeight">
@@ -22,7 +23,9 @@
 			        DockPanel.Dock="Right"
 			        Command="{Binding RunCommand}" />
 		</DockPanel>
-		<StackPanel Orientation="Vertical">
+        <Views:ScenarioSimulatorUserControlView ScenarioSimulatorSettings="{Binding ScenarioSimulatorSettings}"/>
+        
+	<!--	<StackPanel Orientation="Vertical">
 			<TextBlock Text="Number of Monte Carlo Iterations"
 			           Margin="5 0" />
             <TextBox Text="{Binding ScenarioSimulatorSettings.Iterations}"
@@ -108,7 +111,7 @@
 
 				</StackPanel>
 			</Expander>
-		</StackPanel>
+		</StackPanel>-->
 	</DockPanel>
 
 </Window>

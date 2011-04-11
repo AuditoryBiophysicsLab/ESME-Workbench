@@ -204,6 +204,9 @@
     <Compile Include="Views\ScenarioSimulatorOptionsView.xaml.cs">
       <DependentUpon>ScenarioSimulatorOptionsView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ScenarioSimulatorUserControlView.xaml.cs">
+      <DependentUpon>ScenarioSimulatorUserControlView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SimulationView.xaml.cs">
       <DependentUpon>SimulationView.xaml</DependentUpon>
     </Compile>
@@ -389,6 +392,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ScenarioSimulatorOptionsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ScenarioSimulatorUserControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
