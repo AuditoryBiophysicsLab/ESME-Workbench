@@ -110,6 +110,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                  {
                                      ScenarioSimulatorSettings = _experiment.ScenarioSimulatorSettings ?? Globals.AppSettings.ScenarioSimulatorSettings,
                                      NemoFile = _experiment.NemoFile,
+                                     
                                  };
 
                         var result = _visualizerService.ShowDialog("ScenarioSimulatorOptionsView", vm);
