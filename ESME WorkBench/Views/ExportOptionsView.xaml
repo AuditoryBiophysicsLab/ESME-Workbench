@@ -1,0 +1,53 @@
+﻿<Window x:Class="ESMEWorkBench.Views.ExportOptionsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        SizeToContent="WidthAndHeight"
+        Title="Export experiment data">
+    <StackPanel Orientation="Vertical">
+        <CheckBox Content="Analysis points"/>
+        <GroupBox Header="Export analysis points these acoustic simulators">
+            <StackPanel Orientation="Vertical">
+                <CheckBox Content="ESME" ToolTip="ESME currently uses Bellhop and RAM to simulate acoustic propagation.  The model used for each sound source is automatically chosen based on acoustic characteristics and local environmental conditions."/>
+                <CheckBox Content="CASS" ToolTip="This model is only available to the US Navy and authorized contractors and is not shipped with ESME WorkBench"/>
+            </StackPanel>
+        </GroupBox>
+        <CheckBox Content="Environmental data for CASS" />
+        <GroupBox Header="Select environmental data to export">
+            <StackPanel Orientation="Vertical">
+                <CheckBox Content="Bathymetry" />
+                <CheckBox Content="Climatology" ToolTip="Sound speed, wind speed and sediment type data for the current simulation area"/>
+                <GroupBox Header="Available climatological data">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Width="75"
+							        Margin="5"
+							        Command="{Binding SelectAllMonthsCommand}">
+                                Select All
+                            </Button>
+                            <Button Width="75"
+							        Margin="5"
+							        Command="{Binding UnselectAllMonthsCommand}">
+                                Select None
+                            </Button>
+                        </StackPanel>
+                        <ListBox ItemsSource="{Binding AvailableClimatologyData}" />
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </GroupBox>
+        <DockPanel LastChildFill="False"
+		           Margin="5 10">
+            <Button Width="90"
+			        Margin="10 0 0 0"
+			        IsCancel="False"
+			        Content="Cancel"
+			        DockPanel.Dock="Right"
+			        Command="{Binding CancelCommand}" />
+            <Button Width="90"
+			        IsDefault="True"
+			        Content="OK"
+			        DockPanel.Dock="Right"
+			        Command="{Binding OKCommand}" />
+        </DockPanel>
+    </StackPanel>
+</Window>
