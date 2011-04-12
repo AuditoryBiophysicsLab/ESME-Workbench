@@ -155,6 +155,7 @@
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\BellhopRadialCalculatorViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\ExportOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelRadialViewModel.cs" />
@@ -197,6 +198,9 @@
     </Compile>
     <Compile Include="Views\EnvironmentSettingsView.xaml.cs">
       <DependentUpon>EnvironmentSettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ExportOptionsView.xaml.cs">
+      <DependentUpon>ExportOptionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\QuickLookView.xaml.cs">
       <DependentUpon>QuickLookView.xaml</DependentUpon>
@@ -324,6 +328,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\EditableLabelValueListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ExportOptionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
