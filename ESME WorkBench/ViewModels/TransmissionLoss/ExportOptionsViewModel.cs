@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Cinch;
@@ -84,7 +85,19 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        bool IsOkCommandEnabled() { return ExportOptions.IsEnoughChecked; }
+        bool IsOkCommandEnabled()
+        {
+            if (!ExportOptions.ExportAnalysisPoints && !ExportOptions.ExportEnvironmentToCASS) return false;
+            if (ExportOptions.ExportAnalysisPoints)
+                if (!ExportOptions.ExportToESME && !ExportOptions.ExportToCASS) return false;
+            if (ExportOptions.ExportEnvironmentToCASS)
+            {
+                if (!ExportOptions.ExportCASSBathymetry && !ExportOptions.ExportCASSClimatology) return false;
+                if (ExportOptions.ExportCASSClimatology)
+                    return AvailableClimatologyData.Any(curTimePeriod => curTimePeriod.IsChecked.HasValue && curTimePeriod.IsChecked.Value);
+            }
+            return true;
+        }
 
         #endregion
 
@@ -102,18 +115,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
     public class ExportOptions : INotifyPropertyChanged
     {
-        public bool IsEnoughChecked 
-        {
-            get
-            {
-                if (!ExportAnalysisPoints && !ExportEnvironmentToCASS) return false;
-                if (ExportAnalysisPoints)
-                    if (!ExportToESME && !ExportToCASS) return false;
-                if (ExportEnvironmentToCASS)
-                    if (!ExportCASSBathymetry && !ExportCASSClimatology) return false;
-                return true;
-            }
-        }
         #region public bool ExportAnalysisPoints { get; set; }
 
         public bool ExportAnalysisPoints
