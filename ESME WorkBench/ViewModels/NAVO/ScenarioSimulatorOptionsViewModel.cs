@@ -66,7 +66,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 },
                 delegate
                 {
-                    // string commandArgs = string.Format("-Dlog4j.configuration=\"{3}\" -Dsim.output.level={4} {2} -r -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? "-b" : "", ScenarioSimulatorSettings.JavaConfigurationFile,ScenarioSimulatorSettings.LogLevel);
+                    // string commandArgs = string.Format("-Dlog4j.configuration=\"{3}\" -Dsim.output.level={4} {2} -r -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? "-b" : "", ScenarioSimulatorSettings.JavaConfigurationFile,ScenarioSimulatorSettings.SimOutputLevel);
 
                     new Process
                     {
@@ -75,6 +75,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                 FileName = Globals.AppSettings.JavaExecutablePath,
                                 Arguments = CommandArgs(),
                                 CreateNoWindow = true,
+
                             },
                     }.Start();
 
@@ -89,20 +90,21 @@ namespace ESMEWorkBench.ViewModels.NAVO
         {
             //compute max physical memory
             var info = new Microsoft.VisualBasic.Devices.ComputerInfo();
-            var bytes = info.TotalPhysicalMemory;
+            var bytes = info.AvailablePhysicalMemory;
             var megs = bytes >> 20;
 
             var sb = new StringBuilder();
             
-           // sb.Append(string.Format("-Xmx{0}m", megs)); // maximum memory on computer.  Omitted for now)
+            sb.Append(string.Format(" -Xmx{0}m", megs)); // maximum memory on computer.
             if (!string.IsNullOrEmpty(ScenarioSimulatorSettings.JavaConfigurationFile)) sb.Append(string.Format(" -Dlog4j.configuration=\"{0}\"", ScenarioSimulatorSettings.JavaConfigurationFile)); // location of xml config file
-            if (ScenarioSimulatorSettings.LogLevel > 0) sb.Append(string.Format(" -Dsim.output.level={0}", ScenarioSimulatorSettings.LogLevel)); // log level
+            if (ScenarioSimulatorSettings.SimOutputLevel > 0) sb.Append(string.Format(" -Dsim.output.level={0}", ScenarioSimulatorSettings.SimOutputLevel)); // log level
             if (ScenarioSimulatorSettings.DecibelCutoff > 0) sb.Append(string.Format(" -Dsim.receive.cutoff={0}", ScenarioSimulatorSettings.DecibelCutoff)); //db cutoff
             sb.Append(string.Format(" -Dsim.species.cached={0} -Dsim.area.clip={1}", ScenarioSimulatorSettings.ReadAllMammals.ToString().ToLower(), ScenarioSimulatorSettings.ClipOutsideFootprint.ToString().ToLower()));// cache all species, clip? 
-            if (ScenarioSimulatorSettings.SpeciesFileSize > 0) sb.Append(string.Format(" -Dsim.species.filebuffer={0}", ScenarioSimulatorSettings.SpeciesFileSize)); // species file size
-            sb.Append(ScenarioSimulatorSettings.OptimizeBuffer ? " -Dsim.filebuffer.adapt=true" : (ScenarioSimulatorSettings.OutputBufferSize > 0 ? string.Format(" -Dsim.output.filebuffer={0}", ScenarioSimulatorSettings.OutputBufferSize) : string.Format("")));  //output buffer options
+            sb.Append(string.Format(" -Dsim.output.filebuffer={0}", ScenarioSimulatorSettings.OutputBufferSize));  //output buffer options
             if (ScenarioSimulatorSettings.ParallelSimulations > 0) sb.Append(string.Format(" -Dnemo.sim.count={0}", ScenarioSimulatorSettings.ParallelSimulations)); // parallel sims
-            if (ScenarioSimulatorSettings.CASSFileSize > 0) sb.Append(string.Format(" -Dsim.cass.filebuffer={0}", ScenarioSimulatorSettings.CASSFileSize)); // cass file buffer.
+            if(ScenarioSimulatorSettings.OptimizeBuffer) sb.Append(string.Format(" -Dsim.filebuffer.adapt=true"));
+            if (ScenarioSimulatorSettings.CASSFileSize > 0 && !ScenarioSimulatorSettings.OptimizeBuffer) sb.Append(string.Format(" -Dsim.cass.filebuffer={0}", ScenarioSimulatorSettings.CASSFileSize)); // cass file buffer.
+            if (ScenarioSimulatorSettings.SpeciesFileSize > 0 && !ScenarioSimulatorSettings.OptimizeBuffer) sb.Append(string.Format(" -Dsim.species.filebuffer={0}", ScenarioSimulatorSettings.SpeciesFileSize)); // species file size
             sb.Append(string.Format(" -jar \"{0}\"", ScenarioSimulatorSettings.ScenarioExecutablePath));
             sb.Append(string.Format(" -b{2} -n {0} -s \"{1}\"", ScenarioSimulatorSettings.Iterations, NemoFile.FileName, ScenarioSimulatorSettings.IsRandomized ? " -r" : ""));
             return sb.ToString();

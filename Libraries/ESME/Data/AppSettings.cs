@@ -830,7 +830,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs OptimizeBufferChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.OptimizeBuffer);
-        bool _optimizeBuffer;
+        bool _optimizeBuffer = true;
 
         #endregion
 
@@ -859,7 +859,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs OutputBufferSizeChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.OutputBufferSize);
-        int _outputBufferSize;
+        int _outputBufferSize = 16;
 
         #endregion
 
@@ -881,9 +881,9 @@ namespace ESME.Data
 
         #endregion
 
-        #region public int DecibelCutoff { get; set; }
+        #region public double DecibelCutoff { get; set; }
 
-        public int DecibelCutoff
+        public double DecibelCutoff
         {
             get { return _decibelCutoff; }
             set
@@ -895,25 +895,25 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs DecibelCutoffChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.DecibelCutoff);
-        int _decibelCutoff;
+        double _decibelCutoff=0.01;
 
         #endregion
 
-        #region public int LogLevel { get; set; }
+        #region public int SimOutputLevel { get; set; }
 
-        public int LogLevel
+        public int SimOutputLevel
         {
-            get { return _logLevel; }
+            get { return _simOutputLevel; }
             set
             {
-                if (_logLevel == value) return;
-                _logLevel = value;
+                if (_simOutputLevel == value) return;
+                _simOutputLevel = value;
                 NotifyPropertyChanged(LogLevelChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs LogLevelChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.LogLevel);
-        int _logLevel;
+        static readonly PropertyChangedEventArgs LogLevelChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.SimOutputLevel);
+        int _simOutputLevel =5;
 
         #endregion
 
@@ -931,7 +931,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs ParallelSimulationsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ParallelSimulations);
-        int _parallelSimulations;
+        int _parallelSimulations = System.Environment.ProcessorCount - 1;
 
         #endregion
 
@@ -949,7 +949,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs SpeciesFileSizeChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.SpeciesFileSize);
-        int _speciesFileSize;
+        int _speciesFileSize = 8192;
 
         #endregion
 
@@ -967,7 +967,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs CASSFileSizeChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.CASSFileSize);
-        int _cASSFileSize;
+        int _cASSFileSize = 1024;
 
         #endregion
 
@@ -985,7 +985,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs ReadAllMammalsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ReadAllMammals);
-        bool _readAllMammals;
+        bool _readAllMammals = true;
 
         #endregion
 
@@ -1003,7 +1003,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs ClipOutsideFootprintChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ClipOutsideFootprint);
-        bool _clipOutsideFootprint;
+        bool _clipOutsideFootprint = true;
 
         #endregion
 
