@@ -26,14 +26,6 @@
 			          Background="LightGray"
 			          Padding="5">
 				<StackPanel Orientation="Vertical">
-					<Controls:FileOrDirectorySetting Caption="Java Configuration File"
-					                                 Margin="0 0 0 5"
-					                                 DialogTitle="Choose the java configuration file"
-					                                 FileNameFilter="Configuration file (*.xml)|*.xml|All files (*.*)|*.*"
-					                                 IsDirectoryBrowser="False"
-					                                 ToolTip="Specifies the location of the NUWC configuration file"
-					                                 FileName="{Binding Path=ScenarioSimulatorSettings.JavaConfigurationFile, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}" />
-
 					<TextBlock Text="Cutoff Value (dB SPL)" />
 					<TextBox Text="{Binding Path=ScenarioSimulatorSettings.DecibelCutoff, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
 					         Margin="0 0 0 5"
@@ -65,17 +57,19 @@
 						</i:Interaction.Behaviors>
 					</TextBox>
 
-					<CheckBox IsChecked="{Binding Path=ScenarioSimulatorSettings.ReadAllMammals, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
-					          Margin="0 0 0 5">
-						Cache all animats into memory?
-					</CheckBox>
-					<CheckBox IsChecked="{Binding Path=ScenarioSimulatorSettings.ClipOutsideFootprint, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
-					          Margin="0 0 0 5">
-						Clip animats outside footprint?
-					</CheckBox>
-					<CheckBox IsChecked="{Binding Path=ScenarioSimulatorSettings.OptimizeBuffer, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
-					          Margin="0 0 0 2"
-					          Content="Compute optimum file buffer sizes?" />
+                    <CheckBox Content="Cache all animals in memory" 
+                              IsChecked="{Binding Path=ScenarioSimulatorSettings.ReadAllMammals, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					          Margin="0 0 0 5"/>
+                    <CheckBox Content="Clip animals outside footprint" 
+                              IsChecked="{Binding Path=ScenarioSimulatorSettings.ClipOutsideFootprint, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					          Margin="0 0 0 5" />
+                    <CheckBox Content="Log the simulation run" 
+                              ToolTip="If you check this option, you must ensure that a properly-formatted Log4j configuration file, named sim-log4j.xml exists in the same directory as scene-sim.jar"
+                              IsChecked="{Binding Path=ScenarioSimulatorSettings.CreateSimulationLogfile, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					          Margin="0 0 0 5" />
+                    <CheckBox Content="Compute optimum file buffer sizes"
+                              IsChecked="{Binding Path=ScenarioSimulatorSettings.OptimizeBuffer, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					          Margin="0 0 0 2" />
 					<Label Content="Largest Species File Size (bytes)"
 					       Margin="20 -5 0 -5"
 					       IsEnabled="{Binding Path=ScenarioSimulatorSettings.NotOptimizeBuffer, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}" />

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows;
 using Cinch;
 using ESME.Views;
@@ -111,18 +109,11 @@ namespace ESMEWorkBench
             Settings.Default.Save();
         }
 
-        [DllImport("clrdump.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern Int32 CreateDump(Int32 processId, string fileName, Int32 dumpType, Int32 excThreadId, IntPtr extPtrs);
-
         static void LastChanceExceptionHandler(object sender, UnhandledExceptionEventArgs ex)
         {
             Trace.TraceError("{0} encountered an unhandled exception and is exiting.  A dump file will be created in {1}", Name, DumpFile);
 
-            // ExceptionPolicy.HandleException(ex, "Default Policy");
-
-            var pEP = Marshal.GetExceptionPointers();
-            CreateDump(Process.GetCurrentProcess().Id, DumpFile, 0x00000002, //MinidumpType.MiniDumpWithFullMemory
-                Thread.CurrentThread.ManagedThreadId, pEP);
+            MiniDump.Write(DumpFile, MiniDump.Option.Normal, MiniDump.ExceptionInfo.Present);
         }
 
 #if DEBUG

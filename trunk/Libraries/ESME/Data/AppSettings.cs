@@ -863,21 +863,21 @@ namespace ESME.Data
 
         #endregion
 
-        #region public string JavaConfigurationFile { get; set; }
+        #region public bool CreateSimulationLogfile { get; set; }
 
-        public string JavaConfigurationFile
+        public bool CreateSimulationLogfile
         {
-            get { return _javaConfigurationFile; }
+            get { return _createSimulationLogfile; }
             set
             {
-                if (_javaConfigurationFile == value) return;
-                _javaConfigurationFile = value;
-                NotifyPropertyChanged(JavaConfigurationFileChangedEventArgs);
+                if (_createSimulationLogfile == value) return;
+                _createSimulationLogfile = value;
+                NotifyPropertyChanged(CreateSimulationLogfileChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs JavaConfigurationFileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.JavaConfigurationFile);
-        string _javaConfigurationFile;
+        static readonly PropertyChangedEventArgs CreateSimulationLogfileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.CreateSimulationLogfile);
+        bool _createSimulationLogfile;
 
         #endregion
 

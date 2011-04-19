@@ -124,6 +124,8 @@ namespace ESMEWorkBench.ViewModels.Layers
         private static string FormatLatLong(double value, LineType lineType, double increment)
         {
             string result;
+            if (Math.Abs(value) > 180.0)
+                return "N/A";
             try
             {
                 if (increment >= 1)
