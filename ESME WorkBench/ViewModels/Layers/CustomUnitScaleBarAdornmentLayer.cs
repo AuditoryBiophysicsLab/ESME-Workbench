@@ -47,7 +47,8 @@ namespace ESMEWorkBench.ViewModels.Layers
             var screenLocation = GetDrawingLocation(canvas, _width, ypos);
             var scaleBarMapPointR = ExtentHelper.ToWorldCoordinate(canvas.CurrentWorldExtent, screenLocation.X, screenLocation.Y, canvas.Width, canvas.Height);
             var scaleBarMapRightPointR = ExtentHelper.ToWorldCoordinate(canvas.CurrentWorldExtent, screenLocation.X + _width, screenLocation.Y, canvas.Width, canvas.Height);
-
+            if ((Math.Abs(scaleBarMapPointR.X) > 180.0) || (Math.Abs(scaleBarMapRightPointR.X) > 180.0)) return;
+            if ((Math.Abs(scaleBarMapPointR.Y) > 90.0) || (Math.Abs(scaleBarMapRightPointR.Y) > 90.0)) return;
             try
             {
                 //Gets the length of the scale bar according to the unit and the maximum width of the scale bar.
