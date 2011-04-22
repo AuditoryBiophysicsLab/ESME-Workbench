@@ -169,7 +169,11 @@ namespace ESMEWorkBench.ViewModels.Map
                     foreach (var layer in _experiment.MapLayers.Where(layer => layer.Overlay != null))
                     {
                         _wpfMap.Overlays.Add(layer.Name, layer.Overlay);
-                        _wpfMap.Refresh(layer.Overlay);
+                        try
+                        {
+                            _wpfMap.Refresh(layer.Overlay);
+                        }
+                        catch(Exception) {}
                     }
                     _experiment.MapLayers.CollectionChanged += MapLayers_CollectionChanged;
                     _wpfMap.CurrentExtent = new RectangleShape(_experiment.CurrentExtent);
