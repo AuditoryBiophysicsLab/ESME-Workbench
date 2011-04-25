@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using ESME.Model;
 using ESME.NEMO;
+using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 
@@ -113,9 +114,33 @@ namespace ESME.TransmissionLoss
             //Ranges = runFile.
             //Filename = Path.Combine(Field.DataDirectoryPath, Field.BinaryFileName);
         }
+        
+        public TransmissionLossField() {  }
 
-        public TransmissionLossField()
-        {} 
+        public static TransmissionLossField FromCASS(CASSOutput output)
+        {
+            var result = new TransmissionLossField();
+            
+            result.Name = string.Format("CASS|{0}|{1}|{2}|{3}|{4}", output.PlatformName, output.SourceName, output.ModeName, output.SourceRefLatLocation, output.SourceRefLonLocation);
+            result.Metadata = string.Format("Imported from CASS output {0} on {1}", output.Filename, DateTime.Now);
+            result.SourceLevel = output.SourceLevel;
+            result.Latitude = output.SourceRefLatLocation;
+            result.Longitude = output.SourceRefLonLocation;
+            result.SourceDepth = output.SourceDepth;
+            result.VerticalBeamWidth = output.VerticalBeamPattern;
+            result.DepressionElevationAngle = output.DepressionElevationAngle;
+            result.LowFrequency = output.Frequency;
+            result.HighFrequency = output.Frequency;
+            result.MaxCalculationDepth = output.MaxWaterDepth;
+            result.Radius = (int)output.MaxRangeDistance;
+            Array.Copy(output.DepthCells,result.Depths,output.DepthCellCount);
+            Array.Copy(output.RangeCells,result.Ranges,output.RangeCellCount);
+            result.Radials = new TransmissionLossRadial[output.Pressures.Count];
+            for (var i = 0; i < output.Pressures.Count; i++) result.Radials[i] = new TransmissionLossRadial(output.RadialBearings[i],output.Pressures[i]);
+            result.EarthCoordinate = new EarthCoordinate(result.Latitude,result.Longitude);
+            
+            return result;
+        }
 
         public TransmissionLossField(string filename, bool loadHeadersOnly)
         {

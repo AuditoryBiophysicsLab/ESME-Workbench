@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using ESME.TransmissionLoss.Bellhop;
+using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss
@@ -39,8 +40,15 @@ namespace ESME.TransmissionLoss
 
             IsSaved = false;
         }
+        
+        public TransmissionLossRadial(float bearingFromSource, float[,] pressureField)
+        {
+            BearingFromSource = bearingFromSource;
+            TransmissionLoss = pressureField;
+        }
 
         public TransmissionLossRadial() {  }
+        
         public TransmissionLossRadial(BinaryReader stream)
         {
             if (_seekOffset == -1) _seekOffset = stream.BaseStream.Seek(0, SeekOrigin.Current);
