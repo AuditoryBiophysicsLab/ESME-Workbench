@@ -108,6 +108,9 @@
     </Compile>
     <Compile Include="TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
     <Compile Include="TransmissionLoss\BellhopRadialCalculatorViewModel.cs" />
+    <Compile Include="TransmissionLoss\ModeAcousticModelSelectionView.xaml.cs">
+      <DependentUpon>ModeAcousticModelSelectionView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TransmissionLoss\TransmissionLossFieldCalculatorViewModel.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRadialCalculatorViewModel.cs" />
     <Compile Include="VirtualToggleButton.cs" />
@@ -144,6 +147,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TransmissionLoss\BellhopQueueCalculatorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionLoss\ModeAcousticModelSelectionView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -405,6 +405,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                                                         _experiment.SedimentFileName = NAVODataSources.SedimentFilename;
                                                                         _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename;
                                                                         _experiment.SimArea = NAVODataSources.ExtractionArea;
+                                                                        _experiment.AvailableTimePeriods = new List<NAVOTimePeriod>(selectedTimePeriods);
                                                                     }
                                                                     AppSettings.Save(); //remember the new values. 
                                                                     CloseActivePopUpCommand.Execute(true);

@@ -1,13 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Cinch;
 using ESME.Data;
+using ESME.NEMO;
+using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.NAVO;
+using ESMEWorkBench.ViewModels.TransmissionLoss;
+using ExportOptionsViewModel = ESMEWorkBench.ViewModels.NAVO.ExportOptionsViewModel;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -553,17 +559,12 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _nAVOEnvironmentBuilder ?? (_nAVOEnvironmentBuilder = new SimpleCommand<object, object>(delegate
-                                                                                                               {
-                                                                                                                   var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_visualizerService, _messageBoxService, Globals.AppSettings, _experiment);
-                                                                                                                   var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
-                                                                                                                   if (result.HasValue && result.Value)
-                                                                                                                   {
-                                                                                                                   }
-
-
-
-                                                                                                               }));
+                return _nAVOEnvironmentBuilder ?? (_nAVOEnvironmentBuilder = new SimpleCommand<object, object>(delegate { return true; }, delegate
+                                                                                                                             {
+                                                                                                                                 var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_visualizerService, _messageBoxService, Globals.AppSettings, _experiment);
+                                                                                                                                 var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
+                                                                                                                                 if (result.HasValue && result.Value) {}
+                                                                                                                             }));
             }
         }
 
@@ -575,10 +576,72 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public SimpleCommand<object, object> ExportAnalysisPointsToCASSCommand
         {
-            get { return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.ExportAnalysisPointsToCASS, true); })); }
+            get
+            {
+                return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate
+                                                                                                                       {
+                                                                                                                           var exportOptionsViewModel = new ExportOptionsViewModel(_experiment.AvailableTimePeriods, _experiment.EnvironmentRoot, Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), _experiment.Bathymetry);
+                                                                                                                           var result = _visualizerService.ShowDialog("ExportOptionsView", exportOptionsViewModel);
+                                                                                                                           var scenarioDataDirectory = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName);
+                                                                                                                           if (result.HasValue && result.Value)
+                                                                                                                           {
+                                                                                                                               //Status = "Exporting bathymetry data";
+
+                                                                                                                               var bathymetryFiles = Directory.GetFiles(_experiment.EnvironmentRoot, "bathymetry*.yxz");
+                                                                                                                               if (exportOptionsViewModel.ExportCASSBathymetry)
+                                                                                                                               {
+                                                                                                                                   if (bathymetryFiles.Length < 1) throw new FileNotFoundException("No bathymetry files were found, bathymetry data will not be exported");
+                                                                                                                                   foreach (var file in bathymetryFiles)
+                                                                                                                                   {
+                                                                                                                                       var destFile = Path.Combine(Path.Combine(scenarioDataDirectory, "Bathymetry"), "bathymetry.txt");
+                                                                                                                                       File.Copy(file, destFile, true);
+                                                                                                                                       break;
+                                                                                                                                   }
+                                                                                                                               }
+
+                                                                                                                               foreach (var timePeriod in exportOptionsViewModel.AvailableTimePeriods)
+                                                                                                                               {
+                                                                                                                                   if (!timePeriod.IsChecked) continue;
+                                                                                                                                   //Status = "Exporting CASS format data for " + timePeriod.Caption;
+                                                                                                                                   CASSFiles.GenerateSimAreaData(scenarioDataDirectory, _experiment.EnvironmentRoot, timePeriod.Caption, _experiment.Bathymetry);
+                                                                                                                               }
+                                                                                                                               if (exportOptionsViewModel.ExportAnalysisPoints)
+                                                                                                                               {
+                                                                                                                                   var selectedTimePeriods = (from timePeriod in exportOptionsViewModel.AvailableTimePeriods
+                                                                                                                                                              where timePeriod.IsChecked
+                                                                                                                                                              select timePeriod.Caption).ToList();
+                                                                                                                                   CASSFiles.WriteCASSInputFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt");
+
+                                                                                                                               }
+
+                                                                                                                           }
+                                                                                                                       }));
+            }
         }
 
         SimpleCommand<object, object> _exportAnalysisPointsToCASS;
+
+        #endregion
+
+        #region ConfigureAcousticModelsCommand
+
+        public SimpleCommand<object, object> ConfigureAcousticModelsCommand
+        {
+            get
+            {
+                return _configureAcousticModelsCommand ?? (_configureAcousticModelsCommand = new SimpleCommand<object, object>(delegate
+                                                                                                                               {
+                                                                                                                                   var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(_experiment.NemoModeToAcousticModelNameMap, new List<string>{"CASS", "RAM"});
+                                                                                                                                   var result = _visualizerService.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);
+                                                                                                                                   if (result.HasValue && result.Value)
+                                                                                                                                   {
+                                                                                                                                       _experiment.IsChanged = true;
+                                                                                                                                   }
+                                                                                                                               }));
+            }
+        }
+
+        SimpleCommand<object, object> _configureAcousticModelsCommand;
 
         #endregion
 
