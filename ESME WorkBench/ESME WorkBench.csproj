@@ -148,6 +148,7 @@
     <Compile Include="ViewModels\Map\MapShape.cs" />
     <Compile Include="ViewModels\Map\RasterMapLayer.cs" />
     <Compile Include="ViewModels\NAVO\EnvironmentBuilderViewModel.cs" />
+    <Compile Include="ViewModels\NAVO\ExportOptionsViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ScenarioSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
@@ -157,6 +158,7 @@
     <Compile Include="ViewModels\TransmissionLoss\BellhopRadialCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\ExportOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\ModeAcousticModelSelectionView.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelRadialViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldListItemViewModel.cs" />
@@ -545,6 +547,8 @@
   <ItemGroup>
     <Content Include="External References\Kent.Boogaart.Converters.dll" />
     <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
+    <Resource Include="Images\SmallIcons\gnome_sound_recorder.png" />
+    <Resource Include="Images\LargeIcons\gnome_sound_recorder.png" />
     <Resource Include="Images\LargeIcons\Database-Inspect-icon.png" />
     <Resource Include="Images\SmallIcons\Database-Inspect-icon.png" />
     <Resource Include="Images\LargeIcons\Database-Process-icon.png" />

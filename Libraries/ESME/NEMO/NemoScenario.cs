@@ -53,6 +53,18 @@ namespace ESME.NEMO
         public string TimeFrame { get; private set; }
         public List<NemoPlatform> Platforms { get; private set; }
         public List<NemoAnimals> Animals { get; private set; }
+        public IEnumerable<NemoMode> DistinctModes
+        {
+            get
+            {
+                var results = new List<NemoMode>();
+                foreach (var source in Platforms.SelectMany(platform => platform.Sources))
+                    results.AddRange(source.Modes);
+                return results.Distinct();
+            }
+        }
+
+        public List<string> DistinctModePSMNames { get { return DistinctModes.Select(mode => mode.PSMName).ToList(); } }
 
         /// <summary>
         /// A count of the number of unique modes in this scenario, generally used when creating source-receiver level bins

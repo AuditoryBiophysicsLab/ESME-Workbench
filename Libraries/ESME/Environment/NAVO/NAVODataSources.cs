@@ -218,7 +218,7 @@ namespace ESME.Environment.NAVO
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
                     Status = "Exporting CASS format data for " + timePeriod;
-                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod.ToString(), bathymetry, ExtractionArea);
+                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod.ToString(), bathymetry);
                     if (backgroundWorker.CancellationPending) return;
                     ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
                 }

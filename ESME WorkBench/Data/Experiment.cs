@@ -8,7 +8,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Management;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -27,7 +26,6 @@ using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
-using Microsoft.VisualBasic;
 using LineStyle = ESME.Overlay.LineStyle;
 
 namespace ESMEWorkBench.Data
@@ -619,7 +617,7 @@ namespace ESMEWorkBench.Data
             {
                 return _referencedTypes ?? (_referencedTypes = new[]
                                                                {
-                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel), typeof(RasterMapLayer), typeof(AnalysisPoint), typeof(SoundSource), typeof(GeoRect)
+                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel), typeof(RasterMapLayer), typeof(AnalysisPoint), typeof(SoundSource), typeof(GeoRect), typeof(NemoModeToAcousticModelNameMap), typeof(NAVOTimePeriod),
                                                                });
             }
         }
@@ -754,6 +752,44 @@ namespace ESMEWorkBench.Data
         }
 
         #endregion
+
+        #region public List<NAVOTimePeriod> AvailableTimePeriods { get; set; }
+
+        public List<NAVOTimePeriod> AvailableTimePeriods
+        {
+            get { return _availableTimePeriods; }
+            set
+            {
+                if (_availableTimePeriods == value) return;
+                _availableTimePeriods = value;
+                NotifyPropertyChanged(AvailableTimePeriodsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AvailableTimePeriodsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.AvailableTimePeriods);
+        List<NAVOTimePeriod> _availableTimePeriods;
+
+        #endregion
+
+
+        #region public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap { get; set; }
+
+        public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap
+        {
+            get { return _nemoModeToAcousticModelNameMap; }
+            set
+            {
+                if (_nemoModeToAcousticModelNameMap == value) return;
+                _nemoModeToAcousticModelNameMap = value;
+                NotifyPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NemoModeToAcousticModelNameMapChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.NemoModeToAcousticModelNameMap);
+        NemoModeToAcousticModelNameMap _nemoModeToAcousticModelNameMap;
+
+        #endregion
+
 
         [XmlIgnore]
         FileSystemWatcher FileSystemWatcher { get; set; }
@@ -1014,6 +1050,9 @@ namespace ESMEWorkBench.Data
             }
 
             if (NemoFile == null) return;
+
+            if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(NemoFile.Scenario.DistinctModePSMNames, "CASS");
+            else NemoModeToAcousticModelNameMap.UpdateModes(NemoFile.Scenario.DistinctModePSMNames, "CASS");
 
             if (NemoFile.Scenario.OverlayFile != null) OpArea = new GeoRect(NemoFile.Scenario.OverlayFile.Shapes[0].BoundingBox);
             else foreach (var trackdef in NemoFile.Scenario.Platforms.SelectMany(platform => platform.Trackdefs))

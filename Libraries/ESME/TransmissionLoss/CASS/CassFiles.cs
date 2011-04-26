@@ -15,7 +15,7 @@ namespace ESME.TransmissionLoss.CASS
 {
     public static class CASSFiles
     {
-        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, string timePeriodName, Environment2DData bathymetry, GeoRect extractionArea)
+        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, string timePeriodName, Environment2DData bathymetry)
         {
             var sedimentFiles = Directory.GetFiles(extractedDataPath, "sediment-*.chb");
             var windFile = Path.Combine(extractedDataPath, string.Format("{0}-wind.txt", timePeriodName));
@@ -29,13 +29,11 @@ namespace ESME.TransmissionLoss.CASS
             if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.FromSedimentCHB(selectedSedimentFile);
 
             Environment2DData wind = null;
-            if (windFile.EndsWith(".eeb")) wind = Environment2DData.FromEEB(windFile, "windspeed", extractionArea);
-            else if (windFile.EndsWith(".txt")) wind = SurfaceMarineGriddedClimatologyDatabase.Parse(windFile);
+            if (windFile.EndsWith(".txt")) wind = SurfaceMarineGriddedClimatologyDatabase.Parse(windFile);
             if (wind == null) throw new ApplicationException("Error reading wind data");
 
             SoundSpeedField soundSpeedField = null;
-            if (soundspeedFile.EndsWith(".eeb")) soundSpeedField = new SoundSpeedField(soundspeedFile, extractionArea);
-            else if (soundspeedFile.EndsWith(".xml"))
+            if (soundspeedFile.EndsWith(".xml"))
             {
                 var rawSoundSpeeds = SerializedOutput.Load(soundspeedFile, GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes);
                 soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriodName);

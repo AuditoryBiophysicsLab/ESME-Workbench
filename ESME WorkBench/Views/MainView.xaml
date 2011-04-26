@@ -258,6 +258,12 @@
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Export all Analysis Points as CASS jobs"
 					                Command="{Binding ExportAnalysisPointsToCASSCommand}" />
+                    <r:RibbonButton Label="Models"
+					                LargeImageSource="..\Images\LargeIcons\gnome_sound_recorder.png"
+					                SmallImageSource="..\Images\SmallIcons\gnome_sound_recorder.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Choose an acoustic model for each distinct mode in the experiment"
+					                Command="{Binding ConfigureAcousticModelsCommand}" />
                     <r:RibbonButton Label="Quick Look"
 					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
