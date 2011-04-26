@@ -88,12 +88,12 @@ namespace ESME.TransmissionLoss.CASS
                     var batchFileName = string.Format("run_base-cass-{0}-{1}-{2}.bat", platform.Name, platform.Id, timePeriod);
                     var inputFilePath = Path.Combine(curTimePeriodPath, inputFileName);
                     var batchFilePath = Path.Combine(curTimePeriodPath, batchFileName);
-                    Console.WriteLine("For CASS File: {0}", inputFileName);
+                    Console.WriteLine(@"For CASS File: {0}", inputFileName);
                     int sourceCount = 0;
 
                     using (var writer = new StreamWriter(inputFilePath))
                     {
-                        Console.WriteLine("Writing CASS File: {0}", inputFileName);
+                        Console.WriteLine(@"Writing CASS File: {0}", inputFileName);
                         writer.WriteLine("# analyst name: {0}", System.Environment.UserName);
                         writer.WriteLine("# creation date: {0}", DateTime.Now);
                         writer.WriteLine();
@@ -124,11 +124,11 @@ namespace ESME.TransmissionLoss.CASS
 
                         foreach (var source in platform.Sources)
                         {
-                            Console.WriteLine("  Found source: {0}", source.Name);
+                            Console.WriteLine(@"  Found source: {0}", source.Name);
                             var sourceToModes = new OneToMany<NemoSource, List<OneToMany<NemoMode, List<SoundSource>>>>(source);
                             foreach (var mode in source.Modes)
                             {
-                                Console.WriteLine("    Found mode: {0}", mode.Name);
+                                Console.WriteLine(@"    Found mode: {0}", mode.Name);
                                 var modeToSoundSources = new OneToMany<NemoMode, List<SoundSource>>(mode);
                                 sourceToModes.Many.Add(modeToSoundSources);
                                 foreach (var analysisPoint in analysisPoints)
@@ -142,7 +142,7 @@ namespace ESME.TransmissionLoss.CASS
                                         if ((platform.Name.ToLower() == soundSourcePlatform.ToLower()) && (source.Name.ToLower() == soundSourceSource.ToLower()) && (mode.Name.ToLower() == soundSourceMode.ToLower()) && (soundSource.ShouldBeCalculated))
                                         {
                                             modeToSoundSources.Many.Add(soundSource);
-                                            Console.WriteLine("      Found location: {0}", soundSource);
+                                            Console.WriteLine(@"      Found location: {0}", soundSource);
                                         }
                                     } // end loop over all sound sources in the current analysis point
                                 } // end loop over all analysis points
@@ -150,7 +150,7 @@ namespace ESME.TransmissionLoss.CASS
                             foreach (var mode in sourceToModes.Many)
                             {
                                 if (mode.Many.Count() == 0) break;
-                                Console.WriteLine("  Writing loadcase for source: {0}  mode: {1}", source.Name, mode.One.Name);
+                                Console.WriteLine(@"  Writing loadcase for source: {0}  mode: {1}", source.Name, mode.One.Name);
 
                                 writer.WriteLine("*Loadcase");
                                 writer.WriteLine("#Sim_Area_ID                             ");
