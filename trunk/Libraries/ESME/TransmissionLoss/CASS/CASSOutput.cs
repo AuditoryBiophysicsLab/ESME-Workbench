@@ -101,68 +101,68 @@ namespace ESME.TransmissionLoss.CASS
             {
                 #region file header read
 
-                result.RunDateTime = Encoding.ASCII.GetString(reader.ReadBytes(25));
-                result.OperatingSystemName = Encoding.ASCII.GetString(reader.ReadBytes(25));
-                result.SystemNodeName = Encoding.ASCII.GetString(reader.ReadBytes(25));
-                result.OperatingSystemRelease = Encoding.ASCII.GetString(reader.ReadBytes(25));
-                result.OperatingSystemVersion = Encoding.ASCII.GetString(reader.ReadBytes(25));
-                result.MachineType = Encoding.ASCII.GetString(reader.ReadBytes(25));
-                result.ProcessorType = Encoding.ASCII.GetString(reader.ReadBytes(25));
+                result.RunDateTime = ParseCASSString(reader, 25, '\0');
+                result.OperatingSystemName = ParseCASSString(reader, 25, '\0');
+                result.SystemNodeName = ParseCASSString(reader, 25, '\0');
+                result.OperatingSystemRelease = ParseCASSString(reader, 25, '\0');
+                result.OperatingSystemVersion = ParseCASSString(reader, 25, '\0');
+                result.MachineType = ParseCASSString(reader, 25, '\0');
+                result.ProcessorType = ParseCASSString(reader, 25, '\0');
 
-                result.Title = Encoding.ASCII.GetString(reader.ReadBytes(50));
-                result.SiteName = Encoding.ASCII.GetString(reader.ReadBytes(50));
+                result.Title = ParseCASSString(reader, 50, '\0');
+                result.SiteName = ParseCASSString(reader, 50, '\0');
 
                 result.SiteRefLatLocation = reader.ReadSingle();
-                result.SiteRefLatLocationUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.SiteRefLatLocationUnits = ParseCASSString(reader, 10, '\0');
                 result.SiteRefLonLocation = reader.ReadSingle();
-                result.SiteRefLonLocationUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.SiteRefLonLocationUnits = ParseCASSString(reader, 10, '\0');
 
                 result.SourceRefLatLocation = reader.ReadSingle();
-                result.SourceRefLatLocationUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.SourceRefLatLocationUnits = ParseCASSString(reader, 10, '\0');
                 result.SourceRefLonLocation = reader.ReadSingle();
-                result.SourceRefLonLocationUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.SourceRefLonLocationUnits = ParseCASSString(reader, 10, '\0');
 
-                result.PlatformName = Encoding.ASCII.GetString(reader.ReadBytes(50));
-                result.SourceName = Encoding.ASCII.GetString(reader.ReadBytes(50));
-                result.ModeName = Encoding.ASCII.GetString(reader.ReadBytes(50));
+                result.PlatformName = ParseCASSString(reader, 50, '\0');
+                result.SourceName = ParseCASSString(reader, 50, '\0');
+                result.ModeName = ParseCASSString(reader, 50, '\0');
 
                 result.Frequency = reader.ReadSingle();
-                result.FrequencyUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.FrequencyUnits = ParseCASSString(reader, 10, '\0');
 
                 result.DepressionElevationAngle = reader.ReadSingle();
-                result.DepressionElevationAngleUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.DepressionElevationAngleUnits = ParseCASSString(reader, 10, '\0');
 
                 result.VerticalBeamPattern = reader.ReadSingle();
-                result.VerticalBeamPatternUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.VerticalBeamPatternUnits = ParseCASSString(reader, 10, '\0');
 
                 result.SourceDepth = reader.ReadSingle();
-                result.SourceDepthUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.SourceDepthUnits = ParseCASSString(reader, 10, '\0');
 
                 result.SourceLevel = reader.ReadSingle();
-                result.SourceLevelUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.SourceLevelUnits = ParseCASSString(reader, 10, '\0');
 
                 result.MinWaterDepth = reader.ReadSingle();
-                result.MinWaterDepthUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.MinWaterDepthUnits = ParseCASSString(reader, 10, '\0');
 
                 result.MaxWaterDepth = reader.ReadSingle();
-                result.MaxWaterDepthUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.MaxWaterDepthUnits = ParseCASSString(reader, 10, '\0');
 
                 result.WaterDepthIncrement = reader.ReadSingle();
-                result.WaterDepthIncrementUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.WaterDepthIncrementUnits = ParseCASSString(reader, 10, '\0');
 
                 result.MinRangeDistance = reader.ReadSingle();
-                result.MinRangeDistanceUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.MinRangeDistanceUnits = ParseCASSString(reader, 10, '\0');
 
                 result.MaxRangeDistance = reader.ReadSingle();
-                result.MaxRangeDistanceUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.MaxRangeDistanceUnits = ParseCASSString(reader, 10, '\0');
 
                 result.RangeDistanceIncrement = reader.ReadSingle();
-                result.RangeDistanceIncrementUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.RangeDistanceIncrementUnits = ParseCASSString(reader, 10, '\0');
 
-                result.BottomType = Encoding.ASCII.GetString(reader.ReadBytes(50));
-                result.Season = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.BottomType = ParseCASSString(reader, 50, '\0');
+                result.Season = ParseCASSString(reader, 10, '\0');
                 result.WindSpeed = reader.ReadSingle();
-                result.WindSpeedUnits = Encoding.ASCII.GetString(reader.ReadBytes(10));
+                result.WindSpeedUnits = ParseCASSString(reader, 10, '\0');
 
                 result.CASSLevel = reader.ReadSingle();
 
@@ -172,7 +172,7 @@ namespace ESME.TransmissionLoss.CASS
 
                 #region bearing header read
 
-                result.RadialCount = (int) reader.ReadSingle(); //note: comes in as a float, cast to int. See PH's docs
+                result.RadialCount = (int)reader.ReadSingle(); //note: comes in as a float, cast to int. See PH's docs
                 result.RadialBearings = new float[result.RadialCount];
                 for (int i = 0; i < result.RadialCount; i++) result.RadialBearings[i] = reader.ReadSingle();
 
@@ -180,7 +180,7 @@ namespace ESME.TransmissionLoss.CASS
 
                 #region range header read
 
-                result.RangeCellCount = (int) reader.ReadSingle();
+                result.RangeCellCount = (int)reader.ReadSingle();
                 result.RangeCells = new float[result.RangeCellCount];
                 for (int i = 0; i < result.RangeCellCount; i++) result.RangeCells[i] = reader.ReadSingle();
 
@@ -188,7 +188,7 @@ namespace ESME.TransmissionLoss.CASS
 
                 #region depth header read
 
-                result.DepthCellCount = (int) reader.ReadSingle();
+                result.DepthCellCount = (int)reader.ReadSingle();
                 result.DepthCells = new float[result.DepthCellCount];
                 for (int i = 0; i < result.DepthCellCount; i++) result.DepthCells[i] = reader.ReadSingle();
 
@@ -199,11 +199,11 @@ namespace ESME.TransmissionLoss.CASS
                 result.Pressures = new List<float[,]>();
                 foreach (float bearing in result.RadialBearings)
                 {
-                    var pressure = new float[result.DepthCellCount,result.RangeCellCount];
+                    var pressure = new float[result.DepthCellCount, result.RangeCellCount];
 
-                    for (int i = 0; i < result.RangeCellCount; i++)
+                    for (var i = 0; i < result.RangeCellCount; i++)
                     {
-                        for (int j = 0; j < result.DepthCellCount; j++)
+                        for (var j = 0; j < result.DepthCellCount; j++)
                         {
                             pressure[j, i] = reader.ReadSingle();
                         }
@@ -215,6 +215,151 @@ namespace ESME.TransmissionLoss.CASS
             }
 
             return result;
+        }
+
+        public static void Write(string cassOutputFileName, TransmissionLossField transmissionLossField)
+        {
+            using (var writer = new BinaryWriter(new FileStream(cassOutputFileName, FileMode.Create, FileAccess.Write)))
+            {
+                #region file header write
+                WriteCASSField(writer, "Run Date and Time", 25);
+                WriteCASSField(writer, "OS Name", 25);
+                WriteCASSField(writer, "Computer Node Name", 25);
+                WriteCASSField(writer, "OS Release", 25);
+                WriteCASSField(writer, "OS Version", 25);
+                WriteCASSField(writer, "Machine Type", 25);
+                WriteCASSField(writer, "Processor Type", 25);
+                WriteCASSField(writer, "Title", 50);
+                WriteCASSField(writer, "Site Name", 50);
+                
+                float siteRefLatLocation = 0;
+                writer.Write(siteRefLatLocation);
+                WriteCASSField(writer, "SiteRefLatLocation Units", 10);
+                
+                float siteRefLonLocation = 0;
+                writer.Write(siteRefLonLocation);
+                WriteCASSField(writer, "SiteRefLonLocation Units", 10);
+
+                float sourceRefLatLocation = transmissionLossField.Latitude;
+                writer.Write(sourceRefLatLocation);
+                WriteCASSField(writer, "DEG", 10);
+
+                float sourceRefLonLocation = transmissionLossField.Longitude;
+                writer.Write(sourceRefLonLocation);
+                WriteCASSField(writer, "DEG", 10);
+
+                WriteCASSField(writer, "Platform Name", 50);
+                WriteCASSField(writer, "Source Name", 50);
+                WriteCASSField(writer, "Mode Name", 50);
+
+                float frequency = 0;
+                writer.Write(frequency);
+                WriteCASSField(writer, "Frequency Units", 10);
+
+                writer.Write(transmissionLossField.DepressionElevationAngle);
+                WriteCASSField(writer, "D/E Angle Units", 10);
+
+                writer.Write(transmissionLossField.VerticalBeamWidth);
+                WriteCASSField(writer, "verticalBeamPattern Units", 10);
+                
+                writer.Write(transmissionLossField.SourceDepth);
+                WriteCASSField(writer, "sourceDepth Units", 10);
+
+                writer.Write(transmissionLossField.SourceLevel);
+                WriteCASSField(writer, "sourceLevel Units", 10);
+
+                float minWaterDepth = 0;
+                writer.Write(minWaterDepth);
+                WriteCASSField(writer, "minWaterDepth Units", 10);
+
+                float maxWaterDepth = 0;
+                writer.Write(maxWaterDepth);
+                WriteCASSField(writer, "maxWaterDepth Units", 10);
+
+                float waterDepthIncrement = 0;
+                writer.Write(waterDepthIncrement);
+                WriteCASSField(writer, "waterDepthIncrement Units", 10);
+
+                float minRangeDistance = 0;
+                writer.Write(minRangeDistance);
+                WriteCASSField(writer, "minRangeDistance Units", 10);
+
+                float maxRangeDistance = 0;
+                writer.Write(maxRangeDistance);
+                WriteCASSField(writer, "maxRangeDistance Units", 10);
+
+                float rangeDistanceIncrement = 0;
+                writer.Write(rangeDistanceIncrement);
+                WriteCASSField(writer, "rangeDistanceIncrement Units", 10);
+
+                WriteCASSField(writer, "Bottom Type", 50);
+                WriteCASSField(writer, "Season", 10);
+                float windSpeed = 0;
+                writer.Write(windSpeed);
+                WriteCASSField(writer, "windSpeed Units", 10);
+
+                float cassLevel = 0;
+                writer.Write(cassLevel);
+
+                if(writer.BaseStream.Position != 713) throw new FileFormatException("Cass Write: header is of incorrect length.");
+                #endregion
+                #region bearing header
+
+                float radialCount = transmissionLossField.Radials.Length;
+                writer.Write(radialCount);
+                foreach (var radial in transmissionLossField.Radials)
+                {
+                    writer.Write(radial.BearingFromSource);
+                }
+
+                #endregion
+                #region range header
+
+                float rangeCount = transmissionLossField.Ranges.Length;
+                writer.Write(rangeCount);
+                foreach (float range in transmissionLossField.Ranges)
+                {
+                    writer.Write(range);
+                }
+
+                #endregion
+                #region depth header
+
+                float depthCount = transmissionLossField.Depths.Length;
+                writer.Write(depthCount);
+                foreach (float depth in transmissionLossField.Depths)
+                {
+                    writer.Write(depth);
+                }
+
+                #endregion
+                #region payload pressure data
+                foreach (var radial in transmissionLossField.Radials)
+                {
+                    for (var i = 0; i < radial.Ranges.Length; i++)
+                    {
+                        for (var j = 0; j < radial.Depths.Length; j++)
+                        {
+                            writer.Write(radial.TransmissionLoss[j,i]);
+                        }
+                    }
+                }
+                #endregion
+            }
+        }
+
+        static string ParseCASSString(BinaryReader r, int charLength, char paddingChar)
+        {
+            var result = Encoding.ASCII.GetString(r.ReadBytes(charLength)).TrimEnd(paddingChar);
+            return !string.IsNullOrEmpty(result) ? result : null;
+        }
+
+        static void WriteCASSField(BinaryWriter w, string s, int fieldLength)
+        {
+            var buf = new byte[fieldLength];
+            for (var i = 0; i < fieldLength; i++) buf[i] = 0;
+            var result = Encoding.ASCII.GetBytes(s, 0, s.Length <= fieldLength ? s.Length : fieldLength, buf, 0);
+            w.Write(buf, 0, fieldLength);
         }
     }
 }
