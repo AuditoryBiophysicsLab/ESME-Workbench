@@ -9,23 +9,24 @@
                 <CheckBox Focusable="False"
 				          Grid.Column="0"
 				          IsChecked="{Binding IsChecked}"
-				          VerticalAlignment="Center" />
+				          VerticalAlignment="Center" Margin="5 0 5 0" />
                 <ContentPresenter Content="{Binding Caption, Mode=OneTime}"
 				                  Grid.Column="1"
-				                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
+				                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" Margin="0 0 5 0"/>
             </StackPanel>
         </DataTemplate>
     </Window.Resources>
     <StackPanel Orientation="Vertical">
-        <CheckBox Content="Analysis points" IsChecked="{Binding ExportAnalysisPoints}"/>
-        <CheckBox Content="Environmental data for CASS" IsChecked="{Binding ExportCASSData}"/>
+        <CheckBox Content="Analysis points" 
+                  IsChecked="{Binding ExportAnalysisPoints}" Margin="5 5 5 0" />
+        <CheckBox Content="Environmental data for CASS" IsChecked="{Binding ExportCASSData}" Margin="5 0 5 0" />
         <GroupBox Header="Select environmental data to export"
                   IsEnabled="{Binding ExportCASSData}">
             <StackPanel Orientation="Vertical">
-                <CheckBox Content="Bathymetry" IsChecked="{Binding ExportCASSBathymetry}"/>
-                <CheckBox Content="Climatology" IsChecked="{Binding ExportCassClimatology}" 
-                          ToolTip="Sound speed, wind speed and sediment type data for the current simulation area"/>
-                <GroupBox Header="Available climatological data">
+                <CheckBox Content="Bathymetry" IsChecked="{Binding ExportCASSBathymetry}" Margin="5 5 5 0" />
+                <CheckBox Content="Climatology" IsChecked="{Binding ExportCASSClimatology}" 
+                          ToolTip="Sound speed, wind speed and sediment type data for the current simulation area" Margin="5 0 5 0" />
+                <GroupBox Header="Available climatological data" IsEnabled="{Binding ExportCASSClimatology}">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <Button Width="75"

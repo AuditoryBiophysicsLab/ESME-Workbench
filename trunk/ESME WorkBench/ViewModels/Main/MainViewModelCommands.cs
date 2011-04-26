@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Input;
 using Cinch;
 using ESME.Data;
 using ESME.NEMO;
@@ -578,13 +579,15 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate
+                return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate { return (_experiment.NemoFile != null && (!string.IsNullOrEmpty(_experiment.BathymetryFileName) || (!string.IsNullOrEmpty(_experiment.SoundSpeedFileName) || !string.IsNullOrEmpty(_experiment.SedimentFileName) || !string.IsNullOrEmpty(_experiment.WindSpeedFileName) || _experiment.AnalysisPoints.Count > 0))); },
+                                                                                                                       delegate
                                                                                                                        {
-                                                                                                                           var exportOptionsViewModel = new ExportOptionsViewModel(_experiment.AvailableTimePeriods, _experiment.EnvironmentRoot, Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), _experiment.Bathymetry);
+                                                                                                                           var exportOptionsViewModel = new ExportOptionsViewModel(_experiment);
                                                                                                                            var result = _visualizerService.ShowDialog("ExportOptionsView", exportOptionsViewModel);
                                                                                                                            var scenarioDataDirectory = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName);
                                                                                                                            if (result.HasValue && result.Value)
                                                                                                                            {
+                                                                                                                               MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Wait);
                                                                                                                                //Status = "Exporting bathymetry data";
 
                                                                                                                                var bathymetryFiles = Directory.GetFiles(_experiment.EnvironmentRoot, "bathymetry*.yxz");
@@ -595,6 +598,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                    {
                                                                                                                                        var destFile = Path.Combine(Path.Combine(scenarioDataDirectory, "Bathymetry"), "bathymetry.txt");
                                                                                                                                        File.Copy(file, destFile, true);
+                                                                                                                                       MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
                                                                                                                                        break;
                                                                                                                                    }
                                                                                                                                }
@@ -613,7 +617,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                    CASSFiles.WriteCASSInputFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt");
 
                                                                                                                                }
-
+                                                                                                                               MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
                                                                                                                            }
                                                                                                                        }));
             }
@@ -629,15 +633,19 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _configureAcousticModelsCommand ?? (_configureAcousticModelsCommand = new SimpleCommand<object, object>(delegate
-                                                                                                                               {
-                                                                                                                                   var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(_experiment.NemoModeToAcousticModelNameMap, new List<string>{"CASS", "RAM"});
-                                                                                                                                   var result = _visualizerService.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);
-                                                                                                                                   if (result.HasValue && result.Value)
-                                                                                                                                   {
-                                                                                                                                       _experiment.IsChanged = true;
-                                                                                                                                   }
-                                                                                                                               }));
+                return _configureAcousticModelsCommand ?? (_configureAcousticModelsCommand = new SimpleCommand<object, object>(delegate { return _experiment.NemoFile != null; }, delegate
+                                                                                                                                                                                  {
+                                                                                                                                                                                      var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(_experiment.NemoModeToAcousticModelNameMap, new List<string>
+                                                                                                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                                                                                                        "CASS",
+                                                                                                                                                                                                                                                                                                                        "RAM"
+                                                                                                                                                                                                                                                                                                                    });
+                                                                                                                                                                                      var result = _visualizerService.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);
+                                                                                                                                                                                      if (result.HasValue && result.Value)
+                                                                                                                                                                                      {
+                                                                                                                                                                                          _experiment.IsChanged = true;
+                                                                                                                                                                                      }
+                                                                                                                                                                                  }));
             }
         }
 

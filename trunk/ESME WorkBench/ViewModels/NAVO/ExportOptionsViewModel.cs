@@ -6,26 +6,36 @@ using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.NEMO;
 using ESME.TransmissionLoss.CASS;
+using ESMEWorkBench.Data;
 
 namespace ESMEWorkBench.ViewModels.NAVO
 {
     public class ExportOptionsViewModel : ViewModelBase
     {
-        readonly string _environmentRoot;
-        readonly string _nemoSimAreaRoot;
-        readonly Environment2DData _bathymetry;
-        public ExportOptionsViewModel(IEnumerable<NAVOTimePeriod> timePeriods, string environmentRoot, string nemoSimAreaRoot, Environment2DData bathymetry)
+        readonly Experiment _experiment;
+        public ExportOptionsViewModel(Experiment experiment)
         {
-            _environmentRoot = environmentRoot;
-            _nemoSimAreaRoot = nemoSimAreaRoot;
-            _bathymetry = bathymetry;
+            _experiment = experiment;
             AvailableTimePeriods = new CheckboxSettings();
-            foreach (var curPeriod in timePeriods)
+            foreach (var curPeriod in _experiment.AvailableTimePeriods)
                 AvailableTimePeriods.Add(new CheckboxSetting
                                          {
                                              TimePeriod = curPeriod
                                          });
         }
+
+        #region public bool ExperimentHasAnalysisPoints { get; set; }
+
+        public bool ExperimentHasAnalysisPoints
+        {
+            get { return _experiment.AnalysisPoints.Count > 0; }
+        }
+
+        static readonly PropertyChangedEventArgs ExperimentHasAnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ExperimentHasAnalysisPoints);
+        bool _experimentHasAnalysisPoints;
+
+        #endregion
+
 
         #region public CheckboxSettings AvailableTimePeriods { get; set; }
 
@@ -99,21 +109,21 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
-        #region public bool ExportCassClimatology { get; set; }
+        #region public bool ExportCASSClimatology { get; set; }
 
-        public bool ExportCassClimatology
+        public bool ExportCASSClimatology
         {
-            get { return _exportCassClimatology; }
+            get { return _exportCASSClimatology; }
             set
             {
-                if (_exportCassClimatology == value) return;
-                _exportCassClimatology = value;
+                if (_exportCASSClimatology == value) return;
+                _exportCASSClimatology = value;
                 NotifyPropertyChanged(ExportCassClimatologyChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ExportCassClimatologyChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ExportCassClimatology);
-        bool _exportCassClimatology;
+        static readonly PropertyChangedEventArgs ExportCassClimatologyChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ExportCASSClimatology);
+        bool _exportCASSClimatology;
 
         #endregion
 
