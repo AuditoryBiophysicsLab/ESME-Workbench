@@ -46,6 +46,14 @@ namespace ESME.TransmissionLoss
             BearingFromSource = bearingFromSource;
             TransmissionLoss = pressureField;
         }
+        public TransmissionLossRadial(float bearingFromSource, float[,] pressureField,float[] depths, float[] ranges):this(bearingFromSource,pressureField)
+        {
+            Depths = new float[depths.Length];
+            Array.Copy(depths, Depths, depths.Length);
+
+            Ranges = new float[ranges.Length];
+            Array.Copy(ranges, Ranges, ranges.Length);
+        }
 
         public TransmissionLossRadial() {  }
         

@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransmissionLossCalculator"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectBuildInfo", "Utilities\ProjectBuildInfo\ProjectBuildInfo.csproj", "{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grahams_little_sandbox", "grahams_little_sandbox\grahams_little_sandbox.csproj", "{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -292,6 +294,20 @@ Global
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Release|x64.ActiveCfg = Release|x86
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Release|x86.ActiveCfg = Release|x86
 		{33EEBAB0-38DD-4968-ACA0-F6DAB2C6B3B6}.Release|x86.Build.0 = Release|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Debug|Win32.ActiveCfg = Debug|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Debug|x64.ActiveCfg = Debug|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Debug|x86.ActiveCfg = Debug|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Debug|x86.Build.0 = Debug|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Release|Any CPU.ActiveCfg = Release|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Release|Mixed Platforms.Build.0 = Release|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Release|Win32.ActiveCfg = Release|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Release|x64.ActiveCfg = Release|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Release|x86.ActiveCfg = Release|x86
+		{4CF79AA1-B66E-4F1C-82B2-FC9BFBAD77CA}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

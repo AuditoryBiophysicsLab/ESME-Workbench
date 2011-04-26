@@ -122,7 +122,7 @@ namespace ESME.TransmissionLoss
             var result = new TransmissionLossField();
             
             result.Name = string.Format("CASS|{0}|{1}|{2}|{3}|{4}", output.PlatformName, output.SourceName, output.ModeName, output.SourceRefLatLocation, output.SourceRefLonLocation);
-            result.Metadata = string.Format("Imported from CASS output {0} on {1}", output.Filename, DateTime.Now);
+            result.Metadata = string.Format("Imported from CASS output file {0} on {1}", output.Filename, DateTime.Now);
             result.SourceLevel = output.SourceLevel;
             result.Latitude = output.SourceRefLatLocation;
             result.Longitude = output.SourceRefLonLocation;
@@ -133,10 +133,13 @@ namespace ESME.TransmissionLoss
             result.HighFrequency = output.Frequency;
             result.MaxCalculationDepth = output.MaxWaterDepth;
             result.Radius = (int)output.MaxRangeDistance;
+            result.Depths = new float[output.DepthCellCount];
+            result.Ranges = new float[output.RangeCellCount];   
+
             Array.Copy(output.DepthCells,result.Depths,output.DepthCellCount);
             Array.Copy(output.RangeCells,result.Ranges,output.RangeCellCount);
             result.Radials = new TransmissionLossRadial[output.Pressures.Count];
-            for (var i = 0; i < output.Pressures.Count; i++) result.Radials[i] = new TransmissionLossRadial(output.RadialBearings[i],output.Pressures[i]);
+            for (var i = 0; i < output.Pressures.Count; i++) result.Radials[i] = new TransmissionLossRadial(output.RadialBearings[i],output.Pressures[i],result.Depths,result.Ranges);
             result.EarthCoordinate = new EarthCoordinate(result.Latitude,result.Longitude);
             
             return result;
