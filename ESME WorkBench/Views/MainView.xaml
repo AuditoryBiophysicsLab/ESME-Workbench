@@ -318,11 +318,11 @@
 
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Reports">
-                    <r:RibbonButton Label="Report Generator"
+                    <r:RibbonButton Label="Post Processor"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\chart-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\chart-icon.png"
-					                ToolTipDescription="Launches the NUWC Report Generator"
+					                ToolTipDescription="Launches the NUWC Post Processor"
 					                Command="{Binding LaunchNUWCReportGeneratorCommand}"/>
                 </r:RibbonGroup>
             </r:RibbonTab>
