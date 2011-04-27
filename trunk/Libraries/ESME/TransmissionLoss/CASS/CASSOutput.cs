@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using FileFormatException = ESME.Model.FileFormatException;
@@ -223,10 +224,10 @@ namespace ESME.TransmissionLoss.CASS
             {
                 #region file header write
                 WriteCASSField(writer, "Run Date and Time", 25);
-                WriteCASSField(writer, "OS Name", 25);
-                WriteCASSField(writer, "Computer Node Name", 25);
-                WriteCASSField(writer, "OS Release", 25);
-                WriteCASSField(writer, "OS Version", 25);
+                WriteCASSField(writer, System.Environment.OSVersion.Version.ToString(), 25);
+                WriteCASSField(writer, System.Environment.MachineName, 25);
+                WriteCASSField(writer, System.Environment.OSVersion.ServicePack, 25);
+                WriteCASSField(writer, System.Environment.OSVersion.Platform.ToString(), 25);
                 WriteCASSField(writer, "Machine Type", 25);
                 WriteCASSField(writer, "Processor Type", 25);
                 WriteCASSField(writer, "Title", 50);
@@ -252,45 +253,41 @@ namespace ESME.TransmissionLoss.CASS
                 WriteCASSField(writer, "Source Name", 50);
                 WriteCASSField(writer, "Mode Name", 50);
 
-                float frequency = 0;
-                writer.Write(frequency);
-                WriteCASSField(writer, "Frequency Units", 10);
+                writer.Write(transmissionLossField.HighFrequency); //todo: yes?
+                WriteCASSField(writer, "HZ", 10);
 
                 writer.Write(transmissionLossField.DepressionElevationAngle);
-                WriteCASSField(writer, "D/E Angle Units", 10);
+                WriteCASSField(writer, "DEG", 10);
 
                 writer.Write(transmissionLossField.VerticalBeamWidth);
-                WriteCASSField(writer, "verticalBeamPattern Units", 10);
+                WriteCASSField(writer, "DEG", 10);
                 
                 writer.Write(transmissionLossField.SourceDepth);
-                WriteCASSField(writer, "sourceDepth Units", 10);
+                WriteCASSField(writer, "M", 10);
 
                 writer.Write(transmissionLossField.SourceLevel);
-                WriteCASSField(writer, "sourceLevel Units", 10);
+                WriteCASSField(writer, "DB", 10);
+                
+                writer.Write(transmissionLossField.Depths[0]);
+                WriteCASSField(writer, "M", 10);
+                
+                writer.Write(transmissionLossField.Depths[transmissionLossField.Depths.Length-1]);
+                WriteCASSField(writer, "M", 10);
 
-                float minWaterDepth = 0;
-                writer.Write(minWaterDepth);
-                WriteCASSField(writer, "minWaterDepth Units", 10);
-
-                float maxWaterDepth = 0;
-                writer.Write(maxWaterDepth);
-                WriteCASSField(writer, "maxWaterDepth Units", 10);
-
-                float waterDepthIncrement = 0;
+                float waterDepthIncrement = transmissionLossField.Depths[1]-transmissionLossField.Depths[0];
                 writer.Write(waterDepthIncrement);
-                WriteCASSField(writer, "waterDepthIncrement Units", 10);
+                WriteCASSField(writer, "M", 10);
 
-                float minRangeDistance = 0;
-                writer.Write(minRangeDistance);
-                WriteCASSField(writer, "minRangeDistance Units", 10);
+                writer.Write(transmissionLossField.Ranges[0]);
+                WriteCASSField(writer, "M", 10);
 
-                float maxRangeDistance = 0;
-                writer.Write(maxRangeDistance);
-                WriteCASSField(writer, "maxRangeDistance Units", 10);
+                
+                writer.Write(transmissionLossField.Ranges[transmissionLossField.Ranges.Length-1]);
+                WriteCASSField(writer, "M", 10);
 
-                float rangeDistanceIncrement = 0;
+                float rangeDistanceIncrement = transmissionLossField.Ranges[1]-transmissionLossField.Ranges[0];
                 writer.Write(rangeDistanceIncrement);
-                WriteCASSField(writer, "rangeDistanceIncrement Units", 10);
+                WriteCASSField(writer, "M", 10);
 
                 WriteCASSField(writer, "Bottom Type", 50);
                 WriteCASSField(writer, "Season", 10);
@@ -358,7 +355,7 @@ namespace ESME.TransmissionLoss.CASS
         {
             var buf = new byte[fieldLength];
             for (var i = 0; i < fieldLength; i++) buf[i] = 0;
-            var result = Encoding.ASCII.GetBytes(s, 0, s.Length <= fieldLength ? s.Length : fieldLength, buf, 0);
+            var result = Encoding.ASCII.GetBytes(s, 0, s.Length <= fieldLength ? s.Length : fieldLength, buf, 0); //truncates or zero-pads output to fixed fieldLength.
             w.Write(buf, 0, fieldLength);
         }
     }
