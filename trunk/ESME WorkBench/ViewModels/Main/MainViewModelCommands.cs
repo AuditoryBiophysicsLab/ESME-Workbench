@@ -612,7 +612,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                    var selectedTimePeriods = (from timePeriod in exportOptionsViewModel.AvailableTimePeriods
                                                                                                                                                               where timePeriod.IsChecked
                                                                                                                                                               select timePeriod.Caption).ToList();
-                                                                                                                                   CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt", _experiment.NemoModeToAcousticModelNameMap);
+                                                                                                                                   CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt", _experiment.NemoModeToAcousticModelNameMap, _experiment.Bathymetry.Minimum.Data);
                                                                                                                                    //CASSFiles.WriteCASSInputFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt");
 
                                                                                                                                }

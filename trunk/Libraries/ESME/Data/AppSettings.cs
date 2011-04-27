@@ -625,47 +625,66 @@ namespace ESME.Data
         {
             if (string.IsNullOrEmpty(RAMSupportJarFile)) RAMSupportJarFile = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "ram-support.jar");
             if (string.IsNullOrEmpty(RAMExecutable)) RAMExecutable = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "pev54.exe");
-            RangeCellSize = 25;
-            DepthCellSize = 25;
+            MaximumDepth = 2000;
+            RangeStepSize = 25;
+            DepthStepSize = 25;
             SpeedDial = 1;
             SSPUnits = 0;
             CASSLevel = 200;
             BathymetryMetric = 1;
         }
 
-        #region public float RangeCellSize { get; set; }
+        #region public float MaximumDepth { get; set; }
 
-        public float RangeCellSize
+        public float MaximumDepth
         {
-            get { return _rangeCellSize; }
+            get { return _maximumDepth; }
             set
             {
-                if (_rangeCellSize == value) return;
-                _rangeCellSize = value;
+                if (_maximumDepth == value) return;
+                _maximumDepth = value;
+                NotifyPropertyChanged(MaximumDepthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.MaximumDepth);
+        float _maximumDepth = 2000;
+
+        #endregion
+
+        #region public float RangeStepSize { get; set; }
+
+        public float RangeStepSize
+        {
+            get { return _rangeStepSize; }
+            set
+            {
+                if (_rangeStepSize == value) return;
+                _rangeStepSize = value;
                 NotifyPropertyChanged(RangeCellSizeChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RangeCellSize);
-        float _rangeCellSize = 25;
+        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RangeStepSize);
+        float _rangeStepSize = 25;
 
         #endregion
 
-        #region public float DepthCellSize { get; set; }
+        #region public float DepthStepSize { get; set; }
 
-        public float DepthCellSize
+        public float DepthStepSize
         {
-            get { return _depthCellSize; }
+            get { return _depthStepSize; }
             set
             {
-                if (_depthCellSize == value) return;
-                _depthCellSize = value;
+                if (_depthStepSize == value) return;
+                _depthStepSize = value;
                 NotifyPropertyChanged(DepthCellSizeChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.DepthCellSize);
-        float _depthCellSize = 25;
+        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.DepthStepSize);
+        float _depthStepSize = 25;
 
         #endregion
 

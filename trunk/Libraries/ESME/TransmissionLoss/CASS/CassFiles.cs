@@ -71,8 +71,9 @@ namespace ESME.TransmissionLoss.CASS
 #endif
         }
 
-        public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName, NemoModeToAcousticModelNameMap modeToAcousticModelNameMap)
+        public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName, NemoModeToAcousticModelNameMap modeToAcousticModelNameMap, float maxDepth)
         {
+            maxDepth = Math.Abs(maxDepth);
             var nemoScenario = nemoFile.Scenario;
             foreach (var timePeriod in timePeriods)
             {
@@ -96,7 +97,7 @@ namespace ESME.TransmissionLoss.CASS
                                                where (platform.Name.ToLower() == soundSourcePlatform.ToLower()) && (source.Name.ToLower() == soundSourceSource.ToLower()) && (mode.Name.ToLower() == soundSourceMode.ToLower()) && (soundSource.ShouldBeCalculated)
                                                select soundSource).ToList();
                             if (modeSources.Count > 0)
-                                WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, modeToAcousticModelNameMap[modeSources[0].Name].ToLower(), timePeriod, appSettings, nemoFile, cassBathymetryFileName);
+                                WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, modeToAcousticModelNameMap[modeSources[0].Name].ToLower(), timePeriod, appSettings, nemoFile, cassBathymetryFileName, maxDepth);
                         }
                     }
                 }
@@ -110,7 +111,7 @@ namespace ESME.TransmissionLoss.CASS
             foreach (var matchingFile in matchingFiles) File.Delete(matchingFile);
         }
 
-        static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, string simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName)
+        static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, string simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, float maxDepth)
         {
             var nemoScenario = nemoFile.Scenario;
             var simAreaFile = SimAreaCSV.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"));
@@ -120,7 +121,7 @@ namespace ESME.TransmissionLoss.CASS
             var batchFileName = "run_" + Path.GetFileNameWithoutExtension(inputFileName) + ".bat";
             var inputFilePath = Path.Combine(curTimePeriodPath, inputFileName);
             var batchFilePath = Path.Combine(curTimePeriodPath, batchFileName);
-            
+
             // If the file does not yet exist, we need to write the header
             if (!File.Exists(inputFilePath))
             {
@@ -179,18 +180,27 @@ namespace ESME.TransmissionLoss.CASS
                 writer.WriteLine("Sim Area                                ,{0}", nemoScenario.SimAreaName);
                 writer.WriteLine("Event Name                              ,{0}", nemoScenario.EventName);
                 writer.WriteLine("Reference Location                      ,{0:0.000} DEG, {1:0.000} DEG", simAreaData.Latitude, simAreaData.Longitude);
+                float stepCount;
+                float stepSize;
                 switch (simulatorName)
                 {
                     case "ram":
                         writer.WriteLine("Enviro File                             ,env_{0}-lfbl-pe.dat", timePeriod.ToLower());
+                        stepCount = appSettings.CASSSettings.MaximumDepth / appSettings.RAMSettings.DepthStepSize;
+                        if (stepCount > 21) stepSize = appSettings.CASSSettings.MaximumDepth / 21;
+                        else stepSize = appSettings.RAMSettings.DepthStepSize;
+                        writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.RAMSettings.MaximumDepth, stepSize);
                         break;
                     case "cass":
                     default:
                         writer.WriteLine("Enviro File                             ,env_{0}.dat", timePeriod.ToLower());
+                        stepCount = appSettings.CASSSettings.MaximumDepth / appSettings.CASSSettings.DepthStepSize;
+                        if (stepCount > 1024) stepSize = appSettings.CASSSettings.MaximumDepth / 1024;
+                        else stepSize = appSettings.CASSSettings.DepthStepSize;
+                        writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.CASSSettings.MaximumDepth, stepSize);
                         break;
                 }
                 writer.WriteLine("Bathy File                              ,{0}", cassBathymetryFileName);
-                writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.CASSSettings.MaximumDepth, appSettings.CASSSettings.DepthStepSize);
                 writer.WriteLine("Season                                  ,{0}", timePeriod);
                 writer.Write("Radial Angles                           ");
 
@@ -206,7 +216,22 @@ namespace ESME.TransmissionLoss.CASS
                 writer.WriteLine("Vertical Beam                           ,{0:0.000} DEG", mode.VerticalBeamWidth);
                 writer.WriteLine("Source Depth                            ,{0:0.000} M", mode.SourceDepth);
                 writer.WriteLine("SOURCE LEVEL                            ,{0:0.000} DB", mode.SourceLevel);
-                writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", appSettings.CASSSettings.RangeStepSize, mode.Radius);
+                switch (simulatorName)
+                {
+                    case "ram":
+                        stepCount = mode.Radius / appSettings.RAMSettings.RangeStepSize;
+                        if (stepCount > 1024) stepSize = mode.Radius / 1024;
+                        else stepSize = appSettings.RAMSettings.RangeStepSize;
+                        writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
+                        break;
+                    case "cass":
+                    default:
+                        stepCount = mode.Radius / appSettings.CASSSettings.RangeStepSize;
+                        if (stepCount > 1024) stepSize = mode.Radius / 1024;
+                        else stepSize = appSettings.CASSSettings.RangeStepSize;
+                        writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
+                        break;
+                }
 
                 foreach (var soundSource in soundSources)
                     writer.WriteLine("Source Location                         ,{0:0.000} DEG, {1:0.000} DEG", soundSource.Latitude, soundSource.Longitude);
