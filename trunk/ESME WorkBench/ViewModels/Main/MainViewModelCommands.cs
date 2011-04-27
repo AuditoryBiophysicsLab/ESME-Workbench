@@ -7,8 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
 using Cinch;
-using ESME.Data;
-using ESME.NEMO;
 using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
@@ -579,7 +577,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate { return (_experiment.NemoFile != null && (!string.IsNullOrEmpty(_experiment.BathymetryFileName) || (!string.IsNullOrEmpty(_experiment.SoundSpeedFileName) || !string.IsNullOrEmpty(_experiment.SedimentFileName) || !string.IsNullOrEmpty(_experiment.WindSpeedFileName) || _experiment.AnalysisPoints.Count > 0))); },
+                return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate { return (_experiment.NemoFile != null && (!string.IsNullOrEmpty(_experiment.BathymetryFileName) || (!string.IsNullOrEmpty(_experiment.SoundSpeedFileName) || !string.IsNullOrEmpty(_experiment.SedimentFileName) || !string.IsNullOrEmpty(_experiment.WindSpeedFileName) || ((_experiment.AnalysisPoints != null) && (_experiment.AnalysisPoints.Count > 0))))); },
                                                                                                                        delegate
                                                                                                                        {
                                                                                                                            var exportOptionsViewModel = new ExportOptionsViewModel(_experiment);
@@ -614,7 +612,8 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                    var selectedTimePeriods = (from timePeriod in exportOptionsViewModel.AvailableTimePeriods
                                                                                                                                                               where timePeriod.IsChecked
                                                                                                                                                               select timePeriod.Caption).ToList();
-                                                                                                                                   CASSFiles.WriteCASSInputFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt");
+                                                                                                                                   CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt", _experiment.NemoModeToAcousticModelNameMap);
+                                                                                                                                   //CASSFiles.WriteCASSInputFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt");
 
                                                                                                                                }
                                                                                                                                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);

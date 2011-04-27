@@ -50,6 +50,7 @@ namespace ESME.Data
             if (string.IsNullOrEmpty(ReportGeneratorExecutablePath)) ReportGeneratorExecutablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "post-processor.jar");
             if (ScenarioSimulatorSettings != null) ScenarioSimulatorSettings.SetDefaults();
             if (CASSSettings != null) CASSSettings.SetDefaults();
+            if (RAMSettings != null) RAMSettings.SetDefaults();
             if (NAVOConfiguration != null) NAVOConfiguration.SetDefaults();
         }
 
@@ -301,11 +302,11 @@ namespace ESME.Data
 
         #endregion
 
-        #region public RamSettings RamSettings { get; set; }
+        #region public RAMSettings RAMSettings { get; set; }
 
-        public RamSettings RamSettings
+        public RAMSettings RAMSettings
         {
-            get { return _ramSettings ?? (_ramSettings = new RamSettings()); }
+            get { return _ramSettings ?? (_ramSettings = new RAMSettings()); }
             set
             {
                 if (_ramSettings == value) return;
@@ -314,8 +315,8 @@ namespace ESME.Data
             }
         }
 
-        static readonly PropertyChangedEventArgs RamSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.RamSettings);
-        RamSettings _ramSettings;
+        static readonly PropertyChangedEventArgs RamSettingsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.RAMSettings);
+        RAMSettings _ramSettings;
 
         #endregion
 
@@ -607,6 +608,172 @@ namespace ESME.Data
         }
 
         SimpleCommand<object, object> _addCASSParameterFile;
+
+        #endregion
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+
+        #endregion
+    }
+
+    public class RAMSettings : INotifyPropertyChanged
+    {
+        public void SetDefaults()
+        {
+            if (string.IsNullOrEmpty(RAMSupportJarFile)) RAMSupportJarFile = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "ram-support.jar");
+            if (string.IsNullOrEmpty(RAMExecutable)) RAMExecutable = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "pev54.exe");
+            RangeCellSize = 25;
+            DepthCellSize = 25;
+            SpeedDial = 1;
+            SSPUnits = 0;
+            CASSLevel = 200;
+            BathymetryMetric = 1;
+        }
+
+        #region public float RangeCellSize { get; set; }
+
+        public float RangeCellSize
+        {
+            get { return _rangeCellSize; }
+            set
+            {
+                if (_rangeCellSize == value) return;
+                _rangeCellSize = value;
+                NotifyPropertyChanged(RangeCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RangeCellSize);
+        float _rangeCellSize = 25;
+
+        #endregion
+
+        #region public float DepthCellSize { get; set; }
+
+        public float DepthCellSize
+        {
+            get { return _depthCellSize; }
+            set
+            {
+                if (_depthCellSize == value) return;
+                _depthCellSize = value;
+                NotifyPropertyChanged(DepthCellSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.DepthCellSize);
+        float _depthCellSize = 25;
+
+        #endregion
+
+        #region public int SpeedDial { get; set; }
+
+        public int SpeedDial
+        {
+            get { return _speedDial; }
+            set
+            {
+                if (_speedDial == value) return;
+                _speedDial = value;
+                NotifyPropertyChanged(SpeedDialChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SpeedDialChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.SpeedDial);
+        int _speedDial = 1;
+
+        #endregion
+
+        #region public int SSPUnits { get; set; }
+
+        public int SSPUnits
+        {
+            get { return _sspUnits; }
+            set
+            {
+                if (_sspUnits == value) return;
+                _sspUnits = value;
+                NotifyPropertyChanged(SSPUnitsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SSPUnitsChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.SSPUnits);
+        int _sspUnits = 0;
+
+        #endregion
+
+        #region public int CASSLevel { get; set; }
+
+        public int CASSLevel
+        {
+            get { return _cassLevel; }
+            set
+            {
+                if (_cassLevel == value) return;
+                _cassLevel = value;
+                NotifyPropertyChanged(CASSLevelChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CASSLevelChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.CASSLevel);
+        int _cassLevel = 200;
+
+        #endregion
+
+        #region public int BathymetryMetric { get; set; }
+
+        public int BathymetryMetric
+        {
+            get { return _bathymetryMetric; }
+            set
+            {
+                if (_bathymetryMetric == value) return;
+                _bathymetryMetric = value;
+                NotifyPropertyChanged(BathymetryMetricChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BathymetryMetricChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.BathymetryMetric);
+        int _bathymetryMetric = 1;
+
+        #endregion
+
+        #region public string RAMSupportJarFile { get; set; }
+
+        public string RAMSupportJarFile
+        {
+            get { return _ramSupportJarFile; }
+            set
+            {
+                if (_ramSupportJarFile == value) return;
+                _ramSupportJarFile = value;
+                NotifyPropertyChanged(RAMSupportJarFileChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RAMSupportJarFileChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RAMSupportJarFile);
+        string _ramSupportJarFile;
+
+        #endregion
+
+        #region public string RAMExecutable { get; set; }
+
+        public string RAMExecutable
+        {
+            get { return _rAMExecutable; }
+            set
+            {
+                if (_rAMExecutable == value) return;
+                _rAMExecutable = value;
+                NotifyPropertyChanged(RAMExecutableChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RAMExecutableChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RAMExecutable);
+        string _rAMExecutable;
 
         #endregion
 
@@ -1053,16 +1220,6 @@ namespace ESME.Data
 
         #endregion
 
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
-
-        #endregion
-    }
-
-    public class RamSettings : INotifyPropertyChanged
-    {
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;
