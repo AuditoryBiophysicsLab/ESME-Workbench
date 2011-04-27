@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using FileFormatException = ESME.Model.FileFormatException;
@@ -175,7 +174,7 @@ namespace ESME.TransmissionLoss.CASS
 
                 result.RadialCount = (int)reader.ReadSingle(); //note: comes in as a float, cast to int. See PH's docs
                 result.RadialBearings = new float[result.RadialCount];
-                for (int i = 0; i < result.RadialCount; i++) result.RadialBearings[i] = reader.ReadSingle();
+                for (var i = 0; i < result.RadialCount; i++) result.RadialBearings[i] = reader.ReadSingle();
 
                 #endregion
 
@@ -183,7 +182,7 @@ namespace ESME.TransmissionLoss.CASS
 
                 result.RangeCellCount = (int)reader.ReadSingle();
                 result.RangeCells = new float[result.RangeCellCount];
-                for (int i = 0; i < result.RangeCellCount; i++) result.RangeCells[i] = reader.ReadSingle();
+                for (var i = 0; i < result.RangeCellCount; i++) result.RangeCells[i] = reader.ReadSingle();
 
                 #endregion
 
@@ -191,14 +190,14 @@ namespace ESME.TransmissionLoss.CASS
 
                 result.DepthCellCount = (int)reader.ReadSingle();
                 result.DepthCells = new float[result.DepthCellCount];
-                for (int i = 0; i < result.DepthCellCount; i++) result.DepthCells[i] = reader.ReadSingle();
+                for (var i = 0; i < result.DepthCellCount; i++) result.DepthCells[i] = reader.ReadSingle();
 
                 #endregion
 
                 #region pressure data read
 
                 result.Pressures = new List<float[,]>();
-                foreach (float bearing in result.RadialBearings)
+                foreach (var bearing in result.RadialBearings)
                 {
                     var pressure = new float[result.DepthCellCount, result.RangeCellCount];
 
