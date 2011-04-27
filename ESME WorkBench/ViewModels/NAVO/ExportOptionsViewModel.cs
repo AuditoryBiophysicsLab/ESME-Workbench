@@ -1,11 +1,6 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
+﻿using System.ComponentModel;
+using System.Linq;
 using Cinch;
-using ESME.Environment;
-using ESME.Environment.NAVO;
-using ESME.NEMO;
-using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Data;
 
 namespace ESMEWorkBench.ViewModels.NAVO
@@ -13,6 +8,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
     public class ExportOptionsViewModel : ViewModelBase
     {
         readonly Experiment _experiment;
+
         public ExportOptionsViewModel(Experiment experiment)
         {
             _experiment = experiment;
@@ -22,6 +18,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                          {
                                              TimePeriod = curPeriod
                                          });
+            SetHeaderText();
         }
 
         #region public bool ExperimentHasAnalysisPoints { get; set; }
@@ -36,6 +33,55 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
+        #region public string TimePeriodGroupBoxHeader { get; set; }
+
+        public string TimePeriodGroupBoxHeader
+        {
+            get { return _timePeriodGroupBoxHeader; }
+            set
+            {
+                if (_timePeriodGroupBoxHeader == value) return;
+                _timePeriodGroupBoxHeader = value;
+                NotifyPropertyChanged(TimePeriodGroupBoxHeaderChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TimePeriodGroupBoxHeaderChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.TimePeriodGroupBoxHeader);
+        string _timePeriodGroupBoxHeader;
+
+        void SetHeaderText()
+        {
+            if (ExportAnalysisPoints || ExportCASSClimatology)
+            {
+                TimePeriodGroupBoxHeader = "Select one or more available time periods";
+                IsTimePeriodGroupBoxEnabled = true;
+            }
+            else
+            {
+                TimePeriodGroupBoxHeader = "Available time periods";
+                IsTimePeriodGroupBoxEnabled = false;
+            }
+        }
+
+        #endregion
+
+        #region public bool IsTimePeriodGroupBoxEnabled { get; set; }
+
+        public bool IsTimePeriodGroupBoxEnabled
+        {
+            get { return _isTimePeriodGroupBoxEnabled; }
+            set
+            {
+                if (_isTimePeriodGroupBoxEnabled == value) return;
+                _isTimePeriodGroupBoxEnabled = value;
+                NotifyPropertyChanged(IsTimePeriodGroupBoxEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsTimePeriodGroupBoxEnabledChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.IsTimePeriodGroupBoxEnabled);
+        bool _isTimePeriodGroupBoxEnabled;
+
+        #endregion
 
         #region public CheckboxSettings AvailableTimePeriods { get; set; }
 
@@ -53,6 +99,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
         static readonly PropertyChangedEventArgs AvailableTimePeriodsChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.AvailableTimePeriods);
         CheckboxSettings _availableTimePeriods;
 
+        int SelectedTimePeriodCount { get { return AvailableTimePeriods.Count(period => period.IsChecked); } }
+
         #endregion
 
         #region public bool ExportAnalysisPoints { get; set; }
@@ -65,29 +113,12 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 if (_exportAnalysisPoints == value) return;
                 _exportAnalysisPoints = value;
                 NotifyPropertyChanged(ExportAnalysisPointsChangedEventArgs);
+                SetHeaderText();
             }
         }
 
         static readonly PropertyChangedEventArgs ExportAnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ExportAnalysisPoints);
         bool _exportAnalysisPoints;
-
-        #endregion
-
-        #region public bool ExportCASSData { get; set; }
-
-        public bool ExportCASSData
-        {
-            get { return _exportCASSData; }
-            set
-            {
-                if (_exportCASSData == value) return;
-                _exportCASSData = value;
-                NotifyPropertyChanged(ExportCASSDataChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ExportCASSDataChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ExportCASSData);
-        bool _exportCASSData;
 
         #endregion
 
@@ -119,6 +150,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 if (_exportCASSClimatology == value) return;
                 _exportCASSClimatology = value;
                 NotifyPropertyChanged(ExportCassClimatologyChangedEventArgs);
+                SetHeaderText();
             }
         }
 
@@ -167,21 +199,24 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
-
         #region OkCommand
 
         public SimpleCommand<object, object> OkCommand
         {
-            get
-            {
-                return _ok ?? (_ok = new SimpleCommand<object, object>(delegate
-                                                                       {
-                                                                           CloseActivePopUpCommand.Execute(true);
-                                                                       }));
-            }
+            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { return OkIsEnabled; }, delegate { CloseActivePopUpCommand.Execute(true); })); }
         }
 
         SimpleCommand<object, object> _ok;
+
+        bool OkIsEnabled
+        {
+            get
+            {
+                if (ExportAnalysisPoints || ExportCASSClimatology)
+                    return SelectedTimePeriodCount > 0;
+                return ExportCASSBathymetry;
+            }
+        }
 
         #endregion
 

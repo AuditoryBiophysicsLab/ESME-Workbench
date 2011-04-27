@@ -207,7 +207,64 @@
                         </StackPanel>
 					</TabItem>
 					<TabItem Header="RAM">
-                        <TextBlock>Not yet implemented</TextBlock>
+                        <StackPanel Orientation="Vertical"
+                                    Margin="5 5 5 10">
+                            <StackPanel Orientation="Vertical"
+                                        Margin="0 0 0 5">
+                                <TextBlock Text="Range cell size (m)"/>
+                                <TextBox Text="{Binding AppSettings.RAMSettings.RangeCellSize}">
+                                    <i:Interaction.Behaviors>
+                                        <cinch:NumericTextBoxBehaviour />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Depth cell size (m)"/>
+                                <TextBox Text="{Binding AppSettings.RAMSettings.DepthCellSize}">
+                                    <i:Interaction.Behaviors>
+                                        <cinch:NumericTextBoxBehaviour />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Speed Dial"/>
+                                <TextBox Text="{Binding AppSettings.RAMSettings.SpeedDial}">
+                                    <i:Interaction.Behaviors>
+                                        <cinch:NumericTextBoxBehaviour />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="SSP Units"/>
+                                <TextBox Text="{Binding AppSettings.RAMSettings.SSPUnits}">
+                                    <i:Interaction.Behaviors>
+                                        <cinch:NumericTextBoxBehaviour />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="CASS Level"/>
+                                <TextBox Text="{Binding AppSettings.RAMSettings.CASSLevel}">
+                                    <i:Interaction.Behaviors>
+                                        <cinch:NumericTextBoxBehaviour />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Bathymetry Metric"/>
+                                <TextBox Text="{Binding AppSettings.RAMSettings.BathymetryMetric}">
+                                    <i:Interaction.Behaviors>
+                                        <cinch:NumericTextBoxBehaviour />
+                                    </i:Interaction.Behaviors>
+                                </TextBox>
+                                <Controls:FileOrDirectorySetting Caption="RAM Support JAR file"
+									                                 IsDirectoryBrowser="False"
+									                                 FileName="{Binding AppSettings.RAMSettings.RAMSupportJarFile}" />
+                                <Controls:FileOrDirectorySetting Caption="RAM Executable"
+									                                 IsDirectoryBrowser="False"
+									                                 FileName="{Binding AppSettings.RAMSettings.RAMExecutable}" />
+                            </StackPanel>
+                        </StackPanel>
                     </TabItem>
 					<TabItem Header="CASS"
 					         Visibility="{Binding AppSettings.NavyOptionsVisibility}">

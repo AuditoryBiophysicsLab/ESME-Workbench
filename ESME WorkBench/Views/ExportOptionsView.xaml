@@ -19,31 +19,25 @@
     <StackPanel Orientation="Vertical">
         <CheckBox Content="Analysis points" 
                   IsChecked="{Binding ExportAnalysisPoints}" Margin="5 5 5 0" />
-        <CheckBox Content="Environmental data for CASS" IsChecked="{Binding ExportCASSData}" Margin="5 0 5 0" />
-        <GroupBox Header="Select environmental data to export"
-                  IsEnabled="{Binding ExportCASSData}">
-            <StackPanel Orientation="Vertical">
-                <CheckBox Content="Bathymetry" IsChecked="{Binding ExportCASSBathymetry}" Margin="5 5 5 0" />
-                <CheckBox Content="Climatology" IsChecked="{Binding ExportCASSClimatology}" 
+        <CheckBox Content="Climatology" IsChecked="{Binding ExportCASSClimatology}" 
                           ToolTip="Sound speed, wind speed and sediment type data for the current simulation area" Margin="5 0 5 0" />
-                <GroupBox Header="Available climatological data" IsEnabled="{Binding ExportCASSClimatology}">
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <Button Width="75"
+        <CheckBox Content="Bathymetry" IsChecked="{Binding ExportCASSBathymetry}" Margin="5 0 5 0" />
+        <GroupBox Header="{Binding TimePeriodGroupBoxHeader}" IsEnabled="{Binding IsTimePeriodGroupBoxEnabled}">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <Button Width="75"
 							        Margin="5"
 							        Command="{Binding SelectAllPeriodsCommand}">
-                                Select All
-                            </Button>
-                            <Button Width="75"
+                        Select All
+                    </Button>
+                    <Button Width="75"
 							        Margin="5"
 							        Command="{Binding UnselectAllPeriodsCommand}">
-                                Select None
-                            </Button>
-                        </StackPanel>
-                        <ListBox ItemsSource="{Binding AvailableTimePeriods}" 
+                        Select None
+                    </Button>
+                </StackPanel>
+                <ListBox ItemsSource="{Binding AvailableTimePeriods}" 
                                  ItemTemplate="{StaticResource CheckBoxItemTemplate}" />
-                    </StackPanel>
-                </GroupBox>
             </StackPanel>
         </GroupBox>
         <DockPanel LastChildFill="False"
