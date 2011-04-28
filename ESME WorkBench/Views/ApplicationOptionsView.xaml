@@ -86,12 +86,18 @@
 					                                 IsDirectoryBrowser="True"
 					                                 FileName="{Binding AppSettings.ScenarioDataDirectory}" />
 
-					<Controls:FileOrDirectorySetting Caption="Report Generator executable file"
+					<Controls:FileOrDirectorySetting Caption="Post Processor executable file"
 					                                 Margin="5 0"
 					                                 IsDirectoryBrowser="False"
-					                                 DialogTitle="Choose the Report Generator executable file"
+					                                 DialogTitle="Choose the Post Processor executable file"
 					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
 					                                 FileName="{Binding AppSettings.ReportGeneratorExecutablePath}" />
+                    <Controls:FileOrDirectorySetting Caption="Exposure Report Generator executable file"
+					                                 Margin="5 5 5 0"
+					                                 IsDirectoryBrowser="False"
+					                                 DialogTitle="Choose the Scenario Simulator executable file"
+					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
+					                                 FileName="{Binding AppSettings.ExposureReportGeneratorExecutablePath}" />
 
 					<Controls:FileOrDirectorySetting Caption="Scenario Simulator executable file"
 					                                 Margin="5 5 5 0"
@@ -99,6 +105,7 @@
 					                                 DialogTitle="Choose the Scenario Simulator executable file"
 					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
 					                                 FileName="{Binding AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath}" />
+
 					<GroupBox Header="Scenario Simulator Options"
 					          Margin="5"
 					          Padding="5">
