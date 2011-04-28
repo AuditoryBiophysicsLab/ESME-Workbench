@@ -9,9 +9,11 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Data;
@@ -26,6 +28,7 @@ using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
+using FileFormatException = ESME.Model.FileFormatException;
 using LineStyle = ESME.Overlay.LineStyle;
 
 namespace ESMEWorkBench.Data
@@ -230,9 +233,17 @@ namespace ESMEWorkBench.Data
             {
                 if (_scenarioFileName == value) return;
                 _scenarioFileName = value;
-                if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
+                LoadScenarioFile();
                 NotifyPropertyChanged(ScenarioFileNameChangedEventArgs);
                 InitializeEnvironment(false);
+            }
+        }
+
+        void LoadScenarioFile()
+        {
+            if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))
+            {
+                NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
             }
         }
 
@@ -646,6 +657,9 @@ namespace ESMEWorkBench.Data
         [XmlIgnore]
         public Environment2DData Bathymetry { get; private set; }
 
+        [XmlIgnore]
+        Timer ScenarioReloadTimer { get; set; }
+
         #region public bool CanSaveAs { get; set; }
         [XmlIgnore]
         public bool CanSaveAs
@@ -792,7 +806,10 @@ namespace ESMEWorkBench.Data
 
 
         [XmlIgnore]
-        FileSystemWatcher FileSystemWatcher { get; set; }
+        FileSystemWatcher TransmissionLossFileWatcher { get; set; }
+
+        [XmlIgnore]
+        FileSystemWatcher ScenarioFileWatcher { get; set; }
 
         #region public bool IsChanged { get; set; }
 
@@ -864,10 +881,15 @@ namespace ESMEWorkBench.Data
 
         public new void Close()
         {
-            if (FileSystemWatcher != null)
+            if (ScenarioFileWatcher != null)
             {
-                FileSystemWatcher.EnableRaisingEvents = false;
-                FileSystemWatcher = null;
+                ScenarioFileWatcher.EnableRaisingEvents = false;
+                ScenarioFileWatcher = null;
+            }
+            if (TransmissionLossFileWatcher != null)
+            {
+                TransmissionLossFileWatcher.EnableRaisingEvents = false;
+                TransmissionLossFileWatcher = null;
             }
             base.Close();
         }
@@ -980,16 +1002,36 @@ namespace ESMEWorkBench.Data
             MediatorMessage.Send(MediatorMessage.RefreshLayer, analysisPointLayer);
         }
 
+        void ScenarioFileChanged(object sender, FileSystemEventArgs e)
+        {
+            if ((e.ChangeType & WatcherChangeTypes.Created) == WatcherChangeTypes.Created) { }
+            if ((e.ChangeType & WatcherChangeTypes.Deleted) == WatcherChangeTypes.Deleted) { }
+            if ((e.ChangeType & WatcherChangeTypes.Changed) == WatcherChangeTypes.Changed) {}
+            //ProcessTransmissionLossFieldFile(e.FullPath);}
+            if ((e.ChangeType & WatcherChangeTypes.Renamed) == WatcherChangeTypes.Renamed) { }
+            if ((e.ChangeType & WatcherChangeTypes.All) == WatcherChangeTypes.All) { }
+            Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
+            if (ScenarioReloadTimer == null)
+                ScenarioReloadTimer = new Timer(ReloadScenarioFile, null, 1000, Timeout.Infinite);
+        }
+
+        void ReloadScenarioFile(object state)
+        {
+            ScenarioReloadTimer = null;
+            LoadScenarioFile();
+            _mainViewModelDispatcher.Invoke(DispatcherPriority.Background, (Action)(() => AddScenarioFileCommand(ScenarioFileName)));
+        }
+
         void TransmissionLossFieldFileChanged(object sender, FileSystemEventArgs e)
         {
-            if ((e.ChangeType & WatcherChangeTypes.Created) == WatcherChangeTypes.Created) {}
-            if ((e.ChangeType & WatcherChangeTypes.Deleted) == WatcherChangeTypes.Deleted) {}
+            if ((e.ChangeType & WatcherChangeTypes.Created) == WatcherChangeTypes.Created) { }
+            if ((e.ChangeType & WatcherChangeTypes.Deleted) == WatcherChangeTypes.Deleted) { }
             if ((e.ChangeType & WatcherChangeTypes.Changed) == WatcherChangeTypes.Changed)
             {
                 ProcessTransmissionLossFieldFile(e.FullPath);
             }
-            if ((e.ChangeType & WatcherChangeTypes.Renamed) == WatcherChangeTypes.Renamed) {}
-            if ((e.ChangeType & WatcherChangeTypes.All) == WatcherChangeTypes.All) {}
+            if ((e.ChangeType & WatcherChangeTypes.Renamed) == WatcherChangeTypes.Renamed) { }
+            if ((e.ChangeType & WatcherChangeTypes.All) == WatcherChangeTypes.All) { }
             //Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
         }
 
@@ -1036,17 +1078,25 @@ namespace ESMEWorkBench.Data
             var megs = bytes >> 20;
 #endif
 
-            if (FileSystemWatcher != null) FileSystemWatcher.Dispose();
+            if (ScenarioFileWatcher != null) ScenarioFileWatcher.Dispose();
+            if (ScenarioFileName != null)
+            {
+                ScenarioFileWatcher = new FileSystemWatcher(Path.GetDirectoryName(ScenarioFileName), "*.nemo");
+                ScenarioFileWatcher.Changed += ScenarioFileChanged;
+                ScenarioFileWatcher.EnableRaisingEvents = true;
+            }
+
+            if (TransmissionLossFileWatcher != null) TransmissionLossFileWatcher.Dispose();
             if (FileName != null)
             {
-                FileSystemWatcher = new FileSystemWatcher(TransmissionLossFileRoot)
-                                    {
-                                        NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
-                                        Filter = "*.tlf",
-                                    };
-                FileSystemWatcher.Changed += TransmissionLossFieldFileChanged;
-                FileSystemWatcher.Deleted += TransmissionLossFieldFileChanged;
-                FileSystemWatcher.EnableRaisingEvents = true;
+                TransmissionLossFileWatcher = new FileSystemWatcher(TransmissionLossFileRoot)
+                {
+                    NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                    Filter = "*.tlf",
+                };
+                TransmissionLossFileWatcher.Changed += TransmissionLossFieldFileChanged;
+                TransmissionLossFileWatcher.Deleted += TransmissionLossFieldFileChanged;
+                TransmissionLossFileWatcher.EnableRaisingEvents = true;
             }
 
             if (NemoFile == null) return;
