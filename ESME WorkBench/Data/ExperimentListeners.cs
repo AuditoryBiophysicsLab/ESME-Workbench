@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Cinch;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -24,11 +25,13 @@ namespace ESMEWorkBench.Data
         static bool _mainViewModelInitialized;
         static bool _mapViewModelInitialized;
         static bool _layerListViewModelInitialized;
+        static Dispatcher _mainViewModelDispatcher;
 
         [MediatorMessageSink(MediatorMessage.MainViewModelInitialized)]
-        void MainViewModelInitialized(bool dummy)
+        void MainViewModelInitialized(Dispatcher dispatcher)
         {
             _mainViewModelInitialized = true;
+            _mainViewModelDispatcher = dispatcher;
             InitializeIfViewModelsReady();
         }
 
@@ -132,6 +135,7 @@ namespace ESMEWorkBench.Data
                                                                                                   CanChangeLineColor = true,
                                                                                                   LayerType = LayerType.SimArea,
                                                                                               };
+                    simArea.Clear();
                     simArea.Add(NemoFile.Scenario.OverlayFile.Shapes);
                     simArea.Done();
                     if(MapLayers.IndexOf(simArea) == -1) layersToAdd.Add(simArea);
@@ -151,6 +155,7 @@ namespace ESMEWorkBench.Data
                                                                                                     CanChangeLineColor = false,
                                                                                                     LayerType = LayerType.Track,
                                                                                                 };
+                    track.Clear();
                     track.CustomLineStyle = new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1);
                     var behavior = new BehaviorModel(platform);
                     //behavior.CourseChangePoints
@@ -171,6 +176,7 @@ namespace ESMEWorkBench.Data
                                                                                                    CanChangeLineColor = true,
                                                                                                    LayerType = LayerType.OpArea,
                                                                                                };
+                        opArea.Clear();
                         opArea.Add(trackdef.OverlayFile.Shapes);
                         opArea.Done();
                         if (MapLayers.IndexOf(opArea) == -1) layersToAdd.Add(opArea);

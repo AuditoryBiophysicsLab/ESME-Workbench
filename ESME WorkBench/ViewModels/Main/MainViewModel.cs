@@ -116,7 +116,7 @@ namespace ESMEWorkBench.ViewModels.Main
         void ViewLoaded()
         {
             _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-            MediatorMessage.Send(MediatorMessage.MainViewModelInitialized);
+            MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
         }
 
         static void ViewUnloaded()
