@@ -122,6 +122,25 @@ namespace ESME.Data
         string _reportGeneratorExecutablePath;
 
         #endregion
+
+        #region public string ExposureReportGeneratorExecutablePath { get; set; }
+
+        public string ExposureReportGeneratorExecutablePath
+        {
+            get { return _exposureReportGeneratorExecutablePath; }
+            set
+            {
+                if (_exposureReportGeneratorExecutablePath == value) return;
+                _exposureReportGeneratorExecutablePath = value;
+                NotifyPropertyChanged(ExposureReportGeneratorExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExposureReportGeneratorExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ExposureReportGeneratorExecutablePath);
+        string _exposureReportGeneratorExecutablePath;
+
+        #endregion
+
         
         #region public string ScenarioDataDirectory { get; set; }
 

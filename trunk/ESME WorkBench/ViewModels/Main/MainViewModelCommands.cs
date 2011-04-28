@@ -108,7 +108,9 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _launchScenarioSimulator ?? (_launchScenarioSimulator = new SimpleCommand<object, object>(
-                    delegate { return ((Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath != null) && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath) && _experiment.NemoFile != null && _experiment.Bathymetry != null); },
+                    delegate { return ((Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath != null) 
+                        && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath) 
+                        && _experiment.NemoFile != null && _experiment.Bathymetry != null); }, // todo && _experiment.AnalysisPoints != null && species are defined. 
                     delegate
                     {
                         var vm = new ScenarioSimulatorOptionsViewModel
@@ -173,6 +175,28 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _launchNUWCReportGenerator;
+
+        #endregion
+
+        #region LaunchExposureReportGeneratorCommand
+
+        public SimpleCommand<object, object> LaunchExposureReportGeneratorCommand
+        {
+            get { return _launchExposureReportGenerator ?? (_launchExposureReportGenerator = new SimpleCommand<object, object>(
+                delegate { return (Globals.AppSettings.ExposureReportGeneratorExecutablePath != null && File.Exists((Globals.AppSettings.ExposureReportGeneratorExecutablePath))); },
+                delegate{
+                    new Process
+                    {
+                        StartInfo =
+                        {
+                            FileName = Globals.AppSettings.ExposureReportGeneratorExecutablePath,
+                        },
+                    }.Start();
+                }));
+            }
+        }
+
+        SimpleCommand<object, object> _launchExposureReportGenerator;
 
         #endregion
 

@@ -323,7 +323,13 @@
 					                SmallImageSource="..\Images\SmallIcons\chart-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\chart-icon.png"
 					                ToolTipDescription="Launches the NUWC Post Processor"
-					                Command="{Binding LaunchNUWCReportGeneratorCommand}"/>
+					                Command="{Binding LaunchNUWCReportGeneratorCommand}"/>             
+                    <r:RibbonButton Label="Exposure Report Generator"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                SmallImageSource="..\Images\SmallIcons\chart-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\chart-icon.png"
+					                ToolTipDescription="Launches the NUWC Report Generator"
+					                Command="{Binding LaunchExposureReportGeneratorCommand}"/>
                 </r:RibbonGroup>
             </r:RibbonTab>
 			<r:RibbonTab KeyTip="S"
@@ -531,12 +537,18 @@
 			<r:RibbonTab KeyTip="R"
 			             Header="Reports">
 				<r:RibbonGroup Header="Reports">
-					<r:RibbonButton Label="Report Generator"
+					<r:RibbonButton Label="Post Processor"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\chart-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\chart-icon.png"
 					                ToolTipDescription="Launches the NUWC Report Generator"
 					                Command="{Binding LaunchNUWCReportGeneratorCommand}"/>
+                    <r:RibbonButton Label="Exposure Report Generator"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                SmallImageSource="..\Images\SmallIcons\chart-icon.png"
+					                LargeImageSource="..\Images\LargeIcons\chart-icon.png"
+					                ToolTipDescription="Launches the NUWC Report Generator"
+					                Command="{Binding LaunchExposureReportGeneratorCommand}"/>
 				</r:RibbonGroup>
 			</r:RibbonTab>
 		</r:Ribbon>
