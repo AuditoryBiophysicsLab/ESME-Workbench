@@ -486,5 +486,66 @@ namespace ESMEWorkBench.ViewModels.Main
         RecentFileList _recentFiles = new RecentFileList();
 
         #endregion
+
+        #region public bool IsInAnalysisPointMode { get; set; }
+
+        public bool IsInAnalysisPointMode
+        {
+            get { return _isInAnalysisPointMode; }
+            set
+            {
+                if (_isInAnalysisPointMode == value) return;
+                _isInAnalysisPointMode = value;
+                NotifyPropertyChanged(IsInAnalysisPointModeChangedEventArgs);
+                MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, _isInAnalysisPointMode);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsInAnalysisPointModeChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsInAnalysisPointMode);
+        bool _isInAnalysisPointMode;
+
+        #endregion
+
+        #region public bool CanPlaceAnalysisPoint { get; set; }
+
+        public bool CanPlaceAnalysisPoint
+        {
+            get
+            {
+                var result = (_experiment != null) && (_experiment.NemoFile != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null);
+                Debug.WriteLine("CanPlaceAnalysisPoint: " + result);
+                return result;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CanPlaceAnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.CanPlaceAnalysisPoint);
+        bool _canPlaceAnalysisPoint;
+
+        #endregion
+
+
+        #region PreviewKeyDownCommand
+
+        public SimpleCommand<object, EventToCommandArgs> PreviewKeyDownCommand
+        {
+            get
+            {
+                return _previewKeyDown ?? (_previewKeyDown = new SimpleCommand<object, EventToCommandArgs>(delegate(EventToCommandArgs args)
+                {
+                    var commandRan = args.CommandRan;
+                    var o = args.CommandParameter; //get command parameter
+                    var ea = (KeyEventArgs)args.EventArgs; //get event args
+                    var sender = args.Sender; //get orginal sender
+                    if (ea.Key == Key.Escape) IsInAnalysisPointMode = false;
+                }));
+            }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _previewKeyDown;
+
+        #endregion
+
+
+
     }
 }

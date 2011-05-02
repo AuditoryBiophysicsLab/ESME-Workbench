@@ -40,8 +40,11 @@
         <i:EventTrigger EventName="Closing">
             <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
+        <i:EventTrigger EventName="PreviewKeyDown">
+            <cinch:EventToCommandTrigger Command="{Binding PreviewKeyDownCommand}" />
+        </i:EventTrigger>
     </i:Interaction.Triggers>
-	<DockPanel LastChildFill="True">
+    <DockPanel LastChildFill="True">
 		<StatusBar DockPanel.Dock="Bottom">
 			<StatusBarItem>
 				<StackPanel Orientation="Horizontal">
@@ -238,11 +241,12 @@
 					                Command="{Binding ShowEnvironmentSettingsCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Sounds">
-					<r:RibbonButton Label="Analysis Point"
+					<r:RibbonToggleButton Label="Analysis Point"
 					                LargeImageSource="..\Images\LargeIcons\bullet-2-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new analysis point to the experiment"
+                                    IsChecked="{Binding IsInAnalysisPointMode}"
 					                Command="{Binding AnalysisPointCommand}" />
                     <!--
                     <r:RibbonButton Label="Fixed Source"
@@ -551,7 +555,7 @@
 					                Command="{Binding LaunchExposureReportGeneratorCommand}"/>
 				</r:RibbonGroup>
 			</r:RibbonTab>
-		</r:Ribbon>
+        </r:Ribbon>
 		<Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
