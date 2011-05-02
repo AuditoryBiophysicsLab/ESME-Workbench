@@ -67,9 +67,10 @@ namespace ESMEWorkBench.ViewModels.Map
 
             MouseLeftButtonUpCommand = new SimpleCommand<object, object>(delegate
                                                                          {
-                                                                             if (IsAnalysisPointMode)
+                                                                             if (IsInAnalysisPointMode)
                                                                              {
-                                                                                 IsAnalysisPointMode = false;
+                                                                                 IsInAnalysisPointMode = false;
+                                                                                 MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, false);
                                                                                  MediatorMessage.Send(MediatorMessage.SetupAndRunAnalysisPoint);
                                                                              }
                                                                              if (IsQuickLookPointMode)
@@ -81,7 +82,26 @@ namespace ESMEWorkBench.ViewModels.Map
         }
 
         [XmlIgnore]
-        public bool IsAnalysisPointMode { get; set; }
+
+        #region public bool IsInAnalysisPointMode { get; set; }
+
+        public bool IsInAnalysisPointMode
+        {
+            get { return _isInAnalysisPointMode; }
+            set
+            {
+                if (_isInAnalysisPointMode == value) return;
+                _isInAnalysisPointMode = value;
+                NotifyPropertyChanged(IsInAnalysisPointModeChangedEventArgs);
+                Cursor = _isInAnalysisPointMode ? Cursors.Cross : Cursors.Arrow;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsInAnalysisPointModeChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.IsInAnalysisPointMode);
+        bool _isInAnalysisPointMode;
+
+        #endregion
+
         [XmlIgnore]
         public bool IsQuickLookPointMode { get; set; }
 
@@ -217,11 +237,10 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
-        [MediatorMessageSink(MediatorMessage.AnalysisPointCommand)]
-        void AnalysisPointCommand(bool dummy)
+        [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode)]
+        void SetAnalysisPointMode(bool mode)
         {
-            IsAnalysisPointMode = true;
-            Cursor = Cursors.Cross;
+            IsInAnalysisPointMode = mode;
         }
 
         [MediatorMessageSink(MediatorMessage.QuickLookPointCommand)]

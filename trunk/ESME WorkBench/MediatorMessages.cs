@@ -10,7 +10,7 @@ namespace ESMEWorkBench
         public const string ToggleGridOverlayDisplayCommand = "ToggleGridOverlayDisplayCommandMessage";
         public const string TogglePanZoomDisplayCommand = "TogglePanZoomDisplayCommandMessage";
         public const string ToggleScaleBarDisplayCommand = "ToggleScaleBarDisplayCommandMessage";
-        public const string AnalysisPointCommand = "AnalysisPointCommandMessage";
+        public const string SetAnalysisPointMode = "AnalysisPointCommandMessage";
         public const string QuickLookPointCommand = "QuickLookPointCommandMessage";
         public const string AddFileCommand = "AddFileCommandMessage";
         public const string AddScenarioFileCommand = "AddScenarioFileCommandMessage";

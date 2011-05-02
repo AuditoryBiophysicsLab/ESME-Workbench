@@ -96,11 +96,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 }
                 var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
                 var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
+                IsInAnalysisPointMode = false;
                 if ((!settingsResult.HasValue) || (!settingsResult.Value))
-                {
-                    MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
                     return;
-                }
                 var maxRadial = analysisPoint.SoundSources.Where(s => s.ShouldBeCalculated).Aggregate(0, (current, soundSource) => Math.Max(current, soundSource.Radius));
                 for (var i = 0; i < 360; i += 90) if (!_experiment.Bathymetry.BoundingBox.Contains(new EarthCoordinate(MouseEarthCoordinate, i, maxRadial))) throw new AnalysisPointLocationException("One or more radial endpoints extends beyond the bounds of the bathymetry.");
 

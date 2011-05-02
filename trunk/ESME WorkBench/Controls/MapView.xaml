@@ -13,10 +13,10 @@
 				<i:EventTrigger EventName="MouseLeftButtonUp">
 					<cinch:EventToCommandTrigger Command="{Binding MouseLeftButtonUpCommand}" />
 				</i:EventTrigger>
-				<i:EventTrigger EventName="MouseMove">
-					<cinch:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
-				</i:EventTrigger>
-			</i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseMove">
+                    <cinch:EventToCommandTrigger Command="{Binding MouseMoveCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
 		</WpfDesktopEdition:WpfMap>
 	</DockPanel>
 </UserControl>
