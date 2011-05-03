@@ -117,6 +117,12 @@ namespace ESME.TransmissionLoss
         
         public TransmissionLossField() {  }
 
+        public static TransmissionLossField FromCASS(string cassFileName, bool headerOnly)
+        {
+            var cassOutput = CASSOutput.Load(cassFileName, headerOnly);
+            return FromCASS(cassOutput);
+        }
+
         public static TransmissionLossField FromCASS(CASSOutput output)
         {
             var result = new TransmissionLossField();
@@ -133,9 +139,9 @@ namespace ESME.TransmissionLoss
             result.HighFrequency = output.Frequency;
             result.MaxCalculationDepth = output.MaxWaterDepth;
             result.Radius = (int)output.MaxRangeDistance;
+            if (output.RadialCount == 0) return result; // because only the header was loaded.
             result.Depths = new float[output.DepthCellCount];
             result.Ranges = new float[output.RangeCellCount];   
-
             Array.Copy(output.DepthCells,result.Depths,output.DepthCellCount);
             Array.Copy(output.RangeCells,result.Ranges,output.RangeCellCount);
             result.Radials = new TransmissionLossRadial[output.Pressures.Count];

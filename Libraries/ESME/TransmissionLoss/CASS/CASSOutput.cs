@@ -93,12 +93,14 @@ namespace ESME.TransmissionLoss.CASS
 
         public string Filename { get; private set; }
 
-        public static CASSOutput Load(string fileName)
+        public static CASSOutput Load(string fileName, bool headerOnly)
         {
             var result = new CASSOutput();
             result.Filename = fileName;
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
+#if false
+
                 #region file header read
 
                 result.RunDateTime = ParseCASSString(reader, 25, '\0');
@@ -169,7 +171,11 @@ namespace ESME.TransmissionLoss.CASS
                 if (reader.BaseStream.Position != 713) throw new FileFormatException("CASSOutput: file header of incorrect length.");
 
                 #endregion
-
+#endif
+                result.ReadFileHeader(reader);
+                if (headerOnly) return result;
+                
+                
                 #region bearing header read
 
                 result.RadialCount = (int)reader.ReadSingle(); //note: comes in as a float, cast to int. See PH's docs
@@ -356,6 +362,81 @@ namespace ESME.TransmissionLoss.CASS
             for (var i = 0; i < fieldLength; i++) buf[i] = 0;
             var result = Encoding.ASCII.GetBytes(s, 0, s.Length <= fieldLength ? s.Length : fieldLength, buf, 0); //truncates or zero-pads output to fixed fieldLength.
             w.Write(buf, 0, fieldLength);
+        }
+
+        void ReadFileHeader(BinaryReader reader)
+        {
+            #region file header read
+
+            RunDateTime = ParseCASSString(reader, 25, '\0');
+            OperatingSystemName = ParseCASSString(reader, 25, '\0');
+            SystemNodeName = ParseCASSString(reader, 25, '\0');
+            OperatingSystemRelease = ParseCASSString(reader, 25, '\0');
+            OperatingSystemVersion = ParseCASSString(reader, 25, '\0');
+            MachineType = ParseCASSString(reader, 25, '\0');
+            ProcessorType = ParseCASSString(reader, 25, '\0');
+
+            Title = ParseCASSString(reader, 50, '\0');
+            SiteName = ParseCASSString(reader, 50, '\0');
+
+            SiteRefLatLocation = reader.ReadSingle();
+            SiteRefLatLocationUnits = ParseCASSString(reader, 10, '\0');
+            SiteRefLonLocation = reader.ReadSingle();
+            SiteRefLonLocationUnits = ParseCASSString(reader, 10, '\0');
+
+            SourceRefLatLocation = reader.ReadSingle();
+            SourceRefLatLocationUnits = ParseCASSString(reader, 10, '\0');
+            SourceRefLonLocation = reader.ReadSingle();
+            SourceRefLonLocationUnits = ParseCASSString(reader, 10, '\0');
+
+            PlatformName = ParseCASSString(reader, 50, '\0');
+            SourceName = ParseCASSString(reader, 50, '\0');
+            ModeName = ParseCASSString(reader, 50, '\0');
+
+            Frequency = reader.ReadSingle();
+            FrequencyUnits = ParseCASSString(reader, 10, '\0');
+
+            DepressionElevationAngle = reader.ReadSingle();
+            DepressionElevationAngleUnits = ParseCASSString(reader, 10, '\0');
+
+            VerticalBeamPattern = reader.ReadSingle();
+            VerticalBeamPatternUnits = ParseCASSString(reader, 10, '\0');
+
+            SourceDepth = reader.ReadSingle();
+            SourceDepthUnits = ParseCASSString(reader, 10, '\0');
+
+            SourceLevel = reader.ReadSingle();
+            SourceLevelUnits = ParseCASSString(reader, 10, '\0');
+
+            MinWaterDepth = reader.ReadSingle();
+            MinWaterDepthUnits = ParseCASSString(reader, 10, '\0');
+
+            MaxWaterDepth = reader.ReadSingle();
+            MaxWaterDepthUnits = ParseCASSString(reader, 10, '\0');
+
+            WaterDepthIncrement = reader.ReadSingle();
+            WaterDepthIncrementUnits = ParseCASSString(reader, 10, '\0');
+
+            MinRangeDistance = reader.ReadSingle();
+            MinRangeDistanceUnits = ParseCASSString(reader, 10, '\0');
+
+            MaxRangeDistance = reader.ReadSingle();
+            MaxRangeDistanceUnits = ParseCASSString(reader, 10, '\0');
+
+            RangeDistanceIncrement = reader.ReadSingle();
+            RangeDistanceIncrementUnits = ParseCASSString(reader, 10, '\0');
+
+            BottomType = ParseCASSString(reader, 50, '\0');
+            Season = ParseCASSString(reader, 10, '\0');
+            WindSpeed = reader.ReadSingle();
+            WindSpeedUnits = ParseCASSString(reader, 10, '\0');
+
+            CASSLevel = reader.ReadSingle();
+
+            if (reader.BaseStream.Position != 713) throw new FileFormatException("CASSOutput: file header of incorrect length.");
+            
+
+            #endregion
         }
     }
 }

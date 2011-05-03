@@ -507,7 +507,7 @@ namespace ESME.Model
         bool _isStatic;
         double[] _mbsBathymetry;
         double[] _mbsSoundExposure;
-        mbsPosition[][] _parallelPosArray;
+      //  mbsPosition[][] _parallelPosArray;
         mbsPosition[] _posArray;
 
         int _secondsElapsed,
@@ -516,7 +516,7 @@ namespace ESME.Model
         TimeSpan _simulationDuration = TimeSpan.Zero;
         TimeSpan _timeStep = TimeSpan.Zero;
 
-        int _numAnimatsPerInstance;
+    //    int _numAnimatsPerInstance;
 
         #endregion
     }
