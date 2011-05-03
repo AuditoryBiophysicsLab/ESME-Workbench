@@ -52,8 +52,9 @@
 					<ColumnDefinition Width="16" />
 					<ColumnDefinition Width="*" />
 					<ColumnDefinition Width="16" />
-					<ColumnDefinition Width="16" />
-					<ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="10" />
 				</Grid.ColumnDefinitions>
 				<CheckBox Focusable="False"
 				          Grid.Column="0"
@@ -62,10 +63,16 @@
 				<ContentPresenter Content="{Binding Name, Mode=OneTime}"
 				                  Grid.Column="1"
 				                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
+
+                <Image Source="..\Images\SmallIcons\12px-red-circle.png" 
+                       Grid.Column="2"
+                       ToolTip="{Binding AnalysisPointCompletionTooltip}"
+                       Visibility="{Binding VisibleIfAnalysisPointLayer}"/>
+
                 <Rectangle Width="12"
 				           RadiusX="3"
 				           RadiusY="3"
-				           Grid.Column="2"
+				           Grid.Column="3"
 				           Height="12"
 				           Fill="{Binding AreaColorBrush}"
 				           Visibility="{Binding IsAreaColorVisible}"
@@ -82,7 +89,7 @@
                 <Rectangle Width="12"
 				           RadiusX="3"
 				           RadiusY="3"
-				           Grid.Column="3"
+				           Grid.Column="4"
 				           Height="12"
 				           Fill="{Binding LineColorBrush}"
 				           Visibility="{Binding IsLineColorVisible}"
@@ -95,9 +102,7 @@
 					</Rectangle.ContextMenu>
 				</Rectangle>
 
-				
-
-				<Grid.ContextMenu>
+                <Grid.ContextMenu>
 					<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 					             ItemsSource="{Binding ContextMenu}" />
 				</Grid.ContextMenu>

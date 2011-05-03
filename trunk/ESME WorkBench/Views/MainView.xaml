@@ -448,19 +448,22 @@
 			<r:RibbonTab KeyTip="C"
 			             Header="Acoustics">
 				<r:RibbonGroup Header="Simulator">
-					<r:RibbonButton Label="Show Queue"
+                    <!--
+                    <r:RibbonButton Label="Show Queue"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\Database-Process-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\Database-Process-icon.png"
 					                ToolTipDescription="Displays the current work queue for acoustic simulation"
 					                Command="{Binding DisabledCommand}" />
+                    -->
 					<r:RibbonButton Label="Options"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\gear-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\gear-icon.png"
-					                ToolTipDescription="View or change acoustic simulation options"
-					                Command="{Binding AcousticOptionsCommand}" />
+					                ToolTipDescription="View or change acoustic simulator options"
+					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
+                <!--
 				<r:RibbonGroup Header="Analysis Points">
 					<r:RibbonButton Label="Inspect"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -469,6 +472,7 @@
 					                ToolTipDescription="Inspect an analysis point"
 					                Command="{Binding DisabledCommand}" />
 				</r:RibbonGroup>
+                -->
 				<!--
                 <r:RibbonGroup Header="Analysis Points">
                     <r:RibbonButton Label="Add"

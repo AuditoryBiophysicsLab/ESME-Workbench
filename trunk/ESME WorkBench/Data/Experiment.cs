@@ -451,71 +451,6 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        #region public double BellhopRangeCellSize { get; set; }
-
-        static readonly PropertyChangedEventArgs BellhopRangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopRangeCellSize);
-        double _bellhopRangeCellSize = 50.0;
-
-        public double BellhopRangeCellSize
-        {
-            get { return _bellhopRangeCellSize; }
-            set
-            {
-                if (_bellhopRangeCellSize == value) return;
-                _bellhopRangeCellSize = value;
-                NotifyPropertyChanged(BellhopRangeCellSizeChangedEventArgs);
-            }
-        }
-
-        #endregion
-
-        #region public double BellhopDepthCellSize { get; set; }
-
-        static readonly PropertyChangedEventArgs BellhopDepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.BellhopDepthCellSize);
-        double _bellhopDepthCellSize = 50.0;
-
-        public double BellhopDepthCellSize
-        {
-            get { return _bellhopDepthCellSize; }
-            set
-            {
-                if (_bellhopDepthCellSize == value) return;
-                _bellhopDepthCellSize = value;
-                NotifyPropertyChanged(BellhopDepthCellSizeChangedEventArgs);
-            }
-        }
-
-        #endregion
-
-        #region public float OpAreaBufferZoneSize { get; set; }
-        /// <summary>
-        /// Size of the buffer zone around operational area bounding box that will be used to extract environmental data
-        /// from the selected environmental data source
-        /// Units: Degrees
-        /// Default value: 2.0
-        /// </summary>
-        public float OpAreaBufferZoneSize
-        {
-            get { return _opAreaBufferZoneSize; }
-            set
-            {
-                if (_opAreaBufferZoneSize == value) return;
-                _opAreaBufferZoneSize = value;
-                NotifyPropertyChanged(OpAreaBufferZoneSizeChangedEventArgs);
-                // TODO: If/when this value changes, we will need to do the following
-                //     - Compute the new bounding box we will be using
-                //     - Verify that all AnalysisPoints are completely contained inside the new bounding box, including the endpoints of every radial
-                //     - If that verification fails, throw an exception containing descriptive error text about exactly what has failed
-                //     - Re-extract the environmental data from the selected environmental data source
-                //     - Re-initialize the environmental data
-            }
-        }
-
-        static readonly PropertyChangedEventArgs OpAreaBufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.OpAreaBufferZoneSize);
-        float _opAreaBufferZoneSize = 0f;
-
-        #endregion
-
         #region public GeoRect OpArea { get; set; }
 
         public GeoRect OpArea
@@ -1130,9 +1065,9 @@ namespace ESMEWorkBench.Data
                         CanChangeLineWidth = true,
                         CanBeRemoved = false,
                         LayerType = LayerType.WindSpeed,
+                        IsChecked = false,
                     };
                     MapLayers.Add(windLayer);
-                    windLayer.IsChecked = false;
                 }
                 windLayer.Clear();
                 foreach (var lon in WindSpeed.Longitudes)
@@ -1157,16 +1092,16 @@ namespace ESMEWorkBench.Data
                 if (soundSpeedLayer == null)
                 {
                     soundSpeedLayer = new OverlayShapeMapLayer
-                    {
-                        Name = soundSpeedName,
-                        CanBeReordered = true,
-                        CanChangeLineColor = true,
-                        CanChangeLineWidth = true,
-                        CanBeRemoved = false,
-                        LayerType = LayerType.WindSpeed,
-                    };
+                                      {
+                                          Name = soundSpeedName,
+                                          CanBeReordered = true,
+                                          CanChangeLineColor = true,
+                                          CanChangeLineWidth = true,
+                                          CanBeRemoved = false,
+                                          LayerType = LayerType.WindSpeed,
+                                          IsChecked = false,
+                                      };
                     MapLayers.Add(soundSpeedLayer);
-                    soundSpeedLayer.IsChecked = true;
                 }
                 soundSpeedLayer.Clear();
                 foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
@@ -1245,6 +1180,7 @@ namespace ESMEWorkBench.Data
                 bathyBitmapLayer.South = (float)Bathymetry.Latitudes.First();
                 bathyBitmapLayer.East = (float)Bathymetry.Longitudes.Last();
                 bathyBitmapLayer.West = (float)Bathymetry.Longitudes.First();
+                MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }

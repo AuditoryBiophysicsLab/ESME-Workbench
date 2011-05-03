@@ -547,6 +547,13 @@
   <ItemGroup>
     <Content Include="External References\Kent.Boogaart.Converters.dll" />
     <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
+    <Resource Include="Images\SmallIcons\12px-green-circle.png" />
+    <Resource Include="Images\SmallIcons\12px-red-circle.png" />
+    <Resource Include="Images\SmallIcons\12px-yellow-circle-25pct.png" />
+    <Resource Include="Images\SmallIcons\12px-yellow-circle-50pct.png" />
+    <Resource Include="Images\SmallIcons\12px-yellow-circle-75pct.png" />
+    <Resource Include="Images\SmallIcons\hourglass_select_remain.png" />
+    <Resource Include="Images\SmallIcons\green-check.png" />
     <Resource Include="Images\SmallIcons\gnome_sound_recorder.png" />
     <Resource Include="Images\LargeIcons\gnome_sound_recorder.png" />
     <Resource Include="Images\LargeIcons\Database-Inspect-icon.png" />

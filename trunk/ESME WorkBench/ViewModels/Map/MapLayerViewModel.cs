@@ -153,7 +153,11 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_random == null) _random = new Random();
                 var randomBytes = new byte[3];
-                _random.NextBytes(randomBytes);
+                while (true)
+                {
+                    _random.NextBytes(randomBytes);
+                    if ((randomBytes[0] >= 0x40) || (randomBytes[1] >= 0x40) || (randomBytes[2] >= 0x40)) break;
+                }
                 return Color.FromArgb(255, randomBytes[0], randomBytes[1], randomBytes[2]);
             }
         }
@@ -163,6 +167,80 @@ namespace ESMEWorkBench.ViewModels.Map
         static LineStyle CreateLineStyle(Color pen, float width) { return new LineStyle(new GeoPen(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B), width)); }
 
         static PointStyle CreatePointStyle(PointSymbolType pointSymbolType, Color pen, int width) { return new PointStyle(pointSymbolType, new GeoSolidBrush(GeoColor.FromArgb(pen.A, pen.R, pen.G, pen.B)), width); }
+
+        #endregion
+
+        #region Properties for analysis point layers only
+
+        #region public Visibility VisibleIfAnalysisPointLayer { get; set; }
+        
+        [XmlIgnore]
+        public Visibility VisibleIfAnalysisPointLayer
+        {
+            get { return LayerType == LayerType.AnalysisPoint ? Visibility.Visible : Visibility.Hidden; }
+        }
+
+        #endregion
+
+        #region public string AnalysisPointCompletionTooltip { get; set; }
+
+        [XmlIgnore]
+        public string AnalysisPointCompletionTooltip
+        {
+            get { return _analysisPointCompletionTooltip; }
+            set
+            {
+                if (_analysisPointCompletionTooltip == value) return;
+                _analysisPointCompletionTooltip = value;
+                NotifyPropertyChanged(AnalysisPointCompletionTooltipChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AnalysisPointCompletionTooltipChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AnalysisPointCompletionTooltip);
+        string _analysisPointCompletionTooltip = "Not yet calculated";
+
+        #endregion
+
+        #region public int PercentComplete { get; set; }
+
+        [XmlIgnore]
+        public int PercentComplete
+        {
+            get { return _percentComplete; }
+            set
+            {
+                string toolTip;
+                if (_percentComplete == value) return;
+                _percentComplete = value;
+                NotifyPropertyChanged(PercentCompleteChangedEventArgs);
+                if (_percentComplete <= 0)
+                {
+                    toolTip = "Not yet calculated";
+                    System.Diagnostics.Debug.WriteLine("12px-red-circle.png");
+                }
+                else
+                {
+                    toolTip = String.Format("{0}% complete", _percentComplete);
+                    if ((_percentComplete > 0) && (_percentComplete <= 25))
+                        System.Diagnostics.Debug.WriteLine("12px-yellow-circle-25pct.png");
+                    else if ((_percentComplete > 25) && (_percentComplete <= 50))
+                        System.Diagnostics.Debug.WriteLine("12px-yellow-circle-50pct.png");
+                    else if ((_percentComplete > 50) && (_percentComplete <= 75))
+                        System.Diagnostics.Debug.WriteLine("12px-yellow-circle-75pct.png");
+                    else if (_percentComplete >= 100)
+                    {
+                        toolTip = "Calculation complete";
+                        System.Diagnostics.Debug.WriteLine("12px-green-circle.png");
+                    }
+                }
+                AnalysisPointCompletionTooltip = toolTip;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PercentCompleteChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.PercentComplete);
+        int _percentComplete;
+
+        #endregion
 
         #endregion
 
