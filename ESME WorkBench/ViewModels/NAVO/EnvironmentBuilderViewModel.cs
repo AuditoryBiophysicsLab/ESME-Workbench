@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -47,29 +48,28 @@ namespace ESMEWorkBench.ViewModels.NAVO
             ExtractButtonText = "Initializing...";
         }
 
-        #region public float BufferZoneSize { get; set; }
+        #region public int BufferZoneSize { get; set; }
 
-        public float BufferZoneSize
+        public int BufferZoneSize
         {
             get { return _bufferZoneSize; }
             set
             {
                 if (_bufferZoneSize == value) return;
-                if (value < 0) 
+                if (value < 0)
                 {
                     _messageBoxService.ShowError("Buffer zone size may not be negative");
                     NotifyPropertyChanged(BufferZoneSizeChangedEventArgs);
                     return;
                 }
                 _bufferZoneSize = value;
-
                 NotifyPropertyChanged(BufferZoneSizeChangedEventArgs);
-                NAVODataSources.ExtractionArea = GeoRect.Inflate(_experiment.OpArea, BufferZoneSize * 1000, BufferZoneSize * 1000);
+                NAVODataSources.ExtractionArea = GeoRect.Inflate(_experiment.OpArea, BufferZoneSize, BufferZoneSize);
             }
         }
 
         static readonly PropertyChangedEventArgs BufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.BufferZoneSize);
-        float _bufferZoneSize;
+        int _bufferZoneSize;
 
         #endregion
 
@@ -348,6 +348,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
+        bool _bufferZoneSizeOk = true;
+
         #region BufferZoneSizeTextChangedCommand
 
         public SimpleCommand<object, object> BufferZoneSizeTextChangedCommand
@@ -358,7 +360,16 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 {
                     var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
                     //var args = (TextChangedEventArgs)((EventToCommandArgs)cinchArgs).EventArgs;
-                    if (sender != null && !string.IsNullOrEmpty(sender.Text)) BufferZoneSize = float.Parse(sender.Text);
+                    int tempSize;
+                    if (sender != null && !string.IsNullOrEmpty(sender.Text) && (int.TryParse(sender.Text, out tempSize)))
+                    {
+                        BufferZoneSize = tempSize;
+                        _bufferZoneSizeOk = true;
+                    }
+                    else
+                    {
+                        _bufferZoneSizeOk = false;
+                    }
                 }));
             }
         }
@@ -378,7 +389,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 return _extractAll ?? (_extractAll = new SimpleCommand<object, object>(
                     delegate
                     {
-                        return  ((NAVODataSources != null) && (NotExtractingData) && 
+                        return  ((NAVODataSources != null) && (NotExtractingData) && (_bufferZoneSizeOk) && 
                                  ((MonthCheckboxes.SelectedTimePeriods.Count() > 0) || (SeasonCheckboxes.SelectedTimePeriods.Count() > 0))); }, 
                     delegate
                     {

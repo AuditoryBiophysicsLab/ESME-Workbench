@@ -389,39 +389,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region ToggleGridOverlayDisplayCommand
-
-        public SimpleCommand<object, Boolean> ToggleGridOverlayDisplayCommand
-        {
-            get { return _toggleGridOverlayDisplay ?? (_toggleGridOverlayDisplay = new SimpleCommand<object, Boolean>(isChecked => MediatorMessage.Send(MediatorMessage.ToggleGridOverlayDisplayCommand, isChecked))); }
-        }
-
-        SimpleCommand<object, Boolean> _toggleGridOverlayDisplay;
-
-        #endregion
-
-        #region TogglePanZoomDisplayCommand
-
-        public SimpleCommand<object, Boolean> TogglePanZoomDisplayCommand
-        {
-            get { return _togglePanZoomDisplay ?? (_togglePanZoomDisplay = new SimpleCommand<object, Boolean>(isChecked => MediatorMessage.Send(MediatorMessage.TogglePanZoomDisplayCommand, isChecked))); }
-        }
-
-        SimpleCommand<object, Boolean> _togglePanZoomDisplay;
-
-        #endregion
-
-        #region ToggleScaleBarDisplayCommand
-
-        public SimpleCommand<object, Boolean> ToggleScaleBarDisplayCommand
-        {
-            get { return _toggleScaleBarDisplay ?? (_toggleScaleBarDisplay = new SimpleCommand<object, Boolean>(isChecked => MediatorMessage.Send(MediatorMessage.ToggleScaleBarDisplayCommand, isChecked))); }
-        }
-
-        SimpleCommand<object, Boolean> _toggleScaleBarDisplay;
-
-        #endregion
-
         #region QuickLookCommand
 
         public SimpleCommand<object, object> QuickLookCommand

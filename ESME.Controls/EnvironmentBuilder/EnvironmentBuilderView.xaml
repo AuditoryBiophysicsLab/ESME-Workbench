@@ -4,7 +4,7 @@
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
-        Title="Environment data selection"
+        Title="Environment Data Selection"
         mef:ViewModelLocator.ViewModel="EnvironmentBuilderViewModel"
         SizeToContent="WidthAndHeight">
 	<StackPanel Orientation="Vertical">
@@ -29,7 +29,8 @@
                     VerticalAlignment="Bottom"
                     Margin="5">
             <TextBlock Text="Include a buffer of " />
-            <TextBox Text="{Binding BufferZoneSize}">
+            <TextBox Text="{Binding BufferZoneSize}"
+                     ToolTip="This value must be a positive integer">
                 <i:Interaction.Behaviors>
                     <cinch:NumericTextBoxBehaviour />
                 </i:Interaction.Behaviors>
@@ -39,7 +40,7 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
-            <TextBlock Text=" kilometers around the operational area" />
+            <TextBlock Text=" meters around the operational area" />
         </StackPanel>
 
         <TextBlock Text="{Binding NAVODataSources.BathymetryResolutionStatement}" 
@@ -109,11 +110,10 @@
 				</DockPanel>
 			</GroupBox>
 		</Grid>
-		<CheckBox IsChecked="{Binding ExportCASSData}"
+        <CheckBox IsChecked="{Binding ExportCASSData}"
                   Margin="5"
-		          IsEnabled="{Binding NotExtractingData}">
-			Export extracted data to CASS format
-		</CheckBox>
+                  Content="Export extracted data to NAEMO"
+		          IsEnabled="{Binding NotExtractingData}" />
 		<StackPanel Visibility="{Binding NAVODataSources.IsVisible}">
 			<TextBlock HorizontalAlignment="Center"
 			           Text="{Binding NAVODataSources.Status}"

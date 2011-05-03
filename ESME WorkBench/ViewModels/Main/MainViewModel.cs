@@ -62,6 +62,10 @@ namespace ESMEWorkBench.ViewModels.Main
             _viewAwareStatus.ViewUnloaded += ViewUnloaded;
             _viewAwareStatus.ViewLoaded += ViewLoaded;
 
+            IsLatLonGridVisible = Settings.Default.ShowGrid;
+            IsScaleBarVisible = Settings.Default.ShowScaleBar;
+            IsPanZoomVisible = Settings.Default.ShowPanZoom;
+
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
             {
@@ -317,6 +321,9 @@ namespace ESMEWorkBench.ViewModels.Main
             finally
             {
                 MediatorMessage.Send(MediatorMessage.EnableGUI, true);
+                IsLatLonGridVisible = Settings.Default.ShowGrid;
+                IsScaleBarVisible = Settings.Default.ShowScaleBar;
+                IsPanZoomVisible = Settings.Default.ShowPanZoom;
             }
         }
 
@@ -409,6 +416,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             return true;
         }
+
         bool CanShowEnvironmentSettings
         {
             get
@@ -420,6 +428,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 return ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory)) && (_experiment != null) && (_experiment.NemoFile != null));
             }
         }
+
+        public bool CanPlaceAnalysisPoint { get { return (_experiment != null) && (_experiment.NemoFile != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null); } }
+        
         void ShowEnvironmentSettingsView()
         {
             if (Globals.AppSettings.UseOAMLDataSources)
@@ -442,6 +453,64 @@ namespace ESMEWorkBench.ViewModels.Main
                 _experiment.WindSpeedFileName = environmentSettingsViewModel.WindSpeedData.SelectedItem.Name;
             }
         }
+
+        #region public bool IsLatLonGridVisible { get; set; }
+
+        public bool IsLatLonGridVisible
+        {
+            get { return _isLatLonGridVisible; }
+            set
+            {
+                _isLatLonGridVisible = value;
+                Settings.Default.ShowGrid = value;
+                MediatorMessage.Send(MediatorMessage.SetGridOverlayDisplay, value);
+                NotifyPropertyChanged(IsLatLonGridVisibleChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsLatLonGridVisibleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsLatLonGridVisible);
+        bool _isLatLonGridVisible;
+
+        #endregion
+
+        #region public bool IsPanZoomVisible { get; set; }
+
+        public bool IsPanZoomVisible
+        {
+            get { return _isPanZoomVisible; }
+            set
+            {
+                _isPanZoomVisible = value;
+                Settings.Default.ShowPanZoom = value;
+                MediatorMessage.Send(MediatorMessage.SetPanZoomDisplay, value);
+                NotifyPropertyChanged(IsPanZoomVisibleChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsPanZoomVisibleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsPanZoomVisible);
+        bool _isPanZoomVisible;
+
+        #endregion
+
+        #region public bool IsScaleBarVisible { get; set; }
+
+        public bool IsScaleBarVisible
+        {
+            get { return _isScaleBarVisible; }
+            set
+            {
+                _isScaleBarVisible = value;
+                Settings.Default.ShowScaleBar = value;
+                MediatorMessage.Send(MediatorMessage.SetScaleBarDisplay, value);
+                NotifyPropertyChanged(IsScaleBarVisibleChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsScaleBarVisibleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsScaleBarVisible);
+        bool _isScaleBarVisible;
+
+        #endregion
+
 
         #region public RecentFileDescriptor RecentFilesSelectedItem { get; set; }
 
@@ -506,24 +575,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region public bool CanPlaceAnalysisPoint { get; set; }
-
-        public bool CanPlaceAnalysisPoint
-        {
-            get
-            {
-                var result = (_experiment != null) && (_experiment.NemoFile != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null);
-                Debug.WriteLine("CanPlaceAnalysisPoint: " + result);
-                return result;
-            }
-        }
-
-        static readonly PropertyChangedEventArgs CanPlaceAnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.CanPlaceAnalysisPoint);
-        bool _canPlaceAnalysisPoint;
-
-        #endregion
-
-
         #region PreviewKeyDownCommand
 
         public SimpleCommand<object, EventToCommandArgs> PreviewKeyDownCommand
@@ -532,11 +583,25 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _previewKeyDown ?? (_previewKeyDown = new SimpleCommand<object, EventToCommandArgs>(delegate(EventToCommandArgs args)
                 {
-                    var commandRan = args.CommandRan;
-                    var o = args.CommandParameter; //get command parameter
-                    var ea = (KeyEventArgs)args.EventArgs; //get event args
-                    var sender = args.Sender; //get orginal sender
-                    if (ea.Key == Key.Escape) IsInAnalysisPointMode = false;
+                    // var commandRan = args.CommandRan;
+
+                    // get command parameter
+                    // var o = args.CommandParameter; 
+
+                    // get KeyEventArgs
+                    var keyEventArgs = (KeyEventArgs)args.EventArgs;
+                    
+                    // get the orginal event sender
+                    // var sender = args.Sender; 
+                    switch (keyEventArgs.Key)
+                    {
+                        case Key.Escape:
+                            // Anything else that is to be canceled by the user hitting the ESC key must be put here
+                            IsInAnalysisPointMode = false;
+                            break;
+                        default:
+                            break;
+                    }
                 }));
             }
         }
@@ -544,8 +609,5 @@ namespace ESMEWorkBench.ViewModels.Main
         SimpleCommand<object, EventToCommandArgs> _previewKeyDown;
 
         #endregion
-
-
-
     }
 }
