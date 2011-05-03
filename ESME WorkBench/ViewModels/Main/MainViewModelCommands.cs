@@ -404,17 +404,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region AcousticOptionsCommand
-
-        public SimpleCommand<object, object> AcousticOptionsCommand
-        {
-            get { return _acousticOptions ?? (_acousticOptions = new SimpleCommand<object, object>((obj) => MediatorMessage.Send(MediatorMessage.AcousticOptions, true))); }
-        }
-
-        SimpleCommand<object, object> _acousticOptions;
-
-        #endregion
-
         #region AddAnimalPopulationFileCommand
 
         public SimpleCommand<object, object> AddAnimalPopulationFileCommand

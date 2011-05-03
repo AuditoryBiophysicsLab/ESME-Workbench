@@ -314,9 +314,12 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.MoveLayerToBottom)]
         void MoveLayerToBottom(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveToBottom(mapLayer.Overlay);
-            RefreshMap(true);
-            MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
+            if (_wpfMap.Overlays.Count > 0)
+            {
+                _wpfMap.Overlays.MoveToBottom(mapLayer.Overlay);
+                RefreshMap(true);
+                MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.SetCurrentExtent)]

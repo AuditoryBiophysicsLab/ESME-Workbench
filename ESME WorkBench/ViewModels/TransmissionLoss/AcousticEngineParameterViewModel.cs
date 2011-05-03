@@ -25,12 +25,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                       new LabelValuePair
                                                       {
                                                           Label = "Range Cell Size (m): ",
-                                                          Value = experiment.BellhopRangeCellSize.ToString(),
+                                                          //Value = experiment.BellhopRangeCellSize.ToString(),
                                                       },
                                                       new LabelValuePair
                                                       {
                                                           Label = "Depth Cell Size (m): ",
-                                                          Value = experiment.BellhopDepthCellSize.ToString(),
+                                                          //Value = experiment.BellhopDepthCellSize.ToString(),
                                                       },
                                                   }
                                 };
@@ -62,8 +62,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                                                                          {
                                                                              //magic validation not-here; here we assume the user values are okay.
                                                                              //todo  scrubscrub
-                                                                             _experiment.BellhopRangeCellSize = Double.Parse(BellhopParameters.ItemsSource[0].Value);
-                                                                             _experiment.BellhopDepthCellSize = Double.Parse(BellhopParameters.ItemsSource[1].Value);
+                                                                             //_experiment.BellhopRangeCellSize = Double.Parse(BellhopParameters.ItemsSource[0].Value);
+                                                                             //_experiment.BellhopDepthCellSize = Double.Parse(BellhopParameters.ItemsSource[1].Value);
                                                                              CloseActivePopUpCommand.Execute(true);
                                                                          })); }
         }
