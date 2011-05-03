@@ -186,24 +186,18 @@
 					                Command="{Binding AddScenarioFileCommand}" />
 				</r:RibbonGroup>
 				<r:RibbonGroup Header="Overlays">
-					<r:RibbonCheckBox Label="Lat/Lon Grid"
+                    <r:RibbonCheckBox Label="Lat/Lon Grid"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Shows and hides the latitude/longitude grid overlay on the map"
-					                  Command="{Binding ToggleGridOverlayDisplayCommand}"
-					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowGrid, Mode=TwoWay}"
-					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
-					<r:RibbonCheckBox Label="Pan &amp; Zoom"
+					                  IsChecked="{Binding IsLatLonGridVisible}" />
+                    <r:RibbonCheckBox Label="Pan &amp; Zoom"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Shows and hides the pan/zoom control overlay on the map"
-					                  Command="{Binding TogglePanZoomDisplayCommand}"
-					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowPanZoom, Mode=TwoWay}"
-					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
-					<r:RibbonCheckBox Label="Scale Bar"
+					                  IsChecked="{Binding IsPanZoomVisible}" />
+                    <r:RibbonCheckBox Label="Scale Bar"
 					                  ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Shows and hides the scale bar overlay on the map"
-					                  Command="{Binding ToggleScaleBarDisplayCommand}"
-					                  IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=ShowScaleBar, Mode=TwoWay}"
-					                  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=IsChecked}" />
+					                  IsChecked="{Binding IsScaleBarVisible}" />
 				</r:RibbonGroup>
                 <r:RibbonGroup Header="Scenario">
                     <r:RibbonButton Label="Open"

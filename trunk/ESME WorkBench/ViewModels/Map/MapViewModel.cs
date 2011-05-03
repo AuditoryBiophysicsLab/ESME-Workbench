@@ -157,6 +157,7 @@ namespace ESMEWorkBench.ViewModels.Map
                                                        GeoSolidBrush = new GeoSolidBrush(GeoColor.StandardColors.White),
                                                    };
             AdornmentOverlay.Layers.Add("Scale", customUnitScaleBarAdornmentLayer);
+            AdornmentOverlay.Layers["Scale"].IsVisible = Settings.Default.ShowScaleBar;
 
             _wpfMap.MapTools.PanZoomBar.Visibility = Settings.Default.ShowPanZoom ? Visibility.Visible : Visibility.Hidden;
 
@@ -181,7 +182,7 @@ namespace ESMEWorkBench.ViewModels.Map
             set
             {
                 if (_experiment == value) return;
-                if (_experiment != null) _experiment.MapLayers.CollectionChanged -= MapLayers_CollectionChanged;
+                if (_experiment != null) _experiment.MapLayers.CollectionChanged -= MapLayersCollectionChanged;
                 _wpfMap.Overlays.Clear();
                 _experiment = value;
                 if (_experiment != null)
@@ -195,7 +196,7 @@ namespace ESMEWorkBench.ViewModels.Map
                         }
                         catch(Exception) {}
                     }
-                    _experiment.MapLayers.CollectionChanged += MapLayers_CollectionChanged;
+                    _experiment.MapLayers.CollectionChanged += MapLayersCollectionChanged;
                     _wpfMap.CurrentExtent = new RectangleShape(_experiment.CurrentExtent);
                     _wpfMap.CurrentScale = _experiment.CurrentScale;
                     _wpfMap.Refresh();
@@ -207,7 +208,7 @@ namespace ESMEWorkBench.ViewModels.Map
         static readonly PropertyChangedEventArgs ExperimentChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.Experiment);
         Experiment _experiment;
 
-        void MapLayers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -262,24 +263,24 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.RefreshLayer)]
         void RefreshLayer(MapLayerViewModel layer) { _wpfMap.Refresh(layer.LayerOverlay); }
 
-        [MediatorMessageSink(MediatorMessage.ToggleGridOverlayDisplayCommand)]
-        void ToggleGridOverlayDisplay(Boolean isVisible)
+        [MediatorMessageSink(MediatorMessage.SetGridOverlayDisplay)]
+        void SetGridOverlayDisplay(Boolean isVisible)
         {
-            AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid = isVisible;
+            AdornmentOverlay.Layers["Grid"].IsVisible = isVisible;
             RefreshMap(true);
         }
 
-        [MediatorMessageSink(MediatorMessage.TogglePanZoomDisplayCommand)]
-        void TogglePanZoomDisplay(Boolean isVisible)
+        [MediatorMessageSink(MediatorMessage.SetPanZoomDisplay)]
+        void SetPanZoomDisplay(Boolean isVisible)
         {
             _wpfMap.MapTools.PanZoomBar.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
-            Settings.Default.ShowPanZoom = isVisible;
+            //RefreshMap(true);
         }
 
-        [MediatorMessageSink(MediatorMessage.ToggleScaleBarDisplayCommand)]
-        void ToggleScaleBarDisplayCommand(Boolean isVisible)
+        [MediatorMessageSink(MediatorMessage.SetScaleBarDisplay)]
+        void SetScaleBarDisplay(Boolean isVisible)
         {
-            AdornmentOverlay.Layers["Scale"].IsVisible = Settings.Default.ShowScaleBar = isVisible;
+            AdornmentOverlay.Layers["Scale"].IsVisible = isVisible;
             RefreshMap(true);
         }
 
