@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
+using ESME.Views.Services;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 
@@ -27,7 +28,7 @@ namespace ESME.Views.TransmissionLossViewer
         TreeView _treeView;
 
         [ImportingConstructor]
-        public AnalysisPointViewModel(IViewAwareStatus viewAwareStatus, IHRCSaveFileService saveFileService)
+        public AnalysisPointViewModel(IViewAwareStatus viewAwareStatus, IHRCSaveFileService saveFileService, IViewParameterService viewParameterService)
         {
             RegisterMediator();
             _viewAwareStatus = viewAwareStatus;
@@ -38,6 +39,8 @@ namespace ESME.Views.TransmissionLossViewer
                                                _treeView = ((AnalysisPointView) _viewAwareStatus.View).TreeView;
                                                MediatorMessage.Send(MediatorMessage.AnalysisPointViewInitialized, true);
                                            };
+            
+            ViewParameters = viewParameterService;
             TransmissionLossFieldListItems = new ObservableCollection<TransmissionLossFieldListItemViewModel>();
         }
 
@@ -90,6 +93,43 @@ namespace ESME.Views.TransmissionLossViewer
                 Debug.WriteLine("AnalysisPointViewModel: Deferred initialization of analysis point completed");
             }
         }
+
+        #region public double TransmissionLayersWidth { get; set; }
+
+        public double TransmissionLayersWidth
+        {
+            get { return _transmissionLayersWidth; }
+            set
+            {
+                if (_transmissionLayersWidth == value) return;
+                _transmissionLayersWidth = value;
+                NotifyPropertyChanged(TransmissionLayersWidthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TransmissionLayersWidthChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.TransmissionLayersWidth);
+        double _transmissionLayersWidth;
+
+        #endregion
+
+        #region public IViewParameterService ViewParameters { get; set; }
+
+        public IViewParameterService ViewParameters
+        {
+            get { return _viewParameters; }
+            set
+            {
+                if (_viewParameters == value) return;
+                _viewParameters = value;
+                NotifyPropertyChanged(ViewParametersChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ViewParametersChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointViewModel>(x => x.ViewParameters);
+        IViewParameterService _viewParameters;
+
+        #endregion
+
 
         #region public AnalysisPoint AnalysisPoint { get; set; }
 

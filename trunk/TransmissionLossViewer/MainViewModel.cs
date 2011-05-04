@@ -1,47 +1,74 @@
-﻿#if false
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
+using ESME;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.CASS;
+using ESME.Views.Services;
+using ESME.Views.TransmissionLossViewer;
 using HRC.Services;
+using MEFedMVVM.ViewModelLocator;
 
-namespace ESME.Views.TransmissionLossViewer
+
+namespace TransmissionLossViewer
 {
-    public class AnalysisPointVisualizerViewModel: ViewModelBase, IViewStatusAwareInjectionAware
+    [ExportViewModel("MainViewModel")]
+    class MainViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
+
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
         readonly IHRCSaveFileService _saveFileService;
+        readonly IHRCOpenFileService _openFileService;
+        readonly IViewParameterService _viewParameterService;
         bool _iAmInitialized;
         readonly AnalysisPoint _tempAnalysisPoint;
 
         #region public constructor
-
-        public AnalysisPointVisualizerViewModel(AnalysisPoint analysisPoint, IHRCSaveFileService saveFileService)
+        [ImportingConstructor]
+        public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService)
         {
             RegisterMediator();
             _saveFileService = saveFileService;
+            _openFileService = openFileService;
+            _viewParameterService = viewParameterService;
+            _viewParameterService.TransmissionLayersWidth = Properties.Settings.Default.TransmissionLayersWidth;
+            _viewParameterService.PropertyChanged += (s, e) =>
+                                                     {
+                                                         switch (e.PropertyName)
+                                                         {
+                                                             case "TransmissionLayersWidth":
+                                                                 Properties.Settings.Default.TransmissionLayersWidth = _viewParameterService.TransmissionLayersWidth;
+                                                                 break;
+                                                         }
+                                                     };
             
+#if false
+
             if (_iAmInitialized)
             {
-                Debug.WriteLine("AnalysisPointVisualizerViewModel: Initializing analysis point");
+                Debug.WriteLine("MainViewModel: Initializing analysis point");
                 MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, analysisPoint);
                 TransmissionLossFieldChanged(analysisPoint.TransmissionLossFields[0]);
                 
             }
             else
             {
-                Debug.WriteLine("AnalysisPointVisualizerViewModel: Deferring initialization of analysis point");
+                Debug.WriteLine("MainViewModel: Deferring initialization of analysis point");
                 _tempAnalysisPoint = analysisPoint;
             }
+#endif
         }
-
+            
         #endregion
 
         #region public double SelectedRadialBearing { get; set; }
@@ -78,7 +105,7 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedTransmissionLossFieldNameChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointVisualizerViewModel>(x => x.SelectedTransmissionLossFieldName);
+        static readonly PropertyChangedEventArgs SelectedTransmissionLossFieldNameChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedTransmissionLossFieldName);
         string _selectedTransmissionLossFieldName;
 
         #endregion
@@ -104,6 +131,40 @@ namespace ESME.Views.TransmissionLossViewer
         }
         
         #endregion
+
+        #region public double TransmissionLayersWidth { get; set; }
+
+        public double TransmissionLayersWidth
+        {
+            get { return Properties.Settings.Default.TransmissionLayersWidth; }
+            set
+            {
+                Properties.Settings.Default.TransmissionLayersWidth = value;
+                NotifyPropertyChanged(TransmissionLayersWidthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TransmissionLayersWidthChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.TransmissionLayersWidth);
+
+        #endregion
+
+        #region ViewClosingCommand
+
+        public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
+        {
+            get
+            {
+                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
+                {
+                    var ea = (CancelEventArgs)vcArgs.EventArgs;
+                    Properties.Settings.Default.Save();
+                }));
+            }
+        }
+
+        SimpleCommand<object, EventToCommandArgs> _viewClosing;
+
+        #endregion
         
         #region CloseWindowCommand
 
@@ -113,7 +174,7 @@ namespace ESME.Views.TransmissionLossViewer
         {
             get { return _closeWindow ?? (_closeWindow = new SimpleCommand<object, object>(delegate
                                                                                            {
-                                                                                               ((AnalysisPointVisualizerView)_viewAwareStatus.View).Close();
+                                                                                               ((MainView)_viewAwareStatus.View).Close();
 
                                                                                            })); }
         }
@@ -178,6 +239,29 @@ namespace ESME.Views.TransmissionLossViewer
 
         #endregion
 
+        #region OpenCommand
+
+        public SimpleCommand<object, object> OpenCommand
+        {
+            get { return _open ?? (_open = new SimpleCommand<object, object>(
+                delegate
+                {
+                    _openFileService.Filter = "CASS Output (*.bin)|*.bin |";
+                    _openFileService.InitialDirectory = Properties.Settings.Default.ExperimentReportDirectory;
+                    _openFileService.Title = "Select a Transmission Loss file to view";
+
+                    var result = _openFileService.ShowDialog((Window) _viewAwareStatus.View);
+                    if (result.HasValue && result.Value)
+                    {
+                        CASSOutput.Load(result.ToString(), false);
+                    }
+                })); }
+        }
+
+        SimpleCommand<object, object> _open;
+
+        #endregion
+
         [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
 
@@ -194,7 +278,7 @@ namespace ESME.Views.TransmissionLossViewer
             {
                 TransmissionLossFieldChanged(_tempAnalysisPoint.TransmissionLossFields[0]);
                 MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, _tempAnalysisPoint);
-                Debug.WriteLine("AnalysisPointVisualizerViewModel: Deferred initialization of analysis point completed");
+                Debug.WriteLine("MainViewModel: Deferred initialization of analysis point completed");
             }
         }
 
@@ -206,11 +290,9 @@ namespace ESME.Views.TransmissionLossViewer
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("***********\nAnalysisPointVisualizerViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
         }
     }
 }
-
-#endif

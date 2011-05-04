@@ -7,16 +7,14 @@
              xmlns:Views="clr-namespace:ESME.Views"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
-             xmlns:p="clr-namespace:ESME.Views.Properties"
-             xmlns:app="clr-namespace:ESME.Views"
-             xmlns:ESMEWorkBench="clr-namespace:ESMEWorkBench"
+             xmlns:p="clr-namespace:ESME.Views.Properties"             
              xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
              mef:ViewModelLocator.ViewModel="AnalysisPointViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="650">
 	<UserControl.Resources>
-        <Views:GridLengthConverter x:Key="gridLengthConverter" />
+		<Views:GridLengthConverter x:Key="gridLengthConverter" />
 		<HierarchicalDataTemplate x:Key="PlatformSourceModeTreeTemplate"
 		                          ItemsSource="{Binding AcousticProperties}">
 			<TextBlock Text="{Binding FieldName}" />
@@ -52,13 +50,13 @@
 	</UserControl.Resources>
 	<Grid>
 		<Grid.ColumnDefinitions>
-            <ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=TransmissionLayersWidth, Mode=TwoWay}"
+            <ColumnDefinition Width="{Binding ViewParameters.TransmissionLayersWidth, Converter={StaticResource gridLengthConverter},Mode=TwoWay}"
 			                  MinWidth="100" />
 			<ColumnDefinition Width="Auto" />
 			<ColumnDefinition Width="*"
 			                  MinWidth="500" />
 		</Grid.ColumnDefinitions>
-		<GroupBox Grid.Column="0">			
+		<GroupBox Grid.Column="0">
 			<TreeView ItemsSource="{Binding TransmissionLossFieldListItems}"
 			          ItemTemplate="{StaticResource PlatformSourceModeTreeTemplate}"
 			          x:Name="TreeView">

@@ -10,6 +10,7 @@
         Width="{Binding Source={x:Static Properties:Settings.Default}, Path=TLWidth, Mode=TwoWay}"
         MinWidth="800"
         >
+    <!-- 
 	<Window.InputBindings>
 		<KeyBinding Command="{Binding SaveAsCommand}"
 		            Key="S"
@@ -55,4 +56,5 @@
         <TransmissionLossViewer:AnalysisPointView DockPanel.Dock="Bottom"/>
 
 	</DockPanel>
+    -->
 </Window>

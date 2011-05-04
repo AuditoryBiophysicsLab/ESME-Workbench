@@ -1,4 +1,4 @@
-﻿#if false
+﻿
 
 using Cinch;
 
@@ -13,4 +13,3 @@ namespace ESMEWorkBench.Views
         public AnalysisPointVisualizerView() { InitializeComponent(); }
     }
 }
-#endif
