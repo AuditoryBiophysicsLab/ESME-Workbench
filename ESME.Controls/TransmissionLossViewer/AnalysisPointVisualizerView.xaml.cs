@@ -1,4 +1,6 @@
-﻿using Cinch;
+﻿#if false
+
+using Cinch;
 
 namespace ESME.Views.TransmissionLossViewer
 {
@@ -11,3 +13,4 @@ namespace ESME.Views.TransmissionLossViewer
         public AnalysisPointVisualizerView() { InitializeComponent(); }
     }
 }
+#endif

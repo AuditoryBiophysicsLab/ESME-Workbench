@@ -9,7 +9,7 @@
         Width="{Binding Source={x:Static Properties:Settings.Default}, Path=TLWidth, Mode=TwoWay}"
         MinWidth="800"
         >
-    <!--
+    
 	<Window.InputBindings>
 		<KeyBinding Command="{Binding SaveAsCommand}"
 		            Key="S"
@@ -54,5 +54,5 @@
 			</Menu>
         <Views:AnalysisPointView DockPanel.Dock="Bottom"/>
 
-	</DockPanel>-->
+	</DockPanel>
 </Window>

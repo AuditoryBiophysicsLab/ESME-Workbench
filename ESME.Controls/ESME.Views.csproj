@@ -109,6 +109,7 @@
       <DependentUpon>SMGCView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LabelValuePair.cs" />
+    <Compile Include="Services\ViewParameterService.cs" />
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>

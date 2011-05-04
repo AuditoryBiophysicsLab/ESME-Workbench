@@ -1,6 +1,4 @@
-﻿#if false
-
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -8,19 +6,22 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
+using ESME;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.Views;
+using ESME.Views.TransmissionLossViewer;
+using ESMEWorkBench.Properties;
 using HRC.Services;
+using AnalysisPointVisualizerView = ESMEWorkBench.Views.AnalysisPointVisualizerView;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {
-    class AnalysisPointVisualizerViewModel: ViewModelBase, IViewStatusAwareInjectionAware
+    internal class AnalysisPointVisualizerViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
-        IViewAwareStatus _viewAwareStatus;
-        Dispatcher _dispatcher;
         readonly IHRCSaveFileService _saveFileService;
-        bool _iAmInitialized;
         readonly AnalysisPoint _tempAnalysisPoint;
+        Dispatcher _dispatcher;
+        bool _iAmInitialized;
+        IViewAwareStatus _viewAwareStatus;
 
         #region public constructor
 
@@ -28,13 +29,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         {
             RegisterMediator();
             _saveFileService = saveFileService;
-            
+
             if (_iAmInitialized)
             {
                 Debug.WriteLine("AnalysisPointVisualizerViewModel: Initializing analysis point");
                 MediatorMessage.Send(MediatorMessage.AnalysisPointChanged, analysisPoint);
                 TransmissionLossFieldChanged(analysisPoint.TransmissionLossFields[0]);
-                
             }
             else
             {
@@ -47,6 +47,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #region public double SelectedRadialBearing { get; set; }
 
+        static readonly PropertyChangedEventArgs SelectedRadialBearingChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.SelectedRadialBearing);
+        double _selectedRadialBearing;
+
         public double SelectedRadialBearing
         {
             get { return _selectedRadialBearing; }
@@ -58,12 +61,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedRadialBearingChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.SelectedRadialBearing);
-        double _selectedRadialBearing;
-
         #endregion
 
         #region public string SelectedTransmissionLossFieldName { get; set; }
+
+        static readonly PropertyChangedEventArgs SelectedTransmissionLossFieldNameChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointVisualizerViewModel>(x => x.SelectedTransmissionLossFieldName);
+        string _selectedTransmissionLossFieldName;
 
         public string SelectedTransmissionLossFieldName
         {
@@ -73,20 +76,14 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 if (_selectedTransmissionLossFieldName == value) return;
                 _selectedTransmissionLossFieldName = value;
                 NotifyPropertyChanged(SelectedTransmissionLossFieldNameChangedEventArgs);
-                
-                
-                
             }
         }
-
-        static readonly PropertyChangedEventArgs SelectedTransmissionLossFieldNameChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointVisualizerViewModel>(x => x.SelectedTransmissionLossFieldName);
-        string _selectedTransmissionLossFieldName;
 
         #endregion
 
         #region public string  OutputFileName { get; set; }
 
-        public string  OutputFileName
+        public string OutputFileName
         {
             get
             {
@@ -95,28 +92,21 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 lock (this)
                 {
                     if (SelectedTransmissionLossFieldName == null) return null;
-                    var fieldName = SelectedTransmissionLossFieldName.Replace('|', ' ');
-                    return Path.Combine(Properties.Settings.Default.ExperimentReportDirectory, fieldName + string.Format(" radial {0} degrees", SelectedRadialBearing));
+                    string fieldName = SelectedTransmissionLossFieldName.Replace('|', ' ');
+                    return Path.Combine(Settings.Default.ExperimentReportDirectory, fieldName + string.Format(" radial {0} degrees", SelectedRadialBearing));
                 }
-
-
             }
-
         }
-        
+
         #endregion
-        
+
         #region CloseWindowCommand
 
         SimpleCommand<object, object> _closeWindow;
 
         public SimpleCommand<object, object> CloseWindowCommand
         {
-            get { return _closeWindow ?? (_closeWindow = new SimpleCommand<object, object>(delegate
-                                                                                           {
-                                                                                               ((AnalysisPointVisualizerView)_viewAwareStatus.View).Close();
-
-                                                                                           })); }
+            get { return _closeWindow ?? (_closeWindow = new SimpleCommand<object, object>(delegate { ((AnalysisPointVisualizerView) _viewAwareStatus.View).Close(); })); }
         }
 
         #endregion
@@ -130,22 +120,21 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             get
             {
                 return _saveAs ?? (_saveAs = new SimpleCommand<object, object>(delegate
-                {
-                    
-                    _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpeg)|*.jpg|Bitmap (*.bmp)|*.bmp";
-                    _saveFileService.OverwritePrompt = true;
-                    //if (OutputFileName == null) return;
-                    _saveFileService.FileName = OutputFileName;
-                   
-                    var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
-                    if (result.HasValue && result.Value)
-                    {
-                        Properties.Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                        MediatorMessage.Send(MediatorMessage.SaveRadialBitmap,_saveFileService.FileName);
-                    }
-                    //MediatorMessage.Send(MediatorMessage.ResetSelectedField, true);
-                    Keyboard.Focus((Window)_viewAwareStatus.View);
-                }));
+                                                                               {
+                                                                                   _saveFileService.Filter = "Portable Network Graphics (*.png)|*.png| JPEG (*.jpeg)|*.jpg|Bitmap (*.bmp)|*.bmp";
+                                                                                   _saveFileService.OverwritePrompt = true;
+                                                                                   //if (OutputFileName == null) return;
+                                                                                   _saveFileService.FileName = OutputFileName;
+
+                                                                                   bool? result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
+                                                                                   if (result.HasValue && result.Value)
+                                                                                   {
+                                                                                       Settings.Default.LastImageExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
+                                                                                       MediatorMessage.Send(MediatorMessage.SaveRadialBitmap, _saveFileService.FileName);
+                                                                                   }
+                                                                                   //MediatorMessage.Send(MediatorMessage.ResetSelectedField, true);
+                                                                                   Keyboard.Focus((Window) _viewAwareStatus.View);
+                                                                               }));
             }
         }
 
@@ -153,42 +142,38 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #region ExportAsCommand
 
+        SimpleCommand<object, object> _exportAs;
+
         public SimpleCommand<object, object> ExportAsCommand
         {
             get
             {
                 return _exportAs ?? (_exportAs = new SimpleCommand<object, object>(delegate
-                {
-                    _saveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
-                    _saveFileService.OverwritePrompt = true;
-                    _saveFileService.FileName = OutputFileName;
+                                                                                   {
+                                                                                       _saveFileService.Filter = "Comma-Separated Value (*.csv)|*.csv";
+                                                                                       _saveFileService.OverwritePrompt = true;
+                                                                                       _saveFileService.FileName = OutputFileName;
 
-                    var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
-                    if (result.HasValue && result.Value)
-                    {
-                        Properties.Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-                        MediatorMessage.Send(MediatorMessage.SaveRadialAsCSV, _saveFileService.FileName);
-                    }
-                    //MediatorMessage.Send(MediatorMessage.ResetSelectedField,true);
-                    Keyboard.Focus((Window)_viewAwareStatus.View);
-                }));
+                                                                                       bool? result = _saveFileService.ShowDialog((Window) _viewAwareStatus.View);
+                                                                                       if (result.HasValue && result.Value)
+                                                                                       {
+                                                                                           Settings.Default.LastCSVExportFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
+                                                                                           MediatorMessage.Send(MediatorMessage.SaveRadialAsCSV, _saveFileService.FileName);
+                                                                                       }
+                                                                                       //MediatorMessage.Send(MediatorMessage.ResetSelectedField,true);
+                                                                                       Keyboard.Focus((Window) _viewAwareStatus.View);
+                                                                                   }));
             }
         }
 
-        SimpleCommand<object, object> _exportAs;
-
         #endregion
 
-        [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
-        void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
+        #region IViewStatusAwareInjectionAware Members
 
-        [MediatorMessageSink(MediatorMessage.TransmissionLossFieldChanged)]
-        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField) { lock(this) SelectedTransmissionLossFieldName = transmissionLossField.Name; }
-
-        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService) 
+        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {
             _viewAwareStatus = viewAwareStatusService;
-            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+            _dispatcher = ((Window) _viewAwareStatus.View).Dispatcher;
             _iAmInitialized = true;
 
             if (_tempAnalysisPoint != null)
@@ -198,6 +183,14 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                 Debug.WriteLine("AnalysisPointVisualizerViewModel: Deferred initialization of analysis point completed");
             }
         }
+
+        #endregion
+
+        [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
+        void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
+
+        [MediatorMessageSink(MediatorMessage.TransmissionLossFieldChanged)]
+        void TransmissionLossFieldChanged(TransmissionLossField transmissionLossField) { lock (this) SelectedTransmissionLossFieldName = transmissionLossField.Name; }
 
         void RegisterMediator()
         {
@@ -213,4 +206,3 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
     }
 }
-#endif
