@@ -461,7 +461,7 @@
 					                SmallImageSource="..\Images\SmallIcons\gear-icon.png"
 					                LargeImageSource="..\Images\LargeIcons\gear-icon.png"
 					                ToolTipDescription="View or change acoustic simulator options"
-					                Command="{Binding DisabledCommand}" />
+					                Command="{Binding AcousticSimulatorOptionsCommand}" />
 				</r:RibbonGroup>
                 <!--
 				<r:RibbonGroup Header="Analysis Points">

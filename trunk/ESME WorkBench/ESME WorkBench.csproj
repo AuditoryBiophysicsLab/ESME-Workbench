@@ -151,6 +151,7 @@
     <Compile Include="ViewModels\NAVO\ExportOptionsViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ScenarioSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
+    <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointCalculationPreviewViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AnalysisPointVisualizerViewModel.cs" />
@@ -168,6 +169,12 @@
     </Compile>
     <Compile Include="Views\AcousticEngineParameterConfigurationView.xaml.cs">
       <DependentUpon>AcousticEngineParameterConfigurationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AcousticSimulatorOptionsControl.xaml.cs">
+      <DependentUpon>AcousticSimulatorOptionsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AcousticSimulatorOptionsView.xaml.cs">
+      <DependentUpon>AcousticSimulatorOptionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\AnalysisPointCalculationPreviewView.xaml.cs">
       <DependentUpon>AnalysisPointCalculationPreviewView.xaml</DependentUpon>
@@ -247,7 +254,7 @@
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
     <Compile Include="ViewModels\Map\MapViewModel.cs" />
     <Compile Include="ViewModels\Main\MenuItemViewModel.cs" />
-    <Compile Include="ViewModels\Main\ProgramOptionsViewModel.cs" />
+    <Compile Include="ViewModels\Main\ApplicationOptionsViewModel.cs" />
     <Compile Include="ViewModels\Map\ShapefileMapLayer.cs" />
     <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
     <Compile Include="ViewModels\RecentFiles\IPersist.cs" />
@@ -306,6 +313,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AcousticEngineParameterConfigurationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AcousticSimulatorOptionsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AcousticSimulatorOptionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -242,9 +242,9 @@ namespace ESME.TransmissionLoss.CASS
             switch (simulatorName)
             {
                 case "ram":
-                    if (!string.IsNullOrEmpty(appSettings.RAMSettings.RAMSupportJarFile) && !string.IsNullOrEmpty(appSettings.RAMSettings.RAMExecutable)) 
+                    if (!string.IsNullOrEmpty(appSettings.NAEMOTools.RAMSupportJarFile) && !string.IsNullOrEmpty(appSettings.NAEMOTools.RAMExecutable)) 
                         using (var writer = new StreamWriter(batchFilePath))
-                            writer.WriteLine("java -Dlog4j.configuration=ram-log4j.xml -jar \"{0}\" {1} \"{2}\"", appSettings.RAMSettings.RAMSupportJarFile, inputFileName, appSettings.RAMSettings.RAMExecutable);
+                            writer.WriteLine("java -Dlog4j.configuration=ram-log4j.xml -jar \"{0}\" {1} \"{2}\"", appSettings.NAEMOTools.RAMSupportJarFile, inputFileName, appSettings.NAEMOTools.RAMExecutable);
                     break;
                 case "cass":
                 default:

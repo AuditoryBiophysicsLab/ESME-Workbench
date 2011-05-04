@@ -58,10 +58,10 @@ namespace ESMEWorkBench.ViewModels.NAVO
             {
                 return _run ?? (_run = new SimpleCommand<object, object>(delegate
                 {
-                    return ((Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath != null)
-                        && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath) 
-                        && (Globals.AppSettings.JavaExecutablePath !=null) 
-                        && File.Exists(Globals.AppSettings.JavaExecutablePath) 
+                    return ((Globals.AppSettings.NAEMOTools.ScenarioExecutablePath != null)
+                        && File.Exists(Globals.AppSettings.NAEMOTools.ScenarioExecutablePath)
+                        && (Globals.AppSettings.NAEMOTools.JavaExecutablePath != null)
+                        && File.Exists(Globals.AppSettings.NAEMOTools.JavaExecutablePath) 
                         && NemoFile != null);
                 },
                 delegate
@@ -69,13 +69,13 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     var commandArgs = CommandArgs;
                     const string batchFilename = "esme-scene-sim.bat";
                     using (var batchFile = new StreamWriter(batchFilename, false))
-                        batchFile.WriteLine("\"{0}\" {1}", Globals.AppSettings.JavaExecutablePath, commandArgs);
+                        batchFile.WriteLine("\"{0}\" {1}", Globals.AppSettings.NAEMOTools.JavaExecutablePath, commandArgs);
                     new Process
                     {
                         StartInfo =
                             {
-                                WorkingDirectory = Path.GetDirectoryName(ScenarioSimulatorSettings.ScenarioExecutablePath),
-                                FileName = Globals.AppSettings.JavaExecutablePath,
+                                WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioExecutablePath),
+                                FileName = Globals.AppSettings.NAEMOTools.JavaExecutablePath,
                                 Arguments = commandArgs,
                                 CreateNoWindow = true,
                             },
@@ -111,7 +111,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 if (ScenarioSimulatorSettings.OptimizeBuffer) sb.Append(string.Format("-Dsim.filebuffer.adapt=true "));
                 if (ScenarioSimulatorSettings.CASSFileSize > 0 && !ScenarioSimulatorSettings.OptimizeBuffer) sb.Append(string.Format("-Dsim.cass.filebuffer={0} ", ScenarioSimulatorSettings.CASSFileSize)); // cass file buffer.
                 if (ScenarioSimulatorSettings.SpeciesFileSize > 0 && !ScenarioSimulatorSettings.OptimizeBuffer) sb.Append(string.Format("-Dsim.species.filebuffer={0} ", ScenarioSimulatorSettings.SpeciesFileSize)); // species file size
-                sb.Append(string.Format("-jar \"{0}\" -b ", ScenarioSimulatorSettings.ScenarioExecutablePath));
+                sb.Append(string.Format("-jar \"{0}\" -b ",  Globals.AppSettings.NAEMOTools.ScenarioExecutablePath));
                 if (ScenarioSimulatorSettings.IsRandomized) sb.Append("-r ");
                 sb.Append(string.Format("-n {0} -s \"{1}\" ", ScenarioSimulatorSettings.Iterations, NemoFile.FileName));
                 return sb.ToString();
