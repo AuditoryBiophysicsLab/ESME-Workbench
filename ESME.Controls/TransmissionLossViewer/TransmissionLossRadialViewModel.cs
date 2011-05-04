@@ -1,14 +1,10 @@
-﻿#if false
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -17,11 +13,10 @@ using Cinch;
 using ESME.Environment;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
-using ESMEWorkBench.Views;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossRadialViewModel")]
     public class TransmissionLossRadialViewModel : ViewModelBase
@@ -413,4 +408,3 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         //public float DepthMax { get; private set; }
     }
 }
-#endif

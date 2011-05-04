@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
+using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Model;

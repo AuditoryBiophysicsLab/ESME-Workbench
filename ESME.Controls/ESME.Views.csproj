@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -82,8 +83,15 @@
     </Compile>
     <Compile Include="AcousticBuilder\AnalysisPointSettingsViewModel.cs" />
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Controls\ColorBarView.xaml.cs">
+      <DependentUpon>ColorBarView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DataAxis.cs" />
     <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
       <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ScatterPlot.xaml.cs">
+      <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\BSTView.xaml.cs">
       <DependentUpon>BSTView.xaml</DependentUpon>
@@ -100,10 +108,29 @@
     <Compile Include="EnvironmentBuilder\SMGCView.xaml.cs">
       <DependentUpon>SMGCView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LabelValuePair.cs" />
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TestViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\AnalysisPointView.xaml.cs">
+      <DependentUpon>AnalysisPointView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossViewer\AnalysisPointViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\AnalysisPointVisualizerView.xaml.cs">
+      <DependentUpon>AnalysisPointVisualizerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossViewer\AnalysisPointVisualizerViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\ColorMapViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\TransmissionLossFieldListItemViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\TransmissionLossFieldView.xaml.cs">
+      <DependentUpon>TransmissionLossFieldView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossViewer\TransmissionLossFieldViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\TransmissionLossRadialView.xaml.cs">
+      <DependentUpon>TransmissionLossRadialView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransmissionLossViewer\TransmissionLossRadialViewModel.cs" />
     <Compile Include="TransmissionLoss\BellhopQueueCalculatorView.xaml.cs">
       <DependentUpon>BellhopQueueCalculatorView.xaml</DependentUpon>
     </Compile>
@@ -114,12 +141,21 @@
     </Compile>
     <Compile Include="TransmissionLoss\TransmissionLossFieldCalculatorViewModel.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRadialCalculatorViewModel.cs" />
+    <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="AcousticBuilder\AnalysisPointSettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\ColorBarView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\FileOrDirectorySetting.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\ScatterPlot.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -146,6 +182,22 @@
     <Page Include="TestView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLossViewer\AnalysisPointView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionLossViewer\AnalysisPointVisualizerView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionLossViewer\TransmissionLossFieldView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionLossViewer\TransmissionLossRadialView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="TransmissionLoss\BellhopQueueCalculatorView.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -174,6 +226,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -190,9 +243,7 @@
       <Name>HRC</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TransmissionLossViewer\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME.Views -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"

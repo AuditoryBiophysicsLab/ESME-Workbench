@@ -1,5 +1,4 @@
-﻿#if false
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -8,8 +7,9 @@ using ESME.TransmissionLoss;
 using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
+using ESME.Views.Controls;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLossViewer
 {
     [ExportViewModel("TransmissionLossFieldViewModel")]
     public class TransmissionLossFieldViewModel : ViewModelBase
@@ -165,4 +165,3 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
     }
 }
-#endif
