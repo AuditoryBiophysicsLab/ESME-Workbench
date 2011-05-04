@@ -1,6 +1,4 @@
-﻿#if false
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -10,7 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Cinch;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLossViewer
 {
     public class ColorMapViewModel : ViewModelBase
     {
@@ -439,4 +437,3 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         #endregion
     }
 }
-#endif

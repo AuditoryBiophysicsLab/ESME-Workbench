@@ -1,12 +1,11 @@
-﻿<UserControl x:Class="ESMEWorkBench.Controls.ScatterPlot"
+﻿<UserControl x:Class="ESME.Views.Controls.ScatterPlot"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:controls="clr-namespace:ESMEWorkBench.Controls"
+             xmlns:controls="clr-namespace:ESME.Views.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <!-- 
     <DockPanel>
         <DockPanel DockPanel.Dock="Left">
             <DockPanel>
@@ -30,5 +29,4 @@
         </DockPanel>
         <Canvas x:Name="PlotSurface" />
     </DockPanel>
-    -->
 </UserControl>

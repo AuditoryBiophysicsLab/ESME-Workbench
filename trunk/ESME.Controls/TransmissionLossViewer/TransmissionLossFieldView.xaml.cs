@@ -1,5 +1,4 @@
-﻿#if false 
-namespace ESMEWorkBench.Views
+﻿namespace ESME.Views.TransmissionLossViewer
 {
     /// <summary>
     /// Interaction logic for TransmissionLossFieldView.xaml
@@ -9,4 +8,3 @@ namespace ESMEWorkBench.Views
         public TransmissionLossFieldView() { InitializeComponent(); }
     }
 }
-#endif

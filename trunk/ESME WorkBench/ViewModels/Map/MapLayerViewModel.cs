@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
+using ESME;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Main;

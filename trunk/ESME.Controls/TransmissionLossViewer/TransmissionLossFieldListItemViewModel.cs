@@ -1,13 +1,10 @@
-﻿#if false
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using Cinch;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.ViewModels.Main;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLossViewer
 {
     internal class TransmissionLossFieldListItemViewModel : ViewModelBase
     {
@@ -99,4 +96,3 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         #endregion
     }
 }
-#endif

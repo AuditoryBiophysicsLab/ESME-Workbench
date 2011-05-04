@@ -1,5 +1,4 @@
-﻿#if false
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -10,11 +9,11 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.Views;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+
+namespace ESME.Views.TransmissionLossViewer
 {
     [ExportViewModel("AnalysisPointViewModel")]
     internal class AnalysisPointViewModel : ViewModelBase
@@ -174,4 +173,3 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         #endregion
     }
 }
-#endif

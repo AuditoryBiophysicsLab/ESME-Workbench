@@ -1,8 +1,6 @@
-﻿#if false
+﻿using Cinch;
 
-using Cinch;
-
-namespace ESMEWorkBench.Views
+namespace ESME.Views.TransmissionLossViewer
 {
     /// <summary>
     ///   Interaction logic for AnalysisPointVisualizerView.xaml
@@ -13,4 +11,3 @@ namespace ESMEWorkBench.Views
         public AnalysisPointVisualizerView() { InitializeComponent(); }
     }
 }
-#endif

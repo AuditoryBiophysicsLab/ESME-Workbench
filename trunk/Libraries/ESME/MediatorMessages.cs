@@ -1,11 +1,9 @@
-﻿#if false
-
-using System;
+﻿using System;
 using Cinch;
 
-namespace ESMEWorkBench
+namespace ESME
 {
-    internal static class MediatorMessage
+    public static class MediatorMessage
     {
         public const string CancelCurrentCommand = "CancelCurrentCommandMessage";
         public const string SaveExperimentAsCommand = "SaveExperimentAsCommandMessage";
@@ -110,4 +108,3 @@ namespace ESMEWorkBench
         public static void SendAsync(string key) { Mediator.Instance.NotifyColleaguesAsync(key, true); }
     }
 }
-#endif

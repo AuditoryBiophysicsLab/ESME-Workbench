@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
 using Cinch;
+using ESME;
 using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;

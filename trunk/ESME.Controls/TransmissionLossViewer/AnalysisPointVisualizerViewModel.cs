@@ -1,6 +1,4 @@
-﻿#if false
-
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -9,12 +7,11 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.Views;
 using HRC.Services;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLossViewer
 {
-    class AnalysisPointVisualizerViewModel: ViewModelBase, IViewStatusAwareInjectionAware
+    public class AnalysisPointVisualizerViewModel: ViewModelBase, IViewStatusAwareInjectionAware
     {
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
@@ -213,4 +210,3 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         }
     }
 }
-#endif

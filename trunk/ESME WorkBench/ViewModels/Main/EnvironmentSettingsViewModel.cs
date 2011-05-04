@@ -5,7 +5,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Cinch;
-using ESME.Environment;
+ using ESME;
+ using ESME.Environment;
 using ESMERibbonDemo.ViewModels;
 using ESMEWorkBench.Data;
 

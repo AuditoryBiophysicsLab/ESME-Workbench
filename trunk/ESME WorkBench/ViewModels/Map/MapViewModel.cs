@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Xml.Serialization;
 using Cinch;
+using ESME;
 using ESMEWorkBench.Controls;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;

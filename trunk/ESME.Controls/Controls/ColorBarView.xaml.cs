@@ -1,5 +1,4 @@
-﻿#if false
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -8,7 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 
-namespace ESMEWorkBench.Controls
+namespace ESME.Views.Controls
 {
     /// <summary>
     /// Interaction logic for ColorBarView.xaml
@@ -269,4 +268,3 @@ namespace ESMEWorkBench.Controls
 
     #endregion
 }
-#endif

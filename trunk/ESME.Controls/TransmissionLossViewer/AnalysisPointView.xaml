@@ -1,21 +1,22 @@
-﻿ <UserControl x:Class="ESMEWorkBench.Views.AnalysisPointView"
+﻿<UserControl x:Class="ESME.Views.TransmissionLossViewer.AnalysisPointView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
-             xmlns:Views="clr-namespace:ESMEWorkBench.Views"
+             xmlns:Views="clr-namespace:ESME.Views"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
-             xmlns:p="clr-namespace:ESMEWorkBench.Properties"
-             xmlns:app="clr-namespace:ESMEWorkBench"
+             xmlns:p="clr-namespace:ESME.Views.Properties"
+             xmlns:app="clr-namespace:ESME.Views"
+             xmlns:ESMEWorkBench="clr-namespace:ESMEWorkBench"
+             xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
              mef:ViewModelLocator.ViewModel="AnalysisPointViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="650">
-    <!--
 	<UserControl.Resources>
-        <app:GridLengthConverter x:Key="gridLengthConverter" />
+        <Views:GridLengthConverter x:Key="gridLengthConverter" />
 		<HierarchicalDataTemplate x:Key="PlatformSourceModeTreeTemplate"
 		                          ItemsSource="{Binding AcousticProperties}">
 			<TextBlock Text="{Binding FieldName}" />
@@ -77,6 +78,6 @@
 		              VerticalAlignment="Stretch"
 		              ResizeBehavior="BasedOnAlignment"
 		              ResizeDirection="Columns" />
-		<Views:TransmissionLossFieldView Grid.Column="2" />
-	</Grid>-->
+		<TransmissionLossViewer:TransmissionLossFieldView Grid.Column="2" />
+	</Grid>
 </UserControl>

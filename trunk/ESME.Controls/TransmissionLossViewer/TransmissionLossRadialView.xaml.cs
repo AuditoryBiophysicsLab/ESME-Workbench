@@ -1,8 +1,4 @@
-﻿#if false
-
-using Cinch;
-
-namespace ESMEWorkBench.Views
+﻿namespace ESME.Views.TransmissionLossViewer
 {
     /// <summary>
     /// Interaction logic for TransmissionLossRadialView.xaml
@@ -14,4 +10,3 @@ namespace ESMEWorkBench.Views
         public TransmissionLossRadialView() { InitializeComponent(); }
     }
 }
-#endif
