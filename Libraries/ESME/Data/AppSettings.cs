@@ -46,9 +46,6 @@ namespace ESME.Data
 
         public void SetDefaults()
         {
-            if (string.IsNullOrEmpty(ScenarioEditorExecutablePath)) ScenarioEditorExecutablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "scenario-builder.jar");
-            if (string.IsNullOrEmpty(ReportGeneratorExecutablePath)) ReportGeneratorExecutablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "post-processor.jar");
-            if (ScenarioSimulatorSettings != null) ScenarioSimulatorSettings.SetDefaults();
             if (CASSSettings != null) CASSSettings.SetDefaults();
             if (RAMSettings != null) RAMSettings.SetDefaults();
             if (NAVOConfiguration != null) NAVOConfiguration.SetDefaults();
@@ -69,79 +66,6 @@ namespace ESME.Data
 
         public void Reload() { Reload(ReferencedTypes); }
 
-        #region public string JavaExecutablePath { get; set; }
-
-        public string JavaExecutablePath
-        {
-            get { return _javaExecutablePath; }
-            set
-            {
-                if (_javaExecutablePath == value) return;
-                _javaExecutablePath = value;
-                NotifyPropertyChanged(JavaExecutablePathChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs JavaExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.JavaExecutablePath);
-        string _javaExecutablePath;
-
-        #endregion
-
-        #region public string ScenarioEditorExecutablePath { get; set; }
-
-        static readonly PropertyChangedEventArgs ScenarioEditorExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioEditorExecutablePath);
-        string _scenarioEditorExecutablePath;
-
-        public string ScenarioEditorExecutablePath
-        {
-            get { return _scenarioEditorExecutablePath; }
-            set
-            {
-                if (_scenarioEditorExecutablePath == value) return;
-                _scenarioEditorExecutablePath = value;
-                NotifyPropertyChanged(ScenarioEditorExecutablePathChangedEventArgs);
-            }
-        }
-
-        #endregion
-
-        #region public string ReportGeneratorExecutablePath { get; set; }
-
-        public string ReportGeneratorExecutablePath
-        {
-            get { return _reportGeneratorExecutablePath; }
-            set
-            {
-                if (_reportGeneratorExecutablePath == value) return;
-                _reportGeneratorExecutablePath = value;
-                NotifyPropertyChanged(ReportGeneratorExecutablePathChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ReportGeneratorExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ReportGeneratorExecutablePath);
-        string _reportGeneratorExecutablePath;
-
-        #endregion
-
-        #region public string ExposureReportGeneratorExecutablePath { get; set; }
-
-        public string ExposureReportGeneratorExecutablePath
-        {
-            get { return _exposureReportGeneratorExecutablePath; }
-            set
-            {
-                if (_exposureReportGeneratorExecutablePath == value) return;
-                _exposureReportGeneratorExecutablePath = value;
-                NotifyPropertyChanged(ExposureReportGeneratorExecutablePathChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ExposureReportGeneratorExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ExposureReportGeneratorExecutablePath);
-        string _exposureReportGeneratorExecutablePath;
-
-        #endregion
-
-        
         #region public string ScenarioDataDirectory { get; set; }
 
         static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioDataDirectory);
@@ -357,6 +281,24 @@ namespace ESME.Data
 
         #endregion
 
+        #region public NAEMOTools NAEMOTools { get; set; }
+
+        public NAEMOTools NAEMOTools
+        {
+            get { return _naemoTools ?? (_naemoTools = new NAEMOTools()); }
+            set
+            {
+                if (_naemoTools == value) return;
+                _naemoTools = value;
+                NotifyPropertyChanged(NAEMOToolsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NAEMOToolsChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.NAEMOTools);
+        NAEMOTools _naemoTools;
+
+        #endregion
+
         // This list is maintained by the ESME WorkBench.  When a new experiment is saved, the path to the experiment directory is added to this list
         // Periodically, the VerifyExperimentsStillExist() method is called, which will prune directories that no longer exist.
         #region public List<string> ExperimentFiles { get; set; }
@@ -393,6 +335,87 @@ namespace ESME.Data
             ExperimentFiles.AddRange(tmpList);
             Save();
         }
+
+        #endregion
+    }
+
+    public class NAEMOTools : INotifyPropertyChanged
+    {
+        #region public string JavaExecutablePath { get; set; }
+
+        public string JavaExecutablePath
+        {
+            get { return _javaExecutablePath; }
+            set
+            {
+                if (_javaExecutablePath == value) return;
+                _javaExecutablePath = value;
+                NotifyPropertyChanged(JavaExecutablePathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs JavaExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<NAEMOTools>(x => x.JavaExecutablePath);
+        string _javaExecutablePath;
+
+        #endregion
+
+        #region public string NAEMOToolsDirectory { get; set; }
+
+        public string NAEMOToolsDirectory
+        {
+            get { return _naemoToolsDirectory; }
+            set
+            {
+                if (_naemoToolsDirectory == value) return;
+                _naemoToolsDirectory = value;
+                NotifyPropertyChanged(NAEMOToolsDirectoryChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NAEMOToolsDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAEMOTools>(x => x.NAEMOToolsDirectory);
+        string _naemoToolsDirectory;
+
+        #endregion
+
+        #region public string RAMExecutable { get; set; }
+
+        public string RAMExecutable
+        {
+            get { return _rAMExecutable; }
+            set
+            {
+                if (_rAMExecutable == value) return;
+                _rAMExecutable = value;
+                NotifyPropertyChanged(RAMExecutableChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RAMExecutableChangedEventArgs = ObservableHelper.CreateArgs<NAEMOTools>(x => x.RAMExecutable);
+        string _rAMExecutable;
+
+        #endregion
+
+        [XmlIgnore]
+        public string ScenarioEditorExecutablePath { get { return NAEMOTool("scenario-builder.jar"); } }
+
+        [XmlIgnore]
+        public string ReportGeneratorExecutablePath { get { return NAEMOTool("post-processor.jar"); } }
+
+        [XmlIgnore]
+        public string ExposureReportGeneratorExecutablePath { get { return NAEMOTool("range-complex.jar"); } }
+
+        [XmlIgnore]
+        public string RAMSupportJarFile { get { return NAEMOTool("ram-support.jar"); } }
+
+        [XmlIgnore]
+        public string ScenarioExecutablePath { get { return NAEMOTool("scene-sim.jar"); } }
+
+        string NAEMOTool(string toolFileName) { return string.IsNullOrEmpty(NAEMOToolsDirectory) ? null : Path.Combine(NAEMOToolsDirectory, toolFileName); }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
 
         #endregion
     }
@@ -642,8 +665,6 @@ namespace ESME.Data
     {
         public void SetDefaults()
         {
-            if (string.IsNullOrEmpty(RAMSupportJarFile)) RAMSupportJarFile = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "ram-support.jar");
-            if (string.IsNullOrEmpty(RAMExecutable)) RAMExecutable = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "pev54.exe");
             MaximumDepth = 2000;
             RangeStepSize = 25;
             DepthStepSize = 25;
@@ -776,42 +797,6 @@ namespace ESME.Data
 
         static readonly PropertyChangedEventArgs BathymetryMetricChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.BathymetryMetric);
         int _bathymetryMetric = 1;
-
-        #endregion
-
-        #region public string RAMSupportJarFile { get; set; }
-
-        public string RAMSupportJarFile
-        {
-            get { return _ramSupportJarFile; }
-            set
-            {
-                if (_ramSupportJarFile == value) return;
-                _ramSupportJarFile = value;
-                NotifyPropertyChanged(RAMSupportJarFileChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RAMSupportJarFileChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RAMSupportJarFile);
-        string _ramSupportJarFile;
-
-        #endregion
-
-        #region public string RAMExecutable { get; set; }
-
-        public string RAMExecutable
-        {
-            get { return _rAMExecutable; }
-            set
-            {
-                if (_rAMExecutable == value) return;
-                _rAMExecutable = value;
-                NotifyPropertyChanged(RAMExecutableChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RAMExecutableChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RAMExecutable);
-        string _rAMExecutable;
 
         #endregion
 
@@ -961,29 +946,6 @@ namespace ESME.Data
 
     public class ScenarioSimulatorSettings : INotifyPropertyChanged
     {
-        public void SetDefaults()
-        {
-            if (string.IsNullOrEmpty(ScenarioExecutablePath)) ScenarioExecutablePath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "scene-sim.jar");
-        }
-
-        #region public string ScenarioExecutablePath { get; set; }
-
-        public string ScenarioExecutablePath
-        {
-            get { return _scenarioExecutablePath; }
-            set
-            {
-                if (_scenarioExecutablePath == value) return;
-                _scenarioExecutablePath = value;
-                NotifyPropertyChanged(ExecutablePathChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.ScenarioExecutablePath);
-        string _scenarioExecutablePath;
-
-        #endregion
-
         #region public bool IsRandomized { get; set; }
 
         public bool IsRandomized

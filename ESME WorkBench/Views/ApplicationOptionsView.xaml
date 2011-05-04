@@ -2,50 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
-        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         xmlns:Views="clr-namespace:ESMEWorkBench.Views"
         Title="User Options"
         SizeToContent="WidthAndHeight">
-	<Window.Resources>
-		<DataTemplate x:Key="CASSTemplateTemplate">
-			<Grid>
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition SharedSizeGroup="CheckCol" />
-					<ColumnDefinition SharedSizeGroup="PatternCol" />
-					<ColumnDefinition SharedSizeGroup="FileCol" />
-					<ColumnDefinition SharedSizeGroup="EditCol" />
-				</Grid.ColumnDefinitions>
-
-				<CheckBox Content="Enable"
-				          IsChecked="{Binding IsEnabled}"
-				          Grid.Column="0"
-				          Margin="5 0 0 0"
-				          VerticalAlignment="Bottom" />
-				<StackPanel Orientation="Vertical"
-				            Grid.Column="1"
-				            IsEnabled="{Binding IsEnabled}"
-				            Margin="5 0 0 0">
-					<TextBlock Text="Mode name match" />
-					<TextBox Text="{Binding MatchString}"
-					         ToolTip="The string that will be matched against each mode name.  * will match any mode.  The MOST SPECIFIC match found will be used" />
-				</StackPanel>
-				<Controls:FileOrDirectorySetting Grid.Column="2"
-				                                 Caption="Parameter File"
-				                                 IsDirectoryBrowser="False"
-				                                 FileName="{Binding FileName}"
-				                                 IsEnabled="{Binding IsEnabled}"
-				                                 Margin="5 0 0 0" />
-				<Button Content="Edit..."
-				        Command="{Binding EditParameterFileCommand}"
-				        Grid.Column="3"
-				        Width="75"
-				        VerticalAlignment="Bottom"
-				        Height="22"
-				        Margin="5 0 0 0" />
-			</Grid>
-		</DataTemplate>
-	</Window.Resources>
 	<DockPanel LastChildFill="True">
 		<DockPanel LastChildFill="False"
 		           Margin="10"
@@ -68,43 +27,21 @@
 				<StackPanel Orientation="Vertical"
 				            Width="Auto"
 				            Height="Auto">
-                    <Controls:FileOrDirectorySetting Caption="Java"
+                    <Controls:FileOrDirectorySetting Caption="Java executable (javaw.exe)"
 					                                 Margin="5"
-					                                 DialogTitle="Choose the java executable"
-					                                 FileNameFilter="Java executable archive files (*.exe)|*.exe|All files (*.*)|*.*"
+					                                 DialogTitle="Choose the java executable (javaw.exe)"
+					                                 FileNameFilter="Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*"
 					                                 IsDirectoryBrowser="False"
-					                                 FileName="{Binding AppSettings.JavaExecutablePath}" />
-					<Controls:FileOrDirectorySetting Caption="Scenario Editor executable file"
+					                                 FileName="{Binding AppSettings.NAEMOTools.JavaExecutablePath}" />
+					<Controls:FileOrDirectorySetting Caption="NAEMO Tools directory"
 					                                 Margin="5"
-					                                 DialogTitle="Choose the Scenario Editor executable file"
-					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
-					                                 IsDirectoryBrowser="False"
-					                                 FileName="{Binding AppSettings.ScenarioEditorExecutablePath}" />
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.NAEMOTools.NAEMOToolsDirectory}" />
 
 					<Controls:FileOrDirectorySetting Caption="Scenario data directory"
 					                                 Margin="5 0"
 					                                 IsDirectoryBrowser="True"
 					                                 FileName="{Binding AppSettings.ScenarioDataDirectory}" />
-
-					<Controls:FileOrDirectorySetting Caption="Post Processor executable file"
-					                                 Margin="5 0"
-					                                 IsDirectoryBrowser="False"
-					                                 DialogTitle="Choose the Post Processor executable file"
-					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
-					                                 FileName="{Binding AppSettings.ReportGeneratorExecutablePath}" />
-                    <Controls:FileOrDirectorySetting Caption="Exposure Report Generator executable file"
-					                                 Margin="5 5 5 0"
-					                                 IsDirectoryBrowser="False"
-					                                 DialogTitle="Choose the Scenario Simulator executable file"
-					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
-					                                 FileName="{Binding AppSettings.ExposureReportGeneratorExecutablePath}" />
-
-					<Controls:FileOrDirectorySetting Caption="Scenario Simulator executable file"
-					                                 Margin="5 5 5 0"
-					                                 IsDirectoryBrowser="False"
-					                                 DialogTitle="Choose the Scenario Simulator executable file"
-					                                 FileNameFilter="Java executable archive files (*.jar)|*.jar|All files (*.*)|*.*"
-					                                 FileName="{Binding AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath}" />
 
 					<GroupBox Header="Scenario Simulator Options"
 					          Margin="5"
@@ -190,256 +127,7 @@
 				</StackPanel>
 			</TabItem>
 			<TabItem Header="Acoustic Simulators">
-				<TabControl>
-					<TabItem Header="Bellhop">
-						<StackPanel Orientation="Vertical"
-                                    Margin="5 5 5 10">
-                            <StackPanel Orientation="Vertical"
-                                        Margin="0 0 0 5">
-                                <TextBlock Text="Range cell size (m)"/>
-                                <TextBox Text="{Binding AppSettings.BellhopSettings.RangeCellSize}">
-                                    <i:Interaction.Behaviors>
-                                        <cinch:NumericTextBoxBehaviour />
-                                    </i:Interaction.Behaviors>
-                                </TextBox>
-                            </StackPanel>
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Text="Depth cell size (m)"/>
-                                <TextBox Text="{Binding AppSettings.BellhopSettings.DepthCellSize}">
-                                    <i:Interaction.Behaviors>
-                                        <cinch:NumericTextBoxBehaviour />
-                                    </i:Interaction.Behaviors>
-                                </TextBox>
-                            </StackPanel>
-                        </StackPanel>
-					</TabItem>
-					<TabItem Header="RAM">
-                        <StackPanel Orientation="Vertical"
-                                    Margin="5 5 5 10">
-                            <GroupBox Header="Options"
-							          Margin="5 5 5 0"
-							          Padding="5"
-							          DockPanel.Dock="Top">
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Vertical"
-									            Margin="0 10 0 5">
-                                        <TextBlock Text="Maximum depth (m)" />
-                                        <TextBox Text="{Binding AppSettings.RAMSettings.MaximumDepth}">
-                                            <i:Interaction.Behaviors>
-                                                <cinch:NumericTextBoxBehaviour />
-                                            </i:Interaction.Behaviors>
-                                        </TextBox>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Vertical"
-                                        Margin="0 0 0 5">
-                                        <TextBlock Text="Range step size (m)"/>
-                                        <TextBox Text="{Binding AppSettings.RAMSettings.RangeStepSize}">
-                                            <i:Interaction.Behaviors>
-                                                <cinch:NumericTextBoxBehaviour />
-                                            </i:Interaction.Behaviors>
-                                        </TextBox>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock Text="Depth step size (m)"/>
-                                        <TextBox Text="{Binding AppSettings.RAMSettings.DepthStepSize}">
-                                            <i:Interaction.Behaviors>
-                                                <cinch:NumericTextBoxBehaviour />
-                                            </i:Interaction.Behaviors>
-                                        </TextBox>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Vertical" Margin="0 10 0 0">
-                                        <TextBlock Text="Speed Dial"/>
-                                        <TextBox Text="{Binding AppSettings.RAMSettings.SpeedDial}">
-                                            <i:Interaction.Behaviors>
-                                                <cinch:NumericTextBoxBehaviour />
-                                            </i:Interaction.Behaviors>
-                                        </TextBox>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock Text="SSP Units"/>
-                                        <TextBox Text="{Binding AppSettings.RAMSettings.SSPUnits}">
-                                            <i:Interaction.Behaviors>
-                                                <cinch:NumericTextBoxBehaviour />
-                                            </i:Interaction.Behaviors>
-                                        </TextBox>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock Text="CASS Level"/>
-                                        <TextBox Text="{Binding AppSettings.RAMSettings.CASSLevel}">
-                                            <i:Interaction.Behaviors>
-                                                <cinch:NumericTextBoxBehaviour />
-                                            </i:Interaction.Behaviors>
-                                        </TextBox>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock Text="Bathymetry Metric"/>
-                                        <TextBox Text="{Binding AppSettings.RAMSettings.BathymetryMetric}">
-                                            <i:Interaction.Behaviors>
-                                                <cinch:NumericTextBoxBehaviour />
-                                            </i:Interaction.Behaviors>
-                                        </TextBox>
-                                    </StackPanel>
-                                </StackPanel>
-                            </GroupBox>
-                            <GroupBox Header="Paths"
-							          Margin="5 0 5 5"
-							          Padding="5"
-							          DockPanel.Dock="Top">
-                                <StackPanel Orientation="Vertical">
-
-                                    <Controls:FileOrDirectorySetting Caption="RAM Support JAR file"
-									                                 IsDirectoryBrowser="False"
-									                                 FileName="{Binding AppSettings.RAMSettings.RAMSupportJarFile}" />
-                                    <Controls:FileOrDirectorySetting Caption="RAM Executable"
-									                        IsDirectoryBrowser="False"
-									                        FileName="{Binding AppSettings.RAMSettings.RAMExecutable}" />
-                                </StackPanel>
-                            </GroupBox>
-                        </StackPanel>
-                    </TabItem>
-					<TabItem Header="CASS"
-					         Visibility="{Binding AppSettings.NavyOptionsVisibility}">
-						<DockPanel LastChildFill="True">
-							<GroupBox Header="Options"
-							          Margin="5 5 5 0"
-							          Padding="5"
-							          DockPanel.Dock="Top">
-								<StackPanel Orientation="Vertical">
-									<CheckBox Content="Generate Plot Files"
-									          IsChecked="{Binding AppSettings.CASSSettings.GeneratePlotFiles}" />
-									<CheckBox Content="Generate Binary Files"
-									          IsChecked="{Binding AppSettings.CASSSettings.GenerateBinaryFiles}" />
-									<CheckBox Content="Generate Pressure Files"
-									          IsChecked="{Binding AppSettings.CASSSettings.GeneratePressureFiles}" />
-									<CheckBox Content="Generate Eigenray Files"
-									          IsChecked="{Binding AppSettings.CASSSettings.GenerateEigenrayFiles}" />
-									<StackPanel Orientation="Vertical"
-									            Margin="0 10 0 5">
-										<TextBlock Text="Maximum depth (m)" />
-										<TextBox Text="{Binding AppSettings.CASSSettings.MaximumDepth}">
-											<i:Interaction.Behaviors>
-												<cinch:NumericTextBoxBehaviour />
-											</i:Interaction.Behaviors>
-										</TextBox>
-									</StackPanel>
-									<StackPanel Orientation="Vertical">
-										<TextBlock Text="Depth step size (m)" />
-										<TextBox Text="{Binding AppSettings.CASSSettings.DepthStepSize}">
-											<i:Interaction.Behaviors>
-												<cinch:NumericTextBoxBehaviour />
-											</i:Interaction.Behaviors>
-										</TextBox>
-									</StackPanel>
-									<StackPanel Orientation="Vertical"
-									            Margin="0 5 0 10">
-										<TextBlock Text="Range step size (m)" />
-										<TextBox Text="{Binding AppSettings.CASSSettings.RangeStepSize}">
-											<i:Interaction.Behaviors>
-												<cinch:NumericTextBoxBehaviour />
-											</i:Interaction.Behaviors>
-										</TextBox>
-									</StackPanel>
-								</StackPanel>
-							</GroupBox>
-							<GroupBox Header="Paths"
-							          Margin="5 0 5 5"
-							          Padding="5"
-							          DockPanel.Dock="Top">
-								<StackPanel Orientation="Vertical">
-									<Controls:FileOrDirectorySetting Caption="Python executable"
-									                                 IsDirectoryBrowser="False"
-									                                 FileName="{Binding AppSettings.CASSSettings.PythonExecutablePath}" />
-									<Controls:FileOrDirectorySetting Caption="CASS executable"
-									                                 IsDirectoryBrowser="False"
-									                                 FileName="{Binding AppSettings.CASSSettings.CASSExecutablePath}" />
-									<Controls:FileOrDirectorySetting Caption="Python run script"
-									                                 IsDirectoryBrowser="False"
-									                                 FileName="{Binding AppSettings.CASSSettings.PythonScriptPath}" />
-								</StackPanel>
-							</GroupBox>
-							<GroupBox Header="Parameter Files (not currently implemented!)"
-							          DockPanel.Dock="Bottom"
-							          Margin="5 0 5 10"
-							          Padding="5"
-							          IsEnabled="False">
-								<DockPanel LastChildFill="True">
-									<StackPanel Orientation="Horizontal"
-									            DockPanel.Dock="Bottom"
-									            HorizontalAlignment="Right">
-										<Button Content="Add Parameter File"
-										        Command="{Binding AppSettings.CASSSettings.AddCASSParameterFileCommand}"
-										        Width="Auto"
-										        Margin="5" />
-									</StackPanel>
-									<ListBox ItemsSource="{Binding AppSettings.CASSSettings.CASSParameterFiles}"
-									         ItemTemplate="{StaticResource CASSTemplateTemplate}"
-									         Grid.IsSharedSizeScope="True"
-									         Height="Auto"
-									         Padding="5" />
-								</DockPanel>
-							</GroupBox>
-						</DockPanel>
-					</TabItem>
-					<TabItem Header="REFMS"
-					         Visibility="{Binding AppSettings.NavyOptionsVisibility}">
-						<DockPanel LastChildFill="True">
-							<StackPanel Orientation="Vertical">
-								<CheckBox Content="SCALEI (check indicates yes)"
-								          Margin="5"
-								          IsChecked="{Binding AppSettings.REFMSSettings.ScaleI}" />
-								<StackPanel Orientation="Vertical"
-								            Margin="5 0">
-									<TextBlock Text="Default minimum range (ft)" />
-									<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMinimumRange}">
-										<i:Interaction.Behaviors>
-											<cinch:NumericTextBoxBehaviour />
-										</i:Interaction.Behaviors>
-									</TextBox>
-								</StackPanel>
-								<StackPanel Orientation="Vertical"
-								            Margin="5">
-									<TextBlock Text="Default maximum range (ft)" />
-									<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultMaximumRange}">
-										<i:Interaction.Behaviors>
-											<cinch:NumericTextBoxBehaviour />
-										</i:Interaction.Behaviors>
-									</TextBox>
-								</StackPanel>
-								<StackPanel Orientation="Vertical"
-								            Margin="5 0">
-									<TextBlock Text="Default number of range points" />
-									<TextBox Text="{Binding AppSettings.REFMSSettings.DefaultNumberOfRangePoints}">
-										<i:Interaction.Behaviors>
-											<cinch:NumericTextBoxBehaviour />
-										</i:Interaction.Behaviors>
-									</TextBox>
-								</StackPanel>
-								<StackPanel Orientation="Vertical"
-								            Margin="5 20 5 5">
-									<TextBlock Text="Minimum depth (ft)" />
-									<TextBox Text="{Binding AppSettings.REFMSSettings.MinimumDepth}">
-										<i:Interaction.Behaviors>
-											<cinch:NumericTextBoxBehaviour />
-										</i:Interaction.Behaviors>
-									</TextBox>
-								</StackPanel>
-								<StackPanel Orientation="Vertical"
-								            Margin="5 0">
-									<TextBlock Text="Number of depth points" />
-									<TextBox Text="{Binding AppSettings.REFMSSettings.NumberOfDepthPoints}">
-										<i:Interaction.Behaviors>
-											<cinch:NumericTextBoxBehaviour />
-										</i:Interaction.Behaviors>
-									</TextBox>
-								</StackPanel>
-								<Controls:FileOrDirectorySetting Caption="REFMS executable"
-								                                 IsDirectoryBrowser="False"
-								                                 Margin="5 20 5 10"
-								                                 FileName="{Binding AppSettings.REFMSSettings.REFMSExecutablePath}" />
-							</StackPanel>
-						</DockPanel>
-					</TabItem>
-				</TabControl>
+                <Views:AcousticSimulatorOptionsControl DataContext="{Binding AppSettings}" />
 			</TabItem>
 			<TabItem Header="Seasons"
 			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">

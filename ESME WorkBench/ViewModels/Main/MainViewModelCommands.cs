@@ -33,7 +33,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                               {
                                                                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer)
                                                                                                               };
-                                                                                             var programOptionsViewModel = new ProgramOptionsViewModel();
+                                                                                             var programOptionsViewModel = new ApplicationOptionsViewModel();
                                                                                              var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
                                                                                              if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
                                                                                              else Globals.AppSettings.Reload(extraTypes);
@@ -51,7 +51,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _launchScenarioEditor ?? (_launchScenarioEditor = new SimpleCommand<object, object>(arg => (Globals.AppSettings.ScenarioEditorExecutablePath != null) && (File.Exists(Globals.AppSettings.ScenarioEditorExecutablePath)), obj =>
+                return _launchScenarioEditor ?? (_launchScenarioEditor = new SimpleCommand<object, object>(arg => (Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath != null) && (File.Exists(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath)), obj =>
                                                                                                                                                                                                                                                  {
                                                                                                                                                                                                                                                      string arguments;
                                                                                                                                                                                                                                                      if ((_experiment == null) || (_experiment.ScenarioFileName == null) || (!File.Exists(_experiment.ScenarioFileName))) arguments = null;
@@ -60,8 +60,8 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                                                                                                                                      {
                                                                                                                                                                                                                                                          StartInfo =
                                                                                                                                                                                                                                                              {
-                                                                                                                                                                                                                                                                 FileName = Globals.AppSettings.ScenarioEditorExecutablePath,
-                                                                                                                                                                                                                                                                 WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.ScenarioEditorExecutablePath),
+                                                                                                                                                                                                                                                                 FileName = Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
+                                                                                                                                                                                                                                                                 WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
                                                                                                                                                                                                                                                                  Arguments = arguments,
                                                                                                                                                                                                                                                              }
                                                                                                                                                                                                                                                      }.Start();
@@ -109,8 +109,8 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _launchScenarioSimulator ?? (_launchScenarioSimulator = new SimpleCommand<object, object>(
-                    delegate { return ((Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath != null) 
-                        && File.Exists(Globals.AppSettings.ScenarioSimulatorSettings.ScenarioExecutablePath) 
+                    delegate { return ((Globals.AppSettings.NAEMOTools.ScenarioExecutablePath != null)
+                        && File.Exists(Globals.AppSettings.NAEMOTools.ScenarioExecutablePath) 
                         && _experiment.NemoFile != null && _experiment.Bathymetry != null); }, // todo && _experiment.AnalysisPoints != null && species are defined. 
                     delegate
                     {
@@ -161,14 +161,14 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _launchNUWCReportGenerator ?? (_launchNUWCReportGenerator = new SimpleCommand<object, object>(
-                    delegate { return (Globals.AppSettings.ReportGeneratorExecutablePath != null && File.Exists(Globals.AppSettings.ReportGeneratorExecutablePath)); },
+                    delegate { return (Globals.AppSettings.NAEMOTools.ReportGeneratorExecutablePath != null && File.Exists(Globals.AppSettings.NAEMOTools.ReportGeneratorExecutablePath)); },
                     delegate
                     {
                         new Process
                         {
                             StartInfo =
                             {
-                                FileName = Globals.AppSettings.ReportGeneratorExecutablePath,
+                                FileName = Globals.AppSettings.NAEMOTools.ReportGeneratorExecutablePath,
                             },
                         }.Start();
                     }));
@@ -184,13 +184,13 @@ namespace ESMEWorkBench.ViewModels.Main
         public SimpleCommand<object, object> LaunchExposureReportGeneratorCommand
         {
             get { return _launchExposureReportGenerator ?? (_launchExposureReportGenerator = new SimpleCommand<object, object>(
-                delegate { return (Globals.AppSettings.ExposureReportGeneratorExecutablePath != null && File.Exists((Globals.AppSettings.ExposureReportGeneratorExecutablePath))); },
+                delegate { return (Globals.AppSettings.NAEMOTools.ExposureReportGeneratorExecutablePath != null && File.Exists((Globals.AppSettings.NAEMOTools.ExposureReportGeneratorExecutablePath))); },
                 delegate{
                     new Process
                     {
                         StartInfo =
                         {
-                            FileName = Globals.AppSettings.ExposureReportGeneratorExecutablePath,
+                            FileName = Globals.AppSettings.NAEMOTools.ExposureReportGeneratorExecutablePath,
                         },
                     }.Start();
                 }));
@@ -626,6 +626,30 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _configureAcousticModelsCommand;
+
+        #endregion
+
+        #region AcousticSimulatorOptionsCommand
+
+        public SimpleCommand<object, object> AcousticSimulatorOptionsCommand
+        {
+            get
+            {
+                return _acousticSimulatorOptions ?? (_acousticSimulatorOptions = new SimpleCommand<object, object>(delegate
+                                                                                                                   {
+                                                                                                                       var extraTypes = new[]
+                                                                                                                                        {
+                                                                                                                                            typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer)
+                                                                                                                                        };
+                                                                                                                       var viewModel = new AcousticSimulatorOptionsViewModel();
+                                                                                                                       var result = _visualizerService.ShowDialog("AcousticSimulatorOptionsView", viewModel);
+                                                                                                                       if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
+                                                                                                                       else Globals.AppSettings.Reload(extraTypes);
+                                                                                                                   }));
+            }
+        }
+
+        SimpleCommand<object, object> _acousticSimulatorOptions;
 
         #endregion
 

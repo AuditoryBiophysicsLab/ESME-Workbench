@@ -7,9 +7,9 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    public class ProgramOptionsViewModel : ViewModelBase, IDesignTimeAware
+    public class ApplicationOptionsViewModel : ViewModelBase, IDesignTimeAware
     {
-        public ProgramOptionsViewModel()
+        public ApplicationOptionsViewModel()
         {
             AppSettings = Globals.AppSettings;
 

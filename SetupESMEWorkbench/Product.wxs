@@ -15,7 +15,6 @@
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define ReleaseNotesPath="$(var.ESMERoot)\Release Notes"?>
   <?define ExtractionProgramsPath="$(var.ESMERoot)\Utilities\OAML Extractors"?>
-  <?define NAEMOToolsPath="$(var.ESMERoot)\Utilities\NAEMO Tools"?>
   <Product Id="$(var.ProductCode)" 
            Name="$(var.ProductName)" 
            Version="$(var.ProductVersion)" 
@@ -123,32 +122,6 @@
             <File Id="bellhop.exe"
                   Name="bellhop.exe"
                   Source="$(var.BellhopPath)\bellhop.exe" />
-
-            <!-- NAEMO Tools -->
-            <File Id="log4j.xml"
-                  Name="log4j.xml"
-                  Source="$(var.NAEMOToolsPath)\log4j.xml" />
-            <File Id="scenlog4j.xml"
-                  Name="scen-log4j.xml"
-                  Source="$(var.NAEMOToolsPath)\scen-log4j.xml" />
-            <File Id="simlog4j.xml"
-                  Name="sim-log4j.xml"
-                  Source="$(var.NAEMOToolsPath)\sim-log4j.xml" />
-            <File Id="log4j.xmlNemo2.l4j.ini"
-                  Name="Nemo2.l4j.ini"
-                  Source="$(var.NAEMOToolsPath)\Nemo2.l4j.ini" />
-            <File Id="postprocesslog4j.xml"
-                  Name="post-process-log4j.xml"
-                  Source="$(var.NAEMOToolsPath)\post-process-log4j.xml" />
-            <File Id="postprocessor.jar"
-                  Name="post-processor.jar"
-                  Source="$(var.NAEMOToolsPath)\post-processor.jar" />
-            <File Id="scenariobuilder.jar"
-                  Name="scenario-builder.jar"
-                  Source="$(var.NAEMOToolsPath)\scenario-builder.jar" />
-            <File Id="scenesim.jar"
-                  Name="scene-sim.jar"
-                  Source="$(var.NAEMOToolsPath)\scene-sim.jar" />
             <!-- End external executables -->
 
             <!-- ThinkGeo GIS assemblies -->
