@@ -11,6 +11,7 @@ using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Main;
 using HRC.Services;
+using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
@@ -19,6 +20,8 @@ namespace ESMEWorkBench.ViewModels.Map
     public class MapLayerViewModel : INotifyPropertyChanged
     {
         static Random _random;
+        static Color[] _palette;
+        static int _paletteIndex = 0;
 
         public static ObservableCollection<MapLayerViewModel> Layers;
 
@@ -152,6 +155,11 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             get
             {
+#if true
+                var color = _palette[_paletteIndex++];
+                _paletteIndex %= _palette.Length;
+                return color;
+#else
                 if (_random == null) _random = new Random();
                 var randomBytes = new byte[3];
                 while (true)
@@ -160,6 +168,7 @@ namespace ESMEWorkBench.ViewModels.Map
                     if ((randomBytes[0] >= 0x40) || (randomBytes[1] >= 0x40) || (randomBytes[2] >= 0x40)) break;
                 }
                 return Color.FromArgb(255, randomBytes[0], randomBytes[1], randomBytes[2]);
+#endif
             }
         }
 
@@ -458,7 +467,12 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
-        static MapLayerViewModel() { _random = new Random(); }
+        static MapLayerViewModel()
+        {
+            _random = new Random();
+            _palette = ExtensionMethods.CreateHSVPalette(60);
+        }
+
 
         public MapLayerViewModel()
         {
