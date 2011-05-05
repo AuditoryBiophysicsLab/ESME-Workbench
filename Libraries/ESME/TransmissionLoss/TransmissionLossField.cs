@@ -29,7 +29,6 @@ namespace ESME.TransmissionLoss
         public TransmissionLossRadial[] Radials { get; private set; }
         public string Filename { get; set; }
         public EarthCoordinate EarthCoordinate { get; private set; }
-
         public static TransmissionLossField LoadHeader(string filename)
         {
             return new TransmissionLossField(filename, true);
@@ -145,9 +144,9 @@ namespace ESME.TransmissionLoss
             Array.Copy(output.DepthCells,result.Depths,output.DepthCellCount);
             Array.Copy(output.RangeCells,result.Ranges,output.RangeCellCount);
             result.Radials = new TransmissionLossRadial[output.Pressures.Count];
-            for (var i = 0; i < output.Pressures.Count; i++) result.Radials[i] = new TransmissionLossRadial(output.RadialBearings[i],output.Pressures[i],result.Depths,result.Ranges);
+            for (var i = 0; i < output.Pressures.Count; i++) result.Radials[i] = new TransmissionLossRadial(output.RadialBearings[i],output.Pressures[i],result.Depths,result.Ranges,output.SourceLevel);
             result.EarthCoordinate = new EarthCoordinate(result.Latitude,result.Longitude);
-            
+            result._dataIsLoaded = true;
             return result;
         }
 
@@ -159,6 +158,7 @@ namespace ESME.TransmissionLoss
 
         void Load(bool loadHeadersOnly)
         {
+            if(_dataIsLoaded) return;
             if (Filename == null)
                 throw new FileNotFoundException("TransmissionLossFieldData: Specify a filename before calling Load()");
                 using (var stream = new BinaryReader(File.Open(Filename, FileMode.Open)))

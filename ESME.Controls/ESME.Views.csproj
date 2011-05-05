@@ -114,14 +114,6 @@
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TestViewModel.cs" />
-    <Compile Include="TransmissionLossViewer\AnalysisPointView.xaml.cs">
-      <DependentUpon>AnalysisPointView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TransmissionLossViewer\AnalysisPointViewModel.cs" />
-    <Compile Include="TransmissionLossViewer\AnalysisPointVisualizerView.xaml.cs">
-      <DependentUpon>AnalysisPointVisualizerView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TransmissionLossViewer\AnalysisPointVisualizerViewModel.cs" />
     <Compile Include="TransmissionLossViewer\ColorMapViewModel.cs" />
     <Compile Include="TransmissionLossViewer\TransmissionLossFieldListItemViewModel.cs" />
     <Compile Include="TransmissionLossViewer\TransmissionLossFieldView.xaml.cs">
@@ -183,14 +175,6 @@
     <Page Include="TestView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TransmissionLossViewer\AnalysisPointView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="TransmissionLossViewer\AnalysisPointVisualizerView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="TransmissionLossViewer\TransmissionLossFieldView.xaml">
       <Generator>MSBuild:Compile</Generator>
