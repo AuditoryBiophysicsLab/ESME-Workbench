@@ -109,6 +109,10 @@
       <DependentUpon>SMGCView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LabelValuePair.cs" />
+    <Compile Include="Misc\ModuleBuildInfoViewModel.cs" />
+    <Compile Include="Misc\ModuleBuildInfoView.xaml.cs">
+      <DependentUpon>ModuleBuildInfoView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\ViewParameterService.cs" />
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
@@ -169,6 +173,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvironmentBuilder\SMGCView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Misc\ModuleBuildInfoView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
