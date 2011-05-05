@@ -21,7 +21,7 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace TransmissionLossViewer
 {
-    [ExportViewModel("MainViewModel")]
+    [ExportViewModel("TransmissionLossViewerMainViewModel")]
     class MainViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
 
