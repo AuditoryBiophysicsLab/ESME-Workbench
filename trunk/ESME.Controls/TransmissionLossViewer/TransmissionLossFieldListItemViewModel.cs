@@ -6,7 +6,7 @@ using ESME.TransmissionLoss;
 
 namespace ESME.Views.TransmissionLossViewer
 {
-    internal class TransmissionLossFieldListItemViewModel : ViewModelBase
+    public class TransmissionLossFieldListItemViewModel : ViewModelBase
     {
         public TransmissionLossFieldListItemViewModel(TransmissionLossField transmissionLossField)
         {

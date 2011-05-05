@@ -6,59 +6,64 @@
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         mef:ViewModelLocator.ViewModel="MainViewModel"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-                xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
-         Height="350" Width="525">
-    <Window.InputBindings>
-        <KeyBinding Command="{Binding SaveAsCommand}"
+        xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
+        xmlns:Properties="clr-namespace:TransmissionLossViewer.Properties"
+        Icon="gnome_sound_recorder.ico"
+        Top="{Binding Source={x:Static Properties:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
+        Left="{Binding Source={x:Static Properties:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
+        Height="{Binding Source={x:Static Properties:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
+        Width="{Binding Source={x:Static Properties:Settings.Default}, Path=WindowWidth, Mode=TwoWay}">
+	<Window.InputBindings>
+		<KeyBinding Command="{Binding SaveAsCommand}"
 		            Key="S"
 		            Modifiers="Control" />
-        <KeyBinding Command="{Binding ExportAsCommand}"
+		<KeyBinding Command="{Binding ExportAsCommand}"
 		            Key="E"
 		            Modifiers="Control" />
-        <KeyBinding Command="{Binding CloseWindowCommand}"
+		<KeyBinding Command="{Binding CloseWindowCommand}"
 		            Key="W"
 		            Modifiers="Control" />
 
-    </Window.InputBindings>
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Closing">
-            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
-        </i:EventTrigger>      
-    </i:Interaction.Triggers>
+	</Window.InputBindings>
+	<i:Interaction.Triggers>
+		<i:EventTrigger EventName="Closing">
+			<cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+		</i:EventTrigger>
+	</i:Interaction.Triggers>
 
-    <Window.Title>
-        <MultiBinding StringFormat="Transmission Loss: {0} radial bearing {1:0.#} degrees">
-            <Binding Path="SelectedTransmissionLossFieldName"/>
-            <Binding Path="SelectedRadialBearing"/>
-        </MultiBinding>
-    </Window.Title>
+	<Window.Title>
+		<MultiBinding StringFormat="Transmission Loss: {0} radial bearing {1:0.#} degrees">
+			<Binding Path="SelectedTransmissionLossFieldName" />
+			<Binding Path="SelectedRadialBearing" />
+		</MultiBinding>
+	</Window.Title>
 
-    <DockPanel LastChildFill="True">
+	<DockPanel LastChildFill="True">
 
-        <Menu Name="TransmissionLossViewFileMenu"
-                  DockPanel.Dock="Top"
-			      HorizontalAlignment="Stretch"
-			      BorderBrush="Black"
-			      BorderThickness="1">
-            <MenuItem Header="_File">
-                <MenuItem Header="Open"
-                          Command="{Binding OpenCommand}"
-                          InputGestureText="Ctrl+O)" />
-                <MenuItem Header="Save As"
-					          Command="{Binding SaveAsCommand}"
-					          InputGestureText="Ctrl+S" />
-                <MenuItem Header="Export to CSV"
-					          Command="{Binding ExportAsCommand}"
-					          InputGestureText="Ctrl+E" />
-                <MenuItem Header="Exit View"
-					          Command="{Binding CloseWindowCommand}"
-					          InputGestureText="Ctrl+W" />
-            </MenuItem>
-            <MenuItem Header=" _Help"
-				          HorizontalAlignment="Right"
-				          IsEnabled="False" />
-        </Menu>
-        <View:AnalysisPointView DockPanel.Dock="Bottom"/>        
+		<Menu Name="TransmissionLossViewFileMenu"
+		      DockPanel.Dock="Top"
+		      HorizontalAlignment="Stretch"
+		      BorderBrush="Black"
+		      BorderThickness="1">
+			<MenuItem Header="_File">
+				<MenuItem Header="Open"
+				          Command="{Binding OpenCommand}"
+				          InputGestureText="Ctrl+O)" />
+				<MenuItem Header="Save As"
+				          Command="{Binding SaveAsCommand}"
+				          InputGestureText="Ctrl+S" />
+				<MenuItem Header="Export to CSV"
+				          Command="{Binding ExportAsCommand}"
+				          InputGestureText="Ctrl+E" />
+				<MenuItem Header="Exit"
+				          Command="{Binding CloseWindowCommand}"
+				          InputGestureText="Ctrl+W" />
+			</MenuItem>
+			<MenuItem Header=" _Help"
+			          HorizontalAlignment="Right"
+			          IsEnabled="False" />
+		</Menu>
+		<View:TransmissionLossFieldView DockPanel.Dock="Bottom" />
 
-    </DockPanel>
+	</DockPanel>
 </Window>

@@ -30,16 +30,18 @@ namespace TransmissionLossViewer
         readonly IHRCSaveFileService _saveFileService;
         readonly IHRCOpenFileService _openFileService;
         readonly IViewParameterService _viewParameterService;
+        readonly IMessageBoxService _messageBoxService;
         bool _iAmInitialized;
         readonly AnalysisPoint _tempAnalysisPoint;
 
         #region public constructor
         [ImportingConstructor]
-        public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService)
+        public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus,IMessageBoxService messageBoxService)
         {
             RegisterMediator();
             _saveFileService = saveFileService;
             _openFileService = openFileService;
+            _messageBoxService = messageBoxService;
             _viewParameterService = viewParameterService;
             _viewParameterService.TransmissionLayersWidth = Properties.Settings.Default.TransmissionLayersWidth;
             _viewParameterService.PropertyChanged += (s, e) =>
@@ -51,7 +53,10 @@ namespace TransmissionLossViewer
                                                                  break;
                                                          }
                                                      };
+            _viewAwareStatus = viewAwareStatus;
+            _viewAwareStatus.ViewLoaded += ViewLoaded;
             
+
 #if false
 
             if (_iAmInitialized)
@@ -67,7 +72,33 @@ namespace TransmissionLossViewer
                 _tempAnalysisPoint = analysisPoint;
             }
 #endif
+          
         }
+
+        void ViewLoaded()
+        {
+            //todo
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length == 2)
+            {
+                if (File.Exists(args[1]))
+                {
+                    if (args[1].ToLower().EndsWith(".bin"))
+                    {
+                        try
+                        {
+                            OpenCASSFile(args[1]);
+                        }
+                        catch (Exception ex)
+                        {
+                            _messageBoxService.ShowError(string.Format("Error opening CASS file \"{0}\":\n{1}", args[1], ex.Message));
+                        }
+                    }
+                }
+            }
+        }
+
+        
             
         #endregion
 
@@ -246,14 +277,14 @@ namespace TransmissionLossViewer
             get { return _open ?? (_open = new SimpleCommand<object, object>(
                 delegate
                 {
-                    _openFileService.Filter = "CASS Output (*.bin)|*.bin |";
+                    _openFileService.Filter = "CASS Output (*.bin)|*.bin|All Files (*.*)|*.*";
                     _openFileService.InitialDirectory = Properties.Settings.Default.ExperimentReportDirectory;
                     _openFileService.Title = "Select a Transmission Loss file to view";
 
                     var result = _openFileService.ShowDialog((Window) _viewAwareStatus.View);
                     if (result.HasValue && result.Value)
                     {
-                        CASSOutput.Load(result.ToString(), false);
+                      OpenCASSFile(_openFileService.FileName);
                     }
                 })); }
         }
@@ -294,5 +325,12 @@ namespace TransmissionLossViewer
                 throw;
             }
         }
+
+        void OpenCASSFile(string filename)
+        {
+            var tlf = TransmissionLossField.FromCASS(CASSOutput.Load(filename, false));
+            MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, tlf);
+        }
+
     }
 }

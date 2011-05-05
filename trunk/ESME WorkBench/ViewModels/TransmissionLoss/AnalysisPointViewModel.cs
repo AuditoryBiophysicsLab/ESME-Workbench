@@ -1,4 +1,4 @@
-﻿#if false
+﻿#if true
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -9,10 +9,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Cinch;
+using ESME;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.Views;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
+using ESME.Views.TransmissionLossViewer;
+using AnalysisPointView = ESMEWorkBench.Views.AnalysisPointView;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
 {

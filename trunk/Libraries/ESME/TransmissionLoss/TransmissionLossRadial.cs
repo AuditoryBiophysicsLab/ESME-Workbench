@@ -41,12 +41,29 @@ namespace ESME.TransmissionLoss
             IsSaved = false;
         }
         
-        public TransmissionLossRadial(float bearingFromSource, float[,] pressureField)
+        public TransmissionLossRadial(float bearingFromSource, float[,] pressureField,float sourceLevel)
         {
             BearingFromSource = bearingFromSource;
-            TransmissionLoss = pressureField;
+
+            var tl = new float[pressureField.GetLength(0),pressureField.GetLength(1)];
+            var max = float.MinValue;
+            var min = float.MaxValue;
+            for (int i = 0; i < pressureField.GetLength(0); i++)
+            {
+                for (int j = 0; j < pressureField.GetLength(1); j++)
+                {
+                    tl[i, j] = sourceLevel - pressureField[i, j];
+                    max = Math.Max(tl[i, j], max);
+                    min = Math.Min(tl[i, j], min);
+                }
+            }
+            TransmissionLoss = tl;
+            DataMax = sourceLevel;
+            StatMax = sourceLevel;
+            DataMin = min;
+            StatMin = min;
         }
-        public TransmissionLossRadial(float bearingFromSource, float[,] pressureField,float[] depths, float[] ranges):this(bearingFromSource,pressureField)
+        public TransmissionLossRadial(float bearingFromSource, float[,] pressureField,float[] depths, float[] ranges,float sourceLevel):this(bearingFromSource,pressureField, sourceLevel)
         {
             Depths = new float[depths.Length];
             Array.Copy(depths, Depths, depths.Length);
