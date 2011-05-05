@@ -9,9 +9,9 @@
                 <ColumnDefinition SharedSizeGroup="ModuleBuildInfoBindings"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Vertical" Margin="5 5 2 5" HorizontalAlignment="Stretch">
-                <TextBlock Text="Built on:" TextAlignment="Right" />
+                <TextBlock Text="Built:" TextAlignment="Right" />
                 <TextBlock Text="By:" TextAlignment="Right" />
-                <TextBlock Text="Source revision:" TextAlignment="Right" />
+                <TextBlock Text="Rev:" TextAlignment="Right" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Vertical" Margin="2 5 5 5" HorizontalAlignment="Stretch">
                 <TextBlock Text="{Binding BuildDateTime}" TextAlignment="Left" />
