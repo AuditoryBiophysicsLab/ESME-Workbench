@@ -52,8 +52,8 @@ namespace ESMEWorkBench.ViewModels.Map
                 if (projection != null)
                     newLayer.FeatureSource.Projection = new ManagedProj4Projection
                     {
-                        InternalProjectionParameters = projection,
-                        ExternalProjectionParameters = ManagedProj4Projection.GetEpsgParameters(4326),
+                        InternalProjectionParametersString = projection,
+                        ExternalProjectionParametersString = ManagedProj4Projection.GetEpsgParametersString(4326),
                     };
                 LayerOverlay.Layers.Add(newLayer);
             }

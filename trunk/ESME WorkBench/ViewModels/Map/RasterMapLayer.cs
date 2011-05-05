@@ -19,7 +19,7 @@ namespace ESMEWorkBench.ViewModels.Map
     {
         public RasterMapLayer() {LayerOverlay.Layers.Clear();}
 
-        MyGdiPlusRasterLayer _layer;
+        GdiPlusRasterLayer _layer;
         byte[] _fileBuffer;
         MemoryStream _memoryStream;
 
@@ -43,98 +43,35 @@ namespace ESMEWorkBench.ViewModels.Map
             set
             {
                 _rasterFilename = value;
-                var fi = new FileInfo(_rasterFilename);
-                _fileBuffer = new byte[fi.Length];
-                using (var fileStream = File.OpenRead(_rasterFilename))
-                    fileStream.Read(_fileBuffer, 0, _fileBuffer.Length);
-                _memoryStream = new MemoryStream(_fileBuffer);
-                RasterStream = _memoryStream;
-            }
-        }
-
-        string _rasterFilename;
-
-        #endregion
-
-        #region public Stream RasterStream { get; set; }
-        [XmlIgnore]
-        public Stream RasterStream
-        {
-            get { return _rasterStream; }
-            set
-            {
-                //if (_rasterStream == value) return;
-                _rasterStream = value;
-                _layer = new MyGdiPlusRasterLayer("foo");
-
+                _worldFilename = Path.Combine(Path.GetDirectoryName(_rasterFilename), Path.GetFileNameWithoutExtension(_rasterFilename)) + ".bpw";
+                using (var writer = new StreamWriter(_worldFilename, false)) writer.Write(WorldFileContents);
                 var halfPixel = PixelSize / 2.0;
                 var north = North + halfPixel;
                 var south = South - halfPixel;
                 var east = East + halfPixel;
                 var west = West - halfPixel;
-                //var imageSource = new GdiPlusRasterSource(_layer.PathFilename, new RectangleShape(west, north, east, south));
-                var imageSource = new GdiPlusRasterSource("foo.jpg");
-#if true
-                imageSource.StreamLoading += (s, e) =>
-                                                    {
-#if false
-                                                        // Create a simple bitmap and color it purple
-                                                        Bitmap bitmap = new Bitmap(100, 100);
-                                                        using (Graphics g = Graphics.FromImage(bitmap))
-                                                        {
-                                                            g.Clear(Color.Purple);
-                                                        }
 
-                                                        // Lock the bits of the bitmap
-                                                        BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                                                                                                ImageLockMode.ReadWrite,
-                                                                                                PixelFormat.Format32bppArgb);
-
-                                                        // Copy the bytes of the bitmap to a byte array
-                                                        byte[] bitmapBytes = new byte[bitmapData.Stride * bitmapData.Height];
-                                                        Marshal.Copy(bitmapData.Scan0, bitmapBytes, 0, bitmapBytes.Length);
-
-                                                        // Unlock the bitmap bits
-                                                        bitmap.UnlockBits(bitmapData);
-
-                                                        // Create a memory stream of the bitmap bytes
-                                                        MemoryStream bitmapStream = new MemoryStream(bitmapBytes);
-                                                        return;
-#endif
-                                                        if (e.AlternateStreamName.ToLower().Contains(".jpg"))
-                                                        {
-                                                            //e.AlternateStream = File.OpenRead(@"C:\Users\Dave Anderson\Desktop\bathymetric_small.jpg");
-                                                            e.AlternateStream = _rasterStream;
-                                                            e.AlternateStreamName = "bathymetric_small.jpg";
-                                                        }
-                                                        else if (e.AlternateStreamName.ToLower().Contains(".jgw"))
-                                                        {
-                                                            //e.AlternateStream = File.OpenRead(@"C:\Users\Dave Anderson\Desktop\bathymetric_small.jgw");
-                                                            e.AlternateStream = WorldFileStream;
-                                                            e.AlternateStreamName = "bathymetric_small.jgw";
-                                                        }
-                                                    };
-                _layer.ImageSource = imageSource;
-
-#endif
-                _layer.UpperThreshold = double.MaxValue;
-                _layer.LowerThreshold = 1;
-                _layer.IsGrayscale = false;
+                _layer = new GdiPlusRasterLayer(_rasterFilename, new RectangleShape(west, north, east, south))
+                         {
+                             UpperThreshold = double.MaxValue,
+                             LowerThreshold = 0,
+                             IsGrayscale = false
+                         };
 
                 LayerOverlay.Layers.Add(_layer);
             }
         }
 
-        Stream _rasterStream;
+        string _worldFilename;
+        string _rasterFilename;
 
         #endregion
-#if true
+
         [XmlIgnore]
-        MemoryStream WorldFileStream
+        string WorldFileContents
         {
             get
             {
-                //var wf = new WorldFile(PixelSize, 0, 0, -PixelSize, West, North);
                 var sb = new StringBuilder();
                 sb.AppendLine(PixelSize.ToString());
                 sb.AppendLine("0.0");
@@ -142,11 +79,8 @@ namespace ESMEWorkBench.ViewModels.Map
                 sb.AppendLine(PixelSize.ToString());
                 sb.AppendLine(West.ToString());
                 sb.AppendLine(North.ToString());
-                var byteArray = Encoding.ASCII.GetBytes(sb.ToString());
-                return new MemoryStream(byteArray);
+                return sb.ToString();
             }
         }
-#endif    
-
     }
 }
