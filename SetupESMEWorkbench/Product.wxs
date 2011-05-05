@@ -15,6 +15,7 @@
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define ReleaseNotesPath="$(var.ESMERoot)\Release Notes"?>
   <?define ExtractionProgramsPath="$(var.ESMERoot)\Utilities\OAML Extractors"?>
+  <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
   <Product Id="$(var.ProductCode)" 
            Name="$(var.ProductName)" 
            Version="$(var.ProductVersion)" 
@@ -64,6 +65,11 @@
                 <Verb Id="open" Command="Open" TargetFile="ESME_WorkBench.exe" Argument='"%1"'/>
               </Extension>
             </ProgId>
+            <ProgId Id="ESMEWorkbench.binfile" Description="CASS binary output file" Icon="TransmissionLossViewer.exe" IconIndex="1">
+              <Extension Id="bin" ContentType="application/cass">
+                <Verb Id="open" Command="Open" TargetFile="TransmissionLossViewer.exe" Argument='"%1"'/>
+              </Extension>
+            </ProgId>
             <!-- Core ESME executables and assemblies -->
             <File Id="ESME_WorkBench.exe" 
                   Name="ESME WorkBench.exe" 
@@ -87,6 +93,9 @@
             <File Id="UserGuide"
                   Name="ESME Workbench 2011 User Manual.pdf"
                   Source="$(var.ReleaseNotesPath)\ESME Workbench 2011 User Manual.pdf" />
+            <File Id="TransmissionLossViewer.exe"
+                  Name="TransmissionLossViewer.exe"
+                  Source="$(var.TransmissionLossViewerPath)\TransmissionLossViewer.exe" />
             <File Id="WebsiteLink"
                   Name="ESME.url"
                   Source="$(var.ESMERoot)\ESME.url" />
@@ -98,14 +107,6 @@
             <File Id="SMGCExtract.exe"
                   Name="SMGCExtract.exe"
                   Source="$(var.ExtractionProgramsPath)\SMGCExtract.exe" />
-            <!-- BST extraction program -->
-            <File Id="extract.exe"
-                  Name="extract.exe"
-                  Source="$(var.ExtractionProgramsPath)\extract.exe" />
-            <!-- DBDB-V extraction program -->
-            <File Id="dbv5_command.exe"
-                  Name="dbv5_command.exe"
-                  Source="$(var.ExtractionProgramsPath)\dbv5_command.exe" />
             <!-- GDEM Database Extractor (NetCDF format) -->
             <File Id="ImportNetCDF.exe"
                   Name="ImportNetCDF.exe"
@@ -196,6 +197,12 @@
                       Name="$(var.ProductName)"
                       WorkingDirectory="INSTALLLOCATION"
                       Target="[INSTALLLOCATION]ESME WorkBench.exe"
+                      Advertise="no" />
+            <Shortcut Id="TransmissionLossViewer_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Transmission Loss Viewer"
+                      WorkingDirectory="INSTALLLOCATION"
+                      Target="[INSTALLLOCATION]TransmissionLossViewer.exe"
                       Advertise="no" />
             <Shortcut Id="ReleaseNotes_Shortcut"
                       Directory="ProgramMenuDir"
