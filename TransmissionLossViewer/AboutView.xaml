@@ -1,8 +1,8 @@
-﻿<Window x:Class="ESMEWorkBench.Views.AboutView"
+﻿<Window x:Class="TransmissionLossViewer.AboutView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Misc="clr-namespace:ESME.Views.Misc;assembly=ESME.Views"
-        Title="About ESME Workbench 2011"
+        Title="About Transmission Loss Viewer"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight">
 	<Grid>
@@ -60,47 +60,10 @@
 			            Orientation="Vertical"
 			            Margin="2 5 5 5"
 			            HorizontalAlignment="Stretch">
-				<Misc:ModuleBuildInfoView DataContext="{Binding WorkbenchModuleBuildInfo}" />
-				<Misc:ModuleBuildInfoView DataContext="{Binding ESMEModuleBuildInfo}" />
-				<Misc:ModuleBuildInfoView DataContext="{Binding HRCModuleBuildInfo}" />
-				<Misc:ModuleBuildInfoView DataContext="{Binding ViewsModuleBuildInfo}" />
-                <!-- <Misc:ModuleBuildInfoView DataContext="{Binding TransmissionLossViewerModuleBuildInfo}" />-->
-				<GroupBox Header="Mapping components">
-					<Grid>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition SharedSizeGroup="one" />
-							<ColumnDefinition SharedSizeGroup="two" />
-						</Grid.ColumnDefinitions>
-						<StackPanel Grid.Column="0"
-						            Orientation="Vertical"
-						            Margin="5 5 2 5"
-						            HorizontalAlignment="Stretch">
-							<TextBlock Text="WpfDesktopEdition.dll:"
-							           TextAlignment="Right" />
-							<TextBlock Text="MapSuiteCore.dll:"
-							           TextAlignment="Right" />
-							<TextBlock Text="NetTopologySuite.dll:"
-							           TextAlignment="Right" />
-							<TextBlock Text="GeoAPI.dll:"
-							           TextAlignment="Right" />
-						</StackPanel>
-						<StackPanel Grid.Column="1"
-						            Orientation="Vertical"
-						            Margin="2 5 5 5"
-						            HorizontalAlignment="Stretch">
-							<TextBlock Text="{Binding MapDllVersion}"
-							           TextAlignment="Left" />
-							<TextBlock Text="{Binding MapCoreVersion}"
-							           TextAlignment="Left" />
-							<TextBlock Text="{Binding NetTopologyVersion}"
-							           TextAlignment="Left" />
-							<TextBlock Text="{Binding GeoAPIVersion}"
-							           TextAlignment="Left" />
-						</StackPanel>
-					</Grid>
-				</GroupBox>
+                     <Misc:ModuleBuildInfoView DataContext="{Binding BuildInfo}"/>
 
-			</StackPanel>
+
+            </StackPanel>
 		</GroupBox>
 	</Grid>
 </Window>
