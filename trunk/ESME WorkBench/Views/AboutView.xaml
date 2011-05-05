@@ -55,7 +55,7 @@
             </StackPanel>
 		</GroupBox>
 		<GroupBox Grid.Column="1"
-		          Header="Component revision information">
+		          Header="Components">
 			<StackPanel Grid.Column="1"
 			            Orientation="Vertical"
 			            Margin="2 5 5 5"
@@ -64,8 +64,7 @@
 				<Misc:ModuleBuildInfoView DataContext="{Binding ESMEModuleBuildInfo}" />
 				<Misc:ModuleBuildInfoView DataContext="{Binding HRCModuleBuildInfo}" />
 				<Misc:ModuleBuildInfoView DataContext="{Binding ViewsModuleBuildInfo}" />
-				<TextBlock />
-				<GroupBox Header="Mapping component versions">
+				<GroupBox Header="Mapping components">
 					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition SharedSizeGroup="one" />
