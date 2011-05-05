@@ -67,9 +67,11 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 delegate
                 {
                     var commandArgs = CommandArgs;
+#if DEBUG
                     const string batchFilename = "esme-scene-sim.bat";
                     using (var batchFile = new StreamWriter(batchFilename, false))
                         batchFile.WriteLine("\"{0}\" {1}", Globals.AppSettings.NAEMOTools.JavaExecutablePath, commandArgs);
+#endif
                     new Process
                     {
                         StartInfo =
