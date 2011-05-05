@@ -190,6 +190,7 @@ namespace ESMEWorkBench.ViewModels.Map
                 {
                     foreach (var layer in _experiment.MapLayers.Where(layer => layer.Overlay != null))
                     {
+                        //if (layer.LayerType == LayerType.BathymetryRaster) continue;
                         _wpfMap.Overlays.Add(layer.Name, layer.Overlay);
                         try
                         {
