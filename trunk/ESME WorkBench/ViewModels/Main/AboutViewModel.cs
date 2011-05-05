@@ -9,6 +9,9 @@ using System.Windows.Threading;
 using Cinch;
 using HRC.Utility;
 using ESME.Views.Misc;
+using TransmissionLossViewer;
+
+
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -33,6 +36,7 @@ namespace ESMEWorkBench.ViewModels.Main
             ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", ESME.BuildInformation.BuildDateTime, ESME.BuildInformation.BuildEngineer, ESME.BuildInformation.SVNVersion);
             HRCModuleBuildInfo = new ModuleBuildInfoViewModel("HRC.dll", HRC.BuildInformation.BuildDateTime, HRC.BuildInformation.BuildEngineer, HRC.BuildInformation.SVNVersion);
             ViewsModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.Views.dll", ESME.Views.BuildInformation.BuildDateTime, ESME.Views.BuildInformation.BuildEngineer, ESME.Views.BuildInformation.SVNVersion);
+          //  TransmissionLossViewerModuleBuildInfo = new ModuleBuildInfoViewModel("TransmissionLossViewer", TransmissionLossViewer.BuildInformation.BuildDateTime, TransmissionLossViewer.BuildInformation.BuildEngineer, TransmissionLossViewer.BuildInformation.SVNVersion);
             var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(appDir)) return;
             MapDllVersion = Assembly.LoadFile(Path.Combine(appDir, "WpfDesktopEdition.dll")).GetName().Version.ToString();
@@ -45,6 +49,7 @@ namespace ESMEWorkBench.ViewModels.Main
         public ModuleBuildInfoViewModel ESMEModuleBuildInfo { get; private set; }
         public ModuleBuildInfoViewModel HRCModuleBuildInfo { get; private set; }
         public ModuleBuildInfoViewModel ViewsModuleBuildInfo { get; private set; }
+        public ModuleBuildInfoViewModel TransmissionLossViewerModuleBuildInfo { get; private set; }
         public string MapDllVersion { get; private set; }
         public string MapCoreVersion { get; private set; }
         public string NetTopologyVersion { get; private set; }

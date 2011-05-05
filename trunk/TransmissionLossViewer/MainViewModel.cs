@@ -31,17 +31,19 @@ namespace TransmissionLossViewer
         readonly IHRCOpenFileService _openFileService;
         readonly IViewParameterService _viewParameterService;
         readonly IMessageBoxService _messageBoxService;
+        readonly IUIVisualizerService _visualizerService;
         bool _iAmInitialized;
         readonly AnalysisPoint _tempAnalysisPoint;
 
         #region public constructor
         [ImportingConstructor]
-        public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus,IMessageBoxService messageBoxService)
+        public MainViewModel(IHRCSaveFileService saveFileService, IHRCOpenFileService openFileService, IViewParameterService viewParameterService, IViewAwareStatus viewAwareStatus,IMessageBoxService messageBoxService,IUIVisualizerService visualizerService)
         {
             RegisterMediator();
             _saveFileService = saveFileService;
             _openFileService = openFileService;
             _messageBoxService = messageBoxService;
+            _visualizerService = visualizerService;
             _viewParameterService = viewParameterService;
             _viewParameterService.TransmissionLayersWidth = Properties.Settings.Default.TransmissionLayersWidth;
             _viewParameterService.PropertyChanged += (s, e) =>
@@ -55,6 +57,7 @@ namespace TransmissionLossViewer
                                                      };
             _viewAwareStatus = viewAwareStatus;
             _viewAwareStatus.ViewLoaded += ViewLoaded;
+            
             
 
 #if false
@@ -292,6 +295,23 @@ namespace TransmissionLossViewer
         SimpleCommand<object, object> _open;
 
         #endregion
+
+        #region AboutCommand
+
+        public SimpleCommand<object, object> AboutCommand
+        {
+            get { return _about ?? (_about = new SimpleCommand<object, object>(arg => ShowAboutView())); }
+        }
+
+        SimpleCommand<object, object> _about;
+
+        #endregion
+
+        void ShowAboutView()
+        {
+            var aboutViewModel = new AboutViewModel();
+            _visualizerService.ShowDialog("AboutView", aboutViewModel);
+        }
 
         [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }

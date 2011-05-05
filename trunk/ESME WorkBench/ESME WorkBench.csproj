@@ -641,6 +641,10 @@
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TransmissionLossViewer\TransmissionLossViewer.csproj">
+      <Project>{B8D1B045-78F7-4645-9754-5A1DF2B79439}</Project>
+      <Name>TransmissionLossViewer</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

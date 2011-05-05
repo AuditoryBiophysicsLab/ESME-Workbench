@@ -22,13 +22,18 @@
 		<KeyBinding Command="{Binding CloseWindowCommand}"
 		            Key="W"
 		            Modifiers="Control" />
-
+        <KeyBinding Command="{Binding OpenCommand}"
+                    Key="O"
+                    Modifiers="Control" />
 	</Window.InputBindings>
 	<i:Interaction.Triggers>
 		<i:EventTrigger EventName="Closing">
 			<cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
 		</i:EventTrigger>
-	</i:Interaction.Triggers>
+        <i:EventTrigger EventName="PreviewKeyDown">
+            <cinch:EventToCommandTrigger Command="{Binding CloseWindowCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 
 	<Window.Title>
 		<MultiBinding StringFormat="Transmission Loss: {0} radial bearing {1:0.#} degrees">
@@ -47,13 +52,16 @@
 			<MenuItem Header="_File">
 				<MenuItem Header="Open"
 				          Command="{Binding OpenCommand}"
-				          InputGestureText="Ctrl+O)" />
+				          InputGestureText="Ctrl+O" />
 				<MenuItem Header="Save As"
 				          Command="{Binding SaveAsCommand}"
 				          InputGestureText="Ctrl+S" />
 				<MenuItem Header="Export to CSV"
 				          Command="{Binding ExportAsCommand}"
 				          InputGestureText="Ctrl+E" />
+                <MenuItem Header="About"
+                          Command="{Binding AboutCommand}"
+                          />
 				<MenuItem Header="Exit"
 				          Command="{Binding CloseWindowCommand}"
 				          InputGestureText="Ctrl+W" />
