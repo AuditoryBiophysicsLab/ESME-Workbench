@@ -2,11 +2,13 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using HRC.Utility;
+using ESME.Views.Misc;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -27,141 +29,26 @@ namespace ESMEWorkBench.ViewModels.Main
             _assemblyDescription = ((AssemblyDescriptionAttribute)assembly.GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)[0]).Description;
             // assembly title attribute
             _assemblyTitle = ((AssemblyTitleAttribute)assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title;
-            Initialize();
+            WorkbenchModuleBuildInfo = new ModuleBuildInfoViewModel("ESME WorkBench", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, BuildInformation.SVNVersion);
+            ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", ESME.BuildInformation.BuildDateTime, ESME.BuildInformation.BuildEngineer, ESME.BuildInformation.SVNVersion);
+            HRCModuleBuildInfo = new ModuleBuildInfoViewModel("HRC.dll", HRC.BuildInformation.BuildDateTime, HRC.BuildInformation.BuildEngineer, HRC.BuildInformation.SVNVersion);
+            ViewsModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.Views.dll", ESME.Views.BuildInformation.BuildDateTime, ESME.Views.BuildInformation.BuildEngineer, ESME.Views.BuildInformation.SVNVersion);
+            var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (string.IsNullOrEmpty(appDir)) return;
+            MapDllVersion = Assembly.LoadFile(Path.Combine(appDir, "WpfDesktopEdition.dll")).GetName().Version.ToString();
+            MapCoreVersion = Assembly.LoadFile(Path.Combine(appDir, "MapSuiteCore.dll")).GetName().Version.ToString();
+            NetTopologyVersion = Assembly.LoadFile(Path.Combine(appDir, "NetTopologySuite.dll")).GetName().Version.ToString();
+            GeoAPIVersion = Assembly.LoadFile(Path.Combine(appDir, "GeoAPI.dll")).GetName().Version.ToString();
         }
 
-        #region public DateTime BuildDateTime { get; set; }
-
-        public DateTime BuildDateTime
-        {
-            get { return BuildInformation.BuildDateTime; }
-        }
-
-        #endregion
-
-        #region public string BuildEngineer { get; set; }
-
-        public string BuildEngineer
-        {
-            get { return BuildInformation.BuildEngineer; }
-        }
-
-        #endregion
-
-        #region public string SVNVersion { get; set; }
-
-        public string SVNVersion
-        {
-            get { return BuildInformation.SVNVersion; }
-        }
-
-        #endregion
-
-
-        void Initialize()
-        {
-            Column1Items = new ObservableCollection<LabelValuePair>
-                           {
-                               new LabelValuePair
-                               {
-                                   Label = "Product",
-                                   Value = _assemblyTitle,
-                               },
-                               new LabelValuePair
-                               {
-                                   Label = "Description",
-                                   Value = _assemblyDescription,
-                               },
-                               new LabelValuePair
-                               {
-                                   Label = "Version",
-                                   Value = _assemblyName.Version.ToString(),
-                               },
-                               new LabelValuePair
-                               {
-                                   Label = "Build date/time",
-                                   Value = AssemblyTricks.RetrieveLinkerTimestamp().ToString(),
-                               },
-                           };
-            Column2Items = new ObservableCollection<LabelValuePair>
-                           {
-                               new LabelValuePair
-                               {
-                                   Label = "Architect and Lead Developer",
-                                   Value = "Dave Anderson"
-                               },
-                               new LabelValuePair
-                               {
-                                   Label = "Development team",
-                                   Value = "Graham Voysey"
-                               },
-                               new LabelValuePair
-                               {
-                                   Label = "",
-                                   Value = "Andrew Brughera"
-                               },
-                               new LabelValuePair
-                               {
-                                   Label = "Testing",
-                                   Value = "Lenley Woodard"
-                               },
-                               new LabelValuePair
-                               {
-                                   Label = "",
-                                   Value = "Scott Schecklman"
-                               },
-                               new LabelValuePair
-                               {
-                                   Label = "Marine Mammal Simulator",
-                                   Value = "Dorian Houser"
-                               },
-                               new LabelValuePair
-                               {
-                                   Label = "",
-                                   Value = "Matt Cross"
-                               },
-                           };
-            NotifyPropertyChanged(Column1ItemsChangedEventArgs);
-            NotifyPropertyChanged(Column2ItemsChangedEventArgs);
-        }
-
-        #region public ObservableCollection<LabelValuePair> Column1Items { get; set; }
-
-        public ObservableCollection<LabelValuePair> Column1Items { get; private set; }
-
-        static readonly PropertyChangedEventArgs Column1ItemsChangedEventArgs = ObservableHelper.CreateArgs<AboutViewModel>(x => x.Column1Items);
-
-        #endregion
-
-        #region public ObservableCollection<LabelValuePair> Column2Items { get; set; }
-
-        public ObservableCollection<LabelValuePair> Column2Items { get; private set; }
-
-        static readonly PropertyChangedEventArgs Column2ItemsChangedEventArgs = ObservableHelper.CreateArgs<AboutViewModel>(x => x.Column2Items);
-
-        #endregion
-
-        #region public string MapDllVersion { get; set; }
-
-        public string MapDllVersion
-        {
-            get { return _mapDllVersion; }
-            set
-            {
-                if (_mapDllVersion == value) return;
-                _mapDllVersion = value;
-                Column1Items.Add(new LabelValuePair
-                                 {
-                                     Label = "Map Control DLL version",
-                                     Value = MapDllVersion,
-                                 });
-                NotifyPropertyChanged(Column1ItemsChangedEventArgs);
-            }
-        }
-
-        string _mapDllVersion = "Unknown";
-
-        #endregion
+        public ModuleBuildInfoViewModel WorkbenchModuleBuildInfo { get; private set; }
+        public ModuleBuildInfoViewModel ESMEModuleBuildInfo { get; private set; }
+        public ModuleBuildInfoViewModel HRCModuleBuildInfo { get; private set; }
+        public ModuleBuildInfoViewModel ViewsModuleBuildInfo { get; private set; }
+        public string MapDllVersion { get; private set; }
+        public string MapCoreVersion { get; private set; }
+        public string NetTopologyVersion { get; private set; }
+        public string GeoAPIVersion { get; private set; }
 
         #region OkCommand
 

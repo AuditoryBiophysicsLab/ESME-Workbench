@@ -1,33 +1,106 @@
 ﻿<Window x:Class="ESMEWorkBench.Views.AboutView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Misc="clr-namespace:ESME.Views.Misc;assembly=ESME.Views"
         Title="About ESME Workbench 2011"
         ResizeMode="NoResize"
-        Width="565"
-        Height="321">
-    <Window.Background>
-        <ImageBrush ImageSource="/Images/ESMELogo.png"/>
-    </Window.Background>
-    <Window.Resources>
-        <Style TargetType="TextBlock">
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="18" />
-        </Style>
-    </Window.Resources>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" Orientation="Vertical" Margin="5 5 2 5" HorizontalAlignment="Stretch">
-            <TextBlock Text="Build date:" TextAlignment="Right" />
-            <TextBlock Text="Built by:" TextAlignment="Right" />
-            <TextBlock Text="Subversion revision:" TextAlignment="Right" />
-        </StackPanel>
-        <StackPanel Grid.Column="1" Orientation="Vertical" Margin="2 5 5 5" HorizontalAlignment="Stretch">
-            <TextBlock Text="{Binding BuildDateTime}" TextAlignment="Left" />
-            <TextBlock Text="{Binding BuildEngineer}" TextAlignment="Left" />
-            <TextBlock Text="{Binding SVNVersion}" TextAlignment="Left" />
-        </StackPanel>
-    </Grid>
+        SizeToContent="WidthAndHeight">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition SharedSizeGroup="Left" />
+			<ColumnDefinition SharedSizeGroup="Right" />
+		</Grid.ColumnDefinitions>
+		<GroupBox Grid.Column="0"
+		          Header="Credits">
+			<StackPanel Orientation="Vertical"
+			            Margin="2 5 5 5"
+			            HorizontalAlignment="Stretch">
+                <GroupBox Header="Project Leadership">
+                    <StackPanel Orientation="Vertical"
+					            Margin="2 5 5 5"
+					            HorizontalAlignment="Stretch">
+                        <TextBlock Text="Dave Mountain" />
+                        <TextBlock Text="Linda Petitpas" />
+                        <TextBlock Text="Bob Gisiner" />
+                        <TextBlock Text="Mike Weise" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Developers">
+                    <StackPanel Orientation="Vertical"
+					            Margin="2 5 5 5"
+					            HorizontalAlignment="Stretch">
+                        <TextBlock Text="Dave Anderson" />
+                        <TextBlock Text="Graham Voysey" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="NUWC Team">
+                    <StackPanel Orientation="Vertical"
+					            Margin="2 5 5 5"
+					            HorizontalAlignment="Stretch">
+                        <TextBlock Text="Peter Hulton" />
+                        <TextBlock Text="Bill Sutphin" />
+                        <TextBlock Text="Bert Neales" />
+                        <TextBlock Text="Dave Venne" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Testers">
+                    <StackPanel Orientation="Vertical"
+					            Margin="2 5 5 5"
+					            HorizontalAlignment="Stretch">
+                        <TextBlock Text="Chris Butler" />
+                        <TextBlock Text="Scott Schecklman" />
+                        <TextBlock Text="Lenley Woodard" />
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+		</GroupBox>
+		<GroupBox Grid.Column="1"
+		          Header="Component revision information">
+			<StackPanel Grid.Column="1"
+			            Orientation="Vertical"
+			            Margin="2 5 5 5"
+			            HorizontalAlignment="Stretch">
+				<Misc:ModuleBuildInfoView DataContext="{Binding WorkbenchModuleBuildInfo}" />
+				<Misc:ModuleBuildInfoView DataContext="{Binding ESMEModuleBuildInfo}" />
+				<Misc:ModuleBuildInfoView DataContext="{Binding HRCModuleBuildInfo}" />
+				<Misc:ModuleBuildInfoView DataContext="{Binding ViewsModuleBuildInfo}" />
+				<TextBlock />
+				<GroupBox Header="Mapping component versions">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition SharedSizeGroup="one" />
+							<ColumnDefinition SharedSizeGroup="two" />
+						</Grid.ColumnDefinitions>
+						<StackPanel Grid.Column="0"
+						            Orientation="Vertical"
+						            Margin="5 5 2 5"
+						            HorizontalAlignment="Stretch">
+							<TextBlock Text="WpfDesktopEdition.dll:"
+							           TextAlignment="Right" />
+							<TextBlock Text="MapSuiteCore.dll:"
+							           TextAlignment="Right" />
+							<TextBlock Text="NetTopologySuite.dll:"
+							           TextAlignment="Right" />
+							<TextBlock Text="GeoAPI.dll:"
+							           TextAlignment="Right" />
+						</StackPanel>
+						<StackPanel Grid.Column="1"
+						            Orientation="Vertical"
+						            Margin="2 5 5 5"
+						            HorizontalAlignment="Stretch">
+							<TextBlock Text="{Binding MapDllVersion}"
+							           TextAlignment="Left" />
+							<TextBlock Text="{Binding MapCoreVersion}"
+							           TextAlignment="Left" />
+							<TextBlock Text="{Binding NetTopologyVersion}"
+							           TextAlignment="Left" />
+							<TextBlock Text="{Binding GeoAPIVersion}"
+							           TextAlignment="Left" />
+						</StackPanel>
+					</Grid>
+				</GroupBox>
+
+			</StackPanel>
+		</GroupBox>
+	</Grid>
 </Window>
