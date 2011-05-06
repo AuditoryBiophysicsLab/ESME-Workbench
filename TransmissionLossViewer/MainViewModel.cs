@@ -310,7 +310,7 @@ namespace TransmissionLossViewer
         void ShowAboutView()
         {
             var aboutViewModel = new AboutViewModel();
-            _visualizerService.ShowDialog("AboutView", aboutViewModel);
+            _visualizerService.ShowDialog("TLVAboutView", aboutViewModel);
         }
 
         [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]

@@ -1175,12 +1175,12 @@ namespace ESMEWorkBench.Data
                     };
                     MapLayers.Add(bathyBitmapLayer);
                 }
-                bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
                 bathyBitmapLayer.PixelSize = horizontalResolution;
                 bathyBitmapLayer.North = (float)Bathymetry.Latitudes.Last();
                 bathyBitmapLayer.South = (float)Bathymetry.Latitudes.First();
                 bathyBitmapLayer.East = (float)Bathymetry.Longitudes.Last();
                 bathyBitmapLayer.West = (float)Bathymetry.Longitudes.First();
+                bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
                 MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);

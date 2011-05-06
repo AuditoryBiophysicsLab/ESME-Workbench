@@ -36,7 +36,7 @@ namespace ESMEWorkBench.ViewModels.Main
             ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", ESME.BuildInformation.BuildDateTime, ESME.BuildInformation.BuildEngineer, ESME.BuildInformation.SVNVersion);
             HRCModuleBuildInfo = new ModuleBuildInfoViewModel("HRC.dll", HRC.BuildInformation.BuildDateTime, HRC.BuildInformation.BuildEngineer, HRC.BuildInformation.SVNVersion);
             ViewsModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.Views.dll", ESME.Views.BuildInformation.BuildDateTime, ESME.Views.BuildInformation.BuildEngineer, ESME.Views.BuildInformation.SVNVersion);
-          //  TransmissionLossViewerModuleBuildInfo = new ModuleBuildInfoViewModel("TransmissionLossViewer", TransmissionLossViewer.BuildInformation.BuildDateTime, TransmissionLossViewer.BuildInformation.BuildEngineer, TransmissionLossViewer.BuildInformation.SVNVersion);
+            TransmissionLossViewerModuleBuildInfo = new ModuleBuildInfoViewModel("TransmissionLossViewer", TransmissionLossViewer.BuildInformation.BuildDateTime, TransmissionLossViewer.BuildInformation.BuildEngineer, TransmissionLossViewer.BuildInformation.SVNVersion);
             var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(appDir)) return;
             MapDllVersion = Assembly.LoadFile(Path.Combine(appDir, "WpfDesktopEdition.dll")).GetName().Version.ToString();

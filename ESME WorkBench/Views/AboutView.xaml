@@ -64,7 +64,7 @@
 				<Misc:ModuleBuildInfoView DataContext="{Binding ESMEModuleBuildInfo}" />
 				<Misc:ModuleBuildInfoView DataContext="{Binding HRCModuleBuildInfo}" />
 				<Misc:ModuleBuildInfoView DataContext="{Binding ViewsModuleBuildInfo}" />
-                <!-- <Misc:ModuleBuildInfoView DataContext="{Binding TransmissionLossViewerModuleBuildInfo}" />-->
+                <Misc:ModuleBuildInfoView DataContext="{Binding TransmissionLossViewerModuleBuildInfo}" />
 				<GroupBox Header="Mapping components">
 					<Grid>
 						<Grid.ColumnDefinitions>
