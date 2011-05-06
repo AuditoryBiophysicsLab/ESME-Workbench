@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="ESME.Views.Misc.ProjectCredits"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <GroupBox Header="Credits">
+        <StackPanel Orientation="Vertical"
+			            Margin="2 5 5 5"
+			            HorizontalAlignment="Stretch">
+            <GroupBox Header="Project Leadership">
+                <StackPanel Orientation="Vertical"
+					            Margin="2 5 5 5"
+					            HorizontalAlignment="Stretch">
+                    <TextBlock Text="Dave Mountain" />
+                    <TextBlock Text="Linda Petitpas" />
+                    <TextBlock Text="Bob Gisiner" />
+                    <TextBlock Text="Mike Weise" />
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Developers">
+                <StackPanel Orientation="Vertical"
+					            Margin="2 5 5 5"
+					            HorizontalAlignment="Stretch">
+                    <TextBlock Text="Dave Anderson" />
+                    <TextBlock Text="Graham Voysey" />
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="NUWC Team">
+                <StackPanel Orientation="Vertical"
+					            Margin="2 5 5 5"
+					            HorizontalAlignment="Stretch">
+                    <TextBlock Text="Peter Hulton" />
+                    <TextBlock Text="Bill Sutphin" />
+                    <TextBlock Text="Bert Neales" />
+                    <TextBlock Text="Dave Venne" />
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Testers">
+                <StackPanel Orientation="Vertical"
+					            Margin="2 5 5 5"
+					            HorizontalAlignment="Stretch">
+                    <TextBlock Text="Chris Butler" />
+                    <TextBlock Text="Scott Schecklman" />
+                    <TextBlock Text="Lenley Woodard" />
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+    </GroupBox>
+</UserControl>

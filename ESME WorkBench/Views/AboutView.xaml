@@ -10,50 +10,7 @@
 			<ColumnDefinition SharedSizeGroup="Left" />
 			<ColumnDefinition SharedSizeGroup="Right" />
 		</Grid.ColumnDefinitions>
-		<GroupBox Grid.Column="0"
-		          Header="Credits">
-			<StackPanel Orientation="Vertical"
-			            Margin="2 5 5 5"
-			            HorizontalAlignment="Stretch">
-                <GroupBox Header="Project Leadership">
-                    <StackPanel Orientation="Vertical"
-					            Margin="2 5 5 5"
-					            HorizontalAlignment="Stretch">
-                        <TextBlock Text="Dave Mountain" />
-                        <TextBlock Text="Linda Petitpas" />
-                        <TextBlock Text="Bob Gisiner" />
-                        <TextBlock Text="Mike Weise" />
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox Header="Developers">
-                    <StackPanel Orientation="Vertical"
-					            Margin="2 5 5 5"
-					            HorizontalAlignment="Stretch">
-                        <TextBlock Text="Dave Anderson" />
-                        <TextBlock Text="Graham Voysey" />
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox Header="NUWC Team">
-                    <StackPanel Orientation="Vertical"
-					            Margin="2 5 5 5"
-					            HorizontalAlignment="Stretch">
-                        <TextBlock Text="Peter Hulton" />
-                        <TextBlock Text="Bill Sutphin" />
-                        <TextBlock Text="Bert Neales" />
-                        <TextBlock Text="Dave Venne" />
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox Header="Testers">
-                    <StackPanel Orientation="Vertical"
-					            Margin="2 5 5 5"
-					            HorizontalAlignment="Stretch">
-                        <TextBlock Text="Chris Butler" />
-                        <TextBlock Text="Scott Schecklman" />
-                        <TextBlock Text="Lenley Woodard" />
-                    </StackPanel>
-                </GroupBox>
-            </StackPanel>
-		</GroupBox>
+        <Misc:ProjectCredits Grid.Column="0"/>
 		<GroupBox Grid.Column="1"
 		          Header="Components">
 			<StackPanel Grid.Column="1"
@@ -64,7 +21,6 @@
 				<Misc:ModuleBuildInfoView DataContext="{Binding ESMEModuleBuildInfo}" />
 				<Misc:ModuleBuildInfoView DataContext="{Binding HRCModuleBuildInfo}" />
 				<Misc:ModuleBuildInfoView DataContext="{Binding ViewsModuleBuildInfo}" />
-                <Misc:ModuleBuildInfoView DataContext="{Binding TransmissionLossViewerModuleBuildInfo}" />
 				<GroupBox Header="Mapping components">
 					<Grid>
 						<Grid.ColumnDefinitions>
