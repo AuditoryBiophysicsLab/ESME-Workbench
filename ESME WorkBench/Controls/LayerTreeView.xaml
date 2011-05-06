@@ -68,7 +68,8 @@
                 <Image Source="..\Images\SmallIcons\12px-red-circle.png" 
                        Grid.Column="2"
                        ToolTip="{Binding AnalysisPointCompletionTooltip}"
-                       Visibility="{Binding VisibleIfAnalysisPointLayer}"/>
+                       Visibility="Hidden" />
+                       <!-- "{Binding VisibleIfAnalysisPointLayer}" -->
 
                 <Rectangle Width="12"
 				           RadiusX="3"
