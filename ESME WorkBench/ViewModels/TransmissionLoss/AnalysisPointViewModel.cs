@@ -13,6 +13,7 @@ using ESME;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.Views;
 using HRC.Services;
+using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Views.TransmissionLossViewer;
 using AnalysisPointView = ESMEWorkBench.Views.AnalysisPointView;
@@ -39,7 +40,8 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             _dispatcher = Dispatcher.CurrentDispatcher;
             _viewAwareStatus.ViewLoaded += () =>
                                            {
-                                               _treeView = ((AnalysisPointView) _viewAwareStatus.View).TreeView;
+                                               if (Designer.IsInDesignMode) return;
+                                               _treeView = ((AnalysisPointView) (_viewAwareStatus.View)).TreeView;
                                                MediatorMessage.Send(MediatorMessage.AnalysisPointViewInitialized, true);
                                            };
             TransmissionLossFieldListItems = new ObservableCollection<TransmissionLossFieldListItemViewModel>();
