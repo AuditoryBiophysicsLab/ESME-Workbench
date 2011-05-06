@@ -29,12 +29,9 @@ namespace TransmissionLossViewer
             _assemblyTitle = ((AssemblyTitleAttribute)assembly.GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title;
             
             BuildInfo = new ModuleBuildInfoViewModel("Transmission Loss Viewer", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, BuildInformation.SVNVersion);
-            var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (string.IsNullOrEmpty(appDir)) return;
         }
         
         public ModuleBuildInfoViewModel BuildInfo { get; private set; }
-        
 
         #region OkCommand
 
