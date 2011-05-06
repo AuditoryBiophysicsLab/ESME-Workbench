@@ -5,7 +5,8 @@
         Title="About ESME Workbench 2011"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight">
-	<Grid>
+    <DockPanel>
+        <Grid DockPanel.Dock="Top">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition SharedSizeGroup="Left" />
 			<ColumnDefinition SharedSizeGroup="Right" />
@@ -58,5 +59,24 @@
 
 			</StackPanel>
 		</GroupBox>
-	</Grid>
+        </Grid>
+        <DockPanel DockPanel.Dock="Bottom">
+            <Button Content="OK" 
+                    Command="{Binding OkCommand}"
+                    IsDefault="True"
+                    Margin="5"
+                    Width="75"
+                    DockPanel.Dock="Right"/>
+            <Button Content="Copy to Clipboard" 
+                    Command="{Binding HelpfulBugInfoCommand}"
+                    Margin="5"
+                    DockPanel.Dock="Left"/>
+            <Button Content="Report Bug"
+                    Command="{Binding ReportBugCommand}"
+                    Margin="5"
+                    Width="75"
+                    DockPanel.Dock="Left"/>         
+       
+        </DockPanel>
+    </DockPanel>
 </Window>
