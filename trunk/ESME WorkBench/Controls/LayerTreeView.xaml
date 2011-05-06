@@ -46,7 +46,7 @@
 			</Style.Triggers>
 		</Style>
 
-		<DataTemplate x:Key="CheckBoxItemTemplate">
+		<DataTemplate x:Key="CheckBoxItemTemplate" DataType="{x:Type ListBoxItem}">
 			<Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="16" />
@@ -60,9 +60,10 @@
 				          Grid.Column="0"
 				          IsChecked="{Binding IsChecked}"
 				          VerticalAlignment="Center" />
-				<ContentPresenter Content="{Binding Name, Mode=OneTime}"
-				                  Grid.Column="1"
-				                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
+				<TextBlock Text="{Binding Name, Mode=OneTime}"
+                           x:Name="LayerName"
+				           Grid.Column="1"
+    				       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
 
                 <Image Source="..\Images\SmallIcons\12px-red-circle.png" 
                        Grid.Column="2"
@@ -107,6 +108,14 @@
 					             ItemsSource="{Binding ContextMenu}" />
 				</Grid.ContextMenu>
 			</Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                    <DataTrigger.Setters>
+                        <Setter TargetName="LayerName" Property="Foreground" Value="Red"/>
+                        <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ErrorText}" />
+                    </DataTrigger.Setters>
+                </DataTrigger>
+            </DataTemplate.Triggers>
 		</DataTemplate>
 	</UserControl.Resources>
 	<ListBox DockPanel.Dock="Top"

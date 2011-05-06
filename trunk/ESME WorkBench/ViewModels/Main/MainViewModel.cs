@@ -15,6 +15,7 @@ using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.RecentFiles;
 using HRC.Navigation;
 using HRC.Services;
+using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Views.AcousticBuilder;
 
@@ -59,9 +60,19 @@ namespace ESMEWorkBench.ViewModels.Main
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
-            //return;
-            _viewAwareStatus.ViewUnloaded += ViewUnloaded;
-            _viewAwareStatus.ViewLoaded += ViewLoaded;
+            if (Designer.IsInDesignMode) return;
+            _viewAwareStatus.ViewUnloaded += () =>
+            {
+                if (Designer.IsInDesignMode) return;
+                MediatorMessage.Send(MediatorMessage.ApplicationClosing);
+            };
+            
+            _viewAwareStatus.ViewLoaded += () =>
+            {
+                if (Designer.IsInDesignMode) return;
+                _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+                MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
+            };
 
             IsLatLonGridVisible = Settings.Default.ShowGrid;
             IsScaleBarVisible = Settings.Default.ShowScaleBar;
@@ -116,17 +127,6 @@ namespace ESMEWorkBench.ViewModels.Main
                                                       break;
                                               }
                                           };
-        }
-
-        void ViewLoaded()
-        {
-            _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-            MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
-        }
-
-        static void ViewUnloaded()
-        {
-            MediatorMessage.Send(MediatorMessage.ApplicationClosing);
         }
 
         protected override void OnDispose()

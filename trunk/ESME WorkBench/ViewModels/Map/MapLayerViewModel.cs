@@ -254,6 +254,42 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
+        #region public bool HasErrors { get; set; }
+
+        public bool HasErrors
+        {
+            get { return _hasErrors; }
+            set
+            {
+                if (_hasErrors == value) return;
+                _hasErrors = value;
+                NotifyPropertyChanged(HasErrorsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs HasErrorsChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.HasErrors);
+        bool _hasErrors = false;
+
+        #endregion
+
+        #region public string ErrorText { get; set; }
+
+        public string ErrorText
+        {
+            get { return _errorText; }
+            set
+            {
+                if (_errorText == value) return;
+                _errorText = value;
+                NotifyPropertyChanged(ErrorTextChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ErrorTextChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ErrorText);
+        string _errorText;
+
+        #endregion
+
         #region public AreaStyle AreaStyle { get; set; }
 
         AreaStyle _areaStyle;
@@ -1004,9 +1040,8 @@ namespace ESMEWorkBench.ViewModels.Map
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;
+        void NotifyPropertyChanged(PropertyChangedEventArgs e) { if (PropertyChanged != null) PropertyChanged(this, e); }
 
         #endregion
-
-        void NotifyPropertyChanged(PropertyChangedEventArgs e) { if (PropertyChanged != null) PropertyChanged(this, e); }
     }
 }
