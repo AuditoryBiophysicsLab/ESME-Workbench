@@ -42,6 +42,7 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return _rasterFilename; }
             set
             {
+                LayerOverlay.Layers.Clear();
                 _rasterFilename = value;
                 _worldFilename = Path.Combine(Path.GetDirectoryName(_rasterFilename), Path.GetFileNameWithoutExtension(_rasterFilename)) + ".bpw";
                 using (var writer = new StreamWriter(_worldFilename, false)) writer.Write(WorldFileContents);
@@ -57,7 +58,6 @@ namespace ESMEWorkBench.ViewModels.Map
                              LowerThreshold = 0,
                              IsGrayscale = false
                          };
-
                 LayerOverlay.Layers.Add(_layer);
             }
         }

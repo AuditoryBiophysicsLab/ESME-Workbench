@@ -5,7 +5,7 @@ namespace TransmissionLossViewer
     /// <summary>
     ///   Interaction logic for AboutView.xaml
     /// </summary>
-    [PopupNameToViewLookupKeyMetadata("AboutView", typeof (AboutView))]
+    [PopupNameToViewLookupKeyMetadata("TLVAboutView", typeof (AboutView))]
     public partial class AboutView
     {
         public AboutView() { InitializeComponent(); }
