@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Database Name="DataSource" EntityNamespace="ESME.Simulation" ContextNamespace="ESME.Simulation" Class="SimulationDataContext" FilePerClass="false" Provider="Devart.Data.MySql.Linq.Provider.MySqlDataProvider, Devart.Data.MySql.Linq" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="ConnectionString" ConnectionString="User Id=root;Password=a;Host=localhost;Persist Security Info=True" Provider="Devart.Data.MySql" />
+  <Table Name="simulation_output.animatlocations" Member="Animatlocations">
+    <Type Name="Animatlocation">
+      <Column Name="AnimatLocation_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Simulation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="Animat_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="Timestep_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="Latitude_deg" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+      <Column Name="Longitude_deg" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+      <Column Name="Depth_m" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.animats" Member="Animats">
+    <Type Name="Animat">
+      <Column Name="Animat_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Simulation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="Species_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.exposures" Member="Exposures">
+    <Type Name="Exposure">
+      <Column Name="Exposure_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Simulation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="AnimatLocation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="SourceLocation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="ReceivedLevel_dB" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.platformlocations" Member="Platformlocations">
+    <Type Name="Platformlocation">
+      <Column Name="PlatformLocation_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Simulation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="Platform_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="Timestep_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="Latitude_deg" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+      <Column Name="Longitude_deg" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+      <Column Name="Depth_m" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.platforms" Member="Platforms">
+    <Type Name="Platform">
+      <Column Name="Platform_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Simulation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="varchar(45) NOT NULL" CanBeNull="false" />
+      <Column Name="Metadata" Type="System.String" DbType="text NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.simulations" Member="Simulations">
+    <Type Name="Simulation">
+      <Column Name="Simulation_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="varchar(45) NOT NULL" CanBeNull="false" />
+      <Column Name="RunStarted" Type="System.DateTime" DbType="datetime NOT NULL" CanBeNull="false" />
+      <Column Name="RunFinished" Type="System.DateTime" DbType="datetime NOT NULL" CanBeNull="false" />
+      <Column Name="RunStatus" Type="System.String" DbType="varchar(45) NOT NULL" CanBeNull="false" />
+      <Column Name="TimestepInterval_ms" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.sourcelocations" Member="Sourcelocations">
+    <Type Name="Sourcelocation">
+      <Column Name="SourceLocation_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Simulation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="PlatformLocation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="Source_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.sources" Member="Sources">
+    <Type Name="Source">
+      <Column Name="ActiveMode_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Simulation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="HighFreq_Hz" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+      <Column Name="LowFreq_Hz" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+      <Column Name="SourceLevel_dB" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="varchar(45) NOT NULL" CanBeNull="false" />
+      <Column Name="Depth_m" Type="System.Single" DbType="float NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.species" Member="Species">
+    <Type Name="Specy">
+      <Column Name="Species_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="varchar(45) NOT NULL" CanBeNull="false" />
+      <Column Name="File" Type="System.String" DbType="varchar(45) NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.times" Member="Times">
+    <Type Name="Time">
+      <Column Name="Timestep_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="SimulationTime" Type="System.DateTime" DbType="datetime NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="simulation_output.timesteps" Member="Timesteps">
+    <Type Name="Timestep">
+      <Column Name="Timestep_id" AutoSync="OnInsert" Type="System.Int64" DbType="int(10) NOT NULL AUTO_INCREMENT" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Simulation_id" Type="System.Int64" DbType="int(10) NOT NULL" CanBeNull="false" />
+      <Column Name="SimulationTime" Type="System.DateTime" DbType="datetime NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+</Database>

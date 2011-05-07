@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="AcousticProperties"
+           targetNamespace="http://esme.bu.edu/support/schemas/ESME_Experiment"
+           elementFormDefault="qualified"
+           xmlns="http://esme.bu.edu/support/schemas/ESME_Experiment"
+           xmlns:mstns="http://esme.bu.edu/support/schemas/ESME_Experiment"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           version="1.0">
+  <xs:complexType name="AcousticProperties">
+    <xs:sequence>
+      <xs:element name="SourceDepth"
+                  maxOccurs="1"
+                  minOccurs="1">
+        <xs:simpleType>
+          <xs:restriction base="xs:integer">
+            <xs:minInclusive value="0" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="VerticalBeamWidth_degrees"
+                  maxOccurs="1"
+                  minOccurs="1">
+        <xs:simpleType>
+          <xs:restriction base="xs:double">
+            <xs:minInclusive value="0" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="DepressionElevationAngle"
+                  maxOccurs="1"
+                  minOccurs="1">
+        <xs:simpleType>
+          <xs:restriction base="xs:double">
+            <xs:minInclusive value="-90" />
+            <xs:maxInclusive value="-90" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="LowFrequency"
+                  maxOccurs="1"
+                  minOccurs="1">
+        <xs:simpleType>
+          <xs:restriction base="xs:double">
+            <xs:minInclusive value="0" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="HighFrequency"
+                  maxOccurs="1"
+                  minOccurs="1">
+        <xs:simpleType>
+          <xs:restriction base="xs:double">
+            <xs:minInclusive value="0" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

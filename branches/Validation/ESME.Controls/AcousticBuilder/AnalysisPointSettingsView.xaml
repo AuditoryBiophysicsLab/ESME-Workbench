@@ -1,0 +1,201 @@
+﻿<Window x:Class="ESME.Views.AnalysisPointSettingsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+        xmlns:views="clr-namespace:ESME.Views"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        Title="Analysis point settings"
+        mef:ViewModelLocator.ViewModel="AnalysisPointSettingsViewModel"
+        SizeToContent="WidthAndHeight">
+	<Window.Resources>
+		<Style TargetType="ToolTip">
+			<Setter Property="ContentTemplate">
+				<Setter.Value>
+					<DataTemplate>
+						<StackPanel>
+							<TextBlock Text="{Binding}"
+							           Width="200"
+							           TextWrapping='Wrap' />
+						</StackPanel>
+					</DataTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style x:Key="DetailLabelStyle">
+			<Setter Property="TextBlock.TextAlignment"
+			        Value="Left" />
+			<Setter Property="Control.Margin"
+			        Value="5 5 5 0" />
+		</Style>
+		<Style x:Key="DetailValueStyle">
+			<Setter Property="TextBlock.TextAlignment"
+			        Value="Left" />
+			<Setter Property="Control.Background"
+			        Value="#EEEEEE" />
+			<Setter Property="Control.BorderThickness"
+			        Value="1" />
+			<Setter Property="Control.BorderBrush"
+			        Value="LightGray" />
+			<Setter Property="Control.Margin"
+			        Value="5 0 5 0" />
+		</Style>
+        <Style x:Key="ModeListItemStyle"
+		       TargetType="ListBoxItem">
+			<Setter Property="KeyboardNavigation.AcceptsReturn"
+			        Value="True" />
+			<Setter Property="views:VirtualToggleButton.IsVirtualToggleButton"
+			        Value="True" />
+			<Setter Property="views:VirtualToggleButton.IsChecked"
+			        Value="{Binding ShouldBeCalculated}" />
+		</Style>
+		<DataTemplate x:Key="CheckBoxItemTemplate">
+			<Grid Width="{Binding ElementName=ModeList, Path=Width}">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="16" />
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="10" />
+				</Grid.ColumnDefinitions>
+				<CheckBox Focusable="False"
+				          Grid.Column="0"
+				          IsChecked="{Binding ShouldBeCalculated}"
+				          VerticalAlignment="Center" />
+				<ContentPresenter Content="{Binding Name, Mode=OneTime}"
+				                  Grid.Column="1"
+				                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
+			</Grid>
+		</DataTemplate>
+	</Window.Resources>
+	<DockPanel>
+		<DockPanel DockPanel.Dock="Bottom"
+		           LastChildFill="False"
+		           Margin="5 10">
+			<Button Width="90"
+			        Margin="10 0 0 0"
+			        IsCancel="False"
+			        Content="Cancel"
+			        DockPanel.Dock="Right"
+			        Command="{Binding CancelCommand}" />
+			<Button Width="90"
+			        IsDefault="True"
+			        Content="OK"
+			        DockPanel.Dock="Right"
+			        Command="{Binding OkCommand}" />
+		</DockPanel>
+		<GroupBox DockPanel.Dock="Left"
+		          Header="Available Modes">
+			<ListBox x:Name="ModeList" 
+                     ItemsSource="{Binding AvailableModes}"
+			         SelectedItem="{Binding SelectedMode}"
+			         ItemContainerStyle="{StaticResource ModeListItemStyle}"
+			         ToolTip="Checked modes will be calculated along with the rest of this analysis point, and will be usable in a subsequent scenario simulation.  Unchecked modes will not be calculated, and will not be used in simulations."
+			         ItemTemplate="{StaticResource CheckBoxItemTemplate}">
+			</ListBox>
+		</GroupBox>
+		<GroupBox DockPanel.Dock="Right"
+		          IsEnabled="{Binding IsItemSelected}"
+		          Header="{Binding SelectedMode.Name, StringFormat=Selected Mode: {0}}">
+			<DockPanel>
+				<GroupBox DockPanel.Dock="Left"
+				          Margin="5 5 2 5"
+				          Header="Details">
+					<StackPanel Orientation="Vertical"
+					            Grid.Column="0"
+					            HorizontalAlignment="Right">
+						<TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="Name"
+						           ToolTip="The name of the selected mode" />
+						<Label Style="{StaticResource DetailValueStyle}"
+						       Content="{Binding SelectedMode.Name}" />
+						<TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="Source Depth"
+						           ToolTip="Source depth, in meters, of the selected mode" />
+						<Label Style="{StaticResource DetailValueStyle}"
+						       Content="{Binding SelectedMode.AcousticProperties.SourceDepth}" />
+						<TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="High Frequency"
+						           ToolTip="High frequency, in hertz, of the selected mode" />
+						<Label Style="{StaticResource DetailValueStyle}"
+						       Content="{Binding SelectedMode.AcousticProperties.HighFrequency}" />
+						<TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="Low Frequency"
+						           ToolTip="Low frequency, in hertz, of the selected mode" />
+						<Label Style="{StaticResource DetailValueStyle}"
+						       Content="{Binding SelectedMode.AcousticProperties.LowFrequency}" />
+						<TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="Vertical beam width"
+						           ToolTip="Vertical beam width, in degrees, of the selected mode" />
+						<Label Style="{StaticResource DetailValueStyle}"
+						       Content="{Binding SelectedMode.AcousticProperties.VerticalBeamWidth}" />
+						<TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="D/E angle"
+						           ToolTip="Depression/elevation angle, in degrees, of the selected mode.  Positive values mean that the source is aimed toward the bottom" />
+						<Label Style="{StaticResource DetailValueStyle}"
+						       Content="{Binding SelectedMode.AcousticProperties.DepressionElevationAngle}" />
+						<TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="Radius"
+						           ToolTip="Radius, in meters, of the selected mode.  This value is the maximum distance from the source for which a transmission loss will be calculated.  All receivers further away from the source are presumed by the model to not be exposed to this source." />
+						<Label Style="{StaticResource DetailValueStyle}"
+						       Content="{Binding SelectedMode.Radius}" />
+					</StackPanel>
+				</GroupBox>
+				<GroupBox DockPanel.Dock="Right"
+				          Margin="0 5 5 5"
+				          Header="Radials">
+					<DockPanel>
+						<ListBox DockPanel.Dock="Left"
+						         Width="50"
+						         ItemsSource="{Binding AvailableBearings}"
+						         SelectedValue="{Binding SelectedBearing}">
+						</ListBox>
+						<StackPanel DockPanel.Dock="Right"
+						            Orientation="Vertical"
+						            Width="Auto">
+							<Button Content="Remove Selected"
+							        Width="Auto"
+							        HorizontalAlignment="Left"
+							        Margin="5"
+							        Command="{Binding RemoveRadialCommand}" />
+							<TextBlock Text="Selected Radial Bearing"
+							           Margin="5 10 5 2" />
+							<TextBox Text="{Binding DisplayedBearing}"
+							         Margin="5 0 5 5">
+								<i:Interaction.Behaviors>
+									<cinch:NumericTextBoxBehaviour />
+								</i:Interaction.Behaviors>
+								<i:Interaction.Triggers>
+									<i:EventTrigger EventName="TextChanged">
+										<cinch:EventToCommandTrigger Command="{Binding SelectedRadialTextChangedCommand}" />
+									</i:EventTrigger>
+								</i:Interaction.Triggers>
+							</TextBox>
+							<DockPanel HorizontalAlignment="Right"
+							           Margin="5 0 5 0">
+								<Button Content="Cancel"
+								        DockPanel.Dock="Right"
+								        Margin="5 0 0 0"
+								        Width="60"
+								        Command="{Binding CancelRadialEditCommand}" />
+								<Button Content="Update"
+								        DockPanel.Dock="Right"
+								        Margin="5 0 0 0"
+								        Width="60"
+								        Command="{Binding UpdateRadialCommand}" />
+								<Button Content="Add New"
+								        DockPanel.Dock="Right"
+								        Width="60"
+								        Command="{Binding AddRadialCommand}" />
+							</DockPanel>
+							<Button Content="Use for all modes"
+							        HorizontalAlignment="Left"
+							        Width="110"
+							        Margin="5 20 5 5"
+							        Command="{Binding ApplyToAllModesCommand}"
+							        ToolTip="Use the current radial configuration for all modes in this analysis point" />
+						</StackPanel>
+					</DockPanel>
+				</GroupBox>
+			</DockPanel>
+		</GroupBox>
+	</DockPanel>
+</Window>

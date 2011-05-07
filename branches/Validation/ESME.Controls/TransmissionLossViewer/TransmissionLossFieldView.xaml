@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="ESME.Views.TransmissionLossViewer.TransmissionLossFieldView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"             
+             xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
+             xmlns:Views="clr-namespace:ESMEWorkBench.Views"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+             xmlns:TransmissionLossViewer="clr-namespace:ESME.Views.TransmissionLossViewer"
+             mef:ViewModelLocator.ViewModel="TransmissionLossFieldViewModel"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <TabControl>
+
+        <TabItem Header="Vertical">
+            <DockPanel LastChildFill="True">
+                                  
+                <DockPanel DockPanel.Dock="Bottom">
+                    <StackPanel Orientation="Vertical"
+						            Margin="5 0 5 0">
+                        
+                        <TextBlock Text="Drag slider to change the selected radial" />
+                        <Slider AutoToolTipPlacement="BottomRight"
+							        AutoToolTipPrecision="0"
+							        TickPlacement="BottomRight"
+							        Minimum="1"
+							        Maximum="{Binding RadialCount}"
+							        Value="{Binding SelectedRadial}"
+							        Margin="5" />
+                    </StackPanel>                  
+                    
+                </DockPanel>                
+                <TransmissionLossViewer:TransmissionLossRadialView x:Name="RadialView"/>
+            </DockPanel>
+        </TabItem>
+        <TabItem Header="Horizontal"
+			         IsEnabled="False" />
+        <TabItem Header="Minimum"
+			         IsEnabled="False" />
+        <TabItem Header="Maximum"
+			         IsEnabled="False" />
+        <TabItem Header="Mean"
+			         IsEnabled="False" />
+    </TabControl>
+</UserControl>

@@ -1,0 +1,128 @@
+﻿<UserControl x:Class="ESMEWorkBench.Controls.LayerTreeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
+             mef:ViewModelLocator.ViewModel="LayerListViewModel"
+             mc:Ignorable="d"
+             d:DesignHeight="300"
+             d:DesignWidth="300">
+	<UserControl.Resources>
+		<Style x:Key="ContextMenuItemStyle">
+			<Setter Property="MenuItem.Header"
+			        Value="{Binding Header}" />
+			<Setter Property="MenuItem.ItemsSource"
+			        Value="{Binding Children}" />
+			<Setter Property="MenuItem.Command"
+			        Value="{Binding Command}" />
+			<Setter Property="MenuItem.Icon"
+			        Value="{Binding Icon}" />
+			<Setter Property="MenuItem.IsCheckable"
+			        Value="{Binding IsCheckable}" />
+            <Setter Property="MenuItem.IsChecked"
+			        Value="{Binding IsChecked}" />
+            <Setter Property="MenuItem.Visibility"
+			        Value="{Binding Visibility}" />
+            <Setter Property="MenuItem.CommandParameter"
+			        Value="{Binding}" />
+		</Style>
+
+		<Style x:Key="LayersViewItemStyle"
+		       TargetType="ListBoxItem">
+			<Setter Property="KeyboardNavigation.AcceptsReturn"
+			        Value="True" />
+			<Setter Property="views:VirtualToggleButton.IsVirtualToggleButton"
+			        Value="True" />
+			<Setter Property="views:VirtualToggleButton.IsChecked"
+			        Value="{Binding IsChecked}" />
+			<Style.Triggers>
+				<Trigger Property="IsSelected"
+				         Value="True">
+					<Setter Property="FontWeight"
+					        Value="Bold" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+
+		<DataTemplate x:Key="CheckBoxItemTemplate" DataType="{x:Type ListBoxItem}">
+			<Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="16" />
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="10" />
+				</Grid.ColumnDefinitions>
+				<CheckBox Focusable="False"
+				          Grid.Column="0"
+				          IsChecked="{Binding IsChecked}"
+				          VerticalAlignment="Center" />
+				<TextBlock Text="{Binding Name, Mode=OneTime}"
+                           x:Name="LayerName"
+				           Grid.Column="1"
+    				       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
+
+                <Image Source="..\Images\SmallIcons\12px-red-circle.png" 
+                       Grid.Column="2"
+                       ToolTip="{Binding AnalysisPointCompletionTooltip}"
+                       Visibility="Hidden" />
+                       <!-- "{Binding VisibleIfAnalysisPointLayer}" -->
+
+                <Rectangle Width="12"
+				           RadiusX="3"
+				           RadiusY="3"
+				           Grid.Column="3"
+				           Height="12"
+				           Fill="{Binding AreaColorBrush}"
+				           Visibility="{Binding IsAreaColorVisible}"
+				           VerticalAlignment="Center"
+				           ToolTip="Area color: Right click to change"
+				           Name="LineColor">
+                    <Rectangle.ContextMenu>
+                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+						             ItemsSource="{Binding AreaColorPickerMenu}" />
+
+                    </Rectangle.ContextMenu>
+                </Rectangle>
+                
+                <Rectangle Width="12"
+				           RadiusX="3"
+				           RadiusY="3"
+				           Grid.Column="4"
+				           Height="12"
+				           Fill="{Binding LineColorBrush}"
+				           Visibility="{Binding IsLineColorVisible}"
+				           VerticalAlignment="Center"
+				           ToolTip="{Binding PointLineTooltip}">
+					<Rectangle.ContextMenu>
+						<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+						             ItemsSource="{Binding LineOrPointPickerMenu}" />
+
+					</Rectangle.ContextMenu>
+				</Rectangle>
+
+                <Grid.ContextMenu>
+					<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+					             ItemsSource="{Binding ContextMenu}" />
+				</Grid.ContextMenu>
+			</Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                    <DataTrigger.Setters>
+                        <Setter TargetName="LayerName" Property="Foreground" Value="Red"/>
+                        <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ErrorText}" />
+                    </DataTrigger.Setters>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+		</DataTemplate>
+	</UserControl.Resources>
+	<ListBox DockPanel.Dock="Top"
+	         x:Name="ListBox"
+	         ItemContainerStyle="{StaticResource LayersViewItemStyle}"
+	         ItemsSource="{Binding MapLayers}"
+	         ItemTemplate="{StaticResource CheckBoxItemTemplate}">
+	</ListBox>
+</UserControl>

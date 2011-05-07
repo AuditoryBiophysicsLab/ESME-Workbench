@@ -1,0 +1,127 @@
+﻿<Window x:Class="TransmissionLossCalculator.TransmissionLossCalculatorQueueView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:p="clr-namespace:TransmissionLossCalculator.Properties"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        xmlns:local="clr-namespace:TransmissionLossCalculator"
+        xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+        mef:ViewModelLocator.ViewModel="TransmissionLossCalculatorQueueViewModel"
+        Title="ESME Transmission Loss Calculator - Work Queue" 
+        Visibility="Hidden"
+        Icon="Resources\orbz_water.ico"
+        Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
+        Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
+        Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
+        Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
+        mc:Ignorable="d">
+    <Window.Resources>
+        <Style x:Key="RadialCalculatorStatusStyle"
+		       TargetType="TextBlock">
+            <Style.Triggers>
+                <Trigger Property="Text"
+				         Value="Complete">
+                    <Setter Property="FontWeight"
+					        Value="Bold" />
+                    <Setter Property="Foreground"
+					        Value="Black" />
+                </Trigger>
+                <Trigger Property="Text"
+				         Value="Starting">
+                    <Setter Property="Foreground"
+					        Value="Gold" />
+                </Trigger>
+                <Trigger Property="Text"
+				         Value="Running">
+                    <Setter Property="Foreground"
+					        Value="Green" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="RadialCalculatorProgressStyle"
+               TargetType="ProgressBar">
+            <Style.Triggers>
+                <Trigger Property="Value"
+                         Value="100">
+                    <Setter Property="Visibility"
+                            Value="Hidden" />
+                </Trigger>
+                <Trigger Property="Value"
+                         Value="0">
+                    <Setter Property="Visibility"
+                            Value="Hidden" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <HierarchicalDataTemplate x:Key="BellhopQueueTreeViewTemplate"
+		                          ItemsSource="{Binding BellhopRadialCalculatorViewModels}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="100" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Name}" Grid.Column="0"/>
+                <ProgressBar x:Name="FieldProgress" Value="{Binding TotalProgress}" Width="100" Grid.Column="1"/>
+            </Grid>
+            <HierarchicalDataTemplate.Triggers>
+                <DataTrigger Binding="{Binding TotalProgress}"
+				             Value="0">
+                    <Setter TargetName="FieldProgress"
+						    Property="Visibility"
+						    Value="Hidden" />
+                </DataTrigger>
+            </HierarchicalDataTemplate.Triggers>
+            <HierarchicalDataTemplate.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="75" />
+                            <ColumnDefinition Width="75" />
+                            <ColumnDefinition Width="100" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding RadialNumber, StringFormat=Radial {00}}"
+                           TextAlignment="Right"
+                           Grid.Column="0"/>
+                        <TextBlock Text="{Binding BearingFromSource, StringFormat={}{0:0.0} deg}" 
+                           TextAlignment="Right"
+                           Grid.Column="1"/>
+                        <TextBlock Text="{Binding Status}" 
+                           TextAlignment="Center"
+                           Style="{StaticResource RadialCalculatorStatusStyle}"
+                           Grid.Column="2"/>
+                        <ProgressBar Value="{Binding ProgressPercent}" 
+                             Style="{StaticResource RadialCalculatorProgressStyle}"
+                             Grid.Column="3"/>
+                    </Grid>
+                </DataTemplate>
+            </HierarchicalDataTemplate.ItemTemplate>
+        </HierarchicalDataTemplate>
+    </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <DockPanel LastChildFill="True">
+        <TreeView ItemsSource="{Binding BellhopFieldCalculatorViewModels}"
+                  ItemTemplate="{StaticResource BellhopQueueTreeViewTemplate}"/>
+        <local:NotificationAreaIcon Text="ESME Transmission Loss Calculator"
+		                        Icon="Resources\orbz_water.ico"
+		                        MouseDoubleClick="OnNotificationAreaIconDoubleClick">
+            <local:NotificationAreaIcon.MenuItems>
+                <forms:MenuItem Text="Open"
+				                Click="OnMenuItemOpenClick"
+				                DefaultItem="True" />
+                <forms:MenuItem Text="-" />
+                <forms:MenuItem Text="Exit"
+				                Click="OnMenuItemExitClick" />
+            </local:NotificationAreaIcon.MenuItems>
+        </local:NotificationAreaIcon>
+
+    </DockPanel>
+</Window>
