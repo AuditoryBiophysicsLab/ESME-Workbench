@@ -102,9 +102,10 @@ namespace ESMEWorkBench.Data
             var settingsResult = VisualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
             if (settingsResult.HasValue && settingsResult.Value)
             {
-                DisplayAnalysisPoint(analysisPoint);
-                if (analysisPointSettingsViewModel.AnalysisPointIsChanged) IsChanged = true;
             }
+            DisplayAnalysisPoint(analysisPoint);
+            if (analysisPointSettingsViewModel.AnalysisPointIsChanged) IsChanged = true;
+            analysisPoint.Validate();
         }
 
         [MediatorMessageSink(MediatorMessage.RemoveAnalysisPoint)]
