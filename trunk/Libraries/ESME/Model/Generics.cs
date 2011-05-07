@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace ESME.Model
@@ -17,6 +18,13 @@ namespace ESME.Model
     public interface IHasIDField
     {
         ulong IDField { get; set; }
+    }
+
+    public interface ISupportValidation : INotifyPropertyChanged
+    {
+        bool IsValid { get; }
+        string ValidationErrorText { get; }
+        void Validate();
     }
 
     public class AutoIncrementList<T> : List<T>

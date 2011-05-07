@@ -48,7 +48,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
 #endif
                 if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
-                if(!_experiment.Bathymetry.BoundingBox.Contains(MouseEarthCoordinate)) throw new AnalysisPointLocationException("Analysis Points cannot be placed outside the bathymetry bounds.");
+                //if(!_experiment.Bathymetry.BoundingBox.Contains(MouseEarthCoordinate)) throw new AnalysisPointLocationException("Analysis Points cannot be placed outside the bathymetry bounds.");
                 var analysisPoint = new AnalysisPoint(MouseEarthCoordinate);
 #if false
             var analysisPointViewModel = new AnalysisPointCalculationPreviewViewModel
@@ -102,7 +102,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if ((!settingsResult.HasValue) || (!settingsResult.Value))
                     return;
                 var maxRadial = analysisPoint.SoundSources.Where(s => s.ShouldBeCalculated).Aggregate(0, (current, soundSource) => Math.Max(current, soundSource.Radius));
-                for (var i = 0; i < 360; i += 90) if (!_experiment.Bathymetry.BoundingBox.Contains(new EarthCoordinate(MouseEarthCoordinate, i, maxRadial))) throw new AnalysisPointLocationException("One or more radial endpoints extends beyond the bounds of the bathymetry.");
+                //for (var i = 0; i < 360; i += 90) if (!_experiment.Bathymetry.BoundingBox.Contains(new EarthCoordinate(MouseEarthCoordinate, i, maxRadial))) throw new AnalysisPointLocationException("One or more radial endpoints extends beyond the bounds of the bathymetry.");
 
                 MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPoint);
 #if false

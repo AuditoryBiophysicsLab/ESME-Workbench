@@ -197,6 +197,7 @@
     <Compile Include="TransmissionLoss\TransmissionLossJob.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRunFile.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRunFileRadial.cs" />
+    <Compile Include="Validation\AnalysisPointValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="TransmissionLoss\Resources\CreateTLDatabase.sql" />
