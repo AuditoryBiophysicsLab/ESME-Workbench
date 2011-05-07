@@ -1120,6 +1120,9 @@ namespace ESMEWorkBench.Data
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
             if (Bathymetry != null)
             {
+                AnalysisPoint.Bathymetry.Target = Bathymetry;
+                SoundSource.Bathymetry.Target = Bathymetry;
+
                 const string bathyBoundsName = "Bathymetry: Boundary";
                 var bathyBoundsLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == bathyBoundsName);
                 if (bathyBoundsLayer == null)
