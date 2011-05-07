@@ -49,15 +49,50 @@ namespace ESME.TransmissionLoss
         /// </summary>
         public float SourceLevel { get; set; }
 
+        #region public List<float> RadialBearings { get; set; }
+
         /// <summary>
         ///   List of radial bearings, in degrees
         /// </summary>
-        public List<float> RadialBearings { get; set; }
+        public List<float> RadialBearings
+        {
+            get { return _radialBearings; }
+            set
+            {
+                if (_radialBearings == value) return;
+                _radialBearings = value;
+                NotifyPropertyChanged(RadialBearingsChangedEventArgs);
+                Validate();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RadialBearingsChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.RadialBearings);
+        List<float> _radialBearings;
+
+        #endregion
+
+        #region public int Radius { get; set; }
 
         /// <summary>
         ///   transmission loss radius, in meters.
         /// </summary>
-        public int Radius { get; set; }
+        public int Radius
+        {
+            get { return _radius; }
+            set
+            {
+                if (_radius == value) return;
+                _radius = value;
+                NotifyPropertyChanged(RadiusChangedEventArgs);
+                Validate();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RadiusChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.Radius);
+        int _radius;
+
+        #endregion
+
 
         /// <summary>
         ///   The presumptively-unique sound source ID.  Use this as the basis of the filename for transmission loss jobs and TLF files
@@ -82,6 +117,7 @@ namespace ESME.TransmissionLoss
                 if (_shouldBeCalculated == value) return;
                 _shouldBeCalculated = value;
                 NotifyPropertyChanged(ShouldBeCalculatedChangedEventArgs);
+                Validate();
             }
         }
 
@@ -127,7 +163,6 @@ namespace ESME.TransmissionLoss
         {
             get
             {
-                Validate();
                 return _isValid;
             }
             private set
@@ -150,7 +185,6 @@ namespace ESME.TransmissionLoss
         {
             get
             {
-                Validate();
                 return _validationErrorText;
             }
             private set
@@ -169,6 +203,12 @@ namespace ESME.TransmissionLoss
 
         public void Validate()
         {
+            if (!ShouldBeCalculated)
+            {
+                ValidationErrorText = null;
+                return;
+            }
+
             if ((Bathymetry == null) || (Bathymetry.Target == null))
             {
                 ValidationErrorText = "Unable to validate";

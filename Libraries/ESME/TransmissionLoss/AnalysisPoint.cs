@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Text;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
@@ -152,20 +153,28 @@ namespace ESME.TransmissionLoss
                 return;
             }
 
-            var errorCount = 0;
-
-            string result = null;
+            var sourcesInError = new List<string>();
+            
             foreach (var source in SoundSources)
             {
-                result = source.ValidationErrorText;
-                if (!string.IsNullOrEmpty(result)) errorCount++;
-                if (errorCount > 1)
-                {
-                    ValidationErrorText = "Errors in multiple sound sources";
-                    return;
-                }
+                source.Validate();
+                if (!source.IsValid) sourcesInError.Add(source.Name);
             }
-            ValidationErrorText = result;
+            switch (sourcesInError.Count)
+            {
+                case 0:
+                    ValidationErrorText = null;
+                    break;
+                case 1:
+                    ValidationErrorText = string.Format("Source {0} has errors", sourcesInError[0]);
+                    break;
+                default:
+                    var result = new StringBuilder();
+                    result.AppendLine("The following sources have errors:");
+                    foreach (var sourceName in sourcesInError) result.AppendLine(string.Format("  • {0}", sourceName));
+                    ValidationErrorText = result.ToString();
+                    break;
+            }
         }
 
         #region INotifyPropertyChanged Members
