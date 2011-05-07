@@ -262,7 +262,6 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             get
             {
-                Validate();
                 return _isValid;
             }
             private set
@@ -313,8 +312,8 @@ namespace ESMEWorkBench.ViewModels.Map
                 ValidationErrorText = "Unable to validate - AnalysisPoint is null";
                 return;
             }
+            AnalysisPoint.Validate();
             ValidationErrorText = AnalysisPoint.ValidationErrorText;
-
         }
 
         #region public AreaStyle AreaStyle { get; set; }
@@ -520,9 +519,18 @@ namespace ESMEWorkBench.ViewModels.Map
             set
             {
                 if (_analysisPoint == value) return;
+                if ((value != null) && (_analysisPoint != null)) _analysisPoint.PropertyChanged -= AnalysisPointChanged;
                 _analysisPoint = value;
                 NotifyPropertyChanged(AnalysisPointChangedEventArgs);
+                if (_analysisPoint != null) _analysisPoint.PropertyChanged += AnalysisPointChanged;
             }
+        }
+
+        void AnalysisPointChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var ap = (AnalysisPoint) sender;
+            ap.Validate();
+            ValidationErrorText = ap.ValidationErrorText;
         }
 
         static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AnalysisPoint);
