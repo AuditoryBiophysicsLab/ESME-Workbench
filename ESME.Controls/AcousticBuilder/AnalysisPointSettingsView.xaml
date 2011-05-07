@@ -60,11 +60,20 @@
 				          Grid.Column="0"
 				          IsChecked="{Binding ShouldBeCalculated}"
 				          VerticalAlignment="Center" />
-				<ContentPresenter Content="{Binding Name, Mode=OneTime}"
-				                  Grid.Column="1"
-				                  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
+				<TextBlock x:Name="ModeName"
+                           Text="{Binding Name, Mode=OneTime}"
+				           Grid.Column="1"
+				           Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
 			</Grid>
-		</DataTemplate>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsValid}" Value="False">
+                    <DataTrigger.Setters>
+                        <Setter TargetName="ModeName" Property="Foreground" Value="Red"/>
+                        <Setter TargetName="ModeName" Property="ToolTip" Value="{Binding ValidationErrorText}" />
+                    </DataTrigger.Setters>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
 	</Window.Resources>
 	<DockPanel>
 		<DockPanel DockPanel.Dock="Bottom"

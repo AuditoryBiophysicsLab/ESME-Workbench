@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
 using ESME;
+using ESME.Model;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Main;
@@ -17,11 +18,11 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Map
 {
-    public class MapLayerViewModel : INotifyPropertyChanged
+    public class MapLayerViewModel : ISupportValidation 
     {
-        static Random _random;
-        static Color[] _palette;
-        static int _paletteIndex = 0;
+        static readonly Random Random;
+        static readonly Color[] Palette;
+        static int _paletteIndex;
 
         public static ObservableCollection<MapLayerViewModel> Layers;
 
@@ -156,8 +157,8 @@ namespace ESMEWorkBench.ViewModels.Map
             get
             {
 #if true
-                var color = _palette[_paletteIndex++];
-                _paletteIndex %= _palette.Length;
+                var color = Palette[_paletteIndex++];
+                _paletteIndex %= Palette.Length;
                 return color;
 #else
                 if (_random == null) _random = new Random();
@@ -254,41 +255,67 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #endregion
 
-        #region public bool HasErrors { get; set; }
+        #region public bool IsValid { get; set; }
 
-        public bool HasErrors
+        [XmlIgnore]
+        public bool IsValid
         {
-            get { return _hasErrors; }
-            set
+            get
             {
-                if (_hasErrors == value) return;
-                _hasErrors = value;
-                NotifyPropertyChanged(HasErrorsChangedEventArgs);
+                Validate();
+                return _isValid;
+            }
+            private set
+            {
+                if (_isValid == value) return;
+                _isValid = value;
+                NotifyPropertyChanged(IsValidChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs HasErrorsChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.HasErrors);
-        bool _hasErrors = false;
+        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.IsValid);
+        bool _isValid = true;
 
         #endregion
 
-        #region public string ErrorText { get; set; }
-
-        public string ErrorText
+        #region public string ValidationErrorText { get; set; }
+        [XmlIgnore]
+        public string ValidationErrorText
         {
-            get { return _errorText; }
-            set
+            get
             {
-                if (_errorText == value) return;
-                _errorText = value;
-                NotifyPropertyChanged(ErrorTextChangedEventArgs);
+                Validate();
+                return _validationErrorText;
+            }
+            private set
+            {
+                if (_validationErrorText == value) return;
+                _validationErrorText = value;
+                IsValid = string.IsNullOrEmpty(_validationErrorText);
+                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ErrorTextChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ErrorText);
-        string _errorText;
+        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ValidationErrorText);
+        string _validationErrorText;
 
         #endregion
+
+        public void Validate()
+        {
+            if (LayerType != LayerType.AnalysisPoint)
+            {
+                ValidationErrorText = null;
+                return;
+            }
+            if (AnalysisPoint == null)
+            {
+                ValidationErrorText = "Unable to validate - AnalysisPoint is null";
+                return;
+            }
+            ValidationErrorText = AnalysisPoint.ValidationErrorText;
+
+        }
 
         #region public AreaStyle AreaStyle { get; set; }
 
@@ -335,7 +362,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         #region public PointSymbolType PointSymbolType { get; set; }
 
-        PointSymbolType _pointSymbolType = (PointSymbolType) (_random.Next(8));
+        PointSymbolType _pointSymbolType = (PointSymbolType) (Random.Next(8));
 
         public PointSymbolType PointSymbolType
         {
@@ -402,7 +429,7 @@ namespace ESMEWorkBench.ViewModels.Map
         #region public float LineWidth { get; set; }
 
         //float _lineWidth = (float)Math.Max(1, ((_random.NextDouble() * 9) + 1) / 2);
-        float _lineWidth = _random.Next(2, 10) / 2.0f;
+        float _lineWidth = Random.Next(2, 10) / 2.0f;
 
         [XmlElement]
         public float LineWidth
@@ -505,8 +532,8 @@ namespace ESMEWorkBench.ViewModels.Map
 
         static MapLayerViewModel()
         {
-            _random = new Random();
-            _palette = ExtensionMethods.CreateHSVPalette(60);
+            Random = new Random();
+            Palette = ExtensionMethods.CreateHSVPalette(60);
         }
 
 
@@ -654,7 +681,7 @@ namespace ESMEWorkBench.ViewModels.Map
             CheckProperPointSymbolTypeMenu();
             while (PointSymbolType == PointSymbolType.Cross)
             {
-                PointSymbolType = (PointSymbolType) (_random.Next(8));
+                PointSymbolType = (PointSymbolType) (Random.Next(8));
             }
         }
 

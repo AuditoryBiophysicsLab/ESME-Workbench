@@ -144,6 +144,7 @@
     <Compile Include="Utility\Decimator2D.cs" />
     <Compile Include="Utility\EmbeddedResources.cs" />
     <Compile Include="Utility\ExtensionMethods.cs" />
+    <Compile Include="Utility\GenericWeakReference.cs" />
     <Compile Include="Utility\ImprovedBackgroundWorker.cs" />
     <Compile Include="Utility\KeyValuePair.cs" />
     <Compile Include="Utility\MediatorBase.cs" />

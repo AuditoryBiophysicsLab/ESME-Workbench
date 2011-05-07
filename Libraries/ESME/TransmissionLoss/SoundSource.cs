@@ -3,15 +3,21 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Xml.Serialization;
 using Cinch;
+using ESME.Environment;
 using ESME.Model;
 using ESME.NEMO;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.TransmissionLoss
 {
-    public class SoundSource : EarthCoordinate, IEquatable<SoundSource>, INotifyPropertyChanged
+    public class SoundSource : EarthCoordinate, IEquatable<SoundSource>, ISupportValidation
     {
+        public static WeakReference<Environment2DData> Bathymetry = new WeakReference<Environment2DData>(null);
+
         protected SoundSource()
         {
             RadialBearings = new List<float>();
@@ -113,6 +119,80 @@ namespace ESME.TransmissionLoss
         }
 
         #endregion
+
+        #region public bool IsValid { get; private set; }
+
+        [XmlIgnore]
+        public bool IsValid
+        {
+            get
+            {
+                Validate();
+                return _isValid;
+            }
+            private set
+            {
+                if (_isValid == value) return;
+                _isValid = value;
+                NotifyPropertyChanged(IsValidChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.IsValid);
+        bool _isValid;
+
+        #endregion
+
+        #region public string ValidationErrorText { get; private set; }
+
+        [XmlIgnore]
+        public string ValidationErrorText
+        {
+            get
+            {
+                Validate();
+                return _validationErrorText;
+            }
+            private set
+            {
+                if (_validationErrorText == value) return;
+                _validationErrorText = value;
+                IsValid = string.IsNullOrEmpty(_validationErrorText);
+                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.ValidationErrorText);
+        string _validationErrorText;
+
+        #endregion
+
+        public void Validate()
+        {
+            if ((Bathymetry == null) || (Bathymetry.Target == null))
+            {
+                ValidationErrorText = "Unable to validate";
+                return;
+            }
+            var bathymetry = Bathymetry.Target;
+            if (!bathymetry.GeoRect.Contains(this))
+            {
+                ValidationErrorText = "Sound source not contained within bathymetry bounds";
+                return;
+            }
+            var errors = new StringBuilder();
+            foreach (var radialBearing in RadialBearings)
+            {
+                var radialEndPoint = new EarthCoordinate(this, radialBearing, Radius);
+                if (!bathymetry.GeoRect.Contains(radialEndPoint)) errors.AppendLine(string.Format("Radial with bearing {0} extends beyond bathymetry bounds", radialBearing));
+            }
+            if (errors.Length > 0)
+            {
+                ValidationErrorText = errors.ToString();
+                return;
+            }
+            ValidationErrorText = null;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
