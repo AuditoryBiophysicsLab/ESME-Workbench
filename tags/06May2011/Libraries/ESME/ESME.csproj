@@ -1,0 +1,305 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ESME</RootNamespace>
+    <AssemblyName>ESME</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="3MBSLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\..\Utilities\MMMBS\demoProjects\3MBSLib.dll</HintPath>
+    </Reference>
+    <Reference Include="3MBWrapperClass, Version=1.0.3958.23248, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Utilities\MMMBS\demoProjects\3MBWrapperClass.dll</HintPath>
+    </Reference>
+    <Reference Include="Accessibility" />
+    <Reference Include="Cinch.WPF">
+      <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
+    </Reference>
+    <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BuildInformation.cs" />
+    <Compile Include="Data\AppSettings.cs" />
+    <Compile Include="Data\CASSTemplate.cs" />
+    <Compile Include="Environment\Environment2DData.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataArray.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataAxis.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataFile.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataLayer.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataLayerList.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataString.cs" />
+    <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
+    <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
+    <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
+    <Compile Include="Environment\NAVO\DigitalBathymetricDatabase.cs" />
+    <Compile Include="Environment\NAVO\GeneralizedDigitalEnvironmentModelDatabase.cs" />
+    <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
+    <Compile Include="Environment\NAVO\NAVODataSource.cs" />
+    <Compile Include="Environment\NAVO\NAVODataSources.cs" />
+    <Compile Include="Environment\NAVO\SerializedOutput.cs" />
+    <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />
+    <Compile Include="Environment\Sediment.cs" />
+    <Compile Include="Environment\Transect.cs" />
+    <Compile Include="Environment\UNESCO.cs" />
+    <Compile Include="MediatorMessages.cs" />
+    <Compile Include="Model\AnimatInterface.cs" />
+    <Compile Include="NEMO\Exceptions.cs" />
+    <Compile Include="Overlay\Exceptions.cs" />
+    <Compile Include="Overlay\OverlayCircle.cs" />
+    <Compile Include="Overlay\OverlayFile.cs" />
+    <Compile Include="Overlay\OverlayFiles.cs" />
+    <Compile Include="Overlay\OverlayLabel.cs" />
+    <Compile Include="Overlay\OverlayLineSegments.cs" />
+    <Compile Include="Overlay\OverlayParser.cs" />
+    <Compile Include="Overlay\OverlayPoint.cs" />
+    <Compile Include="Overlay\OverlayShape.cs" />
+    <Compile Include="Overlay\LineStyle.cs" />
+    <Compile Include="Globals.cs" />
+    <Compile Include="NEMO\NemoAnimals.cs" />
+    <Compile Include="NEMO\NemoMode.cs" />
+    <Compile Include="NEMO\NemoPlatform.cs" />
+    <Compile Include="NEMO\NemoScenario.cs" />
+    <Compile Include="NEMO\NemoSource.cs" />
+    <Compile Include="NEMO\NemoSpecies.cs" />
+    <Compile Include="NEMO\NemoTrackdef.cs" />
+    <Compile Include="Platform\ActiveMode.cs" />
+    <Compile Include="NEMO\ActiveTimeStep.cs" />
+    <Compile Include="Platform\BehaviorModel.cs" />
+    <Compile Include="Platform\BehaviorModelTest.cs" />
+    <Compile Include="Platform\Exceptions.cs" />
+    <Compile Include="Platform\PlatformState.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
+    <Compile Include="TransmissionLoss\NemoModeToAcousticModelNameMap.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossFileManager.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\RadialCalculator.cs" />
+    <Compile Include="TransmissionLoss\AnalysisPoint.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
+    <Compile Include="TransmissionLoss\CASS\CassFiles.cs" />
+    <Compile Include="TransmissionLoss\CASS\CASSPacket.cs" />
+    <Compile Include="TransmissionLoss\CASS\SimAreaCSV.cs" />
+    <Compile Include="TransmissionLoss\RAM\Ram.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TransmissionLoss\RAM\RamRunFile.cs" />
+    <Compile Include="TransmissionLoss\RAM\RamRunFileRadial.cs" />
+    <Compile Include="TransmissionLoss\SoundPressureLevelField.cs" />
+    <Compile Include="TransmissionLoss\SoundPressureLevelRadial.cs" />
+    <Compile Include="TransmissionLoss\SoundSource.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossAlgorithm.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossField.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossRadial.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossProcess.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="TransmissionLoss\TransmissionLossJob.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossRunFile.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossRunFileRadial.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TransmissionLoss\Resources\CreateTLDatabase.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TransmissionLoss\Resources\TLField_Insert.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <EmbeddedResource Include="Schema\AnalysisPoint.xsd" />
+    <EmbeddedResource Include="Schema\EarthCoordinate.xsd" />
+    <EmbeddedResource Include="Schema\ESME_Experiment.xsd" />
+    <EmbeddedResource Include="Schema\AcousticProperties.xsd" />
+    <EmbeddedResource Include="Schema\SoundSource.xsd" />
+    <EmbeddedResource Include="Schema\TransmissionLossField.xsd" />
+    <EmbeddedResource Include="Schema\BellhopRunfile.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AnimatLocationFile\AnimatLocationFile.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataArraySourceInfo.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataColumn.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataPoint.cs" />
+    <Compile Include="Environment\Binary Data Classes\DataRow.cs" />
+    <Compile Include="Environment\Binary Data Classes\Datum.cs" />
+    <Compile Include="Interfaces.cs" />
+    <Compile Include="Model\AcousticProperties.cs" />
+    <Compile Include="Model\Animat.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\BellhopRunFile.cs" />
+    <Compile Include="Model\DisplayLayers.cs" />
+    <Compile Include="Model\EnvironmentInformation.cs" />
+    <Compile Include="Model\Exceptions.cs" />
+    <Compile Include="Model\ExperimentInformation.cs" />
+    <Compile Include="Model\SourceRecieverLevelBins.cs" />
+    <Compile Include="Model\FixedSource.cs" />
+    <Compile Include="Model\Generics.cs" />
+    <Compile Include="Model\Globals.cs" />
+    <Compile Include="Model\ProgressTracking.cs" />
+    <Compile Include="Model\SedimentType.cs" />
+    <Compile Include="Model\SoundSpeedField.cs" />
+    <Compile Include="Model\SoundSpeedProfile.cs" />
+    <Compile Include="Model\Species.cs" />
+    <Compile Include="Model\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Model\Tester.cs" />
+    <Compile Include="NEMO\NemoBase.cs" />
+    <Compile Include="NEMO\NemoFile.cs" />
+    <Compile Include="NEMO\NemoPSM.cs" />
+    <Compile Include="Overlay\LineReader.cs" />
+    <Compile Include="Overlay\OverlayLineSegment.cs" />
+    <Compile Include="Overlay\Tokenizer.cs" />
+    <Compile Include="Shapes\TransmissionLossFieldShape.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\Bellhop.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossFieldCache.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="Resources\Strings.resx">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Simulation\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HRC\HRC.csproj">
+      <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
+      <Name>HRC</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"
+</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

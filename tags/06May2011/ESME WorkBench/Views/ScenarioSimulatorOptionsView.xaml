@@ -1,0 +1,117 @@
+﻿<Window x:Class="ESMEWorkBench.Views.ScenarioSimulatorOptionsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
+        xmlns:Views="clr-namespace:ESMEWorkBench.Views"
+        Title="Scenario Simulator Options"
+        Loaded="OnLoaded"
+        SizeToContent="WidthAndHeight">
+	<DockPanel LastChildFill="True">
+		<DockPanel LastChildFill="False"
+		           Margin="10"
+		           DockPanel.Dock="Bottom">
+			<Button Width="75"
+			        Margin="10 0 0 0"
+			        IsCancel="True"
+			        Content="Cancel"
+			        DockPanel.Dock="Right" />
+			<Button Width="75"
+			        IsDefault="True"
+			        Content="Run"
+			        DockPanel.Dock="Right"
+			        Command="{Binding RunCommand}" />
+		</DockPanel>
+        <Views:ScenarioSimulatorUserControlView ScenarioSimulatorSettings="{Binding ScenarioSimulatorSettings}"/>
+        
+	<!--	<StackPanel Orientation="Vertical">
+			<TextBlock Text="Number of Monte Carlo Iterations"
+			           Margin="5 0" />
+            <TextBox Text="{Binding ScenarioSimulatorSettings.Iterations}"
+			         Margin="5 0">
+				<i:Interaction.Behaviors>
+					<cinch:NumericTextBoxBehaviour />
+				</i:Interaction.Behaviors>
+			</TextBox>
+            <CheckBox IsChecked="{Binding ScenarioSimulatorSettings.IsRandomized}"
+			          Margin="5 10">
+				Randomize Ship Tracks
+			</CheckBox>
+			<Expander Header="Advanced Options"
+			          Background="LightGray"
+			          Padding="5">
+				<StackPanel Orientation="Vertical">
+					<Controls:FileOrDirectorySetting Caption="Java Configuration File"
+					                                 Margin="0 0 0 5"
+					                                 DialogTitle="Choose the java configuration file"
+					                                 FileNameFilter="Configuration file (*.xml)|*.xml|All files (*.*)|*.*"
+					                                 IsDirectoryBrowser="False"
+					                                 ToolTip="Specifies the location of the NUWC configuration file"
+					                                 FileName="{Binding ScenarioSimulatorSettings.JavaConfigurationFile}" />
+
+					<TextBlock Text="Cutoff Value (dB SPL)" />
+                    <TextBox Text="{Binding ScenarioSimulatorSettings.DecibelCutoff}"
+					         Margin="0 0 0 5"
+					         ToolTip="Mammals with values below this level will not be recorded in simulation output.">
+						<i:Interaction.Behaviors>
+							<cinch:NumericTextBoxBehaviour />
+						</i:Interaction.Behaviors>
+					</TextBox>
+					<TextBlock Text="Log Output Level" />
+                    <TextBox Text="{Binding ScenarioSimulatorSettings.LogLevel}"
+					         Margin="0 0 0 5">
+						<i:Interaction.Behaviors>
+							<cinch:NumericTextBoxBehaviour />
+						</i:Interaction.Behaviors>
+					</TextBox>
+					<TextBlock Text="Number of Parallel Simulations" />
+                    <TextBox Text="{Binding ScenarioSimulatorSettings.ParallelSimulations}"
+					         Margin="0 0 0 5">
+						<i:Interaction.Behaviors>
+							<cinch:NumericTextBoxBehaviour />
+						</i:Interaction.Behaviors>
+					</TextBox>
+					<TextBlock Text="Largest Species File Size (bytes)" />
+                    <TextBox Text="{Binding ScenarioSimulatorSettings.SpeciesFileSize}"
+					         Margin="0 0 0 5">
+						<i:Interaction.Behaviors>
+							<cinch:NumericTextBoxBehaviour />
+						</i:Interaction.Behaviors>
+					</TextBox>
+					<TextBlock Text="Largest CASS File Size (bytes)" />
+                    <TextBox Text="{Binding ScenarioSimulatorSettings.CASSFileSize}"
+					         Margin="0 0 0 5">
+						<i:Interaction.Behaviors>
+							<cinch:NumericTextBoxBehaviour />
+						</i:Interaction.Behaviors>
+					</TextBox>
+                    <CheckBox IsChecked="{Binding ScenarioSimulatorSettings.ReadAllMammals}"
+					          Margin="0 0 0 5">
+						Cache all animats into memory?
+					</CheckBox>
+                    <CheckBox IsChecked="{Binding ScenarioSimulatorSettings.ClipOutsideFootprint}"
+					          Margin="0 0 0 5">
+						Clip animats outside footprint?
+					</CheckBox>
+                    <CheckBox IsChecked="{Binding ScenarioSimulatorSettings.OptimizeBuffer}"
+					          Margin="0 0 0 2"
+					          Content="Compute optimum output file buffer size?" />
+
+					<Label Content="Output file buffer size (Mb)"
+					           Margin="20 -5 0 -5"
+					           IsEnabled="{Binding ScenarioSimulatorSettings.NotOptimizeBuffer}" />
+                    <TextBox Text="{Binding ScenarioSimulatorSettings.OutputBufferSize}"
+					         Margin="25 0 0 0 "
+					         IsEnabled="{Binding ScenarioSimulatorSettings.NotOptimizeBuffer}">
+						<i:Interaction.Behaviors>
+							<cinch:NumericTextBoxBehaviour />
+						</i:Interaction.Behaviors>
+					</TextBox>
+
+				</StackPanel>
+			</Expander>
+		</StackPanel>-->
+	</DockPanel>
+
+</Window>

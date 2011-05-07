@@ -1,0 +1,185 @@
+﻿<Window x:Class="ESMEWorkBench.Views.ApplicationOptionsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
+        xmlns:Views="clr-namespace:ESMEWorkBench.Views"
+        Title="User Options"
+        SizeToContent="WidthAndHeight">
+	<DockPanel LastChildFill="True">
+		<DockPanel LastChildFill="False"
+		           Margin="10"
+		           DockPanel.Dock="Bottom">
+			<Button Width="75"
+			        Margin="10 0 0 0"
+			        IsCancel="True"
+			        Content="Cancel"
+			        DockPanel.Dock="Right" />
+			<Button Width="75"
+			        IsDefault="True"
+			        Content="OK"
+			        DockPanel.Dock="Right"
+			        Command="{Binding OkCommand}" />
+		</DockPanel>
+		<TabControl>
+			<TabItem Header="NAEMO"
+			         HorizontalContentAlignment="Stretch"
+			         VerticalContentAlignment="Stretch">
+				<StackPanel Orientation="Vertical"
+				            Width="Auto"
+				            Height="Auto">
+                    <Controls:FileOrDirectorySetting Caption="Java executable (javaw.exe)"
+					                                 Margin="5"
+					                                 DialogTitle="Choose the java executable (javaw.exe)"
+					                                 FileNameFilter="Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*"
+					                                 IsDirectoryBrowser="False"
+					                                 FileName="{Binding AppSettings.NAEMOTools.JavaExecutablePath}" />
+					<Controls:FileOrDirectorySetting Caption="NAEMO Tools directory"
+					                                 Margin="5"
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.NAEMOTools.NAEMOToolsDirectory}" />
+
+					<Controls:FileOrDirectorySetting Caption="Scenario data directory"
+					                                 Margin="5 0"
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.ScenarioDataDirectory}" />
+
+					<GroupBox Header="Scenario Simulator Options"
+					          Margin="5"
+					          Padding="5">
+                        <Views:ScenarioSimulatorUserControlView ScenarioSimulatorSettings="{Binding AppSettings.ScenarioSimulatorSettings}"/>
+					<!--	<StackPanel Orientation="Vertical">
+							<TextBlock Text="Number of Iterations"
+							           Margin="5 0" />
+							<TextBox Text="{Binding AppSettings.ScenarioSimulatorSettings.Iterations}"
+							         Margin="5 0">
+								<i:Interaction.Behaviors>
+									<cinch:NumericTextBoxBehaviour />
+								</i:Interaction.Behaviors>
+							</TextBox>
+                            <CheckBox IsChecked="{Binding AppSettings.ScenarioSimulatorSettings.IsRandomized}"
+							          Margin="5 10">
+								Randomize Ship Tracks
+							</CheckBox>
+						</StackPanel> -->
+					</GroupBox>
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Environment"
+			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}"
+			         HorizontalContentAlignment="Stretch"
+			         VerticalContentAlignment="Stretch">
+				<StackPanel Orientation="Vertical">
+					<GroupBox Header="Database Locations"
+					          Margin="5 10 5 5"
+					          Padding="5">
+						<StackPanel Orientation="Vertical">
+							<Controls:FileOrDirectorySetting Caption="GDEM-V"
+							                                 Margin="0 5"
+							                                 IsDirectoryBrowser="True"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.GDEMDirectory}" />
+							<Controls:FileOrDirectorySetting Caption="SMGC"
+							                                 IsDirectoryBrowser="True"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.SMGCDirectory}" />
+							<Controls:FileOrDirectorySetting Caption="BST"
+							                                 Margin="0 5"
+							                                 IsDirectoryBrowser="False"
+							                                 DialogTitle="Choose the Bottom Sediment Type database file"
+							                                 FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory}" />
+							<Controls:FileOrDirectorySetting Caption="DBDB"
+							                                 IsDirectoryBrowser="False"
+							                                 DialogTitle="Choose the Digital Bathymetric Database file"
+							                                 FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory}" />
+						</StackPanel>
+					</GroupBox>
+					<GroupBox Header="Required Extraction Tools"
+					          Margin="5 0 5 10"
+					          Padding="5">
+						<StackPanel Orientation="Vertical">
+							<Controls:FileOrDirectorySetting Caption="BST Extractor"
+							                                 Margin="0 5"
+							                                 IsDirectoryBrowser="False"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTEXEPath}" />
+							<Controls:FileOrDirectorySetting Caption="DBDB Extractor"
+							                                 IsDirectoryBrowser="False"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath}" />
+						</StackPanel>
+
+					</GroupBox>
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="[Collapsed]"
+			         Visibility="Collapsed"
+			         HorizontalContentAlignment="Stretch"
+			         VerticalContentAlignment="Stretch">
+				<StackPanel Orientation="Vertical"
+				            VerticalAlignment="Top">
+					<CheckBox IsChecked="{Binding AppSettings.UseOAMLDataSources}"
+					          Margin="5 10">
+						Use Oceanographic and Atmospheric Master Library (OAML) data sources
+					</CheckBox>
+					<Controls:FileOrDirectorySetting Caption="Environment database directory"
+					                                 IsEnabled="{Binding AppSettings.UseESMEDataSources}"
+					                                 Margin="5 20 5 10"
+					                                 IsDirectoryBrowser="True"
+					                                 FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Acoustic Simulators">
+                <Views:AcousticSimulatorOptionsControl DataContext="{Binding AppSettings}" />
+			</TabItem>
+			<TabItem Header="Seasons"
+			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
+				<StackPanel Orientation="Vertical">
+					<StackPanel Orientation="Vertical"
+					            Margin="5">
+						<TextBlock Text="Spring Starts" />
+						<ComboBox ItemsSource="{Binding Months}"
+						          SelectedItem="{Binding AppSettings.NAVOConfiguration.SpringStartMonth}"
+						          ToolTip="The beginning month of a 3-month season" />
+					</StackPanel>
+					<StackPanel Orientation="Vertical"
+					            Margin="5 0">
+						<TextBlock Text="Summer Starts" />
+						<ComboBox ItemsSource="{Binding Months}"
+						          SelectedItem="{Binding AppSettings.NAVOConfiguration.SummerStartMonth}"
+						          ToolTip="The beginning month of a 3-month season" />
+					</StackPanel>
+					<StackPanel Orientation="Vertical"
+					            Margin="5">
+						<TextBlock Text="Fall Starts" />
+						<ComboBox ItemsSource="{Binding Months}"
+						          SelectedItem="{Binding AppSettings.NAVOConfiguration.FallStartMonth}"
+						          ToolTip="The beginning month of a 3-month season" />
+					</StackPanel>
+					<StackPanel Orientation="Vertical"
+					            Margin="5 0">
+						<TextBlock Text="Winter Starts" />
+						<ComboBox ItemsSource="{Binding Months}"
+						          SelectedItem="{Binding AppSettings.NAVOConfiguration.WinterStartMonth}"
+						          ToolTip="The beginning month of a 3-month season" />
+
+					</StackPanel>
+					<StackPanel Orientation="Vertical"
+					            Margin="5">
+						<TextBlock Text="Cold Season Starts" />
+						<ComboBox ItemsSource="{Binding Months}"
+						          SelectedItem="{Binding AppSettings.NAVOConfiguration.ColdSeasonStartMonth}"
+						          ToolTip="The beginning month of a 6-month season" />
+
+					</StackPanel>
+					<StackPanel Orientation="Vertical"
+					            Margin="5">
+						<TextBlock Text="Warm Season Starts" />
+						<ComboBox ItemsSource="{Binding Months}"
+						          SelectedItem="{Binding AppSettings.NAVOConfiguration.WarmSeasonStartMonth}"
+						          ToolTip="The beginning month of a 6-month season" />
+
+					</StackPanel>
+
+				</StackPanel>
+			</TabItem>
+		</TabControl>
+	</DockPanel>
+</Window>

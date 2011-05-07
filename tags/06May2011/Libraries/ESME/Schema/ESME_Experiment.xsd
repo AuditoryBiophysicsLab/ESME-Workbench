@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ESME_Experiment"
+           targetNamespace="http://esme.bu.edu/support/schemas/ESME_Experiment"
+           elementFormDefault="qualified"
+           xmlns="http://esme.bu.edu/support/schemas/ESME_Experiment"
+           xmlns:mstns="http://esme.bu.edu/support/schemas/ESME_Experiment"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           version="1.0">
+  <xs:include schemaLocation="EarthCoordinate.xsd"
+              id="EarthCoordinateSchema"/>
+  <xs:include schemaLocation="AnalysisPoint.xsd"
+              id="AnalysisPointSchema"/>
+  <xs:include schemaLocation="TransmissionLossField.xsd"
+              id="TransmissionLossFieldSchema"/>
+  <xs:element name="ESME_Experiment">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Information"
+                    maxOccurs="1"
+                    minOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Name"
+                          type="xs:string"
+                          maxOccurs="1"
+                          minOccurs="1" />
+              <xs:element name="Description"
+                          type="xs:string"
+                          maxOccurs="1"
+                          minOccurs="0" />
+              <xs:element name="Author"
+                          type="xs:string"
+                          minOccurs="0"
+                          maxOccurs="1" />
+              <xs:element name="Created"
+                          type="xs:dateTime"
+                          maxOccurs="1"
+                          minOccurs="0" />
+              <xs:element name="Modified"
+                          type="xs:dateTime"
+                          maxOccurs="1"
+                          minOccurs="0" />
+              <xs:element name="NemoFileName"
+                          type="xs:string"
+                          maxOccurs="1"
+                          minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Environment"
+                    maxOccurs="1"
+                    minOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="LocationName"
+                          type="xs:string"
+                          maxOccurs="1"
+                          minOccurs="1" />
+              <xs:element name="SoundSpeedFieldName"
+                          type="xs:string"
+                          maxOccurs="1"
+                          minOccurs="0" />
+              <xs:element name="WindSpeed"
+                          maxOccurs="1"
+                          minOccurs="0"
+                          default="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:float">
+                    <xs:minInclusive value="0" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Sediment"
+                          maxOccurs="1"
+                          minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="SedimentType"
+                                type="SedimentItem"/>
+                    <xs:element name="BasementType"
+                                type="SedimentItem" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="FixedSources"
+                    maxOccurs="1"
+                    minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="FixedSource"
+                          minOccurs="1"
+                          maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Name"
+                                type="xs:string" />
+                    <xs:element name="AnalysisPointID"
+                                maxOccurs="1"
+                                minOccurs="1">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:integer">
+                          <xs:minInclusive value="1" />
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="Bearing"
+                                type="xs:double" />
+                    <xs:element name="HorizontalHalfAngle_degrees"
+                                type="xs:double" />
+                    <xs:element name="PingInterval_seconds"
+                                type="xs:double" />
+                    <xs:element name="PingDuration_seconds"
+                                type="xs:double" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="SpeciesList"
+                    maxOccurs="1"
+                    minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Species"
+                          minOccurs="1"
+                          maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="SpeciesName"
+                                type="xs:string"
+                                maxOccurs="1"
+                                minOccurs="1" />
+                    <xs:element name="SpeciesID"
+                                maxOccurs="1"
+                                minOccurs="1" >
+                      <xs:simpleType>
+                        <xs:restriction base="xs:integer">
+                          <xs:minInclusive value="1" />
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Animats"
+                    maxOccurs="1"
+                    minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Animat"
+                          minOccurs="1"
+                          maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Location"
+                                type="EarthCoordinate3D"
+                                maxOccurs="1"
+                                minOccurs="1" />
+                    <xs:element name="SpeciesID"
+                                maxOccurs="1"
+                                minOccurs="1" >
+                      <xs:simpleType>
+                        <xs:restriction base="xs:integer">
+                          <xs:minInclusive value="0" />
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="SedimentItem">
+    <xs:sequence>
+      <xs:element name="Name"
+                  type="xs:string" />
+      <xs:element name="Depth"
+                  type="xs:double"
+                  maxOccurs="1"
+                  minOccurs="0" />
+      <xs:element name="Density"
+                  type="xs:double" />
+      <xs:element name="CompressionWaveSpeed"
+                  type="xs:double" />
+      <xs:element name="CompressionWaveCoefficient"
+                  type="xs:double"
+                  maxOccurs="1"
+                  minOccurs="0" />
+      <xs:element name="ShearWaveSpeed"
+                  type="xs:double" />
+      <xs:element name="ShearWaveCoefficient"
+                  type="xs:double"
+                  minOccurs="0"
+                  maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
