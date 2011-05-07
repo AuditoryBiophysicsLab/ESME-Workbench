@@ -2,14 +2,21 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Text;
 using System.Xml.Serialization;
+using Cinch;
+using ESME.Environment;
 using ESME.Model;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.TransmissionLoss
 {
-    public class AnalysisPoint : EarthCoordinate, IEquatable<AnalysisPoint>, IHasIDField
+    public class AnalysisPoint : EarthCoordinate, IEquatable<AnalysisPoint>, IHasIDField, ISupportValidation
     {
+        public static WeakReference<Environment2DData> Bathymetry = new WeakReference<Environment2DData>(null);
+
         public AnalysisPoint()
         {
             TransmissionLossJobs = new ObservableCollection<TransmissionLossJob>();
@@ -84,6 +91,99 @@ namespace ESME.TransmissionLoss
         public ulong IDField { get; set; }
 
         #endregion
+
+        #region public bool IsValid { get; set; }
+
+        [XmlIgnore]
+        public bool IsValid
+        {
+            get
+            {
+                Validate();
+                return _isValid;
+            }
+            private set
+            {
+                if (_isValid == value) return;
+                _isValid = value;
+                NotifyPropertyChanged(IsValidChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPoint>(x => x.IsValid);
+        bool _isValid;
+
+        #endregion
+
+        #region public string ValidationErrorText { get; set; }
+        [XmlIgnore]
+        public string ValidationErrorText
+        {
+            get
+            {
+                Validate();
+                return _validationErrorText;
+            }
+            private set
+            {
+                if (_validationErrorText == value) return;
+                _validationErrorText = value;
+                IsValid = string.IsNullOrEmpty(_validationErrorText);
+                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPoint>(x => x.ValidationErrorText);
+        string _validationErrorText;
+
+        #endregion
+
+        public void Validate()
+        {
+            if ((Bathymetry == null) || (Bathymetry.Target == null))
+            {
+                ValidationErrorText = "Unable to validate";
+                return;
+            }
+
+            var bathymetry = Bathymetry.Target;
+            if (!bathymetry.GeoRect.Contains(this))
+            {
+                ValidationErrorText = "Analysis point not contained within bathymetry bounds";
+                return;
+            }
+
+            var sourcesInError = new List<string>();
+            
+            foreach (var source in SoundSources)
+            {
+                source.Validate();
+                if (!source.IsValid) sourcesInError.Add(source.Name);
+            }
+            switch (sourcesInError.Count)
+            {
+                case 0:
+                    ValidationErrorText = null;
+                    break;
+                case 1:
+                    ValidationErrorText = string.Format("Source {0} has errors", sourcesInError[0]);
+                    break;
+                default:
+                    var result = new StringBuilder();
+                    result.AppendLine("The following sources have errors:");
+                    foreach (var sourceName in sourcesInError) result.AppendLine(string.Format("  • {0}", sourceName));
+                    ValidationErrorText = result.ToString();
+                    break;
+            }
+        }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+
+        #endregion
+
     }
 
     public class NewAnalysisPointList : UniqueAutoIncrementList<AnalysisPoint> {}

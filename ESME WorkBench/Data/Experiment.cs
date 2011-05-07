@@ -590,8 +590,29 @@ namespace ESMEWorkBench.Data
         [XmlIgnore]
         public Sediment Sediment { get; private set; }
 
+        #region public Environment2DData Bathymetry { get; set; }
+
         [XmlIgnore]
-        public Environment2DData Bathymetry { get; private set; }
+        public Environment2DData Bathymetry
+        {
+            get { return _bathymetry; }
+            set
+            {
+                if (_bathymetry == value) return;
+                _bathymetry = value;
+                NotifyPropertyChanged(BathymetryChangedEventArgs);
+                AnalysisPoint.Bathymetry.Target = _bathymetry;
+                SoundSource.Bathymetry.Target = _bathymetry;
+                if ((_bathymetry == null) || (AnalysisPoints == null)) return;
+                foreach (var analysisPoint in AnalysisPoints)
+                    analysisPoint.Validate();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BathymetryChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Bathymetry);
+        Environment2DData _bathymetry;
+
+        #endregion
 
         [XmlIgnore]
         Timer ScenarioReloadTimer { get; set; }
@@ -916,6 +937,7 @@ namespace ESMEWorkBench.Data
             analysisPointLayer.HasSettings = true;
             analysisPointLayer.CanChangeLineColor = true;
             analysisPointLayer.CanChangeLineWidth = true;
+            analysisPointLayer.Validate();
 
             var sourcePoints = new List<EarthCoordinate>();
             analysisPointLayer.Clear();

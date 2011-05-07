@@ -68,8 +68,7 @@
                 <Image Source="..\Images\SmallIcons\12px-red-circle.png" 
                        Grid.Column="2"
                        ToolTip="{Binding AnalysisPointCompletionTooltip}"
-                       Visibility="Hidden" />
-                       <!-- "{Binding VisibleIfAnalysisPointLayer}" -->
+                       Visibility="{Binding VisibleIfAnalysisPointLayer}" />
 
                 <Rectangle Width="12"
 				           RadiusX="3"
@@ -110,10 +109,10 @@
 				</Grid.ContextMenu>
 			</Grid>
             <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                <DataTrigger Binding="{Binding IsValid}" Value="False">
                     <DataTrigger.Setters>
                         <Setter TargetName="LayerName" Property="Foreground" Value="Red"/>
-                        <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ErrorText}" />
+                        <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ValidationErrorText}" />
                     </DataTrigger.Setters>
                 </DataTrigger>
             </DataTemplate.Triggers>

@@ -82,6 +82,7 @@ namespace ESME.Views.AcousticBuilder
                 AvailableModes.Clear();
                 foreach (var soundSource in _analysisPoint.SoundSources) AvailableModes.Add(soundSource);
                 NotifyPropertyChanged(AnalysisPointChangedEventArgs);
+                if (_analysisPoint != null) _analysisPoint.Validate();
             }
         }
 
@@ -132,7 +133,11 @@ namespace ESME.Views.AcousticBuilder
         void RefreshAvailableBearings()
         {
             AvailableBearings.Clear();
-            if (_selectedMode != null) foreach (var bearing in _selectedMode.RadialBearings) AvailableBearings.Add(bearing);
+            if (_selectedMode != null)
+            {
+                foreach (var bearing in _selectedMode.RadialBearings) AvailableBearings.Add(bearing);
+                _selectedMode.Validate();
+            }
             SelectedBearing = null;
             DisplayedBearing = null;
         }
@@ -246,6 +251,7 @@ namespace ESME.Views.AcousticBuilder
             get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(delegate
                                                                                        {
                                                                                            AnalysisPoint = TempAnalysisPoint;
+                                                                                           if (AnalysisPoint != null) AnalysisPoint.Validate();
                                                                                            CloseActivePopUpCommand.Execute(true);
                                                                                        })); }
         }
@@ -386,6 +392,7 @@ namespace ESME.Views.AcousticBuilder
                                 soundsource.RadialBearings.Clear();
                                 soundsource.RadialBearings.AddRange(AvailableBearings);
                                 soundsource.RadialBearings.Sort();
+                                soundsource.Validate();
                             }
 
                         }
@@ -443,19 +450,18 @@ namespace ESME.Views.AcousticBuilder
 
         #endregion
 
-        public void DesignTimeInitialization() 
+        public void DesignTimeInitialization()
         {
-            AvailableModes.Add(new SoundSource(new EarthCoordinate(0,0),new NemoMode
-                                                                        {
-                                                                        HighFrequency = 1000,
-                                                                        LowFrequency = 100,
-                                                                        DepressionElevationAngle = 0,
-                                                                        SourceDepth = 10,
-                                                                        Name = "Design Test Mode",
-                                                                        VerticalBeamWidth = 90,
-                                                                        Radius = 100000,
-                                                                        },
-                                                                        4));
+            AvailableModes.Add(new SoundSource(new EarthCoordinate(0, 0), new NemoMode
+                                                                          {
+                                                                              HighFrequency = 1000,
+                                                                              LowFrequency = 100,
+                                                                              DepressionElevationAngle = 0,
+                                                                              SourceDepth = 10,
+                                                                              Name = "Design Test Mode",
+                                                                              VerticalBeamWidth = 90,
+                                                                              Radius = 100000,
+                                                                          }, 4));
             AvailableBearings.Add(0);
             AvailableBearings.Add(90);
             AvailableBearings.Add(180);
