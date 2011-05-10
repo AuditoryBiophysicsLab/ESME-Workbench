@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text;
 using Cinch;
 using ESME.Data;
+using ESME.TransmissionLoss;
 
 namespace ESMEWorkBench
 {
@@ -65,5 +67,13 @@ namespace ESMEWorkBench
             }
             return s;
         }
+
+        public static List<TransmissionLossAlgorithm> ValidTransmissionLossAlgorithms = new List<TransmissionLossAlgorithm>
+                                                                                        {
+                                                                                            TransmissionLossAlgorithm.CASS,
+                                                                                            TransmissionLossAlgorithm.RAM,
+                                                                                            TransmissionLossAlgorithm.Bellhop,
+                                                                                            TransmissionLossAlgorithm.RAMGEO
+                                                                                        };
     }
 }

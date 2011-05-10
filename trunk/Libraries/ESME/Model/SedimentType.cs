@@ -94,7 +94,13 @@ namespace ESME.Model
         public static SedimentType Find(string name)
         {
             var q = from s in SedimentArray where s.Name == name select s;
-            return q.FirstOrDefault();
+            return q.First();
+        }
+
+        public static SedimentType Find(int hfevaCategory)
+        {
+            var q = from s in SedimentArray where s.HFEVACategory == hfevaCategory select s;
+            return q.First();
         }
     }
 }

@@ -77,21 +77,30 @@ namespace ESME.Environment
             return false;
         }
 
+        internal class Tester<T> : IComparable<Tester<T>>
+        {
+            public T Coordinate { get; set; }
+            public double Distance { get; set; }
+            public int CompareTo(Tester<T> other) { return Distance.CompareTo(other.Distance); }
+            public override string ToString() { return string.Format("{0} : {1}", Coordinate, Distance); }
+        }
+
         public virtual bool ClosestTo(EarthCoordinate coordinate, out TCoordinate value)
         {
             value = null;
             if (Contains(coordinate))
             {
-                var closestCoordinate = new EarthCoordinate(Latitudes.First(), Longitudes.First());
-                foreach (var curCoordinate in Latitudes.SelectMany(latitude => Longitudes, (latitude, longitude) => new EarthCoordinate(latitude, longitude)).Where(curCoordinate => coordinate.DistanceTo(closestCoordinate) > coordinate.DistanceTo(curCoordinate)))
-                    closestCoordinate = curCoordinate;
-                var latIndex = Latitudes.IndexOf(coordinate.Latitude);
-                var lonIndex = Longitudes.IndexOf(coordinate.Longitude);
-                if ((latIndex >= 0) && (lonIndex >= 0))
-                {
-                    value = FieldData[lonIndex, latIndex];
-                    return true;
-                }
+                var result = new List<Tester<TCoordinate>>();
+                for (var lon = 0; lon < FieldData.GetLength(0); lon++)
+                    for (var lat = 0; lat < FieldData.GetLength(1); lat++)
+                        result.Add(new Tester<TCoordinate>
+                                   {
+                                       Coordinate = FieldData[lon, lat],
+                                       Distance = FieldData[lon, lat].DistanceTo(coordinate)
+                                   });
+                if (result.Count == 0) return false;
+                value = result.Min().Coordinate;
+                return true;
             }
             return false;
         }

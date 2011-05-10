@@ -26,7 +26,7 @@ namespace ESME.TransmissionLoss.RAM
 
         public override void Save(string path)
         {
-            var fileWriter = new StreamWriter(RandomFileName(path, ".ram"), false);
+            var fileWriter = new StreamWriter(Path.Combine(path, Filename + ".ramgeo"), false);
             fileWriter.Write(Serialize());
             fileWriter.Close();
         }
@@ -67,12 +67,10 @@ namespace ESME.TransmissionLoss.RAM
         /// </summary>
         /// <param name = "transmissionLossJob"></param>
         /// <param name = "environmentInformation"></param>
-        /// <param name = "transmissionLossSettings"></param>
+        /// <param name="appSettings"></param>
         /// <returns></returns>
         public static RamRunFile Create(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
         {
-            // todo: Later, change BellhopSettings to RAMSettings when we have some
-            // todo: May need changes to range and depth cell count to better reflect what RAM wants to see.
             var rangeCellCount = (int)Math.Round((transmissionLossJob.SoundSource.Radius / appSettings.BellhopSettings.RangeCellSize)) + 1;
 
             var ramRunFile = new RamRunFile
@@ -97,7 +95,8 @@ namespace ESME.TransmissionLoss.RAM
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var ramConfig = Ram.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], bottomProfiles[bearingIndex], environmentInformation.Sediment, maxCalculationDepthMeters, rangeCellCount, depthCellCount);
+                var sedimentType = environmentInformation.Sediment[transmissionLossJob.SoundSource];
+                var ramConfig = Ram.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], bottomProfiles[bearingIndex], sedimentType, maxCalculationDepthMeters, rangeCellCount, depthCellCount);
                 ramRunFile.TransmissionLossRunFileRadials.Add(new RamRunFileRadial
                                                               {
                                                                   BearingFromSourceDegrees = radialBearing,

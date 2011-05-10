@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows;
 using ESME.Data;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
@@ -22,7 +23,7 @@ namespace ESME.TransmissionLoss
             {
                 return _referencedTypes ?? (_referencedTypes = new[]
                                                                {
-                                                                   typeof (EarthCoordinate), typeof (AnalysisPoint), typeof (AcousticProperties), typeof (TransmissionLossRunFile), typeof(BellhopRunFile), typeof(RamRunFile), typeof(BellhopRunFileRadial), typeof(RamRunFileRadial)
+                                                                   typeof (EarthCoordinate), typeof (AnalysisPoint), typeof (AcousticProperties), typeof (TransmissionLossRunFile), typeof(BellhopRunFile), typeof(RamRunFile), typeof(BellhopRunFileRadial), typeof(RamRunFileRadial), typeof(Point)
                                                                });
             }
         }
@@ -53,7 +54,7 @@ namespace ESME.TransmissionLoss
                 case TransmissionLossAlgorithm.Bellhop:
                     result = BellhopRunFile.Create(transmissionLossJob, environmentInformation, appSettings);
                     break;
-                case TransmissionLossAlgorithm.RAM:
+                case TransmissionLossAlgorithm.RAMGEO:
                     result = RamRunFile.Create(transmissionLossJob, environmentInformation, appSettings);
                     break;
                 case TransmissionLossAlgorithm.CASS:

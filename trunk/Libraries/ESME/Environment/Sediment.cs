@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ESME.Model;
 using HRC.Navigation;
+using FileFormatException = System.IO.FileFormatException;
 
 namespace ESME.Environment
 {
@@ -49,6 +51,16 @@ namespace ESME.Environment
             }
         }
 
+        public new SedimentSample this[EarthCoordinate location]
+        {
+            get
+            {
+                SedimentSample result;
+                if (!ClosestTo(location, out result)) return null;
+                return result;
+            }
+        }
+
         private void FillTheDamnHoles()
         {
             var thereIsAtLeastOneHole = true;
@@ -60,7 +72,7 @@ namespace ESME.Environment
                 {
                     for (var lon = 0; lon < FieldData.GetLength(0); lon++)
                     {
-                        if (!FieldData[lon, lat].Data.HasValue)
+                        if ((!FieldData[lon, lat].Data.HasValue) || ((int)(FieldData[lon, lat].Data.Value) == 999))
                             if (!FillOneDamnHole(FieldData[lon, lat])) 
                                 thereIsAtLeastOneHole = true;
                     }
@@ -110,8 +122,8 @@ namespace ESME.Environment
                     return true;
                 }
 
-                curSample.Data = possibleValues.Max();
-                return true;
+                //curSample.Data = possibleValues.Max();
+                //return true;
             }
             // If no values were found, then don't put anything in the current cell, for now.
             return false;
@@ -201,6 +213,13 @@ namespace ESME.Environment
 
         internal int LatIndex { get; private set; }
         internal int LonIndex { get; private set; }
+
+        public static implicit operator SedimentType(SedimentSample sedimentSample)
+        {
+            if (!sedimentSample.Data.HasValue) throw new InvalidCastException("Cannot cast SedimentSample to SedimentType: Provided sample has no value");
+            return SedimentTypes.Find((int)(sedimentSample.Data.Value));
+        }
+
 
         public int CompareTo(SedimentSample other)
         {

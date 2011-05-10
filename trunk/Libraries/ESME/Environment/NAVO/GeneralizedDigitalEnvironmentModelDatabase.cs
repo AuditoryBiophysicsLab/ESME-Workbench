@@ -26,7 +26,23 @@ namespace ESME.Environment.NAVO
 
         public const float GridSpacing = 0.25f;
         public static string DatabasePath { get; set; }
-        public static string ExtractionProgramPath { get; set; }
+
+        static List<string> RequiredSupportFiles { get; set; }
+
+        static string _extractionProgramPath;
+        public static string ExtractionProgramPath
+        {
+            get { return _extractionProgramPath; }
+            set
+            {
+                if (_extractionProgramPath == value) return;
+                _extractionProgramPath = value;
+                RequiredSupportFiles = new List<string>();
+                var directory = Path.GetDirectoryName(_extractionProgramPath) ?? "";
+                RequiredSupportFiles.Add(Path.Combine(directory, "netcdf.dll"));
+                RequiredSupportFiles.Add(Path.Combine(directory, "NetCDF_Wrapper.dll"));
+            }
+        }
 
         static string OutputFileBaseName(string outputPath, int monthIndex) { return Path.Combine(outputPath, ((NAVOTimePeriod)monthIndex).ToString()); }
         static string OutputFileBaseName(string outputPath, NAVOTimePeriod timePeriod) { return Path.Combine(outputPath, timePeriod.ToString()); }
@@ -81,7 +97,7 @@ namespace ESME.Environment.NAVO
             const string offsetParamName = "add_offset";
             var commandArgs = string.Format("-in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11}  -dataout \"{12}\"",
                 sourceFileName, lonParamName, latParamName, extractionArea.North, extractionArea.South, extractionArea.East, extractionArea.West, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, outputFileName);
-            NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, Path.GetDirectoryName(outputFileName));
+            NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, Path.GetDirectoryName(outputFileName), RequiredSupportFiles);
         }
 
         public static void AverageMonthlyData(string outputPath, IEnumerable<int> monthIndices, NAVOTimePeriod outputTimePeriod)
