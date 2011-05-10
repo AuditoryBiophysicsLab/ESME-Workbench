@@ -71,23 +71,29 @@ namespace ESME.TransmissionLoss.CASS
 #endif
         }
 
-        public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IList<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName, NemoModeToAcousticModelNameMap modeToAcousticModelNameMap, float maxDepth)
+        public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IEnumerable<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName, NemoModeToAcousticModelNameMap modeToAcousticModelNameMap, float maxDepth)
         {
+            if ((analysisPoints == null) || (analysisPoints.Count == 0)) return;
             maxDepth = Math.Abs(maxDepth);
             var nemoScenario = nemoFile.Scenario;
+
             foreach (var timePeriod in timePeriods)
             {
+                // These are for CASS and RAM (Restricted NAVY TL models)
                 var curScenarioDataPath = Path.GetDirectoryName(nemoFile.FileName);
                 var curPropagationPath = Path.Combine(curScenarioDataPath, "Propagation");
                 var curTimePeriodPath = Path.Combine(curPropagationPath, timePeriod);
                 if (!Directory.Exists(curTimePeriodPath)) Directory.CreateDirectory(curTimePeriodPath);
+
                 foreach (var platform in nemoScenario.Platforms)
                 {
+                    // Delete any existing CASS files that might have the same name as the file we're about to write.
                     DeleteAcousticSimulatorFiles(curTimePeriodPath, timePeriod, platform);
                     foreach (var source in platform.Sources)
                     {
                         foreach (var mode in source.Modes)
                         {
+                            // Find the unique modes for the current platform/source pair
                             var modeSources = (from analysisPoint in analysisPoints
                                                from soundSource in analysisPoint.SoundSources
                                                let psmFields = soundSource.Name.Split('|')
@@ -97,7 +103,17 @@ namespace ESME.TransmissionLoss.CASS
                                                where (platform.Name.ToLower() == soundSourcePlatform.ToLower()) && (source.Name.ToLower() == soundSourceSource.ToLower()) && (mode.Name.ToLower() == soundSourceMode.ToLower()) && (soundSource.ShouldBeCalculated)
                                                select soundSource).ToList();
                             if (modeSources.Count > 0)
-                                WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, modeToAcousticModelNameMap[modeSources[0].Name].ToLower(), timePeriod, appSettings, nemoFile, cassBathymetryFileName, maxDepth);
+                            {
+                                var thisModel = modeToAcousticModelNameMap[modeSources[0].Name];
+                                switch (thisModel)
+                                {
+                                    case TransmissionLossAlgorithm.CASS:
+                                    case TransmissionLossAlgorithm.RAM:
+                                    //case TransmissionLossAlgorithm.REFMS:
+                                        WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, thisModel, timePeriod, appSettings, nemoFile, "bathymetry.txt", maxDepth);
+                                        break;
+                                }
+                            }
                         }
                     }
                 }
@@ -111,7 +127,7 @@ namespace ESME.TransmissionLoss.CASS
             foreach (var matchingFile in matchingFiles) File.Delete(matchingFile);
         }
 
-        static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, string simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, float maxDepth)
+        static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, float maxDepth)
         {
             var nemoScenario = nemoFile.Scenario;
             var simAreaFile = SimAreaCSV.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"));
@@ -131,7 +147,7 @@ namespace ESME.TransmissionLoss.CASS
                     writer.WriteLine("# creation date: {0}", DateTime.Now);
                     writer.WriteLine();
                     writer.WriteLine("*System Parms");
-                    if (simulatorName == "cass")
+                    if (simulatorName == TransmissionLossAlgorithm.CASS)
                     {
                         writer.WriteLine("Plot Files,{0}", appSettings.CASSSettings.GeneratePlotFiles ? "y" : "n");
                         writer.WriteLine("Binary Files,{0}", appSettings.CASSSettings.GenerateBinaryFiles ? "y" : "n");
@@ -141,7 +157,7 @@ namespace ESME.TransmissionLoss.CASS
                     writer.WriteLine("Data Directory,{0}", appSettings.ScenarioDataDirectory);
                     writer.WriteLine("*End System Parms");
                     writer.WriteLine();
-                    if (simulatorName == "cass")
+                    if (simulatorName == TransmissionLossAlgorithm.CASS)
                     {
                         writer.WriteLine("*CASS Parms");
                         writer.WriteLine("VOLUME ATTENUATION MODEL                ,FRANCOIS-GARRISON");
@@ -158,7 +174,7 @@ namespace ESME.TransmissionLoss.CASS
                         writer.WriteLine("Source System                           ,LAT-LON");
                         writer.WriteLine("*end Cass Parms");
                     }
-                    if (simulatorName == "ram")
+                    if (simulatorName == TransmissionLossAlgorithm.RAM)
                     {
                         writer.WriteLine("*RAM Parms");
                         writer.WriteLine("Speed Dial                              ,{0}", appSettings.RAMSettings.SpeedDial);
@@ -184,14 +200,14 @@ namespace ESME.TransmissionLoss.CASS
                 float stepSize;
                 switch (simulatorName)
                 {
-                    case "ram":
+                    case TransmissionLossAlgorithm.RAM:
                         writer.WriteLine("Enviro File                             ,env_{0}-lfbl-pe.dat", timePeriod.ToLower());
                         stepCount = appSettings.CASSSettings.MaximumDepth / appSettings.RAMSettings.DepthStepSize;
                         if (stepCount > 21) stepSize = appSettings.CASSSettings.MaximumDepth / 21;
                         else stepSize = appSettings.RAMSettings.DepthStepSize;
                         writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.RAMSettings.MaximumDepth, stepSize);
                         break;
-                    case "cass":
+                    case TransmissionLossAlgorithm.CASS:
                     default:
                         writer.WriteLine("Enviro File                             ,env_{0}.dat", timePeriod.ToLower());
                         stepCount = appSettings.CASSSettings.MaximumDepth / appSettings.CASSSettings.DepthStepSize;
@@ -218,13 +234,13 @@ namespace ESME.TransmissionLoss.CASS
                 writer.WriteLine("SOURCE LEVEL                            ,{0:0.000} DB", mode.SourceLevel);
                 switch (simulatorName)
                 {
-                    case "ram":
+                    case TransmissionLossAlgorithm.RAM:
                         stepCount = mode.Radius / appSettings.RAMSettings.RangeStepSize;
                         if (stepCount > 1024) stepSize = mode.Radius / 1024;
                         else stepSize = appSettings.RAMSettings.RangeStepSize;
                         writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
                         break;
-                    case "cass":
+                    case TransmissionLossAlgorithm.CASS:
                     default:
                         stepCount = mode.Radius / appSettings.CASSSettings.RangeStepSize;
                         if (stepCount > 1024) stepSize = mode.Radius / 1024;
@@ -241,12 +257,12 @@ namespace ESME.TransmissionLoss.CASS
             }
             switch (simulatorName)
             {
-                case "ram":
+                case TransmissionLossAlgorithm.RAM:
                     if (!string.IsNullOrEmpty(appSettings.NAEMOTools.RAMSupportJarFile) && !string.IsNullOrEmpty(appSettings.NAEMOTools.RAMExecutable)) 
                         using (var writer = new StreamWriter(batchFilePath))
                             writer.WriteLine("java -Dlog4j.configuration=ram-log4j.xml -jar \"{0}\" {1} \"{2}\"", appSettings.NAEMOTools.RAMSupportJarFile, inputFileName, appSettings.NAEMOTools.RAMExecutable);
                     break;
-                case "cass":
+                case TransmissionLossAlgorithm.CASS:
                 default:
                     if (!string.IsNullOrEmpty(appSettings.CASSSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.CASSSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSSettings.CASSExecutablePath)) 
                         using (var writer = new StreamWriter(batchFilePath)) 

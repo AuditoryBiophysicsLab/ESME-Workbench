@@ -340,10 +340,16 @@ namespace ESME.Environment.NAVO
                                         WorkerReportsProgress = true,
                                     };
                 _backgroundWorker.DoWork += ExtractAreas;
-                _backgroundWorker.RunWorkerCompleted += delegate
+                _backgroundWorker.RunWorkerCompleted += (s, e) =>
                                                         {
                                                             IsStarted = false;
                                                             ProgressPercent = 100;
+                                                            if (e.Cancelled) Status = "Canceled";
+                                                            else if (e.Error != null)
+                                                            {
+                                                                Status = "Error";
+                                                                throw new ApplicationException(string.Format("Error extracting environmental data"), e.Error);
+                                                            }
                                                         };
                 if (runWorkerCompletedEventHandler != null) _backgroundWorker.RunWorkerCompleted += runWorkerCompletedEventHandler;
                 _backgroundWorker.RunWorkerAsync();

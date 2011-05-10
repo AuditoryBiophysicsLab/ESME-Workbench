@@ -27,7 +27,7 @@
                                    Margin="5 0 5 0"/>
                         <TextBlock Grid.Column="1" Background="Black"/>
                         <ComboBox Grid.Column="2" 
-                                  ItemsSource="{Binding ValidModelNames}" 
+                                  ItemsSource="{Binding ValidModels}" 
                                   SelectedIndex="{Binding SelectedIndex}"
                                   Margin="5 0 5 0"/>
                     </Grid>

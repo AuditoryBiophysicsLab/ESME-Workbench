@@ -2,16 +2,16 @@
 using System.Linq;
 namespace ESME.TransmissionLoss
 {
-    public class NemoModeToAcousticModelNameMap : List<HRC.Utility.KeyValuePair<string, string>>
+    public class NemoModeToAcousticModelNameMap : List<HRC.Utility.KeyValuePair<string, TransmissionLossAlgorithm>>
     {
         public NemoModeToAcousticModelNameMap() {  }
-        public NemoModeToAcousticModelNameMap(IEnumerable<string> distinctModePSMNames, string defaultAcousticModelName)
+        public NemoModeToAcousticModelNameMap(IEnumerable<string> distinctModePSMNames, TransmissionLossAlgorithm defaultAcousticModel)
         {
             foreach (var curMode in distinctModePSMNames)
-                Add(new HRC.Utility.KeyValuePair<string, string>(curMode, defaultAcousticModelName));
+                Add(new HRC.Utility.KeyValuePair<string, TransmissionLossAlgorithm>(curMode, defaultAcousticModel));
         }
 
-        public void UpdateModes(IEnumerable<string> distinctModePSMNames, string defaultAcousticModelName)
+        public void UpdateModes(IEnumerable<string> distinctModePSMNames, TransmissionLossAlgorithm defaultAcousticModel)
         {
             var orphansFound = true;
 
@@ -36,10 +36,10 @@ namespace ESME.TransmissionLoss
 
             // Add any modes in the new master list that are not already in the dictionary
             foreach (var curMode in distinctModePSMNames)
-                if (this[curMode] == null) Add(new HRC.Utility.KeyValuePair<string, string>(curMode, defaultAcousticModelName));
+                if (this[curMode] == TransmissionLossAlgorithm.NoneAssigned) Add(new HRC.Utility.KeyValuePair<string, TransmissionLossAlgorithm>(curMode, defaultAcousticModel));
         }
 
-        public string this[string key]
+        public TransmissionLossAlgorithm this[string key]
         {
             get { return this.Where(curEntry => curEntry.Key == key).Select(curEntry => curEntry.Value).FirstOrDefault(); }
             set
@@ -49,7 +49,7 @@ namespace ESME.TransmissionLoss
                     curEntry.Value = value;
                     return;
                 }
-                Add(new HRC.Utility.KeyValuePair<string, string>(key, value));
+                Add(new HRC.Utility.KeyValuePair<string, TransmissionLossAlgorithm>(key, value));
             }
         }
     }

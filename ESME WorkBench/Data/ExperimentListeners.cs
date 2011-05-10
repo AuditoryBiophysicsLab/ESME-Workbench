@@ -226,27 +226,16 @@ namespace ESMEWorkBench.Data
             MediatorMessage.Send(MediatorMessage.SetTransmissionLossBathymetry,Bathymetry);
         }
 
-        [MediatorMessageSink(MediatorMessage.ExportAnalysisPointsToCASS)]
-        void ExportAnalysisPointsToCASS(bool dummy)
+        public void ExportAnalysisPoints(bool dummy)
         {
             if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0)) return;
             var soundspeedFiles = Directory.GetFiles(EnvironmentRoot, "*-soundspeed.xml");
             var timePeriods = soundspeedFiles.Select(curFile => Path.GetFileName(curFile).Split('-')[0]).ToList();
-            CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, timePeriods, AnalysisPoints, NemoFile, "bathymetry.txt", NemoModeToAcousticModelNameMap, Bathymetry.Minimum.Data);
-            //CASSFiles.WriteCASSInputFiles(Globals.AppSettings, timePeriods, AnalysisPoints, NemoFile, "bathymetry.txt");
-        }
-
-        [MediatorMessageSink(MediatorMessage.ExportAnalysisPointsToBellhop)]
-        void ExportAnalysisPointsToBellhop(bool dummy)
-        {
-            if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0)) return;
-            var soundspeedFiles = Directory.GetFiles(EnvironmentRoot, "*-soundspeed.xml");
-            var timePeriods = soundspeedFiles.Select(curFile => Path.GetFileName(curFile).Split('-')[0]).ToList();
-            var bottomTypeData = Environment2DData.FromCHB(SedimentFileName, 1);
+            var bottomTypeData = Sediment.FromSedimentCHB(SedimentFileName);
             foreach (var timePeriod in timePeriods)
             {
-                var soundSpeedFile = string.Format("{0}-soundspeed.xml", timePeriod);
-                var windSpeedFile = string.Format("{0}-wind.txt", timePeriod);
+                var soundSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-soundspeed.xml", timePeriod));
+                var windSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-wind.txt", timePeriod));
                 var soundSpeedField = new SoundSpeedField(SerializedOutput.Load(soundSpeedFile, GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes), NemoFile.Scenario.TimeFrame);
                 var windSpeedField = SurfaceMarineGriddedClimatologyDatabase.Parse(windSpeedFile);
                 var environmentInfo = new EnvironmentInformation
@@ -254,7 +243,7 @@ namespace ESMEWorkBench.Data
                                           LocationName = NemoFile.Scenario.SimAreaName,
                                           SoundSpeedFieldName = timePeriod,
                                           Bathymetry = Bathymetry,
-                                          BottomType = bottomTypeData,
+                                          Sediment = bottomTypeData,
                                           WindSpeed = windSpeedField,
                                           SoundSpeedField = soundSpeedField,
                                       };
@@ -262,18 +251,27 @@ namespace ESMEWorkBench.Data
                 {
                     foreach (var soundSource in analysisPoint.SoundSources)
                     {
-                        var jobID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
-                        var metadata = string.Format("Transmission loss calculation.\r\nScenario file: {0}\r\nAnalysis point coordinates: {1}\r\nMode name: {2}\r\nTime period: {3}\r\nAlgorithm: {4}", NemoFile.FileName, analysisPoint, soundSource.Name, timePeriod, TransmissionLossAlgorithm.Bellhop);
-                        var job = new TransmissionLossJob
-                                  {
-                                      SoundSource = soundSource,
-                                      Name = soundSource.SoundSourceID,
-                                      Metadata = metadata,
-                                      Filename = jobID,
-                                      MaxDepth = (int)Globals.AppSettings.CASSSettings.MaximumDepth,
-                                  };
-                        var runfile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.Bellhop, job, environmentInfo, Globals.AppSettings);
-                        runfile.Save(TransmissionLossJobRoot);
+                        var algorithm = NemoModeToAcousticModelNameMap[soundSource.Name];
+                        switch (algorithm)
+                        {
+                            case TransmissionLossAlgorithm.Bellhop:
+                            case TransmissionLossAlgorithm.RAMGEO:
+                                var jobID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+                                var metadata = string.Format("Transmission loss calculation.\r\nScenario file: {0}\r\nAnalysis point coordinates: {1}\r\nMode name: {2}\r\nTime period: {3}\r\nAlgorithm: {4}", NemoFile.FileName, analysisPoint, soundSource.Name, timePeriod, TransmissionLossAlgorithm.Bellhop);
+                                var job = new TransmissionLossJob
+                                          {
+                                              SoundSource = soundSource,
+                                              Name = soundSource.SoundSourceID,
+                                              Metadata = metadata,
+                                              Filename = jobID,
+                                              MaxDepth = (int) Globals.AppSettings.CASSSettings.MaximumDepth,
+                                          };
+                                var runfile = TransmissionLossRunFile.Create(algorithm, job, environmentInfo, Globals.AppSettings);
+                                runfile.Save(TransmissionLossJobRoot);
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }

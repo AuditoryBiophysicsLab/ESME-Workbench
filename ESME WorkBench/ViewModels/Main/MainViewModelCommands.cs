@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Windows.Input;
 using Cinch;
 using ESME;
+using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
@@ -590,6 +591,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                                               where timePeriod.IsChecked
                                                                                                                                                               select timePeriod.Caption).ToList();
                                                                                                                                    CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt", _experiment.NemoModeToAcousticModelNameMap, _experiment.Bathymetry.Minimum.Data);
+                                                                                                                                   _experiment.ExportAnalysisPoints(true);
                                                                                                                                    //CASSFiles.WriteCASSInputFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt");
 
                                                                                                                                }
@@ -611,11 +613,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _configureAcousticModelsCommand ?? (_configureAcousticModelsCommand = new SimpleCommand<object, object>(delegate { return _experiment.NemoFile != null; }, delegate
                                                                                                                                                                                   {
-                                                                                                                                                                                      var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(_experiment.NemoModeToAcousticModelNameMap, new List<string>
-                                                                                                                                                                                                                                                                                                                    {
-                                                                                                                                                                                                                                                                                                                        "CASS",
-                                                                                                                                                                                                                                                                                                                        "RAM"
-                                                                                                                                                                                                                                                                                                                    });
+                                                                                                                                                                                      var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(_experiment.NemoModeToAcousticModelNameMap, Globals.ValidTransmissionLossAlgorithms);
                                                                                                                                                                                       var result = _visualizerService.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);
                                                                                                                                                                                       if (result.HasValue && result.Value)
                                                                                                                                                                                       {

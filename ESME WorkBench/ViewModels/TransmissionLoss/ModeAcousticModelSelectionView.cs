@@ -8,13 +8,13 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
     public class ModeAcousticModelSelectionViewModel : ViewModelBase
     {
         readonly NemoModeToAcousticModelNameMap _modeMap;
-        public ModeAcousticModelSelectionViewModel(NemoModeToAcousticModelNameMap modeMap, List<string> validModelNames)
+        public ModeAcousticModelSelectionViewModel(NemoModeToAcousticModelNameMap modeMap, List<TransmissionLossAlgorithm> validModels)
         {
             _modeMap = modeMap;
-            ValidModelNames = validModelNames;
+            ValidModels = validModels;
             ModeToAcousticModelMapList = new List<ModeToAcousticModelMapViewModel>();
             foreach (var curMode in modeMap)
-                ModeToAcousticModelMapList.Add(new ModeToAcousticModelMapViewModel(curMode.Key, curMode.Value, validModelNames));
+                ModeToAcousticModelMapList.Add(new ModeToAcousticModelMapViewModel(curMode.Key, curMode.Value, validModels));
         }
 
         #region public List<ModeToAcousticModelMapViewModel> ModeToAcousticModelMapList { get; set; }
@@ -35,21 +35,21 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public List<string> ValidModelNames { get; set; }
+        #region public List<TransmissionLossAlgorithm> ValidModels { get; set; }
 
-        public List<string> ValidModelNames
+        public List<TransmissionLossAlgorithm> ValidModels
         {
-            get { return _validModelNames; }
+            get { return _validModels; }
             set
             {
-                if (_validModelNames == value) return;
-                _validModelNames = value;
+                if (_validModels == value) return;
+                _validModels = value;
                 NotifyPropertyChanged(ValidModelNamesChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ValidModelNamesChangedEventArgs = ObservableHelper.CreateArgs<ModeAcousticModelSelectionViewModel>(x => x.ValidModelNames);
-        List<string> _validModelNames;
+        static readonly PropertyChangedEventArgs ValidModelNamesChangedEventArgs = ObservableHelper.CreateArgs<ModeAcousticModelSelectionViewModel>(x => x.ValidModels);
+        List<TransmissionLossAlgorithm> _validModels;
 
         #endregion
 
@@ -60,7 +60,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate
                                                                          {
                                                                              // Write the modified entries back to the original list
-                                                                             foreach (var mapEntry in ModeToAcousticModelMapList) _modeMap[mapEntry.ModeName] = mapEntry.ModelName;
+                                                                             foreach (var mapEntry in ModeToAcousticModelMapList) _modeMap[mapEntry.ModeName] = mapEntry.Model;
                                                                              CloseActivePopUpCommand.Execute(true);
                                                                          })); }
         }
@@ -68,17 +68,16 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         SimpleCommand<object, object> _ok;
 
         #endregion
-
     }
 
     public class ModeToAcousticModelMapViewModel : ViewModelBase
     {
-        public ModeToAcousticModelMapViewModel(string modeName, string modelName, List<string> validModelNames)
+        public ModeToAcousticModelMapViewModel(string modeName, TransmissionLossAlgorithm model, List<TransmissionLossAlgorithm> validModels)
         {
             ModeName = modeName;
-            ModelName = modelName;
-            ValidModelNames = validModelNames;
-            SelectedIndex = validModelNames.IndexOf(ModelName);
+            Model = model;
+            ValidModels = validModels;
+            SelectedIndex = validModels.IndexOf(Model);
         }
 
         #region public string ModeName { get; set; }
@@ -99,21 +98,21 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public string ModelName { get; set; }
+        #region public TransmissionLossAlgorithm Model { get; set; }
 
-        public string ModelName
+        public TransmissionLossAlgorithm Model
         {
-            get { return _modelName; }
+            get { return _model; }
             set
             {
-                if (_modelName == value) return;
-                _modelName = value;
+                if (_model == value) return;
+                _model = value;
                 NotifyPropertyChanged(ModelNameChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ModelNameChangedEventArgs = ObservableHelper.CreateArgs<ModeToAcousticModelMapViewModel>(x => x.ModelName);
-        string _modelName;
+        static readonly PropertyChangedEventArgs ModelNameChangedEventArgs = ObservableHelper.CreateArgs<ModeToAcousticModelMapViewModel>(x => x.Model);
+        TransmissionLossAlgorithm _model;
 
         #endregion
 
@@ -121,10 +120,10 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         public int SelectedIndex
         {
-            get { return ValidModelNames.IndexOf(ModelName); }
+            get { return ValidModels.IndexOf(Model); }
             set
             {
-                ModelName = ValidModelNames[value];
+                Model = ValidModels[value];
                 NotifyPropertyChanged(SelectedIndexChangedEventArgs);
             }
         }
@@ -133,23 +132,22 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public List<string> ValidModelNames { get; set; }
+        #region public List<TransmissionLossAlgorithm> ValidModels { get; set; }
 
-        public List<string> ValidModelNames
+        public List<TransmissionLossAlgorithm> ValidModels
         {
-            get { return _validModelNames; }
+            get { return _validModels; }
             set
             {
-                if (_validModelNames == value) return;
-                _validModelNames = value;
+                if (_validModels == value) return;
+                _validModels = value;
                 NotifyPropertyChanged(ValidModelNamesChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ValidModelNamesChangedEventArgs = ObservableHelper.CreateArgs<ModeToAcousticModelMapViewModel>(x => x.ValidModelNames);
-        List<string> _validModelNames;
+        static readonly PropertyChangedEventArgs ValidModelNamesChangedEventArgs = ObservableHelper.CreateArgs<ModeToAcousticModelMapViewModel>(x => x.ValidModels);
+        List<TransmissionLossAlgorithm> _validModels;
 
         #endregion
-
     }
 }
