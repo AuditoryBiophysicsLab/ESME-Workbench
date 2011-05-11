@@ -33,7 +33,7 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IUIVisualizerService _visualizerService;
         Experiment _experiment;
-        //BellhopQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
+        //TransmissionLossQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
         Dispatcher _dispatcher;
         #endregion
 

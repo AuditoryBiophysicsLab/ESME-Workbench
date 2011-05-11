@@ -16,7 +16,7 @@ namespace ESMEWorkBench
         static Globals()
         {
             AppSettings.ApplicationName = App.Name;
-            AppSettings = AppSettings.Load(AppSettings.AppSettingsFile, null);
+            AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
             AppSettings.SetDefaults();
         }
 

@@ -46,7 +46,7 @@
 					<GroupBox Header="Scenario Simulator Options"
 					          Margin="5"
 					          Padding="5">
-                        <Views:ScenarioSimulatorUserControlView ScenarioSimulatorSettings="{Binding AppSettings.ScenarioSimulatorSettings}"/>
+                        <Views:ScenarioSimulatorUserControlView DataContext="{Binding AppSettings.ScenarioSimulatorSettings}"/>
 					<!--	<StackPanel Orientation="Vertical">
 							<TextBlock Text="Number of Iterations"
 							           Margin="5 0" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 using Cinch;
@@ -13,15 +14,16 @@ using HRC.Utility;
 
 namespace ESME.TransmissionLoss
 {
-    public class AnalysisPoint : EarthCoordinate, IEquatable<AnalysisPoint>, IHasIDField, ISupportValidation
+    public class AnalysisPoint : EarthCoordinate, IEquatable<AnalysisPoint>, ISupportValidation
     {
         public static WeakReference<Environment2DData> Bathymetry = new WeakReference<Environment2DData>(null);
 
-        public AnalysisPoint()
+        private AnalysisPoint()
         {
             TransmissionLossJobs = new ObservableCollection<TransmissionLossJob>();
             TransmissionLossFields = new ObservableCollection<TransmissionLossField>();
             SoundSources = new List<SoundSource>();
+            AnalysisPointID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
         }
 
         public AnalysisPoint(EarthCoordinate location) : this()
@@ -30,11 +32,15 @@ namespace ESME.TransmissionLoss
             Longitude = location.Longitude;
         }
 
+        /// <summary>
+        ///   The presumptively-unique analysis point ID.
+        /// </summary>
+        public string AnalysisPointID { get; set; }
+
         public List<SoundSource> SoundSources { get; set; }
 
         #region public ObservableCollection<TransmissionLossJob> TransmissionLossJobs { get; set; }
         [XmlIgnore]
-
         public ObservableCollection<TransmissionLossJob> TransmissionLossJobs
         {
             get { return _transmissionLossJobs; }
@@ -54,7 +60,6 @@ namespace ESME.TransmissionLoss
 
         #region public ObservableCollection<TransmissionLossField> TransmissionLossFields { get; private set; }
         [XmlIgnore]
-
         public ObservableCollection<TransmissionLossField> TransmissionLossFields
         {
             get { return _transmissionLossFields; }
@@ -82,13 +87,6 @@ namespace ESME.TransmissionLoss
                 if (!SoundSources[sourceIndex].Equals(other.SoundSources[sourceIndex])) return false;
             return true;
         }
-
-        #endregion
-
-        #region IHasIDField Members
-
-        [XmlElement("AnalysisPointID")]
-        public ulong IDField { get; set; }
 
         #endregion
 
@@ -185,6 +183,4 @@ namespace ESME.TransmissionLoss
         #endregion
 
     }
-
-    public class NewAnalysisPointList : UniqueAutoIncrementList<AnalysisPoint> {}
 }

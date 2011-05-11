@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if false
+using System.Collections.Generic;
 using System.Xml.Serialization;
 using ESME.TransmissionLoss;
 
@@ -36,3 +37,4 @@ namespace ESME.Model
         }
     }
 }
+#endif

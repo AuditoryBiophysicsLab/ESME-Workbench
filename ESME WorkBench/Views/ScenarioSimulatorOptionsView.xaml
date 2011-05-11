@@ -23,7 +23,7 @@
 			        DockPanel.Dock="Right"
 			        Command="{Binding RunCommand}" />
 		</DockPanel>
-        <Views:ScenarioSimulatorUserControlView ScenarioSimulatorSettings="{Binding ScenarioSimulatorSettings}"/>
+        <Views:ScenarioSimulatorUserControlView DataContext="{Binding ScenarioSimulatorSettings}"/>
         
 	<!--	<StackPanel Orientation="Vertical">
 			<TextBlock Text="Number of Monte Carlo Iterations"

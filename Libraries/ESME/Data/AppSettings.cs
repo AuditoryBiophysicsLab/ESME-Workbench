@@ -21,6 +21,8 @@ namespace ESME.Data
 
         static string _appSettingsDirectory;
 
+        FileSystemWatcher _fileSystemWatcher;
+
         public static string ApplicationName
         {
             get { return _appName; }
@@ -65,6 +67,23 @@ namespace ESME.Data
         public void Save() { Save(FileName, ReferencedTypes); }
 
         public void Reload() { Reload(ReferencedTypes); }
+
+        public static AppSettings Load(string fileName)
+        {
+            var results = Load(fileName, ReferencedTypes);
+#if false
+            results._fileSystemWatcher = new FileSystemWatcher(Path.GetDirectoryName(fileName) ?? "", Path.GetFileNameWithoutExtension(fileName) ?? "" + ".*")
+                                         {
+                                             IncludeSubdirectories = false,
+                                             NotifyFilter = NotifyFilters.LastWrite,
+                                         };
+            results._fileSystemWatcher.Changed += (s, e) =>
+                                                  {
+                                                      Console.WriteLine(e.Name + " changed");
+                                                  };
+#endif
+            return results;
+        }
 
         #region public string ScenarioDataDirectory { get; set; }
 

@@ -225,7 +225,6 @@ namespace ESME.Views.TransmissionLoss
             var radialProgress = 100f/runFile.TransmissionLossRunFileRadials.Count;
             TotalProgress = 0f;
 
-            TransmissionLossField.IDField = runFile.IDField;
             Parallel.ForEach<TransmissionLossRunFileRadial, float>(runFile.TransmissionLossRunFileRadials, () => 0, (radial, loopstate, progress) =>
             {
                 var localRadialNum = Interlocked.Increment(ref radialNum);

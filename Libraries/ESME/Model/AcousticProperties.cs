@@ -1,9 +1,10 @@
 ﻿using System;
 using ESME.NEMO;
+using ESME.TransmissionLoss;
 
 namespace ESME.Model
 {
-    public class AcousticProperties : IEquatable<AcousticProperties>
+    public class AcousticProperties : IEquatable<AcousticProperties>, IEquatable<TransmissionLossField>
     {
         public AcousticProperties() { }
 
@@ -65,5 +66,15 @@ namespace ESME.Model
         }
 
         #endregion
+
+        public bool Equals(TransmissionLossField other) 
+        {
+            if (SourceDepth != other.SourceDepth) return false;
+            if (VerticalBeamWidth != other.VerticalBeamWidth) return false;
+            if (DepressionElevationAngle != other.DepressionElevationAngle) return false;
+            if (LowFrequency != other.LowFrequency) return false;
+            if (HighFrequency != other.HighFrequency) return false;
+            return true;
+        }
     }
 }

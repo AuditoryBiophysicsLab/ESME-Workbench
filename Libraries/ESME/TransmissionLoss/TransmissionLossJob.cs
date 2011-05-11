@@ -1,9 +1,9 @@
-﻿using System.Xml.Serialization;
-using ESME.Model;
+﻿using System;
+using System.Xml.Serialization;
 
 namespace ESME.TransmissionLoss
 {
-    public class TransmissionLossJob : IHasIDField
+    public class TransmissionLossJob : IEquatable<TransmissionLossJob>
     {
         public SoundSource SoundSource { get; set; }
 
@@ -18,15 +18,14 @@ namespace ESME.TransmissionLoss
 
         public string Filename { get; set; }
 
+        /// <summary>
+        ///   The presumptively-unique analysis point ID.
+        /// </summary>
+        public string AnalysisPointID { get; set; }
 
         [XmlIgnore]
         public TransmissionLossField TransmissionLossField { get; set; }
 
-        #region IHasIDField Members
-
-        [XmlElement("TransmissionLossJobID")]
-        public ulong IDField { get; set; }
-
-        #endregion
+        public bool Equals(TransmissionLossJob other) { return SoundSource.Equals(other.SoundSource) && MaxDepth.Equals(other.MaxDepth) && AnalysisPointID.Equals(other.AnalysisPointID); }
     }
 }

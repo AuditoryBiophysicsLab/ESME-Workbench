@@ -132,10 +132,10 @@
       <DependentUpon>TransmissionLossRadialView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TransmissionLossViewer\TransmissionLossRadialViewModel.cs" />
-    <Compile Include="TransmissionLoss\BellhopQueueCalculatorView.xaml.cs">
-      <DependentUpon>BellhopQueueCalculatorView.xaml</DependentUpon>
+    <Compile Include="TransmissionLoss\TransmissionLossQueueView.xaml.cs">
+      <DependentUpon>TransmissionLossQueueView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TransmissionLoss\BellhopQueueCalculatorViewModel.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossQueueCalculatorViewModel.cs" />
     <Compile Include="TransmissionLoss\BellhopRadialCalculatorViewModel.cs" />
     <Compile Include="TransmissionLoss\ModeAcousticModelSelectionView.xaml.cs">
       <DependentUpon>ModeAcousticModelSelectionView.xaml</DependentUpon>
@@ -200,7 +200,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="TransmissionLoss\BellhopQueueCalculatorView.xaml">
+    <Page Include="TransmissionLoss\TransmissionLossQueueView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -998,7 +998,6 @@ namespace ESMEWorkBench.Data
         void ProcessTransmissionLossFieldFile(string fileName)
         {
             var newField = TransmissionLossField.LoadHeader(fileName);
-            if (TransmissionLossFields.Any(field => field.IDField == newField.IDField)) return;
             TransmissionLossFields.Add(newField);
             if (_isInitialized) MatchTransmissionLossFieldToAnalysisPoints(newField);
         }

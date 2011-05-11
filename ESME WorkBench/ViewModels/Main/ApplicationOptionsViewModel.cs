@@ -11,6 +11,7 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         public ApplicationOptionsViewModel()
         {
+            Globals.AppSettings.Reload();
             AppSettings = Globals.AppSettings;
 
             OkCommand = new SimpleCommand<object, object>(delegate
