@@ -103,7 +103,6 @@ namespace ESME.TransmissionLoss.RAM
                                                                   Configuration = ramConfig,
                                                               });
             }
-            ramRunFile.IDField = transmissionLossJob.IDField;
             return ramRunFile;
         }
     }

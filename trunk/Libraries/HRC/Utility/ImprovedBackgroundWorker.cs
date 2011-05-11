@@ -1,195 +1,208 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.ComponentModel;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace HRC.Utility
 {
     public class ImprovedBackgroundWorker
     {
-        private Thread theThread;
-        private ParameterizedThreadStart theParams;
-        private ThreadPriority thePriority = ThreadPriority.Normal;
-        private bool isCancellationPending, isBusy;
-        private bool hasCompleted = false;
-        private int progressPercent = 0;
+        Thread _theThread;
+        ParameterizedThreadStart _theParams;
+        ThreadPriority _thePriority = ThreadPriority.Normal;
+
+        bool _isCancellationPending,
+             _isBusy;
+
+        bool _hasCompleted;
+        int _progressPercent;
 
         #region Constructors
+
         public ImprovedBackgroundWorker()
         {
-            isCancellationPending = false;
-            isBusy = false;
+            _isCancellationPending = false;
+            _isBusy = false;
         }
 
-        public ImprovedBackgroundWorker(string TaskName,
-                                        DoWorkEventHandler doWorkDelegate, EventHandler runWorkerCompletedDelegate,
-                                        MultiProgressDialog MultiProgressDialog)
+        public ImprovedBackgroundWorker(string taskName, DoWorkEventHandler doWorkDelegate, EventHandler runWorkerCompletedDelegate, MultiProgressDialog multiProgressDialog) { Initialize(taskName, doWorkDelegate, runWorkerCompletedDelegate, multiProgressDialog); }
+
+        public ImprovedBackgroundWorker(string taskName, DoWorkEventHandler doWorkDelegate, EventHandler runWorkerCompletedDelegate, MultiProgressDialog multiProgressDialog, object runWorkerParameter)
         {
-            Initialize(TaskName, doWorkDelegate, runWorkerCompletedDelegate, MultiProgressDialog);
+            Initialize(taskName, doWorkDelegate, runWorkerCompletedDelegate, multiProgressDialog);
+            RunWorkerAsync(runWorkerParameter);
         }
 
-        public ImprovedBackgroundWorker(string TaskName, 
-                                        DoWorkEventHandler doWorkDelegate, EventHandler runWorkerCompletedDelegate, 
-                                        MultiProgressDialog MultiProgressDialog, object RunWorkerParameter)
+        public ImprovedBackgroundWorker(string taskName, DoWorkEventHandler doWorkDelegate, DoWorkEventHandler runWorkerCompletedDelegate, MultiProgressDialog multiProgressDialog) { Initialize(taskName, doWorkDelegate, runWorkerCompletedDelegate, multiProgressDialog); }
+
+        public ImprovedBackgroundWorker(string taskName, DoWorkEventHandler doWorkDelegate, DoWorkEventHandler runWorkerCompletedDelegate, MultiProgressDialog multiProgressDialog, object runWorkerParameter)
         {
-            Initialize(TaskName, doWorkDelegate, runWorkerCompletedDelegate, MultiProgressDialog);
-            this.RunWorkerAsync(RunWorkerParameter);
+            Initialize(taskName, doWorkDelegate, runWorkerCompletedDelegate, multiProgressDialog);
+            RunWorkerAsync(runWorkerParameter);
         }
 
-        public ImprovedBackgroundWorker(string TaskName,
-                                        DoWorkEventHandler doWorkDelegate, DoWorkEventHandler runWorkerCompletedDelegate,
-                                        MultiProgressDialog MultiProgressDialog)
-        {
-            Initialize(TaskName, doWorkDelegate, runWorkerCompletedDelegate, MultiProgressDialog);
-        }
-
-        public ImprovedBackgroundWorker(string TaskName,
-                                        DoWorkEventHandler doWorkDelegate, DoWorkEventHandler runWorkerCompletedDelegate,
-                                        MultiProgressDialog MultiProgressDialog, object RunWorkerParameter)
-        {
-            Initialize(TaskName, doWorkDelegate, runWorkerCompletedDelegate, MultiProgressDialog);
-            this.RunWorkerAsync(RunWorkerParameter);
-        }
         #endregion
 
         #region Events
+
         public event DoWorkEventHandler DoWork;
-        protected void OnDoWork(DoWorkEventArgs e)
+
+        void OnDoWork(DoWorkEventArgs e)
         {
             if (DoWork != null)
             {
-                theParams = new ParameterizedThreadStart(WorkerThread);
-                theThread = new Thread(theParams);
-                theThread.IsBackground = true;
-                theThread.Priority = thePriority;
-                theThread.Start(e);
+                _theParams = new ParameterizedThreadStart(WorkerThread);
+                _theThread = new Thread(_theParams)
+                             {
+                                 IsBackground = true,
+                                 Priority = _thePriority
+                             };
+                _theThread.Start(e);
             }
         }
 
         public event ProgressChangedEventHandler ProgressChanged;
-        protected void OnProgressChanged(ProgressChangedEventArgs e)
+        void OnProgressChanged(ProgressChangedEventArgs e)
         {
             if (ProgressChanged != null)
-                ProgressChanged(this, e);
+            {
+                if (Dispatcher == null) ProgressChanged(this, e);
+                else Dispatcher.BeginInvoke(ProgressChanged, this, e);
+            }
         }
 
         public event EventHandler RunWorkerCompleted;
+
         protected void OnRunWorkerCompleted()
         {
-            hasCompleted = true;
-            if (RunWorkerCompleted != null)
-                RunWorkerCompleted(this, new EventArgs());
+            _hasCompleted = true;
+            if (RunWorkerCompleted != null) RunWorkerCompleted(this, new EventArgs());
         }
 
         public event DoWorkEventHandler RunWorkerCompletedWithArg;
+
         protected void OnRunWorkerCompletedWithArg(DoWorkEventArgs e)
         {
-            hasCompleted = true;
-            if (RunWorkerCompletedWithArg != null)
-                RunWorkerCompletedWithArg(this, e);
+            _hasCompleted = true;
+            if (RunWorkerCompletedWithArg != null) RunWorkerCompletedWithArg(this, e);
         }
 
         #endregion
 
         #region Public methods
+
         public void RunWorkerAsync(Object arg)
         {
-            DoWorkEventArgs dw = new DoWorkEventArgs(arg);
+            var dw = new DoWorkEventArgs(arg);
             OnDoWork(dw);
         }
 
         public void CancelAsync()
         {
-            if (WorkerSupportsCancellation)
-                isCancellationPending = true;
-            else
-                throw new InvalidOperationException("Worker thread does not support cancellation");
+            if (WorkerSupportsCancellation) _isCancellationPending = true;
+            else throw new InvalidOperationException("Worker thread does not support cancellation");
         }
 
-        public void ReportProgress(int percentProgress)
+        public void ReportProgress(int percentProgress, object userState = null)
         {
-            ReportProgress(percentProgress, null);
+            _progressPercent = percentProgress;
+            if (WorkerReportsProgress) OnProgressChanged(new ProgressChangedEventArgs(percentProgress, userState));
+            else throw new InvalidOperationException("Worker thread does not support progress reporting");
         }
 
-        public void ReportProgress(int percentProgress, object userState)
-        {
-            progressPercent = percentProgress;
-            if (WorkerReportsProgress)
-                OnProgressChanged(new ProgressChangedEventArgs(percentProgress, userState));
-            else
-                throw new InvalidOperationException("Worker thread does not support progress reporting");
-        }
         #endregion
 
         #region Public Properties
+
+        public Dispatcher Dispatcher { get; set; }
+
+        public int MinValue { get; set; }
+        public int MaxValue { get; set; }
+
+        int _value = 0;
+        public int Value
+        {
+            get { return _value; }
+            set
+            {
+                if (value == _value) return;
+                if ((value < MinValue) || (value > MaxValue)) throw new ArgumentOutOfRangeException("Value out of range");
+                _value = value;
+                ProgressPercent = Value / (MaxValue - MinValue);
+            }
+        }
+
         public int ProgressPercent
         {
-            get { return progressPercent; }
+            get { return _progressPercent; }
             set { ReportProgress(value); }
         }
 
-        public ThreadPriority Priority 
-        { 
-            get { return thePriority; } 
-            set 
+        public ThreadPriority Priority
+        {
+            get { return _thePriority; }
+            set
             {
-                if ((theThread != null) && (theThread.ThreadState == ThreadState.Running))
-                    theThread.Priority = value;
-                thePriority = value; 
-            } 
+                if ((_theThread != null) && (_theThread.ThreadState == ThreadState.Running)) _theThread.Priority = value;
+                _thePriority = value;
+            }
         }
 
         public string TaskName;
-        public bool CancellationPending { get { return isCancellationPending; } }
-        public bool IsBusy { get { return isBusy; } }
-        public bool HasCompleted { get { return hasCompleted; } }
-        public bool WorkerReportsProgress = false;
-        public bool WorkerSupportsCancellation = false;
+
+        public bool CancellationPending
+        {
+            get { return _isCancellationPending; }
+        }
+
+        public bool IsBusy
+        {
+            get { return _isBusy; }
+        }
+
+        public bool HasCompleted
+        {
+            get { return _hasCompleted; }
+        }
+
+        public bool WorkerReportsProgress;
+        public bool WorkerSupportsCancellation;
+
         #endregion
 
         #region Private methods
 
-        private void Initialize(string TaskName,
-                                DoWorkEventHandler doWorkDelegate, EventHandler runWorkerCompletedDelegate,
-                                MultiProgressDialog MultiProgressDialog)
+        void Initialize(string taskName, DoWorkEventHandler doWorkDelegate, EventHandler runWorkerCompletedDelegate, MultiProgressDialog multiProgressDialog)
         {
-            this.TaskName = TaskName;
+            TaskName = taskName;
 
-            if (doWorkDelegate != null)
-                this.DoWork += doWorkDelegate;
+            if (doWorkDelegate != null) DoWork += doWorkDelegate;
 
-            if (runWorkerCompletedDelegate != null)
-                this.RunWorkerCompleted += runWorkerCompletedDelegate;
+            if (runWorkerCompletedDelegate != null) RunWorkerCompleted += runWorkerCompletedDelegate;
 
-            if (MultiProgressDialog != null)
-                MultiProgressDialog.RegisterBackgroundWorker(this);
+            if (multiProgressDialog != null) multiProgressDialog.RegisterBackgroundWorker(this);
         }
 
-        private void Initialize(string TaskName,
-                                DoWorkEventHandler doWorkDelegate, DoWorkEventHandler runWorkerCompletedDelegate,
-                                MultiProgressDialog MultiProgressDialog)
+        void Initialize(string taskName, DoWorkEventHandler doWorkDelegate, DoWorkEventHandler runWorkerCompletedDelegate, MultiProgressDialog multiProgressDialog)
         {
-            this.TaskName = TaskName;
+            TaskName = taskName;
 
-            if (doWorkDelegate != null)
-                this.DoWork += doWorkDelegate;
+            if (doWorkDelegate != null) DoWork += doWorkDelegate;
 
-            if (runWorkerCompletedDelegate != null)
-                this.RunWorkerCompletedWithArg += runWorkerCompletedDelegate;
+            if (runWorkerCompletedDelegate != null) RunWorkerCompletedWithArg += runWorkerCompletedDelegate;
 
-            if (MultiProgressDialog != null)
-                MultiProgressDialog.RegisterBackgroundWorker(this);
+            if (multiProgressDialog != null) multiProgressDialog.RegisterBackgroundWorker(this);
         }
 
-        private void WorkerThread(Object e)
+        void WorkerThread(Object e)
         {
-            isBusy = true;
-            DoWork(this, (DoWorkEventArgs)e);
+            _isBusy = true;
+            DoWork(this, (DoWorkEventArgs) e);
             OnRunWorkerCompleted();
-            OnRunWorkerCompletedWithArg((DoWorkEventArgs)e);
-            isBusy = false;
+            OnRunWorkerCompletedWithArg((DoWorkEventArgs) e);
+            _isBusy = false;
         }
+
         #endregion
     }
 }

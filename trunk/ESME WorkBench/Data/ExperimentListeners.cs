@@ -251,22 +251,31 @@ namespace ESMEWorkBench.Data
                 {
                     foreach (var soundSource in analysisPoint.SoundSources)
                     {
+                        if (!soundSource.ShouldBeCalculated) continue;
                         var algorithm = NemoModeToAcousticModelNameMap[soundSource.Name];
                         switch (algorithm)
                         {
                             case TransmissionLossAlgorithm.Bellhop:
                             case TransmissionLossAlgorithm.RAMGEO:
-                                var jobID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
                                 var metadata = string.Format("Transmission loss calculation.\r\nScenario file: {0}\r\nAnalysis point coordinates: {1}\r\nMode name: {2}\r\nTime period: {3}\r\nAlgorithm: {4}", NemoFile.FileName, analysisPoint, soundSource.Name, timePeriod, TransmissionLossAlgorithm.Bellhop);
                                 var job = new TransmissionLossJob
                                           {
                                               SoundSource = soundSource,
                                               Name = soundSource.SoundSourceID,
                                               Metadata = metadata,
-                                              Filename = jobID,
+                                              Filename = soundSource.SoundSourceID,
+                                              AnalysisPointID = analysisPoint.AnalysisPointID,
                                               MaxDepth = (int) Globals.AppSettings.CASSSettings.MaximumDepth,
                                           };
+                                // Create the job
                                 var runfile = TransmissionLossRunFile.Create(algorithm, job, environmentInfo, Globals.AppSettings);
+
+                                // delete any files that have the same base filename
+                                var filesToDelete = Directory.GetFiles(TransmissionLossJobRoot, runfile.Name + ".*");
+                                foreach (var file in filesToDelete)
+                                    File.Delete(file);
+
+                                // Save the job
                                 runfile.Save(TransmissionLossJobRoot);
                                 break;
                             default:

@@ -9,11 +9,10 @@ using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss
 {
-    public class TransmissionLossField : IHasIDField
+    public class TransmissionLossField : IEquatable<SoundSource>
     {
         public string Name { get; private set; }
         public string Metadata { get; private set; }
-        public ulong IDField { get; set; }
         public float SourceLevel { get; private set; }
         public float Latitude { get; private set; }
         public float Longitude { get; private set; }
@@ -108,7 +107,6 @@ namespace ESME.TransmissionLoss
             HighFrequency = runFile.TransmissionLossJob.SoundSource.AcousticProperties.HighFrequency;
             MaxCalculationDepth = runFile.TransmissionLossJob.MaxDepth;
             Radius = runFile.TransmissionLossJob.SoundSource.Radius;
-            IDField = runFile.IDField;
             //Depths = runFile.
             //Ranges = runFile.
             //Filename = Path.Combine(Field.DataDirectoryPath, Field.BinaryFileName);
@@ -169,7 +167,6 @@ namespace ESME.TransmissionLoss
                 Name = stream.ReadString();
                 Metadata = stream.ReadString();
                 SourceLevel = stream.ReadSingle();
-                IDField = stream.ReadUInt64();
                 Latitude = stream.ReadSingle();
                 Longitude = stream.ReadSingle();
                 EarthCoordinate = new EarthCoordinate(Latitude, Longitude);
@@ -252,7 +249,6 @@ namespace ESME.TransmissionLoss
                     stream.Write(Name);
                     stream.Write(Metadata);
                     stream.Write(SourceLevel);
-                    stream.Write(IDField);
                     stream.Write(Latitude);
                     stream.Write(Longitude);
                     stream.Write(SourceDepth);
@@ -282,18 +278,10 @@ namespace ESME.TransmissionLoss
         bool _dataIsLoaded;
         bool _saved;
 
-    }
-#if false
-    //todo: impelement properly -- > called in ESME_Experiment.cs
-    public class TransmissionLossFieldList : List<TransmissionLossField>
-    {
-        internal void Initialize(NewAnalysisPointList analysisPoints)
+        public bool Equals(SoundSource soundSource)
         {
-
-            foreach (var f in this)
-                f.AnalysisPointID = analysisPoints.Find(a => a.IDField == f.AnalysisPointID);
+            var location = new EarthCoordinate(Latitude, Longitude);
+            return (SourceLevel.Equals(soundSource.SourceLevel) && location.Equals(soundSource) && soundSource.AcousticProperties.Equals(this));
         }
-
-    } 
-#endif
+    }
 }

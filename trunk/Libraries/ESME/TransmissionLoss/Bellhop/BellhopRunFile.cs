@@ -11,7 +11,6 @@ namespace ESME.TransmissionLoss.Bellhop
 {
     public class BellhopRunFile : TransmissionLossRunFile
     {
-        
         #region Load and Save
 
         public new static BellhopRunFile Load(string filename)
@@ -26,7 +25,7 @@ namespace ESME.TransmissionLoss.Bellhop
 
         public override void Save(string path)
         {
-            var fileWriter = new StreamWriter(Path.Combine(path, Filename + ".bellhop"), false);
+            var fileWriter = new StreamWriter(Path.Combine(path, Name + ".bellhop"), false);
             fileWriter.Write(Serialize());
             fileWriter.Close();
         }
@@ -86,7 +85,6 @@ namespace ESME.TransmissionLoss.Bellhop
                 var bellhopConfig = Bellhop.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], sedimentType, maxCalculationDepthMeters, rangeCellCount, depthCellCount, false, false, false, 1500);
                 bellhopRunFile.TransmissionLossRunFileRadials.Add(new BellhopRunFileRadial {BearingFromSourceDegrees = radialBearing, Configuration = bellhopConfig, BottomProfile = bottomProfiles[bearingIndex].ToBellhopString(),});
             }
-            bellhopRunFile.IDField = transmissionLossJob.IDField;
             return bellhopRunFile;
         }
     }

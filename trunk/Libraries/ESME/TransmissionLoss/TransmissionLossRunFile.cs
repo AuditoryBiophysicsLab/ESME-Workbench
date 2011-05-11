@@ -10,7 +10,7 @@ using HRC.Navigation;
 
 namespace ESME.TransmissionLoss
 {
-    public abstract class TransmissionLossRunFile : IHasIDField
+    public abstract class TransmissionLossRunFile : IEquatable<TransmissionLossField>
     {
         protected TransmissionLossRunFile()
         {
@@ -30,20 +30,32 @@ namespace ESME.TransmissionLoss
 
         static Type[] _referencedTypes;
 
-        public static TransmissionLossRunFile Load(string filename)
+        public static TransmissionLossRunFile Load(string filename, out TransmissionLossAlgorithm transmissionLossAlgorithm)
         {
-            if (filename == null) throw new ArgumentNullException(@"TransmissionLossRunFile.Load: filename is null");
-            var extension = Path.GetExtension(filename).ToLower();
+            if (filename == null) throw new ArgumentNullException("TransmissionLossRunFile.Load: filename is null");
+            var extension = (Path.GetExtension(filename) ?? "").ToLower();
             switch (extension)
             {
                 case ".bellhop":
+                    transmissionLossAlgorithm = TransmissionLossAlgorithm.Bellhop;
                     return BellhopRunFile.Load(filename);
-                case ".ram":
+                case ".ramgeo":
+                    transmissionLossAlgorithm = TransmissionLossAlgorithm.RAMGEO;
                     return RamRunFile.Load(filename);
                 case ".cass":
+                    transmissionLossAlgorithm = TransmissionLossAlgorithm.CASS;
+                    break;
+                case ".ram":
+                    transmissionLossAlgorithm = TransmissionLossAlgorithm.RAM;
+                    break;
+                case ".refms":
+                    transmissionLossAlgorithm = TransmissionLossAlgorithm.REFMS;
+                    break;
                 default:
-                    throw new NotImplementedException(string.Format("Loading a TransmissionLossRunFile with an extension of \"{0}\" is not supported", extension));
+                    transmissionLossAlgorithm = TransmissionLossAlgorithm.NoneAssigned;
+                    break;
             }
+            return null;
         }
 
         public static TransmissionLossRunFile Create(TransmissionLossAlgorithm transmissionLossAlgorithm, TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
@@ -59,6 +71,7 @@ namespace ESME.TransmissionLoss
                     break;
                 case TransmissionLossAlgorithm.CASS:
                 case TransmissionLossAlgorithm.REFMS:
+                case TransmissionLossAlgorithm.RAM:
                 default:
                     throw new NotImplementedException(string.Format("Creating a TransmissionLossRunFile using an algorithm of {0} is not currently supported", transmissionLossAlgorithm));
             }
@@ -88,9 +101,9 @@ namespace ESME.TransmissionLoss
 
         public string Name { get; set; }
         public string Metadata { get; set; }
-        public ulong IDField { get; set; }
         public string Filename { get; set; }
 
         public List<TransmissionLossRunFileRadial> TransmissionLossRunFileRadials { get; set; }
+        public bool Equals(TransmissionLossField other) { return other.Equals(TransmissionLossJob.SoundSource); }
     }
 }

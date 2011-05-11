@@ -5,20 +5,18 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
-             xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
-             xmlns:Views="clr-namespace:ESMEWorkBench.Views"
              mc:Ignorable="d">
 	<DockPanel LastChildFill="True">
 		<StackPanel Orientation="Vertical">
 			<TextBlock Text="Number of Monte Carlo Iterations"
 			           Margin="5 0" />
-			<TextBox Text="{Binding Path=ScenarioSimulatorSettings.Iterations, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+			<TextBox Text="{Binding Iterations}"
 			         Margin="5 0">
 				<i:Interaction.Behaviors>
 					<cinch:NumericTextBoxBehaviour />
 				</i:Interaction.Behaviors>
 			</TextBox>
-			<CheckBox IsChecked="{Binding Path=ScenarioSimulatorSettings.IsRandomized, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+			<CheckBox IsChecked="{Binding IsRandomized}"
 			          Margin="5 10">
 				Randomize Ship Tracks
 			</CheckBox>
@@ -27,7 +25,7 @@
 			          Padding="5">
 				<StackPanel Orientation="Vertical">
 					<TextBlock Text="Cutoff Value (dB SPL)" />
-					<TextBox Text="{Binding Path=ScenarioSimulatorSettings.DecibelCutoff, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					<TextBox Text="{Binding DecibelCutoff}"
 					         Margin="0 0 0 5"
 					         ToolTip="Mammals with values below this level will not be recorded in simulation output.">
 						<i:Interaction.Behaviors>
@@ -35,14 +33,14 @@
 						</i:Interaction.Behaviors>
 					</TextBox>
 					<TextBlock Text="Simulator Output Level" />
-                    <TextBox Text="{Binding Path=ScenarioSimulatorSettings.SimOutputLevel, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					<TextBox Text="{Binding SimOutputLevel}"
 					         Margin="0 0 0 5">
 						<i:Interaction.Behaviors>
 							<cinch:NumericTextBoxBehaviour />
 						</i:Interaction.Behaviors>
 					</TextBox>
 					<TextBlock Text="Number of Parallel Simulations" />
-					<TextBox Text="{Binding Path=ScenarioSimulatorSettings.ParallelSimulations, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					<TextBox Text="{Binding ParallelSimulations}"
 					         Margin="0 0 0 5">
 						<i:Interaction.Behaviors>
 							<cinch:NumericTextBoxBehaviour />
@@ -50,47 +48,46 @@
 					</TextBox>
 
 					<TextBlock Text="Output file buffer size (Mb)" />
-					<TextBox Text="{Binding Path=ScenarioSimulatorSettings.OutputBufferSize}"
+					<TextBox Text="{Binding OutputBufferSize}"
 					         Margin="0 0 0 5 ">
 						<i:Interaction.Behaviors>
 							<cinch:NumericTextBoxBehaviour />
 						</i:Interaction.Behaviors>
 					</TextBox>
 
-                    <CheckBox Content="Cache all animals in memory" 
-                              IsChecked="{Binding Path=ScenarioSimulatorSettings.ReadAllMammals, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
-					          Margin="0 0 0 5"/>
-                    <CheckBox Content="Clip animals outside footprint" 
-                              IsChecked="{Binding Path=ScenarioSimulatorSettings.ClipOutsideFootprint, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					<CheckBox Content="Cache all animals in memory"
+					          IsChecked="{Binding ReadAllMammals}"
 					          Margin="0 0 0 5" />
-                    <CheckBox Content="Log the simulation run" 
-                              ToolTip="If you check this option, you must ensure that a properly-formatted Log4j configuration file, named sim-log4j.xml exists in the same directory as scene-sim.jar"
-                              IsChecked="{Binding Path=ScenarioSimulatorSettings.CreateSimulationLogfile, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					<CheckBox Content="Clip animals outside footprint"
+					          IsChecked="{Binding ClipOutsideFootprint}"
 					          Margin="0 0 0 5" />
-                    <CheckBox Content="Compute optimum file buffer sizes"
-                              IsChecked="{Binding Path=ScenarioSimulatorSettings.OptimizeBuffer, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					<CheckBox Content="Log the simulation run"
+					          ToolTip="If you check this option, you must ensure that a properly-formatted Log4j configuration file, named sim-log4j.xml exists in the same directory as scene-sim.jar"
+					          IsChecked="{Binding CreateSimulationLogfile}"
+					          Margin="0 0 0 5" />
+					<CheckBox Content="Compute optimum file buffer sizes"
+					          IsChecked="{Binding OptimizeBuffer}"
 					          Margin="0 0 0 2" />
 					<Label Content="Largest Species File Size (bytes)"
 					       Margin="20 -5 0 -5"
-					       IsEnabled="{Binding Path=ScenarioSimulatorSettings.NotOptimizeBuffer, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}" />
-					<TextBox Text="{Binding Path=ScenarioSimulatorSettings.SpeciesFileSize, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					       IsEnabled="{Binding NotOptimizeBuffer}" />
+					<TextBox Text="{Binding SpeciesFileSize}"
 					         Margin="25 0 0 0"
-					         IsEnabled="{Binding Path=ScenarioSimulatorSettings.NotOptimizeBuffer, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}">
+					         IsEnabled="{Binding NotOptimizeBuffer}">
 						<i:Interaction.Behaviors>
 							<cinch:NumericTextBoxBehaviour />
 						</i:Interaction.Behaviors>
 					</TextBox>
 					<Label Content="Largest CASS File Size (bytes)"
 					       Margin="20 -5 0 -5"
-					       IsEnabled="{Binding Path=ScenarioSimulatorSettings.NotOptimizeBuffer, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}" />
-					<TextBox Text="{Binding Path=ScenarioSimulatorSettings.CASSFileSize, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}"
+					       IsEnabled="{Binding NotOptimizeBuffer}" />
+					<TextBox Text="{Binding CASSFileSize}"
 					         Margin="25 0 0 0"
-					         IsEnabled="{Binding Path=ScenarioSimulatorSettings.NotOptimizeBuffer, RelativeSource={RelativeSource AncestorType={x:Type Views:ScenarioSimulatorUserControlView}}}">
+					         IsEnabled="{Binding NotOptimizeBuffer}">
 						<i:Interaction.Behaviors>
 							<cinch:NumericTextBoxBehaviour />
 						</i:Interaction.Behaviors>
 					</TextBox>
-
 				</StackPanel>
 			</Expander>
 		</StackPanel>

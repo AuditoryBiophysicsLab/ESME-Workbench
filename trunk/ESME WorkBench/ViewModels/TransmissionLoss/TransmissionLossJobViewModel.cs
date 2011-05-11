@@ -385,7 +385,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
                            MaxDepth = _maxCalculationDepth,
                            Name = Name,
                            Metadata = Metadata,
-                           IDField = IDField,
                        };
             }
         }

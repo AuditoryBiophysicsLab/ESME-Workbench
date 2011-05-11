@@ -11,13 +11,13 @@ using Cinch;
 
 namespace ESME.Views.TransmissionLoss
 {
-    public class BellhopQueueCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    public class TransmissionLossQueueCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware
     {
         #region public constructor
 
         readonly string _outputDirectory;
         readonly IMessageBoxService _messageBoxService;
-        public BellhopQueueCalculatorViewModel(string outputDirectory, IMessageBoxService messageBoxService)
+        public TransmissionLossQueueCalculatorViewModel(string outputDirectory, IMessageBoxService messageBoxService)
         {
             _messageBoxService = messageBoxService;
             try
@@ -50,7 +50,7 @@ namespace ESME.Views.TransmissionLoss
             }
         }
 
-        static readonly PropertyChangedEventArgs BellhopFieldCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<BellhopQueueCalculatorViewModel>(x => x.BellhopFieldCalculatorViewModels);
+        static readonly PropertyChangedEventArgs BellhopFieldCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.BellhopFieldCalculatorViewModels);
         ObservableCollection<TransmissionLossFieldCalculatorViewModel> _bellhopFieldCalculatorViewModels;
 
         void BellhopFieldCalculatorViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
