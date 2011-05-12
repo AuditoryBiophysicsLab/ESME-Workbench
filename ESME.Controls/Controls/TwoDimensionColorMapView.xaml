@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="ESME.Views.Controls.TwoDimensionColorMapView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+             xmlns:controls="clr-namespace:ESME.Views.Controls"
+               mc:Ignorable="d"
+             d:DesignHeight="300"
+             d:DesignWidth="300">
+    <DockPanel x:Name="SliceView">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Height="22">
+            <TextBlock Text="{Binding ColorMapViewModel.CurMinValue, StringFormat=CurMin: {0.000}}" />
+            <TextBlock Text="{Binding ColorMapViewModel.CurMaxValue, StringFormat=CurMax: {0.000}}" />
+        </StackPanel>
+        <DockPanel DockPanel.Dock="Left">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Bottom"
+				           MinHeight="{Binding ElementName=XAxis, Path=ActualHeight}" />
+                <controls:DataAxisControl x:Name="YAxis"
+				                   DataContext ="{Binding YAxis}"/>
+            </DockPanel>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Right">
+            <DockPanel Width="80">
+                <TextBlock DockPanel.Dock="Bottom"
+				           MinHeight="{Binding ElementName=XAxis, Path=ActualHeight}" />
+                <DockPanel LastChildFill="False"
+				           Margin="5 0 0 0">
+                    <controls:DataAxisControl DataContext="{Binding ColorAxis}"/>
+                    <controls:ColorBarView ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
+					                       Maximum="{Binding ColorMapViewModel.MaxValue}"
+					                       Minimum="{Binding ColorMapViewModel.MinValue}"
+					                       CurrentMaximum="{Binding ColorMapViewModel.CurMaxValue}"
+					                       CurrentMinimum="{Binding ColorMapViewModel.CurMinValue}"
+					                       DockPanel.Dock="Right"
+					                       MinWidth="50" />
+                </DockPanel>
+            </DockPanel>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <controls:DataAxisControl x:Name="XAxis"
+			                  DataContext="{Binding XAxis}"/>
+        </DockPanel>
+
+        <Grid>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SizeChanged">
+                    <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
+                </i:EventTrigger>
+                <!-- <i:EventTrigger EventName="SourceUpdated">
+                    <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
+                </i:EventTrigger> -->
+            </i:Interaction.Triggers>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="234" />
+            </Grid.RowDefinitions>
+            <Image Source="{Binding WriteableBitmap}"
+			       Stretch="Fill"
+			       Grid.Column="0"
+			       Grid.Row="0" />
+            <Canvas Grid.Row="0"
+			        Grid.Column="0"
+			        x:Name="OverlayCanvas">
+                <!-- <Canvas.RenderTransform>
+                    <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"/>
+                </Canvas.RenderTransform> -->
+                <Path Stroke="BlanchedAlmond"
+				      StrokeThickness="3"
+				      Data="{Binding BottomProfileGeometry}"
+                      Visibility="{Binding CanvasPathVisibility}"/>
+            </Canvas>
+
+        </Grid>
+    </DockPanel>
+</UserControl>

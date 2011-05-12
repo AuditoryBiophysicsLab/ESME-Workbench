@@ -88,6 +88,9 @@
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DataAxis.cs" />
+    <Compile Include="Controls\DataAxisControl.xaml.cs">
+      <DependentUpon>DataAxisControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
       <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
     </Compile>
@@ -122,7 +125,7 @@
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TestViewModel.cs" />
-    <Compile Include="TransmissionLossViewer\ColorMapViewModel.cs" />
+    <Compile Include="Controls\ColorMapViewModel.cs" />
     <Compile Include="TransmissionLossViewer\TransmissionLossFieldListItemViewModel.cs" />
     <Compile Include="TransmissionLossViewer\TransmissionLossFieldView.xaml.cs">
       <DependentUpon>TransmissionLossFieldView.xaml</DependentUpon>
@@ -132,6 +135,10 @@
       <DependentUpon>TransmissionLossRadialView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TransmissionLossViewer\TransmissionLossRadialViewModel.cs" />
+    <Compile Include="Controls\TwoDimensionColorMapView.xaml.cs">
+      <DependentUpon>TwoDimensionColorMapView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TwoDimensionColorMapViewModel.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossQueueView.xaml.cs">
       <DependentUpon>TransmissionLossQueueView.xaml</DependentUpon>
     </Compile>
@@ -151,6 +158,10 @@
     <Page Include="Controls\ColorBarView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\DataAxisControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\FileOrDirectorySetting.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -199,6 +210,10 @@
     <Page Include="TransmissionLossViewer\TransmissionLossRadialView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\TwoDimensionColorMapView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="TransmissionLoss\TransmissionLossQueueView.xaml">
       <Generator>MSBuild:Compile</Generator>
