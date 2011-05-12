@@ -13,6 +13,7 @@ using Cinch;
 using ESME.Environment;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
+using ESME.Views.Controls;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
 

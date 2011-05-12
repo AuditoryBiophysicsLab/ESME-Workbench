@@ -8,7 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Cinch;
 
-namespace ESME.Views.TransmissionLossViewer
+namespace ESME.Views.Controls
 {
     public class ColorMapViewModel : ViewModelBase
     {
