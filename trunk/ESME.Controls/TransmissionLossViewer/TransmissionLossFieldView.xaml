@@ -56,12 +56,15 @@
                 <Controls:TwoDimensionColorMapView x:Name="SliceView"/>
             </DockPanel>
         </TabItem>
-			         
-        <TabItem Header="Minimum"
-			         IsEnabled="False" />
-        <TabItem Header="Maximum"
-			         IsEnabled="False" />
-        <TabItem Header="Mean"
-			         IsEnabled="False" />
+
+        <TabItem Header="Minimum">
+            <Controls:TwoDimensionColorMapView/>
+        </TabItem>
+        <TabItem Header="Maximum">
+            <Controls:TwoDimensionColorMapView/>
+        </TabItem>
+        <TabItem Header="Mean">
+            <Controls:TwoDimensionColorMapView/>
+        </TabItem>
     </TabControl>
 </UserControl>
