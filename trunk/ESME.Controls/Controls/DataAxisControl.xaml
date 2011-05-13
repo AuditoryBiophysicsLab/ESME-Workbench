@@ -6,7 +6,7 @@
              xmlns:controls="clr-namespace:ESME.Views.Controls"
              mc:Ignorable="d"
              d:DesignHeight="300"
-             d:DesignWidth="300">
+             d:DesignWidth="50">
 	<controls:DataAxis AxisLabel="{Binding Label}"
 	                   AxisLocation="{Binding AxisLocation}"
 	                   StartValue="{Binding MinValue}"

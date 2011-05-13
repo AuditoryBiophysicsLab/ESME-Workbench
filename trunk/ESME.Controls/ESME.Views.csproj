@@ -91,6 +91,7 @@
     <Compile Include="Controls\DataAxisControl.xaml.cs">
       <DependentUpon>DataAxisControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DataAxisControlViewModel.cs" />
     <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
       <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
     </Compile>

@@ -1,63 +1,64 @@
 ﻿using System.ComponentModel;
 using System.Windows.Media.Imaging;
 using Cinch;
-using MEFedMVVM.Common;
+using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.Controls
 {
-    class TwoDimensionColorMapViewModel:ViewModelBase
+    [ExportViewModel("TwoDimensionColorMapViewModel")]
+    public class TwoDimensionColorMapViewModel : ViewModelBase, IDesignTimeAware
     {
-        #region public DataAxisViewModel XAxis { get; set; }
+        #region public DataAxisControlViewModel XAxisControl { get; set; }
 
-        public DataAxisViewModel XAxis
+        public DataAxisControlViewModel XAxisControl
         {
-            get { return _xAxis ?? (_xAxis = new DataAxisViewModel()); }
+            get { return _xAxisControl ?? (_xAxisControl = new DataAxisControlViewModel()); }
             set
             {
-                if (_xAxis == value) return;
-                _xAxis = value;
+                if (_xAxisControl == value) return;
+                _xAxisControl = value;
                 NotifyPropertyChanged(XAxisChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs XAxisChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.XAxis);
-        DataAxisViewModel _xAxis;
+        static readonly PropertyChangedEventArgs XAxisChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.XAxisControl);
+        DataAxisControlViewModel _xAxisControl;
 
         #endregion
 
-        #region public DataAxisViewModel YAxis { get; set; }
+        #region public DataAxisControlViewModel YAxisControl { get; set; }
 
-        public DataAxisViewModel YAxis
+        public DataAxisControlViewModel YAxisControl
         {
-            get { return _yAxis ?? (_yAxis = new DataAxisViewModel()); }
+            get { return _yAxisControl ?? (_yAxisControl = new DataAxisControlViewModel()); }
             set
             {
-                if (_yAxis == value) return;
-                _yAxis = value;
+                if (_yAxisControl == value) return;
+                _yAxisControl = value;
                 NotifyPropertyChanged(YAxisChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs YAxisChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.YAxis);
-        DataAxisViewModel _yAxis;
+        static readonly PropertyChangedEventArgs YAxisChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.YAxisControl);
+        DataAxisControlViewModel _yAxisControl;
 
         #endregion
 
-        #region public DataAxisViewModel ColorAxis { get; set; }
+        #region public DataAxisControlViewModel ColorAxisControl { get; set; }
 
-        public DataAxisViewModel ColorAxis
+        public DataAxisControlViewModel ColorAxisControl
         {
-            get { return _colorAxis ?? (_colorAxis = new DataAxisViewModel()); }
+            get { return _colorAxisControl ?? (_colorAxisControl = new DataAxisControlViewModel()); }
             set
             {
-                if (_colorAxis == value) return;
-                _colorAxis = value;
+                if (_colorAxisControl == value) return;
+                _colorAxisControl = value;
                 NotifyPropertyChanged(ColorAxisChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ColorAxisChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.ColorAxis);
-        DataAxisViewModel _colorAxis;
+        static readonly PropertyChangedEventArgs ColorAxisChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.ColorAxisControl);
+        DataAxisControlViewModel _colorAxisControl;
 
         #endregion
 
@@ -144,112 +145,13 @@ namespace ESME.Views.Controls
 
         #endregion
 
-        public TwoDimensionColorMapViewModel()
+        public void DesignTimeInitialization() 
         {
-            if (Designer.IsInDesignMode)
-            {
-                XAxis.AxisLocation = DataAxis.AxisLocationEnum.Top;
-                XAxis.Label = "XAxis";
-                YAxis.AxisLocation = DataAxis.AxisLocationEnum.Right;
-                ColorAxis.AxisLocation = DataAxis.AxisLocationEnum.Left;
-                ColorAxis.TickValueFormat = "0.#";
-            }
+            XAxisControl.AxisLocation = DataAxis.AxisLocationEnum.Top;
+            XAxisControl.Label = "XAxisControl";
+            YAxisControl.AxisLocation = DataAxis.AxisLocationEnum.Right;
+            ColorAxisControl.AxisLocation = DataAxis.AxisLocationEnum.Left;
+            ColorAxisControl.TickValueFormat = "0.#";
         }
-
-    }
-    public class DataAxisViewModel:ViewModelBase
-    {
-        #region public string Label { get; set; }
-
-        public string Label
-        {
-            get { return _label; }
-            set
-            {
-                if (_label == value) return;
-                _label = value;
-                NotifyPropertyChanged(LabelChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs LabelChangedEventArgs = ObservableHelper.CreateArgs<DataAxisViewModel>(x => x.Label);
-        string _label;
-
-        #endregion
-
-        #region public double MaxValue { get; set; }
-
-        public double MaxValue
-        {
-            get { return _maxValue; }
-            set
-            {
-                if (_maxValue == value) return;
-                _maxValue = value;
-                NotifyPropertyChanged(MaxValueChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs MaxValueChangedEventArgs = ObservableHelper.CreateArgs<DataAxisViewModel>(x => x.MaxValue);
-        double _maxValue;
-
-        #endregion
-
-        #region public double MinValue { get; set; }
-
-        public double MinValue
-        {
-            get { return _minValue; }
-            set
-            {
-                if (_minValue == value) return;
-                _minValue = value;
-                NotifyPropertyChanged(MinValueChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs MinValueChangedEventArgs = ObservableHelper.CreateArgs<DataAxisViewModel>(x => x.MinValue);
-        double _minValue;
-
-        #endregion
-
-        #region public string TickValueFormat { get; set; }
-
-        public string TickValueFormat
-        {
-            get { return _tickValueFormat; }
-            set
-            {
-                if (_tickValueFormat == value) return;
-                _tickValueFormat = value;
-                NotifyPropertyChanged(TickValueFormatChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs TickValueFormatChangedEventArgs = ObservableHelper.CreateArgs<DataAxisViewModel>(x => x.TickValueFormat);
-        string _tickValueFormat = "0";
-
-        #endregion
-
-
-        #region public AxisLocationEnum AxisLocation { get; set; }
-
-        public DataAxis.AxisLocationEnum AxisLocation
-        {
-            get { return _axisLocation; }
-            set
-            {
-                if (_axisLocation == value) return;
-                _axisLocation = value;
-                NotifyPropertyChanged(AxisLocationEnumChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs AxisLocationEnumChangedEventArgs = ObservableHelper.CreateArgs<DataAxisViewModel>(x => x.AxisLocation);
-        DataAxis.AxisLocationEnum _axisLocation;
-
-        #endregion
-
-
     }
 }
