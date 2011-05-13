@@ -237,14 +237,19 @@ namespace ESME.Views.Controls
             for (x = _startLocation + _minorTickSpacing; x < _endLocation - 1; x += _minorTickSpacing) newTicks.Add(new AxisTick(x, _minorTickLength, null, null));
 
             // Add a major at the start
-            newTicks.Add(new AxisTick(_startLocation + (_lineThickness/2), _majorTickLength, StartValue, format));
+            var value = StartValue;
+            if (DisplayAbsoluteValue) value = Math.Abs(value);
+            newTicks.Add(new AxisTick(_startLocation + (_lineThickness/2), _majorTickLength, value, format));
 
             // Add the interior major ticks
-            double value = StartValue + (valueStep*_majorTickSpacing);
-            for (x = _startLocation + _majorTickSpacing; x < _endLocation - 1; x += _majorTickSpacing, value += (valueStep*_majorTickSpacing)) newTicks.Add(new AxisTick(x, _majorTickLength, value, format));
+            value = StartValue + (valueStep*_majorTickSpacing);
+            if (DisplayAbsoluteValue) value = Math.Abs(value);
+            for (x = _startLocation + _majorTickSpacing; x < _endLocation - 1; x += _majorTickSpacing, value += (valueStep * _majorTickSpacing)) newTicks.Add(new AxisTick(x, _majorTickLength, value, format));
 
             // Add a major tick at the end
-            newTicks.Add(new AxisTick(_endLocation - (_lineThickness/2), _majorTickLength, EndValue, format));
+            value = EndValue;
+            if (DisplayAbsoluteValue) value = Math.Abs(value);
+            newTicks.Add(new AxisTick(_endLocation - (_lineThickness / 2), _majorTickLength, value, format));
 
             // Make sure all the ticks are in order
             newTicks.Sort();
@@ -378,16 +383,31 @@ namespace ESME.Views.Controls
 
         #region public string AxisLabel { get; set; }
 
-        public static readonly DependencyProperty AxisLabelProperty = DependencyProperty.RegisterAttached("AxisLabel", typeof (string), typeof (DataAxis), new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, AxisLabelPropertyChanged));
+        public static readonly DependencyProperty AxisLabelProperty = DependencyProperty.RegisterAttached("AxisLabel", typeof(string), typeof(DataAxis), new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, AxisLabelPropertyChanged));
 
         public string AxisLabel
         {
-            get { return (string) GetValue(AxisLabelProperty); }
+            get { return (string)GetValue(AxisLabelProperty); }
             set { SetValue(AxisLabelProperty, value); }
         }
 
-        static void AxisLabelPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis) obj).AxisLabelPropertyChanged(); }
+        static void AxisLabelPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).AxisLabelPropertyChanged(); }
         void AxisLabelPropertyChanged() { InvalidateVisual(); }
+
+        #endregion
+
+        #region public bool DisplayAbsoluteValue { get; set; }
+
+        public static readonly DependencyProperty DisplayAbsoluteValueProperty = DependencyProperty.RegisterAttached("DisplayAbsoluteValue", typeof(bool), typeof(DataAxis), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure, DisplayAbsoluteValuePropertyChanged));
+
+        public bool DisplayAbsoluteValue
+        {
+            get { return (bool)GetValue(DisplayAbsoluteValueProperty); }
+            set { SetValue(DisplayAbsoluteValueProperty, value); }
+        }
+
+        static void DisplayAbsoluteValuePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) { ((DataAxis)obj).DisplayAbsoluteValuePropertyChanged(); }
+        void DisplayAbsoluteValuePropertyChanged() { InvalidateVisual(); }
 
         #endregion
 

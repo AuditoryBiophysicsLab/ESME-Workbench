@@ -21,19 +21,19 @@
 		<DockPanel DockPanel.Dock="Left">
 			<DockPanel>
 				<TextBlock DockPanel.Dock="Bottom"
-				           MinHeight="{Binding ElementName=RangeAxis, Path=ActualHeight}" />
+				           Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" />
 				<controls:DataAxis x:Name="DepthAxis"
 				                   AxisLabel="Depth (m)"
 				                   AxisLocation="Right"
 				                   StartValue="{Binding DepthMin}"
 				                   EndValue="{Binding DepthMax}"
-				                   TickValueFormat="0" />
+				                   TickValueFormat="0" Height="262.04" VerticalAlignment="Top" />
 			</DockPanel>
 		</DockPanel>
 		<DockPanel DockPanel.Dock="Right">
 			<DockPanel Width="80">
                 <TextBlock DockPanel.Dock="Bottom"
-				           MinHeight="{Binding ElementName=RangeAxis, Path=ActualHeight}" />
+				           Height="{Binding ActualHeight, ElementName=RangeAxis, Mode=OneWay}" />
 				<DockPanel LastChildFill="False"
 				           Margin="5 0 0 0">
                     <controls:DataAxis AxisLocation="Left"
