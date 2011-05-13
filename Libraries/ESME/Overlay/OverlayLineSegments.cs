@@ -23,6 +23,7 @@ namespace ESME.Overlay
             : base(color, size, lineStyle)
         {
             Add(points);
+            if (points.Length < 2) return;
             CreateSegments();
             ComputeBoundingBox();
             CheckForClosure();
@@ -239,6 +240,7 @@ namespace ESME.Overlay
         {
             get
             {
+                if (EarthCoordinates.Count < 2) return null;
                 if (MyWellKnownText == null)
                 {
                     var retval = new StringBuilder();

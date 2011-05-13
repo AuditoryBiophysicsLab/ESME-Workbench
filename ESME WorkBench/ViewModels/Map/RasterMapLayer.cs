@@ -46,18 +46,19 @@ namespace ESMEWorkBench.ViewModels.Map
                 _rasterFilename = value;
                 _worldFilename = Path.Combine(Path.GetDirectoryName(_rasterFilename), Path.GetFileNameWithoutExtension(_rasterFilename)) + ".bpw";
                 using (var writer = new StreamWriter(_worldFilename, false)) writer.Write(WorldFileContents);
-                var halfPixel = PixelSize / 2.0;
-                var north = North + halfPixel;
-                var south = South - halfPixel;
-                var east = East + halfPixel;
-                var west = West - halfPixel;
+                //var halfPixel = PixelSize / 2.0;
+                //var north = North + halfPixel;
+                //var south = South - halfPixel;
+                //var east = East + halfPixel;
+                //var west = West - halfPixel;
 
-                _layer = new GdiPlusRasterLayer(_rasterFilename, new RectangleShape(west, north, east, south))
-                         {
-                             UpperThreshold = double.MaxValue,
-                             LowerThreshold = 0,
-                             IsGrayscale = false
-                         };
+                //_layer = new GdiPlusRasterLayer(_rasterFilename, new RectangleShape(west, north, east, south))
+                _layer = new GdiPlusRasterLayer(_rasterFilename, new RectangleShape(West, North, East, South))
+                {
+                    UpperThreshold = double.MaxValue,
+                    LowerThreshold = 0,
+                    IsGrayscale = false
+                };
                 LayerOverlay.Layers.Add(_layer);
             }
         }

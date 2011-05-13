@@ -1,8 +1,8 @@
-<Application x:Class="ESMEWorkBench.App"
+﻿<Application x:Class="ESMEWorkBench.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Exit="ApplicationExit"
-             StartupUri="Views\MainView.xaml">
+             StartupUri="Views/MainView.xaml">
 	<Application.Resources>
 		<!-- Resources scoped at the Application level should be defined here. -->
 		<!--
