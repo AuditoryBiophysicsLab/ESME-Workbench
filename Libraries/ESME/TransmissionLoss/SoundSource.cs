@@ -221,13 +221,13 @@ namespace ESME.TransmissionLoss
                 return;
             }
             var errors = new StringBuilder();
-            Console.WriteLine("Validate: Bathymetry bounds: North {0} South {1} East {2} West {3}", bathymetry.GeoRect.North, bathymetry.GeoRect.South, bathymetry.GeoRect.East, bathymetry.GeoRect.West);
+            //Console.WriteLine("Validate: Bathymetry bounds: North {0} South {1} East {2} West {3}", bathymetry.GeoRect.North, bathymetry.GeoRect.South, bathymetry.GeoRect.East, bathymetry.GeoRect.West);
             foreach (var radialBearing in RadialBearings)
             {
                 var radialEndPoint = new EarthCoordinate(this, radialBearing, Radius);
                 if (!bathymetry.GeoRect.Contains(radialEndPoint))
                 {
-                    Console.WriteLine("Source name {0} location ({1}, {2}) bearing {3} endpoint ({4}, {5}) outside of bathymetry", Name, Latitude, Longitude, radialBearing, radialEndPoint.Latitude, radialEndPoint.Longitude);
+                    //Console.WriteLine("Source name {0} location ({1}, {2}) bearing {3} endpoint ({4}, {5}) outside of bathymetry", Name, Latitude, Longitude, radialBearing, radialEndPoint.Latitude, radialEndPoint.Longitude);
                     errors.AppendLine(string.Format("Radial with bearing {0} extends beyond bathymetry bounds", radialBearing));
                 }
             }
