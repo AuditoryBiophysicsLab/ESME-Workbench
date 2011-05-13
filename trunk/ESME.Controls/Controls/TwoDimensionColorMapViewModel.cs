@@ -145,12 +145,12 @@ namespace ESME.Views.Controls
 
         #endregion
 
-        public void DesignTimeInitialization() 
+        public void DesignTimeInitialization()
         {
-            XAxisControl.AxisLocation = DataAxis.AxisLocationEnum.Top;
+            XAxisControl.AxisLocation = "Top";
             XAxisControl.Label = "XAxisControl";
-            YAxisControl.AxisLocation = DataAxis.AxisLocationEnum.Right;
-            ColorAxisControl.AxisLocation = DataAxis.AxisLocationEnum.Left;
+            YAxisControl.AxisLocation = "Right";
+            ColorAxisControl.AxisLocation = "Left";
             ColorAxisControl.TickValueFormat = "0.#";
         }
     }

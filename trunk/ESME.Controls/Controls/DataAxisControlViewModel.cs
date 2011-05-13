@@ -4,7 +4,8 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.Controls
 {
-    public class DataAxisControlViewModel : ViewModelBase
+    [ExportViewModel("DataAxisControlViewModel")]
+    public class DataAxisControlViewModel : ViewModelBase, IDesignTimeAware
     {
         #region public string Label { get; set; }
 
@@ -80,7 +81,7 @@ namespace ESME.Views.Controls
 
         #region public AxisLocationEnum AxisLocation { get; set; }
 
-        public DataAxis.AxisLocationEnum AxisLocation
+        public string AxisLocation
         {
             get { return _axisLocation; }
             set
@@ -92,17 +93,17 @@ namespace ESME.Views.Controls
         }
 
         static readonly PropertyChangedEventArgs AxisLocationEnumChangedEventArgs = ObservableHelper.CreateArgs<DataAxisControlViewModel>(x => x.AxisLocation);
-        DataAxis.AxisLocationEnum _axisLocation;
+        string _axisLocation;
 
         #endregion
 
         public void DesignTimeInitialization()
         {
             Label = "DataAxisControl.Label";
-            MinValue = -1;
-            MaxValue = 1;
+            MinValue = -10;
+            MaxValue = 10;
             TickValueFormat = "0.##";
-            AxisLocation = DataAxis.AxisLocationEnum.Right;
+            AxisLocation = "Left";
         }
     }
 }
