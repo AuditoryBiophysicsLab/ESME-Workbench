@@ -132,6 +132,7 @@
       <DependentUpon>TransmissionLossFieldView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TransmissionLossViewer\TransmissionLossFieldViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\TransmissionLossHorizontalViewModel.cs" />
     <Compile Include="TransmissionLossViewer\TransmissionLossRadialView.xaml.cs">
       <DependentUpon>TransmissionLossRadialView.xaml</DependentUpon>
     </Compile>
