@@ -37,11 +37,16 @@ namespace ESME.Environment
                                    //      It now places the bounding box such that the lines are coincident with the edges of
                                    //      the edge samples of the selected data (extends by half the horizontal/vertical resolution)
                                    //northeast corner:                   
-                                   new EarthCoordinate(geoRect.North + (LatitudinalResolution/2), geoRect.East + (LongitudinalResolution/2)), // northeast corner
-                                   new EarthCoordinate(geoRect.South - (LatitudinalResolution/2), geoRect.East + (LongitudinalResolution/2)), // southeast corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
-                                   new EarthCoordinate(geoRect.South - (LatitudinalResolution/2), geoRect.West - (LongitudinalResolution/2)), // southwest corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
-                                   new EarthCoordinate(geoRect.North + (LatitudinalResolution/2), geoRect.West - (LongitudinalResolution/2)), // northwest corner
-                                   new EarthCoordinate(geoRect.North + (LatitudinalResolution/2), geoRect.East + (LongitudinalResolution/2)), // northeast corner again to close the loop.
+                                   //new EarthCoordinate(geoRect.North + (LatitudinalResolution/2), geoRect.East + (LongitudinalResolution/2)), // northeast corner
+                                   //new EarthCoordinate(geoRect.South - (LatitudinalResolution/2), geoRect.East + (LongitudinalResolution/2)), // southeast corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
+                                   //new EarthCoordinate(geoRect.South - (LatitudinalResolution/2), geoRect.West - (LongitudinalResolution/2)), // southwest corner                                   new EarthCoordinate(SouthWest.Latitude - (LatitudinalResolution/2), SouthWest.Longitude - (LongitudinalResolution/2)), // southwest corner: 
+                                   //new EarthCoordinate(geoRect.North + (LatitudinalResolution/2), geoRect.West - (LongitudinalResolution/2)), // northwest corner
+                                   //new EarthCoordinate(geoRect.North + (LatitudinalResolution/2), geoRect.East + (LongitudinalResolution/2)), // northeast corner again to close the loop.
+                                   new EarthCoordinate(geoRect.North, geoRect.East), // northeast corner
+                                   new EarthCoordinate(geoRect.South, geoRect.East), // southeast corner
+                                   new EarthCoordinate(geoRect.South, geoRect.West), // southwest corner
+                                   new EarthCoordinate(geoRect.North, geoRect.West), // northwest corner
+                                   new EarthCoordinate(geoRect.North, geoRect.East), // northeast corner again to close the loop.
                                };
 
                 var shape = new OverlayLineSegments(bathyBox, Colors.Black, 1, LineStyle.Solid);

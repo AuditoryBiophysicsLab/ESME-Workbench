@@ -927,20 +927,20 @@ namespace ESMEWorkBench.Data
                                          Name = analysisPointName,
                                          LayerType = LayerType.AnalysisPoint,
                                          LineWidth = 1,
+                                         CanBeRemoved = true,
+                                         CanBeReordered = true,
+                                         HasSettings = true,
+                                         CanChangeLineColor = true,
+                                         CanChangeLineWidth = true,
+                                         CanChangeAreaColor = false,
                                      };
                 MapLayers.Add(analysisPointLayer);
             }
             
             analysisPointLayer.AnalysisPoint = curPoint;
-            analysisPointLayer.CanBeRemoved = true;
-            analysisPointLayer.CanBeReordered = true;
-            analysisPointLayer.HasSettings = true;
-            analysisPointLayer.CanChangeLineColor = true;
-            analysisPointLayer.CanChangeLineWidth = true;
             analysisPointLayer.Validate();
 
             var sourcePoints = new List<EarthCoordinate>();
-            analysisPointLayer.Clear();
             foreach (var soundSource in curPoint.SoundSources)
             {
                 if (soundSource.ShouldBeCalculated)
@@ -953,11 +953,11 @@ namespace ESMEWorkBench.Data
                         sourcePoints.Add(endPoint);
                         sourcePoints.Add(curPoint);
                     }
-                    analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5, LineStyle.Solid));
                 }
-                analysisPointLayer.Done();
             }
-            MediatorMessage.Send(MediatorMessage.RefreshLayer, analysisPointLayer);
+            analysisPointLayer.Clear();
+            analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5, LineStyle.Solid));
+            analysisPointLayer.Done();
         }
 
         void ScenarioFileChanged(object sender, FileSystemEventArgs e)
