@@ -8,12 +8,12 @@ namespace TransmissionLossCalculator
     /// <summary>
     ///   Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class TransmissionLossCalculatorQueueView
+    public partial class TransmissionLossQueueView
     {
         WindowState _lastWindowState;
         bool _shouldClose;
 
-        public TransmissionLossCalculatorQueueView() { InitializeComponent(); }
+        public TransmissionLossQueueView() { InitializeComponent(); }
         protected override void OnStateChanged(EventArgs e)
         {
             _lastWindowState = WindowState;
