@@ -64,7 +64,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 }
                 _bufferZoneSize = value;
                 NotifyPropertyChanged(BufferZoneSizeChangedEventArgs);
-                NAVODataSources.ExtractionArea = GeoRect.Inflate(_experiment.OpArea, BufferZoneSize, BufferZoneSize);
+                //NAVODataSources.ExtractionArea = GeoRect.Inflate(_experiment.OpArea, BufferZoneSize, BufferZoneSize);
+                NAVODataSources.ExtractionArea = GeoRect.InflateWithGeo(_experiment.OpArea, BufferZoneSize / 1000.0);
             }
         }
 
