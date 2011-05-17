@@ -160,6 +160,7 @@
     <Compile Include="NEMO\NemoSource.cs" />
     <Compile Include="NEMO\NemoSpecies.cs" />
     <Compile Include="NEMO\NemoTrackdef.cs" />
+    <Compile Include="Overlay\TrackPoint.cs" />
     <Compile Include="Platform\ActiveMode.cs" />
     <Compile Include="NEMO\ActiveTimeStep.cs" />
     <Compile Include="Platform\BehaviorModel.cs" />

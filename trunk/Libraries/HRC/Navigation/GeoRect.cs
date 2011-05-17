@@ -200,6 +200,15 @@ namespace HRC.Navigation
             return new GeoRect(newNorthWest.Latitude, newSouthEast.Latitude, newSouthEast.Longitude, newNorthWest.Longitude);
         }
 
+        public static GeoRect InflateWithGeo(GeoRect geoRect, double rangeOutKm)
+        {
+            var northWest = Geo.makeGeoDegrees(geoRect.North, geoRect.West).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), 315);
+            var northEast = Geo.makeGeoDegrees(geoRect.North, geoRect.East).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), 45);
+            var southEast = Geo.makeGeoDegrees(geoRect.South, geoRect.East).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), 135);
+            var southWest = Geo.makeGeoDegrees(geoRect.South, geoRect.West).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), 225);
+            return new GeoRect(northWest.getLatitude(), southEast.getLatitude(), southEast.getLongitude(), northWest.getLongitude());
+        }
+
         [XmlIgnore]
         public EarthCoordinate NorthWest { get { return new EarthCoordinate(North, West); } }
         [XmlIgnore]
