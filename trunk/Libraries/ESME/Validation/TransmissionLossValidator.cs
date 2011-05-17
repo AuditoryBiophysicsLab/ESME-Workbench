@@ -10,7 +10,7 @@ namespace ESME.Validation
     public class TransmissionLossValidator
     {
         /// <summary>
-        /// Ensure that all Transmission Loss Files in a given directory have matching Transmission Loss Jobs in a second, given directory
+        /// Ensure that all Transmission Loss Field files in a given directory have matching Transmission Loss Job files in a second, given directory
         /// </summary>
         /// <param name="transmissionLossJobRoot">The full path to the directory that should be scanned for Transmission Loss Files</param>
         /// <param name="transmissionLossFileRoot">The full path to the directory that should be scanned for Transmission Loss Jobs</param>
@@ -68,7 +68,7 @@ namespace ESME.Validation
         }
 
         /// <summary>
-        /// 
+        /// Ensure that all Transmission Loss Job files correspond to extant Analysis Points.  This routine must be called from within ESME WorkBench
         /// </summary>
         /// <param name="transmissionLossJobRoot"></param>
         /// <param name="analysisPoints"></param>
@@ -151,7 +151,7 @@ namespace ESME.Validation
         }
 
         /// <summary>
-        /// 
+        /// Returns a queue of all Transmission Loss Job files that do not have a corresponding Transmission Loss Field file
         /// </summary>
         /// <param name="transmissionLossJobRoot"></param>
         /// <param name="transmissionLossFileRoot"></param>
