@@ -14,6 +14,7 @@ using System.Windows.Threading;
 using Cinch;
 using ESME.Data;
 using ESME.Environment.NAVO;
+using ESME.Overlay;
 using ESMEWorkBench.Data;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
@@ -65,7 +66,19 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 _bufferZoneSize = value;
                 NotifyPropertyChanged(BufferZoneSizeChangedEventArgs);
                 //NAVODataSources.ExtractionArea = GeoRect.Inflate(_experiment.OpArea, BufferZoneSize, BufferZoneSize);
-                NAVODataSources.ExtractionArea = GeoRect.InflateWithGeo(_experiment.OpArea, BufferZoneSize / 1000.0);
+                //NAVODataSources.ExtractionArea = GeoRect.InflateWithGeo(_experiment.OpArea, BufferZoneSize / 1000.0);
+                var limits = new Limits(new List<Geo>
+                                        {
+                                            (Geo) _experiment.OpArea.NorthWest,
+                                            (Geo) _experiment.OpArea.NorthEast,
+                                            (Geo) _experiment.OpArea.SouthEast,
+                                            (Geo) _experiment.OpArea.SouthWest,
+                                            (Geo) _experiment.OpArea.NorthWest,
+                                        });
+                var expandedLimits = limits.CreateExpandedLimit(BufferZoneSize / 1000.0);
+                var northWest = expandedLimits.GetNorthWestPoint();
+                var southEast = expandedLimits.GetSouthEastPoint();
+                NAVODataSources.ExtractionArea = new GeoRect(northWest.getLatitude(), southEast.getLatitude(), southEast.getLongitude(), northWest.getLongitude());
             }
         }
 

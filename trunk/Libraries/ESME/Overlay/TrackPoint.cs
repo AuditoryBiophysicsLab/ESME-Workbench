@@ -5,7 +5,7 @@ namespace ESME.Overlay
 {
     public class TrackPoint
     {
-        private readonly Geo _position = Geo.makeGeoDegrees(0, 0);
+        private readonly Geo _position = Geo.FromDegrees(0, 0);
         private double _eheight;
         private double _course;
         private double _speed;
@@ -33,7 +33,7 @@ namespace ESME.Overlay
 
         public Geo GetGeoLlh()
         {
-            return Geo.makeGeo(_position);
+            return Geo.FromGeo(_position);
         }
 
         public void GetGeoLlh(Geo geo)

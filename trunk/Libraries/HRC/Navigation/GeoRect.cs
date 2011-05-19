@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Xml.Serialization;
@@ -202,10 +203,10 @@ namespace HRC.Navigation
 
         public static GeoRect InflateWithGeo(GeoRect geoRect, double rangeOutKm)
         {
-            var northWest = Geo.makeGeoDegrees(geoRect.North, geoRect.West).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(315));
-            var northEast = Geo.makeGeoDegrees(geoRect.North, geoRect.East).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(45));
-            var southEast = Geo.makeGeoDegrees(geoRect.South, geoRect.East).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(135));
-            var southWest = Geo.makeGeoDegrees(geoRect.South, geoRect.West).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(225));
+            var northWest = Geo.FromDegrees(geoRect.North, geoRect.West).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(315));
+            var northEast = Geo.FromDegrees(geoRect.North, geoRect.East).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(45));
+            var southEast = Geo.FromDegrees(geoRect.South, geoRect.East).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(135));
+            var southWest = Geo.FromDegrees(geoRect.South, geoRect.West).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(225));
             return new GeoRect(northWest.getLatitude(), southEast.getLatitude(), southEast.getLongitude(), northWest.getLongitude());
         }
 
