@@ -94,18 +94,21 @@ namespace HRC.Navigation
         /** Construct a Geo from another Geo. */
         public Geo(Geo geo) : this(geo._x, geo._y, geo._z) { }
 
-        public static Geo makeGeoRadians(double latr, double lonr)
+        public static Geo FromRadians(double latr, double lonr)
         {
             var rlat = GeocentricLatitude(latr);
             var c = Math.Cos(rlat);
             return new Geo(c * Math.Cos(lonr), c * Math.Sin(lonr), Math.Sin(rlat));
         }
 
-        public static Geo makeGeoDegrees(double latd, double lond) { return makeGeoRadians(Radians(latd), Radians(lond)); }
+        public static Geo FromDegrees(double latd, double lond) { return FromRadians(Radians(latd), Radians(lond)); }
 
-        public static Geo makeGeo(double x, double y, double z) { return new Geo(x, y, z); }
+        public static Geo FromXYZ(double x, double y, double z) { return new Geo(x, y, z); }
 
-        public static Geo makeGeo(Geo p) { return new Geo(p._x, p._y, p._z); }
+        public static Geo FromGeo(Geo p) { return new Geo(p._x, p._y, p._z); }
+        
+        //public static implicit operator Geo(EarthCoordinate earthCoordinate) { return FromDegrees(earthCoordinate.Latitude, earthCoordinate.Longitude); }
+        public static explicit operator Geo(EarthCoordinate earthCoordinate) { return FromDegrees(earthCoordinate.Latitude, earthCoordinate.Longitude); }
 
         /**
      * Initialize this Geo to match another.
@@ -907,7 +910,7 @@ namespace HRC.Navigation
      * cosaz = Math.Cos(azimuth); double sinaz = Math.Sin(azimuth); double sind =
      * Math.Sin(distance); double cosd = Math.Cos(distance);
      * 
-     * return makeGeoRadians(Math.asin(sinlat * cosd + coslat * sind * cosaz),
+     * return FromRadians(Math.asin(sinlat * cosd + coslat * sind * cosaz),
      * Math.Atan2(sind * sinaz, coslat * cosd - sinlat * sind * cosaz) + lonr); }
      */
 
@@ -932,7 +935,7 @@ namespace HRC.Navigation
             for (var i = 0; i < coords.Length; i++)
             {
                 var ll = coords[i].Split(',');
-                ga[i] = makeGeoDegrees(Double.Parse(ll[0]), Double.Parse(ll[1]));
+                ga[i] = FromDegrees(Double.Parse(ll[0]), Double.Parse(ll[1]));
             }
             return ga;
         }
@@ -1034,11 +1037,11 @@ namespace HRC.Navigation
             {
                 if (isDegrees)
                 {
-                    r[i] = makeGeoDegrees(lla[i * 2], lla[i * 2 + 1]);
+                    r[i] = FromDegrees(lla[i * 2], lla[i * 2 + 1]);
                 }
                 else
                 {
-                    r[i] = makeGeoRadians(lla[i * 2], lla[i * 2 + 1]);
+                    r[i] = FromRadians(lla[i * 2], lla[i * 2 + 1]);
                 }
             }
             return r;
@@ -1060,11 +1063,11 @@ namespace HRC.Navigation
             {
                 if (isDegrees)
                 {
-                    r[i] = makeGeoDegrees(lla[i * 2], lla[i * 2 + 1]);
+                    r[i] = FromDegrees(lla[i * 2], lla[i * 2 + 1]);
                 }
                 else
                 {
-                    r[i] = makeGeoRadians(lla[i * 2], lla[i * 2 + 1]);
+                    r[i] = FromRadians(lla[i * 2], lla[i * 2 + 1]);
                 }
             }
             return r;

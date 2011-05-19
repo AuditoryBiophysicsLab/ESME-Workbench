@@ -46,7 +46,7 @@ namespace HRC.Navigation
         {
             get
             {
-                for (var i = 0; i < Points.Count; i += 2) yield return new GeoSegment(Points[i].Point, Points[i + 1].Point);
+                for (var i = 0; i < Points.Count - 1; i++) yield return new GeoSegment(Points[i].Point, Points[i + 1].Point);
                 yield break;
             }
         }
@@ -61,66 +61,5 @@ namespace HRC.Navigation
         {
             get { return Bc ?? (Bc = new BoundingCircle(this)); }
         }         
-    }
-
-    public class GeoPoint : IGeoExtent
-    {
-        readonly Geo _point;
-
-        public GeoPoint(Geo p) { _point = p; }
-
-        public GeoPoint(double lat, double lon) { _point = new Geo(lat, lon); }
-
-        public GeoPoint(double lat, double lon, bool isDegrees) { _point = new Geo(lat, lon, isDegrees); }
-
-        public Geo Point
-        {
-            get { return _point; }
-        }
-
-        public BoundingCircle BoundingCircle 
-        {
-            get { return new BoundingCircle(_point, 0.0); }
-        }
-    }
-
-    public interface IGeoSegment : IGeoExtent
-    {
-        float[] SegmentArray { get; }
-    }
-
-    public class GeoSegment : IGeoSegment
-    {
-        public GeoSegment(Geo g1, Geo g2)
-        {
-            Segments = new List<Geo>
-                       {
-                           g1,
-                           g2
-                       };
-        }
-
-        public GeoSegment(IEnumerable<Geo> segments)
-        {
-            Segments = new List<Geo>(segments);
-        }
-
-        public List<Geo> Segments { get; private set; }
-
-        public float[] SegmentArray 
-        {
-            get
-            {
-                return new[]
-                       {
-                           (float) Segments[0].getLatitude(), (float) Segments[0].getLongitude(), (float) Segments[1].getLatitude(), (float) Segments[1].getLongitude()
-                       };
-            }
-        }
-
-        public BoundingCircle BoundingCircle 
-        {
-            get { return new BoundingCircle(new GeoPath(Segments)); }
-        }
     }
 }

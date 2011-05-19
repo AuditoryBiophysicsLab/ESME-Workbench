@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using HRC.Navigation;
 
 namespace ESME.Overlay
@@ -43,6 +44,12 @@ namespace ESME.Overlay
 
         Limits() { Initialize(); }
 
+        public Limits(IEnumerable<Geo> geos)
+        {
+            _geoPointList.AddRange(geos);
+            Initialize();
+        }
+
         /**
     * this can be used to set up the "rest" of the Limit if created from
     * serialization. just make it public
@@ -78,7 +85,7 @@ namespace ESME.Overlay
 
             // BoundingCircle attempt to get the center of the polygon. when the
             // shape is not a poly, it hacks a fur ball
-            _boundingCircle = _geoPointList.Count < 3 ? new BoundingCircle(Geo.makeGeoDegrees(0.0, 0.0), 0.0) : new BoundingCircle(new GeoPath(_geoPointList));
+            _boundingCircle = _geoPointList.Count < 3 ? new BoundingCircle(Geo.FromDegrees(0.0, 0.0), 0.0) : new BoundingCircle(new GeoPath(_geoPointList));
 
             _centerOfRegion = _boundingCircle.Center;
 
@@ -119,11 +126,11 @@ namespace ESME.Overlay
 
             result._geoPointList.Clear();
 
-            result._geoPointList.Add(Geo.makeGeoDegrees(result._minLat, result._minLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(225)));
-            result._geoPointList.Add(Geo.makeGeoDegrees(result._maxLat, result._minLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(315)));
-            result._geoPointList.Add(Geo.makeGeoDegrees(result._maxLat, result._maxLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(45)));
-            result._geoPointList.Add(Geo.makeGeoDegrees(result._minLat, result._maxLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(135)));
-            result._geoPointList.Add(Geo.makeGeoDegrees(result._minLat, result._minLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(225)));
+            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(225)));
+            result._geoPointList.Add(Geo.FromDegrees(result._maxLat, result._minLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(315)));
+            result._geoPointList.Add(Geo.FromDegrees(result._maxLat, result._maxLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(45)));
+            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._maxLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(135)));
+            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(225)));
 
             result.Initialize();
 
@@ -178,11 +185,13 @@ namespace ESME.Overlay
 
                 Geo lastEndPt = null;
                 var segIt = _region.Segments;
-                var seg = segIt.Current;
-                var segPts = seg.Segments;
-                segIt.MoveNext();
+                GeoSegment seg;
+                List<Geo> segPts = null;
                 while (segIt.MoveNext())
                 {
+                    seg = segIt.Current;
+                    segPts = seg.Segments;
+
                     var lineCourse = segPts[0].azimuth(segPts[1]);
 
                     // gives specular reflection with angle from center of region
@@ -222,8 +231,6 @@ namespace ESME.Overlay
                     result._geoPointList.Add(newPt1);
 
                     lastEndPt = newPt1;
-                    seg = segIt.Current;
-                    segPts = seg.Segments;
                 }
 
                 if (lastEndPt != null)
@@ -374,9 +381,9 @@ namespace ESME.Overlay
 
         public GeoRegion GetGeoRegion() { return _region; }
 
-        public Geo GetNorthWestPoint() { return Geo.makeGeoDegrees(_maxLat, _minLon); }
+        public Geo GetNorthWestPoint() { return Geo.FromDegrees(_maxLat, _minLon); }
 
-        public Geo GetSouthEastPoint() { return Geo.makeGeoDegrees(_minLat, _maxLon); }
+        public Geo GetSouthEastPoint() { return Geo.FromDegrees(_minLat, _maxLon); }
 
         /**
     * create a random Geo point inside this pattern. tries 100 times to get a
@@ -474,9 +481,9 @@ namespace ESME.Overlay
                 return false;
             }
 
-            var geo = Geo.makeGeoDegrees(aLat, aLong);
+            var geo = Geo.FromDegrees(aLat, aLong);
 
-            // return getGeoRegion().isPointInside(Geo.makeGeoDegrees(aLat, aLong));
+            // return getGeoRegion().isPointInside(Geo.FromDegrees(aLat, aLong));
             if (_boundingCircle == null || _boundingCircle.Intersects(geo, 0.0))
             {
                 return IsPointInPolygon(geo, _centerOfRegion, _geoPointList);
@@ -653,7 +660,14 @@ namespace ESME.Overlay
             }
         }
 
-        public new String ToString() { return _name; }
+        public new String ToString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(_name);
+            foreach (var p in _region.Points) sb.AppendLine(p.Point.ToString());
+            //return _name;
+            return sb.ToString();
+        }
 
         public void ExportOvr(string directory)
         {
@@ -692,18 +706,18 @@ namespace ESME.Overlay
             {
                 var segIt = _region.Segments;
 
-                if (segIt != null)
+                if (segIt.MoveNext())
                 {
                     var seg1 = new Geo[2];
                     var temp = segIt.Current;
-                    seg1[0] = Geo.makeGeo(temp.Segments[0]);
-                    seg1[1] = Geo.makeGeo(temp.Segments[1]);
+                    seg1[0] = Geo.FromGeo(temp.Segments[0]);
+                    seg1[1] = Geo.FromGeo(temp.Segments[1]);
 
                     var seg2 = new Geo[2];
-                    segIt.MoveNext();
+                    if (!segIt.MoveNext()) throw new ApplicationException("Not enough segments!");
                     temp = segIt.Current;
-                    seg2[0] = Geo.makeGeo(temp.Segments[0]);
-                    seg2[1] = Geo.makeGeo(temp.Segments[1]);
+                    seg2[0] = Geo.FromGeo(temp.Segments[0]);
+                    seg2[1] = Geo.FromGeo(temp.Segments[1]);
 
                     var pointInside = seg1[0].midPoint(seg2[1]);
                     var s1 = seg1[0];

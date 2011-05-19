@@ -468,7 +468,7 @@ namespace HRC.Navigation
 
         public static bool IsPointInPolygon(Geo x, float[] poly, bool polyInDegrees)
         {
-            var polyList = poly.Select((t, i) => polyInDegrees ? new GeoPoint(Geo.makeGeoDegrees(t, poly[i + 1])) : new GeoPoint(t, poly[i + 1])).ToList();
+            var polyList = poly.Select((t, i) => polyInDegrees ? new GeoPoint(Geo.FromDegrees(t, poly[i + 1])) : new GeoPoint(t, poly[i + 1])).ToList();
             return IsPointInPolygon(x, polyList);
         }
 
