@@ -114,12 +114,17 @@
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Database\MySqlWrapper.cs" />
     <Compile Include="Globals.cs" />
+    <Compile Include="Navigation\BoundingCircle.cs" />
     <Compile Include="Navigation\Course.cs" />
     <Compile Include="Navigation\EarthCoordinate.cs" />
     <Compile Include="Navigation\EarthCoordinate3DTypeConverter.cs" />
     <Compile Include="Navigation\Geo.cs" />
+    <Compile Include="Navigation\GeoPath.cs" />
+    <Compile Include="Navigation\GeoRegion.cs" />
+    <Compile Include="Navigation\IGeoExtent.cs" />
     <Compile Include="Navigation\GeoRect.cs" />
     <Compile Include="Navigation\GeoReferencedField.cs" />
+    <Compile Include="Navigation\Intersection.cs" />
     <Compile Include="Navigation\Length.cs" />
     <Compile Include="Navigation\Planet.cs" />
     <Compile Include="Navigation\Rotation.cs" />
