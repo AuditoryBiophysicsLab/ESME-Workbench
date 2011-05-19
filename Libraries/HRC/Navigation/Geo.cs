@@ -4,35 +4,40 @@ namespace HRC.Navigation
 {
     public class Geo
     {
-        public static double flattening = 1.0 / 298.257223563;
-        public static double FLATTENING_C = (1.0 - flattening) * (1.0 - flattening);
+        public static double Flattening = 1.0 / 298.257223563;
+        public static double FlatteningC = (1.0 - Flattening) * (1.0 - Flattening);
 
-        public static double METERS_PER_NM = 1852;
-        static readonly double NPD_LTERM1 = 111412.84 / METERS_PER_NM;
-        static readonly double NPD_LTERM2 = -93.5 / METERS_PER_NM;
-        static readonly double NPD_LTERM3 = 0.118 / METERS_PER_NM;
+        public static double MetersPerNm = 1852;
+        static readonly double NpdLterm1 = 111412.84 / MetersPerNm;
+        static readonly double NpdLterm2 = -93.5 / MetersPerNm;
+        static readonly double NpdLterm3 = 0.118 / MetersPerNm;
 
         double _x;
         double _y;
         double _z;
 
-        public static double npdAtLat(double latdeg)
+        /// <summary>
+        /// Nautical miles per degree at a given latitude
+        /// </summary>
+        /// <param name="latdeg"></param>
+        /// <returns></returns>
+        public static double NpdAtLat(double latdeg)
         {
             var lat = (latdeg * Math.PI) / 180.0;
-            return (NPD_LTERM1 * Math.Cos(lat) + NPD_LTERM2 * Math.Cos(3 * lat) + NPD_LTERM3 * Math.Cos(5 * lat));
+            return (NpdLterm1 * Math.Cos(lat) + NpdLterm2 * Math.Cos(3 * lat) + NpdLterm3 * Math.Cos(5 * lat));
         }
 
         /** Convert from geographic to geocentric latitude (radians) */
-        public static double geocentricLatitude(double geographicLatitude) { return Math.Atan((Math.Tan(geographicLatitude) * FLATTENING_C)); }
+        public static double GeocentricLatitude(double geographicLatitude) { return Math.Atan((Math.Tan(geographicLatitude) * FlatteningC)); }
 
         /** Convert from geocentric to geographic latitude (radians) */
-        public static double geographicLatitude(double geocentricLatitude) { return Math.Atan(Math.Tan(geocentricLatitude) / FLATTENING_C); }
+        public static double GeographicLatitude(double geocentricLatitude) { return Math.Atan(Math.Tan(geocentricLatitude) / FlatteningC); }
 
         /** Convert from degrees to radians. */
-        public static double radians(double degrees) { return Length.DECIMAL_DEGREE.toRadians(degrees); }
+        public static double Radians(double degrees) { return Length.DECIMAL_DEGREE.toRadians(degrees); }
 
         /** Convert from radians to degrees. */
-        public static double degrees(double radians) { return Length.DECIMAL_DEGREE.fromRadians(radians); }
+        public static double Degrees(double radians) { return Length.DECIMAL_DEGREE.fromRadians(radians); }
 
         /** Convert radians to kilometers. * */
         public static double km(double radians) { return Length.KM.fromRadians(radians); }
@@ -81,9 +86,9 @@ namespace HRC.Navigation
 
         public Geo(double x, double y, double z)
         {
-            x = x;
-            y = y;
-            z = z;
+            _x = x;
+            _y = y;
+            _z = z;
         }
 
         /** Construct a Geo from another Geo. */
@@ -91,12 +96,12 @@ namespace HRC.Navigation
 
         public static Geo makeGeoRadians(double latr, double lonr)
         {
-            var rlat = geocentricLatitude(latr);
+            var rlat = GeocentricLatitude(latr);
             var c = Math.Cos(rlat);
             return new Geo(c * Math.Cos(lonr), c * Math.Sin(lonr), Math.Sin(rlat));
         }
 
-        public static Geo makeGeoDegrees(double latd, double lond) { return makeGeoRadians(radians(latd), radians(lond)); }
+        public static Geo makeGeoDegrees(double latd, double lond) { return makeGeoRadians(Radians(latd), Radians(lond)); }
 
         public static Geo makeGeo(double x, double y, double z) { return new Geo(x, y, z); }
 
@@ -136,7 +141,7 @@ namespace HRC.Navigation
      * @param lat latitude in decimal degrees.
      * @param lon longitude in decimal degrees.
      */
-        public void initialize(double lat, double lon) { initializeRadians(radians(lat), radians(lon)); }
+        public void initialize(double lat, double lon) { initializeRadians(Radians(lat), Radians(lon)); }
 
         /**
      * Initialize this Geo with to represent coordinates.
@@ -147,7 +152,7 @@ namespace HRC.Navigation
 
         public void initializeRadians(double lat, double lon)
         {
-            var rlat = geocentricLatitude(lat);
+            var rlat = GeocentricLatitude(lat);
             var c = Math.Cos(rlat);
             _x = c * Math.Cos(lon);
             _y = c * Math.Sin(lon);
@@ -185,13 +190,13 @@ namespace HRC.Navigation
      */
         public Geo interpolate(Geo g2, double x, Geo ret) { return scale(x).add(g2.scale(1 - x, ret), ret).normalize(ret); }
 
-        public String toString() { return "Geo[" + getLatitude() + "," + getLongitude() + "]"; }
+        public new String ToString() { return "Geo[" + getLatitude() + "," + getLongitude() + "]"; }
 
-        public double getLatitude() { return degrees(geographicLatitude(Math.Atan2(_z, Math.Sqrt(_x * _x + _y * _y)))); }
+        public double getLatitude() { return Degrees(GeographicLatitude(Math.Atan2(_z, Math.Sqrt(_x * _x + _y * _y)))); }
 
-        public double getLongitude() { return degrees(Math.Atan2(_y, _x)); }
+        public double getLongitude() { return Degrees(Math.Atan2(_y, _x)); }
 
-        public double getLatitudeRadians() { return geographicLatitude(Math.Atan2(_z, Math.Sqrt(_x * _x + _y * _y))); }
+        public double getLatitudeRadians() { return GeographicLatitude(Math.Atan2(_z, Math.Sqrt(_x * _x + _y * _y))); }
 
         public double getLongitudeRadians() { return Math.Atan2(_y, _x); }
 
@@ -246,7 +251,7 @@ namespace HRC.Navigation
         }
 
         /** North pole. */
-        public static Geo north = new Geo(0.0, 0.0, 1.0);
+        public static Geo North = new Geo(0.0, 0.0, 1.0);
 
         /** Dot product. */
         public double dot(Geo b) { return ((_x * b._x) + (_y * b._y) + (_z * b._z)); }
@@ -404,9 +409,9 @@ namespace HRC.Navigation
             // Geo n1 = north.cross(this);
             // Geo n2 = v2.cross(this);
             // crossNormalization is needed to geos of different length.
-            var n1 = north.crossNormalize(this);
+            var n1 = North.crossNormalize(this);
             var n2 = v2.crossNormalize(this);
-            var az = Math.Atan2(-north.dot(n2), n1.dot(n2));
+            var az = Math.Atan2(-North.dot(n2), n1.dot(n2));
             return (az > 0.0) ? az : 2.0 * Math.PI + az;
         }
 
@@ -873,7 +878,7 @@ namespace HRC.Navigation
         public Geo offset(double distance, double azimuth, Geo ret)
         {
             // m is normal the the meridian through this.
-            var m = crossNormalize(north, ret);
+            var m = crossNormalize(North, ret);
             // p is a point on the meridian distance <tt>distance</tt> from this.
             // Geo p = (new Rotation(m, distance)).rotate(this);
             var p = Rotation.rotate(m, distance, this, ret);

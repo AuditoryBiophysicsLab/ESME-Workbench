@@ -143,6 +143,7 @@
     <Compile Include="Model\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="Overlay\Exceptions.cs" />
+    <Compile Include="Overlay\Limits.cs" />
     <Compile Include="Overlay\OverlayCircle.cs" />
     <Compile Include="Overlay\OverlayFile.cs" />
     <Compile Include="Overlay\OverlayFiles.cs" />

@@ -1,87 +1,79 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using HRC.Navigation;
 
 namespace ESME.Overlay
 {
-    class TrackPoint
+    public class TrackPoint
     {
-        private Geo position = Geo.makeGeoDegrees(0, 0);
-        private double eheight = 0;
-        private double course = 0;
-        private double speed = 0;
-        private long timeMillis = 0L;
+        private readonly Geo _position = Geo.makeGeoDegrees(0, 0);
+        private double _eheight;
+        private double _course;
+        private double _speed;
+        private long _timeMillis;
         // 5 millimeters in km. 
-        private static double DELTA_MM = 0.00005;
+        private const double DeltaMm = 0.00005;
 
-        public TrackPoint()
+        public String Dump() { return String.Format("{0} {1} {2} {3} {4}", _position.getLatitude(), _position.getLongitude(), _eheight, _course, _speed); }
+
+        public void SetLatLonHeight(double lat, double lon, double aHeight)
         {
-
+            _position.initialize(lat, lon);
+            _eheight = aHeight;
         }
 
-        public String dump() { return String.Format("{0} {1} {2} {3} {4}", position.getLatitude(), position.getLongitude(), eheight, course, speed); }
-
-        public void setLatLonHeight(double lat, double lon, double aHeight)
+        public void SetTime(long millis)
         {
-            position.initialize(lat, lon);
-            eheight = aHeight;
+            _timeMillis = millis;
         }
 
-        public void setTime(long millis)
+        public long GetTime()
         {
-            timeMillis = millis;
+            return _timeMillis;
         }
 
-        public long getTime()
+        public Geo GetGeoLlh()
         {
-            return timeMillis;
+            return Geo.makeGeo(_position);
         }
 
-        public Geo getGeoLLH()
+        public void GetGeoLlh(Geo geo)
         {
-            return Geo.makeGeo(position);
+            geo.initialize(_position);
         }
 
-        public void getGeoLLH(Geo geo)
+        public double GetEllipsoidHeight()
         {
-            geo.initialize(position);
+            return _eheight;
         }
 
-        public double getEllipsoidHeight()
+        public double GetDepth()
         {
-            return eheight;
+            return -_eheight;
         }
 
-        public double getDepth()
+        public void SetCourse(double c)
         {
-            return -eheight;
+            _course = c;
         }
 
-        public void setCourse(double c)
+        public double GetCourse()
         {
-            course = c;
+            return _course;
         }
 
-        public double getCourse()
+        public void SetSpeed(double s)
         {
-            return course;
+            _speed = s;
         }
 
-        public void setSpeed(double s)
+        public double GetSpeed()
         {
-            speed = s;
+            return _speed;
         }
 
-        public double getSpeed()
+        public bool IsSamePosition(TrackPoint other)
         {
-            return speed;
-        }
-
-        public bool isSamePosition(TrackPoint other)
-        {
-            return isSamePosition(other, DELTA_MM);
+            return IsSamePosition(other, DeltaMm);
         }
 
         /**
@@ -90,11 +82,11 @@ namespace ESME.Overlay
          * @param delta kilometers
          * @return if same position within delta kilometers.
          */
-        public bool isSamePosition(TrackPoint other, double delta)
+        public bool IsSamePosition(TrackPoint other, double delta)
         {
-            double latCheck = (position.getLatitude() - other.getGeoLLH().getLatitude());
-            double lonCheck = (position.getLongitude() - other.getGeoLLH().getLongitude());
-            double deltaDeg = Geo.degrees(Geo.kmToAngle(delta));
+            double latCheck = (_position.getLatitude() - other.GetGeoLlh().getLatitude());
+            double lonCheck = (_position.getLongitude() - other.GetGeoLlh().getLongitude());
+            double deltaDeg = Geo.Degrees(Geo.kmToAngle(delta));
             return (latCheck < deltaDeg) && (lonCheck < deltaDeg);
         }
 
@@ -104,39 +96,39 @@ namespace ESME.Overlay
          * @param other
          * @return
          */
-        public double distance(TrackPoint other)
+        public double Distance(TrackPoint other)
         {
-            double dist = position.distance(other.position);
+            double dist = _position.distance(other._position);
             double distkm = Geo.km(dist);
             return distkm * 1000.0;
         }
 
-        public double slantRange(TrackPoint other)
+        public double SlantRange(TrackPoint other)
         {
-            double dist = position.distance(other.position);
+            double dist = _position.distance(other._position);
             double distM = Geo.km(dist) * 1000.0;
-            double diffHeight = eheight - other.eheight;
+            double diffHeight = _eheight - other._eheight;
 
             return Math.Sqrt((distM * distM) + (diffHeight * diffHeight));
         }
 
         //TODO: make sure this is true bearing
-        public double relativeBearing(TrackPoint other)
+        public double RelativeBearing(TrackPoint other)
         {
-            return Geo.degrees(position.azimuth(other.position));
+            return Geo.Degrees(_position.azimuth(other._position));
         }
 
         public new String ToString()
         {
-            return String.Format("Moving {0:0.###} kts {1:0.###} degs @ {2} {3}T", speed, course, position, timeMillis);
+            return String.Format("Moving {0:0.###} kts {1:0.###} degs @ {2} {3}T", _speed, _course, _position, _timeMillis);
         }
 
         public bool Equals(TrackPoint other)
         {
-            return (isSamePosition(other) &&
-                (this.eheight == other.eheight) &&
-                (this.course == other.course) &&
-                (this.speed == other.speed));
+            return (IsSamePosition(other) &&
+                (_eheight == other._eheight) &&
+                (_course == other._course) &&
+                (_speed == other._speed));
         }
     }
 }
