@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
-using System.Windows;
 using Point = System.Windows.Point;
 
 namespace HRC.Navigation
