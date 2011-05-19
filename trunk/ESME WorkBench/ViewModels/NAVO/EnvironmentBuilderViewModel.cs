@@ -14,6 +14,7 @@ using System.Windows.Threading;
 using Cinch;
 using ESME.Data;
 using ESME.Environment.NAVO;
+using ESME.NEMO;
 using ESME.Overlay;
 using ESMEWorkBench.Data;
 using HRC.Navigation;

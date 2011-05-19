@@ -1,7 +1,7 @@
 ﻿using System;
 using HRC.Navigation;
 
-namespace ESME.Overlay
+namespace ESME.NEMO
 {
     public class TrackPoint
     {

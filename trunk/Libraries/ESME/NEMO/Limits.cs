@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using ESME.Overlay;
 using HRC.Navigation;
 
-namespace ESME.Overlay
+namespace ESME.NEMO
 {
     public class Limits
     {
