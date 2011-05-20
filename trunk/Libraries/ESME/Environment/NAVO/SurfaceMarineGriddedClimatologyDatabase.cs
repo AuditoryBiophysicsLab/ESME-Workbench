@@ -72,7 +72,7 @@ namespace ESME.Environment.NAVO
             var gridSpacing = int.Parse(resarray[3].Split('=')[1]);
 
             var curLineIndex = 0;
-            var curGroupIndex = 0;
+            //var curGroupIndex = 0;
             while (curLineIndex < resarray.Count)
             {
                 string thisline = resarray[curLineIndex++].Trim();

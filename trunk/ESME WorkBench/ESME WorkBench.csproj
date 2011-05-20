@@ -230,7 +230,6 @@
       <DependentUpon>AnalysisPointVisualizerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ValueConverters.cs" />
-    <Compile Include="ViewModels\IHasName.cs" />
     <Compile Include="ViewModels\Layers\CustomStartEndLineStyle.cs" />
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\LayerType.cs" />

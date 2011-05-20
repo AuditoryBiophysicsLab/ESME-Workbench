@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using ESMERibbonDemo.ViewModels;
+using ESME;
 
 namespace ESMEWorkBench.ViewModels.Ribbon
 {

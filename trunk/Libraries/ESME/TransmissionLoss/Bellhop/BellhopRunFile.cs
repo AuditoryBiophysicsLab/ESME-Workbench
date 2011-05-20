@@ -13,7 +13,7 @@ namespace ESME.TransmissionLoss.Bellhop
     {
         #region Load and Save
 
-        public new static BellhopRunFile Load(string filename)
+        public static BellhopRunFile Load(string filename)
         {
             var fileReader = new StreamReader(filename);
             var file = fileReader.ReadToEnd();

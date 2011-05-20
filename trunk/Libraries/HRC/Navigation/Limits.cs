@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using ESME.Overlay;
-using HRC.Navigation;
 
-namespace ESME.NEMO
+namespace HRC.Navigation
 {
     public class Limits
     {
@@ -17,7 +15,7 @@ namespace ESME.NEMO
 
         public static Limits EmptyLimit = new Limits
                                           {
-                                              _name = "empty.ovr",
+                                              Name = "empty.ovr",
                                           };
 
         // used to help generate random values inside the region
@@ -25,9 +23,6 @@ namespace ESME.NEMO
         double _maxLat = Double.MinValue;
         double _minLon = Double.MaxValue;
         double _maxLon = Double.MinValue;
-
-        // name of the limit. usually File.getName()
-        String _name = "";
 
         // the points converted to Geo
         List<Geo> _geoPointList = new List<Geo>();
@@ -44,6 +39,18 @@ namespace ESME.NEMO
         BoundingCircle _boundingCircle;
 
         Limits() { Initialize(); }
+
+        public static explicit operator Limits(GeoRect geoRect)
+        {
+            var result = new Limits();
+            result._geoPointList.Add(geoRect.NorthWest);
+            result._geoPointList.Add(geoRect.NorthEast);
+            result._geoPointList.Add(geoRect.SouthEast);
+            result._geoPointList.Add(geoRect.SouthWest);
+            result._geoPointList.Add(geoRect.NorthWest);
+            result.Initialize();
+            return result;
+        }
 
         public Limits(IEnumerable<Geo> geos)
         {
@@ -97,7 +104,7 @@ namespace ESME.NEMO
         {
             var result = new Limits
                          {
-                             _name = "bounds-cw.ovr"
+                             Name = "bounds-cw.ovr"
                          };
 
             foreach (var l in areas)
@@ -144,11 +151,11 @@ namespace ESME.NEMO
 
             if (_geoPointList == null || _geoPointList.Count == 0)
             {
-                result._name = GetName() + "-Undefined";
+                result.Name = Name + "-Undefined";
             }
             else
             {
-                result._name = GetName() + "-Bounding";
+                result.Name = Name + "-Bounding";
 
                 foreach (var geo in _geoPointList)
                 {
@@ -171,18 +178,18 @@ namespace ESME.NEMO
 
             if (_geoPointList == null || _geoPointList.Count == 0)
             {
-                result._name = GetName() + "-Undefined";
+                result.Name = Name + "-Undefined";
             }
             else
             {
-                var newName = GetName();
+                var newName = Name;
                 var suffix = "";
                 if (newName.EndsWith(".ovr"))
                 {
                     newName = newName.Substring(0, newName.IndexOf(".ovr"));
                     suffix = ".ovr";
                 }
-                result._name = String.Format("{0}_{1}K{2}", newName, rangeOutKm, suffix);
+                result.Name = String.Format("{0}_{1}K{2}", newName, rangeOutKm, suffix);
 
                 Geo lastEndPt = null;
                 var segIt = _region.Segments;
@@ -354,7 +361,7 @@ namespace ESME.NEMO
 
             var limit = new Limits
                         {
-                            _name = String.Format("BEAM {0} {1}", aRadius, beamWidth),
+                            Name = String.Format("BEAM {0} {1}", aRadius, beamWidth),
                             _geoPointList = arc
                         };
 
@@ -370,8 +377,7 @@ namespace ESME.NEMO
             return limit;
         }
 
-        public String GetName() { return _name; }
-
+        public String Name { get; set; }
 
         /**
     * return the list of points composing this limit
@@ -478,7 +484,7 @@ namespace ESME.NEMO
             // this has happened
             if (_region == null)
             {
-                Console.WriteLine("contains called with null region. name: " + _name);
+                Console.WriteLine("contains called with null region. name: " + Name);
                 return false;
             }
 
@@ -663,15 +669,15 @@ namespace ESME.NEMO
         public new String ToString()
         {
             var sb = new StringBuilder();
-            sb.AppendLine(_name);
+            sb.AppendLine(Name);
             foreach (var p in _region.Points) sb.AppendLine(p.Point.ToString());
-            //return _name;
+            //return Name;
             return sb.ToString();
         }
 
         public void ExportOvr(string directory)
         {
-            var name = _name;
+            var name = Name;
             if (!name.EndsWith(".ovr")) name += ".ovr";
             using (var writer = new StreamWriter(Path.Combine(directory, name)))
             {
@@ -700,7 +706,7 @@ namespace ESME.NEMO
 
         void SetIsClockWise()
         {
-            Console.WriteLine(_name + " isClockWise check");
+            Console.WriteLine(Name + " isClockWise check");
             var result = false;
             if (_region.Length > 0)
             {

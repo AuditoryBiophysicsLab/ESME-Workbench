@@ -35,7 +35,7 @@ namespace ESME.Environment
         /// <summary>
         /// Distance in meters from StartPoint to EndPoint
         /// </summary>
-        public double Length { get; private set; }
+        public new double Length { get; private set; }
 
         /// <summary>
         /// Name of the transect
@@ -55,6 +55,6 @@ namespace ESME.Environment
         /// <summary>
         /// Mid point of the transect
         /// </summary>
-        public EarthCoordinate MidPoint { get { return new EarthCoordinate(_midPoint); } }
+        public new EarthCoordinate MidPoint { get { return new EarthCoordinate(_midPoint); } }
     }
 }

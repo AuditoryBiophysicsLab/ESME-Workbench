@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using ESME.NEMO;
+using HRC.Navigation;
 
 namespace ESME
 {

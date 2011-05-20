@@ -22,7 +22,7 @@ namespace HRC.Utility
     }
 
     [Serializable]
-    public class SerializableData<T> : SerializableData where T : new()
+    public class SerializableData<T> : SerializableData where T : class, new()
     {
         [XmlIgnore]
         public string FileName { get; set; }
