@@ -203,11 +203,11 @@ namespace HRC.Navigation
 
         public static GeoRect InflateWithGeo(GeoRect geoRect, double rangeOutKm)
         {
-            var northWest = Geo.FromDegrees(geoRect.North, geoRect.West).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(315));
-            var northEast = Geo.FromDegrees(geoRect.North, geoRect.East).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(45));
-            var southEast = Geo.FromDegrees(geoRect.South, geoRect.East).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(135));
-            var southWest = Geo.FromDegrees(geoRect.South, geoRect.West).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(225));
-            return new GeoRect(northWest.getLatitude(), southEast.getLatitude(), southEast.getLongitude(), northWest.getLongitude());
+            var northWest = Geo.FromDegrees(geoRect.North, geoRect.West).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(315));
+            var northEast = Geo.FromDegrees(geoRect.North, geoRect.East).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(45));
+            var southEast = Geo.FromDegrees(geoRect.South, geoRect.East).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(135));
+            var southWest = Geo.FromDegrees(geoRect.South, geoRect.West).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225));
+            return new GeoRect(northWest.Latitude, southEast.Latitude, southEast.Longitude, northWest.Longitude);
         }
 
         [XmlIgnore]

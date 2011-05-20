@@ -13,11 +13,11 @@ namespace ESME.NEMO
         // 5 millimeters in km. 
         private const double DeltaMm = 0.00005;
 
-        public String Dump() { return String.Format("{0} {1} {2} {3} {4}", _position.getLatitude(), _position.getLongitude(), _eheight, _course, _speed); }
+        public String Dump() { return String.Format("{0} {1} {2} {3} {4}", _position.Latitude, _position.Longitude, _eheight, _course, _speed); }
 
         public void SetLatLonHeight(double lat, double lon, double aHeight)
         {
-            _position.initialize(lat, lon);
+            _position.Initialize(lat, lon);
             _eheight = aHeight;
         }
 
@@ -38,7 +38,7 @@ namespace ESME.NEMO
 
         public void GetGeoLlh(Geo geo)
         {
-            geo.initialize(_position);
+            geo.Initialize(_position);
         }
 
         public double GetEllipsoidHeight()
@@ -84,9 +84,9 @@ namespace ESME.NEMO
          */
         public bool IsSamePosition(TrackPoint other, double delta)
         {
-            double latCheck = (_position.getLatitude() - other.GetGeoLlh().getLatitude());
-            double lonCheck = (_position.getLongitude() - other.GetGeoLlh().getLongitude());
-            double deltaDeg = Geo.Degrees(Geo.kmToAngle(delta));
+            double latCheck = (_position.Latitude - other.GetGeoLlh().Latitude);
+            double lonCheck = (_position.Longitude - other.GetGeoLlh().Longitude);
+            double deltaDeg = Geo.RadiansToDegrees(Geo.KilometersToRadians(delta));
             return (latCheck < deltaDeg) && (lonCheck < deltaDeg);
         }
 
@@ -98,15 +98,15 @@ namespace ESME.NEMO
          */
         public double Distance(TrackPoint other)
         {
-            double dist = _position.distance(other._position);
-            double distkm = Geo.km(dist);
+            double dist = _position.DistanceRadians(other._position);
+            double distkm = Geo.RadiansToKilometers(dist);
             return distkm * 1000.0;
         }
 
         public double SlantRange(TrackPoint other)
         {
-            double dist = _position.distance(other._position);
-            double distM = Geo.km(dist) * 1000.0;
+            double dist = _position.DistanceRadians(other._position);
+            double distM = Geo.RadiansToKilometers(dist) * 1000.0;
             double diffHeight = _eheight - other._eheight;
 
             return Math.Sqrt((distM * distM) + (diffHeight * diffHeight));
@@ -115,7 +115,7 @@ namespace ESME.NEMO
         //TODO: make sure this is true bearing
         public double RelativeBearing(TrackPoint other)
         {
-            return Geo.Degrees(_position.azimuth(other._position));
+            return Geo.RadiansToDegrees(_position.Azimuth(other._position));
         }
 
         public new String ToString()

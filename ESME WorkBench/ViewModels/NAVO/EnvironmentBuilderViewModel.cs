@@ -79,7 +79,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 var expandedLimits = limits.CreateExpandedLimit(BufferZoneSize / 1000.0);
                 var northWest = expandedLimits.GetNorthWestPoint();
                 var southEast = expandedLimits.GetSouthEastPoint();
-                NAVODataSources.ExtractionArea = new GeoRect(northWest.getLatitude(), southEast.getLatitude(), southEast.getLongitude(), northWest.getLongitude());
+                NAVODataSources.ExtractionArea = new GeoRect(northWest.Latitude, southEast.Latitude, southEast.Longitude, northWest.Longitude);
             }
         }
 

@@ -29,8 +29,8 @@ namespace HRC.Navigation
             var length = region.Count;
             for (var i = 0; i < length; i++)
             {
-                storage.initialize(region[i].Point);
-                var pr = c.distance(storage);
+                storage.Initialize(region[i].Point);
+                var pr = c.DistanceRadians(storage);
                 if (pr > r)
                 {
                     r = pr;
@@ -49,7 +49,7 @@ namespace HRC.Navigation
         }
         
         public bool Intersects(Geo g, double r) {
-            return Center.distance(g) <= (Radius + r);
+            return Center.DistanceRadians(g) <= (Radius + r);
         }
         
         public new String ToString() {

@@ -62,21 +62,21 @@ namespace ESME.NEMO
             {
                 // this reason we extract a rectangular extents is
                 // for placing random points within the area.
-                if (geo.getLatitude() < _minLat)
+                if (geo.Latitude < _minLat)
                 {
-                    _minLat = geo.getLatitude();
+                    _minLat = geo.Latitude;
                 }
-                if (geo.getLatitude() > _maxLat)
+                if (geo.Latitude > _maxLat)
                 {
-                    _maxLat = geo.getLatitude();
+                    _maxLat = geo.Latitude;
                 }
-                if (geo.getLongitude() < _minLon)
+                if (geo.Longitude < _minLon)
                 {
-                    _minLon = geo.getLongitude();
+                    _minLon = geo.Longitude;
                 }
-                if (geo.getLongitude() > _maxLon)
+                if (geo.Longitude > _maxLon)
                 {
-                    _maxLon = geo.getLongitude();
+                    _maxLon = geo.Longitude;
                 }
             }
             // need this for a few things
@@ -107,31 +107,31 @@ namespace ESME.NEMO
 
             foreach (var geo in result._geoPointList)
             {
-                if (geo.getLatitude() < result._minLat)
+                if (geo.Latitude < result._minLat)
                 {
-                    result._minLat = geo.getLatitude();
+                    result._minLat = geo.Latitude;
                 }
-                if (geo.getLatitude() > result._maxLat)
+                if (geo.Latitude > result._maxLat)
                 {
-                    result._maxLat = geo.getLatitude();
+                    result._maxLat = geo.Latitude;
                 }
-                if (geo.getLongitude() < result._minLon)
+                if (geo.Longitude < result._minLon)
                 {
-                    result._minLon = geo.getLongitude();
+                    result._minLon = geo.Longitude;
                 }
-                if (geo.getLongitude() > result._maxLon)
+                if (geo.Longitude > result._maxLon)
                 {
-                    result._maxLon = geo.getLongitude();
+                    result._maxLon = geo.Longitude;
                 }
             }
 
             result._geoPointList.Clear();
 
-            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(225)));
-            result._geoPointList.Add(Geo.FromDegrees(result._maxLat, result._minLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(315)));
-            result._geoPointList.Add(Geo.FromDegrees(result._maxLat, result._maxLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(45)));
-            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._maxLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(135)));
-            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).offset(Geo.kmToAngle(Math.Sqrt(2) * rangeOutKm), Geo.Radians(225)));
+            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
+            result._geoPointList.Add(Geo.FromDegrees(result._maxLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(315)));
+            result._geoPointList.Add(Geo.FromDegrees(result._maxLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(45)));
+            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(135)));
+            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
 
             result.Initialize();
 
@@ -152,9 +152,9 @@ namespace ESME.NEMO
 
                 foreach (var geo in _geoPointList)
                 {
-                    var dot = _centerOfRegion.azimuth(geo);
+                    var dot = _centerOfRegion.Azimuth(geo);
 
-                    var point = geo.offset(Geo.kmToAngle(rangeOutKm), dot);
+                    var point = geo.Offset(Geo.KilometersToRadians(rangeOutKm), dot);
 
                     result._geoPointList.Add(point);
                 }
@@ -193,7 +193,7 @@ namespace ESME.NEMO
                     seg = segIt.Current;
                     segPts = seg.Segments;
 
-                    var lineCourse = segPts[0].azimuth(segPts[1]);
+                    var lineCourse = segPts[0].Azimuth(segPts[1]);
 
                     // gives specular reflection with angle from center of region
                     // double ang = Geo.angle(centerOfRegion, segPts[1], segPts[0]);
@@ -201,15 +201,15 @@ namespace ESME.NEMO
                     // -1) * ang)) % (360.0);
                     var azimuth = (lineCourse + (_isClockWise ? -1 : 1) * (Math.PI / 2)) % ((Math.PI * 2.0));
 
-                    var newPt0 = Geo.offset(segPts[0], Geo.kmToAngle(rangeOutKm), azimuth);
-                    var newPt1 = Geo.offset(segPts[1], Geo.kmToAngle(rangeOutKm), azimuth);
+                    var newPt0 = Geo.Offset(segPts[0], Geo.KilometersToRadians(rangeOutKm), azimuth);
+                    var newPt1 = Geo.Offset(segPts[1], Geo.KilometersToRadians(rangeOutKm), azimuth);
 
                     if (lastEndPt != null)
                     {
                         var left = (_isClockWise ? lastEndPt : newPt0);
                         var right = (_isClockWise ? newPt0 : lastEndPt);
 
-                        var arc = Geo.approximateArc(segPts[0], left, right, Geo.Radians(5.0));
+                        var arc = Geo.ApproximateArc(segPts[0], left, right, Geo.DegreesToRadians(5.0));
                         var arcList = new List<Geo>(arc.Length);
                         foreach (var a in arc)
                         {
@@ -238,7 +238,7 @@ namespace ESME.NEMO
                 {
                     var left = (_isClockWise ? lastEndPt : result._geoPointList[0]);
                     var right = (_isClockWise ? result._geoPointList[0] : lastEndPt);
-                    var arc = Geo.approximateArc(segPts[1], left, right, Geo.Radians(5.0));
+                    var arc = Geo.ApproximateArc(segPts[1], left, right, Geo.DegreesToRadians(5.0));
 
                     var arcList = new List<Geo>(arc.Length);
                     foreach (var a in arc)
@@ -289,7 +289,7 @@ namespace ESME.NEMO
             var flag360 = false;
             var beamWidth = aBeamWidth;
 
-            var radius = Geo.kmToAngle(aRadius / 1000.0);
+            var radius = Geo.KilometersToRadians(aRadius / 1000.0);
 
             if (Math.Abs(beamWidth - 360.0) < 0.001)
             {
@@ -310,10 +310,10 @@ namespace ESME.NEMO
 
             var arc = new List<Geo>();
 
-            var left = Geo.offset(origin, radius, -Geo.Radians(top / 2.0));
-            var right = Geo.offset(origin, radius, Geo.Radians(top / 2.0));
+            var left = Geo.Offset(origin, radius, -Geo.DegreesToRadians(top / 2.0));
+            var right = Geo.Offset(origin, radius, Geo.DegreesToRadians(top / 2.0));
 
-            var arc1 = Geo.approximateArc(origin, left, right, Geo.Radians(5.0));
+            var arc1 = Geo.ApproximateArc(origin, left, right, Geo.DegreesToRadians(5.0));
 
             arc.AddRange(arc1);
 
@@ -321,10 +321,10 @@ namespace ESME.NEMO
             {
                 var half = bot / 2.0;
 
-                left = Geo.offset(origin, radius, Geo.Radians(270.0 - half));
-                right = Geo.offset(origin, radius, Geo.Radians(270.0));
+                left = Geo.Offset(origin, radius, Geo.DegreesToRadians(270.0 - half));
+                right = Geo.Offset(origin, radius, Geo.DegreesToRadians(270.0));
 
-                var arc2 = Geo.approximateArc(origin, left, right, Geo.Radians(5.0));
+                var arc2 = Geo.ApproximateArc(origin, left, right, Geo.DegreesToRadians(5.0));
 
                 var index = 0;
                 foreach (var g in arc2)
@@ -333,10 +333,10 @@ namespace ESME.NEMO
                     ++index;
                 }
 
-                left = Geo.offset(origin, radius, Geo.Radians(90.0));
-                right = Geo.offset(origin, radius, Geo.Radians(90.0 + half));
+                left = Geo.Offset(origin, radius, Geo.DegreesToRadians(90.0));
+                right = Geo.Offset(origin, radius, Geo.DegreesToRadians(90.0 + half));
 
-                arc2 = Geo.approximateArc(origin, left, right, Geo.Radians(5.0));
+                arc2 = Geo.ApproximateArc(origin, left, right, Geo.DegreesToRadians(5.0));
 
                 arc.AddRange(arc2);
             }
@@ -416,7 +416,7 @@ namespace ESME.NEMO
                 lat = _minLat + (Random.NextDouble() * latDelta);
                 lon = _minLon + (Random.NextDouble() * lonDelta);
 
-                geo.initialize(lat, lon);
+                geo.Initialize(lat, lon);
 
                 if (IsPointInPolygon(geo, _centerOfRegion, _geoPointList))
                 {
@@ -431,7 +431,7 @@ namespace ESME.NEMO
             lat = _minLat + ((_maxLat - _minLat) / 2.0);
             lon = _minLon + ((_maxLon - _minLon) / 2.0);
 
-            geo.initialize(lat, lon);
+            geo.Initialize(lat, lon);
 
             return geo;
         }
@@ -502,49 +502,48 @@ namespace ESME.NEMO
 
             // bail out if the point is more than 90 degrees off the
             // centroid
-            var d = x.distance(center);
+            var d = x.DistanceRadians(center);
             if (d >= (Math.PI / 2))
             {
                 return false;
             }
             // ray is normal to the great circle from c to x. reusing c to hold ray
             // info
-            var ray = center.crossNormalize(x, new Geo());
+            var ray = center.CrossNormalize(x);
             /*
        * side is a point on the great circle between c and x. It is used to
        * choose a direction.
        */
-            var side = x.crossNormalize(ray, new Geo());
+            var side = x.CrossNormalize(ray);
             var isIn = false;
             // Why do we need to allocate new Geos?
             // Geo p1 = new Geo(poly[0]);
             // Geo p2 = new Geo(poly[0]);
             var p1 = new Geo(poly[0]);
             var p2 = new Geo(poly[0]);
-            var tmp = new Geo();
             var polySize = poly.Count;
             for (var i = 1; i < polySize; i++)
             {
-                p2.initialize(poly[i]);
+                p2.Initialize(poly[i]);
                 /*
           * p1 and p2 are on different sides of the ray, and the great acircle
           * between p1 and p2 is on the side that counts;
           */
-                if ((p1.dot(ray) < 0.0) != (p2.dot(ray) < 0.0) && p1.intersect(p2, ray, tmp).dot(side) > 0.0)
+                if ((p1.Dot(ray) < 0.0) != (p2.Dot(ray) < 0.0) && p1.Intersect(p2, ray).Dot(side) > 0.0)
                 {
                     isIn = !isIn;
                 }
 
-                p1.initialize(p2);
+                p1.Initialize(p2);
             }
 
             // Check for unclosed polygons, if the polygon isn't closed,
             // do the calculation for the last point to the starting
             // point.
-            if (!poly[0].equals(p1))
+            if (!poly[0].Equals(p1))
             {
-                p2.initialize(poly[0]);
-                if ((p1.dot(ray) < 0.0) != (p2.dot(ray) < 0.0) && p1.intersect(p2, ray, tmp).dot(side) > 0.0)
+                p2.Initialize(poly[0]);
+                if ((p1.Dot(ray) < 0.0) != (p2.Dot(ray) < 0.0) && p1.Intersect(p2, ray).Dot(side) > 0.0)
                 {
                     isIn = !isIn;
                 }
@@ -618,22 +617,22 @@ namespace ESME.NEMO
             {
                 count += 1;
                 p2 = new Geo(array[i].Point);
-                angle = Geo.angle(p0, p1, p2);
+                angle = Geo.AngleRadians(p0, p1, p2);
                 area += angle;
-                p0.initialize(p1);
-                p1.initialize(p2);
+                p0.Initialize(p1);
+                p1.Initialize(p2);
             }
 
             count += 1;
-            p2.initialize(v0);
-            angle = Geo.angle(p0, p1, p2);
+            p2.Initialize(v0);
+            angle = Geo.AngleRadians(p0, p1, p2);
             area += angle;
-            p0.initialize(p1);
-            p1.initialize(p2);
+            p0.Initialize(p1);
+            p1.Initialize(p2);
 
             count += 1;
-            p2.initialize(v1);
-            angle = Geo.angle(p0, p1, p2);
+            p2.Initialize(v1);
+            angle = Geo.AngleRadians(p0, p1, p2);
             area += angle;
 
             return area - ((count - 2) * Math.PI);
@@ -651,11 +650,11 @@ namespace ESME.NEMO
             _geoPointList.Clear();
 
             // the math routine in Geo rotates counter-clockwise
-            var rads = Geo.Radians(360.0 - course);
+            var rads = Geo.DegreesToRadians(360.0 - course);
 
             foreach (var g in _shapeList)
             {
-                var geo = Rotation.rotate(_shapeList[0], rads, g, null);
+                var geo = Rotation.Rotate(_shapeList[0], rads, g);
 
                 _geoPointList.Add(geo);
             }
@@ -684,12 +683,12 @@ namespace ESME.NEMO
                 writer.WriteLine("orange");
                 writer.WriteLine("solid");
                 writer.WriteLine("move");
-                writer.WriteLine("{0:0.#####} {1:0.#####}", _geoPointList[0].getLatitude(), _geoPointList[0].getLongitude());
+                writer.WriteLine("{0:0.#####} {1:0.#####}", _geoPointList[0].Latitude, _geoPointList[0].Longitude);
                 writer.WriteLine("lines");
                 var first = true;
                 foreach (var p in _geoPointList)
                 {
-                    if (!first) writer.WriteLine("{0:0.#####} {1:0.#####}", p.getLatitude(), p.getLongitude());
+                    if (!first) writer.WriteLine("{0:0.#####} {1:0.#####}", p.Latitude, p.Longitude);
                     first = false;
                 }
                 writer.WriteLine();
@@ -720,21 +719,21 @@ namespace ESME.NEMO
                     seg2[0] = Geo.FromGeo(temp.Segments[0]);
                     seg2[1] = Geo.FromGeo(temp.Segments[1]);
 
-                    var pointInside = seg1[0].midPoint(seg2[1]);
+                    var pointInside = seg1[0].MidPoint(seg2[1]);
                     var s1 = seg1[0];
                     var s2 = seg1[1];
-                    var p1 = s1.cross(s2);
-                    var p2 = s1.cross(pointInside);
-                    var p3 = p1.cross(p2);
+                    var p1 = s1.Cross(s2);
+                    var p2 = s1.Cross(pointInside);
+                    var p3 = p1.Cross(p2);
 
                     Console.WriteLine("line seg: " + PrintGeo(s1) + " - to - " + PrintGeo(s2));
                     Console.WriteLine("  --        inside: " + PrintGeo(pointInside));
                     Console.WriteLine("  -- normal normal: " + PrintGeo(p3));
 
-                    var sigPiLat = KillZeroSignum(pointInside.getLatitudeRadians());
-                    var sigPiLon = KillZeroSignum(pointInside.getLongitudeRadians());
-                    var sigP3Lat = KillZeroSignum(p3.getLatitudeRadians());
-                    var sigP3Lon = KillZeroSignum(p3.getLongitudeRadians());
+                    var sigPiLat = KillZeroSignum(pointInside.LatitudeRadians);
+                    var sigPiLon = KillZeroSignum(pointInside.LongitudeRadians);
+                    var sigP3Lat = KillZeroSignum(p3.LatitudeRadians);
+                    var sigP3Lon = KillZeroSignum(p3.LongitudeRadians);
 
                     var pilatpos = (sigPiLat > 0);
                     var pilonpos = (sigPiLon > 0);
@@ -768,8 +767,8 @@ namespace ESME.NEMO
             return answer;
         }
 
-        public static String PrintAngle(double d) { return String.Format("{0}", Geo.Degrees(d)); }
+        public static String PrintAngle(double d) { return String.Format("{0}", Geo.RadiansToDegrees(d)); }
 
-        public static String PrintGeo(Geo p) { return String.Format("{0} {1}", p.getLatitude(), p.getLongitude()); }
+        public static String PrintGeo(Geo p) { return String.Format("{0} {1}", p.Latitude, p.Longitude); }
     }
 }
