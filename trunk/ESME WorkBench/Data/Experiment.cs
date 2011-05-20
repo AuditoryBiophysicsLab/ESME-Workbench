@@ -1135,7 +1135,7 @@ namespace ESMEWorkBench.Data
                 if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = Environment2DData.FromEEB(BathymetryFileName, "bathymetry", SimArea);
                 else if (BathymetryFileName.EndsWith(".chb"))
                     Bathymetry = Environment2DData.FromCHB(BathymetryFileName, -1);
-                else if (BathymetryFileName.EndsWith(".yxz"))
+                else if (BathymetryFileName.EndsWith(".yxz") || BathymetryFileName.EndsWith(".txt"))
                     Bathymetry = Environment2DData.FromYXZ(BathymetryFileName, -1);
             }
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");

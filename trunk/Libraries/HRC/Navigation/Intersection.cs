@@ -20,15 +20,15 @@ namespace HRC.Navigation
 
         public static float[] GetIntersection(float lat1, float lon1, float lat2, float lon2, float lat3, float lon3, float lat4, float lon4)
         {
-            var geoCross1 = (new Geo(lat1, lon1)).crossNormalize(new Geo(lat2, lon2));
-            var geoCross2 = (new Geo(lat3, lon3)).crossNormalize(new Geo(lat4, lon4));
+            var geoCross1 = (new Geo(lat1, lon1)).CrossNormalize(new Geo(lat2, lon2));
+            var geoCross2 = (new Geo(lat3, lon3)).CrossNormalize(new Geo(lat4, lon4));
 
-            var geo = geoCross1.crossNormalize(geoCross2);
-            var anti = geo.antipode();
+            var geo = geoCross1.CrossNormalize(geoCross2);
+            var anti = geo.Antipode();
 
             return new[]
                    {
-                       ((float) geo.getLatitude()), ((float) geo.getLongitude()), ((float) anti.getLatitude()), ((float) anti.getLongitude())
+                       ((float) geo.Latitude), ((float) geo.Longitude), ((float) anti.Latitude), ((float) anti.Longitude)
                    };
         }
 
@@ -43,11 +43,11 @@ namespace HRC.Navigation
 
         public static Geo GetIntersectionGeo(float lat1, float lon1, float lat2, float lon2, float lat3, float lon3, float lat4, float lon4)
         {
-            var geoCross1 = (new Geo(lat1, lon1)).crossNormalize(new Geo(lat2, lon2));
-            var geoCross2 = (new Geo(lat3, lon3)).crossNormalize(new Geo(lat4, lon4));
+            var geoCross1 = (new Geo(lat1, lon1)).CrossNormalize(new Geo(lat2, lon2));
+            var geoCross2 = (new Geo(lat3, lon3)).CrossNormalize(new Geo(lat4, lon4));
 
             // geoCross memory is reused for answer.
-            return geoCross1.crossNormalize(geoCross2, geoCross1);
+            return geoCross1.CrossNormalize(geoCross2);
         }
 
         /**
@@ -123,7 +123,7 @@ namespace HRC.Navigation
          * 
          * @return nautical miles
          */
-        public static float PointCircleDistanceNm(Geo p1, Geo p2, Geo center) { return (float) Geo.nm(PointCircleDistance(p1, p2, center)); }
+        public static float PointCircleDistanceNm(Geo p1, Geo p2, Geo center) { return (float) Geo.RadiansToNauticalMiles(PointCircleDistance(p1, p2, center)); }
 
         /**
          * Calculates the great circle distance from the point (lat, lon) to the
@@ -134,9 +134,9 @@ namespace HRC.Navigation
 
         public static double PointCircleDistance(Geo p1, Geo p2, Geo center)
         {
-            var n = Geo.crossNormalize(p1, p2, new Geo());
-            var c = center.normalize(new Geo());
-            var cosTheta = Geo.dot(n, c);
+            var n = Geo.CrossNormalize(p1, p2);
+            var c = center.Normalize();
+            var cosTheta = Geo.Dot(n, c);
             var theta = Math.Acos(cosTheta);
 
             return Math.Abs(Math.PI / 2 - theta);
@@ -153,7 +153,7 @@ namespace HRC.Navigation
             // assert (< (Math.abs (.dot (.crossNormalize a b) i))
             // 1.e-15))
 
-            return ((a.distance(i) < a.distance(b)) && (b.distance(i) < b.distance(a)));
+            return ((a.DistanceRadians(i) < a.DistanceRadians(b)) && (b.DistanceRadians(i) < b.DistanceRadians(a)));
         }
 
         /**
@@ -167,7 +167,7 @@ namespace HRC.Navigation
             // assert (< (Math.abs (.dot (.crossNormalize a b) i))
             // 1.e-15))
 
-            return ((Math.Abs(a.crossNormalize(b).dot(i)) <= withinRad) && (a.distance(i) < a.distance(b)) && (b.distance(i) < b.distance(a)));
+            return ((Math.Abs(a.CrossNormalize(b).Dot(i)) <= withinRad) && (a.DistanceRadians(i) < a.DistanceRadians(b)) && (b.DistanceRadians(i) < b.DistanceRadians(a)));
         }
 
         /**
@@ -179,17 +179,17 @@ namespace HRC.Navigation
         public static Geo SegIntersection(Geo a, Geo b, Geo c)
         {
             // Normal to great circle between a and b
-            var g = a.crossNormalize(b);
+            var g = a.CrossNormalize(b);
             // Normal to the great circle between c and g
-            var f = c.crossNormalize(g);
+            var f = c.CrossNormalize(g);
             // The intersection is normal to both, reusing g object for it's memory.
-            var i = f.crossNormalize(g, g);
+            var i = f.CrossNormalize(g);
             if (IsOnSegment(a, b, i))
             {
                 return i;
             }
             // reuse i object memory
-            var ai = i.antipode(i);
+            var ai = i.Antipode();
             return IsOnSegment(a, b, ai) ? ai : null;
         }
 
@@ -215,7 +215,7 @@ namespace HRC.Navigation
         {
             var ret = PointSegDistance(new Geo(lat1, lon1), new Geo(lat2, lon2), new Geo(lat, lon));
 
-            return (float) (ret == -1 ? ret : Geo.nm(ret));
+            return (float) (ret == -1 ? ret : Geo.RadiansToNauticalMiles(ret));
         }
 
         /**
@@ -228,7 +228,7 @@ namespace HRC.Navigation
         public static double PointSegDistance(Geo a, Geo b, Geo c)
         {
             var i = SegIntersection(a, b, c);
-            return (i == null) ? -1 : c.distance(i);
+            return (i == null) ? -1 : c.DistanceRadians(i);
         }
 
         /**
@@ -241,10 +241,10 @@ namespace HRC.Navigation
         {
             // check if either of the end points of the seg are inside the
             // circle
-            var d1 = Geo.distance(p1, center);
+            var d1 = Geo.DistanceRadians(p1, center);
             if (d1 < radius) return true;
 
-            var d2 = Geo.distance(p2, center);
+            var d2 = Geo.DistanceRadians(p2, center);
             if (d2 < radius) return true;
 
             var dist = PointCircleDistance(p1, p2, center);
@@ -255,22 +255,22 @@ namespace HRC.Navigation
             // (lat, lon) and perpendicular to great circle containing
             // (lat1, lon1) and (lat2, lon2)
 
-            var g = p1.cross(p2);
-            var f = center.cross(g);
+            var g = p1.Cross(p2);
+            var f = center.Cross(g);
             // Reusing g object for i
-            var i = f.crossNormalize(g, g);
+            var i = f.CrossNormalize(g);
 
             // check if point of intersection lies on the segment
             // length of seg
-            var d = Geo.distance(p1, p2);
+            var d = Geo.DistanceRadians(p1, p2);
 
             // Make sure the intersection point is inside the exclusion
             // zone
-            if (center.distance(i) < radius)
+            if (center.DistanceRadians(i) < radius)
             {
                 // between seg endpoints and first point of intersection
-                var d11 = Geo.distance(p1, i);
-                var d12 = Geo.distance(p2, i);
+                var d11 = Geo.DistanceRadians(p1, i);
+                var d12 = Geo.DistanceRadians(p2, i);
                 // Check the distance of the intersection point and either
                 // endpoint to see if it falls between them. Add a second
                 // test to make sure that we are on the shorter of the two
@@ -280,12 +280,12 @@ namespace HRC.Navigation
 
             // Make sure the intersection point is inside the exclusion
             // zone, reusing i object for i2
-            var i2 = i.antipode(i);
-            if (center.distance(i2) < radius)
+            var i2 = i.Antipode();
+            if (center.DistanceRadians(i2) < radius)
             {
                 // between seg1 endpoints and second point of intersection
-                var d21 = Geo.distance(p1, i2);
-                var d22 = Geo.distance(p2, i2);
+                var d21 = Geo.DistanceRadians(p1, i2);
+                var d22 = Geo.DistanceRadians(p2, i2);
                 // Check the distance of the intersection point and either
                 // endpoint to see if it falls between them. Add a second
                 // test to make sure that we are on the shorter of the two
@@ -313,11 +313,11 @@ namespace HRC.Navigation
                 var lat2 = polyPoints[2 * i];
                 var lon2 = polyPoints[2 * i + 1];
 
-                b.initialize(lat2, lon2);
+                b.Initialize(lat2, lon2);
 
                 if (IntersectsCircle(a, b, c, radius)) return true;
 
-                a.initialize(b);
+                a.Initialize(b);
             }
 
             return false;
@@ -337,10 +337,10 @@ namespace HRC.Navigation
             var c = new Geo(poly[0]);
             for (var i = 1; i < poly.Count; i++)
             {
-                ret.initialize(poly[i]);
-                c = c.add(poly[i], c);
+                ret.Initialize(poly[i]);
+                c = c.Add(poly[i]);
             }
-            return c.normalize(ret);
+            return c.Normalize();
         }
 
         /**
@@ -359,9 +359,9 @@ namespace HRC.Navigation
             for (var i = 1; i < size; i++)
             {
                 ret = new Geo(poly[i].Point);
-                c = c.add(ret, c);
+                c = c.Add(ret);
             }
-            return c.normalize(ret);
+            return c.Normalize();
         }
 
         /**
@@ -408,26 +408,25 @@ namespace HRC.Navigation
 
             // bail out if the point is more than 90 degrees off the
             // centroid
-            var d = x.distance(c);
+            var d = x.DistanceRadians(c);
             if (d >= (Math.PI / 2))
             {
                 return false;
             }
             // ray is normal to the great circle from c to x. reusing c to hold ray
             // info
-            var ray = c.crossNormalize(x, c);
+            var ray = c.CrossNormalize(x);
             /*
          * side is a point on the great circle between c and x. It is used to
          * choose a direction.
          */
-            var side = x.crossNormalize(ray, new Geo());
+            var side = x.CrossNormalize(ray);
             var isIn = false;
             // Why do we need to allocate new Geos?
             // Geo p1 = new Geo(poly[0]);
             // Geo p2 = new Geo(poly[0]);
             var p1 = new Geo(poly[0].Point);
             Geo p2;
-            var tmp = new Geo();
             var polySize = poly.Count;
             for (var i = 1; i < polySize; i++)
             {
@@ -437,9 +436,9 @@ namespace HRC.Navigation
              * p1 and p2 are on different sides of the ray, and the great
              * acircle between p1 and p2 is on the side that counts;
              */
-                if ((p1.dot(ray) < 0.0) != (p2.dot(ray) < 0.0) && p1.intersect(p2, ray, tmp).dot(side) > 0.0) isIn = !isIn;
+                if ((p1.Dot(ray) < 0.0) != (p2.Dot(ray) < 0.0) && p1.Intersect(p2, ray).Dot(side) > 0.0) isIn = !isIn;
 
-                p1.initialize(p2);
+                p1.Initialize(p2);
             }
 
             // Check for unclosed polygons, if the polygon isn't closed,
@@ -448,7 +447,7 @@ namespace HRC.Navigation
             if (!poly[0].Point.Equals(p1))
             {
                 p2 = new Geo(poly[0].Point);
-                if ((p1.dot(ray) < 0.0) != (p2.dot(ray) < 0.0) && p1.intersect(p2, ray, tmp).dot(side) > 0.0)
+                if ((p1.Dot(ray) < 0.0) != (p2.Dot(ray) < 0.0) && p1.Intersect(p2, ray).Dot(side) > 0.0)
                 {
                     isIn = !isIn;
                 }
@@ -524,14 +523,14 @@ namespace HRC.Navigation
             // check if first point of intersection lies on both segments
             if (i1 != null)
             {
-                llp[0] = ((float) i1.getLatitude());
-                llp[1] = ((float) i1.getLongitude());
+                llp[0] = ((float) i1.Latitude);
+                llp[1] = ((float) i1.Longitude);
             }
             // check if second point of intersection lies on both segments
             if (i2 != null)
             {
-                llp[2] = ((float) i2.getLatitude());
-                llp[3] = ((float) i2.getLongitude());
+                llp[2] = ((float) i2.Latitude);
+                llp[3] = ((float) i2.Longitude);
             }
             return llp;
         }
@@ -542,34 +541,30 @@ namespace HRC.Navigation
 
         public static Geo[] GetSegIntersection(Geo p1, Geo p2, Geo p3, Geo p4)
         {
-            var geoCross1 = p1.crossNormalize(p2);
-            var geoCross2 = p3.crossNormalize(p4);
-
-            // i1 is really geoCross1, i2 is really geoCross2, memory-wise.
-            var i1 = geoCross1.crossNormalize(geoCross2, geoCross1);
-            var i2 = i1.antipode(geoCross2);
+            var i1 = p1.CrossNormalize(p2).CrossNormalize(p3.CrossNormalize(p4));
+            var i2 = i1.Antipode();
 
             // check if the point of intersection lies on both segs
             // length of seg1
-            var d1 = p1.distance(p2);
+            var d1 = p1.DistanceRadians(p2);
             // length of seg2
-            var d2 = p3.distance(p4);
+            var d2 = p3.DistanceRadians(p4);
 
             // between seg1 endpoints and first point of intersection
-            var d111 = p1.distance(i1);
-            var d121 = p2.distance(i1);
+            var d111 = p1.DistanceRadians(i1);
+            var d121 = p2.DistanceRadians(i1);
 
             // between seg1 endpoints and second point of intersection
-            var d112 = p1.distance(i2);
-            var d122 = p2.distance(i2);
+            var d112 = p1.DistanceRadians(i2);
+            var d122 = p2.DistanceRadians(i2);
 
             // between seg2 endpoints and first point of intersection
-            var d211 = p3.distance(i1);
-            var d221 = p4.distance(i1);
+            var d211 = p3.DistanceRadians(i1);
+            var d221 = p4.DistanceRadians(i1);
 
             // between seg2 endpoints and second point of intersection
-            var d212 = p3.distance(i2);
-            var d222 = p4.distance(i2);
+            var d212 = p3.DistanceRadians(i2);
+            var d222 = p4.DistanceRadians(i2);
 
             var result = new Geo[]
                          {
@@ -676,7 +671,7 @@ namespace HRC.Navigation
          * Does the segment come within near radians of the region defined by
          * rCenter at rRadius?
          */
-        public static bool IsSegmentNearRadialRegion(Geo s1, Geo s2, Geo rCenter, double rRadius, double near) { return s1.isInside(s2, near + rRadius, rCenter); }
+        public static bool IsSegmentNearRadialRegion(Geo s1, Geo s2, Geo rCenter, double rRadius, double near) { return s1.IsInside(s2, near + rRadius, rCenter); }
 
         /** Is a segment horizontally within range of a Region region? */
 
@@ -753,7 +748,7 @@ namespace HRC.Navigation
                     return ret;
                 }
 
-                pl0.initialize(pl1);
+                pl0.Initialize(pl1);
             }
             return null;
         }
@@ -800,7 +795,7 @@ namespace HRC.Navigation
                     check = new Geo();
                 }
 
-                pl0.initialize(pl1);
+                pl0.Initialize(pl1);
             }
             return list;
         }
@@ -817,11 +812,11 @@ namespace HRC.Navigation
             for (var j = 0; j < rlen; j++)
             {
                 var pl1 = new Geo(r[j]);
-                if (pl0.isInside(pl1, near, s))
+                if (pl0.IsInside(pl1, near, s))
                 {
                     return true; // near enough to a region edge
                 }
-                pl0.initialize(pl1);
+                pl0.Initialize(pl1);
             }
             return false;
         }
@@ -916,24 +911,24 @@ namespace HRC.Navigation
 
             // ac and bc are the unit vectors normal to the two great
             // circles defined by the segments
-            var ac = a1.crossNormalize(a2);
-            var bc = b1.crossNormalize(b2);
+            var ac = a1.CrossNormalize(a2);
+            var bc = b1.CrossNormalize(b2);
 
             // aL and bL are the lengths (in radians) of the segments
-            var aL = a1.distance(a2) + r;
-            var bL = b1.distance(b2) + r;
+            var aL = a1.DistanceRadians(a2) + r;
+            var bL = b1.DistanceRadians(b2) + r;
 
             // i is one of the two points where the two great circles
             // intersect. Since we don't use bc anymore, let's reuse it for i, gets
             // passed back from crossNormalize as the second argument.
-            var i = ac.crossNormalize(bc, bc);
+            var i = ac.CrossNormalize(bc);
 
             // if i is not on A
-            if (!(i.distance(a1) <= aL && i.distance(a2) <= aL))
+            if (!(i.DistanceRadians(a1) <= aL && i.DistanceRadians(a2) <= aL))
             {
-                i = i.antipode(i); // switch to the antipode instead, reuse i
+                i = i.Antipode(); // switch to the antipode instead, reuse i
                 // object for new values.
-                if (!(i.distance(a1) <= aL && i.distance(a2) <= aL))
+                if (!(i.DistanceRadians(a1) <= aL && i.DistanceRadians(a2) <= aL))
                 {
                     // check
                     // again
@@ -944,7 +939,7 @@ namespace HRC.Navigation
             // i is intersection or anti-intersection point now.
 
             // Now see if it intersects with b
-            if (i.distance(b1) <= bL && i.distance(b2) <= bL) return i;
+            if (i.DistanceRadians(b1) <= bL && i.DistanceRadians(b2) <= bL) return i;
             return null;
         }
 
@@ -966,24 +961,24 @@ namespace HRC.Navigation
             // ac and bc are the unit vectors normal to the two great
             // circles defined by the segments. ret is returned from crossNormalize
             // as bc.
-            var ac = a1.crossNormalize(a2);
-            var bc = b1.crossNormalize(b2, ret);
+            var ac = a1.CrossNormalize(a2);
+            var bc = b1.CrossNormalize(b2);
 
             // aL and bL are the lengths (in radians) of the segments
-            var aL = a1.distance(a2) + r;
-            var bL = b1.distance(b2) + r;
+            var aL = a1.DistanceRadians(a2) + r;
+            var bL = b1.DistanceRadians(b2) + r;
 
             // i is one of the two points where the two great circles
             // intersect. Since we don't use bc anymore, let's reuse it for i, gets
             // passed back from crossNormalize as the second argument.
-            var i = ac.crossNormalize(bc, bc);
+            var i = ac.CrossNormalize(bc);
 
             // if i is not on A
-            if (!(i.distance(a1) <= aL && i.distance(a2) <= aL))
+            if (!(i.DistanceRadians(a1) <= aL && i.DistanceRadians(a2) <= aL))
             {
-                i = i.antipode(ret); // switch to the antipode instead, reuse ret
+                i = i.Antipode(); // switch to the antipode instead, reuse ret
                 // yet again.
-                if (!(i.distance(a1) <= aL && i.distance(a2) <= aL))
+                if (!(i.DistanceRadians(a1) <= aL && i.DistanceRadians(a2) <= aL))
                 {
                     // check
                     // again
@@ -994,7 +989,7 @@ namespace HRC.Navigation
             // i is intersection or anti-intersection point now.
 
             // Now see if it intersects with b
-            if (i.distance(b1) <= bL && i.distance(b2) <= bL) // remember ret -> bc -> i, so i == ret
+            if (i.DistanceRadians(b1) <= bL && i.DistanceRadians(b2) <= bL) // remember ret -> bc -> i, so i == ret
                 return i;
             return null;
         }

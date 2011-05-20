@@ -44,8 +44,10 @@ namespace HRC.Navigation
             var tmpLon = new List<double>();
             foreach (var datum in data)
             {
-                tmpLat.Add(datum.Latitude);
-                tmpLon.Add(datum.Longitude);
+                var lat = Math.Round(datum.Latitude, 5);
+                var lon = Math.Round(datum.Longitude, 5);
+                tmpLat.Add(lat);
+                tmpLon.Add(lon);
             }
             Latitudes = tmpLat.Distinct().ToList();
             Longitudes = tmpLon.Distinct().ToList();
@@ -55,8 +57,8 @@ namespace HRC.Navigation
             var progress = 0;
             foreach (var datum in data)
             {
-                var lonIndex = Longitudes.IndexOf(datum.Longitude);
-                var latIndex = Latitudes.IndexOf(datum.Latitude);
+                var lonIndex = Longitudes.IndexOf(Math.Round(datum.Longitude, 5));
+                var latIndex = Latitudes.IndexOf(Math.Round(datum.Latitude, 5));
                 FieldData[lonIndex, latIndex] = datum;
                 progress++;
             }

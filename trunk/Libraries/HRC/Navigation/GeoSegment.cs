@@ -26,7 +26,7 @@ namespace HRC.Navigation
             {
                 return new[]
                        {
-                           (float) Segments[0].getLatitude(), (float) Segments[0].getLongitude(), (float) Segments[1].getLatitude(), (float) Segments[1].getLongitude()
+                           (float) Segments[0].Latitude, (float) Segments[0].Longitude, (float) Segments[1].Latitude, (float) Segments[1].Longitude
                        };
             }
         }
