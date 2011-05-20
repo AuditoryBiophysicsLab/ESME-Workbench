@@ -20,8 +20,6 @@ namespace ESMEWorkBench.ViewModels.Map
         public RasterMapLayer() {LayerOverlay.Layers.Clear();}
 
         GdiPlusRasterLayer _layer;
-        byte[] _fileBuffer;
-        MemoryStream _memoryStream;
 
         public float North { get; set; }
         public float South { get; set; }

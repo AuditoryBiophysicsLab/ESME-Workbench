@@ -18,4 +18,19 @@ namespace ESME
     {
         string Log { get; set; }
     }
+
+    public interface IHasName
+    {
+        string Name { get; set; }
+    }
+
+    public interface IMightBeDirty
+    {
+        bool IsDirty { get; set; }
+    }
+
+    public interface IHaveBasePath
+    {
+        string BasePath { get; set; }
+    }
 }

@@ -14,7 +14,7 @@ namespace ESME.TransmissionLoss.RAM
     {
         #region Load and Save
 
-        public new static RamRunFile Load(string filename)
+        public static RamRunFile Load(string filename)
         {
             var fileReader = new StreamReader(filename);
             var file = fileReader.ReadToEnd();

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.Composition;
 using Cinch;
-using ESMERibbonDemo.ViewModels;
+using ESME;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.Ribbon

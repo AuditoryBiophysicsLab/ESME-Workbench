@@ -128,8 +128,10 @@
     <Compile Include="Navigation\GeoReferencedField.cs" />
     <Compile Include="Navigation\Intersection.cs" />
     <Compile Include="Navigation\Length.cs" />
+    <Compile Include="Navigation\Limits.cs" />
     <Compile Include="Navigation\Planet.cs" />
     <Compile Include="Navigation\Rotation.cs" />
+    <Compile Include="Navigation\TrackPoint.cs" />
     <Compile Include="NetCDF\InterfaceDefinitions.cs" />
     <Compile Include="NetCDF\NetCDF.cs" />
     <Compile Include="NetCDF\NetCDFAttribute.cs" />

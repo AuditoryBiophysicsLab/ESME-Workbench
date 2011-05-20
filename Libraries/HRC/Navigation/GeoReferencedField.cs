@@ -23,6 +23,16 @@ namespace HRC.Navigation
         public List<double> Longitudes { get; protected set; }
 
         /// <summary>
+        /// Gets the longitudinal resolution of the current dataset, in degrees
+        /// </summary>
+        public double LongitudinalResolution { get { return Math.Abs(Longitudes[1] - Longitudes[0]); } }
+
+        /// <summary>
+        /// Gets the latitudinal resolution of the current dataset, in degrees
+        /// </summary>
+        public double LatitudinalResolution { get { return Math.Abs(Latitudes[1] - Latitudes[0]); } }
+
+        /// <summary>
         /// The GeoRect that contains the field data
         /// </summary>
         public virtual GeoRect GeoRect {get{return new GeoRect(Latitudes.Last(), Latitudes.First(), Longitudes.Last(), Longitudes.First());}}
@@ -79,16 +89,6 @@ namespace HRC.Navigation
         /// Array of EarthCoordinate-derived field values
         /// </summary>
         public TEarthCoordinate[,] FieldData { get; protected set; }
-
-        /// <summary>
-        /// Gets the longitudinal resolution of the current dataset, in degrees
-        /// </summary>
-        public double LongitudinalResolution { get { return Math.Abs(Longitudes[1] - Longitudes[0]); } }
-
-        /// <summary>
-        /// Gets the latitudinal resolution of the current dataset, in degrees
-        /// </summary>
-        public double LatitudinalResolution { get { return Math.Abs(Latitudes[1] - Latitudes[0]); } }
 
         /// <summary>
         /// Gets the nearest actual data point to the requested location, even if the location is outside the bounds of the data set.

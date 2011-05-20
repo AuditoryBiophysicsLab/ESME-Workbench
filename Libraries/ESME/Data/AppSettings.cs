@@ -21,7 +21,7 @@ namespace ESME.Data
 
         static string _appSettingsDirectory;
 
-        FileSystemWatcher _fileSystemWatcher;
+        //FileSystemWatcher _fileSystemWatcher;
 
         public static string ApplicationName
         {

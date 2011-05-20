@@ -126,6 +126,7 @@
     <Compile Include="Environment\Binary Data Classes\DataLayer.cs" />
     <Compile Include="Environment\Binary Data Classes\DataLayerList.cs" />
     <Compile Include="Environment\Binary Data Classes\DataString.cs" />
+    <Compile Include="Environment\EnvironmentMetadata.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
     <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
@@ -143,7 +144,6 @@
     <Compile Include="Model\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="Overlay\Exceptions.cs" />
-    <Compile Include="NEMO\Limits.cs" />
     <Compile Include="Overlay\OverlayCircle.cs" />
     <Compile Include="Overlay\OverlayFile.cs" />
     <Compile Include="Overlay\OverlayFiles.cs" />
@@ -161,7 +161,6 @@
     <Compile Include="NEMO\NemoSource.cs" />
     <Compile Include="NEMO\NemoSpecies.cs" />
     <Compile Include="NEMO\NemoTrackdef.cs" />
-    <Compile Include="NEMO\TrackPoint.cs" />
     <Compile Include="Platform\ActiveMode.cs" />
     <Compile Include="NEMO\ActiveTimeStep.cs" />
     <Compile Include="Platform\BehaviorModel.cs" />

@@ -28,9 +28,6 @@ namespace ESMEWorkBench.ViewModels.NAVO
             get { return _experiment.AnalysisPoints.Count > 0; }
         }
 
-        static readonly PropertyChangedEventArgs ExperimentHasAnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ExperimentHasAnalysisPoints);
-        bool _experimentHasAnalysisPoints;
-
         #endregion
 
         #region public string TimePeriodGroupBoxHeader { get; set; }

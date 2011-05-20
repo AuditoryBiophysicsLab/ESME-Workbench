@@ -7,7 +7,6 @@ using System.Linq;
 using Cinch;
  using ESME;
  using ESME.Environment;
-using ESMERibbonDemo.ViewModels;
 using ESMEWorkBench.Data;
 
 namespace ESMEWorkBench.ViewModels.Main

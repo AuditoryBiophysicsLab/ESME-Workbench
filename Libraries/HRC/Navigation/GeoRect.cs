@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Xml.Serialization;
 using Cinch;
+using HRC.Utility;
 
 namespace HRC.Navigation
 {
-    public class GeoRect : INotifyPropertyChanged, IEquatable<GeoRect>
+    [Serializable]
+    public class GeoRect : SerializableData<GeoRect>, IEquatable<GeoRect>
     {
         public GeoRect() { North = South = East = West = 0.0; }
 
@@ -19,19 +20,14 @@ namespace HRC.Navigation
             West = west;
         }
 
-        public GeoRect(Rect rect)
-        {
-            FromRect(rect);
-        }
+        public GeoRect(Rect rect) { FromRect(rect); }
 
-        public GeoRect(GeoRect geoRect)
-        {
-            FromRect(geoRect);
-        }
+        public GeoRect(GeoRect geoRect) { FromRect(geoRect); }
 
         #region public double North { get; set; }
+
         /// <summary>
-        /// The North edge of the GeoRect
+        ///   The North edge of the GeoRect
         /// </summary>
         public double North
         {
@@ -52,7 +48,7 @@ namespace HRC.Navigation
         #region public double South { get; set; }
 
         /// <summary>
-        /// The South edge of the GeoRect
+        ///   The South edge of the GeoRect
         /// </summary>
         public double South
         {
@@ -71,8 +67,9 @@ namespace HRC.Navigation
         #endregion
 
         #region public double East { get; set; }
+
         /// <summary>
-        /// The East edge of the GeoRect
+        ///   The East edge of the GeoRect
         /// </summary>
         public double East
         {
@@ -91,8 +88,9 @@ namespace HRC.Navigation
         #endregion
 
         #region public double West { get; set; }
+
         /// <summary>
-        /// The West edge of the GeoRect
+        ///   The West edge of the GeoRect
         /// </summary>
         public double West
         {
@@ -111,82 +109,82 @@ namespace HRC.Navigation
         #endregion
 
         /// <summary>
-        /// Expands the current GeoRect exactly enough to contain the specified GeoRect.
+        ///   Expands the current GeoRect exactly enough to contain the specified GeoRect.
         /// </summary>
-        /// <param name="geoRect"></param>
+        /// <param name = "geoRect"></param>
         public void Union(GeoRect geoRect) { FromRect(Rect.Union(this, geoRect)); }
 
         /// <summary>
-        /// Expands the current GeoRect exactly enough to contain the specified rectangle.
+        ///   Expands the current GeoRect exactly enough to contain the specified rectangle.
         /// </summary>
-        /// <param name="rect"></param>
+        /// <param name = "rect"></param>
         public void Union(Rect rect) { FromRect(Rect.Union(this, rect)); }
 
         /// <summary>
-        /// Expands the current GeoRect exactly enough to contain the specified EarthCoordinate.
+        ///   Expands the current GeoRect exactly enough to contain the specified EarthCoordinate.
         /// </summary>
-        /// <param name="earthCoordinate"></param>
+        /// <param name = "earthCoordinate"></param>
         public void Union(EarthCoordinate earthCoordinate) { FromRect(Rect.Union(this, earthCoordinate)); }
 
         /// <summary>
-        /// Creates a GeoRect that is exactly large enough to contain the two specified GeoRects.
+        ///   Creates a GeoRect that is exactly large enough to contain the two specified GeoRects.
         /// </summary>
-        /// <param name="geoRect1"></param>
-        /// <param name="geoRect2"></param>
+        /// <param name = "geoRect1"></param>
+        /// <param name = "geoRect2"></param>
         /// <returns></returns>
         public static GeoRect Union(GeoRect geoRect1, GeoRect geoRect2) { return new GeoRect(Rect.Union(geoRect1, geoRect2)); }
 
         /// <summary>
-        /// Creates a GeoRect that is exactly large enough to include the specified GeoRect and the specified EarthCoordinate.
+        ///   Creates a GeoRect that is exactly large enough to include the specified GeoRect and the specified EarthCoordinate.
         /// </summary>
-        /// <param name="geoRect"></param>
-        /// <param name="earthCoordinate"></param>
+        /// <param name = "geoRect"></param>
+        /// <param name = "earthCoordinate"></param>
         /// <returns></returns>
         public static GeoRect Union(GeoRect geoRect, EarthCoordinate earthCoordinate) { return new GeoRect(Rect.Union(geoRect, earthCoordinate)); }
 
         /// <summary>
-        /// Indicates whether the GeoRect contains the specified EarthCoordinate.
+        ///   Indicates whether the GeoRect contains the specified EarthCoordinate.
         /// </summary>
-        /// <param name="earthCoordinate"></param>
+        /// <param name = "earthCoordinate"></param>
         /// <returns></returns>
-        public bool Contains(EarthCoordinate earthCoordinate) { return ((Rect)this).Contains(earthCoordinate); }
+        public bool Contains(EarthCoordinate earthCoordinate) { return ((Rect) this).Contains(earthCoordinate); }
 
         /// <summary>
-        /// Indicates whether the GeoRect contains the specified GeoRect.
+        ///   Indicates whether the GeoRect contains the specified GeoRect.
         /// </summary>
-        /// <param name="geoRect"></param>
+        /// <param name = "geoRect"></param>
         /// <returns></returns>
-        public bool Contains(GeoRect geoRect) { return ((Rect)this).Contains(geoRect); }
+        public bool Contains(GeoRect geoRect) { return ((Rect) this).Contains(geoRect); }
 
         /// <summary>
-        /// Indicates whether the specified GeoRect is equal to the current GeoRect.
+        ///   Indicates whether the specified GeoRect is equal to the current GeoRect.
         /// </summary>
-        /// <param name="geoRect"></param>
+        /// <param name = "geoRect"></param>
         /// <returns></returns>
-        public bool Equals(GeoRect geoRect) { return ((Rect)this).Equals(geoRect); }
+        public bool Equals(GeoRect geoRect) { return ((Rect) this).Equals(geoRect); }
 
         /// <summary>
-        /// Indicates whether the specified GeoRects are equal.
+        ///   Indicates whether the specified GeoRects are equal.
         /// </summary>
-        /// <param name="geoRect1"></param>
-        /// <param name="geoRect2"></param>
+        /// <param name = "geoRect1"></param>
+        /// <param name = "geoRect2"></param>
         /// <returns></returns>
         public static bool Equals(GeoRect geoRect1, GeoRect geoRect2) { return Rect.Equals(geoRect1, geoRect2); }
 
         /// <summary>
-        /// Returns the intersection of the specified GeoRects.
+        ///   Returns the intersection of the specified GeoRects.
         /// </summary>
-        /// <param name="geoRect1"></param>
-        /// <param name="geoRect2"></param>
+        /// <param name = "geoRect1"></param>
+        /// <param name = "geoRect2"></param>
         /// <returns></returns>
         public static GeoRect Intersect(GeoRect geoRect1, GeoRect geoRect2) { return new GeoRect(Rect.Intersect(geoRect1, geoRect2)); }
 
         /// <summary>
-        /// Creates a GeoRect that results from expanding or shrinking the specified GeoRect by the specified width and height amounts, in all directions.
+        ///   Creates a GeoRect that results from expanding or shrinking the specified GeoRect by the specified width and height amounts, in all directions.
         /// </summary>
-        /// <param name="geoRect">The GeoRect to expand or shrink</param>
-        /// <param name="width">Amount to change the width of the GeoRect, in meters</param>
-        /// <param name="height">Amount to change the height of the GeoRect, in meters</param>
+        /// <param name = "geoRect">The GeoRect to expand or shrink</param>
+        /// <param name = "width">Amount to change the width of the GeoRect, in meters</param>
+        /// <param name = "height">Amount to change the height of the GeoRect, in meters</param>
         /// <returns></returns>
         public static GeoRect Inflate(GeoRect geoRect, double width, double height)
         {
@@ -211,17 +209,40 @@ namespace HRC.Navigation
         }
 
         [XmlIgnore]
-        public EarthCoordinate NorthWest { get { return new EarthCoordinate(North, West); } }
+        public EarthCoordinate NorthWest
+        {
+            get { return new EarthCoordinate(North, West); }
+        }
+
         [XmlIgnore]
-        public EarthCoordinate NorthEast { get { return new EarthCoordinate(North, East); } }
+        public EarthCoordinate NorthEast
+        {
+            get { return new EarthCoordinate(North, East); }
+        }
+
         [XmlIgnore]
-        public EarthCoordinate SouthWest { get { return new EarthCoordinate(South, West); } }
+        public EarthCoordinate SouthWest
+        {
+            get { return new EarthCoordinate(South, West); }
+        }
+
         [XmlIgnore]
-        public EarthCoordinate SouthEast { get { return new EarthCoordinate(South, East); } }
+        public EarthCoordinate SouthEast
+        {
+            get { return new EarthCoordinate(South, East); }
+        }
+
         [XmlIgnore]
-        public double Width { get { return East - West; } }
+        public double Width
+        {
+            get { return East - West; }
+        }
+
         [XmlIgnore]
-        public double Height { get { return North - South; } }
+        public double Height
+        {
+            get { return North - South; }
+        }
 
         public static implicit operator Rect(GeoRect geoRect) { return new Rect(geoRect.West, geoRect.South, geoRect.Width, geoRect.Height); }
 
@@ -232,8 +253,5 @@ namespace HRC.Navigation
             East = rect.Right;
             West = rect.Left;
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
     }
 }
