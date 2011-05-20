@@ -232,19 +232,19 @@ namespace HRC.Navigation
         ///   X, in internal axis representation (positive to the right side of screen).
         /// </summary>
         [XmlIgnore]
-        public double X { get; private set; }
+        public double X { get; protected set; }
 
         /// <summary>
         ///   Y, in internal axis representation (positive into screen).
         /// </summary>
         [XmlIgnore]
-        public double Y { get; private set; }
+        public double Y { get; protected set; }
 
         /// <summary>
         ///   X, in internal axis representation (positive to top of screen).
         /// </summary>
         [XmlIgnore]
-        public double Z { get; private set; }
+        public double Z { get; protected set; }
 
         /// <summary>
         ///   North pole
