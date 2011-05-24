@@ -145,6 +145,12 @@
       <Abbreviation Text="TLF" />
       <Abbreviation Text="TL" />
       <Abbreviation Text="EEB" />
+      <Abbreviation Text="RAM" />
+      <Abbreviation Text="NAEMO" />
+      <Abbreviation Text="HSV" />
+      <Abbreviation Text="SVN" />
+      <Abbreviation Text="API" />
+      <Abbreviation Text="XYZ" />
     </Naming2>
   </CodeStyleSettings>
   <SharedSolutionTemplateManager>
