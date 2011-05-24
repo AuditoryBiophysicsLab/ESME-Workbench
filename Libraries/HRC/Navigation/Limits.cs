@@ -183,13 +183,16 @@ namespace HRC.Navigation
             else
             {
                 var newName = Name;
-                var suffix = "";
-                if (newName.EndsWith(".ovr"))
+                if (newName != null)
                 {
-                    newName = newName.Substring(0, newName.IndexOf(".ovr"));
-                    suffix = ".ovr";
+                    var suffix = "";
+                    if (newName.EndsWith(".ovr"))
+                    {
+                        newName = newName.Substring(0, newName.IndexOf(".ovr"));
+                        suffix = ".ovr";
+                    }
+                    result.Name = String.Format("{0}_{1}K{2}", newName, rangeOutKm, suffix);
                 }
-                result.Name = String.Format("{0}_{1}K{2}", newName, rangeOutKm, suffix);
 
                 Geo lastEndPt = null;
                 var segIt = _region.Segments;
