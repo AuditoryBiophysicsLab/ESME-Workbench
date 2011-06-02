@@ -89,15 +89,20 @@ namespace ESME.Environment.NAVO
         public static void ExtractArea(string outputDirectory, string selectedResolution, GeoRect extractionArea)
         {
             var contents = string.Format("area {0} {1} {2} {3} {4} {5}", extractionArea.West, extractionArea.East, extractionArea.South, extractionArea.North, selectedResolution, string.Format("sediment-{0}.chb", selectedResolution));
-            var scriptfile = Path.GetTempFileName();
+            var scriptfile = Path.Combine(outputDirectory, "sediment_extract.script");
             File.WriteAllText(scriptfile, contents);
 
             var commandArgs = string.Format("\"{0}\" \"{1}\"", DatabasePath, scriptfile);
+
+            var batchFilename = Path.Combine(outputDirectory, "sediment_extract.bat");
+            using (var batchFile = new StreamWriter(batchFilename, false))
+                batchFile.WriteLine("\"{0}\" {1}", ExtractionProgramPath, commandArgs);
+
             var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputDirectory).Trim();
             //have a look at result and throw an error if needed.
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("error"))) throw new ApplicationException("BottomSedimentTypeDatabase: Error extracting requested area: " + line); //hope this is sufficient..
-            File.Delete(scriptfile);
+            //File.Delete(scriptfile);
         }
     }
 }

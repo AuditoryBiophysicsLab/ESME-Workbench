@@ -27,6 +27,7 @@ namespace ESME.TransmissionLoss.CASS
             //if (selectedSedimentFile.EndsWith(".eeb")) sediment = Sediment.ReadESMEEnvironmentBinaryFile(selectedSedimentFile, north, south, east, west);
             //else if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.ReadChrtrBinaryFile(selectedSedimentFile);
             if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.FromSedimentCHB(selectedSedimentFile);
+            if (sediment == null) throw new ApplicationException("Error reading sediment data");
 
             Environment2DData wind = null;
             if (windFile.EndsWith(".txt")) wind = SurfaceMarineGriddedClimatologyDatabase.Parse(windFile);
@@ -36,8 +37,11 @@ namespace ESME.TransmissionLoss.CASS
             if (soundspeedFile.EndsWith(".xml"))
             {
                 var rawSoundSpeeds = SerializedOutput.Load(soundspeedFile, GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes);
+                if (rawSoundSpeeds == null) throw new ApplicationException("Error reading soundspeed data");
                 soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriodName);
             }
+
+            if (soundSpeedField == null) throw new ApplicationException("No soundspeed data found");
 
             var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriodName.ToLower() + ".dat");
             WriteEnvironmentFile(environmentFileName, bathymetry, sediment, soundSpeedField, wind);

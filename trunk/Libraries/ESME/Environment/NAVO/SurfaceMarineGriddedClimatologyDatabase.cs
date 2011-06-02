@@ -39,6 +39,11 @@ namespace ESME.Environment.NAVO
             System.Environment.SetEnvironmentVariable("SMGC_DATA_NORTH", northPath);
             System.Environment.SetEnvironmentVariable("SMGC_DATA_SOUTH", southPath);
             var commandArgs = string.Format("-lat {0}/{1} -lon {2}/{3} -mon {4}/{5} -par 17/1", extractionArea.South, extractionArea.North, extractionArea.West, extractionArea.East, startMonth, endMonth); // '-par 17/1' extracts wind speed statistical data.  don't ask. 
+
+            var batchFilename = Path.Combine(outputDirectory, "wind_extract.bat");
+            using (var batchFile = new StreamWriter(batchFilename, false))
+                batchFile.WriteLine("\"{0}\" {1}", ExtractionProgramPath, commandArgs);
+
             var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputDirectory);
             //result now contains the entire output of SMGC, i think, since it dumps data to STDOUT... so let's save it to disk in the right place. 
             using (var writer = new StreamWriter(outputFilename))

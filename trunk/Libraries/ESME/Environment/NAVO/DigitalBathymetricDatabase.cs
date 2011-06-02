@@ -96,9 +96,11 @@ namespace ESME.Environment.NAVO
             //var commandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3:0.0000} {4:0.0000} {5:0.0000} {6:0.0000} {7:0.0##} YXZ=\"{8}\"", DatabasePath, resolutions.First(), resolutions.Last(), extractionArea.South, extractionArea.West, extractionArea.North, extractionArea.East, desiredResolution, string.Format("bathymetry-{0}.yxz", selectedResolution));
             var commandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3} {4} {5} {6} {7:0.0##} YXZ=\"{8}\"", DatabasePath, resolutions.First(), resolutions.Last(), extractionArea.South, extractionArea.West, extractionArea.North, extractionArea.East, desiredResolution, string.Format("bathymetry-{0}.yxz", selectedResolution));
             //extract the area and look for success or failure in the output string.
+
             var batchFilename = Path.Combine(outputDirectory, "bathy_extract.bat");
             using (var batchFile = new StreamWriter(batchFilename, false))
                 batchFile.WriteLine("\"{0}\" {1}", ExtractionProgramPath, commandArgs);
+
             var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputDirectory);
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
