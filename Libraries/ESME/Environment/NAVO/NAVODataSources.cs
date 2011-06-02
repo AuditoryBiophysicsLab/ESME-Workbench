@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
@@ -127,7 +128,11 @@ namespace ESME.Environment.NAVO
 
             var tempDirectory = Path.Combine(_localStorageRoot, "NAVOTemp");
 
-            if (Directory.Exists(tempDirectory)) Directory.Delete(tempDirectory, true);
+            if (Directory.Exists(tempDirectory))
+            {
+                Directory.Delete(tempDirectory, true);
+                Thread.Sleep(1000);
+            }
             Directory.CreateDirectory(tempDirectory);
 
             var selectedMonthIndices = new List<int>();

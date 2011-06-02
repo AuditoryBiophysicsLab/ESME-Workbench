@@ -31,7 +31,7 @@ namespace ESME.Environment
                 var minValue = stream.ReadSingle();
                 var maxValue = stream.ReadSingle();
                 var paddingWidth = (width - 10) * 4;
-                if (paddingWidth < 0) return null;
+                if (paddingWidth < 0) throw new FileFormatException("Invalid Sediment File: File contains no data.  Likely cause is that selected area contains no sediment points, or too few of them.  This appears to be a bug in the sediment extraction program.");
                 stream.ReadBytes(paddingWidth);
                 for (var lat = 0; lat < height; lat++)
                 {
