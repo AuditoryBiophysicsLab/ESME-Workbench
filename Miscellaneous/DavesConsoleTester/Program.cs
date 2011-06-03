@@ -23,13 +23,8 @@ namespace DavesConsoleTester
             var highResGroup = H5G.open(fileID, "0.10000/G/UNCLASSIFIED/");
             var lowResGroup = H5G.open(fileID, "5.00000/G/UNCLASSIFIED/");
 
-            var latStart = (int)extractionArea.South;
-            var latEnd = (int)extractionArea.North;
-            var lonStart = (int)extractionArea.West;
-            var lonEnd = (int)extractionArea.East;
-
-            for (var lat = latStart; lat <= latEnd; lat++)
-                for (var lon = lonStart; lon <= lonEnd; lon++ )
+            for (var lat = (int)extractionArea.South; lat <= (int)extractionArea.North; lat++)
+                for (var lon = (int)extractionArea.West; lon <= (int)extractionArea.East; lon++)
                 {
                     var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
                     if (data != null) results.AddRange(data.Where(extractionArea.Contains));
@@ -40,7 +35,7 @@ namespace DavesConsoleTester
             H5F.close(fileID);
         }
 
-        static List<EarthCoordinate<short>> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
+        static IEnumerable<EarthCoordinate<short>> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
         {
             var result = ReadDataset(highResGroup, latitude, longitude);
             double resolutionStep;
