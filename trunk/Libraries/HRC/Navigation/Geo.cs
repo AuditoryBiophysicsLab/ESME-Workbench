@@ -203,6 +203,7 @@ namespace HRC.Navigation
         /// <summary>
         ///   Latitude, in radians
         /// </summary>
+        [XmlIgnore]
         public double LatitudeRadians
         {
             get { return GeographicLatitude(Math.Atan2(Z, Math.Sqrt(X * X + Y * Y))); }
@@ -221,6 +222,7 @@ namespace HRC.Navigation
         /// <summary>
         ///   Longitude, in radians
         /// </summary>
+        [XmlIgnore]
         public double LongitudeRadians
         {
             get { return Math.Atan2(Y, X); }
