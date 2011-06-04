@@ -8,17 +8,8 @@
         mef:ViewModelLocator.ViewModel="EnvironmentBuilderViewModel"
         SizeToContent="WidthAndHeight">
 	<StackPanel Orientation="Vertical">
-		<TextBlock Text="Bottom Sediment Database Resolution"
-		           Margin="5 5 5 2" />
-		<ComboBox ItemsSource="{Binding NAVODataSources.BottomSedimentTypeDatabase.Resolutions}"
-		          SelectedItem="{Binding NAVODataSources.BottomSedimentTypeDatabase.SelectedResolution}"
-		          Margin="5 0 5 0"
-		          IsEnabled="{Binding NotExtractingData}"
-		          ToolTip="Database resolution in arc-minutes">
-		</ComboBox>
-
 		<TextBlock Text="Bathymetry Database Resolution"
-		           Margin="5 20 5 2" />
+		           Margin="5 10 5 2" />
 		<ComboBox ItemsSource="{Binding NAVODataSources.DigitalBathymetricDatabase.Resolutions}"
 		          SelectedItem="{Binding NAVODataSources.DigitalBathymetricDatabase.SelectedResolution}"
 		          Margin="5 0 5 0"

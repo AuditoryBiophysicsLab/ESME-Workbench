@@ -17,16 +17,14 @@ namespace ESME.TransmissionLoss.CASS
     {
         public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, string timePeriodName, Environment2DData bathymetry)
         {
-            var sedimentFiles = Directory.GetFiles(extractedDataPath, "sediment-*.chb");
+            var sedimentFiles = Directory.GetFiles(extractedDataPath, "sediment.xml");
             var windFile = Path.Combine(extractedDataPath, string.Format("{0}-wind.txt", timePeriodName));
             var soundspeedFile = Path.Combine(extractedDataPath, string.Format("{0}-soundspeed.xml", timePeriodName));
 
             Sediment sediment = null;
             var selectedSedimentFile = LargestFileInList(sedimentFiles);
             if (selectedSedimentFile == null) throw new ApplicationException("No sediment files were found, the operation cannot proceed");
-            //if (selectedSedimentFile.EndsWith(".eeb")) sediment = Sediment.ReadESMEEnvironmentBinaryFile(selectedSedimentFile, north, south, east, west);
-            //else if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.ReadChrtrBinaryFile(selectedSedimentFile);
-            if (selectedSedimentFile.EndsWith(".chb")) sediment = Sediment.FromSedimentCHB(selectedSedimentFile);
+            sediment = Sediment.Load(selectedSedimentFile);
             if (sediment == null) throw new ApplicationException("Error reading sediment data");
 
             Environment2DData wind = null;
@@ -455,8 +453,7 @@ namespace ESME.TransmissionLoss.CASS
                         envFile.WriteLine("EOT");
                         envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
                         var sedimentSample = sedimentType[location];
-                        var curSedimentValue = sedimentSample.Data;
-                        var sedimentTypeName = curSedimentValue.HasValue ? BottomSedimentTypeTable.Lookup(curSedimentValue.Value).ToUpper() : "UNKNOWN";
+                        var sedimentTypeName = BottomSedimentTypeTable.Lookup(sedimentSample.Data).ToUpper();
                         if (sedimentTypeName == "LAND") sedimentTypeName = "SAND";
                         envFile.WriteLine(sedimentTypeName);
                         envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", windSpeed[location].Data * 1.94384449);

@@ -55,7 +55,6 @@ namespace ESME.Environment.NAVO
             BottomSedimentTypeDatabase.ExtractionProgramPath = configurations.BSTEXEPath;
 
             BottomSedimentTypeDatabase = new BottomSedimentTypeDatabase();
-            BottomSedimentTypeDatabase.Initialize();
 
             var assemblyLocation = Assembly.GetCallingAssembly().Location;
             if (assemblyLocation == null) throw new ApplicationException("Assembly can't be null!");
@@ -162,7 +161,7 @@ namespace ESME.Environment.NAVO
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";
-            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, BottomSedimentTypeDatabase.SelectedResolution, ExtractionArea);
+            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea);
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
@@ -252,7 +251,7 @@ namespace ESME.Environment.NAVO
         public string SoundspeedFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(_localStorageRoot, timePeriod); }
         public string SoundspeedFilename(string directoryName, NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(directoryName, timePeriod); }
         public string WindFilename(NAVOTimePeriod timePeriod) { return SurfaceMarineGriddedClimatologyDatabase.WindFilename(_localStorageRoot, timePeriod); }
-        public string SedimentFilename { get { return BottomSedimentTypeDatabase.SedimentFilename(_localStorageRoot, BottomSedimentTypeDatabase.SelectedResolution); } }
+        public string SedimentFilename { get { return BottomSedimentTypeDatabase.SedimentFilename(_localStorageRoot); } }
         public string BathymetryFilename { get { return DigitalBathymetricDatabase.BathymetryYXZFilename(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution); } }
 
         #region public int ProgressPercent { get; set; }

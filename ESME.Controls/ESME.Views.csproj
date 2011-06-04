@@ -98,20 +98,8 @@
     <Compile Include="Controls\ScatterPlot.xaml.cs">
       <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EnvironmentBuilder\BSTView.xaml.cs">
-      <DependentUpon>BSTView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="EnvironmentBuilder\DBDBView.xaml.cs">
-      <DependentUpon>DBDBView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="EnvironmentBuilder\GDEMView.xaml.cs">
-      <DependentUpon>GDEMView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="EnvironmentBuilder\SMGCView.xaml.cs">
-      <DependentUpon>SMGCView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LabelValuePair.cs" />
     <Compile Include="Misc\ModuleBuildInfoViewModel.cs" />
@@ -173,23 +161,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="EnvironmentBuilder\BSTView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="EnvironmentBuilder\DBDBView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="EnvironmentBuilder\GDEMView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="EnvironmentBuilder\SMGCView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
