@@ -588,7 +588,7 @@ namespace ESMEWorkBench.Data
         public SoundSpeedField SoundSpeedField { get; private set; }
 
         [XmlIgnore]
-        public Sediment Sediment { get; private set; }
+        public SedimentOld Sediment { get; private set; }
 
         #region public Environment2DData Bathymetry { get; set; }
 

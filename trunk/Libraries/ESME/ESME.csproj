@@ -138,7 +138,7 @@
     <Compile Include="Environment\NAVO\NAVODataSources.cs" />
     <Compile Include="Environment\NAVO\SerializedOutput.cs" />
     <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />
-    <Compile Include="Environment\Sediment.cs" />
+    <Compile Include="Environment\SedimentOld.cs" />
     <Compile Include="Environment\Transect.cs" />
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="MediatorMessages.cs" />

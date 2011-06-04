@@ -12,23 +12,23 @@ using FileFormatException = System.IO.FileFormatException;
 
 namespace ESME.Environment
 {
-    public class SedimentNew : SerializableData<SedimentNew>, IList<SedimentSampleNew>
+    public class Sediment : SerializableData<Sediment>, IList<SedimentSample>
     {
-        readonly List<SedimentSampleNew> _list = new List<SedimentSampleNew>();
+        readonly List<SedimentSample> _list = new List<SedimentSample>();
 
         static readonly Type[] ReferencedTypes = new[]
                                                  {
-                                                     typeof (SedimentSampleNew), typeof (EarthCoordinate<short>), typeof (Geo), typeof(Point)
+                                                     typeof (SedimentSample), typeof (EarthCoordinate<short>), typeof (Geo), typeof(Point)
                                                  };
 
-        public SedimentNew() {  }
+        public Sediment() {  }
 
-        public SedimentSampleNew this[EarthCoordinate location]
+        public SedimentSample this[EarthCoordinate location]
         {
             get
             {
                 var minDistance = double.MaxValue;
-                SedimentSampleNew closestSample = null;
+                SedimentSample closestSample = null;
                 foreach (var item in _list)
                 {
                     var curDistance = item.DistanceKilometers(location);
@@ -40,19 +40,19 @@ namespace ESME.Environment
             }
         }
 
-        public void AddRange(IEnumerable<SedimentSampleNew> collection) { _list.AddRange(collection); }
+        public void AddRange(IEnumerable<SedimentSample> collection) { _list.AddRange(collection); }
 
         public void Save(string fileName) { Save(fileName, ReferencedTypes); }
-        public static SedimentNew Load(string fileName) { return Load(fileName, ReferencedTypes); }
+        public static Sediment Load(string fileName) { return Load(fileName, ReferencedTypes); }
 
         #region IList members
-        public IEnumerator<SedimentSampleNew> GetEnumerator() { return _list.GetEnumerator(); }
+        public IEnumerator<SedimentSample> GetEnumerator() { return _list.GetEnumerator(); }
         IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-        public void Add(SedimentSampleNew item) { _list.Add(item); }
+        public void Add(SedimentSample item) { _list.Add(item); }
         public void Clear() { _list.Clear(); }
-        public bool Contains(SedimentSampleNew item) { return _list.Contains(item); }
-        public void CopyTo(SedimentSampleNew[] array, int arrayIndex) { _list.CopyTo(array, arrayIndex); }
-        public bool Remove(SedimentSampleNew item) { return _list.Remove(item); }
+        public bool Contains(SedimentSample item) { return _list.Contains(item); }
+        public void CopyTo(SedimentSample[] array, int arrayIndex) { _list.CopyTo(array, arrayIndex); }
+        public bool Remove(SedimentSample item) { return _list.Remove(item); }
 
         public int Count
         {
@@ -64,11 +64,11 @@ namespace ESME.Environment
             get { return true; }
         }
 
-        public int IndexOf(SedimentSampleNew item) { return _list.IndexOf(item); }
-        public void Insert(int index, SedimentSampleNew item) { _list.Insert(index, item); }
+        public int IndexOf(SedimentSample item) { return _list.IndexOf(item); }
+        public void Insert(int index, SedimentSample item) { _list.Insert(index, item); }
         public void RemoveAt(int index) { _list.RemoveAt(index); }
 
-        SedimentSampleNew IList<SedimentSampleNew>.this[int index]
+        SedimentSample IList<SedimentSample>.this[int index]
         {
             get { return _list[index]; }
             set { _list[index] = value; }
@@ -76,13 +76,13 @@ namespace ESME.Environment
         #endregion
     }
 
-    public class Sediment : Environment2DData<SedimentSample>
+    public class SedimentOld : Environment2DData<SedimentSampleOld>
     {
-        private Sediment(IEnumerable<SedimentSample> data) : base(data) { }
+        private SedimentOld(IEnumerable<SedimentSampleOld> data) : base(data) { }
 
-        public static Sediment FromSedimentCHB(string fileName)
+        public static SedimentOld FromSedimentCHB(string fileName)
         {
-            var data = new List<SedimentSample>();
+            var data = new List<SedimentSampleOld>();
             using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 var west = stream.ReadSingle();
@@ -108,22 +108,22 @@ namespace ESME.Environment
                     {
                         var longitude = west + (lon * gridSpacing);
                         var curSampleValue = stream.ReadSingle();
-                        var newSample = new SedimentSample(latitude, lat, longitude, lon);
+                        var newSample = new SedimentSampleOld(latitude, lat, longitude, lon);
                         if ((minValue <= curSampleValue) && (curSampleValue <= maxValue)) newSample.Data = curSampleValue;
                         data.Add(newSample);
                     }
                 }
-                var result = new Sediment(data);
+                var result = new SedimentOld(data);
                 result.FillTheDamnHoles();
                 return result;
             }
         }
 
-        public new SedimentSample this[EarthCoordinate location]
+        public new SedimentSampleOld this[EarthCoordinate location]
         {
             get
             {
-                SedimentSample result;
+                SedimentSampleOld result;
                 if (!ClosestTo(location, out result)) return null;
                 return result;
             }
@@ -150,7 +150,7 @@ namespace ESME.Environment
             System.Diagnostics.Debug.WriteLine("FillTheDamnHoles: Sediment sample holes filled after " + passCount + " passes.");
         }
 
-        private bool FillOneDamnHole(SedimentSample curSample)
+        private bool FillOneDamnHole(SedimentSampleOld curSample)
         {
             float nearbyValue;
             var possibleValues = new List<float>();
@@ -269,26 +269,26 @@ namespace ESME.Environment
         public override void Save(BinaryWriter stream) { throw new NotImplementedException(); }
     }
 
-    public class SedimentSampleNew : EarthCoordinate<short>, IComparable<SedimentSampleNew>
+    public class SedimentSample : EarthCoordinate<short>, IComparable<SedimentSample>
     {
-        public SedimentSampleNew() {  }
+        public SedimentSample() {  }
 
-        public SedimentSampleNew(double latitude, double longitude, short sample) : base(latitude, longitude, sample) {  }
+        public SedimentSample(double latitude, double longitude, short sample) : base(latitude, longitude, sample) {  }
 
-        public static implicit operator SedimentType(SedimentSampleNew sedimentSample)
+        public static implicit operator SedimentType(SedimentSample sedimentSample)
         {
             return SedimentTypes.Find(sedimentSample.Data);
         }
 
-        public int CompareTo(SedimentSampleNew other)
+        public int CompareTo(SedimentSample other)
         {
             return Data.CompareTo(other.Data);
         }
     }
 
-    public class SedimentSample : EarthCoordinate<float?>, IComparable<SedimentSample>
+    public class SedimentSampleOld : EarthCoordinate<float?>, IComparable<SedimentSampleOld>
     {
-        internal SedimentSample(double latitude, int latIndex, double longitude, int lonIndex)
+        internal SedimentSampleOld(double latitude, int latIndex, double longitude, int lonIndex)
             : base(latitude, longitude)
         {
             LonIndex = lonIndex;
@@ -299,14 +299,14 @@ namespace ESME.Environment
         internal int LatIndex { get; private set; }
         internal int LonIndex { get; private set; }
 
-        public static implicit operator SedimentType(SedimentSample sedimentSample)
+        public static implicit operator SedimentType(SedimentSampleOld sedimentSample)
         {
             if (!sedimentSample.Data.HasValue) throw new InvalidCastException("Cannot cast SedimentSample to SedimentType: Provided sample has no value");
             return SedimentTypes.Find((int)(sedimentSample.Data.Value));
         }
 
 
-        public int CompareTo(SedimentSample other)
+        public int CompareTo(SedimentSampleOld other)
         {
             if ((Data == null) || (other.Data == null)) throw new ApplicationException("SedimentSample: Can't compare samples when one has null data");
             if (!Data.HasValue) throw new ApplicationException("SedimentSample: Can't compare samples when my data value has not been");
