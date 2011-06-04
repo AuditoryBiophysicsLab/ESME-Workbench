@@ -12,8 +12,7 @@ namespace ESME.Environment.NAVO
     {
         public void SetDefaults()
         {
-            if (string.IsNullOrEmpty(BSTEXEPath)) BSTEXEPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "extract.exe");
-            if (string.IsNullOrEmpty(DBDBEXEPath)) BSTEXEPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "dbv5_command.exe");
+            if (string.IsNullOrEmpty(DBDBEXEPath)) DBDBEXEPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "dbv5_command.exe");
         }
 
         #region public NAVOTimePeriod SpringStartMonth { get; set; }
@@ -124,7 +123,6 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-
         #region public string GDEMDirectory { get; set; }
 
         public string GDEMDirectory
@@ -197,24 +195,6 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        #region public string BSTEXEPath { get; set; }
-
-        public string BSTEXEPath
-        {
-            get { return _bSTEXEPath; }
-            set
-            {
-                if (_bSTEXEPath == value) return;
-                _bSTEXEPath = value;
-                NotifyPropertyChanged(BSTEXEPathChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs BSTEXEPathChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.BSTEXEPath);
-        string _bSTEXEPath;
-
-        #endregion
-
         #region public string DBDBEXEPath { get; set; }
 
         public string DBDBEXEPath
@@ -230,42 +210,6 @@ namespace ESME.Environment.NAVO
 
         static readonly PropertyChangedEventArgs DBDBEXEPathChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.DBDBEXEPath);
         string _dBDBEXEPath;
-
-        #endregion
-
-        #region public string GDEMEXEPath { get; set; }
-
-        public string GDEMEXEPath
-        {
-            get { return _gDEMEXEPath; }
-            set
-            {
-                if (_gDEMEXEPath == value) return;
-                _gDEMEXEPath = value;
-                NotifyPropertyChanged(GDEMEXEPathChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs GDEMEXEPathChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.GDEMEXEPath);
-        string _gDEMEXEPath;
-
-        #endregion
-
-        #region public string BSTSelectedResolution { get; set; }
-
-        public string BSTSelectedResolution
-        {
-            get { return _bSTSelectedResolution; }
-            set
-            {
-                if (_bSTSelectedResolution == value) return;
-                _bSTSelectedResolution = value;
-                NotifyPropertyChanged(BSTSelectedResolutionChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs BSTSelectedResolutionChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.BSTSelectedResolution);
-        string _bSTSelectedResolution;
 
         #endregion
 
@@ -293,8 +237,8 @@ namespace ESME.Environment.NAVO
             {
                 if (!string.IsNullOrEmpty(BSTDirectory) && !string.IsNullOrEmpty(DBDBDirectory) && !string.IsNullOrEmpty(GDEMDirectory) && !string.IsNullOrEmpty(SMGCDirectory))
                     if (File.Exists(BSTDirectory) && File.Exists(DBDBDirectory) && Directory.Exists(GDEMDirectory) && Directory.Exists(SMGCDirectory))
-                        if (!string.IsNullOrEmpty(BSTEXEPath) && !string.IsNullOrEmpty(DBDBEXEPath))
-                            if (File.Exists(BSTEXEPath) && File.Exists(DBDBEXEPath)) return true;
+                        if (!string.IsNullOrEmpty(DBDBEXEPath))
+                            if (File.Exists(DBDBEXEPath)) return true;
                 return false;
             }
         }

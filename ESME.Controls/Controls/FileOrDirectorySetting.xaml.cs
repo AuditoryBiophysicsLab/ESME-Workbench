@@ -27,7 +27,7 @@ namespace ESME.Views.Controls
             set { SetValue(DialogTitleProperty, value); }
         }
 
-        public static DependencyProperty FileNameProperty = DependencyProperty.Register("FileName", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("FileName", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static DependencyProperty FileNameProperty = DependencyProperty.Register("FileName", typeof(string), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata("FileOrDirectorySetting", FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         public string FileName
         {
@@ -48,7 +48,11 @@ namespace ESME.Views.Controls
         public bool IsDirectoryBrowser
         {
             get { return (bool)GetValue(IsDirectoryBrowserProperty); }
-            set { SetValue(IsDirectoryBrowserProperty, value); }
+            set 
+            { 
+                SetValue(IsDirectoryBrowserProperty, value);
+                FileNameProperty.DefaultMetadata.DefaultValue = IsDirectoryBrowser ? "DirectoryName" : "FileName";
+            }
         }
 
         public static DependencyProperty ShowNewFolderButtonProperty = DependencyProperty.Register("ShowNewFolderButton", typeof(bool), typeof(FileOrDirectorySetting), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));

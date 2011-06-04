@@ -97,10 +97,6 @@
 					          Margin="5 0 5 10"
 					          Padding="5">
 						<StackPanel Orientation="Vertical">
-							<Controls:FileOrDirectorySetting Caption="BST Extractor"
-							                                 Margin="0 5"
-							                                 IsDirectoryBrowser="False"
-							                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTEXEPath}" />
 							<Controls:FileOrDirectorySetting Caption="DBDB Extractor"
 							                                 IsDirectoryBrowser="False"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath}" />

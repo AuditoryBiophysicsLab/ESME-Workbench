@@ -52,7 +52,6 @@ namespace ESME.Environment.NAVO
             DigitalBathymetricDatabase.PropertyChanged += (s, e) => { if (e.PropertyName == "SelectedResolution") UpdateResolutionStatement(); };
 
             BottomSedimentTypeDatabase.DatabasePath = configurations.BSTDirectory;
-            BottomSedimentTypeDatabase.ExtractionProgramPath = configurations.BSTEXEPath;
 
             BottomSedimentTypeDatabase = new BottomSedimentTypeDatabase();
 
