@@ -10,7 +10,6 @@ namespace ESME.Environment.NAVO
     public class BottomSedimentTypeDatabase : ViewModelBase
     {
         public static string DatabasePath { get; set; }
-        public static string ExtractionProgramPath { get; set; }
 
         public static string SedimentFilename(string outputPath) { return Path.Combine(outputPath, "sediment.xml"); }
 
