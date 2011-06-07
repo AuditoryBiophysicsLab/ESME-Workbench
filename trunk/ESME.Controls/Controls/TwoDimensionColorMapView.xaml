@@ -10,30 +10,30 @@
              d:DesignHeight="300"
              d:DesignWidth="300"
              Background="White">
-	
-	<DockPanel x:Name="RadialView">
+
+    <DockPanel x:Name="RadialView">
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Height="22">
             <TextBlock Text="{Binding ColorMapViewModel.CurMinValue, StringFormat=CurMin: {0.000}}" />
             <TextBlock Text="{Binding ColorMapViewModel.CurMaxValue, StringFormat=CurMax: {0.000}}" />
         </StackPanel>
-		<DockPanel DockPanel.Dock="Left">
-			<DockPanel>
-				<TextBlock DockPanel.Dock="Bottom"
+        <DockPanel DockPanel.Dock="Left">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Bottom"
 				           Height="{Binding ActualHeight, ElementName=XAxis, Mode=OneWay}" />
-				<controls:DataAxis x:Name="YAxis"
+                <controls:DataAxis x:Name="YAxis"
 				                   AxisLabel="Range from source (m)"
 				                   AxisLocation="Right"
 				                   StartValue="{Binding DepthMin}"
 				                   EndValue="{Binding DepthMax}"
                                    DisplayAbsoluteValue="True"
-				                   TickValueFormat="0" Height="262.04" VerticalAlignment="Top" />
-			</DockPanel>
-		</DockPanel>
-		<DockPanel DockPanel.Dock="Right">
-			<DockPanel Width="80">
+				                   TickValueFormat="0" VerticalAlignment="Top" />
+            </DockPanel>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Right">
+            <DockPanel Width="80">
                 <TextBlock DockPanel.Dock="Bottom"
 				           Height="{Binding ActualHeight, ElementName=XAxis, Mode=OneWay}" />
-				<DockPanel LastChildFill="False"
+                <DockPanel LastChildFill="False"
 				           Margin="5 0 0 0">
                     <controls:DataAxis AxisLocation="Left"
 					                   DockPanel.Dock="Right"
@@ -41,56 +41,47 @@
 					                   StartValue="{Binding ColorMapViewModel.MaxValue}"
 					                   EndValue="{Binding ColorMapViewModel.MinValue}"
 					                   TickValueFormat="0.#" />
-					<controls:ColorBarView ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
+                    <controls:ColorBarView ColorBarImage="{Binding ColorMapViewModel.ColorBitmap}"
 					                       Maximum="{Binding ColorMapViewModel.MaxValue}"
 					                       Minimum="{Binding ColorMapViewModel.MinValue}"
 					                       CurrentMaximum="{Binding ColorMapViewModel.CurMaxValue}"
 					                       CurrentMinimum="{Binding ColorMapViewModel.CurMinValue}"
 					                       DockPanel.Dock="Right"
 					                       MinWidth="50" />
-				</DockPanel>
-			</DockPanel>
-		</DockPanel>
-		<DockPanel DockPanel.Dock="Bottom">
-			<controls:DataAxis x:Name="XAxis"
+                </DockPanel>
+            </DockPanel>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <controls:DataAxis x:Name="XAxis"
 			                   AxisLocation="Top"
 			                   AxisLabel="Range from source (m)"
 			                   StartValue="{Binding RangeMin}"
 			                   EndValue="{Binding RangeMax}"
 							   DisplayAbsoluteValue="True"
 			                   TickValueFormat="0" />
-		</DockPanel>
+        </DockPanel>
 
-		<Grid>
+        <Grid>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SizeChanged">
                     <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-                </i:EventTrigger>
-               <!-- <i:EventTrigger EventName="SourceUpdated">
-                    <cinch:EventToCommandTrigger Command="{Binding GridSizeChangedCommand}" />
-                </i:EventTrigger> -->
+                </i:EventTrigger>                
             </i:Interaction.Triggers>
             <Grid.ColumnDefinitions>
-				<ColumnDefinition />
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition />
-			</Grid.RowDefinitions>
-			<Image Source="{Binding WriteableBitmap}"
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Image Source="{Binding WriteableBitmap}"
 			       Stretch="Fill"
 			       Grid.Column="0"
 			       Grid.Row="0" />
-			<Canvas Grid.Row="0"
+            <Canvas Grid.Row="0"
 			        Grid.Column="0"
 			        x:Name="OverlayCanvas">
-				<!-- <Canvas.RenderTransform>
-                    <ScaleTransform ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}"/>
-                </Canvas.RenderTransform> -->
-				<Path Stroke="BlanchedAlmond"
-				      StrokeThickness="3"
-				      Data="{Binding BottomProfileGeometry}" />
-			</Canvas>
+            </Canvas>
 
-		</Grid>
-	</DockPanel>
+        </Grid>
+    </DockPanel>
 </UserControl>

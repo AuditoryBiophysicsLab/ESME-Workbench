@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
@@ -21,7 +22,7 @@ namespace ESME.TransmissionLoss
             DataMin = bellhopOutput.DataMin;
             StatMax = bellhopOutput.StatMax;
             StatMin = bellhopOutput.StatMin;
-            Mean = bellhopOutput.Mean;
+            BellhopMean = bellhopOutput.Mean;
             Median = bellhopOutput.Median;
             Variance = bellhopOutput.Variance;
             StandardDeviation = bellhopOutput.StandardDeviation;
@@ -84,7 +85,7 @@ namespace ESME.TransmissionLoss
             DataMin = stream.ReadSingle();
             StatMax = stream.ReadSingle();
             StatMin = stream.ReadSingle();
-            Mean = stream.ReadSingle();
+            BellhopMean = stream.ReadSingle();
             Median = stream.ReadSingle();
             Variance = stream.ReadSingle();
             StandardDeviation = stream.ReadSingle();
@@ -94,18 +95,52 @@ namespace ESME.TransmissionLoss
             TransmissionLoss = null;
             IsSaved = true;
             TransmissionLoss = new float[_depths,_ranges];
+            Minimum = new float[_ranges];
+            Maximum = new float[_ranges];
+            Mean = new float[_ranges];
+            for (int i = 0; i < _ranges; i++)
+            {
+                Minimum[i] = float.MaxValue;
+                Maximum[i] = float.MinValue;
+                Mean[i] = 0;
+            }
             ClearAxisData();
             for (int i = 0; i < _depths; i++) // Depths
                 for (int j = 0; j < _ranges; j++) // Ranges
+                {
                     TransmissionLoss[i, j] = stream.ReadSingle();
+                    Minimum[j] = Math.Min(Minimum[j], TransmissionLoss[i, j]);
+                    Maximum[j] = Math.Max(Maximum[j], TransmissionLoss[i, j]);
+                    Mean[j] += TransmissionLoss[i, j];
+                }
+            for (int i = 0; i < _ranges; i++)
+            {
+                Mean[i] /= _depths;
+            }
         }
 
+        public float[] this[int depthIndex]
+        {
+            get
+            {
+                //is depthindex out of range?
+                if (depthIndex > _depths) throw new IndexOutOfRangeException("");
+                //copy out and return all ranges for the depth requested
+                var retval = new float[_ranges];
+                for (int i = 0; i < _ranges; i++)
+                {
+                    retval[i] = TransmissionLoss[depthIndex, i];
+                }
+
+                return retval;
+            }
+        }
         public float BearingFromSource { get; private set; }
         public float DataMax { get; private set; }
         public float DataMin { get; private set; }
         public float StatMax { get; private set; }
         public float StatMin { get; private set; }
-        public float Mean { get; private set; }
+        public float BellhopMean { get; private set; }
         public float Median { get; private set; }
         public float Variance { get; private set; }
         public float StandardDeviation { get; private set; }
@@ -113,6 +148,10 @@ namespace ESME.TransmissionLoss
         public bool IsSaved { get; private set; }
         public float[] Depths { get; internal set; }
         public float[] Ranges { get; internal set; }
+        public float[] Minimum { get; internal set; }
+        public float[] Maximum { get; internal set; }
+        public float[] Mean { get; internal set; }
+
 
         public float this[int depthCell, int rangeCell]
         {
@@ -160,7 +199,7 @@ namespace ESME.TransmissionLoss
             stream.Write(DataMin);
             stream.Write(StatMax);
             stream.Write(StatMin);
-            stream.Write(Mean);
+            stream.Write(BellhopMean);
             stream.Write(Median);
             stream.Write(Variance);
             stream.Write(StandardDeviation);
