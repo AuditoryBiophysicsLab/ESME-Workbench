@@ -24,7 +24,7 @@ namespace ESME.Environment.NAVO
                 for (var lon = (int)extractionArea.West; lon <= (int)extractionArea.East; lon++)
                 {
                     var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
-                    if (data != null) results.AddRange(data.Where(extractionArea.Contains));
+                    if (data != null) results.AddRange(data);
                 }
 
             H5G.close(lowResGroup);

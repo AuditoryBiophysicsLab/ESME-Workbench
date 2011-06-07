@@ -286,6 +286,13 @@ namespace ESME.Environment
         }
     }
 
+    public class SedimentSampleBase : IComparable<SedimentSampleBase>
+    {
+        public short SampleValue { get; set; }
+        public float Resolution { get; set; }
+        public int CompareTo(SedimentSampleBase other) { throw new NotImplementedException(); }
+    }
+
     public class SedimentSampleOld : EarthCoordinate<float?>, IComparable<SedimentSampleOld>
     {
         internal SedimentSampleOld(double latitude, int latIndex, double longitude, int lonIndex)

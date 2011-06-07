@@ -54,6 +54,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\ESME\ESME.csproj">
+      <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
+      <Name>ESME</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Libraries\HRC\HRC.csproj">
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>

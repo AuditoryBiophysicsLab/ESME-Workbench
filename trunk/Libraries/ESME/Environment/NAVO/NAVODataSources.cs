@@ -72,6 +72,7 @@ namespace ESME.Environment.NAVO
             var resMinutes = double.Parse(resString);
             var samplesPerDegree = 60 / resMinutes;
             BathymetryResolutionStatement = string.Format("Extraction area: {0:0.###}deg (lon) by {1:0.###}deg (lat)\nEstimated point count {2:#,#} x {3:#,#} = {4:#,#}", ExtractionArea.Width, ExtractionArea.Height, ExtractionArea.Width * samplesPerDegree, ExtractionArea.Height * samplesPerDegree, ExtractionArea.Width * ExtractionArea.Height * samplesPerDegree * samplesPerDegree);
+            Console.WriteLine("area {0} {1} {2} {3} 0.10000 sediment.chb", ExtractionArea.West, ExtractionArea.East, ExtractionArea.South, ExtractionArea.North);
         }
 
         #region public GeoRect ExtractionArea { get; set; }

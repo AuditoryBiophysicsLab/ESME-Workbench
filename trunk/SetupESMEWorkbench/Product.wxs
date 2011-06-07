@@ -9,6 +9,7 @@
   <?define UpgradeCode="{f82eae19-b38d-47f9-bed7-33454e612509}"?>
   <?define ESMERoot="C:\Projects\ESME Deliverables"?>
   <?define ESMEPath="$(var.ESMERoot)\ESME WorkBench\bin\Release"?>
+  <?define HDFPath="$(var.ESMERoot)\Libraries\ESME\External References"?>
   <?define ESMEViewsPath="$(var.ESMERoot)\ESME.Controls\bin\Release"?>
   <?define BellhopPath="$(var.ESMERoot)\Utilities\Bellhop"?>
   <?define MMMBSPath="$(var.ESMERoot)\Utilities\MMMBS\demoProjects"?>
@@ -138,6 +139,20 @@
             <File Id="WpfDesktopEdition.dll" 
                   Name="WpfDesktopEdition.dll" 
                   Source="$(var.ESMEPath)\WpfDesktopEdition.dll" />
+
+            <!-- HDF5 assemblies and other DLLs -->
+            <File Id="HDF5DotNet.dll"
+                  Name="HDF5DotNet.dll"
+                  Source="$(var.HDFPath)\HDF5DotNet.dll" />
+            <File Id="hdf5dll.dll"
+                  Name="hdf5dll.dll"
+                  Source="$(var.HDFPath)\hdf5dll.dll" />
+            <File Id="hdf5_hldll.dll"
+                  Name="hdf5_hldll.dll"
+                  Source="$(var.HDFPath)\hdf5_hldll.dll" />
+            <File Id="szip.dll"
+                  Name="szip.dll"
+                  Source="$(var.HDFPath)\szip.dll" />
 
             <!-- MVVM assemblies -->
             <File Id="Cinch.WPF.dll"
