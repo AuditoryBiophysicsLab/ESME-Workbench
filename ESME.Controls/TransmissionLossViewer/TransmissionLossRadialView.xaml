@@ -27,7 +27,7 @@
 				                   AxisLocation="Right"
 				                   StartValue="{Binding DepthMin}"
 				                   EndValue="{Binding DepthMax}"
-				                   TickValueFormat="0" Height="262.04" VerticalAlignment="Top" />
+				                   TickValueFormat="0" VerticalAlignment="Top" />
 			</DockPanel>
 		</DockPanel>
 		<DockPanel DockPanel.Dock="Right">

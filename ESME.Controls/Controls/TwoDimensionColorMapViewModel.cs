@@ -100,46 +100,25 @@ namespace ESME.Views.Controls
 
         #endregion
 
-        #region public Environment2DData Bathymetry { get; set; }
+        #region public TransmissionLossField TransmissionLossField { get; set; }
 
-        static readonly PropertyChangedEventArgs BathymetryChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.Bathymetry);
-        Environment2DData _bathymetry;
-
-        public Environment2DData Bathymetry
+        public TransmissionLossField TransmissionLossField
         {
-            get { return _bathymetry; }
+            get { return _transmissionLossField; }
             set
             {
-                if (_bathymetry == value) return;
-                _bathymetry = value;
-                NotifyPropertyChanged(BathymetryChangedEventArgs);
+                if (_transmissionLossField == value) return;
+                _transmissionLossField = value;
+                NotifyPropertyChanged(TransmissionLossFieldChangedEventArgs);
             }
         }
 
-        #endregion
-
-        #region GridSizeChangedCommand
-
-        SimpleCommand<object, object> _gridSizeChanged;
-
-        public SimpleCommand<object, object> GridSizeChangedCommand
-        {
-            get
-            {
-                return _gridSizeChanged ?? (_gridSizeChanged = new SimpleCommand<object, object>(delegate
-                                                                                                 {
-                                                                                                     if(_bathymetry == null) MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
-                                                                                                     else
-                                                                                                     {
-                                                                                                         if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();
-                                                                                                     }
-                                                                                                    
-                                                                                                 }));
-            }
-        }
+        static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.TransmissionLossField);
+        TransmissionLossField _transmissionLossField;
 
         #endregion
 
+        
         readonly Dispatcher _dispatcher;
         readonly IViewAwareStatus _viewAwareStatus;
         bool _iAmInitialized;
@@ -158,8 +137,8 @@ namespace ESME.Views.Controls
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel.Default);
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry, true);
+            
         }
-
 
         public WriteableBitmap WriteableBitmap
         {
@@ -188,21 +167,14 @@ namespace ESME.Views.Controls
 
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialEarthCoordinate)]
         void TransmissionLossRadialEarthCoordinate(EarthCoordinate location) { _location = location; }
-
-        [MediatorMessageSink(MediatorMessage.SetTransmissionLossBathymetry)]
-        void SetTransmissionLossBathymetry(Environment2DData bathymetry)
-        {
-            _bathymetry = bathymetry;
-            if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();
-        }
-
+        
         [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
         void TransmissionLossRadialChanged(TransmissionLossRadial transmissionLossRadial)
         {
             if (_iAmInitialized)
             {
                 Debug.WriteLine("TwoDimensionColorMapViewModel: Initializing transmission loss radial");
-                TransmissionLossRadial = transmissionLossRadial;
+               // TransmissionLossRadial = transmissionLossRadial;
                 //if (_bathymetry == null) 
                 MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
             }
@@ -219,7 +191,7 @@ namespace ESME.Views.Controls
             _iAmInitialized = true;
             if (_tempRadial != null)
             {
-                TransmissionLossRadial = _tempRadial;
+               // TransmissionLossRadial = _tempRadial;
                 Debug.WriteLine("TwoDimensionColorMapViewModel: Deferred initialization of transmission loss field radial");
                 MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
                 
@@ -259,32 +231,34 @@ namespace ESME.Views.Controls
             using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
         }
 
+        float[,] TransmissionLoss { get; set; }
+
         void RenderBitmap()
         {
-            if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
+            if (TransmissionLossField == null || ColorMapViewModel == null) return;
 
-            var width = TransmissionLossRadial.Ranges.Length;
-            var height = TransmissionLossRadial.Depths.Length;
-
-            if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
+           // var width = TransmissionLossRadial.Ranges.Length;
+            //var height = TransmissionLossRadial.Depths.Length;
+            var radius = TransmissionLossField.Ranges.Length;
+            if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(radius, radius, 96, 96, PixelFormats.Bgr32, null);
 
             _writeableBitmap.Lock();
             unsafe
             {
                 var curOffset = (int)_writeableBitmap.BackBuffer;
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < radius; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (int x = 0; x < radius; x++)
                     {
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        var curColor = _colorMapViewModel.Lookup(TransmissionLossRadial.TransmissionLoss[y, x]);
+                        var curColor = _colorMapViewModel.Lookup(TransmissionLoss[y, x]);
                         *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
                         curOffset += sizeof(Int32);
                     }
                 }
             }
-            _writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
+            _writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, radius, radius));
             _writeableBitmap.Unlock();
             _isRendered = true;
             _dispatcher.BeginInvoke(new VoidDelegate(RenderFinished), DispatcherPriority.ApplicationIdle);
@@ -319,79 +293,6 @@ namespace ESME.Views.Controls
                     NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
                     break;
             }
-        }
-
-        #endregion
-
-        #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
-
-        static readonly PropertyChangedEventArgs TransmissionLossRadialChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.TransmissionLossRadial);
-        TransmissionLossRadial _transmissionLossRadial;
-
-        public TransmissionLossRadial TransmissionLossRadial
-        {
-            get { return _transmissionLossRadial; }
-            set
-            {
-                if (_transmissionLossRadial == value) return;
-                _transmissionLossRadial = value;
-                _isRendered = false;
-                _writeableBitmap = null;
-                RangeMin = TransmissionLossRadial.Ranges.First();
-                RangeMax = TransmissionLossRadial.Ranges.Last();
-                DepthMin = TransmissionLossRadial.Depths.First();
-                DepthMax = TransmissionLossRadial.Depths.Last();
-                // ColorMapViewModel.MinValue = TransmissionLossRadial.StatMin;
-                ColorMapViewModel.MaxValue = TransmissionLossRadial.StatMax;
-                ColorMapViewModel.MinValue = TransmissionLossRadial.StatMin;
-                NotifyPropertyChanged(TransmissionLossRadialChangedEventArgs);
-                RenderBitmap();
-            }
-        }
-
-        #endregion
-
-        #region public string BottomProfileGeometry { get; set; }
-
-        static readonly PropertyChangedEventArgs BottomProfileGeometryChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.BottomProfileGeometry);
-        string _bottomProfileGeometry = "M 0,0";
-
-        public string BottomProfileGeometry
-        {
-            get { return _bottomProfileGeometry; }
-            private set
-            {
-                if (_bottomProfileGeometry == value) return;
-                _bottomProfileGeometry = value;
-                NotifyPropertyChanged(BottomProfileGeometryChangedEventArgs);
-            }
-        }
-
-        void CalculateBottomProfileGeometry()
-        {
-            if (_viewAwareStatus == null) return;
-            var actualControlHeight = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualHeight;
-            var actualControlWidth = ((TransmissionLossRadialView)_viewAwareStatus.View).OverlayCanvas.ActualWidth;
-            if (actualControlHeight == 0 || actualControlWidth == 0) return;
-
-            var transect = new Transect("", _location, _transmissionLossRadial.BearingFromSource, _transmissionLossRadial.Ranges.Last());
-            
-            var profile = new BottomProfile(_transmissionLossRadial.Ranges.Length, transect, _bathymetry);
-            //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
-            var depths = profile.Profile.Select(depth => depth * (actualControlHeight / _transmissionLossRadial.Depths.Last())).ToList();
-            var pixelsPerRange = (actualControlWidth / _transmissionLossRadial.Ranges.Length);
-            var sb = new StringBuilder();
-
-            sb.Append(string.Format("M 0,{0} ", depths[0]));
-            for (var index = 0; index < depths.Count; index++)
-            {
-                var depth = depths[index];
-                sb.Append(string.Format("L {0},{1} ", index * pixelsPerRange, depth));
-            }
-            sb.Append(string.Format("L {0},{1} ", depths.Count * pixelsPerRange, depths.Last()));
-
-            BottomProfileGeometry = sb.ToString();
-            
         }
 
         #endregion

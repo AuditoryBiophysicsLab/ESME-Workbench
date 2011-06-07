@@ -41,6 +41,7 @@ namespace ESME
         public const string SaveRadialAsCSV = "SaveRadialAsCSVMessage";
         public const string SaveRadialBitmap = "SaveRadialBitmapMessage";
         public const string SetSelectedRadialBearing = "SetSelectedRadialBearingMessage";
+        public const string SetSelectedDepth = "SetSelectedDepthMessage";
         public const string SetSelectedTransmissionLossFieldName = "SetSelectedTransmissionLossFieldNameMessage";
         public const string ResetSelectedField = "ResetSelectedFieldMessage";
         public const string AcousticOptions = "AcousticOptionsMessage";
