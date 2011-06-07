@@ -245,6 +245,8 @@ namespace ESMEWorkBench.Data
             if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))
             {
                 NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
+                foreach (var species in NemoFile.Scenario.Animals.SelectMany(animal => animal.Species))
+                    DisplaySpecies(species);
             }
         }
 
@@ -914,6 +916,32 @@ namespace ESMEWorkBench.Data
             }
             _isInitialized = true;
             CommandManager.InvalidateRequerySuggested();
+        }
+
+        void DisplaySpecies(NemoSpecies species)
+        {
+            var speciesLayerName = string.Format("Species: {0} [{1}, {2}]", species.SpeciesName, species.AnimatData.ActualMammalPopulation, species.TotalAnimats);
+            var speciesLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == speciesLayerName);
+            if (speciesLayer == null)
+            {
+                speciesLayer = new OverlayShapeMapLayer
+                {
+                    Name = speciesLayerName,
+                    LayerType = LayerType.Animal,
+                    LineWidth = 1,
+                    CanBeRemoved = false,
+                    CanBeReordered = true,
+                    HasSettings = true,
+                    CanChangeLineColor = true,
+                    CanChangeLineWidth = true,
+                    CanChangeAreaColor = false,
+                };
+                MapLayers.Add(speciesLayer);
+            }
+            var startPoints = species.AnimatData.AnimatStartPoints.Select(startPoint => new OverlayPoint(startPoint));
+            speciesLayer.Clear();
+            speciesLayer.Add(startPoints);
+            speciesLayer.Done();
         }
 
         void DisplayAnalysisPoint(AnalysisPoint curPoint)
