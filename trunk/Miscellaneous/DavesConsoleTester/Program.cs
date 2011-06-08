@@ -31,6 +31,8 @@ namespace DavesConsoleTester
             }
         }
 
+        const float MaxDistanceForMatchMeters = 10f;
+
         static void cmpxmlchb(string xmlFile, string lowResCHB, string highResCHB)
         {
             float north, south, east, west;
@@ -84,7 +86,7 @@ namespace DavesConsoleTester
 
                 var nearestSample = sediment[sample];
 
-                if (sample.DistanceKilometers(nearestSample) > 0.01)
+                if (sample.DistanceKilometers(nearestSample) > (MaxDistanceForMatchMeters / 1000f))
                 {
                     missingCount++;
                     continue;
@@ -105,46 +107,46 @@ namespace DavesConsoleTester
             }
 
             Console.WriteLine("CHB sample count: {0}", chb.Count());
-            Console.WriteLine("     XML matches: {0} (res/value match, XML distance < 10m)", matchCount);
-            Console.WriteLine("  Missing in XML: {0} (nearest XML sample distance > 10m)", missingCount);
+            Console.WriteLine("     XML matches: {0} (res/value match, XML distance < {1}m)", matchCount, MaxDistanceForMatchMeters);
+            Console.WriteLine("  Missing in XML: {0} (nearest XML sample distance > {1}m)", missingCount, MaxDistanceForMatchMeters);
             Console.WriteLine("  Res mismatches: {0} (nearest XML sample has different resolution)", resolutionMismatchCount);
             missingCount = resolutionMismatchCount = matchCount = 0;
-            foreach (var xmlSample in sediment)
+            foreach (var curXml in sediment)
             {
                 
-                if (xmlSample.Data.Resolution != resolution)
+                if (curXml.Data.Resolution != resolution)
                 {
                     resolutionMismatchCount++;
                     continue;
                 }
 
                 var minDistance = double.MaxValue;
-                SedimentSampleOld closestSample = null;
+                SedimentSampleOld closestCHB = null;
                 foreach (var item in chb)
                 {
-                    var curDistance = item.DistanceKilometers(xmlSample);
+                    var curDistance = item.DistanceKilometers(curXml);
                     if (curDistance >= minDistance) continue;
                     minDistance = curDistance;
-                    closestSample = item;
+                    closestCHB = item;
                 }
-                
-                if ((closestSample == null) || (closestSample.DistanceKilometers(xmlSample) > 0.01))
+
+                if ((closestCHB == null) || (closestCHB.DistanceKilometers(curXml) > (MaxDistanceForMatchMeters / 1000f)))
                 {
                     missingCount++;
                     continue;
                 }
 
                 matchCount++;
-                if (!closestSample.Data.HasValue)
-                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: No data", closestSample.Latitude, closestSample.Longitude, resolution, xmlSample.Data.SampleValue);
+                if (!closestCHB.Data.HasValue)
+                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: No data", closestCHB.Latitude, closestCHB.Longitude, resolution, curXml.Data.SampleValue);
 
-                if ((closestSample.Data.HasValue) && (closestSample.Data.Value != xmlSample.Data.SampleValue))
-                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: {4}", closestSample.Latitude, closestSample.Longitude, resolution, xmlSample.Data.SampleValue, closestSample.Data.Value);
+                if ((closestCHB.Data.HasValue) && (closestCHB.Data.Value != curXml.Data.SampleValue))
+                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: {4}", closestCHB.Latitude, closestCHB.Longitude, resolution, curXml.Data.SampleValue, closestCHB.Data.Value);
             }
 
             Console.WriteLine("XML sample count: {0}", sediment.Count());
-            Console.WriteLine("     CHB matches: {0} (res/value match, CHB distance < 10m)", matchCount);
-            Console.WriteLine("  Missing in CHB: {0} (nearest CHB sample distance > 10m)", missingCount);
+            Console.WriteLine("     CHB matches: {0} (res/value match, CHB distance < {1}m)", matchCount, MaxDistanceForMatchMeters);
+            Console.WriteLine("  Missing in CHB: {0} (nearest CHB sample distance > {1}m)", missingCount, MaxDistanceForMatchMeters);
             Console.WriteLine("  Res mismatches: {0} (current CHB file has different resolution)", resolutionMismatchCount);
         }
 
