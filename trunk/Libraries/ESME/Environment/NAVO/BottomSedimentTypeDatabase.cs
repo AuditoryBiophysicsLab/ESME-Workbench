@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Cinch;
@@ -20,8 +21,8 @@ namespace ESME.Environment.NAVO
             var highResGroup = H5G.open(fileID, "0.10000/G/UNCLASSIFIED/");
             var lowResGroup = H5G.open(fileID, "5.00000/G/UNCLASSIFIED/");
 
-            for (var lat = (int)extractionArea.South; lat <= (int)extractionArea.North; lat++)
-                for (var lon = (int)extractionArea.West; lon <= (int)extractionArea.East; lon++)
+            for (var lat = (int)Math.Floor(extractionArea.South); lat <= (int)Math.Ceiling(extractionArea.North); lat++)
+                for (var lon = (int)Math.Floor(extractionArea.West); lon <= (int)Math.Ceiling(extractionArea.East); lon++)
                 {
                     var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
                     if (data != null) results.AddRange(data);
@@ -38,9 +39,11 @@ namespace ESME.Environment.NAVO
         {
             var result = ReadDataset(highResGroup, latitude, longitude);
             double resolutionStep;
+            string resolution;
             if (result != null)
             {
                 resolutionStep = 6.0 / 3600.0;
+                resolution = "6s";
             }
             else
             {
@@ -48,11 +51,16 @@ namespace ESME.Environment.NAVO
                 //if (result == null) throw new KeyNotFoundException(string.Format("Unable to locate sediment data for lat: {0}, lon: {1}", latitude, longitude));
                 if (result == null) return null;
                 resolutionStep = 5.0 / 60.0;
+                resolution = "5m";
             }
             var sedimentList = new List<SedimentSample>();
             for (var i = 0; i < result.GetLength(0); i++)
                 for (var j = 0; j < result.GetLength(1); j++)
-                    sedimentList.Add(new SedimentSample(latitude + (i * resolutionStep), longitude + (j * resolutionStep), result[i, j]));
+                    sedimentList.Add(new SedimentSample(latitude + (i * resolutionStep), longitude + (j * resolutionStep), new SedimentSampleBase
+                                                                                                                           {
+                                                                                                                               SampleValue = result[i, j],
+                                                                                                                               Resolution = resolution,
+                                                                                                                           }));
             return sedimentList;
         }
 
