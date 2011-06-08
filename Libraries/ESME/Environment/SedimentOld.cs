@@ -114,7 +114,7 @@ namespace ESME.Environment
                     }
                 }
                 var result = new SedimentOld(data);
-                result.FillTheDamnHoles();
+                //result.FillTheDamnHoles();
                 return result;
             }
         }
@@ -269,15 +269,32 @@ namespace ESME.Environment
         public override void Save(BinaryWriter stream) { throw new NotImplementedException(); }
     }
 
-    public class SedimentSample : EarthCoordinate<short>, IComparable<SedimentSample>
+    public class SedimentSampleNew : EarthCoordinate<short>, IComparable<SedimentSampleNew>
     {
-        public SedimentSample() {  }
+        public SedimentSampleNew() { }
 
-        public SedimentSample(double latitude, double longitude, short sample) : base(latitude, longitude, sample) {  }
+        public SedimentSampleNew(double latitude, double longitude, short sample) : base(latitude, longitude, sample) { }
+
+        public static implicit operator SedimentType(SedimentSampleNew sedimentSample)
+        {
+            return SedimentTypes.Find(sedimentSample.Data);
+        }
+
+        public int CompareTo(SedimentSampleNew other)
+        {
+            return Data.CompareTo(other.Data);
+        }
+    }
+
+    public class SedimentSample : EarthCoordinate<SedimentSampleBase>, IComparable<SedimentSample>
+    {
+        public SedimentSample() { }
+
+        public SedimentSample(double latitude, double longitude, SedimentSampleBase sample) : base(latitude, longitude, sample) { }
 
         public static implicit operator SedimentType(SedimentSample sedimentSample)
         {
-            return SedimentTypes.Find(sedimentSample.Data);
+            return SedimentTypes.Find(sedimentSample.Data.SampleValue);
         }
 
         public int CompareTo(SedimentSample other)
@@ -289,13 +306,17 @@ namespace ESME.Environment
     public class SedimentSampleBase : IComparable<SedimentSampleBase>
     {
         public short SampleValue { get; set; }
-        public float Resolution { get; set; }
-        public int CompareTo(SedimentSampleBase other) { throw new NotImplementedException(); }
+        public string Resolution { get; set; }
+        public int CompareTo(SedimentSampleBase other)
+        {
+            var result = Resolution.CompareTo(other.Resolution);
+            return result != 0 ? result : SampleValue.CompareTo(other.SampleValue);
+        }
     }
 
     public class SedimentSampleOld : EarthCoordinate<float?>, IComparable<SedimentSampleOld>
     {
-        internal SedimentSampleOld(double latitude, int latIndex, double longitude, int lonIndex)
+        public SedimentSampleOld(double latitude, int latIndex, double longitude, int lonIndex)
             : base(latitude, longitude)
         {
             LonIndex = lonIndex;
