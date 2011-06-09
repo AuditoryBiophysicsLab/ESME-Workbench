@@ -246,8 +246,6 @@ namespace ESMEWorkBench.Data
             if ((_scenarioFileName != null) && (Globals.AppSettings.ScenarioDataDirectory != null) && File.Exists(_scenarioFileName) && Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))
             {
                 NemoFile = new NemoFile(_scenarioFileName, Globals.AppSettings.ScenarioDataDirectory);
-                foreach (var species in NemoFile.Scenario.Animals.SelectMany(animal => animal.Species))
-                    DisplaySpecies(species);
             }
         }
 
@@ -1292,6 +1290,12 @@ namespace ESMEWorkBench.Data
             {
                 DisplaySediment(Sediment.Samples);
             }
+            if ((NemoFile != null) && (NemoFile.Scenario != null) && (NemoFile.Scenario.Animals != null))
+            {
+                foreach (var species in NemoFile.Scenario.Animals.SelectMany(animal => animal.Species))
+                    DisplaySpecies(species);
+            }
+
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 
