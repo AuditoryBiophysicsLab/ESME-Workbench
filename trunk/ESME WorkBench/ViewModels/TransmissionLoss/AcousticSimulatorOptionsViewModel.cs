@@ -31,7 +31,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             {
                 return _cancel ?? (_cancel = new SimpleCommand<object, object>(delegate
                 {
-                    Globals.AppSettings.Reload(null);
+                    Globals.AppSettings = AppSettings.Load();
                     CloseActivePopUpCommand.Execute(false);
                 }));
             }

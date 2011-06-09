@@ -8,7 +8,7 @@ using HRC.Utility;
 namespace HRC.Navigation
 {
     [Serializable]
-    public class GeoRect : SerializableData<GeoRect>, IEquatable<GeoRect>
+    public class GeoRect : PropertyChangedBase, IEquatable<GeoRect>
     {
         public GeoRect() { North = South = East = West = 0.0; }
 

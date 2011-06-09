@@ -15,10 +15,10 @@ namespace ESME.Environment.NAVO
                                                       "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
                                                   };
 
-        public static readonly Type[] ReferencedTypes = new[]
-                                                        {
-                                                            typeof (Point)
-                                                        };
+        public static readonly List<Type> ReferencedTypes = new List<Type>
+        {
+            typeof (Point)
+        };
 
         const string SalinityVariableName = "salinity";
         const string TemperatureVariableName = "water_temp";

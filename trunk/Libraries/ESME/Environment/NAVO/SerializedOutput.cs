@@ -1,13 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
-    public class SerializedOutput : SerializableData<SerializedOutput>
+    public class SerializedOutput : PropertyChangedBase
     {
+        public static readonly List<Type> ReferencedTypes = new List<Type>
+        {
+                typeof (EnvironmentalDataPoint),
+                typeof (EarthCoordinate),
+                typeof (EarthCoordinate<List<double>>),
+                typeof (List<double>),
+        };
+
         public SerializedOutput()
         {
             DataPoints = new List<EnvironmentalDataPoint>();
@@ -49,6 +58,31 @@ namespace ESME.Environment.NAVO
 
         public List<double> DepthAxis { get; set; }
 
+        public void Save(string fileName)
+        {
+            var serializer = new XmlSerializer<SerializedOutput> { Data = this };
+            serializer.Save(fileName, ReferencedTypes);
+        }
+
+        public void Save(string fileName, List<Type> referencedTypes)
+        {
+            if (referencedTypes == null) referencedTypes = ReferencedTypes;
+            else referencedTypes.AddRange(ReferencedTypes);
+            var serializer = new XmlSerializer<SerializedOutput> { Data = this };
+            serializer.Save(fileName, referencedTypes);
+        }
+
+        public static SerializedOutput Load(string fileName)
+        {
+            return XmlSerializer<SerializedOutput>.Load(fileName, ReferencedTypes);
+        }
+
+        public static SerializedOutput Load(string fileName, List<Type> referencedTypes)
+        {
+            if (referencedTypes == null) referencedTypes = ReferencedTypes;
+            else referencedTypes.AddRange(ReferencedTypes);
+            return XmlSerializer<SerializedOutput>.Load(fileName, referencedTypes);
+        }
     }
 
     public class EnvironmentalDataPoint : EarthCoordinate<List<double>>

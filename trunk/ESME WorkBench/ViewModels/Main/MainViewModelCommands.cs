@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Windows.Input;
 using Cinch;
 using ESME;
+using ESME.Data;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Properties;
@@ -30,14 +31,14 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(obj =>
                                                                                          {
-                                                                                             var extraTypes = new[]
+                                                                                             var extraTypes = new List<Type>
                                                                                                               {
                                                                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer)
                                                                                                               };
                                                                                              var programOptionsViewModel = new ApplicationOptionsViewModel();
                                                                                              var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
                                                                                              if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
-                                                                                             else Globals.AppSettings.Reload(extraTypes);
+                                                                                             else Globals.AppSettings = AppSettings.Load(extraTypes);
                                                                                          }));
             }
         }
@@ -635,14 +636,14 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _acousticSimulatorOptions ?? (_acousticSimulatorOptions = new SimpleCommand<object, object>(delegate
                                                                                                                    {
-                                                                                                                       var extraTypes = new[]
+                                                                                                                       var extraTypes = new List<Type>
                                                                                                                                         {
                                                                                                                                             typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer)
                                                                                                                                         };
                                                                                                                        var viewModel = new AcousticSimulatorOptionsViewModel();
                                                                                                                        var result = _visualizerService.ShowDialog("AcousticSimulatorOptionsView", viewModel);
                                                                                                                        if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
-                                                                                                                       else Globals.AppSettings.Reload(extraTypes);
+                                                                                                                       else Globals.AppSettings = AppSettings.Load(extraTypes);
                                                                                                                    }));
             }
         }

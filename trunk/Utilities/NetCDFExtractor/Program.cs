@@ -223,9 +223,7 @@ namespace ImportNetCDF
                 progress += progressStep;
             }
             Console.WriteLine(@"Saving imported data ... ");
-            serializedOutput.Save(outputDataFileName, new[]{typeof(Point)});
-            
-
+            serializedOutput.Save(outputDataFileName, null);
             Console.WriteLine(@"done");
         }
 

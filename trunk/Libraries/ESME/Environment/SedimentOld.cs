@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -314,3 +315,4 @@ namespace ESME.Environment
         }
     }
 }
+#endif

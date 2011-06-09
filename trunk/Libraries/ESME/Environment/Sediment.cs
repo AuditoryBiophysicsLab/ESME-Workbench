@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using ESME.Model;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Environment
 {
     public class Sediment
     {
-        private static readonly List<Type> ReferencedTypes = new List<Type>
-                                                                 {
-                                                                     typeof (SedimentSample),
-                                                                     typeof (SedimentSampleBase),
-                                                                 };
+        static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<SedimentSample>.ReferencedTypes) { typeof (SedimentSampleBase) };
 
         public EnvironmentData<SedimentSample> Samples { get; private set; }
 
@@ -22,12 +19,13 @@ namespace ESME.Environment
 
         public static Sediment Load(string filename)
         {
-            return new Sediment {Samples = EnvironmentData<SedimentSample>.Load(filename, ReferencedTypes)};
+            return new Sediment { Samples = XmlSerializer<EnvironmentData<SedimentSample>>.Load(filename, ReferencedTypes) };
         }
 
         public void Save(string filename)
         {
-            Samples.Save(filename, ReferencedTypes);
+            var serializer = new XmlSerializer<EnvironmentData<SedimentSample>> { Data = Samples };
+            serializer.Save(filename, ReferencedTypes);
         }
     }
 

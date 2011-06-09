@@ -8,7 +8,7 @@ using HRC.Utility;
 namespace ESME.Environment.NAVO
 {
     [Serializable]
-    public class NAVOConfiguration : SerializableData<NAVOConfiguration>
+    public class NAVOConfiguration : PropertyChangedBase
     {
         public void SetDefaults()
         {
@@ -242,7 +242,5 @@ namespace ESME.Environment.NAVO
                 return false;
             }
         }
-
-
     }
 }

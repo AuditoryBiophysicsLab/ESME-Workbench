@@ -11,7 +11,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -30,15 +29,13 @@ using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
-using FileFormatException = ESME.Model.FileFormatException;
 using LineStyle = ESME.Overlay.LineStyle;
 
 namespace ESMEWorkBench.Data
 {
     [Serializable]
-    public partial class Experiment : SerializableData<Experiment>
+    public partial class Experiment : PropertyChangedBase
     {
-        static Type[] _referencedTypes;
         static readonly PropertyChangedEventArgs TransmissionLossFieldsChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.TransmissionLossFields);
         public static IUIVisualizerService VisualizerService { get; set; }
 
@@ -534,6 +531,24 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public string FileName { get; set; }
+        [XmlIgnore]
+        public string FileName
+        {
+            get { return _fileName; }
+            set
+            {
+                if (_fileName == value) return;
+                _fileName = value;
+                NotifyPropertyChanged(FileNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs FileNameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.FileName);
+        string _fileName;
+
+        #endregion
+        
         bool _deleteAllSpeciesLayersOnInitialize;
         [XmlIgnore] bool _isInitialized;
         ObservableCollection<TransmissionLossField> _transmissionLossFields;
@@ -559,16 +574,20 @@ namespace ESMEWorkBench.Data
             AnimalPopulationFiles = new ObservableCollection<string>();
         }
 
-        public static Type[] ReferencedTypes
+        public static readonly List<Type> ReferencedTypes = new List<Type>
         {
-            get
-            {
-                return _referencedTypes ?? (_referencedTypes = new[]
-                                                               {
-                                                                   typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer), typeof (MarkerLayerViewModel), typeof(RasterMapLayer), typeof(AnalysisPoint), typeof(SoundSource), typeof(GeoRect), typeof(NemoModeToAcousticModelNameMap), typeof(NAVOTimePeriod),
-                                                               });
-            }
-        }
+                typeof (MapLayerViewModel),
+                typeof (ShapefileMapLayer),
+                typeof (OverlayShapeMapLayer),
+                typeof (OverlayFileMapLayer),
+                typeof (MarkerLayerViewModel),
+                typeof (RasterMapLayer),
+                typeof (AnalysisPoint),
+                typeof (SoundSource),
+                typeof (GeoRect),
+                typeof (NemoModeToAcousticModelNameMap),
+                typeof (NAVOTimePeriod),
+        };
 
         [XmlIgnore]
         public AnimatInterface AnimatInterface { get; set; }
@@ -833,11 +852,17 @@ namespace ESMEWorkBench.Data
         {
             LastModified = DateTime.Now;
             ModifiedBy = Environment.UserName;
-            SaveAs(fileName, ReferencedTypes);
+            var serializer = new XmlSerializer<Experiment> { Data = this };
+            serializer.Save(fileName, ReferencedTypes);
             IsChanged = false;
         }
 
-        public new void Close()
+        public static Experiment Load(string fileName)
+        {
+            return XmlSerializer<Experiment>.Load(fileName, ReferencedTypes);
+        }
+
+        public void Close()
         {
             if (ScenarioFileWatcher != null)
             {
@@ -849,7 +874,6 @@ namespace ESMEWorkBench.Data
                 TransmissionLossFileWatcher.EnableRaisingEvents = false;
                 TransmissionLossFileWatcher = null;
             }
-            base.Close();
         }
 
         public static void CopyAllPrivateFiles(DirectoryInfo source, DirectoryInfo target)

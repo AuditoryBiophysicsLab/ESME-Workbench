@@ -18,7 +18,7 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESMEWorkBench.ViewModels.Map
 {
-    public class MapLayerViewModel : ISupportValidation 
+    public class MapLayerViewModel : PropertyChangedBase, ISupportValidation 
     {
         static readonly Random Random;
         static readonly Color[] Palette;
@@ -1087,13 +1087,6 @@ namespace ESMEWorkBench.ViewModels.Map
                 NotifyPropertyChanged(IsCheckedChangedEventArgs);
             }
         }
-
-        #endregion
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        void NotifyPropertyChanged(PropertyChangedEventArgs e) { if (PropertyChanged != null) PropertyChanged(this, e); }
 
         #endregion
     }

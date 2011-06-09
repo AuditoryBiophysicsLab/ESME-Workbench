@@ -1,9 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using HRC.Utility;
 
 namespace ESMEWorkBench.ViewModels.Ribbon
 {
-    public class ContextualTabGroupData : INotifyPropertyChanged
+    public class ContextualTabGroupData : PropertyChangedBase
     {
         string _header;
         bool _isVisible;
@@ -24,7 +25,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                 if (_header != value)
                 {
                     _header = value;
-                    OnPropertyChanged(new PropertyChangedEventArgs("Header"));
+                    NotifyPropertyChanged(new PropertyChangedEventArgs("Header"));
                 }
             }
         }
@@ -38,7 +39,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                 if (_isVisible != value)
                 {
                     _isVisible = value;
-                    OnPropertyChanged(new PropertyChangedEventArgs("IsVisible"));
+                    NotifyPropertyChanged(new PropertyChangedEventArgs("IsVisible"));
                 }
             }
         }
@@ -51,18 +52,6 @@ namespace ESMEWorkBench.ViewModels.Ribbon
                     _tabDataCollection = new ObservableCollection<TabDataViewModel>();
                 return _tabDataCollection;
             }
-        }
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        #endregion
-
-        void OnPropertyChanged(PropertyChangedEventArgs e)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(this, e);
         }
     }
 }

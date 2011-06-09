@@ -14,7 +14,7 @@ using HRC.Utility;
 namespace ESME.Environment
 {
     [Serializable]
-    public class EnvironmentMetadata : SerializableData<EnvironmentMetadata>, IHasName, ISupportValidation, IMightBeDirty, IHaveBasePath
+    public class EnvironmentMetadata : PropertyChangedBase, IHasName, ISupportValidation, IMightBeDirty, IHaveBasePath
     {
         public EnvironmentMetadata() { PropertyChanged += delegate { IsDirty = true; }; }
 
@@ -250,7 +250,7 @@ namespace ESME.Environment
 
 
     [Serializable]
-    public class BathymetryMetadata : SerializableData<BathymetryMetadata>, IHasName, ISupportValidation, IMightBeDirty, IHaveBasePath
+    public class BathymetryMetadata : PropertyChangedBase, IHasName, ISupportValidation, IMightBeDirty, IHaveBasePath
     {
         public BathymetryMetadata() { PropertyChanged += delegate { IsDirty = true; }; }
 
@@ -456,17 +456,20 @@ namespace ESME.Environment
 
 
     [Serializable]
-    public class MetadataFile<T> : SerializableData<MetadataFile<T>>, IList<T>, IMightBeDirty
+    public class MetadataFile<T> : PropertyChangedBase, IList<T>, IMightBeDirty
         where T : class, IHasName, ISupportValidation, IMightBeDirty, IHaveBasePath, new()
     {
-        static readonly Type[] ExtraTypes = {
-                                                typeof (GeoRect), typeof (DateTime), typeof (string), typeof (float),
-                                            };
+        public static readonly List<Type> ReferencedTypes = new List<Type>
+        {
+                typeof (GeoRect),
+                typeof (DateTime),
+                typeof (string),
+                typeof (float),
+        };
 
         public static MetadataFile<T> Load(string fileName)
         {
-            var result = Load(fileName, ExtraTypes);
-            if (result == null) throw new ApplicationException("Unable to load metadata file: \"" + fileName + "\"");
+            var result = XmlSerializer<MetadataFile<T>>.Load(fileName, ReferencedTypes);
             result._fileName = fileName;
             result.Validate();
             result.IsDirty = false;
@@ -475,7 +478,8 @@ namespace ESME.Environment
 
         public void Save()
         {
-            Save(_fileName, ExtraTypes);
+            var serializer = new XmlSerializer<MetadataFile<T>> { Data = this };
+            serializer.Save(_fileName, ReferencedTypes);
             foreach (var item in _list) item.IsDirty = false;
             IsDirty = false;
         }

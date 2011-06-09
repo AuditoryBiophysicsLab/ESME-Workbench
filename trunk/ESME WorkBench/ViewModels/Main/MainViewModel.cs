@@ -300,7 +300,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     Experiment newExperiment;
                     try
                     {
-                        newExperiment = Experiment.Load(fileName, Experiment.ReferencedTypes);
+                        newExperiment = Experiment.Load(fileName);
                         newExperiment.FileName = fileName;
                     }
                     catch (UserCanceledOperationException)
