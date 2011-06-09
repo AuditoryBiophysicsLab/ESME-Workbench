@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Cinch;
 using HRC.Navigation;
 using HDF5DotNet;
 
 namespace ESME.Environment.NAVO
 {
-    public class BottomSedimentTypeDatabase : ViewModelBase
+    public class BottomSedimentTypeDatabase
     {
         public static string DatabasePath { get; set; }
 
@@ -16,7 +14,7 @@ namespace ESME.Environment.NAVO
 
         public static void ExtractArea(string outputDirectory, GeoRect extractionArea)
         {
-            var results = new EnvironmentData<SedimentSample>();
+            var results = new Sediment();
             var fileId = H5F.open(DatabasePath, H5F.OpenMode.ACC_RDONLY);
             var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
             var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
@@ -25,7 +23,7 @@ namespace ESME.Environment.NAVO
                 for (var lon = (int)extractionArea.West; lon <= (int)extractionArea.East; lon++)
                 {
                     var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
-                    if (data != null) results.AddRange(data.Where(extractionArea.Contains));
+                    if (data != null) results.Samples.AddRange(data.Where(extractionArea.Contains));
                 }
 
             H5G.close(lowResGroup);
@@ -81,6 +79,5 @@ namespace ESME.Environment.NAVO
                 return null;
             }
         }
-
     }
 }

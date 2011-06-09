@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using ESME.Environment;
+using ESME.Environment.NAVO;
 using HDF5DotNet;
 using HRC.Navigation;
 
@@ -36,11 +37,11 @@ namespace DavesConsoleTester
         static void cmpxmlchb(string xmlFile, string lowResCHB, string highResCHB)
         {
             float north, south, east, west;
-            var sediment = EnvironmentData<SedimentSample>.Load(xmlFile);
-            Console.WriteLine("XML bounds: [N: {0}, S: {1}, E: {2}, W: {3}]", sediment.Last().Latitude, sediment.First().Latitude, sediment.Last().Longitude, sediment.First().Longitude);
+            var sediment = Sediment.Load(xmlFile);
+            Console.WriteLine("XML bounds: [N: {0}, S: {1}, E: {2}, W: {3}]", sediment.Samples.Last().Latitude, sediment.Samples.First().Latitude, sediment.Samples.Last().Longitude, sediment.Samples.First().Longitude);
             var hasLowResData = false;
             var hasHighResData = false;
-            foreach (var sample in sediment)
+            foreach (var sample in sediment.Samples)
             {
                 if (sample.Data.Resolution == "5m") hasLowResData = true;
                 if (sample.Data.Resolution == "6s") hasHighResData = true;
@@ -71,7 +72,7 @@ namespace DavesConsoleTester
             else Console.WriteLine("XML does not contain high resolution data"); 
         }
 
-        static void CompareXMLtoCHB(EnvironmentData<SedimentSample> sediment, IEnumerable<SedimentSampleOld> chb, string resolution)
+        static void CompareXMLtoCHB(Sediment sediment, IEnumerable<SedimentSampleOld> chb, string resolution)
         {
             var resolutionMismatchCount = 0;
             var matchCount = 0;
@@ -84,7 +85,7 @@ namespace DavesConsoleTester
                 if ((progress % 1000) == 0)
                     Console.Write("Progress: {0:0.00}%\r", ((float)progress / total) * 100);
 
-                var nearestSample = sediment[sample];
+                var nearestSample = sediment.Samples[sample];
 
                 if (sample.DistanceKilometers(nearestSample) > (MaxDistanceForMatchMeters / 1000f))
                 {
@@ -111,7 +112,7 @@ namespace DavesConsoleTester
             Console.WriteLine("  Missing in XML: {0} (nearest XML sample distance > {1}m)", missingCount, MaxDistanceForMatchMeters);
             Console.WriteLine("  Res mismatches: {0} (nearest XML sample has different resolution)", resolutionMismatchCount);
             missingCount = resolutionMismatchCount = matchCount = 0;
-            foreach (var curXml in sediment)
+            foreach (var curXml in sediment.Samples)
             {
                 
                 if (curXml.Data.Resolution != resolution)
@@ -144,7 +145,7 @@ namespace DavesConsoleTester
                     Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: {4}", closestCHB.Latitude, closestCHB.Longitude, resolution, curXml.Data.SampleValue, closestCHB.Data.Value);
             }
 
-            Console.WriteLine("XML sample count: {0}", sediment.Count());
+            Console.WriteLine("XML sample count: {0}", sediment.Samples.Count());
             Console.WriteLine("     CHB matches: {0} (res/value match, CHB distance < {1}m)", matchCount, MaxDistanceForMatchMeters);
             Console.WriteLine("  Missing in CHB: {0} (nearest CHB sample distance > {1}m)", missingCount, MaxDistanceForMatchMeters);
             Console.WriteLine("  Res mismatches: {0} (current CHB file has different resolution)", resolutionMismatchCount);

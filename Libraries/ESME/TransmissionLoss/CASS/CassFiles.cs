@@ -21,10 +21,10 @@ namespace ESME.TransmissionLoss.CASS
             var windFile = Path.Combine(extractedDataPath, string.Format("{0}-wind.txt", timePeriodName));
             var soundspeedFile = Path.Combine(extractedDataPath, string.Format("{0}-soundspeed.xml", timePeriodName));
 
-            EnvironmentData<SedimentSample> sediment = null;
+            Sediment sediment = null;
             var selectedSedimentFile = LargestFileInList(sedimentFiles);
             if (selectedSedimentFile == null) throw new ApplicationException("No sediment files were found, the operation cannot proceed");
-            sediment = EnvironmentData<SedimentSample>.Load(selectedSedimentFile);
+            sediment = Sediment.Load(selectedSedimentFile);
             if (sediment == null) throw new ApplicationException("Error reading sediment data");
 
             Environment2DData wind = null;
@@ -423,7 +423,7 @@ namespace ESME.TransmissionLoss.CASS
         }
 #endif
 
-        public static void WriteEnvironmentFile(string environmentFileName, Environment2DData bathymetry, EnvironmentData<SedimentSample> sedimentType, SoundSpeedField soundSpeedField, Environment2DData windSpeed)
+        public static void WriteEnvironmentFile(string environmentFileName, Environment2DData bathymetry, Sediment sedimentType, SoundSpeedField soundSpeedField, Environment2DData windSpeed)
         {
             using (var envFile = new StreamWriter(environmentFileName, false))
             {
@@ -452,7 +452,7 @@ namespace ESME.TransmissionLoss.CASS
                             else break;
                         envFile.WriteLine("EOT");
                         envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
-                        var sedimentSample = sedimentType[location];
+                        var sedimentSample = sedimentType.Samples[location];
                         var sedimentTypeName = BottomSedimentTypeTable.Lookup(sedimentSample.Data.SampleValue).ToUpper();
                         if (sedimentTypeName == "LAND") sedimentTypeName = "SAND";
                         envFile.WriteLine(sedimentTypeName);
