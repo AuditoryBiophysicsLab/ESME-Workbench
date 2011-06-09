@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -89,7 +90,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
         }
 
         #endregion
-
+        
         string CommandArgs
         {
             get
@@ -105,7 +106,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 sb.Append(string.Format("-Xmx{0}m ", megs)); // maximum memory on computer.
 #endif
                 if (ScenarioSimulatorSettings.CreateSimulationLogfile) sb.Append(string.Format("-Dlog4j.configuration=sim-log4j.xml ")); 
-                if (ScenarioSimulatorSettings.SimOutputLevel > 0) sb.Append(string.Format("-Dsim.output.level={0} ", ScenarioSimulatorSettings.SimOutputLevel)); // log level
+                if (ScenarioSimulatorSettings.SimOutputLevel > 0) sb.Append(string.Format("-Dsim.output.level={0} ", ScenarioSimulatorSettings.SimOutputLevel+1)); // log level +1 (because LogLevels[0] is actually 1-indexed)
                 if (ScenarioSimulatorSettings.DecibelCutoff > 0) sb.Append(string.Format("-Dsim.receive.cutoff={0} ", ScenarioSimulatorSettings.DecibelCutoff)); //db cutoff
                 sb.Append(string.Format("-Dsim.species.cached={0} -Dsim.area.clip={1}", ScenarioSimulatorSettings.ReadAllMammals.ToString().ToLower(), ScenarioSimulatorSettings.ClipOutsideFootprint.ToString().ToLower()));// cache all species, clip? 
                 if (ScenarioSimulatorSettings.OutputBufferSize > 0) sb.Append(string.Format("-Dsim.output.filebuffer={0} ", ScenarioSimulatorSettings.OutputBufferSize));  //output buffer options

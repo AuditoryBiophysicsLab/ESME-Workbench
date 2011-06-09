@@ -32,14 +32,10 @@
 							<cinch:NumericTextBoxBehaviour />
 						</i:Interaction.Behaviors>
 					</TextBox>
-					<TextBlock Text="Simulator Output Level" />
-					<TextBox Text="{Binding SimOutputLevel}"
-					         Margin="0 0 0 5">
-						<i:Interaction.Behaviors>
-							<cinch:NumericTextBoxBehaviour />
-						</i:Interaction.Behaviors>
-					</TextBox>
-					<TextBlock Text="Number of Parallel Simulations" />
+					<TextBlock Text="Simulator Logging Level" />
+                    <ComboBox ItemsSource="{Binding LogLevels}" SelectedIndex="{Binding SimOutputLevel}"  Margin="0 2 0 5" ToolTip="Detail level of the Scenario Simulator log file."/>
+					
+                    <TextBlock Text="Number of Parallel Simulations" />
 					<TextBox Text="{Binding ParallelSimulations}"
 					         Margin="0 0 0 5">
 						<i:Interaction.Behaviors>
