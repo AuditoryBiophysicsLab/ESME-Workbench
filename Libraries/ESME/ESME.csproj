@@ -125,6 +125,7 @@
     <Compile Include="Environment\SedimentOld.cs" />
     <Compile Include="Environment\Transect.cs" />
     <Compile Include="Environment\UNESCO.cs" />
+    <Compile Include="Environment\Wind.cs" />
     <Compile Include="MediatorMessages.cs" />
     <Compile Include="Model\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />

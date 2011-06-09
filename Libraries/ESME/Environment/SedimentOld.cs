@@ -285,34 +285,6 @@ namespace ESME.Environment
         }
     }
 
-    public class SedimentSample : EarthCoordinate<SedimentSampleBase>, IComparable<SedimentSample>
-    {
-        public SedimentSample() { }
-
-        public SedimentSample(double latitude, double longitude, SedimentSampleBase sample) : base(latitude, longitude, sample) { }
-
-        public static implicit operator SedimentType(SedimentSample sedimentSample)
-        {
-            return SedimentTypes.Find(sedimentSample.Data.SampleValue);
-        }
-
-        public int CompareTo(SedimentSample other)
-        {
-            return Data.CompareTo(other.Data);
-        }
-    }
-
-    public class SedimentSampleBase : IComparable<SedimentSampleBase>
-    {
-        public short SampleValue { get; set; }
-        public string Resolution { get; set; }
-        public int CompareTo(SedimentSampleBase other)
-        {
-            var result = Resolution.CompareTo(other.Resolution);
-            return result != 0 ? result : SampleValue.CompareTo(other.SampleValue);
-        }
-    }
-
     public class SedimentSampleOld : EarthCoordinate<float?>, IComparable<SedimentSampleOld>
     {
         public SedimentSampleOld(double latitude, int latIndex, double longitude, int lonIndex)
