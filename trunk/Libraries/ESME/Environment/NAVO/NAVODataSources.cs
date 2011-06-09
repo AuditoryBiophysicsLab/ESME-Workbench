@@ -72,8 +72,8 @@ namespace ESME.Environment.NAVO
             var resMinutes = double.Parse(resString);
             var samplesPerDegree = 60 / resMinutes;
             BathymetryResolutionStatement = string.Format("Extraction area: {0:0.###}deg (lon) by {1:0.###}deg (lat)\nEstimated point count {2:#,#} x {3:#,#} = {4:#,#}", ExtractionArea.Width, ExtractionArea.Height, ExtractionArea.Width * samplesPerDegree, ExtractionArea.Height * samplesPerDegree, ExtractionArea.Width * ExtractionArea.Height * samplesPerDegree * samplesPerDegree);
-            Console.WriteLine("area {0} {1} {2} {3} 0.10000 sediment-6s.chb", Math.Floor(ExtractionArea.West), Math.Ceiling(ExtractionArea.East), Math.Floor(ExtractionArea.South), Math.Ceiling(ExtractionArea.North));
-            Console.WriteLine("area {0} {1} {2} {3} 5.00000 sediment-5m.chb", Math.Floor(ExtractionArea.West), Math.Ceiling(ExtractionArea.East), Math.Floor(ExtractionArea.South), Math.Ceiling(ExtractionArea.North));
+            //Console.WriteLine("area {0} {1} {2} {3} 0.10000 sediment-6s.chb", ExpandedExtractionArea.West, ExpandedExtractionArea.East, ExpandedExtractionArea.South, ExpandedExtractionArea.North);
+            //Console.WriteLine("area {0} {1} {2} {3} 5.00000 sediment-5m.chb", ExpandedExtractionArea.West, ExpandedExtractionArea.East, ExpandedExtractionArea.South, ExpandedExtractionArea.North);
         }
 
         #region public GeoRect ExtractionArea { get; set; }
@@ -85,6 +85,7 @@ namespace ESME.Environment.NAVO
             {
                 if (_extractionArea == value) return;
                 _extractionArea = value;
+                _expandedExtractionArea = new GeoRect(Math.Ceiling(_extractionArea.North), Math.Floor(_extractionArea.South), Math.Ceiling(_extractionArea.East), Math.Floor(_extractionArea.West));
                 NotifyPropertyChanged(ExtractionAreaChangedEventArgs);
                 UpdateResolutionStatement();
             }
@@ -95,6 +96,16 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
+        #region public GeoRect ExpandedExtractionArea { get; }
+
+        public GeoRect ExpandedExtractionArea
+        {
+            get { return _expandedExtractionArea; }
+        }
+
+        private GeoRect _expandedExtractionArea;
+
+        #endregion
 
         #region public string BathymetryResolutionStatement { get; set; }
 
@@ -111,6 +122,24 @@ namespace ESME.Environment.NAVO
 
         static readonly PropertyChangedEventArgs BathymetryResolutionStatementChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.BathymetryResolutionStatement);
         string _bathymetryResolutionStatement;
+
+        #endregion
+
+        #region public bool RestrictDataToBufferArea { get; set; }
+
+        public bool RestrictDataToBufferArea
+        {
+            get { return _restrictDataToBufferArea; }
+            set
+            {
+                if (_restrictDataToBufferArea == value) return;
+                _restrictDataToBufferArea = value;
+                NotifyPropertyChanged(RestrictDataToBufferAreaChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs RestrictDataToBufferAreaChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.RestrictDataToBufferArea);
+        private bool _restrictDataToBufferArea;
 
         #endregion
 
@@ -160,16 +189,18 @@ namespace ESME.Environment.NAVO
             var bathymetry = Environment2DData.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var maxDepth = bathymetry.Minimum;
 
+            var selectedExtractionArea = RestrictDataToBufferArea ? ExtractionArea : ExpandedExtractionArea;
+
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";
-            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea);
+            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, selectedExtractionArea);
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
             foreach (var month in uniqueMonths)
             {
                 Status = "Extracting temperature and salinity data for " + (NAVOTimePeriod)month;
-                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, ExtractionArea, month);
+                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, selectedExtractionArea, month);
                 if (backgroundWorker.CancellationPending) return;
                 currentExtractionStep += 2;
                 ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
@@ -207,7 +238,7 @@ namespace ESME.Environment.NAVO
             {
                 var monthIndices = GetMonthIndices(timePeriod);
                 Status = "Extracting wind data for " + timePeriod;
-                SurfaceMarineGriddedClimatologyDatabase.ExtractArea(tempDirectory, timePeriod, monthIndices.First(), monthIndices.Last(), monthIndices.Count(), ExtractionArea);
+                SurfaceMarineGriddedClimatologyDatabase.ExtractArea(tempDirectory, timePeriod, monthIndices.First(), monthIndices.Last(), monthIndices.Count(), selectedExtractionArea);
                 if (backgroundWorker.CancellationPending) return;
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }

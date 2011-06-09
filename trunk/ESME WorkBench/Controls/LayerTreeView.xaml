@@ -37,6 +37,7 @@
 			        Value="True" />
 			<Setter Property="views:VirtualToggleButton.IsChecked"
 			        Value="{Binding IsChecked}" />
+            <Setter Property="ToolTip" Value="{Binding ToolTip}" />
 			<Style.Triggers>
 				<Trigger Property="IsSelected"
 				         Value="True">

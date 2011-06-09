@@ -822,6 +822,24 @@ namespace ESMEWorkBench.ViewModels.Map
             }
         }
 
+        #region public string ToolTip { get; set; }
+
+        public string ToolTip
+        {
+            get { return _toolTip; }
+            set
+            {
+                if (_toolTip == value) return;
+                _toolTip = value;
+                NotifyPropertyChanged(ToolTipChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs ToolTipChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.ToolTip);
+        private string _toolTip;
+
+        #endregion
+
         #region public LayerType LayerType { get; set; }
 
         LayerType _layerType;

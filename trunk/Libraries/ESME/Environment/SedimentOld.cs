@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using ESME.Environment.NAVO;
 using ESME.Model;
 using HRC.Navigation;
 using HRC.Utility;
@@ -12,7 +11,7 @@ using FileFormatException = System.IO.FileFormatException;
 
 namespace ESME.Environment
 {
-    public class Sediment : SerializableData<Sediment>, IList<SedimentSample>
+    public class SedimentNewer : SerializableData<SedimentNewer>, IList<SedimentSample>
     {
         readonly List<SedimentSample> _list = new List<SedimentSample>();
 
@@ -21,7 +20,7 @@ namespace ESME.Environment
                                                      typeof (SedimentSample), typeof (EarthCoordinate<short>), typeof (Geo), typeof(Point)
                                                  };
 
-        public Sediment() {  }
+        public SedimentNewer() {  }
 
         public SedimentSample this[EarthCoordinate location]
         {
@@ -43,7 +42,7 @@ namespace ESME.Environment
         public void AddRange(IEnumerable<SedimentSample> collection) { _list.AddRange(collection); }
 
         public void Save(string fileName) { Save(fileName, ReferencedTypes); }
-        public static Sediment Load(string fileName) { return Load(fileName, ReferencedTypes); }
+        public static SedimentNewer Load(string fileName) { return Load(fileName, ReferencedTypes); }
 
         #region IList members
         public IEnumerator<SedimentSample> GetEnumerator() { return _list.GetEnumerator(); }

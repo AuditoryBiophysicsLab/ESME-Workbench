@@ -6,7 +6,7 @@ namespace ESME.Environment.NAVO
     {
         static readonly List<ValueToNameMap> Map;
 
-        static readonly List<ValueToNameMap> HFEVAMap = new List<ValueToNameMap>
+        public static readonly List<ValueToNameMap> HFEVAMap = new List<ValueToNameMap>
                                                   {
                                                       new ValueToNameMap(1, "Rough Rock"),
                                                       new ValueToNameMap(2, "Rock"),
@@ -35,7 +35,7 @@ namespace ESME.Environment.NAVO
                                                       new ValueToNameMap(999, "Land"),
                                                   };
         
-        static readonly List<ValueToNameMap> CASSMap = new List<ValueToNameMap>
+        public static readonly List<ValueToNameMap> CASSMap = new List<ValueToNameMap>
                                                   {
                                                       new ValueToNameMap(1, "ROUGH ROCK"),
                                                       new ValueToNameMap(2, "ROCK"),
@@ -75,7 +75,7 @@ namespace ESME.Environment.NAVO
         }
     }
 
-    internal class ValueToNameMap
+    public class ValueToNameMap
     {
         public ValueToNameMap(float value, string name)
         {
