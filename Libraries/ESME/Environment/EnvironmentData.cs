@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -42,6 +43,16 @@ namespace ESME.Environment
         }
 
         public virtual void AddRange(IEnumerable<T> collection) { _list.AddRange(collection); }
+
+        public void TrimToNearestPoints(GeoRect geoRect)
+        {
+            var southWest = this[geoRect.SouthWest];
+            var northEast = this[geoRect.NorthEast];
+            var trimRect = GeoRect.InflateWithGeo(new GeoRect(northEast.Latitude, southWest.Latitude, northEast.Longitude, southWest.Longitude), 0.01);
+            var pointsToKeep = _list.Where(trimRect.Contains).ToList();
+            _list.Clear();
+            _list.AddRange(pointsToKeep);
+        }
 
         #region IList members
         public virtual IEnumerator<T> GetEnumerator() { return _list.GetEnumerator(); }

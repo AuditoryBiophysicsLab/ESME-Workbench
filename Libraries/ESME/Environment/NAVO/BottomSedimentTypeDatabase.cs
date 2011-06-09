@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using HRC.Navigation;
@@ -19,12 +20,14 @@ namespace ESME.Environment.NAVO
             var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
             var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
 
-            for (var lat = (int)extractionArea.South; lat <= (int)extractionArea.North; lat++)
-                for (var lon = (int)extractionArea.West; lon <= (int)extractionArea.East; lon++)
+            for (var lat = (int)Math.Floor(extractionArea.South); lat <= (int)Math.Ceiling(extractionArea.North); lat++)
+                for (var lon = (int)Math.Floor(extractionArea.West); lon <= (int)Math.Ceiling(extractionArea.East); lon++)
                 {
                     var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
-                    if (data != null) results.Samples.AddRange(data.Where(extractionArea.Contains));
+                    //if (data != null) results.Samples.AddRange(data.Where(extractionArea.Contains));
+                    if (data != null) results.Samples.AddRange(data);
                 }
+            results.Samples.TrimToNearestPoints(extractionArea);
 
             H5G.close(lowResGroup);
             H5G.close(highResGroup);

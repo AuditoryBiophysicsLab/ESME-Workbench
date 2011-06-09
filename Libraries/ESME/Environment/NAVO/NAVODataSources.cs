@@ -193,7 +193,7 @@ namespace ESME.Environment.NAVO
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";
-            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, selectedExtractionArea);
+            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea);
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
