@@ -95,7 +95,7 @@ namespace ESME.TransmissionLoss.RAM
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var sedimentType = environmentInformation.Sediment[transmissionLossJob.SoundSource];
+                var sedimentType = environmentInformation.Sediment.Samples[transmissionLossJob.SoundSource];
                 var ramConfig = Ram.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], bottomProfiles[bearingIndex], sedimentType, maxCalculationDepthMeters, rangeCellCount, depthCellCount);
                 ramRunFile.TransmissionLossRunFileRadials.Add(new RamRunFileRadial
                                                               {

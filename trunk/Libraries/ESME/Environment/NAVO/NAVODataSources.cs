@@ -85,7 +85,7 @@ namespace ESME.Environment.NAVO
             {
                 if (_extractionArea == value) return;
                 _extractionArea = value;
-                _expandedExtractionArea = new GeoRect(Math.Ceiling(_extractionArea.North), Math.Floor(_extractionArea.South), Math.Ceiling(_extractionArea.East), Math.Floor(_extractionArea.West));
+                _expandedExtractionArea = GeoRect.InflateWithGeo(new GeoRect(Math.Ceiling(_extractionArea.North), Math.Floor(_extractionArea.South), Math.Ceiling(_extractionArea.East), Math.Floor(_extractionArea.West)), .01);
                 NotifyPropertyChanged(ExtractionAreaChangedEventArgs);
                 UpdateResolutionStatement();
             }

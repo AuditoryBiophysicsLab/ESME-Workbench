@@ -21,8 +21,6 @@ namespace ESME.Environment
                                                                      typeof (EarthCoordinate),
                                                                      typeof (Geo),
                                                                      typeof (Point),
-                                                                     typeof (SedimentSample),
-                                                                     typeof (SedimentSampleBase),
                                                                  };
         public EnvironmentData() { }
 
@@ -76,12 +74,19 @@ namespace ESME.Environment
         #endregion
 
         #region Load/Save/Serialize/Deserialize
+
         /// <summary>
         /// Load the data from a file without validating against an XML schema
         /// </summary>
         /// <param name="filename">The name of the file containing the data to be loaded</param>
+        /// <param name="derivedReferencedTypes"></param>
         /// <returns></returns>
-        public static EnvironmentData<T> Load(string filename) { return Load(filename, ReferencedTypes.ToArray()); }
+        public static EnvironmentData<T> Load(string filename, List<Type> derivedReferencedTypes)
+        {
+            var allTypes = new List<Type>(ReferencedTypes);
+            if (derivedReferencedTypes != null) allTypes.AddRange(derivedReferencedTypes);
+            return Load(filename, allTypes.ToArray());
+        }
 
         /// <summary>
         /// Load the data from a file without validating against an XML schema
@@ -89,7 +94,7 @@ namespace ESME.Environment
         /// <param name="filename">The name of the file containing the data to be loaded</param>
         /// <param name="extraTypes"></param>
         /// <returns></returns>
-        public static EnvironmentData<T> Load(string filename, Type[] extraTypes) { return Load(filename, null, extraTypes); }
+        protected static EnvironmentData<T> Load(string filename, Type[] extraTypes) { return Load(filename, null, extraTypes); }
 
         /// <summary>
         /// Load the data from a file, validating against a list of schema resources
@@ -98,7 +103,7 @@ namespace ESME.Environment
         /// <param name="schemaResourceNames">An array of resource names containing the schema(s) expected to be found in this file</param>
         /// <param name="extraTypes"></param>
         /// <returns></returns>
-        public static EnvironmentData<T> Load(string filename, string[] schemaResourceNames, Type[] extraTypes)
+        protected static EnvironmentData<T> Load(string filename, string[] schemaResourceNames, Type[] extraTypes)
         {
             if (!File.Exists(filename)) return null;
 
@@ -125,20 +130,23 @@ namespace ESME.Environment
         }
 
         /// <summary>
-        /// Saves the data to a new filename, and that filename is set as the default filename
+        /// Saves the data to a specified filename
         /// </summary>
         /// <param name="fileName"></param>
-        public void Save(string fileName)
+        /// <param name="derivedReferencedTypes"></param>
+        public void Save(string fileName, List<Type> derivedReferencedTypes)
         {
-            Save(fileName, ReferencedTypes.ToArray());
+            var allTypes = new List<Type>(ReferencedTypes);
+            if (derivedReferencedTypes != null) allTypes.AddRange(derivedReferencedTypes);
+            Save(fileName, allTypes.ToArray());
         }
 
         /// <summary>
-        /// Saves the data to a new filename, and that filename is set as the default filename
+        /// Saves the data to a specified filename
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="extraTypes"></param>
-        public void Save(string fileName, Type[] extraTypes)
+        protected void Save(string fileName, Type[] extraTypes)
         {
             var fileWriter = new StreamWriter(fileName, false);
             fileWriter.Write(Serialize(extraTypes));
