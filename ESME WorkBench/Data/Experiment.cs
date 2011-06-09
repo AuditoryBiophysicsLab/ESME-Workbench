@@ -590,7 +590,7 @@ namespace ESMEWorkBench.Data
         public SoundSpeedField SoundSpeedField { get; private set; }
 
         [XmlIgnore]
-        public SedimentOld Sediment { get; private set; }
+        public EnvironmentData<SedimentSample> Sediment { get; private set; }
 
         #region public Environment2DData Bathymetry { get; set; }
 
@@ -918,9 +918,47 @@ namespace ESMEWorkBench.Data
             CommandManager.InvalidateRequerySuggested();
         }
 
+        void DisplaySediment(IEnumerable<SedimentSample> sediment)
+        {
+            var uniqueSedimentTypes = (from sample in sediment
+                                       orderby sample.Data.SampleValue
+                                       select sample.Data.SampleValue).Distinct();
+            foreach (var sedimentType in uniqueSedimentTypes)
+            {
+                var matchingPoints = from sample in sediment
+                                     where sample.Data.SampleValue == sedimentType
+                                     select sample;
+                var sedimentTypeName = BottomSedimentTypeTable.HFEVAMap.Find(m => m.Value == sedimentType).Name;
+                var sedimentLayerName = string.Format("Sediment: {0}", sedimentTypeName);
+                var sedimentLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == sedimentLayerName);
+                if (sedimentLayer == null)
+                {
+                    sedimentLayer = new OverlayShapeMapLayer
+                    {
+                        Name = sedimentLayerName,
+                        LayerType = LayerType.BottomType,
+                        LineWidth = 1,
+                        CanBeRemoved = true,
+                        CanBeReordered = true,
+                        HasSettings = true,
+                        CanChangeLineColor = true,
+                        CanChangeLineWidth = true,
+                        CanChangeAreaColor = false,
+                    };
+                    MapLayers.Add(sedimentLayer);
+                }
+                sedimentLayer.ToolTip = String.Format("Layer contains {0} sample points", matchingPoints.Count());
+                var samplePoints = matchingPoints.Select(samplePoint => new OverlayPoint(samplePoint));
+                sedimentLayer.Clear();
+                sedimentLayer.Add(samplePoints);
+                sedimentLayer.Done();
+            }
+
+        }
+
         void DisplaySpecies(NemoSpecies species)
         {
-            var speciesLayerName = string.Format("Species: {0} [{1}, {2}]", species.SpeciesName, species.AnimatData.ActualMammalPopulation, species.TotalAnimats);
+            var speciesLayerName = string.Format("Species: {0}", species.SpeciesName);
             var speciesLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == speciesLayerName);
             if (speciesLayer == null)
             {
@@ -939,6 +977,7 @@ namespace ESMEWorkBench.Data
                 MapLayers.Add(speciesLayer);
             }
             var startPoints = species.AnimatData.AnimatStartPoints.Select(startPoint => new OverlayPoint(startPoint));
+            speciesLayer.ToolTip = String.Format("Layer contains {0} animats", species.AnimatData.ActualMammalPopulation);
             speciesLayer.Clear();
             speciesLayer.Add(startPoints);
             speciesLayer.Done();
@@ -1231,6 +1270,13 @@ namespace ESMEWorkBench.Data
                 bathyBitmapLayer.West = (float)Bathymetry.Longitudes.First();
                 bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
                 MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+            }
+
+            if ((SedimentFileName != null) && (File.Exists(SedimentFileName)))
+                Sediment = EnvironmentData<SedimentSample>.Load(SedimentFileName);
+            if (Sediment != null)
+            {
+                DisplaySediment(Sediment);
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }

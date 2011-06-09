@@ -16,21 +16,21 @@ namespace ESME.Environment.NAVO
 
         public static void ExtractArea(string outputDirectory, GeoRect extractionArea)
         {
-            var results = new Sediment();
-            var fileID = H5F.open(DatabasePath, H5F.OpenMode.ACC_RDONLY);
-            var highResGroup = H5G.open(fileID, "0.10000/G/UNCLASSIFIED/");
-            var lowResGroup = H5G.open(fileID, "5.00000/G/UNCLASSIFIED/");
+            var results = new EnvironmentData<SedimentSample>();
+            var fileId = H5F.open(DatabasePath, H5F.OpenMode.ACC_RDONLY);
+            var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
+            var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
 
-            for (var lat = (int)Math.Floor(extractionArea.South); lat <= (int)Math.Ceiling(extractionArea.North); lat++)
-                for (var lon = (int)Math.Floor(extractionArea.West); lon <= (int)Math.Ceiling(extractionArea.East); lon++)
+            for (var lat = (int)extractionArea.South; lat <= (int)extractionArea.North; lat++)
+                for (var lon = (int)extractionArea.West; lon <= (int)extractionArea.East; lon++)
                 {
                     var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
-                    if (data != null) results.AddRange(data);
+                    if (data != null) results.AddRange(data.Where(extractionArea.Contains));
                 }
 
             H5G.close(lowResGroup);
             H5G.close(highResGroup);
-            H5F.close(fileID);
+            H5F.close(fileId);
 
             results.Save(Path.Combine(outputDirectory, "sediment.xml"));
         }

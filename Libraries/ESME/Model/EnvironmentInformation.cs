@@ -7,8 +7,7 @@ namespace ESME.Model
         public string LocationName { get; set; }
         public string SoundSpeedFieldName { get; set; }
 
-        public Sediment Sediment { get; set; }
-        public Sediment Basement { get; set; }
+        public EnvironmentData<SedimentSample> Sediment { get; set; }
         public SoundSpeedField SoundSpeedField { get; set; }
         public Environment2DData Bathymetry { get; set; }
         public Environment2DData WindSpeed { get; set; }
@@ -23,7 +22,7 @@ namespace ESME.Model
         public EnvironmentInformation()
         {
             LocationName = SoundSpeedFieldName = null;
-            Sediment = Basement = null;
+            Sediment = null;
             SoundSpeedField = null;
             Bathymetry = null;
         }

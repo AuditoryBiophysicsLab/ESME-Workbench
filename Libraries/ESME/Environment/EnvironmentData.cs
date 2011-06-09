@@ -1,78 +1,87 @@
 ﻿using System;
-using System.ComponentModel;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using HRC.Navigation;
+using System.Windows;
 
-namespace HRC.Utility
+namespace ESME.Environment
 {
-    [Serializable]
-    public class SerializableData : INotifyPropertyChanged
+    public class EnvironmentData<T> : IList<T> where T: EarthCoordinate, new()
     {
-        #region INotifyPropertyChanged Members
+        readonly List<T> _list = new List<T>();
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+        private static readonly List<Type> ReferencedTypes = new List<Type>
+                                                                 {
+                                                                     typeof (EarthCoordinate),
+                                                                     typeof (Geo),
+                                                                     typeof (Point),
+                                                                     typeof (SedimentSample),
+                                                                     typeof (SedimentSampleBase),
+                                                                 };
+        public EnvironmentData() { }
 
-        #endregion
-    }
-
-    [Serializable]
-    public class SerializableData<T> : SerializableData where T : class, new()
-    {
-        [XmlIgnore]
-        public string FileName { get; set; }
-
-        #region Load/Save
-
-        public void CopyFrom(T that)
+        public virtual T this[EarthCoordinate location]
         {
-            // Copy all fields from that to this)
-            foreach (var field in typeof(T).GetFields())
-                field.SetValue(this, field.GetValue(that));
-
-            // Copy all properties from that to this)
-            foreach (var property in typeof(T).GetProperties())
+            get
             {
-                try
+                var minDistance = double.MaxValue;
+                T closestSample = null;
+                foreach (var item in _list)
                 {
-                    property.SetValue(this, property.GetValue(that, null), null);
+                    var curDistance = item.DistanceKilometers(location);
+                    if (curDistance >= minDistance) continue;
+                    minDistance = curDistance;
+                    closestSample = item;
                 }
-                catch
-                {
-                    //todo: dave to make this better. by checking if property has a setter or not. see AppSettings.Reload();
-                }
+                return closestSample;
             }
         }
 
-        /// <summary>
-        /// TRUE if the file should be kept open after reading and/or writing.
-        /// Setting this to TRUE will have the side effect of making the file unavailable to be 
-        /// read or written by any other application while the current app has the file open.
-        /// </summary>
-        public bool CloseAfterReadWrite { get; set; }
+        public virtual void AddRange(IEnumerable<T> collection) { _list.AddRange(collection); }
 
-        /// <summary>
-        /// Close the file if it's open.  If not open, no exception will be thrown
-        /// </summary>
-        public void Close()
+        #region IList members
+        public virtual IEnumerator<T> GetEnumerator() { return _list.GetEnumerator(); }
+        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+        public virtual void Add(T item) { _list.Add(item); }
+        public virtual void Clear() { _list.Clear(); }
+        public virtual bool Contains(T item) { return _list.Contains(item); }
+        public virtual void CopyTo(T[] array, int arrayIndex) { _list.CopyTo(array, arrayIndex); }
+        public virtual bool Remove(T item) { return _list.Remove(item); }
+
+        public virtual int Count
         {
-
+            get { return _list.Count; }
         }
 
-        /// <summary>
-        /// Reload the data from the default file
-        /// </summary>
-        public void Reload(Type[] extraTypes) { CopyFrom(Load(extraTypes)); }
+        public virtual bool IsReadOnly
+        {
+            get { return true; }
+        }
 
+        public virtual int IndexOf(T item) { return _list.IndexOf(item); }
+        public virtual void Insert(int index, T item) { _list.Insert(index, item); }
+        public virtual void RemoveAt(int index) { _list.RemoveAt(index); }
+
+        T IList<T>.this[int index]
+        {
+            get { return _list[index]; }
+            set { _list[index] = value; }
+        }
+        #endregion
+
+        #region Load/Save/Serialize/Deserialize
         /// <summary>
-        /// Load the data from the default filename
+        /// Load the data from a file without validating against an XML schema
         /// </summary>
+        /// <param name="filename">The name of the file containing the data to be loaded</param>
         /// <returns></returns>
-        public T Load(Type[] extraTypes) { return Load(FileName, null, extraTypes); }
+        public static EnvironmentData<T> Load(string filename) { return Load(filename, ReferencedTypes.ToArray()); }
 
         /// <summary>
         /// Load the data from a file without validating against an XML schema
@@ -80,7 +89,7 @@ namespace HRC.Utility
         /// <param name="filename">The name of the file containing the data to be loaded</param>
         /// <param name="extraTypes"></param>
         /// <returns></returns>
-        public static T Load(string filename, Type[] extraTypes) { return Load(filename, null, extraTypes); }
+        public static EnvironmentData<T> Load(string filename, Type[] extraTypes) { return Load(filename, null, extraTypes); }
 
         /// <summary>
         /// Load the data from a file, validating against a list of schema resources
@@ -89,9 +98,9 @@ namespace HRC.Utility
         /// <param name="schemaResourceNames">An array of resource names containing the schema(s) expected to be found in this file</param>
         /// <param name="extraTypes"></param>
         /// <returns></returns>
-        public static T Load(string filename, string[] schemaResourceNames, Type[] extraTypes)
+        public static EnvironmentData<T> Load(string filename, string[] schemaResourceNames, Type[] extraTypes)
         {
-            if (!File.Exists(filename)) return new T();
+            if (!File.Exists(filename)) return null;
 
             String file;
 
@@ -116,9 +125,13 @@ namespace HRC.Utility
         }
 
         /// <summary>
-        /// Save the data to the default filename
+        /// Saves the data to a new filename, and that filename is set as the default filename
         /// </summary>
-        public void Save(Type[] extraTypes) { SaveAs(FileName, extraTypes); }
+        /// <param name="fileName"></param>
+        public void Save(string fileName)
+        {
+            Save(fileName, ReferencedTypes.ToArray());
+        }
 
         /// <summary>
         /// Saves the data to a new filename, and that filename is set as the default filename
@@ -127,30 +140,15 @@ namespace HRC.Utility
         /// <param name="extraTypes"></param>
         public void Save(string fileName, Type[] extraTypes)
         {
-            FileName = fileName;
-            SaveAs(FileName, extraTypes);
-        }
-
-        /// <summary>
-        /// Save the data to a different file
-        /// </summary>
-        /// <param name="fileName">The name of the the file that will contain the saved data</param>
-        /// <param name="extraTypes"></param>
-        public void SaveAs(string fileName, Type[] extraTypes)
-        {
             var fileWriter = new StreamWriter(fileName, false);
             fileWriter.Write(Serialize(extraTypes));
             fileWriter.Close();
         }
 
-        #endregion
-
-        #region Serialize/Deserialize
-
         private string Serialize(Type[] extraTypes)
         {
             var ms = new MemoryStream();
-            var serializer = new XmlSerializer(typeof(T), extraTypes);
+            var serializer = new XmlSerializer(typeof(EnvironmentData<T>), extraTypes);
             var settings = new XmlWriterSettings
             {
                 Encoding = Encoding.UTF8,
@@ -165,7 +163,7 @@ namespace HRC.Utility
             return Encoding.UTF8.GetString(ms.ToArray());
         }
 
-        private static T Deserialize(String xmlData, String xmlSchema, Type[] extraTypes)
+        private static EnvironmentData<T> Deserialize(String xmlData, String xmlSchema, Type[] extraTypes)
         {
             if (xmlSchema != null)
             {
@@ -182,8 +180,8 @@ namespace HRC.Utility
             }
 
             var reader = new StringReader(xmlData);
-            var serializer = new XmlSerializer(typeof(T), extraTypes);
-            var appSettings = (T)serializer.Deserialize(reader);
+            var serializer = new XmlSerializer(typeof(EnvironmentData<T>), extraTypes);
+            var appSettings = (EnvironmentData<T>)serializer.Deserialize(reader);
             return appSettings;
         }
 

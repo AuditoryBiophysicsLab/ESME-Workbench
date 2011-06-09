@@ -36,7 +36,7 @@ namespace DavesConsoleTester
         static void cmpxmlchb(string xmlFile, string lowResCHB, string highResCHB)
         {
             float north, south, east, west;
-            var sediment = Sediment.Load(xmlFile);
+            var sediment = EnvironmentData<SedimentSample>.Load(xmlFile);
             Console.WriteLine("XML bounds: [N: {0}, S: {1}, E: {2}, W: {3}]", sediment.Last().Latitude, sediment.First().Latitude, sediment.Last().Longitude, sediment.First().Longitude);
             var hasLowResData = false;
             var hasHighResData = false;
@@ -71,7 +71,7 @@ namespace DavesConsoleTester
             else Console.WriteLine("XML does not contain high resolution data"); 
         }
 
-        static void CompareXMLtoCHB(Sediment sediment, IEnumerable<SedimentSampleOld> chb, string resolution)
+        static void CompareXMLtoCHB(EnvironmentData<SedimentSample> sediment, IEnumerable<SedimentSampleOld> chb, string resolution)
         {
             var resolutionMismatchCount = 0;
             var matchCount = 0;

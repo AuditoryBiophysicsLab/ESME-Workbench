@@ -109,6 +109,7 @@
     <Compile Include="Environment\Binary Data Classes\DataLayer.cs" />
     <Compile Include="Environment\Binary Data Classes\DataLayerList.cs" />
     <Compile Include="Environment\Binary Data Classes\DataString.cs" />
+    <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />

@@ -81,6 +81,24 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
+        #region public bool RestrictDataToBufferArea { get; set; }
+
+        public bool RestrictDataToBufferArea
+        {
+            get { return _restrictDataToBufferArea; }
+            set
+            {
+                if (_restrictDataToBufferArea == value) return;
+                _restrictDataToBufferArea = value;
+                NotifyPropertyChanged(RestrictDataToBufferAreaChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs RestrictDataToBufferAreaChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.RestrictDataToBufferArea);
+        private bool _restrictDataToBufferArea;
+
+        #endregion
+
         #region SelectAllMonthsCommand
 
         SimpleCommand<object, object> _selectAllMonths;
@@ -410,6 +428,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
                         NAVODataSources.SelectedTimePeriods = selectedTimePeriods;
                         NAVODataSources.ExportCASSData = ExportCASSData;
+                        NAVODataSources.RestrictDataToBufferArea = RestrictDataToBufferArea;
                         NAVODataSources.ExtractDataInBackground(delegate
                                                                 {
                                                                     NotExtractingData = true;

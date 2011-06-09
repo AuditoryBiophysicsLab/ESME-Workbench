@@ -231,7 +231,7 @@ namespace ESMEWorkBench.Data
             if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0)) return;
             var soundspeedFiles = Directory.GetFiles(EnvironmentRoot, "*-soundspeed.xml");
             var timePeriods = soundspeedFiles.Select(curFile => Path.GetFileName(curFile).Split('-')[0]).ToList();
-            var bottomTypeData = ESME.Environment.Sediment.Load(SedimentFileName);
+            var bottomTypeData = EnvironmentData<SedimentSample>.Load(SedimentFileName);
             foreach (var timePeriod in timePeriods)
             {
                 var soundSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-soundspeed.xml", timePeriod));
