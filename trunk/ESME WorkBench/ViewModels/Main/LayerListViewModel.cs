@@ -42,15 +42,13 @@ namespace ESMEWorkBench.ViewModels.Main
             _messageBoxService = messageBoxService;
 
             _viewAwareStatus.ViewLoaded += ViewLoaded;
-
-            MapLayers = new ObservableCollection<MapLayerViewModel>();
         }
 
         #region public ObservableCollection<layerOverlayViewModel> MapLayers { get; set; }
 
         public ObservableCollection<MapLayerViewModel> MapLayers
         {
-            get { return _layerViewModels; }
+            get { return _layerViewModels ?? (_layerViewModels = new ObservableCollection<MapLayerViewModel>()); }
             set
             {
                 if (_layerViewModels == value) return;
