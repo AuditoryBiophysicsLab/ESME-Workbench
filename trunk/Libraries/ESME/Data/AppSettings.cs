@@ -1192,7 +1192,25 @@ namespace ESME.Data
         bool _clipOutsideFootprint = true;
 
         #endregion
+        
+        [XmlIgnore]
+        public List<string> LogLevels { get; private set; }
 
+        public ScenarioSimulatorSettings()
+        {
+            //these are log4j levels http://en.wikipedia.org/wiki/Log4j#Log_level
+            LogLevels = new List<string>
+                            {
+                                "Off",
+                                "Severe Errors",
+                                "Errors",
+                                "Warnings",
+                                "Info",
+                                "Debug",
+                                "Trace",
+                            };
+        }
+        
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;

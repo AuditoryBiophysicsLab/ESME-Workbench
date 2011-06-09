@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using ESME.Overlay;
 using HRC.Navigation;
 using mbs;
 
@@ -421,14 +420,8 @@ namespace ESME.Model
                 {
                     //          logger.trace("version <= 4.200. actual " + getVersionString() + ". no spec name or pop");
 
-                    try
-                    {
-                        reader.ReadBytes(40);
-                    }
-                    catch
-                    {
-                        throw new System.IO.FileFormatException("");
-                    }
+                    //if we can't get the population and name, it's not a valid .ddb file.  Choke and die.
+                    throw new System.IO.FileFormatException("");
                 }
 
 #if false
@@ -585,24 +578,25 @@ namespace ESME.Model
         private void ReadStartPositions(BinaryReader reader)
         {
             reader.BaseStream.Seek(1040, SeekOrigin.Begin); // skip the .ddb header
-            this.AnimatStartPoints = new List<EarthCoordinate>();
-            var datasize = GetSize(MbOutputConfiguration);
+            AnimatStartPoints = new List<EarthCoordinate>();
+            int datasize = GetSize(MbOutputConfiguration);
             for (int i = 0; i < MbTotalAnimats; i++)
             {
                 //var id = reader.ReadSingle();
                 //var time = reader.ReadSingle();
-                reader.BaseStream.Seek(8, SeekOrigin.Current);//skip id and time
-                var lat = reader.ReadSingle();
-                var lon = reader.ReadSingle();
-                AnimatStartPoints.Add(new EarthCoordinate(lat,lon));
+                reader.BaseStream.Seek(8, SeekOrigin.Current); //skip id and time
+                float lat = reader.ReadSingle();
+                float lon = reader.ReadSingle();
+                AnimatStartPoints.Add(new EarthCoordinate(lat, lon));
                 //AnimatStartPoints.Add(new EarthCoordinate(reader.ReadSingle(), reader.ReadSingle()));
-                    //adds lat and lon.
-                reader.BaseStream.Seek(8+datasize, SeekOrigin.Current); // skip depth, packedData, and the data itself.
-                
+                //adds lat and lon.
+                reader.BaseStream.Seek(8 + datasize, SeekOrigin.Current);
+                    // skip depth, packedData, and the data itself.
+
                 //var depth = reader.ReadSingle();
                 //var packedData = reader.ReadSingle();
                 //reader.BaseStream.Seek(datasize, SeekOrigin.Current);
-                
+
                 // reader.BaseStream.Seek(GetSize(MbOutputConfiguration), SeekOrigin.Current);
                 //skip its data because we don't care.
             }
