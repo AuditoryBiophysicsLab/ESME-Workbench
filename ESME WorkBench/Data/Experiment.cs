@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -590,7 +591,7 @@ namespace ESMEWorkBench.Data
         public SoundSpeedField SoundSpeedField { get; private set; }
 
         [XmlIgnore]
-        public EnvironmentData<SedimentSample> Sediment { get; private set; }
+        public Sediment Sediment { get; private set; }
 
         #region public Environment2DData Bathymetry { get; set; }
 
@@ -920,6 +921,11 @@ namespace ESMEWorkBench.Data
 
         void DisplaySediment(IEnumerable<SedimentSample> sediment)
         {
+            var previousSedimentLayers = (from mapLayer in MapLayers
+                                          where mapLayer.LayerType == LayerType.BottomType
+                                          select mapLayer).ToList();
+            var currentLayers = new List<OverlayShapeMapLayer>();
+
             var uniqueSedimentTypes = (from sample in sediment
                                        orderby sample.Data.SampleValue
                                        select sample.Data.SampleValue).Distinct();
@@ -928,7 +934,9 @@ namespace ESMEWorkBench.Data
                 var matchingPoints = from sample in sediment
                                      where sample.Data.SampleValue == sedimentType
                                      select sample;
-                var sedimentTypeName = BottomSedimentTypeTable.HFEVAMap.Find(m => m.Value == sedimentType).Name;
+                var sedimentTypeRecord = BottomSedimentTypeTable.HFEVAMap.Find(m => m.Value == sedimentType);
+                if (sedimentTypeRecord == null) continue;
+                var sedimentTypeName = sedimentTypeRecord.Name;
                 var sedimentLayerName = string.Format("Sediment: {0}", sedimentTypeName);
                 var sedimentLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == sedimentLayerName);
                 if (sedimentLayer == null)
@@ -937,7 +945,8 @@ namespace ESMEWorkBench.Data
                     {
                         Name = sedimentLayerName,
                         LayerType = LayerType.BottomType,
-                        LineWidth = 1,
+                        LineWidth = 4,
+                        PointSymbolType = PointSymbolType.Circle,
                         CanBeRemoved = true,
                         CanBeReordered = true,
                         HasSettings = true,
@@ -946,14 +955,19 @@ namespace ESMEWorkBench.Data
                         CanChangeAreaColor = false,
                     };
                     MapLayers.Add(sedimentLayer);
+                    sedimentLayer.IsChecked = false;
                 }
+                currentLayers.Add(sedimentLayer);
                 sedimentLayer.ToolTip = String.Format("Layer contains {0} sample points", matchingPoints.Count());
                 var samplePoints = matchingPoints.Select(samplePoint => new OverlayPoint(samplePoint));
                 sedimentLayer.Clear();
                 sedimentLayer.Add(samplePoints);
                 sedimentLayer.Done();
             }
-
+            foreach (var currentLayer in currentLayers) previousSedimentLayers.Remove(currentLayer);
+            // Remove any old sediment layers that might be left over
+            foreach (var previousLayer in previousSedimentLayers)
+                MediatorMessage.Send(MediatorMessage.RemoveLayer, previousLayer);
         }
 
         void DisplaySpecies(NemoSpecies species)
@@ -1273,10 +1287,10 @@ namespace ESMEWorkBench.Data
             }
 
             if ((SedimentFileName != null) && (File.Exists(SedimentFileName)))
-                Sediment = EnvironmentData<SedimentSample>.Load(SedimentFileName);
+                Sediment = Sediment.Load(SedimentFileName);
             if (Sediment != null)
             {
-                DisplaySediment(Sediment);
+                DisplaySediment(Sediment.Samples);
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
