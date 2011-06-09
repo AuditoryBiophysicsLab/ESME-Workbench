@@ -153,6 +153,7 @@
     <Compile Include="Utility\NotifyIcon.cs" />
     <Compile Include="Utility\NotifyIcon.Interop.cs" />
     <Compile Include="Utility\OSInfo.cs" />
+    <Compile Include="Utility\PropertyChangedBase.cs" />
     <Compile Include="Utility\SerializableData.cs" />
     <Compile Include="Utility\HRCObservableCollection.cs" />
     <Compile Include="Utility\XmlFormatter.cs" />

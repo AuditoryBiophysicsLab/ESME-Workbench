@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Controls;
 using Cinch;
 using ESME.Environment.NAVO;
+using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.TransmissionLoss
@@ -112,7 +113,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
         #endregion
     }
 
-    public class ExportOptions : INotifyPropertyChanged
+    public class ExportOptions : PropertyChangedBase
     {
         #region public bool ExportAnalysisPoints { get; set; }
 
@@ -219,13 +220,6 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         static readonly PropertyChangedEventArgs ExportCASSClimatologyChangedEventArgs = ObservableHelper.CreateArgs<ExportOptions>(x => x.ExportCASSClimatology);
         bool _exportCASSClimatology;
-
-        #endregion
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
 
         #endregion
     }

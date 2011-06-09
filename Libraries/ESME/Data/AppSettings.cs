@@ -15,9 +15,12 @@ using HRC.Utility;
 namespace ESME.Data
 {
     [Serializable]
-    public class AppSettings : SerializableData<AppSettings>
+    public class AppSettings : PropertyChangedBase
     {
-        static Type[] _referencedTypes;
+        public static readonly List<Type> ReferencedTypes = new List<Type>
+        {
+                typeof (NAVOConfiguration),
+        };
 
         static string _appSettingsDirectory;
 
@@ -39,13 +42,6 @@ namespace ESME.Data
 
         public static string AppSettingsFile { get; private set; }
 
-        public AppSettings()
-        {
-            FileName = AppSettingsFile;
-        }
-
-        public AppSettings(AppSettings that) : this() { CopyFrom(that); }
-
         public void SetDefaults()
         {
             if (CASSSettings != null) CASSSettings.SetDefaults();
@@ -53,36 +49,42 @@ namespace ESME.Data
             if (NAVOConfiguration != null) NAVOConfiguration.SetDefaults();
         }
 
-        public static Type[] ReferencedTypes
+        public void Save()
         {
-            get
-            {
-                return _referencedTypes ?? (_referencedTypes = new[]
-                                                               {
-                                                                   typeof (NAVOConfiguration)
-                                                               });
-            }
+            var serializer = new XmlSerializer<AppSettings> { Data = this };
+            serializer.Save(AppSettingsFile, ReferencedTypes);
         }
 
-        public void Save() { Save(FileName, ReferencedTypes); }
+        public void Save(List<Type> referencedTypes)
+        {
+            if (referencedTypes == null) referencedTypes = ReferencedTypes;
+            else referencedTypes.AddRange(ReferencedTypes);
+            var serializer = new XmlSerializer<AppSettings> { Data = this };
+            serializer.Save(AppSettingsFile, referencedTypes);
+        }
 
-        public void Reload() { Reload(ReferencedTypes); }
+        public static AppSettings Load()
+        {
+            return XmlSerializer<AppSettings>.Load(AppSettingsFile, ReferencedTypes);
+        }
 
         public static AppSettings Load(string fileName)
         {
-            var results = Load(fileName, ReferencedTypes);
-#if false
-            results._fileSystemWatcher = new FileSystemWatcher(Path.GetDirectoryName(fileName) ?? "", Path.GetFileNameWithoutExtension(fileName) ?? "" + ".*")
-                                         {
-                                             IncludeSubdirectories = false,
-                                             NotifyFilter = NotifyFilters.LastWrite,
-                                         };
-            results._fileSystemWatcher.Changed += (s, e) =>
-                                                  {
-                                                      Console.WriteLine(e.Name + " changed");
-                                                  };
-#endif
-            return results;
+            return XmlSerializer<AppSettings>.Load(fileName, ReferencedTypes);
+        }
+
+        public static AppSettings Load(List<Type> referencedTypes)
+        {
+            if (referencedTypes == null) referencedTypes = ReferencedTypes;
+            else referencedTypes.AddRange(ReferencedTypes);
+            return XmlSerializer<AppSettings>.Load(AppSettingsFile, referencedTypes);
+        }
+
+        public static AppSettings Load(string fileName, List<Type> referencedTypes)
+        {
+            if (referencedTypes == null) referencedTypes = ReferencedTypes;
+            else referencedTypes.AddRange(ReferencedTypes);
+            return XmlSerializer<AppSettings>.Load(fileName, referencedTypes);
         }
 
         #region public string ScenarioDataDirectory { get; set; }
@@ -358,7 +360,7 @@ namespace ESME.Data
         #endregion
     }
 
-    public class NAEMOTools : INotifyPropertyChanged
+    public class NAEMOTools : PropertyChangedBase
     {
         #region public string JavaExecutablePath { get; set; }
 
@@ -430,16 +432,9 @@ namespace ESME.Data
         public string ScenarioExecutablePath { get { return NAEMOTool("scene-sim.jar"); } }
 
         string NAEMOTool(string toolFileName) { return string.IsNullOrEmpty(NAEMOToolsDirectory) ? null : Path.Combine(NAEMOToolsDirectory, toolFileName); }
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
-
-        #endregion
     }
 
-    public class CASSSettings : INotifyPropertyChanged
+    public class CASSSettings : PropertyChangedBase
     {
         public void SetDefaults()
         {
@@ -671,16 +666,9 @@ namespace ESME.Data
         SimpleCommand<object, object> _addCASSParameterFile;
 
         #endregion
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
-
-        #endregion
     }
 
-    public class RAMSettings : INotifyPropertyChanged
+    public class RAMSettings : PropertyChangedBase
     {
         public void SetDefaults()
         {
@@ -818,16 +806,9 @@ namespace ESME.Data
         int _bathymetryMetric = 1;
 
         #endregion
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
-
-        #endregion
     }
 
-    public class REFMSSettings : INotifyPropertyChanged
+    public class REFMSSettings : PropertyChangedBase
     {
         #region public bool ScaleI { get; set; }
 
@@ -954,16 +935,9 @@ namespace ESME.Data
         string _rEFMSExecutablePath;
 
         #endregion
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
-
-        #endregion
     }
 
-    public class ScenarioSimulatorSettings : INotifyPropertyChanged
+    public class ScenarioSimulatorSettings : PropertyChangedBase
     {
         #region public bool IsRandomized { get; set; }
 
@@ -1210,16 +1184,9 @@ namespace ESME.Data
                                 "Trace",
                             };
         }
-        
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
-
-        #endregion
     }
 
-    public class BellhopSettings : INotifyPropertyChanged
+    public class BellhopSettings : PropertyChangedBase
     {
         #region public float RangeCellSize { get; set; }
 
@@ -1254,13 +1221,6 @@ namespace ESME.Data
 
         static readonly PropertyChangedEventArgs DepthCellSizeChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.DepthCellSize);
         float _depthCellSize = 5;
-
-        #endregion
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
 
         #endregion
     }

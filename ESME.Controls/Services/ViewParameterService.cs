@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
 using Cinch;
 using MEFedMVVM.ViewModelLocator;
 
@@ -12,7 +8,7 @@ namespace ESME.Views.Services
     [PartCreationPolicy(CreationPolicy.Shared)]
     [ExportService(ServiceType.Both, typeof(IViewParameterService))]
 
-    public class ViewParameterService:IViewParameterService  
+    public class ViewParameterService : IViewParameterService  
     {
         #region public double TransmissionLayersWidth { get; set; }
 

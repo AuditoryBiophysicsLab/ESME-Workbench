@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Drawing;
+using HRC.Utility;
+
 namespace ESME.Model
 {
-    public class DisplayLayer : INotifyPropertyChanged
+    public class DisplayLayer : PropertyChangedBase
     {
         #region Properties
         public List<DisplayLayer> Children { get; private set; }
@@ -27,7 +25,7 @@ namespace ESME.Model
         public bool? IsChecked
         {
             get { return _isChecked; }
-            set { this.SetIsChecked(value, true, true); }
+            set { SetIsChecked(value, true, true); }
         }
 
         void SetIsChecked(bool? value, bool updateChildren, bool updateParent)
@@ -38,20 +36,20 @@ namespace ESME.Model
             _isChecked = value;
 
             if (updateChildren && _isChecked.HasValue)
-                this.Children.ForEach(c => c.SetIsChecked(_isChecked, true, false));
+                Children.ForEach(c => c.SetIsChecked(_isChecked, true, false));
 
             if (updateParent && _parent != null)
                 _parent.VerifyCheckState();
 
-            this.OnPropertyChanged("IsChecked");
+            NotifyPropertyChanged(new PropertyChangedEventArgs("IsChecked"));
         }
 
         void VerifyCheckState()
         {
             bool? state = null;
-            for (int i = 0; i < this.Children.Count; ++i)
+            for (int i = 0; i < Children.Count; ++i)
             {
-                bool? current = this.Children[i].IsChecked;
+                bool? current = Children[i].IsChecked;
                 if (i == 0)
                 {
                     state = current;
@@ -62,29 +60,17 @@ namespace ESME.Model
                     break;
                 }
             }
-            this.SetIsChecked(state, false, true);
+            SetIsChecked(state, false, true);
         }
 
         #endregion // IsChecked
 
         #endregion // Properties
 
-        #region INotifyPropertyChanged Members
-
-        void OnPropertyChanged(string prop)
-        {
-            if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        #endregion
-
         DisplayLayer(string name)
         {
-            this.Name = name;
-            this.Children = new List<DisplayLayer>();
+            Name = name;
+            Children = new List<DisplayLayer>();
         }
 
         void Initialize()
@@ -96,11 +82,11 @@ namespace ESME.Model
             }
         }
 
-        private static int count = 0;
+        private static int _count;
 
         public static List<DisplayLayer> CreateDisplayLayers()
         {
-            DisplayLayer root = new DisplayLayer("Display Layers " + count++)
+            var root = new DisplayLayer("Display Layers " + _count++)
             {
                 IsInitiallySelected = true,
                 IsExpanded = true,
@@ -149,15 +135,9 @@ namespace ESME.Model
                             new DisplayLayer("generic_odontocete"),
                         },
                     },
-                    new DisplayLayer("Sound Speed Field")
-                    {
-                    },
-                    new DisplayLayer("Bathymetry")
-                    {
-                    },
-                    new DisplayLayer("Sediment")
-                    {
-                    },
+                    new DisplayLayer("Sound Speed Field"),
+                    new DisplayLayer("Bathymetry"),
+                    new DisplayLayer("Sediment"),
                 },
             };
             root.Initialize();

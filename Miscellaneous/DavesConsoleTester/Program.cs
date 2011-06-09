@@ -72,7 +72,7 @@ namespace DavesConsoleTester
             else Console.WriteLine("XML does not contain high resolution data"); 
         }
 
-        static void CompareXMLtoCHB(Sediment sediment, IEnumerable<SedimentSampleOld> chb, string resolution)
+        static void CompareXMLtoCHB(Sediment sediment, IEnumerable<SedimentSample> chb, string resolution)
         {
             var resolutionMismatchCount = 0;
             var matchCount = 0;
@@ -100,11 +100,8 @@ namespace DavesConsoleTester
                 }
                 matchCount++;
                 
-                if (!sample.Data.HasValue)
-                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: No data", sample.Latitude, sample.Longitude, resolution, nearestSample.Data.SampleValue);
-
-                if ((sample.Data.HasValue) && (sample.Data.Value != nearestSample.Data.SampleValue))
-                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: {4}", sample.Latitude, sample.Longitude, resolution, nearestSample.Data.SampleValue, sample.Data.Value);
+                if (sample.Data.SampleValue != nearestSample.Data.SampleValue)
+                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: {4}", sample.Latitude, sample.Longitude, resolution, nearestSample.Data.SampleValue, sample.Data.SampleValue);
             }
 
             Console.WriteLine("CHB sample count: {0}", chb.Count());
@@ -122,7 +119,7 @@ namespace DavesConsoleTester
                 }
 
                 var minDistance = double.MaxValue;
-                SedimentSampleOld closestCHB = null;
+                SedimentSample closestCHB = null;
                 foreach (var item in chb)
                 {
                     var curDistance = item.DistanceKilometers(curXml);
@@ -138,11 +135,8 @@ namespace DavesConsoleTester
                 }
 
                 matchCount++;
-                if (!closestCHB.Data.HasValue)
-                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: No data", closestCHB.Latitude, closestCHB.Longitude, resolution, curXml.Data.SampleValue);
-
-                if ((closestCHB.Data.HasValue) && (closestCHB.Data.Value != curXml.Data.SampleValue))
-                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: {4}", closestCHB.Latitude, closestCHB.Longitude, resolution, curXml.Data.SampleValue, closestCHB.Data.Value);
+                if (closestCHB.Data.SampleValue != curXml.Data.SampleValue)
+                    Console.WriteLine("XML/CHB mismatch at {0}, {1}, Resolution {2}, XML: {3}, CHB: {4}", closestCHB.Latitude, closestCHB.Longitude, resolution, curXml.Data.SampleValue, closestCHB.Data.SampleValue);
             }
 
             Console.WriteLine("XML sample count: {0}", sediment.Samples.Count());
@@ -151,9 +145,9 @@ namespace DavesConsoleTester
             Console.WriteLine("  Res mismatches: {0} (current CHB file has different resolution)", resolutionMismatchCount);
         }
 
-        static List<SedimentSampleOld> ReadSedimentCHB(string fileName, out float north, out float south, out float east, out float west)
+        static IEnumerable<SedimentSample> ReadSedimentCHB(string fileName, out float north, out float south, out float east, out float west)
         {
-            var result = new List<SedimentSampleOld>();
+            var result = new List<SedimentSample>();
             using (var stream = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 west = stream.ReadSingle();
@@ -179,9 +173,8 @@ namespace DavesConsoleTester
                     {
                         var longitude = west + (lon * gridSpacing);
                         var curSampleValue = stream.ReadSingle();
-                        var newSample = new SedimentSampleOld(latitude, lat, longitude, lon);
-                        if ((minValue <= curSampleValue) && (curSampleValue <= maxValue)) newSample.Data = curSampleValue;
-                        result.Add(newSample);
+                        if ((minValue <= curSampleValue) && (curSampleValue <= maxValue))
+                            result.Add(new SedimentSample(latitude, longitude, new SedimentSampleBase {SampleValue = (short)curSampleValue}));
                     }
                 }
                 east = west + (width * gridSpacing);
@@ -193,15 +186,12 @@ namespace DavesConsoleTester
 
         static void chb2txt(string sourceCHB, string destinationText)
         {
-            var result = SedimentOld.FromSedimentCHB(sourceCHB);
+            float north, south, east, west;
+            var samples = ReadSedimentCHB(sourceCHB, out north, out south, out east, out west);
             using (var writer = new StreamWriter(destinationText))
             {
-                for (var lat = 0; lat < result.Latitudes.Count; lat++)
-                    for (var lon = 0; lon < result.Longitudes.Count; lon++)
-                    {
-                        writer.WriteLine("{0:0.00000} {1:0.00000} {2}", result.Latitudes[lat], result.Longitudes[lon], result.FieldData[lon, lat].Data);
-                        //if (result.FieldData[lon, lat].Data != 9) Console.WriteLine("non-sand found at location {0:0.00000} {1:0.00000} {2}", result.Latitudes[lat], result.Longitudes[lon], result.FieldData[lon, lat].Data);
-                    }
+                foreach (var sample in samples)
+                    writer.WriteLine("{0:0.00000} {1:0.00000} {2}", sample.Latitude, sample.Longitude, sample.Data.SampleValue);
             }
         }
     }

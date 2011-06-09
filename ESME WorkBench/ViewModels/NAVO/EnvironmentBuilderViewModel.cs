@@ -475,7 +475,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                                                                    }
                                                                                    else
                                                                                    {
-                                                                                       AppSettings.Reload(); //invalidate all changes.
+                                                                                       AppSettings = AppSettings.Load(); //invalidate all changes.
                                                                                        CloseActivePopUpCommand.Execute(false);
                                                                                    }
                                                                                }));

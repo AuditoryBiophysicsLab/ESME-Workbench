@@ -11,7 +11,7 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         public ApplicationOptionsViewModel()
         {
-            Globals.AppSettings.Reload();
+            Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
 
             OkCommand = new SimpleCommand<object, object>(delegate
@@ -21,12 +21,12 @@ namespace ESMEWorkBench.ViewModels.Main
             });
             CancelCommand = new SimpleCommand<object, object>(delegate
             {
-                AppSettings.Reload(null);
+                AppSettings = AppSettings.Load();
                 CloseActivePopUpCommand.Execute(false);
             });
         }
 
-        public void DesignTimeInitialization() { AppSettings = AppSettings.Load(null); }
+        public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }
 
         public AppSettings AppSettings { get; private set; }
         

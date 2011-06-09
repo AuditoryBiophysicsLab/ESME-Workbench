@@ -2,10 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using Cinch;
+using HRC.Utility;
 
 namespace ESME.Data
 {
-    public class CASSTemplate : INotifyPropertyChanged
+    public class CASSTemplate : PropertyChangedBase
     {
         #region public string MatchString { get; set; }
 
@@ -84,13 +85,5 @@ namespace ESME.Data
         }
 
         #endregion
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        #endregion
-
-        void NotifyPropertyChanged(PropertyChangedEventArgs e) { if (PropertyChanged != null) PropertyChanged(this, e); }
     }
 }
