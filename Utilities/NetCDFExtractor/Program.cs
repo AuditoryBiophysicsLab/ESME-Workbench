@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows;
-using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Environment.NAVO;
-using HRC.Navigation;
 using NetCDF;
 
 namespace ImportNetCDF
@@ -23,7 +20,7 @@ namespace ImportNetCDF
             var scaleFactorAttName = "";
             var offsetValueAttName = "";
             var outputDataFileName = "";
-            var netCDFFileName = "";
+            var netCdfFileName = "";
             var north = float.NaN;
             var south = float.NaN;
             var east = float.NaN;
@@ -40,7 +37,7 @@ namespace ImportNetCDF
                 {
                     case "-in":
                     case "-input":
-                        netCDFFileName = args[++i];
+                        netCdfFileName = args[++i];
                         break;
                     case "-lon": //the longitude variable name in the NetCDF file
                     case "-longitude":
@@ -92,22 +89,22 @@ namespace ImportNetCDF
                 }
             }
 
-            if ((netCDFFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (depthVarName == "") || (missingValueAttName == "") || (scaleFactorAttName == "") || (offsetValueAttName == ""))
+            if ((netCdfFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (depthVarName == "") || (missingValueAttName == "") || (scaleFactorAttName == "") || (offsetValueAttName == ""))
             {
                 Usage();
                 return;
             }
 
-            if (!File.Exists(netCDFFileName)) throw new FileNotFoundException("ImportNetCDF: File {0} not found", netCDFFileName);
+            if (!File.Exists(netCdfFileName)) throw new FileNotFoundException("ImportNetCDF: File {0} not found", netCdfFileName);
 
-            ImportNetCDF(netCDFFileName, dataVarName, lonVarName, latVarName, depthVarName, missingValueAttName, scaleFactorAttName, offsetValueAttName, outputDataFileName, north, south, east, west);
+            ImportNetCdf(netCdfFileName, dataVarName, lonVarName, latVarName, depthVarName, missingValueAttName, scaleFactorAttName, offsetValueAttName, outputDataFileName, north, south, east, west);
 
             Console.WriteLine(@"success!");
         }
 
-        static void ImportNetCDF(string netCDFFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string outputDataFileName, float north, float south, float east, float west)
+        static void ImportNetCdf(string netCdfFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string outputDataFileName, float north, float south, float east, float west)
         {
-            var myFile = new NcFile(netCDFFileName);
+            var myFile = new NcFile(netCdfFileName);
             int depthCount, lonIndex, depth;
             short missingValue;
             double[] depths;
@@ -172,9 +169,7 @@ namespace ImportNetCDF
             if (scaleFactorAttName != String.Empty) scaleFactor = dataVar.Attributes[scaleFactorAttName].GetFloat(0);
             if (offsetValueAttName != String.Empty) addOffset = dataVar.Attributes[offsetValueAttName].GetFloat(0);
 
-            Console.WriteLine(@"Importing source file {0}...", Path.GetFileName(netCDFFileName));
-            var progress = 0f;
-            var progressStep = 1f/lonCount;
+            Console.WriteLine(@"Importing source file {0}...", Path.GetFileName(netCdfFileName));
 
             var serializedOutput = new SerializedOutput();
             serializedOutput.DepthAxis.AddRange(depths.ToList()); 
@@ -218,9 +213,6 @@ namespace ImportNetCDF
                     }
                     serializedOutput.DataPoints.Add(curDataPoint);
                 }
-
-                //Console.WriteLine(@"{0} % complete", (int)(progress * 100));
-                progress += progressStep;
             }
             Console.WriteLine(@"Saving imported data ... ");
             serializedOutput.Save(outputDataFileName, null);

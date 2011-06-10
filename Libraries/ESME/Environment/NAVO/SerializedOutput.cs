@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -11,6 +11,7 @@ namespace ESME.Environment.NAVO
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
+                typeof (Point),
                 typeof (EnvironmentalDataPoint),
                 typeof (EarthCoordinate),
                 typeof (EarthCoordinate<List<double>>),
