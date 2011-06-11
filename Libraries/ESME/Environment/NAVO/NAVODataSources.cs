@@ -16,10 +16,28 @@ namespace ESME.Environment.NAVO
 {
     public class NAVODataSources : ViewModelBase
     {
-        internal static readonly int[] MonthMap = new[]
-                                                  {
-                                                      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6
-                                                  };
+        internal static readonly NAVOTimePeriod[] MonthMap = new[]
+        {
+                (NAVOTimePeriod)0,
+                NAVOTimePeriod.January,
+                NAVOTimePeriod.February,
+                NAVOTimePeriod.March,
+                NAVOTimePeriod.April,
+                NAVOTimePeriod.May,
+                NAVOTimePeriod.June,
+                NAVOTimePeriod.July,
+                NAVOTimePeriod.August,
+                NAVOTimePeriod.September,
+                NAVOTimePeriod.October,
+                NAVOTimePeriod.November,
+                NAVOTimePeriod.December,
+                NAVOTimePeriod.January,
+                NAVOTimePeriod.February,
+                NAVOTimePeriod.March,
+                NAVOTimePeriod.April,
+                NAVOTimePeriod.May,
+                NAVOTimePeriod.June,
+        };
 
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
@@ -164,7 +182,7 @@ namespace ESME.Environment.NAVO
             }
             Directory.CreateDirectory(tempDirectory);
 
-            var selectedMonthIndices = new List<int>();
+            var selectedMonthIndices = new List<NAVOTimePeriod>();
             foreach (var timePeriod in SelectedTimePeriods)
                 selectedMonthIndices.AddRange(GetMonthIndices(timePeriod));
             var uniqueMonths = selectedMonthIndices.Distinct().ToList();
@@ -176,8 +194,9 @@ namespace ESME.Environment.NAVO
             var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + (SelectedTimePeriods.Count() * 2) + 2);
             if (ExportCASSData) totalExtractionStepCount += SelectedTimePeriods.Count();
 
-            foreach (var monthIndices in SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1))
-                totalExtractionStepCount++;
+            totalExtractionStepCount += SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1).Count();
+            //foreach (var monthIndices in SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1))
+            //    totalExtractionStepCount++;
 
             var currentExtractionStep = 0;
 
@@ -199,14 +218,14 @@ namespace ESME.Environment.NAVO
 
             foreach (var month in uniqueMonths)
             {
-                Status = "Extracting temperature and salinity data for " + (NAVOTimePeriod)month;
+                Status = "Extracting temperature and salinity data for " + month;
                 GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, selectedExtractionArea, month);
                 if (backgroundWorker.CancellationPending) return;
                 currentExtractionStep += 2;
                 ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
 
-                Status = "Calculating sound speed data for " + (NAVOTimePeriod)month;
-                GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(tempDirectory, (NAVOTimePeriod)month, maxDepth);
+                Status = "Calculating sound speed data for " + month;
+                GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(tempDirectory, month, maxDepth);
                 if (backgroundWorker.CancellationPending) return;
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
@@ -233,6 +252,8 @@ namespace ESME.Environment.NAVO
             }
             foreach (var soundspeedFile in soundspeedFiles)
                 File.Delete(soundspeedFile);
+
+            //SMGCDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods, SelectedTimePeriods.Select(GetMonthIndices), selectedExtractionArea);
 
             foreach (var timePeriod in SelectedTimePeriods)
             {
@@ -415,7 +436,7 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        IEnumerable<int> GetMonthIndices(NAVOTimePeriod timePeriod)
+        public IEnumerable<NAVOTimePeriod> GetMonthIndices(NAVOTimePeriod timePeriod)
         {
             switch (timePeriod)
             {
@@ -431,7 +452,7 @@ namespace ESME.Environment.NAVO
                 case NAVOTimePeriod.October:
                 case NAVOTimePeriod.November:
                 case NAVOTimePeriod.December:
-                    yield return (int) timePeriod;
+                    yield return timePeriod;
                     yield break;
                 case NAVOTimePeriod.Spring:
                     yield return MonthMap[(int) Configuration.SpringStartMonth];

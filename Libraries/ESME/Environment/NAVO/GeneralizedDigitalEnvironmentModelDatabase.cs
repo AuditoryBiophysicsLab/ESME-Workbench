@@ -49,7 +49,7 @@ namespace ESME.Environment.NAVO
         static string OutputFileName(string outputPath, int monthIndex, string dataType) { return OutputFileBaseName(outputPath, monthIndex) + "-" + dataType + ".xml"; }
         static string OutputFileName(string outputPath, NAVOTimePeriod timePeriod, string dataType) { return OutputFileBaseName(outputPath, timePeriod) + "-" + dataType + ".xml"; }
 
-        static string SalinityFile(int monthIndex)
+        static string SalinityFile(NAVOTimePeriod monthIndex)
         {
             var gdem = Path.Combine(DatabasePath, GDEMSalinityFileName(monthIndex));
             var nuwc = Path.Combine(DatabasePath, NUWCSalinityFileName(monthIndex));
@@ -58,7 +58,7 @@ namespace ESME.Environment.NAVO
             throw new FileNotFoundException(string.Format("Could not find requested salinity file, tried {0} and {1}", gdem, nuwc));
         }
 
-        static string TemperatureFile(int monthIndex)
+        static string TemperatureFile(NAVOTimePeriod monthIndex)
         {
             var gdem = Path.Combine(DatabasePath, GDEMTemperatureFileName(monthIndex));
             var nuwc = Path.Combine(DatabasePath, NUWCTemperatureFileName(monthIndex));
@@ -67,13 +67,13 @@ namespace ESME.Environment.NAVO
             throw new FileNotFoundException(string.Format("Could not find requested temperature file, tried {0} and {1}", gdem, nuwc));
         }
 
-        static string GDEMTemperatureFileName(int monthIndex) { return "t" + BaseGDEMFileName(monthIndex); }
-        static string GDEMSalinityFileName(int monthIndex) { return "s" + BaseGDEMFileName(monthIndex); }
-        static string BaseGDEMFileName(int monthIndex) { return "gdemv3s" + string.Format("{0:00}", monthIndex) + ".nc"; }
-        static string NUWCTemperatureFileName(int monthIndex) { return ShortMonthNames[monthIndex] + "_t.nc"; }
-        static string NUWCSalinityFileName(int monthIndex) { return ShortMonthNames[monthIndex] + "_s.nc"; }
+        static string GDEMTemperatureFileName(NAVOTimePeriod monthIndex) { return "t" + BaseGDEMFileName(monthIndex); }
+        static string GDEMSalinityFileName(NAVOTimePeriod monthIndex) { return "s" + BaseGDEMFileName(monthIndex); }
+        static string BaseGDEMFileName(NAVOTimePeriod monthIndex) { return "gdemv3s" + string.Format("{0:00}", (int)monthIndex) + ".nc"; }
+        static string NUWCTemperatureFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_t.nc"; }
+        static string NUWCSalinityFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
 
-        public static void ExtractAreaFromMonthFile(string outputPath, GeoRect extractionArea, int monthIndex)
+        public static void ExtractAreaFromMonthFile(string outputPath, GeoRect extractionArea, NAVOTimePeriod monthIndex)
         {
             ExtractAreaFromMonthFile(SalinityFile(monthIndex), OutputFileName(outputPath, monthIndex, SalinityVariableName), SalinityVariableName, extractionArea);
             ExtractAreaFromMonthFile(TemperatureFile(monthIndex), OutputFileName(outputPath, monthIndex, TemperatureVariableName), TemperatureVariableName, extractionArea);
@@ -100,7 +100,7 @@ namespace ESME.Environment.NAVO
             NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, Path.GetDirectoryName(outputFileName), RequiredSupportFiles);
         }
 
-        public static void AverageMonthlyData(string outputPath, IEnumerable<int> monthIndices, NAVOTimePeriod outputTimePeriod)
+        public static void AverageMonthlyData(string outputPath, IEnumerable<NAVOTimePeriod> monthIndices, NAVOTimePeriod outputTimePeriod)
         {
             var soundspeedFileNames = monthIndices.Select(monthIndex => OutputFileName(outputPath, monthIndex, SoundspeedVariableName)).ToList();
             AverageMonthlyData(soundspeedFileNames, outputTimePeriod, SoundspeedVariableName);
@@ -135,7 +135,7 @@ namespace ESME.Environment.NAVO
                 {
                     var dataValues = from location in accumulator.FieldData[lonIndex, latIndex].Data
                                      select location.Value;
-                    var dataPoint = new EnvironmentalDataPoint()
+                    var dataPoint = new EnvironmentalDataPoint
                     {
                         Latitude = accumulator.Latitudes[latIndex],
                         Longitude = accumulator.Longitudes[lonIndex],
