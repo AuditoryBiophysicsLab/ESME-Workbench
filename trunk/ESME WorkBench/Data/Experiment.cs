@@ -969,15 +969,15 @@ namespace ESMEWorkBench.Data
                         LayerType = LayerType.BottomType,
                         LineWidth = 4,
                         PointSymbolType = PointSymbolType.Circle,
-                        CanBeRemoved = true,
+                        CanBeRemoved = false,
                         CanBeReordered = true,
                         HasSettings = true,
                         CanChangeLineColor = true,
                         CanChangeLineWidth = true,
                         CanChangeAreaColor = false,
+                        IsChecked = false,
                     };
                     MapLayers.Add(sedimentLayer);
-                    sedimentLayer.IsChecked = false;
                 }
                 currentLayers.Add(sedimentLayer);
                 sedimentLayer.ToolTip = String.Format("Layer contains {0} sample points", matchingPoints.Count());
@@ -1009,6 +1009,7 @@ namespace ESMEWorkBench.Data
                     CanChangeLineColor = true,
                     CanChangeLineWidth = true,
                     CanChangeAreaColor = false,
+                    IsChecked = false,
                 };
                 MapLayers.Add(speciesLayer);
             }
@@ -1190,6 +1191,7 @@ namespace ESMEWorkBench.Data
                         CanChangeLineWidth = true,
                         CanBeRemoved = false,
                         LayerType = LayerType.WindSpeed,
+                        LineWidth = 8,
                         IsChecked = false,
                     };
                     MapLayers.Add(windLayer);
@@ -1223,7 +1225,8 @@ namespace ESMEWorkBench.Data
                                           CanChangeLineColor = true,
                                           CanChangeLineWidth = true,
                                           CanBeRemoved = false,
-                                          LayerType = LayerType.WindSpeed,
+                                          LayerType = LayerType.SoundSpeed,
+                                          LineWidth = 6,
                                           IsChecked = false,
                                       };
                     MapLayers.Add(soundSpeedLayer);
@@ -1255,10 +1258,12 @@ namespace ESMEWorkBench.Data
                         CanChangeLineColor = true,
                         CanChangeLineWidth = true,
                         CanBeRemoved = false,
-                        LayerType = LayerType.WindSpeed,
+                        LineWidth = 1,
+                        LayerType = LayerType.Bathymetry,
                     };
                     MapLayers.Add(bathyBoundsLayer);
                 }
+                bathyBoundsLayer.LayerType = LayerType.Bathymetry;
                 bathyBoundsLayer.Clear();
                 bathyBoundsLayer.Add(Bathymetry.BoundingBox);
                 bathyBoundsLayer.Done();

@@ -487,7 +487,7 @@ namespace HRC.Navigation
             // this has happened
             if (_region == null)
             {
-                Console.WriteLine("contains called with null region. name: " + Name);
+                //Console.WriteLine("contains called with null region. name: " + Name);
                 return false;
             }
 
@@ -574,7 +574,7 @@ namespace HRC.Navigation
         {
             if (_region == null)
             {
-                Console.WriteLine("getAreaNM2 called with null region");
+                //Console.WriteLine("getAreaNM2 called with null region");
                 return 0.0;
             }
 
@@ -594,7 +594,7 @@ namespace HRC.Navigation
         {
             if (_region == null)
             {
-                Console.WriteLine("getAreaNM2 called with null region");
+                //Console.WriteLine("getAreaNM2 called with null region");
                 return 0.0;
             }
 
@@ -709,7 +709,7 @@ namespace HRC.Navigation
 
         void SetIsClockWise()
         {
-            Console.WriteLine(Name + " isClockWise check");
+            //Console.WriteLine(Name + " isClockWise check");
             var result = false;
             if (_region.Length > 0)
             {
@@ -735,9 +735,9 @@ namespace HRC.Navigation
                     var p2 = s1.Cross(pointInside);
                     var p3 = p1.Cross(p2);
 
-                    Console.WriteLine("line seg: " + PrintGeo(s1) + " - to - " + PrintGeo(s2));
-                    Console.WriteLine("  --        inside: " + PrintGeo(pointInside));
-                    Console.WriteLine("  -- normal normal: " + PrintGeo(p3));
+                    //Console.WriteLine("line seg: " + PrintGeo(s1) + " - to - " + PrintGeo(s2));
+                    //Console.WriteLine("  --        inside: " + PrintGeo(pointInside));
+                    //Console.WriteLine("  -- normal normal: " + PrintGeo(p3));
 
                     var sigPiLat = KillZeroSignum(pointInside.LatitudeRadians);
                     var sigPiLon = KillZeroSignum(pointInside.LongitudeRadians);
@@ -757,7 +757,7 @@ namespace HRC.Navigation
                     result = flag4;
                 }
             }
-            Console.WriteLine(" is clockwise? " + result);
+            //Console.WriteLine(" is clockwise? " + result);
 
             _isClockWise = result;
         }

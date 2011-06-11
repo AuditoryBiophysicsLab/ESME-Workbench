@@ -253,7 +253,7 @@ namespace ESME.Environment.NAVO
             foreach (var soundspeedFile in soundspeedFiles)
                 File.Delete(soundspeedFile);
 
-            //SMGCDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods, SelectedTimePeriods.Select(GetMonthIndices), selectedExtractionArea);
+            SMGCDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods, SelectedTimePeriods.Select(GetMonthIndices), selectedExtractionArea);
 
             foreach (var timePeriod in SelectedTimePeriods)
             {

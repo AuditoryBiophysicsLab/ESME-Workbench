@@ -138,7 +138,15 @@ namespace ESME.Environment.NAVO
                 }
             var allMonths = new List<NAVOTimePeriod>();
             foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
-            var uniqueMonths = allMonths.Distinct();
+            var uniqueMonths = allMonths.Distinct().ToList();
+            uniqueMonths.Sort();
+            var monthlyWindData = new Wind();
+            foreach (var curMonth in uniqueMonths)
+            {
+                var curMonthData = new TimePeriodEnvironmentData<EarthCoordinate<float>> { TimePeriod = curMonth };
+                curMonthData.AddRange(selectedFiles.Select(dataFile => new EarthCoordinate<float>(dataFile.EarthCoordinate.Latitude, dataFile.EarthCoordinate.Longitude, dataFile[curMonth].MeanWindSpeed)));
+                monthlyWindData.TimePeriods.Add(curMonthData);
+            }
         }
 
 #if false
