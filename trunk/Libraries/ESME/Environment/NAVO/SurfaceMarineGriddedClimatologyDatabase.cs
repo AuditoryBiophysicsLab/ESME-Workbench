@@ -182,6 +182,7 @@ namespace ESME.Environment.NAVO
                     }
                     if (count > 0) curTimePeriodData.EnvironmentData.Add(new WindSample(curLocation, sum / count));
                 }
+                curTimePeriodData.EnvironmentData.RemoveDuplicates();
                 if (!useExpandedExtractionArea) curTimePeriodData.EnvironmentData.TrimToNearestPoints(extractionArea);
                 wind.TimePeriods.Add(curTimePeriodData);
             }

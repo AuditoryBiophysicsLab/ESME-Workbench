@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace HRC.Navigation
 {
-    public class Geo : IEquatable<Geo>
+    public class Geo : EqualityComparer<Geo>, IEquatable<Geo>
     {
         const double Flattening = 1.0 / 298.257223563;
         const double FlatteningC = (1.0 - Flattening) * (1.0 - Flattening);
@@ -1055,5 +1056,10 @@ namespace HRC.Navigation
             return x;
         }
 #endif
+
+        #region Overrides of EqualityComparer<Geo>
+        public override bool Equals(Geo x, Geo y) { return (x.DistanceKilometers(y) < 0.01); }
+        public override int GetHashCode(Geo obj) { if (obj == null) return 0; return (int)Math.Round(obj.X * 1e6, 0) ^ (int)Math.Round(obj.Y * 1e6, 0) ^ (int)Math.Round(obj.Z * 1e6, 0); }
+        #endregion
     }
 }
