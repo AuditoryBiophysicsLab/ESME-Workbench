@@ -585,7 +585,8 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                {
                                                                                                                                    if (!timePeriod.IsChecked) continue;
                                                                                                                                    //Status = "Exporting CASS format data for " + timePeriod.Caption;
-                                                                                                                                   CASSFiles.GenerateSimAreaData(scenarioDataDirectory, _experiment.EnvironmentRoot, (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod.Caption), _experiment.Bathymetry);
+                                                                                                                                   var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod.Caption);
+                                                                                                                                   CASSFiles.GenerateSimAreaData(scenarioDataDirectory, _experiment.EnvironmentRoot, curTimePeriod, _experiment.Bathymetry, _experiment.Sediment, _experiment.SoundSpeedField, _experiment.WindSpeed[curTimePeriod].EnvironmentData);
                                                                                                                                }
                                                                                                                                if (exportOptionsViewModel.ExportAnalysisPoints)
                                                                                                                                {
