@@ -43,6 +43,42 @@ namespace ESME.Environment
             Clear();
             AddRange(pointsToKeep);
         }
+
+        public void RemoveDuplicates()
+        {
+            var uniqueList = new List<T>();
+            foreach (var curEntry in from curEntry in this
+                                     let foundMatch = uniqueList.Any(curEntry.Equals)
+                                     where !foundMatch
+                                     select curEntry) {uniqueList.Add(curEntry);}
+            Clear();
+            AddRange(uniqueList);
+        }
+    }
+
+    internal class EarthCoordinateComparer : IEqualityComparer<EarthCoordinate>
+    {
+        public bool Equals(EarthCoordinate x, EarthCoordinate y)
+        {
+            //Check whether the compared objects reference the same data.
+            if (ReferenceEquals(x, y)) return true;
+            //Check whether any of the compared objects is null.
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                return false;
+
+            return x.DistanceTo(y) < 10;
+        }
+
+        public int GetHashCode(EarthCoordinate obj)
+        {
+            // Check whether the object is null
+            if (ReferenceEquals(obj, null)) return 0;
+            // Get the hash codes for the X, Y and Z fields
+            var xHash = obj.X.GetHashCode();
+            var yHash = obj.Y.GetHashCode();
+            var zHash = obj.Z.GetHashCode();
+            return xHash ^ yHash ^ zHash;
+        }
     }
 
     public class TimePeriodEnvironmentData<T> where T : EarthCoordinate
