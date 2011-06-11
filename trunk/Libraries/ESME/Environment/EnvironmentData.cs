@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ESME.Environment.NAVO;
 using HRC.Navigation;
 using System.Windows;
 
 namespace ESME.Environment
 {
-    public class EnvironmentData<T> : List<T> where T: EarthCoordinate, new()
+    public class EnvironmentData<TList> : List<TList> where TList: EarthCoordinate
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
                 typeof (EarthCoordinate),
                 typeof (Geo),
                 typeof (Point),
-                typeof (T),
+                typeof (TList),
         };
 
-        public virtual T this[EarthCoordinate location]
+        public TList this[EarthCoordinate location]
         {
             get
             {
                 var minDistance = double.MaxValue;
-                T closestSample = null;
+                TList closestSample = null;
                 foreach (var item in this)
                 {
                     var curDistance = item.DistanceKilometers(location);
@@ -43,4 +44,18 @@ namespace ESME.Environment
             AddRange(pointsToKeep);
         }
     }
+
+    public class TimePeriodEnvironmentData<TList> : EnvironmentData<TList> where TList : EarthCoordinate, new()
+    {
+        new public static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<TList>.ReferencedTypes);
+
+        public NAVOTimePeriod TimePeriod { get; set; }
+    }
+
+    static class Tester
+    {
+        static TimePeriodEnvironmentData<EarthCoordinate<float>> _test1 = new TimePeriodEnvironmentData<EarthCoordinate<float>>();
+        static TimeBasedEnvironmentData<EarthCoordinate<float>, float> _test2 = new TimeBasedEnvironmentData<EarthCoordinate<float>, float>();
+    }
+
 }
