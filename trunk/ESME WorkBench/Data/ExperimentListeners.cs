@@ -18,6 +18,7 @@ using ESMEWorkBench.ViewModels.Map;
 using ThinkGeo.MapSuite.Core;
 using ESME.Views.AcousticBuilder;
 using BehaviorModel = ESME.Platform.BehaviorModel;
+using SoundSpeedField = ESME.Model.SoundSpeedField;
 
 namespace ESMEWorkBench.Data
 {

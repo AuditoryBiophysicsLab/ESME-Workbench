@@ -10,6 +10,7 @@ using ESME.Environment.NAVO;
 using ESME.Model;
 using ESME.NEMO;
 using HRC.Navigation;
+using SoundSpeedField = ESME.Model.SoundSpeedField;
 
 namespace ESME.TransmissionLoss.CASS
 {
