@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 using HRC.Utility;
@@ -8,23 +9,23 @@ namespace ESME.Environment
 {
     public class Wind
     {
-        static readonly List<Type> ReferencedTypes = new List<Type>(TimePeriodEnvironmentData<EarthCoordinate<float>>.ReferencedTypes);
+        static readonly List<Type> ReferencedTypes = new List<Type>(TimePeriodEnvironmentData<WindSample>.ReferencedTypes);
 
-        public List<TimePeriodEnvironmentData<EarthCoordinate<float>>> TimePeriods { get; set; }
+        public List<TimePeriodEnvironmentData<WindSample>> TimePeriods { get; set; }
 
         public Wind()
         {
-            TimePeriods = new List<TimePeriodEnvironmentData<EarthCoordinate<float>>>();
+            TimePeriods = new List<TimePeriodEnvironmentData<WindSample>>();
         }
 
         public static Wind Load(string filename)
         {
-            return new Wind { TimePeriods = XmlSerializer<List<TimePeriodEnvironmentData<EarthCoordinate<float>>>>.Load(filename, ReferencedTypes) };
+            return new Wind { TimePeriods = XmlSerializer<List<TimePeriodEnvironmentData<WindSample>>>.Load(filename, ReferencedTypes) };
         }
 
         public void Save(string filename)
         {
-            var serializer = new XmlSerializer<List<TimePeriodEnvironmentData<EarthCoordinate<float>>>> { Data = TimePeriods };
+            var serializer = new XmlSerializer<List<TimePeriodEnvironmentData<WindSample>>> { Data = TimePeriods };
             serializer.Save(filename, ReferencedTypes);
         }
 
@@ -33,9 +34,15 @@ namespace ESME.Environment
         /// </summary>
         /// <param name="timePeriod"></param>
         /// <returns></returns>
-        public TimePeriodEnvironmentData<EarthCoordinate<float>> this[NAVOTimePeriod timePeriod]
+        public TimePeriodEnvironmentData<WindSample> this[NAVOTimePeriod timePeriod]
         {
             get { return TimePeriods.Find(t => t.TimePeriod == timePeriod); }
         }
+    }
+
+    public class WindSample : EarthCoordinate<float>
+    {
+        public WindSample() {  }
+        public WindSample(Geo location, float sample) : base(location.Latitude, location.Longitude, sample) {  }
     }
 }

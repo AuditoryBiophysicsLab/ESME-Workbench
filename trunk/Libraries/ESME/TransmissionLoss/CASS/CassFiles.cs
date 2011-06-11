@@ -15,11 +15,11 @@ namespace ESME.TransmissionLoss.CASS
 {
     public static class CASSFiles
     {
-        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, string timePeriodName, Environment2DData bathymetry)
+        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, NAVOTimePeriod timePeriod, Environment2DData bathymetry)
         {
             var sedimentFiles = Directory.GetFiles(extractedDataPath, "sediment.xml");
-            var windFile = Path.Combine(extractedDataPath, string.Format("{0}-wind.txt", timePeriodName));
-            var soundspeedFile = Path.Combine(extractedDataPath, string.Format("{0}-soundspeed.xml", timePeriodName));
+            var windFile = Path.Combine(extractedDataPath, string.Format("{0}-wind.txt", timePeriod));
+            var soundspeedFile = Path.Combine(extractedDataPath, string.Format("{0}-soundspeed.xml", timePeriod));
 
             Sediment sediment = null;
             var selectedSedimentFile = LargestFileInList(sedimentFiles);
@@ -27,8 +27,8 @@ namespace ESME.TransmissionLoss.CASS
             sediment = Sediment.Load(selectedSedimentFile);
             if (sediment == null) throw new ApplicationException("Error reading sediment data");
 
-            Environment2DData wind = null;
-            if (windFile.EndsWith(".txt")) wind = SurfaceMarineGriddedClimatologyDatabase.Parse(windFile);
+            Wind wind = null;
+            if (windFile.EndsWith(".xml")) wind = Wind.Load(windFile);
             if (wind == null) throw new ApplicationException("Error reading wind data");
 
             SoundSpeedField soundSpeedField = null;
@@ -36,13 +36,13 @@ namespace ESME.TransmissionLoss.CASS
             {
                 var rawSoundSpeeds = SerializedOutput.Load(soundspeedFile, GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes);
                 if (rawSoundSpeeds == null) throw new ApplicationException("Error reading soundspeed data");
-                soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriodName);
+                soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriod.ToString());
             }
 
             if (soundSpeedField == null) throw new ApplicationException("No soundspeed data found");
 
-            var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriodName.ToLower() + ".dat");
-            WriteEnvironmentFile(environmentFileName, bathymetry, sediment, soundSpeedField, wind);
+            var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriod.ToString().ToLower() + ".dat");
+            WriteEnvironmentFile(environmentFileName, bathymetry, sediment, soundSpeedField, wind[timePeriod].EnvironmentData);
         }
 
         static string LargestFileInList(IEnumerable<string> files)
@@ -423,7 +423,7 @@ namespace ESME.TransmissionLoss.CASS
         }
 #endif
 
-        public static void WriteEnvironmentFile(string environmentFileName, Environment2DData bathymetry, Sediment sedimentType, SoundSpeedField soundSpeedField, Environment2DData windSpeed)
+        public static void WriteEnvironmentFile(string environmentFileName, Environment2DData bathymetry, Sediment sedimentType, SoundSpeedField soundSpeedField, EnvironmentData<WindSample> wind)
         {
             using (var envFile = new StreamWriter(environmentFileName, false))
             {
@@ -456,7 +456,7 @@ namespace ESME.TransmissionLoss.CASS
                         var sedimentTypeName = BottomSedimentTypeTable.Lookup(sedimentSample.Data.SampleValue).ToUpper();
                         if (sedimentTypeName == "LAND") sedimentTypeName = "SAND";
                         envFile.WriteLine(sedimentTypeName);
-                        envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", windSpeed[location].Data * 1.94384449);
+                        envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", wind[location].Data * 1.94384449);
                         envFile.WriteLine();
                     }
             }

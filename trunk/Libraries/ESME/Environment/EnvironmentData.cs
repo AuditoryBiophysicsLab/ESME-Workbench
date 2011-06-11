@@ -7,22 +7,22 @@ using System.Windows;
 
 namespace ESME.Environment
 {
-    public class EnvironmentData<TList> : List<TList> where TList: EarthCoordinate
+    public class EnvironmentData<T> : List<T> where T : EarthCoordinate
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
                 typeof (EarthCoordinate),
                 typeof (Geo),
                 typeof (Point),
-                typeof (TList),
+                typeof (T),
         };
 
-        public TList this[EarthCoordinate location]
+        public T this[EarthCoordinate location]
         {
             get
             {
                 var minDistance = double.MaxValue;
-                TList closestSample = null;
+                T closestSample = null;
                 foreach (var item in this)
                 {
                     var curDistance = item.DistanceKilometers(location);
@@ -45,17 +45,12 @@ namespace ESME.Environment
         }
     }
 
-    public class TimePeriodEnvironmentData<TList> : EnvironmentData<TList> where TList : EarthCoordinate, new()
+    public class TimePeriodEnvironmentData<T> where T : EarthCoordinate
     {
-        new public static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<TList>.ReferencedTypes);
+        public static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<EarthCoordinate<T>>.ReferencedTypes);
+        public TimePeriodEnvironmentData() { EnvironmentData = new EnvironmentData<T>(); }
 
         public NAVOTimePeriod TimePeriod { get; set; }
+        public EnvironmentData<T> EnvironmentData { get; set; }
     }
-
-    static class Tester
-    {
-        static TimePeriodEnvironmentData<EarthCoordinate<float>> _test1 = new TimePeriodEnvironmentData<EarthCoordinate<float>>();
-        static TimeBasedEnvironmentData<EarthCoordinate<float>, float> _test2 = new TimeBasedEnvironmentData<EarthCoordinate<float>, float>();
-    }
-
 }

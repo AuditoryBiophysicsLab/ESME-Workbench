@@ -81,23 +81,24 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
-        #region public bool RestrictDataToBufferArea { get; set; }
+        #region public bool UseExpandedExtractionArea { get; set; }
 
-        public bool RestrictDataToBufferArea
+        public bool UseExpandedExtractionArea
         {
-            get { return _restrictDataToBufferArea; }
+            get { return _useExpandedExtractionArea; }
             set
             {
-                if (_restrictDataToBufferArea == value) return;
-                _restrictDataToBufferArea = value;
-                NotifyPropertyChanged(RestrictDataToBufferAreaChangedEventArgs);
+                if (_useExpandedExtractionArea == value) return;
+                _useExpandedExtractionArea = value;
+                NotifyPropertyChanged(UseExpandedExtractionAreaChangedEventArgs);
             }
         }
 
-        private static readonly PropertyChangedEventArgs RestrictDataToBufferAreaChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.RestrictDataToBufferArea);
-        private bool _restrictDataToBufferArea;
+        static readonly PropertyChangedEventArgs UseExpandedExtractionAreaChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.UseExpandedExtractionArea);
+        bool _useExpandedExtractionArea;
 
         #endregion
+
 
         #region SelectAllMonthsCommand
 
@@ -428,7 +429,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
                         NAVODataSources.SelectedTimePeriods = selectedTimePeriods;
                         NAVODataSources.ExportCASSData = ExportCASSData;
-                        NAVODataSources.RestrictDataToBufferArea = RestrictDataToBufferArea;
+                        NAVODataSources.UseExpandedExtractionArea = UseExpandedExtractionArea;
                         NAVODataSources.ExtractDataInBackground(delegate
                                                                 {
                                                                     NotExtractingData = true;
@@ -438,7 +439,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                                                     if (selectedTimePeriods.Count > 0)
                                                                     {
                                                                         var timePeriod = selectedTimePeriods[0];
-                                                                        _experiment.WindSpeedFileName = NAVODataSources.WindFilename(timePeriod);
+                                                                        _experiment.WindSpeedFileName = NAVODataSources.WindFilename;
                                                                         _experiment.SoundSpeedFileName = NAVODataSources.SoundspeedFilename(timePeriod);
                                                                         _experiment.SedimentFileName = NAVODataSources.SedimentFilename;
                                                                         _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename;

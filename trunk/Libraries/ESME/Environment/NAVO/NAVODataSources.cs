@@ -143,21 +143,21 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        #region public bool RestrictDataToBufferArea { get; set; }
+        #region public bool UseExpandedExtractionArea { get; set; }
 
-        public bool RestrictDataToBufferArea
+        public bool UseExpandedExtractionArea
         {
-            get { return _restrictDataToBufferArea; }
+            get { return _useExpandedExtractionArea; }
             set
             {
-                if (_restrictDataToBufferArea == value) return;
-                _restrictDataToBufferArea = value;
-                NotifyPropertyChanged(RestrictDataToBufferAreaChangedEventArgs);
+                if (_useExpandedExtractionArea == value) return;
+                _useExpandedExtractionArea = value;
+                NotifyPropertyChanged(UseExpandedExtractionAreaChangedEventArgs);
             }
         }
 
-        private static readonly PropertyChangedEventArgs RestrictDataToBufferAreaChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.RestrictDataToBufferArea);
-        private bool _restrictDataToBufferArea;
+        static readonly PropertyChangedEventArgs UseExpandedExtractionAreaChangedEventArgs = ObservableHelper.CreateArgs<NAVODataSources>(x => x.UseExpandedExtractionArea);
+        bool _useExpandedExtractionArea;
 
         #endregion
 
@@ -189,9 +189,9 @@ namespace ESME.Environment.NAVO
             uniqueMonths.Sort();
 
             // uniqueMonths * 3 because we're counting Temp, and Salinity extraction, and Soundspeed creation as independent steps.
-            // SelectedTimePeriods.Count() * 2 is for averaging the soundspeed fields AND extracting the windspeed data
+            // SelectedTimePeriods.Count() is for averaging the soundspeed fields
             // and the extra 2 is for extracting bathymetry and sediment data which are time invariant
-            var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + (SelectedTimePeriods.Count() * 2) + 2);
+            var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + SelectedTimePeriods.Count() + 2);
             if (ExportCASSData) totalExtractionStepCount += SelectedTimePeriods.Count();
 
             totalExtractionStepCount += SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1).Count();
@@ -208,18 +208,16 @@ namespace ESME.Environment.NAVO
             var bathymetry = Environment2DData.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var maxDepth = bathymetry.Minimum;
 
-            var selectedExtractionArea = RestrictDataToBufferArea ? ExtractionArea : ExpandedExtractionArea;
-
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";
-            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea);
+            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea, UseExpandedExtractionArea);
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
             foreach (var month in uniqueMonths)
             {
                 Status = "Extracting temperature and salinity data for " + month;
-                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, selectedExtractionArea, month);
+                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, ExtractionArea, month);
                 if (backgroundWorker.CancellationPending) return;
                 currentExtractionStep += 2;
                 ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
@@ -253,8 +251,12 @@ namespace ESME.Environment.NAVO
             foreach (var soundspeedFile in soundspeedFiles)
                 File.Delete(soundspeedFile);
 
-            SMGCDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods.ToList(), SelectedTimePeriods.Select(GetMonthIndices).ToList(), selectedExtractionArea);
+#if true
+            Status = "Extracting wind data";
+            SurfaceMarineGriddedClimatologyDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods.ToList(), SelectedTimePeriods.Select(GetMonthIndices).ToList(), ExtractionArea, UseExpandedExtractionArea);
+            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
+#else
             foreach (var timePeriod in SelectedTimePeriods)
             {
                 var monthIndices = GetMonthIndices(timePeriod);
@@ -263,6 +265,7 @@ namespace ESME.Environment.NAVO
                 if (backgroundWorker.CancellationPending) return;
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
+#endif
 
             if (ExportCASSData)
             {
@@ -275,7 +278,7 @@ namespace ESME.Environment.NAVO
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
                     Status = "Exporting CASS format data for " + timePeriod;
-                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod.ToString(), bathymetry);
+                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod, bathymetry);
                     if (backgroundWorker.CancellationPending) return;
                     ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
                 }
@@ -303,7 +306,7 @@ namespace ESME.Environment.NAVO
         public string SalinityFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SalinityFilename(_localStorageRoot, timePeriod); }
         public string SoundspeedFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(_localStorageRoot, timePeriod); }
         public string SoundspeedFilename(string directoryName, NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(directoryName, timePeriod); }
-        public string WindFilename(NAVOTimePeriod timePeriod) { return SurfaceMarineGriddedClimatologyDatabase.WindFilename(_localStorageRoot, timePeriod); }
+        public string WindFilename { get { return SurfaceMarineGriddedClimatologyDatabase.WindFilename(_localStorageRoot); } }
         public string SedimentFilename { get { return BottomSedimentTypeDatabase.SedimentFilename(_localStorageRoot); } }
         public string BathymetryFilename { get { return DigitalBathymetricDatabase.BathymetryYXZFilename(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution); } }
 

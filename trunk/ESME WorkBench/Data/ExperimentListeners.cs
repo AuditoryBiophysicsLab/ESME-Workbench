@@ -232,19 +232,20 @@ namespace ESMEWorkBench.Data
             var soundspeedFiles = Directory.GetFiles(EnvironmentRoot, "*-soundspeed.xml");
             var timePeriods = soundspeedFiles.Select(curFile => Path.GetFileName(curFile).Split('-')[0]).ToList();
             var bottomTypeData = Sediment.Load(SedimentFileName);
+            var wind = Wind.Load("wind.xml");
             foreach (var timePeriod in timePeriods)
             {
                 var soundSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-soundspeed.xml", timePeriod));
-                var windSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-wind.txt", timePeriod));
+                //var windSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-wind.txt", timePeriod));
                 var soundSpeedField = new SoundSpeedField(SerializedOutput.Load(soundSpeedFile, GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes), NemoFile.Scenario.TimeFrame);
-                var windSpeedField = SurfaceMarineGriddedClimatologyDatabase.Parse(windSpeedFile);
+                var windSpeedField = wind[(NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod)];
                 var environmentInfo = new EnvironmentInformation
                                       {
                                           LocationName = NemoFile.Scenario.SimAreaName,
                                           SoundSpeedFieldName = timePeriod,
                                           Bathymetry = Bathymetry,
                                           Sediment = bottomTypeData,
-                                          WindSpeed = windSpeedField,
+                                          WindSpeed = windSpeedField.EnvironmentData,
                                           SoundSpeedField = soundSpeedField,
                                       };
                 foreach (var analysisPoint in AnalysisPoints)

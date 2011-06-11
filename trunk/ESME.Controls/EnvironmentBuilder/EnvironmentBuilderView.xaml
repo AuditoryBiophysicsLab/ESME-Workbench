@@ -105,10 +105,11 @@
                   Margin="5 5 5 2"
                   Content="Export extracted data to NAEMO"
 		          IsEnabled="{Binding NotExtractingData}" />
-        <CheckBox IsChecked="{Binding RestrictDataToBufferArea}" 
+        <CheckBox IsChecked="{Binding UseExpandedExtractionArea}" 
+                  IsEnabled="{Binding NotExtractingData}"
                   Margin="5 0 5 0"
-                  ToolTip="If this is not checked, the sediment, wind, and soundspeed data will extend outside the buffer area to the nearest whole degree in all directions"
-                  Content="Restrict non-bathymetric data to the buffer area" />
+                  ToolTip="If this is checked, the sediment, wind, and soundspeed data will extend outside the buffer area to the nearest whole degree in all directions"
+                  Content="Extract non-bathymetric data beyond the buffer area" />
 
         <StackPanel Visibility="{Binding NAVODataSources.IsVisible}">
 			<TextBlock HorizontalAlignment="Center"
