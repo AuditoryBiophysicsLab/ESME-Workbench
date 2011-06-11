@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Cinch;
 using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
@@ -30,7 +29,7 @@ namespace ESME.Environment.NAVO
         public static string WindFilename(string outputPath, NAVOTimePeriod timePeriod) { return Path.Combine(outputPath, string.Format("{0}-wind.txt", timePeriod)); }
 
         //public static void ExtractArea(NAVOExtractionPacket extractionPacket)
-        public static void ExtractArea(string outputDirectory, NAVOTimePeriod timePeriod, int startMonth, int endMonth, int monthsDuration, GeoRect extractionArea)
+        public static void ExtractArea(string outputDirectory, NAVOTimePeriod timePeriod, NAVOTimePeriod startMonth, NAVOTimePeriod endMonth, int monthsDuration, GeoRect extractionArea)
         {
             var outputFilename = Path.Combine(outputDirectory, string.Format("{0}-wind.txt", timePeriod));
 
@@ -74,8 +73,8 @@ namespace ESME.Environment.NAVO
             var rawvalues = new List<List<string>>();
             var points = new Dictionary<string, double>();
             //split the string up into lines
-            var startMonth = int.Parse(resarray[0].Split('=')[1]);
-            var endMonth = int.Parse(resarray[1].Split('=')[1]);
+            //var startMonth = int.Parse(resarray[0].Split('=')[1]);
+            //var endMonth = int.Parse(resarray[1].Split('=')[1]);
             var monthDuration = int.Parse(resarray[2].Split('=')[1]);
             var gridSpacing = int.Parse(resarray[3].Split('=')[1]);
 
@@ -123,21 +122,26 @@ namespace ESME.Environment.NAVO
         }
     }
 
-#if false
     internal static class SMGCDatabase
     {
-        public static void ExtractArea(string outputDirectory, NAVOTimePeriod timePeriod, int startMonth, int endMonth, int monthsDuration, GeoRect extractionArea)
+        public static void ExtractArea(string databasePath, string outputDirectory, IEnumerable<NAVOTimePeriod> timePeriods, IEnumerable<IEnumerable<NAVOTimePeriod>> requiredMonths, GeoRect extractionArea)
         {
-            var selectedFiles = new List<string>();
-            for (var lat = (int) extractionArea.South; lat <= (int) extractionArea.North; lat++)
-                for (var lon = (int) extractionArea.West; lon <= (int) extractionArea.East; lon++)
+            // Construct a list of files we will need to read out of the SMGC database
+            var selectedFiles = new List<SMGCFile>();
+            for (var lat = (int) Math.Floor(extractionArea.South); lat <= (int) Math.Ceiling(extractionArea.North); lat++)
+                for (var lon = (int) Math.Floor(extractionArea.West); lon <= (int) Math.Ceiling(extractionArea.East); lon++)
                 {
                     var northSouth = (lat >= 0) ? "n" : "s";
                     var eastWest = (lon >= 0) ? "e" : "w";
-                    selectedFiles.Add(string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon)));
+                    var curFile = string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon));
+                    selectedFiles.Add(new SMGCFile(Directory.GetFiles(databasePath, curFile, SearchOption.AllDirectories).First()));
                 }
+            var allMonths = new List<NAVOTimePeriod>();
+            foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
+            var uniqueMonths = allMonths.Distinct();
         }
 
+#if false
         public static void Import(string baseDirectory, string filePattern, IList<NAVOTimePeriod> months)
         {
             var latValues = new List<float>();
@@ -234,6 +238,7 @@ namespace ESME.Environment.NAVO
                 }
             }
         }
+#endif
 
         internal class SMGCFile
         {
@@ -363,7 +368,7 @@ namespace ESME.Environment.NAVO
                 for (var i = 0; i < 4; i++) SkipRecord(reader);
             }
 
-            public override string ToString() { return string.Format("Mean Wind speed [{0}]: {1} m/s", Name, MeanWindSpeed); }
+            public override string ToString() { return string.Format("Mean Wind speed [{0}]: {1} m/s", NAVOTimePeriod, MeanWindSpeed); }
         }
 
         internal class SMGCRecordTypeA : SMGCRecord
@@ -421,5 +426,4 @@ namespace ESME.Environment.NAVO
             }
         }
     }
-#endif
 }
