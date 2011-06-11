@@ -15,10 +15,11 @@ namespace ESME.TransmissionLoss.CASS
 {
     public static class CASSFiles
     {
-        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, NAVOTimePeriod timePeriod, Environment2DData bathymetry)
+        public static void GenerateSimAreaData(string simAreaPath, string extractedDataPath, NAVOTimePeriod timePeriod, Environment2DData bathymetry, Sediment sediment, SoundSpeedField soundSpeedField, EnvironmentData<WindSample> wind)
         {
+#if false
             var sedimentFiles = Directory.GetFiles(extractedDataPath, "sediment.xml");
-            var windFile = Path.Combine(extractedDataPath, string.Format("{0}-wind.txt", timePeriod));
+            var windFile = Path.Combine(extractedDataPath, "wind.xml");
             var soundspeedFile = Path.Combine(extractedDataPath, string.Format("{0}-soundspeed.xml", timePeriod));
 
             Sediment sediment = null;
@@ -38,11 +39,14 @@ namespace ESME.TransmissionLoss.CASS
                 if (rawSoundSpeeds == null) throw new ApplicationException("Error reading soundspeed data");
                 soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriod.ToString());
             }
-
+#endif
+            if (bathymetry == null) throw new ApplicationException("No bathymetry data found");
+            if (sediment == null) throw new ApplicationException("No sediment data found");
             if (soundSpeedField == null) throw new ApplicationException("No soundspeed data found");
+            if (wind == null) throw new ApplicationException("No wind data found");
 
             var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriod.ToString().ToLower() + ".dat");
-            WriteEnvironmentFile(environmentFileName, bathymetry, sediment, soundSpeedField, wind[timePeriod].EnvironmentData);
+            WriteEnvironmentFile(environmentFileName, bathymetry, sediment, soundSpeedField, wind);
         }
 
         static string LargestFileInList(IEnumerable<string> files)
@@ -452,9 +456,10 @@ namespace ESME.TransmissionLoss.CASS
                             else break;
                         envFile.WriteLine("EOT");
                         envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
-                        var sedimentSample = sedimentType.Samples[location];
-                        var sedimentTypeName = BottomSedimentTypeTable.Lookup(sedimentSample.Data.SampleValue).ToUpper();
-                        if (sedimentTypeName == "LAND") sedimentTypeName = "SAND";
+                        //var sedimentSample = sedimentType.Samples[location];
+                        //var sedimentTypeName = BottomSedimentTypeTable.Lookup(sedimentSample.Data.SampleValue).ToUpper();
+                        var findResult = BottomSedimentTypeTable.CASSMap.Find(mapEntry => mapEntry.Value == sedimentType.Samples[location].Data.SampleValue);
+                        var sedimentTypeName = findResult == null ? "SAND" : findResult.Name;
                         envFile.WriteLine(sedimentTypeName);
                         envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", wind[location].Data * 1.94384449);
                         envFile.WriteLine();

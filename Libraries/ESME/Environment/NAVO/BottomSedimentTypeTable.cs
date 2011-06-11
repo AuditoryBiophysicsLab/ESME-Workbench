@@ -60,8 +60,8 @@ namespace ESME.Environment.NAVO
                                                       new ValueToNameMap(21,"VERY FINE SILT"),
                                                       new ValueToNameMap(22,"SILTY CLAY"),
                                                       new ValueToNameMap(23,"CLAY"),
-                                                      new ValueToNameMap(888, "No Data"),
-                                                      new ValueToNameMap(999, "Land"),
+                                                      //new ValueToNameMap(888, "No Data"), // removing this because it will make CASS puke if it ever shows up.
+                                                      new ValueToNameMap(999, "SAND"),      // should be LAND
                                                   };
 
         static BottomSedimentTypeTable() { Map = CASSMap; }

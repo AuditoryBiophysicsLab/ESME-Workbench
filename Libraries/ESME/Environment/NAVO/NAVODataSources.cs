@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
+using ESME.Model;
 using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 
@@ -211,6 +212,7 @@ namespace ESME.Environment.NAVO
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";
             BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea, UseExpandedExtractionArea);
+            var sediment = Sediment.Load(BottomSedimentTypeDatabase.SedimentFilename(tempDirectory));
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
@@ -254,6 +256,7 @@ namespace ESME.Environment.NAVO
 #if true
             Status = "Extracting wind data";
             SurfaceMarineGriddedClimatologyDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods.ToList(), SelectedTimePeriods.Select(GetMonthIndices).ToList(), ExtractionArea, UseExpandedExtractionArea);
+            var wind = Wind.Load(SurfaceMarineGriddedClimatologyDatabase.WindFilename(tempDirectory));
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
 #else
@@ -278,7 +281,11 @@ namespace ESME.Environment.NAVO
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
                     Status = "Exporting CASS format data for " + timePeriod;
-                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod, bathymetry);
+                    var rawSoundSpeeds = SerializedOutput.Load(GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(tempDirectory, timePeriod), GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes);
+                    if (rawSoundSpeeds == null) throw new ApplicationException("Error reading soundspeed data");
+                    var soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriod.ToString());
+
+                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod, bathymetry, sediment, soundSpeedField, wind[timePeriod].EnvironmentData);
                     if (backgroundWorker.CancellationPending) return;
                     ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
                 }
