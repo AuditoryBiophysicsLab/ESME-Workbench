@@ -124,10 +124,11 @@ namespace ESME.Environment.NAVO
 
     internal static class SMGCDatabase
     {
-        public static void ExtractArea(string databasePath, string outputDirectory, IEnumerable<NAVOTimePeriod> timePeriods, IEnumerable<IEnumerable<NAVOTimePeriod>> requiredMonths, GeoRect extractionArea)
+        public static void ExtractArea(string databasePath, string outputDirectory, IList<NAVOTimePeriod> timePeriods, IList<IEnumerable<NAVOTimePeriod>> requiredMonths, GeoRect extractionArea)
         {
             // Construct a list of files we will need to read out of the SMGC database
             var selectedFiles = new List<SMGCFile>();
+            var selectedLocations = new List<EarthCoordinate>();
             for (var lat = (int) Math.Floor(extractionArea.South); lat <= (int) Math.Ceiling(extractionArea.North); lat++)
                 for (var lon = (int) Math.Floor(extractionArea.West); lon <= (int) Math.Ceiling(extractionArea.East); lon++)
                 {
@@ -135,6 +136,7 @@ namespace ESME.Environment.NAVO
                     var eastWest = (lon >= 0) ? "e" : "w";
                     var curFile = string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon));
                     selectedFiles.Add(new SMGCFile(Directory.GetFiles(databasePath, curFile, SearchOption.AllDirectories).First()));
+                    selectedLocations.Add(new EarthCoordinate(lat, lon));
                 }
             var allMonths = new List<NAVOTimePeriod>();
             foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
@@ -144,9 +146,32 @@ namespace ESME.Environment.NAVO
             foreach (var curMonth in uniqueMonths)
             {
                 var curMonthData = new TimePeriodEnvironmentData<EarthCoordinate<float>> { TimePeriod = curMonth };
-                curMonthData.AddRange(selectedFiles.Select(dataFile => new EarthCoordinate<float>(dataFile.EarthCoordinate.Latitude, dataFile.EarthCoordinate.Longitude, dataFile[curMonth].MeanWindSpeed)));
+                curMonthData.AddRange(from selectedFile in selectedFiles
+                                      where (selectedFile.Months != null) && (selectedFile[curMonth] != null)
+                                      select new EarthCoordinate<float>(selectedFile.EarthCoordinate.Latitude, selectedFile.EarthCoordinate.Longitude, selectedFile[curMonth].MeanWindSpeed));
                 monthlyWindData.TimePeriods.Add(curMonthData);
             }
+            for (var timePeriodIndex = 0; timePeriodIndex < timePeriods.Count(); timePeriodIndex++)
+            {
+                var curTimePeriodData = new TimePeriodEnvironmentData<EnvironmentData<EarthCoordinate<float>>> { TimePeriod = timePeriods[timePeriodIndex] };
+                var monthsInCurTimePeriod = requiredMonths[timePeriodIndex];
+                foreach (var curLocation in selectedLocations)
+                {
+                    var sum = 0f;
+                    var count = 0;
+                    foreach (var curMonth in monthsInCurTimePeriod)
+                    {
+                        if ((monthlyWindData.TimePeriods == null) || (monthlyWindData.TimePeriods[curMonth] == null)) continue;
+                        sum += monthlyWindData.TimePeriods[curMonth].Data[curLocation]
+                        count++;
+                    }
+                }
+                //curTimePeriodData.AddRange(from curLocation in selectedLocations
+                //                           let sum = monthsInCurTimePeriod.Aggregate(0.0, (current, curMonth) => current + monthlyWindData.TimePeriods[curMonth].Data)
+                //                           let mean = sum / monthsInCurTimePeriod.Count()
+                //                           select new EarthCoordinate<float>(curLocation.Latitude, curLocation.Longitude, (float)mean));
+            }
+            monthlyWindData.Save(Path.Combine(outputDirectory, "wind.xml"));
         }
 
 #if false
