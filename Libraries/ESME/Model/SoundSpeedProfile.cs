@@ -24,7 +24,7 @@ namespace ESME.Model
 
         public SoundSpeedProfile() { }
 
-        public SoundSpeedProfile(EarthCoordinate location, IList<float> depths, IList<float> soundSpeeds)
+        public SoundSpeedProfile(Geo location, IList<float> depths, IList<float> soundSpeeds)
             : base(location)
         {
             var speedList = new List<float>();

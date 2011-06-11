@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ESME.Environment.NAVO;
+using ESME.Model;
 using HRC.Navigation;
 using System.Windows;
 

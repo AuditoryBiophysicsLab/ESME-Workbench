@@ -192,7 +192,7 @@ namespace ESME.Environment.NAVO
                     soundSpeedData.Data.AddRange(from soundSpeed in curPointSoundSpeeds select (double)soundSpeed);
                     soundSpeedField.DataPoints.Add(soundSpeedData);
                 }
-            var ssf = new SoundSpeedField(soundSpeedField, "", deepestPoint);
+            var ssf = new Model.SoundSpeedField(soundSpeedField, "", deepestPoint);
             ssf.ExtendProfilesToDepth(Math.Abs(deepestPoint.Data), temperatureField, salinityField);
             ((SerializedOutput)ssf).Save(soundspeedFilename, ReferencedTypes);
         }

@@ -30,6 +30,7 @@ using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 using LineStyle = ESME.Overlay.LineStyle;
+using SoundSpeedField = ESME.Model.SoundSpeedField;
 
 namespace ESMEWorkBench.Data
 {

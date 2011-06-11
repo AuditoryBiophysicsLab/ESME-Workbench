@@ -283,7 +283,7 @@ namespace ESME.Environment.NAVO
                     Status = "Exporting CASS format data for " + timePeriod;
                     var rawSoundSpeeds = SerializedOutput.Load(GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(tempDirectory, timePeriod), GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes);
                     if (rawSoundSpeeds == null) throw new ApplicationException("Error reading soundspeed data");
-                    var soundSpeedField = new SoundSpeedField(rawSoundSpeeds, timePeriod.ToString());
+                    var soundSpeedField = new Model.SoundSpeedField(rawSoundSpeeds, timePeriod.ToString());
 
                     CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod, bathymetry, sediment, soundSpeedField, wind[timePeriod].EnvironmentData);
                     if (backgroundWorker.CancellationPending) return;
