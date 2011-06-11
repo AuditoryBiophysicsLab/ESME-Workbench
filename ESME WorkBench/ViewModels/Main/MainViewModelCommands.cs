@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Cinch;
 using ESME;
 using ESME.Data;
+using ESME.Environment.NAVO;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Properties;
@@ -584,7 +585,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                {
                                                                                                                                    if (!timePeriod.IsChecked) continue;
                                                                                                                                    //Status = "Exporting CASS format data for " + timePeriod.Caption;
-                                                                                                                                   CASSFiles.GenerateSimAreaData(scenarioDataDirectory, _experiment.EnvironmentRoot, timePeriod.Caption, _experiment.Bathymetry);
+                                                                                                                                   CASSFiles.GenerateSimAreaData(scenarioDataDirectory, _experiment.EnvironmentRoot, (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod.Caption), _experiment.Bathymetry);
                                                                                                                                }
                                                                                                                                if (exportOptionsViewModel.ExportAnalysisPoints)
                                                                                                                                {

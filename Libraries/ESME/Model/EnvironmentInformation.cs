@@ -1,5 +1,4 @@
 ﻿using ESME.Environment;
-using ESME.Environment.NAVO;
 
 namespace ESME.Model
 {
@@ -11,7 +10,7 @@ namespace ESME.Model
         public Sediment Sediment { get; set; }
         public SoundSpeedField SoundSpeedField { get; set; }
         public Environment2DData Bathymetry { get; set; }
-        public Environment2DData WindSpeed { get; set; }
+        public EnvironmentData<WindSample> WindSpeed { get; set; }
 
         public EnvironmentInformation(string locationName, string soundSpeedFieldName)
             : this()

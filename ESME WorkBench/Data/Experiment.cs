@@ -602,7 +602,7 @@ namespace ESMEWorkBench.Data
         public static IMessageBoxService MessageBoxService { private get; set; }
 
         [XmlIgnore]
-        public Environment2DData WindSpeed { get; private set; }
+        public Wind WindSpeed { get; private set; }
 
         [XmlIgnore]
         public SoundSpeedField SoundSpeedField { get; private set; }
@@ -1020,6 +1020,33 @@ namespace ESMEWorkBench.Data
             speciesLayer.Done();
         }
 
+        void DisplayEnvironmentData<T>(ICollection<T> environmentData, string layerName, LayerType layerType, float defaultLineWidth) where T : EarthCoordinate
+        {
+            var dataLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == layerName);
+            if (dataLayer == null)
+            {
+                dataLayer = new OverlayShapeMapLayer
+                {
+                    Name = layerName,
+                    LayerType = layerType,
+                    LineWidth = defaultLineWidth,
+                    CanBeRemoved = false,
+                    CanBeReordered = true,
+                    HasSettings = true,
+                    CanChangeLineColor = true,
+                    CanChangeLineWidth = true,
+                    CanChangeAreaColor = false,
+                    IsChecked = false,
+                };
+                MapLayers.Add(dataLayer);
+            }
+            var startPoints = environmentData.Select(startPoint => new OverlayPoint(startPoint));
+            dataLayer.ToolTip = String.Format("Layer contains {0} data points", environmentData.Count);
+            dataLayer.Clear();
+            dataLayer.Add(startPoints);
+            dataLayer.Done();
+        }
+
         void DisplayAnalysisPoint(AnalysisPoint curPoint)
         {
             var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
@@ -1173,12 +1200,13 @@ namespace ESMEWorkBench.Data
 
             if ((WindSpeedFileName != null) && (File.Exists(WindSpeedFileName)))
             {
-                if (WindSpeedFileName.EndsWith(".eeb")) WindSpeed = Environment2DData.FromEEB(WindSpeedFileName, "windspeed", SimArea);
-                else if (WindSpeedFileName.EndsWith(".txt")) WindSpeed = SurfaceMarineGriddedClimatologyDatabase.Parse(WindSpeedFileName);
+                if (WindSpeedFileName.EndsWith(".xml")) WindSpeed = Wind.Load(WindSpeedFileName);
             }
 
             if (WindSpeed != null)
             {
+                DisplayEnvironmentData(WindSpeed.TimePeriods[0].EnvironmentData, "Wind", LayerType.WindSpeed, 3);
+#if false
                 const string windName = "Wind";
                 var windLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == windName);
                 if (windLayer == null)
@@ -1201,6 +1229,7 @@ namespace ESMEWorkBench.Data
                     foreach (var lat in WindSpeed.Latitudes)
                         windLayer.Add(new OverlayPoint(new EarthCoordinate(lat, lon)));
                 windLayer.Done();
+#endif
             }
 
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
