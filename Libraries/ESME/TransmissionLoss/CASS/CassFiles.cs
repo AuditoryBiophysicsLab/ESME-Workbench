@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -7,10 +6,8 @@ using System.Linq;
 using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
-using ESME.Model;
 using ESME.NEMO;
 using HRC.Navigation;
-using SoundSpeedField = ESME.Model.SoundSpeedField;
 
 namespace ESME.TransmissionLoss.CASS
 {
@@ -439,21 +436,23 @@ namespace ESME.TransmissionLoss.CASS
                 envFile.WriteLine("COMMENT TABLE");
                 envFile.WriteLine("EOT");
                 envFile.WriteLine();
-                var latitudes = soundSpeedField.Latitudes.OrderByDescending(x => x);
-                var longitudes = soundSpeedField.Longitudes;
+                var latitudes = soundSpeedField.EnvironmentData.Latitudes.ToList();
+                latitudes.Sort();
+                var longitudes = soundSpeedField.EnvironmentData.Longitudes.ToList();
+                longitudes.Sort();
                 foreach (var longitude in longitudes)
                     foreach (var latitude in latitudes)
                     {
                         var location = new EarthCoordinate(latitude, longitude);
-                        var ssp = soundSpeedField[location];
-                        if (ssp.SoundSpeeds.Length == 0) continue;
+                        var ssp = soundSpeedField.EnvironmentData[location];
+                        if (ssp.Data.Count == 0) continue;
 
                         envFile.WriteLine("ENVIRONMENT LATITUDE  = {0:0.0###} DEG", latitude);
                         envFile.WriteLine("ENVIRONMENT LONGITUDE = {0:0.0###} DEG", longitude);
                         envFile.WriteLine("OCEAN SOUND SPEED TABLE");
                         envFile.WriteLine("M         M/S       ");
-                        for (var dep = 0; dep < ssp.Depths.Length; dep++)
-                            if (!float.IsNaN(ssp.SoundSpeeds[dep])) envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", soundSpeedField.DeepestSSP.Depths[dep], ssp.SoundSpeeds[dep]);
+                        foreach (var datum in ssp.Data)
+                            if (!float.IsNaN(datum.Value)) envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", datum.Depth, datum.Value);
                             else break;
                         envFile.WriteLine("EOT");
                         envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");

@@ -219,7 +219,7 @@ namespace ESME.Environment.NAVO
             foreach (var month in uniqueMonths)
             {
                 Status = "Extracting temperature and salinity data for " + month;
-                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, ExtractionArea, month);
+                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, ExtractionArea, month, UseExpandedExtractionArea);
                 if (backgroundWorker.CancellationPending) return;
                 currentExtractionStep += 2;
                 ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
@@ -240,18 +240,16 @@ namespace ESME.Environment.NAVO
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             }
 
-            var soundspeedFiles = Directory.GetFiles(tempDirectory, "*-soundspeed.xml").ToList();
+            var soundSpeed = new SoundSpeed();
             foreach (var timePeriod in SelectedTimePeriods)
             {
-                var keeperSoundspeedFile = SoundspeedFilename(tempDirectory, timePeriod);
-                foreach (var soundspeedFile in soundspeedFiles.Where(soundspeedFile => soundspeedFile == keeperSoundspeedFile)) 
-                {
-                    soundspeedFiles.Remove(soundspeedFile);
-                    break;
-                }
+                var keeperSoundSpeedField = SoundSpeed.Load(SoundspeedFilename(tempDirectory, timePeriod));
+                soundSpeed.SoundSpeedFields.Add(keeperSoundSpeedField[timePeriod]);
             }
-            foreach (var soundspeedFile in soundspeedFiles)
+            soundSpeed.Save(Path.Combine(tempDirectory, "soundspeed.xml"));
+            foreach (var soundspeedFile in Directory.GetFiles(tempDirectory, "*-soundspeed.xml"))
                 File.Delete(soundspeedFile);
+
 
 #if true
             Status = "Extracting wind data";
@@ -281,11 +279,8 @@ namespace ESME.Environment.NAVO
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
                     Status = "Exporting CASS format data for " + timePeriod;
-                    var rawSoundSpeeds = SerializedOutput.Load(GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(tempDirectory, timePeriod), GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes);
-                    if (rawSoundSpeeds == null) throw new ApplicationException("Error reading soundspeed data");
-                    var soundSpeedField = new Model.SoundSpeedField(rawSoundSpeeds, timePeriod.ToString());
 
-                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod, bathymetry, sediment, soundSpeedField, wind[timePeriod].EnvironmentData);
+                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod, bathymetry, sediment, soundSpeed[timePeriod], wind[timePeriod].EnvironmentData);
                     if (backgroundWorker.CancellationPending) return;
                     ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
                 }
@@ -311,7 +306,6 @@ namespace ESME.Environment.NAVO
 
         public string TemperatureFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.TemperatureFilename(_localStorageRoot, timePeriod); }
         public string SalinityFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SalinityFilename(_localStorageRoot, timePeriod); }
-        public string SoundspeedFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(_localStorageRoot, timePeriod); }
         public string SoundspeedFilename(string directoryName, NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(directoryName, timePeriod); }
         public string WindFilename { get { return SurfaceMarineGriddedClimatologyDatabase.WindFilename(_localStorageRoot); } }
         public string SedimentFilename { get { return BottomSedimentTypeDatabase.SedimentFilename(_localStorageRoot); } }

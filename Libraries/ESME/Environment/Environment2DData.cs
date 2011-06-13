@@ -446,24 +446,24 @@ namespace ESME.Environment
             Count = 0;
         }
 
-        public AverageDatum(double value)
+        public AverageDatum(float value)
         {
             Value = value;
             Count = 1;
         }
 
-        public double Value { get; set; }
-        public int Count { get; set; }
+        public float Value { get; set; }
+        public int Count { get; private set; }
 
-        public void Add(double newValue)
+        public void Add(float newValue)
         {
             Value += newValue;
             Count++;
         }
 
-        public void Average() { if (Count > 0) Value /= Count; }
+        public float Average { get { return Value / Count; } }
     }
-
+#if false
     public sealed class Environment3DAverager : Environment2DData<EarthCoordinate<List<AverageDatum>>>
     {
         public Environment3DAverager(IEnumerable<double> depths, IEnumerable<EarthCoordinate<List<AverageDatum>>> data)
@@ -507,13 +507,6 @@ namespace ESME.Environment
                 }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
         static void VerifyArrays(ICollection<double> left, IList<double> right, string name)
         {
             if (left.Count != right.Count) throw new ApplicationException(name + " array length mismatch");
@@ -621,4 +614,6 @@ namespace ESME.Environment
 
         #endregion
     }
+#endif
+
 }

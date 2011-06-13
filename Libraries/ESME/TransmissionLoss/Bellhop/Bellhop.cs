@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using ESME.Model;
+using ESME.Environment;
 
 namespace ESME.TransmissionLoss.Bellhop
 {
@@ -29,26 +30,9 @@ namespace ESME.TransmissionLoss.Bellhop
                 //if (SSP.DepthVector[SSP.DepthVector.Length - 1] < RealBottomDepth_Meters)
                 //    SoundSpeedProfile = ExtrapolateSSP(SoundSpeedProfile, RealBottomDepth_Meters);
 
-                double depth2;
-                var depth1 = depth2 = ssp.Depths[0];
-                double speed2;
-                var speed1 = speed2 = ssp.SoundSpeeds[0];
-                for (var i = 0; i < ssp.Depths.Length; i++)
-                {
-                    if (ssp.Depths[i] < maxCalculationDepthMeters)
-                    {
-                        depth1 = depth2;
-                        depth2 = ssp.Depths[i];
-                        speed1 = speed2;
-                        speed2 = ssp.SoundSpeeds[i];
-                        sw.WriteLine("{0:F} {1:F} /", ssp.Depths[i], ssp.SoundSpeeds[i]);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                sw.WriteLine("{0:F} {1:F} /", maxCalculationDepthMeters, ExtrapolateSSP(depth1, speed1, depth2, speed2, maxCalculationDepthMeters));
+                foreach (var depthValuePair in ssp.Data)
+                    sw.WriteLine("{0:F} {1:F} /", depthValuePair.Depth, depthValuePair.Value);
+
                 sw.WriteLine("'A*', 0.0"); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)
                 sw.WriteLine("{0:F} {1:F} {2:F} {3:F} {4:F} {5:F} /", maxCalculationDepthMeters, sediment.CompressionWaveSpeed, 0, sediment.Density, sediment.CompressionWaveCoefficient, 0);
                 // Source and Receiver Depths and Ranges
@@ -72,16 +56,6 @@ namespace ESME.TransmissionLoss.Bellhop
                 sw.WriteLine("0 {0:F} {1:F} ! step zbox(meters) rbox(km)", maxCalculationDepthMeters + 100, (transmissionLossJob.SoundSource.Radius / 1000.0) * 1.01);
                 return sw.ToString();
             }
-        }
-
-        static double ExtrapolateSSP(double depth1, double speed1, double depth2, double speed2, double desiredDepth)
-        {
-            var depthDelta1 = depth2 - depth1;
-            var speedDelta = speed2 - speed1;
-            var slope = speedDelta/depthDelta1;
-            var depthDelta2 = desiredDepth - depth2;
-            var finalSpeed = (slope*depthDelta2) + speed2;
-            return finalSpeed;
         }
     }
 }

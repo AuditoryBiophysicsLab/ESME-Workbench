@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using ESME.Environment.NAVO;
-using ESME.Model;
 using HRC.Navigation;
 using System.Windows;
 
@@ -55,6 +54,9 @@ namespace ESME.Environment
             Clear();
             AddRange(uniqueList);
         }
+
+        public IEnumerable<double> Longitudes { get { return this.Select(point => point.Longitude); } }
+        public IEnumerable<double> Latitudes { get { return this.Select(point => point.Latitude); } }
     }
 
     internal class EarthCoordinateComparer : IEqualityComparer<EarthCoordinate>

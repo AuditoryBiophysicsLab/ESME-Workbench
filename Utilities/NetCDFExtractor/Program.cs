@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
 using ESME.Environment.NAVO;
+using HRC.Navigation;
 using NetCDF;
 
 namespace ImportNetCDF
@@ -25,6 +27,7 @@ namespace ImportNetCDF
             var south = float.NaN;
             var east = float.NaN;
             var west = float.NaN;
+            var month = (NAVOTimePeriod) 0;
 
             if (args.Length < 1)
             {
@@ -83,13 +86,16 @@ namespace ImportNetCDF
                     case "-dataout":
                         outputDataFileName = args[++i];
                         break;
+                    case "-month":
+                        month = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), args[++i], true);
+                        break;
                     default:
                         Usage();
                         return;
                 }
             }
 
-            if ((netCdfFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (depthVarName == "") || (missingValueAttName == "") || (scaleFactorAttName == "") || (offsetValueAttName == ""))
+            if ((netCdfFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (depthVarName == "") || (missingValueAttName == "") || (scaleFactorAttName == "") || (offsetValueAttName == "") || (month == 0))
             {
                 Usage();
                 return;
@@ -97,17 +103,16 @@ namespace ImportNetCDF
 
             if (!File.Exists(netCdfFileName)) throw new FileNotFoundException("ImportNetCDF: File {0} not found", netCdfFileName);
 
-            ImportNetCdf(netCdfFileName, dataVarName, lonVarName, latVarName, depthVarName, missingValueAttName, scaleFactorAttName, offsetValueAttName, outputDataFileName, north, south, east, west);
+            ImportNetCdf(netCdfFileName, dataVarName, lonVarName, latVarName, depthVarName, missingValueAttName, scaleFactorAttName, offsetValueAttName, outputDataFileName, north, south, east, west, month);
 
             Console.WriteLine(@"success!");
         }
 
-        static void ImportNetCdf(string netCdfFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string outputDataFileName, float north, float south, float east, float west)
+        static void ImportNetCdf(string netCdfFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string outputDataFileName, float north, float south, float east, float west, NAVOTimePeriod month)
         {
             var myFile = new NcFile(netCdfFileName);
-            int depthCount, lonIndex, depth;
+            int lonIndex, depth;
             short missingValue;
-            double[] depths;
 
             myFile.LoadAllData();
 
@@ -141,21 +146,11 @@ namespace ImportNetCDF
             var selectedLons = lonMap.Select(x => x.Value).ToArray();
             var selectedLats = latMap.Select(x => x.Value).ToArray();
 
-
             Console.WriteLine(@"Initializing output file {0}...", Path.GetFileName(outputDataFileName));
 
-            if (depthVarName != String.Empty)
-            {
-                depthCount = (int) depthVar.Dimensions[0].Size;
-                depths = new double[depthCount];
-                for (depth = 0; depth < depthCount; depth++) depths[depth] = depthVar.GetFloat(depth);
-            }
-            else
-            {
-                depthCount = 1;
-                depths = new double[1];
-            }
-
+            var depthCount = (int) depthVar.Dimensions[0].Size;
+            var depths = new double[depthCount];
+            for (depth = 0; depth < depthCount; depth++) depths[depth] = depthVar.GetFloat(depth);
 
             var latCount = selectedLats.Length;
             var lonCount = selectedLons.Length;
@@ -163,16 +158,14 @@ namespace ImportNetCDF
             var scaleFactor = 1.0f;
             var addOffset = 0.0f;
             if (!short.TryParse(missingValueAttName, out missingValue))
-            {
                 if (missingValueAttName != String.Empty) missingValue = dataVar.Attributes[missingValueAttName].GetShort(0);
-            }
+
             if (scaleFactorAttName != String.Empty) scaleFactor = dataVar.Attributes[scaleFactorAttName].GetFloat(0);
             if (offsetValueAttName != String.Empty) addOffset = dataVar.Attributes[offsetValueAttName].GetFloat(0);
 
             Console.WriteLine(@"Importing source file {0}...", Path.GetFileName(netCdfFileName));
 
-            var serializedOutput = new SerializedOutput();
-            serializedOutput.DepthAxis.AddRange(depths.ToList()); 
+            var newField = new SoundSpeedField{TimePeriod = month};
 
             for (lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
@@ -186,40 +179,33 @@ namespace ImportNetCDF
                 {
                     var lat = latMap[latIndex].Value;
                     var latSourceIndex = latMap[latIndex].Index;
-                    var curDataPoint = new EnvironmentalDataPoint
-                                       {
-                                           Latitude = lat,
-                                           Longitude = wrappedLon,
-                                       };
+                    var newProfile = new SoundSpeedProfile(new EarthCoordinate(lat, wrappedLon));
                     if (depthVarName != String.Empty)
                     {
                         for (depth = 0; depth < depthCount; depth++)
                         {
                             var curValue = dataVar.GetShort(depth, latSourceIndex, lonSourceIndex);
 
-                            if (curValue != missingValue) curDataPoint.Data.Add(((curValue) * scaleFactor) + addOffset);
+                            if (curValue != missingValue) newProfile.Data.Add(new DepthValuePair<float>{Depth = depth, Value = ((curValue)*scaleFactor) + addOffset});
                         }
                     }
                     else
                     {
                         if (dataVar is NcVarFloat)
-                        {
-                            curDataPoint.Data.Add(dataVar.GetFloat(latSourceIndex, lonSourceIndex));
-                        }
+                            newProfile.Data.Add(new DepthValuePair<float>{Depth = 0, Value = dataVar.GetFloat(latSourceIndex, lonSourceIndex)});
                         else if (dataVar is NcVarShort)
-                        {
-                            curDataPoint.Data.Add(dataVar.GetShort(latSourceIndex, lonSourceIndex));
-                        }
+                            newProfile.Data.Add(new DepthValuePair<float>{Depth = 0, Value = dataVar.GetShort(latSourceIndex, lonSourceIndex)});
+                        else throw new DataException("Unexpected data type encountered while importing data from " + netCdfFileName);
                     }
-                    serializedOutput.DataPoints.Add(curDataPoint);
+                    if (newProfile.Data.Count > 0) newField.EnvironmentData.Add(newProfile);
                 }
             }
+            var writer = new SoundSpeed();
+            writer.SoundSpeedFields.Add(newField);
             Console.WriteLine(@"Saving imported data ... ");
-            serializedOutput.Save(outputDataFileName, null);
+            writer.Save(outputDataFileName);
             Console.WriteLine(@"done");
         }
-
-        
 
         static void Usage()
         {
