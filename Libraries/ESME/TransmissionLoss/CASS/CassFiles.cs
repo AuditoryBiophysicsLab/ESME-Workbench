@@ -47,34 +47,6 @@ namespace ESME.TransmissionLoss.CASS
             WriteEnvironmentFile(environmentFileName, bathymetry, sediment, soundSpeedField, wind);
         }
 
-        static string LargestFileInList(IEnumerable<string> files)
-        {
-            long largestFileSize = 0;
-            string largestFileName = null;
-            foreach (var file in files)
-            {
-                var curFileInfo = new FileInfo(file);
-                if (curFileInfo.Length <= largestFileSize) continue;
-                largestFileSize = curFileInfo.Length;
-                largestFileName = file;
-            }
-            return largestFileName;
-        }
-
-        public static void WriteBathymetryFile(string bathymetryFileName, Environment2DData bathymetry)
-        {
-            bathymetry.SaveToYXZ(bathymetryFileName, -1.0f);
-#if false
-            using (var bathyFile = new StreamWriter(bathymetryFileName, false))
-            {
-                bathyFile.WriteLine("BOTTOM DEPTH TABLE");
-                bathyFile.WriteLine("DEG       DEG       M         ");
-                for (var lat = _environment.Bathymetry.Latitudes.Length - 1; lat >= 0; lat--) for (var lon = 0; lon < _environment.Bathymetry.Longitudes.Length; lon++) bathyFile.WriteLine("{0,-10:0.0000}{1,-10:0.0000}{2,-10:0.0000}", _environment.Bathymetry.Latitudes[lat], _environment.Bathymetry.Longitudes[lon], -_environment.Bathymetry.Values[lat, lon]);
-                bathyFile.WriteLine("EOT");
-            }
-#endif
-        }
-
         public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IEnumerable<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName, NemoModeToAcousticModelNameMap modeToAcousticModelNameMap, float maxDepth)
         {
             if ((analysisPoints == null) || (analysisPoints.Count == 0)) return;
@@ -436,34 +408,29 @@ namespace ESME.TransmissionLoss.CASS
                 envFile.WriteLine("COMMENT TABLE");
                 envFile.WriteLine("EOT");
                 envFile.WriteLine();
-                var latitudes = soundSpeedField.EnvironmentData.Latitudes.ToList();
-                latitudes.Sort();
-                var longitudes = soundSpeedField.EnvironmentData.Longitudes.ToList();
-                longitudes.Sort();
-                foreach (var longitude in longitudes)
-                    foreach (var latitude in latitudes)
-                    {
-                        var location = new EarthCoordinate(latitude, longitude);
-                        var ssp = soundSpeedField.EnvironmentData[location];
-                        if (ssp.Data.Count == 0) continue;
+                foreach (var ssp in soundSpeedField.EnvironmentData)
+                {
+                    if (ssp.Data.Count == 0) continue;
 
-                        envFile.WriteLine("ENVIRONMENT LATITUDE  = {0:0.0###} DEG", latitude);
-                        envFile.WriteLine("ENVIRONMENT LONGITUDE = {0:0.0###} DEG", longitude);
-                        envFile.WriteLine("OCEAN SOUND SPEED TABLE");
-                        envFile.WriteLine("M         M/S       ");
-                        foreach (var datum in ssp.Data)
-                            if (!float.IsNaN(datum.Value)) envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", datum.Depth, datum.Value);
-                            else break;
-                        envFile.WriteLine("EOT");
-                        envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
-                        //var sedimentSample = sedimentType.Samples[location];
-                        //var sedimentTypeName = BottomSedimentTypeTable.Lookup(sedimentSample.Data.SampleValue).ToUpper();
-                        var findResult = BottomSedimentTypeTable.CASSMap.Find(mapEntry => mapEntry.Value == sedimentType.Samples[location].Data.SampleValue);
-                        var sedimentTypeName = findResult == null ? "SAND" : findResult.Name;
-                        envFile.WriteLine(sedimentTypeName);
-                        envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", wind[location].Data * 1.94384449);
-                        envFile.WriteLine();
-                    }
+                    envFile.WriteLine("ENVIRONMENT LATITUDE  = {0:0.0###} DEG", ssp.Latitude);
+                    envFile.WriteLine("ENVIRONMENT LONGITUDE = {0:0.0###} DEG", ssp.Longitude);
+                    envFile.WriteLine("OCEAN SOUND SPEED TABLE");
+                    envFile.WriteLine("M         M/S       ");
+                    foreach (var datum in ssp.Data)
+                        if (!float.IsNaN(datum.Value))
+                            envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", datum.Depth, datum.Value);
+                        else break;
+                    envFile.WriteLine("EOT");
+                    envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
+                    //var sedimentSample = sedimentType.Samples[location];
+                    //var sedimentTypeName = BottomSedimentTypeTable.Lookup(sedimentSample.Data.SampleValue).ToUpper();
+                    var findResult =
+                        BottomSedimentTypeTable.CASSMap.Find(mapEntry => mapEntry.Value == sedimentType.Samples[ssp].Data.SampleValue);
+                    var sedimentTypeName = findResult == null ? "SAND" : findResult.Name;
+                    envFile.WriteLine(sedimentTypeName);
+                    envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", wind[ssp].Data*1.94384449);
+                    envFile.WriteLine();
+                }
             }
         }
 

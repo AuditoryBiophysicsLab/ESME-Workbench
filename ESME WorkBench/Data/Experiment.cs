@@ -1159,13 +1159,6 @@ namespace ESMEWorkBench.Data
         {
             if (!isFromInitialize && !_isInitialized) return;
 
-#if false
-            // Graham - here's how to get the physical memory size for the current system
-            var info = new Microsoft.VisualBasic.Devices.ComputerInfo();
-            var bytes = info.TotalPhysicalMemory;
-            var megs = bytes >> 20;
-#endif
-
             if (ScenarioFileWatcher != null) ScenarioFileWatcher.Dispose();
             if (ScenarioFileName != null)
             {
@@ -1206,30 +1199,6 @@ namespace ESMEWorkBench.Data
             if (WindSpeed != null)
             {
                 DisplayEnvironmentData(WindSpeed.TimePeriods[0].EnvironmentData, "Wind", LayerType.WindSpeed, 3);
-#if false
-                const string windName = "Wind";
-                var windLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == windName);
-                if (windLayer == null)
-                {
-                    windLayer = new OverlayShapeMapLayer
-                    {
-                        Name = windName,
-                        CanBeReordered = true,
-                        CanChangeLineColor = true,
-                        CanChangeLineWidth = true,
-                        CanBeRemoved = false,
-                        LayerType = LayerType.WindSpeed,
-                        LineWidth = 8,
-                        IsChecked = false,
-                    };
-                    MapLayers.Add(windLayer);
-                }
-                windLayer.Clear();
-                foreach (var lon in WindSpeed.Longitudes)
-                    foreach (var lat in WindSpeed.Latitudes)
-                        windLayer.Add(new OverlayPoint(new EarthCoordinate(lat, lon)));
-                windLayer.Done();
-#endif
             }
 
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
@@ -1239,26 +1208,7 @@ namespace ESMEWorkBench.Data
             }
             if (SoundSpeedField != null)
             {
-                const string soundSpeedName = "Sound Speed";
-                var soundSpeedLayer = (OverlayShapeMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == soundSpeedName);
-                if (soundSpeedLayer == null)
-                {
-                    soundSpeedLayer = new OverlayShapeMapLayer
-                                      {
-                                          Name = soundSpeedName,
-                                          CanBeReordered = true,
-                                          CanChangeLineColor = true,
-                                          CanChangeLineWidth = true,
-                                          CanBeRemoved = false,
-                                          LayerType = LayerType.SoundSpeed,
-                                          LineWidth = 6,
-                                          IsChecked = false,
-                                      };
-                    MapLayers.Add(soundSpeedLayer);
-                }
-                soundSpeedLayer.Clear();
-                foreach (var soundSpeedProfile in SoundSpeedField.EnvironmentData) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
-                soundSpeedLayer.Done();
+                DisplayEnvironmentData(SoundSpeedField.EnvironmentData, "Sound Speed", LayerType.SoundSpeed, 3);
             }
 
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
