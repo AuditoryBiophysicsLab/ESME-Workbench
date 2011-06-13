@@ -83,10 +83,12 @@ namespace ImportNetCDF
                     case "-west":
                         west = float.Parse(args[++i]);
                         break;
-                    case "-dataout":
+                    case "-output":
+                    case "-out":
                         outputDataFileName = args[++i];
                         break;
                     case "-month":
+                    case "-mon":
                         month = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), args[++i], true);
                         break;
                     default:
@@ -95,7 +97,7 @@ namespace ImportNetCDF
                 }
             }
 
-            if ((netCdfFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (depthVarName == "") || (missingValueAttName == "") || (scaleFactorAttName == "") || (offsetValueAttName == "") || (month == 0))
+            if ((netCdfFileName == "") || (outputDataFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (depthVarName == "") || (missingValueAttName == "") || (scaleFactorAttName == "") || (offsetValueAttName == "") || (month == 0))
             {
                 Usage();
                 return;
@@ -111,7 +113,7 @@ namespace ImportNetCDF
         static void ImportNetCdf(string netCdfFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string outputDataFileName, float north, float south, float east, float west, NAVOTimePeriod month)
         {
             var myFile = new NcFile(netCdfFileName);
-            int lonIndex, depth;
+            int lonIndex, depthIndex;
             short missingValue;
 
             myFile.LoadAllData();
@@ -149,8 +151,8 @@ namespace ImportNetCDF
             Console.WriteLine(@"Initializing output file {0}...", Path.GetFileName(outputDataFileName));
 
             var depthCount = (int) depthVar.Dimensions[0].Size;
-            var depths = new double[depthCount];
-            for (depth = 0; depth < depthCount; depth++) depths[depth] = depthVar.GetFloat(depth);
+            var depths = new float[depthCount];
+            for (depthIndex = 0; depthIndex < depthCount; depthIndex++) depths[depthIndex] = depthVar.GetFloat(depthIndex);
 
             var latCount = selectedLats.Length;
             var lonCount = selectedLons.Length;
@@ -165,7 +167,9 @@ namespace ImportNetCDF
 
             Console.WriteLine(@"Importing source file {0}...", Path.GetFileName(netCdfFileName));
 
-            var newField = new SoundSpeedField{TimePeriod = month};
+            var writer = new SoundSpeed();
+            var newField = new SoundSpeedField { TimePeriod = month };
+            writer.SoundSpeedFields.Add(newField);
 
             for (lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
@@ -180,29 +184,15 @@ namespace ImportNetCDF
                     var lat = latMap[latIndex].Value;
                     var latSourceIndex = latMap[latIndex].Index;
                     var newProfile = new SoundSpeedProfile(new EarthCoordinate(lat, wrappedLon));
-                    if (depthVarName != String.Empty)
+                    for (depthIndex = 0; depthIndex < depthCount; depthIndex++)
                     {
-                        for (depth = 0; depth < depthCount; depth++)
-                        {
-                            var curValue = dataVar.GetShort(depth, latSourceIndex, lonSourceIndex);
-
-                            if (curValue != missingValue) newProfile.Data.Add(new DepthValuePair<float>{Depth = depth, Value = ((curValue)*scaleFactor) + addOffset});
-                        }
-                    }
-                    else
-                    {
-                        if (dataVar is NcVarFloat)
-                            newProfile.Data.Add(new DepthValuePair<float>{Depth = 0, Value = dataVar.GetFloat(latSourceIndex, lonSourceIndex)});
-                        else if (dataVar is NcVarShort)
-                            newProfile.Data.Add(new DepthValuePair<float>{Depth = 0, Value = dataVar.GetShort(latSourceIndex, lonSourceIndex)});
-                        else throw new DataException("Unexpected data type encountered while importing data from " + netCdfFileName);
+                        var curValue = dataVar.GetShort(depthIndex, latSourceIndex, lonSourceIndex);
+                        if (curValue == missingValue) break;
+                        newProfile.Data.Add(new DepthValuePair<float>(depths[depthIndex], ((curValue) * scaleFactor) + addOffset));
                     }
                     if (newProfile.Data.Count > 0) newField.EnvironmentData.Add(newProfile);
                 }
             }
-            newField.EnvironmentData.RemoveDuplicates();
-            var writer = new SoundSpeed();
-            writer.SoundSpeedFields.Add(newField);
             Console.WriteLine(@"Saving imported data ... ");
             writer.Save(outputDataFileName);
             Console.WriteLine(@"done");
@@ -210,16 +200,50 @@ namespace ImportNetCDF
 
         static void Usage()
         {
-            Console.WriteLine( // ReSharper disable LocalizableElement
-                "Usage: {0} -input <netCDFFileName>\n" + "                    -data <DataVariable>\n" + "                    -lon <LongitudeVariable>\n" + "                    -lat <LatitudeVariable>\n" + "                   [-depth <DepthVariable>]\n" + "                   [-missingvalue <MissingValueAttribute>]\n" + "                   [-scalefactor <ScaleFactorAttribute>]\n" + "                   [-offset <OffsetValueAttribute>]\n" + "                   [-output <OutputFileName>]\n" +
-                "                    -layertype <OutputLayerType>\n" + "                    -period <TimePeriod>\n" + "                   [-force]\n" + "\n" + "Where: <netCDFFileName> is the full path to an UNCOMPRESSED NetCDF file,\n" + "       typically provided by OAML for the GDEM-V and the DBDB-V datasets.\n" + "\n" + "       <DataVariable> is the name of the NetCDF variable that contains the\n" + "       'payload' data.\n" + "\n" +
-                "       <LongitudeVariable> is the name of the NetCDF variable that contains the\n" + "       array of longitudes present in the payload data\n" + "\n" + "       <LatitudeVariable> is the name of the NetCDF variable that contains the\n" + "       array of latitudes present in the payload data\n" + "\n" + "       <DepthVariable> is the name of the NetCDF variable that contains the\n" + "       array of depths present in the payload data.  Only required for 3-D data\n" +
-                "       sets.\n" + "\n" + "       <MissingValueAttribute> is the name of the NetCDF attribute of\n" + "       <DataVariable> that contains the value used to represent a 'no data'\n" + "       condition in the payload dataset. Not all data sets have this attribute.\n" + "\n" + "       <ScaleFactorAttribute> is the name of the NetCDF attribute of\n" + "       <DataVariable> that contains the value used to scale the data into\n" +
-                "       its final range. Not all data sets have this attribute.\n" + "\n" + "       <OffsetValueAttribute> is the name of the NetCDF attribute of\n" + "       <DataVariable> that contains the value used to offset the scaled data\n" + "       to its final value. Not all data sets have this attribute.\n" + "\n" + "       <OutputFileName> is the name of the ESME Environment Binary (.eeb) file\n" + "       that will contain the data imported from the specified NetCDF file.\n" +
-                "       If <OutputFileName> is not specified, <netCDFFileName> will be used\n" + "       with a .eeb extension in place of the source file extension.\n" + "\n" + "       <OutputLayerType> is one of a list of types supported by this utility.\n" + "       Legal values for <OutputLayerType> are as follows:\n" + "       wind, soundspeed, bathymetry, bottomtype, temperature, salinity,\n" + "       temperature_std_dev, salinity_std_dev\n" + "\n" +
-                "       The value specified should match the data in the file being imported, or\n" + "       the output of this utility will be unpredictable.\n" + "\n" + "       <TimePeriod> is the time period represented by the data in the file\n" + "       Some examples of time periods would be the names of months or seasons.\n" + "\n" + "       -force will force the utility to re-import the input file if the\n" +
-                "       output file already exists.  Normally in this situation, no action would\n" + "       be taken.\n" + "", "ImportNetCDF");
-            // ReSharper restore LocalizableElement
+            Console.WriteLine(
+                "Usage: ImportNetCDF -input <netCDFFileName>\n" +
+                "                    -data <DataVariable>\n" +
+                "                    -lon <LongitudeVariable>\n" +
+                "                    -lat <LatitudeVariable>\n" +
+                "                    -depth <DepthVariable> \n" +
+                "                    -missingvalue <MissingValueAttribute> \n" +
+                "                    -scalefactor <ScaleFactorAttribute> \n" +
+                "                    -offset <OffsetValueAttribute> \n" +
+                "                    -output <OutputFileName> \n" +
+                "                    -month <MonthName>\n" +
+                "\n" +
+                "Where: <netCDFFileName> is the full path to an UNCOMPRESSED NetCDF file,\n" +
+                "       typically provided by OAML for the GDEM-V and the DBDB-V datasets.\n" +
+                "\n" +
+                "       <DataVariable> is the name of the NetCDF variable that contains the\n" +
+                "       'payload' data.\n" +
+                "\n" +
+                "       <LongitudeVariable> is the name of the NetCDF variable that contains the\n" +
+                "       array of longitudes present in the payload data\n" +
+                "\n" +
+                "       <LatitudeVariable> is the name of the NetCDF variable that contains the\n" +
+                "       array of latitudes present in the payload data\n" +
+                "\n" +
+                "       <DepthVariable> is the name of the NetCDF variable that contains the\n" +
+                "       array of depths present in the payload data.\n" +
+                "\n" +
+                "       <MissingValueAttribute> is the name of the NetCDF attribute of\n" +
+                "       <DataVariable> that contains the value used to represent a 'no data'\n" +
+                "       condition in the payload dataset.\n" +
+                "\n" +
+                "       <ScaleFactorAttribute> is the name of the NetCDF attribute of\n" +
+                "       <DataVariable> that contains the value used to scale the data into\n" +
+                "       its final range.\n" +
+                "\n" +
+                "       <OffsetValueAttribute> is the name of the NetCDF attribute of\n" +
+                "       <DataVariable> that contains the value used to offset the scaled data\n" +
+                "       to its final value.\n" +
+                "\n" +
+                "       <OutputFileName> is the name of the XML file that will contain the data\n" +
+                "       imported from the specified NetCDF file.\n" +
+                "\n" +
+                "       <MonthName> is the time period represented <netCDFFileName>.\n" +
+                "\n");
         }
     }
 }

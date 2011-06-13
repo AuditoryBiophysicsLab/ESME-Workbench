@@ -94,7 +94,7 @@ namespace ESME.Environment.NAVO
                 var temperature = temperatureProfile.Data[index];
                 var salinity = salinityProfile.Data[index];
                 if (temperature.Depth != salinity.Depth) throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity depths do not match");
-                results.Data.Add(new DepthValuePair<float>{Depth = temperature.Depth, Value = SoundSpeed(temperatureProfile, temperature.Depth, temperature.Value, salinity.Value)});
+                results.Data.Add(new DepthValuePair<float>(temperature.Depth, SoundSpeed(temperatureProfile, (float)temperature.Depth, temperature.Value, salinity.Value)));
             }
             return results;
         }

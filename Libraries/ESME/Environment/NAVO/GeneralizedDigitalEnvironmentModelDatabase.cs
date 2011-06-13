@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Windows;
 using System.IO;
 using System.Linq;
 using HRC.Navigation;
@@ -91,10 +90,13 @@ namespace ESME.Environment.NAVO
             const string missingParamName = "missing_value";
             const string scaleParamName = "scale_factor";
             const string offsetParamName = "add_offset";
-            var commandArgs = string.Format("-in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11}  -dataout \"{12}\" -month {13}",
+            var commandArgs = string.Format("-in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11} -out \"{12}\" -mon {13}",
                 sourceFileName, lonParamName, latParamName, expandedArea.North, expandedArea.South, expandedArea.East, expandedArea.West, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, outputFileName, month);
+            //using (var temp = new StreamWriter(Path.GetFileNameWithoutExtension(outputFileName) + "_extract.bat", false))
+            //{
+            //    temp.WriteLine("{0} {1}", ExtractionProgramPath, commandArgs);
+            //}
             NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, Path.GetDirectoryName(outputFileName), RequiredSupportFiles);
-
             if (useExpandedExtractionArea) return;
             
             var field = SoundSpeed.Load(outputFileName);
@@ -148,6 +150,8 @@ namespace ESME.Environment.NAVO
             var field = new SoundSpeedField {TimePeriod = outputTimePeriod};
             foreach (var salinityPoint in salinityField.EnvironmentData)
                 field.EnvironmentData.Add(ChenMilleroLi.SoundSpeed(salinityPoint, temperatureField.EnvironmentData[salinityPoint]));
+            field.DeepestPoint = deepestPoint;
+            field.ExtendProfiles(temperatureField, salinityField);
             result.SoundSpeedFields.Add(field);
             result.Save(soundspeedFilename);
         }

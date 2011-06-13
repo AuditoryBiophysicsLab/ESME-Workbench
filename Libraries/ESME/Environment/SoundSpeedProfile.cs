@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 
@@ -15,13 +16,13 @@ namespace ESME.Environment
         {
             if (Data.Count == 0)
                 foreach (var datum in profile.Data)
-                    Data.Add(new DepthValuePair<AverageDatum>{Depth = datum.Depth, Value = new AverageDatum(datum.Value)});
+                    Data.Add(new DepthValuePair<AverageDatum>(datum.Depth, new AverageDatum(datum.Value)));
             else
                 foreach (var datum in profile.Data)
                 {
                     var averagerAtDepth = Data[datum.Depth];
                     if (averagerAtDepth != null) averagerAtDepth.Value.Add(datum.Value);
-                    else Data.Add(new DepthValuePair<AverageDatum> { Depth = datum.Depth, Value = new AverageDatum(datum.Value) });
+                    else Data.Add(new DepthValuePair<AverageDatum>(datum.Depth, new AverageDatum(datum.Value)));
                 }
         }
 
@@ -31,7 +32,7 @@ namespace ESME.Environment
             {
                 var result = new SoundSpeedProfile(this);
                 foreach (var datum in Data)
-                    result.Data.Add(new DepthValuePair<float> { Depth = datum.Depth, Value = datum.Value.Average });
+                    result.Data.Add(new DepthValuePair<float>(datum.Depth, datum.Value.Average));
                 return result;
             }
         }
@@ -64,7 +65,7 @@ namespace ESME.Environment
             var tempDiff = tempD1 - tempD;
             var newTemp = tempD - tempDiff;
             var soundSpeed = ChenMilleroLi.SoundSpeed(this, newMaxDepth, newTemp, salinity);
-            Data.Add(new DepthValuePair<float> {Depth = newMaxDepth, Value = soundSpeed});
+            Data.Add(new DepthValuePair<float>(newMaxDepth, soundSpeed));
         }
 
         /// <summary>
@@ -100,7 +101,7 @@ namespace ESME.Environment
                     {
                         var newSpeed = templateSSP.Data[speedIndex].Value - ssDiff;
                         //System.Diagnostics.Debug.WriteLine("    Template soundspeed at {0}m: Original: {1} Adjusted: {2}", templateSSP.Depths[speedIndex], templateSSP.SoundSpeeds[speedIndex], newSpeed);
-                        Data.Add(new DepthValuePair<float> { Depth = templateSSP.Data[speedIndex].Depth, Value = newSpeed});
+                        Data.Add(new DepthValuePair<float>(templateSSP.Data[speedIndex].Depth, newSpeed));
                     }
                 }
             }
@@ -111,11 +112,17 @@ namespace ESME.Environment
     public class DepthValuePairs<T> : List<DepthValuePair<T>>
     {
         public DepthValuePairs() { }
+        
+        [XmlIgnore]
         public DepthValuePair<T> this[float depth] { get { return Find(d => d.Depth == depth); } }
+        new public DepthValuePair<T> this[int depthIndex] { get { return base[depthIndex]; } }
+        [XmlIgnore]
         public IEnumerable<float> Depths { get { return this.Select(pair => pair.Depth); } }
+        [XmlIgnore]
         public IEnumerable<T> Values { get { return this.Select(pair => pair.Value); } }
-        public float MinDepth { get { return Depths.First(); } }
-        public float MaxDepth { get { return Depths.Last(); } }
+        [XmlIgnore]
+        public double MaxDepth { get { return Depths.Last(); } }
+
         new public void Add(DepthValuePair<T> item)
         {
             base.Add(item);
@@ -129,17 +136,25 @@ namespace ESME.Environment
         }
     }
 
-    public class DepthValuePair<T> : IComparable<DepthValuePair<T>>, IComparer<DepthValuePair<T>>
+    public class DepthValuePair<TValue> : IComparable<DepthValuePair<TValue>>, IComparer<DepthValuePair<TValue>>
     {
         public DepthValuePair() { }
+
+        public DepthValuePair(float depth, TValue value)
+        {
+            Depth = depth;
+            Value = value;
+        }
+
         public float Depth { get; set; }
-        public T Value { get; set; }
-        public int CompareTo(DepthValuePair<T> other)
+        public TValue Value { get; set; }
+
+        public int CompareTo(DepthValuePair<TValue> other)
         {
             return Depth.CompareTo(other.Depth);
         }
 
-        public int Compare(DepthValuePair<T> x, DepthValuePair<T> y)
+        public int Compare(DepthValuePair<TValue> x, DepthValuePair<TValue> y)
         {
             return x.CompareTo(y);
         }
