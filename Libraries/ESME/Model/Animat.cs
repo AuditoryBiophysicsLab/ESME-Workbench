@@ -290,7 +290,7 @@ namespace ESME.Model
     public class DDB
     {
         #region public properties {get; internal set;}
-
+        //not all of these are ever set; the header load procedure terminates once we have determined the species name, output configuration, and total number of animats -- it's all we need.
         public string Filename { get; internal set; }
         public string SpeciesFilePath { get; internal set; }
         public int MbLibSuperVersion { get; internal set; }
@@ -339,9 +339,14 @@ namespace ESME.Model
         public List<EarthCoordinate> AnimatStartPoints { get; internal set; }
 
         #endregion
-
+        /// <summary>
+        /// the header load procedure terminates once we have determined the species name, output configuration, and total number of animats -- it's all we need to display points on a map.
+        /// </summary>
+        /// <param name="fileName">the full path to the .ddb file</param>
+        /// <returns></returns>
         public static DDB Load(string fileName)
         {
+            if(Path.GetExtension(fileName) != ".ddb") throw new FileFormatException("only ddb files are supported.");
             var result = new DDB();
             result.Filename = fileName;
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
@@ -574,7 +579,10 @@ namespace ESME.Model
             }
             return result;
         }
-
+        /// <summary>
+        /// jumps the .ddb header, and then populates AnimatStartPoints with the starting locations of every animat in the file.
+        /// </summary>
+        /// <param name="reader"></param>
         private void ReadStartPositions(BinaryReader reader)
         {
             reader.BaseStream.Seek(1040, SeekOrigin.Begin); // skip the .ddb header
@@ -601,7 +609,11 @@ namespace ESME.Model
                 //skip its data because we don't care.
             }
         }
-
+        /// <summary>
+        /// takes MbOutputConfiguration and determines the size of each animat's packed data.
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <returns></returns>
         private static int GetSize(int bitmap)
         {
             int size = 0;
@@ -621,18 +633,5 @@ namespace ESME.Model
 
             return size;
         }
-    }
-
-    internal class DDBSpecies
-    {
-        public int Population { get; set; }
-        public string SpeciesName { get; internal set; }
-        //  public SpeciesEntry SpeciesEntry { get; internal set; }
-        // public SpeciesCode SpeciesCode { get; internal set; }
-    }
-
-    internal class AnimatStartPositions
-    {
-        public EarthCoordinate Location { get; internal set; }
     }
 }
