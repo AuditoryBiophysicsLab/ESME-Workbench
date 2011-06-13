@@ -104,10 +104,6 @@
             <!-- External executables -->
 
             <!-- OAML extraction programs -->
-            <!-- SMGC extraction program -->
-            <File Id="SMGCExtract.exe"
-                  Name="SMGCExtract.exe"
-                  Source="$(var.ExtractionProgramsPath)\SMGCExtract.exe" />
             <!-- GDEM Database Extractor (NetCDF format) -->
             <File Id="ImportNetCDF.exe"
                   Name="ImportNetCDF.exe"

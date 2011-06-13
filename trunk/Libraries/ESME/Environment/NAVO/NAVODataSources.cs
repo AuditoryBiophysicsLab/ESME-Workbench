@@ -192,7 +192,8 @@ namespace ESME.Environment.NAVO
             // uniqueMonths * 3 because we're counting Temp, and Salinity extraction, and Soundspeed creation as independent steps.
             // SelectedTimePeriods.Count() is for averaging the soundspeed fields
             // and the extra 2 is for extracting bathymetry and sediment data which are time invariant
-            var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + SelectedTimePeriods.Count() + 2);
+            var averagedSoundSpeedFieldTimePeriods = SelectedTimePeriods.Where(t => GetMonthIndices(t).Count() > 1);
+            var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + averagedSoundSpeedFieldTimePeriods.Count() + 2);
             if (ExportCASSData) totalExtractionStepCount += SelectedTimePeriods.Count();
 
             totalExtractionStepCount += SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1).Count();
@@ -207,7 +208,7 @@ namespace ESME.Environment.NAVO
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
             //var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryCHBFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var bathymetry = Environment2DData.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
-            var maxDepth = bathymetry.Minimum;
+            var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";
@@ -226,14 +227,13 @@ namespace ESME.Environment.NAVO
 
                 Status = "Calculating sound speed data for " + month;
                 GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(tempDirectory, month, maxDepth);
-                if (backgroundWorker.CancellationPending) return;
                 ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
+                if (backgroundWorker.CancellationPending) return;
             }
 
-            foreach (var timePeriod in SelectedTimePeriods)
+            foreach (var timePeriod in averagedSoundSpeedFieldTimePeriods)
             {
                 var monthIndices = GetMonthIndices(timePeriod);
-                if (monthIndices.Count() <= 1) continue;
                 Status = "Calculating average soundspeed data for " + timePeriod;
                 GeneralizedDigitalEnvironmentModelDatabase.AverageMonthlyData(tempDirectory, monthIndices, timePeriod);
                 if (backgroundWorker.CancellationPending) return;
