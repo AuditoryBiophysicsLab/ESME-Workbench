@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Windows;
 using System.IO;
 using System.Linq;
-using ESME.Model;
 using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
@@ -14,11 +14,6 @@ namespace ESME.Environment.NAVO
                                                   {
                                                       "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
                                                   };
-
-        public static readonly List<Type> ReferencedTypes = new List<Type>
-        {
-            typeof (Point)
-        };
 
         const string SalinityVariableName = "salinity";
         const string TemperatureVariableName = "water_temp";
@@ -73,20 +68,21 @@ namespace ESME.Environment.NAVO
         static string NUWCTemperatureFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_t.nc"; }
         static string NUWCSalinityFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
 
-        public static void ExtractAreaFromMonthFile(string outputPath, GeoRect extractionArea, NAVOTimePeriod monthIndex)
+        public static void ExtractAreaFromMonthFile(string outputPath, GeoRect extractionArea, NAVOTimePeriod month, bool useExpandedExtractionArea)
         {
-            ExtractAreaFromMonthFile(SalinityFile(monthIndex), OutputFileName(outputPath, monthIndex, SalinityVariableName), SalinityVariableName, extractionArea);
-            ExtractAreaFromMonthFile(TemperatureFile(monthIndex), OutputFileName(outputPath, monthIndex, TemperatureVariableName), TemperatureVariableName, extractionArea);
+            ExtractAreaFromMonthFile(SalinityFile(month), OutputFileName(outputPath, month, SalinityVariableName), SalinityVariableName, extractionArea, month, useExpandedExtractionArea);
+            ExtractAreaFromMonthFile(TemperatureFile(month), OutputFileName(outputPath, month, TemperatureVariableName), TemperatureVariableName, extractionArea, month, useExpandedExtractionArea);
         }
 
         public static string SalinityFilename(string outputPath, NAVOTimePeriod timePeriod) { return OutputFileName(outputPath, timePeriod, SalinityVariableName); }
         public static string TemperatureFilename(string outputPath, NAVOTimePeriod timePeriod) { return OutputFileName(outputPath, timePeriod, TemperatureVariableName); }
         public static string SoundspeedFilename(string outputPath, NAVOTimePeriod timePeriod) { return OutputFileName(outputPath, timePeriod, SoundspeedVariableName); }
 
-        static void ExtractAreaFromMonthFile(string sourceFileName, string outputFileName, string dataType, GeoRect extractionArea)
+        static void ExtractAreaFromMonthFile(string sourceFileName, string outputFileName, string dataType, GeoRect extractionArea, NAVOTimePeriod month, bool useExpandedExtractionArea)
         {
             if (File.Exists(outputFileName)) File.Delete(outputFileName);
 
+            var expandedArea = new GeoRect(Math.Ceiling(extractionArea.North), Math.Floor(extractionArea.South), Math.Ceiling(extractionArea.East), Math.Floor(extractionArea.West));
             //extract temperature data into a XML file
             //for sanity:
             const string lonParamName = "lon";
@@ -95,9 +91,16 @@ namespace ESME.Environment.NAVO
             const string missingParamName = "missing_value";
             const string scaleParamName = "scale_factor";
             const string offsetParamName = "add_offset";
-            var commandArgs = string.Format("-in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11}  -dataout \"{12}\"",
-                sourceFileName, lonParamName, latParamName, extractionArea.North, extractionArea.South, extractionArea.East, extractionArea.West, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, outputFileName);
+            var commandArgs = string.Format("-in \"{0}\" -lon {1} -lat {2} -north {3} -south {4} -east {5} -west {6} -dep {7}  -mv {8} -data {9} -sf {10} -offset {11}  -dataout \"{12}\" -month {13}",
+                sourceFileName, lonParamName, latParamName, expandedArea.North, expandedArea.South, expandedArea.East, expandedArea.West, depthParamName, missingParamName, dataType, scaleParamName, offsetParamName, outputFileName, month);
             NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, Path.GetDirectoryName(outputFileName), RequiredSupportFiles);
+
+            if (useExpandedExtractionArea) return;
+            
+            var field = SoundSpeed.Load(outputFileName);
+            foreach (var dataField in field.SoundSpeedFields)
+                dataField.EnvironmentData.TrimToNearestPoints(extractionArea);
+            field.Save(outputFileName);
         }
 
         public static void AverageMonthlyData(string outputPath, IEnumerable<NAVOTimePeriod> monthIndices, NAVOTimePeriod outputTimePeriod)
@@ -114,36 +117,15 @@ namespace ESME.Environment.NAVO
         {
             if (monthFileNames.Count <= 1) throw new ApplicationException("Can't average data over several months if the list of months is not longer than one");
             var outputFileName = OutputFileName(Path.GetDirectoryName(monthFileNames[0]), (int) outputTimePeriod, dataType);
-            Environment3DAverager accumulator = null;
-            var depthAxisAggregator = new List<float>();
+            var accumulator = new SoundSpeedFieldAverager { TimePeriod = outputTimePeriod };
             foreach (var monthFileName in monthFileNames)
             {
-                var dataOutput = SerializedOutput.Load(monthFileName, ReferencedTypes);
-
-                var results = ExtractValues(dataOutput);
-                var depthAxis = results.Depths.Select(x => (float)x).ToArray();
-                depthAxisAggregator.AddRange(depthAxis);
-                if (accumulator == null) accumulator = results;
-                else accumulator.Add(results);
+                var dataOutput = SoundSpeed.Load(monthFileName).SoundSpeedFields[0];
+                accumulator.Add(dataOutput);
             }
-            if (accumulator == null) throw new ApplicationException("AverageMonthData: No data was averaged");
-            accumulator.Average();
-            var result = new SerializedOutput();
-            result.DepthAxis.AddRange(accumulator.Depths);
-            for (var lonIndex = 0; lonIndex < accumulator.FieldData.GetLength(0); lonIndex++)
-                for (var latIndex = 0; latIndex < accumulator.FieldData.GetLength(1); latIndex++)
-                {
-                    var dataValues = from location in accumulator.FieldData[lonIndex, latIndex].Data
-                                     select location.Value;
-                    var dataPoint = new EnvironmentalDataPoint
-                    {
-                        Latitude = accumulator.Latitudes[latIndex],
-                        Longitude = accumulator.Longitudes[lonIndex],
-                    };
-                    dataPoint.Data.AddRange(dataValues.ToList());
-                    result.DataPoints.Add(dataPoint);
-                }
-            result.Save(outputFileName, ReferencedTypes);
+            var outputFile = new SoundSpeed();
+            outputFile.SoundSpeedFields.Add(accumulator.Average);
+            outputFile.Save(outputFileName);
         }
 
         public static void CreateSoundSpeedFile(string outputPath, NAVOTimePeriod outputTimePeriod, EarthCoordinate<float> deepestPoint)
@@ -151,60 +133,29 @@ namespace ESME.Environment.NAVO
             var temperatureFileName = OutputFileName(outputPath, (int)outputTimePeriod, TemperatureVariableName);
             var salinityFileName = OutputFileName(outputPath, (int)outputTimePeriod, SalinityVariableName);
             var soundspeedFileName = OutputFileName(outputPath, (int)outputTimePeriod, SoundspeedVariableName);
-            CreateSoundSpeedFile(temperatureFileName, salinityFileName, soundspeedFileName, deepestPoint);
+            CreateSoundSpeedFile(temperatureFileName, salinityFileName, soundspeedFileName, deepestPoint, outputTimePeriod);
             File.Delete(temperatureFileName);
             File.Delete(salinityFileName);
         }
 
-        static void CreateSoundSpeedFile(string temperatureFilename, string salinityFilename, string soundspeedFilename, EarthCoordinate<float> deepestPoint)
+        static void CreateSoundSpeedFile(string temperatureFilename, string salinityFilename, string soundspeedFilename, EarthCoordinate<float> deepestPoint, NAVOTimePeriod outputTimePeriod)
         {
-            var salinityField = SerializedOutput.Load(salinityFilename, ReferencedTypes);
-            var latitudes = salinityField.Latitudes;
-            var longitudes = salinityField.Longitudes;
+            var salinityField = SoundSpeed.Load(salinityFilename).SoundSpeedFields[0];
+            var temperatureField = SoundSpeed.Load(temperatureFilename).SoundSpeedFields[0];
 
-            var temperatureField = SerializedOutput.Load(temperatureFilename, ReferencedTypes);
-            
-            var soundSpeedField = new SerializedOutput();
-            soundSpeedField.DepthAxis.AddRange(temperatureField.DepthAxis);
-            var depthArray = (from depth in temperatureField.DepthAxis
-                              select (float)depth).ToArray();
-            
-            foreach (var latitude in latitudes)
-                foreach (var longitude in longitudes)
-                {
-                    var curLat = latitude;
-                    var curLon = longitude;
-                    var temperaturePoint = temperatureField.DataPoints.Find(x => x.Latitude == curLat && x.Longitude == curLon);
-                    var salinityPoint = salinityField.DataPoints.Find(x => x.Latitude == curLat && x.Longitude == curLon);
-                    var soundSpeedData = new EnvironmentalDataPoint
-                    {
-                        Latitude = curLat,
-                        Longitude = curLon,
-                    };
-                    if ((temperaturePoint == null) || (salinityPoint == null)) continue;
-                    var curPointDepths = new float[Math.Max(temperaturePoint.Data.Count, salinityPoint.Data.Count)];
-                    Array.Copy(depthArray, curPointDepths, curPointDepths.Length);
-                    var curPointTemps = (from temperature in temperaturePoint.Data
-                                         select (float)temperature).ToArray();
-                    var curPointSalinities = (from salinity in salinityPoint.Data
-                                              select (float)salinity).ToArray();
-                    var curPointSoundSpeeds = ChenMilleroLi.SoundSpeed(temperaturePoint, ref curPointDepths, ref curPointTemps, ref curPointSalinities);
-                    soundSpeedData.Data.AddRange(from soundSpeed in curPointSoundSpeeds select (double)soundSpeed);
-                    soundSpeedField.DataPoints.Add(soundSpeedData);
-                }
-            var ssf = new Model.SoundSpeedField(soundSpeedField, "", deepestPoint);
-            ssf.ExtendProfilesToDepth(Math.Abs(deepestPoint.Data), temperatureField, salinityField);
-            ((SerializedOutput)ssf).Save(soundspeedFilename, ReferencedTypes);
+            ValidateThatProfilePointsMatch(salinityField, temperatureField);
+            var result = new SoundSpeed();
+            var field = new SoundSpeedField {TimePeriod = outputTimePeriod};
+            foreach (var salinityPoint in salinityField.EnvironmentData)
+                field.EnvironmentData.Add(ChenMilleroLi.SoundSpeed(salinityPoint, temperatureField.EnvironmentData[salinityPoint]));
+            result.SoundSpeedFields.Add(field);
+            result.Save(soundspeedFilename);
         }
 
-        private static Environment3DAverager ExtractValues(SerializedOutput data)
+        static void ValidateThatProfilePointsMatch(TimePeriodEnvironmentData<SoundSpeedProfile> profile1, TimePeriodEnvironmentData<SoundSpeedProfile> profile2)
         {
-            //var points = new Dictionary<string, List<double>>();
-            var depths = data.DepthAxis;
-            var averageData = (from point in data.DataPoints
-                               where point.Data != null
-                               select new EarthCoordinate<List<AverageDatum>>(point.Latitude, point.Longitude, point.Data.Select(datum => new AverageDatum(datum)).ToList())).ToList();
-            return new Environment3DAverager(depths, averageData);
+            foreach (var point1 in profile1.EnvironmentData.Where(point1 => !profile2.EnvironmentData.Any(point1.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point1));
+            foreach (var point2 in profile2.EnvironmentData.Where(point2 => !profile1.EnvironmentData.Any(point2.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point2));
         }
     }
 }

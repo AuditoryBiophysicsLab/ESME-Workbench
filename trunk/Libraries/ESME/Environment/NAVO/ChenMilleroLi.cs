@@ -85,6 +85,20 @@ namespace ESME.Environment.NAVO
             return results;
         }
 
+        public static SoundSpeedProfile SoundSpeed(SoundSpeedProfile temperatureProfile, SoundSpeedProfile salinityProfile)
+        {
+            if (temperatureProfile.Data.Count != salinityProfile.Data.Count) throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity profiles are of unequal length");
+            var results = new SoundSpeedProfile(temperatureProfile);
+            for (var index = 0; index < temperatureProfile.Data.Count; index++)
+            {
+                var temperature = temperatureProfile.Data[index];
+                var salinity = salinityProfile.Data[index];
+                if (temperature.Depth != salinity.Depth) throw new ApplicationException("ChenMilleroLi.SoundSpeed: Unable to calculate sound speed if temperature and salinity depths do not match");
+                results.Data.Add(new DepthValuePair<float>{Depth = temperature.Depth, Value = SoundSpeed(temperatureProfile, temperature.Depth, temperature.Value, salinity.Value)});
+            }
+            return results;
+        }
+
         public static float SoundSpeed(EarthCoordinate location, float depth, float temperature, float salinity)
         {
             var tempSq = temperature * temperature;

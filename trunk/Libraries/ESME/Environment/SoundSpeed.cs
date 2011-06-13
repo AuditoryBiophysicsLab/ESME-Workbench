@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 using ESME.Environment.NAVO;
-using ESME.Model;
-using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.Environment
@@ -40,38 +37,4 @@ namespace ESME.Environment
             get { return SoundSpeedFields.Find(t => t.TimePeriod == timePeriod); }
         }
     }
-
-    public class SoundSpeedField : TimePeriodEnvironmentData<SoundSpeedProfile>
-    {
-        new public static readonly List<Type> ReferencedTypes = new List<Type>(TimePeriodEnvironmentData<SoundSpeedProfile>.ReferencedTypes);
-
-        [XmlIgnore]
-        public SoundSpeedProfile DeepestSSP { get; set; }
-
-        public SoundSpeedField(SerializedOutput serializedOutput, NAVOTimePeriod timePeriod)
-        {
-            TimePeriod = timePeriod;
-            foreach (var profile in serializedOutput.DataPoints)
-                EnvironmentData.Add(new SoundSpeedProfile(profile, serializedOutput.DepthAxis));
-            foreach (var profile in EnvironmentData) DeepestSSP = (DeepestSSP != null) ? (DeepestSSP.MaxDepth < profile.MaxDepth ? profile : DeepestSSP) : profile;
-        }
-
-        public SoundSpeedField(SerializedOutput serializedOutput, NAVOTimePeriod timePeriod, EarthCoordinate deepestPoint)
-        {
-            TimePeriod = timePeriod;
-            foreach (var profile in serializedOutput.DataPoints)
-                EnvironmentData.Add(new SoundSpeedProfile(profile, serializedOutput.DepthAxis));
-            var minDistance = double.MaxValue;
-            foreach (var profile in EnvironmentData)
-            {
-                if (DeepestSSP == null) DeepestSSP = profile;
-                if (profile.DistanceTo(deepestPoint) >= minDistance) continue;
-                if (profile.MaxDepth < DeepestSSP.MaxDepth) continue;
-                minDistance = profile.DistanceTo(deepestPoint);
-                DeepestSSP = profile;
-            }
-        }
-
-    }
-
 }

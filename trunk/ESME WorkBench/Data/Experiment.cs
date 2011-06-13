@@ -30,7 +30,6 @@ using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 using LineStyle = ESME.Overlay.LineStyle;
-using SoundSpeedField = ESME.Model.SoundSpeedField;
 
 namespace ESMEWorkBench.Data
 {
@@ -1235,12 +1234,8 @@ namespace ESMEWorkBench.Data
 
             if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
             {
-                if (SoundSpeedFileName.EndsWith(".eeb")) SoundSpeedField = new SoundSpeedField(SoundSpeedFileName, SimArea);
-                else if (SoundSpeedFileName.EndsWith(".xml")) 
-                {
-                    var rawSoundSpeeds = SerializedOutput.Load(SoundSpeedFileName, GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes);
-                    SoundSpeedField = new SoundSpeedField(rawSoundSpeeds, NemoFile.Scenario.TimeFrame);
-                }
+                if (SoundSpeedFileName.EndsWith(".xml"))
+                    SoundSpeedField = SoundSpeed.Load(SoundSpeedFileName).SoundSpeedFields[0];
             }
             if (SoundSpeedField != null)
             {
@@ -1262,7 +1257,7 @@ namespace ESMEWorkBench.Data
                     MapLayers.Add(soundSpeedLayer);
                 }
                 soundSpeedLayer.Clear();
-                foreach (var soundSpeedProfile in SoundSpeedField.SoundSpeedProfiles) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
+                foreach (var soundSpeedProfile in SoundSpeedField.EnvironmentData) soundSpeedLayer.Add(new OverlayPoint(soundSpeedProfile));
                 soundSpeedLayer.Done();
             }
 

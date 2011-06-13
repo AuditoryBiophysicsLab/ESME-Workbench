@@ -12,13 +12,11 @@ using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Model;
 using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using ThinkGeo.MapSuite.Core;
 using ESME.Views.AcousticBuilder;
 using BehaviorModel = ESME.Platform.BehaviorModel;
-using SoundSpeedField = ESME.Model.SoundSpeedField;
 
 namespace ESMEWorkBench.Data
 {
@@ -236,10 +234,11 @@ namespace ESMEWorkBench.Data
             var wind = Wind.Load("wind.xml");
             foreach (var timePeriod in timePeriods)
             {
+                var navoTimePeriod = (NAVOTimePeriod) Enum.Parse(typeof (NAVOTimePeriod), timePeriod);
                 var soundSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-soundspeed.xml", timePeriod));
                 //var windSpeedFile = Path.Combine(EnvironmentRoot, string.Format("{0}-wind.txt", timePeriod));
-                var soundSpeedField = new SoundSpeedField(SerializedOutput.Load(soundSpeedFile, GeneralizedDigitalEnvironmentModelDatabase.ReferencedTypes), NemoFile.Scenario.TimeFrame);
-                var windSpeedField = wind[(NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod)];
+                var soundSpeedField = SoundSpeed.Load(soundSpeedFile)[navoTimePeriod];
+                var windSpeedField = wind[navoTimePeriod];
                 var environmentInfo = new EnvironmentInformation
                                       {
                                           LocationName = NemoFile.Scenario.SimAreaName,

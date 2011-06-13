@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -14,8 +13,6 @@ using System.Windows.Threading;
 using Cinch;
 using ESME.Data;
 using ESME.Environment.NAVO;
-using ESME.NEMO;
-using ESME.Overlay;
 using ESMEWorkBench.Data;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
@@ -98,8 +95,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
         bool _useExpandedExtractionArea;
 
         #endregion
-
-
+        
         #region SelectAllMonthsCommand
 
         SimpleCommand<object, object> _selectAllMonths;
@@ -438,9 +434,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                                                     if (_extractionCanceled) return;
                                                                     if (selectedTimePeriods.Count > 0)
                                                                     {
-                                                                        var timePeriod = selectedTimePeriods[0];
                                                                         _experiment.WindSpeedFileName = NAVODataSources.WindFilename;
-                                                                        _experiment.SoundSpeedFileName = NAVODataSources.SoundspeedFilename(timePeriod);
+                                                                        _experiment.SoundSpeedFileName = Path.Combine(_experiment.EnvironmentRoot, "soundspeed.xml");
                                                                         _experiment.SedimentFileName = NAVODataSources.SedimentFilename;
                                                                         _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename;
                                                                         _experiment.SimArea = NAVODataSources.ExtractionArea;
