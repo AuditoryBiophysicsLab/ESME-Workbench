@@ -20,7 +20,7 @@ namespace ESME.Environment
         {
             get
             {
-                var result = new SoundSpeedField();
+                var result = new SoundSpeedField {TimePeriod = TimePeriod};
                 foreach (var averageProfile in EnvironmentData)
                     result.EnvironmentData.Add(averageProfile.Average);
                 return result;

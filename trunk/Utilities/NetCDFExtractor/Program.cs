@@ -200,6 +200,7 @@ namespace ImportNetCDF
                     if (newProfile.Data.Count > 0) newField.EnvironmentData.Add(newProfile);
                 }
             }
+            newField.EnvironmentData.RemoveDuplicates();
             var writer = new SoundSpeed();
             writer.SoundSpeedFields.Add(newField);
             Console.WriteLine(@"Saving imported data ... ");

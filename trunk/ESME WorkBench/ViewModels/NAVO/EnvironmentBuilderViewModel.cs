@@ -434,9 +434,9 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                                                     if (_extractionCanceled) return;
                                                                     if (selectedTimePeriods.Count > 0)
                                                                     {
-                                                                        _experiment.WindSpeedFileName = NAVODataSources.WindFilename;
+                                                                        _experiment.WindSpeedFileName = Path.Combine(_experiment.EnvironmentRoot, "wind.xml");
                                                                         _experiment.SoundSpeedFileName = Path.Combine(_experiment.EnvironmentRoot, "soundspeed.xml");
-                                                                        _experiment.SedimentFileName = NAVODataSources.SedimentFilename;
+                                                                        _experiment.SedimentFileName = Path.Combine(_experiment.EnvironmentRoot, "sediment.xml");
                                                                         _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename;
                                                                         _experiment.SimArea = NAVODataSources.ExtractionArea;
                                                                         _experiment.AvailableTimePeriods = new List<NAVOTimePeriod>(selectedTimePeriods);
