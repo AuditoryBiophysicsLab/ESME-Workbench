@@ -79,7 +79,7 @@ namespace ESME.Environment.NAVO
             var extractionPath = Path.GetDirectoryName(assemblyLocation);
             if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
             ////todo: installer needs to put this in the right place.
-            GeneralizedDigitalEnvironmentModelDatabase.ExtractionProgramPath = Path.Combine(extractionPath, "ImportNetCDF.exe");
+            GeneralizedDigitalEnvironmentModelDatabase.ExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
             GeneralizedDigitalEnvironmentModelDatabase.DatabasePath = configurations.GDEMDirectory;
 
             UpdateResolutionStatement();
@@ -192,7 +192,7 @@ namespace ESME.Environment.NAVO
             // uniqueMonths * 3 because we're counting Temp, and Salinity extraction, and Soundspeed creation as independent steps.
             // SelectedTimePeriods.Count() is for averaging the soundspeed fields
             // and the extra 2 is for extracting bathymetry and sediment data which are time invariant
-            var averagedSoundSpeedFieldTimePeriods = SelectedTimePeriods.Where(t => GetMonthIndices(t).Count() > 1);
+            var averagedSoundSpeedFieldTimePeriods = SelectedTimePeriods.Where(t => GetMonthIndices(t).Count() > 1).ToList();
             var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + averagedSoundSpeedFieldTimePeriods.Count() + 2);
             if (ExportCASSData) totalExtractionStepCount += SelectedTimePeriods.Count();
 
@@ -217,56 +217,23 @@ namespace ESME.Environment.NAVO
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
-            foreach (var month in uniqueMonths)
-            {
-                Status = "Extracting temperature and salinity data for " + month;
-                GeneralizedDigitalEnvironmentModelDatabase.ExtractAreaFromMonthFile(tempDirectory, ExtractionArea, month, UseExpandedExtractionArea);
-                if (backgroundWorker.CancellationPending) return;
-                currentExtractionStep += 2;
-                ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
+            Status = "Extracting temperature and salinity data for selected time periods...";
+            GeneralizedDigitalEnvironmentModelDatabase.ExtractArea(tempDirectory, ExtractionArea, uniqueMonths);
+            currentExtractionStep += uniqueMonths.Count;
+            ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
+            Status = "Calculating sound speed data for selected time periods...";
+            GeneralizedDigitalEnvironmentModelDatabase.CreateMonthlySoundSpeeds(tempDirectory, uniqueMonths, maxDepth);
+            currentExtractionStep += uniqueMonths.Count;
+            ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
+            var averagedTimePeriodMonths = averagedSoundSpeedFieldTimePeriods.Select(period => GetMonthIndices(period).ToList()).ToList();
+            GeneralizedDigitalEnvironmentModelDatabase.CreateAverageSoundSpeeds(tempDirectory, averagedSoundSpeedFieldTimePeriods, averagedTimePeriodMonths);
+            currentExtractionStep += averagedSoundSpeedFieldTimePeriods.Count;
+            ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
 
-                Status = "Calculating sound speed data for " + month;
-                GeneralizedDigitalEnvironmentModelDatabase.CreateSoundSpeedFile(tempDirectory, month, maxDepth);
-                ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
-                if (backgroundWorker.CancellationPending) return;
-            }
-
-            foreach (var timePeriod in averagedSoundSpeedFieldTimePeriods)
-            {
-                var monthIndices = GetMonthIndices(timePeriod);
-                Status = "Calculating average soundspeed data for " + timePeriod;
-                GeneralizedDigitalEnvironmentModelDatabase.AverageMonthlyData(tempDirectory, monthIndices, timePeriod);
-                if (backgroundWorker.CancellationPending) return;
-                ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
-            }
-
-            var soundSpeed = new SoundSpeed();
-            foreach (var timePeriod in SelectedTimePeriods)
-            {
-                var keeperSoundSpeedField = SoundSpeed.Load(SoundspeedFilename(tempDirectory, timePeriod));
-                soundSpeed.SoundSpeedFields.Add(keeperSoundSpeedField[timePeriod]);
-            }
-            soundSpeed.Save(Path.Combine(tempDirectory, "soundspeed.xml"));
-            foreach (var soundspeedFile in Directory.GetFiles(tempDirectory, "*-soundspeed.xml"))
-                File.Delete(soundspeedFile);
-
-
-#if true
             Status = "Extracting wind data";
             SurfaceMarineGriddedClimatologyDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods.ToList(), SelectedTimePeriods.Select(GetMonthIndices).ToList(), ExtractionArea, UseExpandedExtractionArea);
             var wind = Wind.Load(SurfaceMarineGriddedClimatologyDatabase.WindFilename(tempDirectory));
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
-
-#else
-            foreach (var timePeriod in SelectedTimePeriods)
-            {
-                var monthIndices = GetMonthIndices(timePeriod);
-                Status = "Extracting wind data for " + timePeriod;
-                SurfaceMarineGriddedClimatologyDatabase.ExtractArea(tempDirectory, timePeriod, monthIndices.First(), monthIndices.Last(), monthIndices.Count(), selectedExtractionArea);
-                if (backgroundWorker.CancellationPending) return;
-                ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
-            }
-#endif
 
             if (ExportCASSData)
             {
@@ -275,7 +242,7 @@ namespace ESME.Environment.NAVO
                 var cassBathymetryFile = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathymetry.txt");
                 File.Copy(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), cassBathymetryFile, true);
                 //CASSFiles.WriteBathymetryFile(cassBathymetryFile, bathymetry);
-
+                var soundSpeed = SoundSpeed.Load(Path.Combine(tempDirectory, "soundspeed.xml"));
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
                     Status = "Exporting CASS format data for " + timePeriod;
@@ -304,9 +271,6 @@ namespace ESME.Environment.NAVO
 
         public IEnumerable<NAVOTimePeriod> SelectedTimePeriods { get; set; }
 
-        public string TemperatureFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.TemperatureFilename(_localStorageRoot, timePeriod); }
-        public string SalinityFilename(NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SalinityFilename(_localStorageRoot, timePeriod); }
-        public string SoundspeedFilename(string directoryName, NAVOTimePeriod timePeriod) { return GeneralizedDigitalEnvironmentModelDatabase.SoundspeedFilename(directoryName, timePeriod); }
         public string WindFilename { get { return SurfaceMarineGriddedClimatologyDatabase.WindFilename(_localStorageRoot); } }
         public string SedimentFilename { get { return BottomSedimentTypeDatabase.SedimentFilename(_localStorageRoot); } }
         public string BathymetryFilename { get { return DigitalBathymetricDatabase.BathymetryYXZFilename(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution); } }

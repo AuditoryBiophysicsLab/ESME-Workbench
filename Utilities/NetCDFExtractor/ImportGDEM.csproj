@@ -8,8 +8,8 @@
     <ProjectGuid>{1758077A-336A-4C13-B8F9-6B581B616D8A}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ImportNetCDF</RootNamespace>
-    <AssemblyName>ImportNetCDF</AssemblyName>
+    <RootNamespace>ImportGDEM</RootNamespace>
+    <AssemblyName>ImportGDEM</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
