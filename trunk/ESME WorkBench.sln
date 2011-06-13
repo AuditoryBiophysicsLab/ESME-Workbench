@@ -42,7 +42,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME.Views", "ESME.Controls
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCDF_Wrapper", "Libraries\NetCDF\NetCDF_Wrapper.csproj", "{AC11645F-AFD3-4DDE-9E2F-E1F2FEB22A55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCDFExtractor", "Utilities\NetCDFExtractor\NetCDFExtractor.csproj", "{1758077A-336A-4C13-B8F9-6B581B616D8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImportGDEM", "Utilities\NetCDFExtractor\ImportGDEM.csproj", "{1758077A-336A-4C13-B8F9-6B581B616D8A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbtester", "dbtester\dbtester.csproj", "{CE3F47DE-2CCB-451B-862F-9B28B4A3EC9F}"
 EndProject

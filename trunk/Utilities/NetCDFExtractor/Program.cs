@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
@@ -8,26 +7,21 @@ using ESME.Environment.NAVO;
 using HRC.Navigation;
 using NetCDF;
 
-namespace ImportNetCDF
+namespace ImportGDEM
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            var lonVarName = "";
-            var latVarName = "";
-            var depthVarName = "";
-            var dataVarName = "";
-            var missingValueAttName = "";
-            var scaleFactorAttName = "";
-            var offsetValueAttName = "";
-            var outputDataFileName = "";
-            var netCdfFileName = "";
+            string outputDirectory = null;
             var north = float.NaN;
             var south = float.NaN;
             var east = float.NaN;
             var west = float.NaN;
-            var month = (NAVOTimePeriod) 0;
+            string gdemRootDirectory = null;
+            var temperatureFiles = new List<string>();
+            var salinityFiles = new List<string>();
+            var monthNames = new List<string>();
 
             if (args.Length < 1)
             {
@@ -36,40 +30,18 @@ namespace ImportNetCDF
             }
             for (var i = 0; i < args.Length; i++)
             {
-                switch (args[i])
+                switch (args[i].ToLower())
                 {
-                    case "-in":
-                    case "-input":
-                        netCdfFileName = args[++i];
+                    case "-out":
+                    case "-output":
+                        outputDirectory = args[++i];
                         break;
-                    case "-lon": //the longitude variable name in the NetCDF file
-                    case "-longitude":
-                        lonVarName = args[++i];
+                    case "-gdem":
+                        gdemRootDirectory = args[++i];
                         break;
-                    case "-lat": //the latitude variable name
-                    case "-latitude":
-                        latVarName = args[++i];
-                        break;
-                    case "-dep":
-                    case "-depth":
-                        depthVarName = args[++i]; //the depth variable name
-                        break;
-                    case "-data":
-                        dataVarName = args[++i]; //the data variable name (like "water_temp" or "salinity")
-                        break;
-                    case "-mv":
-                    case "-miss":
-                    case "-missing":
-                    case "-missingvalue":
-                        missingValueAttName = args[++i]; //like "missing_value"
-                        break;
-                    case "-sf":
-                    case "-scale":
-                    case "-scalefactor":
-                        scaleFactorAttName = args[++i]; //like "scale_factor"
-                        break;
-                    case "-offset":
-                        offsetValueAttName = args[++i]; //like "add_offset"
+                    case "-mons":
+                    case "-months":
+                        monthNames = GetStringListFromArg(args[++i], ',');
                         break;
                     case "-north":
                         north = float.Parse(args[++i]);
@@ -83,36 +55,102 @@ namespace ImportNetCDF
                     case "-west":
                         west = float.Parse(args[++i]);
                         break;
-                    case "-output":
-                    case "-out":
-                        outputDataFileName = args[++i];
-                        break;
-                    case "-month":
-                    case "-mon":
-                        month = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), args[++i], true);
-                        break;
                     default:
                         Usage();
                         return;
                 }
             }
 
-            if ((netCdfFileName == "") || (outputDataFileName == "") || (lonVarName == "") || (latVarName == "") || (dataVarName == "") || (depthVarName == "") || (missingValueAttName == "") || (scaleFactorAttName == "") || (offsetValueAttName == "") || (month == 0))
+            if ((outputDirectory == null) || (!Directory.Exists(gdemRootDirectory)) || (monthNames.Count == 0) || (float.IsNaN(north) || float.IsNaN(south) || float.IsNaN(east) || float.IsNaN(west)))
             {
                 Usage();
                 return;
             }
 
-            if (!File.Exists(netCdfFileName)) throw new FileNotFoundException("ImportNetCDF: File {0} not found", netCdfFileName);
+            if ((north < -90) || (north > 90) || (south < -90) || (south > 90) || (north <= south) ||
+                (west < -180) || (west > 180) || (east < -180) || (east > 180) || (east <= west))
+            {
+                Usage();
+                return;
+            }
 
-            ImportNetCdf(netCdfFileName, dataVarName, lonVarName, latVarName, depthVarName, missingValueAttName, scaleFactorAttName, offsetValueAttName, outputDataFileName, north, south, east, west, month);
+            var months = monthNames.Select(curMonth => (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), curMonth)).ToList();
+            months.Sort();
+            foreach (var month in months)
+            {
+                temperatureFiles.Add(FindTemperatureFile(month, gdemRootDirectory));
+                salinityFiles.Add(FindSalinityFile(month, gdemRootDirectory));
+            }
+
+            ImportGDEM(temperatureFiles, salinityFiles, months, outputDirectory, north, south, east, west);
 
             Console.WriteLine(@"success!");
         }
 
-        static void ImportNetCdf(string netCdfFileName, string dataVarName, string lonVarName, string latVarName, string depthVarName, string missingValueAttName, string scaleFactorAttName, string offsetValueAttName, string outputDataFileName, float north, float south, float east, float west, NAVOTimePeriod month)
+        static string FindSalinityFile(NAVOTimePeriod monthIndex, string gdemRootDirectory)
         {
-            var myFile = new NcFile(netCdfFileName);
+            var files = Directory.GetFiles(gdemRootDirectory, GDEMSalinityFileName(monthIndex), SearchOption.AllDirectories);
+            if (files.Length > 0) return files[0];
+            files = Directory.GetFiles(gdemRootDirectory, NUWCSalinityFileName(monthIndex), SearchOption.AllDirectories);
+            if (files.Length > 0) return files[0];
+            throw new FileNotFoundException(string.Format("Could not find requested salinity file, tried {0} and {1}", GDEMSalinityFileName(monthIndex), NUWCSalinityFileName(monthIndex)));
+        }
+
+        static string FindTemperatureFile(NAVOTimePeriod monthIndex, string gdemRootDirectory)
+        {
+            var files = Directory.GetFiles(gdemRootDirectory, GDEMTemperatureFileName(monthIndex), SearchOption.AllDirectories);
+            if (files.Length > 0) return files[0];
+            files = Directory.GetFiles(gdemRootDirectory, NUWCTemperatureFileName(monthIndex), SearchOption.AllDirectories);
+            if (files.Length > 0) return files[0];
+            throw new FileNotFoundException(string.Format("Could not find requested temperature file, tried {0} and {1}", GDEMTemperatureFileName(monthIndex), NUWCTemperatureFileName(monthIndex)));
+        }
+
+        static string GDEMTemperatureFileName(NAVOTimePeriod monthIndex) { return "t" + BaseGDEMFileName(monthIndex); }
+        static string GDEMSalinityFileName(NAVOTimePeriod monthIndex) { return "s" + BaseGDEMFileName(monthIndex); }
+        static string BaseGDEMFileName(NAVOTimePeriod monthIndex) { return "gdemv3s" + string.Format("{0:00}", (int)monthIndex) + ".nc"; }
+        static string NUWCTemperatureFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_t.nc"; }
+        static string NUWCSalinityFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
+        static readonly string[] ShortMonthNames = new[]
+                                                  {
+                                                      "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"
+                                                  };
+
+        static List<string> GetStringListFromArg(string arg, char separator) { return arg.Split(separator).ToList(); }
+
+        static void ImportGDEM(IList<string> temperatureFiles, IList<string> salinityFiles, IList<NAVOTimePeriod> months, string outputDirectory, float north, float south, float east, float west)
+        { 
+            var temperatureFile = new SoundSpeed();
+            var salinityFile = new SoundSpeed();
+            const string temperatureVariableName = "water_temp";
+            const string salinityVariableName = "salinity";
+
+            for (var monthIndex = 0; monthIndex < months.Count; monthIndex++)
+            {
+                Console.WriteLine("Importing temperature data for {0}...", months[monthIndex]);
+                var temperatureField = ImportGDEM(temperatureFiles[monthIndex], temperatureVariableName, months[monthIndex], north, south, east, west);
+                temperatureFile.SoundSpeedFields.Add(temperatureField);
+
+                Console.WriteLine("Importing salinity data for {0}...", months[monthIndex]);
+                var salinityField = ImportGDEM(salinityFiles[monthIndex], salinityVariableName, months[monthIndex], north, south, east, west);
+                salinityFile.SoundSpeedFields.Add(salinityField);
+            }
+
+            Console.WriteLine("Saving imported temperature data...");
+            temperatureFile.Save(Path.Combine(outputDirectory, "temperature.xml"));
+            Console.WriteLine("Saving imported salinity data...");
+            salinityFile.Save(Path.Combine(outputDirectory, "salinity.xml"));
+        }
+
+        static SoundSpeedField ImportGDEM(string fileName, string dataVarName, NAVOTimePeriod month, float north, float south, float east, float west)
+        {
+            const string lonVarName = "lon";
+            const string latVarName = "lat";
+            const string depthVarName = "depth";
+            const string missingValueAttName = "missing_value";
+            const string scaleFactorAttName = "scale_factor";
+            const string offsetValueAttName = "add_offset";
+
+            var myFile = new NcFile(fileName);
             int lonIndex, depthIndex;
             short missingValue;
 
@@ -148,8 +186,6 @@ namespace ImportNetCDF
             var selectedLons = lonMap.Select(x => x.Value).ToArray();
             var selectedLats = latMap.Select(x => x.Value).ToArray();
 
-            Console.WriteLine(@"Initializing output file {0}...", Path.GetFileName(outputDataFileName));
-
             var depthCount = (int) depthVar.Dimensions[0].Size;
             var depths = new float[depthCount];
             for (depthIndex = 0; depthIndex < depthCount; depthIndex++) depths[depthIndex] = depthVar.GetFloat(depthIndex);
@@ -165,11 +201,7 @@ namespace ImportNetCDF
             if (scaleFactorAttName != String.Empty) scaleFactor = dataVar.Attributes[scaleFactorAttName].GetFloat(0);
             if (offsetValueAttName != String.Empty) addOffset = dataVar.Attributes[offsetValueAttName].GetFloat(0);
 
-            Console.WriteLine(@"Importing source file {0}...", Path.GetFileName(netCdfFileName));
-
-            var writer = new SoundSpeed();
-            var newField = new SoundSpeedField { TimePeriod = month };
-            writer.SoundSpeedFields.Add(newField);
+            var newField = new SoundSpeedField {TimePeriod = month};
 
             for (lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
@@ -193,56 +225,43 @@ namespace ImportNetCDF
                     if (newProfile.Data.Count > 0) newField.EnvironmentData.Add(newProfile);
                 }
             }
-            Console.WriteLine(@"Saving imported data ... ");
-            writer.Save(outputDataFileName);
-            Console.WriteLine(@"done");
+            return newField;
         }
 
         static void Usage()
         {
             Console.WriteLine(
-                "Usage: ImportNetCDF -input <netCDFFileName>\n" +
-                "                    -data <DataVariable>\n" +
-                "                    -lon <LongitudeVariable>\n" +
-                "                    -lat <LatitudeVariable>\n" +
-                "                    -depth <DepthVariable> \n" +
-                "                    -missingvalue <MissingValueAttribute> \n" +
-                "                    -scalefactor <ScaleFactorAttribute> \n" +
-                "                    -offset <OffsetValueAttribute> \n" +
-                "                    -output <OutputFileName> \n" +
-                "                    -month <MonthName>\n" +
+                "Usage: ImportNetCDF -output <OutputDirectoryName>\n" +
+                "                    -gdem <GDEMRootDirectory>\n" +
+                "                    -months <MonthNameList>\n" +
+                "                    -north <North>\n" +
+                "                    -south <South> \n" +
+                "                    -east <East> \n" +
+                "                    -west <West> \n" +
                 "\n" +
-                "Where: <netCDFFileName> is the full path to an UNCOMPRESSED NetCDF file,\n" +
-                "       typically provided by OAML for the GDEM-V and the DBDB-V datasets.\n" +
+                "Where: <OutputDirectoryName> is the full path to a directory that will contain,\n" +
+                "        the output files 'temperature.xml' and 'salinity.xml'.\n" +
                 "\n" +
-                "       <DataVariable> is the name of the NetCDF variable that contains the\n" +
-                "       'payload' data.\n" +
+                "       <GDEMRootDirectory> is the root directory to search for the uncompressed\n" +
+                "        GDEM netCDF source data. If this directory includes a space in it's name,\n" +
+                "        be sure to wrap this entire argument in quotes.\n" +
                 "\n" +
-                "       <LongitudeVariable> is the name of the NetCDF variable that contains the\n" +
-                "       array of longitudes present in the payload data\n" +
+                "       <MonthNameList> is a comma-separated list of months to extract temperature\n" +
+                "        and salinity data for.  Use complete month names, i.e. 'january' instead of\n" +
+                "        'jan', and if you include spaces around commas, put this entire argument in\n" +
+                "        quotes.\n" +
                 "\n" +
-                "       <LatitudeVariable> is the name of the NetCDF variable that contains the\n" +
-                "       array of latitudes present in the payload data\n" +
+                "       <North> is the northern boundary of the area to be extracted from the\n" +
+                "        database.  Valid values are -90 to 90.  Must be greater than <South>.\n" +
                 "\n" +
-                "       <DepthVariable> is the name of the NetCDF variable that contains the\n" +
-                "       array of depths present in the payload data.\n" +
+                "       <South> is the southern boundary of the area to be extracted from the\n" +
+                "        database.  Valid values are -90 to 90. Must be less than <North>.\n" +
                 "\n" +
-                "       <MissingValueAttribute> is the name of the NetCDF attribute of\n" +
-                "       <DataVariable> that contains the value used to represent a 'no data'\n" +
-                "       condition in the payload dataset.\n" +
+                "       <East> is the eastern boundary of the area to be extracted from the\n" +
+                "        database.  Valid values are -180 to 180.  Must be greater than <West>.\n" +
                 "\n" +
-                "       <ScaleFactorAttribute> is the name of the NetCDF attribute of\n" +
-                "       <DataVariable> that contains the value used to scale the data into\n" +
-                "       its final range.\n" +
-                "\n" +
-                "       <OffsetValueAttribute> is the name of the NetCDF attribute of\n" +
-                "       <DataVariable> that contains the value used to offset the scaled data\n" +
-                "       to its final value.\n" +
-                "\n" +
-                "       <OutputFileName> is the name of the XML file that will contain the data\n" +
-                "       imported from the specified NetCDF file.\n" +
-                "\n" +
-                "       <MonthName> is the time period represented <netCDFFileName>.\n" +
+                "       <West> is the western boundary of the area to be extracted from the\n" +
+                "        database.  Valid values are -180 to 180.  Must be less than <East>.\n" +
                 "\n");
         }
     }
