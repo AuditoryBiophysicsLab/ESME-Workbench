@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using ESME.Environment.NAVO;
@@ -62,16 +63,20 @@ namespace ESME.Environment
             return soundSpeedFile;
         }
 
-        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods)
+        public delegate void MessageDelegate(string message);
+
+        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods, Delegates.Delegate<string> averageOperationMessage = null, BackgroundWorker backgroundWorker = null)
         {
             var result = new SoundSpeed();
             foreach (var timePeriod in timePeriods) 
             {
+                if (averageOperationMessage != null) averageOperationMessage(string.Format("Averaging soundspeeds for {0}", timePeriod));
                 var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
                 var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
                 foreach (var month in months)
                     accumulator.Add(monthlySoundSpeeds[month]);
                 result.SoundSpeedFields.Add(accumulator.Average);
+                if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return result;
             }
             return result;
         }

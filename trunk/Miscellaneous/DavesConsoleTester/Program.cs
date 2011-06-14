@@ -2,12 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using ESME.Environment;
-using ESME.Environment.NAVO;
-using HDF5DotNet;
-using HRC.Navigation;
 
 namespace DavesConsoleTester
 {
@@ -15,7 +10,7 @@ namespace DavesConsoleTester
     {
         static void Main(string[] args)
         {
-            var commandName = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]).ToLower();
+            var commandName = Path.GetFileNameWithoutExtension(System.Environment.GetCommandLineArgs()[0]).ToLower();
             switch (commandName)
             {
                 case "chb2txt":

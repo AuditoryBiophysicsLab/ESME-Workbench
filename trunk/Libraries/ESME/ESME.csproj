@@ -102,6 +102,9 @@
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\CASSTemplate.cs" />
+    <Compile Include="Delegates.cs" />
+    <Compile Include="Environment\Bathymetry.cs" />
+    <Compile Include="Environment\Environment.cs" />
     <Compile Include="Environment\Environment2DData.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />
