@@ -564,7 +564,7 @@ namespace ESMEWorkBench.Data
                 Debug.WriteLine("***********\nExperiment: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
-            Author = Environment.UserName;
+            Author = System.Environment.UserName;
             Created = DateTime.Now;
             PropertyChanged += delegate(object s, PropertyChangedEventArgs e) { if (e.PropertyName != "IsChanged") IsChanged = true; };
             CurrentExtent = "POLYGON((-173.84765625 123.442822265625,169.98046875 123.442822265625,169.98046875 -165.555615234375,-173.84765625 -165.555615234375,-173.84765625 123.442822265625))";
@@ -851,7 +851,7 @@ namespace ESMEWorkBench.Data
         public void SaveAs(string fileName)
         {
             LastModified = DateTime.Now;
-            ModifiedBy = Environment.UserName;
+            ModifiedBy = System.Environment.UserName;
             var serializer = new XmlSerializer<Experiment> { Data = this };
             serializer.Save(fileName, ReferencedTypes);
             IsChanged = false;

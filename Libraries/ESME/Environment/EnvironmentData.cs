@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 using System.Windows;
@@ -44,6 +45,52 @@ namespace ESME.Environment
             AddRange(pointsToKeep);
         }
 
+        #region List<T> overrides
+        public new void Add(T item)
+        {
+            base.Add(item);
+            _latitudes = _longitudes = null;
+        }
+
+        public new void AddRange(IEnumerable<T> collection)
+        {
+            base.AddRange(collection);
+            _latitudes = _longitudes = null;
+        }
+
+        public new void Clear()
+        {
+            base.Clear();
+            _latitudes = _longitudes = null;
+        }
+
+        public new bool Remove(T item)
+        {
+            var result = base.Remove(item);
+            if (result) _latitudes = _longitudes = null;
+            return result;
+        }
+
+        public new int RemoveAll(Predicate<T> match)
+        {
+            var result = base.RemoveAll(match);
+            if (result > 0) _latitudes = _longitudes = null;
+            return result;
+        }
+
+        public new void RemoveAt(int index)
+        {
+            base.RemoveAt(index);
+            _latitudes = _longitudes = null;
+        }
+
+        public new void RemoveRange(int index, int count)
+        {
+            base.RemoveRange(index, count);
+            _latitudes = _longitudes = null;
+        }
+        #endregion
+
         public void RemoveDuplicates()
         {
             var uniqueList = new List<T>();
@@ -55,8 +102,53 @@ namespace ESME.Environment
             AddRange(uniqueList);
         }
 
-        public IEnumerable<double> Longitudes { get { return this.Select(point => point.Longitude); } }
-        public IEnumerable<double> Latitudes { get { return this.Select(point => point.Latitude); } }
+        [XmlIgnore]
+        public List<double> Longitudes
+        {
+            get
+            {
+                if (_longitudes == null)
+                {
+                    _longitudes = this.Select(point => point.Longitude).Distinct().ToList();
+                    _longitudes.Sort();
+                }
+                return _longitudes;
+            }
+        }
+
+        [XmlIgnore]
+        List<double> _longitudes;
+
+        [XmlIgnore]
+        public List<double> Latitudes
+        {
+            get
+            {
+                if (_latitudes == null)
+                {
+                    _latitudes = this.Select(point => point.Longitude).Distinct().ToList();
+                    _latitudes.Sort();
+                }
+                return _latitudes;
+            }
+        }
+
+        [XmlIgnore]
+        List<double> _latitudes;
+        
+        /// <summary>
+        /// The GeoRect that contains the field data
+        /// </summary>
+        public virtual GeoRect GeoRect
+        {
+            get
+            {
+                var latitudes = Latitudes;
+                var longitudes = Longitudes;
+                return new GeoRect(latitudes.Last(), latitudes.First(), longitudes.Last(), longitudes.First());
+            }
+        }
+
     }
     
     public class TimePeriodEnvironmentData<T> where T : EarthCoordinate

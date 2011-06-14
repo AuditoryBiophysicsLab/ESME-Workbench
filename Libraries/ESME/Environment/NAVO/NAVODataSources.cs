@@ -146,9 +146,18 @@ namespace ESME.Environment.NAVO
 
         internal NAVOConfiguration Configuration { get; set; }
 
+        int _currentExtractionStep;
+        float _totalExtractionStepCount;
         void ExtractAreas(object sender, DoWorkEventArgs args)
         {
-            var backgroundWorker = (BackgroundWorker) sender;
+
+            Delegates.Delegate<string> statusUpdateDelegate = delegate(string s)
+            {
+                Status = s;
+                ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
+            };
+
+            var backgroundWorker = (BackgroundWorker)sender;
 
             var tempDirectory = Path.Combine(_localStorageRoot, "NAVOTemp");
 
@@ -169,19 +178,17 @@ namespace ESME.Environment.NAVO
             // SelectedTimePeriods.Count() is for averaging the soundspeed fields
             // and the extra 2 is for extracting bathymetry and sediment data which are time invariant
             var averagedSoundSpeedFieldTimePeriods = SelectedTimePeriods.Where(t => Configuration.MonthsInTimePeriod(t).Count() > 1).ToList();
-            var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + averagedSoundSpeedFieldTimePeriods.Count() + 2);
-            if (ExportCASSData) totalExtractionStepCount += SelectedTimePeriods.Count();
+            _totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + averagedSoundSpeedFieldTimePeriods.Count() + 2);
+            if (ExportCASSData) _totalExtractionStepCount += SelectedTimePeriods.Count();
 
-            totalExtractionStepCount += SelectedTimePeriods.Select(Configuration.MonthsInTimePeriod).Where(monthIndices => monthIndices.Count() > 1).Count();
+            _totalExtractionStepCount += SelectedTimePeriods.Select(Configuration.MonthsInTimePeriod).Where(monthIndices => monthIndices.Count() > 1).Count();
             //foreach (var monthIndices in SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1))
             //    totalExtractionStepCount++;
-
-            var currentExtractionStep = 0;
 
             Status = "Extracting bathymetry data for selected area";
             DigitalBathymetricDatabase.ExtractArea(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea, DigitalBathymetricDatabase.Resolutions);
             if (backgroundWorker.CancellationPending) return;
-            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
+            ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
             //var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryCHBFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var bathymetry = Environment2DData.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
@@ -191,48 +198,42 @@ namespace ESME.Environment.NAVO
             var sediment = BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea, UseExpandedExtractionArea);
             sediment.Save(Path.Combine(tempDirectory, "sediment.xml"));
             if (backgroundWorker.CancellationPending) return;
-            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
+            ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
 
             Status = "Extracting temperature and salinity data for selected time periods...";
             GeneralizedDigitalEnvironmentModelDatabase.ExtractArea(tempDirectory, ExtractionArea, uniqueMonths);
-            currentExtractionStep += uniqueMonths.Count;
-            ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
+            _currentExtractionStep += uniqueMonths.Count;
+            ProgressPercent = (int)((_currentExtractionStep / _totalExtractionStepCount) * 100);
             
             Status = "Calculating sound speed data for selected time periods...";
             var temperature = SoundSpeed.Load(Path.Combine(tempDirectory, "temperature.xml"));
             var salinity = SoundSpeed.Load(Path.Combine(tempDirectory, "salinity.xml"));
             var soundSpeed = SoundSpeed.Create(temperature, salinity);
             soundSpeed.Save(Path.Combine(tempDirectory, "soundspeed.xml"));
-            currentExtractionStep += uniqueMonths.Count;
-            ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
+            _currentExtractionStep += uniqueMonths.Count;
+            ProgressPercent = (int)((_currentExtractionStep / _totalExtractionStepCount) * 100);
 
             Status = "Extracting wind data";
             SurfaceMarineGriddedClimatologyDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods.ToList(), SelectedTimePeriods.Select(Configuration.MonthsInTimePeriod).ToList(), ExtractionArea, UseExpandedExtractionArea);
             var wind = Wind.Load(SurfaceMarineGriddedClimatologyDatabase.WindFilename(tempDirectory));
-            ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
+            ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
 
             if (ExportCASSData)
             {
                 Status = "Exporting bathymetry data";
 
-                //var bathymetryFileName = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathy_" + DigitalBathymetricDatabase.SelectedResolution + ".txt");
-                var cassBathymetryFile = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathymetry.txt");
-                File.Copy(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), cassBathymetryFile, true);
-                //CASSFiles.WriteBathymetryFile(cassBathymetryFile, bathymetry);
-                Status = "Extending soundspeed profiles for CASS...";
-                var extendedAndAveragedSoundSpeeds = new SoundSpeed();
-                foreach (var month in uniqueMonths)
-                    extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(soundSpeed[month].Extend(temperature[month], salinity[month], maxDepth, ExtractionArea));
-                Status = "Averaging soundspeed profiles for CASS...";
-                extendedAndAveragedSoundSpeeds.Add(SoundSpeed.Average(extendedAndAveragedSoundSpeeds, averagedSoundSpeedFieldTimePeriods));
-                foreach (var timePeriod in SelectedTimePeriods)
+                var environment = new Environment
                 {
-                    Status = "Exporting CASS format data for " + timePeriod;
+                        Bathymetry = Bathymetry.FromYXZ(BathymetryFilename, -1),
+                        Sediment = sediment,
+                        SoundSpeed = soundSpeed,
+                        Temperature = temperature,
+                        Salinity = salinity,
+                        Wind = wind,
+                };
 
-                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod, bathymetry, sediment, extendedAndAveragedSoundSpeeds[timePeriod], wind[timePeriod].EnvironmentData);
-                    if (backgroundWorker.CancellationPending) return;
-                    ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
-                }
+                environment.Export(_simAreaPath, SelectedTimePeriods, environment.Bathymetry.Samples.GeoRect, null, null, statusUpdateDelegate, backgroundWorker);
+                if (backgroundWorker.CancellationPending) return;
             }
 
             // At this point, the user can no longer cancel the operation.
@@ -253,8 +254,6 @@ namespace ESME.Environment.NAVO
 
         public IEnumerable<NAVOTimePeriod> SelectedTimePeriods { get; set; }
 
-        public string WindFilename { get { return SurfaceMarineGriddedClimatologyDatabase.WindFilename(_localStorageRoot); } }
-        public string SedimentFilename { get { return BottomSedimentTypeDatabase.SedimentFilename(_localStorageRoot); } }
         public string BathymetryFilename { get { return DigitalBathymetricDatabase.BathymetryYXZFilename(_localStorageRoot, DigitalBathymetricDatabase.SelectedResolution); } }
 
         #region public int ProgressPercent { get; set; }
