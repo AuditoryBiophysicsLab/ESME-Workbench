@@ -104,9 +104,9 @@
 
             <!-- OAML extraction programs -->
             <!-- GDEM Database Extractor (NetCDF format) -->
-            <File Id="ImportNetCDF.exe"
-                  Name="ImportNetCDF.exe"
-                  Source="$(var.ESMEPath)\ImportNetCDF.exe" />
+            <File Id="ImportGDEM.exe"
+                  Name="ImportGDEM.exe"
+                  Source="$(var.ESMEPath)\ImportGDEM.exe" />
             <File Id="netcdf.dll"
                   Name="netcdf.dll"
                   Source="$(var.ESMEPath)\netcdf.dll" />
