@@ -114,7 +114,6 @@
     <Compile Include="Environment\NAVO\NAVODataSource.cs" />
     <Compile Include="Environment\NAVO\NAVODataSources.cs" />
     <Compile Include="Environment\Sediment.cs" />
-    <Compile Include="Environment\NAVO\SerializedOutput.cs" />
     <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />
     <Compile Include="Environment\SoundSpeed.cs" />
     <Compile Include="Environment\SoundSpeedField.cs" />
