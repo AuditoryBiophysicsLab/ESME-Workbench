@@ -41,7 +41,7 @@ namespace ESME.Environment.NAVO
             NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputPath, RequiredSupportFiles);
         }
 
-        public static void CreateMonthlySoundSpeeds(string outputPath, IEnumerable<NAVOTimePeriod> months, EarthCoordinate<float> deepestPoint)
+        public static void CreateMonthlySoundSpeeds(string outputPath, IEnumerable<NAVOTimePeriod> months)
         {
             var temperatureFile = SoundSpeed.Load(Path.Combine(outputPath, "temperature.xml"));
             var salinityFile = SoundSpeed.Load(Path.Combine(outputPath, "salinity.xml"));
@@ -54,26 +54,57 @@ namespace ESME.Environment.NAVO
                 var field = new SoundSpeedField { TimePeriod = month };
                 foreach (var temperatureProfile in temperatureField.EnvironmentData)
                     field.EnvironmentData.Add(ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
-                field.DeepestPoint = deepestPoint;
-                field.ExtendProfiles(temperatureField, salinityField);
                 soundSpeedFile.SoundSpeedFields.Add(field);
             }
             soundSpeedFile.Save(Path.Combine(outputPath, "soundspeed.xml"));
         }
 
-        public static void CreateAverageSoundSpeeds(string outputPath, List<NAVOTimePeriod> timePeriods, List<List<NAVOTimePeriod>> timePeriodMonths)
+        public static SoundSpeed ExtendMonthlySoundSpeeds(string outputPath, IEnumerable<NAVOTimePeriod> months, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest)
         {
+            var temperatureFile = SoundSpeed.Load(Path.Combine(outputPath, "temperature.xml"));
+            var salinityFile = SoundSpeed.Load(Path.Combine(outputPath, "salinity.xml"));
             var soundSpeedFile = SoundSpeed.Load(Path.Combine(outputPath, "soundspeed.xml"));
+            var result = new SoundSpeed();
+            foreach (var month in months)
+            {
+                var temperatureData = temperatureFile[month].EnvironmentData;
+                temperatureData.TrimToNearestPoints(areaOfInterest);
+                var temperatureField = new SoundSpeedField {EnvironmentData = temperatureData};
+
+                var salinityData = salinityFile[month].EnvironmentData;
+                salinityData.TrimToNearestPoints(areaOfInterest);
+                var salinityField = new SoundSpeedField {EnvironmentData = salinityData};
+
+                var soundSpeedData = soundSpeedFile[month].EnvironmentData;
+                soundSpeedData.TrimToNearestPoints(areaOfInterest);
+                var soundSpeedField = new SoundSpeedField
+                {
+                        EnvironmentData = soundSpeedData,
+                        DeepestPoint = deepestPoint,
+                        TimePeriod = month
+                };
+
+                VerifyThatProfilePointsMatch(temperatureField, salinityField);
+                VerifyThatProfilePointsMatch(temperatureField, soundSpeedField);
+                
+                soundSpeedField.ExtendProfiles(temperatureField, salinityField);
+                result.SoundSpeedFields.Add(soundSpeedField);
+            }
+            return result;
+        }
+
+        public static SoundSpeed AddAverageSoundSpeeds(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods, List<List<NAVOTimePeriod>> timePeriodMonths)
+        {
             for (var timePeriodIndex = 0; timePeriodIndex < timePeriods.Count(); timePeriodIndex++)
             {
                 var timePeriod = timePeriods[timePeriodIndex];
                 var months = timePeriodMonths[timePeriodIndex];
                 var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
                 foreach (var month in months)
-                    accumulator.Add(soundSpeedFile[month]);
-                soundSpeedFile.SoundSpeedFields.Add(accumulator.Average);
+                    accumulator.Add(monthlySoundSpeeds[month]);
+                monthlySoundSpeeds.SoundSpeedFields.Add(accumulator.Average);
             }
-            soundSpeedFile.Save(Path.Combine(outputPath, "soundspeed.xml"));
+            return monthlySoundSpeeds;
         }
 
         static void VerifyThatProfilePointsMatch(TimePeriodEnvironmentData<SoundSpeedProfile> profile1, TimePeriodEnvironmentData<SoundSpeedProfile> profile2)
