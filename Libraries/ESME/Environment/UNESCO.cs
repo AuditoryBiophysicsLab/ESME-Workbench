@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HRC.Navigation;
@@ -224,36 +225,6 @@ namespace ESME.Environment
             var soundspeed = DataFile.Create(soundSpeedFile);
             soundspeed.Layers.Add(sspLayer);
             var depths = salinity.Layers[0].DepthAxis.Values;
-#if false
-            if (bw == null)
-                Console.WriteLine("Calculating sound speed data...");
-            float ProgressStep = 1f / (float)salinity.Layers[0].LongitudeAxis.Count;
-            for (int lon = 0; lon < salinity.Layers[0].LongitudeAxis.Count; lon++)
-            {
-                for (int lat = 0; lat < salinity.Layers[0].LatitudeAxis.Count; lat++)
-                {
-                    salData = salinity.Layers[0].DataArray[(uint)lon, (uint)lat];
-                    tempData = salinity.Layers[0].DataArray[(uint)lon, (uint)lat];
-                    location = new EarthCoordinate(salinity.Layers[0].LatitudeAxis[lat], salinity.Layers[0].LongitudeAxis[lon]);
-                    sspData = UNESCO.SoundSpeed(location, ref depths, ref tempData, ref salData);
-                    soundspeed.Layers[0].DataArray[(uint)lon, (uint)lat] = sspData;
-                }
-                CurProgressRatio += ProgressStep;
-                if (bw != null)
-                    bw.ReportProgress((int)(100f * CurProgressRatio));
-                else
-                    Console.Write((CurProgressRatio * 100f).ToString("0") + " % complete                          \r");
-            }
-            if (bw != null)
-                bw.TaskName = "Saving soundspeed data...";
-            else
-                Console.WriteLine("Saving soundspeed data...");
-            soundspeed.Save();
-            soundspeed.Close();
-            salinity = temperature = soundspeed = null;
-            sspLayer = null;
-            GC.Collect();
-#else
             var progressStep = 1f / salinity.Layers[0].LatitudeAxis.Length;
             var temperaturePoint = new DataPoint(temperature.Layers[0]);
             var salinityPoint = new DataPoint(salinity.Layers[0]);
@@ -273,7 +244,6 @@ namespace ESME.Environment
                 if (bw != null) bw.ReportProgress((int) (100f * curProgressRatio));
                 else Console.Write((curProgressRatio * 100f).ToString("0") + " % complete \r");
             }
-#endif
             if (bw == null) Console.WriteLine("Completed");
         }
 
@@ -366,3 +336,4 @@ namespace ESME.Environment
         // UNESCO Constants and algorithm taken from http://resource.npl.co.uk/acoustics/techguides/soundseawater/content.html
     }
 }
+#endif

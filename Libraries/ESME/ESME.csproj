@@ -103,12 +103,6 @@
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\CASSTemplate.cs" />
     <Compile Include="Environment\Environment2DData.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataArray.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataAxis.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataFile.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataLayer.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataLayerList.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataString.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
@@ -122,7 +116,6 @@
     <Compile Include="Environment\Sediment.cs" />
     <Compile Include="Environment\NAVO\SerializedOutput.cs" />
     <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />
-    <Compile Include="Environment\SedimentOld.cs" />
     <Compile Include="Environment\SoundSpeed.cs" />
     <Compile Include="Environment\SoundSpeedField.cs" />
     <Compile Include="Environment\SoundSpeedProfile.cs" />
@@ -207,11 +200,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnimatLocationFile\AnimatLocationFile.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataArraySourceInfo.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataColumn.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataPoint.cs" />
-    <Compile Include="Environment\Binary Data Classes\DataRow.cs" />
-    <Compile Include="Environment\Binary Data Classes\Datum.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Model\AcousticProperties.cs" />
     <Compile Include="Model\Animat.cs" />

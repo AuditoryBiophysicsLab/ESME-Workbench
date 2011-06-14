@@ -1213,8 +1213,7 @@ namespace ESMEWorkBench.Data
 
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
             {
-                if (BathymetryFileName.EndsWith(".eeb")) Bathymetry = Environment2DData.FromEEB(BathymetryFileName, "bathymetry", SimArea);
-                else if (BathymetryFileName.EndsWith(".chb"))
+                if (BathymetryFileName.EndsWith(".chb"))
                     Bathymetry = Environment2DData.FromCHB(BathymetryFileName, -1);
                 else if (BathymetryFileName.EndsWith(".yxz") || BathymetryFileName.EndsWith(".txt"))
                     Bathymetry = Environment2DData.FromYXZ(BathymetryFileName, -1);

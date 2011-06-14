@@ -422,11 +422,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                if (Globals.AppSettings.UseOAMLDataSources)
-                {
-                    return ((_experiment != null) && (_experiment.NemoFile != null) && (_experiment.FileName != null) && Globals.AppSettings.NAVOConfiguration.IsValid);
-                }
-                return ((Globals.AppSettings.EnvironmentDatabaseDirectory != null) && (Directory.Exists(Globals.AppSettings.EnvironmentDatabaseDirectory)) && (_experiment != null) && (_experiment.NemoFile != null));
+                return ((_experiment != null) && (_experiment.NemoFile != null) && (_experiment.FileName != null) && Globals.AppSettings.NAVOConfiguration.IsValid);
             }
         }
 
@@ -434,31 +430,18 @@ namespace ESMEWorkBench.ViewModels.Main
         
         void ShowEnvironmentSettingsView()
         {
-            if (Globals.AppSettings.UseOAMLDataSources)
+            var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_visualizerService, _messageBoxService, Globals.AppSettings, _experiment);
+            try
             {
-                var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_visualizerService, _messageBoxService, Globals.AppSettings, _experiment);
-                try
+                var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
+                if (result.HasValue && result.Value)
                 {
-                    var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
-                    if (result.HasValue && result.Value)
-                    {
-                        _experiment.InitializeEnvironment(false);
-                    }
-                }
-                catch (ApplicationException ex)
-                {
-                    _messageBoxService.ShowError(string.Format("{0}: {1}", ex.Message, ex.InnerException.Message));
+                    _experiment.InitializeEnvironment(false);
                 }
             }
-            else
+            catch (ApplicationException ex)
             {
-                var environmentSettingsViewModel = new EnvironmentSettingsViewModel(Globals.AppSettings.EnvironmentDatabaseDirectory, _experiment, _messageBoxService);
-                var result = _visualizerService.ShowDialog("EnvironmentSettingsView", environmentSettingsViewModel);
-                if (!result.HasValue || !result.Value) return;
-                _experiment.BathymetryFileName = environmentSettingsViewModel.BathymetryData.SelectedItem.Name;
-                _experiment.SedimentFileName = environmentSettingsViewModel.BottomTypeData.SelectedItem.Name;
-                _experiment.SoundSpeedFileName = environmentSettingsViewModel.SoundSpeedData.SelectedItem.Name;
-                _experiment.WindSpeedFileName = environmentSettingsViewModel.WindSpeedData.SelectedItem.Name;
+                _messageBoxService.ShowError(string.Format("{0}: {1}", ex.Message, ex.InnerException.Message));
             }
         }
 
