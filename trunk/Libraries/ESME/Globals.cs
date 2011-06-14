@@ -2,12 +2,11 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using ESME.NEMO;
-using HRC.Navigation;
+using ESME.Data;
 
 namespace ESME
 {
-    internal static class Globals
+    public static class Globals
     {
         public static string UserFolder
         {
@@ -19,12 +18,14 @@ namespace ESME
             if (!string.IsNullOrEmpty(s))
             {
                 var sb = new StringBuilder(s.Length);
-                foreach (var c in s.Where(c => trueIfKeep(c)))
+                foreach (var c in s.Where(trueIfKeep))
                     sb.Append(c);
 
                 return sb.ToString();
             }
             return s;
         }
+
+        public static AppSettings AppSettings { get; set; }
     }
 }

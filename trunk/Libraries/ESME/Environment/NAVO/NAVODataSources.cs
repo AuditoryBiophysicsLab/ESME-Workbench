@@ -9,7 +9,6 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Model;
 using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 
@@ -17,29 +16,6 @@ namespace ESME.Environment.NAVO
 {
     public class NAVODataSources : ViewModelBase
     {
-        internal static readonly NAVOTimePeriod[] MonthMap = new[]
-        {
-                (NAVOTimePeriod)0,
-                NAVOTimePeriod.January,
-                NAVOTimePeriod.February,
-                NAVOTimePeriod.March,
-                NAVOTimePeriod.April,
-                NAVOTimePeriod.May,
-                NAVOTimePeriod.June,
-                NAVOTimePeriod.July,
-                NAVOTimePeriod.August,
-                NAVOTimePeriod.September,
-                NAVOTimePeriod.October,
-                NAVOTimePeriod.November,
-                NAVOTimePeriod.December,
-                NAVOTimePeriod.January,
-                NAVOTimePeriod.February,
-                NAVOTimePeriod.March,
-                NAVOTimePeriod.April,
-                NAVOTimePeriod.May,
-                NAVOTimePeriod.June,
-        };
-
         IViewAwareStatus _viewAwareStatus;
         Dispatcher _dispatcher;
 
@@ -185,18 +161,18 @@ namespace ESME.Environment.NAVO
 
             var selectedMonthIndices = new List<NAVOTimePeriod>();
             foreach (var timePeriod in SelectedTimePeriods)
-                selectedMonthIndices.AddRange(GetMonthIndices(timePeriod));
+                selectedMonthIndices.AddRange(Configuration.MonthsInTimePeriod(timePeriod));
             var uniqueMonths = selectedMonthIndices.Distinct().ToList();
             uniqueMonths.Sort();
 
             // uniqueMonths * 3 because we're counting Temp, and Salinity extraction, and Soundspeed creation as independent steps.
             // SelectedTimePeriods.Count() is for averaging the soundspeed fields
             // and the extra 2 is for extracting bathymetry and sediment data which are time invariant
-            var averagedSoundSpeedFieldTimePeriods = SelectedTimePeriods.Where(t => GetMonthIndices(t).Count() > 1).ToList();
+            var averagedSoundSpeedFieldTimePeriods = SelectedTimePeriods.Where(t => Configuration.MonthsInTimePeriod(t).Count() > 1).ToList();
             var totalExtractionStepCount = (float)((uniqueMonths.Count * 3) + averagedSoundSpeedFieldTimePeriods.Count() + 2);
             if (ExportCASSData) totalExtractionStepCount += SelectedTimePeriods.Count();
 
-            totalExtractionStepCount += SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1).Count();
+            totalExtractionStepCount += SelectedTimePeriods.Select(Configuration.MonthsInTimePeriod).Where(monthIndices => monthIndices.Count() > 1).Count();
             //foreach (var monthIndices in SelectedTimePeriods.Select(GetMonthIndices).Where(monthIndices => monthIndices.Count() > 1))
             //    totalExtractionStepCount++;
 
@@ -212,8 +188,8 @@ namespace ESME.Environment.NAVO
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
             Status = "Extracting sediment data for selected area";
-            BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea, UseExpandedExtractionArea);
-            var sediment = Sediment.Load(BottomSedimentTypeDatabase.SedimentFilename(tempDirectory));
+            var sediment = BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea, UseExpandedExtractionArea);
+            sediment.Save(Path.Combine(tempDirectory, "sediment.xml"));
             if (backgroundWorker.CancellationPending) return;
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
@@ -223,33 +199,37 @@ namespace ESME.Environment.NAVO
             ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
             
             Status = "Calculating sound speed data for selected time periods...";
-            GeneralizedDigitalEnvironmentModelDatabase.CreateMonthlySoundSpeeds(tempDirectory, uniqueMonths);
+            var temperature = SoundSpeed.Load(Path.Combine(tempDirectory, "temperature.xml"));
+            var salinity = SoundSpeed.Load(Path.Combine(tempDirectory, "salinity.xml"));
+            var soundSpeed = SoundSpeed.Create(temperature, salinity);
+            soundSpeed.Save(Path.Combine(tempDirectory, "soundspeed.xml"));
             currentExtractionStep += uniqueMonths.Count;
             ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
 
             Status = "Extracting wind data";
-            SurfaceMarineGriddedClimatologyDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods.ToList(), SelectedTimePeriods.Select(GetMonthIndices).ToList(), ExtractionArea, UseExpandedExtractionArea);
+            SurfaceMarineGriddedClimatologyDatabase.ExtractArea(SurfaceMarineGriddedClimatologyDatabase.DatabasePath, tempDirectory, SelectedTimePeriods.ToList(), SelectedTimePeriods.Select(Configuration.MonthsInTimePeriod).ToList(), ExtractionArea, UseExpandedExtractionArea);
             var wind = Wind.Load(SurfaceMarineGriddedClimatologyDatabase.WindFilename(tempDirectory));
             ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
 
             if (ExportCASSData)
             {
                 Status = "Exporting bathymetry data";
+
                 //var bathymetryFileName = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathy_" + DigitalBathymetricDatabase.SelectedResolution + ".txt");
                 var cassBathymetryFile = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathymetry.txt");
                 File.Copy(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), cassBathymetryFile, true);
                 //CASSFiles.WriteBathymetryFile(cassBathymetryFile, bathymetry);
                 Status = "Extending soundspeed profiles for CASS...";
-                var averagedTimePeriodMonths = averagedSoundSpeedFieldTimePeriods.Select(period => GetMonthIndices(period).ToList()).ToList();
-                var soundSpeed = GeneralizedDigitalEnvironmentModelDatabase.ExtendMonthlySoundSpeeds(tempDirectory, uniqueMonths, maxDepth, ExtractionArea);
+                var extendedAndAveragedSoundSpeeds = new SoundSpeed();
+                foreach (var month in uniqueMonths)
+                    extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(soundSpeed[month].Extend(temperature[month], salinity[month], maxDepth, ExtractionArea));
                 Status = "Averaging soundspeed profiles for CASS...";
-                soundSpeed = GeneralizedDigitalEnvironmentModelDatabase.AddAverageSoundSpeeds(soundSpeed, averagedSoundSpeedFieldTimePeriods, averagedTimePeriodMonths);
-
+                extendedAndAveragedSoundSpeeds.Add(SoundSpeed.Average(extendedAndAveragedSoundSpeeds, averagedSoundSpeedFieldTimePeriods));
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
                     Status = "Exporting CASS format data for " + timePeriod;
 
-                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod, bathymetry, sediment, soundSpeed[timePeriod], wind[timePeriod].EnvironmentData);
+                    CASSFiles.GenerateSimAreaData(_simAreaPath, tempDirectory, timePeriod, bathymetry, sediment, extendedAndAveragedSoundSpeeds[timePeriod], wind[timePeriod].EnvironmentData);
                     if (backgroundWorker.CancellationPending) return;
                     ProgressPercent = (int)((++currentExtractionStep / totalExtractionStepCount) * 100);
                 }
@@ -405,63 +385,6 @@ namespace ESME.Environment.NAVO
         bool _exportCASSData;
 
         #endregion
-
-        public IEnumerable<NAVOTimePeriod> GetMonthIndices(NAVOTimePeriod timePeriod)
-        {
-            switch (timePeriod)
-            {
-                case NAVOTimePeriod.January:
-                case NAVOTimePeriod.February:
-                case NAVOTimePeriod.March:
-                case NAVOTimePeriod.April:
-                case NAVOTimePeriod.May:
-                case NAVOTimePeriod.June:
-                case NAVOTimePeriod.July:
-                case NAVOTimePeriod.August:
-                case NAVOTimePeriod.September:
-                case NAVOTimePeriod.October:
-                case NAVOTimePeriod.November:
-                case NAVOTimePeriod.December:
-                    yield return timePeriod;
-                    yield break;
-                case NAVOTimePeriod.Spring:
-                    yield return MonthMap[(int) Configuration.SpringStartMonth];
-                    yield return MonthMap[(int) Configuration.SpringStartMonth + 1];
-                    yield return MonthMap[(int) Configuration.SpringStartMonth + 2];
-                    yield break;
-                case NAVOTimePeriod.Summer:
-                    yield return MonthMap[(int) Configuration.SummerStartMonth];
-                    yield return MonthMap[(int) Configuration.SummerStartMonth + 1];
-                    yield return MonthMap[(int) Configuration.SummerStartMonth + 2];
-                    yield break;
-                case NAVOTimePeriod.Fall:
-                    yield return MonthMap[(int) Configuration.FallStartMonth];
-                    yield return MonthMap[(int) Configuration.FallStartMonth + 1];
-                    yield return MonthMap[(int) Configuration.FallStartMonth + 2];
-                    yield break;
-                case NAVOTimePeriod.Winter:
-                    yield return MonthMap[(int) Configuration.WinterStartMonth];
-                    yield return MonthMap[(int) Configuration.WinterStartMonth + 1];
-                    yield return MonthMap[(int) Configuration.WinterStartMonth + 2];
-                    yield break;
-                case NAVOTimePeriod.Cold:
-                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth];
-                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 1];
-                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 2];
-                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 3];
-                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 4];
-                    yield return MonthMap[(int) Configuration.ColdSeasonStartMonth + 5];
-                    yield break;
-                case NAVOTimePeriod.Warm:
-                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth];
-                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 1];
-                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 2];
-                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 3];
-                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 4];
-                    yield return MonthMap[(int) Configuration.WarmSeasonStartMonth + 5];
-                    yield break;
-            }
-        }
 
         public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
         {

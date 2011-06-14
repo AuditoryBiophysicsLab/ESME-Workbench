@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using ESME.Environment.NAVO;
 using HRC.Utility;
 
@@ -16,11 +18,6 @@ namespace ESME.Environment
             SoundSpeedFields = new List<SoundSpeedField>();
         }
 
-        public static SoundSpeed Load(string filename)
-        {
-            return new SoundSpeed { SoundSpeedFields = XmlSerializer<List<SoundSpeedField>>.Load(filename, ReferencedTypes) };
-        }
-
         public void Save(string filename)
         {
             var serializer = new XmlSerializer<List<SoundSpeedField>> { Data = SoundSpeedFields };
@@ -32,9 +29,58 @@ namespace ESME.Environment
         /// </summary>
         /// <param name="timePeriod"></param>
         /// <returns></returns>
-        public SoundSpeedField this[NAVOTimePeriod timePeriod]
+        public SoundSpeedField this[NAVOTimePeriod timePeriod] { get { return SoundSpeedFields.Find(t => t.TimePeriod == timePeriod); } }
+
+        public void Add(SoundSpeed newData)
         {
-            get { return SoundSpeedFields.Find(t => t.TimePeriod == timePeriod); }
+            foreach (var soundSpeedField in newData.SoundSpeedFields)
+            {
+                if (this[soundSpeedField.TimePeriod] != null) throw new DataException(string.Format("Unable to add SoundSpeedField for {0}. Data already present.", soundSpeedField.TimePeriod));
+                SoundSpeedFields.Add(soundSpeedField);
+            }
         }
+
+        public static SoundSpeed Load(string filename)
+        {
+            return new SoundSpeed { SoundSpeedFields = XmlSerializer<List<SoundSpeedField>>.Load(filename, ReferencedTypes) };
+        }
+
+        public static SoundSpeed Create(SoundSpeed temperatureData, SoundSpeed salinityData)
+        {
+            VerifyThatTimePeriodsMatch(temperatureData, salinityData);
+
+            var soundSpeedFile = new SoundSpeed();
+            foreach (var temperatureField in temperatureData.SoundSpeedFields)
+            {
+                var salinityField = salinityData[temperatureField.TimePeriod];
+                SoundSpeedField.VerifyThatProfilePointsMatch(temperatureField, salinityField);
+                var field = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
+                foreach (var temperatureProfile in temperatureField.EnvironmentData)
+                    field.EnvironmentData.Add(ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
+                soundSpeedFile.SoundSpeedFields.Add(field);
+            }
+            return soundSpeedFile;
+        }
+
+        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods)
+        {
+            var result = new SoundSpeed();
+            foreach (var timePeriod in timePeriods) 
+            {
+                var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
+                var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
+                foreach (var month in months)
+                    accumulator.Add(monthlySoundSpeeds[month]);
+                result.SoundSpeedFields.Add(accumulator.Average);
+            }
+            return result;
+        }
+
+        internal static void VerifyThatTimePeriodsMatch(SoundSpeed data1, SoundSpeed data2)
+        {
+            foreach (var field1 in data1.SoundSpeedFields.Where(field1 => data2[field1.TimePeriod] == null)) throw new DataException(string.Format("SoundSpeeds do not contain the same time periods. Data 1 has time period {0}, data 2 does not", field1.TimePeriod));
+            foreach (var field2 in data2.SoundSpeedFields.Where(field2 => data1[field2.TimePeriod] == null)) throw new DataException(string.Format("SoundSpeeds do not contain the same time periods. Data 2 has time period {0}, data 1 does not", field2.TimePeriod));
+        }
+
     }
 }

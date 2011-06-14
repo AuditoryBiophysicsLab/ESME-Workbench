@@ -10,9 +10,7 @@ namespace ESME.Environment.NAVO
     {
         public static string DatabasePath { get; set; }
 
-        public static string SedimentFilename(string outputPath) { return Path.Combine(outputPath, "sediment.xml"); }
-
-        public static void ExtractArea(string outputDirectory, GeoRect extractionArea, bool useExpandedExtractionArea)
+        public static Sediment ExtractArea(string outputDirectory, GeoRect extractionArea, bool useExpandedExtractionArea)
         {
             var results = new Sediment();
             var fileId = H5F.open(DatabasePath, H5F.OpenMode.ACC_RDONLY);
@@ -34,7 +32,7 @@ namespace ESME.Environment.NAVO
             H5G.close(highResGroup);
             H5F.close(fileId);
 
-            results.Save(Path.Combine(outputDirectory, "sediment.xml"));
+            return results;
         }
 
         static IEnumerable<SedimentSample> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)

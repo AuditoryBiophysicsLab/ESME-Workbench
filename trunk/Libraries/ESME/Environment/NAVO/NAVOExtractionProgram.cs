@@ -43,38 +43,4 @@ namespace ESME.Environment.NAVO
             return output.ToString();
         }
     }
-
-    public class NAVOExtractionPacket
-    {
-        public string Filename { get; set; }
-        public double North { get; set; }
-        public double South { get; set; }
-        public double East { get; set; }
-        public double West { get; set; }
-        public NAVOTimePeriod StartTime { get; set; }
-        public NAVOTimePeriod EndTime { get; set; }
-        public NAVOTimePeriod TimePeriod { get; set; }
-    }
-
-    public enum NAVOTimePeriod
-    {
-        January = 1,
-        February,
-        March,
-        April,
-        May,
-        June,
-        July,
-        August,
-        September,
-        October,
-        November,
-        December,
-        Spring,
-        Summer,
-        Fall,
-        Winter,
-        Cold,
-        Warm,
-    }
 }
