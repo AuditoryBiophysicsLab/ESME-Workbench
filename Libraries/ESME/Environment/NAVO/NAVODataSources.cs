@@ -221,13 +221,10 @@ namespace ESME.Environment.NAVO
             GeneralizedDigitalEnvironmentModelDatabase.ExtractArea(tempDirectory, ExtractionArea, uniqueMonths);
             currentExtractionStep += uniqueMonths.Count;
             ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
+            
             Status = "Calculating sound speed data for selected time periods...";
-            GeneralizedDigitalEnvironmentModelDatabase.CreateMonthlySoundSpeeds(tempDirectory, uniqueMonths, maxDepth);
+            GeneralizedDigitalEnvironmentModelDatabase.CreateMonthlySoundSpeeds(tempDirectory, uniqueMonths);
             currentExtractionStep += uniqueMonths.Count;
-            ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
-            var averagedTimePeriodMonths = averagedSoundSpeedFieldTimePeriods.Select(period => GetMonthIndices(period).ToList()).ToList();
-            GeneralizedDigitalEnvironmentModelDatabase.CreateAverageSoundSpeeds(tempDirectory, averagedSoundSpeedFieldTimePeriods, averagedTimePeriodMonths);
-            currentExtractionStep += averagedSoundSpeedFieldTimePeriods.Count;
             ProgressPercent = (int)((currentExtractionStep / totalExtractionStepCount) * 100);
 
             Status = "Extracting wind data";
@@ -242,7 +239,12 @@ namespace ESME.Environment.NAVO
                 var cassBathymetryFile = Path.Combine(Path.Combine(_simAreaPath, "Bathymetry"), "bathymetry.txt");
                 File.Copy(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), cassBathymetryFile, true);
                 //CASSFiles.WriteBathymetryFile(cassBathymetryFile, bathymetry);
-                var soundSpeed = SoundSpeed.Load(Path.Combine(tempDirectory, "soundspeed.xml"));
+                Status = "Extending soundspeed profiles for CASS...";
+                var averagedTimePeriodMonths = averagedSoundSpeedFieldTimePeriods.Select(period => GetMonthIndices(period).ToList()).ToList();
+                var soundSpeed = GeneralizedDigitalEnvironmentModelDatabase.ExtendMonthlySoundSpeeds(tempDirectory, uniqueMonths, maxDepth, ExtractionArea);
+                Status = "Averaging soundspeed profiles for CASS...";
+                soundSpeed = GeneralizedDigitalEnvironmentModelDatabase.AddAverageSoundSpeeds(soundSpeed, averagedSoundSpeedFieldTimePeriods, averagedTimePeriodMonths);
+
                 foreach (var timePeriod in SelectedTimePeriods)
                 {
                     Status = "Exporting CASS format data for " + timePeriod;
