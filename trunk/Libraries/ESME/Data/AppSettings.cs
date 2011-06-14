@@ -142,25 +142,6 @@ namespace ESME.Data
 
         #endregion
 
-        #region public bool UseOAMLDataSources { get; set; }
-
-        public bool UseOAMLDataSources
-        {
-            get { return _useOAMLDataSources; }
-            set
-            {
-                if (_useOAMLDataSources == value) return;
-                _useOAMLDataSources = value;
-                UseESMEDataSources = !value;
-                NotifyPropertyChanged(UseOAMLDataSourcesChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs UseOAMLDataSourcesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.UseOAMLDataSources);
-        bool _useOAMLDataSources = true;
-
-        #endregion
-
         #region public bool IsNavyVersion { get; set; }
 
         public bool IsNavyVersion
@@ -193,25 +174,6 @@ namespace ESME.Data
 
         #endregion
         
-        #region public bool UseESMEDataSources { get; set; }
-
-        public bool UseESMEDataSources
-        {
-            get { return _useESMEDataSources; }
-            set
-            {
-                if (_useESMEDataSources == value) return;
-                _useESMEDataSources = value;
-                UseOAMLDataSources = !value;
-                NotifyPropertyChanged(UseESMEDataSourcesChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs UseESMEDataSourcesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.UseESMEDataSources);
-        bool _useESMEDataSources;
-
-        #endregion
-
         #region public CASSSettings CASSSettings { get; set; }
 
         public CASSSettings CASSSettings

@@ -265,4 +265,67 @@ namespace ImportGDEM
                 "\n");
         }
     }
+
+    public class AxisMap : IComparable<AxisMap>, IEquatable<AxisMap>, IEquatable<float>, IEqualityComparer<AxisMap>
+    {
+        public float Value { get; set; }
+        public int Index { get; set; }
+
+        public AxisMap(float value, int index)
+        {
+            Value = value;
+            Index = index;
+        }
+
+        public AxisMap(AxisMap toCopy)
+        {
+            Value = toCopy.Value;
+            Index = toCopy.Index;
+        }
+
+        public AxisMap(BinaryReader stream)
+        {
+            Value = stream.ReadSingle();
+            Index = stream.ReadInt32();
+        }
+
+        public void Save(BinaryWriter stream)
+        {
+            stream.Write(Value);
+            stream.Write(Index);
+        }
+
+        public int CompareTo(AxisMap other)
+        {
+            return Value.CompareTo(other.Value);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("({0}, {1})", Value, Index);
+        }
+
+        public bool Equals(AxisMap theOne, AxisMap theOther)
+        {
+            return theOne.Equals(theOther);
+        }
+
+        public int GetHashCode(AxisMap thing)
+        {
+            return thing.Value.GetHashCode();
+        }
+
+        public bool Equals(AxisMap other)
+        {
+            var product = Value / (double)(other.Value);
+            return (0.99999 <= product) && (product < 1.00001);
+        }
+
+        public bool Equals(float other)
+        {
+            var product = Value / (double)other;
+            return (0.99999 <= product) && (product < 1.00001);
+        }
+    }
+
 }
