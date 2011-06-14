@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
@@ -240,6 +241,86 @@ namespace ESME.Environment.NAVO
                         if (!string.IsNullOrEmpty(DBDBEXEPath))
                             if (File.Exists(DBDBEXEPath)) return true;
                 return false;
+            }
+        }
+
+        static readonly NAVOTimePeriod[] MonthMap = new[]
+        {
+                (NAVOTimePeriod)0,
+                NAVOTimePeriod.January,
+                NAVOTimePeriod.February,
+                NAVOTimePeriod.March,
+                NAVOTimePeriod.April,
+                NAVOTimePeriod.May,
+                NAVOTimePeriod.June,
+                NAVOTimePeriod.July,
+                NAVOTimePeriod.August,
+                NAVOTimePeriod.September,
+                NAVOTimePeriod.October,
+                NAVOTimePeriod.November,
+                NAVOTimePeriod.December,
+                NAVOTimePeriod.January,
+                NAVOTimePeriod.February,
+                NAVOTimePeriod.March,
+                NAVOTimePeriod.April,
+                NAVOTimePeriod.May,
+                NAVOTimePeriod.June,
+        };
+
+        public IEnumerable<NAVOTimePeriod> MonthsInTimePeriod(NAVOTimePeriod timePeriod)
+        {
+            switch (timePeriod)
+            {
+                case NAVOTimePeriod.January:
+                case NAVOTimePeriod.February:
+                case NAVOTimePeriod.March:
+                case NAVOTimePeriod.April:
+                case NAVOTimePeriod.May:
+                case NAVOTimePeriod.June:
+                case NAVOTimePeriod.July:
+                case NAVOTimePeriod.August:
+                case NAVOTimePeriod.September:
+                case NAVOTimePeriod.October:
+                case NAVOTimePeriod.November:
+                case NAVOTimePeriod.December:
+                    yield return timePeriod;
+                    yield break;
+                case NAVOTimePeriod.Spring:
+                    yield return MonthMap[(int)SpringStartMonth];
+                    yield return MonthMap[(int)SpringStartMonth + 1];
+                    yield return MonthMap[(int)SpringStartMonth + 2];
+                    yield break;
+                case NAVOTimePeriod.Summer:
+                    yield return MonthMap[(int)SummerStartMonth];
+                    yield return MonthMap[(int)SummerStartMonth + 1];
+                    yield return MonthMap[(int)SummerStartMonth + 2];
+                    yield break;
+                case NAVOTimePeriod.Fall:
+                    yield return MonthMap[(int)FallStartMonth];
+                    yield return MonthMap[(int)FallStartMonth + 1];
+                    yield return MonthMap[(int)FallStartMonth + 2];
+                    yield break;
+                case NAVOTimePeriod.Winter:
+                    yield return MonthMap[(int)WinterStartMonth];
+                    yield return MonthMap[(int)WinterStartMonth + 1];
+                    yield return MonthMap[(int)WinterStartMonth + 2];
+                    yield break;
+                case NAVOTimePeriod.Cold:
+                    yield return MonthMap[(int)ColdSeasonStartMonth];
+                    yield return MonthMap[(int)ColdSeasonStartMonth + 1];
+                    yield return MonthMap[(int)ColdSeasonStartMonth + 2];
+                    yield return MonthMap[(int)ColdSeasonStartMonth + 3];
+                    yield return MonthMap[(int)ColdSeasonStartMonth + 4];
+                    yield return MonthMap[(int)ColdSeasonStartMonth + 5];
+                    yield break;
+                case NAVOTimePeriod.Warm:
+                    yield return MonthMap[(int)WarmSeasonStartMonth];
+                    yield return MonthMap[(int)WarmSeasonStartMonth + 1];
+                    yield return MonthMap[(int)WarmSeasonStartMonth + 2];
+                    yield return MonthMap[(int)WarmSeasonStartMonth + 3];
+                    yield return MonthMap[(int)WarmSeasonStartMonth + 4];
+                    yield return MonthMap[(int)WarmSeasonStartMonth + 5];
+                    yield break;
             }
         }
     }

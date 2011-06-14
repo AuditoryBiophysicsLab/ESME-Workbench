@@ -18,6 +18,7 @@ namespace ESMEWorkBench
             AppSettings.ApplicationName = App.Name;
             AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
             AppSettings.SetDefaults();
+            ESME.Globals.AppSettings = AppSettings;
         }
 
         public static AppSettings AppSettings { get; set; }

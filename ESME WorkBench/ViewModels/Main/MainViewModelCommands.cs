@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Cinch;
 using ESME;
 using ESME.Data;
+using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
@@ -16,6 +17,7 @@ using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
+using HRC.Navigation;
 using ExportOptionsViewModel = ESMEWorkBench.ViewModels.NAVO.ExportOptionsViewModel;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -580,13 +582,34 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                                                        break;
                                                                                                                                    }
                                                                                                                                }
+                                                                                                                               var soundSpeed = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "soundspeed.xml"));
+                                                                                                                               var temperature = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "temperature.xml"));
+                                                                                                                               var salinity = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "salinity.xml"));
+                                                                                                                               var maxDepth = new EarthCoordinate<float>(_experiment.Bathymetry.Minimum, Math.Abs(_experiment.Bathymetry.Minimum.Data));
+                                                                                                                               var extendedAndAveragedSoundSpeeds = new SoundSpeed();
+                                                                                                                               var selectedMonthIndices = new List<NAVOTimePeriod>();
+                                                                                                                               var averagedTimePeriods = new List<NAVOTimePeriod>();
+                                                                                                                               foreach (var timePeriod in exportOptionsViewModel.AvailableTimePeriods)
+                                                                                                                               {
+                                                                                                                                   if (!timePeriod.IsChecked) continue;
+                                                                                                                                   var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod.Caption);
+                                                                                                                                   var monthsInTimePeriod = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(curTimePeriod);
+                                                                                                                                   selectedMonthIndices.AddRange(monthsInTimePeriod);
+                                                                                                                                   if (monthsInTimePeriod.Count() > 1) averagedTimePeriods.Add(curTimePeriod);
+                                                                                                                               }
+                                                                                                                               var uniqueMonths = selectedMonthIndices.Distinct().ToList();
+                                                                                                                               uniqueMonths.Sort();
+                                                                                                                               foreach (var month in uniqueMonths)
+                                                                                                                                   extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(soundSpeed[month].Extend(temperature[month], salinity[month], maxDepth, _experiment.Bathymetry.GeoRect));
+                                                                                                                               if (averagedTimePeriods.Count() > 0)
+                                                                                                                                    extendedAndAveragedSoundSpeeds.Add(SoundSpeed.Average(extendedAndAveragedSoundSpeeds, averagedTimePeriods));
 
                                                                                                                                foreach (var timePeriod in exportOptionsViewModel.AvailableTimePeriods)
                                                                                                                                {
                                                                                                                                    if (!timePeriod.IsChecked) continue;
                                                                                                                                    //Status = "Exporting CASS format data for " + timePeriod.Caption;
                                                                                                                                    var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod.Caption);
-                                                                                                                                   CASSFiles.GenerateSimAreaData(scenarioDataDirectory, _experiment.EnvironmentRoot, curTimePeriod, _experiment.Bathymetry, _experiment.Sediment, _experiment.SoundSpeedField, _experiment.WindSpeed[curTimePeriod].EnvironmentData);
+                                                                                                                                   CASSFiles.GenerateSimAreaData(scenarioDataDirectory, _experiment.EnvironmentRoot, curTimePeriod, _experiment.Bathymetry, _experiment.Sediment, extendedAndAveragedSoundSpeeds[curTimePeriod], _experiment.WindSpeed[curTimePeriod].EnvironmentData);
                                                                                                                                }
                                                                                                                                if (exportOptionsViewModel.ExportAnalysisPoints)
                                                                                                                                {

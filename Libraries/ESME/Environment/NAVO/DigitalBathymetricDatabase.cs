@@ -85,9 +85,7 @@ namespace ESME.Environment.NAVO
         //public override void ExtractArea(NAVOExtractionPacket extractionPacket)
         public static void ExtractArea(string outputDirectory, string selectedResolution, GeoRect extractionArea, IList<string> resolutions)
         {
-            string resTemp;
-            if (selectedResolution.EndsWith("min")) resTemp = selectedResolution.Remove(selectedResolution.Length - 3);
-            else resTemp = selectedResolution;
+            var resTemp = selectedResolution.EndsWith("min") ? selectedResolution.Remove(selectedResolution.Length - 3) : selectedResolution;
             double desiredResolution;
             if (!double.TryParse(resTemp, out desiredResolution)) throw new FormatException("Illegal number format for selectedResolution: " + selectedResolution);
 
@@ -104,12 +102,6 @@ namespace ESME.Environment.NAVO
             var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputDirectory);
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
-        }
-
-        static double RoundToResolution(double originalValueInDegrees, double desiredResolutionInMinutes)
-        {
-            var scaleFactor = 60.0f / desiredResolutionInMinutes;
-            return Math.Round(originalValueInDegrees * scaleFactor) / scaleFactor;
         }
     }
 }
