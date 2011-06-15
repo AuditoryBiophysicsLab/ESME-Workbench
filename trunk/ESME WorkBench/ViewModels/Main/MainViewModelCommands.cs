@@ -562,67 +562,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate { return (_experiment.NemoFile != null && (!string.IsNullOrEmpty(_experiment.BathymetryFileName) || (!string.IsNullOrEmpty(_experiment.SoundSpeedFileName) || !string.IsNullOrEmpty(_experiment.SedimentFileName) || !string.IsNullOrEmpty(_experiment.WindSpeedFileName) || ((_experiment.AnalysisPoints != null) && (_experiment.AnalysisPoints.Count > 0))))); },
                                                                                                                        delegate
                                                                                                                        {
-                                                                                                                           var exportOptionsViewModel = new ExportOptionsViewModel(_experiment);
+                                                                                                                           var exportOptionsViewModel = new ExportOptionsViewModel(_experiment, _dispatcher);
                                                                                                                            var result = _visualizerService.ShowDialog("ExportOptionsView", exportOptionsViewModel);
-                                                                                                                           var scenarioDataDirectory = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName);
-                                                                                                                           if (result.HasValue && result.Value)
-                                                                                                                           {
-                                                                                                                               MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Wait);
-                                                                                                                               //Status = "Exporting bathymetry data";
-
-                                                                                                                               var bathymetryFiles = Directory.GetFiles(_experiment.EnvironmentRoot, "bathymetry*.yxz");
-                                                                                                                               if (exportOptionsViewModel.ExportCASSBathymetry)
-                                                                                                                               {
-                                                                                                                                   if (bathymetryFiles.Length < 1) throw new FileNotFoundException("No bathymetry files were found, bathymetry data will not be exported");
-                                                                                                                                   foreach (var file in bathymetryFiles)
-                                                                                                                                   {
-                                                                                                                                       var destFile = Path.Combine(Path.Combine(scenarioDataDirectory, "Bathymetry"), "bathymetry.txt");
-                                                                                                                                       File.Copy(file, destFile, true);
-                                                                                                                                       MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-                                                                                                                                       break;
-                                                                                                                                   }
-                                                                                                                               }
-                                                                                                                               var soundSpeed = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "soundspeed.xml"));
-                                                                                                                               var temperature = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "temperature.xml"));
-                                                                                                                               var salinity = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "salinity.xml"));
-                                                                                                                               var maxDepth = new EarthCoordinate<float>(_experiment.Bathymetry.Minimum, Math.Abs(_experiment.Bathymetry.Minimum.Data));
-                                                                                                                               var extendedAndAveragedSoundSpeeds = new SoundSpeed();
-                                                                                                                               var selectedMonthIndices = new List<NAVOTimePeriod>();
-                                                                                                                               var averagedTimePeriods = new List<NAVOTimePeriod>();
-                                                                                                                               foreach (var timePeriod in exportOptionsViewModel.AvailableTimePeriods)
-                                                                                                                               {
-                                                                                                                                   if (!timePeriod.IsChecked) continue;
-                                                                                                                                   var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod.Caption);
-                                                                                                                                   var monthsInTimePeriod = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(curTimePeriod);
-                                                                                                                                   selectedMonthIndices.AddRange(monthsInTimePeriod);
-                                                                                                                                   if (monthsInTimePeriod.Count() > 1) averagedTimePeriods.Add(curTimePeriod);
-                                                                                                                               }
-                                                                                                                               var uniqueMonths = selectedMonthIndices.Distinct().ToList();
-                                                                                                                               uniqueMonths.Sort();
-                                                                                                                               foreach (var month in uniqueMonths)
-                                                                                                                                   extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(soundSpeed[month].Extend(temperature[month], salinity[month], maxDepth, _experiment.Bathymetry.GeoRect));
-                                                                                                                               if (averagedTimePeriods.Count() > 0)
-                                                                                                                                    extendedAndAveragedSoundSpeeds.Add(SoundSpeed.Average(extendedAndAveragedSoundSpeeds, averagedTimePeriods));
-
-                                                                                                                               foreach (var timePeriod in exportOptionsViewModel.AvailableTimePeriods)
-                                                                                                                               {
-                                                                                                                                   if (!timePeriod.IsChecked) continue;
-                                                                                                                                   //Status = "Exporting CASS format data for " + timePeriod.Caption;
-                                                                                                                                   var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod.Caption);
-                                                                                                                                   CASSFiles.GenerateSimAreaData(scenarioDataDirectory, _experiment.EnvironmentRoot, curTimePeriod, _experiment.Bathymetry, _experiment.Sediment, extendedAndAveragedSoundSpeeds[curTimePeriod], _experiment.WindSpeed[curTimePeriod].EnvironmentData);
-                                                                                                                               }
-                                                                                                                               if (exportOptionsViewModel.ExportAnalysisPoints)
-                                                                                                                               {
-                                                                                                                                   var selectedTimePeriods = (from timePeriod in exportOptionsViewModel.AvailableTimePeriods
-                                                                                                                                                              where timePeriod.IsChecked
-                                                                                                                                                              select timePeriod.Caption).ToList();
-                                                                                                                                   CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt", _experiment.NemoModeToAcousticModelNameMap, _experiment.Bathymetry.Minimum.Data);
-                                                                                                                                   _experiment.ExportAnalysisPoints(true);
-                                                                                                                                   //CASSFiles.WriteCASSInputFiles(Globals.AppSettings, selectedTimePeriods, _experiment.AnalysisPoints, _experiment.NemoFile, "bathymetry.txt");
-
-                                                                                                                               }
-                                                                                                                               MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-                                                                                                                           }
+                                                                                                                           if (result.HasValue && result.Value) { }
                                                                                                                        }));
             }
         }

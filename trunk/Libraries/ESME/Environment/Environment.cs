@@ -122,14 +122,32 @@ namespace ESME.Environment
 
         #endregion
 
-        public void Export(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, Delegates.Delegate<int> extendOperationCount = null, Delegates.Delegate<int> averageOperationCount = null, Delegates.Delegate<string> statusMessage = null, BackgroundWorker backgroundWorker = null)
+        public void Export(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, Delegates.Delegate<string> statusMessage = null, BackgroundWorker backgroundWorker = null)
         {
             ExportBathymetry(simAreaPath, areaToExport, statusMessage, backgroundWorker);
             if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return;
-            ExportEnvironment(simAreaPath, timePeriods, areaToExport, extendOperationCount, averageOperationCount, statusMessage, backgroundWorker);
+            ExportEnvironment(simAreaPath, timePeriods, areaToExport, statusMessage, backgroundWorker);
         }
 
-        public void ExportEnvironment(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, Delegates.Delegate<int> extendOperationCount = null, Delegates.Delegate<int> averageOperationCount = null, Delegates.Delegate<string> statusMessage = null, BackgroundWorker backgroundWorker = null)
+        public static int EnvironmentExportStepCount(IEnumerable<NAVOTimePeriod> selectedTimePeriods)
+        {
+            var selectedMonthIndices = new List<NAVOTimePeriod>();
+            var averagedTimePeriods = new List<NAVOTimePeriod>();
+            foreach (var timePeriod in selectedTimePeriods)
+            {
+                var monthsInTimePeriod = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
+                selectedMonthIndices.AddRange(monthsInTimePeriod);
+                if (monthsInTimePeriod.Count() > 1) averagedTimePeriods.Add(timePeriod);
+            }
+            var uniqueMonths = selectedMonthIndices.Distinct().ToList();
+            uniqueMonths.Sort();
+            var result = uniqueMonths.Count;
+            result += averagedTimePeriods.Count;
+            result += selectedTimePeriods.Count();
+            return result;
+        }
+
+        public void ExportEnvironment(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, Delegates.Delegate<string> statusMessage = null, BackgroundWorker backgroundWorker = null)
         {
             if ((Bathymetry == null) || (Sediment == null) || (SoundSpeed == null) || (Salinity == null) || (Temperature == null) || (Wind == null)) throw new DataException("Unable to export environmental data: One or more required data types are not present");
             
@@ -146,6 +164,7 @@ namespace ESME.Environment
                     if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return;
                 }
             }
+            else areaToExport = selectedBathymetry.Samples.GeoRect;
 
             var deepestPoint = selectedBathymetry.Maximum;
             
@@ -159,8 +178,6 @@ namespace ESME.Environment
             }
             var uniqueMonths = selectedMonthIndices.Distinct().ToList();
             uniqueMonths.Sort();
-            if (extendOperationCount != null) extendOperationCount(uniqueMonths.Count);
-            if (averageOperationCount != null) averageOperationCount(averagedTimePeriods.Count);
 
             var extendedAndAveragedSoundSpeeds = new SoundSpeed();
             foreach (var month in uniqueMonths)

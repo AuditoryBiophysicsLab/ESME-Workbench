@@ -1,17 +1,28 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Windows.Input;
+using System.Windows.Threading;
 using Cinch;
+using ESME;
+using ESME.Environment;
+using ESME.Environment.NAVO;
 using ESMEWorkBench.Data;
+using Environment = ESME.Environment.Environment;
 
 namespace ESMEWorkBench.ViewModels.NAVO
 {
     public class ExportOptionsViewModel : ViewModelBase
     {
         readonly Experiment _experiment;
+        readonly Dispatcher _dispatcher;
 
-        public ExportOptionsViewModel(Experiment experiment)
+        public ExportOptionsViewModel(Experiment experiment, Dispatcher dispatcher)
         {
             _experiment = experiment;
+            _dispatcher = dispatcher;
             AvailableTimePeriods = new CheckboxSettings();
             foreach (var curPeriod in _experiment.AvailableTimePeriods)
                 AvailableTimePeriods.Add(new CheckboxSetting
@@ -178,7 +189,123 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
-        #region public string Status { get; set; }
+        #region public bool ProgressIsVisible { get; set; }
+
+        public bool ProgressIsVisible
+        {
+            get { return _progressIsVisible; }
+            set
+            {
+                if (_progressIsVisible == value) return;
+                _progressIsVisible = value;
+                NotifyPropertyChanged(ProgressIsVisibleChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs ProgressIsVisibleChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ProgressIsVisible);
+        private bool _progressIsVisible;
+        #endregion
+
+        #region public int ProgressPercent { get; set; }
+
+        public int ProgressPercent
+        {
+            get { return _progressPercent; }
+            set
+            {
+                if (_progressPercent == value) return;
+                _progressPercent = value;
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ProgressPercentChangedEventArgs));
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs ProgressPercentChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ProgressPercent);
+        private int _progressPercent;
+
+        #endregion
+
+        #region public bool NotExtractingData { get; set; }
+
+        public bool NotExtractingData
+        {
+            get { return _notExtractingData; }
+            set
+            {
+                if (_notExtractingData == value) return;
+                _notExtractingData = value;
+                NotifyPropertyChanged(NotExtractingDataChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs NotExtractingDataChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.NotExtractingData);
+        private bool _notExtractingData;
+
+        #endregion
+
+        #region public string ExtractButtonText { get; set; }
+
+        public string ExtractButtonText
+        {
+            get { return _extractButtonText; }
+            set
+            {
+                if (_extractButtonText == value) return;
+                _extractButtonText = value;
+                NotifyPropertyChanged(ExtractButtonTextChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs ExtractButtonTextChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ExtractButtonText);
+        private string _extractButtonText = "Extract";
+
+        #endregion
+
+        #region public bool IsStarted { get; set; }
+
+        public bool IsStarted
+        {
+            get { return _isStarted; }
+            set
+            {
+                if (_isStarted == value) return;
+                _isStarted = value;
+                NotifyPropertyChanged(IsStartedChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs IsStartedChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.IsStarted);
+        private bool _isStarted;
+
+        #endregion
+
+        #region OkCommand
+
+        public SimpleCommand<object, object> OkCommand
+        {
+            get
+            {
+                return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { return OkIsEnabled; }, delegate
+                {
+                    SelectedTimePeriods = (from timePeriod in AvailableTimePeriods
+                                           where timePeriod.IsChecked
+                                           select (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), timePeriod.Caption)).ToList();
+                    if (SelectedTimePeriods.Count > 0)
+                    ExportDataInBackground(delegate
+                    {
+                        NotExtractingData = true;
+                        ExtractButtonText = "Extract";
+                        CommandManager.InvalidateRequerySuggested();
+                        if (_extractionCanceled) return;
+                        CloseActivePopUpCommand.Execute(true);
+                    });
+                    NotExtractingData = false;
+                    ExtractButtonText = "Extracting...";
+                    _extractionCanceled = false;
+                }));
+            }
+        }
+
+        private List<NAVOTimePeriod> SelectedTimePeriods { get; set; }
 
         public string Status
         {
@@ -187,21 +314,12 @@ namespace ESMEWorkBench.ViewModels.NAVO
             {
                 if (_status == value) return;
                 _status = value;
-                NotifyPropertyChanged(StatusChangedEventArgs);
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(StatusChangedEventArgs));
             }
         }
 
-        static readonly PropertyChangedEventArgs StatusChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.Status);
-        string _status;
-
-        #endregion
-
-        #region OkCommand
-
-        public SimpleCommand<object, object> OkCommand
-        {
-            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { return OkIsEnabled; }, delegate { CloseActivePopUpCommand.Execute(true); })); }
-        }
+        private string _status;
+        private static readonly PropertyChangedEventArgs StatusChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.Status);
 
         SimpleCommand<object, object> _ok;
 
@@ -215,16 +333,96 @@ namespace ESMEWorkBench.ViewModels.NAVO
             }
         }
 
+        bool _extractionCanceled;
+        BackgroundWorker _backgroundWorker;
+        public void ExportDataInBackground(RunWorkerCompletedEventHandler runWorkerCompletedEventHandler)
+        {
+            lock (this)
+            {
+                if (IsStarted) return;
+                IsStarted = true;
+                ProgressPercent = 0;
+                _backgroundWorker = new BackgroundWorker
+                {
+                    WorkerSupportsCancellation = true,
+                    WorkerReportsProgress = true,
+                };
+                _backgroundWorker.DoWork += ExportData;
+                _backgroundWorker.RunWorkerCompleted += (s, e) =>
+                {
+                    IsStarted = false;
+                    ProgressPercent = 100;
+                    if (e.Cancelled) Status = "Canceled";
+                    else if (e.Error != null)
+                    {
+                        Status = "Error";
+                        throw new ApplicationException(string.Format("Error exporting environment data"), e.Error);
+                    }
+                };
+                if (runWorkerCompletedEventHandler != null) _backgroundWorker.RunWorkerCompleted += runWorkerCompletedEventHandler;
+                _backgroundWorker.RunWorkerAsync();
+            }
+        }
+
+        int _currentExportStep;
+        float _totalExportStepCount;
+
+        void ExportData(object sender, DoWorkEventArgs args)
+        {
+            Delegates.Delegate<string> statusUpdateDelegate = delegate(string s)
+            {
+                Status = s;
+                ProgressPercent = (int)((++_currentExportStep / _totalExportStepCount) * 100);
+            };
+            var backgroundWorker = (BackgroundWorker)sender;
+
+            _totalExportStepCount = Environment.EnvironmentExportStepCount(SelectedTimePeriods);
+            _totalExportStepCount += 2;
+            statusUpdateDelegate("Initializing...");
+            var environment = new Environment
+            {
+                Bathymetry = Bathymetry.FromYXZ(_experiment.BathymetryFileName, -1),
+                Sediment = Sediment.Load(_experiment.SedimentFileName),
+                SoundSpeed = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "soundspeed.xml")),
+                Temperature = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "temperature.xml")),
+                Salinity = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "salinity.xml")),
+                Wind = Wind.Load(Path.Combine(_experiment.EnvironmentRoot, "wind.xml")),
+            };
+            environment.Export(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), SelectedTimePeriods, null, statusUpdateDelegate, backgroundWorker);
+            CloseActivePopUpCommand.Execute(true);
+        }
+
         #endregion
 
         #region CancelCommand
 
         public SimpleCommand<object, object> CancelCommand
         {
-            get { return _cancel ?? (_cancel = new SimpleCommand<object, object>(delegate { CloseActivePopUpCommand.Execute(false); })); }
+            get
+            {
+                return _cancel ?? (_cancel = new SimpleCommand<object, object>(delegate
+                {
+                    if (!NotExtractingData)
+                    {
+                        CancelExtraction();
+                        _extractionCanceled = true;
+                    }
+                    else
+                    {
+                        CloseActivePopUpCommand.Execute(false);
+                    }
+                }));
+            }
         }
 
         SimpleCommand<object, object> _cancel;
+
+        public void CancelExtraction()
+        {
+            if (!_backgroundWorker.IsBusy) return;
+            _backgroundWorker.CancelAsync();
+            Status = "Canceling, please wait...";
+        }
 
         #endregion
     }

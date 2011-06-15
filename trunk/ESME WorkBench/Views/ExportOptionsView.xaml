@@ -40,6 +40,16 @@
                                  ItemTemplate="{StaticResource CheckBoxItemTemplate}" />
             </StackPanel>
         </GroupBox>
+        <StackPanel Visibility="{Binding ProgressIsVisible}">
+            <TextBlock HorizontalAlignment="Center"
+			           Text="{Binding Status}"
+			           Margin="5 5 5 2" />
+            <ProgressBar Maximum="100"
+			             Minimum="-5"
+			             Height="22"
+			             Margin="5 0 5 0 "
+			             Value="{Binding ProgressPercent}" />
+        </StackPanel>
         <DockPanel LastChildFill="False"
 		           Margin="5 10">
             <Button Width="90"
@@ -50,7 +60,7 @@
 			        Command="{Binding CancelCommand}" />
             <Button Width="90"
 			        IsDefault="True"
-			        Content="OK"
+			        Content="{Binding ExtractButtonText}"
 			        DockPanel.Dock="Right"
 			        Command="{Binding OkCommand}" />
         </DockPanel>
