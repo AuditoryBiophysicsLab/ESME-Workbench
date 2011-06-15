@@ -9,7 +9,6 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
-using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
@@ -232,7 +231,7 @@ namespace ESME.Environment.NAVO
                         Wind = wind,
                 };
 
-                environment.Export(_simAreaPath, SelectedTimePeriods, environment.Bathymetry.Samples.GeoRect, null, null, statusUpdateDelegate, backgroundWorker);
+                environment.Export(_simAreaPath, SelectedTimePeriods, environment.Bathymetry.Samples.GeoRect, statusUpdateDelegate, backgroundWorker);
                 if (backgroundWorker.CancellationPending) return;
             }
 
