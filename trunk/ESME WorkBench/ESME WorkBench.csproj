@@ -531,6 +531,7 @@
   <ItemGroup>
     <Content Include="External References\Kent.Boogaart.Converters.dll" />
     <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
+    <Resource Include="Images\SmallIcons\overlay-new.png" />
     <Resource Include="Images\LargeIcons\map_resize.png" />
     <Resource Include="Images\LargeIcons\overlay-new.png" />
     <Resource Include="Images\SmallIcons\overlay.png" />
