@@ -116,7 +116,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _launchScenarioSimulator ?? (_launchScenarioSimulator = new SimpleCommand<object, object>(
                     delegate { return ((Globals.AppSettings.NAEMOTools.ScenarioExecutablePath != null)
                         && File.Exists(Globals.AppSettings.NAEMOTools.ScenarioExecutablePath) 
-                        && _experiment.NemoFile != null && _experiment.Bathymetry != null); }, // todo && _experiment.AnalysisPoints != null && species are defined. 
+                        && _experiment != null && _experiment.NemoFile != null && _experiment.Bathymetry != null); }, // todo && _experiment.AnalysisPoints != null && species are defined. 
                     delegate
                     {
                         var vm = new ScenarioSimulatorOptionsViewModel
@@ -146,7 +146,7 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _viewScenarioSimulatorLogDir ?? (_viewScenarioSimulatorLogDir = new SimpleCommand<object, object>(
-                    delegate { return ((_experiment.NemoFile != null) && Directory.Exists(Path.Combine(Path.GetDirectoryName(_experiment.NemoFile.FileName), "Reports"))); },
+                    delegate { return ((_experiment != null && _experiment.NemoFile != null) && Directory.Exists(Path.Combine(Path.GetDirectoryName(_experiment.NemoFile.FileName), "Reports"))); },
                     delegate
                     {
                         Process.Start("explorer.exe", Path.Combine(Path.GetDirectoryName(_experiment.NemoFile.FileName), "Reports"));
@@ -279,7 +279,7 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _resetScenarioZoomLevel ?? (_resetScenarioZoomLevel = new SimpleCommand<object, object>(
-                    obj => _experiment.NemoFile != null,
+                    obj => ((_experiment != null) && (_experiment.NemoFile != null)),
                     obj =>
                         MediatorMessage.Send(MediatorMessage.SetScenarioMapExtent, true)));
             }
@@ -559,7 +559,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate { return (_experiment.NemoFile != null && (!string.IsNullOrEmpty(_experiment.BathymetryFileName) || (!string.IsNullOrEmpty(_experiment.SoundSpeedFileName) || !string.IsNullOrEmpty(_experiment.SedimentFileName) || !string.IsNullOrEmpty(_experiment.WindSpeedFileName) || ((_experiment.AnalysisPoints != null) && (_experiment.AnalysisPoints.Count > 0))))); },
+                return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate { return ((_experiment != null) && (_experiment.NemoFile != null) && (!string.IsNullOrEmpty(_experiment.BathymetryFileName) || (!string.IsNullOrEmpty(_experiment.SoundSpeedFileName) || !string.IsNullOrEmpty(_experiment.SedimentFileName) || !string.IsNullOrEmpty(_experiment.WindSpeedFileName) || ((_experiment.AnalysisPoints != null) && (_experiment.AnalysisPoints.Count > 0))))); },
                                                                                                                        delegate
                                                                                                                        {
                                                                                                                            var exportOptionsViewModel = new ExportOptionsViewModel(_experiment, _dispatcher);
@@ -579,7 +579,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _configureAcousticModelsCommand ?? (_configureAcousticModelsCommand = new SimpleCommand<object, object>(delegate { return _experiment.NemoFile != null; }, delegate
+                return _configureAcousticModelsCommand ?? (_configureAcousticModelsCommand = new SimpleCommand<object, object>(delegate { return ((_experiment != null) && (_experiment.NemoFile != null)); }, delegate
                                                                                                                                                                                   {
                                                                                                                                                                                       var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(_experiment.NemoModeToAcousticModelNameMap, Globals.ValidTransmissionLossAlgorithms);
                                                                                                                                                                                       var result = _visualizerService.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);

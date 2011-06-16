@@ -356,13 +356,86 @@
 			<r:RibbonTab KeyTip="V"
 			             Header="Environment">
 				<r:RibbonGroup Header="Location">
-					<r:RibbonButton Label="Settings"
-					                LargeImageSource="..\Images\LargeIcons\Distance-learning.png"
-					                SmallImageSource="..\Images\SmallIcons\Distance-learning.png"
+                    <r:RibbonButton Label="New..."
+					                LargeImageSource="..\Images\LargeIcons\map_add.png"
+					                SmallImageSource="..\Images\SmallIcons\map_add.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Configure the environmental data to be used for the experiment"
-					                Command="{Binding ShowEnvironmentSettingsCommand}" />
-				</r:RibbonGroup>
+                                    ToolTipDescription="Define a new location to be used for simulations"
+					                Command="{Binding DisabledCommand}" />
+                    <r:RibbonSplitButton Label="Select"
+					                LargeImageSource="..\Images\LargeIcons\map_magnify.png"
+					                SmallImageSource="..\Images\SmallIcons\map_magnify.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Select a previously defined location"
+					                Command="{Binding DisabledCommand}" />
+                    <r:RibbonToggleButton Label="Edit"
+					                LargeImageSource="..\Images\LargeIcons\map_edit.png"
+					                SmallImageSource="..\Images\SmallIcons\map_edit.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Edit a previously defined location"
+					                Command="{Binding DisabledCommand}" />
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Simulation Area">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <r:RibbonTextBox Label="Buffer"
+                                             VerticalContentAlignment="Center"
+                                             Text="{Binding BufferZoneSize}"/>
+                            <r:RibbonComboBox IsEditable="False"
+                                              SelectionBoxWidth="20">
+                                <r:RibbonGallery SelectedValue="km"
+                                                 Margin="0"
+                                                 VerticalContentAlignment="Center"
+                                                 SelectedValuePath="Content"
+                                                 MaxColumnCount="1">
+                                    <r:RibbonGalleryCategory>
+                                        <r:RibbonGalleryItem Content="km" />
+                                        <r:RibbonGalleryItem Content="m" />
+                                        <r:RibbonGalleryItem Content="nm" />
+                                    </r:RibbonGalleryCategory>
+                                </r:RibbonGallery>
+                            </r:RibbonComboBox>
+                        </StackPanel>
+                        <r:RibbonButton Label="Create overlay"
+					                    LargeImageSource="..\Images\LargeIcons\overlay.png"
+					                    SmallImageSource="..\Images\SmallIcons\overlay.png"
+					                    ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                                        ToolTipDescription="Define a new location to be used for simulations"
+					                    Command="{Binding DisabledCommand}">
+                            <r:RibbonButton.ControlSizeDefinition>
+                                <r:RibbonControlSizeDefinition ImageSize="Small" IsLabelVisible="True" />
+                            </r:RibbonButton.ControlSizeDefinition>
+                        </r:RibbonButton>
+                        </StackPanel>
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Overlays">
+                    <r:RibbonSplitButton Label="Display"
+					                LargeImageSource="..\Images\LargeIcons\overlay.png"
+					                SmallImageSource="..\Images\SmallIcons\overlay.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Change the resolution of the bathymetry for this location"
+					                Command="{Binding DisabledCommand}" />
+                    <r:RibbonButton Label="New"
+					                LargeImageSource="..\Images\LargeIcons\overlay-new.png"
+					                SmallImageSource="..\Images\SmallIcons\add-1-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Change the resolution of the bathymetry for this location"
+					                Command="{Binding DisabledCommand}" />
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Available datasets">
+                    <r:RibbonSplitButton Label="Bathymetry Resolutions"
+					                LargeImageSource="..\Images\LargeIcons\map_resolution.png"
+					                SmallImageSource="..\Images\SmallIcons\map_resolution.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Change the resolution of the bathymetry for this location"
+					                Command="{Binding DisabledCommand}" />
+                    <r:RibbonSplitButton Label="Time Periods"
+					                LargeImageSource="..\Images\LargeIcons\calendar_view_month.png"
+					                SmallImageSource="..\Images\SmallIcons\calendar_view_month.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Change the resolution of the bathymetry for this location"
+					                Command="{Binding DisabledCommand}" />
+                </r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="A"
 			             Header="Animals">

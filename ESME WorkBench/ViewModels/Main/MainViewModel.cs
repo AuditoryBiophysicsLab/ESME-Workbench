@@ -211,7 +211,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public bool IsAddScenarioFilePossible()
         {
-            return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) && (_experiment.NemoFile == null));
+            return ((Globals.AppSettings.ScenarioDataDirectory != null) && (Directory.Exists(Globals.AppSettings.ScenarioDataDirectory)) && (_experiment != null) && (_experiment.NemoFile == null));
         }
 
         public void FilesDropped(Object sender, DragEventArgs e)
