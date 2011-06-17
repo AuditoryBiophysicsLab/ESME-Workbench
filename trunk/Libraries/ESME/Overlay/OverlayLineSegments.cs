@@ -1,9 +1,9 @@
 ﻿//#define MATLAB_DEBUG_OUTPUT
 using System;
 using System.Collections.Generic;
-using System.Windows.Media;
 using System.Linq;
 using System.Text;
+using System.Windows.Media;
 using HRC.Navigation;
 
 namespace ESME.Overlay
@@ -19,7 +19,7 @@ namespace ESME.Overlay
         public double East { get; private set; }
         public double West { get; private set; }
 
-        public OverlayLineSegments(EarthCoordinate[] points, Color color, float size, LineStyle lineStyle)
+        public OverlayLineSegments(EarthCoordinate[] points, Color color, float size = 1f, LineStyle lineStyle = LineStyle.Solid)
             : base(color, size, lineStyle)
         {
             Add(points);

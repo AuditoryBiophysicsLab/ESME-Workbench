@@ -367,7 +367,7 @@
 					                SmallImageSource="..\Images\SmallIcons\map_add.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                                     ToolTipDescription="Define a new location to be used for simulations"
-					                Command="{Binding DisabledCommand}">
+					                Command="{Binding NewLocationCommand}">
                     </r:RibbonButton>
                     <r:RibbonToggleButton x:Name="EditLocation" Label="Edit"
 					                LargeImageSource="..\Images\LargeIcons\map_edit.png"
@@ -377,7 +377,7 @@
 					                Command="{Binding DisabledCommand}">
                     </r:RibbonToggleButton>
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Simulation Area">
+                <r:RibbonGroup Header="Simulation Area" IsEnabled="{Binding IsEditingLocation}">
                     <StackPanel x:Name="BufferSizeStackPanel" Orientation="Horizontal" d:LayoutOverrides="Height">
                     	<r:RibbonTextBox x:Name="BufferSizeText" Label="Buffer"
                     		VerticalContentAlignment="Center"
@@ -397,21 +397,20 @@
                     	</r:RibbonComboBox>
                     </StackPanel>
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Overlays" Visibility="Collapsed">
-                    <r:RibbonSplitButton x:Name="AvailableOverlays" Label="Display"
+                <r:RibbonGroup Header="Overlays" Visibility="Collapsed" IsEnabled="{Binding IsEditingLocation}">
+                    <r:RibbonSplitButton Label="Display"
 					                LargeImageSource="..\Images\LargeIcons\overlay.png"
 					                SmallImageSource="..\Images\SmallIcons\overlay.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Change the resolution of the bathymetry for this location"
+					                ToolTipTitle="Display Overlay"
+					                ToolTipDescription="Display one or more available overlays on the map"
 					                Command="{Binding DisabledCommand}" />
-                    <r:RibbonButton x:Name="NewOverlay" Label="New"
-					                LargeImageSource="..\Images\LargeIcons\overlay-new.png"
-					                SmallImageSource="..\Images\SmallIcons\add-1-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Change the resolution of the bathymetry for this location"
+                    <r:RibbonButton Label="New"
+					                SmallImageSource="..\Images\SmallIcons\overlay-new.png"
+					                ToolTipTitle="New Overlay"
+					                ToolTipDescription="Create a new overlay"
 					                Command="{Binding DisabledCommand}" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Available datasets" Visibility="Visible">
+                <r:RibbonGroup Header="Available datasets" Visibility="Collapsed" IsEnabled="{Binding IsEditingLocation}">
                     <r:RibbonSplitButton x:Name="BathymetryResolutionSelect" Label="Bathymetry Resolutions"
 					                LargeImageSource="..\Images\LargeIcons\map_resolution.png"
 					                SmallImageSource="..\Images\SmallIcons\map_resolution.png"
@@ -517,13 +516,13 @@
 										</r:RibbonGallery>
 									</r:RibbonSplitButton>
                 </r:RibbonGroup>
-                <r:RibbonGroup Visibility="Collapsed" Header="Bathymetry Resolutions">
+                <r:RibbonGroup Visibility="Visible" Header="Bathymetry Resolutions" IsEnabled="{Binding IsEditingLocation}">
                 	<r:RibbonCheckBox Label="1.00 min" />
                 	<r:RibbonCheckBox Label="0.50 min" />
                 	<r:RibbonCheckBox Label="0.10 min" />
                 	<r:RibbonCheckBox Label="0.05 min" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Visibility="Collapsed" Header="Months">
+                <r:RibbonGroup Visibility="Visible" Header="Months"  IsEnabled="{Binding IsEditingLocation}">
                 	<r:RibbonCheckBox Label="Jan" />
                 	<r:RibbonCheckBox Label="Feb" />
                 	<r:RibbonCheckBox Label="Mar" />
@@ -537,7 +536,7 @@
                 	<r:RibbonCheckBox Label="Nov" />
                 	<r:RibbonCheckBox Label="Dec" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Visibility="Collapsed" Header="Seasons">
+                <r:RibbonGroup Visibility="Visible" Header="Seasons" IsEnabled="{Binding IsEditingLocation}">
                 	<r:RibbonCheckBox Label="Spring" />
                 	<r:RibbonCheckBox Label="Summer" />
                 	<r:RibbonCheckBox Label="Fall" />

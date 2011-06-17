@@ -502,7 +502,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-
         #region public RecentFileDescriptor RecentFilesSelectedItem { get; set; }
 
         public RecentFileDescriptor RecentFilesSelectedItem

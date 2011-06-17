@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Xml.Serialization;
@@ -23,6 +24,21 @@ namespace HRC.Navigation
         public GeoRect(Rect rect) { FromRect(rect); }
 
         public GeoRect(GeoRect geoRect) { FromRect(geoRect); }
+
+        public GeoRect(IEnumerable<Geo> geoList)
+        {
+            North = double.MinValue;
+            South = double.MaxValue;
+            East = double.MinValue;
+            West = double.MaxValue;
+            foreach (var geo in geoList)
+            {
+                North = Math.Max(North, geo.Latitude);
+                South = Math.Min(South, geo.Latitude);
+                East = Math.Max(East, geo.Longitude);
+                West = Math.Min(West, geo.Longitude);
+            }
+        }
 
         #region public double North { get; set; }
 
