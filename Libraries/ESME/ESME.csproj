@@ -108,6 +108,7 @@
     <Compile Include="Environment\Environment2DData.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />
+    <Compile Include="Environment\Location.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
     <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
