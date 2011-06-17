@@ -58,7 +58,7 @@
 		</StatusBar>
 		<r:Ribbon x:Name="Ribbon"
 		          DockPanel.Dock="Top"
-		          SelectedIndex="0">
+		          SelectedIndex="2">
 			<r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
 					<r:RibbonApplicationMenuItem Header="Save Experiment"
@@ -356,85 +356,194 @@
 			<r:RibbonTab KeyTip="V"
 			             Header="Environment">
 				<r:RibbonGroup Header="Location">
-                    <r:RibbonButton Label="New..."
-					                LargeImageSource="..\Images\LargeIcons\map_add.png"
-					                SmallImageSource="..\Images\SmallIcons\map_add.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                                    ToolTipDescription="Define a new location to be used for simulations"
-					                Command="{Binding DisabledCommand}" />
-                    <r:RibbonSplitButton Label="Select"
+                    <r:RibbonSplitButton x:Name="SelectLocation" Label="Select"
 					                LargeImageSource="..\Images\LargeIcons\map_magnify.png"
 					                SmallImageSource="..\Images\SmallIcons\map_magnify.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Select a previously defined location"
 					                Command="{Binding DisabledCommand}" />
-                    <r:RibbonToggleButton Label="Edit"
+                    <r:RibbonButton x:Name="NewLocation" Label="New..."
+					                LargeImageSource="..\Images\LargeIcons\map_add.png"
+					                SmallImageSource="..\Images\SmallIcons\map_add.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                                    ToolTipDescription="Define a new location to be used for simulations"
+					                Command="{Binding DisabledCommand}">
+                    </r:RibbonButton>
+                    <r:RibbonToggleButton x:Name="EditLocation" Label="Edit"
 					                LargeImageSource="..\Images\LargeIcons\map_edit.png"
 					                SmallImageSource="..\Images\SmallIcons\map_edit.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Edit a previously defined location"
-					                Command="{Binding DisabledCommand}" />
+					                Command="{Binding DisabledCommand}">
+                    </r:RibbonToggleButton>
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Simulation Area">
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <r:RibbonTextBox Label="Buffer"
-                                             VerticalContentAlignment="Center"
-                                             Text="{Binding BufferZoneSize}"/>
-                            <r:RibbonComboBox IsEditable="False"
-                                              SelectionBoxWidth="20">
-                                <r:RibbonGallery SelectedValue="km"
-                                                 Margin="0"
-                                                 VerticalContentAlignment="Center"
-                                                 SelectedValuePath="Content"
-                                                 MaxColumnCount="1">
-                                    <r:RibbonGalleryCategory>
-                                        <r:RibbonGalleryItem Content="km" />
-                                        <r:RibbonGalleryItem Content="m" />
-                                        <r:RibbonGalleryItem Content="nm" />
-                                    </r:RibbonGalleryCategory>
-                                </r:RibbonGallery>
-                            </r:RibbonComboBox>
-                        </StackPanel>
-                        <r:RibbonButton Label="Create overlay"
-					                    LargeImageSource="..\Images\LargeIcons\overlay.png"
-					                    SmallImageSource="..\Images\SmallIcons\overlay.png"
-					                    ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                                        ToolTipDescription="Define a new location to be used for simulations"
-					                    Command="{Binding DisabledCommand}">
-                            <r:RibbonButton.ControlSizeDefinition>
-                                <r:RibbonControlSizeDefinition ImageSize="Small" IsLabelVisible="True" />
-                            </r:RibbonButton.ControlSizeDefinition>
-                        </r:RibbonButton>
-                        </StackPanel>
+                    <StackPanel x:Name="BufferSizeStackPanel" Orientation="Horizontal" d:LayoutOverrides="Height">
+                    	<r:RibbonTextBox x:Name="BufferSizeText" Label="Buffer"
+                    		VerticalContentAlignment="Center"
+                    		Text="{Binding BufferZoneSize}"/>
+                    	<r:RibbonComboBox x:Name="BufferSizeUnits" IsEditable="False">
+                    		<r:RibbonGallery SelectedValue="kilometers"
+                    			Margin="0"
+                    			VerticalContentAlignment="Center"
+                    			SelectedValuePath="Content"
+                    			MaxColumnCount="1">
+                    			<r:RibbonGalleryCategory>
+                    				<r:RibbonGalleryItem Content="kilometers" />
+                    				<r:RibbonGalleryItem Content="meters" />
+                    				<r:RibbonGalleryItem Content="nautical miles" />
+                    			</r:RibbonGalleryCategory>
+                    		</r:RibbonGallery>
+                    	</r:RibbonComboBox>
+                    </StackPanel>
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Overlays">
-                    <r:RibbonSplitButton Label="Display"
+                <r:RibbonGroup Header="Overlays" Visibility="Collapsed">
+                    <r:RibbonSplitButton x:Name="AvailableOverlays" Label="Display"
 					                LargeImageSource="..\Images\LargeIcons\overlay.png"
 					                SmallImageSource="..\Images\SmallIcons\overlay.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Change the resolution of the bathymetry for this location"
 					                Command="{Binding DisabledCommand}" />
-                    <r:RibbonButton Label="New"
+                    <r:RibbonButton x:Name="NewOverlay" Label="New"
 					                LargeImageSource="..\Images\LargeIcons\overlay-new.png"
 					                SmallImageSource="..\Images\SmallIcons\add-1-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Change the resolution of the bathymetry for this location"
 					                Command="{Binding DisabledCommand}" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Available datasets">
-                    <r:RibbonSplitButton Label="Bathymetry Resolutions"
+                <r:RibbonGroup Header="Available datasets" Visibility="Visible">
+                    <r:RibbonSplitButton x:Name="BathymetryResolutionSelect" Label="Bathymetry Resolutions"
 					                LargeImageSource="..\Images\LargeIcons\map_resolution.png"
 					                SmallImageSource="..\Images\SmallIcons\map_resolution.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Change the resolution of the bathymetry for this location"
-					                Command="{Binding DisabledCommand}" />
-                    <r:RibbonSplitButton Label="Time Periods"
+					                Command="{Binding DisabledCommand}">
+	                    	            <r:RibbonGallery>
+	                    	           		<r:RibbonGalleryCategory>
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="2.00 min" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="1.00 min" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="0.50 min" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="0.10 min" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="0.05 min" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+											</r:RibbonGalleryCategory>
+										</r:RibbonGallery>
+									</r:RibbonSplitButton>
+                    <r:RibbonSplitButton x:Name="TimePeriods" Label="Time Periods"
 					                LargeImageSource="..\Images\LargeIcons\calendar_view_month.png"
 					                SmallImageSource="..\Images\SmallIcons\calendar_view_month.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Change the resolution of the bathymetry for this location"
-					                Command="{Binding DisabledCommand}" />
+					                Command="{Binding DisabledCommand}">
+	                    	            <r:RibbonGallery MaxColumnCount="4">
+	                    	           		<r:RibbonGalleryCategory MaxColumnCount="4" Header="Months">
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="January" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="February" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="March" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="April" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="May" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+											</r:RibbonGalleryCategory>
+	                    	           		<r:RibbonGalleryCategory MaxColumnCount="2" Header="Seasons">
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="Spring" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="Summer" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="Fall" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="Winter" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="Warm" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+	                    	           			<r:RibbonGalleryItem>
+		                    	         			<r:RibbonGalleryItem.Content>
+									                	<r:RibbonCheckBox Label="Cold" />
+													</r:RibbonGalleryItem.Content>
+												</r:RibbonGalleryItem>          	           		
+											</r:RibbonGalleryCategory>
+										</r:RibbonGallery>
+									</r:RibbonSplitButton>
+                </r:RibbonGroup>
+                <r:RibbonGroup Visibility="Collapsed" Header="Bathymetry Resolutions">
+                	<r:RibbonCheckBox Label="1.00 min" />
+                	<r:RibbonCheckBox Label="0.50 min" />
+                	<r:RibbonCheckBox Label="0.10 min" />
+                	<r:RibbonCheckBox Label="0.05 min" />
+                </r:RibbonGroup>
+                <r:RibbonGroup Visibility="Collapsed" Header="Months">
+                	<r:RibbonCheckBox Label="Jan" />
+                	<r:RibbonCheckBox Label="Feb" />
+                	<r:RibbonCheckBox Label="Mar" />
+                	<r:RibbonCheckBox Label="Apr" />
+                	<r:RibbonCheckBox Label="May" />
+                	<r:RibbonCheckBox Label="Jun" />
+                	<r:RibbonCheckBox Label="Jul" />
+                	<r:RibbonCheckBox Label="Aug" />
+                	<r:RibbonCheckBox Label="Sep" />
+                	<r:RibbonCheckBox Label="Oct" />
+                	<r:RibbonCheckBox Label="Nov" />
+                	<r:RibbonCheckBox Label="Dec" />
+                </r:RibbonGroup>
+                <r:RibbonGroup Visibility="Collapsed" Header="Seasons">
+                	<r:RibbonCheckBox Label="Spring" />
+                	<r:RibbonCheckBox Label="Summer" />
+                	<r:RibbonCheckBox Label="Fall" />
+                	<r:RibbonCheckBox Label="Winter" />
+                	<r:RibbonCheckBox Label="Warm" />
+                	<r:RibbonCheckBox Label="Cold" />
                 </r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="A"
