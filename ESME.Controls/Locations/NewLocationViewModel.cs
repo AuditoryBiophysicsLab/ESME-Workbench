@@ -36,7 +36,7 @@ namespace ESME.Views.Locations
         private static readonly PropertyChangedEventArgs LocationNameChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.LocationName);
         private string _locationName;
 
-        string LocationPath
+        public string LocationPath
         {
             get
             {
@@ -120,10 +120,7 @@ namespace ESME.Views.Locations
         {
             get
             {
-                if ((LocationPath == null) || Directory.Exists(LocationPath)) return false;
                 Validate();
-                if (string.IsNullOrEmpty(ExistingOverlayFilename) && ((NewOverlayEarthCoordinates == null) || (NewOverlayEarthCoordinates.Count < 4)))
-                    return false;
                 if (!IsValid) return false;
                 return true;
             }
@@ -172,6 +169,7 @@ namespace ESME.Views.Locations
                                        }
                                };
             location.Save(Path.Combine(LocationPath, "location.xml"));
+            CloseActivePopUpCommand.Execute(true);
         }
         private SimpleCommand<object, object> _ok;
 
@@ -217,21 +215,40 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        public string ValidationErrorText { get; private set; }
+        #region public string ValidationErrorText { get; set; }
+
+        public string ValidationErrorText
+        {
+            get { return _validationErrorText; }
+            set
+            {
+                if (_validationErrorText == value) return;
+                _validationErrorText = value;
+                NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
+                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.ValidationErrorText);
+        string _validationErrorText;
+
+        #endregion
 
         public void Validate()
         {
             ValidationErrorText = "";
             if ((LocationPath != null) && Directory.Exists(LocationPath))
                 ValidationErrorText += "Location already exists, please choose a different name\n";
+            if (string.IsNullOrEmpty(LocationName)) 
+                ValidationErrorText += "New location name must be specified\n";
             if (!string.IsNullOrEmpty(ExistingOverlayFilename) && !string.IsNullOrEmpty(NewOverlayCoordinates))
                 ValidationErrorText += "Select EITHER an existing overlay file OR coordinates for a new overlay\n";
             if (!string.IsNullOrEmpty(ExistingOverlayFilename) && !File.Exists(ExistingOverlayFilename))
                 ValidationErrorText += "Selected overlay file does not exist\n";
-            NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
+            if (string.IsNullOrEmpty(NewOverlayCoordinates)) 
+                ValidationErrorText += "Baseline operational area must be defined\n";
             if (!string.IsNullOrEmpty(ValidationErrorText)) return;
 
-            if (string.IsNullOrEmpty(NewOverlayCoordinates)) return;
 
             var lineSeparators = new [] {'\r', '\n'};
             var lines = NewOverlayCoordinates.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);

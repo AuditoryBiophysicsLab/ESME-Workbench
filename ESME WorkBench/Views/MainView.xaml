@@ -356,48 +356,75 @@
 			<r:RibbonTab KeyTip="V"
 			             Header="Environment">
 				<r:RibbonGroup Header="Location">
-                    <r:RibbonSplitButton x:Name="SelectLocation" Label="Select"
-					                LargeImageSource="..\Images\LargeIcons\map_magnify.png"
-					                SmallImageSource="..\Images\SmallIcons\map_magnify.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Select a previously defined location"
-					                Command="{Binding DisabledCommand}" />
-                    <r:RibbonButton x:Name="NewLocation" Label="New..."
-					                LargeImageSource="..\Images\LargeIcons\map_add.png"
+                    <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                  ToolTipDescription="Select a previously defined location"
+					                  IsEnabled="{Binding LocationsAreAvailable}">
+                        <r:RibbonGallery 
+                    			Margin="0"
+                    			VerticalContentAlignment="Center"
+								SelectedItem="{Binding Location}"
+                    			MaxColumnCount="1">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding AvailableLocations}">
+                                <r:RibbonGalleryCategory.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical"
+											            IsItemsHost="True">
+                                        </StackPanel>
+                                    </ItemsPanelTemplate>
+                                </r:RibbonGalleryCategory.ItemsPanel>
+                                <r:RibbonGalleryCategory.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding LocationMetadata.Name}" />
+                                    </DataTemplate>
+                                </r:RibbonGalleryCategory.ItemTemplate>
+                                <r:RibbonGalleryCategory.Style>
+                                    <Style>
+                                    </Style>
+                                </r:RibbonGalleryCategory.Style>
+                            </r:RibbonGalleryCategory>
+                        </r:RibbonGallery>
+                    </r:RibbonComboBox>
+                    <r:RibbonButton x:Name="NewLocation" Label="New"
 					                SmallImageSource="..\Images\SmallIcons\map_add.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                                     ToolTipDescription="Define a new location to be used for simulations"
 					                Command="{Binding NewLocationCommand}">
                     </r:RibbonButton>
-                    <r:RibbonToggleButton x:Name="EditLocation" Label="Edit"
-					                LargeImageSource="..\Images\LargeIcons\map_edit.png"
-					                SmallImageSource="..\Images\SmallIcons\map_edit.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Edit a previously defined location"
-					                Command="{Binding DisabledCommand}">
-                    </r:RibbonToggleButton>
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Simulation Area" IsEnabled="{Binding IsEditingLocation}">
-                    <StackPanel x:Name="BufferSizeStackPanel" Orientation="Horizontal" d:LayoutOverrides="Height">
-                    	<r:RibbonTextBox x:Name="BufferSizeText" Label="Buffer"
-                    		VerticalContentAlignment="Center"
-                    		Text="{Binding BufferZoneSize}"/>
-                    	<r:RibbonComboBox x:Name="BufferSizeUnits" IsEditable="False">
-                    		<r:RibbonGallery SelectedValue="kilometers"
+                <r:RibbonGroup Header="Simulation Area" IsEnabled="{Binding LocationIsSelected}">
+                        <r:RibbonTextBox Label="Buffer" Text="{Binding BufferZoneSize}" IsEnabled="True" IsReadOnly="false">
+                            <i:Interaction.Behaviors>
+                                <cinch:NumericTextBoxBehaviour />
+                            </i:Interaction.Behaviors>
+                        </r:RibbonTextBox>
+                        <r:RibbonComboBox IsEditable="False">
+                    		<r:RibbonGallery 
                     			Margin="0"
                     			VerticalContentAlignment="Center"
-                    			SelectedValuePath="Content"
+								SelectedItem="{Binding SelectedDistanceUnit}"
                     			MaxColumnCount="1">
-                    			<r:RibbonGalleryCategory>
-                    				<r:RibbonGalleryItem Content="kilometers" />
-                    				<r:RibbonGalleryItem Content="meters" />
-                    				<r:RibbonGalleryItem Content="nautical miles" />
-                    			</r:RibbonGalleryCategory>
+                                <r:RibbonGalleryCategory ItemsSource="{Binding DistanceUnits}">
+                                    <r:RibbonGalleryCategory.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"
+											            IsItemsHost="True">
+                                            </StackPanel>
+                                        </ItemsPanelTemplate>
+                                    </r:RibbonGalleryCategory.ItemsPanel>
+                                    <r:RibbonGalleryCategory.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" />
+                                        </DataTemplate>
+                                    </r:RibbonGalleryCategory.ItemTemplate>
+                                    <r:RibbonGalleryCategory.Style>
+                                        <Style>
+                                        </Style>
+                                    </r:RibbonGalleryCategory.Style>
+                                </r:RibbonGalleryCategory>
                     		</r:RibbonGallery>
                     	</r:RibbonComboBox>
-                    </StackPanel>
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Overlays" Visibility="Collapsed" IsEnabled="{Binding IsEditingLocation}">
+                <r:RibbonGroup Header="Overlays" Visibility="Collapsed" IsEnabled="{Binding LocationIsSelected}">
                     <r:RibbonSplitButton Label="Display"
 					                LargeImageSource="..\Images\LargeIcons\overlay.png"
 					                SmallImageSource="..\Images\SmallIcons\overlay.png"
@@ -410,7 +437,7 @@
 					                ToolTipDescription="Create a new overlay"
 					                Command="{Binding DisabledCommand}" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Available datasets" Visibility="Collapsed" IsEnabled="{Binding IsEditingLocation}">
+                <r:RibbonGroup Header="Available datasets" Visibility="Collapsed" IsEnabled="{Binding LocationIsSelected}">
                     <r:RibbonSplitButton x:Name="BathymetryResolutionSelect" Label="Bathymetry Resolutions"
 					                LargeImageSource="..\Images\LargeIcons\map_resolution.png"
 					                SmallImageSource="..\Images\SmallIcons\map_resolution.png"
@@ -516,13 +543,15 @@
 										</r:RibbonGallery>
 									</r:RibbonSplitButton>
                 </r:RibbonGroup>
-                <r:RibbonGroup Visibility="Visible" Header="Bathymetry Resolutions" IsEnabled="{Binding IsEditingLocation}">
-                	<r:RibbonCheckBox Label="1.00 min" />
-                	<r:RibbonCheckBox Label="0.50 min" />
-                	<r:RibbonCheckBox Label="0.10 min" />
-                	<r:RibbonCheckBox Label="0.05 min" />
+                <r:RibbonGroup Visibility="Visible" Header="Bathymetry Resolutions" IsEnabled="{Binding LocationIsSelected}"
+				               ToolTipTitle="Available bathymetry resolutions (in minutes)" ToolTip="Select the bathymetry data resolutions which will be available to users of this location">
+                	<r:RibbonCheckBox Label="2.0 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[2.0].IsAvailable}"/>
+                    <r:RibbonCheckBox Label="1.0 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[1.0].IsAvailable}" />
+                    <r:RibbonCheckBox Label="0.5 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[0.5].IsAvailable}" />
+                    <r:RibbonCheckBox Label="0.10 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[0.1].IsAvailable}" />
+                    <r:RibbonCheckBox Label="0.05 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[0.05].IsAvailable}" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Visibility="Visible" Header="Months"  IsEnabled="{Binding IsEditingLocation}">
+                <r:RibbonGroup Visibility="Visible" Header="Months"  IsEnabled="{Binding LocationIsSelected}">
                 	<r:RibbonCheckBox Label="Jan" />
                 	<r:RibbonCheckBox Label="Feb" />
                 	<r:RibbonCheckBox Label="Mar" />
@@ -536,7 +565,7 @@
                 	<r:RibbonCheckBox Label="Nov" />
                 	<r:RibbonCheckBox Label="Dec" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Visibility="Visible" Header="Seasons" IsEnabled="{Binding IsEditingLocation}">
+                <r:RibbonGroup Visibility="Visible" Header="Seasons" IsEnabled="{Binding LocationIsSelected}">
                 	<r:RibbonCheckBox Label="Spring" />
                 	<r:RibbonCheckBox Label="Summer" />
                 	<r:RibbonCheckBox Label="Fall" />

@@ -2,6 +2,7 @@
 {
     public enum NAVOTimePeriod
     {
+        Invalid = 0,
         January = 1,
         February,
         March,

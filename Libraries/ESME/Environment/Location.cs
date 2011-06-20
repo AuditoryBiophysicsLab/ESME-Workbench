@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using Cinch;
 using HRC.Navigation;
 using HRC.Utility;
@@ -25,7 +27,16 @@ namespace ESME.Environment
             var serializer = new XmlSerializer<LocationMetadata> { Data = LocationMetadata };
             serializer.Save(filename, ReferencedTypes);
         }
+
+        public static List<Location> AvailableLocations(string scenarioDirectory)
+        {
+            var locationDirectories = Directory.GetDirectories(scenarioDirectory);
+            return (from location in locationDirectories
+                    where File.Exists(Path.Combine(location, "location.xml"))
+                    select Load(Path.Combine(location, "location.xml"))).ToList();
+        }
     }
+
 
     public class LocationMetadata : PropertyChangedBase
     {
