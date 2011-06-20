@@ -354,7 +354,7 @@
 				</r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="V"
-			             Header="Environment">
+			             Header="Environment" ContextualTabGroupHeader="Location Editor">
 				<r:RibbonGroup Header="Location">
                     <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Select a previously defined location"
@@ -391,8 +391,9 @@
 					                Command="{Binding NewLocationCommand}">
                     </r:RibbonButton>
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Simulation Area" IsEnabled="{Binding LocationIsSelected}">
-                        <r:RibbonTextBox Label="Buffer" Text="{Binding BufferZoneSize}" IsEnabled="True" IsReadOnly="false">
+                <r:RibbonGroup Header="Simulation Area">
+                    <StackPanel Orientation="Horizontal">
+                        <r:RibbonTextBox x:Name="BufferZoneSize" Label="Buffer" Text="{Binding BufferZoneSize}">
                             <i:Interaction.Behaviors>
                                 <cinch:NumericTextBoxBehaviour />
                             </i:Interaction.Behaviors>
@@ -423,6 +424,7 @@
                                 </r:RibbonGalleryCategory>
                     		</r:RibbonGallery>
                     	</r:RibbonComboBox>
+                    </StackPanel>
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Overlays" Visibility="Collapsed" IsEnabled="{Binding LocationIsSelected}">
                     <r:RibbonSplitButton Label="Display"
@@ -763,6 +765,9 @@
 					                Command="{Binding LaunchExposureReportGeneratorCommand}"/>
 				</r:RibbonGroup>
 			</r:RibbonTab>
+            <r:Ribbon.ContextualTabGroups>
+                <r:RibbonContextualTabGroup Header="Location Editor" Visibility="{Binding LocationEditorContextIsVisible}" Background="Green" />
+            </r:Ribbon.ContextualTabGroups>
         </r:Ribbon>
 		<Grid>
 			<Grid.ColumnDefinitions>
