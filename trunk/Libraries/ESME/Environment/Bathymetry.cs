@@ -103,23 +103,15 @@ namespace ESME.Environment
     {
         public Resolutions()
         {
-            base.Add(new T { Resolution = 0.05f });
-            base.Add(new T { Resolution = 0.10f });
-            base.Add(new T { Resolution = 0.50f });
-            base.Add(new T { Resolution = 1.00f });
-            base.Add(new T { Resolution = 2.00f });
+            if (Count != 0) return;
+            Add(new T {Resolution = 0.05f});
+            Add(new T {Resolution = 0.10f});
+            Add(new T {Resolution = 0.50f});
+            Add(new T {Resolution = 1.00f});
+            Add(new T {Resolution = 2.00f});
         }
 
         public T this[float resolution] { get { return Find(t => t.Resolution == resolution); } }
-
-        public new T this[int index] { get { return base[index]; } }
-        public new void Add(T item) { throw new NotImplementedException(""); }
-        public new void AddRange(IEnumerable<T> collection) { throw new NotImplementedException(""); }
-        public new void Clear() { throw new NotImplementedException(""); }
-        public new bool Remove(T item) { throw new NotImplementedException(""); }
-        public new int RemoveAll(Predicate<T> item) { throw new NotImplementedException(""); }
-        public new void RemoveAt(int index) { throw new NotImplementedException(""); }
-        public new void RemoveRange(int index, int count) { throw new NotImplementedException(""); }
     }
 
     public class AvailableResolutions : Resolutions<AvailableResolution> { }
@@ -150,37 +142,29 @@ namespace ESME.Environment
     {
         public TimePeriods()
         {
-            base.Add(new T { TimePeriod = 0 });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.January });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.February });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.March });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.April });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.May });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.June});
-            base.Add(new T { TimePeriod = NAVOTimePeriod.July });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.August });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.September });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.October });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.November });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.December });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.Spring });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.Summer });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.Fall });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.Winter });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.Cold });
-            base.Add(new T { TimePeriod = NAVOTimePeriod.Warm });
+            if (Count != 0) return;
+            Add(new T { TimePeriod = NAVOTimePeriod.Invalid });
+            Add(new T { TimePeriod = NAVOTimePeriod.January });
+            Add(new T { TimePeriod = NAVOTimePeriod.February });
+            Add(new T { TimePeriod = NAVOTimePeriod.March });
+            Add(new T { TimePeriod = NAVOTimePeriod.April });
+            Add(new T { TimePeriod = NAVOTimePeriod.May });
+            Add(new T { TimePeriod = NAVOTimePeriod.June});
+            Add(new T { TimePeriod = NAVOTimePeriod.July });
+            Add(new T { TimePeriod = NAVOTimePeriod.August });
+            Add(new T { TimePeriod = NAVOTimePeriod.September });
+            Add(new T { TimePeriod = NAVOTimePeriod.October });
+            Add(new T { TimePeriod = NAVOTimePeriod.November });
+            Add(new T { TimePeriod = NAVOTimePeriod.December });
+            Add(new T { TimePeriod = NAVOTimePeriod.Spring });
+            Add(new T { TimePeriod = NAVOTimePeriod.Summer });
+            Add(new T { TimePeriod = NAVOTimePeriod.Fall });
+            Add(new T { TimePeriod = NAVOTimePeriod.Winter });
+            Add(new T { TimePeriod = NAVOTimePeriod.Cold });
+            Add(new T { TimePeriod = NAVOTimePeriod.Warm });
         }
 
         public T this[NAVOTimePeriod timePeriod] { get { return Find(t => t.TimePeriod == timePeriod); } }
-
-        public new T this[int index] { get { return base[index]; } }
-        public new void Add(T item) { throw new NotImplementedException(""); }
-        public new void AddRange(IEnumerable<T> collection) { throw new NotImplementedException(""); }
-        public new void Clear() { throw new NotImplementedException(""); }
-        public new bool Remove(T item) { throw new NotImplementedException(""); }
-        public new int RemoveAll(Predicate<T> item) { throw new NotImplementedException(""); }
-        public new void RemoveAt(int index) { throw new NotImplementedException(""); }
-        public new void RemoveRange(int index, int count) { throw new NotImplementedException(""); }
     }
 
     public class AvailableTimePeriods : TimePeriods<AvailableTimePeriod> { }
