@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Windows;
 using Cinch;
 using ESME.Environment;
 using ESME.Views.Locations;
@@ -11,7 +12,6 @@ namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {
-        
         #region Bindable Properties
 
         #region public float BufferZoneSize { get; set; }
@@ -58,6 +58,17 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public Visibility LocationEditorContextIsVisible { get; set; }
+
+        public Visibility LocationEditorContextIsVisible
+        {
+            get { return LocationIsSelected ? Visibility.Visible : Visibility.Collapsed; }
+        }
+
+        static readonly PropertyChangedEventArgs LocationEditorContextIsVisibleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.LocationEditorContextIsVisible);
+
+        #endregion
+
         #region public GeoDistanceUnit SelectedDistanceUnit { get; set; }
 
         public GeoDistanceUnit SelectedDistanceUnit
@@ -65,7 +76,6 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return _selectedDistanceUnit ?? (_selectedDistanceUnit = DistanceUnits[0]); }
             set
             {
-                if (_selectedDistanceUnit == value) return;
                 _selectedDistanceUnit = value;
                 NotifyPropertyChanged(SelectedDistanceUnitChangedEventArgs);
                 Debug.WriteLine(string.Format("SelectedDistanceUnit is now {0}", SelectedDistanceUnit == null ? "NULL" : SelectedDistanceUnit.Name));
@@ -121,7 +131,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-
         #region public Location Location { get; set; }
 
         public Location Location
@@ -131,8 +140,10 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_location == value) return;
                 _location = value;
-                NotifyPropertyChanged(LocationChangedEventArgs);
                 NotifyPropertyChanged(LocationIsSelectedChangedEventArgs);
+                NotifyPropertyChanged(LocationChangedEventArgs);
+                NotifyPropertyChanged(LocationEditorContextIsVisibleChangedEventArgs);
+                SelectedDistanceUnit = DistanceUnits[0];
             }
         }
 
