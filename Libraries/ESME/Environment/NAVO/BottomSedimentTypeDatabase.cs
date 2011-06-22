@@ -37,7 +37,8 @@ namespace ESME.Environment.NAVO
 
         static IEnumerable<SedimentSample> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
         {
-            var result = ReadDataset(highResGroup, latitude, longitude);
+            short[,] result = null;
+            //result = ReadDataset(highResGroup, latitude, longitude);
             double resolutionStep;
             string resolution;
             if (result != null)

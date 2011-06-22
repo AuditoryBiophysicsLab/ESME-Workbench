@@ -54,8 +54,15 @@ namespace ESMEWorkBench.ViewModels.Map
                     PointStyle = new PointStyle(PointSymbolType.Circle, new GeoSolidBrush(GeoColor.FromArgb(LineColor.A, LineColor.R, LineColor.G, LineColor.B)), (int) LineWidth);
                 }
             }
-            var wellKnownText = overlayShape.WellKnownText;
-            if (wellKnownText != null) _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(overlayShape.WellKnownText)));
+            if (overlayShape is OverlayLabel)
+            {
+                _layer.InternalFeatures.Add(new Feature());
+            }
+            else
+            {
+                var wellKnownText = overlayShape.WellKnownText;
+                if (wellKnownText != null) _layer.InternalFeatures.Add(new Feature(BaseShape.CreateShapeFromWellKnownData(overlayShape.WellKnownText)));
+            }
             //LayerOverlay.Layers.Add(_layer);
         }
 

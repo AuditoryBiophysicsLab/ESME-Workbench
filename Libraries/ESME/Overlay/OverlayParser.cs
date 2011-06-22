@@ -158,7 +158,8 @@ namespace ESME.Overlay
                                 curState = OverlayParseState.Initialization;
                                 break;
                             case OverlayKeywords.Label:
-                                shapes.Add(new OverlayLabel(lastPoint, curColor, tokenizer.NextToken().Value as string));
+                                //shapes.Add(new OverlayLabel(lastPoint, curColor, tokenizer.NextToken().Value as string));
+                                tokenizer.NextToken();
                                 break;
                             default:
                                 throw new FormatException("OverlayParser: Unknown token at line " + curToken.LineNumber + ": " + curToken.Value);

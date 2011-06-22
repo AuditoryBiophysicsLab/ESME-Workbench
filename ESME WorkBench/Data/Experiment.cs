@@ -762,7 +762,6 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-
         #region public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap { get; set; }
 
         public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap
@@ -780,7 +779,6 @@ namespace ESMEWorkBench.Data
         NemoModeToAcousticModelNameMap _nemoModeToAcousticModelNameMap;
 
         #endregion
-
 
         [XmlIgnore]
         FileSystemWatcher TransmissionLossFileWatcher { get; set; }
