@@ -22,7 +22,7 @@ namespace ESME.Views.Controls
     [ExportViewModel("TwoDimensionColorMapViewModel")]
     public class TwoDimensionColorMapViewModel : ViewModelBase
     {
-          static readonly PropertyChangedEventArgs WriteableBitmapChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.WriteableBitmap);
+        static readonly PropertyChangedEventArgs WriteableBitmapChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.WriteableBitmap);
 
         #region public float RangeMin { get; set; }
 
@@ -136,7 +136,7 @@ namespace ESME.Views.Controls
             _dispatcher = Dispatcher.CurrentDispatcher;
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel.Default);
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry, true);
+            //_viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry, true);
             
         }
 
@@ -231,7 +231,9 @@ namespace ESME.Views.Controls
             using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
         }
 
-        float[,] TransmissionLoss { get; set; }
+        float[,] TransmissionLoss { get; set; } //todo
+
+
 
         void RenderBitmap()
         {

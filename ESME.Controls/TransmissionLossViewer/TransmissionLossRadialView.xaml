@@ -15,8 +15,8 @@
 	
 	<DockPanel x:Name="RadialView">
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Height="22">
-            <TextBlock Text="{Binding ColorMapViewModel.CurMinValue, StringFormat=CurMin: {0.000}}" />
-            <TextBlock Text="{Binding ColorMapViewModel.CurMaxValue, StringFormat=CurMax: {0.000}}" />
+          <!--  <TextBlock Text="{Binding ColorMapViewModel.CurMinValue, StringFormat=CurMin: {0.000}}" />
+            <TextBlock Text="{Binding ColorMapViewModel.CurMaxValue, StringFormat=CurMax: {0.000}}" /> -->
         </StackPanel>
 		<DockPanel DockPanel.Dock="Left">
 			<DockPanel>
