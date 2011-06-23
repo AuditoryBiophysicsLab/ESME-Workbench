@@ -10,7 +10,7 @@ namespace ESME.Overlay
 {
     public class OverlayLineSegments : OverlayShape
     {
-        private readonly List<OverlayLineSegment> _segments = new List<OverlayLineSegment>();
+        public List<OverlayLineSegment> Segments { get; private set; }
         public override bool IsClosed { get; protected set; }
         public override bool HasCrossingSegments { get; protected set; }
         public Course[] Normals { get; private set; }
@@ -18,10 +18,12 @@ namespace ESME.Overlay
         public double South { get; private set; }
         public double East { get; private set; }
         public double West { get; private set; }
+        public GeoRect GeoRect { get; private set; }
 
         public OverlayLineSegments(EarthCoordinate[] points, Color color, float size = 1f, LineStyle lineStyle = LineStyle.Solid)
             : base(color, size, lineStyle)
         {
+            Segments = new List<OverlayLineSegment>();
             Add(points);
             if (points.Length < 2) return;
             CreateSegments();
@@ -33,7 +35,7 @@ namespace ESME.Overlay
         private void CreateSegments()
         {
             for (var i = 0; i < Length - 1; i++)
-                _segments.Add(new OverlayLineSegment(this[i], this[i + 1]));
+                Segments.Add(new OverlayLineSegment(this[i], this[i + 1]));
         }
         /// <summary>
         /// Returns an OverlayLineSegments containing the verticies of the  rectangular bounding box of the contained polygon, starting and ending with the northwest corner.
@@ -43,14 +45,14 @@ namespace ESME.Overlay
             North = East = double.MinValue;
             South = West = double.MaxValue;
          
-            foreach (var cursegment in _segments)
+            foreach (var cursegment in Segments)
             {
                 North = Math.Max(North, cursegment.Location.Latitude);
                 East = Math.Max(East, cursegment.Location.Longitude);
                 South = Math.Min(South, cursegment.Location.Latitude);
                 West = Math.Min(West, cursegment.Location.Longitude);
             }
-
+            GeoRect = new GeoRect(North, South, East, West);
         }
 
         public override bool IsUsableAsPerimeter
@@ -67,7 +69,7 @@ namespace ESME.Overlay
                     for (var i = 0; i < Length - 1; i++)
                     {
                         var edgeNormalCourse = new Course(this[i], this[i + 1]);
-                        var trialCw = _segments[i].Midpoint;
+                        var trialCw = Segments[i].Midpoint;
                         edgeNormalCourse.Degrees += 90;
                         trialCw.Move(edgeNormalCourse.Degrees, 100);
                         if (Contains(trialCw))
@@ -122,14 +124,14 @@ namespace ESME.Overlay
 #endif
             var proposedCourse = new Course(startLocation, proposedEndLocation);
             var proposedCourseSegment = new OverlayLineSegment(startLocation, proposedEndLocation);
-            for (var i = 0; i < _segments.Count(); i++)
+            for (var i = 0; i < Segments.Count(); i++)
             {
-                var intersect = proposedCourseSegment.IntersectionPoint(_segments[i]);
+                var intersect = proposedCourseSegment.IntersectionPoint(Segments[i]);
 #if MATLAB_DEBUG_OUTPUT
                 Console.WriteLine("Intersects({0},:)=[{1} {2}];", i + 1, intersect.Longitude, intersect.Latitude);
 #endif
                 if (intersect == null) continue;
-                if (!proposedCourseSegment.Contains(intersect) || !_segments[i].Contains(intersect)) continue;
+                if (!proposedCourseSegment.Contains(intersect) || !Segments[i].Contains(intersect)) continue;
                 proposedCourse.Reflect(Normals[i]);
                 var result = new EarthCoordinate(startLocation);
                 result.Move(proposedCourse, proposedEndLocation.DistanceTo(startLocation));
@@ -159,22 +161,24 @@ namespace ESME.Overlay
             // it always joins to the first one (by definition)
 
             // Special case for the first segment - we stop at the second to last segment
-            for (var j = 2; j < _segments.Count() - 1; j++)
+            for (var j = 2; j < Segments.Count() - 1; j++)
             {
-                if (_segments[0].Intersects(_segments[j]))
+                if (Segments[0].Intersects(Segments[j]))
                 {
+                    Console.WriteLine("Segment {0} intersects segment {1}", 0, j);
                     HasCrossingSegments = true;
                     return;
                 }
             }
 
             // Check the rest of the pairs, now stopping at the last segment
-            for (var i = 1; i < _segments.Count() - 2; i++)
+            for (var i = 1; i < Segments.Count() - 2; i++)
             {
-                for (var j = i + 2; j < _segments.Count(); j++)
+                for (var j = i + 2; j < Segments.Count(); j++)
                 {
-                    if (_segments[i].Intersects(_segments[j]))
+                    if (Segments[i].Intersects(Segments[j]))
                     {
+                        Console.WriteLine("Segment {0} intersects segment {1}", i, j);
                         HasCrossingSegments = true;
                         return;
                     }

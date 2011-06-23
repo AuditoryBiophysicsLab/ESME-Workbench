@@ -2,12 +2,11 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Text;
-using ESME.Model;
 using HRC.Navigation;
 
 namespace ESME.Overlay
 {
-    internal class OverlayLineSegment : OverlayShape
+    public class OverlayLineSegment : OverlayShape
     {
         public OverlayLineSegment(EarthCoordinate p1, EarthCoordinate p2)
             : this(p1, p2, Colors.Black, 1f, LineStyle.Solid)
@@ -39,12 +38,14 @@ namespace ESME.Overlay
         {
             get
             {
+                if (EarthCoordinates.Count < 2) return null;
                 if (MyWellKnownText == null)
                 {
                     var retval = new StringBuilder();
                     retval.Append("LINESTRING(");
                     foreach (var coord in EarthCoordinates)
                         retval.Append(string.Format("{0} {1}, ", coord.Latitude, coord.Longitude));
+                    retval.Append(string.Format("{0} {1}, ", EarthCoordinates[0].Latitude, EarthCoordinates[0].Longitude));
                     retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
                     retval.Append(")");
                     MyWellKnownText = retval.ToString();
@@ -101,7 +102,7 @@ namespace ESME.Overlay
             // contains the intersection point, then they DO intersect
             var intersectionPoint = IntersectionPoint(that);
             //Console.WriteLine("Intersection point calculated to be ({0}, {1})", IntersectionPoint.Latitude, IntersectionPoint.Longitude);
-            if ((intersectionPoint != null) && (BoundingBox.Contains((Point) intersectionPoint)))
+            if ((intersectionPoint != null) && (BoundingBox.Contains(intersectionPoint) && that.BoundingBox.Contains(intersectionPoint)))
                 return true;
             //if (IntersectionPoint.Longitude < BoundingBox.Left)
             //    Console.WriteLine("Intersection point is LEFT of the bounding box by {0}", BoundingBox.Left - IntersectionPoint.Longitude);
