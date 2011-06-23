@@ -19,23 +19,37 @@ namespace ESME.TransmissionLoss
             Mean,
         }
 
-        public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, int maxDisplaySize, SliceType sliceType) : this(transmissionLossField, maxDisplaySize)
-        { }
-        public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, int maxDisplaySize, int depthIndex) : this(transmissionLossField, maxDisplaySize)
-        { }
+        public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo, SliceType sliceType)
+            : this(transmissionLossField, lookupInfo) { CreateSliceData(transmissionLossField); }
+        public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo, int depthIndex)
+            : this(transmissionLossField, lookupInfo) { CreateSliceData(transmissionLossField); }
 
-        protected TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, int maxDisplaySize)
+        protected TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo)
         {
-            if (maxDisplaySize < 10) throw new ApplicationException("maxDisplaySize too small");
-
-            var rangeCellCount = transmissionLossField.Radials[0].Ranges.Length;
-            RadialSlices = new List<TransmissionLossRadialSlice>();
+            _rangeCellCount = transmissionLossField.Radials[0].Ranges.Length;
+            _radialSlices = new List<TransmissionLossRadialSlice>();
             foreach (var radial in transmissionLossField.Radials)
-                RadialSlices.Add(new TransmissionLossRadialSlice { Bearing = radial.BearingFromSource, Values = new float[rangeCellCount] });
+                _radialSlices.Add(new TransmissionLossRadialSlice { Bearing = radial.BearingFromSource, Values = new float[_rangeCellCount] });
 
-            SliceData = new float[maxDisplaySize, maxDisplaySize];
+            _radialLookupInfo = lookupInfo;
+            _sliceData = new float[lookupInfo.GetLength(0), lookupInfo.GetLength(1)];
         }
 
+        void CreateSliceData(TransmissionLossField transmissionLossField)
+        {
+            var radialCount = _radialSlices.Count;
+            for (var x = 0; x < _sliceData.GetLength(0); x++)
+                for (var y = 0; y < _sliceData.GetLength(1); y++)
+                {
+                    var sourceRadial = _radialLookupInfo[x, y].SourceRadialIndex;
+                    var rangeIndex = _radialLookupInfo[x, y].RangeIndex;
+                    _sliceData[x, y] = 0;
+                    if ((sourceRadial < radialCount) && (rangeIndex < _rangeCellCount)) 
+                        _sliceData[x, y] = _radialSlices[(int)sourceRadial].Values[rangeIndex];
+                }
+        }
+
+        #region Static helpers
         public static RadialLookupInfo[,] CreateRadialLookupInfo(TransmissionLossField transmissionLossField, int maxDisplaySize)
         {
             if (maxDisplaySize < 10) throw new ApplicationException("maxDisplaySize too small");
@@ -50,7 +64,6 @@ namespace ESME.TransmissionLoss
                 {
                     result[i, j] = new RadialLookupInfo();
                     const double radiansToDegrees = 180.0 / Math.PI;
-
 
                     var xCoord = i - halfDisplaySize;
                     var yCoord = j - halfDisplaySize;
@@ -119,10 +132,12 @@ namespace ESME.TransmissionLoss
                 result -= 360;
             return result;
         }
+        #endregion
 
-        public List<TransmissionLossRadialSlice> RadialSlices { get; private set; }
-        public float[,] SliceData { get; private set; }
-        public RadialLookupInfo[,] RadialLookupInfo { get; set; }
+        readonly List<TransmissionLossRadialSlice> _radialSlices;
+        readonly int _rangeCellCount;
+        readonly float[,] _sliceData;
+        readonly RadialLookupInfo[,] _radialLookupInfo;
     }
 
     public class RadialLookupInfo
