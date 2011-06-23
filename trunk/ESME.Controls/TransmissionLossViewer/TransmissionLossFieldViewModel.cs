@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -26,6 +27,7 @@ namespace ESME.Views.TransmissionLossViewer
             _viewAwareStatus = viewAwareStatus;
             ColorMapViewModel = ColorMapViewModel.Default;
             _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossFieldViewInitialized, true);
+            
         }
         
         #region public TransmissionLossField TransmissionLossField { get; set; }
@@ -46,7 +48,15 @@ namespace ESME.Views.TransmissionLossViewer
                 NotifyPropertyChanged(MeanViewChangedEventArgs);
                 NotifyPropertyChanged(MaxViewChangedEventArgs);
                 NotifyPropertyChanged(MinViewChangedEventArgs);
+
+                //generate TLFslices. 
+                CalculateMaxes();
             }
+        }
+
+        private void CalculateMaxes()
+        {
+            throw new NotImplementedException();
         }
 
         static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.TransmissionLossField);
@@ -240,10 +250,167 @@ namespace ESME.Views.TransmissionLossViewer
 
         #endregion
 
+        #region public TransmissionLossFieldSlice DepthSlice { get; set; }
+
+        public TransmissionLossSlice.TransmissionLossFieldSlice DepthSlice
+        {
+            get { return _depthSlice; }
+            set
+            {
+                if (_depthSlice == value) return;
+                _depthSlice = value;
+                NotifyPropertyChanged(DepthSliceChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs DepthSliceChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.DepthSlice);
+        private TransmissionLossSlice.TransmissionLossFieldSlice _depthSlice;
+
+        #endregion
+
+        #region public TransmissionLossFieldSlice MeanSlice { get; set; }
+
+        public TransmissionLossSlice.TransmissionLossFieldSlice MeanSlice
+        {
+            get { return _meanSlice; }
+            set
+            {
+                if (_meanSlice == value) return;
+                _meanSlice = value;
+                NotifyPropertyChanged(MeanSliceChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs MeanSliceChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.MeanSlice);
+        private TransmissionLossSlice.TransmissionLossFieldSlice _meanSlice;
+
+        #endregion
+
+        #region public TransmissionLossFieldSlice MaxSlice { get; set; }
+
+        public TransmissionLossSlice.TransmissionLossFieldSlice MaxSlice
+        {
+            get { return _maxSlice; }
+            set
+            {
+                if (_maxSlice == value) return;
+                _maxSlice = value;
+                NotifyPropertyChanged(MaxSliceChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs MaxSliceChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.MaxSlice);
+        private TransmissionLossSlice.TransmissionLossFieldSlice _maxSlice;
+
+        #endregion
+
+        #region public TransmissionLossFieldSlice MinSlice { get; set; }
+
+        public TransmissionLossSlice.TransmissionLossFieldSlice MinSlice
+        {
+            get { return _minSlice; }
+            set
+            {
+                if (_minSlice == value) return;
+                _minSlice = value;
+                NotifyPropertyChanged(MinSliceChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs MinSliceChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.MinSlice);
+        private TransmissionLossSlice.TransmissionLossFieldSlice _minSlice;
+
+        #endregion
 
 
 
+#if false
+        //protected HorizontalWeightInfo InterpolateToPoint(int xIndex, int yIndex)
+        protected void InterpolateToPoint(int xIndex, int yIndex)
+        {
+            int xSize, ySize, xCoord, yCoord;
+            double Bearing_Degrees;
+            int Range, StartTransectNumber, EndTransectNumber;
+            double OutOfBeamArcCenter_Degrees;
+            double OutOfBeamArcHalfAngle_Degrees;
+            double StartBearing, EndBearing;
+            // HorizontalWeightInfo Results = new HorizontalWeightInfo();
 
+            OutOfBeamArcCenter_Degrees = (this.soundSource.Bearing_degrees + 180) % 360;
+            if (this.soundSource.BeamHorizontalWidthHalfAngle_degrees >= 180)
+                OutOfBeamArcHalfAngle_Degrees = 0;
+            else
+                OutOfBeamArcHalfAngle_Degrees = 180.0 - (this.soundSource.BeamHorizontalWidthHalfAngle_degrees);
+
+            xSize = (2 * BoundingBoxX);
+            ySize = (2 * BoundingBoxY);
+
+            xCoord = xIndex - BoundingBoxX;
+            yCoord = yIndex - BoundingBoxY;
+            Bearing_Degrees = Math.Atan2(xCoord, yCoord) * RadiansToDegrees;
+            if (Bearing_Degrees < 0)
+                Bearing_Degrees += 360;
+            Bearing_Degrees %= 360;
+
+            Range = (int)Math.Round(Math.Sqrt((xCoord * xCoord) + (yCoord * yCoord)));
+
+            // Set default values for the weight array
+            Results.RangeIndex = Range;
+            Results.SourceRadialIndex = -1;
+
+            // If the current point is not within the "out of beam" area, in other words, if it's within the sonar beam
+            // at least in an angular sense
+            if (!PlaneGeometry.IsWithinArc(Bearing_Degrees, OutOfBeamArcCenter_Degrees, OutOfBeamArcHalfAngle_Degrees))
+            {
+                // The current point is not out of the sonar beam, unless it's beyond the max range we're computing
+                for (int TransectNumber = 0; TransectNumber < soundSource.TransectCount; TransectNumber++)
+                {
+                    if (TransectNumber < (soundSource.TransectCount - 1))
+                    {
+                        StartTransectNumber = TransectNumber;
+                        EndTransectNumber = TransectNumber + 1;
+                    }
+                    else
+                    {
+                        if (OutOfBeamArcHalfAngle_Degrees == 0)
+                        {
+                            StartTransectNumber = TransectNumber;
+                            EndTransectNumber = 0;
+                        }
+                        else
+                            break;
+                    }
+                    StartBearing = soundSource.TransectProperties[StartTransectNumber].Bearing_degrees;
+                    EndBearing = soundSource.TransectProperties[EndTransectNumber].Bearing_degrees;
+                    if (PlaneGeometry.IsWithinArcEndpoints(Bearing_Degrees, StartBearing, EndBearing))
+                    {
+                        int MaxRange = (int)Math.Max(soundSource.TransmissionLossVertical[StartTransectNumber].Data.GetLength(0), soundSource.TransmissionLossVertical[EndTransectNumber].Data.GetLength(0));
+                        double TransectAngle_Degrees, CurBearingPercentAngularDistance;
+
+                        if (Range < MaxRange)
+                        {
+                            TransectAngle_Degrees = PlaneGeometry.AngularDistance_Degrees(StartBearing, EndBearing);
+                            CurBearingPercentAngularDistance = PlaneGeometry.AngularDistance_Degrees(StartBearing, Bearing_Degrees) / TransectAngle_Degrees;
+                            if (CurBearingPercentAngularDistance <= 0.5)
+                                Results.SourceRadialIndex = StartTransectNumber;
+                            else
+                                Results.SourceRadialIndex = EndTransectNumber;
+                            Results.RangeIndex = Range;
+                            return Results;
+                        } // if (Range < MaxRange)
+                        else
+                        {
+                            // If it's out of the sonar beam because the range to source is greater than max range
+                            Results.RangeIndex = Range;
+                            Results.SourceRadialIndex = -1;
+                            return Results;
+                        } // if (Range < MaxRange)
+                    } // if (IsWithinArcEndpoints(Bearing_Degrees, StartTransect.Bearing, EndTransect.Bearing))
+                } // for (int TransectNumber = 0; TransectNumber < (soundSource.TransectNumber - 1); TransectNumber++)
+            } // if (IsWithinArc(Bearing_Degrees, OutOfBeamArcCenter_Degrees, OutOfBeamArcHalfAngle_Degrees))
+            return Results;
+        } // private HorizontalWeightInfo InterpolateToPoint(int xIndex, int yIndex)  
+#endif
 
         [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
@@ -293,4 +460,5 @@ namespace ESME.Views.TransmissionLossViewer
             }
         }
     }
+
 }

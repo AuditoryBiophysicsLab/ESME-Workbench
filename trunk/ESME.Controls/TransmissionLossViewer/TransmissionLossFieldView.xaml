@@ -32,8 +32,10 @@
 					</StackPanel>
 
 				</DockPanel>
-				<TransmissionLossViewer:TransmissionLossRadialView x:Name="RadialView" />
-			</DockPanel>
+                 <TransmissionLossViewer:TransmissionLossRadialView x:Name="RadialView" />
+                
+
+            </DockPanel>
 		</TabItem>
 		<TabItem Header="Horizontal">
 			<DockPanel LastChildFill="True">
@@ -49,7 +51,6 @@
 						        Minimum="0"
 						        Maximum="{Binding DepthCount}"
 						        SmallChange="{Binding DepthStep}"
-						        LargeChange="{Binding DepthStep}"
 						        Value="{Binding SelectedDepth}"
 						        Margin="5"
 						        IsDirectionReversed="True"
@@ -57,18 +58,19 @@
 					</StackPanel>
 
 				</DockPanel>
-                <Controls:TwoDimensionColorMapView DataContext="{Binding SliceView}" />
-			</DockPanel>
+                <!--  <Controls:TwoDimensionColorMapView DataContext="{Binding SliceView}" />
+                <Controls:TwoDimensionColorMapView x:Name="SliceView" />-->
+            </DockPanel> 
 		</TabItem>
 
 		<TabItem Header="Minimum">
-            <Controls:TwoDimensionColorMapView DataContext="{Binding MinView}" />
+           <!-- <Controls:TwoDimensionColorMapView DataContext="{Binding MinView}" /> -->
 		</TabItem>
 		<TabItem Header="Maximum">
-            <Controls:TwoDimensionColorMapView DataContext="{Binding MaxView}"/>
+            <!--<Controls:TwoDimensionColorMapView DataContext="{Binding MaxView}"/> -->
 		</TabItem>
 		<TabItem Header="Mean">
-            <Controls:TwoDimensionColorMapView DataContext="{Binding MeanView}"/>
+            <!--<Controls:TwoDimensionColorMapView DataContext="{Binding MeanView}"/>-->
 		</TabItem>
 	</TabControl>
 </UserControl>
