@@ -20,9 +20,16 @@ namespace ESME.TransmissionLoss
         }
 
         public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo, SliceType sliceType)
-            : this(transmissionLossField, lookupInfo) { CreateSliceData(transmissionLossField); }
+            : this(transmissionLossField, lookupInfo)
+        {
+            CreateSliceData(transmissionLossField);
+        }
+
         public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo, int depthIndex)
-            : this(transmissionLossField, lookupInfo) { CreateSliceData(transmissionLossField); }
+            : this(transmissionLossField, lookupInfo)
+        {
+            CreateSliceData(transmissionLossField);
+        }
 
         protected TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo)
         {
