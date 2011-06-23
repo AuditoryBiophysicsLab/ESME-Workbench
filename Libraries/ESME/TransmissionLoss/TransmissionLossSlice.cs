@@ -56,8 +56,19 @@ namespace ESME.TransmissionLoss
                 }
         }
 
+        readonly List<TransmissionLossRadialSlice> _radialSlices;
+        readonly int _rangeCellCount;
+        readonly float[,] _sliceData;
+        readonly RadialLookupInfo[,] _radialLookupInfo;
+    }
+
+    public class RadialLookupInfo
+    {
+        public uint RangeIndex { get; internal set; }
+        public uint SourceRadialIndex { get; internal set; }
+
         #region Static helpers
-        public static RadialLookupInfo[,] CreateRadialLookupInfo(TransmissionLossField transmissionLossField, int maxDisplaySize)
+        public static RadialLookupInfo[,] Create(TransmissionLossField transmissionLossField, int maxDisplaySize)
         {
             if (maxDisplaySize < 10) throw new ApplicationException("maxDisplaySize too small");
 
@@ -128,7 +139,7 @@ namespace ESME.TransmissionLoss
 
             return (arcStart <= bearing) && (bearing <= arcEnd);
         }
-        
+
         static float AngularDistance(double angle1, double angle2)
         {
             var result = (float)(angle2 - angle1);
@@ -140,16 +151,5 @@ namespace ESME.TransmissionLoss
             return result;
         }
         #endregion
-
-        readonly List<TransmissionLossRadialSlice> _radialSlices;
-        readonly int _rangeCellCount;
-        readonly float[,] _sliceData;
-        readonly RadialLookupInfo[,] _radialLookupInfo;
-    }
-
-    public class RadialLookupInfo
-    {
-        public uint RangeIndex { get; internal set; }
-        public uint SourceRadialIndex { get; internal set; }
     }
 }
