@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Windows;
+using System.Windows.Forms;
 using Cinch;
 using ESME.TransmissionLoss;
 using HRC.Navigation;
@@ -50,19 +52,43 @@ namespace ESME.Views.TransmissionLossViewer
                 NotifyPropertyChanged(MinViewChangedEventArgs);
 
                 //generate TLFslices. 
-                CalculateMaxes();
+               
+
             }
         }
 
-        private void CalculateMaxes()
-        {
-            throw new NotImplementedException();
-        }
+        
 
         static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.TransmissionLossField);
         TransmissionLossField _transmissionLossField;
 
         #endregion
+
+        void CalculateSlice()
+        {
+
+            var maxDisplaySize = Math.Min(SystemInformation.PrimaryMonitorSize.Height,SystemInformation.PrimaryMonitorSize.Width);
+            var TL = TransmissionLossField;
+            var depthIndex = SelectedDepth;
+            List<TransmissionLossRadialSlice> RadialSlices = new List<TransmissionLossRadialSlice>();
+            
+            foreach (var radial in TL.Radials)
+            {
+                var radialslice = new TransmissionLossRadialSlice();
+            //    radialslice.Bearing = radial.BearingFromSource;
+            //    radialslice.Values = radial[depthIndex];
+                RadialSlices.Add(radialslice);
+            }
+
+            
+        }
+
+        void CalculateStatSlices()
+        {
+            var maxDisplaySize = Math.Min(SystemInformation.PrimaryMonitorSize.Height, SystemInformation.PrimaryMonitorSize.Width);
+            var TL = TransmissionLossField;
+            var sliceType = TransmissionLossFieldSlice.SliceType.Mean;
+        }
 
         #region public double SelectedRadialBearing { get; set; }
 
@@ -252,7 +278,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         #region public TransmissionLossFieldSlice DepthSlice { get; set; }
 
-        public TransmissionLossSlice.TransmissionLossFieldSlice DepthSlice
+        public TransmissionLossFieldSlice DepthSlice
         {
             get { return _depthSlice; }
             set
@@ -264,13 +290,13 @@ namespace ESME.Views.TransmissionLossViewer
         }
 
         private static readonly PropertyChangedEventArgs DepthSliceChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.DepthSlice);
-        private TransmissionLossSlice.TransmissionLossFieldSlice _depthSlice;
+        private TransmissionLossFieldSlice _depthSlice;
 
         #endregion
 
         #region public TransmissionLossFieldSlice MeanSlice { get; set; }
 
-        public TransmissionLossSlice.TransmissionLossFieldSlice MeanSlice
+        public TransmissionLossFieldSlice MeanSlice
         {
             get { return _meanSlice; }
             set
@@ -282,13 +308,13 @@ namespace ESME.Views.TransmissionLossViewer
         }
 
         private static readonly PropertyChangedEventArgs MeanSliceChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.MeanSlice);
-        private TransmissionLossSlice.TransmissionLossFieldSlice _meanSlice;
+        private TransmissionLossFieldSlice _meanSlice;
 
         #endregion
 
         #region public TransmissionLossFieldSlice MaxSlice { get; set; }
 
-        public TransmissionLossSlice.TransmissionLossFieldSlice MaxSlice
+        public TransmissionLossFieldSlice MaxSlice
         {
             get { return _maxSlice; }
             set
@@ -300,13 +326,13 @@ namespace ESME.Views.TransmissionLossViewer
         }
 
         private static readonly PropertyChangedEventArgs MaxSliceChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.MaxSlice);
-        private TransmissionLossSlice.TransmissionLossFieldSlice _maxSlice;
+        private TransmissionLossFieldSlice _maxSlice;
 
         #endregion
 
         #region public TransmissionLossFieldSlice MinSlice { get; set; }
 
-        public TransmissionLossSlice.TransmissionLossFieldSlice MinSlice
+        public TransmissionLossFieldSlice MinSlice
         {
             get { return _minSlice; }
             set
@@ -318,7 +344,7 @@ namespace ESME.Views.TransmissionLossViewer
         }
 
         private static readonly PropertyChangedEventArgs MinSliceChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.MinSlice);
-        private TransmissionLossSlice.TransmissionLossFieldSlice _minSlice;
+        private TransmissionLossFieldSlice _minSlice;
 
         #endregion
 
