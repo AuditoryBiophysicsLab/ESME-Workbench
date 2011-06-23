@@ -143,18 +143,22 @@ namespace ESME.TransmissionLoss.CASS
                 switch (simulatorName)
                 {
                     case TransmissionLossAlgorithm.RAM:
+                        // For RAM, range and depth step size in INP files need to be integers, so round up to the next int if the computed value is not an integer.  Max depth cell count is 19
                         writer.WriteLine("Enviro File                             ,env_{0}-lfbl-pe.dat", timePeriod.ToLower());
-                        stepCount = appSettings.CASSSettings.MaximumDepth / appSettings.RAMSettings.DepthStepSize;
-                        if (stepCount > 21) stepSize = appSettings.CASSSettings.MaximumDepth / 21;
+                        stepCount = appSettings.RAMSettings.MaximumDepth / appSettings.RAMSettings.DepthStepSize;
+                        if (stepCount > 19) stepSize = appSettings.RAMSettings.MaximumDepth / 19;
                         else stepSize = appSettings.RAMSettings.DepthStepSize;
+                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.RAMSettings.MaximumDepth, stepSize);
                         break;
                     case TransmissionLossAlgorithm.CASS:
                     default:
+                        // For CASS, range and depth step size in INP files need to be integers, so round up to the next int if the computed value is not an integer.  Max depth cell count is 1024
                         writer.WriteLine("Enviro File                             ,env_{0}.dat", timePeriod.ToLower());
                         stepCount = appSettings.CASSSettings.MaximumDepth / appSettings.CASSSettings.DepthStepSize;
                         if (stepCount > 1024) stepSize = appSettings.CASSSettings.MaximumDepth / 1024;
                         else stepSize = appSettings.CASSSettings.DepthStepSize;
+                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.CASSSettings.MaximumDepth, stepSize);
                         break;
                 }
@@ -174,19 +178,24 @@ namespace ESME.TransmissionLoss.CASS
                 writer.WriteLine("Vertical Beam                           ,{0:0.000} DEG", mode.VerticalBeamWidth);
                 writer.WriteLine("Source Depth                            ,{0:0.000} M", mode.SourceDepth);
                 writer.WriteLine("SOURCE LEVEL                            ,{0:0.000} DB", mode.SourceLevel);
+
                 switch (simulatorName)
                 {
                     case TransmissionLossAlgorithm.RAM:
+                        // For RAM, range and depth step size in INP files need to be integers, so round up to the next int if the computed value is not an integer.  Max range cell count is 999
                         stepCount = mode.Radius / appSettings.RAMSettings.RangeStepSize;
-                        if (stepCount > 1024) stepSize = mode.Radius / 1024;
+                        if (stepCount > 999) stepSize = mode.Radius / 999;
                         else stepSize = appSettings.RAMSettings.RangeStepSize;
+                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
                         break;
                     case TransmissionLossAlgorithm.CASS:
                     default:
+                        // For CASS, range and depth step size in INP files need to be integers, so round up to the next int if the computed value is not an integer.  Max range cell count is 1024
                         stepCount = mode.Radius / appSettings.CASSSettings.RangeStepSize;
                         if (stepCount > 1024) stepSize = mode.Radius / 1024;
                         else stepSize = appSettings.CASSSettings.RangeStepSize;
+                        if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
                         break;
                 }

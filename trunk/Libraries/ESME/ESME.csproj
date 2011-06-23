@@ -184,6 +184,7 @@
     <Compile Include="TransmissionLoss\TransmissionLossJob.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRunFile.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossRunFileRadial.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossSlice.cs" />
     <Compile Include="Validation\TransmissionLossValidator.cs" />
   </ItemGroup>
   <ItemGroup>
