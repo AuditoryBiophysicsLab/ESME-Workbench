@@ -22,12 +22,30 @@ namespace ESME.TransmissionLoss
         public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo, SliceType sliceType)
             : this(transmissionLossField, lookupInfo)
         {
+            switch (sliceType)
+            {
+                case SliceType.Minimum:
+                    break;
+                case SliceType.Maximum:
+                    break;
+                case SliceType.Mean:
+                    break;
+                default:
+                    throw new ApplicationException("unknown slice type");
+            }
             CreateSliceData();
         }
 
         public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo, int depthIndex)
             : this(transmissionLossField, lookupInfo)
         {
+            for (var i = 0; i < transmissionLossField.Radials.Length; i++)
+            {
+                var radial = transmissionLossField.Radials[i];
+                var radialSlice = _radialSlices[i];
+                for (var j = 0; j < radial.Ranges.Length; j++)
+                    radialSlice.Values[j] = radial[depthIndex, j];
+            }
             CreateSliceData();
         }
 

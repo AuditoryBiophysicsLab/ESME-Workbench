@@ -22,6 +22,8 @@ namespace ESME.Views.TransmissionLossViewer
         bool _iAmInitialized;
         TransmissionLossField _tempField;
 
+        private RadialLookupInfo[,] LookupInfo { get; set; }
+
         [ImportingConstructor]
         public TransmissionLossFieldViewModel(IHRCSaveFileService saveFileService, IViewAwareStatus viewAwareStatus)
         {
@@ -51,9 +53,15 @@ namespace ESME.Views.TransmissionLossViewer
                 NotifyPropertyChanged(MaxViewChangedEventArgs);
                 NotifyPropertyChanged(MinViewChangedEventArgs);
 
-                //generate TLFslices. 
-               
-
+                var nativesize = _transmissionLossField.Radials[0].Ranges.Length * 2;
+                LookupInfo = RadialLookupInfo.Create(_transmissionLossField,
+                                                                  Math.Min(Math.Min(SystemInformation.PrimaryMonitorSize.Height,
+                                                                           SystemInformation.PrimaryMonitorSize.Width), nativesize));
+                DepthSlice = new TransmissionLossFieldSlice(_transmissionLossField,LookupInfo,0);
+                MinSlice = new TransmissionLossFieldSlice(_transmissionLossField,LookupInfo,TransmissionLossFieldSlice.SliceType.Minimum);
+                MaxSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Maximum);
+                MeanSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Mean);
+                
             }
         }
 
@@ -63,33 +71,7 @@ namespace ESME.Views.TransmissionLossViewer
         TransmissionLossField _transmissionLossField;
 
         #endregion
-
-        void CalculateSlice()
-        {
-
-            var maxDisplaySize = Math.Min(SystemInformation.PrimaryMonitorSize.Height,SystemInformation.PrimaryMonitorSize.Width);
-            var TL = TransmissionLossField;
-            var depthIndex = SelectedDepth;
-            List<TransmissionLossRadialSlice> RadialSlices = new List<TransmissionLossRadialSlice>();
-            
-            foreach (var radial in TL.Radials)
-            {
-                var radialslice = new TransmissionLossRadialSlice();
-            //    radialslice.Bearing = radial.BearingFromSource;
-            //    radialslice.Values = radial[depthIndex];
-                RadialSlices.Add(radialslice);
-            }
-
-            
-        }
-
-        void CalculateStatSlices()
-        {
-            var maxDisplaySize = Math.Min(SystemInformation.PrimaryMonitorSize.Height, SystemInformation.PrimaryMonitorSize.Width);
-            var TL = TransmissionLossField;
-            var sliceType = TransmissionLossFieldSlice.SliceType.Mean;
-        }
-
+       
         #region public double SelectedRadialBearing { get; set; }
 
         public double SelectedRadialBearing
@@ -276,6 +258,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         #endregion
 
+        
         #region public TransmissionLossFieldSlice DepthSlice { get; set; }
 
         public TransmissionLossFieldSlice DepthSlice
@@ -348,95 +331,6 @@ namespace ESME.Views.TransmissionLossViewer
 
         #endregion
 
-
-
-#if false
-        //protected HorizontalWeightInfo InterpolateToPoint(int xIndex, int yIndex)
-        protected void InterpolateToPoint(int xIndex, int yIndex)
-        {
-            int xSize, ySize, xCoord, yCoord;
-            double Bearing_Degrees;
-            int Range, StartTransectNumber, EndTransectNumber;
-            double OutOfBeamArcCenter_Degrees;
-            double OutOfBeamArcHalfAngle_Degrees;
-            double StartBearing, EndBearing;
-            // HorizontalWeightInfo Results = new HorizontalWeightInfo();
-
-            OutOfBeamArcCenter_Degrees = (this.soundSource.Bearing_degrees + 180) % 360;
-            if (this.soundSource.BeamHorizontalWidthHalfAngle_degrees >= 180)
-                OutOfBeamArcHalfAngle_Degrees = 0;
-            else
-                OutOfBeamArcHalfAngle_Degrees = 180.0 - (this.soundSource.BeamHorizontalWidthHalfAngle_degrees);
-
-            xSize = (2 * BoundingBoxX);
-            ySize = (2 * BoundingBoxY);
-
-            xCoord = xIndex - BoundingBoxX;
-            yCoord = yIndex - BoundingBoxY;
-            Bearing_Degrees = Math.Atan2(xCoord, yCoord) * RadiansToDegrees;
-            if (Bearing_Degrees < 0)
-                Bearing_Degrees += 360;
-            Bearing_Degrees %= 360;
-
-            Range = (int)Math.Round(Math.Sqrt((xCoord * xCoord) + (yCoord * yCoord)));
-
-            // Set default values for the weight array
-            Results.RangeIndex = Range;
-            Results.SourceRadialIndex = -1;
-
-            // If the current point is not within the "out of beam" area, in other words, if it's within the sonar beam
-            // at least in an angular sense
-            if (!PlaneGeometry.IsWithinArc(Bearing_Degrees, OutOfBeamArcCenter_Degrees, OutOfBeamArcHalfAngle_Degrees))
-            {
-                // The current point is not out of the sonar beam, unless it's beyond the max range we're computing
-                for (int TransectNumber = 0; TransectNumber < soundSource.TransectCount; TransectNumber++)
-                {
-                    if (TransectNumber < (soundSource.TransectCount - 1))
-                    {
-                        StartTransectNumber = TransectNumber;
-                        EndTransectNumber = TransectNumber + 1;
-                    }
-                    else
-                    {
-                        if (OutOfBeamArcHalfAngle_Degrees == 0)
-                        {
-                            StartTransectNumber = TransectNumber;
-                            EndTransectNumber = 0;
-                        }
-                        else
-                            break;
-                    }
-                    StartBearing = soundSource.TransectProperties[StartTransectNumber].Bearing_degrees;
-                    EndBearing = soundSource.TransectProperties[EndTransectNumber].Bearing_degrees;
-                    if (PlaneGeometry.IsWithinArcEndpoints(Bearing_Degrees, StartBearing, EndBearing))
-                    {
-                        int MaxRange = (int)Math.Max(soundSource.TransmissionLossVertical[StartTransectNumber].Data.GetLength(0), soundSource.TransmissionLossVertical[EndTransectNumber].Data.GetLength(0));
-                        double TransectAngle_Degrees, CurBearingPercentAngularDistance;
-
-                        if (Range < MaxRange)
-                        {
-                            TransectAngle_Degrees = PlaneGeometry.AngularDistance_Degrees(StartBearing, EndBearing);
-                            CurBearingPercentAngularDistance = PlaneGeometry.AngularDistance_Degrees(StartBearing, Bearing_Degrees) / TransectAngle_Degrees;
-                            if (CurBearingPercentAngularDistance <= 0.5)
-                                Results.SourceRadialIndex = StartTransectNumber;
-                            else
-                                Results.SourceRadialIndex = EndTransectNumber;
-                            Results.RangeIndex = Range;
-                            return Results;
-                        } // if (Range < MaxRange)
-                        else
-                        {
-                            // If it's out of the sonar beam because the range to source is greater than max range
-                            Results.RangeIndex = Range;
-                            Results.SourceRadialIndex = -1;
-                            return Results;
-                        } // if (Range < MaxRange)
-                    } // if (IsWithinArcEndpoints(Bearing_Degrees, StartTransect.Bearing, EndTransect.Bearing))
-                } // for (int TransectNumber = 0; TransectNumber < (soundSource.TransectNumber - 1); TransectNumber++)
-            } // if (IsWithinArc(Bearing_Degrees, OutOfBeamArcCenter_Degrees, OutOfBeamArcHalfAngle_Degrees))
-            return Results;
-        } // private HorizontalWeightInfo InterpolateToPoint(int xIndex, int yIndex)  
-#endif
 
         [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
