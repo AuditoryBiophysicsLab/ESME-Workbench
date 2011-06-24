@@ -57,7 +57,8 @@ namespace ESME.Views.TransmissionLossViewer
                 LookupInfo = RadialLookupInfo.Create(_transmissionLossField,
                                                                   Math.Min(Math.Min(SystemInformation.PrimaryMonitorSize.Height,
                                                                            SystemInformation.PrimaryMonitorSize.Width), nativesize));
-                DepthSlice = new TransmissionLossFieldSlice(_transmissionLossField,LookupInfo,0);
+                DepthSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo,
+                                                            TransmissionLossFieldSlice.SliceType.Depth,0);//or SelectedDepth
                 MinSlice = new TransmissionLossFieldSlice(_transmissionLossField,LookupInfo,TransmissionLossFieldSlice.SliceType.Minimum);
                 MaxSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Maximum);
                 MeanSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Mean);
@@ -176,8 +177,8 @@ namespace ESME.Views.TransmissionLossViewer
                // if (_selectedDepth == value) return;
                 _selectedDepth = value;
                 NotifyPropertyChanged(SelectedDepthChangedEventArgs);
-                //todo
-                SetSelectedDepth(_selectedDepth-1);
+                DepthSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo,
+                                                            TransmissionLossFieldSlice.SliceType.Depth, _selectedDepth);
             }
         }
 
@@ -334,9 +335,6 @@ namespace ESME.Views.TransmissionLossViewer
 
         [MediatorMessageSink(MediatorMessage.SetSelectedRadialBearing)]
         void SetSelectedRadialBearing(double selectedRadialBearing) { SelectedRadialBearing = selectedRadialBearing; }
-
-        [MediatorMessageSink(MediatorMessage.SetSelectedDepth)]
-        void SetSelectedDepth(int selectedDepth) { SelectedDepth = selectedDepth; }
 
         [MediatorMessageSink(MediatorMessage.SaveRadialAsCSV)]
         void SaveRadialAsCSV(string fileName) { TransmissionLossField.Radials[SelectedRadial-1].SaveAsCSV(fileName, TransmissionLossField); }
