@@ -48,7 +48,7 @@ namespace ESME.Views.TransmissionLossViewer
                 NotifyPropertyChanged(TransmissionLossFieldChangedEventArgs);
                 NotifyPropertyChanged(RadialCountChangedEventArgs);
                 //todo this is where slices get initialized.
-                NotifyPropertyChanged(SliceViewChangedEventArgs);
+                NotifyPropertyChanged(DepthViewChangedEventArgs);
                 NotifyPropertyChanged(MeanViewChangedEventArgs);
                 NotifyPropertyChanged(MaxViewChangedEventArgs);
                 NotifyPropertyChanged(MinViewChangedEventArgs);
@@ -57,12 +57,14 @@ namespace ESME.Views.TransmissionLossViewer
                 LookupInfo = RadialLookupInfo.Create(_transmissionLossField,
                                                                   Math.Min(Math.Min(SystemInformation.PrimaryMonitorSize.Height,
                                                                            SystemInformation.PrimaryMonitorSize.Width), nativesize));
+
                 DepthSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo,
                                                             TransmissionLossFieldSlice.SliceType.Depth,0);//or SelectedDepth
                 MinSlice = new TransmissionLossFieldSlice(_transmissionLossField,LookupInfo,TransmissionLossFieldSlice.SliceType.Minimum);
                 MaxSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Maximum);
                 MeanSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Mean);
-                
+                DepthView.SliceData = DepthSlice.SliceData;
+
             }
         }
 
@@ -187,24 +189,24 @@ namespace ESME.Views.TransmissionLossViewer
 
         #endregion
 
-        #region public TwoDimensionColorMapViewModel SliceView { get; set; }
+        #region public TwoDimensionColorMapViewModel DepthView { get; set; }
 
-        public TwoDimensionColorMapViewModel SliceView
+        public TwoDimensionColorMapViewModel DepthView
         {
-            get { return _sliceView ?? (_sliceView = new TwoDimensionColorMapViewModel(_viewAwareStatus)); }
+            get { return _depthView ?? (_depthView = new TwoDimensionColorMapViewModel(_viewAwareStatus)); }
             set
             {
-                if (_sliceView == value) return;
-                _sliceView = value;
-                NotifyPropertyChanged(SliceViewChangedEventArgs);
+                if (_depthView == value) return;
+                _depthView = value;
+                NotifyPropertyChanged(DepthViewChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs SliceViewChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.SliceView);
-        TwoDimensionColorMapViewModel _sliceView;
+        private static readonly PropertyChangedEventArgs DepthViewChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.DepthView);
+        private TwoDimensionColorMapViewModel _depthView;
 
         #endregion
-
+        
         #region public TwoDimensionColorMapViewModel MeanView { get; set; }
 
         public TwoDimensionColorMapViewModel MeanView

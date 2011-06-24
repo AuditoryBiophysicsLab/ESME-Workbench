@@ -58,8 +58,7 @@
 					</StackPanel>
 
 				</DockPanel>
-                <!--  <Controls:TwoDimensionColorMapView DataContext="{Binding SliceView}" />
-                <Controls:TwoDimensionColorMapView x:Name="SliceView" />-->
+                  <Controls:TwoDimensionColorMapView DataContext="{Binding DepthView}" />                
             </DockPanel> 
 		</TabItem>
 
