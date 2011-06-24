@@ -205,7 +205,7 @@ namespace ESME.Views.Controls
 
             // var width = TransmissionLossRadial.Ranges.Length;
             //var height = TransmissionLossRadial.Depths.Length;
-            int radius = TransmissionLossField.Ranges.Length;
+            int radius = TransmissionLossField.Ranges.Count;
             if (_writeableBitmap == null)
                 _writeableBitmap = new WriteableBitmap(radius, radius, 96, 96, PixelFormats.Bgr32, null);
 

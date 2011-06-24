@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using ESME.TransmissionLoss.Bellhop;
-using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss
@@ -10,9 +9,7 @@ namespace ESME.TransmissionLoss
     public class TransmissionLossRadial : IComparable<TransmissionLossRadial>
     {
         const UInt32 Magic = 0xe6763c72;
-        readonly int _depths;
         readonly long _rangeStride;
-        readonly int _ranges;
         long _seekOffset = -1;
 
         public TransmissionLossRadial(float bearingFromSource, BellhopOutput bellhopOutput)
@@ -29,15 +26,10 @@ namespace ESME.TransmissionLoss
 
             TransmissionLoss = bellhopOutput.TransmissionLoss;
 
-            _depths = TransmissionLoss.GetLength(0);
-            _ranges = TransmissionLoss.GetLength(1);
-            _rangeStride = sizeof (float)*_ranges;
+            _rangeStride = sizeof(float) * TransmissionLoss.GetLength(1);
 
-            Depths = new float[bellhopOutput.ReceiverDepths.Length];
-            Array.Copy(bellhopOutput.ReceiverDepths, Depths, bellhopOutput.ReceiverDepths.Length);
-
-            Ranges = new float[bellhopOutput.ReceiverRanges.Length];
-            Array.Copy(bellhopOutput.ReceiverRanges, Ranges, bellhopOutput.ReceiverRanges.Length);
+            Depths = new List<float>(bellhopOutput.ReceiverDepths);
+            Ranges = new List<float>(bellhopOutput.ReceiverRanges);
 
             IsSaved = false;
         }
@@ -49,9 +41,9 @@ namespace ESME.TransmissionLoss
             var tl = new float[pressureField.GetLength(0),pressureField.GetLength(1)];
             var max = float.MinValue;
             var min = float.MaxValue;
-            for (int i = 0; i < pressureField.GetLength(0); i++)
+            for (var i = 0; i < pressureField.GetLength(0); i++)
             {
-                for (int j = 0; j < pressureField.GetLength(1); j++)
+                for (var j = 0; j < pressureField.GetLength(1); j++)
                 {
                     tl[i, j] = sourceLevel - pressureField[i, j];
                     max = Math.Max(tl[i, j], max);
@@ -64,13 +56,11 @@ namespace ESME.TransmissionLoss
             DataMin = min;
             StatMin = min;
         }
-        public TransmissionLossRadial(float bearingFromSource, float[,] pressureField,float[] depths, float[] ranges,float sourceLevel):this(bearingFromSource,pressureField, sourceLevel)
+        public TransmissionLossRadial(float bearingFromSource, float[,] pressureField, IEnumerable<float> depths, IEnumerable<float> ranges, float sourceLevel)
+            : this(bearingFromSource, pressureField, sourceLevel)
         {
-            Depths = new float[depths.Length];
-            Array.Copy(depths, Depths, depths.Length);
-
-            Ranges = new float[ranges.Length];
-            Array.Copy(ranges, Ranges, ranges.Length);
+            Depths = new List<float>(depths);
+            Ranges = new List<float>(ranges);
         }
 
         public TransmissionLossRadial() {  }
@@ -89,48 +79,45 @@ namespace ESME.TransmissionLoss
             Median = stream.ReadSingle();
             Variance = stream.ReadSingle();
             StandardDeviation = stream.ReadSingle();
-            _depths = stream.ReadInt32();
-            _ranges = stream.ReadInt32();
-            _rangeStride = sizeof (float)*_ranges;
+            var depthCount = stream.ReadInt32();
+            var rangeCount = stream.ReadInt32();
+            _rangeStride = sizeof (float)*rangeCount;
             TransmissionLoss = null;
             IsSaved = true;
-            TransmissionLoss = new float[_depths,_ranges];
-            Minimum = new float[_ranges];
-            Maximum = new float[_ranges];
-            Mean = new float[_ranges];
-            for (int i = 0; i < _ranges; i++)
+            TransmissionLoss = new float[depthCount,rangeCount];
+            Minimum = new List<float>();
+            Maximum = new List<float>();
+            Mean = new List<float>();
+            for (var i = 0; i < rangeCount; i++)
             {
-                Minimum[i] = float.MaxValue;
-                Maximum[i] = float.MinValue;
-                Mean[i] = 0;
+                Minimum.Add(float.MaxValue);
+                Maximum.Add(float.MinValue);
+                Mean.Add(0);
             }
             ClearAxisData();
-            for (int i = 0; i < _depths; i++) // Depths
-                for (int j = 0; j < _ranges; j++) // Ranges
+            for (var i = 0; i < depthCount; i++) // Depths
+                for (var j = 0; j < rangeCount; j++) // Ranges
                 {
                     TransmissionLoss[i, j] = stream.ReadSingle();
                     Minimum[j] = Math.Min(Minimum[j], TransmissionLoss[i, j]);
                     Maximum[j] = Math.Max(Maximum[j], TransmissionLoss[i, j]);
                     Mean[j] += TransmissionLoss[i, j];
                 }
-            for (int i = 0; i < _ranges; i++)
+            for (var i = 0; i < rangeCount; i++)
             {
-                Mean[i] /= _depths;
+                Mean[i] /= depthCount;
             }
         }
 
-        public float[] this[int depthIndex]
+        public List<float> this[int rangeIndex]
         {
             get
             {
-                //is depthindex out of range?
-                if (depthIndex > _depths) throw new IndexOutOfRangeException("");
-                //copy out and return all ranges for the depth requested
-                var retval = new float[_ranges];
-                for (int i = 0; i < _ranges; i++)
-                {
-                    retval[i] = TransmissionLoss[depthIndex, i];
-                }
+                if (rangeIndex > Ranges.Count) throw new IndexOutOfRangeException("");
+
+                var retval = new List<float>();
+                for (var i = 0; i < Depths.Count; i++)
+                    retval.Add(TransmissionLoss[i, rangeIndex]);
 
                 return retval;
             }
@@ -146,11 +133,11 @@ namespace ESME.TransmissionLoss
         public float StandardDeviation { get; private set; }
         public float[,] TransmissionLoss { get; private set; }
         public bool IsSaved { get; private set; }
-        public float[] Depths { get; internal set; }
-        public float[] Ranges { get; internal set; }
-        public float[] Minimum { get; internal set; }
-        public float[] Maximum { get; internal set; }
-        public float[] Mean { get; internal set; }
+        public List<float> Depths { get; internal set; }
+        public List<float> Ranges { get; internal set; }
+        public List<float> Minimum { get; internal set; }
+        public List<float> Maximum { get; internal set; }
+        public List<float> Mean { get; internal set; }
 
 
         public float this[int depthCell, int rangeCell]
@@ -158,7 +145,7 @@ namespace ESME.TransmissionLoss
             get
             {
                 if (TransmissionLoss == null) throw new ApplicationException("TransmissionLossRadialData: Indexing is invalid unless all data is in memory.  Try ReadSingleValue(...) instead.");
-                if ((depthCell >= _depths) || (rangeCell >= _ranges)) throw new IndexOutOfRangeException("TransmissionLossRadialData: Requested DepthCell or RangeCell out of valid range");
+                if ((depthCell >= Depths.Count) || (rangeCell >= Ranges.Count)) throw new IndexOutOfRangeException("TransmissionLossRadialData: Requested DepthCell or RangeCell out of valid range");
                 return TransmissionLoss[depthCell, rangeCell];
             }
         }
@@ -174,7 +161,7 @@ namespace ESME.TransmissionLoss
         public float ReadSingleValue(BinaryReader stream, int depthCell, int rangeCell)
         {
             if ((stream == null) || (!stream.BaseStream.CanSeek)) throw new ArgumentException("TransmissionLossRadialData: Attempted to seek on an invalid stream");
-            if ((depthCell >= _depths) || (rangeCell >= _ranges)) throw new ArgumentException("TransmissionLossRadialData: Attempted to seek to data indices out of their valid ranges");
+            if ((depthCell >= Depths.Count) || (rangeCell >= Ranges.Count)) throw new ArgumentException("TransmissionLossRadialData: Attempted to seek to data indices out of their valid ranges");
 
             // Skip past the header information (9 floats [statistics] and 2 ints [depth count and range count])
             long seekOffset = _seekOffset + (sizeof (float)*9) + (sizeof (int)*2);
@@ -203,10 +190,10 @@ namespace ESME.TransmissionLoss
             stream.Write(Median);
             stream.Write(Variance);
             stream.Write(StandardDeviation);
-            stream.Write(_depths);
-            stream.Write(_ranges);
-            for (int i = 0; i < _depths; i++) // Depths
-                for (int j = 0; j < _ranges; j++) // Ranges
+            stream.Write(Depths.Count);
+            stream.Write(Ranges.Count);
+            for (var i = 0; i < Depths.Count; i++) // Depths
+                for (var j = 0; j < Ranges.Count; j++) // Ranges
                     stream.Write(TransmissionLoss[i, j]);
             TransmissionLoss = null;
             IsSaved = true;
@@ -224,11 +211,11 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine(); // Terminate the line
                 sw.WriteLine("Depth (m)");
                 // Write the slice data
-                for (var i = 0; i < Depths.Length; i++)
+                for (var i = 0; i < Depths.Count; i++)
                 {
                     // Write out the Y axis value
                     sw.Write(Depths[i] + ",,");
-                    for (var j = 0; j < Ranges.Length; j++)
+                    for (var j = 0; j < Ranges.Count; j++)
                         sw.Write(TransmissionLoss[i, j] + ","); 
                     sw.WriteLine(); // Terminate the line
                 } // for i
@@ -253,6 +240,5 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine();
             } // using sw
         }
-
     }
 }

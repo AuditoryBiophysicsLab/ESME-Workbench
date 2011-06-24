@@ -263,8 +263,8 @@ namespace ESME.Views.TransmissionLossViewer
         {
             if (TransmissionLossRadial == null || ColorMapViewModel == null) return;
 
-            var width = TransmissionLossRadial.Ranges.Length;
-            var height = TransmissionLossRadial.Depths.Length;
+            var width = TransmissionLossRadial.Ranges.Count;
+            var height = TransmissionLossRadial.Depths.Count;
 
             if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
 
@@ -376,10 +376,10 @@ namespace ESME.Views.TransmissionLossViewer
 
             var transect = new Transect("", _location, _transmissionLossRadial.BearingFromSource, _transmissionLossRadial.Ranges.Last());
             
-            var profile = new BottomProfile(_transmissionLossRadial.Ranges.Length, transect, _bathymetry);
+            var profile = new BottomProfile(_transmissionLossRadial.Ranges.Count, transect, _bathymetry);
             //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
             var depths = profile.Profile.Select(depth => depth * (actualControlHeight / _transmissionLossRadial.Depths.Last())).ToList();
-            var pixelsPerRange = (actualControlWidth / _transmissionLossRadial.Ranges.Length);
+            var pixelsPerRange = (actualControlWidth / _transmissionLossRadial.Ranges.Count);
             var sb = new StringBuilder();
 
             sb.Append(string.Format("M 0,{0} ", depths[0]));
