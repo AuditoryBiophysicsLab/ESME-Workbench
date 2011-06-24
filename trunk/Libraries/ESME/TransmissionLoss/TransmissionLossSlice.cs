@@ -17,39 +17,12 @@ namespace ESME.TransmissionLoss
             Minimum,
             Maximum,
             Mean,
+            Depth,
         }
 
-        public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo, SliceType sliceType)
-            : this(transmissionLossField, lookupInfo)
-        {
-            switch (sliceType)
-            {
-                case SliceType.Minimum:
-                    break;
-                case SliceType.Maximum:
-                    break;
-                case SliceType.Mean:
-                    break;
-                default:
-                    throw new ApplicationException("unknown slice type");
-            }
-            CreateSliceData();
-        }
+        delegate float ValueSelector(List<float> values, int index);
 
-        public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo, int depthIndex)
-            : this(transmissionLossField, lookupInfo)
-        {
-            for (var i = 0; i < transmissionLossField.Radials.Length; i++)
-            {
-                var radial = transmissionLossField.Radials[i];
-                var radialSlice = _radialSlices[i];
-                for (var j = 0; j < radial.Ranges.Length; j++)
-                    radialSlice.Values[j] = radial[depthIndex, j];
-            }
-            CreateSliceData();
-        }
-
-        protected TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo)
+        public TransmissionLossFieldSlice(TransmissionLossField transmissionLossField, RadialLookupInfo[,] lookupInfo, SliceType sliceType, int depthIndex = 0)
         {
             _rangeCellCount = transmissionLossField.Radials[0].Ranges.Length;
             _radialSlices = new List<TransmissionLossRadialSlice>();
@@ -58,6 +31,38 @@ namespace ESME.TransmissionLoss
 
             _radialLookupInfo = lookupInfo;
             _sliceData = new float[lookupInfo.GetLength(0), lookupInfo.GetLength(1)];
+
+            ValueSelector selector;
+            switch (sliceType)
+            {
+                case SliceType.Minimum:
+                    selector = (values, index) => { return values.Min(); };
+                    break;
+                case SliceType.Maximum:
+                    selector = (values, index) => { return values.Max(); };
+                    break;
+                case SliceType.Mean:
+                    selector = (values, index) => { return values.Average(); };
+                    break;
+                case SliceType.Depth:
+                    selector = (values, index) => { return values[index]; };
+                    break;
+                default:
+                    throw new ApplicationException("unknown slice type");
+            }
+            var depthValues = new List<float>();
+            for (var i = 0; i < transmissionLossField.Radials.Length; i++)
+            {
+                var radial = transmissionLossField.Radials[i];
+                var radialSlice = _radialSlices[i];
+                for (var j = 0; j < radial.Ranges.Length; j++)
+                {
+                    depthValues.Clear();
+                    depthValues.AddRange(radial.Depths.Select((t, k) => radial[k, j]));
+                    radialSlice.Values[j] = selector(depthValues, depthIndex);
+                }
+            }
+            CreateSliceData();
         }
 
         void CreateSliceData()
