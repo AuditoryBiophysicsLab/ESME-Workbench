@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,8 +41,8 @@ namespace ESME.TransmissionLoss.Bellhop
                 stringBuilder.Append(String.Format("{0} Bellhop calculation complete.\n", DateTime.Now));
                 viewModel.Log = stringBuilder.ToString();
             }
-            fieldData.Depths = fieldData.Radials[0].Depths;
-            fieldData.Ranges = fieldData.Radials[0].Ranges;
+            fieldData.Depths = new List<float>(fieldData.Radials[0].Depths);
+            fieldData.Ranges = new List<float>(fieldData.Radials[0].Ranges);
             return fieldData;
         }
     }

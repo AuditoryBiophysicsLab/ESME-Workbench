@@ -95,8 +95,7 @@ namespace ESME.TransmissionLoss.CASS
 
         public static CASSOutput Load(string fileName, bool headerOnly)
         {
-            var result = new CASSOutput();
-            result.Filename = fileName;
+            var result = new CASSOutput {Filename = fileName};
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
 #if false
@@ -238,15 +237,15 @@ namespace ESME.TransmissionLoss.CASS
                 WriteCASSField(writer, "Title", 50);
                 WriteCASSField(writer, "Site Name", 50);
                 
-                float siteRefLatLocation = 0;
+                const float siteRefLatLocation = 0;
                 writer.Write(siteRefLatLocation);
                 WriteCASSField(writer, "SiteRefLatLocation Units", 10);
                 
-                float siteRefLonLocation = 0;
+                const float siteRefLonLocation = 0;
                 writer.Write(siteRefLonLocation);
                 WriteCASSField(writer, "SiteRefLonLocation Units", 10);
 
-                float sourceRefLatLocation = transmissionLossField.Latitude;
+                var sourceRefLatLocation = transmissionLossField.Latitude;
                 writer.Write(sourceRefLatLocation);
                 WriteCASSField(writer, "DEG", 10);
 
@@ -276,10 +275,10 @@ namespace ESME.TransmissionLoss.CASS
                 writer.Write(transmissionLossField.Depths[0]);
                 WriteCASSField(writer, "M", 10);
                 
-                writer.Write(transmissionLossField.Depths[transmissionLossField.Depths.Length-1]);
+                writer.Write(transmissionLossField.Depths[transmissionLossField.Depths.Count-1]);
                 WriteCASSField(writer, "M", 10);
 
-                float waterDepthIncrement = transmissionLossField.Depths[1]-transmissionLossField.Depths[0];
+                var waterDepthIncrement = transmissionLossField.Depths[1]-transmissionLossField.Depths[0];
                 writer.Write(waterDepthIncrement);
                 WriteCASSField(writer, "M", 10);
 
@@ -287,27 +286,27 @@ namespace ESME.TransmissionLoss.CASS
                 WriteCASSField(writer, "M", 10);
 
                 
-                writer.Write(transmissionLossField.Ranges[transmissionLossField.Ranges.Length-1]);
+                writer.Write(transmissionLossField.Ranges[transmissionLossField.Ranges.Count-1]);
                 WriteCASSField(writer, "M", 10);
 
-                float rangeDistanceIncrement = transmissionLossField.Ranges[1]-transmissionLossField.Ranges[0];
+                var rangeDistanceIncrement = transmissionLossField.Ranges[1]-transmissionLossField.Ranges[0];
                 writer.Write(rangeDistanceIncrement);
                 WriteCASSField(writer, "M", 10);
 
                 WriteCASSField(writer, "Bottom Type", 50);
                 WriteCASSField(writer, "Season", 10);
-                float windSpeed = 0;
+                const float windSpeed = 0;
                 writer.Write(windSpeed);
                 WriteCASSField(writer, "windSpeed Units", 10);
 
-                float cassLevel = 0;
+                const float cassLevel = 0;
                 writer.Write(cassLevel);
 
                 if(writer.BaseStream.Position != 713) throw new FileFormatException("Cass Write: header is of incorrect length.");
                 #endregion
                 #region bearing header
 
-                float radialCount = transmissionLossField.Radials.Length;
+                float radialCount = transmissionLossField.Radials.Count;
                 writer.Write(radialCount);
                 foreach (var radial in transmissionLossField.Radials)
                 {
@@ -317,9 +316,9 @@ namespace ESME.TransmissionLoss.CASS
                 #endregion
                 #region range header
 
-                float rangeCount = transmissionLossField.Ranges.Length;
+                float rangeCount = transmissionLossField.Ranges.Count;
                 writer.Write(rangeCount);
-                foreach (float range in transmissionLossField.Ranges)
+                foreach (var range in transmissionLossField.Ranges)
                 {
                     writer.Write(range);
                 }
@@ -327,9 +326,9 @@ namespace ESME.TransmissionLoss.CASS
                 #endregion
                 #region depth header
 
-                float depthCount = transmissionLossField.Depths.Length;
+                float depthCount = transmissionLossField.Depths.Count;
                 writer.Write(depthCount);
-                foreach (float depth in transmissionLossField.Depths)
+                foreach (var depth in transmissionLossField.Depths)
                 {
                     writer.Write(depth);
                 }
@@ -338,9 +337,9 @@ namespace ESME.TransmissionLoss.CASS
                 #region payload pressure data
                 foreach (var radial in transmissionLossField.Radials)
                 {
-                    for (var i = 0; i < radial.Ranges.Length; i++)
+                    for (var i = 0; i < radial.Ranges.Count; i++)
                     {
-                        for (var j = 0; j < radial.Depths.Length; j++)
+                        for (var j = 0; j < radial.Depths.Count; j++)
                         {
                             writer.Write(radial.TransmissionLoss[j,i]);
                         }

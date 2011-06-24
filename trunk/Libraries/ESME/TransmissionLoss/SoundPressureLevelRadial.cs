@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss
 {
-     
-    class SoundPressureLevelRadial:TransmissionLossRadial
+    class SoundPressureLevelRadial : TransmissionLossRadial
     {
         public float[,] SoundPressureLevel { get; private set; }
 
@@ -20,18 +15,16 @@ namespace ESME.TransmissionLoss
                 sw.WriteLine("Vertical SPL (dB)");
                 sw.Write(",Range (m),");
 
-                for (int i = 0; i < Ranges.Length; i++) sw.Write(Ranges[i] + ","); //write out the X axis values.
+                foreach (var t in Ranges) sw.Write(t + ","); //write out the X axis values.
                 sw.WriteLine(); // Terminate the line
                 sw.WriteLine("Depth (m)");
                 // Write the slice data
-                for (int i = 0; i < Depths.Length; i++)
+                for (var i = 0; i < Depths.Count; i++)
                 {
                     // Write out the Y axis value
                     sw.Write(Depths[i] + ",,");
-                    for (var j = 0; j < Ranges.Length; j++)
-                    {
-                        sw.Write(SoundPressureLevel[Depths.Length - i - 1, j] + ","); //todo: verify dimension match.
-                    }
+                    for (var j = 0; j < Ranges.Count; j++)
+                        sw.Write(SoundPressureLevel[Depths.Count - i - 1, j] + ","); //todo: verify dimension match.
                     sw.WriteLine(); // Terminate the line
                 } // for i
                 sw.WriteLine();
@@ -54,6 +47,4 @@ namespace ESME.TransmissionLoss
             } // using sw
         }
     }
-
-
 }

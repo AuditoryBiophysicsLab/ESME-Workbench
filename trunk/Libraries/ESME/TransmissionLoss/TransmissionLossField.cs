@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using ESME.Model;
 using ESME.NEMO;
 using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
@@ -23,9 +22,9 @@ namespace ESME.TransmissionLoss
         public float HighFrequency { get; private set; }
         public float MaxCalculationDepth { get; private set; }
         public int Radius { get; private set; }
-        public float[] Depths { get;  set; }
-        public float[] Ranges { get;  set; }
-        public TransmissionLossRadial[] Radials { get; private set; }
+        public List<float> Depths { get; set; }
+        public List<float> Ranges { get; set; }
+        public List<TransmissionLossRadial> Radials { get; private set; }
         public string Filename { get; set; }
         public EarthCoordinate EarthCoordinate { get; private set; }
         public static TransmissionLossField LoadHeader(string filename)
@@ -40,7 +39,6 @@ namespace ESME.TransmissionLoss
 
         public bool IsAcousticMatchFor(NemoMode nemoMode)
         {
-            //if (nemoMode.PSMName == "SH60B|ALFS|Search") System.Diagnostics.Debugger.Break();
             return (FloatMatch(LowFrequency, nemoMode.LowFrequency, 0.1f)) &&
                    (FloatMatch(HighFrequency, nemoMode.HighFrequency, 0.1f)) &&
                    (FloatMatch(SourceDepth, nemoMode.SourceDepth, 0.1f)) &&
@@ -77,13 +75,13 @@ namespace ESME.TransmissionLoss
                     var sourceRadial = Radials[sourceRadialIndex];
 
                     int sourceRangeIndex;
-                    for (sourceRangeIndex = 0; sourceRangeIndex < sourceRadial.Ranges.Length - 1; sourceRangeIndex++)
+                    for (sourceRangeIndex = 0; sourceRangeIndex < sourceRadial.Ranges.Count - 1; sourceRangeIndex++)
                         if (sourceRadial.Ranges[sourceRangeIndex + 1] >= range) break;
                     //if (sourceRangeIndex == sourceRadialRanges.Length - 1)
 
                     
                     int sourceDepthIndex;
-                    for (sourceDepthIndex = 0; sourceDepthIndex < sourceRadial.Depths.Length - 1; sourceDepthIndex++)
+                    for (sourceDepthIndex = 0; sourceDepthIndex < sourceRadial.Depths.Count - 1; sourceDepthIndex++)
                         if (sourceRadial.Depths[sourceDepthIndex + 1] >= depth) break;
                     
                     return sourceRadial[sourceDepthIndex, sourceRangeIndex];
@@ -122,27 +120,27 @@ namespace ESME.TransmissionLoss
 
         public static TransmissionLossField FromCASS(CASSOutput output)
         {
-            var result = new TransmissionLossField();
-            
-            result.Name = string.Format("CASS|{0}|{1}|{2}|{3}|{4}", output.PlatformName, output.SourceName, output.ModeName, output.SourceRefLatLocation, output.SourceRefLonLocation);
-            result.Metadata = string.Format("Imported from CASS output file {0} on {1}", output.Filename, DateTime.Now);
-            result.SourceLevel = output.SourceLevel;
-            result.Latitude = output.SourceRefLatLocation;
-            result.Longitude = output.SourceRefLonLocation;
-            result.SourceDepth = output.SourceDepth;
-            result.VerticalBeamWidth = output.VerticalBeamPattern;
-            result.DepressionElevationAngle = output.DepressionElevationAngle;
-            result.LowFrequency = output.Frequency;
-            result.HighFrequency = output.Frequency;
-            result.MaxCalculationDepth = output.MaxWaterDepth;
-            result.Radius = (int)output.MaxRangeDistance;
+            var result = new TransmissionLossField
+            {
+                    Name = string.Format("CASS|{0}|{1}|{2}|{3}|{4}", output.PlatformName, output.SourceName, output.ModeName, output.SourceRefLatLocation, output.SourceRefLonLocation),
+                    Metadata = string.Format("Imported from CASS output file {0} on {1}", output.Filename, DateTime.Now),
+                    SourceLevel = output.SourceLevel,
+                    Latitude = output.SourceRefLatLocation,
+                    Longitude = output.SourceRefLonLocation,
+                    SourceDepth = output.SourceDepth,
+                    VerticalBeamWidth = output.VerticalBeamPattern,
+                    DepressionElevationAngle = output.DepressionElevationAngle,
+                    LowFrequency = output.Frequency,
+                    HighFrequency = output.Frequency,
+                    MaxCalculationDepth = output.MaxWaterDepth,
+                    Radius = (int)output.MaxRangeDistance
+            };
+
             if (output.RadialCount == 0) return result; // because only the header was loaded.
-            result.Depths = new float[output.DepthCellCount];
-            result.Ranges = new float[output.RangeCellCount];   
-            Array.Copy(output.DepthCells,result.Depths,output.DepthCellCount);
-            Array.Copy(output.RangeCells,result.Ranges,output.RangeCellCount);
-            result.Radials = new TransmissionLossRadial[output.Pressures.Count];
-            for (var i = 0; i < output.Pressures.Count; i++) result.Radials[i] = new TransmissionLossRadial(output.RadialBearings[i],output.Pressures[i],result.Depths,result.Ranges,output.SourceLevel);
+            result.Depths = new List<float>(output.DepthCells);
+            result.Ranges = new List<float>(output.RangeCells);
+            result.Radials = new List<TransmissionLossRadial>();
+            for (var i = 0; i < output.Pressures.Count; i++) result.Radials.Add(new TransmissionLossRadial(output.RadialBearings[i],output.Pressures[i],result.Depths,result.Ranges,output.SourceLevel));
             result.EarthCoordinate = new EarthCoordinate(result.Latitude,result.Longitude);
             result._dataIsLoaded = true;
             return result;
@@ -179,25 +177,25 @@ namespace ESME.TransmissionLoss
                 Radius = stream.ReadInt32();
                 if (loadHeadersOnly) return;
                 var depthCount = stream.ReadInt32();
-                Depths = new float[depthCount];
-                for (var i = 0; i < Depths.Length; i++)
-                    Depths[i] = stream.ReadSingle();
+                Depths = new List<float>();
+                for (var i = 0; i < depthCount; i++)
+                    Depths.Add(stream.ReadSingle());
                 var rangeCount = stream.ReadInt32();
-                Ranges = new float[rangeCount];
-                for (var i = 0; i < Ranges.Length; i++)
-                    Ranges[i] = stream.ReadSingle();
+                Ranges = new List<float>();
+                for (var i = 0; i < rangeCount; i++)
+                    Ranges.Add(stream.ReadSingle());
                 var radialCount = stream.ReadInt32();
+                Radials = new List<TransmissionLossRadial>();
                 for (var j = 0; j < radialCount; j++)
-                    _radials.Add(new TransmissionLossRadial(stream)
+                    Radials.Add(new TransmissionLossRadial(stream)
                                  {
                                      Ranges = Ranges,
                                      Depths = Depths
                                  });
                 for (var j = 0; j < radialCount; j++)
-                    _pieSlices.Add(new PieSlice(_radials[j].BearingFromSource, 360.0 / _radials.Count));
+                    _pieSlices.Add(new PieSlice(Radials[j].BearingFromSource, 360.0 / radialCount));
                 _saved = true;
-                _radials.Sort();
-                Radials = _radials.ToArray();
+                Radials.Sort();
                 _dataIsLoaded = true;
             }
         }
@@ -213,7 +211,7 @@ namespace ESME.TransmissionLoss
             _dataIsLoaded = false;
             Depths = null;
             Ranges = null;
-            _radials = new List<TransmissionLossRadial>(); ;
+            Radials = new List<TransmissionLossRadial>();
             _pieSlices = new List<PieSlice>();
             Radials = null;
         }
@@ -221,17 +219,15 @@ namespace ESME.TransmissionLoss
         public void AddRadial(TransmissionLossRadial radial)
         {
             if (radial.TransmissionLoss == null)
-                throw new ApplicationException(
-                    "TransmissionLossFieldData: Attempt to add a new radial that is not completely loaded into memory.  This operation is not supported.");
+                throw new ApplicationException("TransmissionLossFieldData: Attempt to add a new radial that is not completely loaded into memory.  This operation is not supported.");
             if (((Depths == null) || (Ranges == null)) &&
                 ((radial.Depths != null) && (radial.Ranges != null)))
             {
                 Depths = radial.Depths;
                 Ranges = radial.Ranges;
             }
-            _radials.Add(radial);
-            _radials.Sort();
-            Radials = _radials.ToArray();
+            Radials.Add(radial);
+            Radials.Sort();
         }
 
         public void Save()
@@ -258,22 +254,21 @@ namespace ESME.TransmissionLoss
                     stream.Write(HighFrequency);
                     stream.Write(MaxCalculationDepth);
                     stream.Write(Radius);
-                    stream.Write(Depths.Length);
+                    stream.Write(Depths.Count);
                     foreach (var depth in Depths)
                         stream.Write(depth);
-                    stream.Write(Ranges.Length);
+                    stream.Write(Ranges.Count);
                     foreach (var range in Ranges)
                         stream.Write(range);
                     _saved = true;
                 }
-                stream.Write(_radials.Count);
-                foreach (var radial in _radials)
+                stream.Write(Radials.Count);
+                foreach (var radial in Radials)
                     radial.Save(stream);
             }
         }
 
         const UInt32 Magic = 0x93f34525;
-        List<TransmissionLossRadial> _radials = new List<TransmissionLossRadial>();
         List<PieSlice> _pieSlices = new List<PieSlice>();
         bool _dataIsLoaded;
         bool _saved;

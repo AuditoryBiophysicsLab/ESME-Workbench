@@ -53,13 +53,13 @@ namespace ESME.Views.TransmissionLossViewer
                 NotifyPropertyChanged(MaxViewChangedEventArgs);
                 NotifyPropertyChanged(MinViewChangedEventArgs);
 
-                var nativesize = _transmissionLossField.Radials[0].Ranges.Length * 2;
+                var nativesize = _transmissionLossField.Radials[0].Ranges.Count * 2;
                 LookupInfo = RadialLookupInfo.Create(_transmissionLossField,
                                                                   Math.Min(Math.Min(SystemInformation.PrimaryMonitorSize.Height,
                                                                            SystemInformation.PrimaryMonitorSize.Width), nativesize));
 
                 DepthSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo,
-                                                            TransmissionLossFieldSlice.SliceType.Depth,0);//or SelectedDepth
+                                                            TransmissionLossFieldSlice.SliceType.Depth, 0);//or SelectedDepth
                 MinSlice = new TransmissionLossFieldSlice(_transmissionLossField,LookupInfo,TransmissionLossFieldSlice.SliceType.Minimum);
                 MaxSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Maximum);
                 MeanSlice = new TransmissionLossFieldSlice(_transmissionLossField, LookupInfo, TransmissionLossFieldSlice.SliceType.Mean);
@@ -116,7 +116,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         public int RadialCount
         {
-            get { return TransmissionLossField != null ? TransmissionLossField.Radials.Length : 0; }
+            get { return TransmissionLossField != null ? TransmissionLossField.Radials.Count : 0; }
         }
 
         static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.RadialCount);
@@ -148,7 +148,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         public int DepthCount
         {
-            get { return TransmissionLossField != null ? TransmissionLossField.Depths.Length : 0; }
+            get { return TransmissionLossField != null ? TransmissionLossField.Depths.Count : 0; }
             
         }
         static readonly PropertyChangedEventArgs DepthCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldViewModel>(x => x.DepthCount);
