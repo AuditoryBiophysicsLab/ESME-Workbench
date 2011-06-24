@@ -3,16 +3,12 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Environment;
 using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.TransmissionLossViewer;
 using HRC.Navigation;
 using MEFedMVVM.ViewModelLocator;
@@ -22,12 +18,15 @@ namespace ESME.Views.Controls
     [ExportViewModel("TwoDimensionColorMapViewModel")]
     public class TwoDimensionColorMapViewModel : ViewModelBase
     {
-        static readonly PropertyChangedEventArgs WriteableBitmapChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.WriteableBitmap);
+        private static readonly PropertyChangedEventArgs WriteableBitmapChangedEventArgs =
+            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.WriteableBitmap);
 
         #region public float RangeMin { get; set; }
 
-        static readonly PropertyChangedEventArgs RangeMinChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.RangeMin);
-        float _rangeMin;
+        private static readonly PropertyChangedEventArgs RangeMinChangedEventArgs =
+            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.RangeMin);
+
+        private float _rangeMin;
 
         public float RangeMin
         {
@@ -45,8 +44,10 @@ namespace ESME.Views.Controls
 
         #region public float  RangeMax { get; set; }
 
-        static readonly PropertyChangedEventArgs RangeMaxChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.RangeMax);
-        float _rangeMax;
+        private static readonly PropertyChangedEventArgs RangeMaxChangedEventArgs =
+            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.RangeMax);
+
+        private float _rangeMax;
 
         public float RangeMax
         {
@@ -61,11 +62,13 @@ namespace ESME.Views.Controls
         }
 
         #endregion
-        
+
         #region public float DepthMin { get; set; }
 
-        static readonly PropertyChangedEventArgs DepthMinChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.DepthMin);
-        float _depthMin;
+        private static readonly PropertyChangedEventArgs DepthMinChangedEventArgs =
+            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.DepthMin);
+
+        private float _depthMin;
 
         public float DepthMin
         {
@@ -83,8 +86,10 @@ namespace ESME.Views.Controls
 
         #region public float  DepthMax { get; set; }
 
-        static readonly PropertyChangedEventArgs DepthMaxChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.DepthMax);
-        float _depthMax;
+        private static readonly PropertyChangedEventArgs DepthMaxChangedEventArgs =
+            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.DepthMax);
+
+        private float _depthMax;
 
         public float DepthMax
         {
@@ -94,13 +99,18 @@ namespace ESME.Views.Controls
                 if (_depthMax == value) return;
                 _depthMax = value;
                 NotifyPropertyChanged(DepthMaxChangedEventArgs);
-               // CenterY = (DepthMax - DepthMin) / 2;
+                // CenterY = (DepthMax - DepthMin) / 2;
             }
         }
 
         #endregion
 
         #region public TransmissionLossField TransmissionLossField { get; set; }
+
+        private static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs =
+            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.TransmissionLossField);
+
+        private TransmissionLossField _transmissionLossField;
 
         public TransmissionLossField TransmissionLossField
         {
@@ -113,19 +123,15 @@ namespace ESME.Views.Controls
             }
         }
 
-        static readonly PropertyChangedEventArgs TransmissionLossFieldChangedEventArgs = ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.TransmissionLossField);
-        TransmissionLossField _transmissionLossField;
-
         #endregion
 
-        
-        readonly Dispatcher _dispatcher;
-        readonly IViewAwareStatus _viewAwareStatus;
-        bool _iAmInitialized;
-        bool _isRendered;
-        TransmissionLossRadial _tempRadial;
-        WriteableBitmap _writeableBitmap;
-        EarthCoordinate _location;
+        private readonly Dispatcher _dispatcher;
+        private readonly IViewAwareStatus _viewAwareStatus;
+        private bool _iAmInitialized;
+        private bool _isRendered;
+        private EarthCoordinate _location;
+        private TransmissionLossRadial _tempRadial;
+        private WriteableBitmap _writeableBitmap;
 
 
         [ImportingConstructor]
@@ -134,10 +140,6 @@ namespace ESME.Views.Controls
             RegisterMediator();
             _viewAwareStatus = viewAwareStatus;
             _dispatcher = Dispatcher.CurrentDispatcher;
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialColorMapChanged, ColorMapViewModel.Default);
-            _viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.TransmissionLossRadialViewInitialized, true);
-            //_viewAwareStatus.ViewLoaded += () => MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry, true);
-            
         }
 
         public WriteableBitmap WriteableBitmap
@@ -149,7 +151,7 @@ namespace ESME.Views.Controls
             }
         }
 
-        void RegisterMediator()
+        private void RegisterMediator()
         {
             try
             {
@@ -157,49 +159,14 @@ namespace ESME.Views.Controls
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("***********\nTwoDimensionColorMapViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                Debug.WriteLine("***********\nTwoDimensionColorMapViewModel: Mediator registration failed: " +
+                                ex.Message + "\n***********");
                 throw;
             }
         }
 
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialColorMapChanged)]
-        void TransmissionLossRadialColorMapChanged(ColorMapViewModel colorMapViewModel) { ColorMapViewModel = colorMapViewModel; }
-
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialEarthCoordinate)]
-        void TransmissionLossRadialEarthCoordinate(EarthCoordinate location) { _location = location; }
-        
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialChanged)]
-        void TransmissionLossRadialChanged(TransmissionLossRadial transmissionLossRadial)
-        {
-            if (_iAmInitialized)
-            {
-                Debug.WriteLine("TwoDimensionColorMapViewModel: Initializing transmission loss radial");
-               // TransmissionLossRadial = transmissionLossRadial;
-                //if (_bathymetry == null) 
-                MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
-            }
-            else
-            {
-                Debug.WriteLine("TwoDimensionColorMapViewModel: Deferring initialization of transmission loss radial");
-                _tempRadial = transmissionLossRadial;
-            }
-        }
-
-        [MediatorMessageSink(MediatorMessage.TransmissionLossRadialViewInitialized)]
-        void TransmissionLossRadialViewInitialized(bool dummy)
-        {
-            _iAmInitialized = true;
-            if (_tempRadial != null)
-            {
-               // TransmissionLossRadial = _tempRadial;
-                Debug.WriteLine("TwoDimensionColorMapViewModel: Deferred initialization of transmission loss field radial");
-                MediatorMessage.Send(MediatorMessage.RequestTransmissionLossBathymetry,true);
-                
-            }
-        }
-
         [MediatorMessageSink(MediatorMessage.SaveRadialBitmap)]
-        void SaveRadialBitmap(string fileName)
+        private void SaveRadialBitmap(string fileName)
         {
             BitmapEncoder encoder = null;
 
@@ -224,39 +191,38 @@ namespace ESME.Views.Controls
             if (encoder == null) return;
 
 
-            var theView = ((TwoDimensionColorMapView)_viewAwareStatus.View);
-            var bmp = new RenderTargetBitmap((int)theView.ActualWidth, (int)theView.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+            var theView = ((TwoDimensionColorMapView) _viewAwareStatus.View);
+            var bmp = new RenderTargetBitmap((int) theView.ActualWidth, (int) theView.ActualHeight, 96, 96,
+                                             PixelFormats.Pbgra32);
             bmp.Render(theView);
             encoder.Frames.Add(BitmapFrame.Create(bmp));
             using (var stream = new FileStream(fileName, FileMode.Create)) encoder.Save(stream);
         }
 
-        float[,] TransmissionLoss { get; set; } //todo
-
-
-
-        void RenderBitmap()
+        private void RenderBitmap()
         {
             if (TransmissionLossField == null || ColorMapViewModel == null) return;
 
-           // var width = TransmissionLossRadial.Ranges.Length;
+            // var width = TransmissionLossRadial.Ranges.Length;
             //var height = TransmissionLossRadial.Depths.Length;
-            var radius = TransmissionLossField.Ranges.Length;
-            if (_writeableBitmap == null) _writeableBitmap = new WriteableBitmap(radius, radius, 96, 96, PixelFormats.Bgr32, null);
+            int radius = TransmissionLossField.Ranges.Length;
+            if (_writeableBitmap == null)
+                _writeableBitmap = new WriteableBitmap(radius, radius, 96, 96, PixelFormats.Bgr32, null);
 
             _writeableBitmap.Lock();
             unsafe
             {
-                var curOffset = (int)_writeableBitmap.BackBuffer;
+                var curOffset = (int) _writeableBitmap.BackBuffer;
                 for (int y = 0; y < radius; y++)
                 {
                     for (int x = 0; x < radius; x++)
                     {
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
-                        var curColor = _colorMapViewModel.Lookup(TransmissionLoss[y, x]);
-                        *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
-                        curOffset += sizeof(Int32);
+                        Color curColor = _colorMapViewModel.Lookup(SliceData[y, x]);
+                        *((int*) curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) |
+                                               (curColor.B));
+                        curOffset += sizeof (Int32);
                     }
                 }
             }
@@ -266,12 +232,17 @@ namespace ESME.Views.Controls
             _dispatcher.BeginInvoke(new VoidDelegate(RenderFinished), DispatcherPriority.ApplicationIdle);
         }
 
-        void RenderFinished() { NotifyPropertyChanged(WriteableBitmapChangedEventArgs); }
+        private void RenderFinished()
+        {
+            NotifyPropertyChanged(WriteableBitmapChangedEventArgs);
+        }
 
         #region public ColorMapViewModel ColorMapViewModel { get; set; }
 
-        static readonly PropertyChangedEventArgs ColorMapViewModelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.ColorMapViewModel);
-        ColorMapViewModel _colorMapViewModel;
+        private static readonly PropertyChangedEventArgs ColorMapViewModelChangedEventArgs =
+            ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.ColorMapViewModel);
+
+        private ColorMapViewModel _colorMapViewModel;
 
         public ColorMapViewModel ColorMapViewModel
         {
@@ -285,7 +256,7 @@ namespace ESME.Views.Controls
             }
         }
 
-        void ColorMapViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void ColorMapViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -298,12 +269,31 @@ namespace ESME.Views.Controls
         }
 
         #endregion
-        
-        #region Nested type: VoidDelegate
 
-        delegate void VoidDelegate();
+        #region public float[,] SliceData { get; set; }
+
+        private static readonly PropertyChangedEventArgs SliceDataChangedEventArgs =
+            ObservableHelper.CreateArgs<TwoDimensionColorMapViewModel>(x => x.SliceData);
+
+        private float[,] _sliceData;
+
+        public float[,] SliceData
+        {
+            get { return _sliceData; }
+            set
+            {
+                _sliceData = value;
+                _isRendered = false;
+                NotifyPropertyChanged(SliceDataChangedEventArgs);
+            }
+        }
 
         #endregion
-  
+
+        #region Nested type: VoidDelegate
+
+        private delegate void VoidDelegate();
+
+        #endregion
     }
 }
