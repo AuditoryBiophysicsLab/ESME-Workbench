@@ -30,7 +30,7 @@ namespace ESME.TransmissionLoss
                 _radialSlices.Add(new TransmissionLossRadialSlice { Bearing = radial.BearingFromSource, Values = new float[_rangeCellCount] });
 
             _radialLookupInfo = lookupInfo;
-            _sliceData = new float[lookupInfo.GetLength(0), lookupInfo.GetLength(1)];
+            SliceData = new float[lookupInfo.GetLength(0), lookupInfo.GetLength(1)];
 
             ValueSelector selector;
             switch (sliceType)
@@ -62,26 +62,23 @@ namespace ESME.TransmissionLoss
                     radialSlice.Values[j] = selector(depthValues, depthIndex);
                 }
             }
-            CreateSliceData();
-        }
 
-        void CreateSliceData()
-        {
             var radialCount = _radialSlices.Count;
-            for (var x = 0; x < _sliceData.GetLength(0); x++)
-                for (var y = 0; y < _sliceData.GetLength(1); y++)
+            for (var x = 0; x < SliceData.GetLength(0); x++)
+                for (var y = 0; y < SliceData.GetLength(1); y++)
                 {
                     var sourceRadial = _radialLookupInfo[x, y].SourceRadialIndex;
                     var rangeIndex = _radialLookupInfo[x, y].RangeIndex;
-                    _sliceData[x, y] = 0;
-                    if ((sourceRadial < radialCount) && (rangeIndex < _rangeCellCount)) 
-                        _sliceData[x, y] = _radialSlices[(int)sourceRadial].Values[rangeIndex];
+                    SliceData[x, y] = 0;
+                    if ((sourceRadial < radialCount) && (rangeIndex < _rangeCellCount))
+                        SliceData[x, y] = _radialSlices[(int)sourceRadial].Values[rangeIndex];
                 }
         }
 
+        public float[,] SliceData { get; private set; }
+
         readonly List<TransmissionLossRadialSlice> _radialSlices;
         readonly int _rangeCellCount;
-        readonly float[,] _sliceData;
         readonly RadialLookupInfo[,] _radialLookupInfo;
     }
 
