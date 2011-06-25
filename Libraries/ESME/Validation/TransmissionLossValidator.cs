@@ -14,23 +14,12 @@ namespace ESME.Validation
         /// </summary>
         /// <param name="transmissionLossJobRoot">The full path to the directory that should be scanned for Transmission Loss Files</param>
         /// <param name="transmissionLossFileRoot">The full path to the directory that should be scanned for Transmission Loss Jobs</param>
-        /// <param name="bw"></param>
-        public static void ValidateTransmissionLossFiles(string transmissionLossJobRoot, string transmissionLossFileRoot, ImprovedBackgroundWorker bw = null)
+        public static void ValidateTransmissionLossFiles(string transmissionLossJobRoot, string transmissionLossFileRoot)
         {
             var tlfFiles = Directory.GetFiles(transmissionLossFileRoot);
 
-            var reportProgress = false;
-            if ((bw != null) && (bw.WorkerReportsProgress))
-            {
-                reportProgress = true;
-                bw.MinValue = 0;
-                bw.MaxValue = tlfFiles.Count() + 1;
-                bw.Value = 0;
-            }
-
             foreach (var tlfFile in tlfFiles)
             {
-                if (reportProgress) bw.Value++;
                 var fileBaseName = Path.GetFileNameWithoutExtension(tlfFile);
                 var tljFiles = Directory.GetFiles(transmissionLossJobRoot, fileBaseName + ".*");
                 switch (tlfFiles.Length)
@@ -72,23 +61,12 @@ namespace ESME.Validation
         /// </summary>
         /// <param name="transmissionLossJobRoot"></param>
         /// <param name="analysisPoints"></param>
-        /// <param name="bw"></param>
-        public static void ValidateTransmissionLossJobs(string transmissionLossJobRoot, IEnumerable<AnalysisPoint> analysisPoints, ImprovedBackgroundWorker bw = null)
+        public static void ValidateTransmissionLossJobs(string transmissionLossJobRoot, IEnumerable<AnalysisPoint> analysisPoints)
         {
             var tljFiles = Directory.GetFiles(transmissionLossJobRoot);
 
-            var reportProgress = false;
-            if ((bw != null) && (bw.WorkerReportsProgress))
-            {
-                reportProgress = true;
-                bw.MinValue = 0;
-                bw.MaxValue = tljFiles.Count() + 1;
-                bw.Value = 0;
-            }
-
             foreach (var tljFile in tljFiles)
             {
-                if (reportProgress) bw.Value++;
                 var soundSourceID = Path.GetFileNameWithoutExtension(tljFile);
                 TransmissionLossAlgorithm algorithm;
                 var runFile = TransmissionLossRunFile.Load(tljFile, out algorithm);
@@ -155,23 +133,13 @@ namespace ESME.Validation
         /// </summary>
         /// <param name="transmissionLossJobRoot"></param>
         /// <param name="transmissionLossFileRoot"></param>
-        /// <param name="bw"></param>
         /// <returns></returns>
-        public static Queue<string> GetUncalculatedJobs(string transmissionLossJobRoot, string transmissionLossFileRoot, ImprovedBackgroundWorker bw = null)
+        public static Queue<string> GetUncalculatedJobs(string transmissionLossJobRoot, string transmissionLossFileRoot)
         {
             var result = new Queue<string>();
             var tljFiles = Directory.GetFiles(transmissionLossJobRoot);
-            var reportProgress = false;
-            if ((bw != null) && (bw.WorkerReportsProgress))
-            {
-                reportProgress = true;
-                bw.MinValue = 0;
-                bw.MaxValue = tljFiles.Count() + 1;
-                bw.Value = 0;
-            }
             foreach (var tljFile in tljFiles)
             {
-                if (reportProgress) bw.Value++;
                 var soundSourceID = Path.GetFileNameWithoutExtension(tljFile);
                 TransmissionLossAlgorithm algorithm;
                 var runFile = TransmissionLossRunFile.Load(tljFile, out algorithm);

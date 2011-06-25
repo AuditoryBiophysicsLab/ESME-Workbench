@@ -111,13 +111,31 @@
     <Compile Include="Environment\Location.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
+    <Compile Include="Environment\NAVO\BSTBackgroundExtractor.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
+    <Compile Include="Environment\NAVO\DBDBBackgroundExtractor.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Environment\NAVO\DigitalBathymetricDatabase.cs" />
+    <Compile Include="Environment\NAVO\GDEMBackgroundExtractor.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Environment\NAVO\GeneralizedDigitalEnvironmentModelDatabase.cs" />
+    <Compile Include="Environment\NAVO\NAVOBackgroundExtractor.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Environment\NAVO\NAVOConfiguration.cs" />
     <Compile Include="Environment\NAVO\NAVOExtractionProgram.cs" />
     <Compile Include="Environment\NAVO\NAVODataSources.cs" />
     <Compile Include="Environment\NAVO\NAVOTimePeriod.cs" />
+    <Compile Include="Environment\NAVO\SMGCBackgroundExtractor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Environment\NAVO\SoundSpeedBackgroundAverager.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Environment\Sediment.cs" />
     <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />
     <Compile Include="Environment\SoundSpeed.cs" />

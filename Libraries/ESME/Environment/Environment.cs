@@ -122,11 +122,11 @@ namespace ESME.Environment
 
         #endregion
 
-        public void Export(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, Delegates.Delegate<string> statusMessage = null, BackgroundWorker backgroundWorker = null)
+        public void Export(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, BackgroundTask backgroundTask = null)
         {
-            ExportBathymetry(simAreaPath, areaToExport, statusMessage, backgroundWorker);
-            if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return;
-            ExportEnvironment(simAreaPath, timePeriods, areaToExport, statusMessage, backgroundWorker);
+            ExportBathymetry(simAreaPath, areaToExport, backgroundTask);
+            if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
+            ExportEnvironment(simAreaPath, timePeriods, areaToExport, backgroundTask);
         }
 
         public static int EnvironmentExportStepCount(IEnumerable<NAVOTimePeriod> selectedTimePeriods)
@@ -147,7 +147,7 @@ namespace ESME.Environment
             return result;
         }
 
-        public void ExportEnvironment(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, Delegates.Delegate<string> statusMessage = null, BackgroundWorker backgroundWorker = null)
+        public void ExportEnvironment(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, BackgroundTask backgroundTask = null)
         {
             if ((Bathymetry == null) || (Sediment == null) || (SoundSpeed == null) || (Salinity == null) || (Temperature == null) || (Wind == null)) throw new DataException("Unable to export environmental data: One or more required data types are not present");
             
@@ -161,7 +161,7 @@ namespace ESME.Environment
                     selectedBathymetry = new Bathymetry();
                     selectedBathymetry.Samples.AddRange(Bathymetry.Samples);
                     selectedBathymetry.Samples.TrimToNearestPoints(areaToExport);
-                    if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return;
+                    if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
                 }
             }
             else areaToExport = selectedBathymetry.Samples.GeoRect;
@@ -182,25 +182,25 @@ namespace ESME.Environment
             var extendedAndAveragedSoundSpeeds = new SoundSpeed();
             foreach (var month in uniqueMonths)
             {
-                if (statusMessage != null) statusMessage(string.Format("Extending soundspeeds for {0}", month));
+                if (backgroundTask != null) backgroundTask.Status = string.Format("Extending soundspeeds for {0}", month);
                 extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(SoundSpeed[month].Extend(Temperature[month], Salinity[month], deepestPoint, areaToExport));
-                if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return;
+                if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
             }
             
             if (averagedTimePeriods.Count() > 0)
-                extendedAndAveragedSoundSpeeds.Add(SoundSpeed.Average(extendedAndAveragedSoundSpeeds, averagedTimePeriods, statusMessage, backgroundWorker));
-            if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return;
+                extendedAndAveragedSoundSpeeds.Add(SoundSpeed.Average(extendedAndAveragedSoundSpeeds, averagedTimePeriods, backgroundTask));
+            if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
 
             foreach (var timePeriod in timePeriods)
             {
-                if (statusMessage != null) statusMessage(string.Format("Exporting environment data for {0}", timePeriod));
+                if (backgroundTask != null) backgroundTask.Status = string.Format("Exporting environment data for {0}", timePeriod);
                 var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriod.ToString().ToLower() + ".dat");
                 CASSFiles.WriteEnvironmentFile(environmentFileName, selectedBathymetry, Sediment, extendedAndAveragedSoundSpeeds[timePeriod], Wind[timePeriod]);
-                if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return;
+                if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
             }
         }
 
-        public void ExportBathymetry(string simAreaPath, GeoRect areaToExport = null, Delegates.Delegate<string> statusMessage = null, BackgroundWorker backgroundWorker = null)
+        public void ExportBathymetry(string simAreaPath, GeoRect areaToExport = null, BackgroundTask backgroundTask = null)
         {
             if (Bathymetry == null) throw new DataException("Unable to export bathymetry data: No bathymetry data is present");
 
@@ -214,11 +214,11 @@ namespace ESME.Environment
                     selectedBathymetry = new Bathymetry();
                     selectedBathymetry.Samples.AddRange(Bathymetry.Samples);
                     selectedBathymetry.Samples.TrimToNearestPoints(areaToExport);
-                    if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return;
+                    if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
                 }
             }
 
-            if (statusMessage != null) statusMessage(string.Format("Exporting bathymetry data"));
+            if (backgroundTask != null) backgroundTask.Status = string.Format("Exporting bathymetry data");
             selectedBathymetry.ToYXZ(Path.Combine(simAreaPath, "Bathymetry", "bathymetry.txt"), -1);
         }
     }

@@ -165,7 +165,7 @@ namespace ESME.Overlay
             {
                 if (Segments[0].Intersects(Segments[j]))
                 {
-                    Console.WriteLine("Segment {0} intersects segment {1}", 0, j);
+                    //Console.WriteLine("Segment {0} intersects segment {1}", 0, j);
                     HasCrossingSegments = true;
                     return;
                 }
@@ -178,7 +178,7 @@ namespace ESME.Overlay
                 {
                     if (Segments[i].Intersects(Segments[j]))
                     {
-                        Console.WriteLine("Segment {0} intersects segment {1}", i, j);
+                        //Console.WriteLine("Segment {0} intersects segment {1}", i, j);
                         HasCrossingSegments = true;
                         return;
                     }

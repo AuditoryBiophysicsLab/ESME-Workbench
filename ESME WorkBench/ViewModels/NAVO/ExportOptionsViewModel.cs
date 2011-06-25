@@ -10,6 +10,7 @@ using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESMEWorkBench.Data;
+using HRC.Utility;
 using Environment = ESME.Environment.Environment;
 
 namespace ESMEWorkBench.ViewModels.NAVO
@@ -369,16 +370,11 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         void ExportData(object sender, DoWorkEventArgs args)
         {
-            Delegates.Delegate<string> statusUpdateDelegate = delegate(string s)
-            {
-                Status = s;
-                ProgressPercent = (int)((++_currentExportStep / _totalExportStepCount) * 100);
-            };
-            var backgroundWorker = (BackgroundWorker)sender;
+            var backgroundTask = (BackgroundTask)sender;
 
             _totalExportStepCount = Environment.EnvironmentExportStepCount(SelectedTimePeriods);
             _totalExportStepCount += 2;
-            statusUpdateDelegate("Initializing...");
+            backgroundTask.Status = "Initializing...";
             var environment = new Environment
             {
                 Bathymetry = Bathymetry.FromYXZ(_experiment.BathymetryFileName, -1),
@@ -388,7 +384,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 Salinity = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "salinity.xml")),
                 Wind = Wind.Load(Path.Combine(_experiment.EnvironmentRoot, "wind.xml")),
             };
-            environment.Export(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), SelectedTimePeriods, null, statusUpdateDelegate, backgroundWorker);
+            environment.Export(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), SelectedTimePeriods, null, backgroundTask);
             CloseActivePopUpCommand.Execute(true);
         }
 

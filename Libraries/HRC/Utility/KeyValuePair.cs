@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Data;
 
 namespace HRC.Utility
 {
     [Serializable]
-    public class KeyValuePair<TKey, TValue> where TKey : IComparable<TKey>
+    public class KeyValuePair<TKey, TValue>
     {
         public KeyValuePair()
         {

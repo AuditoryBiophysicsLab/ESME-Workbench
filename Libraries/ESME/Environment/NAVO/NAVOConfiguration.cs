@@ -146,17 +146,17 @@ namespace ESME.Environment.NAVO
 
         public string SMGCDirectory
         {
-            get { return _sMGCDirectory; }
+            get { return _smgcDirectory; }
             set
             {
-                if (_sMGCDirectory == value) return;
-                _sMGCDirectory = value;
+                if (_smgcDirectory == value) return;
+                _smgcDirectory = value;
                 NotifyPropertyChanged(SMGCDirectoryChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs SMGCDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SMGCDirectory);
-        string _sMGCDirectory;
+        string _smgcDirectory;
 
         #endregion
 

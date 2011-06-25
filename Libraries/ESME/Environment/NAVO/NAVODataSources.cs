@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
@@ -37,7 +38,6 @@ namespace ESME.Environment.NAVO
             _extractionArea = opArea;
 
             SurfaceMarineGriddedClimatologyDatabase.DatabasePath = configurations.SMGCDirectory;
-            SurfaceMarineGriddedClimatologyDatabase.ExtractionProgramPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "SMGCExtract.exe");
 
             DigitalBathymetricDatabase.DatabasePath = configurations.DBDBDirectory;
             DigitalBathymetricDatabase.ExtractionProgramPath = configurations.DBDBEXEPath;
@@ -62,6 +62,7 @@ namespace ESME.Environment.NAVO
 
         void UpdateResolutionStatement()
         {
+            if (DigitalBathymetricDatabase.SelectedResolution == null) return;
             var resString = DigitalBathymetricDatabase.SelectedResolution.Remove(DigitalBathymetricDatabase.SelectedResolution.Length - 3, 3);
             var resMinutes = double.Parse(resString);
             var samplesPerDegree = 60 / resMinutes;
@@ -150,13 +151,7 @@ namespace ESME.Environment.NAVO
         void ExtractAreas(object sender, DoWorkEventArgs args)
         {
 
-            Delegates.Delegate<string> statusUpdateDelegate = delegate(string s)
-            {
-                Status = s;
-                ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
-            };
-
-            var backgroundWorker = (BackgroundWorker)sender;
+            var backgroundTask = (BackgroundTask)sender;
 
             var tempDirectory = Path.Combine(_localStorageRoot, "NAVOTemp");
 
@@ -185,8 +180,8 @@ namespace ESME.Environment.NAVO
             //    totalExtractionStepCount++;
 
             Status = "Extracting bathymetry data for selected area";
-            DigitalBathymetricDatabase.ExtractArea(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea, DigitalBathymetricDatabase.Resolutions);
-            if (backgroundWorker.CancellationPending) return;
+            DigitalBathymetricDatabase.ExtractArea(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea);
+            if (backgroundTask.CancellationPending) return;
             ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
             //var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryCHBFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var bathymetry = Environment2DData.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
@@ -196,7 +191,7 @@ namespace ESME.Environment.NAVO
             Status = "Extracting sediment data for selected area";
             var sediment = BottomSedimentTypeDatabase.ExtractArea(tempDirectory, ExtractionArea, UseExpandedExtractionArea);
             sediment.Save(Path.Combine(tempDirectory, "sediment.xml"));
-            if (backgroundWorker.CancellationPending) return;
+            if (backgroundTask.CancellationPending) return;
             ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
 
             Status = "Extracting temperature and salinity data for selected time periods...";
@@ -231,8 +226,8 @@ namespace ESME.Environment.NAVO
                         Wind = wind,
                 };
 
-                environment.Export(_simAreaPath, SelectedTimePeriods, environment.Bathymetry.Samples.GeoRect, statusUpdateDelegate, backgroundWorker);
-                if (backgroundWorker.CancellationPending) return;
+                environment.Export(_simAreaPath, SelectedTimePeriods, environment.Bathymetry.Samples.GeoRect, backgroundTask);
+                if (backgroundTask.CancellationPending) return;
             }
 
             // At this point, the user can no longer cancel the operation.

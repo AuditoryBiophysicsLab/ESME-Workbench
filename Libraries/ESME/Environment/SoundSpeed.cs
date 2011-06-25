@@ -65,20 +65,35 @@ namespace ESME.Environment
 
         public delegate void MessageDelegate(string message);
 
-        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods, Delegates.Delegate<string> averageOperationMessage = null, BackgroundWorker backgroundWorker = null)
+        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods, BackgroundTask backgroundTask = null)
         {
             var result = new SoundSpeed();
-            foreach (var timePeriod in timePeriods) 
+            if (backgroundTask != null) backgroundTask.Maximum += timePeriods.Count;
+            foreach (var timePeriod in timePeriods)
             {
-                if (averageOperationMessage != null) averageOperationMessage(string.Format("Averaging soundspeeds for {0}", timePeriod));
+                if (backgroundTask != null) backgroundTask.Status = string.Format("Averaging soundspeeds for {0}", timePeriod);
                 var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
                 var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
                 foreach (var month in months)
                     accumulator.Add(monthlySoundSpeeds[month]);
                 result.SoundSpeedFields.Add(accumulator.Average);
-                if ((backgroundWorker != null) && backgroundWorker.CancellationPending) return result;
+                if ((backgroundTask != null) && backgroundTask.CancellationPending) return result;
             }
             return result;
+        }
+
+        public static SoundSpeedField Average(SoundSpeed monthlySoundSpeeds, NAVOTimePeriod timePeriod, BackgroundTask backgroundTask = null)
+        {
+            if (backgroundTask != null) backgroundTask.Status = string.Format("Averaging soundspeeds for {0}", timePeriod);
+            var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList();
+            if (backgroundTask != null) backgroundTask.Maximum += months.Count + 1;
+            var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
+            foreach (var month in months)
+            {
+                accumulator.Add(monthlySoundSpeeds[month]);
+                if (backgroundTask != null) backgroundTask.Value++;
+            }
+            return accumulator.Average;
         }
 
         internal static void VerifyThatTimePeriodsMatch(SoundSpeed data1, SoundSpeed data2)
