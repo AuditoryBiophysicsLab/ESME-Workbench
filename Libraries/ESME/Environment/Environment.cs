@@ -195,7 +195,7 @@ namespace ESME.Environment
             {
                 if (backgroundTask != null) backgroundTask.Status = string.Format("Exporting environment data for {0}", timePeriod);
                 var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriod.ToString().ToLower() + ".dat");
-                CASSFiles.WriteEnvironmentFile(environmentFileName, selectedBathymetry, Sediment, extendedAndAveragedSoundSpeeds[timePeriod], Wind[timePeriod]);
+                CASSFiles.WriteEnvironmentFile(environmentFileName, selectedBathymetry.Samples.GeoRect, Sediment, extendedAndAveragedSoundSpeeds[timePeriod], Wind[timePeriod]);
                 if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
             }
         }

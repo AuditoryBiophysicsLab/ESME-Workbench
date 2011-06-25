@@ -115,6 +115,7 @@
                   ToolTip="If this is checked, the sediment, wind, and soundspeed data will extend outside the buffer area to the nearest whole degree in all directions"
                   Content="Extract non-bathymetric data beyond the buffer area" />
 
+        <!--
         <StackPanel Visibility="{Binding NAVODataSources.IsVisible}">
 			<TextBlock HorizontalAlignment="Center"
 			           Text="{Binding NAVODataSources.Status}"
@@ -125,17 +126,23 @@
 			             Margin="5 0 5 0 "
 			             Value="{Binding NAVODataSources.ProgressPercent}" />
         </StackPanel>
-        <StackPanel>
-            <ListBox ItemsSource="{Binding BackgroundTasks}"
-                     HorizontalContentAlignment="Stretch"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     MaxHeight="200">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Controls:BackgroundTaskProgress BackgroundTask="{Binding}" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+        -->
+        <StackPanel Visibility="{Binding BackgroundTaskAggregator.IsBusy, Converter={StaticResource boolToVisibilityConverter}}"
+                    Margin="0 5 0 5">
+            <Controls:BackgroundTaskProgress BackgroundTask="{Binding BackgroundTaskAggregator}" 
+                                             HorizontalContentAlignment="Stretch"/>
+            <Expander Header="Detail">
+                <ListBox ItemsSource="{Binding BackgroundTaskAggregator.BackgroundTasks}"
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         MaxHeight="200">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Controls:BackgroundTaskProgress BackgroundTask="{Binding}" Visibility="{Binding IsBusy, Converter={StaticResource boolToVisibilityConverter}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Expander>
         </StackPanel>
         <DockPanel LastChildFill="False"
 		           Margin="5 10">

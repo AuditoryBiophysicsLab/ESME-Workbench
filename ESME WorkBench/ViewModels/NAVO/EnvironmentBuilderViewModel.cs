@@ -14,6 +14,7 @@ using Cinch;
 using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
+using ESME.TransmissionLoss.CASS;
 using ESMEWorkBench.Data;
 using HRC.Navigation;
 using HRC.Utility;
@@ -373,50 +374,23 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
-        #region public ObservableCollection<BackgroundTask> BackgroundTasks { get; set; }
+        #region public BackgroundTaskAggregator BackgroundTaskAggregator { get; set; }
 
-        public ObservableCollection<BackgroundTask> BackgroundTasks
+        public BackgroundTaskAggregator BackgroundTaskAggregator
         {
-            get { return _backgroundTasks ?? (_backgroundTasks = new ObservableCollection<BackgroundTask>()); }
+            get { return _backgroundTaskAggregator; }
             set
             {
-                if (_backgroundTasks == value) return;
-                if (_backgroundTasks != null) _backgroundTasks.CollectionChanged -= BackgroundTasksCollectionChanged;
-                _backgroundTasks = value;
-                if (_backgroundTasks != null) _backgroundTasks.CollectionChanged += BackgroundTasksCollectionChanged;
-                NotifyPropertyChanged(BackgroundTasksChangedEventArgs);
+                if (_backgroundTaskAggregator == value) return;
+                _backgroundTaskAggregator = value;
+                NotifyPropertyChanged(BackgroundTaskAggregatorChangedEventArgs);
             }
         }
 
-        void BackgroundTasksCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            NotifyPropertyChanged(BackgroundTasksChangedEventArgs);
-            BackgroundTasksAreRunning = BackgroundTasks.Count > 0;
-        }
-        static readonly PropertyChangedEventArgs BackgroundTasksChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.BackgroundTasks);
-        ObservableCollection<BackgroundTask> _backgroundTasks;
+        static readonly PropertyChangedEventArgs BackgroundTaskAggregatorChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.BackgroundTaskAggregator);
+        BackgroundTaskAggregator _backgroundTaskAggregator = new BackgroundTaskAggregator();
 
         #endregion
-
-        #region public bool BackgroundTasksAreRunning { get; set; }
-
-        public bool BackgroundTasksAreRunning
-        {
-            get { return _backgroundTasksAreRunning; }
-            set
-            {
-                if (_backgroundTasksAreRunning == value) return;
-                _backgroundTasksAreRunning = value;
-                NotifyPropertyChanged(BackgroundTasksAreRunningChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs BackgroundTasksAreRunningChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.BackgroundTasksAreRunning);
-        bool _backgroundTasksAreRunning;
-
-        #endregion
-
-        bool _bufferZoneSizeOk = true;
 
         #region BufferZoneSizeTextChangedCommand
 
@@ -446,11 +420,38 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
-        #region ExtractAllCommand
+        bool _bufferZoneSizeOk = true;
 
-        void ExtractInBackground(List<NAVOTimePeriod> selectedTimePeriods, float desiredResolution, GeoRect extractionArea, AppSettings appSettings, string simAreaPath, bool useExpandedExtractionArea)
+        #region ExtractAllCommand
+        static void ExtractInBackground(List<NAVOTimePeriod> selectedTimePeriods, float desiredResolution, GeoRect extractionArea, AppSettings appSettings, string environmentRoot, string simAreaPath, bool useExpandedExtractionArea, BackgroundTaskAggregator aggregator, bool exportToNAEMO)
         {
-            var aggregator = new BackgroundTaskAggregator {};
+            var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
+            if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
+            if (!Directory.Exists(environmentRoot)) Directory.CreateDirectory(environmentRoot);
+            if (!Directory.Exists(simAreaPath)) Directory.CreateDirectory(simAreaPath);
+
+            // Create a NAEMO exporter if we've been asked to export to NAEMO
+            var naemoEnvironmentExporters = !exportToNAEMO
+                                                    ? null
+                                                    : selectedTimePeriods.Select(t => new CASSBackgroundExporter
+                                                    {
+                                                            WorkerSupportsCancellation = false,
+                                                            TimePeriod = t,
+                                                            ExtractionArea = extractionArea,
+                                                            NAVOConfiguration = appSettings.NAVOConfiguration,
+                                                            DestinationPath = simAreaPath,
+                                                            UseExpandedExtractionArea = useExpandedExtractionArea,
+                                                    }).ToList();
+            var naemoBathymetryExporter = !exportToNAEMO
+                                                  ? null
+                                                  : new CASSBackgroundExporter
+                                                  {
+                                                          WorkerSupportsCancellation = false,
+                                                          ExtractionArea = extractionArea,
+                                                          NAVOConfiguration = appSettings.NAVOConfiguration,
+                                                          DestinationPath = simAreaPath,
+                                                          UseExpandedExtractionArea = useExpandedExtractionArea,
+                                                  };
 
             // Create a wind extractor
             var windExtractor = new SMGCBackgroundExtractor
@@ -459,10 +460,16 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 ExtractionArea = extractionArea,
                 SelectedTimePeriods = selectedTimePeriods,
                 NAVOConfiguration = appSettings.NAVOConfiguration,
-                DestinationPath = simAreaPath,
+                DestinationPath = tempPath,
                 UseExpandedExtractionArea = useExpandedExtractionArea,
             };
             aggregator.BackgroundTasks.Add(windExtractor);
+            windExtractor.RunWorkerCompleted += (s, e) =>
+            {
+                var wind = ((SMGCBackgroundExtractor)s).Wind;
+                wind.Save(Path.Combine(environmentRoot, "wind.xml"));
+                if (naemoEnvironmentExporters != null) foreach (var naemo in naemoEnvironmentExporters) naemo.Wind = wind;
+            };
 
             // Create a sediment extractor
             var sedimentExtractor = new BSTBackgroundExtractor
@@ -470,10 +477,16 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 WorkerSupportsCancellation = false,
                 ExtractionArea = extractionArea,
                 NAVOConfiguration = appSettings.NAVOConfiguration,
-                DestinationPath = simAreaPath,
+                DestinationPath = tempPath,
                 UseExpandedExtractionArea = useExpandedExtractionArea,
             };
             aggregator.BackgroundTasks.Add(sedimentExtractor);
+            sedimentExtractor.RunWorkerCompleted += (s, e) =>
+            {
+                var sediment = ((BSTBackgroundExtractor)s).Sediment;
+                sediment.Save(Path.Combine(environmentRoot, "sediment.xml"));
+                if (naemoEnvironmentExporters != null) foreach (var naemo in naemoEnvironmentExporters) naemo.Sediment = sediment;
+            };
 
             // Create a bathymetry extractor
             var bathymetryExtractor = new DBDBBackgroundExtractor
@@ -481,11 +494,18 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 WorkerSupportsCancellation = false,
                 ExtractionArea = extractionArea,
                 NAVOConfiguration = appSettings.NAVOConfiguration,
-                DestinationPath = simAreaPath,
+                DestinationPath = tempPath,
                 UseExpandedExtractionArea = useExpandedExtractionArea,
                 SelectedResolution = desiredResolution,
             };
             aggregator.BackgroundTasks.Add(bathymetryExtractor);
+            bathymetryExtractor.RunWorkerCompleted += (s, e) =>
+            {
+                var bathymetry = ((DBDBBackgroundExtractor)s).Bathymetry;
+                bathymetry.Save(Path.Combine(environmentRoot, "bathymetry.xml"));
+                if (naemoBathymetryExporter != null) naemoBathymetryExporter.Bathymetry = bathymetry;
+                if (naemoEnvironmentExporters != null) foreach (var naemo in naemoEnvironmentExporters) naemo.GeoRect = bathymetry.Samples.GeoRect;
+            };
 
             // Create a soundspeed averager/extender for each selected time period.  These averagers need the max bathymetry depth
             // and the monthly sound speed fields.  The averagers will block until that data becomes available
@@ -495,9 +515,10 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 TimePeriod = timePeriod,
                 ExtractionArea = extractionArea,
                 NAVOConfiguration = appSettings.NAVOConfiguration,
-                DestinationPath = simAreaPath,
+                DestinationPath = tempPath,
                 UseExpandedExtractionArea = useExpandedExtractionArea,
             }).ToList();
+
 
             var requiredMonths = selectedTimePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
             var allMonths = new List<NAVOTimePeriod>();
@@ -505,6 +526,9 @@ namespace ESMEWorkBench.ViewModels.NAVO
             var uniqueMonths = allMonths.Distinct().ToList();
             uniqueMonths.Sort();
             var extendedMonthlySoundSpeeds = new SoundSpeed();
+            var extendedAndAveragedSoundSpeeds = new SoundSpeed();
+            var monthlyTemperature = new SoundSpeed();
+            var monthlySalinity = new SoundSpeed();
             var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
             foreach (var month in uniqueMonths)
             {
@@ -514,15 +538,19 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     TimePeriod = month,
                     ExtractionArea = extractionArea,
                     NAVOConfiguration = appSettings.NAVOConfiguration,
-                    DestinationPath = simAreaPath,
+                    DestinationPath = tempPath,
                     UseExpandedExtractionArea = useExpandedExtractionArea,
                 };
                 soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
                 {
                     var extractor = (GDEMBackgroundExtractor)sender;
+                    monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
+                    monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
                     extendedMonthlySoundSpeeds.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
                     if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
                     foreach (var averager in averagers) averager.ExtendedMonthlySoundSpeeds = extendedMonthlySoundSpeeds;
+                    monthlyTemperature.Save(Path.Combine(environmentRoot, "temperature.xml"));
+                    monthlySalinity.Save(Path.Combine(environmentRoot, "salinity.xml"));
                 };
                 soundSpeedExtractors.Add(soundSpeedExtractor);
                 aggregator.BackgroundTasks.Add(soundSpeedExtractor);
@@ -537,22 +565,26 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 foreach (var soundSpeedExtractor in soundSpeedExtractors) soundSpeedExtractor.MaxDepth = maxDepth;
             };
 
-
             foreach (var averager in averagers)
             {
                 aggregator.BackgroundTasks.Add(averager);
+                averager.RunWorkerCompleted += (sender, e) =>
+                {
+                    var avg = (SoundSpeedBackgroundAverager)sender;
+                    extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(avg.ExtendedAverageSoundSpeedField);
+                    if (averagers.Any(a => a.IsBusy)) return;
+                    if (naemoEnvironmentExporters != null) foreach (var naemo in naemoEnvironmentExporters) naemo.ExtendedAndAveragedSoundSpeeds = extendedAndAveragedSoundSpeeds;
+                };
             }
+
+            if (naemoBathymetryExporter != null) aggregator.BackgroundTasks.Add(naemoBathymetryExporter);
+            if (naemoEnvironmentExporters != null) foreach (var naemo in naemoEnvironmentExporters) aggregator.BackgroundTasks.Add(naemo);
 
             aggregator.TaskName = "Environmental data extraction";
-            BackgroundTasks.Add(aggregator);
-            foreach (var aggregatedTask in aggregator.BackgroundTasks)
-                BackgroundTasks.Add(aggregatedTask);
 
-            foreach (var task in BackgroundTasks)
-            {
-                task.RunWorkerCompleted += (sender, e) => BackgroundTasks.Remove((BackgroundTask)sender);
+            aggregator.Run();
+            foreach (var task in aggregator.BackgroundTasks)
                 task.Run();
-            }
         }
 
         SimpleCommand<object, object> _extractAll;
@@ -578,7 +610,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
                         var resTemp = selectedResolution.EndsWith("min") ? selectedResolution.Remove(selectedResolution.Length - 3) : selectedResolution;
                         double desiredResolution;
                         if (!double.TryParse(resTemp, out desiredResolution)) throw new FormatException("Illegal number format for selectedResolution: " + selectedResolution);
-                        ExtractInBackground(selectedTimePeriods, (float)desiredResolution, NAVODataSources.ExtractionArea, Globals.AppSettings, Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), UseExpandedExtractionArea);
+                        BackgroundTaskAggregator = new BackgroundTaskAggregator();
+                        ExtractInBackground(selectedTimePeriods, (float)desiredResolution, NAVODataSources.ExtractionArea, Globals.AppSettings, Path.Combine(_experiment.LocalStorageRoot, "NAVOTemp"), Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), UseExpandedExtractionArea, BackgroundTaskAggregator, ExportCASSData);
 #if false
                         NAVODataSources.SelectedTimePeriods = selectedTimePeriods;
                         NAVODataSources.ExportCASSData = ExportCASSData;

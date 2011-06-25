@@ -222,7 +222,7 @@ namespace ESME.TransmissionLoss.CASS
             }
         }
 
-        public static void WriteEnvironmentFile(string environmentFileName, Bathymetry bathymetry, Sediment sedimentType, SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind)
+        public static void WriteEnvironmentFile(string environmentFileName, GeoRect geoRect, Sediment sedimentType, SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind)
         {
             var isFirstPoint = true;
             using (var envFile = new StreamWriter(environmentFileName, false))
@@ -236,17 +236,16 @@ namespace ESME.TransmissionLoss.CASS
 
                 double lat, lon;
 
-                var selectedArea = bathymetry.Samples.GeoRect;
-                for (lon = selectedArea.West; lon < selectedArea.East; lon += 0.25)
+                for (lon = geoRect.West; lon < geoRect.East; lon += 0.25)
                 {
-                    for (lat = selectedArea.South; lat < selectedArea.North; lat += 0.25)
+                    for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                         WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(lat, lon), ref isFirstPoint);
-                    if ((lat - selectedArea.North) < 0.125)
-                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(selectedArea.North, lon), ref isFirstPoint);
+                    if ((lat - geoRect.North) < 0.125)
+                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(geoRect.North, lon), ref isFirstPoint);
                 }
-                if ((lon - selectedArea.East) < 0.125)
-                    for (lat = selectedArea.South; lat < selectedArea.North; lat += 0.25)
-                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(lat, selectedArea.East), ref isFirstPoint);
+                if ((lon - geoRect.East) < 0.125)
+                    for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
+                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(lat, geoRect.East), ref isFirstPoint);
             }
         }
 

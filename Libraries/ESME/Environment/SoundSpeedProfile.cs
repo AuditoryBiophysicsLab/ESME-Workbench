@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Xml.Serialization;
 using ESME.Environment.NAVO;
@@ -18,15 +17,11 @@ namespace ESME.Environment
             if (Data.Count == 0)
                 foreach (var datum in profile.Data)
                 { 
-                    if (datum.Depth > 1000)
-                        Debug.WriteLine("Break!");
                     Data.Add(new DepthValuePair<AverageDatum>(datum.Depth, new AverageDatum(datum.Value)));
                 }
             else
                 foreach (var datum in profile.Data)
                 {
-                    if (datum.Depth > 1000)
-                        Debug.WriteLine("Break!");
                     var averagerAtDepth = Data[datum.Depth];
                     if (averagerAtDepth != null) averagerAtDepth.Value.Add(datum.Value);
                     else Data.Add(new DepthValuePair<AverageDatum>(datum.Depth, new AverageDatum(datum.Value)));

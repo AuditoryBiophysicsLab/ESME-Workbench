@@ -49,7 +49,7 @@ namespace ESME.Environment.NAVO
             var expandedArea = new GeoRect(north, south, east, west);
             var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6}", backgroundExtractor.DestinationPath, DatabasePath, backgroundExtractor.TimePeriod, expandedArea.North, expandedArea.South, expandedArea.East, expandedArea.West);
 
-            NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath, RequiredSupportFiles);
+            var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath, RequiredSupportFiles);
             backgroundExtractor.Value++;
 
             var temperatureFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}-temperature.xml", backgroundExtractor.TimePeriod));
