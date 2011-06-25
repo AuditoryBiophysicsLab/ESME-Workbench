@@ -207,7 +207,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
         private bool _progressIsVisible;
         #endregion
 
-        #region public int ProgressPercent { get; set; }
+        #region public int ProgressPercentage { get; set; }
 
         public int ProgressPercent
         {
