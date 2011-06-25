@@ -450,6 +450,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         void ExtractInBackground(List<NAVOTimePeriod> selectedTimePeriods, float desiredResolution, GeoRect extractionArea, AppSettings appSettings, string simAreaPath, bool useExpandedExtractionArea)
         {
+            var aggregator = new BackgroundTaskAggregator {};
+
             // Create a wind extractor
             var windExtractor = new SMGCBackgroundExtractor
             {
@@ -460,7 +462,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 DestinationPath = simAreaPath,
                 UseExpandedExtractionArea = useExpandedExtractionArea,
             };
-            BackgroundTasks.Add(windExtractor);
+            aggregator.BackgroundTasks.Add(windExtractor);
 
             // Create a sediment extractor
             var sedimentExtractor = new BSTBackgroundExtractor
@@ -471,7 +473,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 DestinationPath = simAreaPath,
                 UseExpandedExtractionArea = useExpandedExtractionArea,
             };
-            BackgroundTasks.Add(sedimentExtractor);
+            aggregator.BackgroundTasks.Add(sedimentExtractor);
 
             // Create a bathymetry extractor
             var bathymetryExtractor = new DBDBBackgroundExtractor
@@ -483,7 +485,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 UseExpandedExtractionArea = useExpandedExtractionArea,
                 SelectedResolution = desiredResolution,
             };
-            BackgroundTasks.Add(bathymetryExtractor);
+            aggregator.BackgroundTasks.Add(bathymetryExtractor);
 
             // Create a soundspeed averager/extender for each selected time period.  These averagers need the max bathymetry depth
             // and the monthly sound speed fields.  The averagers will block until that data becomes available
@@ -523,7 +525,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     foreach (var averager in averagers) averager.ExtendedMonthlySoundSpeeds = extendedMonthlySoundSpeeds;
                 };
                 soundSpeedExtractors.Add(soundSpeedExtractor);
-                BackgroundTasks.Add(soundSpeedExtractor);
+                aggregator.BackgroundTasks.Add(soundSpeedExtractor);
             }
 
             bathymetryExtractor.RunWorkerCompleted += (sender, args) =>
@@ -538,8 +540,14 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
             foreach (var averager in averagers)
             {
-                BackgroundTasks.Add(averager);
+                aggregator.BackgroundTasks.Add(averager);
             }
+
+            aggregator.TaskName = "Environmental data extraction";
+            aggregator.Status = "Extraction in progress";
+            BackgroundTasks.Add(aggregator);
+            foreach (var aggregatedTask in aggregator.BackgroundTasks)
+                BackgroundTasks.Add(aggregatedTask);
 
             foreach (var task in BackgroundTasks)
             {

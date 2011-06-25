@@ -1,5 +1,9 @@
 using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
+using System.Threading;
 using System.Windows.Input;
 using Cinch;
 
@@ -12,6 +16,7 @@ namespace HRC.Utility
             Minimum = 0;
             Maximum = 100;
             Value = 0;
+            WorkerReportsProgress = true;
         }
 
         public virtual void Run()
@@ -27,8 +32,33 @@ namespace HRC.Utility
         {
             RunState = IsCanceled ? "Canceled" : "Completed";
             Value = IsCanceled ? Value : Maximum;
-            base.OnRunWorkerCompleted(new RunWorkerCompletedEventArgs(this, null, IsCanceled));
+            if ((e != null) && (e.Error != null)) Console.WriteLine("Got an exception!");
+            base.OnRunWorkerCompleted(new RunWorkerCompletedEventArgs(this, e == null ? null : e.Error, IsCanceled));
         }
+
+        protected override void OnProgressChanged(ProgressChangedEventArgs e)
+        {
+            ProgressPercentage = e.ProgressPercentage;
+            base.OnProgressChanged(e);
+        }
+
+        #region public int ProgressPercentage { get; set; }
+
+        public int ProgressPercentage
+        {
+            get { return _progressPercentage; }
+            set
+            {
+                if (_progressPercentage == value) return;
+                _progressPercentage = value;
+                NotifyPropertyChanged(ProgressPercentChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ProgressPercentChangedEventArgs = ObservableHelper.CreateArgs<BackgroundTask>(x => x.ProgressPercentage);
+        int _progressPercentage;
+
+        #endregion
 
         #region public string TaskName { get; set; }
 
@@ -58,6 +88,7 @@ namespace HRC.Utility
                 if (_minimum == value) return;
                 _minimum = value;
                 NotifyPropertyChanged(MinValueChangedEventArgs);
+                _range = Maximum - Minimum;
             }
         }
 
@@ -76,6 +107,7 @@ namespace HRC.Utility
                 if (_maximum == value) return;
                 _maximum = value;
                 NotifyPropertyChanged(MaxValueChangedEventArgs);
+                _range = Maximum - Minimum;
             }
         }
 
@@ -94,13 +126,14 @@ namespace HRC.Utility
                 if (_value == value) return;
                 if ((value < Minimum) || (value > Maximum)) throw new ArgumentOutOfRangeException("Value", string.Format("Value {0} must be between {1} and {2}", value, Minimum, Maximum));
                 _value = value;
-                if (WorkerReportsProgress) ReportProgress((int)((float)_value / (Maximum - Minimum)));
+                if ((WorkerReportsProgress) && (_range > 0f) && IsBusy) ReportProgress((int)((_value / _range) * 100f));
                 NotifyPropertyChanged(ValueChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs ValueChangedEventArgs = ObservableHelper.CreateArgs<BackgroundTask>(x => x.Value);
         int _value;
+        float _range = 1f;
 
         #endregion
 
@@ -190,5 +223,67 @@ namespace HRC.Utility
         protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
 
         #endregion
+    }
+
+    public class BackgroundTaskAggregator : BackgroundTask
+    {
+        public BackgroundTaskAggregator() { BackgroundTasks = new ObservableCollection<BackgroundTask>(); }
+
+        #region public ObservableCollection<BackgroundTask> BackgroundTasks { get; set; }
+
+        public ObservableCollection<BackgroundTask> BackgroundTasks
+        {
+            get { return _backgroundTasks; }
+            private set
+            {
+                if (_backgroundTasks == value) return;
+                if (_backgroundTasks != null) _backgroundTasks.CollectionChanged -= BackgroundTasksCollectionChanged;
+                _backgroundTasks = value;
+                if (_backgroundTasks != null) _backgroundTasks.CollectionChanged += BackgroundTasksCollectionChanged;
+                NotifyPropertyChanged(BackgroundTasksChangedEventArgs);
+            }
+        }
+
+        void BackgroundTasksCollectionChanged(object sender, NotifyCollectionChangedEventArgs eventArgs)
+        {
+            NotifyPropertyChanged(BackgroundTasksChangedEventArgs);
+            switch (eventArgs.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (var newItem in eventArgs.NewItems)
+                    {
+                        ((BackgroundTask)newItem).ProgressChanged += ProgressHasChanged;
+                        ((BackgroundTask)newItem).RunWorkerCompleted += WorkerHasCompleted;
+                    }
+                    break;
+            }
+        }
+
+        void WorkerHasCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            var activeTasks = BackgroundTasks.Where(b => b.IsBusy);
+            if (activeTasks.Count() == 0) _mutex.ReleaseMutex();
+        }
+
+        void ProgressHasChanged(object sender, ProgressChangedEventArgs e)
+        {
+            Maximum = BackgroundTasks.Count * 100;
+            Value = BackgroundTasks.Sum(b => b.ProgressPercentage);
+        }
+
+        static readonly PropertyChangedEventArgs BackgroundTasksChangedEventArgs = ObservableHelper.CreateArgs<BackgroundTaskAggregator>(x => x.BackgroundTasks);
+        ObservableCollection<BackgroundTask> _backgroundTasks;
+
+        #endregion
+
+        readonly Mutex _mutex = new Mutex(true);
+
+        protected override void Run(object sender, DoWorkEventArgs e)
+        {
+            var backgroundTask = (BackgroundTask)sender;
+            RunState = "Running";
+            Thread.Sleep(1000); // to give the aggregated workers time to start
+            _mutex.WaitOne();
+        }
     }
 }
