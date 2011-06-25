@@ -39,6 +39,7 @@ namespace HRC.Utility
         protected override void OnProgressChanged(ProgressChangedEventArgs e)
         {
             ProgressPercentage = e.ProgressPercentage;
+            RunState = string.Format("{0}% complete", ProgressPercentage);
             base.OnProgressChanged(e);
         }
 
@@ -280,6 +281,7 @@ namespace HRC.Utility
 
         protected override void Run(object sender, DoWorkEventArgs e)
         {
+            Status = "Operation in progress";
             var backgroundTask = (BackgroundTask)sender;
             RunState = "Running";
             Thread.Sleep(1000); // to give the aggregated workers time to start
