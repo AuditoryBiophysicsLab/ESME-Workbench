@@ -544,7 +544,6 @@ namespace ESMEWorkBench.ViewModels.NAVO
             }
 
             aggregator.TaskName = "Environmental data extraction";
-            aggregator.Status = "Extraction in progress";
             BackgroundTasks.Add(aggregator);
             foreach (var aggregatedTask in aggregator.BackgroundTasks)
                 BackgroundTasks.Add(aggregatedTask);
