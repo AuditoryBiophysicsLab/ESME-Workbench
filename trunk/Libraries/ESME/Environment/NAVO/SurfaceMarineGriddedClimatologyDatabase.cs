@@ -8,131 +8,87 @@ using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
-#if false
-    public static class SurfaceMarineGriddedClimatologyDatabase
-    {
-        static string _databasePath;
-        public static string DatabasePath
-        {
-            get { return _databasePath; }
-            set
-            {
-                if (_databasePath == value) return;
-                _databasePath = value;
-                if (!_databasePath.EndsWith(@"\")) _databasePath = _databasePath + @"\"; //database path has to end with a trailing slash here.  For SMGC, it's a directory, not a file.
-            }
-        }
-
-        public static string ExtractionProgramPath { get; set; }
-
-        public const float GridSpacing = 1.0f;
-
-        public static string WindFilename(string outputPath, NAVOTimePeriod timePeriod) { return Path.Combine(outputPath, string.Format("{0}-wind.txt", timePeriod)); }
-
-        //public static void ExtractArea(NAVOExtractionPacket extractionPacket)
-        public static void ExtractArea(string outputDirectory, NAVOTimePeriod timePeriod, NAVOTimePeriod startMonth, NAVOTimePeriod endMonth, int monthsDuration, GeoRect extractionArea)
-        {
-            var outputFilename = Path.Combine(outputDirectory, string.Format("{0}-wind.txt", timePeriod));
-
-            var northPath = DatabasePath;
-            var southPath = DatabasePath;
-            if (Directory.Exists(Path.Combine(DatabasePath, "north"))) northPath = (Path.Combine(DatabasePath, @"north\"));
-            if (Directory.Exists(Path.Combine(DatabasePath, "south"))) southPath = (Path.Combine(DatabasePath, @"south\"));
-
-            System.Environment.SetEnvironmentVariable("SMGC_DATA_NORTH", northPath);
-            System.Environment.SetEnvironmentVariable("SMGC_DATA_SOUTH", southPath);
-            var commandArgs = string.Format("-lat {0}/{1} -lon {2}/{3} -mon {4}/{5} -par 17/1", extractionArea.South, extractionArea.North, extractionArea.West, extractionArea.East, (int)startMonth, (int)endMonth); // '-par 17/1' extracts wind speed statistical data.  don't ask. 
-
-            var batchFilename = Path.Combine(outputDirectory, "wind_extract.bat");
-            using (var batchFile = new StreamWriter(batchFilename, false))
-                batchFile.WriteLine("\"{0}\" {1}", ExtractionProgramPath, commandArgs);
-
-            var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputDirectory);
-            //result now contains the entire output of SMGC, i think, since it dumps data to STDOUT... so let's save it to disk in the right place. 
-            using (var writer = new StreamWriter(outputFilename))
-            {
-                writer.WriteLine("StartMonth=" + startMonth);
-                writer.WriteLine("EndMonth=" + endMonth);
-                writer.WriteLine("MonthDuration=" + monthsDuration);
-                writer.WriteLine("GridSpacing=" + GridSpacing);
-                writer.Write(result);
-            }
-        }
-
-        /// <summary>
-        /// Parser for SMGC raw wind speed output. 
-        /// </summary>
-        /// <param name="fileName">The filename containing the SMGC output</param>
-        /// <returns>a populated Environment2DData object with windspeeds per latitude/longitude.</returns>
-        public static Environment2DData Parse(string fileName)
-        {
-            var resarray = File.ReadAllLines(fileName).ToList();
-            var lats = new List<double>();
-            var lons = new List<double>();
-            var data = new List<EarthCoordinate<float>>();
-            //  var averagevalues = new List<double>();
-            var rawvalues = new List<List<string>>();
-            var points = new Dictionary<string, double>();
-            //split the string up into lines
-            var startMonth = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), resarray[0].Split('=')[1]);
-            var endMonth = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), resarray[1].Split('=')[1]);
-            var monthDuration = int.Parse(resarray[2].Split('=')[1]);
-            var gridSpacing = int.Parse(resarray[3].Split('=')[1]);
-
-            var curLineIndex = 0;
-            //var curGroupIndex = 0;
-            while (curLineIndex < resarray.Count)
-            {
-                string thisline = resarray[curLineIndex++].Trim();
-                if (curLineIndex >= resarray.Count) break;
-                //if the line starts with 'Lat', add it plus everything up to the next blank line to rawvalues[i].
-                if (thisline.StartsWith("Lat"))
-                {
-                    var curGroup = new List<string>
-                                   {
-                                       thisline.Trim()
-                                   };
-                    while (!string.IsNullOrEmpty(thisline = resarray[curLineIndex++]))
-                    {
-                        if (curLineIndex >= resarray.Count) break;
-                        curGroup.Add(thisline.Trim());
-                    }
-                    rawvalues.Add(curGroup);
-                    //if (curLineIndex >= resarray.Count) break;
-                }
-            }
-
-            foreach (var curGroup in rawvalues)
-            {
-                var lat = double.NaN;
-                var lon = double.NaN;
-                var monthspeed = new List<double>();
-                foreach (var dataline in from curLine in curGroup
-                                         where !curLine.StartsWith("Lat") && !curLine.StartsWith("---") && !string.IsNullOrEmpty(curLine)
-                                         select curLine.Split('\t'))
-                {
-                    if (double.TryParse(dataline[0], out lat) && double.TryParse(dataline[1], out lon)) monthspeed.Add(double.Parse(dataline[7]));
-                    else throw new InvalidDataException("unexpected data in SMGC");
-                }
-                if (double.IsNaN(lat) || double.IsNaN(lon) || (monthspeed.Count <= 0)) continue;
-                data.Add(new EarthCoordinate<float>(lat, lon, (float)monthspeed.Average()));
-            }
-            return new Environment2DData(data);
-            //and finally, make a useful thing out of them. 
-            //return new Environment2DData(uniqueLats.Last(), uniqueLats.First(), uniqueLons.Last(), uniqueLons.First(), gridSpacing, dataArray, 0, 0);
-        }
-    }
-#endif
-
     public static class SurfaceMarineGriddedClimatologyDatabase
     {
         public static string DatabasePath { get; set; }
 
-        public static string ExtractionProgramPath { get; set; }
-
         public const float GridSpacing = 1.0f;
 
         public static string WindFilename(string outputPath) { return Path.Combine(outputPath, "wind.xml"); }
+
+        public static Wind ExtractArea(NAVOBackgroundExtractor backgroundExtractor)
+        {
+            backgroundExtractor.Status = "Extracting monthly wind data";
+
+            var north = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
+            var south = (int)Math.Floor(backgroundExtractor.ExtractionArea.South);
+            var east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
+            var west = (int)Math.Floor(backgroundExtractor.ExtractionArea.West);
+
+            var requiredMonths = backgroundExtractor.SelectedTimePeriods.Select(backgroundExtractor.NAVOConfiguration.MonthsInTimePeriod).ToList();
+            var allMonths = new List<NAVOTimePeriod>();
+            foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
+            var uniqueMonths = allMonths.Distinct().ToList();
+            uniqueMonths.Sort();
+
+            backgroundExtractor.Maximum = (north - south + 1) * (east - west + 1) + uniqueMonths.Count + backgroundExtractor.SelectedTimePeriods.Count;
+
+            // Construct a list of files we will need to read out of the SMGC database
+            var selectedFiles = new List<SMGCFile>();
+            var selectedLocations = new List<EarthCoordinate>();
+            for (var lat = south; lat <= north; lat++)
+                for (var lon = west; lon <= east; lon++)
+                {
+                    var northSouth = (lat >= 0) ? "n" : "s";
+                    var eastWest = (lon >= 0) ? "e" : "w";
+                    var curFile = string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon));
+                    selectedFiles.Add(new SMGCFile(Directory.GetFiles(backgroundExtractor.NAVOConfiguration.SMGCDirectory, curFile, SearchOption.AllDirectories).First()));
+                    selectedLocations.Add(new EarthCoordinate(lat, lon));
+                    backgroundExtractor.Value++;
+                    if (backgroundExtractor.CancellationPending) return null;
+                }
+            var monthlyWindData = new Wind();
+            backgroundExtractor.Status = "Aggregating monthly wind data";
+            foreach (var curMonth in uniqueMonths)
+            {
+                var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
+                curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
+                                                      where
+                                                              (selectedFile.Months != null) &&
+                                                              (selectedFile[curMonth] != null)
+                                                      select
+                                                              new WindSample(selectedFile.EarthCoordinate,
+                                                                             selectedFile[curMonth].MeanWindSpeed));
+                monthlyWindData.TimePeriods.Add(curMonthData);
+                backgroundExtractor.Value++;
+                if (backgroundExtractor.CancellationPending) return null;
+            }
+            var wind = new Wind();
+            backgroundExtractor.Status = "Averaging monthly wind data";
+            for (var timePeriodIndex = 0; timePeriodIndex < backgroundExtractor.SelectedTimePeriods.Count; timePeriodIndex++)
+            {
+                var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = backgroundExtractor.SelectedTimePeriods[timePeriodIndex] };
+                var monthsInCurTimePeriod = requiredMonths[timePeriodIndex];
+                foreach (var curLocation in selectedLocations)
+                {
+                    var sum = 0f;
+                    var count = 0;
+                    foreach (var curMonth in monthsInCurTimePeriod)
+                    {
+                        if ((monthlyWindData.TimePeriods == null) || (monthlyWindData[curMonth] == null)) continue;
+                        sum += monthlyWindData[curMonth].EnvironmentData[curLocation].Data;
+                        count++;
+                    }
+                    if (count > 0) curTimePeriodData.EnvironmentData.Add(new WindSample(curLocation, sum / count));
+                }
+                curTimePeriodData.EnvironmentData.RemoveDuplicates();
+                if (!backgroundExtractor.UseExpandedExtractionArea) curTimePeriodData.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
+                wind.TimePeriods.Add(curTimePeriodData);
+                backgroundExtractor.Value++;
+                if (backgroundExtractor.CancellationPending) return null;
+            }
+            return wind;
+        }
 
         public static void ExtractArea(string databasePath, string outputDirectory, IList<NAVOTimePeriod> timePeriods, IList<IEnumerable<NAVOTimePeriod>> requiredMonths, GeoRect extractionArea, bool useExpandedExtractionArea)
         {
@@ -166,7 +122,7 @@ namespace ESME.Environment.NAVO
                 monthlyWindData.TimePeriods.Add(curMonthData);
             }
             var wind = new Wind();
-            for (var timePeriodIndex = 0; timePeriodIndex < timePeriods.Count(); timePeriodIndex++)
+            for (var timePeriodIndex = 0; timePeriodIndex < timePeriods.Count; timePeriodIndex++)
             {
                 var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriods[timePeriodIndex] };
                 var monthsInCurTimePeriod = requiredMonths[timePeriodIndex];
@@ -188,105 +144,6 @@ namespace ESME.Environment.NAVO
             }
             wind.Save(Path.Combine(outputDirectory, "wind.xml"));
         }
-
-#if false
-        public static void Import(string baseDirectory, string filePattern, IList<NAVOTimePeriod> months)
-        {
-            var latValues = new List<float>();
-            var lonValues = new List<float>();
-            for (var lat = -90.0f; lat <= 90.0f; lat++) latValues.Add(lat);
-            for (var lon = -180.0f; lon <= 179.0f; lon++) lonValues.Add(lon);
-            var latitudeAxis = new DataAxis("latitude", latValues.ToArray());
-            var longitudeAxis = new DataAxis("longitude", lonValues.ToArray());
-
-            Console.Write("  Creating EEB Files");
-            foreach (var curMonth in fileMonthNames)
-            {
-                var curDataFile = DataFile.Create(curMonth.FileName);
-                var curWaveLayer = new DataLayer(WaveHeightLayerName, curMonth.MonthName, curMonth.FileName + " imported from the SMGC 2.0 database on " + DateTime.Now, "Units are meters", latitudeAxis, longitudeAxis, null)
-                                   {
-                                       DefaultValue = float.NaN
-                                   };
-                curDataFile.Layers.Add(curWaveLayer);
-                var curWindLayer = new DataLayer(WindSpeedLayerName, curMonth.MonthName, curMonth.FileName + " imported from the SMGC 2.0 database on " + DateTime.Now, "Units are meters", latitudeAxis, longitudeAxis, null)
-                                   {
-                                       DefaultValue = float.NaN
-                                   };
-                curDataFile.Layers.Add(curWindLayer);
-                DataFiles.Add(curDataFile);
-                Console.Write(".");
-            }
-            Console.WriteLine(" done\n");
-            SearchDirectoryTree(baseDirectory, filePattern);
-        }
-
-        static List<string> LocateDataFiles(string baseDirectory, List<string> selectedFiles)
-        {
-            Console.WriteLine("  Processing directory: " + baseDirectory);
-            var subdirectories = Directory.GetDirectories(baseDirectory);
-
-            foreach (var directory in subdirectories) SearchDirectoryTree(directory, filePattern);
-
-            var matchingFiles = Directory.GetFiles(baseDirectory, filePattern);
-            float fileCount = 0;
-            float totalFiles = matchingFiles.Count();
-            foreach (var file in matchingFiles)
-            {
-                try
-                {
-                    ProcessMatchingFile(file);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("\n\n********** ERROR **********\n");
-                    Console.WriteLine("Error importing file {0}\n  {1}\nFile skipped.\n\n", Path.GetFileName(file), e.Message);
-                    //throw;
-                }
-                if ((fileCount % 100) == 0)
-                    Console.Write("    Directory progress: {0:0}%       \r", (fileCount / totalFiles) * 100.0f);
-                fileCount++;
-            }
-        }
-
-        static void ProcessMatchingFile(string fileName)
-        {
-            var file = new SMGCFile(fileName);
-            if ((file.Months != null) && (file.Months.Count > 0))
-            {
-                for (var month = 1; month <= 12; month++)
-                {
-                    var curMonth = file[month];
-                    if (curMonth != null)
-                    {
-                        var curMonthDataFile = DataFiles[month - 1];
-
-                        // figure out the row and column of the EEB files that corresponds to file.EarthCoordinate
-                        var row = (int)(file.EarthCoordinate.Latitude + 90.0f);
-                        var col = (int)(file.EarthCoordinate.Longitude + 180.0f);
-
-                        //Console.WriteLine("Data for ({0:0}, {1:0}) Month {2}",
-                        //    file.EarthCoordinate.Latitude, file.EarthCoordinate.Longitude, month);
-                        if (!float.IsNaN(curMonth.MeanWaveHeight))
-                        {
-                            //Console.WriteLine("  Wave Height = {0:0.0}", curMonth.MeanWaveHeight_m);
-                            curMonthDataFile.Layers[WaveHeightLayerName][row, col].Data = new[]
-                                                                                          {
-                                                                                              curMonth.MeanWaveHeight
-                                                                                          };
-                        }
-                        if (!float.IsNaN(curMonth.MeanWindSpeed))
-                        {
-                            //Console.WriteLine("  Wind Speed = {0:0.0}", curMonth.MeanWindSpeed_mps);
-                            curMonthDataFile.Layers[WindSpeedLayerName][row, col].Data = new[]
-                                                                                         {
-                                                                                             curMonth.MeanWindSpeed
-                                                                                         };
-                        }
-                    }
-                }
-            }
-        }
-#endif
 
         internal class SMGCFile
         {

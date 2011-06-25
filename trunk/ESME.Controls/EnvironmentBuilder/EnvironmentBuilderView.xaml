@@ -3,10 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" 
+        xmlns:Controls="clr-namespace:ESME.Views.Controls" 
         Title="Environment Data Selection"
         mef:ViewModelLocator.ViewModel="EnvironmentBuilderViewModel"
         SizeToContent="WidthAndHeight">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter"/>
+    </Window.Resources>
 	<StackPanel Orientation="Vertical">
 		<TextBlock Text="Bathymetry Database Resolution"
 		           Margin="5 10 5 2" />
@@ -120,8 +124,20 @@
 			             Height="22"
 			             Margin="5 0 5 0 "
 			             Value="{Binding NAVODataSources.ProgressPercent}" />
-		</StackPanel>
-		<DockPanel LastChildFill="False"
+        </StackPanel>
+        <StackPanel>
+            <ListBox ItemsSource="{Binding BackgroundTasks}"
+                     HorizontalContentAlignment="Stretch"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     MaxHeight="200">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Controls:BackgroundTaskProgress BackgroundTask="{Binding}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
+        <DockPanel LastChildFill="False"
 		           Margin="5 10">
 			<Button Width="90"
 			        Margin="10 0 0 0"

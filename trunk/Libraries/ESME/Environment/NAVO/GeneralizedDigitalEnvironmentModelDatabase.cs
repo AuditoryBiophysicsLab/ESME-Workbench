@@ -38,5 +38,32 @@ namespace ESME.Environment.NAVO
 
             NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputPath, RequiredSupportFiles);
         }
+
+        public static void ExtractArea(NAVOBackgroundExtractor backgroundExtractor, out SoundSpeedField temperatureProfile, out SoundSpeedField salinityProfile)
+        {
+            var north = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
+            var south = (int)Math.Floor(backgroundExtractor.ExtractionArea.South);
+            var east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
+            var west = (int)Math.Floor(backgroundExtractor.ExtractionArea.West);
+
+            var expandedArea = new GeoRect(north, south, east, west);
+            var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6}", backgroundExtractor.DestinationPath, DatabasePath, backgroundExtractor.TimePeriod, expandedArea.North, expandedArea.South, expandedArea.East, expandedArea.West);
+
+            NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath, RequiredSupportFiles);
+            backgroundExtractor.Value++;
+
+            var temperatureFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}-temperature.xml", backgroundExtractor.TimePeriod));
+            var salinityFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}-salinity.xml", backgroundExtractor.TimePeriod));
+            
+            var field = SoundSpeed.Load(temperatureFileName);
+            File.Delete(temperatureFileName);
+            temperatureProfile = field.SoundSpeedFields[0];
+            backgroundExtractor.Value++;
+            
+            field = SoundSpeed.Load(salinityFileName);
+            File.Delete(salinityFileName);
+            salinityProfile = field.SoundSpeedFields[0];
+            backgroundExtractor.Value++;
+        }
     }
 }

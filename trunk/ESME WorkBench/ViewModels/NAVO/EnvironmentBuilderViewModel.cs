@@ -12,9 +12,11 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Data;
+using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESMEWorkBench.Data;
 using HRC.Navigation;
+using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.NAVO
@@ -371,6 +373,49 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
+        #region public ObservableCollection<BackgroundTask> BackgroundTasks { get; set; }
+
+        public ObservableCollection<BackgroundTask> BackgroundTasks
+        {
+            get { return _backgroundTasks ?? (_backgroundTasks = new ObservableCollection<BackgroundTask>()); }
+            set
+            {
+                if (_backgroundTasks == value) return;
+                if (_backgroundTasks != null) _backgroundTasks.CollectionChanged -= BackgroundTasksCollectionChanged;
+                _backgroundTasks = value;
+                if (_backgroundTasks != null) _backgroundTasks.CollectionChanged += BackgroundTasksCollectionChanged;
+                NotifyPropertyChanged(BackgroundTasksChangedEventArgs);
+            }
+        }
+
+        void BackgroundTasksCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(BackgroundTasksChangedEventArgs);
+            BackgroundTasksAreRunning = BackgroundTasks.Count > 0;
+        }
+        static readonly PropertyChangedEventArgs BackgroundTasksChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.BackgroundTasks);
+        ObservableCollection<BackgroundTask> _backgroundTasks;
+
+        #endregion
+
+        #region public bool BackgroundTasksAreRunning { get; set; }
+
+        public bool BackgroundTasksAreRunning
+        {
+            get { return _backgroundTasksAreRunning; }
+            set
+            {
+                if (_backgroundTasksAreRunning == value) return;
+                _backgroundTasksAreRunning = value;
+                NotifyPropertyChanged(BackgroundTasksAreRunningChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BackgroundTasksAreRunningChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentBuilderViewModel>(x => x.BackgroundTasksAreRunning);
+        bool _backgroundTasksAreRunning;
+
+        #endregion
+
         bool _bufferZoneSizeOk = true;
 
         #region BufferZoneSizeTextChangedCommand
@@ -403,6 +448,106 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #region ExtractAllCommand
 
+        void ExtractInBackground(List<NAVOTimePeriod> selectedTimePeriods, float desiredResolution, GeoRect extractionArea, AppSettings appSettings, string simAreaPath, bool useExpandedExtractionArea)
+        {
+            // Create a wind extractor
+            var windExtractor = new SMGCBackgroundExtractor
+            {
+                WorkerSupportsCancellation = false,
+                ExtractionArea = extractionArea,
+                SelectedTimePeriods = selectedTimePeriods,
+                NAVOConfiguration = appSettings.NAVOConfiguration,
+                DestinationPath = simAreaPath,
+                UseExpandedExtractionArea = useExpandedExtractionArea,
+            };
+            BackgroundTasks.Add(windExtractor);
+
+            // Create a sediment extractor
+            var sedimentExtractor = new BSTBackgroundExtractor
+            {
+                WorkerSupportsCancellation = false,
+                ExtractionArea = extractionArea,
+                NAVOConfiguration = appSettings.NAVOConfiguration,
+                DestinationPath = simAreaPath,
+                UseExpandedExtractionArea = useExpandedExtractionArea,
+            };
+            BackgroundTasks.Add(sedimentExtractor);
+
+            // Create a bathymetry extractor
+            var bathymetryExtractor = new DBDBBackgroundExtractor
+            {
+                WorkerSupportsCancellation = false,
+                ExtractionArea = extractionArea,
+                NAVOConfiguration = appSettings.NAVOConfiguration,
+                DestinationPath = simAreaPath,
+                UseExpandedExtractionArea = useExpandedExtractionArea,
+                SelectedResolution = desiredResolution,
+            };
+            BackgroundTasks.Add(bathymetryExtractor);
+
+            // Create a soundspeed averager/extender for each selected time period.  These averagers need the max bathymetry depth
+            // and the monthly sound speed fields.  The averagers will block until that data becomes available
+            var averagers = selectedTimePeriods.Select(timePeriod => new SoundSpeedBackgroundAverager
+            {
+                WorkerSupportsCancellation = false, 
+                TimePeriod = timePeriod,
+                ExtractionArea = extractionArea,
+                NAVOConfiguration = appSettings.NAVOConfiguration,
+                DestinationPath = simAreaPath,
+                UseExpandedExtractionArea = useExpandedExtractionArea,
+            }).ToList();
+
+            var requiredMonths = selectedTimePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
+            var allMonths = new List<NAVOTimePeriod>();
+            foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
+            var uniqueMonths = allMonths.Distinct().ToList();
+            uniqueMonths.Sort();
+            var extendedMonthlySoundSpeeds = new SoundSpeed();
+            var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
+            foreach (var month in uniqueMonths)
+            {
+                var soundSpeedExtractor = new GDEMBackgroundExtractor
+                {
+                    WorkerSupportsCancellation = false,
+                    TimePeriod = month,
+                    ExtractionArea = extractionArea,
+                    NAVOConfiguration = appSettings.NAVOConfiguration,
+                    DestinationPath = simAreaPath,
+                    UseExpandedExtractionArea = useExpandedExtractionArea,
+                };
+                soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
+                {
+                    var extractor = (GDEMBackgroundExtractor)sender;
+                    extendedMonthlySoundSpeeds.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
+                    if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
+                    foreach (var averager in averagers) averager.ExtendedMonthlySoundSpeeds = extendedMonthlySoundSpeeds;
+                };
+                soundSpeedExtractors.Add(soundSpeedExtractor);
+                BackgroundTasks.Add(soundSpeedExtractor);
+            }
+
+            bathymetryExtractor.RunWorkerCompleted += (sender, args) =>
+            {
+                // When the bathymetry extractor has completed, provide the max depth to all the averagers
+                var extractor = (DBDBBackgroundExtractor)sender;
+                var maxDepth = new EarthCoordinate<float>(extractor.Bathymetry.Minimum, Math.Abs(bathymetryExtractor.Bathymetry.Minimum.Data));
+                // The averagers block until the monthly soundspeed dataset is available, AND the bathymetry is available so we know the max depth
+                foreach (var soundSpeedExtractor in soundSpeedExtractors) soundSpeedExtractor.MaxDepth = maxDepth;
+            };
+
+
+            foreach (var averager in averagers)
+            {
+                BackgroundTasks.Add(averager);
+            }
+
+            foreach (var task in BackgroundTasks)
+            {
+                task.RunWorkerCompleted += (sender, e) => BackgroundTasks.Remove((BackgroundTask)sender);
+                task.Run();
+            }
+        }
+
         SimpleCommand<object, object> _extractAll;
 
         public SimpleCommand<object, object> ExtractAllCommand
@@ -422,7 +567,12 @@ namespace ESMEWorkBench.ViewModels.NAVO
                         if (SeasonCheckboxes != null)
                             selectedTimePeriods.AddRange(SeasonCheckboxes.SelectedTimePeriods);
                         if (selectedTimePeriods.Count < 1) return;
-
+                        var selectedResolution = NAVODataSources.DigitalBathymetricDatabase.SelectedResolution;
+                        var resTemp = selectedResolution.EndsWith("min") ? selectedResolution.Remove(selectedResolution.Length - 3) : selectedResolution;
+                        double desiredResolution;
+                        if (!double.TryParse(resTemp, out desiredResolution)) throw new FormatException("Illegal number format for selectedResolution: " + selectedResolution);
+                        ExtractInBackground(selectedTimePeriods, (float)desiredResolution, NAVODataSources.ExtractionArea, Globals.AppSettings, Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), UseExpandedExtractionArea);
+#if false
                         NAVODataSources.SelectedTimePeriods = selectedTimePeriods;
                         NAVODataSources.ExportCASSData = ExportCASSData;
                         NAVODataSources.UseExpandedExtractionArea = UseExpandedExtractionArea;
@@ -448,9 +598,11 @@ namespace ESMEWorkBench.ViewModels.NAVO
                         ExtractButtonText = "Extracting...";
                         _extractionCanceled = false;
                         //close the view.
+#endif
                     }));
             }
         }
+
 
         #endregion
 

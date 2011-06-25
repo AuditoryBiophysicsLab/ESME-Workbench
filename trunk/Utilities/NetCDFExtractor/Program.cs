@@ -136,9 +136,16 @@ namespace ImportGDEM
             }
 
             Console.WriteLine("Saving imported temperature data...");
-            temperatureFile.Save(Path.Combine(outputDirectory, "temperature.xml"));
+            var temperatureFileName = "temperature.xml";
+            var salinityFileName = "salinity.xml";
+            if (months.Count == 1)
+            {
+                temperatureFileName = string.Format("{0}-temperature.xml", months[0]);
+                salinityFileName = string.Format("{0}-salinity.xml", months[0]);
+            }
+            temperatureFile.Save(Path.Combine(outputDirectory, temperatureFileName));
             Console.WriteLine("Saving imported salinity data...");
-            salinityFile.Save(Path.Combine(outputDirectory, "salinity.xml"));
+            salinityFile.Save(Path.Combine(outputDirectory, salinityFileName));
         }
 
         static SoundSpeedField ImportGDEM(string fileName, string dataVarName, NAVOTimePeriod month, float north, float south, float east, float west)

@@ -41,6 +41,9 @@
     <Reference Include="Cinch.WPF">
       <HintPath>..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
     </Reference>
+    <Reference Include="Kent.Boogaart.Converters">
+      <HintPath>..\ESME WorkBench\External References\Kent.Boogaart.Converters.dll</HintPath>
+    </Reference>
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -68,6 +71,9 @@
     </Compile>
     <Compile Include="AcousticBuilder\AnalysisPointSettingsViewModel.cs" />
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Controls\BackgroundTaskProgress.xaml.cs">
+      <DependentUpon>BackgroundTaskProgress.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ColorBarView.xaml.cs">
       <DependentUpon>ColorBarView.xaml</DependentUpon>
     </Compile>
@@ -130,6 +136,10 @@
     <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="AcousticBuilder\AnalysisPointSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\BackgroundTaskProgress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

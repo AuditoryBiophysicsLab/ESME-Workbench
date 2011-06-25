@@ -10,6 +10,43 @@ namespace ESME.Environment.NAVO
     {
         public static string DatabasePath { get; set; }
 
+        public static Sediment ExtractArea(NAVOBackgroundExtractor backgroundExtractor)
+        {
+            backgroundExtractor.Status = "Extracting sediment data";
+
+            var north = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
+            var south = (int)Math.Floor(backgroundExtractor.ExtractionArea.South);
+            var east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
+            var west = (int)Math.Floor(backgroundExtractor.ExtractionArea.West);
+
+            backgroundExtractor.Maximum = (north - south + 1) * (east - west + 1) + 2;
+
+            var results = new Sediment();
+            var fileId = H5F.open(DatabasePath, H5F.OpenMode.ACC_RDONLY);
+            var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
+            var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
+
+            for (var lat = south; lat <= north; lat++)
+                for (var lon = west; lon <= east; lon++)
+                {
+                    var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
+                    //if (data != null) results.Samples.AddRange(data.Where(extractionArea.Contains));
+                    if (data != null) results.Samples.AddRange(data);
+                    backgroundExtractor.Value++;
+                }
+
+            results.Samples.RemoveDuplicates();
+            backgroundExtractor.Value++;
+            if (!backgroundExtractor.UseExpandedExtractionArea) results.Samples.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
+            backgroundExtractor.Value++;
+
+            H5G.close(lowResGroup);
+            H5G.close(highResGroup);
+            H5F.close(fileId);
+
+            return results;
+        }
+
         public static Sediment ExtractArea(string outputDirectory, GeoRect extractionArea, bool useExpandedExtractionArea)
         {
             var results = new Sediment();
