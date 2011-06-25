@@ -130,6 +130,9 @@
     <Compile Include="Services\HRCSaveFileService.cs" />
     <Compile Include="Utility\AppEventLog.cs" />
     <Compile Include="Utility\AssemblyTricks.cs" />
+    <Compile Include="Utility\BackgroundTaskAggregator.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Utility\BitFields.cs" />
     <Compile Include="Utility\Colormap.cs" />
     <Compile Include="Utility\Decimator2D.cs" />
