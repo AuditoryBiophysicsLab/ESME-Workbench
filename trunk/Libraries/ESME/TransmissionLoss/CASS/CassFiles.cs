@@ -236,7 +236,7 @@ namespace ESME.TransmissionLoss.CASS
                 envFile.WriteLine();
 
                 double lat, lon;
-                if (backgroundTask != null) backgroundTask.Maximum = (int)(((geoRect.East - geoRect.West) * 4) * ((geoRect.North - geoRect.South) * 4));
+                if (backgroundTask != null) backgroundTask.Maximum += (int)(((geoRect.East - geoRect.West) * 4) * ((geoRect.North - geoRect.South) * 4));
                 for (lon = geoRect.West; lon < geoRect.East; lon += 0.25)
                 {
                     for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
