@@ -22,7 +22,7 @@ namespace ImportGDEM
             var temperatureFiles = new List<string>();
             var salinityFiles = new List<string>();
             var monthNames = new List<string>();
-
+            var isNewMode = false;
             if (args.Length < 1)
             {
                 Usage();
@@ -55,6 +55,9 @@ namespace ImportGDEM
                     case "-west":
                         west = float.Parse(args[++i]);
                         break;
+                    case "-new":
+                        isNewMode = true;
+                        break;
                     default:
                         Usage();
                         return;
@@ -82,7 +85,7 @@ namespace ImportGDEM
                 salinityFiles.Add(FindSalinityFile(month, gdemRootDirectory));
             }
 
-            ImportGDEM(temperatureFiles, salinityFiles, months, outputDirectory, north, south, east, west);
+            ImportGDEM(temperatureFiles, salinityFiles, months, outputDirectory, north, south, east, west, isNewMode);
 
             Console.WriteLine(@"success!");
         }
@@ -117,7 +120,7 @@ namespace ImportGDEM
 
         static List<string> GetStringListFromArg(string arg, char separator) { return arg.Split(separator).ToList(); }
 
-        static void ImportGDEM(IList<string> temperatureFiles, IList<string> salinityFiles, IList<NAVOTimePeriod> months, string outputDirectory, float north, float south, float east, float west)
+        static void ImportGDEM(IList<string> temperatureFiles, IList<string> salinityFiles, IList<NAVOTimePeriod> months, string outputDirectory, float north, float south, float east, float west, bool isNewMode)
         { 
             var temperatureFile = new SoundSpeed();
             var salinityFile = new SoundSpeed();
@@ -138,7 +141,7 @@ namespace ImportGDEM
             Console.WriteLine("Saving imported temperature data...");
             var temperatureFileName = "temperature.xml";
             var salinityFileName = "salinity.xml";
-            if (months.Count == 1)
+            if (isNewMode && (months.Count == 1))
             {
                 temperatureFileName = string.Format("{0}-temperature.xml", months[0]);
                 salinityFileName = string.Format("{0}-salinity.xml", months[0]);

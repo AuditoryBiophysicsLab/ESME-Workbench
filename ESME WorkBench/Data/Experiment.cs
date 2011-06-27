@@ -176,6 +176,42 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
+        #region public string TemperatureFilename { get; set; }
+
+        public string TemperatureFilename
+        {
+            get { return _temperatureFilename; }
+            set
+            {
+                if (_temperatureFilename == value) return;
+                _temperatureFilename = value;
+                NotifyPropertyChanged(TemperatureFilenameChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs TemperatureFilenameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.TemperatureFilename);
+        private string _temperatureFilename;
+
+        #endregion
+
+        #region public string SalinityFilename { get; set; }
+
+        public string SalinityFilename
+        {
+            get { return _salinityFilename; }
+            set
+            {
+                if (_salinityFilename == value) return;
+                _salinityFilename = value;
+                NotifyPropertyChanged(SalinityFilenameChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs SalinityFilenameChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.SalinityFilename);
+        private string _salinityFilename;
+
+        #endregion
+
         #region public string SedimentFileName { get; set; }
 
         [XmlIgnore]
@@ -1199,16 +1235,6 @@ namespace ESMEWorkBench.Data
                 DisplayEnvironmentData(WindSpeed.TimePeriods[0].EnvironmentData, "Wind", LayerType.WindSpeed, 3);
             }
 
-            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
-            {
-                if (SoundSpeedFileName.EndsWith(".xml"))
-                    SoundSpeedField = SoundSpeed.Load(SoundSpeedFileName).SoundSpeedFields[0];
-            }
-            if (SoundSpeedField != null)
-            {
-                DisplayEnvironmentData(SoundSpeedField.EnvironmentData, "Sound Speed", LayerType.SoundSpeed, 3);
-            }
-
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
             {
                 if (BathymetryFileName.EndsWith(".chb"))
@@ -1283,6 +1309,24 @@ namespace ESMEWorkBench.Data
                 bathyBitmapLayer.West = (float)Bathymetry.Longitudes.First();
                 bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
                 MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+            }
+
+            if ((SoundSpeedFileName != null) && (File.Exists(SoundSpeedFileName)))
+                SoundSpeedField = SoundSpeed.Load(SoundSpeedFileName).SoundSpeedFields[0];
+            else if ((TemperatureFilename != null) && (SalinityFilename != null) && File.Exists(TemperatureFilename) && File.Exists(SalinityFilename))
+            {
+                EarthCoordinate<float> deepestPoint = null;
+                GeoRect areaOfInterest = null;
+                if (Bathymetry != null)
+                {
+                    deepestPoint = new EarthCoordinate<float>(Bathymetry.Minimum, Math.Abs(Bathymetry.Minimum.Data));
+                    areaOfInterest = Bathymetry.GeoRect;
+                }
+                SoundSpeedField = SoundSpeed.Load(TemperatureFilename, SalinityFilename, deepestPoint, areaOfInterest).SoundSpeedFields[0];
+            }
+            if (SoundSpeedField != null)
+            {
+                DisplayEnvironmentData(SoundSpeedField.EnvironmentData, "Sound Speed", LayerType.SoundSpeed, 3);
             }
 
             if ((SedimentFileName != null) && (File.Exists(SedimentFileName)))

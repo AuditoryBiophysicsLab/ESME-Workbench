@@ -151,7 +151,7 @@ namespace ESME.Environment.NAVO
         void ExtractAreas(object sender, DoWorkEventArgs args)
         {
 
-            var backgroundTask = (BackgroundTask)sender;
+            var backgroundTask = (BackgroundWorker)sender;
 
             var tempDirectory = Path.Combine(_localStorageRoot, "NAVOTemp");
 
@@ -226,7 +226,7 @@ namespace ESME.Environment.NAVO
                         Wind = wind,
                 };
 
-                environment.Export(_simAreaPath, SelectedTimePeriods, environment.Bathymetry.Samples.GeoRect, backgroundTask);
+                environment.Export(_simAreaPath, SelectedTimePeriods, environment.Bathymetry.Samples.GeoRect);
                 if (backgroundTask.CancellationPending) return;
             }
 

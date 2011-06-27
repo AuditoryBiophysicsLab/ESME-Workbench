@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using Cinch;
 
@@ -16,7 +17,7 @@ namespace ESME.Environment.NAVO
                 if (_extendedMonthlySoundSpeeds == value) return;
                 _extendedMonthlySoundSpeeds = value;
                 NotifyPropertyChanged(MonthlySoundSpeedsChangedEventArgs);
-                if (_extendedMonthlySoundSpeeds != null) _mutex.ReleaseMutex();
+                _semaphore.Release();
             }
         }
 
@@ -43,7 +44,7 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        readonly Mutex _mutex = new Mutex(true);
+        readonly Semaphore _semaphore = new Semaphore(0, 1);
 
         protected override void Run(object sender, DoWorkEventArgs e)
         {
@@ -52,7 +53,7 @@ namespace ESME.Environment.NAVO
             RunState = "Waiting for monthly soundspeeds";
             TaskName = "Soundspeed averaging for " + backgroundExtractor.TimePeriod;
 
-            _mutex.WaitOne();
+            _semaphore.WaitOne();
 
             RunState = "Running";
             if (UniqueMonths.Count <= 1)
@@ -64,7 +65,6 @@ namespace ESME.Environment.NAVO
             }
 
             ExtendedAverageSoundSpeedField = SoundSpeed.Average(ExtendedMonthlySoundSpeeds, backgroundExtractor.TimePeriod, this);
-            _mutex.ReleaseMutex();
         }
     }
 }

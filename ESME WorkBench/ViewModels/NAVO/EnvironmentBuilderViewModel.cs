@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -423,34 +424,48 @@ namespace ESMEWorkBench.ViewModels.NAVO
         bool _bufferZoneSizeOk = true;
 
         #region ExtractAllCommand
-        static void ExtractInBackground(List<NAVOTimePeriod> selectedTimePeriods, float desiredResolution, GeoRect extractionArea, AppSettings appSettings, string environmentRoot, string simAreaPath, bool useExpandedExtractionArea, BackgroundTaskAggregator aggregator, bool exportToNAEMO)
+        void ExtractInBackground(List<NAVOTimePeriod> selectedTimePeriods, float desiredResolution, GeoRect extractionArea, AppSettings appSettings, string environmentRoot, string simAreaPath, bool useExpandedExtractionArea, BackgroundTaskAggregator aggregator, bool exportToNAEMO)
         {
             var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
             if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
             if (!Directory.Exists(environmentRoot)) Directory.CreateDirectory(environmentRoot);
             if (!Directory.Exists(simAreaPath)) Directory.CreateDirectory(simAreaPath);
 
+            var assemblyLocation = Assembly.GetCallingAssembly().Location;
+            if (assemblyLocation == null) throw new ApplicationException("Assembly can't be null!");
+            var extractionPath = Path.GetDirectoryName(assemblyLocation);
+            if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
+
+            var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
+            var gdemRequiredSupportFiles = new List<string>
+                                               {
+                                                   Path.Combine(extractionPath, "netcdf.dll"),
+                                                   Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
+                                               };
+
             // Create a NAEMO exporter if we've been asked to export to NAEMO
             var naemoEnvironmentExporters = !exportToNAEMO
                                                     ? null
                                                     : selectedTimePeriods.Select(t => new CASSBackgroundExporter
                                                     {
-                                                            WorkerSupportsCancellation = false,
-                                                            TimePeriod = t,
-                                                            ExtractionArea = extractionArea,
-                                                            NAVOConfiguration = appSettings.NAVOConfiguration,
-                                                            DestinationPath = simAreaPath,
-                                                            UseExpandedExtractionArea = useExpandedExtractionArea,
+                                                        WorkerSupportsCancellation = false,
+                                                        TimePeriod = t,
+                                                        ExtractionArea = extractionArea,
+                                                        NAVOConfiguration = appSettings.NAVOConfiguration,
+                                                        DestinationPath = simAreaPath,
+                                                        UseExpandedExtractionArea = useExpandedExtractionArea,
+                                                        TaskName = "EnvironmentExporter" + t,
                                                     }).ToList();
             var naemoBathymetryExporter = !exportToNAEMO
                                                   ? null
                                                   : new CASSBackgroundExporter
                                                   {
-                                                          WorkerSupportsCancellation = false,
-                                                          ExtractionArea = extractionArea,
-                                                          NAVOConfiguration = appSettings.NAVOConfiguration,
-                                                          DestinationPath = simAreaPath,
-                                                          UseExpandedExtractionArea = useExpandedExtractionArea,
+                                                        WorkerSupportsCancellation = false,
+                                                        ExtractionArea = extractionArea,
+                                                        NAVOConfiguration = appSettings.NAVOConfiguration,
+                                                        DestinationPath = simAreaPath,
+                                                        UseExpandedExtractionArea = useExpandedExtractionArea,
+                                                        TaskName = "BathymetryExporter",
                                                   };
 
             // Create a wind extractor
@@ -540,6 +555,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     NAVOConfiguration = appSettings.NAVOConfiguration,
                     DestinationPath = tempPath,
                     UseExpandedExtractionArea = useExpandedExtractionArea,
+                    ExtractionProgramPath = gdemExtractionProgramPath,
+                    RequiredSupportFiles = gdemRequiredSupportFiles,
                 };
                 soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
                 {
@@ -547,6 +564,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
                     monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
                     extendedMonthlySoundSpeeds.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
+                    Console.WriteLine("soundspeed extractor for {0} complete. {1} extractors are still busy", extractor.TimePeriod, soundSpeedExtractors.Where(s => s.IsBusy).Count());
                     if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
                     foreach (var averager in averagers) averager.ExtendedMonthlySoundSpeeds = extendedMonthlySoundSpeeds;
                     monthlyTemperature.Save(Path.Combine(environmentRoot, "temperature.xml"));
@@ -581,10 +599,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             if (naemoEnvironmentExporters != null) foreach (var naemo in naemoEnvironmentExporters) aggregator.BackgroundTasks.Add(naemo);
 
             aggregator.TaskName = "Environmental data extraction";
-
             aggregator.Run();
-            foreach (var task in aggregator.BackgroundTasks)
-                task.Run();
         }
 
         SimpleCommand<object, object> _extractAll;
@@ -610,9 +625,46 @@ namespace ESMEWorkBench.ViewModels.NAVO
                         var resTemp = selectedResolution.EndsWith("min") ? selectedResolution.Remove(selectedResolution.Length - 3) : selectedResolution;
                         double desiredResolution;
                         if (!double.TryParse(resTemp, out desiredResolution)) throw new FormatException("Illegal number format for selectedResolution: " + selectedResolution);
+#if true
                         BackgroundTaskAggregator = new BackgroundTaskAggregator();
+                        BackgroundTaskAggregator.RunWorkerCompleted += (s, e) =>
+                        {
+                            var tempDirectory = Path.Combine(_experiment.LocalStorageRoot, "NAVOTemp");
+                            // At this point, the user can no longer cancel the operation.)
+                            if (!Directory.Exists(_experiment.EnvironmentRoot)) Directory.CreateDirectory(_experiment.EnvironmentRoot);
+                            var files = Directory.GetFiles(_experiment.EnvironmentRoot);
+                            foreach (var file in files) File.Delete(file);
+                            files = Directory.GetFiles(tempDirectory);
+                            foreach (var sourceFile in files)
+                            {
+                                var destFile = Path.Combine(_experiment.EnvironmentRoot, Path.GetFileName(sourceFile));
+                                File.Move(sourceFile, destFile);
+                            }
+                            Directory.Delete(tempDirectory, true);
+
+                            NotExtractingData = true;
+                            ExtractButtonText = "Extract";
+                            CommandManager.InvalidateRequerySuggested();
+                            if (_extractionCanceled) return;
+                            if (selectedTimePeriods.Count > 0)
+                            {
+                                _experiment.WindSpeedFileName = Path.Combine(_experiment.EnvironmentRoot, "wind.xml");
+                                _experiment.TemperatureFilename = Path.Combine(_experiment.EnvironmentRoot, "temperature.xml");
+                                _experiment.SalinityFilename = Path.Combine(_experiment.EnvironmentRoot, "salinity.xml");
+                                _experiment.SedimentFileName = Path.Combine(_experiment.EnvironmentRoot, "sediment.xml");
+                                _experiment.BathymetryFileName = NAVODataSources.BathymetryFilename;
+                                _experiment.SimArea = NAVODataSources.ExtractionArea;
+                                _experiment.AvailableTimePeriods = new List<NAVOTimePeriod>(selectedTimePeriods);
+                            }
+                            AppSettings.Save(); //remember the new values. 
+                            CloseActivePopUpCommand.Execute(true);
+                        };
+                        NotExtractingData = false;
+                        ExtractButtonText = "Extracting...";
+                        _extractionCanceled = false;
+
                         ExtractInBackground(selectedTimePeriods, (float)desiredResolution, NAVODataSources.ExtractionArea, Globals.AppSettings, Path.Combine(_experiment.LocalStorageRoot, "NAVOTemp"), Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), UseExpandedExtractionArea, BackgroundTaskAggregator, ExportCASSData);
-#if false
+#else
                         NAVODataSources.SelectedTimePeriods = selectedTimePeriods;
                         NAVODataSources.ExportCASSData = ExportCASSData;
                         NAVODataSources.UseExpandedExtractionArea = UseExpandedExtractionArea;

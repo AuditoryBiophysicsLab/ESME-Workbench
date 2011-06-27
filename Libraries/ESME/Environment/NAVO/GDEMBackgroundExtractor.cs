@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Threading;
 using Cinch;
 using HRC.Navigation;
@@ -53,7 +56,7 @@ namespace ESME.Environment.NAVO
                 if (_maxDepth == value) return;
                 _maxDepth = value;
                 NotifyPropertyChanged(MaxDepthChangedEventArgs);
-                if (_maxDepth != null) _maxDepthMutex.ReleaseMutex();
+                _semaphore.Release();
             }
         }
 
@@ -80,35 +83,87 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        readonly Mutex _maxDepthMutex = new Mutex(true);
+        #region public string ExtractionProgramPath { get; set; }
+
+        public string ExtractionProgramPath
+        {
+            get { return _extractionProgramPath; }
+            set
+            {
+                if (_extractionProgramPath == value) return;
+                _extractionProgramPath = value;
+                NotifyPropertyChanged(ExtractionProgramPathChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs ExtractionProgramPathChangedEventArgs = ObservableHelper.CreateArgs<GDEMBackgroundExtractor>(x => x.ExtractionProgramPath);
+        private string _extractionProgramPath;
+
+        #endregion
+
+        #region public List<string> RequiredSupportFiles { get; set; }
+
+        public List<string> RequiredSupportFiles
+        {
+            get { return _requiredSupportFiles; }
+            set
+            {
+                if (_requiredSupportFiles == value) return;
+                _requiredSupportFiles = value;
+                NotifyPropertyChanged(RequiredSupportFilesChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs RequiredSupportFilesChangedEventArgs = ObservableHelper.CreateArgs<GDEMBackgroundExtractor>(x => x.RequiredSupportFiles);
+        private List<string> _requiredSupportFiles;
+
+        #endregion
+
+        readonly Semaphore _semaphore = new Semaphore(0, 1);
 
         protected override void Run(object sender, DoWorkEventArgs e)
         {
             RunState = "Running";
-            var backgroundExtractor = (NAVOBackgroundExtractor)e.Argument;
+            var backgroundExtractor = (GDEMBackgroundExtractor)e.Argument;
             TaskName = "Temperature and salinity data extraction for " + backgroundExtractor.TimePeriod;
             backgroundExtractor.Maximum = 5;
-            GeneralizedDigitalEnvironmentModelDatabase.ExtractArea(backgroundExtractor, out _temperatureField, out _salinityField);
+            var north = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
+            var south = (int)Math.Floor(backgroundExtractor.ExtractionArea.South);
+            var east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
+            var west = (int)Math.Floor(backgroundExtractor.ExtractionArea.West);
+
+            var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6} -new", backgroundExtractor.DestinationPath, backgroundExtractor.NAVOConfiguration.GDEMDirectory, backgroundExtractor.TimePeriod, north, south, east, west);
+
+            var result = NAVOExtractionProgram.Execute(backgroundExtractor.ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath, backgroundExtractor.RequiredSupportFiles);
+            backgroundExtractor.Value++;
+
+            var temperatureFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}-temperature.xml", backgroundExtractor.TimePeriod));
+            var salinityFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}-salinity.xml", backgroundExtractor.TimePeriod));
+
+            var field = SoundSpeed.Load(temperatureFileName);
+            File.Delete(temperatureFileName);
+            TemperatureField = field.SoundSpeedFields[0];
+            backgroundExtractor.Value++;
+
+            field = SoundSpeed.Load(salinityFileName);
+            File.Delete(salinityFileName);
+            SalinityField = field.SoundSpeedFields[0];
+            backgroundExtractor.Value++;
+
             TaskName = "Soundspeed calculation for " + TimePeriod;
             RunState = "Waiting for bathymetry";
-            _maxDepthMutex.WaitOne();
+            Console.WriteLine("GDEM: Waiting on bathymetry for " + TimePeriod);
+            _semaphore.WaitOne();
             RunState = "Running";
             backgroundExtractor.Status = "Creating soundspeed profile for " + TimePeriod;
 
-            var temperature = new SoundSpeed();
-            temperature.SoundSpeedFields.Add(_temperatureField);
-            
-            var salinity = new SoundSpeed();
-            salinity.SoundSpeedFields.Add(_salinityField);
-            
-            var soundSpeed = SoundSpeed.Create(temperature, salinity);
+            var soundSpeedField = SoundSpeedField.Create(TemperatureField, SalinityField);
             backgroundExtractor.Value++;
 
             backgroundExtractor.Status = "Extending soundspeed profile for " + TimePeriod;
-            soundSpeed.SoundSpeedFields[0].Extend(_temperatureField, _salinityField, MaxDepth, backgroundExtractor.ExtractionArea);
-            ExtendedSoundSpeedField = soundSpeed.SoundSpeedFields[0];
+            soundSpeedField.Extend(TemperatureField, SalinityField, MaxDepth, backgroundExtractor.ExtractionArea);
+            ExtendedSoundSpeedField = soundSpeedField;
             backgroundExtractor.Value++;
-            _maxDepthMutex.ReleaseMutex();
         }
     }
 }

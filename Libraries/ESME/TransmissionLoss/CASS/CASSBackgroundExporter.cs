@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using Cinch;
@@ -20,7 +21,8 @@ namespace ESME.TransmissionLoss.CASS
                 if (_bathymetry == value) return;
                 _bathymetry = value;
                 NotifyPropertyChanged(BathymetryChangedEventArgs);
-                if ((Bathymetry != null) || ((GeoRect != null) && (Sediment != null) && (ExtendedAndAveragedSoundSpeeds != null) && (Wind != null))) _mutex.ReleaseMutex();
+                Console.WriteLine("CASS Exporter got bathymetry...");
+                CheckForMutexRelease();
             }
         }
 
@@ -39,7 +41,7 @@ namespace ESME.TransmissionLoss.CASS
                 if (_geoRect == value) return;
                 _geoRect = value;
                 NotifyPropertyChanged(GeoRectChangedEventArgs);
-                if ((Bathymetry != null) || ((GeoRect != null) && (Sediment != null) && (ExtendedAndAveragedSoundSpeeds != null) && (Wind != null))) _mutex.ReleaseMutex();
+                CheckForMutexRelease();
             }
         }
 
@@ -58,7 +60,7 @@ namespace ESME.TransmissionLoss.CASS
                 if (_sediment == value) return;
                 _sediment = value;
                 NotifyPropertyChanged(SedimentChangedEventArgs);
-                if ((Bathymetry != null) || ((GeoRect != null) && (Sediment != null) && (ExtendedAndAveragedSoundSpeeds != null) && (Wind != null))) _mutex.ReleaseMutex();
+                CheckForMutexRelease();
             }
         }
 
@@ -77,7 +79,7 @@ namespace ESME.TransmissionLoss.CASS
                 if (_extendedAndAveragedSoundSpeeds == value) return;
                 _extendedAndAveragedSoundSpeeds = value;
                 NotifyPropertyChanged(ExtendedAndAveragedSoundSpeedsChangedEventArgs);
-                if ((Bathymetry != null) || ((GeoRect != null) && (Sediment != null) && (ExtendedAndAveragedSoundSpeeds != null) && (Wind != null))) _mutex.ReleaseMutex();
+                CheckForMutexRelease();
             }
         }
 
@@ -96,7 +98,7 @@ namespace ESME.TransmissionLoss.CASS
                 if (_wind == value) return;
                 _wind = value;
                 NotifyPropertyChanged(WindChangedEventArgs);
-                if ((Bathymetry != null) || ((GeoRect != null) && (Sediment != null) && (ExtendedAndAveragedSoundSpeeds != null) && (Wind != null))) _mutex.ReleaseMutex();
+                CheckForMutexRelease();
             }
         }
 
@@ -105,34 +107,41 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
-        readonly Mutex _mutex = new Mutex(true);
+        void CheckForMutexRelease()
+        {
+            if ((Bathymetry != null) || ((GeoRect != null) && (Sediment != null) && (ExtendedAndAveragedSoundSpeeds != null) && (Wind != null)))
+                _semaphore.Release();
+        }
+
+        readonly Semaphore _semaphore = new Semaphore(0, 1);
 
         protected override void Run(object sender, DoWorkEventArgs e)
         {
-            var backgroundExtractor = (NAVOBackgroundExtractor)e.Argument;
+            var backgroundExtractor = (CASSBackgroundExporter)e.Argument;
 
-            backgroundExtractor.Maximum = 1;
             RunState = "Waiting for extended soundspeeds";
             TaskName = "Exporting NAEMO data";
-
-            _mutex.WaitOne();
+            Console.WriteLine("CASS Exporter about to wait.");
+            _semaphore.WaitOne();
             RunState = "Running";
 
             if (Bathymetry != null)
             {
+                Console.WriteLine("CASS Exporter about export bathymetry...");
                 TaskName = "Exporting NAEMO bathymetry";
                 Bathymetry.ToYXZ(Path.Combine(backgroundExtractor.DestinationPath, "Bathymetry", "bathymetry.txt"), -1);
             }
             else
             {
+                Console.WriteLine("CASS Exporter about export environment data for {0}", TimePeriod);
                 TaskName = "Exporting NAEMO environment for " + TimePeriod;
                 var environmentFileName = Path.Combine(backgroundExtractor.DestinationPath, "Environment", "env_" + TimePeriod.ToString().ToLower() + ".dat");
 
-                CASSFiles.WriteEnvironmentFile(environmentFileName, GeoRect, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod]);
+                CASSFiles.WriteEnvironmentFile(environmentFileName, GeoRect, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], backgroundExtractor);
+                Console.WriteLine("CASS Exporter finished exporting environment data for {0}", TimePeriod);
             }
 
             backgroundExtractor.Value++;
-            _mutex.ReleaseMutex();
         }
     }
 }

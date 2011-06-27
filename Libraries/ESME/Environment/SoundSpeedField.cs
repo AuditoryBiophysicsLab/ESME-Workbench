@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Environment
 {
@@ -57,7 +58,17 @@ namespace ESME.Environment
                 profile.Extend(DeepestSSP);
         }
 
-        public SoundSpeedField Extend(SoundSpeedField sourceTemperatureField, SoundSpeedField sourceSalinityField, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest)
+        public static SoundSpeedField Create(SoundSpeedField temperatureField, SoundSpeedField salinityField, BackgroundTask backgroundTask = null)
+        {
+            if (temperatureField.TimePeriod != salinityField.TimePeriod) throw new DataException("");
+            VerifyThatProfilePointsMatch(temperatureField, salinityField);
+            var result = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
+            foreach (var temperatureProfile in temperatureField.EnvironmentData)
+                result.EnvironmentData.Add(ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
+            return result;
+        }
+
+        public SoundSpeedField Extend(SoundSpeedField sourceTemperatureField, SoundSpeedField sourceSalinityField, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest = null, BackgroundTask backgroundTask = null)
         {
             if ((TimePeriod != sourceTemperatureField.TimePeriod) || (TimePeriod != sourceSalinityField.TimePeriod))
                 throw new DataException("");
@@ -70,7 +81,7 @@ namespace ESME.Environment
             var salinityField = new SoundSpeedField { EnvironmentData = salinityData };
 
             var soundSpeedData = EnvironmentData;
-            soundSpeedData.TrimToNearestPoints(areaOfInterest);
+            if (areaOfInterest != null) soundSpeedData.TrimToNearestPoints(areaOfInterest);
             var soundSpeedField = new SoundSpeedField
             {
                 EnvironmentData = soundSpeedData,
