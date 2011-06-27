@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using ESME.Environment.NAVO;
+using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.Environment
@@ -46,24 +46,37 @@ namespace ESME.Environment
             return new SoundSpeed { SoundSpeedFields = XmlSerializer<List<SoundSpeedField>>.Load(filename, ReferencedTypes) };
         }
 
-        public static SoundSpeed Create(SoundSpeed temperatureData, SoundSpeed salinityData)
+        public static SoundSpeed Load(string temperatureFilename, string salinityFilename, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null, BackgroundTask backgroundTask = null)
+        {
+            var temperatureData = Load(temperatureFilename);
+            var salinityData = Load(salinityFilename);
+            VerifyThatTimePeriodsMatch(temperatureData, salinityData);
+            var soundSpeed = Create(temperatureData, salinityData, backgroundTask);
+            if (deepestPoint == null) return soundSpeed;
+            soundSpeed.Extend(temperatureData, salinityData, deepestPoint, areaOfInterest);
+            foreach (var soundSpeedField in soundSpeed.SoundSpeedFields)
+                soundSpeedField.Extend(temperatureData[soundSpeedField.TimePeriod], salinityData[soundSpeedField.TimePeriod], deepestPoint, areaOfInterest);
+            return soundSpeed;
+        }
+
+        public void Extend(SoundSpeed temperatureData, SoundSpeed salinityData, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest, BackgroundTask backgroundTask = null)
+        {
+            VerifyThatTimePeriodsMatch(this, temperatureData);
+            VerifyThatTimePeriodsMatch(temperatureData, salinityData);
+
+            foreach (var soundSpeedField in SoundSpeedFields)
+                soundSpeedField.Extend(temperatureData[soundSpeedField.TimePeriod], salinityData[soundSpeedField.TimePeriod], deepestPoint, areaOfInterest, backgroundTask);
+        }
+
+        public static SoundSpeed Create(SoundSpeed temperatureData, SoundSpeed salinityData, BackgroundTask backgroundTask = null)
         {
             VerifyThatTimePeriodsMatch(temperatureData, salinityData);
 
             var soundSpeedFile = new SoundSpeed();
             foreach (var temperatureField in temperatureData.SoundSpeedFields)
-            {
-                var salinityField = salinityData[temperatureField.TimePeriod];
-                SoundSpeedField.VerifyThatProfilePointsMatch(temperatureField, salinityField);
-                var field = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
-                foreach (var temperatureProfile in temperatureField.EnvironmentData)
-                    field.EnvironmentData.Add(ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
-                soundSpeedFile.SoundSpeedFields.Add(field);
-            }
+                soundSpeedFile.SoundSpeedFields.Add(SoundSpeedField.Create(temperatureField, salinityData[temperatureField.TimePeriod], backgroundTask));
             return soundSpeedFile;
         }
-
-        public delegate void MessageDelegate(string message);
 
         public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods, BackgroundTask backgroundTask = null)
         {
@@ -86,7 +99,7 @@ namespace ESME.Environment
         {
             if (backgroundTask != null) backgroundTask.Status = string.Format("Averaging soundspeeds for {0}", timePeriod);
             var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList();
-            if (backgroundTask != null) backgroundTask.Maximum += months.Count + 1;
+            if (backgroundTask != null) backgroundTask.Maximum += months.Count;
             var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
             foreach (var month in months)
             {
@@ -101,6 +114,5 @@ namespace ESME.Environment
             foreach (var field1 in data1.SoundSpeedFields.Where(field1 => data2[field1.TimePeriod] == null)) throw new DataException(string.Format("SoundSpeeds do not contain the same time periods. Data 1 has time period {0}, data 2 does not", field1.TimePeriod));
             foreach (var field2 in data2.SoundSpeedFields.Where(field2 => data1[field2.TimePeriod] == null)) throw new DataException(string.Format("SoundSpeeds do not contain the same time periods. Data 2 has time period {0}, data 1 does not", field2.TimePeriod));
         }
-
     }
 }

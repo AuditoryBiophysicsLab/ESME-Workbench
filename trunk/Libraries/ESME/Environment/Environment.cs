@@ -78,6 +78,7 @@ namespace ESME.Environment
                 if (_salinity == value) return;
                 _salinity = value;
                 NotifyPropertyChanged(SalinityChangedEventArgs);
+                ComputeSoundSpeedIfNeeded();
             }
         }
 
@@ -121,6 +122,14 @@ namespace ESME.Environment
         Wind _wind;
 
         #endregion
+
+        void ComputeSoundSpeedIfNeeded()
+        {
+            if ((SoundSpeed == null) && (Temperature != null) && (Salinity != null))
+            {
+                SoundSpeed = SoundSpeed.Create(Temperature, Salinity);
+            }
+        }
 
         public void Export(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, BackgroundTask backgroundTask = null)
         {
@@ -184,6 +193,7 @@ namespace ESME.Environment
             {
                 if (backgroundTask != null) backgroundTask.Status = string.Format("Extending soundspeeds for {0}", month);
                 extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(SoundSpeed[month].Extend(Temperature[month], Salinity[month], deepestPoint, areaToExport));
+                if (backgroundTask != null) backgroundTask.Value++;
                 if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
             }
             
@@ -196,6 +206,7 @@ namespace ESME.Environment
                 if (backgroundTask != null) backgroundTask.Status = string.Format("Exporting environment data for {0}", timePeriod);
                 var environmentFileName = Path.Combine(Path.Combine(simAreaPath, "Environment"), "env_" + timePeriod.ToString().ToLower() + ".dat");
                 CASSFiles.WriteEnvironmentFile(environmentFileName, selectedBathymetry.Samples.GeoRect, Sediment, extendedAndAveragedSoundSpeeds[timePeriod], Wind[timePeriod]);
+                if (backgroundTask != null) backgroundTask.Value++;
                 if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
             }
         }

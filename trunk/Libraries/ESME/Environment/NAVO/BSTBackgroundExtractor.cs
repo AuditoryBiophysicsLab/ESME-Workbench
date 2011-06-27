@@ -1,5 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using Cinch;
+using HDF5DotNet;
 
 namespace ESME.Environment.NAVO
 {
@@ -28,7 +31,85 @@ namespace ESME.Environment.NAVO
             RunState = "Running";
             TaskName = "Sediment data extraction";
             var backgroundExtractor = (NAVOBackgroundExtractor)e.Argument;
-            Sediment = BottomSedimentTypeDatabase.ExtractArea(backgroundExtractor);
+            backgroundExtractor.Status = "Extracting sediment data";
+
+            var north = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
+            var south = (int)Math.Floor(backgroundExtractor.ExtractionArea.South);
+            var east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
+            var west = (int)Math.Floor(backgroundExtractor.ExtractionArea.West);
+
+            backgroundExtractor.Maximum = (north - south + 1) * (east - west + 1) + 2;
+
+            Sediment = new Sediment();
+            var fileId = H5F.open(backgroundExtractor.NAVOConfiguration.BSTDirectory, H5F.OpenMode.ACC_RDONLY);
+            var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
+            var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
+
+            for (var lat = south; lat <= north; lat++)
+                for (var lon = west; lon <= east; lon++)
+                {
+                    var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
+                    //if (data != null) results.Samples.AddRange(data.Where(extractionArea.Contains));
+                    if (data != null) Sediment.Samples.AddRange(data);
+                    backgroundExtractor.Value++;
+                }
+
+            Sediment.Samples.RemoveDuplicates();
+            backgroundExtractor.Value++;
+            if (!backgroundExtractor.UseExpandedExtractionArea) Sediment.Samples.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
+            backgroundExtractor.Value++;
+
+            H5G.close(lowResGroup);
+            H5G.close(highResGroup);
+            H5F.close(fileId);
         }
+
+        static IEnumerable<SedimentSample> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
+        {
+            var result = ReadDataset(highResGroup, latitude, longitude);
+            double resolutionStep;
+            string resolution;
+            if (result != null)
+            {
+                resolutionStep = 6.0 / 3600.0;
+                resolution = "6s";
+            }
+            else
+            {
+                result = ReadDataset(lowResGroup, latitude, longitude);
+                //if (result == null) throw new KeyNotFoundException(string.Format("Unable to locate sediment data for lat: {0}, lon: {1}", latitude, longitude));
+                if (result == null) return null;
+                resolutionStep = 5.0 / 60.0;
+                resolution = "5m";
+            }
+            var sedimentList = new List<SedimentSample>();
+            for (var i = 0; i < result.GetLength(0); i++)
+                for (var j = 0; j < result.GetLength(1); j++)
+                    sedimentList.Add(new SedimentSample(latitude + (i * resolutionStep), longitude + (j * resolutionStep), new SedimentSampleBase
+                    {
+                        SampleValue = result[i, j],
+                        Resolution = resolution,
+                    }));
+            return sedimentList;
+        }
+
+        static short[,] ReadDataset(H5FileOrGroupId groupId, int latitude, int longitude)
+        {
+            try
+            {
+                var data = H5D.open(groupId, string.Format("{0}_{1}", latitude, longitude));
+                var sid = H5D.getSpace(data);
+                var dims = H5S.getSimpleExtentDims(sid);
+                var readBuf = new short[dims[0], dims[1]];
+                H5D.read(data, H5T.copy(H5T.H5Type.NATIVE_SHORT), new H5Array<short>(readBuf));
+                H5D.close(data);
+                return readBuf;
+            }
+            catch (H5DopenException)
+            {
+                return null;
+            }
+        }
+
     }
 }

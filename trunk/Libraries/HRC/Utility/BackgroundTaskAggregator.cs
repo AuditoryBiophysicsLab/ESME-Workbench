@@ -43,6 +43,8 @@ namespace HRC.Utility
 
         void WorkerHasCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            ((BackgroundTask)sender).ProgressChanged -= ProgressHasChanged;
+            ((BackgroundTask)sender).RunWorkerCompleted -= WorkerHasCompleted;
             var activeTasks = BackgroundTasks.Where(b => b.IsBusy);
             if (activeTasks.Count() == 0) _mutex.ReleaseMutex();
         }
@@ -58,13 +60,20 @@ namespace HRC.Utility
 
         #endregion
 
+        protected override void OnRunWorkerCompleted(RunWorkerCompletedEventArgs e)
+        {
+            BackgroundTasks.Clear();
+            base.OnRunWorkerCompleted(e);
+        }
+
         readonly Mutex _mutex = new Mutex(true);
 
         protected override void Run(object sender, DoWorkEventArgs e)
         {
             Status = "Operation in progress";
-            var backgroundTask = (BackgroundTask)sender;
             RunState = "Running";
+            foreach (var task in BackgroundTasks)
+                task.Run();
             Thread.Sleep(1000); // to give the aggregated workers time to start
             _mutex.WaitOne();
         }

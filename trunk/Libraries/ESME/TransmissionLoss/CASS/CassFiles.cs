@@ -8,6 +8,7 @@ using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.NEMO;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.TransmissionLoss.CASS
 {
@@ -222,7 +223,7 @@ namespace ESME.TransmissionLoss.CASS
             }
         }
 
-        public static void WriteEnvironmentFile(string environmentFileName, GeoRect geoRect, Sediment sedimentType, SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind)
+        public static void WriteEnvironmentFile(string environmentFileName, GeoRect geoRect, Sediment sedimentType, SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, BackgroundTask backgroundTask = null)
         {
             var isFirstPoint = true;
             using (var envFile = new StreamWriter(environmentFileName, false))
@@ -235,17 +236,33 @@ namespace ESME.TransmissionLoss.CASS
                 envFile.WriteLine();
 
                 double lat, lon;
-
+                if (backgroundTask != null) backgroundTask.Maximum = (int)(((geoRect.East - geoRect.West) * 4) * ((geoRect.North - geoRect.South) * 4));
                 for (lon = geoRect.West; lon < geoRect.East; lon += 0.25)
                 {
                     for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
-                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(lat, lon), ref isFirstPoint);
+                    {
+                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(lat, lon),
+                                             ref isFirstPoint);
+                        if (backgroundTask != null) backgroundTask.Value++;
+                    }
                     if ((lat - geoRect.North) < 0.125)
-                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(geoRect.North, lon), ref isFirstPoint);
+                    {
+                        if (backgroundTask != null) backgroundTask.Maximum++;
+                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind,
+                                             new EarthCoordinate(geoRect.North, lon), ref isFirstPoint);
+                        if (backgroundTask != null) backgroundTask.Value++;
+                    }
                 }
                 if ((lon - geoRect.East) < 0.125)
+                {
+                    if (backgroundTask != null) backgroundTask.Maximum += (int) ((geoRect.North - geoRect.South)*4);
                     for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
-                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(lat, geoRect.East), ref isFirstPoint);
+                    {
+                        WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind,
+                                             new EarthCoordinate(lat, geoRect.East), ref isFirstPoint);
+                        if (backgroundTask != null) backgroundTask.Value++;
+                    }
+                }
             }
         }
 
