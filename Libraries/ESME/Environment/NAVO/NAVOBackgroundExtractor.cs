@@ -159,5 +159,23 @@ namespace ESME.Environment.NAVO
         float _selectedResolution;
 
         #endregion
+
+        #region public string SaveAsFilename { get; set; }
+
+        public string SaveAsFilename
+        {
+            get { return _saveAsFilename; }
+            set
+            {
+                if (_saveAsFilename == value) return;
+                _saveAsFilename = value;
+                NotifyPropertyChanged(SaveAsFilenameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SaveAsFilenameChangedEventArgs = ObservableHelper.CreateArgs<NAVOBackgroundExtractor>(x => x.SaveAsFilename);
+        string _saveAsFilename;
+
+        #endregion
     }
 }

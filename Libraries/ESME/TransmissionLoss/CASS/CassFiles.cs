@@ -17,7 +17,6 @@ namespace ESME.TransmissionLoss.CASS
         public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IEnumerable<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName, NemoModeToAcousticModelNameMap modeToAcousticModelNameMap, float maxDepth)
         {
             if ((analysisPoints == null) || (analysisPoints.Count == 0)) return;
-            maxDepth = Math.Abs(maxDepth);
             var nemoScenario = nemoFile.Scenario;
 
             foreach (var timePeriod in timePeriods)
@@ -53,7 +52,7 @@ namespace ESME.TransmissionLoss.CASS
                                     case TransmissionLossAlgorithm.CASS:
                                     case TransmissionLossAlgorithm.RAM:
                                     //case TransmissionLossAlgorithm.REFMS:
-                                        WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, thisModel, timePeriod, appSettings, nemoFile, "bathymetry.txt", maxDepth);
+                                        WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, thisModel, timePeriod, appSettings, nemoFile, "bathymetry.txt");
                                         break;
                                 }
                             }
@@ -70,7 +69,7 @@ namespace ESME.TransmissionLoss.CASS
             foreach (var matchingFile in matchingFiles) File.Delete(matchingFile);
         }
 
-        static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, float maxDepth)
+        static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName)
         {
             var nemoScenario = nemoFile.Scenario;
             var simAreaFile = SimAreaCSV.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"));
@@ -152,7 +151,7 @@ namespace ESME.TransmissionLoss.CASS
                         if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Water Depth                             ,0 M, {0} M, {1} M", appSettings.RAMSettings.MaximumDepth, stepSize);
                         break;
-                    case TransmissionLossAlgorithm.CASS:
+                    //case TransmissionLossAlgorithm.CASS:
                     default:
                         // For CASS, range and depth step size in INP files need to be integers, so round up to the next int if the computed value is not an integer.  Max depth cell count is 1024
                         writer.WriteLine("Enviro File                             ,env_{0}.dat", timePeriod.ToLower());
@@ -190,7 +189,7 @@ namespace ESME.TransmissionLoss.CASS
                         if (Math.Floor(stepSize) != stepSize) stepSize = (float)Math.Ceiling(stepSize);
                         writer.WriteLine("Range Distance                          ,{0} M, {1} M, {0} M", stepSize, mode.Radius);
                         break;
-                    case TransmissionLossAlgorithm.CASS:
+                    //case TransmissionLossAlgorithm.CASS:
                     default:
                         // For CASS, range and depth step size in INP files need to be integers, so round up to the next int if the computed value is not an integer.  Max range cell count is 1024
                         stepCount = mode.Radius / appSettings.CASSSettings.RangeStepSize;
@@ -214,7 +213,7 @@ namespace ESME.TransmissionLoss.CASS
                         using (var writer = new StreamWriter(batchFilePath))
                             writer.WriteLine("java -Dlog4j.configuration=ram-log4j.xml -jar \"{0}\" {1} \"{2}\"", appSettings.NAEMOTools.RAMSupportJarFile, inputFileName, appSettings.NAEMOTools.RAMExecutable);
                     break;
-                case TransmissionLossAlgorithm.CASS:
+                //case TransmissionLossAlgorithm.CASS:
                 default:
                     if (!string.IsNullOrEmpty(appSettings.CASSSettings.PythonExecutablePath) && !string.IsNullOrEmpty(appSettings.CASSSettings.PythonScriptPath) && !string.IsNullOrEmpty(appSettings.CASSSettings.CASSExecutablePath)) 
                         using (var writer = new StreamWriter(batchFilePath)) 
@@ -268,16 +267,23 @@ namespace ESME.TransmissionLoss.CASS
 
         static void WriteEnvironmentFile(TextWriter envFile, Sediment sediment, TimePeriodEnvironmentData<SoundSpeedProfile> soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, EarthCoordinate requestedLocation, ref bool isFirstPoint)
         {
+            // ssp is the nearest actual soundspeed profile to the point that's been requested.  The actual profiles are not laid out
+            // in a grid, rather they are placed at quarter-degree grid points where there is water.  So grid points on land typically won't
+            // have a profile associated with them.  CASS, however, wants a regularly-spaced grid so we tell CASS that every grid point
+            // has a profile.  The roundedLat and roundedLon variables is the grid points we report to CASS, regardless of where the actual
+            // profile data came from.
             var ssp = soundSpeedField.EnvironmentData[requestedLocation];
+            var roundedLat = Math.Round(requestedLocation.Latitude * 4) / 4;
+            var roundedLon = Math.Round(requestedLocation.Longitude * 4) / 4;
             if (ssp.Data.Count == 0) return;
-            if (isFirstPoint) envFile.WriteLine("RESET ENVIRONMENT NUMBER");
-            else envFile.WriteLine("INCREMENT ENVIRONMENT NUMBER");
+            envFile.WriteLine(isFirstPoint ? "RESET ENVIRONMENT NUMBER" : "INCREMENT ENVIRONMENT NUMBER");
             envFile.WriteLine("COMMENT TABLE");
             envFile.WriteLine("Requested Latitude: {0:0.0000} Longitude: {1:0.0000}", requestedLocation.Latitude, requestedLocation.Longitude);
-            envFile.WriteLine("Returned Latitude: {0:0.0000} Longitude: {1:0.0000}", ssp.Latitude, ssp.Longitude);
+            envFile.WriteLine("Actual Profile Latitude: {0:0.0000} Longitude: {1:0.0000}", ssp.Latitude, ssp.Longitude);
+            envFile.WriteLine("Synthesized Latitude: {0:0.0000} Longitude: {1:0.0000}", roundedLat, roundedLon);
             envFile.WriteLine("EOT");
-            envFile.WriteLine("ENVIRONMENT LATITUDE  = {0:0.0###} DEG", ssp.Latitude);
-            envFile.WriteLine("ENVIRONMENT LONGITUDE = {0:0.0###} DEG", ssp.Longitude);
+            envFile.WriteLine("ENVIRONMENT LATITUDE  = {0:0.0###} DEG", roundedLat);
+            envFile.WriteLine("ENVIRONMENT LONGITUDE = {0:0.0###} DEG", roundedLon);
             envFile.WriteLine("OCEAN SOUND SPEED TABLE");
             envFile.WriteLine("M         M/S       ");
             foreach (var datum in ssp.Data)

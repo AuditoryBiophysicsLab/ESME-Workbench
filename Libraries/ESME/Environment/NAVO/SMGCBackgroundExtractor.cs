@@ -59,7 +59,8 @@ namespace ESME.Environment.NAVO
                     var northSouth = (lat >= 0) ? "n" : "s";
                     var eastWest = (lon >= 0) ? "e" : "w";
                     var curFile = string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon));
-                    selectedFiles.Add(new SMGCFile(Directory.GetFiles(backgroundExtractor.NAVOConfiguration.SMGCDirectory, curFile, SearchOption.AllDirectories).First()));
+                    var selectedFile = new SMGCFile(Directory.GetFiles(backgroundExtractor.NAVOConfiguration.SMGCDirectory, curFile, SearchOption.AllDirectories).First());
+                    selectedFiles.Add(selectedFile);
                     selectedLocations.Add(new EarthCoordinate(lat, lon));
                     backgroundExtractor.Value++;
                     if (backgroundExtractor.CancellationPending) return;
@@ -69,13 +70,18 @@ namespace ESME.Environment.NAVO
             foreach (var curMonth in uniqueMonths)
             {
                 var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
-                curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
-                                                      where
-                                                              (selectedFile.Months != null) &&
-                                                              (selectedFile[curMonth] != null)
-                                                      select
-                                                              new WindSample(selectedFile.EarthCoordinate,
-                                                                             selectedFile[curMonth].MeanWindSpeed));
+                foreach (var selectedFile in selectedFiles)
+                {
+                    if ((selectedFile.Months != null) && (selectedFile[curMonth] != null))
+                        curMonthData.EnvironmentData.Add(new WindSample(selectedFile.EarthCoordinate, selectedFile[curMonth].MeanWindSpeed));
+                }
+                //curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
+                //                                      where
+                //                                              (selectedFile.Months != null) &&
+                //                                              (selectedFile[curMonth] != null)
+                //                                      select
+                //                                              new WindSample(selectedFile.EarthCoordinate,
+                //                                                             selectedFile[curMonth].MeanWindSpeed));
                 monthlyWindData.TimePeriods.Add(curMonthData);
                 backgroundExtractor.Value++;
                 if (backgroundExtractor.CancellationPending) return;
@@ -93,6 +99,7 @@ namespace ESME.Environment.NAVO
                     foreach (var curMonth in monthsInCurTimePeriod)
                     {
                         if ((monthlyWindData.TimePeriods == null) || (monthlyWindData[curMonth] == null)) continue;
+                        if (!monthlyWindData[curMonth].EnvironmentData[curLocation].Equals(curLocation)) continue;
                         sum += monthlyWindData[curMonth].EnvironmentData[curLocation].Data;
                         count++;
                     }
@@ -102,8 +109,8 @@ namespace ESME.Environment.NAVO
                 if (!backgroundExtractor.UseExpandedExtractionArea) curTimePeriodData.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
                 Wind.TimePeriods.Add(curTimePeriodData);
                 backgroundExtractor.Value++;
-                if (backgroundExtractor.CancellationPending) return;
             }
+            if (backgroundExtractor.SaveAsFilename != null) Wind.Save(backgroundExtractor.SaveAsFilename);
         }
 
         internal class SMGCFile
@@ -217,7 +224,7 @@ namespace ESME.Environment.NAVO
                 MeanWaveHeight = waveHeight.MeanValue;
                 if (!float.IsNaN(MeanWaveHeight))
                 {
-                    if ((MeanWaveHeight < 0.0f) || (MeanWaveHeight > 19.0f)) Console.WriteLine("\nMean Wave Height value {0} outside stated range for {1}.  File may be corrupt.", MeanWaveHeight, timePeriod);
+                    if ((MeanWaveHeight < 0.0f) || (MeanWaveHeight > 19.0f)) Console.WriteLine("Mean Wave Height value {0} outside stated range for {1}.  File may be corrupt.\n", MeanWaveHeight, timePeriod);
                 }
 
                 for (var i = 0; i < 3; i++) SkipRecord(reader);
@@ -227,14 +234,14 @@ namespace ESME.Environment.NAVO
                 MeanWindSpeed = windSpeed.MeanValue;
                 if (!float.IsNaN(MeanWindSpeed))
                 {
-                    if ((MeanWindSpeed < 0.0f) || (MeanWindSpeed > 40.1f)) Console.WriteLine("\nMean Wind Speed value {0} outside stated range for {1}.  File may be corrupt.", MeanWindSpeed, timePeriod);
+                    if ((MeanWindSpeed < 0.0f) || (MeanWindSpeed > 40.1f)) Console.WriteLine("Mean Wind Speed value {0} outside stated range for {1}.  File may be corrupt.\n", MeanWindSpeed, timePeriod);
                 }
 
                 // Skip the B records at the end of the current month
                 for (var i = 0; i < 4; i++) SkipRecord(reader);
             }
 
-            public override string ToString() { return string.Format("Mean Wind speed [{0}]: {1} m/s", NAVOTimePeriod, MeanWindSpeed); }
+            public override string ToString() { return string.Format("Mean Wind speed [{0}]: {1} m/s\n", NAVOTimePeriod, MeanWindSpeed); }
         }
 
         internal class SMGCRecordTypeA : SMGCRecord

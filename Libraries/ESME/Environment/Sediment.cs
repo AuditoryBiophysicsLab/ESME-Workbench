@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using ESME.Model;
 using HRC.Navigation;
 using HRC.Utility;
@@ -49,7 +50,8 @@ namespace ESME.Environment
     public class SedimentSampleBase : IComparable<SedimentSampleBase>
     {
         public short SampleValue { get; set; }
-        public string Resolution { get; set; }
+        [XmlIgnore]
+        public bool IsHighResolution { get; set; }
         public int CompareTo(SedimentSampleBase other)
         {
             return SampleValue.CompareTo(other.SampleValue);

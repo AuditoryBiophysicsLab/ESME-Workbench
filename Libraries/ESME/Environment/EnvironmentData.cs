@@ -5,6 +5,7 @@ using System.Xml.Serialization;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 using System.Windows;
+using HRC.Utility;
 
 namespace ESME.Environment
 {
@@ -91,13 +92,55 @@ namespace ESME.Environment
         }
         #endregion
 
-        public void RemoveDuplicates()
+        public void RemoveDuplicates(BackgroundTask backgroundTask = null)
         {
+            const int sectionCount = 100;
             var uniqueList = new List<T>();
+            var originalCount = this.Count;
+            var duplicateCount = 0;
+#if false
+            var startLon = Longitudes.First();
+            var endLon = Longitudes.Last();
+            var lonSpan = endLon - startLon;
+            var lonStep = lonSpan / sectionCount;
+            var subLists = new List<List<T>>();
+            for (var curSection = 0; curSection < sectionCount; curSection++)
+            {
+                if (backgroundTask != null) backgroundTask.RunState = "creating section " + curSection;
+                var sectionStart = startLon + (curSection * lonStep);
+                var sectionEnd = startLon + ((curSection + 1) * lonStep);
+                var subList = new List<T>();
+                var section = from entry in this
+                              where ((sectionStart <= entry.Longitude) && (entry.Longitude < sectionEnd))
+                              select entry;
+                if (backgroundTask != null) backgroundTask.RunState = "deduping section " + curSection;
+                foreach (var entry in section)
+                {
+                    var checkForDuplicates = true;
+                    var duplicate = false;
+                    if ((entry is SedimentSample) && ((entry as SedimentSample).Data.IsHighResolution)) checkForDuplicates = false;
+                    if (checkForDuplicates)
+                    {
+                        foreach (var subItem in subList)
+                            if (entry.Equals(subItem))
+                            {
+                                duplicate = true;
+                                duplicateCount++;
+                                if (backgroundTask != null) backgroundTask.Status = string.Format("Found {0} duplicates in {1} raw data points", duplicateCount, originalCount);
+                                break;
+                            }
+                    }
+                    if (!duplicate) subList.Add(entry);
+                }
+                subLists.Add(subList);
+                uniqueList.AddRange(subList);
+            }
+#else
             foreach (var curEntry in from curEntry in this
                                      let foundMatch = uniqueList.Any(curEntry.Equals)
                                      where !foundMatch
                                      select curEntry) {uniqueList.Add(curEntry);}
+#endif
             Clear();
             AddRange(uniqueList);
         }
@@ -126,7 +169,7 @@ namespace ESME.Environment
             {
                 if (_latitudes == null)
                 {
-                    _latitudes = this.Select(point => point.Longitude).Distinct().ToList();
+                    _latitudes = this.Select(point => point.Latitude).Distinct().ToList();
                     _latitudes.Sort();
                 }
                 return _latitudes;

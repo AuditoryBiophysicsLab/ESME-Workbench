@@ -33,6 +33,8 @@ namespace ESME.Environment.NAVO
                 },
             };
             process.Start();
+            if (process.HasExited) return process.StandardOutput.ReadToEnd();
+
             process.PriorityClass = ProcessPriorityClass.BelowNormal;
             var output = new StringBuilder();
             while (!process.HasExited)

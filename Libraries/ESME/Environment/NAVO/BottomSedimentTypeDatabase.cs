@@ -75,13 +75,13 @@ namespace ESME.Environment.NAVO
         static IEnumerable<SedimentSample> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
         {
             short[,] result = null;
-            //result = ReadDataset(highResGroup, latitude, longitude);
+            result = ReadDataset(highResGroup, latitude, longitude);
             double resolutionStep;
-            string resolution;
+            bool isHighResolution;
             if (result != null)
             {
                 resolutionStep = 6.0 / 3600.0;
-                resolution = "6s";
+                isHighResolution = true;
             }
             else
             {
@@ -89,7 +89,7 @@ namespace ESME.Environment.NAVO
                 //if (result == null) throw new KeyNotFoundException(string.Format("Unable to locate sediment data for lat: {0}, lon: {1}", latitude, longitude));
                 if (result == null) return null;
                 resolutionStep = 5.0 / 60.0;
-                resolution = "5m";
+                isHighResolution = false;
             }
             var sedimentList = new List<SedimentSample>();
             for (var i = 0; i < result.GetLength(0); i++)
@@ -97,7 +97,7 @@ namespace ESME.Environment.NAVO
                     sedimentList.Add(new SedimentSample(latitude + (i * resolutionStep), longitude + (j * resolutionStep), new SedimentSampleBase
                                                                                                                            {
                                                                                                                                SampleValue = result[i, j],
-                                                                                                                               Resolution = resolution,
+                                                                                                                               IsHighResolution = isHighResolution,
                                                                                                                            }));
             return sedimentList;
         }
