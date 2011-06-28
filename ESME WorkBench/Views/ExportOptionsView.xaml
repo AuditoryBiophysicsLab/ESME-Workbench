@@ -42,10 +42,11 @@
         </GroupBox>
         <StackPanel Visibility="{Binding ProgressIsVisible}">
             <TextBlock HorizontalAlignment="Center"
-			           Text="{Binding Status}"
+			           Text="I know this ProgressBar is broken"
 			           Margin="5 5 5 2" />
             <ProgressBar Maximum="100"
 			             Minimum="-5"
+                         ToolTip="This entire dialog will be removed or substantially reworked in the next release, so I didn't want to waste any time on it now."
 			             Height="22"
 			             Margin="5 0 5 0 "
 			             Value="{Binding ProgressPercent}" />
