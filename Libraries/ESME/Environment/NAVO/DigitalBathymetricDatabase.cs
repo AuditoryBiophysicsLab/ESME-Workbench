@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Cinch;
 using HRC.Navigation;
 
@@ -10,7 +11,12 @@ namespace ESME.Environment.NAVO
 {
     public class DigitalBathymetricDatabase : ViewModelBase
     {
-        static DigitalBathymetricDatabase() { Resolutions = new List<string>(); }
+        static DigitalBathymetricDatabase()
+        {
+            Resolutions = new List<string>();
+            var thread = new Thread(Initialize);
+            thread.Start();
+        }
 
         public static string DatabasePath { get; set; }
         public static string ExtractionProgramPath { get; set; }
@@ -38,7 +44,7 @@ namespace ESME.Environment.NAVO
         public static string BathymetryCHBFilename(string outputPath, string selectedResolution) { return Path.Combine(outputPath, string.Format("bathymetry-{0}.chb", selectedResolution)); }
         public static string BathymetryYXZFilename(string outputPath, string selectedResolution) { return Path.Combine(outputPath, string.Format("bathymetry-{0}.yxz", selectedResolution)); }
         
-        public void Initialize()
+        public static void Initialize()
         {
             Resolutions.Clear();
             var commandArgs = string.Format("resolutions \"{0}\"", DatabasePath);

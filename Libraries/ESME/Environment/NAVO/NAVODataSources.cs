@@ -41,8 +41,11 @@ namespace ESME.Environment.NAVO
 
             DigitalBathymetricDatabase.DatabasePath = configurations.DBDBDirectory;
             DigitalBathymetricDatabase.ExtractionProgramPath = configurations.DBDBEXEPath;
-            DigitalBathymetricDatabase = new DigitalBathymetricDatabase();
-            DigitalBathymetricDatabase.Initialize();
+            while (DigitalBathymetricDatabase.Resolutions.Count == 0) Thread.Sleep(100);
+            DigitalBathymetricDatabase = new DigitalBathymetricDatabase
+            {
+                SelectedResolution = DigitalBathymetricDatabase.Resolutions.Last()
+            };
             DigitalBathymetricDatabase.PropertyChanged += (s, e) => { if (e.PropertyName == "SelectedResolution") UpdateResolutionStatement(); };
 
             BottomSedimentTypeDatabase.DatabasePath = configurations.BSTDirectory;
