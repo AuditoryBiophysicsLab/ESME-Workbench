@@ -40,6 +40,7 @@
 
     <WixVariable Id="WixUIBannerBmp" Value="Bitmaps\bannrbmp.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="Bitmaps\dlgbmp.bmp" />
+    <!--<WixVariable Id="WixUILicenseRtf" Value="$(var.ESMERoot)\license.rtf" />-->
 
     <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
     <Upgrade Id="$(var.UpgradeCode)">
@@ -307,6 +308,7 @@
 
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
     <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_ErrorProgressText" />
     <!--
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="View README.TXT file when setup exits" />
     <Property Id="WIXUI_INSTALLDIR" Value="TARGETDIR" />
