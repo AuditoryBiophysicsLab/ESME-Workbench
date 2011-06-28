@@ -618,7 +618,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 return _extractAll ?? (_extractAll = new SimpleCommand<object, object>(
                     delegate
                     {
-                        return  ((NAVODataSources != null) && (NotExtractingData) && (_bufferZoneSizeOk) && 
+                        return  ((NAVODataSources != null) && (NotExtractingData) && (_bufferZoneSizeOk) && (NAVODataSources.DigitalBathymetricDatabase.SelectedResolution != null) &&  
                                  ((MonthCheckboxes.SelectedTimePeriods.Count() > 0) || (SeasonCheckboxes.SelectedTimePeriods.Count() > 0))); }, 
                     delegate
                     {
