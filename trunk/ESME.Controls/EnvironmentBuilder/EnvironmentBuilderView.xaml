@@ -1,12 +1,10 @@
 ﻿<Window x:Class="ESME.Views.EnvironmentBuilderView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mef="clr-namespace:MEFedMVVM.ViewModelLocator;assembly=MEFedMVVM.WPF"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" 
         xmlns:Controls="clr-namespace:ESME.Views.Controls" 
         Title="Environment Data Selection"
-        mef:ViewModelLocator.ViewModel="EnvironmentBuilderViewModel"
         SizeToContent="WidthAndHeight">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter"/>
@@ -131,7 +129,7 @@
                     Margin="0 5 0 5">
             <Controls:BackgroundTaskProgress BackgroundTask="{Binding BackgroundTaskAggregator}" 
                                              HorizontalContentAlignment="Stretch"/>
-            <Expander Header="Detail">
+            <Expander Header="{Binding BackgroundTaskAggregator.ActiveTaskMessage}">
                 <ListBox ItemsSource="{Binding BackgroundTaskAggregator.BackgroundTasks}"
                          HorizontalContentAlignment="Stretch"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"

@@ -15,8 +15,9 @@ namespace ESME.Environment
         {
             foreach (var sourceProfile in sourceField.EnvironmentData)
             {
-                if (EnvironmentData[sourceProfile] == null) EnvironmentData.Add(new SoundSpeedProfileAverager(sourceProfile));
-                EnvironmentData[sourceProfile].Add(sourceProfile);
+                var profile = EnvironmentData.Find(p => p.Equals(sourceProfile));
+                if (profile == null) EnvironmentData.Add(new SoundSpeedProfileAverager(sourceProfile));
+                else profile.Add(sourceProfile);
             }
         }
 
@@ -73,11 +74,11 @@ namespace ESME.Environment
             if ((TimePeriod != sourceTemperatureField.TimePeriod) || (TimePeriod != sourceSalinityField.TimePeriod))
                 throw new DataException("");
             var temperatureData = sourceTemperatureField.EnvironmentData;
-            temperatureData.TrimToNearestPoints(areaOfInterest);
+            if (areaOfInterest != null) temperatureData.TrimToNearestPoints(areaOfInterest);
             var temperatureField = new SoundSpeedField { EnvironmentData = temperatureData };
 
             var salinityData = sourceSalinityField.EnvironmentData;
-            salinityData.TrimToNearestPoints(areaOfInterest);
+            if (areaOfInterest != null) salinityData.TrimToNearestPoints(areaOfInterest);
             var salinityField = new SoundSpeedField { EnvironmentData = salinityData };
 
             var soundSpeedData = EnvironmentData;

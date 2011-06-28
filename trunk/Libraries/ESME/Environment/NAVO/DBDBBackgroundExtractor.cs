@@ -54,7 +54,6 @@ namespace ESME.Environment.NAVO
             }
             backgroundExtractor.Value++;
 
-
             //from documentation, area extractions for DBDB are of the form <dbv5_command path> area <database path> <finest_resolution> <coarsest resolution> nearest 0 meters G <south west north east> 
             //var commandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3:0.0000} {4:0.0000} {5:0.0000} {6:0.0000} {7:0.0##} YXZ=\"{8}\"", DatabasePath, resolutions.First(), resolutions.Last(), RoundToResolution(extractionArea.South, desiredResolution), RoundToResolution(extractionArea.West, desiredResolution), RoundToResolution(extractionArea.North, desiredResolution), RoundToResolution(extractionArea.East, desiredResolution), desiredResolution, string.Format("bathymetry-{0}.yxz", selectedResolution));
             //var commandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3:0.0000} {4:0.0000} {5:0.0000} {6:0.0000} {7:0.0##} YXZ=\"{8}\"", DatabasePath, resolutions.First(), resolutions.Last(), extractionArea.South, extractionArea.West, extractionArea.North, extractionArea.East, desiredResolution, string.Format("bathymetry-{0}.yxz", selectedResolution));
@@ -70,6 +69,13 @@ namespace ESME.Environment.NAVO
             Bathymetry = Bathymetry.FromYXZ(yxzPath, -1);
             File.Delete(yxzPath);
             backgroundExtractor.Value++;
+            if (backgroundExtractor.SaveAsFilename != null)
+            {
+                var filename = backgroundExtractor.SaveAsFilename.ToLower();
+                if (filename.EndsWith("yxz") || filename.EndsWith("txt")) Bathymetry.ToYXZ(backgroundExtractor.SaveAsFilename, -1);
+                else if (filename.EndsWith("xml")) Bathymetry.Save(backgroundExtractor.SaveAsFilename);
+                else throw new ApplicationException("Unknown file extension");
+            }
         }
     }
 }

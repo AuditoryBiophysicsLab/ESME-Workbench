@@ -175,7 +175,7 @@ namespace ESME.Environment
             }
             else areaToExport = selectedBathymetry.Samples.GeoRect;
 
-            var deepestPoint = selectedBathymetry.Maximum;
+            var deepestPoint = new EarthCoordinate<float>(Bathymetry.Minimum, Math.Abs(Bathymetry.Minimum.Data));
             
             var selectedMonthIndices = new List<NAVOTimePeriod>();
             var averagedTimePeriods = new List<NAVOTimePeriod>();

@@ -1237,9 +1237,7 @@ namespace ESMEWorkBench.Data
 
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
             {
-                if (BathymetryFileName.EndsWith(".chb"))
-                    Bathymetry = Environment2DData.FromCHB(BathymetryFileName, -1);
-                else if (BathymetryFileName.EndsWith(".yxz") || BathymetryFileName.EndsWith(".txt"))
+                if (BathymetryFileName.EndsWith(".yxz") || BathymetryFileName.EndsWith(".txt"))
                     Bathymetry = Environment2DData.FromYXZ(BathymetryFileName, -1);
             }
             //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
@@ -1316,13 +1314,9 @@ namespace ESMEWorkBench.Data
             else if ((TemperatureFilename != null) && (SalinityFilename != null) && File.Exists(TemperatureFilename) && File.Exists(SalinityFilename))
             {
                 EarthCoordinate<float> deepestPoint = null;
-                GeoRect areaOfInterest = null;
                 if (Bathymetry != null)
-                {
                     deepestPoint = new EarthCoordinate<float>(Bathymetry.Minimum, Math.Abs(Bathymetry.Minimum.Data));
-                    areaOfInterest = Bathymetry.GeoRect;
-                }
-                SoundSpeedField = SoundSpeed.Load(TemperatureFilename, SalinityFilename, deepestPoint, areaOfInterest).SoundSpeedFields[0];
+                SoundSpeedField = SoundSpeed.Load(TemperatureFilename, SalinityFilename, deepestPoint).SoundSpeedFields[0];
             }
             if (SoundSpeedField != null)
             {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Threading;
 using Cinch;
 using HRC.Navigation;
 
@@ -56,7 +55,7 @@ namespace ESME.Environment.NAVO
                 if (_maxDepth == value) return;
                 _maxDepth = value;
                 NotifyPropertyChanged(MaxDepthChangedEventArgs);
-                _semaphore.Release();
+                WaitSemaphore.Release();
             }
         }
 
@@ -119,14 +118,12 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        readonly Semaphore _semaphore = new Semaphore(0, 1);
-
         protected override void Run(object sender, DoWorkEventArgs e)
         {
             RunState = "Running";
             var backgroundExtractor = (GDEMBackgroundExtractor)e.Argument;
             TaskName = "Temperature and salinity data extraction for " + backgroundExtractor.TimePeriod;
-            backgroundExtractor.Maximum = 5;
+            backgroundExtractor.Maximum = 6;
             var north = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
             var south = (int)Math.Floor(backgroundExtractor.ExtractionArea.South);
             var east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
@@ -134,7 +131,7 @@ namespace ESME.Environment.NAVO
 
             var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6} -new", backgroundExtractor.DestinationPath, backgroundExtractor.NAVOConfiguration.GDEMDirectory, backgroundExtractor.TimePeriod, north, south, east, west);
 
-            var result = NAVOExtractionProgram.Execute(backgroundExtractor.ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath, backgroundExtractor.RequiredSupportFiles);
+            NAVOExtractionProgram.Execute(backgroundExtractor.ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath, backgroundExtractor.RequiredSupportFiles);
             backgroundExtractor.Value++;
 
             var temperatureFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}-temperature.xml", backgroundExtractor.TimePeriod));
@@ -152,8 +149,8 @@ namespace ESME.Environment.NAVO
 
             TaskName = "Soundspeed calculation for " + TimePeriod;
             RunState = "Waiting for bathymetry";
-            Console.WriteLine("GDEM: Waiting on bathymetry for " + TimePeriod);
-            _semaphore.WaitOne();
+            //Console.WriteLine("GDEM: Waiting on bathymetry for " + TimePeriod);
+            WaitSemaphore.WaitOne();
             RunState = "Running";
             backgroundExtractor.Status = "Creating soundspeed profile for " + TimePeriod;
 
@@ -161,8 +158,16 @@ namespace ESME.Environment.NAVO
             backgroundExtractor.Value++;
 
             backgroundExtractor.Status = "Extending soundspeed profile for " + TimePeriod;
-            soundSpeedField.Extend(TemperatureField, SalinityField, MaxDepth, backgroundExtractor.ExtractionArea);
+            soundSpeedField.Extend(TemperatureField, SalinityField, MaxDepth);
+            backgroundExtractor.Value++;
             ExtendedSoundSpeedField = soundSpeedField;
+            if (!backgroundExtractor.UseExpandedExtractionArea)
+            {
+                backgroundExtractor.Status = "Trimming soundspeed data for " + TimePeriod;
+                TemperatureField.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
+                SalinityField.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
+                ExtendedSoundSpeedField.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
+            }
             backgroundExtractor.Value++;
         }
     }

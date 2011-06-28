@@ -10,6 +10,7 @@ using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESMEWorkBench.Data;
+using HRC.Navigation;
 using HRC.Utility;
 using Environment = ESME.Environment.Environment;
 
@@ -225,21 +226,21 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #endregion
 
-        #region public bool NotExtractingData { get; set; }
+        #region public bool ExtractingData { get; set; }
 
-        public bool NotExtractingData
+        public bool ExtractingData
         {
-            get { return _notExtractingData; }
+            get { return _extractingData; }
             set
             {
-                if (_notExtractingData == value) return;
-                _notExtractingData = value;
+                if (_extractingData == value) return;
+                _extractingData = value;
                 NotifyPropertyChanged(NotExtractingDataChangedEventArgs);
             }
         }
 
-        private static readonly PropertyChangedEventArgs NotExtractingDataChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.NotExtractingData);
-        private bool _notExtractingData;
+        private static readonly PropertyChangedEventArgs NotExtractingDataChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ExtractingData);
+        private bool _extractingData;
 
         #endregion
 
@@ -257,7 +258,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
         }
 
         private static readonly PropertyChangedEventArgs ExtractButtonTextChangedEventArgs = ObservableHelper.CreateArgs<ExportOptionsViewModel>(x => x.ExtractButtonText);
-        private string _extractButtonText = "Extract";
+        private string _extractButtonText = "Export";
 
         #endregion
 
@@ -293,14 +294,14 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     if (SelectedTimePeriods.Count > 0)
                     ExportDataInBackground(delegate
                     {
-                        NotExtractingData = true;
-                        ExtractButtonText = "Extract";
+                        ExtractingData = false;
+                        ExtractButtonText = "Export";
                         CommandManager.InvalidateRequerySuggested();
                         if (_extractionCanceled) return;
                         CloseActivePopUpCommand.Execute(true);
                     });
-                    NotExtractingData = false;
-                    ExtractButtonText = "Extracting...";
+                    ExtractingData = true;
+                    ExtractButtonText = "Exporting...";
                     _extractionCanceled = false;
                 }));
             }
@@ -328,8 +329,9 @@ namespace ESMEWorkBench.ViewModels.NAVO
         {
             get
             {
+                if (ExtractingData) return false;
                 if (ExportAnalysisPoints || ExportCASSClimatology)
-                    return SelectedTimePeriodCount > 0;
+                    return (SelectedTimePeriodCount > 0);
                 return ExportCASSBathymetry;
             }
         }
@@ -370,21 +372,23 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         void ExportData(object sender, DoWorkEventArgs args)
         {
-            var backgroundTask = (BackgroundTask)sender;
+            var backgroundTask = (BackgroundWorker)sender;
 
             _totalExportStepCount = Environment.EnvironmentExportStepCount(SelectedTimePeriods);
             _totalExportStepCount += 2;
-            backgroundTask.Status = "Initializing...";
+            //backgroundTask.Status = "Initializing...";
+            var bathymetry = Bathymetry.FromYXZ(_experiment.BathymetryFileName, -1);
+            var soundSpeed = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "temperature.xml"), Path.Combine(_experiment.EnvironmentRoot, "salinity.xml"));
             var environment = new Environment
             {
-                Bathymetry = Bathymetry.FromYXZ(_experiment.BathymetryFileName, -1),
+                Bathymetry = bathymetry,
+                SoundSpeed = soundSpeed,
                 Sediment = Sediment.Load(_experiment.SedimentFileName),
-                SoundSpeed = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "soundspeed.xml")),
                 Temperature = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "temperature.xml")),
                 Salinity = SoundSpeed.Load(Path.Combine(_experiment.EnvironmentRoot, "salinity.xml")),
                 Wind = Wind.Load(Path.Combine(_experiment.EnvironmentRoot, "wind.xml")),
             };
-            environment.Export(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), SelectedTimePeriods, null, backgroundTask);
+            environment.Export(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _experiment.NemoFile.Scenario.SimAreaName), SelectedTimePeriods);
             CloseActivePopUpCommand.Execute(true);
         }
 
@@ -398,7 +402,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             {
                 return _cancel ?? (_cancel = new SimpleCommand<object, object>(delegate
                 {
-                    if (!NotExtractingData)
+                    if (ExtractingData)
                     {
                         CancelExtraction();
                         _extractionCanceled = true;
@@ -415,7 +419,11 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         public void CancelExtraction()
         {
-            if (!_backgroundWorker.IsBusy) return;
+            if ((_backgroundWorker == null) || (!_backgroundWorker.IsBusy))
+            {
+                CloseActivePopUpCommand.Execute(false);
+                return;
+            }
             _backgroundWorker.CancelAsync();
             Status = "Canceling, please wait...";
         }

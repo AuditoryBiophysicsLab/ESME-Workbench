@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Threading;
 using System.Windows.Input;
 using Cinch;
 
@@ -15,10 +16,13 @@ namespace HRC.Utility
             WorkerReportsProgress = true;
         }
 
-        public virtual void Run()
+        public virtual void Start()
         {
-            RunState = "Starting";
+            RunState = "Waiting";
             DoWork += Run;
+            RunWorkerCompleted += (s, e) => { IsDone = true; };
+            if (StartSemaphore != null) StartSemaphore.WaitOne();
+            RunState = "Starting";
             RunWorkerAsync(this);
         }
 
@@ -38,6 +42,69 @@ namespace HRC.Utility
             RunState = string.Format("{0}% complete", ProgressPercentage);
             base.OnProgressChanged(e);
         }
+
+        #region public bool IsDone { get; set; }
+
+        public bool IsDone
+        {
+            get { return _isDone; }
+            private set
+            {
+                if (_isDone == value) return;
+                _isDone = value;
+                NotifyPropertyChanged(IsDoneChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsDoneChangedEventArgs = ObservableHelper.CreateArgs<BackgroundTask>(x => x.IsDone);
+        bool _isDone;
+
+        #endregion
+
+        #region public Semaphore StartSemaphore { get; set; }
+
+        /// <summary>
+        /// This semaphore is used to signal the task to start, if it's not null.
+        /// The semaphore provided here is typically created and controlled by some
+        /// kind of aggregator task.
+        /// </summary>
+        public Semaphore StartSemaphore
+        {
+            get { return _startSemaphore; }
+            set
+            {
+                if (_startSemaphore == value) return;
+                _startSemaphore = value;
+                NotifyPropertyChanged(StartSemaphoreChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs StartSemaphoreChangedEventArgs = ObservableHelper.CreateArgs<BackgroundTask>(x => x.StartSemaphore);
+        Semaphore _startSemaphore;
+
+        #endregion
+
+        #region public Semaphore WaitSemaphore { get; set; }
+
+        /// <summary>
+        /// Subclasses should use this semaphore to wait for dependencies.
+        /// If the design of the subclass requires more than one semaphore, define it in the subclass
+        /// </summary>
+        public Semaphore WaitSemaphore
+        {
+            get { return _waitSemaphore; }
+            set
+            {
+                if (_waitSemaphore == value) return;
+                _waitSemaphore = value;
+                NotifyPropertyChanged(WaitSemaphoreChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs WaitSemaphoreChangedEventArgs = ObservableHelper.CreateArgs<BackgroundTask>(x => x.WaitSemaphore);
+        Semaphore _waitSemaphore = new Semaphore(0, 1);
+
+        #endregion
 
         #region public int ProgressPercentage { get; set; }
 

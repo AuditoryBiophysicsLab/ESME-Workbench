@@ -38,41 +38,52 @@ namespace ESME.Environment.NAVO
             var east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
             var west = (int)Math.Floor(backgroundExtractor.ExtractionArea.West);
 
-            backgroundExtractor.Maximum = (north - south + 1) * (east - west + 1) + 2;
+            backgroundExtractor.Maximum = (north - south) * (east - west) + 3;
 
             Sediment = new Sediment();
             var fileId = H5F.open(backgroundExtractor.NAVOConfiguration.BSTDirectory, H5F.OpenMode.ACC_RDONLY);
             var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
             var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
 
-            for (var lat = south; lat <= north; lat++)
-                for (var lon = west; lon <= east; lon++)
+            for (var lat = south; lat < north; lat++)
+                for (var lon = west; lon < east; lon++)
                 {
                     var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
                     //if (data != null) results.Samples.AddRange(data.Where(extractionArea.Contains));
                     if (data != null) Sediment.Samples.AddRange(data);
                     backgroundExtractor.Value++;
                 }
+            backgroundExtractor.Status = string.Format("Sediment: Extracted {0} raw points from database", Sediment.Samples.Count);
 
-            Sediment.Samples.RemoveDuplicates();
+            //TaskName = "Sediment: Removing duplicate data";
+            //Sediment.Samples.RemoveDuplicates(backgroundExtractor);
             backgroundExtractor.Value++;
+            RunState = "Trimming data to selected region";
             if (!backgroundExtractor.UseExpandedExtractionArea) Sediment.Samples.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
             backgroundExtractor.Value++;
 
             H5G.close(lowResGroup);
             H5G.close(highResGroup);
             H5F.close(fileId);
+            if (backgroundExtractor.SaveAsFilename != null)
+            {
+                RunState = "Saving";
+                Sediment.Save(backgroundExtractor.SaveAsFilename);
+                RunState = "Saved";
+            }
+            backgroundExtractor.Value++;
         }
 
         static IEnumerable<SedimentSample> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
         {
-            var result = ReadDataset(highResGroup, latitude, longitude);
+            short[,] result = null;
+            result = ReadDataset(highResGroup, latitude, longitude);
             double resolutionStep;
-            string resolution;
+            bool isHighResolution;
             if (result != null)
             {
                 resolutionStep = 6.0 / 3600.0;
-                resolution = "6s";
+                isHighResolution = true;
             }
             else
             {
@@ -80,7 +91,7 @@ namespace ESME.Environment.NAVO
                 //if (result == null) throw new KeyNotFoundException(string.Format("Unable to locate sediment data for lat: {0}, lon: {1}", latitude, longitude));
                 if (result == null) return null;
                 resolutionStep = 5.0 / 60.0;
-                resolution = "5m";
+                isHighResolution = true;
             }
             var sedimentList = new List<SedimentSample>();
             for (var i = 0; i < result.GetLength(0); i++)
@@ -88,7 +99,7 @@ namespace ESME.Environment.NAVO
                     sedimentList.Add(new SedimentSample(latitude + (i * resolutionStep), longitude + (j * resolutionStep), new SedimentSampleBase
                     {
                         SampleValue = result[i, j],
-                        Resolution = resolution,
+                        IsHighResolution = isHighResolution,
                     }));
             return sedimentList;
         }

@@ -430,7 +430,7 @@ namespace ESMEWorkBench.ViewModels.Main
         
         void ShowEnvironmentSettingsView()
         {
-            var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_visualizerService, _messageBoxService, Globals.AppSettings, _experiment);
+            var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_messageBoxService, Globals.AppSettings, _experiment);
             try
             {
                 var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
