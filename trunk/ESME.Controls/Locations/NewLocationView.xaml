@@ -3,12 +3,12 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     xmlns:Controls="clr-namespace:ESME.Views.Controls" 
     x:Class="ESME.Views.Locations.NewLocationView"
-	Title="New Location"
+	Title="New Range Complex"
 	SizeToContent="WidthAndHeight">
 
 	<StackPanel Margin="5">
 		<DockPanel LastChildFill="True">
-			<TextBlock DockPanel.Dock="Left" Text="Location name:"/>
+			<TextBlock DockPanel.Dock="Left" Text="Name:"/>
 			<TextBox Text="{Binding LocationName}" DockPanel.Dock="Left"/>
 		</DockPanel>
         <Grid>
@@ -40,11 +40,11 @@
                                  IsDirectoryBrowser="False"
 								 VerticalAlignment="Center"
 								 FileNameFilter="Overlay files (*.ovr)|*.ovr|All files (*.*)|*.*"
-                                 FileName="{Binding ExistingOverlayFilename}" />
+                                 FileName="{Binding ExistingOpAreaOverlayFilename}" />
                 <TextBlock Text="OR" HorizontalAlignment="Center" Margin="10" FontSize="18" FontWeight="Bold"/>
                 <GroupBox Margin="5 0 5 0" Padding="5" Header="Coordinates for new overlay (lat, lon)">
                     <StackPanel Orientation="Vertical">
-                        <TextBox Text="{Binding NewOverlayCoordinates}" 
+                        <TextBox Text="{Binding NewOpAreaOverlayCoordinates}" 
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
 							 Height="100"
@@ -66,11 +66,11 @@
                                  IsDirectoryBrowser="False"
 								 VerticalAlignment="Center"
 								 FileNameFilter="Overlay files (*.ovr)|*.ovr|All files (*.*)|*.*"
-                                 FileName="{Binding ExistingOverlayFilename}" />
+                                 FileName="{Binding ExistingSimAreaOverlayFilename}" />
                 <TextBlock Text="OR" HorizontalAlignment="Center" Margin="10" FontSize="18" FontWeight="Bold"/>
                 <GroupBox Margin="5 0 5 0" Padding="5" Header="Coordinates for new overlay (lat, lon)">
                     <StackPanel Orientation="Vertical">
-                        <TextBox Text="{Binding NewOverlayCoordinates}" 
+                        <TextBox Text="{Binding NewSimAreaOverlayCoordinates}" 
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
 							 Height="100"
@@ -79,7 +79,7 @@
                         <Button Content="Clear" 
 					        Width="100" 
 							HorizontalAlignment="Right" 
-							Command="{Binding ClearCoordinatesCommand}" />
+							Command="{Binding ClearSimAreaCoordinatesCommand}" />
                     </StackPanel>
                 </GroupBox>
 
