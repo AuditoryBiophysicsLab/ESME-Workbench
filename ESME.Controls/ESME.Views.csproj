@@ -92,10 +92,10 @@
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LabelValuePair.cs" />
-    <Compile Include="Locations\NewLocationView.xaml.cs">
-      <DependentUpon>NewLocationView.xaml</DependentUpon>
+    <Compile Include="Locations\NewRangeComplexView.xaml.cs">
+      <DependentUpon>NewRangeComplexView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Locations\NewLocationViewModel.cs" />
+    <Compile Include="Locations\NewRangeComplexViewModel.cs" />
     <Compile Include="Misc\ModuleBuildInfoViewModel.cs" />
     <Compile Include="Misc\ModuleBuildInfoView.xaml.cs">
       <DependentUpon>ModuleBuildInfoView.xaml</DependentUpon>
@@ -163,7 +163,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Locations\NewLocationView.xaml">
+    <Page Include="Locations\NewRangeComplexView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

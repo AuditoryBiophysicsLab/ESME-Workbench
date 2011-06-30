@@ -13,9 +13,9 @@ using HRC.Navigation;
 
 namespace ESME.Views.Locations
 {
-    public class NewLocationViewModel : ViewModelBase, ISupportValidation
+    public class NewRangeComplexViewModel : ViewModelBase, ISupportValidation
     {
-        public NewLocationViewModel(AppSettings appSettings)
+        public NewRangeComplexViewModel(AppSettings appSettings)
         {
             SimAreaFolder = appSettings.ScenarioDataDirectory;
         }
@@ -33,7 +33,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs LocationNameChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.LocationName);
+        private static readonly PropertyChangedEventArgs LocationNameChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.LocationName);
         private string _locationName;
 
         public string LocationPath
@@ -59,7 +59,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs ExistingOverlayFilenameChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.ExistingOpAreaOverlayFilename);
+        private static readonly PropertyChangedEventArgs ExistingOverlayFilenameChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ExistingOpAreaOverlayFilename);
         private string _existingOpAreaOverlayFilename;
 
         #endregion
@@ -77,7 +77,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs NewOverlayCoordinatesChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.NewOpAreaOverlayCoordinates);
+        private static readonly PropertyChangedEventArgs NewOverlayCoordinatesChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.NewOpAreaOverlayCoordinates);
         private string _newOpAreaOverlayCoordinates;
 
         #endregion
@@ -95,7 +95,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs ExistingSimAreaOverlayFilenameChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.ExistingSimAreaOverlayFilename);
+        private static readonly PropertyChangedEventArgs ExistingSimAreaOverlayFilenameChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ExistingSimAreaOverlayFilename);
         private string _existingSimAreaOverlayFilename;
 
         #endregion
@@ -113,7 +113,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs NewSimAreaOverlayCoordinatesChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.NewSimAreaOverlayCoordinates);
+        private static readonly PropertyChangedEventArgs NewSimAreaOverlayCoordinatesChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.NewSimAreaOverlayCoordinates);
         private string _newSimAreaOverlayCoordinates;
 
         #endregion
@@ -131,7 +131,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs ReferencePointLatitudeChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.ReferencePointLatitude);
+        private static readonly PropertyChangedEventArgs ReferencePointLatitudeChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLatitude);
         private float _referencePointLatitude;
 
         #endregion
@@ -149,7 +149,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs ReferencePointLongitudeChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.ReferencePointLongitude);
+        private static readonly PropertyChangedEventArgs ReferencePointLongitudeChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLongitude);
         private float _referencePointLongitude;
 
         #endregion
@@ -167,7 +167,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs HeightChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.Height);
+        private static readonly PropertyChangedEventArgs HeightChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.Height);
         private float _height;
 
         #endregion
@@ -185,7 +185,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs GeoidSeparationChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.GeoidSeparation);
+        private static readonly PropertyChangedEventArgs GeoidSeparationChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.GeoidSeparation);
         private float _geoidSeparation;
 
         #endregion
@@ -203,7 +203,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs SimAreaFolderChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.SimAreaFolder);
+        private static readonly PropertyChangedEventArgs SimAreaFolderChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.SimAreaFolder);
         private string _simAreaFolder;
 
         #endregion
@@ -361,7 +361,7 @@ namespace ESME.Views.Locations
             get { return IsValid ? Visibility.Collapsed : Visibility.Visible; }
         }
 
-        private static readonly PropertyChangedEventArgs ErrorVisibilityChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.ErrorVisibility);
+        private static readonly PropertyChangedEventArgs ErrorVisibilityChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ErrorVisibility);
 
         #endregion
 
@@ -379,7 +379,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<NewLocationViewModel>(x => x.ValidationErrorText);
+        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ValidationErrorText);
         string _validationErrorText;
 
         #endregion
