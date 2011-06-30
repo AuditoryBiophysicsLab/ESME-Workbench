@@ -98,6 +98,16 @@
     <Compile Include="Database\MySqlWrapper.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="LinqStatistics\EnumerableStats.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsCovariance.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsMedian.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsMode.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsPearson.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsRange.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsStandardDeviation.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsStandardDeviationP.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsVariance.cs" />
+    <Compile Include="LinqStatistics\EnumerableStatsVarianceP.cs" />
     <Compile Include="Navigation\BoundingCircle.cs" />
     <Compile Include="Navigation\Course.cs" />
     <Compile Include="Navigation\EarthCoordinate.cs" />

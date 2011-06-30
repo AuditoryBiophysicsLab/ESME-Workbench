@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using ESME.Environment.NAVO;
+using HRC.LinqStatistics;
 using HRC.Navigation;
 using System.Windows;
 using HRC.Utility;
@@ -145,18 +146,44 @@ namespace ESME.Environment
             AddRange(uniqueList);
         }
 
-        [XmlIgnore]
-        public List<double> Longitudes
+        private static List<double> DistinctSortedLatLonList(IEnumerable<double> rawEnumerable)
+        {
+            var rawList = rawEnumerable.Distinct().ToList();
+            rawList.Sort();
+            var result = new List<double>();
+            for (var index = 0; index < rawList.Count - 1; index++)
+            {
+                result.Add(Math.Round(rawList[index], 4));
+                int duplicateCount;
+                for (duplicateCount = 0; duplicateCount < (rawList.Count - 1 - index); duplicateCount++)
+                    if (Math.Round(rawList[index + duplicateCount], 4) != Math.Round(rawList[index + duplicateCount + 1], 4)) break;
+                index += duplicateCount;
+            }
+            return result;
+        }
+
+        static double CalculateResolution(IList<double> axis)
+        {
+            var differences = new List<double>();
+            for (var index = 0; index < axis.Count - 1; index++)
+                differences.Add(axis[index + 1] - axis[index]);
+            return differences.StandardDeviation() < 0.001 ? Math.Round(differences[0] * 60, 2) : double.NaN;
+        }
+
+        public double Resolution
         {
             get
             {
-                if (_longitudes == null)
-                {
-                    _longitudes = this.Select(point => point.Longitude).Distinct().ToList();
-                    _longitudes.Sort();
-                }
-                return _longitudes;
+                var lonRes = CalculateResolution(Longitudes);
+                var latRes = CalculateResolution(Latitudes);
+                return lonRes == latRes ? lonRes : double.NaN;
             }
+        }
+
+        [XmlIgnore]
+        public List<double> Longitudes
+        {
+            get { return _longitudes ?? (_longitudes = DistinctSortedLatLonList(this.Select(point => point.Longitude))); }
         }
 
         [XmlIgnore]
@@ -169,8 +196,9 @@ namespace ESME.Environment
             {
                 if (_latitudes == null)
                 {
-                    _latitudes = this.Select(point => point.Latitude).Distinct().ToList();
-                    _latitudes.Sort();
+                    _latitudes = DistinctSortedLatLonList(this.Select(point => point.Latitude));
+                    //_latitudes = this.Select(point => point.Latitude).Distinct().ToList();
+                    //_latitudes.Sort();
                 }
                 return _latitudes;
             }

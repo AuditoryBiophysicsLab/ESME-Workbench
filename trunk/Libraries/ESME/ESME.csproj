@@ -148,6 +148,11 @@
     <Compile Include="Environment\UNESCO.cs" />
     <Compile Include="Environment\Wind.cs" />
     <Compile Include="MediatorMessages.cs" />
+    <Compile Include="Metadata\NAEMOBathymetryMetadata.cs" />
+    <Compile Include="Metadata\NAEMOEnvironmentMetadata.cs" />
+    <Compile Include="Metadata\NAEMOMetadata.cs" />
+    <Compile Include="Metadata\NAEMOMetadataBase.cs" />
+    <Compile Include="Metadata\NAEMOScenarioMetadata.cs" />
     <Compile Include="Model\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="Overlay\Exceptions.cs" />
@@ -178,6 +183,7 @@
     <Compile Include="TransmissionLoss\CASS\CASSBackgroundExporter.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentFile.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
     <Compile Include="TransmissionLoss\NemoModeToAcousticModelNameMap.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFileManager.cs" />
@@ -189,7 +195,7 @@
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
     <Compile Include="TransmissionLoss\CASS\CassFiles.cs" />
-    <Compile Include="TransmissionLoss\CASS\CASSPacket.cs" />
+    <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentLocation.cs" />
     <Compile Include="TransmissionLoss\CASS\SimAreaCSV.cs" />
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>

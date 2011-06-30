@@ -57,6 +57,7 @@
 			</StatusBarItem>
 		</StatusBar>
 		<r:Ribbon x:Name="Ribbon"
+                  SelectedIndex="0"
 		          DockPanel.Dock="Top">
 			<r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
@@ -353,7 +354,7 @@
 				</r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="V"
-			             Header="Environment" ContextualTabGroupHeader="Location Editor">
+			             Header="Environment">
 				<r:RibbonGroup Header="Location">
                     <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                  ToolTipDescription="Select a previously defined location"
