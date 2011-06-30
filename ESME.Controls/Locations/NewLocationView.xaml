@@ -11,32 +11,81 @@
 			<TextBlock DockPanel.Dock="Left" Text="Location name:"/>
 			<TextBox Text="{Binding LocationName}" DockPanel.Dock="Left"/>
 		</DockPanel>
-		<GroupBox Margin="0 5 0 0" Header="Baseline operational area (choose one)">
-			<StackPanel Orientation="Horizontal">
-				<Controls:FileOrDirectorySetting Caption="Existing overlay file"
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Column="0" LastChildFill="True">
+                <TextBlock DockPanel.Dock="Left" Text="Reference point latitude:" />
+                <TextBox DockPanel.Dock="Left" MinWidth="75" Text="{Binding ReferencePointLatitude}" />
+            </DockPanel>
+            <DockPanel Grid.Column="1" LastChildFill="True">
+                <TextBlock DockPanel.Dock="Left" Text="longitude:" />
+                <TextBox DockPanel.Dock="Left" MinWidth="75" Text="{Binding ReferencePointLongitude}" />
+            </DockPanel>
+        </Grid>
+        <DockPanel LastChildFill="True">
+            <TextBlock DockPanel.Dock="Left" Text="Height (m):" />
+            <TextBox DockPanel.Dock="Right" Text="{Binding Height}" />
+        </DockPanel>
+        <DockPanel LastChildFill="True">
+            <TextBlock DockPanel.Dock="Left" Text="Geoid separation (m):" />
+            <TextBox DockPanel.Dock="Right" Text="{Binding GeoidSeparation}" />
+        </DockPanel>
+        <GroupBox Margin="0 5 0 0" Header="Operational limits (choose one)">
+            <StackPanel Orientation="Vertical">
+                <Controls:FileOrDirectorySetting Caption="Existing overlay file"
                                  Margin="5 0 5 0"
                                  IsDirectoryBrowser="False"
 								 VerticalAlignment="Center"
 								 FileNameFilter="Overlay files (*.ovr)|*.ovr|All files (*.*)|*.*"
                                  FileName="{Binding ExistingOverlayFilename}" />
-	            <GroupBox Margin="5 0 5 0" Padding="5" Header="Coordinates for new overlay (lat, lon)">
-	            	<StackPanel Orientation="Vertical">
-	            	<TextBox Text="{Binding NewOverlayCoordinates}" 
+                <TextBlock Text="OR" HorizontalAlignment="Center" Margin="10" FontSize="18" FontWeight="Bold"/>
+                <GroupBox Margin="5 0 5 0" Padding="5" Header="Coordinates for new overlay (lat, lon)">
+                    <StackPanel Orientation="Vertical">
+                        <TextBox Text="{Binding NewOverlayCoordinates}" 
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
 							 Height="100"
 					         ToolTip="Please enter coordinates in latitude, longitude pairs separated by newlines" 
 							 VerticalScrollBarVisibility="Auto" />
-					<Button Content="Clear" 
+                        <Button Content="Clear" 
 					        Width="100" 
 							HorizontalAlignment="Right" 
 							Command="{Binding ClearCoordinatesCommand}" />
-					</StackPanel>
-				</GroupBox>
+                    </StackPanel>
+                </GroupBox>
 
-			</StackPanel>
-		</GroupBox>
-		<StackPanel Orientation="Horizontal" Margin="5" Visibility="Collapsed">
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Margin="0 5 0 0" Header="Simulation limits (choose one)">
+            <StackPanel Orientation="Vertical">
+                <Controls:FileOrDirectorySetting Caption="Existing overlay file"
+                                 Margin="5 0 5 0"
+                                 IsDirectoryBrowser="False"
+								 VerticalAlignment="Center"
+								 FileNameFilter="Overlay files (*.ovr)|*.ovr|All files (*.*)|*.*"
+                                 FileName="{Binding ExistingOverlayFilename}" />
+                <TextBlock Text="OR" HorizontalAlignment="Center" Margin="10" FontSize="18" FontWeight="Bold"/>
+                <GroupBox Margin="5 0 5 0" Padding="5" Header="Coordinates for new overlay (lat, lon)">
+                    <StackPanel Orientation="Vertical">
+                        <TextBox Text="{Binding NewOverlayCoordinates}" 
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+							 Height="100"
+					         ToolTip="Please enter coordinates in latitude, longitude pairs separated by newlines" 
+							 VerticalScrollBarVisibility="Auto" />
+                        <Button Content="Clear" 
+					        Width="100" 
+							HorizontalAlignment="Right" 
+							Command="{Binding ClearCoordinatesCommand}" />
+                    </StackPanel>
+                </GroupBox>
+
+            </StackPanel>
+        </GroupBox>
+        <StackPanel Orientation="Vertical" Margin="5">
 			<TextBlock Text="Location will be created inside simulation area folder: " />
 			<TextBlock Text="{Binding SimAreaFolder}" />
 		</StackPanel>

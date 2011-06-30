@@ -57,7 +57,7 @@
 			</StatusBarItem>
 		</StatusBar>
 		<r:Ribbon x:Name="Ribbon"
-                  SelectedIndex="0"
+                  SelectedIndex="2"
 		          DockPanel.Dock="Top">
 			<r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
