@@ -71,7 +71,7 @@ namespace ESME.Views.Locations
             get { return _newOpAreaOverlayCoordinates; }
             set
             {
-                if (_newOpAreaOverlayCoordinates == value) return;
+              //  if (_newOpAreaOverlayCoordinates == value) return;
                 _newOpAreaOverlayCoordinates = value;
                 NotifyPropertyChanged(NewOverlayCoordinatesChangedEventArgs);
             }
@@ -107,7 +107,7 @@ namespace ESME.Views.Locations
             get { return _newSimAreaOverlayCoordinates; }
             set
             {
-                if (_newSimAreaOverlayCoordinates == value) return;
+               // if (_newSimAreaOverlayCoordinates == value) return;
                 _newSimAreaOverlayCoordinates = value;
                 NotifyPropertyChanged(NewSimAreaOverlayCoordinatesChangedEventArgs);
             }
@@ -117,8 +117,6 @@ namespace ESME.Views.Locations
         private string _newSimAreaOverlayCoordinates;
 
         #endregion
-
-
 
         #region public float ReferencePointLatitude { get; set; }
 
@@ -191,7 +189,6 @@ namespace ESME.Views.Locations
         private float _geoidSeparation;
 
         #endregion
-
 
         #region public string SimAreaFolder { get; set; }
 
@@ -394,24 +391,25 @@ namespace ESME.Views.Locations
                 ValidationErrorText += "Location already exists, please choose a different name\n";
             if (string.IsNullOrEmpty(LocationName)) 
                 ValidationErrorText += "New location name must be specified\n";
-            if (-180 < ReferencePointLatitude || ReferencePointLatitude > 180)
+            if (-180 > ReferencePointLatitude || ReferencePointLatitude > 180)
                 ValidationErrorText += "Reference Latitude is out of bounds\n";
-            if (-90 < ReferencePointLongitude || ReferencePointLongitude > 90)
+            if (-90 > ReferencePointLongitude || ReferencePointLongitude > 90)
                 ValidationErrorText += "Reference Longitude is out of bounds\n";
-            if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) && !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates))
-                ValidationErrorText += "Select EITHER an existing overlay file OR coordinates for a new Operational Limit overlay\n";
             if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) && !File.Exists(ExistingOpAreaOverlayFilename))
                 ValidationErrorText += "Selected overlay file does not exist\n";
-            if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) && !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates))
+               if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) && !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates))
                 ValidationErrorText += "Select EITHER an existing overlay file OR coordinates for a new Simulation Limit overlay\n";
+             if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) && !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates))
+                ValidationErrorText += "Select EITHER an existing overlay file OR coordinates for a new Operational Limit overlay\n";
             if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) && !File.Exists(ExistingSimAreaOverlayFilename))
                 ValidationErrorText += "Selected overlay file does not exist\n";
             if (string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)) 
                 ValidationErrorText += "Baseline operational area must be defined\n";
-
+            if (string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)) 
+                ValidationErrorText += "Baseline simulation area must be defined\n";
             if (!string.IsNullOrEmpty(ValidationErrorText)) return;
-            List<EarthCoordinate> opCoords;
-            List<EarthCoordinate> simCoords;
+            List<EarthCoordinate> opCoords = null;
+            List<EarthCoordinate> simCoords = null;
             OpBounds = ValidateOverlayCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords);
             SimBounds = ValidateOverlayCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords);
             if (OpBounds != null) NewOpAreaOverlayEarthCoordinates = opCoords;

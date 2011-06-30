@@ -53,7 +53,7 @@
                         <Button Content="Clear" 
 					        Width="100" 
 							HorizontalAlignment="Right" 
-							Command="{Binding ClearCoordinatesCommand}" />
+							Command="{Binding ClearOpAreaCoordinatesCommand}" />
                     </StackPanel>
                 </GroupBox>
 
