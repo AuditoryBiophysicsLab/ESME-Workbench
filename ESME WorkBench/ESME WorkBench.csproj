@@ -112,6 +112,7 @@
     <Compile Include="ViewModels\Main\EditableLabelListViewModel.cs" />
     <Compile Include="ViewModels\Main\EnvironmentTab.cs" />
     <Compile Include="ViewModels\Main\MainViewModelListeners.cs" />
+    <Compile Include="ViewModels\Main\NAEMOCruft.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\Main\SimulationViewModel.cs" />
     <Compile Include="ViewModels\Map\MarkerLayerViewModel.cs" />

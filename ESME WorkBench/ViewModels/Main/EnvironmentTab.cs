@@ -156,31 +156,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region Commands
 
-        #region NewLocationCommand
-
-        public SimpleCommand<object, object> NewLocationCommand
-        {
-            get
-            {
-                return _newLocation ??
-                       (_newLocation =
-                        new SimpleCommand<object, object>(delegate { NewLocationHandler(); }));
-            }
-        }
-
-        private SimpleCommand<object, object> _newLocation;
-
-        void NewLocationHandler()
-        {
-            var vm = new NewLocationViewModel(Globals.AppSettings);
-            var result = _visualizerService.ShowDialog("NewLocationView", vm);
-            if ((result.HasValue) && (result.Value))
-            {
-                UpdateAvailableLocations();
-                Location = Location.Load(Path.Combine(vm.LocationPath, "location.xml"));
-            }
-        }
-        #endregion
 
         #endregion
     }
