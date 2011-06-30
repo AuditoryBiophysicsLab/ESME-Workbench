@@ -104,6 +104,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 DecoratedExperimentName = "<New experiment>";
             }
             HookPropertyChanged(_experiment);
+            InitializeNAEMOCruft();
             //TestRecentFiles();
         }
 

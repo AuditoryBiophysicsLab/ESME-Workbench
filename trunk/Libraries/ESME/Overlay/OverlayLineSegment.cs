@@ -245,8 +245,12 @@ namespace ESME.Overlay
             if (IsParallelTo(that))
             {
                 if (IsColinearWith(that))
-                    throw new GeometricException(
-                        "Lines are colinear, there is no single defined intersection point");
+                {
+                    if (BoundingBox.Contains(that[0])) return that[0];
+                    if (BoundingBox.Contains(that[1])) return that[1];
+                    if (that.BoundingBox.Contains(this[0])) return this[0];
+                    if (that.BoundingBox.Contains(this[1])) return this[1];
+                }
                 return null;
                 //throw new GeometricException(
                 //    "OverlayLineSegment: Lines are parallel but not colinear, they do not intersect");

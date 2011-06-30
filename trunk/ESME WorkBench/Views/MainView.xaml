@@ -355,16 +355,14 @@
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="V"
 			             Header="Environment">
-				<r:RibbonGroup Header="Location">
+				<r:RibbonGroup Header="Range Complex">
                     <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a previously defined location"
-					                  IsEnabled="{Binding LocationsAreAvailable}">
-                        <r:RibbonGallery 
-                    			Margin="0"
-                    			VerticalContentAlignment="Center"
-								SelectedItem="{Binding Location}"
-                    			MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding AvailableLocations}">
+					                  ToolTipDescription="Select a previously defined range complex">
+                        <r:RibbonGallery Margin="0"
+                    			         VerticalContentAlignment="Center"
+								         SelectedItem="{Binding SelectedRangeComplex}"
+                    			         MaxColumnCount="1">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding SimAreaCSV}">
                                 <r:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical"
@@ -374,7 +372,7 @@
                                 </r:RibbonGalleryCategory.ItemsPanel>
                                 <r:RibbonGalleryCategory.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding LocationMetadata.Name}" />
+                                        <TextBlock Text="{Binding Name}" />
                                     </DataTemplate>
                                 </r:RibbonGalleryCategory.ItemTemplate>
                                 <r:RibbonGalleryCategory.Style>
@@ -387,9 +385,42 @@
                     <r:RibbonButton x:Name="NewLocation" Label="New"
 					                SmallImageSource="..\Images\SmallIcons\map_add.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                                    ToolTipDescription="Define a new location to be used for simulations"
+                                    ToolTipDescription="Define a new range complex"
 					                Command="{Binding NewLocationCommand}">
                     </r:RibbonButton>
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Overlays">
+                    <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                  ToolTipDescription="Select a previously defined range complex">
+                        <r:RibbonGallery Margin="0"
+                    			         VerticalContentAlignment="Center"
+								         SelectedItem="{Binding SelectedOverlayName}"
+                    			         MaxColumnCount="1">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding OverlayFiles}">
+                                <r:RibbonGalleryCategory.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical"
+											            IsItemsHost="True">
+                                        </StackPanel>
+                                    </ItemsPanelTemplate>
+                                </r:RibbonGalleryCategory.ItemsPanel>
+                                <r:RibbonGalleryCategory.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Key}" />
+                                    </DataTemplate>
+                                </r:RibbonGalleryCategory.ItemTemplate>
+                                <r:RibbonGalleryCategory.Style>
+                                    <Style>
+                                    </Style>
+                                </r:RibbonGalleryCategory.Style>
+                            </r:RibbonGalleryCategory>
+                        </r:RibbonGallery>
+                    </r:RibbonComboBox>
+                    <r:RibbonButton Label="New"
+					                SmallImageSource="..\Images\SmallIcons\overlay-new.png"
+					                ToolTipTitle="New Overlay"
+					                ToolTipDescription="Create a new overlay"
+					                Command="{Binding DisabledCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Simulation Area">
                     <StackPanel Orientation="Horizontal">
@@ -425,19 +456,6 @@
                     		</r:RibbonGallery>
                     	</r:RibbonComboBox>
                     </StackPanel>
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Overlays" Visibility="Collapsed" IsEnabled="{Binding LocationIsSelected}">
-                    <r:RibbonSplitButton Label="Display"
-					                LargeImageSource="..\Images\LargeIcons\overlay.png"
-					                SmallImageSource="..\Images\SmallIcons\overlay.png"
-					                ToolTipTitle="Display Overlay"
-					                ToolTipDescription="Display one or more available overlays on the map"
-					                Command="{Binding DisabledCommand}" />
-                    <r:RibbonButton Label="New"
-					                SmallImageSource="..\Images\SmallIcons\overlay-new.png"
-					                ToolTipTitle="New Overlay"
-					                ToolTipDescription="Create a new overlay"
-					                Command="{Binding DisabledCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Available datasets" Visibility="Collapsed" IsEnabled="{Binding LocationIsSelected}">
                     <r:RibbonSplitButton x:Name="BathymetryResolutionSelect" Label="Bathymetry Resolutions"
