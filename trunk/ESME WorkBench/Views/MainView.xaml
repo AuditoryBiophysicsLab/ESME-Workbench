@@ -386,12 +386,13 @@
 					                SmallImageSource="..\Images\SmallIcons\map_add.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                                     ToolTipDescription="Define a new range complex"
-					                Command="{Binding NewLocationCommand}">
+					                Command="{Binding NewRangeComplexCommand}">
                     </r:RibbonButton>
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Overlays">
                     <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a previously defined range complex">
+					                  ToolTipDescription="Select a previously defined range complex"
+                                      IsEnabled="{Binding IsRangeComplexSelected}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
 								         SelectedItem="{Binding SelectedOverlayName}"
@@ -420,7 +421,7 @@
 					                SmallImageSource="..\Images\SmallIcons\overlay-new.png"
 					                ToolTipTitle="New Overlay"
 					                ToolTipDescription="Create a new overlay"
-					                Command="{Binding DisabledCommand}" />
+					                Command="{Binding NewOverlayCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Simulation Area">
                     <StackPanel Orientation="Horizontal">

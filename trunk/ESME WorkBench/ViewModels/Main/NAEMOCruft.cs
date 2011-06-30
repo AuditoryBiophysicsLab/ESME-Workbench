@@ -43,12 +43,37 @@ namespace ESMEWorkBench.ViewModels.Main
                 _selectedRangeComplex = value;
                 NotifyPropertyChanged(SelectedSimAreaChangedEventArgs);
                 if (_selectedRangeComplex != null)
+                {
                     OverlayFiles = new OverlayFiles(_selectedRangeComplex.Name);
+                    IsRangeComplexSelected = true;
+                }
+                else
+                {
+                    IsRangeComplexSelected = false;
+                }
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedSimAreaChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplex);
         SimAreaDescriptor _selectedRangeComplex;
+
+        #endregion
+
+        #region public bool IsRangeComplexSelected { get; set; }
+
+        public bool IsRangeComplexSelected
+        {
+            get { return _isRangeComplexSelected; }
+            set
+            {
+                if (_isRangeComplexSelected == value) return;
+                _isRangeComplexSelected = value;
+                NotifyPropertyChanged(RangeComplexIsSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RangeComplexIsSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsRangeComplexSelected);
+        bool _isRangeComplexSelected;
 
         #endregion
 
@@ -88,9 +113,9 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region NewLocationCommand
+        #region NewRangeComplexCommand
 
-        public SimpleCommand<object, object> NewLocationCommand
+        public SimpleCommand<object, object> NewRangeComplexCommand
         {
             get
             {
@@ -107,7 +132,36 @@ namespace ESMEWorkBench.ViewModels.Main
             var vm = new NewRangeComplexViewModel(Globals.AppSettings);
             var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
             if ((result.HasValue) && (result.Value))
+            {
                 SimAreaCSV = SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+                SelectedRangeComplex = SimAreaCSV[vm.LocationName];
+            }
+        }
+        #endregion
+
+        #region NewOverlayCommand
+
+        public SimpleCommand<object, object> NewOverlayCommand
+        {
+            get
+            {
+                return _newOverlay ?? (_newOverlay = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { NewOverlayHandler(); }));
+            }
+        }
+
+        private SimpleCommand<object, object> _newOverlay;
+
+        void NewOverlayHandler()
+        {
+#if false
+		    var vm = new NewOverlayViewModel(Globals.AppSettings);
+            var result = _visualizerService.ShowDialog("NewOverlayView", vm);
+            if ((result.HasValue) && (result.Value))
+            {
+                if (SelectedRangeComplex != null)
+                    OverlayFiles = new OverlayFiles(SelectedRangeComplex.Name);
+            }
+#endif        
         }
         #endregion
     }
