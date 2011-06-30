@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ESME.Environment.NAVO;
+using ESME.Metadata;
 using HRC.Navigation;
 using HRC.Utility;
 

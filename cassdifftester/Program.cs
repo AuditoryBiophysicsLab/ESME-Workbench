@@ -52,18 +52,20 @@ namespace cassdifftester
                 return;
             }
 
-            var esmeResult = (from packet in CASSFiles.ReadEnvironmentFile(esmeInputFile)
-                              orderby packet.Location.Latitude , packet.Location.Longitude
+            var esmeFile = NAEMOEnvironmentFile.Load(esmeInputFile);
+            var esmeResult = (from packet in esmeFile.Locations
+                              orderby packet.Latitude , packet.Longitude
                               select packet).ToList();
 
-            var nemoResult = (from packet in CASSFiles.ReadEnvironmentFile(nemoInputFile)
-                              orderby packet.Location.Latitude , packet.Location.Longitude
+            var naemoFile = NAEMOEnvironmentFile.Load(nemoInputFile);
+            var nemoResult = (from packet in naemoFile.Locations
+                              orderby packet.Latitude , packet.Longitude
                               select packet).ToList();
 
             var esmeMatchesNemo = (from esme in esmeResult
                                    from nemo in nemoResult
-                                   where (esme.Location.Equals(nemo.Location))
-                                   orderby nemo.Location.Latitude, nemo.Location.Longitude
+                                   where (esme.Equals(nemo))
+                                   orderby nemo.Latitude, nemo.Longitude
                                    select new
                                    {
                                        esme,
@@ -71,8 +73,8 @@ namespace cassdifftester
                                    }).ToList();
             var nemoMatchesEsme = (from nemo in nemoResult
                                    from esme in esmeResult
-                                   where (nemo.Location.Equals(esme.Location))
-                                   orderby nemo.Location.Latitude , nemo.Location.Longitude
+                                   where (nemo.Equals(esme))
+                                   orderby nemo.Latitude , nemo.Longitude
                                    select new
                                           {
                                               esme,
@@ -88,11 +90,11 @@ namespace cassdifftester
                 foreach (var esme in esmeResult)
                 {
                     var matched = false;
-                    foreach (var nemo in nemoResult.Where(nemo => esme.Location.Equals(nemo.Location)))
+                    foreach (var nemo in nemoResult.Where(nemo => esme.Equals(nemo)))
                     {
                         matched = true;
                     }
-                    if (!matched) outFile.AppendLine(string.Format("ESME location {0} is not in the NEMO file", esme.Location));
+                    if (!matched) outFile.AppendLine(string.Format("ESME location {0} is not in the NEMO file", esme));
                 }
             }
             else
@@ -103,11 +105,11 @@ namespace cassdifftester
                 foreach (var nemo in nemoResult)
                 {
                     var matched = false;
-                    foreach (var esme in esmeResult.Where(esme => nemo.Location.Equals(esme.Location)))
+                    foreach (var esme in esmeResult.Where(esme => nemo.Equals(esme)))
                     {
                         matched = true;
                     }
-                    if (!matched) outFile.AppendLine(string.Format("NEMO location {0} is not in the ESME file", nemo.Location));
+                    if (!matched) outFile.AppendLine(string.Format("NEMO location {0} is not in the ESME file", nemo));
                 }
             }
             else
@@ -121,7 +123,7 @@ namespace cassdifftester
             foreach (var result in esmeMatchesNemo.Where(result => result.nemo.BottomType != result.esme.BottomType))
             {
                 //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but NEMO is {2}", result.esme.Location, result.esme.BottomType, result.NEMO.BottomType));
-                outFile.AppendLine(string.Format("{0,-18} {1,-20} {2,-20}", result.esme.Location, result.esme.BottomType, result.nemo.BottomType));
+                outFile.AppendLine(string.Format("{0,-18} {1,-20} {2,-20}", result.esme, result.esme.BottomType, result.nemo.BottomType));
                 bottomcounter++;
             }
             outFile.AppendLine(string.Format("{0} differences found", bottomcounter));
@@ -134,7 +136,7 @@ namespace cassdifftester
             foreach (var result in esmeMatchesNemo.Where(result => result.nemo.Depths.Count != result.esme.Depths.Count))
             {
                 //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but NEMO is {2}", result.esme.Location, result.esme.Depths.Count, result.NEMO.Depths.Count));
-                outFile.AppendLine(string.Format("{0,-18} {1,4} {2,4}", result.esme.Location, result.esme.Depths.Count, result.nemo.Depths.Count));
+                outFile.AppendLine(string.Format("{0,-18} {1,4} {2,4}", result.esme, result.esme.Depths.Count, result.nemo.Depths.Count));
                 depthcounter++;
             }
             outFile.AppendLine(string.Format("{0} differences found", depthcounter));
@@ -170,10 +172,10 @@ namespace cassdifftester
             outFile.AppendLine("Wind Speed Differences");
             outFile.AppendLine("Lat/Lon               ESME    NEMO");
             outFile.AppendLine("------------------ ------- -------");
-            foreach (var result in esmeMatchesNemo.Where(result => (result.nemo.WindSpeed != result.esme.WindSpeed) && (result.esme.Location.Equals(result.nemo.Location))))
+            foreach (var result in esmeMatchesNemo.Where(result => (result.nemo.WindSpeed != result.esme.WindSpeed) && (result.esme.Equals(result.nemo))))
             {
                 //outFile.AppendLine(string.Format("{0}: esme bottom type is {1} but NEMO is {2}", result.esme.Location, result.esme.Depths.Count, result.NEMO.Depths.Count));
-                outFile.AppendLine(string.Format("{0,-18} {1,7} {2,7}", result.esme.Location, result.esme.WindSpeed, result.nemo.WindSpeed));
+                outFile.AppendLine(string.Format("{0,-18} {1,7} {2,7}", result.esme, result.esme.WindSpeed, result.nemo.WindSpeed));
                 windspeedcounter++;
             }
             outFile.AppendLine(string.Format("{0} differences found", windspeedcounter));

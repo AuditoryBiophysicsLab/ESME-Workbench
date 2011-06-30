@@ -20,6 +20,7 @@ using ESME;
 using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
+using ESME.Metadata;
 using ESME.Model;
 using ESME.NEMO;
 using ESME.Overlay;
@@ -1235,12 +1236,9 @@ namespace ESMEWorkBench.Data
                 DisplayEnvironmentData(WindSpeed.TimePeriods[0].EnvironmentData, "Wind", LayerType.WindSpeed, 3);
             }
 
-            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)))
-            {
-                if (BathymetryFileName.EndsWith(".yxz") || BathymetryFileName.EndsWith(".txt"))
-                    Bathymetry = Environment2DData.FromYXZ(BathymetryFileName, -1);
-            }
-            //Bathymetry = Environment2DData.ReadChrtrBinaryFile(@"C:\Users\Dave Anderson\Desktop\test.chb");
+            if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)) && (BathymetryFileName.EndsWith(".yxz") || BathymetryFileName.EndsWith(".txt")))
+                Bathymetry = Environment2DData.FromYXZ(BathymetryFileName, -1);
+
             if (Bathymetry != null)
             {
                 const string bathyBoundsName = "Bathymetry: Boundary";

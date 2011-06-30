@@ -190,7 +190,12 @@ namespace HRC.Utility
                 if (_value == value) return;
                 if ((value < Minimum) || (value > Maximum)) throw new ArgumentOutOfRangeException("Value", string.Format("Value {0} must be between {1} and {2}", value, Minimum, Maximum));
                 _value = value;
-                if ((WorkerReportsProgress) && (_range > 0f) && IsBusy) ReportProgress((int)((_value / _range) * 100f));
+                if ((WorkerReportsProgress) && (_range > 0f) && IsBusy)
+                    try
+                    {
+                        ReportProgress((int)((_value / _range) * 100f));
+                    }
+                    catch (InvalidOperationException) {}
                 NotifyPropertyChanged(ValueChangedEventArgs);
             }
         }
