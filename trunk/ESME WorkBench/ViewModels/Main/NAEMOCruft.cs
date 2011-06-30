@@ -104,8 +104,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void NewLocationHandler()
         {
-            var vm = new NewLocationViewModel(Globals.AppSettings);
-            var result = _visualizerService.ShowDialog("NewLocationView", vm);
+            var vm = new NewRangeComplexViewModel(Globals.AppSettings);
+            var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
             if ((result.HasValue) && (result.Value))
                 SimAreaCSV = SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
         }
