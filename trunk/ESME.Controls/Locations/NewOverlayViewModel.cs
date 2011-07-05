@@ -193,6 +193,8 @@ namespace ESME.Views.Locations
             ValidationErrorText = "";
             if (string.IsNullOrEmpty(OverlayName))
                 ValidationErrorText += "The Overlay file must have a name\n";
+            if (string.IsNullOrEmpty(OverlayCoordinates))
+                ValidationErrorText += "No Overlay Coordinates have been entered\n";
             if (!string.IsNullOrEmpty(ValidationErrorText)) return;
             List<EarthCoordinate> coords;
             Bounds = ValidateOverlayCoordinates(OverlayCoordinates, "Op Limits", out coords);
