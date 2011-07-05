@@ -18,6 +18,7 @@ namespace ESME.Views.Locations
         public NewOverlayViewModel(AppSettings appSettings)
         {
             SimAreaFolder = appSettings.ScenarioDataDirectory;
+            
         }
 
         #region public string  SimAreaFolder { get; set; }
@@ -76,8 +77,6 @@ namespace ESME.Views.Locations
         
         List<EarthCoordinate> OverlayEarthCoordinates { get; set; }
       
-        GeoRect OverlayBounds { get; set; }
-      
         #region OkCommand
 
         public SimpleCommand<object, object> OkCommand
@@ -122,6 +121,8 @@ namespace ESME.Views.Locations
         void OkCommandHandler()
         {
             //var opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", LocationName));
+           // var overlayFileName = Path.Combine(SimAreaFolder);
+            //WriteOverlayFile(overlayFileName,OverlayEarthCoordinates);
             CloseActivePopUpCommand.Execute(true);
         }
         private SimpleCommand<object, object> _ok;
