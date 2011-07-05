@@ -153,7 +153,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void NewOverlayHandler()
         {
-#if false
+#if true
 		    var vm = new NewOverlayViewModel(Globals.AppSettings);
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((result.HasValue) && (result.Value))
