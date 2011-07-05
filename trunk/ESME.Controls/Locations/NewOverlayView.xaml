@@ -1,0 +1,43 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    xmlns:Controls="clr-namespace:ESME.Views.Controls" 
+    x:Class="ESME.Views.Locations.NewOverlayView"
+	Title="New Overlay File"
+	SizeToContent="WidthAndHeight">
+
+	<StackPanel Margin="5">
+		<DockPanel LastChildFill="True">
+			<TextBlock DockPanel.Dock="Left" Text="Overlay Name:"/>
+			<TextBox Text="{Binding OverlayName}" DockPanel.Dock="Left"/>
+		</DockPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+           
+        </Grid>     
+        <GroupBox Padding="5" Header="Coordinates for new overlay (lat, lon)">
+            <StackPanel Orientation="Vertical">
+                <TextBox Text="{Binding OverlayCoordinates}" 
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+							 Height="100"
+					         ToolTip="Please enter coordinates in latitude, longitude pairs separated by newlines" 
+							 VerticalScrollBarVisibility="Auto" />
+                <Button Content="Clear" 
+					        Width="100" 
+							HorizontalAlignment="Right" 
+							Command="{Binding ClearCoordinatesCommand}" />
+            </StackPanel>
+        </GroupBox>                
+        <GroupBox Header="Error(s):" Foreground="Red" Visibility="{Binding ErrorVisibility}" Padding="5" Margin="0 0 0 5">
+            <TextBlock Foreground="Red" Text="{Binding ValidationErrorText}" Margin="5" />
+        </GroupBox>
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+			<Button Content="OK" Width="75" Margin="5" IsDefault="True" Command="{Binding OkCommand}"/>
+			<Button Content="Cancel" Width="75" Margin="5" IsCancel="True"/>
+		</StackPanel>
+	</StackPanel>
+</Window>
