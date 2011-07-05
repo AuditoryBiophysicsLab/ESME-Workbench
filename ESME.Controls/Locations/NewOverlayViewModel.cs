@@ -15,10 +15,11 @@ namespace ESME.Views.Locations
 {
     public class NewOverlayViewModel : ViewModelBase, ISupportValidation
     {
-        public NewOverlayViewModel(AppSettings appSettings)
+        public NewOverlayViewModel(AppSettings appSettings, string locationName)
         {
             SimAreaFolder = appSettings.ScenarioDataDirectory;
-            
+            LocationName = locationName;
+
         }
 
         #region public string  SimAreaFolder { get; set; }
@@ -76,6 +77,7 @@ namespace ESME.Views.Locations
         #endregion
         
         List<EarthCoordinate> OverlayEarthCoordinates { get; set; }
+        private string LocationName { get; set; }
       
         #region OkCommand
 
@@ -120,9 +122,8 @@ namespace ESME.Views.Locations
 
         void OkCommandHandler()
         {
-            var locationName = "";
             if (!OverlayName.EndsWith(".ovr")) OverlayName += ".ovr";
-            var overlayFileName = Path.Combine(SimAreaFolder,locationName,"Areas",OverlayName);
+            var overlayFileName = Path.Combine(SimAreaFolder,LocationName,"Areas",OverlayName);
             WriteOverlayFile(overlayFileName,OverlayEarthCoordinates);
             CloseActivePopUpCommand.Execute(true);
         }
