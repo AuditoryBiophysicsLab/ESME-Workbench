@@ -120,9 +120,10 @@ namespace ESME.Views.Locations
 
         void OkCommandHandler()
         {
-            //var opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", LocationName));
-           // var overlayFileName = Path.Combine(SimAreaFolder);
-            //WriteOverlayFile(overlayFileName,OverlayEarthCoordinates);
+            var locationName = "";
+            if (!OverlayName.EndsWith(".ovr")) OverlayName += ".ovr";
+            var overlayFileName = Path.Combine(SimAreaFolder,locationName,"Areas",OverlayName);
+            WriteOverlayFile(overlayFileName,OverlayEarthCoordinates);
             CloseActivePopUpCommand.Execute(true);
         }
         private SimpleCommand<object, object> _ok;
