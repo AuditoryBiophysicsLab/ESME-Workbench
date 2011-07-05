@@ -126,10 +126,11 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         private SimpleCommand<object, object> _newLocation;
-
+       string locationName;
         void NewLocationHandler()
         {
             var vm = new NewRangeComplexViewModel(Globals.AppSettings);
+            locationName = vm.LocationName;
             var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
             if ((result.HasValue) && (result.Value))
             {
@@ -138,14 +139,14 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
         #endregion
-
+        
         #region NewOverlayCommand
 
         public SimpleCommand<object, object> NewOverlayCommand
         {
             get
             {
-                return _newOverlay ?? (_newOverlay = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { NewOverlayHandler(); }));
+                return _newOverlay ?? (_newOverlay = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected && !string.IsNullOrEmpty(locationName); }, delegate { NewOverlayHandler(); }));
             }
         }
 
@@ -154,7 +155,7 @@ namespace ESMEWorkBench.ViewModels.Main
         void NewOverlayHandler()
         {
 #if true
-		    var vm = new NewOverlayViewModel(Globals.AppSettings);
+		    var vm = new NewOverlayViewModel(Globals.AppSettings,locationName);
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((result.HasValue) && (result.Value))
             {
