@@ -13,7 +13,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             SimAreaCSV = SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
         }
-
+        
         #region public SimAreaCSV SimAreaCSV { get; set; }
 
         public SimAreaCSV SimAreaCSV
