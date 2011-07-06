@@ -8,12 +8,17 @@ namespace ESME.Overlay
 {
     public class OverlayFiles : List<KeyValuePair<string, OverlayFile>>, INotifyPropertyChanged
     {
-        public OverlayFiles(string selectedRangeComplex)
+        public OverlayFiles(string selectedRangeComplexName)
         {
-            if (string.IsNullOrEmpty(selectedRangeComplex)) return;
-            var files = Directory.GetFiles(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, selectedRangeComplex, "Areas"), "*.ovr");
+            Refresh(selectedRangeComplexName);
+        }
+
+        public void Refresh(string selectedRangeComplexName)
+        {
+            if (string.IsNullOrEmpty(selectedRangeComplexName)) return;
+            Clear();
+            var files = Directory.GetFiles(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, selectedRangeComplexName, "Areas"), "*.ovr");
             AddRange(files.Select(file => new KeyValuePair<string, OverlayFile>(Path.GetFileNameWithoutExtension(file), new OverlayFile(file))));
-            NotifyPropertyChanged(OverlaysChangedEventArgs);
         }
 
         public OverlayFile this[string overlayKey]

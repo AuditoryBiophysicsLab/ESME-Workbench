@@ -43,7 +43,22 @@ namespace ESME.Environment
         public EarthCoordinate<float> DeepestPoint { get; set; }
 
         [XmlIgnore]
-        public SoundSpeedProfile DeepestSSP { get { return DeepestPoint != null ? EnvironmentData[DeepestPoint] : null; } }
+        public SoundSpeedProfile DeepestSSP
+        {
+            get
+            {
+                var step1 = from ssp in EnvironmentData
+                            orderby ssp.Data.Count
+                            select ssp;
+                var maxCount = step1.Last().Data.Count;
+                var step2 = from ssp in step1
+                            where ssp.Data.Count == maxCount
+                            orderby ssp.DistanceTo(DeepestPoint)
+                            select ssp;
+                return step2.First();
+                //return DeepestPoint != null ? EnvironmentData[DeepestPoint] : null;
+            }
+        }
 
         public void ExtendProfiles(TimePeriodEnvironmentData<SoundSpeedProfile> temperatureData, TimePeriodEnvironmentData<SoundSpeedProfile> salinityData)
         {
