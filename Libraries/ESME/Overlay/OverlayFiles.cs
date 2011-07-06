@@ -7,22 +7,6 @@ using ESME.TransmissionLoss.CASS;
 
 namespace ESME.Overlay
 {
-    public class OverlayFiles : List<KeyValuePair<string, OverlayFile>>
-    {
-        public OverlayFiles(string selectedRangeComplexName)
-        {
-            if (string.IsNullOrEmpty(selectedRangeComplexName)) return;
-            Clear();
-            var files = Directory.GetFiles(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, selectedRangeComplexName, "Areas"), "*.ovr");
-            AddRange(files.Select(file => new KeyValuePair<string, OverlayFile>(Path.GetFileNameWithoutExtension(file), new OverlayFile(file))));
-        }
-
-        public OverlayFile this[string overlayKey]
-        {
-            get { return this.FirstOrDefault(f => f.Key == overlayKey).Value; }
-        }
-    }
-
     public abstract class NAEMODescriptors<T> : List<KeyValuePair<string, T>> where T : NAEMODescriptor, new()
     {
         public delegate KeyValuePair<string, T> NewDescriptor(string sourceFilename);
@@ -40,17 +24,17 @@ namespace ESME.Overlay
         }
     }
 
-    public class NAEMOOverlayDescriptors : NAEMODescriptors<OverlayDescriptor>
+    public class NAEMOOverlayDescriptors : NAEMODescriptors<NAEMOOverlayDescriptor>
     {
         public NAEMOOverlayDescriptors(string selectedRangeComplexName)
             : base(selectedRangeComplexName, "Areas", "*.ovr")
         { }
     }
 
-    public class NAEMOBathymetryDescriptors : NAEMODescriptors<BathymetryDescriptor>
+    public class NAEMOBathymetryDescriptors : NAEMODescriptors<NAEMOBathymetryDescriptor>
     {
         public NAEMOBathymetryDescriptors(string selectedRangeComplexName)
-            : base(selectedRangeComplexName, "Areas", "*.ovr")
+            : base(selectedRangeComplexName, "Bathymetry", "*_bathy.txt")
         { }
     }
 
@@ -58,8 +42,6 @@ namespace ESME.Overlay
     {
         public abstract void Save();
         public string DataFilename { get; set; }
-
-        public abstract NAEMODescriptor Load(string sourceFilename);
     }
 
     public abstract class NAEMODescriptor<TData, TMetadata> : NAEMODescriptor where TMetadata : NAEMOMetadataBase, new()
@@ -73,13 +55,9 @@ namespace ESME.Overlay
         }
 
         public override void Save() { Metadata.Save(Metadata); }
-        public override NAEMODescriptor Load(string sourceFilename)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 
-    public class OverlayDescriptor : NAEMODescriptor<OverlayFile, NAEMOOverlayMetadata>
+    public class NAEMOOverlayDescriptor : NAEMODescriptor<OverlayFile, NAEMOOverlayMetadata>
     {
         #region public OverlayFile Data { get; set; }
 
@@ -92,7 +70,7 @@ namespace ESME.Overlay
         #endregion
     }
 
-    public class BathymetryDescriptor : NAEMODescriptor<Bathymetry, NAEMOBathymetryMetadata>
+    public class NAEMOBathymetryDescriptor : NAEMODescriptor<Bathymetry, NAEMOBathymetryMetadata>
     {
         #region public OverlayFile Data { get; set; }
 
@@ -105,7 +83,7 @@ namespace ESME.Overlay
         #endregion
     }
 
-    public class EnvironmentDescriptor : NAEMODescriptor<NAEMOEnvironmentFile, NAEMOEnvironmentMetadata>
+    public class NAEMOEnvironmentDescriptor : NAEMODescriptor<NAEMOEnvironmentFile, NAEMOEnvironmentMetadata>
     {
         #region public OverlayFile Data { get; set; }
 
