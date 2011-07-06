@@ -59,7 +59,13 @@
 		<r:Ribbon x:Name="Ribbon"
                   SelectedIndex="2"
 		          DockPanel.Dock="Top">
-			<r:Ribbon.ApplicationMenu>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectionChanged">
+                    <cinch:EventToCommandTrigger Command="{Binding EnvironmentTabGotFocusCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
 					<r:RibbonApplicationMenuItem Header="Save Experiment"
 					                             InputGestureText="Ctrl+S"
