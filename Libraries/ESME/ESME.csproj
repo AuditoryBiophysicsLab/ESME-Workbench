@@ -152,6 +152,7 @@
     <Compile Include="Metadata\NAEMOEnvironmentMetadata.cs" />
     <Compile Include="Metadata\NAEMOMetadata.cs" />
     <Compile Include="Metadata\NAEMOMetadataBase.cs" />
+    <Compile Include="Metadata\NAEMOOverlayMetadata.cs" />
     <Compile Include="Metadata\NAEMOScenarioMetadata.cs" />
     <Compile Include="Model\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />

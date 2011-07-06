@@ -10,6 +10,10 @@ namespace ESME.Metadata
     {
         new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes) {typeof(NAVOTimePeriod)};
 
+        public static NAEMOEnvironmentMetadata Load(string metaDataFilename) { return Load<NAEMOEnvironmentMetadata>(metaDataFilename); }
+
+        public void Save(string filename = null) { Save(this, filename); }
+
         #region public NAVOTimePeriod TimePeriod { get; set; }
 
         public NAVOTimePeriod TimePeriod

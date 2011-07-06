@@ -16,11 +16,12 @@ namespace ESME.Metadata
     {
         new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes){typeof(EarthCoordinate), typeof(GeoRect)};
 
+#if true
         public static NAEMOBathymetryMetadata FromBathymetryFile(string naemoBathymetryFilename, out Bathymetry bathymetry)
         {
             bathymetry = Bathymetry.FromYXZ(naemoBathymetryFilename, -1);
 
-            var metaDataFilename = MetadataFilename(naemoBathymetryFilename);
+            var metaDataFilename = naemoBathymetryFilename;
             var areasPath = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(naemoBathymetryFilename)), "Areas");
             var fields = naemoBathymetryFilename.Split('_');
 
@@ -64,7 +65,7 @@ namespace ESME.Metadata
             {
                 var overlayNameEndIndex = metaDataFilename.IndexOf(fields[fields.Length - 2]) - 1;
                 overlayFilename = Path.GetFileName(metaDataFilename.Substring(0, overlayNameEndIndex) + ".ovr");
-                if (!File.Exists(Path.Combine(areasPath, overlayFilename))) 
+                if (!File.Exists(Path.Combine(areasPath, overlayFilename)))
                     overlayFilename = null;
             }
 
@@ -89,8 +90,9 @@ namespace ESME.Metadata
                 Filename = metaDataFilename,
             };
         }
-
-        public static void CreateMissingBathymetryFiles(string bathymetryPath)
+        
+#endif
+        public static void CreateMissingBathymetryMetadata(string bathymetryPath)
         {
             var files = Directory.GetFiles(bathymetryPath, "*.txt");
             foreach (var file in files.Where(file => !File.Exists(MetadataFilename(file))).Where(file => !file.ToLower().EndsWith("security_readme.txt"))) 
@@ -101,21 +103,9 @@ namespace ESME.Metadata
             }
         }
 
-        public static string MetadataFilename(string naemoBathymetryFilename)
-        {
-            var metadataPath = Path.GetDirectoryName(naemoBathymetryFilename);
-            var metadataFile = Path.GetFileNameWithoutExtension(naemoBathymetryFilename);
-            return Path.Combine(metadataPath, metadataFile + ".emf");
-        }
+        public static NAEMOBathymetryMetadata Load(string metaDataFilename) { return Load<NAEMOBathymetryMetadata>(metaDataFilename); }
 
-        public static NAEMOBathymetryMetadata Load(string metaDataFilename) { return XmlSerializer<NAEMOBathymetryMetadata>.Load(metaDataFilename, ReferencedTypes); }
-
-        public void Save(string filename = null)
-        {
-            if (string.IsNullOrEmpty(filename)) filename = Filename;
-            var serializer = new XmlSerializer<NAEMOBathymetryMetadata> { Data = this };
-            serializer.Save(filename, ReferencedTypes);
-        }
+        public void Save(string filename = null) { Save(this, filename); }
 
         public virtual string GeneratedFilename
         {
