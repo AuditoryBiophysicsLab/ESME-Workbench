@@ -88,6 +88,9 @@
     <Compile Include="Controls\ScatterPlot.xaml.cs">
       <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TimePeriodComboBox.xaml.cs">
+      <DependentUpon>TimePeriodComboBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
@@ -166,6 +169,10 @@
     <Page Include="Controls\ScatterPlot.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\TimePeriodComboBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
       <SubType>Designer</SubType>

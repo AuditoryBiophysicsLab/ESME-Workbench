@@ -1,37 +1,56 @@
 ﻿<Window x:Class="ESME.Views.Locations.MetadataPropertiesView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Controls="clr-namespace:ESME.Views.Controls" Title="{Binding TitleString}" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Controls="clr-namespace:ESME.Views.Controls" xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" Title="{Binding TitleString}" 
         SizeToContent="WidthAndHeight">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter"/>
     </Window.Resources>
     <StackPanel Margin="5">
-        
+
         <StackPanel Orientation="Vertical" DataContext="{Binding BathymetryMetadata}"                 
                    Visibility="{Binding IsBathymetryDisplay, Converter={StaticResource boolToVisibilityConverter}}">
-                 
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Overlay"/>
+                <TextBox Text="{Binding OverlayFilename}"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Resolution"/>
+                <TextBox Text="{Binding Resolution}">
+                    <i:Interaction.Behaviors>
+                        <cinch:NumericTextBoxBehaviour />
+                    </i:Interaction.Behaviors>
+                </TextBox>
+            </StackPanel>
         </StackPanel>
-        
+
+        <StackPanel Orientation="Vertical" DataContext="{Binding OverlayMetadata}"                 
+                   Visibility="{Binding IsOverlayyDisplay, Converter={StaticResource boolToVisibilityConverter}}">
+
+        </StackPanel>
+
+
         <StackPanel Orientation="Vertical" DataContext="{Binding EnvironmentMetadata}" 
                    Visibility="{Binding IsEnvironmentDisplay, Converter={StaticResource boolToVisibilityConverter}}">
-          
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Overlay"/>
+                <TextBox Text="{Binding OverlayFilename}"/>
+            </StackPanel>
+            <Controls:TimePeriodComboBox SelectedItem="{Binding TimePeriod}"/>            
         </StackPanel>
-        
-        <StackPanel Orientation="Vertical" DataContext="{Binding ScenarioMetadata}" 
-                   Visibility="{Binding IsScenarioDisplay, Converter={StaticResource boolToVisibilityConverter}}">
-            <Controls:FileOrDirectorySetting Caption="Bathymetry file"
-                                 Margin="5 0 5 0"
-                                 IsDirectoryBrowser="False"
-								 VerticalAlignment="Center"
-								 FileNameFilter="Bathymetry files (*.xyz)|*.xyz|All files (*.*)|*.*"
-                                 FileName="{Binding BathymetryFilename}" /> 
-            
-            <Controls:FileOrDirectorySetting Caption="Environment file"
-                                 Margin="5 0 5 0"
-                                 IsDirectoryBrowser="False"
-								 VerticalAlignment="Center"
-								 FileNameFilter="Bathymetry files (*.xyz)|*.xyz|All files (*.*)|*.*"
-                                 FileName="{Binding EnvironmentFilename}" />
+
+        <StackPanel Orientation="Vertical" DataContext="{Binding ScenarioMetadata}" Visibility="{Binding IsScenarioDisplay, Converter={StaticResource boolToVisibilityConverter}}">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Bathymetry"/>
+                <TextBox Text="{Binding BathymetryFilename}"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Environment"/>
+                <TextBox Text="{Binding EnvironmentFilename}"/>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="OK" Width="75" Margin="5" IsDefault="True" Command="{Binding OkCommand}"/>
+            <Button Content="Cancel" Width="75" Margin="5" IsCancel="True"/>
         </StackPanel>
     </StackPanel>
 
