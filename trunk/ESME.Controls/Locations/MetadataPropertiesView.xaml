@@ -1,0 +1,31 @@
+﻿<Window x:Class="ESME.Views.Locations.MetadataPropertiesView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Controls="clr-namespace:ESME.Views.Controls" Title="{Binding TitleString}" 
+        SizeToContent="WidthAndHeight">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter"/>
+    </Window.Resources>
+    <StackPanel Margin="5">
+        
+        <StackPanel Orientation="Vertical" DataContext="{Binding BathymetryMetadata}"                 
+                   Visibility="{Binding IsBathymetryDisplay, Converter={StaticResource boolToVisibilityConverter}}">
+                 
+        </StackPanel>
+        
+        <StackPanel Orientation="Vertical" DataContext="{Binding EnvironmentMetadata}" 
+                   Visibility="{Binding IsEnvironmentDisplay, Converter={StaticResource boolToVisibilityConverter}}">
+          
+        </StackPanel>
+        
+        <StackPanel Orientation="Vertical" DataContext="{Binding ScenarioMetadata}" 
+                   Visibility="{Binding IsScenarioDisplay, Converter={StaticResource boolToVisibilityConverter}}">
+            <Controls:FileOrDirectorySetting Caption="Bathymetry file"
+                                 Margin="5 0 5 0"
+                                 IsDirectoryBrowser="False"
+								 VerticalAlignment="Center"
+								 FileNameFilter="Bathymetry files (*.xyz)|*.xyz|All files (*.*)|*.*"
+                                 FileName="{Binding BathymetryFilename}" />
+        </StackPanel>
+    </StackPanel>
+
+</Window>

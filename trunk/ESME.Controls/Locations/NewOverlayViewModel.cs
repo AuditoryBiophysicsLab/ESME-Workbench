@@ -125,6 +125,7 @@ namespace ESME.Views.Locations
             if (!OverlayName.EndsWith(".ovr")) OverlayName += ".ovr";
             var overlayFileName = Path.Combine(SimAreaFolder,LocationName,"Areas",OverlayName);
             WriteOverlayFile(overlayFileName,OverlayEarthCoordinates);
+
             CloseActivePopUpCommand.Execute(true);
         }
         private SimpleCommand<object, object> _ok;
