@@ -37,7 +37,7 @@
             </StackPanel>
             <Controls:TimePeriodComboBox SelectedItem="{Binding TimePeriod}"/>            
         </StackPanel>
-
+        <Controls:TimePeriodComboBox SelectedItem="{Binding TimePeriod}"/>
         <StackPanel Orientation="Vertical" DataContext="{Binding ScenarioMetadata}" Visibility="{Binding IsScenarioDisplay, Converter={StaticResource boolToVisibilityConverter}}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Bathymetry"/>
