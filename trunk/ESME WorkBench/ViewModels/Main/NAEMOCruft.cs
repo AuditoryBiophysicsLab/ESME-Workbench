@@ -5,7 +5,6 @@ using Cinch;
 using ESME.Overlay;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.Locations;
-using Microsoft.Windows.Controls.Ribbon;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -168,15 +167,15 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region EnvironmentTabGotFocusCommand
-        public SimpleCommand<object, object> EnvironmentTabGotFocusCommand
+        #region RibbonTabSelectionChangedCommand
+        public SimpleCommand<object, object> RibbonTabSelectionChangedCommand
         {
-            get { return _environmentTabGotFocus ?? (_environmentTabGotFocus = new SimpleCommand<object, object>(delegate { RibbonTabChanged(); })); }
+            get { return _ribbonTabSelectionChangedCommand ?? (_ribbonTabSelectionChangedCommand = new SimpleCommand<object, object>(delegate { RibbonTabSelectionChanged(); })); }
         }
 
-        SimpleCommand<object, object> _environmentTabGotFocus;
+        SimpleCommand<object, object> _ribbonTabSelectionChangedCommand;
 
-        void RibbonTabChanged()
+        void RibbonTabSelectionChanged()
         {
             switch (((Views.MainView)_viewAwareStatus.View).Ribbon.SelectedIndex)
             {

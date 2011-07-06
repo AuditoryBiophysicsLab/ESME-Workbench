@@ -92,6 +92,7 @@
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LabelValuePair.cs" />
+    <Compile Include="Locations\MetadataPropertiesViewModel.cs" />
     <Compile Include="Locations\NewOverlayViewModel.cs" />
     <Compile Include="Locations\NewOverlayView.xaml.cs">
       <DependentUpon>NewOverlayView.xaml</DependentUpon>

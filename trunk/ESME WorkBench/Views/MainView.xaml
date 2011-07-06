@@ -61,7 +61,7 @@
 		          DockPanel.Dock="Top">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <cinch:EventToCommandTrigger Command="{Binding EnvironmentTabGotFocusCommand}" />
+                    <cinch:EventToCommandTrigger Command="{Binding RibbonTabSelectionChangedCommand}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
 
@@ -363,7 +363,7 @@
 			             Header="Environment">
 				<r:RibbonGroup Header="Range Complex">
                     <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a previously defined range complex">
+					                  ToolTipDescription="Select a pre-defined range complex">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
 								         SelectedItem="{Binding SelectedRangeComplex}"
@@ -397,7 +397,7 @@
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Overlays">
                     <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a previously defined range complex"
+					                  ToolTipDescription="Select a pre-defined overlay"
                                       IsEnabled="{Binding IsRangeComplexSelected}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
@@ -424,12 +424,105 @@
                             </r:RibbonGalleryCategory>
                         </r:RibbonGallery>
                     </r:RibbonComboBox>
-                    <r:RibbonButton Label="New"
+                    <StackPanel Orientation="Horizontal">
+                        <r:RibbonButton Label="New"
 					                SmallImageSource="..\Images\SmallIcons\overlay-new.png"
 					                ToolTipTitle="New Overlay"
 					                ToolTipDescription="Create a new overlay"
 					                Command="{Binding NewOverlayCommand}" />
+                        <r:RibbonButton Label="Expand"
+					                SmallImageSource="..\Images\SmallIcons\top_right_expand.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Expand the selected overlay to create a new overlay"
+					                Command="{Binding ExpandOverlayCommand}" />
+                    </StackPanel>
+                    <r:RibbonButton Label="Properties"
+					                SmallImageSource="..\Images\SmallIcons\properties.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="View or edit the overlay properties"
+					                Command="{Binding OverlayPropertiesCommand}" />
                 </r:RibbonGroup>
+                <r:RibbonGroup Header="Bathymetry">
+                    <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                  ToolTipDescription="Select a pre-defined bathymetry dataset"
+                                      IsEnabled="{Binding IsRangeComplexSelected}">
+                        <r:RibbonGallery Margin="0"
+                    			         VerticalContentAlignment="Center"
+								         SelectedValue="{Binding SelectedBathymetryName}"
+                                         SelectedValuePath="Key"
+                    			         MaxColumnCount="1">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding BathymetryFiles}">
+                                <r:RibbonGalleryCategory.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical"
+											            IsItemsHost="True">
+                                        </StackPanel>
+                                    </ItemsPanelTemplate>
+                                </r:RibbonGalleryCategory.ItemsPanel>
+                                <r:RibbonGalleryCategory.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Key}" />
+                                    </DataTemplate>
+                                </r:RibbonGalleryCategory.ItemTemplate>
+                                <r:RibbonGalleryCategory.Style>
+                                    <Style>
+                                    </Style>
+                                </r:RibbonGalleryCategory.Style>
+                            </r:RibbonGalleryCategory>
+                        </r:RibbonGallery>
+                    </r:RibbonComboBox>
+                    <r:RibbonButton Label="New"
+					            SmallImageSource="..\Images\SmallIcons\map_add.png"
+					            ToolTipTitle="New Bathymetry"
+					            ToolTipDescription="Extract a new bathymetry dataset"
+					            Command="{Binding NewBathymetryCommand}" />
+                    <r:RibbonButton Label="Properties"
+					                SmallImageSource="..\Images\SmallIcons\properties.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="View or edit the bathymetry properties"
+					                Command="{Binding BathymetryPropertiesCommand}" />
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Environment">
+                    <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                  ToolTipDescription="Select a pre-defined environmental dataset"
+                                      IsEnabled="{Binding IsRangeComplexSelected}">
+                        <r:RibbonGallery Margin="0"
+                    			         VerticalContentAlignment="Center"
+								         SelectedValue="{Binding SelectedEnvironmentName}"
+                                         SelectedValuePath="Key"
+                    			         MaxColumnCount="1">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding EnvironmentFiles}">
+                                <r:RibbonGalleryCategory.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical"
+											            IsItemsHost="True">
+                                        </StackPanel>
+                                    </ItemsPanelTemplate>
+                                </r:RibbonGalleryCategory.ItemsPanel>
+                                <r:RibbonGalleryCategory.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Key}" />
+                                    </DataTemplate>
+                                </r:RibbonGalleryCategory.ItemTemplate>
+                                <r:RibbonGalleryCategory.Style>
+                                    <Style>
+                                    </Style>
+                                </r:RibbonGalleryCategory.Style>
+                            </r:RibbonGalleryCategory>
+                        </r:RibbonGallery>
+                    </r:RibbonComboBox>
+                    <r:RibbonButton Label="New"
+					            SmallImageSource="..\Images\SmallIcons\breeze.png"
+					            ToolTipTitle="New Bathymetry"
+					            ToolTipDescription="Extract a new bathymetry dataset"
+					            Command="{Binding NewEnvironmentCommand}" />
+                    <r:RibbonButton Label="Properties"
+					                SmallImageSource="..\Images\SmallIcons\properties.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="View or edit the bathymetry properties"
+					                Command="{Binding EnvironmentPropertiesCommand}" />
+                </r:RibbonGroup>
+                <!--
                 <r:RibbonGroup Header="Simulation Area">
                     <StackPanel Orientation="Horizontal">
                         <r:RibbonTextBox x:Name="BufferZoneSize" Label="Buffer" Text="{Binding BufferZoneSize}">
@@ -601,6 +694,7 @@
                 	<r:RibbonCheckBox Label="Warm" />
                 	<r:RibbonCheckBox Label="Cold" />
                 </r:RibbonGroup>
+                -->
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="A"
 			             Header="Animals">
