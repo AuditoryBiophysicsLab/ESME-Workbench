@@ -5,6 +5,7 @@ using Cinch;
 using ESME.Overlay;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.Locations;
+using Microsoft.Windows.Controls.Ribbon;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -163,6 +164,41 @@ namespace ESMEWorkBench.ViewModels.Main
                 SelectedOverlayName = OverlayFiles.Find(item => item.Key == Path.GetFileNameWithoutExtension(vm.OverlayName)).Key;
             }
 #endif        
+        }
+
+        #endregion
+
+        #region EnvironmentTabGotFocusCommand
+        public SimpleCommand<object, object> EnvironmentTabGotFocusCommand
+        {
+            get { return _environmentTabGotFocus ?? (_environmentTabGotFocus = new SimpleCommand<object, object>(delegate { RibbonTabChanged(); })); }
+        }
+
+        SimpleCommand<object, object> _environmentTabGotFocus;
+
+        void RibbonTabChanged()
+        {
+            switch (((Views.MainView)_viewAwareStatus.View).Ribbon.SelectedIndex)
+            {
+                case 0:
+                    Console.WriteLine("Experiment tab selected");
+                    break;
+                case 1:
+                    Console.WriteLine("Scenario tab selected");
+                    break;
+                case 2:
+                    Console.WriteLine("Environment tab selected");
+                    break;
+                case 3:
+                    Console.WriteLine("Animals tab selected");
+                    break;
+                case 4:
+                    Console.WriteLine("Acoustics tab selected");
+                    break;
+                default:
+                    Console.WriteLine("Other tab selected");
+                    break;
+            }
         }
         #endregion
     }
