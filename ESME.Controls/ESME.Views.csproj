@@ -92,6 +92,9 @@
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LabelValuePair.cs" />
+    <Compile Include="Locations\MetadataPropertiesView.xaml.cs">
+      <DependentUpon>MetadataPropertiesView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Locations\MetadataPropertiesViewModel.cs" />
     <Compile Include="Locations\NewOverlayViewModel.cs" />
     <Compile Include="Locations\NewOverlayView.xaml.cs">
@@ -165,6 +168,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Locations\MetadataPropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
