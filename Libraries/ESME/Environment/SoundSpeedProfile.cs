@@ -89,6 +89,7 @@ namespace ESME.Environment
                 else
                 {
                     //System.Diagnostics.Debug.WriteLine("  Original SSP depth vector length: {0} ({1}m)", Depths.Length, MaxDepth);
+                    if (Data.Count > templateSSP.Data.Count) System.Diagnostics.Debugger.Break();
                     var myProfileLength = Data.Count;
                     var templateProfileLength = templateSSP.Data.Count;
                     var shallowSpeed = Data.Last().Value;

@@ -395,7 +395,8 @@
                                       IsEnabled="{Binding IsRangeComplexSelected}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
-								         SelectedItem="{Binding SelectedOverlayName}"
+								         SelectedValue="{Binding SelectedOverlayName}"
+                                         SelectedValuePath="Key"
                     			         MaxColumnCount="1">
                             <r:RibbonGalleryCategory ItemsSource="{Binding OverlayFiles}">
                                 <r:RibbonGalleryCategory.ItemsPanel>

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
 using Cinch;
 using ESME.Overlay;
@@ -126,7 +127,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         private SimpleCommand<object, object> _newLocation;
-       
+
         void NewLocationHandler()
         {
             var vm = new NewRangeComplexViewModel(Globals.AppSettings);
@@ -145,7 +146,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _newOverlay ?? (_newOverlay = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected&&(!string.IsNullOrEmpty(SelectedRangeComplex.Name) || string.IsNullOrEmpty(_experiment.NemoFile.Scenario.SimAreaName)); }, delegate { NewOverlayHandler(); }));
+                return _newOverlay ?? (_newOverlay = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { NewOverlayHandler(); }));
             }
         }
 
@@ -154,14 +155,12 @@ namespace ESMEWorkBench.ViewModels.Main
         void NewOverlayHandler()
         {
 #if true
-            string locationName;
-            locationName = !string.IsNullOrEmpty(SelectedRangeComplex.Name) ? SelectedRangeComplex.Name : _experiment.NemoFile.Scenario.SimAreaName;
-		    var vm = new NewOverlayViewModel(Globals.AppSettings,locationName);
+		    var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplex.Name);
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                if (SelectedRangeComplex != null)
-                    OverlayFiles = new OverlayFiles(SelectedRangeComplex.Name);
+                OverlayFiles = new OverlayFiles(SelectedRangeComplex.Name);
+                SelectedOverlayName = OverlayFiles.Find(item => item.Key == Path.GetFileNameWithoutExtension(vm.OverlayName)).Key;
             }
 #endif        
         }
