@@ -1,20 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using Cinch;
 using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.Metadata
 {
-    public abstract class NAEMOMetadataBase : PropertyChangedBase
+    public class NAEMOMetadataBase : PropertyChangedBase
     {
         protected static readonly List<Type> ReferencedTypes = new List<Type>{typeof(string), typeof(DateTime)};
 
-        protected NAEMOMetadataBase()
+        public NAEMOMetadataBase()
         {
             Creator = System.Environment.UserName;
             CreationDateTime = DateTime.Now;
+        }
+
+        protected static string MetadataFilename(string sourceFilename)
+        {
+            var metadataPath = Path.GetDirectoryName(sourceFilename);
+            var metadataFile = Path.GetFileNameWithoutExtension(sourceFilename);
+            return Path.Combine(metadataPath, metadataFile + ".xml");
+        }
+
+        public static T Load<T>(string sourceFilename) where T: NAEMOMetadataBase, new()
+        {
+            var metaDataFilename = MetadataFilename(sourceFilename);
+
+            var result = XmlSerializer<T>.Load(metaDataFilename, ReferencedTypes);
+            result.Filename = metaDataFilename;
+            return result;
+        }
+
+        public virtual void Save<T>(T data, string filename = null) where T : NAEMOMetadataBase, new()
+        {
+            if (string.IsNullOrEmpty(filename)) filename = Filename;
+            var serializer = new XmlSerializer<T> { Data = data };
+            serializer.Save(filename, ReferencedTypes);
         }
 
         #region public string Creator { get; set; }

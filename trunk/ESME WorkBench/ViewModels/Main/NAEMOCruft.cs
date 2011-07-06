@@ -45,7 +45,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedSimAreaChangedEventArgs);
                 if (_selectedRangeComplex != null)
                 {
-                    OverlayFiles = new OverlayFiles(_selectedRangeComplex.Name);
+                    OverlayFiles = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name);
                     IsRangeComplexSelected = true;
                 }
                 else
@@ -80,7 +80,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region public OverlayFiles OverlayFiles { get; set; }
 
-        public OverlayFiles OverlayFiles
+        public NAEMOOverlayDescriptors OverlayFiles
         {
             get { return _overlayFiles; }
             set
@@ -92,7 +92,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         static readonly PropertyChangedEventArgs OverlayFilesChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.OverlayFiles);
-        OverlayFiles _overlayFiles;
+        NAEMOOverlayDescriptors _overlayFiles;
 
         #endregion
 
@@ -159,7 +159,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                OverlayFiles = new OverlayFiles(SelectedRangeComplex.Name);
+                OverlayFiles = new NAEMOOverlayDescriptors(SelectedRangeComplex.Name);
                 SelectedOverlayName = OverlayFiles.Find(item => item.Key == Path.GetFileNameWithoutExtension(vm.OverlayName)).Key;
             }
 #endif        
@@ -199,6 +199,59 @@ namespace ESMEWorkBench.ViewModels.Main
                     break;
             }
         }
+        #endregion
+
+        #region public OverlayFile SelectedOverlayFile { get; set; }
+
+        public OverlayFile SelectedOverlayFile
+        {
+            get { return _selectedOverlayFile; }
+            set
+            {
+                if (_selectedOverlayFile == value) return;
+                _selectedOverlayFile = value;
+                NotifyPropertyChanged(SelectedOverlayFileChangedEventArgs);
+                IsOverlayFileSelected = _selectedOverlayFile != null;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedOverlayFileChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedOverlayFile);
+        OverlayFile _selectedOverlayFile;
+
+        #endregion
+
+        #region public bool IsOverlayFileSelected { get; set; }
+
+        public bool IsOverlayFileSelected
+        {
+            get { return _isOverlayFileSelected; }
+            set
+            {
+                if (_isOverlayFileSelected == value) return;
+                _isOverlayFileSelected = value;
+                NotifyPropertyChanged(IsOverlayFileSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsOverlayFileSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsOverlayFileSelected);
+        bool _isOverlayFileSelected;
+
+        #endregion
+
+        #region ExpandOverlayCommand
+        public SimpleCommand<object, object> ExpandOverlayCommand
+        {
+            get { return _expandOverlay ?? (_expandOverlay = new SimpleCommand<object, object>(delegate { return IsExpandOverlayCommandEnabled; }, delegate { ExpandOverlayHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _expandOverlay;
+
+        bool IsExpandOverlayCommandEnabled
+        {
+            get { return IsOverlayFileSelected; }
+        }
+
+        void ExpandOverlayHandler() { }
         #endregion
     }
 }

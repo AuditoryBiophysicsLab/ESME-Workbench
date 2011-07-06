@@ -9,6 +9,10 @@ namespace ESME.Metadata
     {
         new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes) {};
 
+        public static NAEMOScenarioMetadata Load(string metaDataFilename) { return Load<NAEMOScenarioMetadata>(metaDataFilename); }
+
+        public void Save(string filename = null) { Save(this, filename); }
+
         #region public string BathymetryFilename { get; set; }
 
         public string BathymetryFilename
