@@ -401,10 +401,10 @@
                                       IsEnabled="{Binding IsRangeComplexSelected}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
-								         SelectedValue="{Binding SelectedOverlayName}"
-                                         SelectedValuePath="Key"
+								         SelectedValue="{Binding SelectedOverlayDescriptor}"
+                                         SelectedValuePath="Value"
                     			         MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding OverlayFiles}">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOOverlayDescriptors}">
                                 <r:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical"
@@ -448,10 +448,10 @@
                                       IsEnabled="{Binding IsRangeComplexSelected}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
-								         SelectedValue="{Binding SelectedBathymetryName}"
-                                         SelectedValuePath="Key"
+								         SelectedValue="{Binding SelectedBathymetryDescriptor}"
+                                         SelectedValuePath="Value"
                     			         MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding BathymetryFiles}">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOBathymetryDescriptors}">
                                 <r:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical"
@@ -488,10 +488,10 @@
                                       IsEnabled="{Binding IsRangeComplexSelected}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
-								         SelectedValue="{Binding SelectedEnvironmentName}"
-                                         SelectedValuePath="Key"
+								         SelectedValue="{Binding SelectedEnvironmentDescriptor}"
+                                         SelectedValuePath="Value"
                     			         MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding EnvironmentFiles}">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding NAEMEnvironmentDescriptors}">
                                 <r:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical"
