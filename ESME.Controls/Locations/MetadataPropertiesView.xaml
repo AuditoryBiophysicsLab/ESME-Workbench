@@ -25,7 +25,18 @@
 
         <StackPanel Orientation="Vertical"                 
                    Visibility="{Binding IsOverlayDisplay, Converter={StaticResource boolToVisibilityConverter}}">
-
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Source overlay"/>
+                <TextBox Text="{Binding OverlayMetadata.SourceOverlay}"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Buffer Zone size"/>
+                <TextBox Text="{Binding OverlayMetadata.BufferZoneSize}">
+                    <i:Interaction.Behaviors>
+                        <cinch:NumericTextBoxBehaviour />
+                    </i:Interaction.Behaviors>
+                </TextBox>
+            </StackPanel>
         </StackPanel>
 
 
@@ -35,9 +46,9 @@
                 <TextBlock Text="Overlay"/>
                 <TextBox Text="{Binding EnvironmentMetadata.OverlayFilename}"/>
             </StackPanel>
-            <Controls:TimePeriodComboBox SelectedItem="{Binding EnvironmentMetadata.TimePeriod}"/>            
+            <Controls:TimePeriodComboBox SelectedItem="{Binding EnvironmentMetadata.TimePeriod}"/>
         </StackPanel>
-       
+
         <StackPanel Orientation="Vertical"  Visibility="{Binding IsScenarioDisplay, Converter={StaticResource boolToVisibilityConverter}}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Bathymetry"/>
