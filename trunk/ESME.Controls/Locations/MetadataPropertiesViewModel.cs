@@ -11,7 +11,7 @@ namespace ESME.Views.Locations
 {
     public class MetadataPropertiesViewModel : ViewModelBase
     {
-        public MetadataPropertiesViewModel(NAEMOBathymetryMetadata bathymetryMetadata = null, NAEMOEnvironmentMetadata environmentMetadata = null, NAEMOScenarioMetadata naemoScenarioMetadata = null)
+        public MetadataPropertiesViewModel(NAEMOOverlayMetadata overlayMetadata = null, NAEMOBathymetryMetadata bathymetryMetadata = null, NAEMOEnvironmentMetadata environmentMetadata = null, NAEMOScenarioMetadata naemoScenarioMetadata = null)
         {
             if (bathymetryMetadata != null)
             {
