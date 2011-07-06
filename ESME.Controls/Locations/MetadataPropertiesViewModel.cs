@@ -13,6 +13,12 @@ namespace ESME.Views.Locations
     {
         public MetadataPropertiesViewModel(NAEMOOverlayMetadata overlayMetadata = null, NAEMOBathymetryMetadata bathymetryMetadata = null, NAEMOEnvironmentMetadata environmentMetadata = null, NAEMOScenarioMetadata naemoScenarioMetadata = null)
         {
+            if (overlayMetadata != null)
+            {
+                IsOverlayDisplay = true;
+                TitleString = "Overlay Properties (" + overlayMetadata.Filename + ")";
+                OverlayMetadata = overlayMetadata;
+            }
             if (bathymetryMetadata != null)
             {
                 IsBathymetryDisplay = true;
@@ -50,6 +56,25 @@ namespace ESME.Views.Locations
         private string _titleString;
 
         #endregion
+
+        #region public NAEMOOverlayMetadata OverlayMetadata { get; set; }
+
+        public NAEMOOverlayMetadata OverlayMetadata
+        {
+            get { return _overlayMetadata; }
+            set
+            {
+                if (_overlayMetadata == value) return;
+                _overlayMetadata = value;
+                NotifyPropertyChanged(OverlayMetadataChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs OverlayMetadataChangedEventArgs = ObservableHelper.CreateArgs<MetadataPropertiesViewModel>(x => x.OverlayMetadata);
+        private NAEMOOverlayMetadata _overlayMetadata;
+
+        #endregion
+
 
         #region public NAEMOBathymetryMetadata BathymetryMetadata { get; set; }
 
@@ -159,7 +184,51 @@ namespace ESME.Views.Locations
 
         #endregion
 
+        #region public bool IsOverlayDisplay { get; set; }
 
+        public bool IsOverlayDisplay
+        {
+            get { return _isOverlayDisplay; }
+            set
+            {
+                if (_isOverlayDisplay == value) return;
+                _isOverlayDisplay = value;
+                NotifyPropertyChanged(IsOverlayDisplayChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs IsOverlayDisplayChangedEventArgs = ObservableHelper.CreateArgs<MetadataPropertiesViewModel>(x => x.IsOverlayDisplay);
+        private bool _isOverlayDisplay;
+
+        #endregion
+
+
+        #region OKCommand
+
+        public SimpleCommand<object, object> OKCommand
+        {
+            get
+            {
+                return _oK ??
+                       (_oK =
+                        new SimpleCommand<object, object>(delegate { return IsOKCommandEnabled; },
+                                                          delegate { OKHandler(); }));
+            }
+        }
+
+        private SimpleCommand<object, object> _oK;
+
+        private bool IsOKCommandEnabled
+        {
+            get { return true; }
+        }
+
+        private void OKHandler()
+        {
+            CloseActivePopUpCommand.Execute(true);
+        }
+
+        #endregion
 
 
 
