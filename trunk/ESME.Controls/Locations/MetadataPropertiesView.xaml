@@ -7,15 +7,15 @@
     </Window.Resources>
     <StackPanel Margin="5">
 
-        <StackPanel Orientation="Vertical" DataContext="{Binding BathymetryMetadata}"                 
+        <StackPanel Orientation="Vertical"
                    Visibility="{Binding IsBathymetryDisplay, Converter={StaticResource boolToVisibilityConverter}}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Overlay"/>
-                <TextBox Text="{Binding OverlayFilename}"/>
+                <TextBox Text="{Binding BathymetryMetadata.OverlayFilename}"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Resolution"/>
-                <TextBox Text="{Binding Resolution}">
+                <TextBox Text="{Binding BathymetryMetadata.Resolution}">
                     <i:Interaction.Behaviors>
                         <cinch:NumericTextBoxBehaviour />
                     </i:Interaction.Behaviors>
@@ -23,33 +23,33 @@
             </StackPanel>
         </StackPanel>
 
-        <StackPanel Orientation="Vertical" DataContext="{Binding OverlayMetadata}"                 
-                   Visibility="{Binding IsOverlayyDisplay, Converter={StaticResource boolToVisibilityConverter}}">
+        <StackPanel Orientation="Vertical"                 
+                   Visibility="{Binding IsOverlayDisplay, Converter={StaticResource boolToVisibilityConverter}}">
 
         </StackPanel>
 
 
-        <StackPanel Orientation="Vertical" DataContext="{Binding EnvironmentMetadata}" 
+        <StackPanel Orientation="Vertical" 
                    Visibility="{Binding IsEnvironmentDisplay, Converter={StaticResource boolToVisibilityConverter}}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Overlay"/>
-                <TextBox Text="{Binding OverlayFilename}"/>
+                <TextBox Text="{Binding EnvironmentMetadata.OverlayFilename}"/>
             </StackPanel>
-            <Controls:TimePeriodComboBox SelectedItem="{Binding TimePeriod}"/>            
+            <Controls:TimePeriodComboBox SelectedItem="{Binding EnvironmentMetadata.TimePeriod}"/>            
         </StackPanel>
-        <Controls:TimePeriodComboBox SelectedItem="{Binding TimePeriod}"/>
-        <StackPanel Orientation="Vertical" DataContext="{Binding ScenarioMetadata}" Visibility="{Binding IsScenarioDisplay, Converter={StaticResource boolToVisibilityConverter}}">
+       
+        <StackPanel Orientation="Vertical"  Visibility="{Binding IsScenarioDisplay, Converter={StaticResource boolToVisibilityConverter}}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Bathymetry"/>
-                <TextBox Text="{Binding BathymetryFilename}"/>
+                <TextBox Text="{Binding ScenarioMetadata.BathymetryFilename}"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Environment"/>
-                <TextBox Text="{Binding EnvironmentFilename}"/>
+                <TextBox Text="{Binding ScenarioMetadata.EnvironmentFilename}"/>
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="OK" Width="75" Margin="5" IsDefault="True" Command="{Binding OkCommand}"/>
+            <Button Content="OK" Width="75" Margin="5" IsDefault="True" Command="{Binding OKCommand}"/>
             <Button Content="Cancel" Width="75" Margin="5" IsCancel="True"/>
         </StackPanel>
     </StackPanel>
