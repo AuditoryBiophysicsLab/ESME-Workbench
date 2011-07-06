@@ -24,7 +24,14 @@
                                  IsDirectoryBrowser="False"
 								 VerticalAlignment="Center"
 								 FileNameFilter="Bathymetry files (*.xyz)|*.xyz|All files (*.*)|*.*"
-                                 FileName="{Binding BathymetryFilename}" />
+                                 FileName="{Binding BathymetryFilename}" /> 
+            
+            <Controls:FileOrDirectorySetting Caption="Environment file"
+                                 Margin="5 0 5 0"
+                                 IsDirectoryBrowser="False"
+								 VerticalAlignment="Center"
+								 FileNameFilter="Bathymetry files (*.xyz)|*.xyz|All files (*.*)|*.*"
+                                 FileName="{Binding EnvironmentFilename}" />
         </StackPanel>
     </StackPanel>
 

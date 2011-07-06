@@ -16,19 +16,19 @@ namespace ESME.Views.Locations
             if (bathymetryMetadata != null)
             {
                 IsBathymetryDisplay = true;
-                TitleString = "Bathymetry Properties";
+                TitleString = "Bathymetry Properties (" + bathymetryMetadata.Filename +")";
                 BathymetryMetadata = bathymetryMetadata;
             }
             if (environmentMetadata != null)
             {
                 IsEnvironmentDisplay = true;
-                TitleString = "Environment Properties";
+                TitleString = "Environment Properties (" + environmentMetadata.Filename + ")";
                 EnvironmentMetadata = environmentMetadata;
             }
             if (naemoScenarioMetadata != null)
             {
                 IsScenarioDisplay = true;
-                TitleString = "Scenario Properties";
+                TitleString = "Scenario Properties (" + naemoScenarioMetadata.Filename + ")";
                 ScenarioMetadata = naemoScenarioMetadata;
             }
         }
