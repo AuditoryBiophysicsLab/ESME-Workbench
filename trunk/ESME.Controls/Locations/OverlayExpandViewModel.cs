@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Cinch;
 using ESME.Metadata;
+using HRC.Navigation;
 
 namespace ESME.Views.Locations
 {
@@ -13,6 +14,7 @@ namespace ESME.Views.Locations
         public OverlayExpandViewModel(NAEMOOverlayMetadata naemoOverlayMetadata)
         {
             TitleString = naemoOverlayMetadata.Filename;
+            NAEMOOverlayMetadata = naemoOverlayMetadata;
         }
 
         #region public string TitleString { get; set; }
@@ -30,6 +32,43 @@ namespace ESME.Views.Locations
 
         private static readonly PropertyChangedEventArgs TitleStringChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.TitleString);
         private string _titleString;
+
+        #endregion
+
+        #region public NAEMOOverlayMetadata NAEMOOverlayMetadata { get; set; }
+
+        public NAEMOOverlayMetadata NAEMOOverlayMetadata
+        {
+            get { return _nAEMOOverlayMetadata; }
+            set
+            {
+                if (_nAEMOOverlayMetadata == value) return;
+                _nAEMOOverlayMetadata = value;
+                NotifyPropertyChanged(NAEMOOverlayMetadataChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs NAEMOOverlayMetadataChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.NAEMOOverlayMetadata);
+        private NAEMOOverlayMetadata _nAEMOOverlayMetadata;
+
+        #endregion
+
+        
+        #region public float BufferZoneSize { get; set; }
+
+        public float BufferZoneSize
+        {
+            get { return _bufferZoneSize; }
+            set
+            {
+                if (_bufferZoneSize == value) return;
+                if (value > 0) _bufferZoneSize = value;
+                NotifyPropertyChanged(BufferZoneSizeChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs BufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.BufferZoneSize);
+        private float _bufferZoneSize;
 
         #endregion
 
@@ -86,7 +125,7 @@ namespace ESME.Views.Locations
 
         private bool IsOKCommandEnabled
         {
-            get { return true; }
+            get { return BufferZoneSize>0; }
         }
 
         private void OKHandler()

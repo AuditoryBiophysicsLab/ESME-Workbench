@@ -9,14 +9,14 @@
              Title="{Binding TitleString}"
              SizeToContent="WidthAndHeight">
     <StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="Expand Buffer Zone size by "/>
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Expand Limits by (km) "/>
             <TextBox Text="{Binding BufferZoneSize}">
                 <i:Interaction.Behaviors>
                     <cinch:NumericTextBoxBehaviour />
                 </i:Interaction.Behaviors>
             </TextBox>
-            <ComboBox ItemsSource="{Binding BufferZoneUnits}" SelectedItem="{Binding SelectedItem}"/>
+           <!-- <ComboBox ItemsSource="{Binding BufferZoneUnits}" SelectedItem="{Binding SelectedItem}"/> -->
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="75" Margin="5" IsDefault="True" Command="{Binding OKCommand}"/>
