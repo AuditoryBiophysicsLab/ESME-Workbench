@@ -25,7 +25,7 @@ namespace HRC.Navigation
         double _maxLon = Double.MinValue;
 
         // the points converted to Geo
-        List<Geo> _geoPointList = new List<Geo>();
+        public List<Geo> GeoPointList = new List<Geo>();
 
         // this is used to create a dynamic shape - mostly beam patterns. it
         // maintains the original 0,0 north facing pattern that allow the
@@ -43,18 +43,18 @@ namespace HRC.Navigation
         public static explicit operator Limits(GeoRect geoRect)
         {
             var result = new Limits();
-            result._geoPointList.Add(geoRect.NorthWest);
-            result._geoPointList.Add(geoRect.NorthEast);
-            result._geoPointList.Add(geoRect.SouthEast);
-            result._geoPointList.Add(geoRect.SouthWest);
-            result._geoPointList.Add(geoRect.NorthWest);
+            result.GeoPointList.Add(geoRect.NorthWest);
+            result.GeoPointList.Add(geoRect.NorthEast);
+            result.GeoPointList.Add(geoRect.SouthEast);
+            result.GeoPointList.Add(geoRect.SouthWest);
+            result.GeoPointList.Add(geoRect.NorthWest);
             result.Initialize();
             return result;
         }
 
         public Limits(IEnumerable<Geo> geos)
         {
-            _geoPointList.AddRange(geos);
+            GeoPointList.AddRange(geos);
             Initialize();
         }
 
@@ -65,7 +65,7 @@ namespace HRC.Navigation
 
         void Initialize()
         {
-            foreach (var geo in _geoPointList)
+            foreach (var geo in GeoPointList)
             {
                 // this reason we extract a rectangular extents is
                 // for placing random points within the area.
@@ -89,11 +89,11 @@ namespace HRC.Navigation
             // need this for a few things
 
             // create a region for testing inside / outside
-            _region = new GeoRegion(_geoPointList);
+            _region = new GeoRegion(GeoPointList);
 
             // BoundingCircle attempt to get the center of the polygon. when the
             // shape is not a poly, it hacks a fur ball
-            _boundingCircle = _geoPointList.Count < 3 ? new BoundingCircle(Geo.FromDegrees(0.0, 0.0), 0.0) : new BoundingCircle(new GeoPath(_geoPointList));
+            _boundingCircle = GeoPointList.Count < 3 ? new BoundingCircle(Geo.FromDegrees(0.0, 0.0), 0.0) : new BoundingCircle(new GeoPath(GeoPointList));
 
             _centerOfRegion = _boundingCircle.Center;
 
@@ -109,10 +109,10 @@ namespace HRC.Navigation
 
             foreach (var l in areas)
             {
-                foreach (var p in l._geoPointList) result._geoPointList.Add(p);
+                foreach (var p in l.GeoPointList) result.GeoPointList.Add(p);
             }
 
-            foreach (var geo in result._geoPointList)
+            foreach (var geo in result.GeoPointList)
             {
                 if (geo.Latitude < result._minLat)
                 {
@@ -132,13 +132,13 @@ namespace HRC.Navigation
                 }
             }
 
-            result._geoPointList.Clear();
+            result.GeoPointList.Clear();
 
-            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
-            result._geoPointList.Add(Geo.FromDegrees(result._maxLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(315)));
-            result._geoPointList.Add(Geo.FromDegrees(result._maxLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(45)));
-            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(135)));
-            result._geoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
+            result.GeoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
+            result.GeoPointList.Add(Geo.FromDegrees(result._maxLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(315)));
+            result.GeoPointList.Add(Geo.FromDegrees(result._maxLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(45)));
+            result.GeoPointList.Add(Geo.FromDegrees(result._minLat, result._maxLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(135)));
+            result.GeoPointList.Add(Geo.FromDegrees(result._minLat, result._minLon).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225)));
 
             result.Initialize();
 
@@ -149,7 +149,7 @@ namespace HRC.Navigation
         {
             var result = new Limits();
 
-            if (_geoPointList == null || _geoPointList.Count == 0)
+            if (GeoPointList == null || GeoPointList.Count == 0)
             {
                 result.Name = Name + "-Undefined";
             }
@@ -157,13 +157,13 @@ namespace HRC.Navigation
             {
                 result.Name = Name + "-Bounding";
 
-                foreach (var geo in _geoPointList)
+                foreach (var geo in GeoPointList)
                 {
                     var dot = _centerOfRegion.Azimuth(geo);
 
                     var point = geo.Offset(Geo.KilometersToRadians(rangeOutKm), dot);
 
-                    result._geoPointList.Add(point);
+                    result.GeoPointList.Add(point);
                 }
 
                 result.Initialize();
@@ -176,7 +176,7 @@ namespace HRC.Navigation
         {
             var result = new Limits();
 
-            if (_geoPointList == null || _geoPointList.Count == 0)
+            if (GeoPointList == null || GeoPointList.Count == 0)
             {
                 result.Name = Name + "-Undefined";
             }
@@ -235,19 +235,19 @@ namespace HRC.Navigation
 
                         foreach (var a in arcList)
                         {
-                            result._geoPointList.Add(a);
+                            result.GeoPointList.Add(a);
                         }
                     }
-                    result._geoPointList.Add(newPt0);
-                    result._geoPointList.Add(newPt1);
+                    result.GeoPointList.Add(newPt0);
+                    result.GeoPointList.Add(newPt1);
 
                     lastEndPt = newPt1;
                 }
 
                 if (lastEndPt != null)
                 {
-                    var left = (_isClockWise ? lastEndPt : result._geoPointList[0]);
-                    var right = (_isClockWise ? result._geoPointList[0] : lastEndPt);
+                    var left = (_isClockWise ? lastEndPt : result.GeoPointList[0]);
+                    var right = (_isClockWise ? result.GeoPointList[0] : lastEndPt);
                     var arc = Geo.ApproximateArc(segPts[1], left, right, Geo.DegreesToRadians(5.0));
 
                     var arcList = new List<Geo>(arc.Length);
@@ -265,7 +265,7 @@ namespace HRC.Navigation
 
                     foreach (var a in arcList)
                     {
-                        result._geoPointList.Add(a);
+                        result.GeoPointList.Add(a);
                     }
                 }
 
@@ -365,12 +365,12 @@ namespace HRC.Navigation
             var limit = new Limits
                         {
                             Name = String.Format("BEAM {0} {1}", aRadius, beamWidth),
-                            _geoPointList = arc
+                            GeoPointList = arc
                         };
 
             // I believe shapelist is intended to hold the unrotated version of
             // the beam pattern
-            limit._shapeList.AddRange(limit._geoPointList);
+            limit._shapeList.AddRange(limit.GeoPointList);
 
             // this call affects geoPointlist
             limit.Rotate(posit.GetCourse() + relAngle);
@@ -387,7 +387,7 @@ namespace HRC.Navigation
     * 
     * @return the Geo point list. there are encapsulation issues here
     */
-        public List<Geo> GetGeoList() { return _geoPointList; }
+        public List<Geo> GetGeoList() { return GeoPointList; }
 
         public GeoRegion GetGeoRegion() { return _region; }
 
@@ -427,7 +427,7 @@ namespace HRC.Navigation
 
                 geo.Initialize(lat, lon);
 
-                if (IsPointInPolygon(geo, _centerOfRegion, _geoPointList))
+                if (IsPointInPolygon(geo, _centerOfRegion, GeoPointList))
                 {
                     return geo;
                 }
@@ -471,7 +471,7 @@ namespace HRC.Navigation
             // this has happened
             if (_region == null) throw new ApplicationException("Limits.isInside: region is null");
 
-            foreach (var point in limit._geoPointList)
+            foreach (var point in limit.GeoPointList)
             {
                 if (_region.IsPointInside(point) == false)
                 {
@@ -496,13 +496,13 @@ namespace HRC.Navigation
             // return getGeoRegion().isPointInside(Geo.FromDegrees(aLat, aLong));
             if (_boundingCircle == null || _boundingCircle.Intersects(geo, 0.0))
             {
-                return IsPointInPolygon(geo, _centerOfRegion, _geoPointList);
+                return IsPointInPolygon(geo, _centerOfRegion, GeoPointList);
             }
 
             return false;
         }
 
-        bool IsPointInside(TrackPoint loc) { return IsPointInPolygon(loc.GetGeoLlh(), _centerOfRegion, _geoPointList); }
+        bool IsPointInside(TrackPoint loc) { return IsPointInPolygon(loc.GetGeoLlh(), _centerOfRegion, GeoPointList); }
 
         static bool IsPointInPolygon(Geo x, Geo center, IList<Geo> poly)
         {
@@ -656,7 +656,7 @@ namespace HRC.Navigation
 
             // it might be possible to load the new posits in this array without
             // reallocating
-            _geoPointList.Clear();
+            GeoPointList.Clear();
 
             // the math routine in Geo rotates counter-clockwise
             var rads = Geo.DegreesToRadians(360.0 - course);
@@ -665,7 +665,7 @@ namespace HRC.Navigation
             {
                 var geo = Rotation.Rotate(_shapeList[0], rads, g);
 
-                _geoPointList.Add(geo);
+                GeoPointList.Add(geo);
             }
         }
 
@@ -692,10 +692,10 @@ namespace HRC.Navigation
                 writer.WriteLine("orange");
                 writer.WriteLine("solid");
                 writer.WriteLine("move");
-                writer.WriteLine("{0:0.#####} {1:0.#####}", _geoPointList[0].Latitude, _geoPointList[0].Longitude);
+                writer.WriteLine("{0:0.#####} {1:0.#####}", GeoPointList[0].Latitude, GeoPointList[0].Longitude);
                 writer.WriteLine("lines");
                 var first = true;
-                foreach (var p in _geoPointList)
+                foreach (var p in GeoPointList)
                 {
                     if (!first) writer.WriteLine("{0:0.#####} {1:0.#####}", p.Latitude, p.Longitude);
                     first = false;
