@@ -243,7 +243,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void ExpandOverlayHandler()
         {
-            // Graham : Show the popup dialog here
+            var vm = new OverlayExpandViewModel(SelectedOverlayDescriptor.Metadata);
+            var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
+            if ((result.HasValue) && (result.Value))
+            {
+            }
         }
         #endregion
 

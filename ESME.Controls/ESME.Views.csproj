@@ -107,6 +107,10 @@
       <DependentUpon>NewRangeComplexView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Locations\NewRangeComplexViewModel.cs" />
+    <Compile Include="Locations\OverlayExpandView.xaml.cs">
+      <DependentUpon>OverlayExpandView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Locations\OverlayExpandViewModel.cs" />
     <Compile Include="Misc\ModuleBuildInfoViewModel.cs" />
     <Compile Include="Misc\ModuleBuildInfoView.xaml.cs">
       <DependentUpon>ModuleBuildInfoView.xaml</DependentUpon>
@@ -189,6 +193,10 @@
     <Page Include="Locations\NewRangeComplexView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Locations\OverlayExpandView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Misc\ModuleBuildInfoView.xaml">
       <SubType>Designer</SubType>
