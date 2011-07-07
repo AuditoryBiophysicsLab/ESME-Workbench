@@ -197,6 +197,8 @@ namespace ESME.Views.Locations
             ValidationErrorText = "";
             if (string.IsNullOrEmpty(OverlayName))
                 ValidationErrorText += "The Overlay file must have a name\n";
+            if (File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName)) || File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName + ".ovr")))
+                ValidationErrorText += "An overlay file with the specified file name already exists.";
             if (string.IsNullOrEmpty(OverlayCoordinates))
                 ValidationErrorText += "No Overlay Coordinates have been entered\n";
             if (!string.IsNullOrEmpty(ValidationErrorText)) return;
