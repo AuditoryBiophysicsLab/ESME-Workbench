@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Security.Principal;
 using Cinch;
 using ESME.Metadata;
 using ESME.Overlay;
@@ -306,7 +304,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void OverlayPropertiesHandler()
         {
-            var vm = new MetadataPropertiesViewModel(SelectedOverlayDescriptor.Metadata, null, null, null);
+            var vm = new MetadataPropertiesViewModel(SelectedOverlayDescriptor.Metadata);
             var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
@@ -387,7 +385,6 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return IsBathymetryFileSelected; }
         }
 
-        void NewBathymetryHandler() { }
         #endregion
 
         #region BathymetryPropertiesCommand
@@ -405,7 +402,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void BathymetryPropertiesHandler()
         {
-            var vm = new MetadataPropertiesViewModel(null, SelectedBathymetryDescriptor.Metadata, null, null);
+            var vm = new MetadataPropertiesViewModel(null, SelectedBathymetryDescriptor.Metadata);
             var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
@@ -493,7 +490,6 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return IsEnvironmentFileSelected; }
         }
 
-        void NewEnvironmentHandler() { }
         #endregion
 
         #region EnvironmentPropertiesCommand
@@ -517,7 +513,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void EnvironmentPropertiesHandler()
         {
-            var vm = new MetadataPropertiesViewModel(null,null,SelectedEnvironmentDescriptor.Metadata,null);
+            var vm = new MetadataPropertiesViewModel(null,null,SelectedEnvironmentDescriptor.Metadata);
             var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {

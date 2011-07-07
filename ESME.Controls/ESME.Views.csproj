@@ -91,6 +91,10 @@
     <Compile Include="Controls\TimePeriodComboBox.xaml.cs">
       <DependentUpon>TimePeriodComboBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EnvironmentBuilder\BathymetryExtractionView.xaml.cs">
+      <DependentUpon>BathymetryExtractionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EnvironmentBuilder\BathymetryExtractionViewModel.cs" />
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
@@ -175,6 +179,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\TimePeriodComboBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\BathymetryExtractionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
