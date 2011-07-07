@@ -28,7 +28,15 @@ namespace ESME.Overlay
     {
         public NAEMOOverlayDescriptors(string selectedRangeComplexName)
             : base(selectedRangeComplexName, "Areas", "*.ovr")
-        { }
+        {
+            foreach (var ovrItem in this)
+            {
+                if(ovrItem.Value.Metadata == null)
+                {
+                    
+                }
+            }
+        }
     }
 
     public class NAEMOBathymetryDescriptors : NAEMODescriptors<NAEMOBathymetryDescriptor>

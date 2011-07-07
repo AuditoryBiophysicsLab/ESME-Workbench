@@ -18,7 +18,7 @@ namespace ESME.Metadata
             CreationDateTime = DateTime.Now;
         }
 
-        protected static string MetadataFilename(string sourceFilename)
+        public static string MetadataFilename(string sourceFilename)
         {
             var metadataPath = Path.GetDirectoryName(sourceFilename);
             var metadataFile = Path.GetFileNameWithoutExtension(sourceFilename);
@@ -28,7 +28,7 @@ namespace ESME.Metadata
         public static T Load<T>(string sourceFilename) where T: NAEMOMetadataBase, new()
         {
             var metaDataFilename = MetadataFilename(sourceFilename);
-
+            if (!File.Exists(metaDataFilename)) return null;
             var result = XmlSerializer<T>.Load(metaDataFilename, ReferencedTypes);
             result.Filename = metaDataFilename;
             return result;
