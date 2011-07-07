@@ -491,7 +491,7 @@
 								         SelectedValue="{Binding SelectedEnvironmentDescriptor}"
                                          SelectedValuePath="Value"
                     			         MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding NAEMEnvironmentDescriptors}">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOEnvironmentDescriptors}">
                                 <r:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical"
