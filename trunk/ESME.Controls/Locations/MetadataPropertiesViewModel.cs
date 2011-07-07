@@ -22,7 +22,7 @@ namespace ESME.Views.Locations
             if (bathymetryMetadata != null)
             {
                 IsBathymetryDisplay = true;
-                TitleString = "Bathymetry Properties (" + bathymetryMetadata.OverlayFilename +")";
+                TitleString = "Bathymetry Properties (" + bathymetryMetadata.OverlayFilename + ")";
                 BathymetryMetadata = bathymetryMetadata;
             }
             if (environmentMetadata != null)
@@ -225,10 +225,10 @@ namespace ESME.Views.Locations
 
         private void OKHandler()
         {
-            if(BathymetryMetadata != null) BathymetryMetadata.Save();
-            if(EnvironmentMetadata !=null) EnvironmentMetadata.Save();
-            if(ScenarioMetadata != null) ScenarioMetadata.Save();
-            if(OverlayMetadata != null) OverlayMetadata.Save();
+            if (BathymetryMetadata != null) BathymetryMetadata.Save();
+            if (EnvironmentMetadata != null) EnvironmentMetadata.Save();
+            if (ScenarioMetadata != null) ScenarioMetadata.Save();
+            if (OverlayMetadata != null) OverlayMetadata.Save();
             CloseActivePopUpCommand.Execute(true);
         }
 
