@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Security.Principal;
 using Cinch;
+using ESME.Metadata;
 using ESME.Overlay;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.Locations;
+using HRC.Navigation;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -145,7 +149,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region Overlay ribbon group
-        
+
         #region public NAEMOOverlayDescriptors NAEMOOverlayDescriptors { get; set; }
 
         public NAEMOOverlayDescriptors NAEMOOverlayDescriptors
@@ -217,13 +221,13 @@ namespace ESMEWorkBench.ViewModels.Main
         void NewOverlayHandler()
         {
 #if true
-		    var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplex.Name);
+            var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplex.Name);
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((result.HasValue) && (result.Value))
             {
                 NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(SelectedRangeComplex.Name);
             }
-#endif        
+#endif
         }
 
         #endregion
@@ -247,8 +251,44 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
             if ((result.HasValue) && (result.Value))
             {
+                //vm.BufferZoneSize
+                var curOverlay = SelectedOverlayDescriptor.Data;
+                var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].BoundingBox));
+                var expandedLimits = limits.CreateExpandedLimit(vm.BufferZoneSize);  //in km.
+                var geoRect = new GeoRect(expandedLimits.GeoPointList);
+                var overlayFileName = string.Format("{0}_{1}km.ovr",Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename),vm.BufferZoneSize);
+                var metadataFileName = string.Format("{0}_{1}km.xml", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferZoneSize);
+                var overlayPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename),overlayFileName);
+                var metadataPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), metadataFileName);
+                using (var writer = new StreamWriter(overlayPath))
+                {
+                    writer.WriteLine("navigation");
+                    writer.WriteLine("green");
+                    writer.WriteLine("solid");
+                    writer.WriteLine("move");
+                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.NorthWest.Latitude, geoRect.NorthWest.Longitude);
+                    writer.WriteLine("lines");
+                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.NorthEast.Latitude, geoRect.NorthEast.Longitude);
+                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.SouthEast.Latitude, geoRect.SouthEast.Longitude);
+                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.SouthWest.Latitude, geoRect.SouthWest.Longitude);
+                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.NorthWest.Latitude, geoRect.NorthWest.Longitude);
+                }
+
+                var metadata = new NAEMOOverlayMetadata
+                                   {
+                                       Bounds = geoRect,
+                                       BufferZoneSize = vm.BufferZoneSize,
+                                       Filename = metadataPath,
+                                       SourceOverlay = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename),
+                                   };
+                metadata.Save();
+
+                NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name);
+                SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(overlayFileName)];
+
             }
         }
+
         #endregion
 
         #region OverlayPropertiesCommand
@@ -277,7 +317,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region Bathymetry ribbon group
-        
+
         #region public NAEMOBathymetryDescriptors NAEMOBathymetryDescriptors { get; set; }
 
         public NAEMOBathymetryDescriptors NAEMOBathymetryDescriptors
