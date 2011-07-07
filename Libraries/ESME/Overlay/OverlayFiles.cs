@@ -38,6 +38,13 @@ namespace ESME.Overlay
         { }
     }
 
+    public class NAEMOEnvironmentDescriptors : NAEMODescriptors<NAEMOEnvironmentDescriptor>
+    {
+        public NAEMOEnvironmentDescriptors(string selectedRangeComplexName)
+            : base(selectedRangeComplexName, "Environment", "*.dat")
+        { }
+    }
+
     public abstract class NAEMODescriptor
     {
         public abstract void Save();

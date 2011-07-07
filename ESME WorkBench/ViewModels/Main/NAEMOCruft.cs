@@ -49,6 +49,8 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
+        #region Range Complex ribbon group
+
         #region public SimAreaCSV SimAreaCSV { get; set; }
 
         public SimAreaCSV SimAreaCSV
@@ -81,6 +83,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 {
                     NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name);
                     NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name);
+                    NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
                     IsRangeComplexSelected = true;
                 }
                 else
@@ -139,6 +142,10 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
+        #endregion
+
+        #region Overlay ribbon group
+        
         #region public NAEMOOverlayDescriptors NAEMOOverlayDescriptors { get; set; }
 
         public NAEMOOverlayDescriptors NAEMOOverlayDescriptors
@@ -149,7 +156,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_naemoOverlayDescriptors == value) return;
                 _naemoOverlayDescriptors = value;
                 NotifyPropertyChanged(OverlayFilesChangedEventArgs);
-                SelectedOverlayDescriptor = NAEMOOverlayDescriptors[0].Value;
+                if (NAEMOOverlayDescriptors.Count > 0) SelectedOverlayDescriptor = NAEMOOverlayDescriptors[0].Value;
             }
         }
 
@@ -263,6 +270,10 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
+        #endregion
+
+        #region Bathymetry ribbon group
+        
         #region public NAEMOBathymetryDescriptors NAEMOBathymetryDescriptors { get; set; }
 
         public NAEMOBathymetryDescriptors NAEMOBathymetryDescriptors
@@ -273,7 +284,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_naemoBathymetryDescriptors == value) return;
                 _naemoBathymetryDescriptors = value;
                 NotifyPropertyChanged(NAEMOBathymetryDescriptorsChangedEventArgs);
-                SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors[0].Value;
+                if (NAEMOBathymetryDescriptors.Count > 0) SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors[0].Value;
             }
         }
 
@@ -359,5 +370,110 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
+        #endregion
+
+        #region Environment ribbon group
+
+        #region public NAEMOEnvironmentDescriptors NAEMOEnvironmentDescriptors { get; set; }
+
+        public NAEMOEnvironmentDescriptors NAEMOEnvironmentDescriptors
+        {
+            get { return _naemoEnvironmentDescriptors; }
+            set
+            {
+                if (_naemoEnvironmentDescriptors == value) return;
+                _naemoEnvironmentDescriptors = value;
+                NotifyPropertyChanged(NAEMOEnvironmentDescriptorsChangedEventArgs);
+                if (NAEMOEnvironmentDescriptors.Count > 0) SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors[0].Value;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NAEMOEnvironmentDescriptorsChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.NAEMOEnvironmentDescriptors);
+        NAEMOEnvironmentDescriptors _naemoEnvironmentDescriptors;
+
+        #endregion
+
+        #region public NAEMOEnvironmentDescriptor SelectedEnvironmentDescriptor { get; set; }
+
+        public NAEMOEnvironmentDescriptor SelectedEnvironmentDescriptor
+        {
+            get { return _selectedEnvironmentDescriptor; }
+            set
+            {
+                if (_selectedEnvironmentDescriptor == value) return;
+                _selectedEnvironmentDescriptor = value;
+                NotifyPropertyChanged(SelectedEnvironmentDescriptorChangedEventArgs);
+                IsEnvironmentFileSelected = _selectedEnvironmentDescriptor != null;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedEnvironmentDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedEnvironmentDescriptor);
+        NAEMOEnvironmentDescriptor _selectedEnvironmentDescriptor;
+
+        #endregion
+
+        #region public bool IsEnvironmentFileSelected { get; set; }
+
+        public bool IsEnvironmentFileSelected
+        {
+            get { return _isEnvironmentFileSelected; }
+            set
+            {
+                if (_isEnvironmentFileSelected == value) return;
+                _isEnvironmentFileSelected = value;
+                NotifyPropertyChanged(IsEnvironmentFileSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnvironmentFileSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsEnvironmentFileSelected);
+        bool _isEnvironmentFileSelected;
+
+        #endregion
+
+        #region NewEnvironmentCommand
+        public SimpleCommand<object, object> NewEnvironmentCommand
+        {
+            get
+            {
+                return _newEnvironment ??
+                       (_newEnvironment =
+                        new SimpleCommand<object, object>(delegate { return IsNewEnvironmentCommandEnabled; },
+                                                          delegate { NewEnvironmentHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _newEnvironment;
+
+        bool IsNewEnvironmentCommandEnabled
+        {
+            get { return IsEnvironmentFileSelected; }
+        }
+
+        void NewEnvironmentHandler() { }
+        #endregion
+
+        #region EnvironmentPropertiesCommand
+        public SimpleCommand<object, object> EnvironmentPropertiesCommand
+        {
+            get
+            {
+                return _environmentProperties ??
+                       (_environmentProperties =
+                        new SimpleCommand<object, object>(delegate { return IsEnvironmentPropertiesCommandEnabled; },
+                                                          delegate { EnvironmentPropertiesHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _environmentProperties;
+
+        bool IsEnvironmentPropertiesCommandEnabled
+        {
+            get { return IsEnvironmentFileSelected; }
+        }
+
+        void EnvironmentPropertiesHandler() { }
+        #endregion
+
+        #endregion
     }
 }
