@@ -1,0 +1,31 @@
+﻿<Window x:Class="ESME.Views.EnvironmentBuilder.BathymetryExtractionView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Bathymetry Data Extraction"
+        SizeToContent="WidthAndHeight">
+    <StackPanel Orientation="Vertical">
+        <TextBlock Text="Bathymetry resolution"
+		           Margin="5 10 5 2" />
+        <ComboBox ItemsSource="{Binding NAVODataSources.DigitalBathymetricDatabase.Resolutions}"
+		          SelectedItem="{Binding NAVODataSources.DigitalBathymetricDatabase.SelectedResolution}"
+		          Margin="5 0 5 0"
+		          IsEnabled="{Binding NotExtractingData}"
+		          ToolTip="Database resolution in arc-minutes">
+        </ComboBox>
+        <DockPanel LastChildFill="False"
+		           Margin="5 10">
+            <Button Width="90"
+			        Margin="10 0 0 0"
+			        IsCancel="False"
+			        Content="Cancel"
+			        DockPanel.Dock="Right"
+			        Command="{Binding CancelCommand}" />
+            <Button Width="90"
+			        IsDefault="True"
+			        Content="{Binding ExtractButtonText}"
+			        DockPanel.Dock="Right"
+			        IsEnabled="{Binding NotExtractingData}"
+			        Command="{Binding ExtractAllCommand}" />
+        </DockPanel>
+    </StackPanel>
+</Window>
