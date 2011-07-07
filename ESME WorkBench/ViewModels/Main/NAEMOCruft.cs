@@ -515,7 +515,14 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return IsEnvironmentFileSelected; }
         }
 
-        void EnvironmentPropertiesHandler() { }
+        void EnvironmentPropertiesHandler()
+        {
+            var vm = new MetadataPropertiesViewModel(null,null,SelectedEnvironmentDescriptor.Metadata,null);
+            var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
+            if ((result.HasValue) && (result.Value))
+            {
+            }
+        }
         #endregion
 
         #endregion
