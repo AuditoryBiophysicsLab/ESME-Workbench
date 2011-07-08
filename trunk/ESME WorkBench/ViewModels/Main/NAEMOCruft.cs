@@ -6,6 +6,7 @@ using Cinch;
 using ESME.Metadata;
 using ESME.Overlay;
 using ESME.TransmissionLoss.CASS;
+using ESME.Views.EnvironmentBuilder;
 using ESME.Views.Locations;
 using HRC.Navigation;
 using HRC.Utility;
@@ -407,6 +408,15 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return IsBathymetryFileSelected; }
         }
 
+        void NewBathymetryHandler()
+        {
+            var vm = new BathymetryExtractionViewModel(Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
+            var result = _visualizerService.ShowDialog("BathymetryExtractionView", vm);
+            if ((result.HasValue) && (result.Value))
+            {
+            }
+        }
+
         #endregion
 
         #region BathymetryPropertiesCommand
@@ -510,6 +520,15 @@ namespace ESMEWorkBench.ViewModels.Main
         bool IsNewEnvironmentCommandEnabled
         {
             get { return IsEnvironmentFileSelected; }
+        }
+
+        void NewEnvironmentHandler()
+        {
+            var vm = new EnvironmentExtractionViewModel(Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
+            var result = _visualizerService.ShowDialog("EnvironmentExtractionView", vm);
+            if ((result.HasValue) && (result.Value))
+            {
+            }
         }
 
         #endregion
