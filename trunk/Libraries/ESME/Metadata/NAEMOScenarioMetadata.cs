@@ -11,7 +11,7 @@ namespace ESME.Metadata
 
         public static NAEMOScenarioMetadata Load(string metaDataFilename) { return Load<NAEMOScenarioMetadata>(metaDataFilename); }
 
-        public void Save(string filename = null) { Save(this, filename); }
+        public void Save(string filename = null) { Save(this, ReferencedTypes, filename); }
 
         #region public string BathymetryFilename { get; set; }
 

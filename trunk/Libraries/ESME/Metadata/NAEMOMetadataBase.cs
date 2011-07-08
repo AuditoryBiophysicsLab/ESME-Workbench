@@ -25,20 +25,27 @@ namespace ESME.Metadata
             return Path.Combine(metadataPath, metadataFile + ".xml");
         }
 
-        public static T Load<T>(string sourceFilename) where T: NAEMOMetadataBase, new()
+        public static T Load<T>(string sourceFilename, List<Type> referencedTypes = null) where T: NAEMOMetadataBase, new()
         {
             var metaDataFilename = MetadataFilename(sourceFilename);
             if (!File.Exists(metaDataFilename)) return null;
-            var result = XmlSerializer<T>.Load(metaDataFilename, ReferencedTypes);
-            result.Filename = metaDataFilename;
-            return result;
+            try
+            {
+                var result = XmlSerializer<T>.Load(metaDataFilename, referencedTypes ?? ReferencedTypes);
+                result.Filename = metaDataFilename;
+                return result;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
-        public virtual void Save<T>(T data, string filename = null) where T : NAEMOMetadataBase, new()
+        public virtual void Save<T>(T data, List<Type> referencedTypes = null, string filename = null) where T : NAEMOMetadataBase, new()
         {
             if (string.IsNullOrEmpty(filename)) filename = Filename;
             var serializer = new XmlSerializer<T> { Data = data };
-            serializer.Save(filename, ReferencedTypes);
+            serializer.Save(filename, referencedTypes ?? ReferencedTypes);
         }
 
         #region public string OverlayFilename { get; set; }

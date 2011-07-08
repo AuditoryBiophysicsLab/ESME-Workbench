@@ -126,7 +126,7 @@ namespace ESME.Metadata
 
         public static NAEMOBathymetryMetadata Load(string metaDataFilename) { return Load<NAEMOBathymetryMetadata>(metaDataFilename); }
 
-        public void Save(string filename = null) { Save(this, filename); }
+        public void Save(string filename = null) { Save(this, ReferencedTypes, filename); }
 
         public virtual string GeneratedFilename
         {

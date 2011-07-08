@@ -46,6 +46,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
             _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
+            _dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
         }
 
         T FindMapLayer<T>(LayerType layerType, string layerName) where T : class
@@ -69,6 +70,7 @@ namespace ESMEWorkBench.ViewModels.Main
             _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
             _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
+            _dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
         }
         bool _viewIsActivated;
         #endregion
@@ -849,12 +851,35 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedEnvironmentDescriptorChangedEventArgs);
                 if (_selectedEnvironmentDescriptor != null) SelectedEnvironmentInfo = string.Format("Name: {0}\nTime Period: {1}\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedEnvironmentDescriptor.DataFilename), _selectedEnvironmentDescriptor.Metadata.TimePeriod, _selectedEnvironmentDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
                 IsEnvironmentFileSelected = _selectedEnvironmentDescriptor != null;
+                _dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedEnvironmentDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedEnvironmentDescriptor);
         NAEMOEnvironmentDescriptor _selectedEnvironmentDescriptor;
 
+        void DisplayEnvironment()
+        {
+            if ((_selectedEnvironmentDescriptor == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
+            var overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment") ?? new OverlayShapeMapLayer
+            {
+                Name = "Environment",
+                CanBeRemoved = true,
+                CanBeReordered = true,
+                CanChangeAreaColor = false,
+                CanChangeLineColor = true,
+                LineWidth = 6,
+                PointSymbolType = PointSymbolType.Circle,
+                LayerType = LayerType.SoundSpeed,
+            };
+            var samplePoints = _selectedEnvironmentDescriptor.Metadata.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
+            overlayLayer.Clear();
+            overlayLayer.Add(samplePoints);
+            overlayLayer.Done();
+            if (MapLayers.IndexOf(overlayLayer) == -1) MapLayers.Add(overlayLayer);
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+        }
         #endregion
 
         #region public string SelectedEnvironmentInfo { get; set; }

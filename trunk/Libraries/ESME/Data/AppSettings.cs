@@ -313,10 +313,10 @@ namespace ESME.Data
 
         public void VerifyExperimentsStillExist()
         {
-            var tmpList = ExperimentFiles.Where(File.Exists).ToList();
-            ExperimentFiles.Clear();
-            ExperimentFiles.AddRange(tmpList);
-            Save();
+            //var tmpList = ExperimentFiles.Where(File.Exists).ToList();
+            //ExperimentFiles.Clear();
+            //ExperimentFiles.AddRange(tmpList);
+            //Save();
         }
 
         #endregion
