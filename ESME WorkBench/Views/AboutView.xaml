@@ -4,7 +4,8 @@
         xmlns:Misc="clr-namespace:ESME.Views.Misc;assembly=ESME.Views"
         Title="About ESME Workbench 2011"
         ResizeMode="NoResize"
-        SizeToContent="WidthAndHeight">
+        SizeToContent="WidthAndHeight" 
+        WindowStyle="ToolWindow">
     <DockPanel>
         <Grid DockPanel.Dock="Top">
 		<Grid.ColumnDefinitions>
