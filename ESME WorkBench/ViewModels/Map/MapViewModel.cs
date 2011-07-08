@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
@@ -175,7 +176,47 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return _wpfMap.AdornmentOverlay; }
         }
 
+        #region public ObservableCollection<MapLayerViewModel> MapLayers { get; set; }
+
+        [MediatorMessageSink(MediatorMessage.SetMapLayers)]
+        void SetMapLayers(ObservableCollection<MapLayerViewModel> mapLayers) { MapLayers = mapLayers; }
+
+        public ObservableCollection<MapLayerViewModel> MapLayers
+        {
+            get { return _mapLayers ?? (_mapLayers = new ObservableCollection<MapLayerViewModel>()); }
+            set
+            {
+                if (_mapLayers == value) return;
+                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
+                _wpfMap.Overlays.Clear();
+                _mapLayers = value;
+                if (_mapLayers != null)
+                {
+                    foreach (var layer in _mapLayers.Where(layer => layer.Overlay != null))
+                    {
+                        //if (layer.LayerType == LayerType.BathymetryRaster) continue;
+                        if (!_wpfMap.Overlays.Contains(layer.Name)) _wpfMap.Overlays.Add(layer.Name, layer.Overlay);
+                        try
+                        {
+                            _wpfMap.Refresh(layer.Overlay);
+                        }
+                        catch (Exception) {}
+                    }
+                }
+                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
+                NotifyPropertyChanged(MapLayersChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.MapLayers);
+        ObservableCollection<MapLayerViewModel> _mapLayers;
+
+        #endregion
+
         #region public Experiment Experiment { get; set; }
+
+        [MediatorMessageSink(MediatorMessage.SetExperiment)]
+        void SetExperiment(Experiment experiment) { Experiment = experiment; }
 
         public Experiment Experiment
         {
@@ -212,6 +253,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            var mapLayers = (ObservableCollection<MapLayerViewModel>)sender;
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
@@ -233,7 +275,7 @@ namespace ESMEWorkBench.ViewModels.Map
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     _wpfMap.Overlays.Clear();
-                    foreach (var layer in _experiment.MapLayers) _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay);
+                    foreach (var layer in mapLayers) _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay);
                     break;
             }
         }
@@ -253,8 +295,58 @@ namespace ESMEWorkBench.ViewModels.Map
             Cursor = Cursors.Cross;
         }
 
-        [MediatorMessageSink(MediatorMessage.SetExperiment)]
-        void SetExperiment(Experiment experiment) { Experiment = experiment; }
+        #region public RectangleShape CurrentExtent { get; set; }
+
+        [MediatorMessageSink(MediatorMessage.SetCurrentExtent)]
+        void SetCurrentExtent(RectangleShape currentExtent)
+        {
+            CurrentExtent = currentExtent;
+        }
+
+        public RectangleShape CurrentExtent
+        {
+            get { return _currentExtent; }
+            set
+            {
+                if (_currentExtent == value) return;
+                _currentExtent = value;
+                NotifyPropertyChanged(CurrentExtentChangedEventArgs);
+                _wpfMap.CurrentExtent = _currentExtent;
+                _wpfMap.Refresh();
+                SetCurrentExtent(_currentExtent);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CurrentExtentChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.CurrentExtent);
+        RectangleShape _currentExtent;
+
+        #endregion
+
+        #region public double CurrentScale { get; set; }
+
+        [MediatorMessageSink(MediatorMessage.SetCurrentScale)]
+        void SetCurrentScale(double currentScale)
+        {
+            CurrentScale = currentScale;
+        }
+
+        public double CurrentScale
+        {
+            get { return _currentScale; }
+            set
+            {
+                if (_currentScale == value) return;
+                _currentScale = value;
+                NotifyPropertyChanged(CurrentScaleChangedEventArgs);
+                _wpfMap.CurrentScale = _currentScale;
+                SetCurrentScale(_currentScale);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CurrentScaleChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.CurrentScale);
+        double _currentScale;
+
+        #endregion
 
         [MediatorMessageSink(MediatorMessage.RemoveLayer)]
         void RemoveLayer(MapLayerViewModel mapLayer) { _wpfMap.Overlays.Remove(mapLayer.LayerOverlay); }
@@ -322,14 +414,6 @@ namespace ESMEWorkBench.ViewModels.Map
                 RefreshMap(true);
                 MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
             }
-        }
-
-        [MediatorMessageSink(MediatorMessage.SetCurrentExtent)]
-        void SetCurrentExtent(RectangleShape rectangleShape)
-        {
-            _wpfMap.CurrentExtent = rectangleShape;
-           // _wpfMap.CurrentScale = _experiment.CurrentScale; //?
-            _wpfMap.Refresh();
         }
 
         [MediatorMessageSink(MediatorMessage.EnableGUI)]

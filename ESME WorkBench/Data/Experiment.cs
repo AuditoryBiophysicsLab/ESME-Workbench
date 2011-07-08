@@ -928,7 +928,7 @@ namespace ESMEWorkBench.Data
         }
 
 
-        public void InitializeIfViewModelsReady() { if (_mainViewModelInitialized && _mapViewModelInitialized && _layerListViewModelInitialized) Initialize(); }
+        public void InitializeIfViewModelsReady() { if (_allViewModelsAreReady) Initialize(); }
 
         void Initialize()
         {

@@ -11,45 +11,32 @@ using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Model;
-using ESME.Overlay;
 using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using ThinkGeo.MapSuite.Core;
 using ESME.Views.AcousticBuilder;
 using BehaviorModel = ESME.Platform.BehaviorModel;
-using LineStyle = ThinkGeo.MapSuite.Core.LineStyle;
 
 namespace ESMEWorkBench.Data
 {
     public partial class Experiment
     {
-        static bool _mainViewModelInitialized;
-        static bool _mapViewModelInitialized;
-        static bool _layerListViewModelInitialized;
         static Dispatcher _mainViewModelDispatcher;
 
         [MediatorMessageSink(MediatorMessage.MainViewModelInitialized)]
         void MainViewModelInitialized(Dispatcher dispatcher)
         {
-            _mainViewModelInitialized = true;
             _mainViewModelDispatcher = dispatcher;
-            InitializeIfViewModelsReady();
         }
 
-        [MediatorMessageSink(MediatorMessage.MapViewModelInitialized)]
-        void MapViewModelInitialized(bool dummy)
+        [MediatorMessageSink(MediatorMessage.AllViewModelsAreReady)]
+        void AllViewModelsAreReady(bool allViewModelsAreReady)
         {
-            _mapViewModelInitialized = true;
+            _allViewModelsAreReady = true;
             InitializeIfViewModelsReady();
         }
-
-        [MediatorMessageSink(MediatorMessage.LayerListViewModelInitialized)]
-        void LayerListViewModelInitialized(bool dummy)
-        {
-            _layerListViewModelInitialized = true;
-            InitializeIfViewModelsReady();
-        }
+        static bool _allViewModelsAreReady;
 
         [MediatorMessageSink(MediatorMessage.AddFileCommand)]
         void AddFileCommand(string fileName)
@@ -70,7 +57,6 @@ namespace ESMEWorkBench.Data
                                       });
                         break;
                     case ".ovr":
-#if true
                         MapLayers.Add(new OverlayFileMapLayer
                                       {
                                           OverlayFileName = fileName,
@@ -80,41 +66,7 @@ namespace ESMEWorkBench.Data
                                           CanChangeLineColor = true,
                                           LayerType = LayerType.OverlayFile,
                                       });
-#else
-                        var overlay = OverlayFile.Parse(fileName);
-                        if (overlay[0] is OverlayLineSegments)
-                        {
-                            var segments = ((OverlayLineSegments) overlay[0]).Segments;
-                            var file = Path.GetFileNameWithoutExtension(fileName);
-                            var segNum = 0;
-                            foreach (var segment in segments)
-                            {
-                                var segLayerName = file + ": seg " + segNum;
-                                var segLayer = (OverlayFileMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == segLayerName);
-                                if (segLayer == null)
-                                {
-                                    segLayer = new OverlayFileMapLayer
-                                                   {
-                                                       Name = segLayerName,
-                                                       CanBeRemoved = false,
-                                                       CanBeReordered = true,
-                                                       CanChangeAreaColor = false,
-                                                       CanChangeLineColor = true,
-                                                       LineWidth = 1f,
-                                                       IsChecked = true,
-                                                       LayerType = LayerType.OverlayFile,
-                                                   };
-                                    MapLayers.Add(segLayer);
-                                }
-                                segLayer.Clear();
-                                Console.WriteLine("Adding segment {0}, WKT: {1}", segNum, segment.WellKnownText);
-                                segLayer.Add(segment);
-                                segLayer.Done();
-                                segNum++;
-                            }
-                        }
-#endif
-                        break;
+                       break;
                 }
             }
             catch (Exception ex)
