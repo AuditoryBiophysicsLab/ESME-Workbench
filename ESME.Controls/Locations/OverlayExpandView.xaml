@@ -6,7 +6,7 @@
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" 
              mc:Ignorable="d"        
-             Title="{Binding TitleString}"
+             Title="Expand Overlay File"
              SizeToContent="WidthAndHeight">
     <StackPanel>
         <StackPanel Orientation="Vertical">

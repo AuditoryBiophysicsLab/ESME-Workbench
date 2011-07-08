@@ -17,11 +17,12 @@
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Resolution"/>
+               
                 <TextBox Text="{Binding BathymetryMetadata.Resolution}">
                     <i:Interaction.Behaviors>
                         <cinch:NumericTextBoxBehaviour />
                     </i:Interaction.Behaviors>
-                </TextBox>
+                </TextBox> 
             </StackPanel>
         </StackPanel>
 
