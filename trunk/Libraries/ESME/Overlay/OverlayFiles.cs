@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
@@ -16,10 +17,18 @@ namespace ESME.Overlay
         protected NAEMODescriptors(string selectedRangeComplexName, string subDirectoryName, string searchPattern, FilenameFilter filenameFilter = null)
         {
             if (string.IsNullOrEmpty(selectedRangeComplexName)) return;
+            Console.WriteLine("{0} Entered NAEMODescriptors constructor", DateTime.Now);
             var files = Directory.GetFiles(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, selectedRangeComplexName, subDirectoryName), searchPattern);
+            Console.WriteLine("{0} Got directory listing containing {1} files", DateTime.Now, files.Length);
             IEnumerable<string> filteredFiles = files;
-            if (filenameFilter != null) filteredFiles = filenameFilter(files);
+            if (filenameFilter != null)
+            {
+                filteredFiles = filenameFilter(files);
+                Console.WriteLine("{0} Filtered directory listing, now contains {1} files", DateTime.Now, filteredFiles.Count());
+            }
+            Console.WriteLine("{0} About to call AddRange", DateTime.Now);
             AddRange(filteredFiles.Select(file => new KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(file), new T { DataFilename = file })));
+            Console.WriteLine("{0} Leaving NAEMODescriptors constructor", DateTime.Now);
         }
 
         public virtual NAEMODescriptor this[string overlayKey]
