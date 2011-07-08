@@ -13,28 +13,9 @@ namespace ESME.Views.Locations
     {
         public OverlayExpandViewModel(NAEMOOverlayMetadata naemoOverlayMetadata)
         {
-            TitleString = naemoOverlayMetadata.Filename;
             NAEMOOverlayMetadata = naemoOverlayMetadata;
         }
-
-        #region public string TitleString { get; set; }
-
-        public string TitleString
-        {
-            get { return _titleString; }
-            set
-            {
-                if (_titleString == value) return;
-                _titleString = value;
-                NotifyPropertyChanged(TitleStringChangedEventArgs);
-            }
-        }
-
-        private static readonly PropertyChangedEventArgs TitleStringChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.TitleString);
-        private string _titleString;
-
-        #endregion
-
+        
         #region public NAEMOOverlayMetadata NAEMOOverlayMetadata { get; set; }
 
         public NAEMOOverlayMetadata NAEMOOverlayMetadata
@@ -52,7 +33,6 @@ namespace ESME.Views.Locations
         private NAEMOOverlayMetadata _nAEMOOverlayMetadata;
 
         #endregion
-
         
         #region public float BufferZoneSize { get; set; }
 
@@ -72,7 +52,6 @@ namespace ESME.Views.Locations
 
         #endregion
 
-
         #region public string SelectedItem { get; set; }
 
         public string SelectedItem
@@ -90,23 +69,7 @@ namespace ESME.Views.Locations
         private string _selectedItem;
 
         #endregion
-
-        public List<string> ListItems
-        {
-            get
-            {
-                return _listItems ?? (_listItems = new List<string>
-                                                         {
-                                                             "km",
-                                                             "m",
-                                                             "nm",
-                                                             
-                                                         });
-            }
-        }
-
-        private static List<string> _listItems;
-
+        
 
         #region OKCommand
 
