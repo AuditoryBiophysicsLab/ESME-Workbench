@@ -1,0 +1,93 @@
+﻿<Window x:Class="ESME.Views.EnvironmentBuilder.EnvironmentExtractionView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Environment Data Extraction"
+        SizeToContent="WidthAndHeight" 
+        ResizeMode="NoResize" 
+        WindowStyle="ToolWindow">
+    <StackPanel Orientation="Vertical">
+        <Grid IsEnabled="{Binding NotExtractingData}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <GroupBox Grid.Column="0"
+			          Header="Months">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Width="75"
+							        Margin="5"
+							        Command="{Binding SelectAllMonthsCommand}">
+                                Select All
+                            </Button>
+                            <Button Width="75"
+							        Margin="5"
+							        Command="{Binding UnselectAllMonthsCommand}">
+                                Select None
+                            </Button>
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Top">
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[January].IsChecked}">January</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[February].IsChecked}">February</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[March].IsChecked}">March</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[April].IsChecked}">April</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[May].IsChecked}">May</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[June].IsChecked}">June</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[July].IsChecked}">July</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[August].IsChecked}">August</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[September].IsChecked}">September</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[October].IsChecked}">October</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[November].IsChecked}">November</CheckBox>
+                            <CheckBox IsChecked="{Binding MonthCheckboxes[December].IsChecked}">December</CheckBox>
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </GroupBox>
+            <GroupBox Grid.Column="1"
+			          Header="Seasons">
+                <DockPanel>
+                    <StackPanel Orientation="Horizontal"
+					            DockPanel.Dock="Top">
+                        <Button Width="75"
+						        Margin="5"
+						        Command="{Binding SelectAllSeasonsCommand}">
+                            Select All
+                        </Button>
+                        <Button Width="75"
+						        Margin="5"
+						        Command="{Binding UnselectAllSeasonsCommand}">
+                            Select None
+                        </Button>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Spring].IsChecked}">Spring</CheckBox>
+                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Summer].IsChecked}">Summer</CheckBox>
+                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Fall].IsChecked}">Fall</CheckBox>
+                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Winter].IsChecked}">Winter</CheckBox>
+                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Warm].IsChecked}">Warm</CheckBox>
+                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Cold].IsChecked}">Cold</CheckBox>
+                    </StackPanel>
+                </DockPanel>
+            </GroupBox>
+        </Grid>
+        <TextBlock Width="350"
+                   Margin="5"
+                   TextWrapping="WrapWithOverflow" 
+                   Text="{Binding Note}" />
+        <DockPanel LastChildFill="False"
+		           Margin="5 10">
+            <Button Width="90"
+			        Margin="10 0 0 0"
+			        IsCancel="True"
+			        Content="Cancel"
+			        DockPanel.Dock="Right" />
+            <Button Width="90"
+			        IsDefault="True"
+			        Content="OK"
+			        DockPanel.Dock="Right"
+			        Command="{Binding OkCommand}" />
+        </DockPanel>
+
+    </StackPanel>
+</Window>
