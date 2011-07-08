@@ -214,13 +214,13 @@ namespace ESME.Views.EnvironmentBuilder
             foreach (var timePeriod in MonthCheckboxes.SelectedTimePeriods)
                 EnvironmentDescriptors.Add(new EnvironmentDescriptor
                 {
-                        EnvironmentName = string.Format("{0}_{1}, ", _selectedBathymetry, timePeriod),
+                        EnvironmentName = string.Format("{0}_{1}", _selectedBathymetry, timePeriod),
                         TimePeriod = timePeriod,
                 });
             foreach (var timePeriod in SeasonCheckboxes.SelectedTimePeriods)
                 EnvironmentDescriptors.Add(new EnvironmentDescriptor
                 {
-                        EnvironmentName = string.Format("{0}_{1}, ", _selectedBathymetry, timePeriod),
+                        EnvironmentName = string.Format("{0}_{1}", _selectedBathymetry, timePeriod),
                         TimePeriod = timePeriod,
                 });
             foreach (var environmentDescriptor in EnvironmentDescriptors)

@@ -440,6 +440,17 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                                    Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
                                                };
 
+            var requiredMonths = selectedTimePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
+            var allMonths = new List<NAVOTimePeriod>();
+            foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
+            var uniqueMonths = allMonths.Distinct().ToList();
+            uniqueMonths.Sort();
+            var extendedMonthlySoundSpeeds = new SoundSpeed();
+            var extendedAndAveragedSoundSpeeds = new SoundSpeed();
+            var monthlyTemperature = new SoundSpeed();
+            var monthlySalinity = new SoundSpeed();
+            var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
+
             // Create a NAEMO exporter if we've been asked to export to NAEMO
             var naemoEnvironmentExporters = !exportToNAEMO
                                                     ? null
@@ -472,7 +483,6 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 ExtractionArea = extractionArea,
                 SelectedTimePeriods = selectedTimePeriods,
                 NAVOConfiguration = appSettings.NAVOConfiguration,
-                DestinationPath = tempPath,
                 UseExpandedExtractionArea = useExpandedExtractionArea,
                 SaveAsFilename = (Path.Combine(environmentRoot, "wind.xml")),
                 TaskName = "Wind data extraction",
@@ -487,7 +497,6 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 WorkerSupportsCancellation = false,
                 ExtractionArea = extractionArea,
                 NAVOConfiguration = appSettings.NAVOConfiguration,
-                DestinationPath = tempPath,
                 UseExpandedExtractionArea = useExpandedExtractionArea,
                 SaveAsFilename = (Path.Combine(environmentRoot, "sediment.xml")),
                 TaskName = "Sediment data extraction",
@@ -532,22 +541,10 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                             TimePeriod = timePeriod,
                                             ExtractionArea = extractionArea,
                                             NAVOConfiguration = appSettings.NAVOConfiguration,
-                                            DestinationPath = tempPath,
                                             UseExpandedExtractionArea = useExpandedExtractionArea,
                                             TaskName = "Calculate extended sound speeds for " + timePeriod,
                                     }).ToList();
 
-
-            var requiredMonths = selectedTimePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
-            var allMonths = new List<NAVOTimePeriod>();
-            foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
-            var uniqueMonths = allMonths.Distinct().ToList();
-            uniqueMonths.Sort();
-            var extendedMonthlySoundSpeeds = new SoundSpeed();
-            var extendedAndAveragedSoundSpeeds = new SoundSpeed();
-            var monthlyTemperature = new SoundSpeed();
-            var monthlySalinity = new SoundSpeed();
-            var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
             foreach (var month in uniqueMonths)
             {
                 var soundSpeedExtractor = new GDEMBackgroundExtractor

@@ -33,6 +33,24 @@ namespace ESME.Metadata
 
         public void Save(string filename = null) { Save(this, ReferencedTypes, filename); }
 
+        #region public string BathymetryName { get; set; }
+
+        public string BathymetryName
+        {
+            get { return _bathymetryName; }
+            set
+            {
+                if (_bathymetryName == value) return;
+                _bathymetryName = value;
+                NotifyPropertyChanged(BathymetryNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BathymetryNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOEnvironmentMetadata>(x => x.BathymetryName);
+        string _bathymetryName;
+
+        #endregion
+
         #region public NAVOTimePeriod TimePeriod { get; set; }
 
         public NAVOTimePeriod TimePeriod

@@ -955,6 +955,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 NAEMOEnvironmentDescriptors = null;
                 CommandManager.InvalidateRequerySuggested();
                 var bathymetry = SelectedBathymetryDescriptor.Data;
+                var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
                 var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
                 var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
                 if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
@@ -965,10 +966,10 @@ namespace ESMEWorkBench.ViewModels.Main
 
                 var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
                 var gdemRequiredSupportFiles = new List<string>
-                                               {
-                                                   Path.Combine(extractionPath, "netcdf.dll"),
-                                                   Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
-                                               };
+                {
+                        Path.Combine(extractionPath, "netcdf.dll"),
+                        Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
+                };
 
                 var extendedMonthlySoundSpeeds = new SoundSpeed();
                 var extendedAndAveragedSoundSpeeds = new SoundSpeed();
@@ -976,36 +977,35 @@ namespace ESMEWorkBench.ViewModels.Main
                 var monthlySalinity = new SoundSpeed();
 
                 var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
-                
+
                 var selectedTimePeriods = vm.EnvironmentDescriptors.Select(t => t.TimePeriod).ToList();
                 var requiredMonths = selectedTimePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
                 var allMonths = new List<NAVOTimePeriod>();
                 foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
                 var uniqueMonths = allMonths.Distinct().ToList();
                 uniqueMonths.Sort();
-
+                var environmentPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplex.Name, "Environment");
                 BackgroundTaskAggregator = new BackgroundTaskAggregator();
 
                 var naemoEnvironmentExporters = selectedTimePeriods.Select(t => new CASSBackgroundExporter
-                                        {
-                                            WorkerSupportsCancellation = false,
-                                            TimePeriod = t,
-                                            ExtractionArea = extractionArea,
-                                            NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                                            DestinationPath = tempPath,
-                                            UseExpandedExtractionArea = false,
-                                            TaskName = "Export NAEMO environment for " + t,
-                                        }).ToList();
+                {
+                        WorkerSupportsCancellation = false,
+                        TimePeriod = t,
+                        ExtractionArea = extractionArea,
+                        NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                        DestinationPath = Path.Combine(environmentPath, vm.EnvironmentDescriptors.Find(descriptor => descriptor.TimePeriod == t).EnvironmentName + ".dat"),
+                        UseExpandedExtractionArea = false,
+                        TaskName = "Export NAEMO environment for " + t,
+                }).ToList();
 
                 var windExtractor = new SMGCBackgroundExtractor
                 {
-                    WorkerSupportsCancellation = false,
-                    ExtractionArea = extractionArea,
-                    SelectedTimePeriods = selectedTimePeriods,
-                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                    DestinationPath = tempPath,
-                    UseExpandedExtractionArea = false,
-                    TaskName = "Wind data extraction",
+                        WorkerSupportsCancellation = false,
+                        ExtractionArea = extractionArea,
+                        SelectedTimePeriods = selectedTimePeriods,
+                        NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                        UseExpandedExtractionArea = false,
+                        TaskName = "Wind data extraction",
                 };
                 BackgroundTaskAggregator.BackgroundTasks.Add(windExtractor);
                 windExtractor.RunWorkerCompleted += (s, e) => { foreach (var naemo in naemoEnvironmentExporters) naemo.Wind = ((SMGCBackgroundExtractor)s).Wind; };
@@ -1013,41 +1013,35 @@ namespace ESMEWorkBench.ViewModels.Main
                 // Create a sediment extractor
                 var sedimentExtractor = new BSTBackgroundExtractor
                 {
-                    WorkerSupportsCancellation = false,
-                    ExtractionArea = extractionArea,
-                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                    DestinationPath = tempPath,
-                    UseExpandedExtractionArea = false,
-                    TaskName = "Sediment data extraction",
+                        WorkerSupportsCancellation = false,
+                        ExtractionArea = extractionArea,
+                        NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                        UseExpandedExtractionArea = false,
+                        TaskName = "Sediment data extraction",
                 };
                 BackgroundTaskAggregator.BackgroundTasks.Add(sedimentExtractor);
                 sedimentExtractor.RunWorkerCompleted += (s, e) => { foreach (var naemo in naemoEnvironmentExporters) naemo.Sediment = ((BSTBackgroundExtractor)s).Sediment; };
 
                 var temperatureAndSalinityFileWriter = new TemperatureAndSalinityFileWriter
                 {
-                    WorkerSupportsCancellation = false,
-                    DestinationPath = tempPath,
-                    TaskName = "Save soundspeed data"
+                        WorkerSupportsCancellation = false,
+                        DestinationPath = tempPath,
+                        TaskName = "Save soundspeed data"
                 };
-
-                foreach (var environmentDescriptor in vm.EnvironmentDescriptors)
+                var averagers = selectedTimePeriods.Select(timePeriod => new SoundSpeedBackgroundAverager
                 {
-                    var environmentPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplex.Name, "Environment", environmentDescriptor.EnvironmentName + ".dat");
+                        WorkerSupportsCancellation = false,
+                        TimePeriod = timePeriod,
+                        ExtractionArea = extractionArea,
+                        NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                        UseExpandedExtractionArea = false,
+                        TaskName = "Calculate extended sound speeds for " + timePeriod,
+                }).ToList();
 
-                    var averagers = selectedTimePeriods.Select(timePeriod => new SoundSpeedBackgroundAverager
+                foreach (var month in uniqueMonths)
+                {
+                    var soundSpeedExtractor = new GDEMBackgroundExtractor
                     {
-                            WorkerSupportsCancellation = false,
-                            TimePeriod = timePeriod,
-                            ExtractionArea = extractionArea,
-                            NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                            DestinationPath = tempPath,
-                            UseExpandedExtractionArea = false,
-                            TaskName = "Calculate extended sound speeds for " + timePeriod,
-                    }).ToList();
-                    foreach (var month in uniqueMonths)
-                    {
-                        var soundSpeedExtractor = new GDEMBackgroundExtractor
-                        {
                             WorkerSupportsCancellation = false,
                             TimePeriod = month,
                             ExtractionArea = extractionArea,
@@ -1056,25 +1050,59 @@ namespace ESMEWorkBench.ViewModels.Main
                             UseExpandedExtractionArea = false,
                             ExtractionProgramPath = gdemExtractionProgramPath,
                             RequiredSupportFiles = gdemRequiredSupportFiles,
-                        };
-                        soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
-                        {
-                            var extractor = (GDEMBackgroundExtractor)sender;
-                            monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
-                            monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
-                            extendedMonthlySoundSpeeds.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
-                            //Console.WriteLine("soundspeed extractor for {0} complete. {1} extractors are still busy", extractor.TimePeriod, soundSpeedExtractors.Where(s => s.IsBusy).Count());
-                            if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
-                            temperatureAndSalinityFileWriter.Temperature = monthlyTemperature;
-                            temperatureAndSalinityFileWriter.Salinity = monthlySalinity;
-                            if (averagers != null) foreach (var averager in averagers) averager.ExtendedMonthlySoundSpeeds = extendedMonthlySoundSpeeds;
-                        };
-                        soundSpeedExtractors.Add(soundSpeedExtractor);
-                        aggregator.BackgroundTasks.Add(soundSpeedExtractor);
-                    }
-                    aggregator.BackgroundTasks.Add(temperatureAndSalinityFileWriter);
-
+                            MaxDepth = maxDepth,
+                    };
+                    soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
+                    {
+                        var extractor = (GDEMBackgroundExtractor)sender;
+                        monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
+                        monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
+                        extendedMonthlySoundSpeeds.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
+                        //Console.WriteLine("soundspeed extractor for {0} complete. {1} extractors are still busy", extractor.TimePeriod, soundSpeedExtractors.Where(s => s.IsBusy).Count());
+                        if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
+                        temperatureAndSalinityFileWriter.Temperature = monthlyTemperature;
+                        temperatureAndSalinityFileWriter.Salinity = monthlySalinity;
+                        foreach (var averager in averagers) averager.ExtendedMonthlySoundSpeeds = extendedMonthlySoundSpeeds;
+                    };
+                    soundSpeedExtractors.Add(soundSpeedExtractor);
+                    BackgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
                 }
+                BackgroundTaskAggregator.BackgroundTasks.Add(temperatureAndSalinityFileWriter);
+                foreach (var averager in averagers)
+                {
+                    BackgroundTaskAggregator.BackgroundTasks.Add(averager);
+                    averager.RunWorkerCompleted += (sender, e) =>
+                    {
+                        var avg = (SoundSpeedBackgroundAverager)sender;
+                        extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(avg.ExtendedAverageSoundSpeedField);
+                        if (averagers.Any(a => a.IsBusy)) return;
+                        foreach (var naemo in naemoEnvironmentExporters) naemo.ExtendedAndAveragedSoundSpeeds = extendedAndAveragedSoundSpeeds;
+                    };
+                }
+                foreach (var naemo in naemoEnvironmentExporters) BackgroundTaskAggregator.BackgroundTasks.Add(naemo);
+                BackgroundTaskAggregator.TaskName = "Environmental data extraction";
+                BackgroundTaskAggregator.RunWorkerCompleted += (s, e) =>
+                {
+                    foreach (var timePeriod in selectedTimePeriods)
+                    {
+                        var metadataFilename = Path.Combine(environmentPath, vm.EnvironmentDescriptors.Find(descriptor => descriptor.TimePeriod == timePeriod).EnvironmentName + ".dat");
+                        var metadata = NAEMOEnvironmentMetadata.FromEnvironmentFile(metadataFilename);
+                        metadata.TimePeriod = timePeriod;
+                        metadata.Bounds = extractionArea;
+                        metadata.OverlayFilename = overlayName;
+                        metadata.BathymetryName = bathymetryName;
+                        metadata.Save();
+                    }
+                    var bw1 = new BackgroundWorker();
+                    bw1.DoWork += (s1, e1) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
+                    bw1.RunWorkerCompleted += (s1, e1) =>
+                    {
+                        SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors.Find(item => item.Key == vm.EnvironmentDescriptors[0].EnvironmentName).Value;
+                        CommandManager.InvalidateRequerySuggested();
+                    };
+                    bw1.RunWorkerAsync();
+                };
+                BackgroundTaskAggregator.Start();
             }
         }
 
