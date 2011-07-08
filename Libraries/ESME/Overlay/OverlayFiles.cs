@@ -106,11 +106,7 @@ namespace ESME.Overlay
             {
                 if ((backgroundWorker != null) && (backgroundWorker.CancellationPending)) return;
                 if (envItem.Value.Metadata != null) continue;
-                envItem.Value.Metadata = new NAEMOEnvironmentMetadata()
-                {
-                        Filename = NAEMOMetadataBase.MetadataFilename(envItem.Value.DataFilename),
-                        TimePeriod = envItem.Value.Data.TimePeriod,
-                };
+                envItem.Value.Metadata = NAEMOEnvironmentMetadata.FromEnvironmentFile(envItem.Value.DataFilename);
                 envItem.Value.Metadata.Save();
             }
         }

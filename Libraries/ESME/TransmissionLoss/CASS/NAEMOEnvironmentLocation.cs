@@ -6,6 +6,7 @@ namespace ESME.TransmissionLoss.CASS
 {
     public class NAEMOEnvironmentLocation : EarthCoordinate<NAEMOEnvironmentLocation>, IEquatable<NAEMOEnvironmentLocation>
     {
+        public NAEMOEnvironmentLocation() {  }
         public NAEMOEnvironmentLocation(Geo location) : base(location) {  }
         public List<double> Depths;
         public List<double> Soundspeeds;

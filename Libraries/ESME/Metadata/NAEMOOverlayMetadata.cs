@@ -26,6 +26,6 @@ namespace ESME.Metadata
 
         #endregion
 
-        public void Save(string filename = null) {Save(this, filename);}
+        public void Save(string filename = null) { Save(this, ReferencedTypes, filename); }
     }
 }
