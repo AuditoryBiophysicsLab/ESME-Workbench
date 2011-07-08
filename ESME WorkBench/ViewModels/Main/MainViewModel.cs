@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -284,7 +283,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _experiment.FileName = _openFileService.FileName;
                 Settings.Default.LastExperimentFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
             }
-            using (var cursor = new OverrideCursor(Cursors.Wait))
+            using (new OverrideCursor(Cursors.Wait)) 
             {
                 LoadExperimentFile(_openFileService.FileName);
                 RecentFiles.InsertFile(_openFileService.FileName);
@@ -295,7 +294,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             try
             {
-                using (var cursor = new OverrideCursor(Cursors.Wait))
+                using (new OverrideCursor(Cursors.Wait)) 
                 {
                     MediatorMessage.Send(MediatorMessage.EnableGUI, false);
                     Experiment newExperiment;
@@ -521,6 +520,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     _messageBoxService.ShowError("Error opening experiment: " + e.Message);
                     RecentFiles.RemoveFile(_recentFilesSelectedItem.LongName);
                 }
+                NotifyPropertyChanged(RecentFilesSelectedItemChangedEventArgs);
             }
         }
 
@@ -598,6 +598,27 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, EventToCommandArgs> _previewKeyDown;
+
+        #endregion
+
+        #region public int SelectedRibbonTabIndex { get; set; }
+
+        public int SelectedRibbonTabIndex
+        {
+            get
+            {
+                IsLayerListViewVisible = Settings.Default.SelectedTabIndex != 2;
+                return Settings.Default.SelectedTabIndex;
+            }
+            set
+            {
+                Settings.Default.SelectedTabIndex = value;
+                IsLayerListViewVisible = Settings.Default.SelectedTabIndex != 2;
+                NotifyPropertyChanged(RibbonTabIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RibbonTabIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRibbonTabIndex);
 
         #endregion
 
