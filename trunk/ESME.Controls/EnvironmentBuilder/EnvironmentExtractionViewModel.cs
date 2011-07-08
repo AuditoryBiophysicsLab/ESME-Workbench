@@ -13,9 +13,12 @@ namespace ESME.Views.EnvironmentBuilder
     public class EnvironmentExtractionViewModel : ViewModelBase
     {
         readonly string _selectedOverlay;
-        public EnvironmentExtractionViewModel(string selectedOverlay)
+        readonly string _selectedBathymetry;
+        public EnvironmentExtractionViewModel(string selectedOverlay, string selectedBathymetry)
         {
             _selectedOverlay = selectedOverlay;
+            _selectedBathymetry = selectedBathymetry;
+
             foreach (var item in MonthCheckboxes) item.PropertyChanged += (o, args) => UpdateNote();
             foreach (var item in SeasonCheckboxes) item.PropertyChanged += (o, args) => UpdateNote();
             UpdateNote();
@@ -209,12 +212,40 @@ namespace ESME.Views.EnvironmentBuilder
 
             var sb = new StringBuilder();
             foreach (var timePeriod in MonthCheckboxes.SelectedTimePeriods)
-                sb.Append(string.Format("{0}_{1}, ", _selectedOverlay, timePeriod));
+                EnvironmentDescriptors.Add(new EnvironmentDescriptor
+                {
+                        EnvironmentName = string.Format("{0}_{1}, ", _selectedBathymetry, timePeriod),
+                        TimePeriod = timePeriod,
+                });
             foreach (var timePeriod in SeasonCheckboxes.SelectedTimePeriods)
-                sb.Append(string.Format("{0}_{1}, ", _selectedOverlay, timePeriod));
+                EnvironmentDescriptors.Add(new EnvironmentDescriptor
+                {
+                        EnvironmentName = string.Format("{0}_{1}, ", _selectedBathymetry, timePeriod),
+                        TimePeriod = timePeriod,
+                });
+            foreach (var environmentDescriptor in EnvironmentDescriptors)
+                sb.Append(string.Format("{0}, ", environmentDescriptor.EnvironmentName));
             sb.Remove(sb.Length - 2, 2);
             Note = string.Format("Note: Environment data will be extracted within the bounds of the overlay {0}.  The following environment files will be created:\n{1}", _selectedOverlay, sb);
         }
+
+        #endregion
+
+        #region public List<EnvironmentDescriptors> EnvironmentDescriptor { get; set; }
+
+        public List<EnvironmentDescriptor> EnvironmentDescriptors
+        {
+            get { return _environmentDescriptor ?? (_environmentDescriptor = new List<EnvironmentDescriptor>()); }
+            set
+            {
+                if (_environmentDescriptor == value) return;
+                _environmentDescriptor = value;
+                NotifyPropertyChanged(EnvironmentDescriptorChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs EnvironmentDescriptorChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentExtractionViewModel>(x => x.EnvironmentDescriptors);
+        List<EnvironmentDescriptor> _environmentDescriptor;
 
         #endregion
 
@@ -231,6 +262,12 @@ namespace ESME.Views.EnvironmentBuilder
             CloseActivePopUpCommand.Execute(true);
         }
         #endregion
+    }
+
+    public class EnvironmentDescriptor
+    {
+        public string EnvironmentName { get; set; }
+        public NAVOTimePeriod TimePeriod { get; set; }
     }
 
     public class CheckboxSettings : ObservableCollection<CheckboxSetting>
