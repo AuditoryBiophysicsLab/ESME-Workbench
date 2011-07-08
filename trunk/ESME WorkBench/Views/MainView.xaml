@@ -75,13 +75,8 @@
             </StatusBarItem>
         </StatusBar>
 		<r:Ribbon x:Name="Ribbon"
-                  SelectedIndex="2"
+                  SelectedIndex="{Binding SelectedRibbonTabIndex, Mode=TwoWay}"
 		          DockPanel.Dock="Top">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SelectionChanged">
-                    <cinch:EventToCommandTrigger Command="{Binding RibbonTabSelectionChangedCommand}" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
 
             <r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
@@ -911,9 +906,6 @@
 					                Command="{Binding LaunchExposureReportGeneratorCommand}"/>
 				</r:RibbonGroup>
 			</r:RibbonTab>
-            <r:Ribbon.ContextualTabGroups>
-                <r:RibbonContextualTabGroup Header="Location Editor" Visibility="{Binding LocationEditorContextIsVisible}" Background="Green" />
-            </r:Ribbon.ContextualTabGroups>
         </r:Ribbon>
 		<Grid>
 			<Grid.ColumnDefinitions>
