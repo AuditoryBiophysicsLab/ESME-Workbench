@@ -43,6 +43,9 @@
         <i:EventTrigger EventName="Closing">
             <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
         </i:EventTrigger>
+        <i:EventTrigger EventName="Activated">
+            <cinch:EventToCommandTrigger Command="{Binding ViewActivatedCommand}" />
+        </i:EventTrigger>
         <i:EventTrigger EventName="PreviewKeyDown">
             <cinch:EventToCommandTrigger Command="{Binding PreviewKeyDownCommand}" />
         </i:EventTrigger>
@@ -379,10 +382,11 @@
                     <r:RibbonComboBox ToolTipTitle="Range Complex"
 					                  ToolTipDescription="Select a pre-defined range complex"
                                       ToolTipFooterTitle="Currently selected range complex"
-                                      ToolTipFooterDescription="{Binding SelectedRangeComplexInfo}">
+                                      ToolTipFooterDescription="{Binding SelectedRangeComplexInfo}"
+                                      IsEnabled="{Binding IsRangeComplexListReady}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
-								         SelectedItem="{Binding SelectedRangeComplex}"
+								         SelectedValue="{Binding SelectedRangeComplex}"
                     			         MaxColumnCount="1">
                             <r:RibbonGalleryCategory ItemsSource="{Binding SimAreaCSV}">
                                 <r:RibbonGalleryCategory.ItemsPanel>

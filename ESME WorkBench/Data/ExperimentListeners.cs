@@ -48,6 +48,7 @@ namespace ESMEWorkBench.Data
                     case ".shp":
                         MapLayers.Add(new ShapefileMapLayer
                                       {
+                                          Name=Path.GetFileNameWithoutExtension(fileName),
                                           ShapefileName = fileName,
                                           CanBeRemoved = true,
                                           CanBeReordered = true,
@@ -59,6 +60,7 @@ namespace ESMEWorkBench.Data
                     case ".ovr":
                         MapLayers.Add(new OverlayFileMapLayer
                                       {
+                                          Name = Path.GetFileNameWithoutExtension(fileName),
                                           OverlayFileName = fileName,
                                           CanBeRemoved = true,
                                           CanBeReordered = true,

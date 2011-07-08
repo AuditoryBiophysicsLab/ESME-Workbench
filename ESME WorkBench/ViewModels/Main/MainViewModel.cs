@@ -686,8 +686,8 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (_layerListViewModelInitialized && _mapViewModelInitialized && _mainViewModelInitialized)
             {
-                MediatorMessage.Send(MediatorMessage.AllViewModelsAreReady, true);
                 _allViewModelsAreReady = true;
+                MediatorMessage.Send(MediatorMessage.AllViewModelsAreReady, true);
             }
         }
         static bool _allViewModelsAreReady;
