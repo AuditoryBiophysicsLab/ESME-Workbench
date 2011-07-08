@@ -39,8 +39,8 @@ namespace ESME.Overlay
                 if (ovrItem.Value.Metadata == null)
                 {
                     var keyName = ovrItem.Key.Split('_');
-                    var buffer = keyName.Last().ToLowerInvariant();
-                    if (keyName.Length == 1 || !buffer.EndsWith("km"))
+                    var buffer = keyName.Last();
+                    if (keyName.Length == 1 || !buffer.ToLowerInvariant().EndsWith("km"))
                     {
                         ovrItem.Value.Metadata = new NAEMOOverlayMetadata
                                                      {
@@ -80,7 +80,7 @@ namespace ESME.Overlay
     public class NAEMOBathymetryDescriptors : NAEMODescriptors<NAEMOBathymetryDescriptor>
     {
         public NAEMOBathymetryDescriptors(string selectedRangeComplexName)
-            : base(selectedRangeComplexName, "Bathymetry", "*.txt",Filter)
+            : base(selectedRangeComplexName, "Bathymetry", "*.txt", Filter)
         {
             foreach (var bathyItem in this)
             {
