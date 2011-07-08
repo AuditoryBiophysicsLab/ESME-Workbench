@@ -32,8 +32,27 @@ namespace ESME.Views.EnvironmentBuilder
 
         void UpdateNote()
         {
-            Note = string.Format("Note: Bathymetry data will be extracted within the bounds of the overlay {0}. The resulting bathymetry file will be named {0}_{1}min", _selectedOverlay, SelectedResolution);
+            BathymetryName = string.Format("{0}_{1:0.00}min", _selectedOverlay, SelectedResolution);
+            Note = string.Format("Note: Bathymetry data will be extracted within the bounds of the overlay {0}. The resulting bathymetry file will be named {1}", _selectedOverlay, BathymetryName);
         }
+
+        #endregion
+
+        #region public string BathymetryName { get; set; }
+
+        public string BathymetryName
+        {
+            get { return _bathymetryName; }
+            set
+            {
+                if (_bathymetryName == value) return;
+                _bathymetryName = value;
+                NotifyPropertyChanged(BathymetryNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BathymetryNameChangedEventArgs = ObservableHelper.CreateArgs<BathymetryExtractionViewModel>(x => x.BathymetryName);
+        string _bathymetryName;
 
         #endregion
 

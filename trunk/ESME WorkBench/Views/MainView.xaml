@@ -9,8 +9,9 @@
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                 xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
-                xmlns:Controls="clr-namespace:ESMEWorkBench.Controls"
-                xmlns:app="clr-namespace:ESMEWorkBench"
+                xmlns:LocalControls="clr-namespace:ESMEWorkBench.Controls"
+                xmlns:app="clr-namespace:ESMEWorkBench" 
+                xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views" 
                 mef:ViewModelLocator.ViewModel="MainViewModel"
                 SnapsToDevicePixels="True"
                 Title="{Binding DecoratedExperimentName, StringFormat=ESME WorkBench: {0}}"
@@ -22,7 +23,8 @@
                 mc:Ignorable="d">
 	<r:RibbonWindow.Resources>
 		<app:GridLengthConverter x:Key="gridLengthConverter" />
-	</r:RibbonWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter"/>
+    </r:RibbonWindow.Resources>
 	<r:RibbonWindow.InputBindings>
 		<KeyBinding Command="{Binding CancelCurrentCommand}"
 		            Key="Escape" />
@@ -46,16 +48,32 @@
     </i:Interaction.Triggers>
     <DockPanel LastChildFill="True">
 		<StatusBar DockPanel.Dock="Bottom">
-			<StatusBarItem>
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="{Binding MouseEarthCoordinate.Latitude, StringFormat=Lat: {0:0.000000}}" />
-					<TextBlock Text=" " />
-					<TextBlock Text="{Binding MouseEarthCoordinate.Longitude, StringFormat=Lon: {0:0.000000}}" />
-					<TextBlock Text=" " />
-					<TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
-				</StackPanel>
-			</StatusBarItem>
-		</StatusBar>
+		    <StatusBarItem HorizontalAlignment="Left">
+			    <StackPanel Orientation="Horizontal">
+				    <TextBlock Text="{Binding MouseEarthCoordinate.Latitude, StringFormat=Lat: {0:0.000000}}" />
+				    <TextBlock Text=" " />
+				    <TextBlock Text="{Binding MouseEarthCoordinate.Longitude, StringFormat=Lon: {0:0.000000}}" />
+				    <TextBlock Text=" " />
+				    <TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
+			    </StackPanel>
+		    </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right" Visibility="{Binding BackgroundTaskAggregator.IsBusy, Converter={StaticResource boolToVisibilityConverter}}">
+                <ProgressBar Minimum="{Binding Path=BackgroundTaskAggregator.Minimum}" 
+                             Maximum="{Binding Path=BackgroundTaskAggregator.Maximum}" 
+                             Value="{Binding Path=BackgroundTaskAggregator.Value}" 
+                             ToolTip="{Binding Path=BackgroundTaskAggregator.Status}" 
+                             Height="22" 
+                             Width="50">
+                    <ProgressBar.ContextMenu>
+                        <ContextMenu IsEnabled="{Binding BackgroundTaskAggregator.IsBusy}">
+                            <MenuItem Header="Show detailed progress" 
+                                      Command="{Binding ShowDetailedProgressCommand}"/>
+                        </ContextMenu>
+                    </ProgressBar.ContextMenu>
+                </ProgressBar>
+
+            </StatusBarItem>
+        </StatusBar>
 		<r:Ribbon x:Name="Ribbon"
                   SelectedIndex="2"
 		          DockPanel.Dock="Top">
@@ -899,18 +917,18 @@
         </r:Ribbon>
 		<Grid>
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="{Binding Source={x:Static p:Settings.Default}, Converter={StaticResource gridLengthConverter}, Path=LayersWidth, Mode=TwoWay}"
-				                  MinWidth="100" />
+                <ColumnDefinition Width="{Binding LayersListWidth, Converter={StaticResource gridLengthConverter}, Mode=TwoWay}"/>
 				<ColumnDefinition Width="Auto" />
-				<ColumnDefinition Width="*"
-				                  MinWidth="500" />
+				<ColumnDefinition Width="*" MinWidth="500" />
 			</Grid.ColumnDefinitions>
 			<GroupBox Grid.Column="0"
-			          Header="Layers">
-				<Controls:LayerTreeView />
+			          Header="Layers"
+                      Visibility="{Binding IsLayerListViewVisible, Converter={StaticResource boolToVisibilityConverter}}">
+				<LocalControls:LayerTreeView />
 			</GroupBox>
 			<GridSplitter Name="GridSplitter"
 			              Grid.Column="1"
+                          Visibility="{Binding IsLayerListViewVisible, Converter={StaticResource boolToVisibilityConverter}}"
 			              Width="2"
 			              Background="Black"
 			              HorizontalAlignment="Center"
@@ -918,7 +936,7 @@
 			              VerticalAlignment="Stretch"
 			              ResizeBehavior="BasedOnAlignment"
 			              ResizeDirection="Columns" />
-			<Controls:MapView Grid.Column="2" />
+			<LocalControls:MapView Grid.Column="2" />
 			<i:Interaction.Triggers>
 				<i:EventTrigger EventName="Drop">
 					<ia:CallMethodAction TargetObject="{Binding}"
