@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Reflection;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using Cinch;
+using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Metadata;
@@ -10,8 +16,11 @@ using ESME.Overlay;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.EnvironmentBuilder;
 using ESME.Views.Locations;
+using ESMEWorkBench.ViewModels.Layers;
+using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -27,6 +36,79 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         FileSystemWatcher _simAreaCSVWatcher;
+
+        [MediatorMessageSink(MediatorMessage.AllViewModelsAreReady)]
+        void AllViewModelsAreReady(bool allViewModelsAreReady)
+        {
+            DisplayRangeComplex();
+        }
+
+        #region public bool EnvironmentTabIsActive { get; set; }
+
+        public bool EnvironmentTabIsActive
+        {
+            get { return _environmentTabIsActive; }
+            set
+            {
+                if (_environmentTabIsActive == value) return;
+                _environmentTabIsActive = value;
+                NotifyPropertyChanged(EnvironmentTabIsActiveChangedEventArgs);
+                if (_environmentTabIsActive)
+                {
+                    MapLayers = new ObservableCollection<MapLayerViewModel>();
+                }
+                else
+                {
+                    MapLayers = null;
+                }
+            }
+        }
+
+        static readonly PropertyChangedEventArgs EnvironmentTabIsActiveChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.EnvironmentTabIsActive);
+        bool _environmentTabIsActive;
+
+        #endregion
+
+        #region public ObservableCollection<MapLayerViewModel> MapLayers { get; set; }
+
+        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MapLayers);
+        ObservableCollection<MapLayerViewModel> _mapLayers;
+
+        public ObservableCollection<MapLayerViewModel> MapLayers
+        {
+            get { return _mapLayers; }
+            set
+            {
+                if (_mapLayers == value) return;
+                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
+                _mapLayers = value;
+                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
+                NotifyPropertyChanged(MapLayersChangedEventArgs);
+                MapLayerViewModel.Layers = _mapLayers;
+                MediatorMessage.Send(MediatorMessage.SetMapLayers, _mapLayers);
+            }
+        }
+
+        void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null) { }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    break;
+            }
+            NotifyPropertyChanged(MapLayersChangedEventArgs);
+        }
+
+        #endregion
 
         #region Range Complex ribbon group
 
@@ -61,11 +143,64 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedSimAreaChangedEventArgs);
                 if (_selectedRangeComplex != null) SelectedRangeComplexInfo = string.Format("Name: {0}\nReference Point: ({1}, {2})\nHeight: {3}\nGeoid Separation: {4}\nOps Limit: {5}\nSim Limit: {6}", _selectedRangeComplex.Name, Math.Round(_selectedRangeComplex.Latitude, 5), Math.Round(_selectedRangeComplex.Longitude, 5), _selectedRangeComplex.Height, _selectedRangeComplex.GeoidSeparation, SelectedRangeComplex.OpsLimitFile, SelectedRangeComplex.SimLimitFile);
                 IsRangeComplexSelected = _selectedRangeComplex != null;
+                DisplayRangeComplex();
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedSimAreaChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplex);
         SimAreaDescriptor _selectedRangeComplex;
+
+        void DisplayRangeComplex()
+        {
+            if ((_selectedRangeComplex == null) || (!_allViewModelsAreReady)) return;
+            var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplex.Name, "Areas", _selectedRangeComplex.OpsLimitFile);
+            var simAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplex.Name, "Areas", _selectedRangeComplex.SimLimitFile);
+            var opsLimit = new OverlayFile(opAreaOverlayFilename);
+            var north = (float)opsLimit.Shapes[0].BoundingBox.Bottom + 3;
+            var west = (float)opsLimit.Shapes[0].BoundingBox.Left - 3;
+            var south = (float)opsLimit.Shapes[0].BoundingBox.Top - 3;
+            var east = (float)opsLimit.Shapes[0].BoundingBox.Right + 3;
+            var mapExtent = new RectangleShape(west, north, east, south);
+            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
+            if (MapLayers == null)
+            {
+                var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                MapLayers = new ObservableCollection<MapLayerViewModel>
+                            {
+                                new ShapefileMapLayer
+                                {
+                                    LineColor = Colors.Beige,
+                                    AreaStyle = AreaStyles.Country2,
+                                    CanBeRemoved = false,
+                                    CanBeReordered = true,
+                                    CanChangeAreaColor = true,
+                                    CanChangeLineColor = true,
+                                    ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
+                                    Name = "Base Map",
+                                    LayerType = LayerType.BaseMap,
+                                },
+                            };
+            }
+            MapLayers.Add(new OverlayFileMapLayer
+            {
+                OverlayFileName = opAreaOverlayFilename,
+                CanBeRemoved = true,
+                CanBeReordered = true,
+                CanChangeAreaColor = false,
+                CanChangeLineColor = true,
+                LayerType = LayerType.OverlayFile,
+            });
+            if (simAreaOverlayFilename != opAreaOverlayFilename)
+                MapLayers.Add(new OverlayFileMapLayer
+                {
+                    OverlayFileName = simAreaOverlayFilename,
+                    CanBeRemoved = true,
+                    CanBeReordered = true,
+                    CanChangeAreaColor = false,
+                    CanChangeLineColor = true,
+                    LayerType = LayerType.OverlayFile,
+                });
+        }
 
         #endregion
 

@@ -622,47 +622,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region RibbonTabSelectionChangedCommand
-        public SimpleCommand<object, object> RibbonTabSelectionChangedCommand
-        {
-            get { return _ribbonTabSelectionChangedCommand ?? (_ribbonTabSelectionChangedCommand = new SimpleCommand<object, object>(delegate { RibbonTabSelectionChanged(); })); }
-        }
-
-        SimpleCommand<object, object> _ribbonTabSelectionChangedCommand;
-
-        void RibbonTabSelectionChanged()
-        {
-            switch (((Views.MainView)_viewAwareStatus.View).Ribbon.SelectedIndex)
-            {
-                case 0:
-                    Console.WriteLine("Experiment tab selected");
-                    IsLayerListViewVisible = true;
-                    break;
-                case 1:
-                    Console.WriteLine("Scenario tab selected");
-                    IsLayerListViewVisible = true;
-                    break;
-                case 2:
-                    Console.WriteLine("Environment tab selected");
-                    IsLayerListViewVisible = false;
-                    break;
-                case 3:
-                    Console.WriteLine("Animals tab selected");
-                    IsLayerListViewVisible = true;
-                    break;
-                case 4:
-                    Console.WriteLine("Acoustics tab selected");
-                    IsLayerListViewVisible = true;
-                    break;
-                default:
-                    Console.WriteLine("Other tab selected");
-                    IsLayerListViewVisible = true;
-                    break;
-            }
-        }
-
-        #endregion
-
         #region public bool IsLayerListViewVisible { get; set; }
 
         public bool IsLayerListViewVisible
@@ -699,6 +658,39 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        [MediatorMessageSink(MediatorMessage.MainViewModelInitialized)]
+        void MainViewModelInitialized(Dispatcher dispatcher)
+        {
+            _mainViewModelInitialized = true;
+            AllViewModelsAreReady();
+        }
+        static bool _mainViewModelInitialized;
+
+        [MediatorMessageSink(MediatorMessage.MapViewModelInitialized)]
+        void MapViewModelInitialized(bool dummy)
+        {
+            _mapViewModelInitialized = true;
+            AllViewModelsAreReady();
+        }
+        static bool _mapViewModelInitialized;
+
+        [MediatorMessageSink(MediatorMessage.LayerListViewModelInitialized)]
+        void LayerListViewModelInitialized(bool dummy)
+        {
+            _layerListViewModelInitialized = true;
+            AllViewModelsAreReady();
+        }
+        static bool _layerListViewModelInitialized;
+
+        static void AllViewModelsAreReady()
+        {
+            if (_layerListViewModelInitialized && _mapViewModelInitialized && _mainViewModelInitialized)
+            {
+                MediatorMessage.Send(MediatorMessage.AllViewModelsAreReady, true);
+                _allViewModelsAreReady = true;
+            }
+        }
+        static bool _allViewModelsAreReady;
 
     }
 }

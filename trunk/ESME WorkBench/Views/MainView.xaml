@@ -11,7 +11,6 @@
                 xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
                 xmlns:LocalControls="clr-namespace:ESMEWorkBench.Controls"
                 xmlns:app="clr-namespace:ESMEWorkBench" 
-                xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views" 
                 mef:ViewModelLocator.ViewModel="MainViewModel"
                 SnapsToDevicePixels="True"
                 Title="{Binding DecoratedExperimentName, StringFormat=ESME WorkBench: {0}}"
@@ -20,6 +19,8 @@
                 Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
                 Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
                 Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
+                d:DesignWidth="1000"
+                d:DesignHeight="800"
                 mc:Ignorable="d">
 	<r:RibbonWindow.Resources>
 		<app:GridLengthConverter x:Key="gridLengthConverter" />
@@ -543,179 +544,6 @@
 					                ToolTipDescription="View or edit the bathymetry properties"
 					                Command="{Binding EnvironmentPropertiesCommand}" />
                 </r:RibbonGroup>
-                <!--
-                <r:RibbonGroup Header="Simulation Area">
-                    <StackPanel Orientation="Horizontal">
-                        <r:RibbonTextBox x:Name="BufferZoneSize" Label="Buffer" Text="{Binding BufferZoneSize}">
-                            <i:Interaction.Behaviors>
-                                <cinch:NumericTextBoxBehaviour />
-                            </i:Interaction.Behaviors>
-                        </r:RibbonTextBox>
-                        <r:RibbonComboBox IsEditable="False">
-                    		<r:RibbonGallery 
-                    			Margin="0"
-                    			VerticalContentAlignment="Center"
-								SelectedItem="{Binding SelectedDistanceUnit}"
-                    			MaxColumnCount="1">
-                                <r:RibbonGalleryCategory ItemsSource="{Binding DistanceUnits}">
-                                    <r:RibbonGalleryCategory.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Vertical"
-											            IsItemsHost="True">
-                                            </StackPanel>
-                                        </ItemsPanelTemplate>
-                                    </r:RibbonGalleryCategory.ItemsPanel>
-                                    <r:RibbonGalleryCategory.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Name}" />
-                                        </DataTemplate>
-                                    </r:RibbonGalleryCategory.ItemTemplate>
-                                    <r:RibbonGalleryCategory.Style>
-                                        <Style>
-                                        </Style>
-                                    </r:RibbonGalleryCategory.Style>
-                                </r:RibbonGalleryCategory>
-                    		</r:RibbonGallery>
-                    	</r:RibbonComboBox>
-                    </StackPanel>
-                </r:RibbonGroup>
-                <r:RibbonGroup Header="Available datasets" Visibility="Collapsed" IsEnabled="{Binding LocationIsSelected}">
-                    <r:RibbonSplitButton x:Name="BathymetryResolutionSelect" Label="Bathymetry Resolutions"
-					                LargeImageSource="..\Images\LargeIcons\map_resolution.png"
-					                SmallImageSource="..\Images\SmallIcons\map_resolution.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Change the resolution of the bathymetry for this location"
-					                Command="{Binding DisabledCommand}">
-	                    	            <r:RibbonGallery>
-	                    	           		<r:RibbonGalleryCategory>
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="2.00 min" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="1.00 min" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="0.50 min" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="0.10 min" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="0.05 min" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-											</r:RibbonGalleryCategory>
-										</r:RibbonGallery>
-									</r:RibbonSplitButton>
-                    <r:RibbonSplitButton x:Name="TimePeriods" Label="Time Periods"
-					                LargeImageSource="..\Images\LargeIcons\calendar_view_month.png"
-					                SmallImageSource="..\Images\SmallIcons\calendar_view_month.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Change the resolution of the bathymetry for this location"
-					                Command="{Binding DisabledCommand}">
-	                    	            <r:RibbonGallery MaxColumnCount="4">
-	                    	           		<r:RibbonGalleryCategory MaxColumnCount="4" Header="Months">
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="January" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="February" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="March" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="April" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="May" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-											</r:RibbonGalleryCategory>
-	                    	           		<r:RibbonGalleryCategory MaxColumnCount="2" Header="Seasons">
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="Spring" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="Summer" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="Fall" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="Winter" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="Warm" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-	                    	           			<r:RibbonGalleryItem>
-		                    	         			<r:RibbonGalleryItem.Content>
-									                	<r:RibbonCheckBox Label="Cold" />
-													</r:RibbonGalleryItem.Content>
-												</r:RibbonGalleryItem>          	           		
-											</r:RibbonGalleryCategory>
-										</r:RibbonGallery>
-									</r:RibbonSplitButton>
-                </r:RibbonGroup>
-                <r:RibbonGroup Visibility="Visible" Header="Bathymetry Resolutions" IsEnabled="{Binding LocationIsSelected}"
-				               ToolTipTitle="Available bathymetry resolutions (in minutes)" ToolTip="Select the bathymetry data resolutions which will be available to users of this location">
-                	<r:RibbonCheckBox Label="2.0 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[2.0].IsAvailable}"/>
-                    <r:RibbonCheckBox Label="1.0 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[1.0].IsAvailable}" />
-                    <r:RibbonCheckBox Label="0.5 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[0.5].IsAvailable}" />
-                    <r:RibbonCheckBox Label="0.10 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[0.1].IsAvailable}" />
-                    <r:RibbonCheckBox Label="0.05 min" IsChecked="{Binding Location.LocationMetadata.AvailableResolutions[0.05].IsAvailable}" />
-                </r:RibbonGroup>
-                <r:RibbonGroup Visibility="Visible" Header="Months"  IsEnabled="{Binding LocationIsSelected}">
-                	<r:RibbonCheckBox Label="Jan" />
-                	<r:RibbonCheckBox Label="Feb" />
-                	<r:RibbonCheckBox Label="Mar" />
-                	<r:RibbonCheckBox Label="Apr" />
-                	<r:RibbonCheckBox Label="May" />
-                	<r:RibbonCheckBox Label="Jun" />
-                	<r:RibbonCheckBox Label="Jul" />
-                	<r:RibbonCheckBox Label="Aug" />
-                	<r:RibbonCheckBox Label="Sep" />
-                	<r:RibbonCheckBox Label="Oct" />
-                	<r:RibbonCheckBox Label="Nov" />
-                	<r:RibbonCheckBox Label="Dec" />
-                </r:RibbonGroup>
-                <r:RibbonGroup Visibility="Visible" Header="Seasons" IsEnabled="{Binding LocationIsSelected}">
-                	<r:RibbonCheckBox Label="Spring" />
-                	<r:RibbonCheckBox Label="Summer" />
-                	<r:RibbonCheckBox Label="Fall" />
-                	<r:RibbonCheckBox Label="Winter" />
-                	<r:RibbonCheckBox Label="Warm" />
-                	<r:RibbonCheckBox Label="Cold" />
-                </r:RibbonGroup>
-                -->
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="A"
 			             Header="Animals">
