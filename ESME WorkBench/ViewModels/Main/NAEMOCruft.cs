@@ -1,12 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Windows.Threading;
 using Cinch;
 using ESME.Metadata;
 using ESME.Overlay;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.Locations;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -81,11 +83,31 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_selectedRangeComplex == value) return;
                 _selectedRangeComplex = value;
                 NotifyPropertyChanged(SelectedSimAreaChangedEventArgs);
+                NAEMOOverlayDescriptors = null;
+                NAEMOBathymetryDescriptors = null;
+                NAEMOEnvironmentDescriptors = null;
+                SelectedOverlayDescriptor = null;
+                SelectedBathymetryDescriptor = null;
+                SelectedEnvironmentDescriptor = null;
                 if (_selectedRangeComplex != null)
                 {
-                    NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name);
-                    NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name);
-                    NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
+                    Console.WriteLine("{0}: Selected range complex: {1}", DateTime.Now, _selectedRangeComplex.Name);
+
+                    var bw1 = new BackgroundWorker();
+                    bw1.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name);
+                    bw1.RunWorkerAsync();
+                    //_dispatcher.BeginInvoke(new Action(() => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name)) , DispatcherPriority.ApplicationIdle);
+                    Console.WriteLine("{0}: Overlay descriptors created", DateTime.Now);
+                    var bw2 = new BackgroundWorker();
+                    bw2.DoWork += (s, e) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name);
+                    bw2.RunWorkerAsync();
+                    //_dispatcher.BeginInvoke(new Action(() => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name)), DispatcherPriority.ApplicationIdle);
+                    Console.WriteLine("{0}: Bathymetry descriptors created", DateTime.Now);
+                    var bw3 = new BackgroundWorker();
+                    bw3.DoWork += (s, e) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
+                    bw3.RunWorkerAsync();
+                    //_dispatcher.BeginInvoke(new Action(() => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name)), DispatcherPriority.ApplicationIdle);
+                    Console.WriteLine("{0}: Environment descriptors created", DateTime.Now);
                     IsRangeComplexSelected = true;
                 }
                 else
@@ -158,7 +180,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_naemoOverlayDescriptors == value) return;
                 _naemoOverlayDescriptors = value;
                 NotifyPropertyChanged(OverlayFilesChangedEventArgs);
-                if (NAEMOOverlayDescriptors.Count > 0) SelectedOverlayDescriptor = NAEMOOverlayDescriptors[0].Value;
+                SelectedOverlayDescriptor = NAEMOOverlayDescriptors != null && NAEMOOverlayDescriptors.Count > 0 ? NAEMOOverlayDescriptors[0].Value : null;
             }
         }
 
@@ -326,7 +348,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_naemoBathymetryDescriptors == value) return;
                 _naemoBathymetryDescriptors = value;
                 NotifyPropertyChanged(NAEMOBathymetryDescriptorsChangedEventArgs);
-                if (NAEMOBathymetryDescriptors.Count > 0) SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors[0].Value;
+                SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors != null && NAEMOBathymetryDescriptors.Count > 0 ? NAEMOBathymetryDescriptors[0].Value : null;
             }
         }
 
@@ -425,7 +447,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_naemoEnvironmentDescriptors == value) return;
                 _naemoEnvironmentDescriptors = value;
                 NotifyPropertyChanged(NAEMOEnvironmentDescriptorsChangedEventArgs);
-                if (NAEMOEnvironmentDescriptors.Count > 0) SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors[0].Value;
+                SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors != null && NAEMOEnvironmentDescriptors.Count > 0 ? NAEMOEnvironmentDescriptors[0].Value : null;
             }
         }
 
