@@ -943,6 +943,7 @@ namespace ESMEWorkBench.Data
                             {
                                 new ShapefileMapLayer
                                 {
+                                    Name = "Base Map",
                                     LineColor = Colors.Beige,
                                     AreaStyle = AreaStyles.Country2,
                                     CanBeRemoved = false,
@@ -950,7 +951,6 @@ namespace ESMEWorkBench.Data
                                     CanChangeAreaColor = true,
                                     CanChangeLineColor = true,
                                     ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
-                                    Name = "Base Map",
                                     LayerType = LayerType.BaseMap,
                                 },
                             };

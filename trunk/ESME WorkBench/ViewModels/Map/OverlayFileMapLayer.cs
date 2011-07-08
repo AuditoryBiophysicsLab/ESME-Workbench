@@ -21,8 +21,8 @@ namespace ESMEWorkBench.ViewModels.Map
             {
                 if (_overlayFileName == value) return;
                 _overlayFileName = value;
-                Name = Path.GetFileNameWithoutExtension(_overlayFileName);
-
+                //Name = Path.GetFileNameWithoutExtension(_overlayFileName);
+                Clear();
                 var overlayFile = new OverlayFile(_overlayFileName);
                 Add(overlayFile.Shapes);
                 Done();

@@ -3,10 +3,11 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Cinch;
 using ESME;
 using ESME.Environment;
@@ -28,20 +29,49 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         void InitializeEnvironmentTab()
         {
+            if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
             SimAreaCSV = SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
-            if (_simAreaCSVWatcher != null) _simAreaCSVWatcher.Dispose();
-            _simAreaCSVWatcher = new FileSystemWatcher(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv");
-            _simAreaCSVWatcher.Changed += (s, e) => SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
-            _simAreaCSVWatcher.EnableRaisingEvents = true;
+            //if (_simAreaCSVWatcher != null) _simAreaCSVWatcher.Dispose();
+            //_simAreaCSVWatcher = new FileSystemWatcher(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv");
+            //_simAreaCSVWatcher.Changed += (s, e) => SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+            //_simAreaCSVWatcher.EnableRaisingEvents = true;
         }
 
-        FileSystemWatcher _simAreaCSVWatcher;
+        //FileSystemWatcher _simAreaCSVWatcher;
 
         [MediatorMessageSink(MediatorMessage.AllViewModelsAreReady)]
         void AllViewModelsAreReady(bool allViewModelsAreReady)
         {
-            DisplayRangeComplex();
+            Console.WriteLine("All view models are ready!");
+            _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
+            _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
+            _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
         }
+
+        T FindMapLayer<T>(LayerType layerType, string layerName) where T : class
+        {
+            return MapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
+        }
+
+        #region ViewActivatedCommand
+        public SimpleCommand<object, object> ViewActivatedCommand
+        {
+            get { return _viewActivated ?? (_viewActivated = new SimpleCommand<object, object>(delegate { ViewActivatedHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _viewActivated;
+
+        void ViewActivatedHandler()
+        {
+            if (_viewIsActivated) return;
+            Console.WriteLine("The window has been activated!");
+            _viewIsActivated = true;
+            _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
+            _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
+            _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
+        }
+        bool _viewIsActivated;
+        #endregion
 
         #region public bool EnvironmentTabIsActive { get; set; }
 
@@ -138,21 +168,95 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return _selectedRangeComplex; }
             set
             {
-                if (_selectedRangeComplex == value) return;
+                if ((_selectedRangeComplex == value) || (!IsRangeComplexListReady)) return;
                 _selectedRangeComplex = value;
-                NotifyPropertyChanged(SelectedSimAreaChangedEventArgs);
-                if (_selectedRangeComplex != null) SelectedRangeComplexInfo = string.Format("Name: {0}\nReference Point: ({1}, {2})\nHeight: {3}\nGeoid Separation: {4}\nOps Limit: {5}\nSim Limit: {6}", _selectedRangeComplex.Name, Math.Round(_selectedRangeComplex.Latitude, 5), Math.Round(_selectedRangeComplex.Longitude, 5), _selectedRangeComplex.Height, _selectedRangeComplex.GeoidSeparation, SelectedRangeComplex.OpsLimitFile, SelectedRangeComplex.SimLimitFile);
                 IsRangeComplexSelected = _selectedRangeComplex != null;
-                DisplayRangeComplex();
+                if ((_selectedRangeComplex != null) && (_selectedRangeComplex != _lastNonNullSimArea))
+                {
+                    _lastNonNullSimArea = _selectedRangeComplex;
+                    SelectedRangeComplexInfo = string.Format("Name: {0}\nReference Point: ({1}, {2})\nHeight: {3}\nGeoid Separation: {4}\nOps Limit: {5}\nSim Limit: {6}",
+                                                             _selectedRangeComplex.Name, Math.Round(_selectedRangeComplex.Latitude, 5), Math.Round(_selectedRangeComplex.Longitude, 5),
+                                                             _selectedRangeComplex.Height, _selectedRangeComplex.GeoidSeparation, SelectedRangeComplex.OpsLimitFile,
+                                                             SelectedRangeComplex.SimLimitFile);
+                    Console.WriteLine("Range complex {0} is selected!", _selectedRangeComplex.Name);
+                    //if (_selectedRangeComplex.Name == "Jacksonville") System.Diagnostics.Debugger.Break();
+
+                    if ((_bw1 != null) && (_bw1.IsBusy)) _bw1.CancelAsync();
+                    _bw1 = new BackgroundWorker {WorkerSupportsCancellation = true};
+                    _bw1.DoWork += (s, e) =>
+                    {
+                        NotifyPropertyChanged(IsRangeComplexListReadyChangedEventArgs);
+                        NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name, _bw1);
+                    };
+                    _bw1.RunWorkerCompleted += (s, e) =>
+                    {
+                        _bw1 = null;
+                        CommandManager.InvalidateRequerySuggested();
+                        NotifyPropertyChanged(IsRangeComplexListReadyChangedEventArgs);
+                    };
+                    _bw1.RunWorkerAsync();
+
+                    if ((_bw2 != null) && (_bw2.IsBusy)) _bw2.CancelAsync();
+                    _bw2 = new BackgroundWorker {WorkerSupportsCancellation = true};
+                    _bw2.DoWork += (s, e) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name, _bw2);
+                    _bw2.RunWorkerCompleted += (s, e) =>
+                    {
+                        _bw2 = null;
+                        CommandManager.InvalidateRequerySuggested();
+                        NotifyPropertyChanged(IsRangeComplexListReadyChangedEventArgs);
+                    };
+                    _bw2.RunWorkerAsync();
+
+                    if ((_bw3 != null) && (_bw3.IsBusy)) _bw3.CancelAsync();
+                    _bw3 = new BackgroundWorker {WorkerSupportsCancellation = true};
+                    _bw3.DoWork += (s, e) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name, _bw3);
+                    _bw3.RunWorkerCompleted += (s, e) =>
+                    {
+                        _bw3 = null;
+                        CommandManager.InvalidateRequerySuggested();
+                        NotifyPropertyChanged(IsRangeComplexListReadyChangedEventArgs);
+                    };
+                    _bw3.RunWorkerAsync();
+                }
+                else
+                {
+                    NAEMOOverlayDescriptors = null;
+                    NAEMOBathymetryDescriptors = null;
+                    NAEMOEnvironmentDescriptors = null;
+                }
+                _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedSimAreaChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplex);
         SimAreaDescriptor _selectedRangeComplex;
+        SimAreaDescriptor _lastNonNullSimArea;
+
+        void DisplayWorldMap()
+        {
+            if (MapLayers != null) return;
+            var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            MapLayers = new ObservableCollection<MapLayerViewModel>
+            {
+                    new ShapefileMapLayer
+                    {
+                            LineColor = Colors.Beige,
+                            AreaStyle = AreaStyles.Country2,
+                            CanBeRemoved = false,
+                            CanBeReordered = true,
+                            CanChangeAreaColor = true,
+                            CanChangeLineColor = true,
+                            ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
+                            Name = "Base Map",
+                            LayerType = LayerType.BaseMap,
+                    },
+            };
+        }
 
         void DisplayRangeComplex()
         {
-            if ((_selectedRangeComplex == null) || (!_allViewModelsAreReady)) return;
+            if ((_selectedRangeComplex == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplex.Name, "Areas", _selectedRangeComplex.OpsLimitFile);
             var simAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplex.Name, "Areas", _selectedRangeComplex.SimLimitFile);
             var opsLimit = new OverlayFile(opAreaOverlayFilename);
@@ -162,44 +266,43 @@ namespace ESMEWorkBench.ViewModels.Main
             var east = (float)opsLimit.Shapes[0].BoundingBox.Right + 3;
             var mapExtent = new RectangleShape(west, north, east, south);
             MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
-            if (MapLayers == null)
-            {
-                var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                MapLayers = new ObservableCollection<MapLayerViewModel>
-                            {
-                                new ShapefileMapLayer
-                                {
-                                    LineColor = Colors.Beige,
-                                    AreaStyle = AreaStyles.Country2,
-                                    CanBeRemoved = false,
-                                    CanBeReordered = true,
-                                    CanChangeAreaColor = true,
-                                    CanChangeLineColor = true,
-                                    ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
-                                    Name = "Base Map",
-                                    LayerType = LayerType.BaseMap,
-                                },
-                            };
-            }
-            MapLayers.Add(new OverlayFileMapLayer
-            {
-                OverlayFileName = opAreaOverlayFilename,
-                CanBeRemoved = true,
-                CanBeReordered = true,
-                CanChangeAreaColor = false,
-                CanChangeLineColor = true,
-                LayerType = LayerType.OverlayFile,
-            });
-            if (simAreaOverlayFilename != opAreaOverlayFilename)
-                MapLayers.Add(new OverlayFileMapLayer
+            var opAreaLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area") ?? new OverlayShapeMapLayer
                 {
-                    OverlayFileName = simAreaOverlayFilename,
+                        Name = "Op Area",
+                        CanBeRemoved = true,
+                        CanBeReordered = true,
+                        CanChangeAreaColor = false,
+                        CanChangeLineColor = true,
+                        LineWidth = 1,
+                        LayerType = LayerType.OverlayFile,
+                };
+            opAreaLayer.Clear();
+            var opAreaOverlay = new OverlayFile(opAreaOverlayFilename);
+            foreach (var shape in opAreaOverlay.Shapes)
+                opAreaLayer.Add(shape);
+            opAreaLayer.Done();
+            if (MapLayers.IndexOf(opAreaLayer) == -1) MapLayers.Add(opAreaLayer);
+
+            if (simAreaOverlayFilename != opAreaOverlayFilename)
+            {
+                var simAreaLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area") ?? new OverlayShapeMapLayer
+                {
+                    Name = "Sim Area",
                     CanBeRemoved = true,
                     CanBeReordered = true,
                     CanChangeAreaColor = false,
                     CanChangeLineColor = true,
+                    LineWidth = 1,
                     LayerType = LayerType.OverlayFile,
-                });
+                };
+                simAreaLayer.Clear();
+                var simAreaOverlay = new OverlayFile(opAreaOverlayFilename);
+                foreach (var shape in simAreaOverlay.Shapes)
+                    simAreaLayer.Add(shape);
+                simAreaLayer.Done();
+                if (MapLayers.IndexOf(simAreaLayer) == -1) MapLayers.Add(simAreaLayer);
+            }
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 
         #endregion
@@ -222,6 +325,30 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public bool IsRangeComplexListReady { get; set; }
+
+        public bool IsRangeComplexListReady
+        {
+            get
+            {
+                var result = ((_bw1 == null) && (_bw2 == null) && (_bw3 == null));
+                if (_isRangeComplexListReady != result)
+                {
+                    _isRangeComplexListReady = result;
+                    if (_isRangeComplexListReady) NotifyPropertyChanged(SelectedSimAreaChangedEventArgs);
+                    NotifyPropertyChanged(IsOverlayListReadyChangedEventArgs);
+                    NotifyPropertyChanged(IsBathymetryListReadyChangedEventArgs);
+                    NotifyPropertyChanged(IsEnvironmentListReadyChangedEventArgs);
+                }
+                return result;
+            }
+        }
+
+        bool _isRangeComplexListReady;
+        static readonly PropertyChangedEventArgs IsRangeComplexListReadyChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsRangeComplexListReady);
+
+        #endregion
+
         #region public bool IsRangeComplexSelected { get; set; }
 
         public bool IsRangeComplexSelected
@@ -231,39 +358,12 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_isRangeComplexSelected == value) return;
                 _isRangeComplexSelected = value;
-                if (_isRangeComplexSelected)
-                {
-                    //Console.WriteLine("{0}: Selected range complex: {1}", DateTime.Now, _selectedRangeComplex.Name);
 
-                    var bw1 = new BackgroundWorker();
-                    bw1.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name);
-                    bw1.RunWorkerCompleted += (s, e) => CommandManager.InvalidateRequerySuggested();
-                    bw1.RunWorkerAsync();
-                    //_dispatcher.BeginInvoke(new Action(() => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name)) , DispatcherPriority.ApplicationIdle);
-                    //Console.WriteLine("{0}: Overlay descriptors created", DateTime.Now);
-                    var bw2 = new BackgroundWorker();
-                    bw2.DoWork += (s, e) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name);
-                    bw2.RunWorkerCompleted += (s, e) => CommandManager.InvalidateRequerySuggested();
-                    bw2.RunWorkerAsync();
-                    //_dispatcher.BeginInvoke(new Action(() => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name)), DispatcherPriority.ApplicationIdle);
-                    //Console.WriteLine("{0}: Bathymetry descriptors created", DateTime.Now);
-                    var bw3 = new BackgroundWorker();
-                    bw3.DoWork += (s, e) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
-                    bw3.RunWorkerCompleted += (s, e) => CommandManager.InvalidateRequerySuggested();
-                    bw3.RunWorkerAsync();
-                    //_dispatcher.BeginInvoke(new Action(() => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name)), DispatcherPriority.ApplicationIdle);
-                    //Console.WriteLine("{0}: Environment descriptors created", DateTime.Now);
-                }
-                else
-                {
-                    NAEMOOverlayDescriptors = null;
-                    NAEMOBathymetryDescriptors = null;
-                    NAEMOEnvironmentDescriptors = null;
-                }
                 NotifyPropertyChanged(RangeComplexIsSelectedChangedEventArgs);
             }
         }
 
+        BackgroundWorker _bw1, _bw2, _bw3;
         static readonly PropertyChangedEventArgs RangeComplexIsSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsRangeComplexSelected);
         bool _isRangeComplexSelected;
 
@@ -330,12 +430,36 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedOverlayDescriptorChangedEventArgs);
                 if (_selectedOverlayDescriptor != null) SelectedOverlayInfo = string.Format("Name: {0}\nBuffer: {1}\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename), _selectedOverlayDescriptor.Metadata.BufferZoneSize > 0 ? _selectedOverlayDescriptor.Metadata.BufferZoneSize + " km" : "[N/A]", _selectedOverlayDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
                 IsOverlayFileSelected = _selectedOverlayDescriptor != null;
+                _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedOverlayDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedOverlayDescriptor);
         NAEMOOverlayDescriptor _selectedOverlayDescriptor;
 
+        void DisplayOverlay()
+        {
+            if ((_selectedOverlayDescriptor == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
+            var overlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplex.Name, "Areas", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename) + ".ovr");
+            var overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
+            {
+                Name = "Overlay",
+                CanBeRemoved = true,
+                CanBeReordered = true,
+                CanChangeAreaColor = false,
+                CanChangeLineColor = true,
+                LineWidth = 1,
+                LayerType = LayerType.OverlayFile,
+            };
+            overlayLayer.Clear();
+            var overlay = new OverlayFile(overlayFilename);
+            foreach (var shape in overlay.Shapes)
+                overlayLayer.Add(shape);
+            overlayLayer.Done();
+            if (MapLayers.IndexOf(overlayLayer) == -1) MapLayers.Add(overlayLayer);
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+        }
         #endregion
 
         #region public string SelectedOverlayInfo { get; set; }
@@ -360,7 +484,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public bool IsOverlayListReady
         {
-            get { return _naemoOverlayDescriptors != null; }
+            get { return (_naemoOverlayDescriptors != null) && IsRangeComplexListReady; }
         }
 
         static readonly PropertyChangedEventArgs IsOverlayListReadyChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsOverlayListReady);
@@ -522,11 +646,34 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedBathymetryDescriptorChangedEventArgs);
                 if (_selectedBathymetryDescriptor != null) SelectedBathymetryInfo = string.Format("Name: {0}\nResolution: {1} min\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename), _selectedBathymetryDescriptor.Metadata.Resolution, _selectedBathymetryDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
                 IsBathymetryFileSelected = _selectedBathymetryDescriptor != null;
+                _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedBathymetryDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedBathymetryDescriptor);
         NAEMOBathymetryDescriptor _selectedBathymetryDescriptor;
+        void DisplayBathymetry()
+        {
+            if ((_selectedBathymetryDescriptor == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
+            var bathyBitmapLayer = FindMapLayer<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry") ?? new RasterMapLayer
+            {
+                Name = "Bathymetry",
+                CanBeReordered = true,
+                CanChangeLineColor = false,
+                CanChangeLineWidth = false,
+                CanBeRemoved = false,
+                LayerType = LayerType.BathymetryRaster,
+            };
+            bathyBitmapLayer.North = (float)_selectedBathymetryDescriptor.Metadata.Bounds.North;
+            bathyBitmapLayer.South = (float)_selectedBathymetryDescriptor.Metadata.Bounds.South;
+            bathyBitmapLayer.East = (float)_selectedBathymetryDescriptor.Metadata.Bounds.East;
+            bathyBitmapLayer.West = (float)_selectedBathymetryDescriptor.Metadata.Bounds.West;
+            bathyBitmapLayer.RasterFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplex.Name, "Images",
+                                                           Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp");
+            if (MapLayers.IndexOf(bathyBitmapLayer) == -1) MapLayers.Add(bathyBitmapLayer);
+            MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+        }
 
         #endregion
 
@@ -552,11 +699,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public bool IsBathymetryListReady
         {
-            get { return _naemoBathymetryDescriptors != null; }
+            get { return (_naemoBathymetryDescriptors != null) && IsRangeComplexListReady; }
         }
 
         static readonly PropertyChangedEventArgs IsBathymetryListReadyChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsBathymetryListReady);
-
+        
         #endregion
 
         #region public bool IsBathymetryFileSelected { get; set; }
@@ -750,7 +897,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public bool IsEnvironmentListReady
         {
-            get { return _naemoEnvironmentDescriptors != null; }
+            get { return (_naemoEnvironmentDescriptors != null) && IsRangeComplexListReady; }
         }
 
         static readonly PropertyChangedEventArgs IsEnvironmentListReadyChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsEnvironmentListReady);

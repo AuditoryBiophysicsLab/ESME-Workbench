@@ -276,19 +276,6 @@ namespace ESME.Views.Locations
                 File.Copy(ExistingSimAreaOverlayFilename, simOverlayFilename);
             else WriteOverlayFile(simOverlayFilename, NewSimAreaOverlayEarthCoordinates);
 
-#if false
-            var location = new Location
-                                   {
-                                       LocationMetadata =
-                                           {
-                                               Name = LocationName,
-                                               Bounds = OpBounds,
-                                               AvailableResolutions = new AvailableResolutions(),
-                                               AvailableTimePeriods = new AvailableTimePeriods()
-                                           }
-                                   };
-            location.Save(Path.Combine(LocationPath, "location.xml")); 
-#endif
             using(var writer = new StreamWriter(Path.Combine(Path.GetDirectoryName(LocationPath),"SimAreas.csv"),true))
                 writer.WriteLine("{0},{1:0.0###},{2:0.0###},{3:0.0###},{4:0.0###},{5},{6}", LocationName, ReferencePointLatitude,ReferencePointLongitude,Height,GeoidSeparation,Path.GetFileName(opsOverlayFilename),Path.GetFileName(simOverlayFilename));
 

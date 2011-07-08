@@ -65,6 +65,10 @@ namespace ESMEWorkBench.ViewModels.Main
         void ShapeMapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(MapLayersChangedEventArgs); }
 
         #endregion
+
+        [MediatorMessageSink(MediatorMessage.SetMapLayers)]
+        void SetMapLayers(ObservableCollection<MapLayerViewModel> mapLayers) { MapLayers = mapLayers; }
+
         #region public Experiment Experiment { get; set; }
 
         public Experiment Experiment

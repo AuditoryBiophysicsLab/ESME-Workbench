@@ -253,7 +253,6 @@ namespace ESMEWorkBench.ViewModels.Map
 
         void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            var mapLayers = (ObservableCollection<MapLayerViewModel>)sender;
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
@@ -275,6 +274,7 @@ namespace ESMEWorkBench.ViewModels.Map
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     _wpfMap.Overlays.Clear();
+                    var mapLayers = (ObservableCollection<MapLayerViewModel>)sender;
                     foreach (var layer in mapLayers) _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay);
                     break;
             }
@@ -410,6 +410,7 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             if (_wpfMap.Overlays.Count > 0)
             {
+                //if (_wpfMap.Overlays.IndexOf(mapLayer.Overlay) == -1) _wpfMap.Overlays.Add(mapLayer.Overlay);
                 _wpfMap.Overlays.MoveToBottom(mapLayer.Overlay);
                 RefreshMap(true);
                 MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);

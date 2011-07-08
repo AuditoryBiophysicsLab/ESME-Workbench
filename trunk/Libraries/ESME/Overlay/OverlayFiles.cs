@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
@@ -39,58 +40,53 @@ namespace ESME.Overlay
 
     public class NAEMOOverlayDescriptors : NAEMODescriptors<NAEMOOverlayDescriptor>
     {
-        public NAEMOOverlayDescriptors(string selectedRangeComplexName)
+        public NAEMOOverlayDescriptors(string selectedRangeComplexName, BackgroundWorker backgroundWorker = null)
             : base(selectedRangeComplexName, "Areas", "*.ovr")
         {
             foreach (var ovrItem in this)
             {
-                if (ovrItem.Value.Metadata == null)
+                if ((backgroundWorker != null) && (backgroundWorker.CancellationPending)) return;
+                if (ovrItem.Value.Metadata != null) continue;
+                var keyName = ovrItem.Key.Split('_');
+                var buffer = keyName.Last();
+                if (keyName.Length == 1 || !buffer.ToLowerInvariant().EndsWith("km"))
                 {
-                    var keyName = ovrItem.Key.Split('_');
-                    var buffer = keyName.Last();
-                    if (keyName.Length == 1 || !buffer.ToLowerInvariant().EndsWith("km"))
-                    {
-                        ovrItem.Value.Metadata = new NAEMOOverlayMetadata
-                        {
-                            Filename = NAEMOMetadataBase.MetadataFilename(ovrItem.Value.DataFilename),
-                        };
-                        ovrItem.Value.Metadata.Save();
-                        continue;
-                    }
-                    //now likely that range is there. 
-                    var bufferStart = ovrItem.Key.IndexOf(buffer) - 1;
-                    var sourceOverlay = ovrItem.Key.Substring(0, bufferStart);
-                    float bufferSize;
-                    var bufferIsValid = float.TryParse(buffer.Substring(0, buffer.Length - 2), out bufferSize);
-                    if (!bufferIsValid) bufferSize = 0;
                     ovrItem.Value.Metadata = new NAEMOOverlayMetadata
                     {
                         Filename = NAEMOMetadataBase.MetadataFilename(ovrItem.Value.DataFilename),
-                        OverlayFilename = sourceOverlay,
-                        BufferZoneSize = bufferSize,
                     };
                     ovrItem.Value.Metadata.Save();
+                    continue;
                 }
+                //now likely that range is there. 
+                var bufferStart = ovrItem.Key.IndexOf(buffer) - 1;
+                var sourceOverlay = ovrItem.Key.Substring(0, bufferStart);
+                float bufferSize;
+                var bufferIsValid = float.TryParse(buffer.Substring(0, buffer.Length - 2), out bufferSize);
+                if (!bufferIsValid) bufferSize = 0;
+                ovrItem.Value.Metadata = new NAEMOOverlayMetadata
+                {
+                    Filename = NAEMOMetadataBase.MetadataFilename(ovrItem.Value.DataFilename),
+                    OverlayFilename = sourceOverlay,
+                    BufferZoneSize = bufferSize,
+                };
+                ovrItem.Value.Metadata.Save();
             }
         }
     }
 
     public class NAEMOBathymetryDescriptors : NAEMODescriptors<NAEMOBathymetryDescriptor>
     {
-        public NAEMOBathymetryDescriptors(string selectedRangeComplexName)
+        public NAEMOBathymetryDescriptors(string selectedRangeComplexName, BackgroundWorker backgroundWorker = null)
             : base(selectedRangeComplexName, "Bathymetry", "*.txt", Filter)
         {
             foreach (var bathyItem in this)
             {
-                if (bathyItem.Value.Metadata == null)
-                {
-                    bathyItem.Value.Metadata = new NAEMOBathymetryMetadata()
-                    {
-                        Filename = NAEMOMetadataBase.MetadataFilename(bathyItem.Value.DataFilename),
-                        Resolution = (float)bathyItem.Value.Data.Samples.Resolution, //very slow!
-                    };
-                    bathyItem.Value.Metadata.Save();
-                }
+                if ((backgroundWorker != null) && (backgroundWorker.CancellationPending)) return;
+                if (bathyItem.Value.Metadata != null) continue;
+                Bathymetry bathymetry;
+                bathyItem.Value.Metadata = NAEMOBathymetryMetadata.FromBathymetryFile(bathyItem.Value.DataFilename, out bathymetry);
+                bathyItem.Value.Metadata.Save();
             }
 
         }
@@ -103,20 +99,19 @@ namespace ESME.Overlay
 
     public class NAEMOEnvironmentDescriptors : NAEMODescriptors<NAEMOEnvironmentDescriptor>
     {
-        public NAEMOEnvironmentDescriptors(string selectedRangeComplexName)
+        public NAEMOEnvironmentDescriptors(string selectedRangeComplexName, BackgroundWorker backgroundWorker = null)
             : base(selectedRangeComplexName, "Environment", "*.dat")
         {
             foreach (var envItem in this)
             {
-                if (envItem.Value.Metadata == null)
+                if ((backgroundWorker != null) && (backgroundWorker.CancellationPending)) return;
+                if (envItem.Value.Metadata != null) continue;
+                envItem.Value.Metadata = new NAEMOEnvironmentMetadata()
                 {
-                    envItem.Value.Metadata = new NAEMOEnvironmentMetadata()
-                    {
                         Filename = NAEMOMetadataBase.MetadataFilename(envItem.Value.DataFilename),
                         TimePeriod = envItem.Value.Data.TimePeriod,
-                    };
-                    envItem.Value.Metadata.Save();
-                }
+                };
+                envItem.Value.Metadata.Save();
             }
         }
     }
