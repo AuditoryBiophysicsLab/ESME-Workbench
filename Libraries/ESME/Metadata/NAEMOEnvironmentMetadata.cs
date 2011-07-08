@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using Cinch;
 using ESME.Environment.NAVO;
 
@@ -29,24 +30,6 @@ namespace ESME.Metadata
 
         static readonly PropertyChangedEventArgs TimePeriodChangedEventArgs = ObservableHelper.CreateArgs<NAEMOEnvironmentMetadata>(x => x.TimePeriod);
         NAVOTimePeriod _timePeriod;
-
-        #endregion
-
-        #region public string OverlayFilename { get; set; }
-
-        public string OverlayFilename
-        {
-            get { return _overlayFilename; }
-            set
-            {
-                if (_overlayFilename == value) return;
-                _overlayFilename = value;
-                NotifyPropertyChanged(OverlayNameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOEnvironmentMetadata>(x => x.OverlayFilename);
-        string _overlayFilename;
 
         #endregion
     }

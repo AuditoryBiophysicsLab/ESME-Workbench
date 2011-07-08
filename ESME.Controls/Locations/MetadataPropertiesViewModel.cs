@@ -1,59 +1,77 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel;
+using System.IO;
 using Cinch;
 using ESME.Metadata;
-using HRC.Utility;
 
 namespace ESME.Views.Locations
 {
     public class MetadataPropertiesViewModel : ViewModelBase
     {
-        public MetadataPropertiesViewModel(NAEMOOverlayMetadata overlayMetadata = null, NAEMOBathymetryMetadata bathymetryMetadata = null, NAEMOEnvironmentMetadata environmentMetadata = null, NAEMOScenarioMetadata naemoScenarioMetadata = null)
+        public MetadataPropertiesViewModel(NAEMOOverlayMetadata overlayMetadata = null, NAEMOBathymetryMetadata bathymetryMetadata = null, NAEMOEnvironmentMetadata environmentMetadata = null, NAEMOScenarioMetadata scenarioMetadata = null)
         {
             if (overlayMetadata != null)
             {
                 IsOverlayDisplay = true;
-                TitleString = "Overlay Properties (" + overlayMetadata.SourceOverlay + ")";
+                DataSetType = "Overlay";
+                DataSetName = Path.GetFileNameWithoutExtension(overlayMetadata.Filename);
                 OverlayMetadata = overlayMetadata;
-            }
-            if (bathymetryMetadata != null)
+            } 
+            else if (bathymetryMetadata != null)
             {
                 IsBathymetryDisplay = true;
-                TitleString = "Bathymetry Properties (" + bathymetryMetadata.OverlayFilename + ")";
+                DataSetType = "Bathymetry";
+                DataSetName = Path.GetFileNameWithoutExtension(bathymetryMetadata.Filename);
                 BathymetryMetadata = bathymetryMetadata;
-            }
-            if (environmentMetadata != null)
+            } 
+            else if (environmentMetadata != null)
             {
                 IsEnvironmentDisplay = true;
-                TitleString = "Environment Properties (" + environmentMetadata.OverlayFilename + ")";
+                DataSetType = "Environment";
+                DataSetName = Path.GetFileNameWithoutExtension(environmentMetadata.Filename);
                 EnvironmentMetadata = environmentMetadata;
-            }
-            if (naemoScenarioMetadata != null)
+            } 
+            else if (scenarioMetadata != null)
             {
                 IsScenarioDisplay = true;
-                TitleString = "Scenario Properties (" + naemoScenarioMetadata.EnvironmentFilename + ")";
-                ScenarioMetadata = naemoScenarioMetadata;
+                DataSetType = "Scenario";
+                DataSetName = Path.GetFileNameWithoutExtension(scenarioMetadata.Filename);
+                ScenarioMetadata = scenarioMetadata;
             }
         }
 
-        #region public string TitleString { get; set; }
+        #region public string DataSetType { get; set; }
 
-        public string TitleString
+        public string DataSetType
         {
-            get { return _titleString; }
+            get { return _dataSetType; }
             set
             {
-                if (_titleString == value) return;
-                _titleString = value;
-                NotifyPropertyChanged(TitleStringChangedEventArgs);
+                if (_dataSetType == value) return;
+                _dataSetType = value;
+                NotifyPropertyChanged(DataSetTypeChangedEventArgs);
             }
         }
 
-        private static readonly PropertyChangedEventArgs TitleStringChangedEventArgs = ObservableHelper.CreateArgs<MetadataPropertiesViewModel>(x => x.TitleString);
-        private string _titleString;
+        static readonly PropertyChangedEventArgs DataSetTypeChangedEventArgs = ObservableHelper.CreateArgs<MetadataPropertiesViewModel>(x => x.DataSetType);
+        string _dataSetType;
+
+        #endregion
+
+        #region public string DataSetName { get; set; }
+
+        public string DataSetName
+        {
+            get { return _dataSetName; }
+            set
+            {
+                if (_dataSetName == value) return;
+                _dataSetName = value;
+                NotifyPropertyChanged(DataSetNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DataSetNameChangedEventArgs = ObservableHelper.CreateArgs<MetadataPropertiesViewModel>(x => x.DataSetName);
+        string _dataSetName;
 
         #endregion
 
@@ -74,7 +92,6 @@ namespace ESME.Views.Locations
         private NAEMOOverlayMetadata _overlayMetadata;
 
         #endregion
-
 
         #region public NAEMOBathymetryMetadata BathymetryMetadata { get; set; }
 
@@ -202,26 +219,20 @@ namespace ESME.Views.Locations
 
         #endregion
 
-
         #region OKCommand
 
-        public SimpleCommand<object, object> OKCommand
+        public SimpleCommand<object, object> OkCommand
         {
             get
             {
-                return _oK ??
-                       (_oK =
-                        new SimpleCommand<object, object>(delegate { return IsOKCommandEnabled; },
+                return _ok ??
+                       (_ok =
+                        new SimpleCommand<object, object>(delegate { return true; },
                                                           delegate { OKHandler(); }));
             }
         }
 
-        private SimpleCommand<object, object> _oK;
-
-        private bool IsOKCommandEnabled
-        {
-            get { return true; }
-        }
+        private SimpleCommand<object, object> _ok;
 
         private void OKHandler()
         {
@@ -233,8 +244,5 @@ namespace ESME.Views.Locations
         }
 
         #endregion
-
-
-
     }
 }

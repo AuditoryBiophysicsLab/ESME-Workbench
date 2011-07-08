@@ -72,6 +72,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (Designer.IsInDesignMode) return;
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
+                InitializeNAEMOCruft();
             };
 
             IsLatLonGridVisible = Settings.Default.ShowGrid;
@@ -104,7 +105,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 DecoratedExperimentName = "<New experiment>";
             }
             HookPropertyChanged(_experiment);
-            InitializeNAEMOCruft();
             //TestRecentFiles();
         }
 
