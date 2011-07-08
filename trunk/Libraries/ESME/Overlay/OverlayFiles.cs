@@ -71,7 +71,6 @@ namespace ESME.Overlay
                                            };
                         ovrItem.Value.Metadata.Save();
                     }
-
                 }
             }
         }
