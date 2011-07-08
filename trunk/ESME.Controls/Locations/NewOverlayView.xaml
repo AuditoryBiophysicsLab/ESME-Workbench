@@ -4,7 +4,9 @@
     xmlns:Controls="clr-namespace:ESME.Views.Controls" 
     x:Class="ESME.Views.Locations.NewOverlayView"
 	Title="New Overlay File"
-	SizeToContent="WidthAndHeight">
+	SizeToContent="WidthAndHeight"
+    ResizeMode="NoResize"
+        WindowStyle="ToolWindow">
 
 	<StackPanel Margin="5">
 		<DockPanel LastChildFill="True">
