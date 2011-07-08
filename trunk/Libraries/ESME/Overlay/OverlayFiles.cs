@@ -17,18 +17,18 @@ namespace ESME.Overlay
         protected NAEMODescriptors(string selectedRangeComplexName, string subDirectoryName, string searchPattern, FilenameFilter filenameFilter = null)
         {
             if (string.IsNullOrEmpty(selectedRangeComplexName)) return;
-            Console.WriteLine("{0} Entered NAEMODescriptors constructor", DateTime.Now);
+            //Console.WriteLine("{0} Entered NAEMODescriptors constructor", DateTime.Now);
             var files = Directory.GetFiles(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, selectedRangeComplexName, subDirectoryName), searchPattern);
-            Console.WriteLine("{0} Got directory listing containing {1} files", DateTime.Now, files.Length);
+            //Console.WriteLine("{0} Got directory listing containing {1} files", DateTime.Now, files.Length);
             IEnumerable<string> filteredFiles = files;
             if (filenameFilter != null)
             {
                 filteredFiles = filenameFilter(files);
-                Console.WriteLine("{0} Filtered directory listing, now contains {1} files", DateTime.Now, filteredFiles.Count());
+                //Console.WriteLine("{0} Filtered directory listing, now contains {1} files", DateTime.Now, filteredFiles.Count());
             }
-            Console.WriteLine("{0} About to call AddRange", DateTime.Now);
+            //Console.WriteLine("{0} About to call AddRange", DateTime.Now);
             AddRange(filteredFiles.Select(file => new KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(file), new T { DataFilename = file })));
-            Console.WriteLine("{0} Leaving NAEMODescriptors constructor", DateTime.Now);
+            //Console.WriteLine("{0} Leaving NAEMODescriptors constructor", DateTime.Now);
         }
 
         public virtual NAEMODescriptor this[string overlayKey]
@@ -51,34 +51,25 @@ namespace ESME.Overlay
                     if (keyName.Length == 1 || !buffer.ToLowerInvariant().EndsWith("km"))
                     {
                         ovrItem.Value.Metadata = new NAEMOOverlayMetadata
-                                                     {
-                                                         Filename = NAEMOMetadataBase.MetadataFilename(ovrItem.Value.DataFilename),
-                                                     };
+                        {
+                            Filename = NAEMOMetadataBase.MetadataFilename(ovrItem.Value.DataFilename),
+                        };
                         ovrItem.Value.Metadata.Save();
                         continue;
                     }
                     //now likely that range is there. 
                     var bufferStart = ovrItem.Key.IndexOf(buffer) - 1;
                     var sourceOverlay = ovrItem.Key.Substring(0, bufferStart);
-                    var sourceOverlayFile = Path.Combine(Path.GetDirectoryName(ovrItem.Value.DataFilename), sourceOverlay + ".ovr");
-                    if (File.Exists(sourceOverlayFile))
+                    float bufferSize;
+                    var bufferIsValid = float.TryParse(buffer.Substring(0, buffer.Length - 2), out bufferSize);
+                    if (!bufferIsValid) bufferSize = 0;
+                    ovrItem.Value.Metadata = new NAEMOOverlayMetadata
                     {
-                        float bufferSize;
-                        var bufferIsValid = float.TryParse(buffer.Substring(0, buffer.Length - 2), out bufferSize);
-                        if (!bufferIsValid)
-                        {
-                            bufferSize = 0;
-                            sourceOverlay = null;
-                        }
-                        ovrItem.Value.Metadata = new NAEMOOverlayMetadata
-                                           {
-                                               Filename = NAEMOMetadataBase.MetadataFilename(ovrItem.Value.DataFilename),
-                                               SourceOverlay = sourceOverlay,
-                                               BufferZoneSize = bufferSize,
-
-                                           };
-                        ovrItem.Value.Metadata.Save();
-                    }
+                        Filename = NAEMOMetadataBase.MetadataFilename(ovrItem.Value.DataFilename),
+                        OverlayFilename = sourceOverlay,
+                        BufferZoneSize = bufferSize,
+                    };
+                    ovrItem.Value.Metadata.Save();
                 }
             }
         }

@@ -41,6 +41,28 @@ namespace ESME.Metadata
             serializer.Save(filename, ReferencedTypes);
         }
 
+        #region public string OverlayFilename { get; set; }
+
+        public string OverlayFilename
+        {
+            get { return _overlayFilename; }
+            set
+            {
+                if (_overlayFilename == value) return;
+                _overlayFilename = Path.GetFileNameWithoutExtension(value);
+                if (!string.IsNullOrEmpty(_overlayFilename) && !string.IsNullOrEmpty(Filename))
+                    if (!OverlayFileExists) _overlayFilename = null;
+                NotifyPropertyChanged(OverlayNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOMetadataBase>(x => x.OverlayFilename);
+        string _overlayFilename;
+
+        bool OverlayFileExists { get { return File.Exists(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Filename)), "Areas", OverlayFilename + ".ovr")); } }
+
+        #endregion
+
         #region public string Creator { get; set; }
 
         public string Creator
@@ -104,6 +126,8 @@ namespace ESME.Metadata
             {
                 if (_filename == value) return;
                 _filename = value;
+                if (!string.IsNullOrEmpty(OverlayFilename) && !string.IsNullOrEmpty(_filename))
+                    if (!OverlayFileExists) OverlayFilename = null;
                 NotifyPropertyChanged(FilenameChangedEventArgs);
             }
         }

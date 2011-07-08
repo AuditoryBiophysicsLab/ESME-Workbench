@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using System.Windows.Threading;
+using System.Windows.Input;
 using Cinch;
 using ESME.Metadata;
 using ESME.Overlay;
@@ -9,7 +9,6 @@ using ESME.TransmissionLoss.CASS;
 using ESME.Views.EnvironmentBuilder;
 using ESME.Views.Locations;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -18,7 +17,13 @@ namespace ESMEWorkBench.ViewModels.Main
         void InitializeNAEMOCruft()
         {
             SimAreaCSV = SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+            if (_simAreaCSVWatcher != null) _simAreaCSVWatcher.Dispose();
+            _simAreaCSVWatcher = new FileSystemWatcher(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv");
+            _simAreaCSVWatcher.Changed += (s, e) => SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+            _simAreaCSVWatcher.EnableRaisingEvents = true;
         }
+
+        FileSystemWatcher _simAreaCSVWatcher;
 
         #region RibbonTabSelectionChangedCommand
         public SimpleCommand<object, object> RibbonTabSelectionChangedCommand
@@ -66,6 +71,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_simAreaCSV == value) return;
                 _simAreaCSV = value;
                 NotifyPropertyChanged(SimAreaCSVChangedEventArgs);
+                SelectedRangeComplex = _simAreaCSV[0];
             }
         }
 
@@ -84,42 +90,31 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_selectedRangeComplex == value) return;
                 _selectedRangeComplex = value;
                 NotifyPropertyChanged(SelectedSimAreaChangedEventArgs);
-                NAEMOOverlayDescriptors = null;
-                NAEMOBathymetryDescriptors = null;
-                NAEMOEnvironmentDescriptors = null;
-                SelectedOverlayDescriptor = null;
-                SelectedBathymetryDescriptor = null;
-                SelectedEnvironmentDescriptor = null;
-                if (_selectedRangeComplex != null)
-                {
-                    Console.WriteLine("{0}: Selected range complex: {1}", DateTime.Now, _selectedRangeComplex.Name);
-
-                    var bw1 = new BackgroundWorker();
-                    bw1.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name);
-                    bw1.RunWorkerAsync();
-                    //_dispatcher.BeginInvoke(new Action(() => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name)) , DispatcherPriority.ApplicationIdle);
-                    Console.WriteLine("{0}: Overlay descriptors created", DateTime.Now);
-                    var bw2 = new BackgroundWorker();
-                    bw2.DoWork += (s, e) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name);
-                    bw2.RunWorkerAsync();
-                    //_dispatcher.BeginInvoke(new Action(() => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name)), DispatcherPriority.ApplicationIdle);
-                    Console.WriteLine("{0}: Bathymetry descriptors created", DateTime.Now);
-                    var bw3 = new BackgroundWorker();
-                    bw3.DoWork += (s, e) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
-                    bw3.RunWorkerAsync();
-                    //_dispatcher.BeginInvoke(new Action(() => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name)), DispatcherPriority.ApplicationIdle);
-                    Console.WriteLine("{0}: Environment descriptors created", DateTime.Now);
-                    IsRangeComplexSelected = true;
-                }
-                else
-                {
-                    IsRangeComplexSelected = false;
-                }
+                if (_selectedRangeComplex != null) SelectedRangeComplexInfo = string.Format("Name: {0}\nReference Point: ({1}, {2})\nHeight: {3}\nGeoid Separation: {4}\nOps Limit: {5}\nSim Limit: {6}", _selectedRangeComplex.Name, Math.Round(_selectedRangeComplex.Latitude, 5), Math.Round(_selectedRangeComplex.Longitude, 5), _selectedRangeComplex.Height, _selectedRangeComplex.GeoidSeparation, SelectedRangeComplex.OpsLimitFile, SelectedRangeComplex.SimLimitFile);
+                IsRangeComplexSelected = _selectedRangeComplex != null;
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedSimAreaChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplex);
         SimAreaDescriptor _selectedRangeComplex;
+
+        #endregion
+
+        #region public string SelectedRangeComplexInfo { get; set; }
+
+        public string SelectedRangeComplexInfo
+        {
+            get { return _selectedRangeComplexInfo; }
+            set
+            {
+                if (_selectedRangeComplexInfo == value) return;
+                _selectedRangeComplexInfo = value;
+                NotifyPropertyChanged(SelectedRangeComplexInfoChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedRangeComplexInfoChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplexInfo);
+        string _selectedRangeComplexInfo;
 
         #endregion
 
@@ -132,6 +127,35 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_isRangeComplexSelected == value) return;
                 _isRangeComplexSelected = value;
+                if (_isRangeComplexSelected)
+                {
+                    //Console.WriteLine("{0}: Selected range complex: {1}", DateTime.Now, _selectedRangeComplex.Name);
+
+                    var bw1 = new BackgroundWorker();
+                    bw1.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name);
+                    bw1.RunWorkerCompleted += (s, e) => CommandManager.InvalidateRequerySuggested();
+                    bw1.RunWorkerAsync();
+                    //_dispatcher.BeginInvoke(new Action(() => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name)) , DispatcherPriority.ApplicationIdle);
+                    //Console.WriteLine("{0}: Overlay descriptors created", DateTime.Now);
+                    var bw2 = new BackgroundWorker();
+                    bw2.DoWork += (s, e) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name);
+                    bw2.RunWorkerCompleted += (s, e) => CommandManager.InvalidateRequerySuggested();
+                    bw2.RunWorkerAsync();
+                    //_dispatcher.BeginInvoke(new Action(() => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name)), DispatcherPriority.ApplicationIdle);
+                    //Console.WriteLine("{0}: Bathymetry descriptors created", DateTime.Now);
+                    var bw3 = new BackgroundWorker();
+                    bw3.DoWork += (s, e) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
+                    bw3.RunWorkerCompleted += (s, e) => CommandManager.InvalidateRequerySuggested();
+                    bw3.RunWorkerAsync();
+                    //_dispatcher.BeginInvoke(new Action(() => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name)), DispatcherPriority.ApplicationIdle);
+                    //Console.WriteLine("{0}: Environment descriptors created", DateTime.Now);
+                }
+                else
+                {
+                    NAEMOOverlayDescriptors = null;
+                    NAEMOBathymetryDescriptors = null;
+                    NAEMOEnvironmentDescriptors = null;
+                }
                 NotifyPropertyChanged(RangeComplexIsSelectedChangedEventArgs);
             }
         }
@@ -181,6 +205,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_naemoOverlayDescriptors == value) return;
                 _naemoOverlayDescriptors = value;
                 NotifyPropertyChanged(OverlayFilesChangedEventArgs);
+                NotifyPropertyChanged(IsOverlayListReadyChangedEventArgs);
                 SelectedOverlayDescriptor = NAEMOOverlayDescriptors != null && NAEMOOverlayDescriptors.Count > 0 ? NAEMOOverlayDescriptors[0].Value : null;
             }
         }
@@ -197,15 +222,44 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return _selectedOverlayDescriptor; }
             set
             {
-                if (_selectedOverlayDescriptor == value) return;
                 _selectedOverlayDescriptor = value;
                 NotifyPropertyChanged(SelectedOverlayDescriptorChangedEventArgs);
+                if (_selectedOverlayDescriptor != null) SelectedOverlayInfo = string.Format("Name: {0}\nBuffer: {1}\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename), _selectedOverlayDescriptor.Metadata.BufferZoneSize > 0 ? _selectedOverlayDescriptor.Metadata.BufferZoneSize.ToString() + " km" : "[N/A]", _selectedOverlayDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
                 IsOverlayFileSelected = _selectedOverlayDescriptor != null;
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedOverlayDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedOverlayDescriptor);
         NAEMOOverlayDescriptor _selectedOverlayDescriptor;
+
+        #endregion
+
+        #region public string SelectedOverlayInfo { get; set; }
+
+        public string SelectedOverlayInfo
+        {
+            get { return _selectedOverlayInfo; }
+            set
+            {
+                if (_selectedOverlayInfo == value) return;
+                _selectedOverlayInfo = value;
+                NotifyPropertyChanged(SelectedOverlayNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedOverlayNameChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedOverlayInfo);
+        string _selectedOverlayInfo;
+
+        #endregion
+
+        #region public bool IsOverlayListReady { get; set; }
+
+        public bool IsOverlayListReady
+        {
+            get { return _naemoOverlayDescriptors != null; }
+        }
+
+        static readonly PropertyChangedEventArgs IsOverlayListReadyChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsOverlayListReady);
 
         #endregion
 
@@ -241,14 +295,12 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void NewOverlayHandler()
         {
-#if true
             var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplex.Name);
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((result.HasValue) && (result.Value))
             {
                 NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(SelectedRangeComplex.Name);
             }
-#endif
         }
 
         #endregion
@@ -300,7 +352,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                        Bounds = geoRect,
                                        BufferZoneSize = vm.BufferZoneSize,
                                        Filename = metadataPath,
-                                       SourceOverlay = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename),
+                                       OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename),
                                    };
                 metadata.Save();
 
@@ -315,15 +367,10 @@ namespace ESMEWorkBench.ViewModels.Main
         #region OverlayPropertiesCommand
         public SimpleCommand<object, object> OverlayPropertiesCommand
         {
-            get { return _overlayProperties ?? (_overlayProperties = new SimpleCommand<object, object>(delegate { return IsOverlayPropertiesCommandEnabled; }, delegate { OverlayPropertiesHandler(); })); }
+            get { return _overlayProperties ?? (_overlayProperties = new SimpleCommand<object, object>(delegate { return IsOverlayFileSelected; }, delegate { OverlayPropertiesHandler(); })); }
         }
 
         SimpleCommand<object, object> _overlayProperties;
-
-        bool IsOverlayPropertiesCommandEnabled
-        {
-            get { return IsOverlayFileSelected; }
-        }
 
         void OverlayPropertiesHandler()
         {
@@ -331,6 +378,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
+                SelectedOverlayDescriptor = _selectedOverlayDescriptor;
             }
         }
         #endregion
@@ -349,6 +397,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_naemoBathymetryDescriptors == value) return;
                 _naemoBathymetryDescriptors = value;
                 NotifyPropertyChanged(NAEMOBathymetryDescriptorsChangedEventArgs);
+                NotifyPropertyChanged(IsBathymetryListReadyChangedEventArgs);
                 SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors != null && NAEMOBathymetryDescriptors.Count > 0 ? NAEMOBathymetryDescriptors[0].Value : null;
             }
         }
@@ -365,15 +414,44 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return _selectedBathymetryDescriptor; }
             set
             {
-                if (_selectedBathymetryDescriptor == value) return;
                 _selectedBathymetryDescriptor = value;
                 NotifyPropertyChanged(SelectedBathymetryDescriptorChangedEventArgs);
+                if (_selectedBathymetryDescriptor != null) SelectedBathymetryInfo = string.Format("Name: {0}\nResolution: {1} min\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename), _selectedBathymetryDescriptor.Metadata.Resolution, _selectedBathymetryDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
                 IsBathymetryFileSelected = _selectedBathymetryDescriptor != null;
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedBathymetryDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedBathymetryDescriptor);
         NAEMOBathymetryDescriptor _selectedBathymetryDescriptor;
+
+        #endregion
+
+        #region public string SelectedBathymetryInfo { get; set; }
+
+        public string SelectedBathymetryInfo
+        {
+            get { return _selectedBathymetryInfo; }
+            set
+            {
+                if (_selectedBathymetryInfo == value) return;
+                _selectedBathymetryInfo = value;
+                NotifyPropertyChanged(SelectedBathymetryNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedBathymetryNameChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedBathymetryInfo);
+        string _selectedBathymetryInfo;
+
+        #endregion
+
+        #region public bool IsBathymetryListReady { get; set; }
+
+        public bool IsBathymetryListReady
+        {
+            get { return _naemoBathymetryDescriptors != null; }
+        }
+
+        static readonly PropertyChangedEventArgs IsBathymetryListReadyChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsBathymetryListReady);
 
         #endregion
 
@@ -398,15 +476,10 @@ namespace ESMEWorkBench.ViewModels.Main
         #region NewBathymetryCommand
         public SimpleCommand<object, object> NewBathymetryCommand
         {
-            get { return _newBathymetry ?? (_newBathymetry = new SimpleCommand<object, object>(delegate { return IsNewBathymetryCommandEnabled; }, delegate { NewBathymetryHandler(); })); }
+            get { return _newBathymetry ?? (_newBathymetry = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { NewBathymetryHandler(); })); }
         }
 
         SimpleCommand<object, object> _newBathymetry;
-
-        bool IsNewBathymetryCommandEnabled
-        {
-            get { return IsBathymetryFileSelected; }
-        }
 
         void NewBathymetryHandler()
         {
@@ -422,15 +495,10 @@ namespace ESMEWorkBench.ViewModels.Main
         #region BathymetryPropertiesCommand
         public SimpleCommand<object, object> BathymetryPropertiesCommand
         {
-            get { return _bathymetryProperties ?? (_bathymetryProperties = new SimpleCommand<object, object>(delegate { return IsBathymetryPropertiesCommandEnabled; }, delegate { BathymetryPropertiesHandler(); })); }
+            get { return _bathymetryProperties ?? (_bathymetryProperties = new SimpleCommand<object, object>(delegate { return IsBathymetryFileSelected; }, delegate { BathymetryPropertiesHandler(); })); }
         }
 
         SimpleCommand<object, object> _bathymetryProperties;
-
-        bool IsBathymetryPropertiesCommandEnabled
-        {
-            get { return IsBathymetryFileSelected; }
-        }
 
         void BathymetryPropertiesHandler()
         {
@@ -438,6 +506,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
+                SelectedBathymetryDescriptor = _selectedBathymetryDescriptor;
             }
 
         }
@@ -457,6 +526,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_naemoEnvironmentDescriptors == value) return;
                 _naemoEnvironmentDescriptors = value;
                 NotifyPropertyChanged(NAEMOEnvironmentDescriptorsChangedEventArgs);
+                NotifyPropertyChanged(IsEnvironmentListReadyChangedEventArgs);
                 SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors != null && NAEMOEnvironmentDescriptors.Count > 0 ? NAEMOEnvironmentDescriptors[0].Value : null;
             }
         }
@@ -473,15 +543,33 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return _selectedEnvironmentDescriptor; }
             set
             {
-                if (_selectedEnvironmentDescriptor == value) return;
                 _selectedEnvironmentDescriptor = value;
                 NotifyPropertyChanged(SelectedEnvironmentDescriptorChangedEventArgs);
+                if (_selectedEnvironmentDescriptor != null) SelectedEnvironmentInfo = string.Format("Name: {0}\nTime Period: {1}\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedEnvironmentDescriptor.DataFilename), _selectedEnvironmentDescriptor.Metadata.TimePeriod, _selectedEnvironmentDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
                 IsEnvironmentFileSelected = _selectedEnvironmentDescriptor != null;
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedEnvironmentDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedEnvironmentDescriptor);
         NAEMOEnvironmentDescriptor _selectedEnvironmentDescriptor;
+
+        #endregion
+
+        #region public string SelectedEnvironmentInfo { get; set; }
+
+        public string SelectedEnvironmentInfo
+        {
+            get { return _selectedEnvironmentInfo; }
+            set
+            {
+                if (_selectedEnvironmentInfo == value) return;
+                _selectedEnvironmentInfo = value;
+                NotifyPropertyChanged(SelectedEnvironmentNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedEnvironmentNameChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedEnvironmentInfo);
+        string _selectedEnvironmentInfo;
 
         #endregion
 
@@ -503,6 +591,17 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public bool IsEnvironmentListReady { get; set; }
+
+        public bool IsEnvironmentListReady
+        {
+            get { return _naemoEnvironmentDescriptors != null; }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnvironmentListReadyChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsEnvironmentListReady);
+
+        #endregion
+
         #region NewEnvironmentCommand
         public SimpleCommand<object, object> NewEnvironmentCommand
         {
@@ -510,17 +609,12 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _newEnvironment ??
                        (_newEnvironment =
-                        new SimpleCommand<object, object>(delegate { return IsNewEnvironmentCommandEnabled; },
+                        new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; },
                                                           delegate { NewEnvironmentHandler(); }));
             }
         }
 
         SimpleCommand<object, object> _newEnvironment;
-
-        bool IsNewEnvironmentCommandEnabled
-        {
-            get { return IsEnvironmentFileSelected; }
-        }
 
         void NewEnvironmentHandler()
         {
@@ -540,17 +634,12 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _environmentProperties ??
                        (_environmentProperties =
-                        new SimpleCommand<object, object>(delegate { return IsEnvironmentPropertiesCommandEnabled; },
+                        new SimpleCommand<object, object>(delegate { return IsEnvironmentFileSelected; },
                                                           delegate { EnvironmentPropertiesHandler(); }));
             }
         }
 
         SimpleCommand<object, object> _environmentProperties;
-
-        bool IsEnvironmentPropertiesCommandEnabled
-        {
-            get { return IsEnvironmentFileSelected; }
-        }
 
         void EnvironmentPropertiesHandler()
         {
@@ -558,6 +647,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
+                SelectedEnvironmentDescriptor = _selectedEnvironmentDescriptor;
             }
         }
         #endregion

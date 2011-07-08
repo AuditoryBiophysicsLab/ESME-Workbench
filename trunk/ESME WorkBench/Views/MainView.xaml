@@ -362,8 +362,10 @@
 			<r:RibbonTab KeyTip="V"
 			             Header="Environment">
 				<r:RibbonGroup Header="Range Complex">
-                    <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a pre-defined range complex">
+                    <r:RibbonComboBox ToolTipTitle="Range Complex"
+					                  ToolTipDescription="Select a pre-defined range complex"
+                                      ToolTipFooterTitle="Currently selected range complex"
+                                      ToolTipFooterDescription="{Binding SelectedRangeComplexInfo}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
 								         SelectedItem="{Binding SelectedRangeComplex}"
@@ -396,9 +398,11 @@
                     </r:RibbonButton>
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Overlays">
-                    <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                    <r:RibbonComboBox ToolTipTitle="Overlay"
 					                  ToolTipDescription="Select a pre-defined overlay"
-                                      IsEnabled="{Binding IsRangeComplexSelected}">
+                                      ToolTipFooterTitle="Currently selected overlay"
+                                      ToolTipFooterDescription="{Binding SelectedOverlayInfo}"
+                                      IsEnabled="{Binding IsOverlayListReady}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
 								         SelectedValue="{Binding SelectedOverlayDescriptor}"
@@ -443,9 +447,11 @@
 					                Command="{Binding OverlayPropertiesCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Bathymetry">
-                    <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                    <r:RibbonComboBox ToolTipTitle="Bathymetry"
 					                  ToolTipDescription="Select a pre-defined bathymetry dataset"
-                                      IsEnabled="{Binding IsRangeComplexSelected}">
+                                      ToolTipFooterTitle="Currently selected bathymetry"
+                                      ToolTipFooterDescription="{Binding SelectedBathymetryInfo}"
+                                      IsEnabled="{Binding IsBathymetryListReady}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
 								         SelectedValue="{Binding SelectedBathymetryDescriptor}"
@@ -483,9 +489,11 @@
 					                Command="{Binding BathymetryPropertiesCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Environment">
-                    <r:RibbonComboBox ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                  ToolTipDescription="Select a pre-defined environmental dataset"
-                                      IsEnabled="{Binding IsRangeComplexSelected}">
+                    <r:RibbonComboBox ToolTipTitle="Environment"
+                                      ToolTipDescription="Select a pre-defined environmental dataset"
+                                      ToolTipFooterTitle="Currently selected environment"
+                                      ToolTipFooterDescription="{Binding SelectedEnvironmentInfo}"
+                                      IsEnabled="{Binding IsEnvironmentListReady}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
 								         SelectedValue="{Binding SelectedEnvironmentDescriptor}"
