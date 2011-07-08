@@ -72,7 +72,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (Designer.IsInDesignMode) return;
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
-                InitializeNAEMOCruft();
+                InitializeEnvironmentTab();
             };
 
             IsLatLonGridVisible = Settings.Default.ShowGrid;
@@ -600,5 +600,84 @@ namespace ESMEWorkBench.ViewModels.Main
         SimpleCommand<object, EventToCommandArgs> _previewKeyDown;
 
         #endregion
+
+        #region RibbonTabSelectionChangedCommand
+        public SimpleCommand<object, object> RibbonTabSelectionChangedCommand
+        {
+            get { return _ribbonTabSelectionChangedCommand ?? (_ribbonTabSelectionChangedCommand = new SimpleCommand<object, object>(delegate { RibbonTabSelectionChanged(); })); }
+        }
+
+        SimpleCommand<object, object> _ribbonTabSelectionChangedCommand;
+
+        void RibbonTabSelectionChanged()
+        {
+            switch (((Views.MainView)_viewAwareStatus.View).Ribbon.SelectedIndex)
+            {
+                case 0:
+                    Console.WriteLine("Experiment tab selected");
+                    IsLayerListViewVisible = true;
+                    break;
+                case 1:
+                    Console.WriteLine("Scenario tab selected");
+                    IsLayerListViewVisible = true;
+                    break;
+                case 2:
+                    Console.WriteLine("Environment tab selected");
+                    IsLayerListViewVisible = false;
+                    break;
+                case 3:
+                    Console.WriteLine("Animals tab selected");
+                    IsLayerListViewVisible = true;
+                    break;
+                case 4:
+                    Console.WriteLine("Acoustics tab selected");
+                    IsLayerListViewVisible = true;
+                    break;
+                default:
+                    Console.WriteLine("Other tab selected");
+                    IsLayerListViewVisible = true;
+                    break;
+            }
+        }
+
+        #endregion
+
+        #region public bool IsLayerListViewVisible { get; set; }
+
+        public bool IsLayerListViewVisible
+        {
+            get { return _isLayerListViewVisible; }
+            set
+            {
+                if (_isLayerListViewVisible == value) return;
+                _isLayerListViewVisible = value;
+                NotifyPropertyChanged(IsLayerListViewVisibleChangedEventArgs);
+                NotifyPropertyChanged(LayersListWidthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsLayerListViewVisibleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsLayerListViewVisible);
+        bool _isLayerListViewVisible;
+
+        #endregion
+
+        #region public double LayersListWidth { get; set; }
+
+        public double LayersListWidth
+        {
+            get { return IsLayerListViewVisible ? Math.Max(100, Settings.Default.LayersWidth) : 0; }
+            set
+            {
+                if (!IsLayerListViewVisible) return;
+                Settings.Default.LayersWidth = value;
+                NotifyPropertyChanged(LayersListWidthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LayersListWidthChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.LayersListWidth);
+
+        #endregion
+
+
     }
 }

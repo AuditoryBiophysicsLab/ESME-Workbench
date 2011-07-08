@@ -103,12 +103,12 @@ namespace ESME.TransmissionLoss.CASS
             if (Bathymetry != null)
             {
                 TaskName = "Exporting NAEMO bathymetry";
-                Bathymetry.ToYXZ(Path.Combine(backgroundExtractor.DestinationPath, "Bathymetry", "bathymetry.txt"), -1);
+                Bathymetry.ToYXZ(backgroundExtractor.DestinationPath, -1);
             }
             else
             {
                 TaskName = "Exporting NAEMO environment for " + TimePeriod;
-                var environmentFileName = Path.Combine(backgroundExtractor.DestinationPath, "Environment", "env_" + TimePeriod.ToString().ToLower() + ".dat");
+                var environmentFileName = backgroundExtractor.DestinationPath;
 
                 CASSFiles.WriteEnvironmentFile(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], backgroundExtractor);
             }

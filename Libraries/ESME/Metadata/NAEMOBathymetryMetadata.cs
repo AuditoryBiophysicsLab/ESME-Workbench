@@ -21,7 +21,7 @@ namespace ESME.Metadata
         {
             bathymetry = Bathymetry.FromYXZ(naemoBathymetryFilename, -1);
 
-            var metaDataFilename = naemoBathymetryFilename;
+            var metaDataFilename = Path.Combine(Path.GetDirectoryName(naemoBathymetryFilename), Path.GetFileNameWithoutExtension(naemoBathymetryFilename) + ".xml");
             var areasPath = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(naemoBathymetryFilename)), "Areas");
             var fields = naemoBathymetryFilename.Split('_');
 
@@ -64,22 +64,9 @@ namespace ESME.Metadata
             if (fields.Length >= 3)
             {
                 var overlayNameEndIndex = metaDataFilename.IndexOf(fields[fields.Length - 2]) - 1;
-                overlayFilename = Path.GetFileName(metaDataFilename.Substring(0, overlayNameEndIndex) + ".ovr");
-                if (!File.Exists(Path.Combine(areasPath, overlayFilename)))
+                overlayFilename = Path.GetFileName(metaDataFilename.Substring(0, overlayNameEndIndex));
+                if (!File.Exists(Path.Combine(areasPath, overlayFilename) + ".ovr"))
                     overlayFilename = null;
-            }
-
-            if (overlayFilename == null)
-            {
-                var overlayFiles = Directory.GetFiles(areasPath, "*.ovr");
-                foreach (var overlayFile in overlayFiles)
-                {
-                    var overlay = new OverlayFile(overlayFile);
-                    var geoRect = new GeoRect(overlay.Shapes[0].BoundingBox);
-                    if (!geoRect.Equals(bathymetry.Samples.GeoRect)) continue;
-                    overlayFilename = Path.GetFileName(overlayFile);
-                    break;
-                }
             }
 
             return new NAEMOBathymetryMetadata
