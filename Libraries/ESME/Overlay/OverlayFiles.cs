@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using ESME.Environment;
-using ESME.Environment.NAVO;
 using ESME.Metadata;
 using ESME.TransmissionLoss.CASS;
 
@@ -83,7 +82,7 @@ namespace ESME.Overlay
         {
             foreach (var bathyItem in this)
             {
-                if (bathyItem.Value.Metadata == null && File.Exists(bathyItem.Value.DataFilename))
+                if (bathyItem.Value.Metadata == null)
                 {
                     bathyItem.Value.Metadata = new NAEMOBathymetryMetadata()
                     {
@@ -95,6 +94,7 @@ namespace ESME.Overlay
             }
 
         }
+
         static IEnumerable<string> Filter(IEnumerable<string> raw)
         {
             return raw.Where(item => !item.ToLower().EndsWith("_security_readme.txt"));
@@ -108,16 +108,13 @@ namespace ESME.Overlay
         {
             foreach (var envItem in this)
             {
-                if (envItem.Value.Metadata == null && File.Exists(envItem.Value.DataFilename))
+                if (envItem.Value.Metadata == null)
                 {
                     envItem.Value.Metadata = new NAEMOEnvironmentMetadata()
-                                                 {
-                                                     Filename =
-                                                         NAEMOMetadataBase.MetadataFilename(
-                                                             envItem.Value.DataFilename),
-                                                     TimePeriod = envItem.Value.Data.TimePeriod,
-
-                                                 };
+                    {
+                        Filename = NAEMOMetadataBase.MetadataFilename(envItem.Value.DataFilename),
+                        TimePeriod = envItem.Value.Data.TimePeriod,
+                    };
                     envItem.Value.Metadata.Save();
                 }
             }
