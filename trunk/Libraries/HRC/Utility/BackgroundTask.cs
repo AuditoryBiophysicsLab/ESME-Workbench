@@ -48,7 +48,7 @@ namespace HRC.Utility
         public bool IsDone
         {
             get { return _isDone; }
-            private set
+            protected set
             {
                 if (_isDone == value) return;
                 _isDone = value;

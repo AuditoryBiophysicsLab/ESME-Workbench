@@ -1,21 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
 using ESME.Metadata;
 using ESME.TransmissionLoss.CASS;
+using HRC.Utility;
 
 namespace ESME.Overlay
 {
-    public abstract class NAEMODescriptors<T> : List<KeyValuePair<string, T>> where T : NAEMODescriptor, new()
+    public abstract class NAEMODescriptors<T> : List<System.Collections.Generic.KeyValuePair<string, T>> where T : NAEMODescriptor, new()
     {
-        public delegate KeyValuePair<string, T> NewDescriptor(string sourceFilename);
+        public delegate System.Collections.Generic.KeyValuePair<string, T> NewDescriptor(string sourceFilename);
 
         public delegate IEnumerable<string> FilenameFilter(IEnumerable<string> fileName); 
 
-        protected NAEMODescriptors(string selectedRangeComplexName, string subDirectoryName, string searchPattern, FilenameFilter filenameFilter = null)
+        protected NAEMODescriptors(string selectedRangeComplexName, string subDirectoryName, string searchPattern, FilenameFilter filenameFilter = null, BackgroundTask backgroundTask = null)
         {
             if (string.IsNullOrEmpty(selectedRangeComplexName)) return;
             //Console.WriteLine("{0} Entered NAEMODescriptors constructor", DateTime.Now);
@@ -27,8 +27,18 @@ namespace ESME.Overlay
                 filteredFiles = filenameFilter(files);
                 //Console.WriteLine("{0} Filtered directory listing, now contains {1} files", DateTime.Now, filteredFiles.Count());
             }
+            if (backgroundTask != null)
+            {
+                backgroundTask.Maximum = filteredFiles.Count() * 2;
+                backgroundTask.Value = 0;
+            }
             //Console.WriteLine("{0} About to call AddRange", DateTime.Now);
-            AddRange(filteredFiles.Select(file => new KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(file), new T { DataFilename = file })));
+            foreach (var file in filteredFiles)
+            {
+                Add(new System.Collections.Generic.KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(file), new T { DataFilename = file }));
+                if (backgroundTask != null) backgroundTask.Value++;
+            }
+            //AddRange(filteredFiles.Select(file => new System.Collections.Generic.KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(file), new T { DataFilename = file })));
             //Console.WriteLine("{0} Leaving NAEMODescriptors constructor", DateTime.Now);
         }
 
@@ -40,12 +50,13 @@ namespace ESME.Overlay
 
     public class NAEMOOverlayDescriptors : NAEMODescriptors<NAEMOOverlayDescriptor>
     {
-        public NAEMOOverlayDescriptors(string selectedRangeComplexName, BackgroundWorker backgroundWorker = null)
-            : base(selectedRangeComplexName, "Areas", "*.ovr")
+        public NAEMOOverlayDescriptors(string selectedRangeComplexName, BackgroundTask backgroundTask = null)
+            : base(selectedRangeComplexName, "Areas", "*.ovr", null, backgroundTask)
         {
             foreach (var ovrItem in this)
             {
-                if ((backgroundWorker != null) && (backgroundWorker.CancellationPending)) return;
+                if ((backgroundTask != null) && (backgroundTask.CancellationPending)) return;
+                if (backgroundTask != null) backgroundTask.Value++;
                 if (ovrItem.Value.Metadata != null) continue;
                 var keyName = ovrItem.Key.Split('_');
                 var buffer = keyName.Last();
@@ -77,12 +88,13 @@ namespace ESME.Overlay
 
     public class NAEMOBathymetryDescriptors : NAEMODescriptors<NAEMOBathymetryDescriptor>
     {
-        public NAEMOBathymetryDescriptors(string selectedRangeComplexName, BackgroundWorker backgroundWorker = null)
-            : base(selectedRangeComplexName, "Bathymetry", "*.txt", Filter)
+        public NAEMOBathymetryDescriptors(string selectedRangeComplexName, BackgroundTask backgroundTask = null)
+            : base(selectedRangeComplexName, "Bathymetry", "*.txt", Filter, backgroundTask)
         {
             foreach (var bathyItem in this)
             {
-                if ((backgroundWorker != null) && (backgroundWorker.CancellationPending)) return;
+                if ((backgroundTask != null) && (backgroundTask.CancellationPending)) return;
+                if (backgroundTask != null) backgroundTask.Value++;
                 if (bathyItem.Value.Metadata != null) continue;
                 Bathymetry bathymetry;
                 bathyItem.Value.Metadata = NAEMOBathymetryMetadata.FromBathymetryFile(bathyItem.Value.DataFilename, out bathymetry);
@@ -99,12 +111,13 @@ namespace ESME.Overlay
 
     public class NAEMOEnvironmentDescriptors : NAEMODescriptors<NAEMOEnvironmentDescriptor>
     {
-        public NAEMOEnvironmentDescriptors(string selectedRangeComplexName, BackgroundWorker backgroundWorker = null)
-            : base(selectedRangeComplexName, "Environment", "*.dat")
+        public NAEMOEnvironmentDescriptors(string selectedRangeComplexName, BackgroundTask backgroundTask = null)
+            : base(selectedRangeComplexName, "Environment", "*.dat", null, backgroundTask)
         {
             foreach (var envItem in this)
             {
-                if ((backgroundWorker != null) && (backgroundWorker.CancellationPending)) return;
+                if ((backgroundTask != null) && (backgroundTask.CancellationPending)) return;
+                if (backgroundTask != null) backgroundTask.Value++;
                 if (envItem.Value.Metadata != null) continue;
                 envItem.Value.Metadata = NAEMOEnvironmentMetadata.FromEnvironmentFile(envItem.Value.DataFilename);
                 envItem.Value.Metadata.Save();

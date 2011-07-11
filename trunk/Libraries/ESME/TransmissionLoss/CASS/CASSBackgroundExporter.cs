@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-using System.IO;
+using System.Text;
 using Cinch;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -35,7 +35,6 @@ namespace ESME.TransmissionLoss.CASS
             get { return _sediment; }
             set
             {
-                if (_sediment == value) return;
                 _sediment = value;
                 NotifyPropertyChanged(SedimentChangedEventArgs);
                 CheckForMutexRelease();
@@ -54,7 +53,6 @@ namespace ESME.TransmissionLoss.CASS
             get { return _extendedAndAveragedSoundSpeeds; }
             set
             {
-                if (_extendedAndAveragedSoundSpeeds == value) return;
                 _extendedAndAveragedSoundSpeeds = value;
                 NotifyPropertyChanged(ExtendedAndAveragedSoundSpeedsChangedEventArgs);
                 CheckForMutexRelease();
@@ -73,7 +71,6 @@ namespace ESME.TransmissionLoss.CASS
             get { return _wind; }
             set
             {
-                if (_wind == value) return;
                 _wind = value;
                 NotifyPropertyChanged(WindChangedEventArgs);
                 CheckForMutexRelease();
@@ -87,6 +84,14 @@ namespace ESME.TransmissionLoss.CASS
 
         void CheckForMutexRelease()
         {
+            var sb = new StringBuilder();
+            sb.Append("Waiting for ");
+            if (Sediment == null) sb.Append("sediment, ");
+            if (Wind == null) sb.Append("wind, ");
+            if (ExtendedAndAveragedSoundSpeeds == null) sb.Append("soundspeed, ");
+            sb.Remove(sb.Length - 2, 2);
+            sb.Append(" data");
+            RunState = sb.ToString();
             if ((Bathymetry != null) || ((Sediment != null) && (ExtendedAndAveragedSoundSpeeds != null) && (Wind != null)))
                 WaitSemaphore.Release();
         }
@@ -95,7 +100,7 @@ namespace ESME.TransmissionLoss.CASS
         {
             var backgroundExtractor = (CASSBackgroundExporter)e.Argument;
 
-            RunState = "Waiting for extended soundspeeds";
+            RunState = "Waiting for extended sediment, wind, soundspeed data";
             TaskName = "Exporting NAEMO data";
             WaitSemaphore.WaitOne();
             RunState = "Running";

@@ -148,6 +148,9 @@
     <Compile Include="Utility\Decimator2D.cs" />
     <Compile Include="Utility\EmbeddedResources.cs" />
     <Compile Include="Utility\ExtensionMethods.cs" />
+    <Compile Include="Utility\GenericBackgroundTask.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Utility\GenericWeakReference.cs" />
     <Compile Include="Utility\GeoDistanceUnit.cs" />
     <Compile Include="Utility\BackgroundTask.cs">

@@ -548,6 +548,11 @@
 					                ToolTipDescription="View or edit the bathymetry properties"
 					                Command="{Binding EnvironmentPropertiesCommand}" />
                 </r:RibbonGroup>
+                <r:RibbonGroup Header="Debug">
+                    <r:RibbonButton LargeImageSource="..\Images\LargeIcons\Button-Reload-icon.png"
+                                    Command="{Binding RequeryCommand}"
+                                    Label="Requery" />
+                </r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="A"
 			             Header="Animals">
