@@ -17,7 +17,11 @@ namespace ESME.Views.Misc
                 if (_backgroundTaskAggregator == value) return;
                 _backgroundTaskAggregator = value;
                 NotifyPropertyChanged(BackgroundTaskAggregatorChangedEventArgs);
-                if (_backgroundTaskAggregator != null) _backgroundTaskAggregator.RunWorkerCompleted += (s, e) => CloseActivePopUpCommand.Execute(true);
+                if (_backgroundTaskAggregator != null) _backgroundTaskAggregator.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == "IsRunning")
+                        if (!_backgroundTaskAggregator.IsRunning) CloseActivePopUpCommand.Execute(false);
+                };
             }
         }
 
@@ -35,5 +39,17 @@ namespace ESME.Views.Misc
 
         #endregion
 
+        #region ViewActivatedCommand
+        public SimpleCommand<object, object> ViewActivatedCommand
+        {
+            get
+            {
+                return _viewActivated ?? (_viewActivated = new SimpleCommand<object, object>(obj => NotifyPropertyChanged(BackgroundTaskAggregatorChangedEventArgs)));
+            }
+        }
+
+        SimpleCommand<object, object> _viewActivated;
+
+        #endregion
     }
 }

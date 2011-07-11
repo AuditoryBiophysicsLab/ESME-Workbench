@@ -17,8 +17,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_backgroundTaskAggregator == value) return;
                 _backgroundTaskAggregator = value;
                 NotifyPropertyChanged(BackgroundTaskAggregatorChangedEventArgs);
-                if (_backgroundTaskAggregator != null)
-                    _backgroundTaskAggregator.RunWorkerCompleted += (s, e) => NotifyPropertyChanged(BackgroundTaskAggregatorChangedEventArgs);
+                if (_backgroundTaskAggregator != null) _backgroundTaskAggregator.PropertyChanged += (s, e) => NotifyPropertyChanged(BackgroundTaskAggregatorChangedEventArgs);
             }
         }
 
@@ -37,7 +36,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         bool IsShowDetailedProgressCommandEnabled
         {
-            get { return BackgroundTaskAggregator.IsBusy; }
+            get { return BackgroundTaskAggregator.IsRunning; }
         }
 
         void ShowDetailedProgressHandler()

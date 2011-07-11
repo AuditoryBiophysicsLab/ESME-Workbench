@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using Cinch;
+using ESME.Environment.NAVO;
+using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -10,7 +12,7 @@ namespace ESME.Metadata
 {
     public class NAEMOMetadataBase : PropertyChangedBase
     {
-        protected static readonly List<Type> ReferencedTypes = new List<Type>{typeof(string), typeof(DateTime)};
+        protected static readonly List<Type> ReferencedTypes = new List<Type> { typeof(string), typeof(DateTime), typeof(NAVOTimePeriod), typeof(NAEMOEnvironmentLocation), typeof(NAEMOEnvironmentFile) };
 
         public NAEMOMetadataBase()
         {

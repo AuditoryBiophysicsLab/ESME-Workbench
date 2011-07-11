@@ -14,6 +14,7 @@ using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.RecentFiles;
 using HRC.Navigation;
 using HRC.Services;
+using HRC.Utility;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Views.AcousticBuilder;
@@ -40,6 +41,9 @@ namespace ESMEWorkBench.ViewModels.Main
         [ImportingConstructor]
         public MainViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
+            BackgroundTaskAggregator = new BackgroundTaskAggregator();
+            BackgroundTaskAggregator.Start();
+
             try
             {
                 Mediator.Instance.Register(this);
@@ -101,7 +105,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _experiment = new Experiment();
                 HookPropertyChanged(_experiment);
                 _experiment.InitializeIfViewModelsReady();
-                DecoratedExperimentName = "<New experiment>";
+                //DecoratedExperimentName = "<New experiment>";
             }
             HookPropertyChanged(_experiment);
             //TestRecentFiles();
@@ -116,13 +120,13 @@ namespace ESMEWorkBench.ViewModels.Main
                                                   case "IsChanged":
                                                       if (_experiment.IsChanged)
                                                       {
-                                                          if (DecoratedExperimentName.EndsWith(" *")) return;
-                                                          DecoratedExperimentName += " *";
+                                                          //if (DecoratedExperimentName.EndsWith(" *")) return;
+                                                          //DecoratedExperimentName += " *";
                                                       }
                                                       else
                                                       {
-                                                          if (!DecoratedExperimentName.EndsWith(" *")) return;
-                                                          DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
+                                                          //if (!DecoratedExperimentName.EndsWith(" *")) return;
+                                                          //DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
                                                       }
                                                       break;
                                               }

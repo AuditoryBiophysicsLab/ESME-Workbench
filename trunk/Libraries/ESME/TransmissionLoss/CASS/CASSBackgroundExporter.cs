@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Text;
+using System.Threading;
 using Cinch;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -19,7 +20,7 @@ namespace ESME.TransmissionLoss.CASS
                 _bathymetry = value;
                 NotifyPropertyChanged(BathymetryChangedEventArgs);
                 //Console.WriteLine("CASS Exporter got bathymetry...");
-                CheckForMutexRelease();
+                CheckForSemaphoreRelease();
             }
         }
 
@@ -37,7 +38,7 @@ namespace ESME.TransmissionLoss.CASS
             {
                 _sediment = value;
                 NotifyPropertyChanged(SedimentChangedEventArgs);
-                CheckForMutexRelease();
+                CheckForSemaphoreRelease();
             }
         }
 
@@ -55,7 +56,7 @@ namespace ESME.TransmissionLoss.CASS
             {
                 _extendedAndAveragedSoundSpeeds = value;
                 NotifyPropertyChanged(ExtendedAndAveragedSoundSpeedsChangedEventArgs);
-                CheckForMutexRelease();
+                CheckForSemaphoreRelease();
             }
         }
 
@@ -73,7 +74,7 @@ namespace ESME.TransmissionLoss.CASS
             {
                 _wind = value;
                 NotifyPropertyChanged(WindChangedEventArgs);
-                CheckForMutexRelease();
+                CheckForSemaphoreRelease();
             }
         }
 
@@ -82,8 +83,11 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
-        void CheckForMutexRelease()
+        readonly Mutex _mutex = new Mutex();
+
+        void CheckForSemaphoreRelease()
         {
+            _mutex.WaitOne();
             var sb = new StringBuilder();
             sb.Append("Waiting for ");
             if (Sediment == null) sb.Append("sediment, ");
@@ -94,6 +98,7 @@ namespace ESME.TransmissionLoss.CASS
             RunState = sb.ToString();
             if ((Bathymetry != null) || ((Sediment != null) && (ExtendedAndAveragedSoundSpeeds != null) && (Wind != null)))
                 WaitSemaphore.Release();
+            _mutex.ReleaseMutex();
         }
 
         protected override void Run(object sender, DoWorkEventArgs e)
@@ -112,9 +117,19 @@ namespace ESME.TransmissionLoss.CASS
             }
             else
             {
+                while ((ExtendedAndAveragedSoundSpeeds[TimePeriod] == null) || (Wind[TimePeriod] == null) || (ExtractionArea == null))
+                {
+                    var sb = new StringBuilder();
+                    sb.Append("Still waiting on ");
+                    if (ExtendedAndAveragedSoundSpeeds[TimePeriod] == null) sb.Append("sound speed, ");
+                    if (Wind[TimePeriod] == null) sb.Append("wind, ");
+                    if (ExtractionArea == null) sb.Append("extraction area, ");
+                    sb.Remove(sb.Length - 2, 2);
+                    TaskName = sb.ToString();
+                    Thread.Sleep(100);
+                }
                 TaskName = "Exporting NAEMO environment for " + TimePeriod;
                 var environmentFileName = backgroundExtractor.DestinationPath;
-
                 CASSFiles.WriteEnvironmentFile(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], backgroundExtractor);
             }
 

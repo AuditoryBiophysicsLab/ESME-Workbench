@@ -61,7 +61,7 @@
 				    <TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
 			    </StackPanel>
 		    </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right" Visibility="{Binding BackgroundTaskAggregator.IsBusy, Converter={StaticResource boolToVisibilityConverter}}">
+            <StatusBarItem HorizontalAlignment="Right" Visibility="{Binding BackgroundTaskAggregator.IsRunning, Converter={StaticResource boolToVisibilityConverter}}">
                 <ProgressBar Minimum="{Binding Path=BackgroundTaskAggregator.Minimum}" 
                              Maximum="{Binding Path=BackgroundTaskAggregator.Maximum}" 
                              Value="{Binding Path=BackgroundTaskAggregator.Value}" 
@@ -69,7 +69,7 @@
                              Height="22" 
                              Width="50">
                     <ProgressBar.ContextMenu>
-                        <ContextMenu IsEnabled="{Binding BackgroundTaskAggregator.IsBusy}">
+                        <ContextMenu IsEnabled="{Binding BackgroundTaskAggregator.IsRunning}">
                             <MenuItem Header="Show detailed progress" 
                                       Command="{Binding ShowDetailedProgressCommand}"/>
                         </ContextMenu>
@@ -184,7 +184,8 @@
 				</r:RibbonApplicationMenu>
 			</r:Ribbon.ApplicationMenu>
 			<r:RibbonTab KeyTip="E"
-			             Header="Experiment">
+			             Header="Experiment"
+                         Visibility="Collapsed">
 				<r:RibbonGroup Header="Map Data">
 					<!-- <r:RibbonButton Label="Refresh"
 					                SmallImageSource="..\Images\SmallIcons\Button-Refresh-icon.png"
@@ -548,7 +549,7 @@
 					                ToolTipDescription="View or edit the bathymetry properties"
 					                Command="{Binding EnvironmentPropertiesCommand}" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Debug">
+                <r:RibbonGroup Header="Debug" Visibility="Collapsed">
                     <r:RibbonButton LargeImageSource="..\Images\LargeIcons\Button-Reload-icon.png"
                                     Command="{Binding RequeryCommand}"
                                     Label="Requery" />
