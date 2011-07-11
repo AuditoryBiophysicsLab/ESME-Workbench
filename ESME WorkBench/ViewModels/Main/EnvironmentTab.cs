@@ -870,7 +870,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 _selectedEnvironmentDescriptor = value;
                 NotifyPropertyChanged(SelectedEnvironmentDescriptorChangedEventArgs);
-                if (_selectedEnvironmentDescriptor != null) SelectedEnvironmentInfo = string.Format("Name: {0}\nTime Period: {1}\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedEnvironmentDescriptor.DataFilename), _selectedEnvironmentDescriptor.Metadata.TimePeriod, _selectedEnvironmentDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
+                if ((_selectedEnvironmentDescriptor != null) && (_selectedEnvironmentDescriptor.Metadata != null)) SelectedEnvironmentInfo = string.Format("Name: {0}\nTime Period: {1}\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedEnvironmentDescriptor.DataFilename), _selectedEnvironmentDescriptor.Metadata.TimePeriod, _selectedEnvironmentDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
                 IsEnvironmentFileSelected = _selectedEnvironmentDescriptor != null;
                 _dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
             }
@@ -894,6 +894,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 PointSymbolType = PointSymbolType.Circle,
                 LayerType = LayerType.SoundSpeed,
             };
+            if (_selectedEnvironmentDescriptor.Metadata == null) return;
             var samplePoints = _selectedEnvironmentDescriptor.Metadata.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
             overlayLayer.Clear();
             overlayLayer.Add(samplePoints);
