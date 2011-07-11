@@ -790,7 +790,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     DestinationPath = tempPath,
                     UseExpandedExtractionArea = false,
                     SelectedResolution = vm.SelectedResolution,
-                    SaveAsFilename = (Path.Combine(tempPath, vm.BathymetryName + ".txt")),
+                    SaveAsFilename = destinationPath,
                     TaskName = "Bathymetry data extraction",
                 };
                 bathymetryExtractor.RunWorkerCompleted += (s, e) =>
