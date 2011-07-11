@@ -159,24 +159,5 @@ namespace ESME.Metadata
         float _resolution;
 
         #endregion
-
-        #region public string OverlayFilename { get; set; }
-
-        public string OverlayFilename
-        {
-            get { return _overlayFilename; }
-            set
-            {
-                if (_overlayFilename == value) return;
-                _overlayFilename = value;
-                NotifyPropertyChanged(OverlayFilenameChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs OverlayFilenameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOBathymetryMetadata>(x => x.OverlayFilename);
-        string _overlayFilename;
-
-        #endregion
-
     }
 }

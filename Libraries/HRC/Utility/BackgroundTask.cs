@@ -21,7 +21,6 @@ namespace HRC.Utility
             RunState = "Waiting";
             DoWork += Run;
             RunWorkerCompleted += (s, e) => { IsDone = true; };
-            if (StartSemaphore != null) StartSemaphore.WaitOne();
             RunState = "Starting";
             RunWorkerAsync(this);
         }
@@ -58,29 +57,6 @@ namespace HRC.Utility
 
         static readonly PropertyChangedEventArgs IsDoneChangedEventArgs = ObservableHelper.CreateArgs<BackgroundTask>(x => x.IsDone);
         bool _isDone;
-
-        #endregion
-
-        #region public Semaphore StartSemaphore { get; set; }
-
-        /// <summary>
-        /// This semaphore is used to signal the task to start, if it's not null.
-        /// The semaphore provided here is typically created and controlled by some
-        /// kind of aggregator task.
-        /// </summary>
-        public Semaphore StartSemaphore
-        {
-            get { return _startSemaphore; }
-            set
-            {
-                if (_startSemaphore == value) return;
-                _startSemaphore = value;
-                NotifyPropertyChanged(StartSemaphoreChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs StartSemaphoreChangedEventArgs = ObservableHelper.CreateArgs<BackgroundTask>(x => x.StartSemaphore);
-        Semaphore _startSemaphore;
 
         #endregion
 

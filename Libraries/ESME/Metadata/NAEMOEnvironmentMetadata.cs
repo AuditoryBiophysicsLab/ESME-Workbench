@@ -13,7 +13,7 @@ namespace ESME.Metadata
     {
         public NAEMOEnvironmentMetadata() {  }
 
-        new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes) { typeof(NAVOTimePeriod), typeof(NAEMOEnvironmentLocation), typeof(NAEMOEnvironmentFile) };
+        new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes);
 
         public static NAEMOEnvironmentMetadata FromEnvironmentFile(string naemoEnvironmentFilename)
         {
@@ -29,7 +29,7 @@ namespace ESME.Metadata
             return result;
         }
 
-        public static NAEMOEnvironmentMetadata Load(string metaDataFilename) { return Load<NAEMOEnvironmentMetadata>(metaDataFilename); }
+        public static NAEMOEnvironmentMetadata Load(string metaDataFilename) { return Load<NAEMOEnvironmentMetadata>(metaDataFilename, ReferencedTypes); }
 
         public void Save(string filename = null) { Save(this, ReferencedTypes, filename); }
 

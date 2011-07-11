@@ -9,7 +9,6 @@ namespace HRC.Utility
         {
             RunState = "Waiting";
             RunWorkerCompleted += (s, e) => { IsDone = true; };
-            if (StartSemaphore != null) StartSemaphore.WaitOne();
             RunState = "Starting";
             RunWorkerAsync(this);
         }

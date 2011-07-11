@@ -206,35 +206,41 @@ namespace ESMEWorkBench.ViewModels.Main
                     Console.WriteLine("Range complex {0} is selected!", _selectedRangeComplex.Name);
                     //if (_selectedRangeComplex.Name == "Jacksonville") System.Diagnostics.Debugger.Break();
 
-                    BackgroundTaskAggregator = new BackgroundTaskAggregator {TaskName = "Load range complex"};
-                    BackgroundTaskAggregator.RunWorkerCompleted += (s, e) => { IsRangeComplexListReady = true; };
+                    var overlaysDone = false;
+                    var bathymetryDone = false;
+                    var environmentDone = false;
+                    //BackgroundTaskAggregator = new BackgroundTaskAggregator {TaskName = "Load range complex"};
+                    //BackgroundTaskAggregator.RunWorkerCompleted += (s, e) => { IsRangeComplexListReady = true; };
                     var bt1 = new GenericBackgroundTask {WorkerSupportsCancellation = false, TaskName = "Load overlays"};
-                    bt1.DoWork += (s, e) =>
+                    bt1.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name, bt1);
+                    bt1.RunWorkerCompleted += (s, e) =>
                     {
-                        NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name, bt1);
-                        Console.WriteLine("Overlays done!");
+                        overlaysDone = true;
+                        IsRangeComplexListReady = (overlaysDone && bathymetryDone && environmentDone);
                     };
                     BackgroundTaskAggregator.BackgroundTasks.Add(bt1);
                     //_bw1.RunWorkerAsync();
 
                     var bt2 = new GenericBackgroundTask { WorkerSupportsCancellation = false, TaskName = "Load bathymetry data sets" };
-                    bt2.DoWork += (s, e) =>
+                    bt2.DoWork += (s, e) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name, bt2);
+                    bt2.RunWorkerCompleted += (s, e) =>
                     {
-                        NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name, bt2);
-                        Console.WriteLine("Bathymetry done!");
+                        bathymetryDone = true;
+                        IsRangeComplexListReady = (overlaysDone && bathymetryDone && environmentDone);
                     };
                     BackgroundTaskAggregator.BackgroundTasks.Add(bt2);
                     //_bw2.RunWorkerAsync();
 
                     var bt3 = new GenericBackgroundTask { WorkerSupportsCancellation = false, TaskName = "Load environment data sets"};
-                    bt3.DoWork += (s, e) =>
+                    bt3.DoWork += (s, e) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name, bt3);
+                    bt3.RunWorkerCompleted += (s, e) =>
                     {
-                        NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name, bt3);
-                        Console.WriteLine("Environment done!");
+                        environmentDone = true;
+                        IsRangeComplexListReady = (overlaysDone && bathymetryDone && environmentDone);
                     };
                     BackgroundTaskAggregator.BackgroundTasks.Add(bt3);
                     //_bw3.RunWorkerAsync();
-                    BackgroundTaskAggregator.Start();
+                    //BackgroundTaskAggregator.Start();
                 }
                 else
                 {
@@ -352,6 +358,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_isRangeComplexListReady == value) return;
                 _isRangeComplexListReady = value;
+                NotifyPropertyChanged(IsRangeComplexListReadyChangedEventArgs);
                 NotifyPropertyChanged(IsOverlayListReadyChangedEventArgs);
                 NotifyPropertyChanged(IsBathymetryListReadyChangedEventArgs);
                 NotifyPropertyChanged(IsEnvironmentListReadyChangedEventArgs);
@@ -540,7 +547,16 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(SelectedRangeComplex.Name);
+                var backgroundTask = new GenericBackgroundTask { WorkerSupportsCancellation = false, TaskName = "Load overlays" };
+                backgroundTask.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name, backgroundTask);
+                backgroundTask.RunWorkerCompleted += (s, e) =>
+                {
+                    SelectedOverlayDescriptor = NAEMOOverlayDescriptors.Find(item => item.Key == vm.OverlayName).Value;
+                    CommandManager.InvalidateRequerySuggested();
+                };
+
+                BackgroundTaskAggregator.BackgroundTasks.Add(backgroundTask);
+                //NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(SelectedRangeComplex.Name);
             }
         }
 
@@ -779,29 +795,23 @@ namespace ESMEWorkBench.ViewModels.Main
                 };
                 bathymetryExtractor.RunWorkerCompleted += (s, e) =>
                 {
-                    var bathymetry = ((DBDBBackgroundExtractor)s).Bathymetry;
-                    naemoBathymetryExporter.Bathymetry = bathymetry;
-                };
-                BackgroundTaskAggregator = new BackgroundTaskAggregator();
-                BackgroundTaskAggregator.BackgroundTasks.Add(bathymetryExtractor);
-                BackgroundTaskAggregator.BackgroundTasks.Add(naemoBathymetryExporter);
-                BackgroundTaskAggregator.TaskName = "Bathymetry data extraction";
-                BackgroundTaskAggregator.Start();
-                BackgroundTaskAggregator.RunWorkerCompleted += (s, e) =>
-                {
                     Bathymetry bathymetry;
                     var metadata = NAEMOBathymetryMetadata.FromBathymetryFile(destinationPath, out bathymetry);
+                    naemoBathymetryExporter.Bathymetry = bathymetry;
                     metadata.OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename);
                     metadata.Save();
-                    var bw1 = new BackgroundWorker();
-                    bw1.DoWork += (s1, e1) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name);
-                    bw1.RunWorkerCompleted += (s1, e1) =>
+                    var bt1 = new GenericBackgroundTask();
+                    bt1.DoWork += (s2, e2) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name);
+                    bt1.RunWorkerCompleted += (s3, e3) =>
                     {
                         SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors.Find(item => item.Key == Path.GetFileNameWithoutExtension(destinationPath)).Value;
                         CommandManager.InvalidateRequerySuggested();
                     };
-                    bw1.RunWorkerAsync();
+                    BackgroundTaskAggregator.BackgroundTasks.Add(bt1);
                 };
+                BackgroundTaskAggregator.BackgroundTasks.Add(bathymetryExtractor);
+                BackgroundTaskAggregator.BackgroundTasks.Add(naemoBathymetryExporter);
+                BackgroundTaskAggregator.TaskName = "Bathymetry data extraction";
             }
         }
 
@@ -1032,12 +1042,12 @@ namespace ESMEWorkBench.ViewModels.Main
                 BackgroundTaskAggregator.BackgroundTasks.Add(sedimentExtractor);
                 sedimentExtractor.RunWorkerCompleted += (s, e) => { foreach (var naemo in naemoEnvironmentExporters) naemo.Sediment = ((BSTBackgroundExtractor)s).Sediment; };
 
-                var temperatureAndSalinityFileWriter = new TemperatureAndSalinityFileWriter
-                {
-                        WorkerSupportsCancellation = false,
-                        DestinationPath = tempPath,
-                        TaskName = "Save soundspeed data"
-                };
+                //var temperatureAndSalinityFileWriter = new TemperatureAndSalinityFileWriter
+                //{
+                //        WorkerSupportsCancellation = false,
+                //        DestinationPath = tempPath,
+                //        TaskName = "Save soundspeed data"
+                //};
                 var averagers = selectedTimePeriods.Select(timePeriod => new SoundSpeedBackgroundAverager
                 {
                         WorkerSupportsCancellation = false,
@@ -1070,14 +1080,14 @@ namespace ESMEWorkBench.ViewModels.Main
                         extendedMonthlySoundSpeeds.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
                         //Console.WriteLine("soundspeed extractor for {0} complete. {1} extractors are still busy", extractor.TimePeriod, soundSpeedExtractors.Where(s => s.IsBusy).Count());
                         if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
-                        temperatureAndSalinityFileWriter.Temperature = monthlyTemperature;
-                        temperatureAndSalinityFileWriter.Salinity = monthlySalinity;
+                        //temperatureAndSalinityFileWriter.Temperature = monthlyTemperature;
+                        //temperatureAndSalinityFileWriter.Salinity = monthlySalinity;
                         foreach (var averager in averagers) averager.ExtendedMonthlySoundSpeeds = extendedMonthlySoundSpeeds;
                     };
                     soundSpeedExtractors.Add(soundSpeedExtractor);
                     BackgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
                 }
-                BackgroundTaskAggregator.BackgroundTasks.Add(temperatureAndSalinityFileWriter);
+                //BackgroundTaskAggregator.BackgroundTasks.Add(temperatureAndSalinityFileWriter);
                 foreach (var averager in averagers)
                 {
                     BackgroundTaskAggregator.BackgroundTasks.Add(averager);
@@ -1089,30 +1099,50 @@ namespace ESMEWorkBench.ViewModels.Main
                         foreach (var naemo in naemoEnvironmentExporters) naemo.ExtendedAndAveragedSoundSpeeds = extendedAndAveragedSoundSpeeds;
                     };
                 }
-                foreach (var naemo in naemoEnvironmentExporters) BackgroundTaskAggregator.BackgroundTasks.Add(naemo);
-                BackgroundTaskAggregator.TaskName = "Environmental data extraction";
-                BackgroundTaskAggregator.RunWorkerCompleted += (s, e) =>
+                var loadMetadataTasks = new List<GenericBackgroundTask>();
+                foreach (var naemo in naemoEnvironmentExporters)
                 {
-                    foreach (var timePeriod in selectedTimePeriods)
+                    BackgroundTaskAggregator.BackgroundTasks.Add(naemo);
+                    naemo.RunWorkerCompleted += (s, e) =>
                     {
-                        var metadataFilename = Path.Combine(environmentPath, vm.EnvironmentDescriptors.Find(descriptor => descriptor.TimePeriod == timePeriod).EnvironmentName + ".dat");
-                        var metadata = NAEMOEnvironmentMetadata.FromEnvironmentFile(metadataFilename);
-                        metadata.TimePeriod = timePeriod;
-                        metadata.Bounds = extractionArea;
-                        metadata.OverlayFilename = overlayName;
-                        metadata.BathymetryName = bathymetryName;
-                        metadata.Save();
-                    }
-                    var bw1 = new BackgroundWorker();
-                    bw1.DoWork += (s1, e1) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
-                    bw1.RunWorkerCompleted += (s1, e1) =>
-                    {
-                        SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors.Find(item => item.Key == vm.EnvironmentDescriptors[0].EnvironmentName).Value;
-                        CommandManager.InvalidateRequerySuggested();
+                        if (naemoEnvironmentExporters.Any(n => n.IsBusy)) return;
+                        foreach (var timePeriod in selectedTimePeriods)
+                        {
+                            var curEnvironment = vm.EnvironmentDescriptors.Find(
+                                                                                descriptor =>
+                                                                                descriptor.TimePeriod == timePeriod);
+                            var bt = new GenericBackgroundTask
+                            {
+                                TaskName = "Load environment metadata for " + curEnvironment.EnvironmentName
+                            };
+                            bt.DoWork += (s1, e1) =>
+                            {
+                                var metadataFilename = Path.Combine(environmentPath, curEnvironment.EnvironmentName + ".dat");
+                                var metadata = NAEMOEnvironmentMetadata.FromEnvironmentFile(metadataFilename);
+                                metadata.TimePeriod = timePeriod;
+                                metadata.Bounds = extractionArea;
+                                metadata.OverlayFilename = overlayName;
+                                metadata.BathymetryName = bathymetryName;
+                                metadata.Save();
+                            };
+                            bt.RunWorkerCompleted += (s1, e1) =>
+                            {
+                                if (loadMetadataTasks.Any(n => n.IsBusy)) return;
+                                var bt1 = new GenericBackgroundTask();
+                                bt1.DoWork += (s2, e2) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
+                                bt1.RunWorkerCompleted += (s3, e3) =>
+                                {
+                                    SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors.Find(item => item.Key == vm.EnvironmentDescriptors[0].EnvironmentName).Value;
+                                    CommandManager.InvalidateRequerySuggested();
+                                };
+                                BackgroundTaskAggregator.BackgroundTasks.Add(bt1);
+                            };
+                            loadMetadataTasks.Add(bt);
+                            BackgroundTaskAggregator.BackgroundTasks.Add(bt);
+                        }
                     };
-                    bw1.RunWorkerAsync();
-                };
-                BackgroundTaskAggregator.Start();
+                }
+                BackgroundTaskAggregator.TaskName = "Environmental data extraction";
             }
         }
 
