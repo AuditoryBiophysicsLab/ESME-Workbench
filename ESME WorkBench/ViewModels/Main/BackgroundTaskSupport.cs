@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel;
 using Cinch;
+using ESME.Views.Misc;
 using HRC.Utility;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -14,12 +11,14 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public BackgroundTaskAggregator BackgroundTaskAggregator
         {
-            get { return _backgroundTaskAggregator ?? (_backgroundTaskAggregator = new BackgroundTaskAggregator()); }
+            get { return _backgroundTaskAggregator; }
             set
             {
                 if (_backgroundTaskAggregator == value) return;
                 _backgroundTaskAggregator = value;
                 NotifyPropertyChanged(BackgroundTaskAggregatorChangedEventArgs);
+                if (_backgroundTaskAggregator != null)
+                    _backgroundTaskAggregator.RunWorkerCompleted += (s, e) => NotifyPropertyChanged(BackgroundTaskAggregatorChangedEventArgs);
             }
         }
 
@@ -41,7 +40,18 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return BackgroundTaskAggregator.IsBusy; }
         }
 
-        void ShowDetailedProgressHandler() { }
+        void ShowDetailedProgressHandler()
+        {
+            var vm = new BackgroundTaskStatusViewModel
+            {
+                BackgroundTaskAggregator = BackgroundTaskAggregator
+            };
+            var result = _visualizerService.ShowDialog("BackgroundTaskStatusView", vm);
+            if ((result.HasValue) && (result.Value))
+            {
+                
+            }
+        }
         #endregion
     }
 }

@@ -55,6 +55,28 @@ namespace ESMEWorkBench.ViewModels.Main
             return MapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
         }
 
+        #region RequeryCommand
+        public SimpleCommand<object, object> RequeryCommand
+        {
+            get
+            {
+                return _requery ??
+                       (_requery =
+                        new SimpleCommand<object, object>(delegate { return IsRequeryCommandEnabled; },
+                                                          delegate { RequeryHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _requery;
+
+        bool IsRequeryCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void RequeryHandler() { CommandManager.InvalidateRequerySuggested(); }
+        #endregion
+
         #region ViewActivatedCommand
         public SimpleCommand<object, object> ViewActivatedCommand
         {
@@ -171,7 +193,7 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return _selectedRangeComplex; }
             set
             {
-                if ((_selectedRangeComplex == value) || (!IsRangeComplexListReady)) return;
+                if (_selectedRangeComplex == value) return;
                 _selectedRangeComplex = value;
                 IsRangeComplexSelected = _selectedRangeComplex != null;
                 if ((_selectedRangeComplex != null) && (_selectedRangeComplex != _lastNonNullSimArea))
@@ -184,42 +206,35 @@ namespace ESMEWorkBench.ViewModels.Main
                     Console.WriteLine("Range complex {0} is selected!", _selectedRangeComplex.Name);
                     //if (_selectedRangeComplex.Name == "Jacksonville") System.Diagnostics.Debugger.Break();
 
-                    if ((_bw1 != null) && (_bw1.IsBusy)) _bw1.CancelAsync();
-                    _bw1 = new BackgroundWorker {WorkerSupportsCancellation = true};
-                    _bw1.DoWork += (s, e) =>
+                    BackgroundTaskAggregator = new BackgroundTaskAggregator {TaskName = "Load range complex"};
+                    BackgroundTaskAggregator.RunWorkerCompleted += (s, e) => { IsRangeComplexListReady = true; };
+                    var bt1 = new GenericBackgroundTask {WorkerSupportsCancellation = false, TaskName = "Load overlays"};
+                    bt1.DoWork += (s, e) =>
                     {
-                        NotifyPropertyChanged(IsRangeComplexListReadyChangedEventArgs);
-                        NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name, _bw1);
+                        NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name, bt1);
+                        Console.WriteLine("Overlays done!");
                     };
-                    _bw1.RunWorkerCompleted += (s, e) =>
-                    {
-                        _bw1 = null;
-                        CommandManager.InvalidateRequerySuggested();
-                        NotifyPropertyChanged(IsRangeComplexListReadyChangedEventArgs);
-                    };
-                    _bw1.RunWorkerAsync();
+                    BackgroundTaskAggregator.BackgroundTasks.Add(bt1);
+                    //_bw1.RunWorkerAsync();
 
-                    if ((_bw2 != null) && (_bw2.IsBusy)) _bw2.CancelAsync();
-                    _bw2 = new BackgroundWorker {WorkerSupportsCancellation = true};
-                    _bw2.DoWork += (s, e) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name, _bw2);
-                    _bw2.RunWorkerCompleted += (s, e) =>
+                    var bt2 = new GenericBackgroundTask { WorkerSupportsCancellation = false, TaskName = "Load bathymetry data sets" };
+                    bt2.DoWork += (s, e) =>
                     {
-                        _bw2 = null;
-                        CommandManager.InvalidateRequerySuggested();
-                        NotifyPropertyChanged(IsRangeComplexListReadyChangedEventArgs);
+                        NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name, bt2);
+                        Console.WriteLine("Bathymetry done!");
                     };
-                    _bw2.RunWorkerAsync();
+                    BackgroundTaskAggregator.BackgroundTasks.Add(bt2);
+                    //_bw2.RunWorkerAsync();
 
-                    if ((_bw3 != null) && (_bw3.IsBusy)) _bw3.CancelAsync();
-                    _bw3 = new BackgroundWorker {WorkerSupportsCancellation = true};
-                    _bw3.DoWork += (s, e) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name, _bw3);
-                    _bw3.RunWorkerCompleted += (s, e) =>
+                    var bt3 = new GenericBackgroundTask { WorkerSupportsCancellation = false, TaskName = "Load environment data sets"};
+                    bt3.DoWork += (s, e) =>
                     {
-                        _bw3 = null;
-                        CommandManager.InvalidateRequerySuggested();
-                        NotifyPropertyChanged(IsRangeComplexListReadyChangedEventArgs);
+                        NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name, bt3);
+                        Console.WriteLine("Environment done!");
                     };
-                    _bw3.RunWorkerAsync();
+                    BackgroundTaskAggregator.BackgroundTasks.Add(bt3);
+                    //_bw3.RunWorkerAsync();
+                    BackgroundTaskAggregator.Start();
                 }
                 else
                 {
@@ -332,18 +347,14 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public bool IsRangeComplexListReady
         {
-            get
+            get { return _isRangeComplexListReady; }
+            set
             {
-                var result = ((_bw1 == null) && (_bw2 == null) && (_bw3 == null));
-                if (_isRangeComplexListReady != result)
-                {
-                    _isRangeComplexListReady = result;
-                    if (_isRangeComplexListReady) NotifyPropertyChanged(SelectedSimAreaChangedEventArgs);
-                    NotifyPropertyChanged(IsOverlayListReadyChangedEventArgs);
-                    NotifyPropertyChanged(IsBathymetryListReadyChangedEventArgs);
-                    NotifyPropertyChanged(IsEnvironmentListReadyChangedEventArgs);
-                }
-                return result;
+                if (_isRangeComplexListReady == value) return;
+                _isRangeComplexListReady = value;
+                NotifyPropertyChanged(IsOverlayListReadyChangedEventArgs);
+                NotifyPropertyChanged(IsBathymetryListReadyChangedEventArgs);
+                NotifyPropertyChanged(IsEnvironmentListReadyChangedEventArgs);
             }
         }
 
@@ -366,7 +377,6 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        BackgroundWorker _bw1, _bw2, _bw3;
         static readonly PropertyChangedEventArgs RangeComplexIsSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsRangeComplexSelected);
         bool _isRangeComplexSelected;
 
@@ -730,7 +740,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #region NewBathymetryCommand
         public SimpleCommand<object, object> NewBathymetryCommand
         {
-            get { return _newBathymetry ?? (_newBathymetry = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { NewBathymetryHandler(); })); }
+            get { return _newBathymetry ?? (_newBathymetry = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected && SelectedOverlayDescriptor != null; }, delegate { NewBathymetryHandler(); })); }
         }
 
         SimpleCommand<object, object> _newBathymetry;
@@ -937,7 +947,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _newEnvironment ??
                        (_newEnvironment =
-                        new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; },
+                        new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected && SelectedOverlayDescriptor != null && SelectedBathymetryDescriptor != null; },
                                                           delegate { NewEnvironmentHandler(); }));
             }
         }

@@ -210,6 +210,7 @@ namespace ESME.Views.EnvironmentBuilder
                 return;
             }
 
+            EnvironmentDescriptors.Clear();
             var sb = new StringBuilder();
             foreach (var timePeriod in MonthCheckboxes.SelectedTimePeriods)
                 EnvironmentDescriptors.Add(new EnvironmentDescriptor

@@ -1,0 +1,28 @@
+﻿<Window x:Class="ESME.Views.Misc.BackgroundTaskStatusView" 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:Controls="clr-namespace:ESME.Views.Controls" 
+        Title="Background Task Status" 
+        MaxHeight="{Binding MaxHeight}"
+        SizeToContent="WidthAndHeight">
+	<Window.Resources>
+		<BooleanToVisibilityConverter x:Key="boolToVisibilityConverter" />
+	</Window.Resources>
+	<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+		<StackPanel HorizontalAlignment="Stretch"  Visibility="{Binding BackgroundTaskAggregator.IsBusy, Converter={StaticResource boolToVisibilityConverter}}" Margin="0 5 0 5">
+			<Controls:BackgroundTaskProgress BackgroundTask="{Binding BackgroundTaskAggregator}" HorizontalContentAlignment="Stretch" />
+			<Expander Header="{Binding BackgroundTaskAggregator.ActiveTaskMessage}">
+				<ListBox ItemsSource="{Binding BackgroundTaskAggregator.BackgroundTasks}" HorizontalContentAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Auto">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<Controls:BackgroundTaskProgress BackgroundTask="{Binding}" Visibility="{Binding IsBusy, Converter={StaticResource boolToVisibilityConverter}}" />
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</Expander>
+		</StackPanel>
+		<DockPanel LastChildFill="False" Margin="5 10">
+			<Button Width="90" Margin="10 0 0 0" IsCancel="True" Content="Close" DockPanel.Dock="Right" />
+		</DockPanel>
+	</StackPanel>
+</Window>
