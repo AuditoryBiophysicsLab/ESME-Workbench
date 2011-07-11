@@ -136,11 +136,6 @@ namespace ESME.TransmissionLoss.CASS
             {
                 double lat;
                 double lon;
-                if (packet.Count < 2)
-                {
-                    File.Delete(environmentFileName);
-                    return null;
-                }
                 if (!double.TryParse(packet[0].Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out lat)) throw new DataMisalignedException("");
                 if (!double.TryParse(packet[1].Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out lon)) throw new DataMisalignedException("");
                 var retpacket = new NAEMOEnvironmentLocation(new EarthCoordinate(lat, lon))
