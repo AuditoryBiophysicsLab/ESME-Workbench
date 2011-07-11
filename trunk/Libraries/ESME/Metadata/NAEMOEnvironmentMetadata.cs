@@ -18,13 +18,22 @@ namespace ESME.Metadata
         public static NAEMOEnvironmentMetadata FromEnvironmentFile(string naemoEnvironmentFilename)
         {
             var metaDataFilename = Path.Combine(Path.GetDirectoryName(naemoEnvironmentFilename), Path.GetFileNameWithoutExtension(naemoEnvironmentFilename) + ".xml");
-            var environmentFile = NAEMOEnvironmentFile.Load(naemoEnvironmentFilename);
-            var result = new NAEMOEnvironmentMetadata
+            NAEMOEnvironmentMetadata result = null;
+            try
             {
-                TimePeriod = environmentFile.TimePeriod,
-                Filename = metaDataFilename,
-            };
-            result.Locations.AddRange(environmentFile.Locations);
+                var environmentFile = NAEMOEnvironmentFile.Load(naemoEnvironmentFilename);
+                if (environmentFile == null) return null;
+                result = new NAEMOEnvironmentMetadata
+                {
+                        TimePeriod = environmentFile.TimePeriod,
+                        Filename = metaDataFilename,
+                };
+                result.Locations.AddRange(environmentFile.Locations);
+            }
+            catch
+            {
+                File.Delete(naemoEnvironmentFilename);
+            }
 
             return result;
         }

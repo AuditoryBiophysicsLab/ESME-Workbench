@@ -120,6 +120,7 @@ namespace ESME.Overlay
                 if (backgroundTask != null) backgroundTask.Value++;
                 if (envItem.Value.Metadata != null) continue;
                 envItem.Value.Metadata = NAEMOEnvironmentMetadata.FromEnvironmentFile(envItem.Value.DataFilename);
+                if (envItem.Value.Metadata == null) continue;
                 envItem.Value.Metadata.Save();
             }
         }
