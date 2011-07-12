@@ -21,7 +21,7 @@ namespace ESME.Overlay
                 {
                     var retval = new StringBuilder();
                     retval.Append("POINT(");
-                    foreach (var coord in EarthCoordinates)
+                    foreach (var coord in _earthCoordinates)
                         retval.Append(string.Format("{0} {1}, ", coord.Longitude, coord.Latitude));
                     retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
                     retval.Append(")");

@@ -390,15 +390,21 @@ namespace ESME.Views.Locations
                 ValidationErrorText += "Select EITHER an existing overlay file OR coordinates for a new Operational Limit overlay\n";
             if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) && !File.Exists(ExistingSimAreaOverlayFilename))
                 ValidationErrorText += "Selected overlay file does not exist\n";
-            if (string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)) 
+            if (string.IsNullOrEmpty(NewOpAreaOverlayCoordinates) && (string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) || !File.Exists(ExistingOpAreaOverlayFilename))) 
                 ValidationErrorText += "Baseline operational area must be defined\n";
-            if (string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)) 
+            if (!string.IsNullOrEmpty(NewOpAreaOverlayCoordinates) && (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename)))
+                ValidationErrorText += "Conflicting operational areas defined\n.";
+            if (string.IsNullOrEmpty(NewSimAreaOverlayCoordinates) && (string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) || !File.Exists(ExistingSimAreaOverlayFilename)))  
                 ValidationErrorText += "Baseline simulation area must be defined\n";
+            if (!string.IsNullOrEmpty(NewSimAreaOverlayCoordinates) && (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename)))
+                ValidationErrorText += "Conflicting simulation areas defined\n.";
             if (!string.IsNullOrEmpty(ValidationErrorText)) return;
-            List<EarthCoordinate> opCoords = null;
-            List<EarthCoordinate> simCoords = null;
-            OpBounds = ValidateOverlayCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords);
-            SimBounds = ValidateOverlayCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords);
+
+            List<EarthCoordinate> opCoords;
+            List<EarthCoordinate> simCoords;
+            OpBounds = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates) ? ValidateOverlayCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords) : ValidateOverlayFile(ExistingOpAreaOverlayFilename, "Op Limits", out opCoords);
+            SimBounds = !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates) ? ValidateOverlayCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords) : ValidateOverlayFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simCoords);
+
             if (OpBounds != null) NewOpAreaOverlayEarthCoordinates = opCoords;
             if (SimBounds != null) NewSimAreaOverlayEarthCoordinates = simCoords;
 
@@ -434,6 +440,26 @@ namespace ESME.Views.Locations
             NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
         }
 
+        private GeoRect ValidateOverlayFile(string overlayFileName, string overlayName, out List<EarthCoordinate> earthCoordinates)
+        {
+            earthCoordinates = null;
+            try
+            {
+                var myOvr = new OverlayFile(overlayFileName);
+                if (myOvr.Shapes.Length != 1 || !myOvr.Shapes[0].IsUsableAsPerimeter)
+                    ValidationErrorText += "Specified "+ overlayName + " file is invalid\n";
+                else
+                {
+                    earthCoordinates = myOvr.Shapes[0].EarthCoordinates;
+                    return new GeoRect(myOvr.Shapes[0].BoundingBox);
+                }
+            }
+            catch (Exception e)
+            {
+                ValidationErrorText += "Error loading " + overlayFileName + ": " + e.Message + "\n";
+            }
+            return null;
+        }
         private GeoRect ValidateOverlayCoordinates(string fieldData, string overlayName, out List<EarthCoordinate> earthCoordinates)
         {
             var lineSeparators = new[] { '\r', '\n' };

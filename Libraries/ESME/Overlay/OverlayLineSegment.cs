@@ -38,14 +38,14 @@ namespace ESME.Overlay
         {
             get
             {
-                if (EarthCoordinates.Count < 2) return null;
+                if (_earthCoordinates.Count < 2) return null;
                 if (MyWellKnownText == null)
                 {
                     var retval = new StringBuilder();
                     retval.Append("LINESTRING(");
-                    foreach (var coord in EarthCoordinates)
+                    foreach (var coord in _earthCoordinates)
                         retval.Append(string.Format("{0} {1}, ", coord.Latitude, coord.Longitude));
-                    retval.Append(string.Format("{0} {1}, ", EarthCoordinates[0].Latitude, EarthCoordinates[0].Longitude));
+                    retval.Append(string.Format("{0} {1}, ", _earthCoordinates[0].Latitude, _earthCoordinates[0].Longitude));
                     retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
                     retval.Append(")");
                     MyWellKnownText = retval.ToString();
@@ -128,16 +128,16 @@ namespace ESME.Overlay
             if (IsColinearWith(that))
             {
                 // If they are colinear, check if our bounding box contains either of the other segment's endpoints
-                if (BoundingBox.Contains((Point)that.EarthCoordinates[0]) ||
-                    (BoundingBox.Contains((Point)that.EarthCoordinates[1])))
+                if (BoundingBox.Contains((Point)that._earthCoordinates[0]) ||
+                    (BoundingBox.Contains((Point)that._earthCoordinates[1])))
                     // If it does, we overlap the other segment
                     return true;
 
                 // If it doesn't, then check if the other segment overlaps us.  This can happen if the other segment
                 // completely contains us, and is also longer than us. If that turns out to be the case, then one or
                 // both of our endpoints will be contained in the other segment's bounding box.
-                if (that.BoundingBox.Contains((Point)EarthCoordinates[0]) ||
-                    (that.BoundingBox.Contains((Point)EarthCoordinates[1])))
+                if (that.BoundingBox.Contains((Point)_earthCoordinates[0]) ||
+                    (that.BoundingBox.Contains((Point)_earthCoordinates[1])))
                     // If it does, we overlap the other segment
                     return true;
             }
@@ -153,7 +153,7 @@ namespace ESME.Overlay
         {
             if (IsVertical && that.IsVertical)
             {
-                if (EarthCoordinates[0].Longitude == that.EarthCoordinates[0].Longitude)
+                if (_earthCoordinates[0].Longitude == that._earthCoordinates[0].Longitude)
                     return true;
             }
             if (IsParallelTo(that))

@@ -194,12 +194,12 @@ namespace ESME.Overlay
             IsClosed = false;
 
             // If we have less than four points, it's not possible for this shape to be closed
-            if (EarthCoordinates.Count < 4)
+            if (_earthCoordinates.Count < 4)
                 return;
 
             // If the first point and the last point are identical, then this shape IS closed
-            if ((EarthCoordinates[0].Longitude == EarthCoordinates[EarthCoordinates.Count - 1].Longitude) &&
-                (EarthCoordinates[0].Latitude == EarthCoordinates[EarthCoordinates.Count - 1].Latitude))
+            if ((_earthCoordinates[0].Longitude == _earthCoordinates[_earthCoordinates.Count - 1].Longitude) &&
+                (_earthCoordinates[0].Latitude == _earthCoordinates[_earthCoordinates.Count - 1].Latitude))
                 IsClosed = true;
         }
 
@@ -214,23 +214,23 @@ namespace ESME.Overlay
 
             //% loop through all edges of the polygon
             //for i=1:n % edge from V(i) to V(i+1)
-            for (var i = 0; i < (EarthCoordinates.Count - 1); i++)
+            for (var i = 0; i < (_earthCoordinates.Count - 1); i++)
             {
                 // if (((V(i).y <= P.y) && (V(i+1).y > P.y)) ||    % an upward crossing
                 //     ((V(i).y > P.y) && (V(i+1).y <= P.y)))      % a downward crossing
                 //     vt = (P.y - V(i).y) / (V(i+1).y - V(i).y);  % compute the actual edge-ray intersect x-coordinate
-                if (((EarthCoordinates[i].Latitude <= coordinate.Latitude) &&
-                     (EarthCoordinates[i + 1].Latitude > coordinate.Latitude)) ||
-                    ((EarthCoordinates[i].Latitude > coordinate.Latitude) &&
-                     (EarthCoordinates[i + 1].Latitude <= coordinate.Latitude)))
+                if (((_earthCoordinates[i].Latitude <= coordinate.Latitude) &&
+                     (_earthCoordinates[i + 1].Latitude > coordinate.Latitude)) ||
+                    ((_earthCoordinates[i].Latitude > coordinate.Latitude) &&
+                     (_earthCoordinates[i + 1].Latitude <= coordinate.Latitude)))
                 {
-                    var vt = (coordinate.Latitude - EarthCoordinates[i].Latitude) /
-                                (EarthCoordinates[i + 1].Latitude - EarthCoordinates[i].Latitude);
+                    var vt = (coordinate.Latitude - _earthCoordinates[i].Latitude) /
+                                (_earthCoordinates[i + 1].Latitude - _earthCoordinates[i].Latitude);
                     // if (P.x < (V(i).x + vt * (V(i+1).x - V(i).x))) % P.x < intersect
                     //     cn = cn + 1;   % a valid crossing of y=P.y right of P.x
                     if (coordinate.Longitude <
-                        (EarthCoordinates[i].Longitude +
-                         (vt * (EarthCoordinates[i + 1].Longitude - EarthCoordinates[i].Longitude))))
+                        (_earthCoordinates[i].Longitude +
+                         (vt * (_earthCoordinates[i + 1].Longitude - _earthCoordinates[i].Longitude))))
                         crossingNumber++;
                 }
             }
@@ -244,12 +244,12 @@ namespace ESME.Overlay
         {
             get
             {
-                if (EarthCoordinates.Count < 2) return null;
+                if (_earthCoordinates.Count < 2) return null;
                 if (MyWellKnownText == null)
                 {
                     var retval = new StringBuilder();
                     retval.Append("LINESTRING(");
-                    foreach (var coord in EarthCoordinates)
+                    foreach (var coord in _earthCoordinates)
                         retval.Append(string.Format("{0} {1}, ", coord.Longitude, coord.Latitude));
                     retval.Remove(retval.Length - 2, 2); // Lose the last comma and space
                     retval.Append(")");
