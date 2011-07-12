@@ -275,6 +275,24 @@ namespace ESME.Views.Locations
             }
         }
 
+        #region public string ReferencePointLatitudeString { get; set; }
+
+        public string ReferencePointLatitudeString
+        {
+            get { return _referencePointLatitudeString; }
+            set
+            {
+                if (_referencePointLatitudeString == value) return;
+                _referencePointLatitudeString = value;
+                NotifyPropertyChanged(ReferencePointLatitudeStringChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ReferencePointLatitudeStringChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLatitudeString);
+        string _referencePointLatitudeString;
+
+        #endregion
+
         #endregion
 
         #region ReferencePointLongitudeChangedCommand
