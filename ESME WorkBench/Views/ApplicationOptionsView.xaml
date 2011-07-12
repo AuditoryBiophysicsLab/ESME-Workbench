@@ -4,7 +4,9 @@
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:Views="clr-namespace:ESMEWorkBench.Views"
         Title="User Options"
-        SizeToContent="WidthAndHeight">
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow">
 	<DockPanel LastChildFill="True">
 		<DockPanel LastChildFill="False"
 		           Margin="10"

@@ -17,6 +17,11 @@
                 <i:Interaction.Behaviors>
                     <cinch:NumericTextBoxBehaviour />
                 </i:Interaction.Behaviors>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="TextChanged">
+                        <cinch:EventToCommandTrigger Command="{Binding BufferZoneSizeTextChangedCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
             </TextBox>
             <!-- <ComboBox ItemsSource="{Binding BufferZoneUnits}" SelectedItem="{Binding SelectedItem}"/> -->
         </StackPanel>

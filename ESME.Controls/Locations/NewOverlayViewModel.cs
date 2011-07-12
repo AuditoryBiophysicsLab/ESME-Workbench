@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using Cinch;
 using ESME.Data;
@@ -24,7 +25,7 @@ namespace ESME.Views.Locations
 
         #region public string  SimAreaFolder { get; set; }
 
-        public string  SimAreaFolder
+        public string SimAreaFolder
         {
             get { return _simAreaFolder; }
             set
@@ -36,7 +37,7 @@ namespace ESME.Views.Locations
         }
 
         private static readonly PropertyChangedEventArgs SimAreaFolderChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.SimAreaFolder);
-        private string  _simAreaFolder;
+        private string _simAreaFolder;
 
         #endregion
 
@@ -75,10 +76,10 @@ namespace ESME.Views.Locations
         private string _overlayCoordinates;
 
         #endregion
-        
+
         List<EarthCoordinate> OverlayEarthCoordinates { get; set; }
         private string LocationName { get; set; }
-      
+
         #region OkCommand
 
         public SimpleCommand<object, object> OkCommand
@@ -123,8 +124,8 @@ namespace ESME.Views.Locations
         void OkCommandHandler()
         {
             if (!OverlayName.EndsWith(".ovr")) OverlayName += ".ovr";
-            var overlayFileName = Path.Combine(SimAreaFolder,LocationName,"Areas",OverlayName);
-            WriteOverlayFile(overlayFileName,OverlayEarthCoordinates);
+            var overlayFileName = Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName);
+            WriteOverlayFile(overlayFileName, OverlayEarthCoordinates);
 
             CloseActivePopUpCommand.Execute(true);
         }
@@ -154,8 +155,51 @@ namespace ESME.Views.Locations
 
         void ClearCoordinatesCommandHandler()
         {
-           OverlayCoordinates = "";
+            OverlayCoordinates = "";
         }
+
+        #endregion
+
+        #region OverlayNameChangedCommand
+
+        public SimpleCommand<object, object> OverlayNameChangedCommand
+        {
+            get
+            {
+                return _overlayNameChanged ??
+                       (_overlayNameChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
+                                OverlayName = sender.Text;
+                        }));
+            }
+        }
+
+        private SimpleCommand<object, object> _overlayNameChanged;
+        #endregion
+
+        #region OverlayCoordinatesChangedCommand
+
+        public SimpleCommand<object, object> OverlayCoordinatesChangedCommand
+        {
+            get
+            {
+                return _overlayCoordinatesChanged ??
+                       (_overlayCoordinatesChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
+                                OverlayCoordinates = sender.Text;
+                        }));
+            }
+        }
+
+        private SimpleCommand<object, object> _overlayCoordinatesChanged;
 
         #endregion
 
@@ -197,14 +241,14 @@ namespace ESME.Views.Locations
             ValidationErrorText = "";
             if (string.IsNullOrEmpty(OverlayName))
                 ValidationErrorText += "The Overlay file must have a name\n";
-            if ((OverlayName != null && File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName))) || File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName + ".ovr")))
-                ValidationErrorText += "An overlay file with the specified file name already exists.";
+            if(((OverlayName != null && File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName))) || File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName + ".ovr"))))
+                ValidationErrorText += "An overlay file with the specified file name already exists.\n";
             if (string.IsNullOrEmpty(OverlayCoordinates))
                 ValidationErrorText += "No Overlay Coordinates have been entered\n";
             if (!string.IsNullOrEmpty(ValidationErrorText)) return;
             List<EarthCoordinate> coords;
             Bounds = ValidateOverlayCoordinates(OverlayCoordinates, "Op Limits", out coords);
-            
+
             if (Bounds != null) OverlayEarthCoordinates = coords;
             NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
         }
@@ -213,7 +257,7 @@ namespace ESME.Views.Locations
         {
             var lineSeparators = new[] { '\r', '\n' };
             var lines = fieldData.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length < 4) ValidationErrorText += overlayName +": There must be at least four points given to define an area\n";
+            if (lines.Length < 4) ValidationErrorText += overlayName + ": There must be at least four points given to define an area\n";
             earthCoordinates = new List<EarthCoordinate>();
             var lineCount = 0;
             foreach (var line in lines)
