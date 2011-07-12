@@ -10,7 +10,7 @@ namespace ESME.Overlay
 {
     public abstract class OverlayShape
     {
-        protected List<EarthCoordinate> EarthCoordinates;
+        protected List<EarthCoordinate> _earthCoordinates;
         protected string MyWellKnownText;
 
         protected OverlayShape()
@@ -33,8 +33,11 @@ namespace ESME.Overlay
             Color = color;
             Width = width;
             LineStyle = lineStyle;
-            EarthCoordinates = new List<EarthCoordinate>();
+            _earthCoordinates = new List<EarthCoordinate>();
         }
+
+        public virtual List<EarthCoordinate> EarthCoordinates { get { return new List<EarthCoordinate>(_earthCoordinates); } }
+
         public virtual bool IsClosed
         {
             get { throw new NotImplementedException(); }
@@ -62,7 +65,7 @@ namespace ESME.Overlay
 
         public EarthCoordinate Location
         {
-            get { return EarthCoordinates[0]; }
+            get { return _earthCoordinates[0]; }
             //set { Move(value); }
         }
 
@@ -73,39 +76,39 @@ namespace ESME.Overlay
 
         protected EarthCoordinate this[int index]
         {
-            get { return EarthCoordinates[index]; }
-            set { EarthCoordinates[index] = value; }
+            get { return _earthCoordinates[index]; }
+            set { _earthCoordinates[index] = value; }
         }
 
         protected int Length
         {
-            get { return EarthCoordinates.Count(); }
+            get { return _earthCoordinates.Count(); }
         }
 
         private void Move(EarthCoordinate newLocation)
         {
-            double bearingDegrees = EarthCoordinates[0].BearingTo(newLocation);
-            double distanceMeters = EarthCoordinates[0].DistanceTo(newLocation);
+            double bearingDegrees = _earthCoordinates[0].BearingTo(newLocation);
+            double distanceMeters = _earthCoordinates[0].DistanceTo(newLocation);
 
             Move(bearingDegrees, distanceMeters);
         }
 
         private void Move(double bearingDegrees, double distanceMeters)
         {
-            foreach (var cur in EarthCoordinates)
+            foreach (var cur in _earthCoordinates)
                 cur.Move(bearingDegrees, distanceMeters);
         }
 
         protected void Add(EarthCoordinate newPoint)
         {
-            EarthCoordinates.Add(newPoint);
-            if (EarthCoordinates.Count > 1)
+            _earthCoordinates.Add(newPoint);
+            if (_earthCoordinates.Count > 1)
                 CalculateBoundingBox();
         }
 
         protected void Add(EarthCoordinate[] newPoints)
         {
-            EarthCoordinates.AddRange(newPoints);
+            _earthCoordinates.AddRange(newPoints);
             CalculateBoundingBox();
         }
 
@@ -115,7 +118,7 @@ namespace ESME.Overlay
             var south = 90.0;
             var east = -180.0;
             var west = 180.0;
-            foreach (var curPoint in EarthCoordinates)
+            foreach (var curPoint in _earthCoordinates)
             {
                 north = Math.Max(curPoint.Latitude, north);
                 south = Math.Min(curPoint.Latitude, south);
