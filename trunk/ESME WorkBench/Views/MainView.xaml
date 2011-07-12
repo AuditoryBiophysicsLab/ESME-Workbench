@@ -13,7 +13,7 @@
                 xmlns:app="clr-namespace:ESMEWorkBench" 
                 mef:ViewModelLocator.ViewModel="MainViewModel"
                 SnapsToDevicePixels="True"
-                Title="{Binding DecoratedExperimentName, StringFormat=ESME WorkBench: {0}}"
+                Title="ESME WorkBench 2011"
                 Icon="..\Wave.ico"
                 Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
                 Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
@@ -387,9 +387,9 @@
                                       IsEnabled="{Binding IsRangeComplexListReady}">
                         <r:RibbonGallery Margin="0"
                     			         VerticalContentAlignment="Center"
-								         SelectedValue="{Binding SelectedRangeComplex}"
+								         SelectedValue="{Binding SelectedRangeComplexDescriptor}"
                     			         MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding SimAreaCSV}">
+                            <r:RibbonGalleryCategory ItemsSource="{Binding RangeComplexDescriptors}">
                                 <r:RibbonGalleryCategory.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Vertical"
@@ -399,7 +399,7 @@
                                 </r:RibbonGalleryCategory.ItemsPanel>
                                 <r:RibbonGalleryCategory.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Name}" />
+                                        <TextBlock Text="{Binding Key}" />
                                     </DataTemplate>
                                 </r:RibbonGalleryCategory.ItemTemplate>
                                 <r:RibbonGalleryCategory.Style>

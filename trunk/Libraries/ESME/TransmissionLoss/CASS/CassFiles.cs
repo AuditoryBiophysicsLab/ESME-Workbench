@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using ESME.Data;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.NEMO;
 using HRC.Navigation;
@@ -72,8 +73,8 @@ namespace ESME.TransmissionLoss.CASS
         static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName)
         {
             var nemoScenario = nemoFile.Scenario;
-            var simAreaFile = SimAreaCSV.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"));
-            var simAreaData = simAreaFile[nemoScenario.SimAreaName];
+            var simAreaFile = RangeComplexDescriptors.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"));
+            var rangeComplex = ((RangeComplexDescriptor)simAreaFile[nemoScenario.SimAreaName]).Data;
 
             var inputFileName = string.Format("base-{0}-{1}-{2}-{3}.inp", simulatorName, platform.Name, platform.Id, timePeriod);
             var batchFileName = "run_" + Path.GetFileNameWithoutExtension(inputFileName) + ".bat";
@@ -137,7 +138,7 @@ namespace ESME.TransmissionLoss.CASS
                 writer.WriteLine("Range Complex                           ,{0}", nemoScenario.SimAreaName);
                 writer.WriteLine("Sim Area                                ,{0}", nemoScenario.SimAreaName);
                 writer.WriteLine("Event Name                              ,{0}", nemoScenario.EventName);
-                writer.WriteLine("Reference Location                      ,{0:0.000} DEG, {1:0.000} DEG", simAreaData.Latitude, simAreaData.Longitude);
+                writer.WriteLine("Reference Location                      ,{0:0.000} DEG, {1:0.000} DEG", rangeComplex.Latitude, rangeComplex.Longitude);
                 float stepCount;
                 float stepSize;
                 switch (simulatorName)
