@@ -25,7 +25,7 @@
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Column="0" LastChildFill="True">
                 <TextBlock DockPanel.Dock="Left" Text="Reference point latitude:" />
-                <TextBox DockPanel.Dock="Left" MinWidth="75" Text="{Binding ReferencePointLatitude}" >
+                <TextBox DockPanel.Dock="Left" MinWidth="75" Text="{Binding ReferencePointLatitudeString}" >
                     <i:Interaction.Behaviors>
                         <cinch:NumericTextBoxBehaviour />
                     </i:Interaction.Behaviors>
