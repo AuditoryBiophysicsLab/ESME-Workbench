@@ -12,6 +12,7 @@ using System.Windows.Threading;
 using Cinch;
 using ESME;
 using ESME.Environment;
+using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Metadata;
 using ESME.Overlay;
@@ -31,10 +32,10 @@ namespace ESMEWorkBench.ViewModels.Main
         void InitializeEnvironmentTab()
         {
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
-            SimAreaCSV = SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+            RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
             //if (_simAreaCSVWatcher != null) _simAreaCSVWatcher.Dispose();
             //_simAreaCSVWatcher = new FileSystemWatcher(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv");
-            //_simAreaCSVWatcher.Changed += (s, e) => SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+            //_simAreaCSVWatcher.Changed += (s, e) => RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
             //_simAreaCSVWatcher.EnableRaisingEvents = true;
         }
 
@@ -167,44 +168,44 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region Range Complex ribbon group
 
-        #region public SimAreaCSV SimAreaCSV { get; set; }
+        #region public RangeComplexDescriptors RangeComplexDescriptors { get; set; }
 
-        public SimAreaCSV SimAreaCSV
+        public RangeComplexDescriptors RangeComplexDescriptors
         {
-            get { return _simAreaCSV; }
+            get { return _rangeComplexDescriptors; }
             set
             {
-                if (_simAreaCSV == value) return;
-                _simAreaCSV = value;
+                if (_rangeComplexDescriptors == value) return;
+                _rangeComplexDescriptors = value;
                 NotifyPropertyChanged(SimAreaCSVChangedEventArgs);
-                SelectedRangeComplex = _simAreaCSV[0];
+                SelectedRangeComplexDescriptor = _rangeComplexDescriptors[0].Value;
             }
         }
 
-        static readonly PropertyChangedEventArgs SimAreaCSVChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SimAreaCSV);
-        SimAreaCSV _simAreaCSV;
+        static readonly PropertyChangedEventArgs SimAreaCSVChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RangeComplexDescriptors);
+        RangeComplexDescriptors _rangeComplexDescriptors;
 
         #endregion
 
-        #region public SimAreaDescriptor SelectedRangeComplex { get; set; }
+        #region public RangeComplexDescriptor SelectedRangeComplexDescriptor { get; set; }
 
-        public SimAreaDescriptor SelectedRangeComplex
+        public RangeComplexDescriptor SelectedRangeComplexDescriptor
         {
-            get { return _selectedRangeComplex; }
+            get { return _selectedRangeComplexDescriptor; }
             set
             {
-                if (_selectedRangeComplex == value) return;
-                _selectedRangeComplex = value;
-                IsRangeComplexSelected = _selectedRangeComplex != null;
-                if ((_selectedRangeComplex != null) && (_selectedRangeComplex != _lastNonNullSimArea))
+                if (_selectedRangeComplexDescriptor == value) return;
+                _selectedRangeComplexDescriptor = value;
+                IsRangeComplexSelected = _selectedRangeComplexDescriptor != null;
+                if ((_selectedRangeComplexDescriptor != null) && (_selectedRangeComplexDescriptor != _lastNonNullRangeComplex))
                 {
-                    _lastNonNullSimArea = _selectedRangeComplex;
+                    _lastNonNullRangeComplex = _selectedRangeComplexDescriptor;
                     SelectedRangeComplexInfo = string.Format("Name: {0}\nReference Point: ({1}, {2})\nHeight: {3}\nGeoid Separation: {4}\nOps Limit: {5}\nSim Limit: {6}",
-                                                             _selectedRangeComplex.Name, Math.Round(_selectedRangeComplex.Latitude, 5), Math.Round(_selectedRangeComplex.Longitude, 5),
-                                                             _selectedRangeComplex.Height, _selectedRangeComplex.GeoidSeparation, SelectedRangeComplex.OpsLimitFile,
-                                                             SelectedRangeComplex.SimLimitFile);
-                    Console.WriteLine("Range complex {0} is selected!", _selectedRangeComplex.Name);
-                    //if (_selectedRangeComplex.Name == "Jacksonville") System.Diagnostics.Debugger.Break();
+                                                             _selectedRangeComplexDescriptor.Data.Name, Math.Round(_selectedRangeComplexDescriptor.Data.Latitude, 5), Math.Round(_selectedRangeComplexDescriptor.Data.Longitude, 5),
+                                                             _selectedRangeComplexDescriptor.Data.Height, _selectedRangeComplexDescriptor.Data.GeoidSeparation, SelectedRangeComplexDescriptor.Data.OpsLimitFile,
+                                                             SelectedRangeComplexDescriptor.Data.SimLimitFile);
+                    Console.WriteLine("Range complex {0} is selected!", _selectedRangeComplexDescriptor.Data.Name);
+                    //if (_selectedRangeComplexDescriptor.Name == "Jacksonville") System.Diagnostics.Debugger.Break();
 
                     var overlaysDone = false;
                     var bathymetryDone = false;
@@ -212,7 +213,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     //BackgroundTaskAggregator = new BackgroundTaskAggregator {TaskName = "Load range complex"};
                     //BackgroundTaskAggregator.RunWorkerCompleted += (s, e) => { IsRangeComplexListReady = true; };
                     var bt1 = new GenericBackgroundTask {WorkerSupportsCancellation = false, TaskName = "Load overlays"};
-                    bt1.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name, bt1);
+                    bt1.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplexDescriptor.Data.Name, bt1);
                     bt1.RunWorkerCompleted += (s, e) =>
                     {
                         overlaysDone = true;
@@ -222,7 +223,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     //_bw1.RunWorkerAsync();
 
                     var bt2 = new GenericBackgroundTask { WorkerSupportsCancellation = false, TaskName = "Load bathymetry data sets" };
-                    bt2.DoWork += (s, e) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name, bt2);
+                    bt2.DoWork += (s, e) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplexDescriptor.Data.Name, bt2);
                     bt2.RunWorkerCompleted += (s, e) =>
                     {
                         bathymetryDone = true;
@@ -232,7 +233,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     //_bw2.RunWorkerAsync();
 
                     var bt3 = new GenericBackgroundTask { WorkerSupportsCancellation = false, TaskName = "Load environment data sets"};
-                    bt3.DoWork += (s, e) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name, bt3);
+                    bt3.DoWork += (s, e) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplexDescriptor.Data.Name, bt3);
                     bt3.RunWorkerCompleted += (s, e) =>
                     {
                         environmentDone = true;
@@ -252,9 +253,9 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedSimAreaChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplex);
-        SimAreaDescriptor _selectedRangeComplex;
-        SimAreaDescriptor _lastNonNullSimArea;
+        static readonly PropertyChangedEventArgs SelectedSimAreaChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplexDescriptor);
+        RangeComplexDescriptor _selectedRangeComplexDescriptor;
+        RangeComplexDescriptor _lastNonNullRangeComplex;
 
         void DisplayWorldMap()
         {
@@ -279,10 +280,10 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DisplayRangeComplex()
         {
-            if ((_selectedRangeComplex == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            if ((_selectedRangeComplexDescriptor == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
-            var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplex.Name, "Areas", _selectedRangeComplex.OpsLimitFile);
-            var simAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplex.Name, "Areas", _selectedRangeComplex.SimLimitFile);
+            var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.OpsLimitFile);
+            var simAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.SimLimitFile);
             var opsLimit = new OverlayFile(opAreaOverlayFilename);
             var north = (float)opsLimit.Shapes[0].BoundingBox.Bottom + 3;
             var west = (float)opsLimit.Shapes[0].BoundingBox.Left - 3;
@@ -409,8 +410,8 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                SimAreaCSV = SimAreaCSV.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
-                SelectedRangeComplex = SimAreaCSV[vm.LocationName];
+                RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+                SelectedRangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[vm.LocationName];
             }
         }
         #endregion
@@ -461,7 +462,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if ((_selectedOverlayDescriptor == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
-            var overlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplex.Name, "Areas", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename) + ".ovr");
+            var overlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename) + ".ovr");
             var overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
             {
                 Name = "Overlay",
@@ -543,12 +544,12 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void NewOverlayHandler()
         {
-            var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplex.Name);
+            var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplexDescriptor.Data.Name);
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((result.HasValue) && (result.Value))
             {
                 var backgroundTask = new GenericBackgroundTask { WorkerSupportsCancellation = false, TaskName = "Load overlays" };
-                backgroundTask.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name, backgroundTask);
+                backgroundTask.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplexDescriptor.Data.Name, backgroundTask);
                 backgroundTask.RunWorkerCompleted += (s, e) =>
                 {
                     SelectedOverlayDescriptor = NAEMOOverlayDescriptors.Find(item => item.Key == vm.OverlayName).Value;
@@ -556,7 +557,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 };
 
                 BackgroundTaskAggregator.BackgroundTasks.Add(backgroundTask);
-                //NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(SelectedRangeComplex.Name);
+                //NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(SelectedRangeComplexDescriptor.Name);
             }
         }
 
@@ -613,7 +614,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 };
                 metadata.Save();
 
-                NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplex.Name);
+                NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplexDescriptor.Data.Name);
                 SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(overlayFileName)];
 
             }
@@ -698,7 +699,7 @@ namespace ESMEWorkBench.ViewModels.Main
             bathyBitmapLayer.South = (float)_selectedBathymetryDescriptor.Metadata.Bounds.South;
             bathyBitmapLayer.East = (float)_selectedBathymetryDescriptor.Metadata.Bounds.East;
             bathyBitmapLayer.West = (float)_selectedBathymetryDescriptor.Metadata.Bounds.West;
-            bathyBitmapLayer.RasterFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplex.Name, "Images",
+            bathyBitmapLayer.RasterFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Images",
                                                            Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp");
             if (MapLayers.IndexOf(bathyBitmapLayer) == -1) MapLayers.Add(bathyBitmapLayer);
             MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
@@ -772,7 +773,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
                 var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
                 if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
-                var destinationPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplex.Name, "Bathymetry", vm.BathymetryName + ".txt");
+                var destinationPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Bathymetry", vm.BathymetryName + ".txt");
                 var naemoBathymetryExporter = new CASSBackgroundExporter
                 {
                     WorkerSupportsCancellation = false,
@@ -801,7 +802,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     metadata.OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename);
                     metadata.Save();
                     var bt1 = new GenericBackgroundTask();
-                    bt1.DoWork += (s2, e2) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplex.Name);
+                    bt1.DoWork += (s2, e2) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplexDescriptor.Data.Name);
                     bt1.RunWorkerCompleted += (s3, e3) =>
                     {
                         SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors.Find(item => item.Key == Path.GetFileNameWithoutExtension(destinationPath)).Value;
@@ -1005,7 +1006,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
                 var uniqueMonths = allMonths.Distinct().ToList();
                 uniqueMonths.Sort();
-                var environmentPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplex.Name, "Environment");
+                var environmentPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Environment");
                 BackgroundTaskAggregator = new BackgroundTaskAggregator();
 
                 var naemoEnvironmentExporters = selectedTimePeriods.Select(t => new CASSBackgroundExporter
@@ -1130,7 +1131,7 @@ namespace ESMEWorkBench.ViewModels.Main
                             {
                                 if (loadMetadataTasks.Any(n => n.IsBusy)) return;
                                 var bt1 = new GenericBackgroundTask();
-                                bt1.DoWork += (s2, e2) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplex.Name);
+                                bt1.DoWork += (s2, e2) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplexDescriptor.Data.Name);
                                 bt1.RunWorkerCompleted += (s3, e3) =>
                                 {
                                     SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors.Find(item => item.Key == vm.EnvironmentDescriptors[0].EnvironmentName).Value;

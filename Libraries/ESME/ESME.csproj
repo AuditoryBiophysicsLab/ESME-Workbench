@@ -104,6 +104,12 @@
     <Compile Include="Data\CASSTemplate.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="Environment\Bathymetry.cs" />
+    <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptor.cs" />
+    <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptors.cs" />
+    <Compile Include="Environment\Descriptors\NAEMODescriptor.cs" />
+    <Compile Include="Environment\Descriptors\NAEMOEnvironmentDescriptors.cs" />
+    <Compile Include="Environment\Descriptors\NAEMOOverlayDescriptor.cs" />
+    <Compile Include="Environment\Descriptors\NAEMOOverlayDescriptors.cs" />
     <Compile Include="Environment\Environment.cs" />
     <Compile Include="Environment\Environment2DData.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />
@@ -157,9 +163,10 @@
     <Compile Include="Model\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="Overlay\Exceptions.cs" />
+    <Compile Include="Environment\Descriptors\NAEMODescriptors.cs" />
     <Compile Include="Overlay\OverlayCircle.cs" />
     <Compile Include="Overlay\OverlayFile.cs" />
-    <Compile Include="Overlay\OverlayFiles.cs" />
+    <Compile Include="Environment\Descriptors\NAEMOEnvironmentDescriptor.cs" />
     <Compile Include="Overlay\OverlayLabel.cs" />
     <Compile Include="Overlay\OverlayLineSegments.cs" />
     <Compile Include="Overlay\OverlayParser.cs" />
@@ -186,6 +193,7 @@
     </Compile>
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentFile.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
+    <Compile Include="Environment\Descriptors\RangeComplex.cs" />
     <Compile Include="TransmissionLoss\NemoModeToAcousticModelNameMap.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFileManager.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
@@ -197,7 +205,7 @@
     <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
     <Compile Include="TransmissionLoss\CASS\CassFiles.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentLocation.cs" />
-    <Compile Include="TransmissionLoss\CASS\SimAreaCSV.cs" />
+    <Compile Include="Environment\Descriptors\RangeComplexDescriptors.cs" />
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>
     </Compile>
