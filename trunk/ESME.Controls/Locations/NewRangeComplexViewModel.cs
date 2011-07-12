@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using Cinch;
 using ESME.Data;
-using ESME.Environment;
 using ESME.Model;
 using ESME.Overlay;
 using HRC.Navigation;
@@ -22,6 +22,11 @@ namespace ESME.Views.Locations
 
         #region public string LocationName { get; set; }
 
+        private static readonly PropertyChangedEventArgs LocationNameChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.LocationName);
+
+        private string _locationName;
+
         public string LocationName
         {
             get { return _locationName; }
@@ -33,20 +38,24 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs LocationNameChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.LocationName);
-        private string _locationName;
-
         public string LocationPath
         {
             get
             {
-                return string.IsNullOrEmpty(SimAreaFolder) || string.IsNullOrEmpty(LocationName) ? null : Path.Combine(SimAreaFolder, LocationName);
+                return string.IsNullOrEmpty(SimAreaFolder) || string.IsNullOrEmpty(LocationName)
+                           ? null
+                           : Path.Combine(SimAreaFolder, LocationName);
             }
         }
 
         #endregion
 
         #region public string ExistingOpAreaOverlayFilename { get; set; }
+
+        private static readonly PropertyChangedEventArgs ExistingOverlayFilenameChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ExistingOpAreaOverlayFilename);
+
+        private string _existingOpAreaOverlayFilename;
 
         public string ExistingOpAreaOverlayFilename
         {
@@ -59,30 +68,34 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs ExistingOverlayFilenameChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ExistingOpAreaOverlayFilename);
-        private string _existingOpAreaOverlayFilename;
-
         #endregion
 
         #region public string NewOpAreaOverlayCoordinates { get; set; }
+
+        private static readonly PropertyChangedEventArgs NewOverlayCoordinatesChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.NewOpAreaOverlayCoordinates);
+
+        private string _newOpAreaOverlayCoordinates;
 
         public string NewOpAreaOverlayCoordinates
         {
             get { return _newOpAreaOverlayCoordinates; }
             set
             {
-              //  if (_newOpAreaOverlayCoordinates == value) return;
+                //  if (_newOpAreaOverlayCoordinates == value) return;
                 _newOpAreaOverlayCoordinates = value;
                 NotifyPropertyChanged(NewOverlayCoordinatesChangedEventArgs);
             }
         }
 
-        private static readonly PropertyChangedEventArgs NewOverlayCoordinatesChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.NewOpAreaOverlayCoordinates);
-        private string _newOpAreaOverlayCoordinates;
-
         #endregion
 
         #region public string ExistingSimAreaOverlayFilename { get; set; }
+
+        private static readonly PropertyChangedEventArgs ExistingSimAreaOverlayFilenameChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ExistingSimAreaOverlayFilename);
+
+        private string _existingSimAreaOverlayFilename;
 
         public string ExistingSimAreaOverlayFilename
         {
@@ -95,30 +108,34 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs ExistingSimAreaOverlayFilenameChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ExistingSimAreaOverlayFilename);
-        private string _existingSimAreaOverlayFilename;
-
         #endregion
 
         #region public string NewSimAreaOverlayCoordinates { get; set; }
+
+        private static readonly PropertyChangedEventArgs NewSimAreaOverlayCoordinatesChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.NewSimAreaOverlayCoordinates);
+
+        private string _newSimAreaOverlayCoordinates;
 
         public string NewSimAreaOverlayCoordinates
         {
             get { return _newSimAreaOverlayCoordinates; }
             set
             {
-               // if (_newSimAreaOverlayCoordinates == value) return;
+                // if (_newSimAreaOverlayCoordinates == value) return;
                 _newSimAreaOverlayCoordinates = value;
                 NotifyPropertyChanged(NewSimAreaOverlayCoordinatesChangedEventArgs);
             }
         }
 
-        private static readonly PropertyChangedEventArgs NewSimAreaOverlayCoordinatesChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.NewSimAreaOverlayCoordinates);
-        private string _newSimAreaOverlayCoordinates;
-
         #endregion
 
         #region public float ReferencePointLatitude { get; set; }
+
+        private static readonly PropertyChangedEventArgs ReferencePointLatitudeChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLatitude);
+
+        private float _referencePointLatitude;
 
         public float ReferencePointLatitude
         {
@@ -131,12 +148,14 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs ReferencePointLatitudeChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLatitude);
-        private float _referencePointLatitude;
-
         #endregion
 
         #region public float ReferencePointLongitude { get; set; }
+
+        private static readonly PropertyChangedEventArgs ReferencePointLongitudeChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLongitude);
+
+        private float _referencePointLongitude;
 
         public float ReferencePointLongitude
         {
@@ -149,12 +168,14 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs ReferencePointLongitudeChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLongitude);
-        private float _referencePointLongitude;
-
         #endregion
 
         #region public float Height { get; set; }
+
+        private static readonly PropertyChangedEventArgs HeightChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.Height);
+
+        private float _height;
 
         public float Height
         {
@@ -167,12 +188,14 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs HeightChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.Height);
-        private float _height;
-
         #endregion
 
         #region public float GeoidSeparation { get; set; }
+
+        private static readonly PropertyChangedEventArgs GeoidSeparationChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.GeoidSeparation);
+
+        private float _geoidSeparation;
 
         public float GeoidSeparation
         {
@@ -185,12 +208,14 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs GeoidSeparationChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.GeoidSeparation);
-        private float _geoidSeparation;
-
         #endregion
 
         #region public string SimAreaFolder { get; set; }
+
+        private static readonly PropertyChangedEventArgs SimAreaFolderChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.SimAreaFolder);
+
+        private string _simAreaFolder;
 
         public string SimAreaFolder
         {
@@ -203,18 +228,176 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs SimAreaFolderChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.SimAreaFolder);
-        private string _simAreaFolder;
+        #endregion
+
+        #region User Field Changed Commands
+        #region LocationNameChangedCommand
+
+        private SimpleCommand<object, object> _locationNameChanged;
+
+        public SimpleCommand<object, object> LocationNameChangedCommand
+        {
+            get
+            {
+                return _locationNameChanged ??
+                       (_locationNameChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null &&
+                                !string.IsNullOrEmpty(sender.Text))
+                                LocationName = sender.Text;
+                        }));
+            }
+        }
 
         #endregion
 
-        List<EarthCoordinate> NewOpAreaOverlayEarthCoordinates { get; set; }
-        private List<EarthCoordinate> NewSimAreaOverlayEarthCoordinates { get; set; }
-        GeoRect OpBounds { get; set; }
-        GeoRect SimBounds { get; set; }
+        #region ReferencePointLatitudeChangedCommand
 
+        private SimpleCommand<object, object> _referencePointLatitudeChanged;
+
+        public SimpleCommand<object, object> ReferencePointLatitudeChangedCommand
+        {
+            get
+            {
+                return _referencePointLatitudeChanged ??
+                       (_referencePointLatitudeChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            float lat;
+                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
+                                ReferencePointLatitude = float.TryParse(sender.Text, out lat) ? lat : float.NaN;
+
+                        }));
+            }
+        }
+
+        #endregion
+
+        #region ReferencePointLongitudeChangedCommand
+
+        private SimpleCommand<object, object> _referencePointLongitudeChanged;
+
+        public SimpleCommand<object, object> ReferencePointLongitudeChangedCommand
+        {
+            get
+            {
+                return _referencePointLongitudeChanged ??
+                       (_referencePointLongitudeChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            float lon;
+                            var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
+                                ReferencePointLongitude = float.TryParse(sender.Text, out lon) ? lon : float.NaN;
+                        }));
+            }
+        }
+
+        #endregion
+
+        #region HeightChangedCommand
+
+        private SimpleCommand<object, object> _heightChanged;
+
+        public SimpleCommand<object, object> HeightChangedCommand
+        {
+            get
+            {
+                return _heightChanged ??
+                       (_heightChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                                                              {
+                                                                  float height;
+                                                                  var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                                                                  if (sender != null && !string.IsNullOrEmpty(sender.Text))
+                                                                      Height = float.TryParse(sender.Text, out height) ? height : float.NaN;
+                                                              }));
+            }
+        }
+
+        #endregion
+
+        #region GeoidSeparationChangedCommand
+
+        private SimpleCommand<object, object> _geoidSeparationChanged;
+
+        public SimpleCommand<object, object> GeoidSeparationChangedCommand
+        {
+            get
+            {
+                return _geoidSeparationChanged ??
+                       (_geoidSeparationChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                                                              {
+                                                                  float geoid;
+                                                                  var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                                                                  if (sender != null && !string.IsNullOrEmpty(sender.Text))
+                                                                      GeoidSeparation = float.TryParse(sender.Text,out geoid) ? geoid: float.NaN;
+                                                              }));
+            }
+        }
+
+        #endregion
+
+        #region NewOpAreaOverlayCoordinatesChangedCommand
+
+        private SimpleCommand<object, object> _newOpAreaOverlayCoordinatesChanged;
+
+        public SimpleCommand<object, object> NewOpAreaOverlayCoordinatesChangedCommand
+        {
+            get
+            {
+                return _newOpAreaOverlayCoordinatesChanged ??
+                       (_newOpAreaOverlayCoordinatesChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null &&
+                                !string.IsNullOrEmpty(sender.Text))
+                                NewOpAreaOverlayCoordinates = sender.Text;
+                        }));
+            }
+        }
+
+        #endregion
+
+        #region NewSimAreaOverlayCoordinatesChangedCommand
+
+        private SimpleCommand<object, object> _newSimAreaOverlayCoordinatesChanged;
+
+        public SimpleCommand<object, object> NewSimAreaOverlayCoordinatesChangedCommand
+        {
+            get
+            {
+                return _newSimAreaOverlayCoordinatesChanged ??
+                       (_newSimAreaOverlayCoordinatesChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null &&
+                                !string.IsNullOrEmpty(sender.Text))
+                                NewSimAreaOverlayCoordinates = sender.Text;
+                        }));
+            }
+        }
+
+        #endregion
+        #endregion
+
+        private List<EarthCoordinate> NewOpAreaOverlayEarthCoordinates { get; set; }
+        private List<EarthCoordinate> NewSimAreaOverlayEarthCoordinates { get; set; }
+        private GeoRect OpBounds { get; set; }
+        private GeoRect SimBounds { get; set; }
 
         #region OkCommand
+
+        private SimpleCommand<object, object> _ok;
 
         public SimpleCommand<object, object> OkCommand
         {
@@ -227,7 +410,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        bool OkIsEnabled
+        private bool OkIsEnabled
         {
             get
             {
@@ -237,7 +420,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        static void WriteOverlayFile(string fileName, IEnumerable<EarthCoordinate> coords)
+        private static void WriteOverlayFile(string fileName, IEnumerable<EarthCoordinate> coords)
         {
             using (var writer = new StreamWriter(fileName))
             {
@@ -245,8 +428,8 @@ namespace ESME.Views.Locations
                 writer.WriteLine("green");
                 writer.WriteLine("solid");
                 writer.WriteLine("move");
-                var first = true;
-                foreach (var coordinate in coords)
+                bool first = true;
+                foreach (EarthCoordinate coordinate in coords)
                 {
                     writer.WriteLine("{0:0.0000}  {1:0.0000}", coordinate.Latitude, coordinate.Longitude);
                     if (first) writer.WriteLine("lines");
@@ -255,10 +438,10 @@ namespace ESME.Views.Locations
             }
         }
 
-        void OkCommandHandler()
+        private void OkCommandHandler()
         {
             Directory.CreateDirectory(LocationPath);
-            var areasPath = Path.Combine(LocationPath, "Areas");
+            string areasPath = Path.Combine(LocationPath, "Areas");
             Directory.CreateDirectory(areasPath);
             Directory.CreateDirectory(Path.Combine(LocationPath, "Bathymetry"));
             Directory.CreateDirectory(Path.Combine(LocationPath, "Environment"));
@@ -266,26 +449,30 @@ namespace ESME.Views.Locations
             Directory.CreateDirectory(Path.Combine(LocationPath, "Images"));
             Directory.CreateDirectory(Path.Combine(LocationPath, "Species"));
 
-            var opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", LocationName));
+            string opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", LocationName));
             if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename))
                 File.Copy(ExistingOpAreaOverlayFilename, opsOverlayFilename);
             else WriteOverlayFile(opsOverlayFilename, NewOpAreaOverlayEarthCoordinates);
 
-            var simOverlayFilename = Path.Combine(areasPath, String.Format("{0}_SimArea.ovr", LocationName));
+            string simOverlayFilename = Path.Combine(areasPath, String.Format("{0}_SimArea.ovr", LocationName));
             if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename))
                 File.Copy(ExistingSimAreaOverlayFilename, simOverlayFilename);
             else WriteOverlayFile(simOverlayFilename, NewSimAreaOverlayEarthCoordinates);
 
-            using(var writer = new StreamWriter(Path.Combine(Path.GetDirectoryName(LocationPath),"SimAreas.csv"),true))
-                writer.WriteLine("{0},{1:0.0###},{2:0.0###},{3:0.0###},{4:0.0###},{5},{6}", LocationName, ReferencePointLatitude,ReferencePointLongitude,Height,GeoidSeparation,Path.GetFileName(opsOverlayFilename),Path.GetFileName(simOverlayFilename));
+            using (
+                var writer = new StreamWriter(Path.Combine(Path.GetDirectoryName(LocationPath), "SimAreas.csv"), true))
+                writer.WriteLine("{0},{1:0.0###},{2:0.0###},{3:0.0###},{4:0.0###},{5},{6}", LocationName,
+                                 ReferencePointLatitude, ReferencePointLongitude, Height, GeoidSeparation,
+                                 Path.GetFileName(opsOverlayFilename), Path.GetFileName(simOverlayFilename));
 
             CloseActivePopUpCommand.Execute(true);
         }
-        private SimpleCommand<object, object> _ok;
 
         #endregion
 
         #region ClearOpAreaCoordinatesCommand
+
+        private SimpleCommand<object, object> _clearOpAreaCoordinates;
 
         public SimpleCommand<object, object> ClearOpAreaCoordinatesCommand
         {
@@ -298,14 +485,12 @@ namespace ESME.Views.Locations
             }
         }
 
-        private SimpleCommand<object, object> _clearOpAreaCoordinates;
-
-        bool ClearOpAreaCoordinatesIsEnabled
+        private bool ClearOpAreaCoordinatesIsEnabled
         {
             get { return (!string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)); }
         }
 
-        void ClearOpAreaCoordinatesCommandHandler()
+        private void ClearOpAreaCoordinatesCommandHandler()
         {
             NewOpAreaOverlayCoordinates = "";
         }
@@ -313,6 +498,8 @@ namespace ESME.Views.Locations
         #endregion
 
         #region ClearSimAreaCoordinatesCommand
+
+        private SimpleCommand<object, object> _clearSimAreaCoordinates;
 
         public SimpleCommand<object, object> ClearSimAreaCoordinatesCommand
         {
@@ -325,85 +512,74 @@ namespace ESME.Views.Locations
             }
         }
 
-        private SimpleCommand<object, object> _clearSimAreaCoordinates;
-
-        bool ClearSimAreaCoordinatesIsEnabled
+        private bool ClearSimAreaCoordinatesIsEnabled
         {
             get { return (!string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)); }
         }
 
-        void ClearSimAreaCoordinatesCommandHandler()
+        private void ClearSimAreaCoordinatesCommandHandler()
         {
             NewSimAreaOverlayCoordinates = "";
         }
 
         #endregion
 
-        public bool IsValid { get { return string.IsNullOrEmpty(ValidationErrorText); } }
+        #region ISupportValidation Members
 
-        #region public Visibility ErrorVisibility { get; set; }
-
-        public Visibility ErrorVisibility
+        public bool IsValid
         {
-            get { return IsValid ? Visibility.Collapsed : Visibility.Visible; }
+            get { return string.IsNullOrEmpty(ValidationErrorText); }
         }
-
-        private static readonly PropertyChangedEventArgs ErrorVisibilityChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ErrorVisibility);
-
-        #endregion
-
-        #region public string ValidationErrorText { get; set; }
-
-        public string ValidationErrorText
-        {
-            get { return _validationErrorText; }
-            set
-            {
-                if (_validationErrorText == value) return;
-                _validationErrorText = value;
-                NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
-                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ValidationErrorText);
-        string _validationErrorText;
-
-        #endregion
 
         public void Validate()
         {
             ValidationErrorText = "";
             if ((LocationPath != null) && Directory.Exists(LocationPath))
                 ValidationErrorText += "Location already exists, please choose a different name\n";
-            if (string.IsNullOrEmpty(LocationName)) 
+            if (string.IsNullOrEmpty(LocationName))
                 ValidationErrorText += "New location name must be specified\n";
             if (-180 > ReferencePointLatitude || ReferencePointLatitude > 180)
                 ValidationErrorText += "Reference Latitude is out of bounds\n";
+            if (float.IsNaN(ReferencePointLatitude)) ValidationErrorText += "Latitude is invalid\n";
             if (-90 > ReferencePointLongitude || ReferencePointLongitude > 90)
                 ValidationErrorText += "Reference Longitude is out of bounds\n";
+            if (float.IsNaN(ReferencePointLongitude)) ValidationErrorText += "Reference Longitude is invalid\n";
+            if (float.IsNaN(Height)) ValidationErrorText += "Height is invalid\n.";
+            if (float.IsNaN(GeoidSeparation)) ValidationErrorText += "Geoid Separation is invalid\n";
             if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) && !File.Exists(ExistingOpAreaOverlayFilename))
                 ValidationErrorText += "Selected overlay file does not exist\n";
-               if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) && !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates))
-                ValidationErrorText += "Select EITHER an existing overlay file OR coordinates for a new Simulation Limit overlay\n";
-             if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) && !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates))
-                ValidationErrorText += "Select EITHER an existing overlay file OR coordinates for a new Operational Limit overlay\n";
+            if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) &&
+                !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates))
+                ValidationErrorText +=
+                    "Select EITHER an existing overlay file OR coordinates for a new Simulation Limit overlay\n";
+            if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) &&
+                !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates))
+                ValidationErrorText +=
+                    "Select EITHER an existing overlay file OR coordinates for a new Operational Limit overlay\n";
             if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) && !File.Exists(ExistingSimAreaOverlayFilename))
                 ValidationErrorText += "Selected overlay file does not exist\n";
-            if (string.IsNullOrEmpty(NewOpAreaOverlayCoordinates) && (string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) || !File.Exists(ExistingOpAreaOverlayFilename))) 
+            if (string.IsNullOrEmpty(NewOpAreaOverlayCoordinates) &&
+                (string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) || !File.Exists(ExistingOpAreaOverlayFilename)))
                 ValidationErrorText += "Baseline operational area must be defined\n";
-            if (!string.IsNullOrEmpty(NewOpAreaOverlayCoordinates) && (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename)))
+            if (!string.IsNullOrEmpty(NewOpAreaOverlayCoordinates) &&
+                (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename)))
                 ValidationErrorText += "Conflicting operational areas defined\n.";
-            if (string.IsNullOrEmpty(NewSimAreaOverlayCoordinates) && (string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) || !File.Exists(ExistingSimAreaOverlayFilename)))  
+            if (string.IsNullOrEmpty(NewSimAreaOverlayCoordinates) &&
+                (string.IsNullOrEmpty(ExistingSimAreaOverlayFilename) || !File.Exists(ExistingSimAreaOverlayFilename)))
                 ValidationErrorText += "Baseline simulation area must be defined\n";
-            if (!string.IsNullOrEmpty(NewSimAreaOverlayCoordinates) && (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename)))
+            if (!string.IsNullOrEmpty(NewSimAreaOverlayCoordinates) &&
+                (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename)))
                 ValidationErrorText += "Conflicting simulation areas defined\n.";
             if (!string.IsNullOrEmpty(ValidationErrorText)) return;
 
             List<EarthCoordinate> opCoords;
             List<EarthCoordinate> simCoords;
-            OpBounds = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates) ? ValidateOverlayCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords) : ValidateOverlayFile(ExistingOpAreaOverlayFilename, "Op Limits", out opCoords);
-            SimBounds = !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates) ? ValidateOverlayCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords) : ValidateOverlayFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simCoords);
+            OpBounds = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)
+                           ? ValidateOverlayCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords)
+                           : ValidateOverlayFile(ExistingOpAreaOverlayFilename, "Op Limits", out opCoords);
+            SimBounds = !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)
+                            ? ValidateOverlayCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords)
+                            : ValidateOverlayFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simCoords);
 
             if (OpBounds != null) NewOpAreaOverlayEarthCoordinates = opCoords;
             if (SimBounds != null) NewSimAreaOverlayEarthCoordinates = simCoords;
@@ -435,19 +611,55 @@ namespace ESME.Views.Locations
                         ValidationErrorText += "The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed\n";
                     else Bounds = new GeoRect(overlayLineSegments.BoundingBox);
                 }
-            } 
+            }
 #endif
             NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
         }
 
-        private GeoRect ValidateOverlayFile(string overlayFileName, string overlayName, out List<EarthCoordinate> earthCoordinates)
+        #endregion
+
+        #region public Visibility ErrorVisibility { get; set; }
+
+        private static readonly PropertyChangedEventArgs ErrorVisibilityChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ErrorVisibility);
+
+        public Visibility ErrorVisibility
+        {
+            get { return IsValid ? Visibility.Collapsed : Visibility.Visible; }
+        }
+
+        #endregion
+
+        #region public string ValidationErrorText { get; set; }
+
+        private static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ValidationErrorText);
+
+        private string _validationErrorText;
+
+        public string ValidationErrorText
+        {
+            get { return _validationErrorText; }
+            set
+            {
+                if (_validationErrorText == value) return;
+                _validationErrorText = value;
+                NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
+                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
+            }
+        }
+
+        #endregion
+
+        private GeoRect ValidateOverlayFile(string overlayFileName, string overlayName,
+                                            out List<EarthCoordinate> earthCoordinates)
         {
             earthCoordinates = null;
             try
             {
                 var myOvr = new OverlayFile(overlayFileName);
                 if (myOvr.Shapes.Length != 1 || !myOvr.Shapes[0].IsUsableAsPerimeter)
-                    ValidationErrorText += "Specified "+ overlayName + " file is invalid\n";
+                    ValidationErrorText += "Specified " + overlayName + " file is invalid\n";
                 else
                 {
                     earthCoordinates = myOvr.Shapes[0].EarthCoordinates;
@@ -460,32 +672,41 @@ namespace ESME.Views.Locations
             }
             return null;
         }
-        private GeoRect ValidateOverlayCoordinates(string fieldData, string overlayName, out List<EarthCoordinate> earthCoordinates)
+
+        private GeoRect ValidateOverlayCoordinates(string fieldData, string overlayName,
+                                                   out List<EarthCoordinate> earthCoordinates)
         {
             var lineSeparators = new[] { '\r', '\n' };
-            var lines = fieldData.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length < 4) ValidationErrorText += overlayName +": There must be at least four points given to define an area\n";
+            string[] lines = fieldData.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length < 4)
+                ValidationErrorText += overlayName + ": There must be at least four points given to define an area\n";
             earthCoordinates = new List<EarthCoordinate>();
-            var lineCount = 0;
-            foreach (var line in lines)
+            int lineCount = 0;
+            foreach (string line in lines)
             {
                 lineCount++;
                 var coordSeparators = new[] { ',', ' ' };
-                var coords = line.Split(coordSeparators, StringSplitOptions.RemoveEmptyEntries);
+                string[] coords = line.Split(coordSeparators, StringSplitOptions.RemoveEmptyEntries);
                 double lat, lon;
                 if (double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
                     earthCoordinates.Add(new EarthCoordinate(lat, lon));
                 else
-                    ValidationErrorText += string.Format(overlayName + ": Invalid latitude/longitude on line {0}. Please use decimal degrees\n", lineCount);
+                    ValidationErrorText +=
+                        string.Format(
+                            overlayName + ": Invalid latitude/longitude on line {0}. Please use decimal degrees\n",
+                            lineCount);
             }
             if (string.IsNullOrEmpty(ValidationErrorText))
             {
-                if (earthCoordinates.Count < 4) ValidationErrorText += overlayName + ": There must be at least four points given to define an area\n";
+                if (earthCoordinates.Count < 4)
+                    ValidationErrorText += overlayName +
+                                           ": There must be at least four points given to define an area\n";
                 else
                 {
                     var overlayLineSegments = new OverlayLineSegments(earthCoordinates.ToArray(), Colors.Black);
                     if (!overlayLineSegments.IsUsableAsPerimeter)
-                        ValidationErrorText += overlayName + ": The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed\n";
+                        ValidationErrorText += overlayName +
+                                               ": The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed\n";
                     else return new GeoRect(overlayLineSegments.BoundingBox);
                 }
             }
