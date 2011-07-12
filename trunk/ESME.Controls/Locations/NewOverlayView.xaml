@@ -1,8 +1,7 @@
 ﻿<Window
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-    xmlns:Controls="clr-namespace:ESME.Views.Controls" 
-    x:Class="ESME.Views.Locations.NewOverlayView"
+    xmlns:Controls="clr-namespace:ESME.Views.Controls" xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" x:Class="ESME.Views.Locations.NewOverlayView"
 	Title="New Overlay File"
 	SizeToContent="WidthAndHeight"
     ResizeMode="NoResize"
@@ -11,8 +10,14 @@
 	<StackPanel Margin="5">
 		<DockPanel LastChildFill="True">
 			<TextBlock DockPanel.Dock="Left" Text="Overlay Name:"/>
-			<TextBox Text="{Binding OverlayName}" DockPanel.Dock="Left"/>
-		</DockPanel>
+            <TextBox Text="{Binding OverlayName}" DockPanel.Dock="Left">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="TextChanged">
+                        <cinch:EventToCommandTrigger Command="{Binding OverlayNameChangedCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </TextBox>
+        </DockPanel>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -27,7 +32,13 @@
                              AcceptsReturn="True"
 							 Height="100"
 					         ToolTip="Please enter coordinates in latitude, longitude pairs separated by newlines" 
-							 VerticalScrollBarVisibility="Auto" />
+							 VerticalScrollBarVisibility="Auto">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <cinch:EventToCommandTrigger Command="{Binding OverlayCoordinatesChangedCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
                 <Button Content="Clear" 
 					        Width="100" 
 							HorizontalAlignment="Right" 

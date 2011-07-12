@@ -7,7 +7,9 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         Title="Analysis point settings"
         mef:ViewModelLocator.ViewModel="AnalysisPointSettingsViewModel"
-        SizeToContent="WidthAndHeight">
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow">
 	<Window.Resources>
 		<Style TargetType="ToolTip">
 			<Setter Property="ContentTemplate">

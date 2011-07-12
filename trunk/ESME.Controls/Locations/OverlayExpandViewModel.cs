@@ -1,22 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel;
+using System.Windows.Controls;
 using Cinch;
 using ESME.Metadata;
-using HRC.Navigation;
 
 namespace ESME.Views.Locations
 {
-    public class OverlayExpandViewModel:ViewModelBase
+    public class OverlayExpandViewModel : ViewModelBase
     {
         public OverlayExpandViewModel(NAEMOOverlayMetadata naemoOverlayMetadata)
         {
             NAEMOOverlayMetadata = naemoOverlayMetadata;
         }
-        
+
         #region public NAEMOOverlayMetadata NAEMOOverlayMetadata { get; set; }
+
+        private static readonly PropertyChangedEventArgs NAEMOOverlayMetadataChangedEventArgs =
+            ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.NAEMOOverlayMetadata);
+
+        private NAEMOOverlayMetadata _nAEMOOverlayMetadata;
 
         public NAEMOOverlayMetadata NAEMOOverlayMetadata
         {
@@ -29,12 +30,14 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs NAEMOOverlayMetadataChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.NAEMOOverlayMetadata);
-        private NAEMOOverlayMetadata _nAEMOOverlayMetadata;
-
         #endregion
-        
+
         #region public float BufferZoneSize { get; set; }
+
+        private static readonly PropertyChangedEventArgs BufferZoneSizeChangedEventArgs =
+            ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.BufferZoneSize);
+
+        private float _bufferZoneSize;
 
         public float BufferZoneSize
         {
@@ -47,12 +50,14 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs BufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.BufferZoneSize);
-        private float _bufferZoneSize;
-
         #endregion
 
         #region public string SelectedItem { get; set; }
+
+        private static readonly PropertyChangedEventArgs SelectedItemChangedEventArgs =
+            ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.SelectedItem);
+
+        private string _selectedItem;
 
         public string SelectedItem
         {
@@ -65,13 +70,33 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static readonly PropertyChangedEventArgs SelectedItemChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.SelectedItem);
-        private string _selectedItem;
-
         #endregion
-        
+
+        #region BufferZoneSizeTextChangedCommand
+
+        private SimpleCommand<object, object> _bufferZoneSizeTextChanged;
+
+        public SimpleCommand<object, object> BufferZoneSizeTextChangedCommand
+        {
+            get
+            {
+                return _bufferZoneSizeTextChanged ??
+                       (_bufferZoneSizeTextChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                                                              {
+                                                                  var sender =
+                                                                      (TextBox) ((EventToCommandArgs) cinchArgs).Sender;
+                                                                  if (sender != null &&
+                                                                      !string.IsNullOrEmpty(sender.Text))
+                                                                      BufferZoneSize = float.Parse(sender.Text);
+                                                              }));
+            }
+        }
+        #endregion
 
         #region OKCommand
+
+        private SimpleCommand<object, object> _oK;
 
         public SimpleCommand<object, object> OKCommand
         {
@@ -84,11 +109,9 @@ namespace ESME.Views.Locations
             }
         }
 
-        private SimpleCommand<object, object> _oK;
-
         private bool IsOKCommandEnabled
         {
-            get { return BufferZoneSize>0; }
+            get { return BufferZoneSize > 0; }
         }
 
         private void OKHandler()
