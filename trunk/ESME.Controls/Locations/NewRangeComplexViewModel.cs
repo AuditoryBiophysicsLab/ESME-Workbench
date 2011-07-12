@@ -150,12 +150,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public float ReferencePointLongitude { get; set; }
-
-        private static readonly PropertyChangedEventArgs ReferencePointLongitudeChangedEventArgs =
-            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLongitude);
-
-        private float _referencePointLongitude;
+        #region public float ReferencePointLongitude { get; set; } [changed]
 
         public float ReferencePointLongitude
         {
@@ -167,6 +162,48 @@ namespace ESME.Views.Locations
                 NotifyPropertyChanged(ReferencePointLongitudeChangedEventArgs);
             }
         }
+
+        static readonly PropertyChangedEventArgs ReferencePointLongitudeChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLongitude);
+        float _referencePointLongitude;
+
+        #region ReferencePointLongitudeChangedCommand
+        SimpleCommand<object, object> _referencePointLongitudeChanged;
+
+        public SimpleCommand<object, object> ReferencePointLongitudeChangedCommand
+        {
+            get
+            {
+                return _referencePointLongitudeChanged ??
+                       (_referencePointLongitudeChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            float temp;
+                            if (sender != null && !string.IsNullOrEmpty(sender.Text)) ReferencePointLongitude = float.TryParse(sender.Text, out temp) ? temp : float.NaN;
+
+                        }));
+            }
+        }
+
+        #region public string ReferencePointLongitudeString { get; set; }
+
+        public string ReferencePointLongitudeString
+        {
+            get { return _referencePointLongitudeString; }
+            set
+            {
+                if (_referencePointLongitudeString == value) return;
+                _referencePointLongitudeString = value;
+                NotifyPropertyChanged(ReferencePointLongitudeStringChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ReferencePointLongitudeStringChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLongitudeString);
+        string _referencePointLongitudeString;
+
+        #endregion
+
+        #endregion
 
         #endregion
 
@@ -292,28 +329,6 @@ namespace ESME.Views.Locations
         string _referencePointLatitudeString;
 
         #endregion
-
-        #endregion
-
-        #region ReferencePointLongitudeChangedCommand
-
-        private SimpleCommand<object, object> _referencePointLongitudeChanged;
-
-        public SimpleCommand<object, object> ReferencePointLongitudeChangedCommand
-        {
-            get
-            {
-                return _referencePointLongitudeChanged ??
-                       (_referencePointLongitudeChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                        {
-                            float lon;
-                            var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
-                                ReferencePointLongitude = float.TryParse(sender.Text, out lon) ? lon : float.NaN;
-                        }));
-            }
-        }
 
         #endregion
 
