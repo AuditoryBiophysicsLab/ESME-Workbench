@@ -41,7 +41,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public string OverlayName { get; set; }
+        #region public string OverlayName { get; set; } [changed]
 
         public string OverlayName
         {
@@ -57,9 +57,29 @@ namespace ESME.Views.Locations
         private static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.OverlayName);
         private string _overlayName;
 
+        #region OverlayNameChangedCommand
+
+        public SimpleCommand<object, object> OverlayNameChangedCommand
+        {
+            get
+            {
+                return _overlayNameChanged ??
+                       (_overlayNameChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
+                                OverlayName = sender.Text;
+                        }));
+            }
+        }
+
+        private SimpleCommand<object, object> _overlayNameChanged;
+        #endregion
         #endregion
 
-        #region public string OverlayCoordinates { get; set; }
+        #region public string OverlayCoordinates { get; set; } [changed]
 
         public string OverlayCoordinates
         {
@@ -74,6 +94,28 @@ namespace ESME.Views.Locations
 
         private static readonly PropertyChangedEventArgs OverlayCoordinatesChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.OverlayCoordinates);
         private string _overlayCoordinates;
+
+        #region OverlayCoordinatesChangedCommand
+
+        public SimpleCommand<object, object> OverlayCoordinatesChangedCommand
+        {
+            get
+            {
+                return _overlayCoordinatesChanged ??
+                       (_overlayCoordinatesChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
+                                OverlayCoordinates = sender.Text;
+                        }));
+            }
+        }
+
+        private SimpleCommand<object, object> _overlayCoordinatesChanged;
+
+        #endregion
 
         #endregion
 
@@ -157,49 +199,6 @@ namespace ESME.Views.Locations
         {
             OverlayCoordinates = "";
         }
-
-        #endregion
-
-        #region OverlayNameChangedCommand
-
-        public SimpleCommand<object, object> OverlayNameChangedCommand
-        {
-            get
-            {
-                return _overlayNameChanged ??
-                       (_overlayNameChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                        {
-                            var sender =
-                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
-                                OverlayName = sender.Text;
-                        }));
-            }
-        }
-
-        private SimpleCommand<object, object> _overlayNameChanged;
-        #endregion
-
-        #region OverlayCoordinatesChangedCommand
-
-        public SimpleCommand<object, object> OverlayCoordinatesChangedCommand
-        {
-            get
-            {
-                return _overlayCoordinatesChanged ??
-                       (_overlayCoordinatesChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                        {
-                            var sender =
-                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
-                                OverlayCoordinates = sender.Text;
-                        }));
-            }
-        }
-
-        private SimpleCommand<object, object> _overlayCoordinatesChanged;
 
         #endregion
 

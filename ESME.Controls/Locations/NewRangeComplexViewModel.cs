@@ -20,7 +20,7 @@ namespace ESME.Views.Locations
             SimAreaFolder = appSettings.ScenarioDataDirectory;
         }
 
-        #region public string LocationName { get; set; }
+        #region public string LocationName { get; set; } [changed]
 
         private static readonly PropertyChangedEventArgs LocationNameChangedEventArgs =
             ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.LocationName);
@@ -48,6 +48,28 @@ namespace ESME.Views.Locations
             }
         }
 
+        #region LocationNameChangedCommand
+
+        private SimpleCommand<object, object> _locationNameChanged;
+
+        public SimpleCommand<object, object> LocationNameChangedCommand
+        {
+            get
+            {
+                return _locationNameChanged ??
+                       (_locationNameChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null &&
+                                !string.IsNullOrEmpty(sender.Text))
+                                LocationName = sender.Text;
+                        }));
+            }
+        }
+
+        #endregion
         #endregion
 
         #region public string ExistingOpAreaOverlayFilename { get; set; }
@@ -70,7 +92,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public string NewOpAreaOverlayCoordinates { get; set; }
+        #region public string NewOpAreaOverlayCoordinates { get; set; } [changed]
 
         private static readonly PropertyChangedEventArgs NewOverlayCoordinatesChangedEventArgs =
             ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.NewOpAreaOverlayCoordinates);
@@ -87,6 +109,29 @@ namespace ESME.Views.Locations
                 NotifyPropertyChanged(NewOverlayCoordinatesChangedEventArgs);
             }
         }
+     
+        #region NewOpAreaOverlayCoordinatesChangedCommand
+
+        private SimpleCommand<object, object> _newOpAreaOverlayCoordinatesChanged;
+
+        public SimpleCommand<object, object> NewOpAreaOverlayCoordinatesChangedCommand
+        {
+            get
+            {
+                return _newOpAreaOverlayCoordinatesChanged ??
+                       (_newOpAreaOverlayCoordinatesChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null &&
+                                !string.IsNullOrEmpty(sender.Text))
+                                NewOpAreaOverlayCoordinates = sender.Text;
+                        }));
+            }
+        }
+
+        #endregion
 
         #endregion
 
@@ -110,7 +155,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public string NewSimAreaOverlayCoordinates { get; set; }
+        #region public string NewSimAreaOverlayCoordinates { get; set; } [changed]
 
         private static readonly PropertyChangedEventArgs NewSimAreaOverlayCoordinatesChangedEventArgs =
             ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.NewSimAreaOverlayCoordinates);
@@ -128,14 +173,32 @@ namespace ESME.Views.Locations
             }
         }
 
+        #region NewSimAreaOverlayCoordinatesChangedCommand
+
+        private SimpleCommand<object, object> _newSimAreaOverlayCoordinatesChanged;
+
+        public SimpleCommand<object, object> NewSimAreaOverlayCoordinatesChangedCommand
+        {
+            get
+            {
+                return _newSimAreaOverlayCoordinatesChanged ??
+                       (_newSimAreaOverlayCoordinatesChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                        {
+                            var sender =
+                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
+                            if (sender != null &&
+                                !string.IsNullOrEmpty(sender.Text))
+                                NewSimAreaOverlayCoordinates = sender.Text;
+                        }));
+            }
+        }
+
         #endregion
 
-        #region public float ReferencePointLatitude { get; set; }
+        #endregion
 
-        private static readonly PropertyChangedEventArgs ReferencePointLatitudeChangedEventArgs =
-            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLatitude);
-
-        private float _referencePointLatitude;
+        #region public float ReferencePointLatitude { get; set; } [changed]
 
         public float ReferencePointLatitude
         {
@@ -147,6 +210,56 @@ namespace ESME.Views.Locations
                 NotifyPropertyChanged(ReferencePointLatitudeChangedEventArgs);
             }
         }
+
+        private static readonly PropertyChangedEventArgs ReferencePointLatitudeChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLatitude);
+        private float _referencePointLatitude;
+
+        #region ReferencePointLatitudeChangedCommand
+
+        private SimpleCommand<object, object> _referencePointLatitudeChanged;
+
+        public SimpleCommand<object, object> ReferencePointLatitudeChangedCommand
+        {
+            get
+            {
+                return _referencePointLatitudeChanged ??
+                       (_referencePointLatitudeChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                                                              {
+                                                                  var sender =
+                                                                      (TextBox) ((EventToCommandArgs) cinchArgs).Sender;
+                                                                  float temp;
+                                                                  if (sender != null &&
+                                                                      !string.IsNullOrEmpty(sender.Text))
+                                                                      ReferencePointLatitude = float.TryParse(sender.Text, out temp)
+                                                                              ? temp
+                                                                              : float.NaN;
+
+                                                              }));
+            }
+        }
+
+        #endregion
+
+        #region public string ReferencePointLatitudeString { get; set; }
+
+        public string ReferencePointLatitudeString
+        {
+            get { return _referencePointLatitudeString; }
+            set
+            {
+                if (_referencePointLatitudeString == value) return;
+                _referencePointLatitudeString = value;
+                NotifyPropertyChanged(ReferencePointLatitudeStringChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs ReferencePointLatitudeStringChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLatitudeString);
+
+        private string _referencePointLatitudeString;
+
+        #endregion
 
         #endregion
 
@@ -207,12 +320,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public float Height { get; set; }
-
-        private static readonly PropertyChangedEventArgs HeightChangedEventArgs =
-            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.Height);
-
-        private float _height;
+        #region public float Height { get; set; } [changed]
 
         public float Height
         {
@@ -225,14 +333,59 @@ namespace ESME.Views.Locations
             }
         }
 
+        private static readonly PropertyChangedEventArgs HeightChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.Height);
+        private float _height;
+
+        #region HeightChangedCommand
+
+        private SimpleCommand<object, object> _heightChanged;
+
+        public SimpleCommand<object, object> HeightChangedCommand
+        {
+            get
+            {
+                return _heightChanged ??
+                       (_heightChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                                                              {
+                                                                  var sender =
+                                                                      (TextBox) ((EventToCommandArgs) cinchArgs).Sender;
+                                                                  float temp;
+                                                                  if (sender != null &&
+                                                                      !string.IsNullOrEmpty(sender.Text))
+                                                                      Height = float.TryParse(sender.Text, out temp)
+                                                                              ? temp
+                                                                              : float.NaN;
+
+                                                              }));
+            }
+        }
+
         #endregion
 
-        #region public float GeoidSeparation { get; set; }
+        #region public string HeightString { get; set; }
 
-        private static readonly PropertyChangedEventArgs GeoidSeparationChangedEventArgs =
-            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.GeoidSeparation);
+        public string HeightString
+        {
+            get { return _heightString; }
+            set
+            {
+                if (_heightString == value) return;
+                _heightString = value;
+                NotifyPropertyChanged(HeightStringChangedEventArgs);
+            }
+        }
 
-        private float _geoidSeparation;
+        private static readonly PropertyChangedEventArgs HeightStringChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.HeightString);
+
+        private string _heightString;
+
+        #endregion
+
+        #endregion
+
+        #region public float GeoidSeparation { get; set; } [changed]
 
         public float GeoidSeparation
         {
@@ -244,6 +397,56 @@ namespace ESME.Views.Locations
                 NotifyPropertyChanged(GeoidSeparationChangedEventArgs);
             }
         }
+
+        private static readonly PropertyChangedEventArgs GeoidSeparationChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.GeoidSeparation);
+        private float _geoidSeparation;
+
+        #region GeoidSeparationChangedCommand
+
+        private SimpleCommand<object, object> _geoidSeparationChanged;
+
+        public SimpleCommand<object, object> GeoidSeparationChangedCommand
+        {
+            get
+            {
+                return _geoidSeparationChanged ??
+                       (_geoidSeparationChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                                                              {
+                                                                  var sender =
+                                                                      (TextBox) ((EventToCommandArgs) cinchArgs).Sender;
+                                                                  float temp;
+                                                                  if (sender != null &&
+                                                                      !string.IsNullOrEmpty(sender.Text))
+                                                                      GeoidSeparation = float.TryParse(sender.Text, out temp)
+                                                                              ? temp
+                                                                              : float.NaN;
+
+                                                              }));
+            }
+        }
+
+        #endregion
+
+        #region public string GeoidSeparationString { get; set; }
+
+        public string GeoidSeparationString
+        {
+            get { return _geoidSeparationString; }
+            set
+            {
+                if (_geoidSeparationString == value) return;
+                _geoidSeparationString = value;
+                NotifyPropertyChanged(GeoidSeparationStringChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs GeoidSeparationStringChangedEventArgs =
+            ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.GeoidSeparationString);
+
+        private string _geoidSeparationString;
+
+        #endregion
 
         #endregion
 
@@ -265,162 +468,6 @@ namespace ESME.Views.Locations
             }
         }
 
-        #endregion
-
-        #region User Field Changed Commands
-        #region LocationNameChangedCommand
-
-        private SimpleCommand<object, object> _locationNameChanged;
-
-        public SimpleCommand<object, object> LocationNameChangedCommand
-        {
-            get
-            {
-                return _locationNameChanged ??
-                       (_locationNameChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                        {
-                            var sender =
-                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                            if (sender != null &&
-                                !string.IsNullOrEmpty(sender.Text))
-                                LocationName = sender.Text;
-                        }));
-            }
-        }
-
-        #endregion
-
-        #region ReferencePointLatitudeChangedCommand
-
-        private SimpleCommand<object, object> _referencePointLatitudeChanged;
-
-        public SimpleCommand<object, object> ReferencePointLatitudeChangedCommand
-        {
-            get
-            {
-                return _referencePointLatitudeChanged ??
-                       (_referencePointLatitudeChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                        {
-                            var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                            float lat;
-                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
-                                ReferencePointLatitude = float.TryParse(sender.Text, out lat) ? lat : float.NaN;
-
-                        }));
-            }
-        }
-
-        #region public string ReferencePointLatitudeString { get; set; }
-
-        public string ReferencePointLatitudeString
-        {
-            get { return _referencePointLatitudeString; }
-            set
-            {
-                if (_referencePointLatitudeString == value) return;
-                _referencePointLatitudeString = value;
-                NotifyPropertyChanged(ReferencePointLatitudeStringChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ReferencePointLatitudeStringChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ReferencePointLatitudeString);
-        string _referencePointLatitudeString;
-
-        #endregion
-
-        #endregion
-
-        #region HeightChangedCommand
-
-        private SimpleCommand<object, object> _heightChanged;
-
-        public SimpleCommand<object, object> HeightChangedCommand
-        {
-            get
-            {
-                return _heightChanged ??
-                       (_heightChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                                                              {
-                                                                  float height;
-                                                                  var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                                                                  if (sender != null && !string.IsNullOrEmpty(sender.Text))
-                                                                      Height = float.TryParse(sender.Text, out height) ? height : float.NaN;
-                                                              }));
-            }
-        }
-
-        #endregion
-
-        #region GeoidSeparationChangedCommand
-
-        private SimpleCommand<object, object> _geoidSeparationChanged;
-
-        public SimpleCommand<object, object> GeoidSeparationChangedCommand
-        {
-            get
-            {
-                return _geoidSeparationChanged ??
-                       (_geoidSeparationChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                                                              {
-                                                                  float geoid;
-                                                                  var sender = (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                                                                  if (sender != null && !string.IsNullOrEmpty(sender.Text))
-                                                                      GeoidSeparation = float.TryParse(sender.Text,out geoid) ? geoid: float.NaN;
-                                                              }));
-            }
-        }
-
-        #endregion
-
-        #region NewOpAreaOverlayCoordinatesChangedCommand
-
-        private SimpleCommand<object, object> _newOpAreaOverlayCoordinatesChanged;
-
-        public SimpleCommand<object, object> NewOpAreaOverlayCoordinatesChangedCommand
-        {
-            get
-            {
-                return _newOpAreaOverlayCoordinatesChanged ??
-                       (_newOpAreaOverlayCoordinatesChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                        {
-                            var sender =
-                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                            if (sender != null &&
-                                !string.IsNullOrEmpty(sender.Text))
-                                NewOpAreaOverlayCoordinates = sender.Text;
-                        }));
-            }
-        }
-
-        #endregion
-
-        #region NewSimAreaOverlayCoordinatesChangedCommand
-
-        private SimpleCommand<object, object> _newSimAreaOverlayCoordinatesChanged;
-
-        public SimpleCommand<object, object> NewSimAreaOverlayCoordinatesChangedCommand
-        {
-            get
-            {
-                return _newSimAreaOverlayCoordinatesChanged ??
-                       (_newSimAreaOverlayCoordinatesChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                        {
-                            var sender =
-                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                            if (sender != null &&
-                                !string.IsNullOrEmpty(sender.Text))
-                                NewSimAreaOverlayCoordinates = sender.Text;
-                        }));
-            }
-        }
-
-        #endregion
         #endregion
 
         private List<EarthCoordinate> NewOpAreaOverlayEarthCoordinates { get; set; }

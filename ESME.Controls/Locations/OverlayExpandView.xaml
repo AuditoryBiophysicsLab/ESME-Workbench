@@ -13,13 +13,13 @@
     <StackPanel>
         <StackPanel Orientation="Vertical">
             <TextBlock Text="Expand Limits by (km) "/>
-            <TextBox Text="{Binding BufferZoneSize}">
+            <TextBox Text="{Binding BufferZoneSizeString}">
                 <i:Interaction.Behaviors>
                     <cinch:NumericTextBoxBehaviour />
                 </i:Interaction.Behaviors>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="TextChanged">
-                        <cinch:EventToCommandTrigger Command="{Binding BufferZoneSizeTextChangedCommand}" />
+                        <cinch:EventToCommandTrigger Command="{Binding BufferZoneSizeChangedCommand}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>

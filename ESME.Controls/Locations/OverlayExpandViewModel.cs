@@ -32,12 +32,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public float BufferZoneSize { get; set; }
-
-        private static readonly PropertyChangedEventArgs BufferZoneSizeChangedEventArgs =
-            ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.BufferZoneSize);
-
-        private float _bufferZoneSize;
+        #region public float BufferZoneSize { get; set; } [changed]
 
         public float BufferZoneSize
         {
@@ -45,10 +40,60 @@ namespace ESME.Views.Locations
             set
             {
                 if (_bufferZoneSize == value) return;
-                if (value > 0) _bufferZoneSize = value;
+                _bufferZoneSize = value;
                 NotifyPropertyChanged(BufferZoneSizeChangedEventArgs);
             }
         }
+
+        private static readonly PropertyChangedEventArgs BufferZoneSizeChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.BufferZoneSize);
+        private float _bufferZoneSize;
+
+        #region BufferZoneSizeChangedCommand
+
+        private SimpleCommand<object, object> _bufferZoneSizeChanged;
+
+        public SimpleCommand<object, object> BufferZoneSizeChangedCommand
+        {
+            get
+            {
+                return _bufferZoneSizeChanged ??
+                       (_bufferZoneSizeChanged =
+                        new SimpleCommand<object, object>(delegate(object cinchArgs)
+                                                              {
+                                                                  var sender =
+                                                                      (TextBox) ((EventToCommandArgs) cinchArgs).Sender;
+                                                                  float temp;
+                                                                  if (sender != null &&
+                                                                      !string.IsNullOrEmpty(sender.Text))
+                                                                      BufferZoneSize = float.TryParse(sender.Text, out temp)
+                                                                              ? temp
+                                                                              : float.NaN;
+
+                                                              }));
+            }
+        }
+
+        #endregion
+
+        #region public string BufferZoneSizeString { get; set; }
+
+        public string BufferZoneSizeString
+        {
+            get { return _bufferZoneSizeString; }
+            set
+            {
+                if (_bufferZoneSizeString == value) return;
+                _bufferZoneSizeString = value;
+                NotifyPropertyChanged(BufferZoneSizeStringChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs BufferZoneSizeStringChangedEventArgs =
+            ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.BufferZoneSizeString);
+
+        private string _bufferZoneSizeString;
+
+        #endregion
 
         #endregion
 
@@ -72,27 +117,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region BufferZoneSizeTextChangedCommand
-
-        private SimpleCommand<object, object> _bufferZoneSizeTextChanged;
-
-        public SimpleCommand<object, object> BufferZoneSizeTextChangedCommand
-        {
-            get
-            {
-                return _bufferZoneSizeTextChanged ??
-                       (_bufferZoneSizeTextChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                                                              {
-                                                                  var sender =
-                                                                      (TextBox) ((EventToCommandArgs) cinchArgs).Sender;
-                                                                  if (sender != null &&
-                                                                      !string.IsNullOrEmpty(sender.Text))
-                                                                      BufferZoneSize = float.Parse(sender.Text);
-                                                              }));
-            }
-        }
-        #endregion
+        
 
         #region OKCommand
 
