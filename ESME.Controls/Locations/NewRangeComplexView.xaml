@@ -3,7 +3,9 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     xmlns:Controls="clr-namespace:ESME.Views.Controls" xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" x:Class="ESME.Views.Locations.NewRangeComplexView"
 	Title="New Range Complex"
-	SizeToContent="WidthAndHeight">
+	SizeToContent="WidthAndHeight"
+    ResizeMode="NoResize"
+    WindowStyle="ToolWindow">
 
     <StackPanel Margin="5">
         <DockPanel LastChildFill="True">
