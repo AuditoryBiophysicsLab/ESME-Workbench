@@ -1,10 +1,8 @@
-﻿using System;
-using System.ComponentModel;
-using Cinch;
+﻿using ESME.Environment.Descriptors;
 using ESME.Metadata;
 using HRC.Navigation;
 
-namespace ESME.Environment.Descriptors
+namespace ESME.Environment
 {
     public class RangeComplex : EarthCoordinate
     {
@@ -44,9 +42,7 @@ namespace ESME.Environment.Descriptors
 
     public class RangeComplexDescriptor : NAEMODescriptor<RangeComplex, RangeComplexMetadata>
     {
-
         public override RangeComplex Data { get; internal set; }
-
     }
 
 }
