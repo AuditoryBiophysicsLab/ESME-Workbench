@@ -378,7 +378,44 @@
 				</r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="V"
-			             Header="Environment">
+			             Header="Environment"                         >
+                <r:RibbonGroup Header="Map">
+                    <ListBox ItemsSource="{Binding RangeComplexDescriptors}"
+                             IsEnabled="{Binding IsRangeComplexListReady}">
+                        <ListBox.ToolTip>
+                            <r:RibbonToolTip Title="Range Complex"
+					                  Description="Select a pre-defined range complex"
+                                      FooterTitle="Currently selected range complex"
+                                      FooterDescription="{Binding SelectedRangeComplexInfo}"/>
+                        </ListBox.ToolTip>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Key}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ListBox ItemsSource="{Binding NAEMOOverlayDescriptors}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Key}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ListBox ItemsSource="{Binding NAEMOBathymetryDescriptors}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Key}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ListBox ItemsSource="{Binding NAEMOEnvironmentDescriptors}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Key}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </r:RibbonGroup>
 				<r:RibbonGroup Header="Range Complex">
                     <r:RibbonComboBox ToolTipTitle="Range Complex"
 					                  ToolTipDescription="Select a pre-defined range complex"
