@@ -13,7 +13,7 @@
             <TextBox Text="{Binding LocationName}" DockPanel.Dock="Left">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="TextChanged">
-                        <cinch:EventToCommandTrigger Command="{Binding LocationNameChangedCommand}" />
+                        <cinch:EventToCommandTrigger Command="{Binding LocationNameChangedCommand}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
