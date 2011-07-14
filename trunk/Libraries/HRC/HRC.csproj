@@ -170,6 +170,7 @@
     <Compile Include="Utility\NotifyIcon.Interop.cs" />
     <Compile Include="Utility\OSInfo.cs" />
     <Compile Include="Utility\PropertyChangedBase.cs" />
+    <Compile Include="Utility\TriggerTracing.cs" />
     <Compile Include="Utility\XmlSerializer.cs" />
     <Compile Include="Utility\HRCObservableCollection.cs" />
   </ItemGroup>

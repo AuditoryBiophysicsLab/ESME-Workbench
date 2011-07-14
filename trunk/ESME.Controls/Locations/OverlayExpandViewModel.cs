@@ -8,7 +8,7 @@ using ESME.Metadata;
 
 namespace ESME.Views.Locations
 {
-    public class OverlayExpandViewModel : ValidatingViewModelBase
+    public class OverlayExpandViewModel : EditableValidatingViewModelBase
     {
         readonly IEnumerable<DataWrapperBase> _dataWrappers;
 
@@ -95,7 +95,7 @@ namespace ESME.Views.Locations
         public void CreateBufferSizeWrapper()
         {
             BufferSize = new DataWrapper<float>(this, BufferSizeChangedEventArgs) {IsEditable = true};
-            _bufferSize.AddRule(new SimpleRule("Buffer Size", "The size must be greater than zero", source =>
+            _bufferSize.AddRule(new SimpleRule("BufferSize.DataValue", "The size must be greater than zero", source =>
             {
                 var dataValue = ((DataWrapper<float>)source).DataValue;
                 // This must return true if the value is NOT valid
