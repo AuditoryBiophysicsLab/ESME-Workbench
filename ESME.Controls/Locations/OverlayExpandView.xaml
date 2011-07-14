@@ -6,7 +6,7 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" 
         xmlns:c="clr-namespace:ESME.Views.Locations" 
-        xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
+        xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase" 
         mc:Ignorable="d"        
         Title="Expand Overlay File"
         SizeToContent="WidthAndHeight"
@@ -33,7 +33,7 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="ValidatingTextBox" TargetType="{x:Type TextBox}" diag:PresentationTraceSources.TraceLevel="High">
+        <Style x:Key="ValidatingTextBox" TargetType="{x:Type TextBoxBase}">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
@@ -41,14 +41,14 @@
             <Setter Property="MinWidth" Value="120"/>
             <Setter Property="MinHeight" Value="20"/>
             <Setter Property="AllowDrop" Value="true"/>
-            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource validationTemplate}"/>
+            <Setter Property="Validation.ErrorTemplate" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type TextBoxBase}">
                         <Border Name="Border"
                                 Padding="2"
                                 Background="White"
-                                BorderBrush="LightGray"
+                                BorderBrush="Black"
                                 BorderThickness="1" >
                             <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
                         </Border>
@@ -65,17 +65,20 @@
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <Trigger Property="Validation.HasError" Value="true"
-                         diag:PresentationTraceSources.TraceLevel="High">
+                <Trigger Property="Validation.HasError" Value="true">
                     <Setter Property="ToolTip"
                             Value="{Binding RelativeSource={x:Static RelativeSource.Self},
                             Path=(Validation.Errors).CurrentItem.ErrorContent}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <DataTemplate DataType="{x:Type ValidationError}">
+            <TextBlock Foreground="Red" Text="{Binding ErrorContent}" />
+        </DataTemplate>
     </Window.Resources>
     <StackPanel>
         <StackPanel Orientation="Vertical">
+            <!--
             <TextBlock Text="Expand Limits by (km) "/>
             <TextBox x:Name="Binding" Validation.ErrorTemplate="{StaticResource validationTemplate}"
                      Style="{StaticResource textBoxInError}" >
@@ -87,14 +90,16 @@
                     </Binding>
                 </TextBox.Text>
             </TextBox>
+            -->
             <TextBlock Text="Expand Limits by (km) "/>
-            <TextBox x:Name="DataValue" Text="{Binding BufferSize.DataValue, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, diag:PresentationTraceSources.TraceLevel=High}"
+            <TextBox x:Name="DataValue" Text="{Binding BufferSize.DataValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True}"
                      Style="{StaticResource ValidatingTextBox}"
                      IsEnabled="{Binding BufferSize.IsEditable}">
                 <i:Interaction.Behaviors>
                     <cinch:NumericTextBoxBehaviour/>
                 </i:Interaction.Behaviors>
             </TextBox>
+            <ContentPresenter Content="{Binding ElementName=DataValue, Path=(ValidationErrors).CurrentItem}" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="75" Margin="5" IsDefault="True" Command="{Binding OKCommand}"/>
