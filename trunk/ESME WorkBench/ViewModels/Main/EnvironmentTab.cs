@@ -23,6 +23,7 @@ using ESMEWorkBench.ViewModels.Layers;
 using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
+using Microsoft.Windows.Controls.Ribbon;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -332,6 +333,25 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public RibbonToolTip RangeComplexToolTip { get; set; }
+
+        public RibbonToolTip RangeComplexToolTip
+        {
+            get { return _rangeComplexToolTip; }
+            set
+            {
+                if (_rangeComplexToolTip == value) return;
+                _rangeComplexToolTip = value;
+                NotifyPropertyChanged(RangeComplexToolTipChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RangeComplexToolTipChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RangeComplexToolTip);
+        RibbonToolTip _rangeComplexToolTip;
+
+        #endregion
+
+
         #region public string SelectedRangeComplexInfo { get; set; }
 
         public string SelectedRangeComplexInfo
@@ -585,10 +605,10 @@ namespace ESMEWorkBench.ViewModels.Main
                 //vm.BufferZoneSize
                 var curOverlay = SelectedOverlayDescriptor.Data;
                 var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].BoundingBox));
-                var expandedLimits = limits.CreateExpandedLimit(vm.BufferZoneSize);  //in km.
+                var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize.DataValue);  //in km.
                 var geoRect = new GeoRect(expandedLimits.GeoPointList);
-                var overlayFileName = string.Format("{0}_{1}km.ovr", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferZoneSize);
-                var metadataFileName = string.Format("{0}_{1}km.xml", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferZoneSize);
+                var overlayFileName = string.Format("{0}_{1}km.ovr", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize.DataValue);
+                var metadataFileName = string.Format("{0}_{1}km.xml", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize.DataValue);
                 var overlayPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), overlayFileName);
                 var metadataPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), metadataFileName);
                 using (var writer = new StreamWriter(overlayPath))
@@ -608,7 +628,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 var metadata = new NAEMOOverlayMetadata
                 {
                     Bounds = geoRect,
-                    BufferZoneSize = vm.BufferZoneSize,
+                    BufferZoneSize = vm.BufferSize.DataValue,
                     Filename = metadataPath,
                     OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename),
                 };
