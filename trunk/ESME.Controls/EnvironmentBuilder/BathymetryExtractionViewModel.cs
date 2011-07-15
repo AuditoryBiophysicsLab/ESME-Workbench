@@ -62,8 +62,8 @@ namespace ESME.Views.EnvironmentBuilder
 
         void UpdatePointNote()
         {
-            BathymetryName = string.Format("{0}_{1:0.00}min", _selectedOverlay, SelectedResolution);
-            Note = string.Format("Note: Bathymetry data will be extracted within the bounds of the overlay {0}. The resulting bathymetry file will be named {1}", _selectedOverlay, BathymetryName);
+            var samplesPerDegree = 60 / SelectedResolution;
+            PointNote = string.Format("Extraction area: {0:0.###}deg (lon) by {1:0.###}deg (lat)\nEstimated point count {2:#,#} x {3:#,#} = {4:#,#}", _boundingBox.Width, _boundingBox.Height, _boundingBox.Width * samplesPerDegree, _boundingBox.Height * samplesPerDegree, _boundingBox.Width * _boundingBox.Height * samplesPerDegree * samplesPerDegree);
         }
 
         #endregion
