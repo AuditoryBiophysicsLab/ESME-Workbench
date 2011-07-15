@@ -79,7 +79,7 @@
             </StatusBarItem>
         </StatusBar>
 		<r:Ribbon x:Name="Ribbon"
-                  SelectedIndex="{Binding SelectedRibbonTabIndex, Mode=TwoWay}"
+                  SelectedIndex="{Binding Source={x:Static p:Settings.Default}, Path=SelectedRibbonTabIndex, Mode=TwoWay}"
 		          DockPanel.Dock="Top">
 
             <r:Ribbon.ApplicationMenu>
@@ -380,211 +380,223 @@
 			<r:RibbonTab KeyTip="V"
 			             Header="Environment"                         >
                 <r:RibbonGroup Header="Map">
-                    <ListBox ItemsSource="{Binding RangeComplexDescriptors}"
-                             IsEnabled="{Binding IsRangeComplexListReady}">
-                        <ListBox.ToolTip>
-                            <r:RibbonToolTip Title="Range Complex"
-					                  Description="Select a pre-defined range complex"
-                                      FooterTitle="Currently selected range complex"
-                                      FooterDescription="{Binding SelectedRangeComplexInfo}"/>
-                        </ListBox.ToolTip>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Key}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                    <ListBox ItemsSource="{Binding NAEMOOverlayDescriptors}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Key}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                    <ListBox ItemsSource="{Binding NAEMOBathymetryDescriptors}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Key}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                    <ListBox ItemsSource="{Binding NAEMOEnvironmentDescriptors}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Key}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <r:RibbonButton Label="World Map" 
+					                LargeImageSource="..\Images\LargeIcons\globe-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\globe-icon.png"
+                                    Command="{Binding ZoomToWorldMapCommand}" />
                 </r:RibbonGroup>
 				<r:RibbonGroup Header="Range Complex">
-                    <r:RibbonComboBox ToolTipTitle="Range Complex"
-					                  ToolTipDescription="Select a pre-defined range complex"
-                                      ToolTipFooterTitle="Currently selected range complex"
-                                      ToolTipFooterDescription="{Binding SelectedRangeComplexInfo}"
-                                      IsEnabled="{Binding IsRangeComplexListReady}">
-                        <r:RibbonGallery Margin="0"
-                    			         VerticalContentAlignment="Center"
-								         SelectedValue="{Binding SelectedRangeComplexDescriptor}"
-                    			         MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding RangeComplexDescriptors}">
-                                <r:RibbonGalleryCategory.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Vertical"
-											            IsItemsHost="True">
-                                        </StackPanel>
-                                    </ItemsPanelTemplate>
-                                </r:RibbonGalleryCategory.ItemsPanel>
-                                <r:RibbonGalleryCategory.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Key}" />
-                                    </DataTemplate>
-                                </r:RibbonGalleryCategory.ItemTemplate>
-                                <r:RibbonGalleryCategory.Style>
-                                    <Style>
-                                    </Style>
-                                </r:RibbonGalleryCategory.Style>
-                            </r:RibbonGalleryCategory>
-                        </r:RibbonGallery>
-                    </r:RibbonComboBox>
-                    <r:RibbonButton x:Name="NewLocation" Label="New"
-					                SmallImageSource="..\Images\SmallIcons\map_add.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                                    ToolTipDescription="Define a new range complex"
-					                Command="{Binding NewRangeComplexCommand}">
-                    </r:RibbonButton>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <!--
+                        <ListBox ItemsSource="{Binding RangeComplexDescriptors}"
+                                 IsEnabled="{Binding IsRangeComplexListReady}">
+                            <ListBox.ToolTip>
+                                <r:RibbonToolTip Title="Range Complex"
+					                             Description="Select a pre-defined range complex"
+                                                 FooterTitle="Currently selected range complex"
+                                                 FooterDescription="{Binding SelectedRangeComplexInfo}"/>
+                            </ListBox.ToolTip>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Key}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        -->
+                        <r:RibbonComboBox Grid.Column="0"
+                                          ToolTipTitle="Range Complex"
+					                      ToolTipDescription="Select a pre-defined range complex"
+                                          ToolTipFooterTitle="Currently selected range complex"
+                                          ToolTipFooterDescription="{Binding SelectedRangeComplexInfo}"
+                                          IsEnabled="{Binding IsRangeComplexListReady}">
+                            <r:RibbonGallery Margin="0"
+                    			             VerticalContentAlignment="Center"
+								             SelectedValue="{Binding SelectedRangeComplexDescriptor}"
+                                             SelectedValuePath="Value"
+                    			             MaxColumnCount="1">
+                                <r:RibbonGalleryCategory ItemsSource="{Binding RangeComplexDescriptors}">
+                                    <r:RibbonGalleryCategory.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"
+											                IsItemsHost="True">
+                                            </StackPanel>
+                                        </ItemsPanelTemplate>
+                                    </r:RibbonGalleryCategory.ItemsPanel>
+                                    <r:RibbonGalleryCategory.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Key}" />
+                                        </DataTemplate>
+                                    </r:RibbonGalleryCategory.ItemTemplate>
+                                </r:RibbonGalleryCategory>
+                            </r:RibbonGallery>
+                        </r:RibbonComboBox>
+                        <StackPanel Orientation="Vertical"
+                                    Grid.Column="1">
+                            <r:RibbonButton Label="New"
+					                        SmallImageSource="..\Images\SmallIcons\map_add.png"
+					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                                            ToolTipDescription="Define a new range complex"
+					                        Command="{Binding NewRangeComplexCommand}" />
+                            <r:RibbonButton Label="Zoom"
+					                        SmallImageSource="..\Images\SmallIcons\map_magnify.png"
+					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                                            ToolTipDescription="Show the selected range complex on the map"
+					                        Command="{Binding ZoomToRangeComplexCommand}" />
+                        </StackPanel>
+                    </Grid>
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Overlays">
-                    <r:RibbonComboBox ToolTipTitle="Overlay"
-					                  ToolTipDescription="Select a pre-defined overlay"
-                                      ToolTipFooterTitle="Currently selected overlay"
-                                      ToolTipFooterDescription="{Binding SelectedOverlayInfo}"
-                                      IsEnabled="{Binding IsOverlayListReady}">
-                        <r:RibbonGallery Margin="0"
-                    			         VerticalContentAlignment="Center"
-								         SelectedValue="{Binding SelectedOverlayDescriptor}"
-                                         SelectedValuePath="Value"
-                    			         MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOOverlayDescriptors}">
-                                <r:RibbonGalleryCategory.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Vertical"
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <r:RibbonComboBox Grid.Column="0" 
+                                          ToolTipTitle="Overlay"
+					                      ToolTipDescription="Select a pre-defined overlay"
+                                          ToolTipFooterTitle="Currently selected overlay"
+                                          ToolTipFooterDescription="{Binding SelectedOverlayInfo}"
+                                          IsEnabled="{Binding IsOverlayListReady}">
+                            <r:RibbonGallery Margin="0"
+                    			             VerticalContentAlignment="Center"
+								             SelectedValue="{Binding SelectedOverlayDescriptor}"
+                                             SelectedValuePath="Value"
+                    			             MaxColumnCount="1">
+                                <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOOverlayDescriptors}">
+                                    <r:RibbonGalleryCategory.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"
 											            IsItemsHost="True">
-                                        </StackPanel>
-                                    </ItemsPanelTemplate>
-                                </r:RibbonGalleryCategory.ItemsPanel>
-                                <r:RibbonGalleryCategory.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Key}" />
-                                    </DataTemplate>
-                                </r:RibbonGalleryCategory.ItemTemplate>
-                                <r:RibbonGalleryCategory.Style>
-                                    <Style>
-                                    </Style>
-                                </r:RibbonGalleryCategory.Style>
-                            </r:RibbonGalleryCategory>
-                        </r:RibbonGallery>
-                    </r:RibbonComboBox>
-                    <StackPanel Orientation="Horizontal">
-                        <r:RibbonButton Label="New"
-					                SmallImageSource="..\Images\SmallIcons\overlay-new.png"
-					                ToolTipTitle="New Overlay"
-					                ToolTipDescription="Create a new overlay"
-					                Command="{Binding NewOverlayCommand}" />
-                        <r:RibbonButton Label="Expand"
-					                SmallImageSource="..\Images\SmallIcons\top_right_expand.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Expand the selected overlay to create a new overlay"
-					                Command="{Binding ExpandOverlayCommand}" />
-                    </StackPanel>
-                    <r:RibbonButton Label="Properties"
-					                SmallImageSource="..\Images\SmallIcons\properties.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="View or edit the overlay properties"
-					                Command="{Binding OverlayPropertiesCommand}" />
+                                            </StackPanel>
+                                        </ItemsPanelTemplate>
+                                    </r:RibbonGalleryCategory.ItemsPanel>
+                                    <r:RibbonGalleryCategory.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Key}" />
+                                        </DataTemplate>
+                                    </r:RibbonGalleryCategory.ItemTemplate>
+                                </r:RibbonGalleryCategory>
+                            </r:RibbonGallery>
+                        </r:RibbonComboBox>
+                        <StackPanel Orientation="Vertical"
+                                    Grid.Column="1">
+                            <r:RibbonButton Label="New"
+					                        SmallImageSource="..\Images\SmallIcons\overlay-new.png"
+					                        ToolTipTitle="New Overlay"
+					                        ToolTipDescription="Create a new overlay"
+					                        Command="{Binding NewOverlayCommand}" />
+                            <r:RibbonButton Label="Expand"
+					                        SmallImageSource="..\Images\SmallIcons\top_right_expand.png"
+					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                        ToolTipDescription="Expand the selected overlay to create a new overlay"
+					                        Command="{Binding ExpandOverlayCommand}" />
+                            <r:RibbonButton Label="Properties"
+					                        SmallImageSource="..\Images\SmallIcons\properties.png"
+					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                        ToolTipDescription="View or edit the overlay properties"
+					                        Command="{Binding OverlayPropertiesCommand}" />
+                        </StackPanel>
+                    </Grid>
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Bathymetry">
-                    <r:RibbonComboBox ToolTipTitle="Bathymetry"
-					                  ToolTipDescription="Select a pre-defined bathymetry dataset"
-                                      ToolTipFooterTitle="Currently selected bathymetry"
-                                      ToolTipFooterDescription="{Binding SelectedBathymetryInfo}"
-                                      IsEnabled="{Binding IsBathymetryListReady}">
-                        <r:RibbonGallery Margin="0"
-                    			         VerticalContentAlignment="Center"
-								         SelectedValue="{Binding SelectedBathymetryDescriptor}"
-                                         SelectedValuePath="Value"
-                    			         MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOBathymetryDescriptors}">
-                                <r:RibbonGalleryCategory.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Vertical"
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <r:RibbonComboBox Grid.Column="0"
+                                          ToolTipTitle="Bathymetry"
+					                      ToolTipDescription="Select a pre-defined bathymetry dataset"
+                                          ToolTipFooterTitle="Currently selected bathymetry"
+                                          ToolTipFooterDescription="{Binding SelectedBathymetryInfo}"
+                                          IsEnabled="{Binding IsBathymetryListReady}">
+                            <r:RibbonGallery Margin="0"
+                    			             VerticalContentAlignment="Center"
+								             SelectedValue="{Binding SelectedBathymetryDescriptor}"
+                                             SelectedValuePath="Value"
+                    			             MaxColumnCount="1">
+                                <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOBathymetryDescriptors}">
+                                    <r:RibbonGalleryCategory.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"
 											            IsItemsHost="True">
-                                        </StackPanel>
-                                    </ItemsPanelTemplate>
-                                </r:RibbonGalleryCategory.ItemsPanel>
-                                <r:RibbonGalleryCategory.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Key}" />
-                                    </DataTemplate>
-                                </r:RibbonGalleryCategory.ItemTemplate>
-                                <r:RibbonGalleryCategory.Style>
-                                    <Style>
-                                    </Style>
-                                </r:RibbonGalleryCategory.Style>
-                            </r:RibbonGalleryCategory>
-                        </r:RibbonGallery>
-                    </r:RibbonComboBox>
-                    <r:RibbonButton Label="New"
-					            SmallImageSource="..\Images\SmallIcons\map_add.png"
-					            ToolTipTitle="New Bathymetry"
-					            ToolTipDescription="Extract a new bathymetry dataset"
-					            Command="{Binding NewBathymetryCommand}" />
-                    <r:RibbonButton Label="Properties"
-					                SmallImageSource="..\Images\SmallIcons\properties.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="View or edit the bathymetry properties"
-					                Command="{Binding BathymetryPropertiesCommand}" />
+                                            </StackPanel>
+                                        </ItemsPanelTemplate>
+                                    </r:RibbonGalleryCategory.ItemsPanel>
+                                    <r:RibbonGalleryCategory.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Key}" />
+                                        </DataTemplate>
+                                    </r:RibbonGalleryCategory.ItemTemplate>
+                                </r:RibbonGalleryCategory>
+                            </r:RibbonGallery>
+                        </r:RibbonComboBox>
+                        <StackPanel Orientation="Vertical"
+                                    Grid.Column="1">
+                            <r:RibbonButton Label="New"
+					                        SmallImageSource="..\Images\SmallIcons\map_add.png"
+					                        ToolTipTitle="New Bathymetry"
+					                        ToolTipDescription="Extract a new bathymetry dataset"
+					                        Command="{Binding NewBathymetryCommand}" />
+                            <r:RibbonButton Label="Properties"
+					                        SmallImageSource="..\Images\SmallIcons\properties.png"
+					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                        ToolTipDescription="View or edit the bathymetry properties"
+					                        Command="{Binding BathymetryPropertiesCommand}" />
+                        </StackPanel>
+                    </Grid>
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Environment">
-                    <r:RibbonComboBox ToolTipTitle="Environment"
-                                      ToolTipDescription="Select a pre-defined environmental dataset"
-                                      ToolTipFooterTitle="Currently selected environment"
-                                      ToolTipFooterDescription="{Binding SelectedEnvironmentInfo}"
-                                      IsEnabled="{Binding IsEnvironmentListReady}">
-                        <r:RibbonGallery Margin="0"
-                    			         VerticalContentAlignment="Center"
-								         SelectedValue="{Binding SelectedEnvironmentDescriptor}"
-                                         SelectedValuePath="Value"
-                    			         MaxColumnCount="1">
-                            <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOEnvironmentDescriptors}">
-                                <r:RibbonGalleryCategory.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Vertical"
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <r:RibbonComboBox Grid.Column="0"
+                                          ToolTipTitle="Environment"
+                                          ToolTipDescription="Select a pre-defined environmental dataset"
+                                          ToolTipFooterTitle="Currently selected environment"
+                                          ToolTipFooterDescription="{Binding SelectedEnvironmentInfo}"
+                                          IsEnabled="{Binding IsEnvironmentListReady}">
+                            <r:RibbonGallery Margin="0"
+                    			             VerticalContentAlignment="Center"
+								             SelectedValue="{Binding SelectedEnvironmentDescriptor}"
+                                             SelectedValuePath="Value"
+                    			             MaxColumnCount="1">
+                                <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOEnvironmentDescriptors}">
+                                    <r:RibbonGalleryCategory.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical"
 											            IsItemsHost="True">
-                                        </StackPanel>
-                                    </ItemsPanelTemplate>
-                                </r:RibbonGalleryCategory.ItemsPanel>
-                                <r:RibbonGalleryCategory.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Key}" />
-                                    </DataTemplate>
-                                </r:RibbonGalleryCategory.ItemTemplate>
-                                <r:RibbonGalleryCategory.Style>
-                                    <Style>
-                                    </Style>
-                                </r:RibbonGalleryCategory.Style>
-                            </r:RibbonGalleryCategory>
-                        </r:RibbonGallery>
-                    </r:RibbonComboBox>
-                    <r:RibbonButton Label="New"
-					            SmallImageSource="..\Images\SmallIcons\breeze.png"
-					            ToolTipTitle="New Bathymetry"
-					            ToolTipDescription="Extract a new bathymetry dataset"
-					            Command="{Binding NewEnvironmentCommand}" />
-                    <r:RibbonButton Label="Properties"
-					                SmallImageSource="..\Images\SmallIcons\properties.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="View or edit the bathymetry properties"
-					                Command="{Binding EnvironmentPropertiesCommand}" />
+                                            </StackPanel>
+                                        </ItemsPanelTemplate>
+                                    </r:RibbonGalleryCategory.ItemsPanel>
+                                    <r:RibbonGalleryCategory.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Key}" />
+                                        </DataTemplate>
+                                    </r:RibbonGalleryCategory.ItemTemplate>
+                                </r:RibbonGalleryCategory>
+                            </r:RibbonGallery>
+                        </r:RibbonComboBox>
+                        <StackPanel Orientation="Vertical"
+                                    Grid.Column="1">
+                            <r:RibbonButton Label="New"
+					                        SmallImageSource="..\Images\SmallIcons\breeze.png"
+					                        ToolTipTitle="New Bathymetry"
+					                        ToolTipDescription="Extract a new bathymetry dataset"
+					                        Command="{Binding NewEnvironmentCommand}" />
+                            <r:RibbonButton Label="Properties"
+					                        SmallImageSource="..\Images\SmallIcons\properties.png"
+					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                        ToolTipDescription="View or edit the bathymetry properties"
+					                        Command="{Binding EnvironmentPropertiesCommand}" />
+                        </StackPanel>
+                    </Grid>
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Debug" Visibility="Collapsed">
                     <r:RibbonButton LargeImageSource="..\Images\LargeIcons\Button-Reload-icon.png"

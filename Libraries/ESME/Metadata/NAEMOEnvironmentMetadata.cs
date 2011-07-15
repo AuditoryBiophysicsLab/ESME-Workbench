@@ -25,10 +25,9 @@ namespace ESME.Metadata
                 if (environmentFile == null) return null;
                 result = new NAEMOEnvironmentMetadata
                 {
-                        TimePeriod = environmentFile.TimePeriod,
-                        Filename = metaDataFilename,
+                    TimePeriod = environmentFile.TimePeriod,
+                    Filename = metaDataFilename,
                 };
-                result.Locations.AddRange(environmentFile.Locations);
             }
             catch
             {
@@ -77,24 +76,5 @@ namespace ESME.Metadata
         NAVOTimePeriod _timePeriod;
 
         #endregion
-
-        #region public List<EarthCoordinate> Locations { get; set; }
-
-        public List<EarthCoordinate> Locations
-        {
-            get { return _locations ?? (_locations = new List<EarthCoordinate>()); }
-            set
-            {
-                if (_locations == value) return;
-                _locations = value;
-                NotifyPropertyChanged(LocationsChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs LocationsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOEnvironmentMetadata>(x => x.Locations);
-        List<EarthCoordinate> _locations;
-
-        #endregion
-
     }
 }

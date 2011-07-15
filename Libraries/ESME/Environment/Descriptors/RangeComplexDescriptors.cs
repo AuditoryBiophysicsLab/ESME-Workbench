@@ -52,7 +52,10 @@ namespace ESME.Environment.Descriptors
                                        GeoidSeparation = geoid,
                                        OpsLimitFile = opsLimitFile,
                                        SimLimitFile = simLimitFile,
-                                   }
+                                   },
+                                   NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(simAreaName),
+                                   NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(simAreaName),
+                                   NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(simAreaName),
                                }));
                 }
             }

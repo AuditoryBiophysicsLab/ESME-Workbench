@@ -326,12 +326,12 @@ namespace ESMEWorkBench.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("2")]
-        public int SelectedTabIndex {
+        public int SelectedRibbonTabIndex {
             get {
-                return ((int)(this["SelectedTabIndex"]));
+                return ((int)(this["SelectedRibbonTabIndex"]));
             }
             set {
-                this["SelectedTabIndex"] = value;
+                this["SelectedRibbonTabIndex"] = value;
             }
         }
     }
