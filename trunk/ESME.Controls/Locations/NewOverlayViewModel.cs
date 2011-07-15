@@ -41,7 +41,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public string OverlayName { get; set; } [changed]
+        #region public string OverlayName { get; set; } 
 
         public string OverlayName
         {
@@ -56,30 +56,9 @@ namespace ESME.Views.Locations
 
         private static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.OverlayName);
         private string _overlayName;
-
-        #region OverlayNameChangedCommand
-
-        public SimpleCommand<object, object> OverlayNameChangedCommand
-        {
-            get
-            {
-                return _overlayNameChanged ??
-                       (_overlayNameChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                        {
-                            var sender =
-                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
-                                OverlayName = sender.Text;
-                        }));
-            }
-        }
-
-        private SimpleCommand<object, object> _overlayNameChanged;
-        #endregion
         #endregion
 
-        #region public string OverlayCoordinates { get; set; } [changed]
+        #region public string OverlayCoordinates { get; set; } 
 
         public string OverlayCoordinates
         {
@@ -94,28 +73,7 @@ namespace ESME.Views.Locations
 
         private static readonly PropertyChangedEventArgs OverlayCoordinatesChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.OverlayCoordinates);
         private string _overlayCoordinates;
-
-        #region OverlayCoordinatesChangedCommand
-
-        public SimpleCommand<object, object> OverlayCoordinatesChangedCommand
-        {
-            get
-            {
-                return _overlayCoordinatesChanged ??
-                       (_overlayCoordinatesChanged =
-                        new SimpleCommand<object, object>(delegate(object cinchArgs)
-                        {
-                            var sender =
-                                (TextBox)((EventToCommandArgs)cinchArgs).Sender;
-                            if (sender != null && !string.IsNullOrEmpty(sender.Text))
-                                OverlayCoordinates = sender.Text;
-                        }));
-            }
-        }
-
-        private SimpleCommand<object, object> _overlayCoordinatesChanged;
-
-        #endregion
+    
 
         #endregion
 
@@ -265,7 +223,7 @@ namespace ESME.Views.Locations
                 var coordSeparators = new[] { ',', ' ' };
                 var coords = line.Split(coordSeparators, StringSplitOptions.RemoveEmptyEntries);
                 double lat, lon;
-                if (double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
+                if (coords.Length==2 && double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
                     earthCoordinates.Add(new EarthCoordinate(lat, lon));
                 else
                     ValidationErrorText += string.Format(overlayName + ": Invalid latitude/longitude on line {0}. Please use decimal degrees\n", lineCount);

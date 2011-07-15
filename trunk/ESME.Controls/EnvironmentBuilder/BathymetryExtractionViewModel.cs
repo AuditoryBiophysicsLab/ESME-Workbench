@@ -1,17 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows;
 using Cinch;
+using HRC.Navigation;
 
 namespace ESME.Views.EnvironmentBuilder
 {
     public class BathymetryExtractionViewModel : ViewModelBase
     {
         readonly string _selectedOverlay;
-        public BathymetryExtractionViewModel(string selectedOverlay)
+        public BathymetryExtractionViewModel(string selectedOverlay, GeoRect boundingBox)
         {
             _selectedOverlay = selectedOverlay;
+            _boundingBox = boundingBox;
             SelectedResolution = 2.0f;
             UpdateNote();
+            UpdatePointNote();
         }
 
         #region public string Note { get; set; }
@@ -31,6 +35,32 @@ namespace ESME.Views.EnvironmentBuilder
         string _note;
 
         void UpdateNote()
+        {
+            BathymetryName = string.Format("{0}_{1:0.00}min", _selectedOverlay, SelectedResolution);
+            Note = string.Format("Note: Bathymetry data will be extracted within the bounds of the overlay {0}. The resulting bathymetry file will be named {1}", _selectedOverlay, BathymetryName);
+        }
+
+        #endregion
+
+        private readonly GeoRect _boundingBox;
+
+        #region public string PointNote { get; set; }
+
+        public string PointNote
+        {
+            get { return _pointNote; }
+            set
+            {
+                if (_pointNote == value) return;
+                _pointNote = value;
+                NotifyPropertyChanged(PointNoteChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs PointNoteChangedEventArgs = ObservableHelper.CreateArgs<BathymetryExtractionViewModel>(x => x.PointNote);
+        private string _pointNote;
+
+        void UpdatePointNote()
         {
             BathymetryName = string.Format("{0}_{1:0.00}min", _selectedOverlay, SelectedResolution);
             Note = string.Format("Note: Bathymetry data will be extracted within the bounds of the overlay {0}. The resulting bathymetry file will be named {1}", _selectedOverlay, BathymetryName);
@@ -67,6 +97,7 @@ namespace ESME.Views.EnvironmentBuilder
                 _selectedResolution = value;
                 NotifyPropertyChanged(SelectedResolutionChangedEventArgs);
                 UpdateNote();
+                UpdatePointNote();
             }
         }
 

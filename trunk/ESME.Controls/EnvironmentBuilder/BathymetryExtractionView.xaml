@@ -17,6 +17,10 @@
                    Margin="5"
                    TextWrapping="WrapWithOverflow" 
                    Text="{Binding Note}" />
+        <TextBlock Width="190"
+                   Margin="5"
+                   TextWrapping="WrapWithOverflow" 
+                   Text="{Binding PointNote}" />
         <DockPanel LastChildFill="False"
 		           Margin="5 10">
             <Button Width="90"

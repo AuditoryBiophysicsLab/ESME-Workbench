@@ -10,13 +10,7 @@
     <StackPanel Margin="5">
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Left" Text="Name:"/>
-            <TextBox Text="{Binding LocationName}" DockPanel.Dock="Left">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="TextChanged">
-                        <cinch:EventToCommandTrigger Command="{Binding LocationNameChangedCommand}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </TextBox>
+            <TextBox Text="{Binding LocationName, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Left"/>
         </DockPanel>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -25,55 +19,35 @@
             </Grid.ColumnDefinitions>
             <DockPanel Grid.Column="0" LastChildFill="True">
                 <TextBlock DockPanel.Dock="Left" Text="Reference point latitude:" />
-                <TextBox DockPanel.Dock="Left" MinWidth="75" Text="{Binding ReferencePointLatitudeString}" >
+                <TextBox DockPanel.Dock="Left" MinWidth="75" Text="{Binding ReferencePointLatitude, UpdateSourceTrigger=PropertyChanged}" >
                     <i:Interaction.Behaviors>
                         <cinch:NumericTextBoxBehaviour />
                     </i:Interaction.Behaviors>
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="TextChanged">
-                            <cinch:EventToCommandTrigger Command="{Binding ReferencePointLatitudeChangedCommand}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
                 </TextBox>
             </DockPanel>
             <DockPanel Grid.Column="1" LastChildFill="True">
                 <TextBlock DockPanel.Dock="Left" Text="longitude:" />
-                <TextBox DockPanel.Dock="Left" MinWidth="75" Text="{Binding ReferencePointLongitudeString}">
+                <TextBox DockPanel.Dock="Left" MinWidth="75" Text="{Binding ReferencePointLongitude, UpdateSourceTrigger=PropertyChanged}">
                     <i:Interaction.Behaviors>
                         <cinch:NumericTextBoxBehaviour />
-                    </i:Interaction.Behaviors>
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="TextChanged">
-                            <cinch:EventToCommandTrigger Command="{Binding ReferencePointLongitudeChangedCommand}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
+                    </i:Interaction.Behaviors>                    
                 </TextBox>
             </DockPanel>
         </Grid>
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Left" Text="Height (m):" />
-            <TextBox DockPanel.Dock="Right" Text="{Binding HeightString}">
+            <TextBox DockPanel.Dock="Right" Text="{Binding Height, UpdateSourceTrigger=PropertyChanged}">
                 <i:Interaction.Behaviors>
                     <cinch:NumericTextBoxBehaviour />
-                </i:Interaction.Behaviors>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="TextChanged">
-                        <cinch:EventToCommandTrigger Command="{Binding HeightChangedCommand}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
+                </i:Interaction.Behaviors>                
             </TextBox>
         </DockPanel>
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Left" Text="Geoid separation (m):" />
-            <TextBox DockPanel.Dock="Right" Text="{Binding GeoidSeparationString}">
+            <TextBox DockPanel.Dock="Right" Text="{Binding GeoidSeparation, UpdateSourceTrigger=PropertyChanged}">
                 <i:Interaction.Behaviors>
                     <cinch:NumericTextBoxBehaviour />
-                </i:Interaction.Behaviors>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="TextChanged">
-                        <cinch:EventToCommandTrigger Command="{Binding GeoidSeparationChangedCommand}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
+                </i:Interaction.Behaviors>              
             </TextBox>
         </DockPanel>
         <GroupBox Margin="0 5 0 0" Header="Operational limits (choose one)">
@@ -87,18 +61,12 @@
                 <TextBlock Text="OR" HorizontalAlignment="Center" Margin="10" FontSize="18" FontWeight="Bold"/>
                 <GroupBox Margin="5 0 5 0" Padding="5" Header="Coordinates for new overlay (lat, lon)">
                     <StackPanel Orientation="Vertical">
-                        <TextBox Text="{Binding NewOpAreaOverlayCoordinates}" 
+                        <TextBox Text="{Binding NewOpAreaOverlayCoordinates, UpdateSourceTrigger=PropertyChanged}" 
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
 							 Height="100"
 					         ToolTip="Please enter coordinates in latitude, longitude pairs separated by newlines" 
-							 VerticalScrollBarVisibility="Auto">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="TextChanged">
-                                    <cinch:EventToCommandTrigger Command="{Binding NewOpAreaOverlayCoordinatesChangedCommand}" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </TextBox>
+							 VerticalScrollBarVisibility="Auto"/>
                         <Button Content="Clear" 
 					        Width="100" 
 							HorizontalAlignment="Right" 
@@ -119,18 +87,12 @@
                 <TextBlock Text="OR" HorizontalAlignment="Center" Margin="10" FontSize="18" FontWeight="Bold"/>
                 <GroupBox Margin="5 0 5 0" Padding="5" Header="Coordinates for new overlay (lat, lon)">
                     <StackPanel Orientation="Vertical">
-                        <TextBox Text="{Binding NewSimAreaOverlayCoordinates}" 
+                        <TextBox Text="{Binding NewSimAreaOverlayCoordinates, UpdateSourceTrigger=PropertyChanged}" 
                              TextWrapping="Wrap"
                              AcceptsReturn="True"
 							 Height="100"
 					         ToolTip="Please enter coordinates in latitude, longitude pairs separated by newlines" 
-							 VerticalScrollBarVisibility="Auto">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="TextChanged">
-                                    <cinch:EventToCommandTrigger Command="{Binding NewSimAreaOverlayCoordinatesChangedCommand}" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </TextBox>
+							 VerticalScrollBarVisibility="Auto"/>
                         <Button Content="Clear" 
 					        Width="100" 
 							HorizontalAlignment="Right" 
@@ -145,7 +107,7 @@
             <TextBlock Text="{Binding SimAreaFolder}" />
         </StackPanel>
         <GroupBox Header="Error(s):" Foreground="Red" Visibility="{Binding ErrorVisibility}" Padding="5" Margin="0 0 0 5">
-            <TextBlock Foreground="Red" Text="{Binding ValidationErrorText}" Margin="5" />
+            <TextBlock Foreground="Red" Text="{Binding ValidationErrorText}" Margin="5"  MaxWidth="200" TextWrapping="WrapWithOverflow"/>
         </GroupBox>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="75" Margin="5" IsDefault="True" Command="{Binding OkCommand}"/>

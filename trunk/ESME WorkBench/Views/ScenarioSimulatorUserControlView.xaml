@@ -13,7 +13,7 @@
 			<TextBox Text="{Binding Iterations}"
 			         Margin="5 0">
 				<i:Interaction.Behaviors>
-					<cinch:NumericTextBoxBehaviour />
+					<cinch:NumericTextBoxBehaviour  />
 				</i:Interaction.Behaviors>
 			</TextBox>
 			<CheckBox IsChecked="{Binding IsRandomized}"
