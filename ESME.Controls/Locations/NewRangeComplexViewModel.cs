@@ -410,13 +410,16 @@ namespace ESME.Views.Locations
 
             List<EarthCoordinate> opCoords;
             List<EarthCoordinate> simCoords;
+            string opErrors;
             OpBounds = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)
-                           ? ValidateOverlayCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords)
-                           : ValidateOverlayFile(ExistingOpAreaOverlayFilename, "Op Limits", out opCoords);
+                           ? OverlayFile.ValidateCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords,out opErrors)
+                           : OverlayFile.ValidateFile(ExistingOpAreaOverlayFilename, "Op Limits", out opCoords,out opErrors);
+            ValidationErrorText += opErrors;
+            string simErrors;
             SimBounds = !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)
-                            ? ValidateOverlayCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords)
-                            : ValidateOverlayFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simCoords);
-
+                            ? OverlayFile.ValidateCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords,out simErrors)
+                            : OverlayFile.ValidateFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simCoords,out simErrors);
+            ValidationErrorText += simErrors;
             if (OpBounds != null) NewOpAreaOverlayEarthCoordinates = opCoords;
             if (SimBounds != null) NewSimAreaOverlayEarthCoordinates = simCoords;
 
@@ -486,67 +489,5 @@ namespace ESME.Views.Locations
         }
 
         #endregion
-
-        private GeoRect ValidateOverlayFile(string overlayFileName, string overlayName,
-                                            out List<EarthCoordinate> earthCoordinates)
-        {
-            earthCoordinates = null;
-            try
-            {
-                var myOvr = new OverlayFile(overlayFileName);
-                if (myOvr.Shapes.Length != 1 || !myOvr.Shapes[0].IsUsableAsPerimeter)
-                    ValidationErrorText += "Specified " + overlayName + " file is invalid\n";
-                else
-                {
-                    earthCoordinates = myOvr.Shapes[0].EarthCoordinates;
-                    return new GeoRect(myOvr.Shapes[0].BoundingBox);
-                }
-            }
-            catch (Exception e)
-            {
-                ValidationErrorText += "Error loading " + overlayFileName + ": " + e.Message + "\n";
-            }
-            return null;
-        }
-
-        private GeoRect ValidateOverlayCoordinates(string fieldData, string overlayName,
-                                                   out List<EarthCoordinate> earthCoordinates)
-        {
-            var lineSeparators = new[] { '\r', '\n' };
-            string[] lines = fieldData.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length < 4)
-                ValidationErrorText += overlayName + ": There must be at least four points given to define an area\n";
-            earthCoordinates = new List<EarthCoordinate>();
-            int lineCount = 0;
-            foreach (string line in lines)
-            {
-                lineCount++;
-                var coordSeparators = new[] { ',', ' ' };
-                string[] coords = line.Split(coordSeparators, StringSplitOptions.RemoveEmptyEntries);
-                double lat, lon;
-                if (coords.Length ==2 &&double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
-                    earthCoordinates.Add(new EarthCoordinate(lat, lon));
-                else
-                    ValidationErrorText +=
-                        string.Format(
-                            overlayName + ": Invalid latitude/longitude on line {0}. Please use decimal degrees\n",
-                            lineCount);
-            }
-            if (string.IsNullOrEmpty(ValidationErrorText))
-            {
-                if (earthCoordinates.Count < 4)
-                    ValidationErrorText += overlayName +
-                                           ": There must be at least four points given to define an area\n";
-                else
-                {
-                    var overlayLineSegments = new OverlayLineSegments(earthCoordinates.ToArray(), Colors.Black);
-                    if (!overlayLineSegments.IsUsableAsPerimeter)
-                        ValidationErrorText += overlayName +
-                                               ": The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed\n";
-                    else return new GeoRect(overlayLineSegments.BoundingBox);
-                }
-            }
-            return null;
-        }
     }
 }
