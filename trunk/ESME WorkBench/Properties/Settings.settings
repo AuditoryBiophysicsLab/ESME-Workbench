@@ -77,7 +77,7 @@
     <Setting Name="TransmissionLayersWidth" Type="System.Double" Scope="User">
       <Value Profile="(Default)">150</Value>
     </Setting>
-    <Setting Name="SelectedTabIndex" Type="System.Int32" Scope="User">
+    <Setting Name="SelectedRibbonTabIndex" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2</Value>
     </Setting>
   </Settings>

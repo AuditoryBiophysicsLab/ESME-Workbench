@@ -1,6 +1,4 @@
-﻿using ESME.Environment.Descriptors;
-using ESME.Metadata;
-using HRC.Navigation;
+﻿using HRC.Navigation;
 
 namespace ESME.Environment
 {
@@ -35,14 +33,4 @@ namespace ESME.Environment
         /// </summary>
         public string SimLimitFile { get; internal set; }
     }
-
-    public class RangeComplexMetadata : NAEMOMetadataBase
-    {
-    }
-
-    public class RangeComplexDescriptor : NAEMODescriptor<RangeComplex, RangeComplexMetadata>
-    {
-        public override RangeComplex Data { get; internal set; }
-    }
-
 }

@@ -611,13 +611,13 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                IsLayerListViewVisible = Settings.Default.SelectedTabIndex != 2;
-                return Settings.Default.SelectedTabIndex;
+                IsLayerListViewVisible = Settings.Default.SelectedRibbonTabIndex != 2;
+                return Settings.Default.SelectedRibbonTabIndex;
             }
             set
             {
-                Settings.Default.SelectedTabIndex = value;
-                IsLayerListViewVisible = Settings.Default.SelectedTabIndex != 2;
+                Settings.Default.SelectedRibbonTabIndex = value;
+                IsLayerListViewVisible = Settings.Default.SelectedRibbonTabIndex != 2;
                 NotifyPropertyChanged(RibbonTabIndexChangedEventArgs);
             }
         }
