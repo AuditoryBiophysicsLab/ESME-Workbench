@@ -48,19 +48,14 @@ namespace ESME.Views.Locations
 
         public static bool AtLeastOneIsNotEmpty(params string[] fields)
         {
-            return fields.All(field => !string.IsNullOrEmpty(field));
+            var result = fields.Any(field => !string.IsNullOrEmpty(field));
+            return result;
         }
 
         public static bool OnlyOneIsNotEmpty(params string[] fields)
         {
-            var foundNonEmpty = false;
-
-            foreach (var field in fields.Where(field => !string.IsNullOrEmpty(field))) 
-            {
-                if (foundNonEmpty) return false;
-                foundNonEmpty = true;
-            }
-            return foundNonEmpty;
+            var nonEmptyCount = fields.Select(field => !string.IsNullOrEmpty(field)).Count();
+            return nonEmptyCount == 1;
         }
 
         public static bool ValidateMinimumLineCount(string fieldData, int minimumLineCount)
