@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 using Cinch;
 using ESME.Data;
-using ESME.Model;
 using ESME.Overlay;
 using HRC.Navigation;
+using HRC.Validation;
 
 namespace ESME.Views.Locations
 {
-    public class NewRangeComplexViewModel : ViewModelBase, ISupportValidation
+    public class NewRangeComplexViewModel : ValidatingViewModel
     {
         public NewRangeComplexViewModel(AppSettings appSettings)
         {

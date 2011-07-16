@@ -104,6 +104,16 @@
     <Compile Include="Converters.cs" />
     <Compile Include="Database\MySqlWrapper.cs" />
     <Compile Include="Globals.cs" />
+    <Compile Include="Interactivity\CommandAction.cs" />
+    <Compile Include="Interactivity\DragBehavior.cs" />
+    <Compile Include="Interactivity\HyperlinkAction.cs" />
+    <Compile Include="Interactivity\PlayStoryboardAction.cs" />
+    <Compile Include="Interactivity\RandomMovementBehavior.cs" />
+    <Compile Include="Interactivity\RemoveElementAction.cs" />
+    <Compile Include="Interactivity\ShowMessageBoxAction.cs" />
+    <Compile Include="Interactivity\StopStoryboardAction.cs" />
+    <Compile Include="Interactivity\TextBoxAutoSelectBehavior.cs" />
+    <Compile Include="Interactivity\TextBoxSelectionHandler.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="LinqStatistics\EnumerableStats.cs" />
     <Compile Include="LinqStatistics\EnumerableStatsCovariance.cs" />
@@ -173,6 +183,9 @@
     <Compile Include="Utility\TriggerTracing.cs" />
     <Compile Include="Utility\XmlSerializer.cs" />
     <Compile Include="Utility\HRCObservableCollection.cs" />
+    <Compile Include="Triggers\RoutedEventTrigger.cs" />
+    <Compile Include="Validation\ValidatingViewModel.cs" />
+    <Compile Include="Triggers\ValidationErrorEventTrigger.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -196,6 +209,7 @@
     <EmbeddedResource Include="Resources\jet.map" />
     <EmbeddedResource Include="Resources\summer.map" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace HRC -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"
