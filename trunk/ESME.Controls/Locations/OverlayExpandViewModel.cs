@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Windows.Controls;
 using Cinch;
 using ESME.Metadata;
 using HRC.Validation;

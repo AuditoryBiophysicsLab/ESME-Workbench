@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
+using System.Windows.Media;
 using Cinch;
 using ESME.Data;
 using ESME.Overlay;
@@ -11,11 +13,115 @@ using HRC.Validation;
 
 namespace ESME.Views.Locations
 {
-    public class NewRangeComplexViewModel : ValidatingViewModel
+    public sealed class NewRangeComplexViewModel : ValidatingViewModel
     {
         public NewRangeComplexViewModel(AppSettings appSettings)
         {
             SimAreaFolder = appSettings.ScenarioDataDirectory;
+            ValidationRules.Add(new SimpleRule("LocationName", "Cannot be empty", o => !string.IsNullOrEmpty(((NewRangeComplexViewModel)o).LocationName)));
+            ValidationRules.Add(new SimpleRule("LocationName", "Location already exists.  Choose a different name", o => (string.IsNullOrEmpty(((NewRangeComplexViewModel)o).LocationName)) || ((LocationPath == null) || !Directory.Exists(LocationPath))));
+            
+            ValidationRules.Add(new SimpleRule("ReferencePointLatitude", "Must be between -90 and +90", o => RangeCheck(((NewRangeComplexViewModel)o).ReferencePointLatitude, -90, 90)));
+            
+            ValidationRules.Add(new SimpleRule("ReferencePointLongitude", "Must be between -180 and +180", o => RangeCheck(((NewRangeComplexViewModel)o).ReferencePointLongitude, -180, 180)));
+            
+            ValidationRules.Add(new SimpleRule("Height", "Invalid value", o => RangeCheck(((NewRangeComplexViewModel)o).Height, double.MinValue, double.MaxValue)));
+            
+            ValidationRules.Add(new SimpleRule("GeoidSeparation", "Invalid value", o => RangeCheck(((NewRangeComplexViewModel)o).GeoidSeparation, double.MinValue, double.MaxValue)));
+
+            ValidationRules.Add(new SimpleRule("ExistingOpAreaOverlayFilename", "If coordinates are not specified, you must provide an overlay file", o => OnlyOneIsNotEmpty(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename)));
+
+            ValidationRules.Add(new SimpleRule("NewOpAreaOverlayCoordinates", "If an overlay file is not specified, you must provide coordinates", o => AtLeastOneIsNotEmpty(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename)));
+            ValidationRules.Add(new SimpleRule("NewOpAreaOverlayCoordinates", "There must be at least four points (lines) given to define an area", o => ValidateMinimumLineCount(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, 4)));
+            ValidationRules.Add(new SimpleRule("NewOpAreaOverlayCoordinates", "Invalid latitude/longitude format. Please use decimal degrees", o => ValidateLatLonFormat(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates)));
+            ValidationRules.Add(new SimpleRule("NewOpAreaOverlayCoordinates", "There must be at least four points given to define an area", o => ValidateMinimumCoordinateCount(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, 4)));
+            ValidationRules.Add(new SimpleRule("NewOpAreaOverlayCoordinates", "The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed.", o => ValidateUsabilityAsPerimeter(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates)));
+
+            ValidationRules.Add(new SimpleRule("ExistingSimAreaOverlayFilename", "If coordinates are not specified, you must provide an overlay file", o => OnlyOneIsNotEmpty(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingSimAreaOverlayFilename)));
+
+            ValidationRules.Add(new SimpleRule("NewSimAreaOverlayCoordinates", "If an overlay file is not specified, you must provide coordinates", o => AtLeastOneIsNotEmpty(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingSimAreaOverlayFilename)));
+            ValidationRules.Add(new SimpleRule("NewSimAreaOverlayCoordinates", "There must be at least four points (lines) given to define an area", o => ValidateMinimumLineCount(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, 4)));
+            ValidationRules.Add(new SimpleRule("NewSimAreaOverlayCoordinates", "Invalid latitude/longitude format. Please use decimal degrees", o => ValidateLatLonFormat(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates)));
+            ValidationRules.Add(new SimpleRule("NewSimAreaOverlayCoordinates", "There must be at least four points given to define an area", o => ValidateMinimumCoordinateCount(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, 4)));
+            ValidationRules.Add(new SimpleRule("NewSimAreaOverlayCoordinates", "The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed.", o => ValidateUsabilityAsPerimeter(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates)));
+        }
+
+        public static bool AtLeastOneIsNotEmpty(params string[] fields)
+        {
+            return fields.All(field => !string.IsNullOrEmpty(field));
+        }
+
+        public static bool OnlyOneIsNotEmpty(params string[] fields)
+        {
+            var foundNonEmpty = false;
+
+            foreach (var field in fields.Where(field => !string.IsNullOrEmpty(field))) 
+            {
+                if (foundNonEmpty) return false;
+                foundNonEmpty = true;
+            }
+            return foundNonEmpty;
+        }
+
+        public static bool ValidateMinimumLineCount(string fieldData, int minimumLineCount)
+        {
+            if (string.IsNullOrEmpty(fieldData)) return true;
+            var lineSeparators = new[] { '\r', '\n' };
+            var lines = fieldData.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
+            return lines.Length >= minimumLineCount;
+        }
+
+        public static bool ValidateLatLonFormat(string fieldData)
+        {
+            if (string.IsNullOrEmpty(fieldData)) return true;
+            var lineSeparators = new[] { '\r', '\n' };
+            var lines = fieldData.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
+            var earthCoordinates = new List<EarthCoordinate>();
+            foreach (var line in lines)
+            {
+                var coordSeparators = new[] { ',', ' ' };
+                var coords = line.Split(coordSeparators, StringSplitOptions.RemoveEmptyEntries);
+                double lat, lon;
+                if (coords.Length == 2 && double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
+                    earthCoordinates.Add(new EarthCoordinate(lat, lon));
+                else return false;
+            }
+            return true;
+        }
+
+        public static bool ValidateMinimumCoordinateCount(string fieldData, int minimumCoordinateCount)
+        {
+            if (string.IsNullOrEmpty(fieldData)) return true;
+            var lineSeparators = new[] { '\r', '\n' };
+            var lines = fieldData.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
+            var earthCoordinates = new List<EarthCoordinate>();
+            foreach (var line in lines)
+            {
+                var coordSeparators = new[] { ',', ' ' };
+                var coords = line.Split(coordSeparators, StringSplitOptions.RemoveEmptyEntries);
+                double lat, lon;
+                if (coords.Length == 2 && double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
+                    earthCoordinates.Add(new EarthCoordinate(lat, lon));
+            }
+            return earthCoordinates.Count >= minimumCoordinateCount;
+        }
+
+        public static bool ValidateUsabilityAsPerimeter(string fieldData)
+        {
+            if (string.IsNullOrEmpty(fieldData)) return true;
+            var lineSeparators = new[] { '\r', '\n' };
+            var lines = fieldData.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
+            var earthCoordinates = new List<EarthCoordinate>();
+            foreach (var line in lines)
+            {
+                var coordSeparators = new[] { ',', ' ' };
+                var coords = line.Split(coordSeparators, StringSplitOptions.RemoveEmptyEntries);
+                double lat, lon;
+                if (coords.Length == 2 && double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
+                    earthCoordinates.Add(new EarthCoordinate(lat, lon));
+            }
+            var overlayLineSegments = new OverlayLineSegments(earthCoordinates.ToArray(), Colors.Black);
+            return overlayLineSegments.IsUsableAsPerimeter;
         }
 
         #region public string LocationName { get; set; } 
