@@ -1,9 +1,7 @@
 ﻿<Window x:Class="ESME.Views.Locations.OverlayExpandView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
-        xmlns:Interactivity="clr-namespace:HRC.Interactivity;assembly=HRC" 
-        xmlns:Triggers="clr-namespace:HRC.Triggers;assembly=HRC" 
+        xmlns:Controls="clr-namespace:ESME.Views.Controls" 
         Title="Expand Overlay File"
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
@@ -13,16 +11,9 @@
         <StackPanel Orientation="Vertical">
             <TextBlock Text="Expand Limits by (km)"
                        Margin="5 5 5 2"/>
-            <TextBox Text="{Binding BufferSize, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True}"
-                     Margin="5 0 5 5"
-                     Style="{StaticResource ValidatingTextBoxStyle}"
-                     TabIndex="0">
-                <i:Interaction.Triggers>
-                    <Triggers:ValidationErrorEventTrigger>
-                        <Interactivity:CommandAction Command="{Binding ValidationErrorCommand}" />
-                    </Triggers:ValidationErrorEventTrigger>
-                </i:Interaction.Triggers>
-            </TextBox>
+            <Controls:ValidatingTextBox BoundField="BufferSize"
+                                        Margin="5 0 5 5"
+                                        TabIndex="0"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Ok" 
