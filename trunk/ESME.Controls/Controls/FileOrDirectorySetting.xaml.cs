@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.Win32;
 
 namespace ESME.Views.Controls
@@ -71,7 +72,7 @@ namespace ESME.Views.Controls
             set { SetValue(UseSaveFileDialogProperty, value); }
         }
 
-        void OpenFile_Click(object sender, RoutedEventArgs e)
+        void OpenFileClick(object sender, RoutedEventArgs e)
         {
             if (IsDirectoryBrowser)
             {
