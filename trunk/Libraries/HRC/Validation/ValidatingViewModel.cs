@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Cinch;
@@ -115,5 +116,19 @@ namespace HRC.Validation
                 return (!double.IsNaN(valueToCheck) && (valueToCheck >= minimum)) && (valueToCheck <= maximum);
             return (!double.IsNaN(valueToCheck) && (valueToCheck > minimum)) && (valueToCheck < maximum);
         }
+
+        public static bool AtLeastOneIsNotEmpty(params string[] fields)
+        {
+            var result = fields.Any(field => !string.IsNullOrEmpty(field));
+            return result;
+        }
+
+        public static bool OnlyOneIsNotEmpty(params string[] fields)
+        {
+            var nonEmptyCount = fields.Where(field => !string.IsNullOrEmpty(field)).Count();
+            return nonEmptyCount == 1;
+        }
+
+
     }
 }

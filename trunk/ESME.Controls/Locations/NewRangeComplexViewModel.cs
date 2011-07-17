@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using Cinch;
@@ -44,18 +43,6 @@ namespace ESME.Views.Locations
             ValidationRules.Add(new SimpleRule("NewSimAreaOverlayCoordinates", "Invalid latitude/longitude format. Please use decimal degrees", o => ValidateLatLonFormat(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates)));
             ValidationRules.Add(new SimpleRule("NewSimAreaOverlayCoordinates", "There must be at least four points given to define an area", o => ValidateMinimumCoordinateCount(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, 4)));
             ValidationRules.Add(new SimpleRule("NewSimAreaOverlayCoordinates", "The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed.", o => ValidateUsabilityAsPerimeter(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates)));
-        }
-
-        public static bool AtLeastOneIsNotEmpty(params string[] fields)
-        {
-            var result = fields.Any(field => !string.IsNullOrEmpty(field));
-            return result;
-        }
-
-        public static bool OnlyOneIsNotEmpty(params string[] fields)
-        {
-            var nonEmptyCount = fields.Select(field => !string.IsNullOrEmpty(field)).Count();
-            return nonEmptyCount == 1;
         }
 
         public static bool ValidateMinimumLineCount(string fieldData, int minimumLineCount)
@@ -163,6 +150,7 @@ namespace ESME.Views.Locations
                 if (_existingOpAreaOverlayFilename == value) return;
                 _existingOpAreaOverlayFilename = value;
                 NotifyPropertyChanged(ExistingOverlayFilenameChangedEventArgs);
+                NotifyPropertyChanged(NewOverlayCoordinatesChangedEventArgs);
             }
         }
 
@@ -183,6 +171,7 @@ namespace ESME.Views.Locations
                 //  if (_newOpAreaOverlayCoordinates == value) return;
                 _newOpAreaOverlayCoordinates = value;
                 NotifyPropertyChanged(NewOverlayCoordinatesChangedEventArgs);
+                NotifyPropertyChanged(ExistingOverlayFilenameChangedEventArgs);
             }
         }
      
@@ -203,6 +192,7 @@ namespace ESME.Views.Locations
                 if (_existingSimAreaOverlayFilename == value) return;
                 _existingSimAreaOverlayFilename = value;
                 NotifyPropertyChanged(ExistingSimAreaOverlayFilenameChangedEventArgs);
+                NotifyPropertyChanged(NewSimAreaOverlayCoordinatesChangedEventArgs);
             }
         }
 
@@ -223,14 +213,9 @@ namespace ESME.Views.Locations
                 // if (_newSimAreaOverlayCoordinates == value) return;
                 _newSimAreaOverlayCoordinates = value;
                 NotifyPropertyChanged(NewSimAreaOverlayCoordinatesChangedEventArgs);
+                NotifyPropertyChanged(ExistingSimAreaOverlayFilenameChangedEventArgs);
             }
         }
-
-        #region NewSimAreaOverlayCoordinatesChangedCommand
-
-        private SimpleCommand<object, object> _newSimAreaOverlayCoordinatesChanged;
-
-        #endregion
 
         #endregion
 
@@ -363,8 +348,8 @@ namespace ESME.Views.Locations
                 writer.WriteLine("green");
                 writer.WriteLine("solid");
                 writer.WriteLine("move");
-                bool first = true;
-                foreach (EarthCoordinate coordinate in coords)
+                var first = true;
+                foreach (var coordinate in coords)
                 {
                     writer.WriteLine("{0:0.0000}  {1:0.0000}", coordinate.Latitude, coordinate.Longitude);
                     if (first) writer.WriteLine("lines");
@@ -376,7 +361,7 @@ namespace ESME.Views.Locations
         private void OkCommandHandler()
         {
             Directory.CreateDirectory(LocationPath);
-            string areasPath = Path.Combine(LocationPath, "Areas");
+            var areasPath = Path.Combine(LocationPath, "Areas");
             Directory.CreateDirectory(areasPath);
             Directory.CreateDirectory(Path.Combine(LocationPath, "Bathymetry"));
             Directory.CreateDirectory(Path.Combine(LocationPath, "Environment"));
@@ -384,12 +369,12 @@ namespace ESME.Views.Locations
             Directory.CreateDirectory(Path.Combine(LocationPath, "Images"));
             Directory.CreateDirectory(Path.Combine(LocationPath, "Species"));
 
-            string opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", LocationName));
+            var opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", LocationName));
             if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename))
                 File.Copy(ExistingOpAreaOverlayFilename, opsOverlayFilename);
             else WriteOverlayFile(opsOverlayFilename, NewOpAreaOverlayEarthCoordinates);
 
-            string simOverlayFilename = Path.Combine(areasPath, String.Format("{0}_SimArea.ovr", LocationName));
+            var simOverlayFilename = Path.Combine(areasPath, String.Format("{0}_SimArea.ovr", LocationName));
             if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename))
                 File.Copy(ExistingSimAreaOverlayFilename, simOverlayFilename);
             else WriteOverlayFile(simOverlayFilename, NewSimAreaOverlayEarthCoordinates);
@@ -461,11 +446,6 @@ namespace ESME.Views.Locations
 
         #region ISupportValidation Members
 
-        public bool IsValid
-        {
-            get { return string.IsNullOrEmpty(ValidationErrorText); }
-        }
-
         public void Validate()
         {
             ValidationErrorText = "";
@@ -522,35 +502,6 @@ namespace ESME.Views.Locations
             if (OpBounds != null) NewOpAreaOverlayEarthCoordinates = opCoords;
             if (SimBounds != null) NewSimAreaOverlayEarthCoordinates = simCoords;
 
-#if false
-            var lineSeparators = new[] { '\r', '\n' };
-            var lines = NewOpAreaOverlayCoordinates.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length < 4) ValidationErrorText += "There must be at least four points given to define an area\n";
-            NewOpAreaOverlayEarthCoordinates = new List<EarthCoordinate>();
-            var lineCount = 0;
-            foreach (var line in lines)
-            {
-                lineCount++;
-                var coordSeparators = new[] { ',', ' ' };
-                var coords = line.Split(coordSeparators, StringSplitOptions.RemoveEmptyEntries);
-                double lat, lon;
-                if (double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
-                    NewOpAreaOverlayEarthCoordinates.Add(new EarthCoordinate(lat, lon));
-                else
-                    ValidationErrorText += string.Format("Invalid latitude/longitude on line {0}. Please use decimal degrees\n", lineCount);
-            }
-            if (string.IsNullOrEmpty(ValidationErrorText))
-            {
-                if (NewOpAreaOverlayEarthCoordinates.Count < 4) ValidationErrorText += "There must be at least four points given to define an area\n";
-                else
-                {
-                    var overlayLineSegments = new OverlayLineSegments(NewOpAreaOverlayEarthCoordinates.ToArray(), Colors.Black);
-                    if (!overlayLineSegments.IsUsableAsPerimeter)
-                        ValidationErrorText += "The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed\n";
-                    else Bounds = new GeoRect(overlayLineSegments.BoundingBox);
-                }
-            }
-#endif
             NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
         }
 
