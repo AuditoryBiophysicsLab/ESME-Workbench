@@ -34,6 +34,7 @@ namespace ESME.Environment.Descriptors
                 backgroundTask.Value = 0;
             }
             //Console.WriteLine("{0} About to call AddRange", DateTime.Now);
+            Add(new System.Collections.Generic.KeyValuePair<string, T>("[None]", null));
             foreach (var file in filteredFiles)
             {
                 Add(new System.Collections.Generic.KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(file), new T { DataFilename = file }));
@@ -41,6 +42,7 @@ namespace ESME.Environment.Descriptors
             }
             //AddRange(filteredFiles.Select(file => new System.Collections.Generic.KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(file), new T { DataFilename = file })));
             //Console.WriteLine("{0} Leaving NAEMODescriptors constructor", DateTime.Now);
+            
         }
 
         public virtual NAEMODescriptor this[string overlayKey]

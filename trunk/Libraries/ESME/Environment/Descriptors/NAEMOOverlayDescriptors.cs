@@ -13,7 +13,7 @@ namespace ESME.Environment.Descriptors
             {
                 if ((backgroundTask != null) && (backgroundTask.CancellationPending)) return;
                 if (backgroundTask != null) backgroundTask.Value++;
-                if (ovrItem.Value.Metadata != null) continue;
+                if ((ovrItem.Value == null) || (ovrItem.Value.Metadata != null)) continue;
                 var keyName = ovrItem.Key.Split('_');
                 var buffer = keyName.Last();
                 if (keyName.Length == 1 || !buffer.ToLowerInvariant().EndsWith("km"))
