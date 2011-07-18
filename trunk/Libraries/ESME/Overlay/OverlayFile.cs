@@ -47,12 +47,13 @@ namespace ESME.Overlay
             return Path.GetFileName(_fileName);
         }
 
-        public static GeoRect ValidateCoordinates(string fieldData, string overlayName, out List<EarthCoordinate> earthCoordinates, out  string errorText)
+        public static GeoRect ValidateCoordinates(string fieldData, string overlayName, out List<EarthCoordinate> earthCoordinates, out string errorText)
         {
             errorText = "";
             var lineSeparators = new[] { '\r', '\n' };
             var lines = fieldData.Split(lineSeparators, StringSplitOptions.RemoveEmptyEntries);
-            if (lines.Length < 4) errorText += overlayName + ": There must be at least four points given to define an area\n";
+            if (overlayName != null) overlayName += ": ";
+            if (lines.Length < 4) errorText += overlayName + "There must be at least four points given to define an area" + System.Environment.NewLine;
             earthCoordinates = new List<EarthCoordinate>();
             var lineCount = 0;
             foreach (var line in lines)
@@ -64,16 +65,16 @@ namespace ESME.Overlay
                 if (coords.Length == 2 && double.TryParse(coords[0], out lat) && (double.TryParse(coords[1], out lon)))
                     earthCoordinates.Add(new EarthCoordinate(lat, lon));
                 else
-                    errorText += string.Format(overlayName + ": Invalid latitude/longitude on line {0}. Please use decimal degrees\n", lineCount);
+                    errorText += string.Format(overlayName + "Invalid latitude/longitude on line {0}. Please use decimal degrees" + System.Environment.NewLine, lineCount);
             }
             if (string.IsNullOrEmpty(errorText))
             {
-                if (earthCoordinates.Count < 4) errorText += overlayName + ": There must be at least four points given to define an area\n";
+                if (earthCoordinates.Count < 4) errorText += overlayName + "There must be at least four points given to define an area" + System.Environment.NewLine;
                 else
                 {
                     var overlayLineSegments = new OverlayLineSegments(earthCoordinates.ToArray(), Colors.Black);
                     if (!overlayLineSegments.IsUsableAsPerimeter)
-                        errorText += overlayName + ": The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed\n";
+                        errorText += overlayName + "The points provided are not usable as a perimeter.  Line segments are used in the order given, and cannot cross each other.  The resulting polygon must also be closed." + System.Environment.NewLine;
                     else return new GeoRect(overlayLineSegments.BoundingBox);
                 }
             }
@@ -83,12 +84,16 @@ namespace ESME.Overlay
         public static GeoRect ValidateFile(string overlayFileName, string overlayName, out List<EarthCoordinate> earthCoordinates, out string errorText)
         {
             errorText = "";
+            if (!File.Exists(overlayName))
+            {
+                errorText += "Specified " + overlayName + " does not exist" + System.Environment.NewLine;
+            }
             earthCoordinates = null;
             try
             {
                 var myOvr = new OverlayFile(overlayFileName);
                 if (myOvr.Shapes.Length != 1 || !myOvr.Shapes[0].IsUsableAsPerimeter)
-                    errorText += "Specified " + overlayName + " file is invalid\n";
+                    errorText += "Specified " + overlayName + " is invalid" + System.Environment.NewLine;
                 else
                 {
                     earthCoordinates = myOvr.Shapes[0].EarthCoordinates;
@@ -97,7 +102,7 @@ namespace ESME.Overlay
             }
             catch (Exception e)
             {
-                errorText += "Error loading " + overlayFileName + ": " + e.Message + "\n";
+                errorText += "Error loading " + overlayFileName + ": " + e.Message + System.Environment.NewLine;
             }
             return null;
         }

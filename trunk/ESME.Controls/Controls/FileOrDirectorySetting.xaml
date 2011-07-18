@@ -5,8 +5,15 @@
 	<StackPanel Orientation="Vertical">
         <TextBlock Text="{Binding Path=Caption, RelativeSource={RelativeSource AncestorType={x:Type Controls:FileOrDirectorySetting}}}" />
 		<DockPanel LastChildFill="True">
-			<Button DockPanel.Dock="Right" Content=" ..." MinWidth="30" Name="btnOpenFile" Margin=" 5 0 0 0" Click="OpenFileClick" />
-            <TextBox DockPanel.Dock="Left" Text="{Binding Path=FileName, RelativeSource={RelativeSource AncestorType={x:Type Controls:FileOrDirectorySetting}}}" />
+			<Button DockPanel.Dock="Right" 
+                    Content=" ..." 
+                    MinWidth="30" 
+                    Name="btnOpenFile" 
+                    Margin=" 5 0 0 0" 
+                    Click="OpenFileClick" />
+            <TextBox x:Name="FileOrDirectoryName" 
+                     DockPanel.Dock="Left" 
+                     Text="{Binding Path=FileName, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type Controls:FileOrDirectorySetting}}}" />
 		</DockPanel>
 	</StackPanel>
 </UserControl>

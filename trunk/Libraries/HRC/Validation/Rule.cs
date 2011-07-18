@@ -18,17 +18,23 @@ namespace HRC.Validation
         /// <summary>
         /// Gets descriptive text about this broken rule.
         /// </summary>
-        public virtual string Description { get; protected set; }
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Gets a string that is intended to be written by a validation routine, 
+        /// describing what's wrong with the object being validated.
+        /// </summary>
+        public virtual string ValidationErrorMessage { get; set; }
 
         /// <summary>
         /// Gets the name of the property the rule belongs to.
         /// </summary>
-        public virtual string PropertyName { get; protected set; }
+        public virtual string PropertyName { get; set; }
 
         /// <summary>
         /// Validates that the rule has been followed.
         /// </summary>
-        public abstract bool ValidateRule(Object domainObject);
+        public abstract bool ValidateRule(Object domainObject, Rule rule);
 
         /// <summary>
         /// Gets a string representation of this rule.

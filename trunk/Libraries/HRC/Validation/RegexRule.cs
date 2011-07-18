@@ -11,7 +11,7 @@ namespace HRC.Validation
         public string RegularExpression { get; set; }
 
         #region Overrides
-        public override bool ValidateRule(Object domainObject)
+        public override bool ValidateRule(Object domainObject, Rule rule)
         {
             var pi = domainObject.GetType().GetProperty(PropertyName);
             var value = pi.GetValue(domainObject, null) as String;
