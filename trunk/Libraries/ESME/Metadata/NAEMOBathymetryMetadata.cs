@@ -77,22 +77,21 @@ namespace ESME.Metadata
                 Threshold = 0,
             };
 
-            var bathy2D = Environment2DData.FromYXZ(naemoBathymetryFilename, -1);
-            var bathysize = Math.Max(bathy2D.Longitudes.Count, bathy2D.Latitudes.Count);
+            var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
             var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
-            Bitmap displayBitmap;
+            Bitmap displayBitmap = null;
             if (bathysize > screenSize)
             {
                 var scaleFactor = screenSize / bathysize;
-                var decimatedValues = Decimator2D.Decimate(bathy2D.FieldData, (int)(bathy2D.Longitudes.Count * scaleFactor), (int)(bathy2D.Latitudes.Count * scaleFactor));
-                displayBitmap = colormap.ToBitmap(decimatedValues, bathy2D.Minimum.Data, bathy2D.Maximum.Data < 0 ? bathy2D.Maximum.Data : 8000);
+                var decimatedValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples, (int)(bathymetry.Samples.Longitudes.Count * scaleFactor), (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
+                //displayBitmap = colormap.ToBitmap(decimatedValues, bathy2D.Minimum.Data, bathy2D.Maximum.Data < 0 ? bathy2D.Maximum.Data : 8000);
             }
             else
             {
-                displayBitmap = colormap.ToBitmap(bathy2D.FieldData, bathy2D.Minimum.Data, bathy2D.Maximum.Data < 0 ? bathy2D.Maximum.Data : 8000);
+                //displayBitmap = colormap.ToBitmap(bathy2D.FieldData, bathy2D.Minimum.Data, bathy2D.Maximum.Data < 0 ? bathy2D.Maximum.Data : 8000);
             }
             var imagesPath = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(naemoBathymetryFilename)), "Images");
-            displayBitmap.Save(Path.Combine(imagesPath, Path.GetFileNameWithoutExtension(naemoBathymetryFilename) + ".bmp"), ImageFormat.Bmp);
+            //displayBitmap.Save(Path.Combine(imagesPath, Path.GetFileNameWithoutExtension(naemoBathymetryFilename) + ".bmp"), ImageFormat.Bmp);
             var sb = new StringBuilder();
             sb.AppendLine(resolution.ToString());
             sb.AppendLine("0.0");

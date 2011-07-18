@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Xml.Serialization;
 using Cinch;
 
 namespace HRC.Validation
@@ -24,6 +25,7 @@ namespace HRC.Validation
         /// The error message for the property. The default is an empty string ("").
         /// </returns>
         /// <param name="columnName">The name of the property whose error message to get. </param>
+        [XmlIgnore]
         public virtual string this[string columnName]
         {
             get
@@ -51,6 +53,7 @@ namespace HRC.Validation
 
         #region public virtual bool IsValid { get; private set; }
 
+        [XmlIgnore]
         public virtual bool IsValid
         {
             get { return _isValid; }
@@ -75,6 +78,7 @@ namespace HRC.Validation
         /// <returns>
         /// An error message indicating what is wrong with this object. The default is an empty string ("").
         /// </returns>
+        [XmlIgnore]
         public string Error
         {
             get { return _error; }

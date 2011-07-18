@@ -37,6 +37,40 @@ namespace ESME.Environment
             }
         }
 
+        public T this[uint lonIndex, uint latIndex]
+        {
+            get
+            {
+                if ((lonIndex < Longitudes.Count) || (latIndex < Latitudes.Count)) throw new IndexOutOfRangeException(string.Format("EnvironmentData: Attempted to access [{0}, {1}] when max indices are [{2}, {3}]", lonIndex, latIndex, Longitudes.Count, Latitudes.Count));
+                var desiredLon = Longitudes[(int)lonIndex];
+                var desiredLat = Latitudes[(int)latIndex];
+                return this.Where(item => (Math.Round(item.Longitude, 4) == desiredLon) && (Math.Round(item.Latitude, 4) == desiredLat)).FirstOrDefault();
+            }
+        }
+
+        public static EnvironmentData<T> Decimate(EnvironmentData<T> source, int outputWidth, int outputHeight)
+        {
+            if (outputWidth > source.Longitudes.Count || outputHeight > source.Latitudes.Count) throw new DataMisalignedException("Cannot decimate to a larger area.");
+            var result = new EnvironmentData<T>();
+            var sourceWidth = source.Longitudes.Count;
+            var sourceHeight = source.Latitudes.Count;
+            var widthStep = (double)sourceWidth / outputWidth;
+            var heightStep = (double)sourceHeight / outputHeight;
+
+            for (var widthIndex = 0; widthIndex < outputWidth; widthIndex++)
+            {
+                var sourceWidthIndex = (uint)((widthIndex * widthStep) + (widthStep / 2));
+                for (var heightIndex = 0; heightIndex < outputHeight; heightIndex++)
+                {
+                    var sourceHeightIndex = (uint)((heightIndex * heightStep) + (heightStep / 2));
+                    result.Add(source[sourceWidthIndex, sourceHeightIndex]);
+                }
+            }
+
+            return result;
+        }
+
+
         public void TrimToNearestPoints(GeoRect geoRect)
         {
             var southWest = this[geoRect.SouthWest];
@@ -95,71 +129,30 @@ namespace ESME.Environment
 
         public void RemoveDuplicates(BackgroundTask backgroundTask = null)
         {
-            const int sectionCount = 100;
             var uniqueList = new List<T>();
-            var originalCount = this.Count;
-            var duplicateCount = 0;
-#if false
-            var startLon = Longitudes.First();
-            var endLon = Longitudes.Last();
-            var lonSpan = endLon - startLon;
-            var lonStep = lonSpan / sectionCount;
-            var subLists = new List<List<T>>();
-            for (var curSection = 0; curSection < sectionCount; curSection++)
-            {
-                if (backgroundTask != null) backgroundTask.RunState = "creating section " + curSection;
-                var sectionStart = startLon + (curSection * lonStep);
-                var sectionEnd = startLon + ((curSection + 1) * lonStep);
-                var subList = new List<T>();
-                var section = from entry in this
-                              where ((sectionStart <= entry.Longitude) && (entry.Longitude < sectionEnd))
-                              select entry;
-                if (backgroundTask != null) backgroundTask.RunState = "deduping section " + curSection;
-                foreach (var entry in section)
-                {
-                    var checkForDuplicates = true;
-                    var duplicate = false;
-                    if ((entry is SedimentSample) && ((entry as SedimentSample).Data.IsHighResolution)) checkForDuplicates = false;
-                    if (checkForDuplicates)
-                    {
-                        foreach (var subItem in subList)
-                            if (entry.Equals(subItem))
-                            {
-                                duplicate = true;
-                                duplicateCount++;
-                                if (backgroundTask != null) backgroundTask.Status = string.Format("Found {0} duplicates in {1} raw data points", duplicateCount, originalCount);
-                                break;
-                            }
-                    }
-                    if (!duplicate) subList.Add(entry);
-                }
-                subLists.Add(subList);
-                uniqueList.AddRange(subList);
-            }
-#else
             foreach (var curEntry in from curEntry in this
                                      let foundMatch = uniqueList.Any(curEntry.Equals)
                                      where !foundMatch
                                      select curEntry) {uniqueList.Add(curEntry);}
-#endif
             Clear();
             AddRange(uniqueList);
         }
 
-        private static List<double> DistinctSortedLatLonList(IEnumerable<double> rawEnumerable)
+        private static List<double> SortedList(IEnumerable<double> rawEnumerable)
         {
-            var rawList = rawEnumerable.Distinct().ToList();
+            var rawList = rawEnumerable.ToList();
             rawList.Sort();
-            var result = new List<double>();
-            for (var index = 0; index < rawList.Count - 1; index++)
-            {
-                result.Add(Math.Round(rawList[index], 4));
-                int duplicateCount;
-                for (duplicateCount = 0; duplicateCount < (rawList.Count - 1 - index); duplicateCount++)
-                    if (Math.Round(rawList[index + duplicateCount], 4) != Math.Round(rawList[index + duplicateCount + 1], 4)) break;
-                index += duplicateCount;
-            }
-            return result;
+            return rawList;
+            //var result = new List<double>();
+            //for (var index = 0; index < rawList.Count - 1; index++)
+            //{
+            //    result.Add(Math.Round(rawList[index], 4));
+            //    int duplicateCount;
+            //    for (duplicateCount = 0; duplicateCount < (rawList.Count - 1 - index); duplicateCount++)
+            //        if (Math.Round(rawList[index + duplicateCount], 4) != Math.Round(rawList[index + duplicateCount + 1], 4)) break;
+            //    index += duplicateCount;
+            //}
+            //return result;
         }
 
         static double CalculateResolution(IList<double> axis)
@@ -183,7 +176,7 @@ namespace ESME.Environment
         [XmlIgnore]
         public List<double> Longitudes
         {
-            get { return _longitudes ?? (_longitudes = DistinctSortedLatLonList(this.Select(point => point.Longitude))); }
+            get { return _longitudes ?? (_longitudes = SortedList(this.Select(point => Math.Round(point.Longitude, 4)).Distinct())); }
         }
 
         [XmlIgnore]
@@ -192,16 +185,7 @@ namespace ESME.Environment
         [XmlIgnore]
         public List<double> Latitudes
         {
-            get
-            {
-                if (_latitudes == null)
-                {
-                    _latitudes = DistinctSortedLatLonList(this.Select(point => point.Latitude));
-                    //_latitudes = this.Select(point => point.Latitude).Distinct().ToList();
-                    //_latitudes.Sort();
-                }
-                return _latitudes;
-            }
+            get { return _latitudes ?? (_latitudes = SortedList(this.Select(point => Math.Round(point.Latitude, 4)).Distinct())); }
         }
 
         [XmlIgnore]
