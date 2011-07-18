@@ -107,7 +107,15 @@ namespace HRC.Validation
                         new SimpleCommand<object, ValidationErrorEventArgs>(args =>
                         {
                             if ((args == null) || (args.Action != ValidationErrorEventAction.Added)) return;
-                            var message = (args.Error.Exception != null) ? args.Error.Exception.Message : "An exception has occurred";
+                            var curException = args.Error.Exception;
+                            var message = string.Empty;
+                            while (curException != null)
+                            {
+                                if (!string.IsNullOrEmpty(message)) message += Environment.NewLine;
+                                message += string.IsNullOrEmpty(curException.Message) ? "(empty)" : curException.Message;
+                                curException = curException.InnerException;
+                            }
+                            if (string.IsNullOrEmpty(message)) message += "An unknown exception has occurred";
                             if (!string.IsNullOrEmpty(Error)) Error += Environment.NewLine + message;
                             else Error = message;
                             IsValid = false;
