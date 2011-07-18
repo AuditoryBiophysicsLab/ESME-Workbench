@@ -9,10 +9,10 @@ namespace HRC.Validation
     /// </summary>
     /// <remarks>
     /// This class is primarily designed to be used on a domain object to validate a business rule. In most cases, you will want to use the 
-    /// concrete class SimpleRule, which just needs you to supply a delegate used for validation. For custom, complex business rules, you can 
+    /// concrete class ValidationRule, which just needs you to supply a delegate used for validation. For custom, complex business rules, you can 
     /// extend this class and provide your own method to validate the rule.
     /// </remarks>
-    public abstract class Rule
+    public abstract class ValidationRuleBase
     {
         #region Public Methods/Properties
         /// <summary>
@@ -34,7 +34,7 @@ namespace HRC.Validation
         /// <summary>
         /// Validates that the rule has been followed.
         /// </summary>
-        public abstract bool ValidateRule(Object domainObject, Rule rule);
+        public abstract bool Validate(Object domainObject, ValidationRuleBase rule);
 
         /// <summary>
         /// Gets a string representation of this rule.

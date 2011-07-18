@@ -6,12 +6,12 @@ namespace HRC.Validation
     /// <summary>
     /// A class to define a RegEx rule, using a delegate for validation.
     /// </summary>
-    public class RegexRule : Rule
+    public class RegexRule : ValidationRuleBase
     {
         public string RegularExpression { get; set; }
 
         #region Overrides
-        public override bool ValidateRule(Object domainObject, Rule rule)
+        public override bool Validate(Object domainObject, ValidationRuleBase rule)
         {
             var pi = domainObject.GetType().GetProperty(PropertyName);
             var value = pi.GetValue(domainObject, null) as String;
