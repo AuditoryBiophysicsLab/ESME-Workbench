@@ -11,10 +11,10 @@ namespace HRC.Validation
     public abstract class ValidatingViewModel : ViewModelBase, IDataErrorInfo
     {
 // ReSharper disable DoNotCallOverridableMethodsInConstructor
-        protected ValidatingViewModel() { ValidationRules = new List<SimpleRule>(); }
+        protected ValidatingViewModel() { ValidationRules = new List<ValidationRule>(); }
 // ReSharper restore DoNotCallOverridableMethodsInConstructor
 
-        protected virtual List<SimpleRule> ValidationRules { get; set; }
+        protected virtual List<ValidationRule> ValidationRules { get; set; }
 
         #region Implementation of IDataErrorInfo
         /// <summary>
@@ -34,7 +34,7 @@ namespace HRC.Validation
                 foreach (var rule in ValidationRules)
                 {
                     rule.ValidationErrorMessage = null;
-                    var ruleIsBroken = !rule.ValidateRule(this, rule);
+                    var ruleIsBroken = !rule.Validate(this, rule);
                     if (!ruleIsBroken) continue;
                     allRulesValid = false;
                     if (!string.IsNullOrEmpty(rule.Description)) errStr += rule.Description + Environment.NewLine;

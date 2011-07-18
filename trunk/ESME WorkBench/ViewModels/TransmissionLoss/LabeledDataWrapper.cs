@@ -37,7 +37,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public ObservableCollection<SimpleRule> ValidationRules { get; set; }
+        #region public ObservableCollection<ValidationRule> ValidationRules { get; set; }
 
         public ObservableCollection<SimpleRule> ValidationRules
         {

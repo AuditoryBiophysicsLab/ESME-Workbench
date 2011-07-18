@@ -8,8 +8,6 @@ using ESME.Data;
 using ESME.Overlay;
 using HRC.Navigation;
 using HRC.Validation;
-using Rule = HRC.Validation.Rule;
-using SimpleRule = HRC.Validation.SimpleRule;
 
 namespace ESME.Views.Locations
 {
@@ -18,87 +16,87 @@ namespace ESME.Views.Locations
         public NewRangeComplexViewModel(AppSettings appSettings)
         {
             SimAreaFolder = appSettings.ScenarioDataDirectory;
-            ValidationRules.AddRange(new List<SimpleRule>
+            ValidationRules.AddRange(new List<ValidationRule>
             {
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "LocationName",
                     Description = "Cannot be empty",
                     RuleDelegate = (o, r) => !string.IsNullOrEmpty(((NewRangeComplexViewModel)o).LocationName),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "LocationName",
                     Description = "Location already exists.  Choose a different name",
                     RuleDelegate = (o, r) => (string.IsNullOrEmpty(((NewRangeComplexViewModel)o).LocationName)) || ((LocationPath == null) || !Directory.Exists(LocationPath)),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "ReferencePointLatitude",
                     Description = "Must be between -90 and +90",
                     RuleDelegate = (o, r) => RangeCheck(((NewRangeComplexViewModel)o).ReferencePointLatitude, -90, 90),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "ReferencePointLongitude", 
                     Description = "Must be between -180 and +180",
                     RuleDelegate = (o, r) => RangeCheck(((NewRangeComplexViewModel)o).ReferencePointLongitude, -180, 180),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "Height", 
                     Description = "Invalid value", 
                     RuleDelegate = (o, r) => RangeCheck(((NewRangeComplexViewModel)o).Height, double.MinValue, double.MaxValue),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "GeoidSeparation", 
                     Description = "Invalid value", 
                     RuleDelegate = (o, r) => RangeCheck(((NewRangeComplexViewModel)o).GeoidSeparation, double.MinValue, double.MaxValue),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "ExistingOpAreaOverlayFilename", 
                     Description = "If coordinates are not specified, you must provide an overlay file", 
                     RuleDelegate = (o, r) => OnlyOneIsNotEmpty(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "NewOpAreaOverlayCoordinates", 
                     Description = "If an overlay file is not specified, you must provide coordinates", 
                     RuleDelegate = (o, r) => AtLeastOneIsNotEmpty(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename)
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "ExistingSimAreaOverlayFilename", 
                     Description = "If coordinates are not specified, you must provide an overlay file", 
                     RuleDelegate = (o, r) => OnlyOneIsNotEmpty(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingSimAreaOverlayFilename),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "NewSimAreaOverlayCoordinates", 
                     Description = "If an overlay file is not specified, you must provide coordinates", 
                     RuleDelegate = (o, r) => AtLeastOneIsNotEmpty(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingSimAreaOverlayFilename),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "NewOpAreaOverlayCoordinates", 
                     Description = "Invalid or incomplete data entered", 
                     RuleDelegate = (o, r) => ValidateOverlayCoordinates(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, r)
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "NewSimAreaOverlayCoordinates", 
                     Description = "Invalid or incomplete data entered", 
                     RuleDelegate = (o, r) => ValidateOverlayCoordinates(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, r)
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "ExistingOpAreaOverlayFilename", 
                     Description = null, 
                     RuleDelegate = (o, r) => ValidateOverlayFile(((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename, r),
                 },
-                new SimpleRule
+                new ValidationRule
                 {
                     PropertyName = "ExistingSimAreaOverlayFilename", 
                     Description = null, 
@@ -107,7 +105,7 @@ namespace ESME.Views.Locations
             });
         }
 
-        public static bool ValidateOverlayCoordinates(string fieldData, Rule rule)
+        public static bool ValidateOverlayCoordinates(string fieldData, ValidationRuleBase rule)
         {
             if (string.IsNullOrEmpty(fieldData)) return true;
 
@@ -119,7 +117,7 @@ namespace ESME.Views.Locations
             return false;
         }
 
-        public static bool ValidateOverlayFile(string overlayFilename, Rule rule)
+        public static bool ValidateOverlayFile(string overlayFilename, ValidationRuleBase rule)
         {
             if (string.IsNullOrEmpty(overlayFilename)) return true;
 

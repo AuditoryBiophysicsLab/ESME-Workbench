@@ -2,7 +2,6 @@
 using Cinch;
 using ESME.Metadata;
 using HRC.Validation;
-using SimpleRule = HRC.Validation.SimpleRule;
 
 namespace ESME.Views.Locations
 {
@@ -11,7 +10,7 @@ namespace ESME.Views.Locations
         public OverlayExpandViewModel(NAEMOOverlayMetadata naemoOverlayMetadata)
         {
             NAEMOOverlayMetadata = naemoOverlayMetadata;
-            ValidationRules.Add(new SimpleRule
+            ValidationRules.Add(new ValidationRule
             {
                 PropertyName = "BufferSize",
                 Description = "Must be greater than zero.",
