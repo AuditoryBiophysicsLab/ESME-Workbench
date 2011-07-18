@@ -184,6 +184,9 @@
     <Compile Include="Utility\XmlSerializer.cs" />
     <Compile Include="Utility\HRCObservableCollection.cs" />
     <Compile Include="Triggers\RoutedEventTrigger.cs" />
+    <Compile Include="Validation\RegexRule.cs" />
+    <Compile Include="Validation\Rule.cs" />
+    <Compile Include="Validation\SimpleRule.cs" />
     <Compile Include="Validation\ValidatingViewModel.cs" />
     <Compile Include="Triggers\ValidationErrorEventTrigger.cs" />
   </ItemGroup>
