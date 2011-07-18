@@ -126,11 +126,18 @@ namespace HRC.Validation
         SimpleCommand<object, ValidationErrorEventArgs> _validationError;
         #endregion
 
-        public static bool RangeCheck(double valueToCheck, double minimum, double maximum, bool includeEndpoints = true)
+        public static bool RangeCheck(double valueToCheck, double minimum = double.MinValue, double maximum = double.MaxValue, bool includeEndpoints = true)
         {
             if (includeEndpoints)
                 return (!double.IsNaN(valueToCheck) && (valueToCheck >= minimum)) && (valueToCheck <= maximum);
             return (!double.IsNaN(valueToCheck) && (valueToCheck > minimum)) && (valueToCheck < maximum);
+        }
+
+        public static bool RangeCheck(int valueToCheck, int minimum = int.MinValue, int maximum = int.MaxValue, bool includeEndpoints = true)
+        {
+            if (includeEndpoints)
+                return ((valueToCheck >= minimum)) && (valueToCheck <= maximum);
+            return ((valueToCheck > minimum)) && (valueToCheck < maximum);
         }
 
         public static bool AtLeastOneIsNotEmpty(params string[] fields)
