@@ -33,11 +33,15 @@ namespace HRC.Validation
                 var allRulesValid = true;
                 foreach (var rule in ValidationRules)
                 {
-                    var ruleIsBroken = !rule.ValidateRule(this);
+                    rule.ValidationErrorMessage = null;
+                    var ruleIsBroken = !rule.ValidateRule(this, rule);
                     if (!ruleIsBroken) continue;
                     allRulesValid = false;
-                    errStr += rule.Description + Environment.NewLine;
-                    if (rule.PropertyName == columnName) result += rule.Description + Environment.NewLine;
+                    if (!string.IsNullOrEmpty(rule.Description)) errStr += rule.Description + Environment.NewLine;
+                    if (!string.IsNullOrEmpty(rule.ValidationErrorMessage)) errStr += rule.ValidationErrorMessage + Environment.NewLine;
+                    if (string.IsNullOrEmpty(rule.PropertyName) || (rule.PropertyName != columnName)) continue;
+                    if (!string.IsNullOrEmpty(rule.Description)) result += rule.Description + Environment.NewLine;
+                    if (!string.IsNullOrEmpty(rule.ValidationErrorMessage)) result += rule.ValidationErrorMessage + Environment.NewLine;
                 }
                 IsValid = allRulesValid;
                 Error = !string.IsNullOrEmpty(errStr) ? errStr.Remove(errStr.Length - 2, 2) : errStr;
@@ -128,7 +132,5 @@ namespace HRC.Validation
             var nonEmptyCount = fields.Where(field => !string.IsNullOrEmpty(field)).Count();
             return nonEmptyCount == 1;
         }
-
-
     }
 }
