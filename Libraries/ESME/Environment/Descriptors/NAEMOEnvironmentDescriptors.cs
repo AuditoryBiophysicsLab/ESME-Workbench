@@ -12,7 +12,7 @@ namespace ESME.Environment.Descriptors
             {
                 if ((backgroundTask != null) && (backgroundTask.CancellationPending)) return;
                 if (backgroundTask != null) backgroundTask.Value++;
-                if (envItem.Value.Metadata != null) continue;
+                if ((envItem.Value == null) || (envItem.Value.Metadata != null)) continue;
                 envItem.Value.Metadata = NAEMOEnvironmentMetadata.FromEnvironmentFile(envItem.Value.DataFilename);
                 if (envItem.Value.Metadata == null) continue;
                 envItem.Value.Metadata.Save();

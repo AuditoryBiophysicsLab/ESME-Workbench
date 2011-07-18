@@ -161,6 +161,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Utility\BitFields.cs" />
+    <Compile Include="Utility\BooleanToVisibilityConverter.cs" />
     <Compile Include="Utility\Colormap.cs" />
     <Compile Include="Utility\Decimator2D.cs" />
     <Compile Include="Utility\EmbeddedResources.cs" />

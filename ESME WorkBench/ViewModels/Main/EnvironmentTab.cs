@@ -54,6 +54,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         T FindMapLayer<T>(LayerType layerType, string layerName) where T : class
         {
+            if (MapLayers == null) return null;
             return MapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
         }
 
@@ -187,12 +188,12 @@ namespace ESMEWorkBench.ViewModels.Main
                     NAEMOBathymetryDescriptors = null;
                     NAEMOEnvironmentDescriptors = null;
                 }
-                NotifyPropertyChanged(SelectedSimAreaChangedEventArgs);
+                NotifyPropertyChanged(SelectedRangeComplexDescriptorChangedEventArgs);
                 _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedSimAreaChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplexDescriptor);
+        static readonly PropertyChangedEventArgs SelectedRangeComplexDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplexDescriptor);
         RangeComplexDescriptor _selectedRangeComplexDescriptor;
         RangeComplexDescriptor _lastNonNullRangeComplex;
 
@@ -219,7 +220,18 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DisplayRangeComplex()
         {
-            if ((_selectedRangeComplexDescriptor == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            OverlayShapeMapLayer opAreaLayer;
+            OverlayShapeMapLayer simAreaLayer;
+            if (_selectedRangeComplexDescriptor == null)
+            {
+                opAreaLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
+                if (opAreaLayer != null) opAreaLayer.IsChecked = false;
+                simAreaLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
+                if (simAreaLayer != null) simAreaLayer.IsChecked = false;
+                return;
+            }
+
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.OpsLimitFile);
             var simAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.SimLimitFile);
@@ -230,7 +242,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var east = (float)opsLimit.Shapes[0].BoundingBox.Right + 3;
             var mapExtent = new RectangleShape(west, north, east, south);
             MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
-            var opAreaLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area") ?? new OverlayShapeMapLayer
+            opAreaLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area") ?? new OverlayShapeMapLayer
                 {
                         Name = "Op Area",
                         CanBeRemoved = true,
@@ -245,11 +257,12 @@ namespace ESMEWorkBench.ViewModels.Main
             foreach (var shape in opAreaOverlay.Shapes)
                 opAreaLayer.Add(shape);
             opAreaLayer.Done();
+            opAreaLayer.IsChecked = true;
             if (MapLayers.IndexOf(opAreaLayer) == -1) MapLayers.Add(opAreaLayer);
 
             if (simAreaOverlayFilename != opAreaOverlayFilename)
             {
-                var simAreaLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area") ?? new OverlayShapeMapLayer
+                simAreaLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area") ?? new OverlayShapeMapLayer
                 {
                     Name = "Sim Area",
                     CanBeRemoved = true,
@@ -264,6 +277,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 foreach (var shape in simAreaOverlay.Shapes)
                     simAreaLayer.Add(shape);
                 simAreaLayer.Done();
+                simAreaLayer.IsChecked = true;
                 if (MapLayers.IndexOf(simAreaLayer) == -1) MapLayers.Add(simAreaLayer);
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
@@ -395,10 +409,17 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DisplayOverlay()
         {
-            if ((_selectedOverlayDescriptor == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            OverlayShapeMapLayer overlayLayer;
+            if (_selectedOverlayDescriptor == null)
+            {
+                overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
+                if (overlayLayer != null) overlayLayer.IsChecked = false;
+                return;
+            }
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             var overlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename) + ".ovr");
-            var overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
+            overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
             {
                 Name = "Overlay",
                 CanBeRemoved = true,
@@ -413,6 +434,7 @@ namespace ESMEWorkBench.ViewModels.Main
             foreach (var shape in overlay.Shapes)
                 overlayLayer.Add(shape);
             overlayLayer.Done();
+            overlayLayer.IsChecked = true;
             if (MapLayers.IndexOf(overlayLayer) == -1) MapLayers.Add(overlayLayer);
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
@@ -607,9 +629,16 @@ namespace ESMEWorkBench.ViewModels.Main
         NAEMOBathymetryDescriptor _selectedBathymetryDescriptor;
         void DisplayBathymetry()
         {
-            if ((_selectedBathymetryDescriptor == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            RasterMapLayer bathyBitmapLayer;
+            if (_selectedBathymetryDescriptor == null)
+            {
+                bathyBitmapLayer = FindMapLayer<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry");
+                if (bathyBitmapLayer != null) bathyBitmapLayer.IsChecked = false;
+                return;
+            }
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
-            var bathyBitmapLayer = FindMapLayer<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry") ?? new RasterMapLayer
+            bathyBitmapLayer = FindMapLayer<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry") ?? new RasterMapLayer
             {
                 Name = "Bathymetry",
                 CanBeReordered = true,
@@ -625,6 +654,7 @@ namespace ESMEWorkBench.ViewModels.Main
             bathyBitmapLayer.RasterFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Images",
                                                            Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp");
             if (MapLayers.IndexOf(bathyBitmapLayer) == -1) MapLayers.Add(bathyBitmapLayer);
+            bathyBitmapLayer.IsChecked = true;
             MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
         }
 
@@ -793,9 +823,16 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DisplayEnvironment()
         {
-            if ((_selectedEnvironmentDescriptor == null) || (!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            OverlayShapeMapLayer overlayLayer;
+            if (_selectedEnvironmentDescriptor == null)
+            {
+                overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment");
+                if (overlayLayer != null) overlayLayer.IsChecked = false;
+                return;
+            }
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
-            var overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment") ?? new OverlayShapeMapLayer
+            overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment") ?? new OverlayShapeMapLayer
             {
                 Name = "Environment",
                 CanBeRemoved = true,
@@ -811,6 +848,7 @@ namespace ESMEWorkBench.ViewModels.Main
             overlayLayer.Clear();
             overlayLayer.Add(samplePoints);
             overlayLayer.Done();
+            overlayLayer.IsChecked = true;
             if (MapLayers.IndexOf(overlayLayer) == -1) MapLayers.Add(overlayLayer);
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }

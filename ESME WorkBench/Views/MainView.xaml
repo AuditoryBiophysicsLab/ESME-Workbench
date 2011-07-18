@@ -391,22 +391,27 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <!--
-                        <ListBox ItemsSource="{Binding RangeComplexDescriptors}"
-                                 IsEnabled="{Binding IsRangeComplexListReady}">
-                            <ListBox.ToolTip>
+                        <ListView Grid.Column="0"
+                                  DockPanel.Dock="Top"
+                                  ItemsSource="{Binding RangeComplexDescriptors}"
+                                  SelectedValue="{Binding SelectedRangeComplexDescriptor}"
+                                  SelectedValuePath="Value"
+                                  SelectionMode="Single"
+                                  MinWidth="75"
+                                  MinHeight="66">
+                            <ListView.ToolTip>
                                 <r:RibbonToolTip Title="Range Complex"
-					                             Description="Select a pre-defined range complex"
-                                                 FooterTitle="Currently selected range complex"
-                                                 FooterDescription="{Binding SelectedRangeComplexInfo}"/>
-                            </ListBox.ToolTip>
-                            <ListBox.ItemTemplate>
+					                            Description="Select a pre-defined range complex"
+                                                FooterTitle="Currently selected range complex"
+                                                FooterDescription="{Binding SelectedRangeComplexInfo}"/>
+                            </ListView.ToolTip>
+                            <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Key}" />
+                                    <TextBlock Text="{Binding Key}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Key}"/>
                                 </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                        -->
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <!--
                         <r:RibbonComboBox Grid.Column="0"
                                           ToolTipTitle="Range Complex"
 					                      ToolTipDescription="Select a pre-defined range complex"
@@ -434,6 +439,7 @@
                                 </r:RibbonGalleryCategory>
                             </r:RibbonGallery>
                         </r:RibbonComboBox>
+                        -->
                         <StackPanel Orientation="Vertical"
                                     Grid.Column="1">
                             <r:RibbonButton Label="New"
@@ -455,6 +461,27 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
+                        <ListView Grid.Column="0"
+                                    DockPanel.Dock="Top"
+                                    ItemsSource="{Binding NAEMOOverlayDescriptors}"
+                                    SelectedValue="{Binding SelectedOverlayDescriptor}"
+                                    SelectedValuePath="Value"
+                                    SelectionMode="Single"
+                                    MinWidth="75"
+                                    MinHeight="66">
+                            <ListView.ToolTip>
+                                <r:RibbonToolTip Title="Overlay"
+    					                            Description="Select a pre-defined overlay"
+                                                    FooterTitle="Currently selected overlay"
+                                                    FooterDescription="{Binding SelectedOverlayInfo}"/>
+                            </ListView.ToolTip>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Key}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Key}"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <!--
                         <r:RibbonComboBox Grid.Column="0" 
                                           ToolTipTitle="Overlay"
 					                      ToolTipDescription="Select a pre-defined overlay"
@@ -482,6 +509,7 @@
                                 </r:RibbonGalleryCategory>
                             </r:RibbonGallery>
                         </r:RibbonComboBox>
+                        -->
                         <StackPanel Orientation="Vertical"
                                     Grid.Column="1">
                             <r:RibbonButton Label="New"
@@ -492,7 +520,8 @@
                             <r:RibbonButton Label="Expand"
 					                        SmallImageSource="..\Images\SmallIcons\top_right_expand.png"
 					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                        ToolTipDescription="Expand the selected overlay to create a new overlay"
+					                        ToolTipDescription="Create a new overlay by expanding the selected overlay"
+                                            ToolTipFooterDescription="Note: You cannot expand an overlay that was previously created by expanding another overlay"
 					                        Command="{Binding ExpandOverlayCommand}" />
                             <r:RibbonButton Label="Properties"
 					                        SmallImageSource="..\Images\SmallIcons\properties.png"
@@ -508,6 +537,26 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
+                        <ListView Grid.Column="0"
+                                  ItemsSource="{Binding NAEMOBathymetryDescriptors}"
+                                  SelectedValue="{Binding SelectedBathymetryDescriptor}"
+                                  SelectedValuePath="Value"
+                                  SelectionMode="Single"
+                                  MinWidth="75"
+                                  MinHeight="66">
+                            <ListBox.ToolTip>
+                                <r:RibbonToolTip Title="Bathymetry"
+					                             Description="Select a pre-defined bathymetry dataset"
+                                                 FooterTitle="Currently selected bathymetry"
+                                                 FooterDescription="{Binding SelectedBathymetryInfo}"/>
+                            </ListBox.ToolTip>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Key}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Key}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListView>
+                        <!--
                         <r:RibbonComboBox Grid.Column="0"
                                           ToolTipTitle="Bathymetry"
 					                      ToolTipDescription="Select a pre-defined bathymetry dataset"
@@ -535,6 +584,7 @@
                                 </r:RibbonGalleryCategory>
                             </r:RibbonGallery>
                         </r:RibbonComboBox>
+                        -->
                         <StackPanel Orientation="Vertical"
                                     Grid.Column="1">
                             <r:RibbonButton Label="New"
@@ -556,6 +606,26 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
+                        <ListView Grid.Column="0"
+                                  ItemsSource="{Binding NAEMOEnvironmentDescriptors}"
+                                  SelectedValue="{Binding SelectedEnvironmentDescriptor}"
+                                  SelectedValuePath="Value"
+                                  SelectionMode="Single"
+                                  MinWidth="75"
+                                  MinHeight="66">
+                            <ListBox.ToolTip>
+                                <r:RibbonToolTip Title="Environment"
+					                             Description="Select a pre-defined environmental dataset"
+                                                 FooterTitle="Currently selected environment"
+                                                 FooterDescription="{Binding SelectedEnvironmentInfo}"/>
+                            </ListBox.ToolTip>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Key}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Key}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListView>
+                        <!--
                         <r:RibbonComboBox Grid.Column="0"
                                           ToolTipTitle="Environment"
                                           ToolTipDescription="Select a pre-defined environmental dataset"
@@ -583,6 +653,7 @@
                                 </r:RibbonGalleryCategory>
                             </r:RibbonGallery>
                         </r:RibbonComboBox>
+                        -->
                         <StackPanel Orientation="Vertical"
                                     Grid.Column="1">
                             <r:RibbonButton Label="New"
