@@ -11,6 +11,7 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment.NAVO;
 using HRC.Utility;
+using HRC.Validation;
 
 namespace ESME.Data
 {
@@ -630,7 +631,7 @@ namespace ESME.Data
         #endregion
     }
 
-    public class RAMSettings : PropertyChangedBase
+    public class RAMSettings : ValidatingViewModel
     {
         public void SetDefaults()
         {

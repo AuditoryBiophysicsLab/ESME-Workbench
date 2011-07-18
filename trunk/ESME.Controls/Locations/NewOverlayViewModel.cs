@@ -11,15 +11,66 @@ using ESME.Environment;
 using ESME.Model;
 using ESME.Overlay;
 using HRC.Navigation;
+using HRC.Validation;
+using ValidationRule = HRC.Validation.ValidationRule;
 
 namespace ESME.Views.Locations
 {
-    public class NewOverlayViewModel : ViewModelBase, ISupportValidation
+    public sealed class NewOverlayViewModel : ValidatingViewModel
     {
         public NewOverlayViewModel(AppSettings appSettings, string locationName)
         {
             SimAreaFolder = appSettings.ScenarioDataDirectory;
             LocationName = locationName;
+            RangeComplexAreasFolder = Path.Combine(SimAreaFolder, LocationName, "Areas");
+            ValidationRules.AddRange(new List<ValidationRule>
+                                         {
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "OverlayName",
+                                                     Description = "A name must be specified.",
+                                                     RuleDelegate = (o, r) => !string.IsNullOrEmpty(((NewOverlayViewModel) o).OverlayName),
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "OverlayCoordinates",
+                                                     Description = "Coordinates must be specified.",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((NewOverlayViewModel) o).OverlayCoordinates;
+                                                                            return !string.IsNullOrEmpty(ruleTarget);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "OverlayCoordinates",
+                                                     Description = null,
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((NewOverlayViewModel) o).OverlayCoordinates;
+                                                                            return ValidateOverlayCoordinates(
+                                                                                ruleTarget, r);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "OverlayName",
+                                                     Description = "An overlay file with this name already exists.",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            
+                                                                            var ruleTarget = ((NewOverlayViewModel) o).OverlayName;
+                                                                            if (string.IsNullOrEmpty(ruleTarget))
+                                                                                return true;
+                                                                            if(ruleTarget.ToLower().EndsWith(".ovr"))
+                                                                                ruleTarget = Path.GetFileNameWithoutExtension(ruleTarget);
+                                                                            var locationPath = Path.Combine(SimAreaFolder, LocationName,"Areas", ruleTarget+".ovr");
+                                                                            return !File.Exists(locationPath);
+                                                                        },
+                                                 },
+                                 
+                                 
+                                         });
 
         }
 
@@ -41,7 +92,25 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public string OverlayName { get; set; } 
+        #region public string  RangeComplexAreasFolder { get; set; }
+
+        public string RangeComplexAreasFolder
+        {
+            get { return _rangeComplexAreasFolder; }
+            set
+            {
+                if (_rangeComplexAreasFolder == value) return;
+                _rangeComplexAreasFolder = value;
+                NotifyPropertyChanged(RangeComplexFolderChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs RangeComplexFolderChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.RangeComplexAreasFolder);
+        private string _rangeComplexAreasFolder;
+
+        #endregion
+
+        #region public string OverlayName { get; set; }
 
         public string OverlayName
         {
@@ -58,7 +127,7 @@ namespace ESME.Views.Locations
         private string _overlayName;
         #endregion
 
-        #region public string OverlayCoordinates { get; set; } 
+        #region public string OverlayCoordinates { get; set; }
 
         public string OverlayCoordinates
         {
@@ -73,12 +142,22 @@ namespace ESME.Views.Locations
 
         private static readonly PropertyChangedEventArgs OverlayCoordinatesChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.OverlayCoordinates);
         private string _overlayCoordinates;
-    
+
 
         #endregion
 
-        List<EarthCoordinate> OverlayEarthCoordinates { get; set; }
         private string LocationName { get; set; }
+
+        public static bool ValidateOverlayCoordinates(string fieldData, ValidationRuleBase rule)
+        {
+            if (string.IsNullOrEmpty(fieldData)) return true;
+            List<EarthCoordinate> earthCoordinates;
+            string validationErrors;
+            var result = OverlayFile.ValidateCoordinates(fieldData, null, out earthCoordinates, out validationErrors);
+            if (result != null) return true;
+            rule.ValidationErrorMessage = validationErrors;
+            return false;
+        }
 
         #region OkCommand
 
@@ -88,18 +167,8 @@ namespace ESME.Views.Locations
             {
                 return _ok ??
                        (_ok =
-                        new SimpleCommand<object, object>(delegate { return OkIsEnabled; },
+                        new SimpleCommand<object, object>(delegate { return IsValid; },
                                                           delegate { OkCommandHandler(); }));
-            }
-        }
-
-        bool OkIsEnabled
-        {
-            get
-            {
-                Validate();
-                if (!IsValid) return false;
-                return true;
             }
         }
 
@@ -121,10 +190,18 @@ namespace ESME.Views.Locations
             }
         }
 
+        List<EarthCoordinate> OverlayEarthCoordinates { get; set; }
+
         void OkCommandHandler()
         {
+            GeoRect bounds;
+            List<EarthCoordinate> coords;
+            string overlayError;
+            bounds = OverlayFile.ValidateCoordinates(OverlayCoordinates, "Op Limits", out coords, out overlayError);
+            if (bounds != null) OverlayEarthCoordinates = coords;
+
             if (!OverlayName.EndsWith(".ovr")) OverlayName += ".ovr";
-            var overlayFileName = Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName);
+            var overlayFileName = Path.Combine(RangeComplexAreasFolder, OverlayName);
             WriteOverlayFile(overlayFileName, OverlayEarthCoordinates);
 
             CloseActivePopUpCommand.Execute(true);
@@ -160,8 +237,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        public bool IsValid { get { return string.IsNullOrEmpty(ValidationErrorText); } }
-
+#if false
         #region public Visibility ErrorVisibility { get; set; }
 
         public Visibility ErrorVisibility
@@ -169,7 +245,7 @@ namespace ESME.Views.Locations
             get { return IsValid ? Visibility.Collapsed : Visibility.Visible; }
         }
 
-        private static readonly PropertyChangedEventArgs ErrorVisibilityChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ErrorVisibility);
+        private static readonly PropertyChangedEventArgs ErrorVisibilityChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.ErrorVisibility);
 
         #endregion
 
@@ -187,18 +263,18 @@ namespace ESME.Views.Locations
             }
         }
 
-        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.ValidationErrorText);
+        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<NewOverlayViewModel>(x => x.ValidationErrorText);
         string _validationErrorText;
 
         #endregion
+         private GeoRect Bounds { get; set; }
 
-        private GeoRect Bounds { get; set; }
         public void Validate()
         {
             ValidationErrorText = "";
             if (string.IsNullOrEmpty(OverlayName))
                 ValidationErrorText += "The Overlay file must have a name\n";
-            if(((OverlayName != null && File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName))) || File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName + ".ovr"))))
+            if (((OverlayName != null && File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName))) || File.Exists(Path.Combine(SimAreaFolder, LocationName, "Areas", OverlayName + ".ovr"))))
                 ValidationErrorText += "An overlay file with the specified file name already exists.\n";
             if (string.IsNullOrEmpty(OverlayCoordinates))
                 ValidationErrorText += "No Overlay Coordinates have been entered\n";
@@ -210,6 +286,7 @@ namespace ESME.Views.Locations
 
             if (Bounds != null) OverlayEarthCoordinates = coords;
             NotifyPropertyChanged(ErrorVisibilityChangedEventArgs);
-        }
+        } 
+#endif
     }
 }

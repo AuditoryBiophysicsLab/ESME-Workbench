@@ -348,18 +348,8 @@ namespace ESME.Views.Locations
             {
                 return _ok ??
                        (_ok =
-                        new SimpleCommand<object, object>(delegate { return OkIsEnabled; },
+                        new SimpleCommand<object, object>(delegate { return IsValid; },
                                                           delegate { OkCommandHandler(); }));
-            }
-        }
-
-        private bool OkIsEnabled
-        {
-            get
-            {
-                Validate();
-                if (!IsValid) return false;
-                return true;
             }
         }
 
@@ -391,6 +381,22 @@ namespace ESME.Views.Locations
             Directory.CreateDirectory(Path.Combine(LocationPath, "GeographicAreas"));
             Directory.CreateDirectory(Path.Combine(LocationPath, "Images"));
             Directory.CreateDirectory(Path.Combine(LocationPath, "Species"));
+
+            List<EarthCoordinate> opCoords;
+            List<EarthCoordinate> simCoords;
+            string opErrors;
+            OpBounds = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)
+                           ? OverlayFile.ValidateCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords, out opErrors)
+                           : OverlayFile.ValidateFile(ExistingOpAreaOverlayFilename, "Op Limits", out opCoords, out opErrors);
+            
+            string simErrors;
+            SimBounds = !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)
+                            ? OverlayFile.ValidateCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords, out simErrors)
+                            : OverlayFile.ValidateFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simCoords, out simErrors);
+            
+            if (OpBounds != null) NewOpAreaOverlayEarthCoordinates = opCoords;
+            if (SimBounds != null) NewSimAreaOverlayEarthCoordinates = simCoords;
+
 
             var opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", LocationName));
             if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename))
@@ -467,6 +473,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
+#if false
         #region ISupportValidation Members
 
         public void Validate()
@@ -514,13 +521,13 @@ namespace ESME.Views.Locations
             List<EarthCoordinate> simCoords;
             string opErrors;
             OpBounds = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)
-                           ? OverlayFile.ValidateCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords,out opErrors)
-                           : OverlayFile.ValidateFile(ExistingOpAreaOverlayFilename, "Op Limits", out opCoords,out opErrors);
+                           ? OverlayFile.ValidateCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords, out opErrors)
+                           : OverlayFile.ValidateFile(ExistingOpAreaOverlayFilename, "Op Limits", out opCoords, out opErrors);
             ValidationErrorText += opErrors;
             string simErrors;
             SimBounds = !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)
-                            ? OverlayFile.ValidateCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords,out simErrors)
-                            : OverlayFile.ValidateFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simCoords,out simErrors);
+                            ? OverlayFile.ValidateCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords, out simErrors)
+                            : OverlayFile.ValidateFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simCoords, out simErrors);
             ValidationErrorText += simErrors;
             if (OpBounds != null) NewOpAreaOverlayEarthCoordinates = opCoords;
             if (SimBounds != null) NewSimAreaOverlayEarthCoordinates = simCoords;
@@ -561,6 +568,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        #endregion
+        #endregion 
+#endif
     }
 }
