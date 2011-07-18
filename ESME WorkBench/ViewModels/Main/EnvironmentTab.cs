@@ -47,11 +47,10 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             Console.WriteLine("All view models are ready!");
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
-            return;
-            _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
-            _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
-            _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
-            _dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
         }
 
         T FindMapLayer<T>(LayerType layerType, string layerName) where T : class
@@ -193,7 +192,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                              _selectedRangeComplexDescriptor.Data.Name, Math.Round(_selectedRangeComplexDescriptor.Data.Latitude, 5), Math.Round(_selectedRangeComplexDescriptor.Data.Longitude, 5),
                                                              _selectedRangeComplexDescriptor.Data.Height, _selectedRangeComplexDescriptor.Data.GeoidSeparation, SelectedRangeComplexDescriptor.Data.OpsLimitFile,
                                                              SelectedRangeComplexDescriptor.Data.SimLimitFile);
-                    Console.WriteLine("Range complex {0} is selected!", _selectedRangeComplexDescriptor.Data.Name);
+                    //Console.WriteLine("Range complex {0} is selected!", _selectedRangeComplexDescriptor.Data.Name);
 
                     NAEMOOverlayDescriptors = _selectedRangeComplexDescriptor.NAEMOOverlayDescriptors;
                     NAEMOBathymetryDescriptors = _selectedRangeComplexDescriptor.NAEMOBathymetryDescriptors;
