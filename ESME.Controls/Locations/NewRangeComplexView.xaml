@@ -91,13 +91,10 @@
                 </GroupBox>
             </StackPanel>
         </GroupBox>
-        <StackPanel Orientation="Vertical" Margin="5">
+        <StackPanel Orientation="Vertical" Margin="5" Visibility="{Binding IsValid, Converter={StaticResource TrueVisibleFalseCollapsed}}">
             <TextBlock Text="Location will be created inside simulation area folder: " />
-            <TextBlock Text="{Binding SimAreaFolder}" />
-        </StackPanel>
-        <GroupBox Header="Error(s):" Foreground="Red" Visibility="{Binding ErrorVisibility}" Padding="5" Margin="0 0 0 5">
-            <TextBlock Foreground="Red" Text="{Binding ValidationErrorText}" Margin="5"  MaxWidth="600" TextWrapping="WrapWithOverflow"/>
-        </GroupBox>
+            <TextBlock Text="{Binding SimAreaFolder}" TextWrapping="WrapWithOverflow"/>
+        </StackPanel>        
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="OK" Width="75" Margin="5" IsDefault="True" Command="{Binding OkCommand}"/>
             <Button Content="Cancel" Width="75" Margin="5" IsCancel="True"/>

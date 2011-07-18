@@ -7,31 +7,73 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
-    public class ApplicationOptionsViewModel : ViewModelBase, IDesignTimeAware
+    public class ApplicationOptionsViewModel : ViewModelBase
     {
         public ApplicationOptionsViewModel()
         {
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
-
-            OkCommand = new SimpleCommand<object, object>(delegate
-            {
-                AppSettings.Save(null);
-                CloseActivePopUpCommand.Execute(true);
-            });
-            CancelCommand = new SimpleCommand<object, object>(delegate
-            {
-                AppSettings = AppSettings.Load();
-                CloseActivePopUpCommand.Execute(false);
-            });
         }
 
         public void DesignTimeInitialization() { AppSettings = AppSettings.Load(); }
 
         public AppSettings AppSettings { get; private set; }
-        
-        public SimpleCommand<Object, Object> OkCommand { get; private set; }
-        public SimpleCommand<Object, Object> CancelCommand { get; private set; }
+
+        #region OkCommand
+
+        public SimpleCommand<object, object> OkCommand
+        {
+            get
+            {
+                return _ok ??
+                       (_ok =
+                        new SimpleCommand<object, object>(delegate { return IsOkCommandEnabled; },
+                                                          delegate { OkHandler(); }));
+            }
+        }
+
+        private SimpleCommand<object, object> _ok;
+
+        private bool IsOkCommandEnabled
+        {
+            get { return true; }
+        }
+
+        private void OkHandler()
+        {
+            AppSettings.Save(null);
+            CloseActivePopUpCommand.Execute(true);
+        }
+
+        #endregion
+
+        #region CancelCommand
+
+        public SimpleCommand<object, object> CancelCommand
+        {
+            get
+            {
+                return _cancel ??
+                       (_cancel =
+                        new SimpleCommand<object, object>(delegate { return IsCancelCommandEnabled; },
+                                                          delegate { CancelHandler(); }));
+            }
+        }
+
+        private SimpleCommand<object, object> _cancel;
+
+        private bool IsCancelCommandEnabled
+        {
+            get { return true; }
+        }
+
+        private void CancelHandler()
+        {
+            AppSettings = AppSettings.Load();
+            CloseActivePopUpCommand.Execute(false);
+        }
+
+        #endregion
 
         #region public List<NAVOTimePeriod> Months { get; set; }
 

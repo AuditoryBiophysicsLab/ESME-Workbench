@@ -10,7 +10,8 @@
 	<StackPanel Margin="5">
 		<DockPanel LastChildFill="True">
 			<TextBlock DockPanel.Dock="Left" Text="Overlay Name:"/>
-            <TextBox Text="{Binding OverlayName, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Left"/>
+            <Controls:ValidatingTextBox BoundField="OverlayName" DockPanel.Dock="Left"/>
+            
         </DockPanel>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -21,21 +22,22 @@
         </Grid>     
         <GroupBox Padding="5" Header="Coordinates for new overlay (lat, lon)">
             <StackPanel Orientation="Vertical">
-                <TextBox Text="{Binding OverlayCoordinates, UpdateSourceTrigger=PropertyChanged}" 
-                             TextWrapping="Wrap"
-                             AcceptsReturn="True"
-							 Height="100"
-					         ToolTip="Please enter coordinates in latitude, longitude pairs separated by newlines" 
-							 VerticalScrollBarVisibility="Auto"/>                                    
+                <Controls:ValidatingTextBox BoundField="OverlayCoordinates"
+                                                    TextWrapping="Wrap"
+                                                    AcceptsReturn="True"
+                                                    Height="100"                                                   
+                                                    VerticalScrollBarVisibility="Auto"/>                                    
                 <Button Content="Clear" 
 					        Width="100" 
 							HorizontalAlignment="Right" 
 							Command="{Binding ClearCoordinatesCommand}" />
+                <StackPanel Orientation="Vertical" Visibility="{Binding IsValid, Converter={StaticResource TrueVisibleFalseCollapsed}}">
+                    <TextBlock Text="Location will be created inside range complex folder: " />
+                    <TextBlock Margin="0 5 0 0" Text="{Binding RangeComplexAreasFolder}" MaxWidth="400" TextWrapping="WrapWithOverflow"/>
+                </StackPanel>
             </StackPanel>
-        </GroupBox>                
-        <GroupBox Header="Error(s):" Foreground="Red" Visibility="{Binding ErrorVisibility}" Padding="5" Margin="0 0 0 5">
-            <TextBlock Foreground="Red" Text="{Binding ValidationErrorText}" Margin="5" MaxWidth="200" TextWrapping="WrapWithOverflow"/>
-        </GroupBox>
+            
+        </GroupBox>                       
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
 			<Button Content="OK" Width="75" Margin="5" IsDefault="True" Command="{Binding OkCommand}"/>
 			<Button Content="Cancel" Width="75" Margin="5" IsCancel="True"/>
