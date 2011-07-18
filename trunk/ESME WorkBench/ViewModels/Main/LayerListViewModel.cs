@@ -114,9 +114,11 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         [MediatorMessageSink(MediatorMessage.LayersReordered)]
-        void ReorderLayer(MapLayerViewModel layer) 
+        void ReorderLayer(MapLayerViewModel layer)
         {
-            MapLayers.Move(MapLayers.IndexOf(layer), layer.Index); 
+            var layerIndex = MapLayers.IndexOf(layer);
+            if (layerIndex == -1) return;
+            MapLayers.Move(layerIndex, layer.Index); 
         }
 
         [MediatorMessageSink(MediatorMessage.EnableGUI)]

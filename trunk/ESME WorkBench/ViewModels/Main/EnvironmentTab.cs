@@ -46,6 +46,8 @@ namespace ESMEWorkBench.ViewModels.Main
         void AllViewModelsAreReady(bool allViewModelsAreReady)
         {
             Console.WriteLine("All view models are ready!");
+            _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
+            return;
             _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
             _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
@@ -57,6 +59,21 @@ namespace ESMEWorkBench.ViewModels.Main
             if (MapLayers == null) return null;
             return MapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
         }
+
+        #region ZoomToWorldMapCommand
+        public SimpleCommand<object, object> ZoomToWorldMapCommand
+        {
+            get { return _zoomToWorldMap ?? (_zoomToWorldMap = new SimpleCommand<object, object>(delegate { ZoomToWorldMap(); })); }
+        }
+
+        SimpleCommand<object, object> _zoomToWorldMap;
+
+        static void ZoomToWorldMap()
+        {
+            var mapExtent = new RectangleShape(-180, 90, 180, -90);
+            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
+        }
+        #endregion
 
         #region ViewActivatedCommand
         public SimpleCommand<object, object> ViewActivatedCommand
@@ -187,6 +204,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     NAEMOOverlayDescriptors = null;
                     NAEMOBathymetryDescriptors = null;
                     NAEMOEnvironmentDescriptors = null;
+                    ZoomToWorldMap();
                 }
                 NotifyPropertyChanged(SelectedRangeComplexDescriptorChangedEventArgs);
                 _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
@@ -232,16 +250,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 return;
             }
 
-            _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.OpsLimitFile);
             var simAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.SimLimitFile);
-            var opsLimit = new OverlayFile(opAreaOverlayFilename);
-            var north = (float)opsLimit.Shapes[0].BoundingBox.Bottom + 3;
-            var west = (float)opsLimit.Shapes[0].BoundingBox.Left - 3;
-            var south = (float)opsLimit.Shapes[0].BoundingBox.Top - 3;
-            var east = (float)opsLimit.Shapes[0].BoundingBox.Right + 3;
-            var mapExtent = new RectangleShape(west, north, east, south);
-            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
+            ZoomToRangeComplex();
             opAreaLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area") ?? new OverlayShapeMapLayer
                 {
                         Name = "Op Area",
@@ -366,6 +377,27 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
+        #region ZoomToRangeComplexCommand
+        public SimpleCommand<object, object> ZoomToRangeComplexCommand
+        {
+            get { return _zoomToRangeComplex ?? (_zoomToRangeComplex = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { ZoomToRangeComplex(); })); }
+        }
+
+        SimpleCommand<object, object> _zoomToRangeComplex;
+
+        void ZoomToRangeComplex()
+        {
+            var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.OpsLimitFile);
+            var opsLimit = new OverlayFile(opAreaOverlayFilename);
+            var north = (float)opsLimit.Shapes[0].BoundingBox.Bottom + 3;
+            var west = (float)opsLimit.Shapes[0].BoundingBox.Left - 3;
+            var south = (float)opsLimit.Shapes[0].BoundingBox.Top - 3;
+            var east = (float)opsLimit.Shapes[0].BoundingBox.Right + 3;
+            var mapExtent = new RectangleShape(west, north, east, south);
+            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
+        }
+        #endregion
+
         #endregion
 
         #region Overlay ribbon group
@@ -417,7 +449,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (overlayLayer != null) overlayLayer.IsChecked = false;
                 return;
             }
-            _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             var overlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename) + ".ovr");
             overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
             {
@@ -637,7 +669,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (bathyBitmapLayer != null) bathyBitmapLayer.IsChecked = false;
                 return;
             }
-            _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             bathyBitmapLayer = FindMapLayer<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry") ?? new RasterMapLayer
             {
                 Name = "Bathymetry",
@@ -653,8 +685,8 @@ namespace ESMEWorkBench.ViewModels.Main
             bathyBitmapLayer.West = (float)_selectedBathymetryDescriptor.Metadata.Bounds.West;
             bathyBitmapLayer.RasterFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Images",
                                                            Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp");
-            if (MapLayers.IndexOf(bathyBitmapLayer) == -1) MapLayers.Add(bathyBitmapLayer);
             bathyBitmapLayer.IsChecked = true;
+            if (MapLayers.IndexOf(bathyBitmapLayer) == -1) MapLayers.Add(bathyBitmapLayer);
             MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
         }
 
@@ -831,7 +863,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (overlayLayer != null) overlayLayer.IsChecked = false;
                 return;
             }
-            _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             overlayLayer = FindMapLayer<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment") ?? new OverlayShapeMapLayer
             {
                 Name = "Environment",
