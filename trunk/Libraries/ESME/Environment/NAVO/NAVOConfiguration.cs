@@ -5,12 +5,81 @@ using System.IO;
 using System.Reflection;
 using Cinch;
 using HRC.Utility;
+using HRC.Validation;
 
 namespace ESME.Environment.NAVO
 {
     [Serializable]
-    public class NAVOConfiguration : PropertyChangedBase
+    public sealed class NAVOConfiguration : ValidatingViewModel
     {
+        public NAVOConfiguration()
+        {
+            ValidationRules.AddRange(new List<ValidationRule>
+                                         {
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "GDEMDirectory",
+                                                     Description = "Directory must exist and contain many uncompressed .nc files",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((NAVOConfiguration) o).GDEMDirectory;
+                                                                            if(!Directory.Exists(ruleTarget))
+                                                                                return false;
+                                                                            return Directory.GetFiles(ruleTarget,"*.nc").Length>1;
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "SMGCDirectory",
+                                                     Description = "Directory must exist and contain many .stt files",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((NAVOConfiguration) o).SMGCDirectory;
+                                                                            if (!Directory.Exists(ruleTarget))
+                                                                                return false;
+                                                                            return
+                                                                                (File.Exists(Path.Combine(ruleTarget, "n00e009.stt")) && File.Exists(Path.Combine(ruleTarget, "n52e117.stt")) && File.Exists(Path.Combine(ruleTarget, "n88e091.stt")));
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "BSTDirectory",
+                                                     Description = "File must exist.",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((NAVOConfiguration) o).BSTDirectory;
+                                                                            return File.Exists(ruleTarget);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "DBDBDirectory",
+                                                     Description = "File must exist.",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((NAVOConfiguration) o).DBDBDirectory;
+                                                                            return File.Exists(ruleTarget);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "DBDBEXEPath",
+                                                     Description = "File must exist.",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((NAVOConfiguration) o).DBDBEXEPath;
+                                                                            return File.Exists(ruleTarget);
+                                                                        },
+                                                 },                               
+                               
+                                         });
+      
+        }
+             private bool ValidateBST(string filePath)
+             {
+                 return false;
+             }
+
         public void SetDefaults()
         {
             if (string.IsNullOrEmpty(DBDBEXEPath)) DBDBEXEPath = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "dbv5_command.exe");

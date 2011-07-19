@@ -53,19 +53,11 @@
                 <StackPanel Orientation="Vertical"
                                         Margin="0 0 0 5">
                     <TextBlock Text="Range cell size (m)"/>
-                    <TextBox Text="{Binding BellhopSettings.RangeCellSize}">
-                        <i:Interaction.Behaviors>
-                            <cinch:NumericTextBoxBehaviour />
-                        </i:Interaction.Behaviors>
-                    </TextBox>
+                    <Controls:ValidatingTextBox BoundField="BellhopSettings.RangeCellSize"/>
                 </StackPanel>
                 <StackPanel Orientation="Vertical">
                     <TextBlock Text="Depth cell size (m)"/>
-                    <TextBox Text="{Binding BellhopSettings.DepthCellSize}">
-                        <i:Interaction.Behaviors>
-                            <cinch:NumericTextBoxBehaviour />
-                        </i:Interaction.Behaviors>
-                    </TextBox>
+                    <Controls:ValidatingTextBox BoundField="BellhopSettings.DepthCellSize"/>
                 </StackPanel>
             </StackPanel>
         </TabItem>
@@ -80,60 +72,32 @@
                         <StackPanel Orientation="Vertical"
 									            Margin="0 10 0 5">
                             <TextBlock Text="Maximum depth (m)" />
-                            <TextBox Text="{Binding RAMSettings.MaximumDepth}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="RAMSettings.MaximumDepth" />
                         </StackPanel>
                         <StackPanel Orientation="Vertical"
                                         Margin="0 0 0 5">
                             <TextBlock Text="Range step size (m)"/>
-                            <TextBox Text="{Binding RAMSettings.RangeStepSize}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="RAMSettings.RangeStepSize"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Depth step size (m)"/>
-                            <TextBox Text="{Binding RAMSettings.DepthStepSize}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="RAMSettings.DepthStepSize"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="0 10 0 0">
                             <TextBlock Text="Speed Dial"/>
-                            <TextBox Text="{Binding RAMSettings.SpeedDial}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="RAMSettings.SpeedDial"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="SSP Units"/>
-                            <TextBox Text="{Binding RAMSettings.SSPUnits}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="RAMSettings.SSPUnits"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="CASS Level"/>
-                            <TextBox Text="{Binding RAMSettings.CASSLevel}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="RAMSettings.CASSLevel"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Bathymetry Metric"/>
-                            <TextBox Text="{Binding RAMSettings.BathymetryMetric}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="RAMSettings.BathymetryMetric"/>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
@@ -142,10 +106,11 @@
 							          Padding="5"
 							          DockPanel.Dock="Top">
                     <StackPanel Orientation="Vertical">
-
-                        <Controls:FileOrDirectorySetting Caption="RAM Executable"
-									                        IsDirectoryBrowser="False"
-									                        FileName="{Binding NAEMOTools.RAMExecutable}" />
+                        <Controls:FileOrDirectorySetting Caption="RAM Executable" DataContext="{Binding NAEMOTools}"
+                                                 Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"                                                 
+                                                 IsDirectoryBrowser="False"
+								                 VerticalAlignment="Center"								                 
+                                                 FileName="{Binding RAMExecutable, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </GroupBox>
             </StackPanel>
@@ -169,28 +134,16 @@
                         <StackPanel Orientation="Vertical"
 									            Margin="0 10 0 5">
                             <TextBlock Text="Maximum depth (m)" />
-                            <TextBox Text="{Binding CASSSettings.MaximumDepth}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="CASSSettings.MaximumDepth"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="Depth step size (m)" />
-                            <TextBox Text="{Binding CASSSettings.DepthStepSize}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="CASSSettings.DepthStepSize"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical"
 									            Margin="0 5 0 10">
                             <TextBlock Text="Range step size (m)" />
-                            <TextBox Text="{Binding CASSSettings.RangeStepSize}">
-                                <i:Interaction.Behaviors>
-                                    <cinch:NumericTextBoxBehaviour />
-                                </i:Interaction.Behaviors>
-                            </TextBox>
+                            <Controls:ValidatingTextBox BoundField="CASSSettings.RangeStepSize"/>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
@@ -200,12 +153,15 @@
 							          DockPanel.Dock="Top">
                     <StackPanel Orientation="Vertical">
                         <Controls:FileOrDirectorySetting Caption="Python executable"
+                                                         Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" 
 									                                 IsDirectoryBrowser="False"
 									                                 FileName="{Binding CASSSettings.PythonExecutablePath}" />
                         <Controls:FileOrDirectorySetting Caption="CASS executable"
+                                                         Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" 
 									                                 IsDirectoryBrowser="False"
 									                                 FileName="{Binding CASSSettings.CASSExecutablePath}" />
                         <Controls:FileOrDirectorySetting Caption="Python run script"
+                                                         Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" 
 									                                 IsDirectoryBrowser="False"
 									                                 FileName="{Binding CASSSettings.PythonScriptPath}" />
                     </StackPanel>
@@ -243,47 +199,27 @@
                     <StackPanel Orientation="Vertical"
 								            Margin="5 0">
                         <TextBlock Text="Default minimum range (ft)" />
-                        <TextBox Text="{Binding REFMSSettings.DefaultMinimumRange}">
-                            <i:Interaction.Behaviors>
-                                <cinch:NumericTextBoxBehaviour />
-                            </i:Interaction.Behaviors>
-                        </TextBox>
+                        <Controls:ValidatingTextBox BoundField="REFMSSettings.DefaultMinimumRange"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical"
 								            Margin="5">
                         <TextBlock Text="Default maximum range (ft)" />
-                        <TextBox Text="{Binding REFMSSettings.DefaultMaximumRange}">
-                            <i:Interaction.Behaviors>
-                                <cinch:NumericTextBoxBehaviour />
-                            </i:Interaction.Behaviors>
-                        </TextBox>
+                        <Controls:ValidatingTextBox BoundField="REFMSSettings.DefaultMaximumRange"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical"
 								            Margin="5 0">
                         <TextBlock Text="Default number of range points" />
-                        <TextBox Text="{Binding REFMSSettings.DefaultNumberOfRangePoints}">
-                            <i:Interaction.Behaviors>
-                                <cinch:NumericTextBoxBehaviour />
-                            </i:Interaction.Behaviors>
-                        </TextBox>
+                        <Controls:ValidatingTextBox BoundField="REFMSSettings.DefaultNumberOfRangePoints"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical"
 								            Margin="5 20 5 5">
                         <TextBlock Text="Minimum depth (ft)" />
-                        <TextBox Text="{Binding REFMSSettings.MinimumDepth}">
-                            <i:Interaction.Behaviors>
-                                <cinch:NumericTextBoxBehaviour />
-                            </i:Interaction.Behaviors>
-                        </TextBox>
+                        <Controls:ValidatingTextBox BoundField="REFMSSettings.MinimumDepth"/>
                     </StackPanel>
                     <StackPanel Orientation="Vertical"
 								            Margin="5 0">
                         <TextBlock Text="Number of depth points" />
-                        <TextBox Text="{Binding REFMSSettings.NumberOfDepthPoints}">
-                            <i:Interaction.Behaviors>
-                                <cinch:NumericTextBoxBehaviour />
-                            </i:Interaction.Behaviors>
-                        </TextBox>
+                        <Controls:ValidatingTextBox BoundField="REFMSSettings.NumberOfDepthPoints"/>
                     </StackPanel>
                     <Controls:FileOrDirectorySetting Caption="REFMS executable"
 								                                 IsDirectoryBrowser="False"
