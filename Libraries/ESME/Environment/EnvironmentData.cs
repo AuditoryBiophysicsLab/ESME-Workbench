@@ -10,7 +10,8 @@ using HRC.Utility;
 
 namespace ESME.Environment
 {
-    public class EnvironmentData<T> : List<T> where T : EarthCoordinate
+    //public class EnvironmentData<T> : List<T> where T : EarthCoordinate
+    public class EnvironmentData<T> : SortedList<LatLonKey, T> where T : EarthCoordinate
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
@@ -28,10 +29,10 @@ namespace ESME.Environment
                 T closestSample = null;
                 foreach (var item in this)
                 {
-                    var curDistance = item.DistanceKilometers(location);
+                    var curDistance = item.Value.DistanceKilometers(location);
                     if (curDistance >= minDistance) continue;
                     minDistance = curDistance;
-                    closestSample = item;
+                    closestSample = item.Value;
                 }
                 return closestSample;
             }
@@ -41,10 +42,9 @@ namespace ESME.Environment
         {
             get
             {
-                if ((lonIndex < Longitudes.Count) || (latIndex < Latitudes.Count)) throw new IndexOutOfRangeException(string.Format("EnvironmentData: Attempted to access [{0}, {1}] when max indices are [{2}, {3}]", lonIndex, latIndex, Longitudes.Count, Latitudes.Count));
-                var desiredLon = Longitudes[(int)lonIndex];
-                var desiredLat = Latitudes[(int)latIndex];
-                return this.Where(item => (Math.Round(item.Longitude, 4) == desiredLon) && (Math.Round(item.Latitude, 4) == desiredLat)).FirstOrDefault();
+                if ((lonIndex >= Longitudes.Count) || (latIndex >= Latitudes.Count)) throw new IndexOutOfRangeException(string.Format("EnvironmentData: Attempted to access [{0}, {1}] when max indices are [{2}, {3}]", lonIndex, latIndex, Longitudes.Count, Latitudes.Count));
+                var key = new LatLonKey(Latitudes[(int)latIndex], Longitudes[(int)lonIndex]);
+                return this[key];
             }
         }
 
@@ -70,27 +70,56 @@ namespace ESME.Environment
             return result;
         }
 
-
         public void TrimToNearestPoints(GeoRect geoRect)
         {
             var southWest = this[geoRect.SouthWest];
             var northEast = this[geoRect.NorthEast];
             var trimRect = GeoRect.InflateWithGeo(new GeoRect(northEast.Latitude, southWest.Latitude, northEast.Longitude, southWest.Longitude), 0.01);
-            var pointsToKeep = this.Where(trimRect.Contains).ToList();
+            var matchingPoints = this.Where(point => trimRect.Contains(point.Value)).ToList();
+            var pointsToKeep = from point in matchingPoints
+                               select point.Value;
             Clear();
             AddRange(pointsToKeep);
         }
 
         #region List<T> overrides
-        public new void Add(T item)
+        public void Add(T item)
         {
-            base.Add(item);
-            _latitudes = _longitudes = null;
+            try
+            {
+                var key = new LatLonKey(item);
+                if (FindKey(key) == null)
+                {
+                    Add(key, item);
+                    _latitudes = _longitudes = null;
+                }
+                //if (Keys.Contains(key)) return;
+            }
+            catch { }
         }
 
-        public new void AddRange(IEnumerable<T> collection)
+        LatLonKey FindKey(LatLonKey key)
         {
-            base.AddRange(collection);
+            if (Keys.Count == 0) return null;
+            var min = 0;
+            var max = Keys.Count - 1;
+            while (min < max)
+            {
+                var mid = (max + min) / 2;
+                var midKey = Keys[mid];
+                var comp = LatLonKey.Compare(midKey, key);
+                if (comp < 0) min = mid + 1;
+                else if (comp > 0) max = mid - 1;
+                else return midKey;
+            }
+            if (min == max && LatLonKey.Compare(Keys[min], key) == 0)
+                return Keys[min];
+            return null;
+        }
+
+        public void AddRange(IEnumerable<T> collection)
+        {
+            foreach (var item in collection) Add(item);
             _latitudes = _longitudes = null;
         }
 
@@ -100,17 +129,10 @@ namespace ESME.Environment
             _latitudes = _longitudes = null;
         }
 
-        public new bool Remove(T item)
+        public bool Remove(T item)
         {
-            var result = base.Remove(item);
+            var result = Remove(new LatLonKey(item));
             if (result) _latitudes = _longitudes = null;
-            return result;
-        }
-
-        public new int RemoveAll(Predicate<T> match)
-        {
-            var result = base.RemoveAll(match);
-            if (result > 0) _latitudes = _longitudes = null;
             return result;
         }
 
@@ -120,11 +142,6 @@ namespace ESME.Environment
             _latitudes = _longitudes = null;
         }
 
-        public new void RemoveRange(int index, int count)
-        {
-            base.RemoveRange(index, count);
-            _latitudes = _longitudes = null;
-        }
         #endregion
 
         public void RemoveDuplicates(BackgroundTask backgroundTask = null)
@@ -133,7 +150,7 @@ namespace ESME.Environment
             foreach (var curEntry in from curEntry in this
                                      let foundMatch = uniqueList.Any(curEntry.Equals)
                                      where !foundMatch
-                                     select curEntry) {uniqueList.Add(curEntry);}
+                                     select curEntry) {uniqueList.Add(curEntry.Value);}
             Clear();
             AddRange(uniqueList);
         }
@@ -176,7 +193,7 @@ namespace ESME.Environment
         [XmlIgnore]
         public List<double> Longitudes
         {
-            get { return _longitudes ?? (_longitudes = SortedList(this.Select(point => Math.Round(point.Longitude, 4)).Distinct())); }
+            get { return _longitudes ?? (_longitudes = SortedList(this.Select(point => Math.Round(point.Value.Longitude, 4)).Distinct())); }
         }
 
         [XmlIgnore]
@@ -185,7 +202,7 @@ namespace ESME.Environment
         [XmlIgnore]
         public List<double> Latitudes
         {
-            get { return _latitudes ?? (_latitudes = SortedList(this.Select(point => Math.Round(point.Latitude, 4)).Distinct())); }
+            get { return _latitudes ?? (_latitudes = SortedList(this.Select(point => Math.Round(point.Value.Latitude, 4)).Distinct())); }
         }
 
         [XmlIgnore]
@@ -204,6 +221,65 @@ namespace ESME.Environment
             }
         }
 
+    }
+
+    public class LatLonKey : IComparer<LatLonKey>, IComparable<LatLonKey>
+    {
+        public LatLonKey(Geo geo)
+        {
+            Latitude = Math.Round(geo.Latitude, 4);
+            Longitude = Math.Round(geo.Longitude, 4);
+        }
+
+        public LatLonKey(double latitude, double longitude)
+        {
+            Latitude = Math.Round(latitude, 4);
+            Longitude = Math.Round(longitude, 4);
+        }
+
+        double Latitude { get; set; }
+        double Longitude { get; set; }
+
+        /// <summary>
+        /// Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
+        /// </summary>
+        /// <returns>
+        /// A signed integer that indicates the relative values of <paramref name="e1"/> and <paramref name="e2"/>, 
+        /// as shown in the following table.
+        /// Value Meaning 
+        /// Return value of less than zero means that <paramref name="e1"/> is less than <paramref name="e2"/>.
+        /// Return value of zero means that <paramref name="e1"/> equals <paramref name="e2"/>.
+        /// Return value of greater than zero means that <paramref name="e1"/> is greater than <paramref name="e2"/>.
+        /// </returns>
+        /// <param name="e1">The first object to compare.</param>
+        /// <param name="e2">The second object to compare.</param>
+        public static int Compare(LatLonKey e1, LatLonKey e2)
+        {
+            if (e1.Latitude < e2.Latitude) return -1;
+            if (e1.Latitude > e2.Latitude) return 1;
+            if (e1.Longitude < e2.Longitude) return -1;
+            return e1.Longitude > e2.Longitude ? 1 : 0;
+        }
+
+        /// <summary>
+        /// Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
+        /// </summary>
+        /// <returns>
+        /// A signed integer that indicates the relative values of <paramref name="x"/> and <paramref name="y"/>, as shown in the following table.Value Meaning Less than zero<paramref name="x"/> is less than <paramref name="y"/>.Zero<paramref name="x"/> equals <paramref name="y"/>.Greater than zero<paramref name="x"/> is greater than <paramref name="y"/>.
+        /// </returns>
+        /// <param name="x">The first object to compare.</param><param name="y">The second object to compare.</param>
+        int IComparer<LatLonKey>.Compare(LatLonKey x, LatLonKey y) { return Compare(x, y); }
+
+        /// <summary>
+        /// Compares the current object with another object of the same type.
+        /// </summary>
+        /// <returns>
+        /// A value that indicates the relative order of the objects being compared. The return value has the following meanings: Value Meaning Less than zero This object is less than the <paramref name="other"/> parameter.Zero This object is equal to <paramref name="other"/>. Greater than zero This object is greater than <paramref name="other"/>. 
+        /// </returns>
+        /// <param name="other">An object to compare with this object.</param>
+        public int CompareTo(LatLonKey other) { return Compare(this, other); }
+        public override string ToString() { return string.Format("{0:0.#####},{1:0.#####}", Latitude, Longitude); }
+        public override int GetHashCode() { return ToString().GetHashCode(); }
     }
     
     public class TimePeriodEnvironmentData<T> where T : EarthCoordinate

@@ -160,8 +160,8 @@ namespace HRC.Utility
         public float Threshold { get; set; }
 
         // data[lats,lons]
-        public Bitmap ToBitmap<T>(T[,] data, float minValue, float maxValue) 
-            where T : EarthCoordinate<float> 
+        public Bitmap ToBitmap<T>(T[,] data, float minValue, float maxValue)
+            where T : EarthCoordinate<float>
         {
             if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
 
@@ -179,6 +179,38 @@ namespace HRC.Utility
                     for (var x = 0; x < width; x++)
                     {
                         var curValue = data[x, height - 1 - y].Data;
+                        curColor = curValue <= Threshold ? BelowThresholdColormap.Lookup(curValue, minValue, Threshold, Threshold - minValue) : AboveThresholdColormap.Lookup(curValue, Threshold, maxValue, maxValue - Threshold);
+                        // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
+                        // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
+                        *((int*)curOffset) = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
+                        curOffset += sizeof(Int32);
+                    }
+                }
+            }
+            writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
+            writeableBitmap.Unlock();
+            return new Bitmap(width, height, 4 * width, PixelFormat.Format32bppArgb, writeableBitmap.BackBuffer);
+        }
+
+        // data[lats,lons]
+        public Bitmap ToBitmap(float[,] data, float minValue, float maxValue)
+        {
+            if (data == null) throw new ApplicationException("ToBitmap: data cannot be null");
+
+            var height = data.GetLength(1);
+            var width = data.GetLength(0);
+            var writeableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null);
+
+            writeableBitmap.Lock();
+            unsafe
+            {
+                Color curColor;
+                var curOffset = (int)writeableBitmap.BackBuffer;
+                for (var y = 0; y < height; y++)
+                {
+                    for (var x = 0; x < width; x++)
+                    {
+                        var curValue = data[x, height - 1 - y];
                         curColor = curValue <= Threshold ? BelowThresholdColormap.Lookup(curValue, minValue, Threshold, Threshold - minValue) : AboveThresholdColormap.Lookup(curValue, Threshold, maxValue, maxValue - Threshold);
                         // Draw from the bottom up, which matches the default render order.  This may change as the UI becomes
                         // more fully implemented, especially if we need to flip the canvas and render from the top.  Time will tell.
