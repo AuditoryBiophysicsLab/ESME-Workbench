@@ -132,6 +132,12 @@ namespace HRC.Validation
                 return (!double.IsNaN(valueToCheck) && (valueToCheck >= minimum)) && (valueToCheck <= maximum);
             return (!double.IsNaN(valueToCheck) && (valueToCheck > minimum)) && (valueToCheck < maximum);
         }
+        public static bool RangeCheck(float valueToCheck, float minimum = float.MinValue, float maximum = float.MaxValue, bool includeEndpoints = true)
+        {
+            if (includeEndpoints)
+                return (!float.IsNaN(valueToCheck) && (valueToCheck >= minimum)) && (valueToCheck <= maximum);
+            return (!float.IsNaN(valueToCheck) && (valueToCheck > minimum)) && (valueToCheck < maximum);
+        }
 
         public static bool RangeCheck(int valueToCheck, int minimum = int.MinValue, int maximum = int.MaxValue, bool includeEndpoints = true)
         {

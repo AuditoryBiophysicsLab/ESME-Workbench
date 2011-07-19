@@ -16,7 +16,7 @@ using HRC.Validation;
 namespace ESME.Data
 {
     [Serializable]
-    public class AppSettings : PropertyChangedBase
+    public class AppSettings : ValidatingViewModel
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
@@ -132,7 +132,7 @@ namespace ESME.Data
 
         public NAVOConfiguration NAVOConfiguration
         {
-            get { return _navoConfiguration ?? (_navoConfiguration = new NAVOConfiguration());}
+            get { return _navoConfiguration ?? (_navoConfiguration = new NAVOConfiguration()); }
             set
             {
                 if (_navoConfiguration == value) return;
@@ -174,7 +174,7 @@ namespace ESME.Data
         #endregion
 
         #endregion
-        
+
         #region public CASSSettings CASSSettings { get; set; }
 
         public CASSSettings CASSSettings
@@ -323,8 +323,49 @@ namespace ESME.Data
         #endregion
     }
 
-    public class NAEMOTools : PropertyChangedBase
+    public sealed class NAEMOTools : ValidatingViewModel
     {
+        public NAEMOTools()
+        {
+            ValidationRules.AddRange(new List<ValidationRule>
+                                        {
+                                            new ValidationRule
+                                                {
+                                                    PropertyName = "RAMExecutable",
+                                                    Description = "File must exist",
+                                                    RuleDelegate = (o, r) =>
+                                                                       {
+                                                                           var ruleTarget = ((NAEMOTools) o).RAMExecutable;
+                                                                           return File.Exists(ruleTarget);
+                                                                       },
+                                                },
+                                            new ValidationRule
+                                                {
+                                                    PropertyName = "JavaExecutablePath",
+                                                    Description = "File must exist",
+                                                    RuleDelegate = (o, r) =>
+                                                                       {
+                                                                           var ruleTarget = ((NAEMOTools) o).JavaExecutablePath;
+                                                                           return File.Exists(ruleTarget);
+                                                                       },
+                                                },
+                                            new ValidationRule
+                                                {
+                                                    PropertyName = "NAEMOToolsDirectory",
+                                                    Description = "Directory must exist and be nonempty",
+                                                    RuleDelegate = (o, r) =>
+                                                                       {
+                                                                           var ruleTarget = ((NAEMOTools) o).NAEMOToolsDirectory;
+                                                                           return (Directory.Exists(ruleTarget) && (Directory.GetFiles(ruleTarget).Length > 0));
+                                                                       },
+                                                },
+
+                                 
+                                 
+                                 
+                                        });
+        }
+
         #region public string JavaExecutablePath { get; set; }
 
         public string JavaExecutablePath
@@ -397,8 +438,75 @@ namespace ESME.Data
         string NAEMOTool(string toolFileName) { return string.IsNullOrEmpty(NAEMOToolsDirectory) ? null : Path.Combine(NAEMOToolsDirectory, toolFileName); }
     }
 
-    public class CASSSettings : PropertyChangedBase
+    public sealed class CASSSettings : ValidatingViewModel
     {
+        public CASSSettings()
+        {
+            ValidationRules.AddRange(new List<ValidationRule>
+                                         {
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "MaximumDepth",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((CASSSettings) o).MaximumDepth;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "DepthStepSize",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((CASSSettings) o).DepthStepSize;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "RangeStepSize",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((CASSSettings) o).RangeStepSize;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "PythonExecutablePath",
+                                                     Description = "File must exist",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((CASSSettings) o).PythonExecutablePath;
+                                                                            return File.Exists(ruleTarget);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "CASSExecutablePath",
+                                                     Description = "File must exist",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((CASSSettings) o).CASSExecutablePath;
+                                                                            return File.Exists(ruleTarget);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "PythonScriptPath",
+                                                     Description = "File must exist",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((CASSSettings) o).PythonScriptPath;
+                                                                            return File.Exists(ruleTarget);
+                                                                        },
+                                                 },
+                                         });
+        }
+
         public void SetDefaults()
         {
             if (CASSParameterFiles.Count == 0)
@@ -602,7 +710,7 @@ namespace ESME.Data
 
         public ObservableCollection<CASSTemplate> CASSParameterFiles
         {
-            get { return _cassParameterFiles ?? (_cassParameterFiles = new ObservableCollection<CASSTemplate>()); }  
+            get { return _cassParameterFiles ?? (_cassParameterFiles = new ObservableCollection<CASSTemplate>()); }
             set
             {
                 if (_cassParameterFiles == value) return;
@@ -631,8 +739,87 @@ namespace ESME.Data
         #endregion
     }
 
-    public class RAMSettings : ValidatingViewModel
+    public sealed class RAMSettings : ValidatingViewModel
     {
+        public RAMSettings()
+        {
+            ValidationRules.AddRange(new List<ValidationRule>
+                                         {
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "MaximumDepth",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((RAMSettings) o).MaximumDepth;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "RangeStepSize",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((RAMSettings) o).RangeStepSize;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "DepthStepSize",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((RAMSettings) o).DepthStepSize;
+                                                                            return RangeCheck(ruleTarget, 0,float.MaxValue,false);
+                                                                        },
+                                                 },
+
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "SpeedDial",
+                                                     Description = "Must be an integer",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((RAMSettings) o).SpeedDial;
+                                                                            return RangeCheck(ruleTarget);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "SSPUnits",
+                                                     Description = "Must be an integer",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((RAMSettings) o).SSPUnits;
+                                                                            return RangeCheck(ruleTarget);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "CASSLevel",
+                                                     Description = "Must be an integer",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((RAMSettings) o).CASSLevel;
+                                                                            return RangeCheck(ruleTarget);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "BathymetryMetric",
+                                                     Description = "Must be an integer",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((RAMSettings) o).BathymetryMetric;
+                                                                            return RangeCheck(ruleTarget);
+                                                                        },
+                                                 },
+                                         }
+
+                );
+        }
         public void SetDefaults()
         {
             MaximumDepth = 2000;
@@ -771,8 +958,77 @@ namespace ESME.Data
         #endregion
     }
 
-    public class REFMSSettings : PropertyChangedBase
+    public sealed class REFMSSettings : ValidatingViewModel
     {
+        public REFMSSettings()
+        {
+            ValidationRules.AddRange(new List<ValidationRule>
+                                         {
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "DefaultMinimumRange",
+                                                     Description = "Must be greater than zero and less than the default maximum range",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((REFMSSettings) o).DefaultMinimumRange;
+                                                                            var defaultMaximumRange = ((REFMSSettings)o).DefaultMaximumRange;
+                                                                            return RangeCheck(ruleTarget, 0, defaultMaximumRange, false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "DefaultMaximumRange",
+                                                     Description = "Must be greater than the default minimum range",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var defaultMinimumRange = ((REFMSSettings)o).DefaultMinimumRange;
+                                                                            var ruleTarget = ((REFMSSettings) o).DefaultMaximumRange;
+                                                                            return ruleTarget > defaultMinimumRange;
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "DefaultNumberOfRangePoints",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((REFMSSettings) o).DefaultNumberOfRangePoints;
+                                                                            return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "MinimumDepth",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((REFMSSettings) o).MinimumDepth;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "NumberOfDepthPoints",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((REFMSSettings) o).NumberOfDepthPoints;
+                                                                            return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "REFMSExecutablePath",
+                                                     Description = "File must exist.",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((REFMSSettings) o).REFMSExecutablePath;
+                                                                            return File.Exists(ruleTarget);
+                                                                        },
+                                                 },
+                                         });
+        }
+
         #region public bool ScaleI { get; set; }
 
         public bool ScaleI
@@ -801,6 +1057,7 @@ namespace ESME.Data
                 if (_defaultMinimumRange == value) return;
                 _defaultMinimumRange = value;
                 NotifyPropertyChanged(DefaultMinimumRangeChangedEventArgs);
+                NotifyPropertyChanged(DefaultMaximumRangeChangedEventArgs);
             }
         }
 
@@ -819,6 +1076,7 @@ namespace ESME.Data
                 if (_defaultMaximumRange == value) return;
                 _defaultMaximumRange = value;
                 NotifyPropertyChanged(DefaultMaximumRangeChangedEventArgs);
+                NotifyPropertyChanged(DefaultMinimumRangeChangedEventArgs);
             }
         }
 
@@ -900,8 +1158,87 @@ namespace ESME.Data
         #endregion
     }
 
-    public class ScenarioSimulatorSettings : PropertyChangedBase
+    public sealed class ScenarioSimulatorSettings : ValidatingViewModel
     {
+        public ScenarioSimulatorSettings()
+        {
+            ValidationRules.AddRange(new List<ValidationRule>
+            {
+                new ValidationRule
+                    {
+                        PropertyName = "Iterations",
+                        Description = "Must be positive",
+                        RuleDelegate = (o, r) =>
+                                           {
+                                               var ruleTarget = ((ScenarioSimulatorSettings) o).Iterations;
+                                               return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                           },
+                    },
+                new ValidationRule
+                    {
+                        PropertyName = "DecibelCutoff",
+                        Description = "Must be positive",
+                        RuleDelegate = (o, r) =>
+                                           {
+                                               var ruleTarget = ((ScenarioSimulatorSettings) o).DecibelCutoff;
+                                               return RangeCheck(ruleTarget,0,double.MaxValue,false);
+                                           },
+                    },
+                new ValidationRule
+                    {
+                        PropertyName = "ParallelSimulations",
+                        Description = "Must be positive",
+                        RuleDelegate = (o, r) =>
+                                           {
+                                               var ruleTarget = ((ScenarioSimulatorSettings) o).ParallelSimulations;
+                                               return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                           },
+                    },
+                new ValidationRule
+                    {
+                        PropertyName = "OutputBufferSize",
+                        Description = "Must be positive",
+                        RuleDelegate = (o, r) =>
+                                           {
+                                               var ruleTarget = ((ScenarioSimulatorSettings) o).OutputBufferSize;
+                                               return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                           },
+                    },
+                new ValidationRule
+                    {
+                        PropertyName = "SpeciesFileSize",
+                        Description = "Must be positive",
+                        RuleDelegate = (o, r) =>
+                                           {
+                                               var ruleTarget = ((ScenarioSimulatorSettings) o).SpeciesFileSize;
+                                               return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                           },
+                    },
+                new ValidationRule
+                    {
+                        PropertyName = "CASSFileSize",
+                        Description = "Must be positive",
+                        RuleDelegate = (o, r) =>
+                                           {
+                                               var ruleTarget = ((ScenarioSimulatorSettings) o).CASSFileSize;
+                                               return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                           },
+                    },
+            });
+           
+            //these are log4j levels http://en.wikipedia.org/wiki/Log4j#Log_level
+            LogLevels = new List<string>
+                            {
+                                "Off",
+                                "Severe Errors",
+                                "Errors",
+                                "Warnings",
+                                "Info",
+                                "Debug",
+                                "Trace",
+                            };
+        }
+
         #region public bool IsRandomized { get; set; }
 
         public bool IsRandomized
@@ -965,7 +1302,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs NotOptimizeBufferChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.NotOptimizeBuffer);
-        
+
         #endregion
 
         #region public int OutputBufferSize { get; set; }
@@ -1018,7 +1355,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs DecibelCutoffChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.DecibelCutoff);
-        double _decibelCutoff=0.01;
+        double _decibelCutoff = 0.01;
 
         #endregion
 
@@ -1036,7 +1373,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs LogLevelChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorSettings>(x => x.SimOutputLevel);
-        int _simOutputLevel =5;
+        int _simOutputLevel = 5;
 
         #endregion
 
@@ -1129,28 +1466,43 @@ namespace ESME.Data
         bool _clipOutsideFootprint = true;
 
         #endregion
-        
+
         [XmlIgnore]
         public List<string> LogLevels { get; private set; }
 
-        public ScenarioSimulatorSettings()
-        {
-            //these are log4j levels http://en.wikipedia.org/wiki/Log4j#Log_level
-            LogLevels = new List<string>
-                            {
-                                "Off",
-                                "Severe Errors",
-                                "Errors",
-                                "Warnings",
-                                "Info",
-                                "Debug",
-                                "Trace",
-                            };
-        }
+      
     }
 
-    public class BellhopSettings : PropertyChangedBase
+    public sealed class BellhopSettings : ValidatingViewModel
     {
+        public BellhopSettings()
+        {
+            ValidationRules.AddRange(new List<ValidationRule>
+                                         {
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "RangeCellSize",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget =((BellhopSettings) o).RangeCellSize;
+                                                                            return RangeCheck(ruleTarget, 0,float.MaxValue, false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "DepthCellSize",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((BellhopSettings) o).DepthCellSize;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+
+                                         });
+
+        }
         #region public float RangeCellSize { get; set; }
 
         public float RangeCellSize
