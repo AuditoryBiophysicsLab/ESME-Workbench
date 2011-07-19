@@ -50,7 +50,7 @@ namespace ESME.Environment
             using (var stream = new StreamWriter(fileName, false, System.Text.Encoding.ASCII))
             {
                 foreach (var sample in Samples)
-                    stream.WriteLine("{0:0.0000} {1:0.0000} {2:0.00}", sample.Latitude, sample.Longitude, sample.Data * scaleFactor);
+                    stream.WriteLine("{0:0.0000} {1:0.0000} {2:0.00}", sample.Value.Latitude, sample.Value.Longitude, sample.Value.Data * scaleFactor);
             }
         }
 
@@ -58,8 +58,8 @@ namespace ESME.Environment
         {
             get
             {
-                var minPoint = Samples[0];
-                foreach (var sample in Samples.Where(sample => sample.Data < minPoint.Data)) minPoint = sample;
+                var minPoint = Samples.Values[0];
+                foreach (var sample in Samples.Where(sample => sample.Value.Data < minPoint.Data)) minPoint = sample.Value;
                 return minPoint;
             }
         }
@@ -68,8 +68,8 @@ namespace ESME.Environment
         {
             get
             {
-                var maxPoint = Samples[0];
-                foreach (var sample in Samples.Where(sample => sample.Data > maxPoint.Data)) maxPoint = sample;
+                var maxPoint = Samples.Values[0];
+                foreach (var sample in Samples.Where(sample => sample.Value.Data > maxPoint.Data)) maxPoint = sample.Value;
                 return maxPoint;
             }
         }

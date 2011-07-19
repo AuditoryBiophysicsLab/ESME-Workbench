@@ -15,9 +15,9 @@ namespace ESME.Environment
         {
             foreach (var sourceProfile in sourceField.EnvironmentData)
             {
-                var profile = EnvironmentData.Find(p => p.Equals(sourceProfile));
-                if (profile == null) EnvironmentData.Add(new SoundSpeedProfileAverager(sourceProfile));
-                else profile.Add(sourceProfile);
+                var profile = EnvironmentData.Values.ToList().Find(p => p.Equals(sourceProfile));
+                if (profile == null) EnvironmentData.Add(new SoundSpeedProfileAverager(sourceProfile.Value));
+                else profile.Add(sourceProfile.Value);
             }
         }
 
@@ -27,7 +27,7 @@ namespace ESME.Environment
             {
                 var result = new SoundSpeedField {TimePeriod = TimePeriod};
                 foreach (var averageProfile in EnvironmentData)
-                    result.EnvironmentData.Add(averageProfile.Average);
+                    result.EnvironmentData.Add(averageProfile.Value.Average);
                 return result;
             }
         }
@@ -48,8 +48,8 @@ namespace ESME.Environment
             get
             {
                 var step1 = from ssp in EnvironmentData
-                            orderby ssp.Data.Count
-                            select ssp;
+                            orderby ssp.Value.Data.Count
+                            select ssp.Value;
                 var maxCount = step1.Last().Data.Count;
                 var step2 = from ssp in step1
                             where ssp.Data.Count == maxCount
@@ -70,8 +70,8 @@ namespace ESME.Environment
             if (DeepestPoint.Data > DeepestSSP.Data.MaxDepth)
                 DeepestSSP.Extend(DeepestPoint.Data, temperatureData.EnvironmentData[DeepestSSP], salinityData.EnvironmentData[DeepestSSP]);
 
-            foreach (var profile in EnvironmentData.Where(profile => profile != DeepestSSP))
-                profile.Extend(DeepestSSP);
+            foreach (var profile in EnvironmentData.Where(profile => profile.Value != DeepestSSP))
+                profile.Value.Extend(DeepestSSP);
         }
 
         public static SoundSpeedField Create(SoundSpeedField temperatureField, SoundSpeedField salinityField, BackgroundTask backgroundTask = null)
@@ -80,7 +80,7 @@ namespace ESME.Environment
             VerifyThatProfilePointsMatch(temperatureField, salinityField);
             var result = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
             foreach (var temperatureProfile in temperatureField.EnvironmentData)
-                result.EnvironmentData.Add(ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
+                result.EnvironmentData.Add(ChenMilleroLi.SoundSpeed(temperatureProfile.Value, salinityField.EnvironmentData[temperatureProfile.Value]));
             return result;
         }
 
@@ -114,8 +114,8 @@ namespace ESME.Environment
 
         internal static void VerifyThatProfilePointsMatch(TimePeriodEnvironmentData<SoundSpeedProfile> profile1, TimePeriodEnvironmentData<SoundSpeedProfile> profile2)
         {
-            foreach (var point1 in profile1.EnvironmentData.Where(point1 => !profile2.EnvironmentData.Any(point1.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point1));
-            foreach (var point2 in profile2.EnvironmentData.Where(point2 => !profile1.EnvironmentData.Any(point2.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point2));
+            foreach (var point1 in profile1.EnvironmentData.Where(point1 => !profile2.EnvironmentData.Values.Any(point1.Value.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point1.Value));
+            foreach (var point2 in profile2.EnvironmentData.Where(point2 => !profile1.EnvironmentData.Values.Any(point2.Value.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point2.Value));
         }
     }
 }

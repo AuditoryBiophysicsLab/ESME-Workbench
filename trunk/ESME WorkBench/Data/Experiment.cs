@@ -1233,7 +1233,7 @@ namespace ESMEWorkBench.Data
 
             if (WindSpeed != null)
             {
-                DisplayEnvironmentData(WindSpeed.TimePeriods[0].EnvironmentData, "Wind", LayerType.WindSpeed, 3);
+                DisplayEnvironmentData(WindSpeed.TimePeriods[0].EnvironmentData.Values, "Wind", LayerType.WindSpeed, 3);
             }
 
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)) && (BathymetryFileName.EndsWith(".yxz") || BathymetryFileName.EndsWith(".txt")))
@@ -1318,14 +1318,14 @@ namespace ESMEWorkBench.Data
             }
             if (SoundSpeedField != null)
             {
-                DisplayEnvironmentData(SoundSpeedField.EnvironmentData, "Sound Speed", LayerType.SoundSpeed, 3);
+                DisplayEnvironmentData(SoundSpeedField.EnvironmentData.Values, "Sound Speed", LayerType.SoundSpeed, 3);
             }
 
             if ((SedimentFileName != null) && (File.Exists(SedimentFileName)))
                 Sediment = Sediment.Load(SedimentFileName);
             if (Sediment != null)
             {
-                DisplaySediment(Sediment.Samples);
+                DisplaySediment(Sediment.Samples.Values);
             }
             if ((NemoFile != null) && (NemoFile.Scenario != null) && (NemoFile.Scenario.Animals != null))
             {
