@@ -149,7 +149,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
             Settings.Default.LastBathymetryFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-            _experiment.Bathymetry.SaveToYXZ(_saveFileService.FileName, 1);
+            _experiment.Bathymetry.ToYXZ(_saveFileService.FileName, 1);
         }
 
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]

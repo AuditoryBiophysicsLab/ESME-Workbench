@@ -213,7 +213,7 @@ namespace ESMEWorkBench.Data
         [MediatorMessageSink(MediatorMessage.RequestTransmissionLossBathymetry)]
         void RequestTransmissionLossBathymetry(bool dummy)
         {
-            MediatorMessage.Send(MediatorMessage.SetTransmissionLossBathymetry,Bathymetry);
+            MediatorMessage.Send(MediatorMessage.SetTransmissionLossBathymetry, Bathymetry);
         }
 
         public void ExportAnalysisPoints(bool dummy)

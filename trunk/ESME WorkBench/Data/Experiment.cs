@@ -647,10 +647,10 @@ namespace ESMEWorkBench.Data
         [XmlIgnore]
         public Sediment Sediment { get; private set; }
 
-        #region public Environment2DData Bathymetry { get; set; }
+        #region public Bathymetry Bathymetry { get; set; }
 
         [XmlIgnore]
-        public Environment2DData Bathymetry
+        public Bathymetry Bathymetry
         {
             get { return _bathymetry; }
             set
@@ -667,7 +667,7 @@ namespace ESMEWorkBench.Data
         }
 
         static readonly PropertyChangedEventArgs BathymetryChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.Bathymetry);
-        Environment2DData _bathymetry;
+        Bathymetry _bathymetry;
 
         #endregion
 
@@ -1237,7 +1237,7 @@ namespace ESMEWorkBench.Data
             }
 
             if ((BathymetryFileName != null) && (File.Exists(BathymetryFileName)) && (BathymetryFileName.EndsWith(".yxz") || BathymetryFileName.EndsWith(".txt")))
-                Bathymetry = Environment2DData.FromYXZ(BathymetryFileName, -1);
+                Bathymetry = Bathymetry.FromYXZ(BathymetryFileName, -1);
 
             if (Bathymetry != null)
             {
@@ -1259,7 +1259,7 @@ namespace ESMEWorkBench.Data
                 }
                 bathyBoundsLayer.LayerType = LayerType.Bathymetry;
                 bathyBoundsLayer.Clear();
-                bathyBoundsLayer.Add(Bathymetry.BoundingBox);
+                bathyBoundsLayer.Add(new OverlayLineSegments(Bathymetry.Samples.GeoRect));
                 bathyBoundsLayer.Done();
 
                 const string bathyBitmapName = "Bathymetry: Bitmap";
@@ -1267,22 +1267,19 @@ namespace ESMEWorkBench.Data
                 {
                     Threshold = 0,
                 };
-                var bathysize = Math.Max(Bathymetry.Longitudes.Count, Bathymetry.Latitudes.Count);
+                var bathysize = Math.Max(Bathymetry.Samples.Longitudes.Count, Bathymetry.Samples.Latitudes.Count);
                 var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
-                Bitmap displayBitmap;
-                float horizontalResolution;
+                var displayValues = Bathymetry.Samples;
                 if (bathysize > screenSize)
                 {
-                    var scaleFactor = screenSize/bathysize;
-                    var decimatedValues = Decimator2D.Decimate(Bathymetry.FieldData, (int)(Bathymetry.Longitudes.Count * scaleFactor), (int)(Bathymetry.Latitudes.Count * scaleFactor));
-                    horizontalResolution = (float)(Bathymetry.LongitudinalResolution / ((double)decimatedValues.GetLength(0) / Bathymetry.Longitudes.Count));
-                    displayBitmap = colormap.ToBitmap(decimatedValues, Bathymetry.Minimum.Data, Bathymetry.Maximum.Data < 0 ? Bathymetry.Maximum.Data : 8000);
+                    var scaleFactor = screenSize / bathysize;
+                    displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(Bathymetry.Samples, (int)(Bathymetry.Samples.Longitudes.Count * scaleFactor), (int)(Bathymetry.Samples.Latitudes.Count * scaleFactor));
                 }
-                else
-                {
-                    displayBitmap = colormap.ToBitmap(Bathymetry.FieldData, Bathymetry.Minimum.Data, Bathymetry.Maximum.Data < 0 ? Bathymetry.Maximum.Data : 8000);
-                    horizontalResolution = (float) Bathymetry.LongitudinalResolution;
-                }
+                var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
+                for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++)
+                    for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++)
+                        bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
+                var displayBitmap = colormap.ToBitmap(bitmapData, Bathymetry.Minimum.Data, Bathymetry.Maximum.Data < 0 ? Bathymetry.Maximum.Data : 8000);
                 displayBitmap.Save(Path.Combine(LocalStorageRoot, "bathy.bmp"), ImageFormat.Bmp);
                 var bathyBitmapLayer = (RasterMapLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == bathyBitmapName);
                 if (bathyBitmapLayer == null)
@@ -1298,11 +1295,11 @@ namespace ESMEWorkBench.Data
                     };
                     MapLayers.Add(bathyBitmapLayer);
                 }
-                bathyBitmapLayer.PixelSize = horizontalResolution;
-                bathyBitmapLayer.North = (float)Bathymetry.Latitudes.Last();
-                bathyBitmapLayer.South = (float)Bathymetry.Latitudes.First();
-                bathyBitmapLayer.East = (float)Bathymetry.Longitudes.Last();
-                bathyBitmapLayer.West = (float)Bathymetry.Longitudes.First();
+                bathyBitmapLayer.PixelSize = (float)Bathymetry.Samples.Resolution;
+                bathyBitmapLayer.North = (float)Bathymetry.Samples.Latitudes.Last();
+                bathyBitmapLayer.South = (float)Bathymetry.Samples.Latitudes.First();
+                bathyBitmapLayer.East = (float)Bathymetry.Samples.Longitudes.Last();
+                bathyBitmapLayer.West = (float)Bathymetry.Samples.Longitudes.First();
                 bathyBitmapLayer.RasterFilename = Path.Combine(LocalStorageRoot, "bathy.bmp");
                 MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
             }

@@ -10,7 +10,6 @@ using HRC.Utility;
 
 namespace ESME.Environment
 {
-    //public class EnvironmentData<T> : List<T> where T : EarthCoordinate
     public class EnvironmentData<T> : SortedList<LatLonKey, T> where T : EarthCoordinate
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>

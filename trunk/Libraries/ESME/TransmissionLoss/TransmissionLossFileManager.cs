@@ -19,7 +19,7 @@ namespace ESME.TransmissionLoss
 
         public NemoFile NemoFile { get; set; }
 
-        public Environment2DData Bathymetry { get; set; }
+        public Bathymetry Bathymetry { get; set; }
 
         List<SoundSourceTimePeriod> _bellhopSources;
         List<SoundSourceTimePeriod> _ramSources;

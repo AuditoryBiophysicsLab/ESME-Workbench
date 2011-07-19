@@ -301,18 +301,6 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        public bool IsValid
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(BSTDirectory) && !string.IsNullOrEmpty(DBDBDirectory) && !string.IsNullOrEmpty(GDEMDirectory) && !string.IsNullOrEmpty(SMGCDirectory))
-                    if (File.Exists(BSTDirectory) && File.Exists(DBDBDirectory) && Directory.Exists(GDEMDirectory) && Directory.Exists(SMGCDirectory))
-                        if (!string.IsNullOrEmpty(DBDBEXEPath))
-                            if (File.Exists(DBDBEXEPath)) return true;
-                return false;
-            }
-        }
-
         static readonly NAVOTimePeriod[] MonthMap = new[]
         {
                 (NAVOTimePeriod)0,

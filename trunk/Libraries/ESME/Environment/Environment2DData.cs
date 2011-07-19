@@ -9,6 +9,7 @@ using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Environment
 {
+#if false
     public abstract class Environment2DData<TCoordinate> : GenericGeoField<TCoordinate>
         where TCoordinate : EarthCoordinate
     {
@@ -280,30 +281,5 @@ namespace ESME.Environment
             }
         }
     }
-
-    public class AverageDatum
-    {
-        public AverageDatum()
-        {
-            Value = 0;
-            Count = 0;
-        }
-
-        public AverageDatum(float value)
-        {
-            Value = value;
-            Count = 1;
-        }
-
-        public float Value { get; set; }
-        public int Count { get; private set; }
-
-        public void Add(float newValue)
-        {
-            Value += newValue;
-            Count++;
-        }
-
-        public float Average { get { return Value / Count; } }
-    }
+#endif
 }

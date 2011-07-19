@@ -187,7 +187,7 @@ namespace ESME.Environment.NAVO
             if (backgroundTask.CancellationPending) return;
             ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
             //var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryCHBFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
-            var bathymetry = Environment2DData.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
+            var bathymetry = Bathymetry.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant
