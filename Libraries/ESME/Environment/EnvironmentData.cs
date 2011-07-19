@@ -118,6 +118,9 @@ namespace ESME.Environment
 
         public void AddRange(IEnumerable<T> collection)
         {
+            var newItemCount = collection.Count();
+            if (Capacity < (Count + newItemCount))
+                Capacity += Capacity - (Count + newItemCount + 1);
             foreach (var item in collection) Add(item);
             _latitudes = _longitudes = null;
         }
