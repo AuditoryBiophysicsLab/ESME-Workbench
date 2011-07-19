@@ -20,6 +20,20 @@ namespace ESME.Overlay
         public double West { get; private set; }
         public GeoRect GeoRect { get; private set; }
 
+        public OverlayLineSegments(GeoRect geoRect) : base(Colors.Black, 1f, LineStyle.Solid)
+        {
+            Segments = new List<OverlayLineSegment>();
+            Add(geoRect.SouthWest);
+            Add(geoRect.SouthEast);
+            Add(geoRect.NorthEast);
+            Add(geoRect.NorthWest);
+            Add(geoRect.SouthWest);
+            CreateSegments();
+            ComputeBoundingBox();
+            CheckForClosure();
+            CheckCrossingSegments();
+        }
+
         public OverlayLineSegments(EarthCoordinate[] points, Color color, float size = 1f, LineStyle lineStyle = LineStyle.Solid)
             : base(color, size, lineStyle)
         {

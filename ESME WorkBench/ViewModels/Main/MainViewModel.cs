@@ -173,9 +173,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_experiment.Bathymetry != null)
                 {
                     EarthCoordinate<float> mouseDepth;
-                    if (_experiment.Bathymetry.Contains(_mouseEarthCoordinate))
+                    if (_experiment.Bathymetry.Samples.GeoRect.Contains(_mouseEarthCoordinate))
                     {
-                        mouseDepth = _experiment.Bathymetry[_mouseEarthCoordinate];
+                        mouseDepth = _experiment.Bathymetry.Samples[_mouseEarthCoordinate];
                         if (mouseDepth != null) MouseDepth = mouseDepth.Data;
                         else MouseDepth = null;
                     }

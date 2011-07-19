@@ -39,7 +39,7 @@ namespace ESME.Model
 
         public string AnimatLogFilePath { get; set; }
 
-        public Environment2DData Bathymetry { get; set; }
+        public Bathymetry Bathymetry { get; set; }
 
         #endregion
 
@@ -90,11 +90,11 @@ namespace ESME.Model
         /// <param name = "speciesDirectory"></param>
         /// <param name = "animatLogFilePath"></param>
         /// <param name = "mmmbsOutputDirectory"></param>
-        /// <param name = "bathymetryFile"></param>
+        /// <param name = "bathymetry"></param>
         /// <param name = "simulationDuration"></param>
         /// <param name = "simulationTimeStep"></param>
         /// <returns></returns>
-        public static AnimatInterface Create(string animatScenarioFile, string speciesDirectory, Environment2DData bathymetry, string animatLogFilePath, string mmmbsOutputDirectory, TimeSpan simulationDuration, TimeSpan simulationTimeStep)
+        public static AnimatInterface Create(string animatScenarioFile, string speciesDirectory, Bathymetry bathymetry, string animatLogFilePath, string mmmbsOutputDirectory, TimeSpan simulationDuration, TimeSpan simulationTimeStep)
         {
             var mbs = new C3mbs();
             mbsRESULT mbsResult;
@@ -481,12 +481,8 @@ namespace ESME.Model
             {
                 curAnimat = AnimatList[i];
                 // Make sure the animat is still contained in the current bathymetry dataset, and if so get the depth at the animat's current position
-                EarthCoordinate<float> bathymetryDepthMeters;
-                if (Bathymetry.Lookup(curAnimat.Location, out bathymetryDepthMeters))
-                {
-                    // Update the depth at the animat's current position
-                    _mbsBathymetry[i] = bathymetryDepthMeters.Data;
-                }
+                // Update the depth at the animat's current position
+                _mbsBathymetry[i] = Bathymetry.Samples[curAnimat.Location].Data;
             } // for (animats)
             if (mbsRESULT.OK != (result = _mmmbs.SetAnimatBathymetry(_mbsBathymetry)))
             {

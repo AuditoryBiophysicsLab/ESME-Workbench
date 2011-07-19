@@ -16,7 +16,7 @@ namespace ESME.TransmissionLoss
 {
     public class SoundSource : EarthCoordinate, IEquatable<SoundSource>, ISupportValidation
     {
-        public static WeakReference<Environment2DData> Bathymetry = new WeakReference<Environment2DData>(null);
+        public static WeakReference<Bathymetry> Bathymetry = new WeakReference<Bathymetry>(null);
 
         protected SoundSource()
         {
@@ -25,7 +25,7 @@ namespace ESME.TransmissionLoss
             SoundSourceID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
         }
 
-        public SoundSource(EarthCoordinate location, NemoMode nemoMode, int radialCount) : this()
+        public SoundSource(Geo location, NemoMode nemoMode, int radialCount) : this()
         {
             Latitude = location.Latitude;
             Longitude = location.Longitude;
@@ -215,7 +215,7 @@ namespace ESME.TransmissionLoss
                 return;
             }
             var bathymetry = Bathymetry.Target;
-            if (!bathymetry.GeoRect.Contains(this))
+            if (!bathymetry.Samples.GeoRect.Contains(this))
             {
                 ValidationErrorText = "Sound source not contained within bathymetry bounds";
                 return;
@@ -225,7 +225,7 @@ namespace ESME.TransmissionLoss
             foreach (var radialBearing in RadialBearings)
             {
                 var radialEndPoint = new EarthCoordinate(this, radialBearing, Radius);
-                if (!bathymetry.GeoRect.Contains(radialEndPoint))
+                if (!bathymetry.Samples.GeoRect.Contains(radialEndPoint))
                 {
                     //Console.WriteLine("Source name {0} location ({1}, {2}) bearing {3} endpoint ({4}, {5}) outside of bathymetry", Name, Latitude, Longitude, radialBearing, radialEndPoint.Latitude, radialEndPoint.Longitude);
                     errors.AppendLine(string.Format("Radial with bearing {0} extends beyond bathymetry bounds", radialBearing));

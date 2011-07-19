@@ -11,7 +11,7 @@ namespace ESME.TransmissionLoss.Bellhop
     {
         const UInt32 Magic = 0x2bf6f6e5;
 
-        public BottomProfile(int numberOfPointsInTransect, Transect transect, Environment2DData environment2DData)
+        public BottomProfile(int numberOfPointsInTransect, Transect transect, Bathymetry bathymetry)
         {
             MaxDepth = double.MinValue;
             Profile = new double[numberOfPointsInTransect];
@@ -20,7 +20,7 @@ namespace ESME.TransmissionLoss.Bellhop
             var currentPoint = transect.StartPoint;
             for (var i = 0; i < numberOfPointsInTransect; i++)
             {
-                Profile[i] = Math.Abs(TwoDBilinearApproximation(environment2DData, currentPoint));
+                Profile[i] = Math.Abs(TwoDBilinearApproximation(bathymetry, currentPoint));
                 if (MaxDepth < Profile[i])
                 {
                     MaxDepth = Profile[i];
@@ -75,26 +75,26 @@ namespace ESME.TransmissionLoss.Bellhop
             }
         }
 
-        public static double TwoDBilinearApproximation(Environment2DData elevations, EarthCoordinate point)
+        public static double TwoDBilinearApproximation(Bathymetry bathymetry, EarthCoordinate point)
         {
-            if ((point.Latitude < elevations.Latitudes[0]) || (point.Latitude > elevations.Latitudes[elevations.Latitudes.Count - 1]) || (point.Longitude < elevations.Longitudes[0]) || (point.Longitude > elevations.Longitudes[elevations.Longitudes.Count - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
-            for (var i = 0; i < elevations.Latitudes.Count - 1; i++)
+            if ((point.Latitude < bathymetry.Samples.Latitudes[0]) || (point.Latitude > bathymetry.Samples.Latitudes[bathymetry.Samples.Latitudes.Count - 1]) || (point.Longitude < bathymetry.Samples.Longitudes[0]) || (point.Longitude > bathymetry.Samples.Longitudes[bathymetry.Samples.Longitudes.Count - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
+            for (var i = 0; i < bathymetry.Samples.Latitudes.Count - 1; i++)
             {
                 // elevations.Latitudes go from south to north, so a southern elevations.Latitudes come before northern ones
-                if ((elevations.Latitudes[i] > point.Latitude) || (point.Latitude > elevations.Latitudes[i + 1])) continue;
-                for (var j = 0; j < elevations.Longitudes.Count - 1; j++)
+                if ((bathymetry.Samples.Latitudes[i] > point.Latitude) || (point.Latitude > bathymetry.Samples.Latitudes[i + 1])) continue;
+                for (var j = 0; j < bathymetry.Samples.Longitudes.Count - 1; j++)
                 {
                     // elevations.Longitudes go from west to east, so western elevations.Longitudes come before eastern ones
-                    if ((elevations.Longitudes[j] > point.Longitude) || (point.Longitude > elevations.Longitudes[j + 1])) continue;
+                    if ((bathymetry.Samples.Longitudes[j] > point.Longitude) || (point.Longitude > bathymetry.Samples.Longitudes[j + 1])) continue;
                     var north = i + 1;
                     var south = i;
                     var east = j + 1;
                     var west = j;
                     return BilinearRecursive(point, // Point to interpolate
-                                             new EarthCoordinate3D(elevations.Latitudes[north], elevations.Longitudes[east], elevations.FieldData[east, north].Data), // northeast corner
-                                             new EarthCoordinate3D(elevations.Latitudes[north], elevations.Longitudes[west], elevations.FieldData[west, north].Data), // northwest corner
-                                             new EarthCoordinate3D(elevations.Latitudes[south], elevations.Longitudes[east], elevations.FieldData[east, south].Data), // southeast corner
-                                             new EarthCoordinate3D(elevations.Latitudes[south], elevations.Longitudes[west], elevations.FieldData[west, south].Data) // southwest corner
+                                             new EarthCoordinate3D(bathymetry.Samples.Latitudes[north], bathymetry.Samples.Longitudes[east], bathymetry.Samples[(uint)east, (uint)north].Data), // northeast corner
+                                             new EarthCoordinate3D(bathymetry.Samples.Latitudes[north], bathymetry.Samples.Longitudes[west], bathymetry.Samples[(uint)west, (uint)north].Data), // northwest corner
+                                             new EarthCoordinate3D(bathymetry.Samples.Latitudes[south], bathymetry.Samples.Longitudes[east], bathymetry.Samples[(uint)east, (uint)south].Data), // southeast corner
+                                             new EarthCoordinate3D(bathymetry.Samples.Latitudes[south], bathymetry.Samples.Longitudes[west], bathymetry.Samples[(uint)west, (uint)south].Data) // southwest corner
                         );
                 } // for j
             } // for i

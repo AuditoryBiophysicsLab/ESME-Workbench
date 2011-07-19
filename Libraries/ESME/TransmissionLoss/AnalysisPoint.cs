@@ -16,7 +16,7 @@ namespace ESME.TransmissionLoss
 {
     public class AnalysisPoint : EarthCoordinate, IEquatable<AnalysisPoint>, ISupportValidation
     {
-        public static WeakReference<Environment2DData> Bathymetry = new WeakReference<Environment2DData>(null);
+        public static WeakReference<Bathymetry> Bathymetry = new WeakReference<Bathymetry>(null);
 
         private AnalysisPoint()
         {
@@ -26,7 +26,7 @@ namespace ESME.TransmissionLoss
             AnalysisPointID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
         }
 
-        public AnalysisPoint(EarthCoordinate location) : this()
+        public AnalysisPoint(Geo location) : this()
         {
             Latitude = location.Latitude;
             Longitude = location.Longitude;
@@ -145,7 +145,7 @@ namespace ESME.TransmissionLoss
             }
 
             var bathymetry = Bathymetry.Target;
-            if (!bathymetry.GeoRect.Contains(this))
+            if (!bathymetry.Samples.GeoRect.Contains(this))
             {
                 ValidationErrorText = "Analysis point not contained within bathymetry bounds";
                 return;

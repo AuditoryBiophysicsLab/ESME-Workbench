@@ -104,12 +104,12 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public Environment2DData Bathymetry { get; set; }
+        #region public Bathymetry Bathymetry { get; set; }
 
         static readonly PropertyChangedEventArgs BathymetryChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.Bathymetry);
-        Environment2DData _bathymetry;
+        Bathymetry _bathymetry;
 
-        public Environment2DData Bathymetry
+        public Bathymetry Bathymetry
         {
             get { return _bathymetry; }
             set
@@ -142,7 +142,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        #endregion
+#endregion
 
         readonly Dispatcher _dispatcher;
         readonly IViewAwareStatus _viewAwareStatus;
@@ -296,7 +296,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         void RenderFinished() { NotifyPropertyChanged(WriteableBitmapChangedEventArgs); }
 
-        #region public ColorMapViewModel ColorMapViewModel { get; set; }
+#region public ColorMapViewModel ColorMapViewModel { get; set; }
 
         static readonly PropertyChangedEventArgs ColorMapViewModelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.ColorMapViewModel);
         ColorMapViewModel _colorMapViewModel;
@@ -325,9 +325,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        #endregion
+#endregion
 
-        #region public TransmissionLossRadial TransmissionLossRadial { get; set; }
+#region public TransmissionLossRadial TransmissionLossRadial { get; set; }
 
         static readonly PropertyChangedEventArgs TransmissionLossRadialChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.TransmissionLossRadial);
         TransmissionLossRadial _transmissionLossRadial;
@@ -353,9 +353,9 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             }
         }
 
-        #endregion
+#endregion
 
-        #region public string BottomProfileGeometry { get; set; }
+#region public string BottomProfileGeometry { get; set; }
 
         static readonly PropertyChangedEventArgs BottomProfileGeometryChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.BottomProfileGeometry);
         string _bottomProfileGeometry = "M 0,0";
@@ -398,13 +398,13 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
             
         }
 
-        #endregion
+#endregion
         
-        #region Nested type: VoidDelegate
+#region Nested type: VoidDelegate
 
         delegate void VoidDelegate();
 
-        #endregion
+#endregion
 
         //public TransmissionLossRadial TransmissionLossRadial { get; private set; }
         //public float RangeMin { get; private set; }

@@ -100,12 +100,12 @@ namespace ESME.Views.TransmissionLossViewer
 
         #endregion
 
-        #region public Environment2DData Bathymetry { get; set; }
+        #region public Bathymetry Bathymetry { get; set; }
 
         static readonly PropertyChangedEventArgs BathymetryChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialViewModel>(x => x.Bathymetry);
-        Environment2DData _bathymetry;
+        Bathymetry _bathymetry;
 
-        public Environment2DData Bathymetry
+        public Bathymetry Bathymetry
         {
             get { return _bathymetry; }
             set
@@ -190,7 +190,7 @@ namespace ESME.Views.TransmissionLossViewer
         void TransmissionLossRadialEarthCoordinate(EarthCoordinate location) { _location = location; }
 
         [MediatorMessageSink(MediatorMessage.SetTransmissionLossBathymetry)]
-        void SetTransmissionLossBathymetry(Environment2DData bathymetry)
+        void SetTransmissionLossBathymetry(Bathymetry bathymetry)
         {
             _bathymetry = bathymetry;
             if (TransmissionLossRadial != null) CalculateBottomProfileGeometry();

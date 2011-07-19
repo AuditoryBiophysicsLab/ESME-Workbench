@@ -237,8 +237,8 @@ namespace ESME.Environment
 
             if (BoundingBox == null)
             {
-                var bathymetry = Environment2DData.FromYXZ(bathyFile, -1);
-                BoundingBox = new GeoRect(bathymetry.GeoRect);
+                var bathymetry = Bathymetry.FromYXZ(bathyFile, -1);
+                BoundingBox = new GeoRect(bathymetry.Samples.GeoRect);
             }
 
             IsValid = true;
@@ -421,7 +421,7 @@ namespace ESME.Environment
             if (!Directory.Exists(BasePath)) throw new ApplicationException("BathymetryMetadata: Cannot validate, because the BasePath points to a directory that does not exist: \"" + BasePath + "\"");
 
             var bathyFile = Path.Combine(BasePath, "Bathymetry", BathymetryFilename);
-            Environment2DData bathymetry = null;
+            Bathymetry bathymetry = null;
 
             if (!File.Exists(bathyFile))
             {
@@ -432,8 +432,8 @@ namespace ESME.Environment
 
             if (Resolution <= 0)
             {
-                bathymetry = Environment2DData.FromYXZ(BathymetryFilename, -1);
-                Resolution = (float) (bathymetry.LatitudinalResolution * 60);
+                bathymetry = Bathymetry.FromYXZ(BathymetryFilename, -1);
+                Resolution = (float) (bathymetry.Samples.Resolution * 60);
             }
 
             if (string.IsNullOrEmpty(OperationalAreaName))
@@ -443,8 +443,8 @@ namespace ESME.Environment
 
             if (BoundingBox == null)
             {
-                if (bathymetry == null) bathymetry = Environment2DData.FromYXZ(BathymetryFilename, -1);
-                BoundingBox = new GeoRect(bathymetry.GeoRect);
+                if (bathymetry == null) bathymetry = Bathymetry.FromYXZ(BathymetryFilename, -1);
+                BoundingBox = new GeoRect(bathymetry.Samples.GeoRect);
             }
 
             IsValid = true;

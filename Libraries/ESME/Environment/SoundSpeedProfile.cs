@@ -40,6 +40,33 @@ namespace ESME.Environment
         }
     }
 
+
+    public class AverageDatum
+    {
+        public AverageDatum()
+        {
+            Value = 0;
+            Count = 0;
+        }
+
+        public AverageDatum(float value)
+        {
+            Value = value;
+            Count = 1;
+        }
+
+        public float Value { get; set; }
+        public int Count { get; private set; }
+
+        public void Add(float newValue)
+        {
+            Value += newValue;
+            Count++;
+        }
+
+        public float Average { get { return Value / Count; } }
+    }
+
     public class SoundSpeedProfile : EarthCoordinate<DepthValuePairs<float>>
     {
         public SoundSpeedProfile() { Data = new DepthValuePairs<float>(); }
