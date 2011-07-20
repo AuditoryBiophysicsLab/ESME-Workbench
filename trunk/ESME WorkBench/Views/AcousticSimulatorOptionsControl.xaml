@@ -87,7 +87,7 @@
                             <TextBlock Text="Speed Dial"/>
                             <Controls:ValidatingTextBox BoundField="RAMSettings.SpeedDial"/>
                         </StackPanel>
-                        <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Vertical" IsEnabled="False">
                             <TextBlock Text="SSP Units"/>
                             <Controls:ValidatingTextBox BoundField="RAMSettings.SSPUnits"/>
                         </StackPanel>
@@ -95,7 +95,7 @@
                             <TextBlock Text="CASS Level"/>
                             <Controls:ValidatingTextBox BoundField="RAMSettings.CASSLevel"/>
                         </StackPanel>
-                        <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Vertical" IsEnabled="False">
                             <TextBlock Text="Bathymetry Metric"/>
                             <Controls:ValidatingTextBox BoundField="RAMSettings.BathymetryMetric"/>
                         </StackPanel>
