@@ -36,7 +36,10 @@ namespace ESMEWorkBench.ViewModels.Main
 
         private bool IsOkCommandEnabled
         {
-            get { return true; }
+            get
+            {
+                return true;
+            }
         }
 
         private void OkHandler()

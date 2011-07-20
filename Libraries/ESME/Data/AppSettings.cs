@@ -436,6 +436,7 @@ namespace ESME.Data
         public string ScenarioExecutablePath { get { return NAEMOTool("scene-sim.jar"); } }
 
         string NAEMOTool(string toolFileName) { return string.IsNullOrEmpty(NAEMOToolsDirectory) ? null : Path.Combine(NAEMOToolsDirectory, toolFileName); }
+        
     }
 
     public sealed class CASSSettings : ValidatingViewModel
