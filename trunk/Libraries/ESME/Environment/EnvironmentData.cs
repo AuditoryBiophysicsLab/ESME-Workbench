@@ -47,7 +47,8 @@ namespace ESME.Environment
             {
                 if ((lonIndex >= Longitudes.Count) || (latIndex >= Latitudes.Count)) throw new IndexOutOfRangeException(string.Format("EnvironmentData: Attempted to access [{0}, {1}] when max indices are [{2}, {3}]", lonIndex, latIndex, Longitudes.Count, Latitudes.Count));
                 var key = new LatLonKey(Latitudes[(int)latIndex], Longitudes[(int)lonIndex]);
-                return _sortedList[key];
+                var keyIndex = FindKeyIndex(key);
+                return _sortedList.Values[keyIndex];
             }
         }
 
@@ -91,7 +92,7 @@ namespace ESME.Environment
             try
             {
                 var key = new LatLonKey(item);
-                if (FindKey(key) == null)
+                if (FindKeyIndex(key) == -1)
                 {
                     _sortedList.Add(key, item);
                     _latitudes = _longitudes = null;
@@ -101,9 +102,9 @@ namespace ESME.Environment
             catch { }
         }
 
-        LatLonKey FindKey(LatLonKey key)
+        int FindKeyIndex(LatLonKey key)
         {
-            if (_sortedList.Keys.Count == 0) return null;
+            if (_sortedList.Keys.Count == 0) return -1;
             var min = 0;
             var max = _sortedList.Keys.Count - 1;
             while (min < max)
@@ -113,11 +114,11 @@ namespace ESME.Environment
                 var comp = LatLonKey.Compare(midKey, key);
                 if (comp < 0) min = mid + 1;
                 else if (comp > 0) max = mid - 1;
-                else return midKey;
+                else return mid;
             }
             if (min == max && LatLonKey.Compare(_sortedList.Keys[min], key) == 0)
-                return _sortedList.Keys[min];
-            return null;
+                return min;
+            return -1;
         }
 
         public void AddRange(IEnumerable<T> collection)
