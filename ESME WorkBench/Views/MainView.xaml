@@ -501,6 +501,11 @@
 					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                                             ToolTipDescription="Show the selected range complex on the map"
 					                        Command="{Binding ZoomToRangeComplexCommand}" />
+                            <r:RibbonButton Label="Delete"
+					                        SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
+					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                                            ToolTipDescription="Delete the selected range complex, and all data within it."
+					                        Command="{Binding DisabledCommand}" />
                         </StackPanel>
                     </Grid>
                 </r:RibbonGroup>
@@ -572,11 +577,11 @@
 					                        ToolTipDescription="Create a new overlay by expanding the selected overlay"
                                             ToolTipFooterDescription="Note: You cannot expand an overlay that was previously created by expanding another overlay"
 					                        Command="{Binding ExpandOverlayCommand}" />
-                            <r:RibbonButton Label="Properties"
-					                        SmallImageSource="..\Images\SmallIcons\properties.png"
+                            <r:RibbonButton Label="Delete"
+					                        SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
 					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                        ToolTipDescription="View or edit the overlay properties"
-					                        Command="{Binding OverlayPropertiesCommand}" />
+                                            ToolTipDescription="Delete the selected overlay, and all overlays, bathymetry and environment data that depends on it."
+					                        Command="{Binding DisabledCommand}" />
                         </StackPanel>
                     </Grid>
                 </r:RibbonGroup>
@@ -641,11 +646,11 @@
 					                        ToolTipTitle="New Bathymetry"
 					                        ToolTipDescription="Extract a new bathymetry dataset"
 					                        Command="{Binding NewBathymetryCommand}" />
-                            <r:RibbonButton Label="Properties"
-					                        SmallImageSource="..\Images\SmallIcons\properties.png"
+                            <r:RibbonButton Label="Delete"
+					                        SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
 					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                        ToolTipDescription="View or edit the bathymetry properties"
-					                        Command="{Binding BathymetryPropertiesCommand}" />
+                                            ToolTipDescription="Delete the selected bathymetry dataset, and all environment data that depends on it."
+					                        Command="{Binding DisabledCommand}" />
                         </StackPanel>
                     </Grid>
                 </r:RibbonGroup>
@@ -710,11 +715,11 @@
 					                        ToolTipTitle="New Bathymetry"
 					                        ToolTipDescription="Extract a new bathymetry dataset"
 					                        Command="{Binding NewEnvironmentCommand}" />
-                            <r:RibbonButton Label="Properties"
-					                        SmallImageSource="..\Images\SmallIcons\properties.png"
+                            <r:RibbonButton Label="Delete"
+					                        SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
 					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                        ToolTipDescription="View or edit the bathymetry properties"
-					                        Command="{Binding EnvironmentPropertiesCommand}" />
+                                            ToolTipDescription="Delete the selected evironment dataset"
+					                        Command="{Binding DisabledCommand}" />
                         </StackPanel>
                     </Grid>
                 </r:RibbonGroup>
