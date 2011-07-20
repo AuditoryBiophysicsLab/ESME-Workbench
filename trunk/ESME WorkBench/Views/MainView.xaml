@@ -669,11 +669,6 @@
                         </StackPanel>
                     </Grid>
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Debug" Visibility="Collapsed">
-                    <r:RibbonButton LargeImageSource="..\Images\LargeIcons\Button-Reload-icon.png"
-                                    Command="{Binding RequeryCommand}"
-                                    Label="Requery" />
-                </r:RibbonGroup>
 			</r:RibbonTab>
 			<r:RibbonTab KeyTip="A"
 			             Header="Animals">

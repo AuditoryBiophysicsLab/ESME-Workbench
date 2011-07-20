@@ -35,7 +35,6 @@ namespace ESME.Environment.NAVO
                     backgroundExtractor.Value++;
                 }
 
-            results.Samples.RemoveDuplicates();
             backgroundExtractor.Value++;
             if (!backgroundExtractor.UseExpandedExtractionArea) results.Samples.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
             backgroundExtractor.Value++;
@@ -62,7 +61,6 @@ namespace ESME.Environment.NAVO
                     if (data != null) results.Samples.AddRange(data);
                 }
 
-            results.Samples.RemoveDuplicates();
             if (!useExpandedExtractionArea) results.Samples.TrimToNearestPoints(extractionArea);
 
             H5G.close(lowResGroup);

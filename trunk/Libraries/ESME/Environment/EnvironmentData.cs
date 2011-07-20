@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
@@ -6,11 +7,10 @@ using ESME.Environment.NAVO;
 using HRC.LinqStatistics;
 using HRC.Navigation;
 using System.Windows;
-using HRC.Utility;
 
 namespace ESME.Environment
 {
-    public class EnvironmentData<T> : SortedList<LatLonKey, T> where T : EarthCoordinate
+    public class EnvironmentData<T> : IList<T> where T : EarthCoordinate
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
@@ -20,13 +20,17 @@ namespace ESME.Environment
                 typeof (T),
         };
 
+        readonly SortedList<LatLonKey, T> _sortedList = new SortedList<LatLonKey, T>();
+
+        public T this[int index] { get { return _sortedList.Values[index]; } }
+
         public T this[EarthCoordinate location]
         {
             get
             {
                 var minDistance = double.MaxValue;
                 T closestSample = null;
-                foreach (var item in this)
+                foreach (var item in _sortedList)
                 {
                     var curDistance = item.Value.DistanceKilometers(location);
                     if (curDistance >= minDistance) continue;
@@ -43,7 +47,7 @@ namespace ESME.Environment
             {
                 if ((lonIndex >= Longitudes.Count) || (latIndex >= Latitudes.Count)) throw new IndexOutOfRangeException(string.Format("EnvironmentData: Attempted to access [{0}, {1}] when max indices are [{2}, {3}]", lonIndex, latIndex, Longitudes.Count, Latitudes.Count));
                 var key = new LatLonKey(Latitudes[(int)latIndex], Longitudes[(int)lonIndex]);
-                return this[key];
+                return _sortedList[key];
             }
         }
 
@@ -74,7 +78,7 @@ namespace ESME.Environment
             var southWest = this[geoRect.SouthWest];
             var northEast = this[geoRect.NorthEast];
             var trimRect = GeoRect.InflateWithGeo(new GeoRect(northEast.Latitude, southWest.Latitude, northEast.Longitude, southWest.Longitude), 0.01);
-            var matchingPoints = this.Where(point => trimRect.Contains(point.Value)).ToList();
+            var matchingPoints = _sortedList.Where(point => trimRect.Contains(point.Value)).ToList();
             var pointsToKeep = from point in matchingPoints
                                select point.Value;
             Clear();
@@ -89,7 +93,7 @@ namespace ESME.Environment
                 var key = new LatLonKey(item);
                 if (FindKey(key) == null)
                 {
-                    Add(key, item);
+                    _sortedList.Add(key, item);
                     _latitudes = _longitudes = null;
                 }
                 //if (Keys.Contains(key)) return;
@@ -99,63 +103,114 @@ namespace ESME.Environment
 
         LatLonKey FindKey(LatLonKey key)
         {
-            if (Keys.Count == 0) return null;
+            if (_sortedList.Keys.Count == 0) return null;
             var min = 0;
-            var max = Keys.Count - 1;
+            var max = _sortedList.Keys.Count - 1;
             while (min < max)
             {
                 var mid = (max + min) / 2;
-                var midKey = Keys[mid];
+                var midKey = _sortedList.Keys[mid];
                 var comp = LatLonKey.Compare(midKey, key);
                 if (comp < 0) min = mid + 1;
                 else if (comp > 0) max = mid - 1;
                 else return midKey;
             }
-            if (min == max && LatLonKey.Compare(Keys[min], key) == 0)
-                return Keys[min];
+            if (min == max && LatLonKey.Compare(_sortedList.Keys[min], key) == 0)
+                return _sortedList.Keys[min];
             return null;
         }
 
         public void AddRange(IEnumerable<T> collection)
         {
-            var newItemCount = collection.Count();
-            if (Capacity < (Count + newItemCount))
-                Capacity += Capacity - (Count + newItemCount + 1);
             foreach (var item in collection) Add(item);
             _latitudes = _longitudes = null;
         }
 
-        public new void Clear()
+        public void Clear()
         {
-            base.Clear();
+            _sortedList.Clear();
             _latitudes = _longitudes = null;
         }
 
+        /// <summary>
+        /// Determines whether the <see cref="T:System.Collections.Generic.ICollection`1"/> contains a specific value.
+        /// </summary>
+        /// <returns>
+        /// true if <paramref name="item"/> is found in the <see cref="T:System.Collections.Generic.ICollection`1"/>; otherwise, false.
+        /// </returns>
+        /// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection`1"/>.</param>
+        public bool Contains(T item) { return _sortedList.ContainsKey(new LatLonKey(item)); }
+
+        /// <summary>
+        /// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection`1"/> to an <see cref="T:System.Array"/>, starting at a particular <see cref="T:System.Array"/> index.
+        /// </summary>
+        /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from <see cref="T:System.Collections.Generic.ICollection`1"/>. The <see cref="T:System.Array"/> must have zero-based indexing.</param><param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param><exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception><exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0.</exception><exception cref="T:System.ArgumentException"><paramref name="array"/> is multidimensional.-or-The number of elements in the source <see cref="T:System.Collections.Generic.ICollection`1"/> is greater than the available space from <paramref name="arrayIndex"/> to the end of the destination <paramref name="array"/>.-or-Type <paramref name="T"></paramref>
+        ///                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     cannot be cast automatically to the type of the destination <paramref name="array"/>.</exception>
+        public void CopyTo(T[] array, int arrayIndex) { _sortedList.Values.CopyTo(array, arrayIndex); }
+
         public bool Remove(T item)
         {
-            var result = Remove(new LatLonKey(item));
+            var result = _sortedList.Remove(new LatLonKey(item));
             if (result) _latitudes = _longitudes = null;
             return result;
         }
 
-        public new void RemoveAt(int index)
+        /// <summary>
+        /// Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1"/>.
+        /// </summary>
+        /// <returns>
+        /// The number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1"/>.
+        /// </returns>
+        public int Count
         {
-            base.RemoveAt(index);
+            get { return _sortedList.Count; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1"/> is read-only.
+        /// </summary>
+        /// <returns>
+        /// true if the <see cref="T:System.Collections.Generic.ICollection`1"/> is read-only; otherwise, false.
+        /// </returns>
+        public bool IsReadOnly
+        {
+            get { return _sortedList.Values.IsReadOnly; }
+        }
+
+        /// <summary>
+        /// Determines the index of a specific item in the <see cref="T:System.Collections.Generic.IList`1"/>.
+        /// </summary>
+        /// <returns>
+        /// The index of <paramref name="item"/> if found in the list; otherwise, -1.
+        /// </returns>
+        /// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.IList`1"/>.</param>
+        public int IndexOf(T item) { return _sortedList.IndexOfKey(new LatLonKey(item)); }
+
+        /// <summary>
+        /// Inserts an item to the <see cref="T:System.Collections.Generic.IList`1"/> at the specified index.
+        /// </summary>
+        /// <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param><param name="item">The object to insert into the <see cref="T:System.Collections.Generic.IList`1"/>.</param><exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the <see cref="T:System.Collections.Generic.IList`1"/>.</exception><exception cref="T:System.NotSupportedException">The <see cref="T:System.Collections.Generic.IList`1"/> is read-only.</exception>
+        public void Insert(int index, T item) { throw new NotImplementedException(); }
+
+        public void RemoveAt(int index)
+        {
+            _sortedList.RemoveAt(index);
             _latitudes = _longitudes = null;
         }
 
-        #endregion
-
-        public void RemoveDuplicates(BackgroundTask backgroundTask = null)
+        /// <summary>
+        /// Gets or sets the element at the specified index.
+        /// </summary>
+        /// <returns>
+        /// The element at the specified index.
+        /// </returns>
+        /// <param name="index">The zero-based index of the element to get or set.</param><exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the <see cref="T:System.Collections.Generic.IList`1"/>.</exception><exception cref="T:System.NotSupportedException">The property is set and the <see cref="T:System.Collections.Generic.IList`1"/> is read-only.</exception>
+        T IList<T>.this[int index]
         {
-            var uniqueList = new List<T>();
-            foreach (var curEntry in from curEntry in this
-                                     let foundMatch = uniqueList.Any(curEntry.Equals)
-                                     where !foundMatch
-                                     select curEntry) {uniqueList.Add(curEntry.Value);}
-            Clear();
-            AddRange(uniqueList);
+            get { return _sortedList.Values[index]; }
+            set { throw new NotImplementedException(); }
         }
+        #endregion
 
         private static List<double> SortedList(IEnumerable<double> rawEnumerable)
         {
@@ -195,7 +250,7 @@ namespace ESME.Environment
         [XmlIgnore]
         public List<double> Longitudes
         {
-            get { return _longitudes ?? (_longitudes = SortedList(this.Select(point => Math.Round(point.Value.Longitude, 4)).Distinct())); }
+            get { return _longitudes ?? (_longitudes = SortedList(_sortedList.Select(point => Math.Round(point.Value.Longitude, 4)).Distinct())); }
         }
 
         [XmlIgnore]
@@ -204,7 +259,7 @@ namespace ESME.Environment
         [XmlIgnore]
         public List<double> Latitudes
         {
-            get { return _latitudes ?? (_latitudes = SortedList(this.Select(point => Math.Round(point.Value.Latitude, 4)).Distinct())); }
+            get { return _latitudes ?? (_latitudes = SortedList(_sortedList.Select(point => Math.Round(point.Value.Latitude, 4)).Distinct())); }
         }
 
         [XmlIgnore]
@@ -223,6 +278,25 @@ namespace ESME.Environment
             }
         }
 
+        #region Implementation of IEnumerable
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+        /// </returns>
+        /// <filterpriority>1</filterpriority>
+        public IEnumerator<T> GetEnumerator() { return _sortedList.Values.GetEnumerator(); }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through a collection.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
+        /// </returns>
+        /// <filterpriority>2</filterpriority>
+        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+        #endregion
     }
 
     public class LatLonKey : IComparer<LatLonKey>, IComparable<LatLonKey>
