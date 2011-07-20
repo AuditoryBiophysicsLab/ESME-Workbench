@@ -34,16 +34,19 @@
 					                                 DialogTitle="Choose the java executable (javaw.exe)"
 					                                 FileNameFilter="Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*"
 					                                 IsDirectoryBrowser="False"
-					                                 FileName="{Binding AppSettings.NAEMOTools.JavaExecutablePath}" />
+					                                 FileName="{Binding AppSettings.NAEMOTools.JavaExecutablePath, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"  />
                     <Controls:FileOrDirectorySetting Caption="NAEMO Tools directory"
 					                                 Margin="5"
 					                                 IsDirectoryBrowser="True"
-					                                 FileName="{Binding AppSettings.NAEMOTools.NAEMOToolsDirectory}" />
+					                                 FileName="{Binding AppSettings.NAEMOTools.NAEMOToolsDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"  />
 
                     <Controls:FileOrDirectorySetting Caption="Scenario data directory"
 					                                 Margin="5 0"
 					                                 IsDirectoryBrowser="True"
-					                                 FileName="{Binding AppSettings.ScenarioDataDirectory}" />
+					                                 FileName="{Binding AppSettings.ScenarioDataDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"  />
 
                     <GroupBox Header="Scenario Simulator Options"
 					          Margin="5"
@@ -77,22 +80,26 @@
                         <StackPanel Orientation="Vertical">
                             <Controls:FileOrDirectorySetting Caption="GDEM-V"
 							                                 Margin="0 5"
+                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
 							                                 IsDirectoryBrowser="True"
-							                                 FileName="{Binding AppSettings.NAVOConfiguration.GDEMDirectory}" />
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.GDEMDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                             <Controls:FileOrDirectorySetting Caption="SMGC"
+                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
 							                                 IsDirectoryBrowser="True"
-							                                 FileName="{Binding AppSettings.NAVOConfiguration.SMGCDirectory}" />
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.SMGCDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                             <Controls:FileOrDirectorySetting Caption="BST"
 							                                 Margin="0 5"
+                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
 							                                 IsDirectoryBrowser="False"
 							                                 DialogTitle="Choose the Bottom Sediment Type database file"
 							                                 FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
-							                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory}" />
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.BSTDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                             <Controls:FileOrDirectorySetting Caption="DBDB"
 							                                 IsDirectoryBrowser="False"
+                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
 							                                 DialogTitle="Choose the Digital Bathymetric Database file"
 							                                 FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
-							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory}" />
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Header="Required Extraction Tools"
@@ -101,7 +108,8 @@
                         <StackPanel Orientation="Vertical">
                             <Controls:FileOrDirectorySetting Caption="DBDB Extractor"
 							                                 IsDirectoryBrowser="False"
-							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath}" />
+                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                     </GroupBox>

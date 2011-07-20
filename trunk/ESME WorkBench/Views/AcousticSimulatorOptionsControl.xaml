@@ -106,11 +106,11 @@
 							          Padding="5"
 							          DockPanel.Dock="Top">
                     <StackPanel Orientation="Vertical">
-                        <Controls:FileOrDirectorySetting Caption="RAM Executable" DataContext="{Binding NAEMOTools}"
+                        <Controls:FileOrDirectorySetting Caption="RAM Executable" 
                                                  Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"                                                 
                                                  IsDirectoryBrowser="False"
 								                 VerticalAlignment="Center"								                 
-                                                 FileName="{Binding RAMExecutable, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
+                                                 FileName="{Binding NAEMOTools.RAMExecutable, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </GroupBox>
             </StackPanel>
@@ -155,15 +155,15 @@
                         <Controls:FileOrDirectorySetting Caption="Python executable"
                                                          Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" 
 									                                 IsDirectoryBrowser="False"
-									                                 FileName="{Binding CASSSettings.PythonExecutablePath}" />
+									                                 FileName="{Binding CASSSettings.PythonExecutablePath, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                         <Controls:FileOrDirectorySetting Caption="CASS executable"
                                                          Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" 
 									                                 IsDirectoryBrowser="False"
-									                                 FileName="{Binding CASSSettings.CASSExecutablePath}" />
+									                                 FileName="{Binding CASSSettings.CASSExecutablePath, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                         <Controls:FileOrDirectorySetting Caption="Python run script"
                                                          Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" 
 									                                 IsDirectoryBrowser="False"
-									                                 FileName="{Binding CASSSettings.PythonScriptPath}" />
+									                                 FileName="{Binding CASSSettings.PythonScriptPath, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Header="Parameter Files (not currently implemented!)"
@@ -222,9 +222,10 @@
                         <Controls:ValidatingTextBox BoundField="REFMSSettings.NumberOfDepthPoints"/>
                     </StackPanel>
                     <Controls:FileOrDirectorySetting Caption="REFMS executable"
+                                                     Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" 
 								                                 IsDirectoryBrowser="False"
 								                                 Margin="5 20 5 10"
-								                                 FileName="{Binding REFMSSettings.REFMSExecutablePath}" />
+								                                 FileName="{Binding REFMSSettings.REFMSExecutablePath, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
             </DockPanel>
         </TabItem>

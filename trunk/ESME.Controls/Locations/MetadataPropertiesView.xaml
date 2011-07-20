@@ -20,16 +20,13 @@
                    Visibility="{Binding IsBathymetryDisplay, Converter={StaticResource boolToVisibilityConverter}}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Overlay"/>
-                <TextBox Text="{Binding BathymetryMetadata.OverlayFilename}"/>
+                <TextBlock Text="{Binding BathymetryMetadata.OverlayFilename}"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Resolution"/>
-               
-                <TextBox Text="{Binding BathymetryMetadata.Resolution}">
-                    <i:Interaction.Behaviors>
-                        <cinch:NumericTextBoxBehaviour />
-                    </i:Interaction.Behaviors>
-                </TextBox> 
+
+                <TextBlock Text="{Binding BathymetryMetadata.Resolution}"/>
+                    
             </StackPanel>
         </StackPanel>
 
@@ -37,15 +34,12 @@
                    Visibility="{Binding IsOverlayDisplay, Converter={StaticResource boolToVisibilityConverter}}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Source overlay"/>
-                <TextBox Text="{Binding OverlayMetadata.OverlayFilename}"/>
+                <TextBlock Text="{Binding OverlayMetadata.OverlayFilename}"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Buffer Zone size"/>
-                <TextBox Text="{Binding OverlayMetadata.BufferZoneSize}">
-                    <i:Interaction.Behaviors>
-                        <cinch:NumericTextBoxBehaviour />
-                    </i:Interaction.Behaviors>
-                </TextBox>
+                <TextBlock Text="{Binding OverlayMetadata.BufferZoneSize}"/>
+                   
             </StackPanel>
         </StackPanel>
 
@@ -54,7 +48,7 @@
                    Visibility="{Binding IsEnvironmentDisplay, Converter={StaticResource boolToVisibilityConverter}}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Overlay"/>
-                <TextBox Text="{Binding EnvironmentMetadata.OverlayFilename}"/>
+                <TextBlock Text="{Binding EnvironmentMetadata.OverlayFilename}"/>
             </StackPanel>
            <!-- <Controls:TimePeriodComboBox SelectedItem="{Binding EnvironmentMetadata.TimePeriod}"/> -->
         </StackPanel>
@@ -62,11 +56,11 @@
         <StackPanel Orientation="Vertical"  Visibility="{Binding IsScenarioDisplay, Converter={StaticResource boolToVisibilityConverter}}">
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Bathymetry"/>
-                <TextBox Text="{Binding ScenarioMetadata.BathymetryFilename}"/>
+                <TextBlock Text="{Binding ScenarioMetadata.BathymetryFilename}"/>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <TextBlock Text="Environment"/>
-                <TextBox Text="{Binding ScenarioMetadata.EnvironmentFilename}"/>
+                <TextBlock Text="{Binding ScenarioMetadata.EnvironmentFilename}"/>
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
