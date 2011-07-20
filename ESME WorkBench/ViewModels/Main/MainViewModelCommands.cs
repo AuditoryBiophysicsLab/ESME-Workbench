@@ -52,6 +52,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region LaunchScenarioEditorCommand
 
+#if EXPERIMENTS_SUPPORTED
         public SimpleCommand<object, object> LaunchScenarioEditorCommand
         {
             get
@@ -59,6 +60,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _launchScenarioEditor ?? (_launchScenarioEditor = new SimpleCommand<object, object>(arg => (Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath != null) && (File.Exists(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath)), obj =>
                                                                                                                                                                                                                                                  {
                                                                                                                                                                                                                                                      string arguments;
+
+
                                                                                                                                                                                                                                                      if ((_experiment == null) || (_experiment.ScenarioFileName == null) || (!File.Exists(_experiment.ScenarioFileName))) arguments = null;
                                                                                                                                                                                                                                                      else arguments = "\"" + _experiment.ScenarioFileName + "\"";
                                                                                                                                                                                                                                                      new Process
@@ -75,6 +78,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _launchScenarioEditor;
+#endif
 
         #endregion
 
@@ -108,7 +112,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region LaunchScenarioSimulatorCommand
-
+#if EXPERIMENTS_SUPPORTED
         public SimpleCommand<object, object> LaunchScenarioSimulatorCommand
         {
             get
@@ -136,11 +140,12 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _launchScenarioSimulator;
-
+#endif
         #endregion
 
         #region ViewScenarioSimulatorLogDirCommand
 
+#if EXPERIMENTS_SUPPORTED
         public SimpleCommand<object, object> ViewScenarioSimulatorLogDirCommand
         {
             get
@@ -156,7 +161,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _viewScenarioSimulatorLogDir;
-
+#endif
         #endregion
 
         #region LaunchNUWCReportGeneratorCommand
@@ -229,6 +234,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region ViewClosingCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
         {
@@ -247,10 +253,11 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, EventToCommandArgs> _viewClosing;
-
+#endif
         #endregion
 
         #region OpenExperimentCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> OpenExperimentCommand
         {
@@ -258,7 +265,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _openExperiment;
-
+#endif
         #endregion
 
         #region RefreshMapCommand
@@ -273,6 +280,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region ResetScenarioZoomLevelCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> ResetScenarioZoomLevelCommand
         {
@@ -286,7 +294,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _resetScenarioZoomLevel;
-
+#endif
         #endregion
 
         #region ShowEnvironmentSettingsCommand
@@ -306,6 +314,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region SaveExperimentCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> SaveExperimentCommand
         {
@@ -313,10 +322,11 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _saveExperiment;
-
+#endif
         #endregion
 
         #region SaveExperimentAsCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> SaveExperimentAsCommand
         {
@@ -324,10 +334,11 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _saveExperimentAs;
-
+#endif
         #endregion
 
         #region NewExperimentCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> NewExperimentCommand
         {
@@ -335,7 +346,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _newExperiment;
-
+#endif
         #endregion
 
         #region AddShapefileCommand
@@ -396,6 +407,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region QuickLookCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> QuickLookCommand
         {
@@ -407,7 +419,7 @@ namespace ESMEWorkBench.ViewModels.Main
             return (_experiment != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null);
         }
         SimpleCommand<object, object> _quickLookPoint;
-
+#endif
         #endregion
 
         #region AddAnimalPopulationFileCommand
@@ -474,6 +486,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region CreateMMMBSBathymetryFileCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> CreateMMMBSBathymetryFileCommand
         {
@@ -481,10 +494,11 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _createMMMBSBathymetryFileCommand;
-
+#endif
         #endregion
 
         #region RunExperimentCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> RunExperimentCommand
         {
@@ -498,7 +512,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _runExperiment;
-
+#endif
         #endregion
 
         #region AnalysisPointCommand
@@ -523,24 +537,14 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region DavesTestCommand
-
-        public SimpleCommand<object, object> DavesTestCommand
-        {
-            get { return _davesTest ?? (_davesTest = new SimpleCommand<object, object>((obj) => MediatorMessage.Send(MediatorMessage.DavesTestCommand, true))); }
-        }
-
-        SimpleCommand<object, object> _davesTest;
-
-        #endregion
-
         #region NAVOEnvironmentBuilderCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> NAVOEnvironmentBuilderCommand
         {
             get
             {
-                return _nAVOEnvironmentBuilder ?? (_nAVOEnvironmentBuilder = new SimpleCommand<object, object>(delegate { return true; }, delegate
+                return _navoEnvironmentBuilder ?? (_navoEnvironmentBuilder = new SimpleCommand<object, object>(delegate { return true; }, delegate
                                                                                                                              {
                                                                                                                                  var environmentBuilderViewModel = new EnvironmentBuilderViewModel(_messageBoxService, Globals.AppSettings, _experiment);
                                                                                                                                  var result = _visualizerService.ShowDialog("EnvironmentBuilderView", environmentBuilderViewModel);
@@ -549,11 +553,12 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        SimpleCommand<object, object> _nAVOEnvironmentBuilder;
-
+        SimpleCommand<object, object> _navoEnvironmentBuilder;
+#endif
         #endregion
 
         #region ExportAnalysisPointsToCASSCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> ExportAnalysisPointsToCASSCommand
         {
@@ -570,10 +575,11 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _exportAnalysisPointsToCASS;
-
+#endif
         #endregion
 
         #region ConfigureAcousticModelsCommand
+#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> ConfigureAcousticModelsCommand
         {
@@ -592,7 +598,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _configureAcousticModelsCommand;
-
+#endif
         #endregion
 
         #region AcousticSimulatorOptionsCommand

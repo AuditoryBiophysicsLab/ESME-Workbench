@@ -32,9 +32,12 @@ namespace ESMEWorkBench.ViewModels.Main
         readonly IHRCSaveFileService _saveFileService;
         readonly IViewAwareStatus _viewAwareStatus;
         readonly IUIVisualizerService _visualizerService;
+#if EXPERIMENTS_SUPPORTED
         Experiment _experiment;
+#endif
         //TransmissionLossQueueCalculatorViewModel _bellhopQueueCalculatorViewModel;
         Dispatcher _dispatcher;
+        public const bool ExperimentsCurrentlySupported = false;
         #endregion
 
         #region Constructors
@@ -81,7 +84,7 @@ namespace ESMEWorkBench.ViewModels.Main
             IsLatLonGridVisible = Settings.Default.ShowGrid;
             IsScaleBarVisible = Settings.Default.ShowScaleBar;
             IsPanZoomVisible = Settings.Default.ShowPanZoom;
-
+#if EXPERIMENTS_SUPPORTED
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
             {
@@ -103,12 +106,13 @@ namespace ESMEWorkBench.ViewModels.Main
             else
             {
                 _experiment = new Experiment();
-                HookPropertyChanged(_experiment);
-                _experiment.InitializeIfViewModelsReady();
+                //HookPropertyChanged(_experiment);
+                //_experiment.InitializeIfViewModelsReady();
                 //DecoratedExperimentName = "<New experiment>";
             }
-            HookPropertyChanged(_experiment);
+            //HookPropertyChanged(_experiment);
             //TestRecentFiles();
+#endif
         }
 
         void HookPropertyChanged(INotifyPropertyChanged experiment)
@@ -120,13 +124,13 @@ namespace ESMEWorkBench.ViewModels.Main
                                                   case "IsChanged":
                                                       if (_experiment.IsChanged)
                                                       {
-                                                          //if (DecoratedExperimentName.EndsWith(" *")) return;
-                                                          //DecoratedExperimentName += " *";
+                                                          if (DecoratedExperimentName.EndsWith(" *")) return;
+                                                          DecoratedExperimentName += " *";
                                                       }
                                                       else
                                                       {
-                                                          //if (!DecoratedExperimentName.EndsWith(" *")) return;
-                                                          //DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
+                                                          if (!DecoratedExperimentName.EndsWith(" *")) return;
+                                                          DecoratedExperimentName.Remove(DecoratedExperimentName.Length - 2);
                                                       }
                                                       break;
                                               }
@@ -170,6 +174,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_mouseEarthCoordinate == value) return;
                 _mouseEarthCoordinate = value;
+#if EXPERIMENTS_SUPPORTED
                 if (_experiment.Bathymetry != null)
                 {
                     EarthCoordinate<float> mouseDepth;
@@ -181,6 +186,8 @@ namespace ESMEWorkBench.ViewModels.Main
                     }
                     else MouseDepth = null;
                 }
+#else
+#endif
                 NotifyPropertyChanged(MouseEarthCoordinateChangedEventArgs);
             }
         }
@@ -208,6 +215,21 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public bool IsDebugMode { get; set; }
+
+        public bool IsDebugMode
+        {
+            get
+            {
+#if DEBUG
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        #endregion
 
         #endregion
 
@@ -248,6 +270,10 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             if (refreshNeeded) MediatorMessage.Send(MediatorMessage.RefreshMap);
         }
+        #endregion
+
+
+#if EXPERIMENTS_SUPPORTED
 
         public bool UserWantsToAddScenarioFile(string fileName)
         {
@@ -255,8 +281,6 @@ namespace ESMEWorkBench.ViewModels.Main
             if ((_experiment.ScenarioFileName != null) && (_messageBoxService.ShowYesNo("A scenario is already part of this experiment.\nWould you like to replace the current scenario file with this one?", CustomDialogIcons.Exclamation) != CustomDialogResults.Yes)) return false;
             return true;
         }
-
-        #endregion
 
         #region Experiment Load/Save and associated utility functions
 
@@ -266,6 +290,8 @@ namespace ESMEWorkBench.ViewModels.Main
         /// <returns>true if the user wants to cancel the current operation, false otherwise.</returns>
         bool UserCanceledBecauseExperimentUnsaved()
         {
+            return false;
+
             if ((_experiment == null) || (!_experiment.IsChanged)) return false;
             var results = _messageBoxService.ShowYesNoCancel("The current experiment has changed.\nWould you like to save it first?", CustomDialogIcons.Exclamation);
             if (results == CustomDialogResults.Cancel) return true;
@@ -342,23 +368,6 @@ namespace ESMEWorkBench.ViewModels.Main
             HookPropertyChanged(_experiment);
         }
 
-        void OpenScenarioFile(string fileName)
-        {
-            _openFileService.FileName = null;
-            if (fileName == null)
-            {
-                _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-                _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
-                _openFileService.FileName = null;
-                var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
-                if (!result.HasValue || !result.Value) return;
-                fileName = _openFileService.FileName;
-            }
-            if (!UserWantsToReplaceScenarioFileIfPresent(fileName)) return;
-            if (_openFileService.FileName != null) Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-            MediatorMessage.Send(MediatorMessage.AddScenarioFileCommand, fileName);
-        }
-
         bool SaveExperimentDialog()
         {
             _saveFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
@@ -406,11 +415,31 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+#endif
+        void OpenScenarioFile(string fileName)
+        {
+            _openFileService.FileName = null;
+            if (fileName == null)
+            {
+                _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
+                _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
+                _openFileService.FileName = null;
+                var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
+                if (!result.HasValue || !result.Value) return;
+                fileName = _openFileService.FileName;
+            }
+            if (!UserWantsToReplaceScenarioFileIfPresent(fileName)) return;
+            if (_openFileService.FileName != null) Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
+            MediatorMessage.Send(MediatorMessage.AddScenarioFileCommand, fileName);
+        }
+
         void ShowAboutView()
         {
             var aboutViewModel = new AboutViewModel();
             _visualizerService.ShowDialog("AboutView", aboutViewModel);
         }
+
+#if EXPERIMENTS_SUPPORTED
 
         bool UserWantsToReplaceScenarioFileIfPresent(string filename)
         {
@@ -448,7 +477,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _messageBoxService.ShowError(string.Format("{0}: {1}", ex.Message, ex.InnerException.Message));
             }
         }
-
+#endif
         #region public bool IsLatLonGridVisible { get; set; }
 
         public bool IsLatLonGridVisible

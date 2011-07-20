@@ -222,6 +222,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                     new ShapefileMapLayer
                     {
+                            Name = "Base Map",
                             LineColor = Colors.Beige,
                             AreaStyle = AreaStyles.Country2,
                             CanBeRemoved = false,
@@ -229,10 +230,10 @@ namespace ESMEWorkBench.ViewModels.Main
                             CanChangeAreaColor = true,
                             CanChangeLineColor = true,
                             ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
-                            Name = "Base Map",
                             LayerType = LayerType.BaseMap,
                     },
             };
+            ZoomToWorldMap();
         }
 
         void DisplayRangeComplex()
