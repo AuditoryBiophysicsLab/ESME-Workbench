@@ -258,8 +258,14 @@
 					                ToolTipDescription="Select or change the environmental data to be used for this experiment. A scenario file must be selected AND the experiment must be saved before environmental data can be selected."
 					                Command="{Binding ShowEnvironmentSettingsCommand}" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Sounds">
-					<r:RibbonToggleButton Label="Analysis Point"
+                <r:RibbonGroup Header="Acoustics">
+                    <r:RibbonButton Label="Export"
+					                LargeImageSource="..\Images\LargeIcons\export-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\export-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Export all Analysis Points as CASS jobs"
+					                Command="{Binding ExportAnalysisPointsToCASSCommand}" />
+                    <r:RibbonToggleButton Label="Analysis Point"
 					                LargeImageSource="..\Images\LargeIcons\bullet-2-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -274,12 +280,6 @@
 					                ToolTipDescription="Add a new fixed sound source to the experiment"
 					                Command="{Binding DisabledCommand}" />
                     -->
-                    <r:RibbonButton Label="Export"
-					                LargeImageSource="..\Images\LargeIcons\export-icon.png"
-					                SmallImageSource="..\Images\SmallIcons\export-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Export all Analysis Points as CASS jobs"
-					                Command="{Binding ExportAnalysisPointsToCASSCommand}" />
                     <r:RibbonButton Label="Models"
 					                LargeImageSource="..\Images\LargeIcons\gnome_sound_recorder.png"
 					                SmallImageSource="..\Images\SmallIcons\gnome_sound_recorder.png"
@@ -393,9 +393,14 @@
 					                  ToolTipDescription="Shows and hides the scale bar overlay on the map"
 					                  IsChecked="{Binding IsScaleBarVisible}" />
                 </r:RibbonGroup>
-                <r:RibbonGroup Header="Sounds">
+                <r:RibbonGroup Header="Acoustics">
+                    <r:RibbonButton Label="Export"
+					                LargeImageSource="..\Images\SmallIcons\export-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\export-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Export all Analysis Points as CASS jobs"
+					                Command="{Binding ExportAnalysisPointsToCASSCommand}" />
                     <r:RibbonToggleButton Label="Analysis Point"
-					                LargeImageSource="..\Images\LargeIcons\bullet-2-icon.png"
 					                SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Add a new analysis point to the experiment"
@@ -409,11 +414,6 @@
 					                ToolTipDescription="Add a new fixed sound source to the experiment"
 					                Command="{Binding DisabledCommand}" />
                     -->
-                    <r:RibbonButton Label="Export"
-					                SmallImageSource="..\Images\SmallIcons\export-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Export all Analysis Points as CASS jobs"
-					                Command="{Binding ExportAnalysisPointsToCASSCommand}" />
                     <r:RibbonButton Label="Models"
 					                SmallImageSource="..\Images\SmallIcons\gnome_sound_recorder.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"

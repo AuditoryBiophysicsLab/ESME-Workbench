@@ -78,6 +78,9 @@
         </DataTemplate>
 	</Window.Resources>
 	<DockPanel>
+        <TextBlock DockPanel.Dock="Top" Foreground="Red">
+            We will remove the entire Radials panel and replace it with a comma-separated field for each radial
+        </TextBlock>
 		<DockPanel DockPanel.Dock="Bottom"
 		           LastChildFill="False"
 		           Margin="5 10">
