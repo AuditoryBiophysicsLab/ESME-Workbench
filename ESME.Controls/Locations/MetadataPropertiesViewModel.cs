@@ -218,31 +218,5 @@ namespace ESME.Views.Locations
         private bool _isOverlayDisplay;
 
         #endregion
-
-        #region OKCommand
-
-        public SimpleCommand<object, object> OkCommand
-        {
-            get
-            {
-                return _ok ??
-                       (_ok =
-                        new SimpleCommand<object, object>(delegate { return true; },
-                                                          delegate { OKHandler(); }));
-            }
-        }
-
-        private SimpleCommand<object, object> _ok;
-
-        private void OKHandler()
-        {
-            if (BathymetryMetadata != null) BathymetryMetadata.Save();
-            if (EnvironmentMetadata != null) EnvironmentMetadata.Save();
-            if (ScenarioMetadata != null) ScenarioMetadata.Save();
-            if (OverlayMetadata != null) OverlayMetadata.Save();
-            CloseActivePopUpCommand.Execute(true);
-        }
-
-        #endregion
     }
 }
