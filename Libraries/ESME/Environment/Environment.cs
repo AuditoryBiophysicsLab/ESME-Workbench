@@ -168,7 +168,7 @@ namespace ESME.Environment
                 if (!Bathymetry.Samples.GeoRect.Equals(areaToExport))
                 {
                     selectedBathymetry = new Bathymetry();
-                    selectedBathymetry.Samples.AddRange(Bathymetry.Samples.Values);
+                    selectedBathymetry.Samples.AddRange(Bathymetry.Samples);
                     selectedBathymetry.Samples.TrimToNearestPoints(areaToExport);
                     if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
                 }
@@ -223,7 +223,7 @@ namespace ESME.Environment
                 if (!Bathymetry.Samples.GeoRect.Equals(areaToExport))
                 {
                     selectedBathymetry = new Bathymetry();
-                    selectedBathymetry.Samples.AddRange(Bathymetry.Samples.Values);
+                    selectedBathymetry.Samples.AddRange(Bathymetry.Samples);
                     selectedBathymetry.Samples.TrimToNearestPoints(areaToExport);
                     if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
                 }

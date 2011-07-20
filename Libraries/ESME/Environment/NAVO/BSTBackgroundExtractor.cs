@@ -48,7 +48,7 @@ namespace ESME.Environment.NAVO
             for (var lat = south; lat < north; lat++)
                 for (var lon = west; lon < east; lon++)
                 {
-                    var data = ReadDataset(highResGroup, lowResGroup, lat, lon);
+                    var data = ReadDataset(null, lowResGroup, lat, lon);
                     //if (data != null) results.Samples.AddRange(data.Where(extractionArea.Contains));
                     if (data != null) Sediment.Samples.AddRange(data);
                     backgroundExtractor.Value++;
@@ -106,6 +106,7 @@ namespace ESME.Environment.NAVO
 
         static short[,] ReadDataset(H5FileOrGroupId groupId, int latitude, int longitude)
         {
+            if (groupId == null) return null;
             try
             {
                 var data = H5D.open(groupId, string.Format("{0}_{1}", latitude, longitude));
