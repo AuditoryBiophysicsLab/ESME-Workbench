@@ -17,7 +17,7 @@ namespace ESME.Metadata
 {
     public class NAEMOBathymetryMetadata : NAEMOMetadataBase
     {
-        new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes){typeof(EarthCoordinate), typeof(GeoRect)};
+        new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes) { typeof(EarthCoordinate), typeof(GeoRect) };
 
 #if true
         public static NAEMOBathymetryMetadata FromBathymetryFile(string naemoBathymetryFilename, out Bathymetry bathymetry)
@@ -103,19 +103,20 @@ namespace ESME.Metadata
                 writer.Write(sb.ToString());
 
             return new NAEMOBathymetryMetadata
-            {
-                Resolution = resolution,
-                Bounds = bathymetry.Samples.GeoRect,
-                OverlayFilename = overlayFilename,
-                Filename = metaDataFilename,
-            };
+                       {
+                           Resolution = resolution,
+                           Bounds = bathymetry.Samples.GeoRect,
+                           OverlayFilename = overlayFilename,
+                           PointCount = bathymetry.Samples.Count,
+                           Filename = metaDataFilename,
+                       };
         }
-        
+
 #endif
         public static void CreateMissingBathymetryMetadata(string bathymetryPath)
         {
             var files = Directory.GetFiles(bathymetryPath, "*.txt");
-            foreach (var file in files.Where(file => !File.Exists(MetadataFilename(file))).Where(file => !file.ToLower().EndsWith("security_readme.txt"))) 
+            foreach (var file in files.Where(file => !File.Exists(MetadataFilename(file))).Where(file => !file.ToLower().EndsWith("security_readme.txt")))
             {
                 Bathymetry bathymetry;
                 var bathyMetadata = FromBathymetryFile(file, out bathymetry);
@@ -158,5 +159,24 @@ namespace ESME.Metadata
         float _resolution;
 
         #endregion
+
+        #region public int PointCount { get; set; }
+
+        public int PointCount
+        {
+            get { return _pointCount; }
+            set
+            {
+                if (_pointCount == value) return;
+                _pointCount = value;
+                NotifyPropertyChanged(PointCountChangedEventArgs);
+            }
+        }
+
+        private static readonly PropertyChangedEventArgs PointCountChangedEventArgs = ObservableHelper.CreateArgs<NAEMOBathymetryMetadata>(x => x.PointCount);
+        private int _pointCount;
+
+        #endregion
+
     }
 }
