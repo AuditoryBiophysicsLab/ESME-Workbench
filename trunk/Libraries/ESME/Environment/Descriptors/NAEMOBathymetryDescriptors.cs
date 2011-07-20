@@ -14,7 +14,8 @@ namespace ESME.Environment.Descriptors
             {
                 if ((backgroundTask != null) && (backgroundTask.CancellationPending)) return;
                 if (backgroundTask != null) backgroundTask.Value++;
-                if ((bathyItem.Value == null) || (bathyItem.Value.Metadata != null)) continue;
+                if ((bathyItem.Value == null) || ((bathyItem.Value.Metadata != null) && (bathyItem.Value.Metadata.PointCount != 0))) continue;
+
                 Bathymetry bathymetry;
                 bathyItem.Value.Metadata = NAEMOBathymetryMetadata.FromBathymetryFile(bathyItem.Value.DataFilename, out bathymetry);
                 bathyItem.Value.Metadata.Save();

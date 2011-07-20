@@ -651,7 +651,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 _selectedBathymetryDescriptor = value;
                 NotifyPropertyChanged(SelectedBathymetryDescriptorChangedEventArgs);
-                if (_selectedBathymetryDescriptor != null) SelectedBathymetryInfo = string.Format("Name: {0}\nResolution: {1} min\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename), _selectedBathymetryDescriptor.Metadata.Resolution, _selectedBathymetryDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
+                if (_selectedBathymetryDescriptor != null) SelectedBathymetryInfo = string.Format("Name: {0}\nResolution: {1} min\nSource Overlay: {2}\nNumber of Points: {3}", Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename), _selectedBathymetryDescriptor.Metadata.Resolution, _selectedBathymetryDescriptor.Metadata.OverlayFilename ?? "[Unknown]",_selectedBathymetryDescriptor.Metadata.PointCount);
                 IsBathymetryFileSelected = _selectedBathymetryDescriptor != null;
                 _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
             }
