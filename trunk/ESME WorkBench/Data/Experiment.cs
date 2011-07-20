@@ -592,6 +592,7 @@ namespace ESMEWorkBench.Data
 
         public Experiment()
         {
+#if false
             try
             {
                 Mediator.Instance.Register(this);
@@ -601,6 +602,7 @@ namespace ESMEWorkBench.Data
                 Debug.WriteLine("***********\nExperiment: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
+#endif
             Author = System.Environment.UserName;
             Created = DateTime.Now;
             PropertyChanged += delegate(object s, PropertyChangedEventArgs e) { if (e.PropertyName != "IsChanged") IsChanged = true; };

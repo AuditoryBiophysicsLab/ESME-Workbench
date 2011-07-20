@@ -39,7 +39,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EXPERIMENTS_SUPPORTED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -48,7 +48,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;EXPERIMENTS_SUPPORTED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -214,7 +214,6 @@
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\OverlayFileMapLayer.cs" />
-    <Compile Include="ViewModels\Main\EnvironmentSettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModelCommands.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\LayerListViewModel.cs">

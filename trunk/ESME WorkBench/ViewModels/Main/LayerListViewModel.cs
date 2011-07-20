@@ -69,6 +69,8 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.SetMapLayers)]
         void SetMapLayers(ObservableCollection<MapLayerViewModel> mapLayers) { MapLayers = mapLayers; }
 
+#if EXPERIMENTS_SUPPORTED
+
         #region public Experiment Experiment { get; set; }
 
         public Experiment Experiment
@@ -97,14 +99,12 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             Experiment = experiment;
         }
+#endif
 
         static void ViewLoaded()
         {
             MediatorMessage.Send(MediatorMessage.LayerListViewModelInitialized);
         }
-
-        [MediatorMessageSink(MediatorMessage.SetLayerCollection)]
-        void SetLayerCollection(ObservableCollection<MapLayerViewModel> mapLayers) { MapLayers = mapLayers; }
 
         [MediatorMessageSink(MediatorMessage.RemoveLayer)]
         void RemoveLayer(MapLayerViewModel layer)
