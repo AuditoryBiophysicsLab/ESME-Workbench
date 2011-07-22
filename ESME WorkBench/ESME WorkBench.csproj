@@ -664,6 +664,10 @@
       <Project>{49221733-2EB6-468F-8833-06C0E36B3C83}</Project>
       <Name>ESME.Views</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Libraries\C5\C5.csproj">
+      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
+      <Name>C5</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Libraries\ESME\ESME.csproj">
       <Project>{9BE4EC87-58B9-4B9F-8C27-4132BBD4A9B3}</Project>
       <Name>ESME</Name>
@@ -698,6 +702,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
   <PropertyGroup>

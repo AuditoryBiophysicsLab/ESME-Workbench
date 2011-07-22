@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -6,6 +7,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using C5;
+using C5.Comparers;
 using Cinch;
 using ESME;
 using ESMEWorkBench.Data;
@@ -86,7 +89,7 @@ namespace ESMEWorkBench.ViewModels.Main
             IsScaleBarVisible = Settings.Default.ShowScaleBar;
             IsPanZoomVisible = Settings.Default.ShowPanZoom;
 
-            //TestLongKeyedList();
+            //TestSorting();
 #if EXPERIMENTS_SUPPORTED
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
@@ -118,46 +121,41 @@ namespace ESMEWorkBench.ViewModels.Main
 #endif
         }
 
-        static void TestLongKeyedList()
+
+        static void TestSorting()
         {
-#if false
-            Console.Write("Creating 10K reversed...");
-            var test10K = new KeyedList<LongKeyListTestClass>();
-            for (var i = 9999; i >= 0; i--) test10K.Add(new LongKeyListTestClass { Value = i });
-            test10K.AddToTree();
-            Console.Write("Sorting 10K reversed...");
-            var sw = Stopwatch.StartNew();
-            test10K.TreeSort();
-            sw.Stop();
-            Console.WriteLine("{0} ms", sw.Elapsed.TotalMilliseconds);
+            var comparer = ComparerFactory<EarthCoordinate<float>>.CreateComparer((x, y) =>
+            {
+                var xLat = (int)(x.Latitude * 10000);
+                var yLat = (int)(y.Latitude * 10000);
+                if (xLat < yLat) return -1;
+                if (xLat > yLat) return 1;
+                var xLon = (int)(x.Longitude * 10000);
+                var yLon = (int)(y.Longitude * 10000);
+                if (xLon < yLon) return -1;
+                return xLon > yLon ? 1 : 0;
+            });
+            var set = new TreeSet<EarthCoordinate<float>>(comparer);
 
-            Console.Write("Creating 100K reversed...");
-            var test100K = new KeyedList<LongKeyListTestClass>();
-            for (var i = 99999; i >= 0; i--) test100K.Add(new LongKeyListTestClass { Value = i });
-            Console.Write("Sorting 100K reversed...");
-            sw = Stopwatch.StartNew();
-            test100K.TreeSort();
-            sw.Stop();
-            Console.WriteLine("{0} ms", sw.Elapsed.TotalMilliseconds);
-
-            Console.Write("Creating 1M reversed...");
-            var test1M = new KeyedList<LongKeyListTestClass>();
-            for (var i = 999999; i >= 0; i--) test1M.Add(new LongKeyListTestClass { Value = i });
-            Console.Write("Sorting 1M reversed...");
-            sw = Stopwatch.StartNew();
-            test1M.TreeSort();
-            sw.Stop();
-            Console.WriteLine("{0} ms", sw.Elapsed.TotalMilliseconds);
-
-            Console.Write("Creating 10M reversed...");
-            var test10M = new KeyedList<LongKeyListTestClass>();
-            for (var i = 9999999; i >= 0; i--) test10M.Add(new LongKeyListTestClass { Value = i });
-            Console.Write("Sorting 10M reversed...");
-            sw = Stopwatch.StartNew();
-            test10M.TreeSort();
-            sw.Stop();
-            Console.WriteLine("{0} ms", sw.Elapsed.TotalMilliseconds);
-#endif
+            char[] separators = { ' ' };
+            var curLineCount = 0;
+            using (var stream = new StreamReader(File.Open(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Bathymetry\Jax_Ops_Area_75km_200km_0.10min.txt", FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                var curLine = stream.ReadLine();
+                while (curLine != null)
+                {
+                    curLineCount++;
+                    var fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+                    var latitude = double.Parse(fields[0]);
+                    var longitude = double.Parse(fields[1]);
+                    var depth = float.Parse(fields[2]) * -1;
+                    set.Add(new EarthCoordinate<float>(latitude, longitude, depth));
+                    curLine = stream.ReadLine();
+                }
+            }
+            Console.WriteLine(curLineCount + " items added to set");
+            var result = set.ToArray();
+            Console.WriteLine(result.Length + " items returned by ToArray()");
         }
 
         void HookPropertyChanged(INotifyPropertyChanged experiment)
