@@ -28,20 +28,27 @@
 			<Setter Property="TextBlock.TextAlignment"
 			        Value="Left" />
 			<Setter Property="Control.Margin"
-			        Value="5 5 5 0" />
+			        Value="0 5 0 0" />
 		</Style>
-		<Style x:Key="DetailValueStyle">
-			<Setter Property="TextBlock.TextAlignment"
+        <Style x:Key="DetailValueStyleReadonly" TargetType="Label">
+            <Setter Property="TextBlock.TextAlignment"
 			        Value="Left" />
-			<Setter Property="Control.Background"
+            <Setter Property="Control.Background"
 			        Value="#EEEEEE" />
-			<Setter Property="Control.BorderThickness"
+            <Setter Property="Control.BorderThickness"
 			        Value="1" />
-			<Setter Property="Control.BorderBrush"
+            <Setter Property="Control.BorderBrush"
 			        Value="LightGray" />
-			<Setter Property="Control.Margin"
-			        Value="5 0 5 0" />
-		</Style>
+            <Setter Property="Height" Value="22" />
+        </Style>
+        <Style x:Key="DetailValueStyleEditable" TargetType="TextBox">
+            <Setter Property="TextBlock.TextAlignment"
+			        Value="Left" />
+            <Setter Property="Control.BorderThickness"
+			        Value="1" />
+            <Setter Property="Control.BorderBrush"
+			        Value="LightGray" />
+        </Style>
         <Style x:Key="ModeListItemStyle"
 		       TargetType="ListBoxItem">
 			<Setter Property="KeyboardNavigation.AcceptsReturn"
@@ -78,9 +85,6 @@
         </DataTemplate>
 	</Window.Resources>
 	<DockPanel>
-        <TextBlock DockPanel.Dock="Top" Foreground="Red">
-            We will remove the entire Radials panel and replace it with a comma-separated field for each radial
-        </TextBlock>
 		<DockPanel DockPanel.Dock="Bottom"
 		           LastChildFill="False"
 		           Margin="5 10">
@@ -96,6 +100,27 @@
 			        DockPanel.Dock="Right"
 			        Command="{Binding OkCommand}" />
 		</DockPanel>
+        <GroupBox Header="Analysis point location"
+                  DockPanel.Dock="Top">
+            <DockPanel LastChildFill="False">
+                <StackPanel Orientation="Vertical" DockPanel.Dock="Left" HorizontalAlignment="Stretch">
+                    <TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="Latitude"
+						           ToolTip="The name of the selected mode" />
+                    <TextBox Style="{StaticResource DetailValueStyleEditable}"
+						       Text="{Binding SelectedMode.Name}" />
+
+                </StackPanel>
+                <StackPanel Orientation="Vertical" DockPanel.Dock="Right" HorizontalAlignment="Stretch">
+                    <TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="Longitude"
+						           ToolTip="The name of the selected mode" />
+                    <TextBox Style="{StaticResource DetailValueStyleEditable}"
+						       Text="{Binding SelectedMode.Name}" />
+
+                </StackPanel>
+            </DockPanel>
+        </GroupBox>
 		<GroupBox DockPanel.Dock="Left"
 		          Header="Available Modes">
 			<ListBox x:Name="ModeList" 
@@ -112,49 +137,69 @@
 			<DockPanel>
 				<GroupBox DockPanel.Dock="Left"
 				          Margin="5 5 2 5"
+                          Padding="5"
+                          MinWidth="400"
 				          Header="Details">
 					<StackPanel Orientation="Vertical"
 					            Grid.Column="0"
-					            HorizontalAlignment="Right">
-						<TextBlock Style="{StaticResource DetailLabelStyle}"
+					            HorizontalAlignment="Stretch">
+                        <TextBlock Style="{StaticResource DetailLabelStyle}"
 						           Text="Name"
 						           ToolTip="The name of the selected mode" />
-						<Label Style="{StaticResource DetailValueStyle}"
+                        <Label Style="{StaticResource DetailValueStyleReadonly}"
 						       Content="{Binding SelectedMode.Name}" />
-						<TextBlock Style="{StaticResource DetailLabelStyle}"
-						           Text="Source Depth"
+                        <TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="Radials (deg)"
+						           ToolTip="The name of the selected mode" />
+                        <DockPanel LastChildFill="True">
+                            <!-- The intent for the visibility binding here is that if ANY of the radial lists in ANY mode in the current analysis point
+                                 is different, the button should become visble.  Perhaps it should simply enable/disable as normal but doing it this way
+                                 may be cooler ;) -->
+                            <Button DockPanel.Dock="Right" 
+                                    Margin="5 0 0 0"
+                                    Content="Apply to all" 
+                                    Visibility="{Binding IsApplyToAllCommandEnabled, Converter={StaticResource TrueVisibleFalseCollapsed}}"
+                                    Command="{Binding ApplyToAllCommand}"
+                                    ToolTip="Apply this radial configuration to all modes in this analysis point" />
+                        <TextBox Style="{StaticResource DetailValueStyleEditable}" 
+                                 Text="{Binding SelectedMode.Radials}" />
+                        </DockPanel>
+                        <TextBlock Style="{StaticResource DetailLabelStyle}"
+						           Text="Source Depth (m)"
 						           ToolTip="Source depth, in meters, of the selected mode" />
-						<Label Style="{StaticResource DetailValueStyle}"
+                        <Label Style="{StaticResource DetailValueStyleReadonly}"
 						       Content="{Binding SelectedMode.AcousticProperties.SourceDepth}" />
 						<TextBlock Style="{StaticResource DetailLabelStyle}"
-						           Text="High Frequency"
+						           Text="High Frequency (Hz)"
 						           ToolTip="High frequency, in hertz, of the selected mode" />
-						<Label Style="{StaticResource DetailValueStyle}"
+                        <Label Style="{StaticResource DetailValueStyleReadonly}"
 						       Content="{Binding SelectedMode.AcousticProperties.HighFrequency}" />
 						<TextBlock Style="{StaticResource DetailLabelStyle}"
-						           Text="Low Frequency"
+						           Text="Low Frequency (Hz)"
 						           ToolTip="Low frequency, in hertz, of the selected mode" />
-						<Label Style="{StaticResource DetailValueStyle}"
+                        <Label Style="{StaticResource DetailValueStyleReadonly}"
 						       Content="{Binding SelectedMode.AcousticProperties.LowFrequency}" />
 						<TextBlock Style="{StaticResource DetailLabelStyle}"
-						           Text="Vertical beam width"
+						           Text="Vertical beam width (deg)"
 						           ToolTip="Vertical beam width, in degrees, of the selected mode" />
-						<Label Style="{StaticResource DetailValueStyle}"
+                        <Label Style="{StaticResource DetailValueStyleReadonly}"
 						       Content="{Binding SelectedMode.AcousticProperties.VerticalBeamWidth}" />
 						<TextBlock Style="{StaticResource DetailLabelStyle}"
-						           Text="D/E angle"
+						           Text="D/E angle (deg)"
 						           ToolTip="Depression/elevation angle, in degrees, of the selected mode.  Positive values mean that the source is aimed toward the bottom" />
-						<Label Style="{StaticResource DetailValueStyle}"
+                        <Label Style="{StaticResource DetailValueStyleReadonly}"
 						       Content="{Binding SelectedMode.AcousticProperties.DepressionElevationAngle}" />
 						<TextBlock Style="{StaticResource DetailLabelStyle}"
-						           Text="Radius"
+						           Text="Radius (m)"
 						           ToolTip="Radius, in meters, of the selected mode.  This value is the maximum distance from the source for which a transmission loss will be calculated.  All receivers further away from the source are presumed by the model to not be exposed to this source." />
-						<Label Style="{StaticResource DetailValueStyle}"
+                        <Label Style="{StaticResource DetailValueStyleReadonly}"
 						       Content="{Binding SelectedMode.Radius}" />
 					</StackPanel>
 				</GroupBox>
-				<GroupBox DockPanel.Dock="Right"
+				<!--
+                <GroupBox DockPanel.Dock="Right"
 				          Margin="0 5 5 5"
+                          Visibility="Collapsed"
 				          Header="Radials">
 					<DockPanel>
 						<ListBox DockPanel.Dock="Left"
@@ -209,7 +254,8 @@
 						</StackPanel>
 					</DockPanel>
 				</GroupBox>
+                -->
 			</DockPanel>
 		</GroupBox>
-	</DockPanel>
+    </DockPanel>
 </Window>

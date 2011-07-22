@@ -13,21 +13,24 @@ namespace ESME.Environment
     {
         public void Add(SoundSpeedField sourceField)
         {
+            var environmentDataList = EnvironmentData.ToList();
+            var itemsToAdd = new List<SoundSpeedProfileAverager>();
             foreach (var sourceProfile in sourceField.EnvironmentData)
             {
-                var profile = EnvironmentData.ToList().Find(p => p.Equals(sourceProfile));
-                if (profile == null) EnvironmentData.Add(new SoundSpeedProfileAverager(sourceProfile));
+                var profile = environmentDataList.Find(p => p.Equals(sourceProfile));
+                if (profile == null) itemsToAdd.Add(new SoundSpeedProfileAverager(sourceProfile));
                 else profile.Add(sourceProfile);
             }
+            EnvironmentData.AddRange(itemsToAdd);
         }
 
         public SoundSpeedField Average
         {
             get
             {
-                var result = new SoundSpeedField {TimePeriod = TimePeriod};
-                foreach (var averageProfile in EnvironmentData)
-                    result.EnvironmentData.Add(averageProfile.Average);
+                var environmentData = EnvironmentData.Select(averageProfile => averageProfile.Average);
+                var result = new SoundSpeedField { TimePeriod = TimePeriod };
+                result.EnvironmentData.AddRange(environmentData);
                 return result;
             }
         }
@@ -78,9 +81,9 @@ namespace ESME.Environment
         {
             if (temperatureField.TimePeriod != salinityField.TimePeriod) throw new DataException("");
             VerifyThatProfilePointsMatch(temperatureField, salinityField);
+            var environmentData = temperatureField.EnvironmentData.Select(temperatureProfile => ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
             var result = new SoundSpeedField { TimePeriod = temperatureField.TimePeriod };
-            foreach (var temperatureProfile in temperatureField.EnvironmentData)
-                result.EnvironmentData.Add(ChenMilleroLi.SoundSpeed(temperatureProfile, salinityField.EnvironmentData[temperatureProfile]));
+            result.EnvironmentData.AddRange(environmentData);
             return result;
         }
 

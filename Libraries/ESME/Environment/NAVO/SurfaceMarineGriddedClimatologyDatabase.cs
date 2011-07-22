@@ -52,6 +52,7 @@ namespace ESME.Environment.NAVO
             {
                 var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriods[timePeriodIndex] };
                 var monthsInCurTimePeriod = requiredMonths[timePeriodIndex];
+                var curTimePeriodEnvironmentData = new List<WindSample>();
                 foreach (var curLocation in selectedLocations)
                 {
                     var sum = 0f;
@@ -62,8 +63,9 @@ namespace ESME.Environment.NAVO
                         sum += monthlyWindData[curMonth].EnvironmentData[curLocation].Data;
                         count++;
                     }
-                    if (count > 0) curTimePeriodData.EnvironmentData.Add(new WindSample(curLocation, sum / count));
+                    if (count > 0) curTimePeriodEnvironmentData.Add(new WindSample(curLocation, sum / count));
                 }
+                curTimePeriodData.EnvironmentData.AddRange(curTimePeriodEnvironmentData);
                 if (!useExpandedExtractionArea) curTimePeriodData.EnvironmentData.TrimToNearestPoints(extractionArea);
                 wind.TimePeriods.Add(curTimePeriodData);
             }

@@ -12,6 +12,7 @@ using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.RecentFiles;
+using HRC.Collections;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.Utility;
@@ -84,6 +85,8 @@ namespace ESMEWorkBench.ViewModels.Main
             IsLatLonGridVisible = Settings.Default.ShowGrid;
             IsScaleBarVisible = Settings.Default.ShowScaleBar;
             IsPanZoomVisible = Settings.Default.ShowPanZoom;
+
+            //TestLongKeyedList();
 #if EXPERIMENTS_SUPPORTED
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
@@ -112,6 +115,48 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             //HookPropertyChanged(_experiment);
             //TestRecentFiles();
+#endif
+        }
+
+        static void TestLongKeyedList()
+        {
+#if false
+            Console.Write("Creating 10K reversed...");
+            var test10K = new KeyedList<LongKeyListTestClass>();
+            for (var i = 9999; i >= 0; i--) test10K.Add(new LongKeyListTestClass { Value = i });
+            test10K.AddToTree();
+            Console.Write("Sorting 10K reversed...");
+            var sw = Stopwatch.StartNew();
+            test10K.TreeSort();
+            sw.Stop();
+            Console.WriteLine("{0} ms", sw.Elapsed.TotalMilliseconds);
+
+            Console.Write("Creating 100K reversed...");
+            var test100K = new KeyedList<LongKeyListTestClass>();
+            for (var i = 99999; i >= 0; i--) test100K.Add(new LongKeyListTestClass { Value = i });
+            Console.Write("Sorting 100K reversed...");
+            sw = Stopwatch.StartNew();
+            test100K.TreeSort();
+            sw.Stop();
+            Console.WriteLine("{0} ms", sw.Elapsed.TotalMilliseconds);
+
+            Console.Write("Creating 1M reversed...");
+            var test1M = new KeyedList<LongKeyListTestClass>();
+            for (var i = 999999; i >= 0; i--) test1M.Add(new LongKeyListTestClass { Value = i });
+            Console.Write("Sorting 1M reversed...");
+            sw = Stopwatch.StartNew();
+            test1M.TreeSort();
+            sw.Stop();
+            Console.WriteLine("{0} ms", sw.Elapsed.TotalMilliseconds);
+
+            Console.Write("Creating 10M reversed...");
+            var test10M = new KeyedList<LongKeyListTestClass>();
+            for (var i = 9999999; i >= 0; i--) test10M.Add(new LongKeyListTestClass { Value = i });
+            Console.Write("Sorting 10M reversed...");
+            sw = Stopwatch.StartNew();
+            test10M.TreeSort();
+            sw.Stop();
+            Console.WriteLine("{0} ms", sw.Elapsed.TotalMilliseconds);
 #endif
         }
 

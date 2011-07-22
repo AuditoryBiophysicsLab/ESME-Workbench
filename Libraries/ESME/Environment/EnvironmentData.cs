@@ -41,14 +41,38 @@ namespace ESME.Environment
             }
         }
 
+        #region T[,] TwoDIndex { get; set; }
+
+        T[,] TwoDIndex
+        {
+            get 
+            {
+                if (_twoDIndex != null) return _twoDIndex;
+                _twoDIndex = new T[Longitudes.Count,Latitudes.Count];
+                for (var lonIndex = 0; lonIndex < Longitudes.Count; lonIndex++)
+                {
+                    var lon = Longitudes[lonIndex];
+                    for (var latIndex = 0; latIndex < Latitudes.Count; latIndex++)
+                    {
+                        var lat = Latitudes[latIndex];
+                        var key = new LatLonKey(lat, lon);
+                        _twoDIndex[lonIndex, latIndex] = _sortedList[key];
+                    }
+                }
+                return _twoDIndex;
+            }
+        }
+
+        T[,] _twoDIndex;
+
+        #endregion
+
+
         public T this[uint lonIndex, uint latIndex]
         {
             get
             {
-                if ((lonIndex >= Longitudes.Count) || (latIndex >= Latitudes.Count)) throw new IndexOutOfRangeException(string.Format("EnvironmentData: Attempted to access [{0}, {1}] when max indices are [{2}, {3}]", lonIndex, latIndex, Longitudes.Count, Latitudes.Count));
-                var key = new LatLonKey(Latitudes[(int)latIndex], Longitudes[(int)lonIndex]);
-                var keyIndex = FindKeyIndex(key);
-                return _sortedList.Values[keyIndex];
+                return TwoDIndex[lonIndex, latIndex];
             }
         }
 
@@ -60,17 +84,17 @@ namespace ESME.Environment
             var sourceHeight = source.Latitudes.Count;
             var widthStep = (double)sourceWidth / outputWidth;
             var heightStep = (double)sourceHeight / outputHeight;
-
-            for (var widthIndex = 0; widthIndex < outputWidth; widthIndex++)
+            var resultList = new List<T>();
+            for (var heightIndex = 0; heightIndex < outputHeight; heightIndex++)
             {
-                var sourceWidthIndex = (uint)((widthIndex * widthStep) + (widthStep / 2));
-                for (var heightIndex = 0; heightIndex < outputHeight; heightIndex++)
+                var sourceHeightIndex = (uint)((heightIndex * heightStep) + (heightStep / 2));
+                for (var widthIndex = 0; widthIndex < outputWidth; widthIndex++)
                 {
-                    var sourceHeightIndex = (uint)((heightIndex * heightStep) + (heightStep / 2));
-                    result.Add(source[sourceWidthIndex, sourceHeightIndex]);
+                    var sourceWidthIndex = (uint)((widthIndex * widthStep) + (widthStep / 2));
+                    resultList.Add(source.TwoDIndex[sourceWidthIndex, sourceHeightIndex]);
                 }
             }
-
+            result.AddRange(resultList);
             return result;
         }
 
@@ -87,72 +111,43 @@ namespace ESME.Environment
         }
 
         #region List<T> overrides
-        public void Add(T item)
-        {
-            try
-            {
-                var key = new LatLonKey(item);
-                if (FindKeyIndex(key) == -1)
-                {
-                    _sortedList.Add(key, item);
-                    _latitudes = _longitudes = null;
-                }
-                //if (Keys.Contains(key)) return;
-            }
-            catch { }
-        }
+        public void Add(T item) { throw new NotImplementedException(); }
 
-        int FindKeyIndex(LatLonKey key)
+        void ClearHelperIndices()
         {
-            if (_sortedList.Keys.Count == 0) return -1;
-            var min = 0;
-            var max = _sortedList.Keys.Count - 1;
-            while (min < max)
-            {
-                var mid = (max + min) / 2;
-                var midKey = _sortedList.Keys[mid];
-                var comp = LatLonKey.Compare(midKey, key);
-                if (comp < 0) min = mid + 1;
-                else if (comp > 0) max = mid - 1;
-                else return mid;
-            }
-            if (min == max && LatLonKey.Compare(_sortedList.Keys[min], key) == 0)
-                return min;
-            return -1;
+            _latitudes = _longitudes = null;
+            _twoDIndex = null;
         }
 
         public void AddRange(IEnumerable<T> collection)
         {
-            foreach (var item in collection) Add(item);
-            _latitudes = _longitudes = null;
+            _sortedList.Capacity += collection.Count();
+            foreach (var item in collection)
+            {
+                try
+                {
+                    var key = new LatLonKey(item);
+                    _sortedList.Add(key, item);
+                }
+                catch { }
+            }
+            ClearHelperIndices();
         }
 
         public void Clear()
         {
             _sortedList.Clear();
-            _latitudes = _longitudes = null;
+            ClearHelperIndices();
         }
 
-        /// <summary>
-        /// Determines whether the <see cref="T:System.Collections.Generic.ICollection`1"/> contains a specific value.
-        /// </summary>
-        /// <returns>
-        /// true if <paramref name="item"/> is found in the <see cref="T:System.Collections.Generic.ICollection`1"/>; otherwise, false.
-        /// </returns>
-        /// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection`1"/>.</param>
         public bool Contains(T item) { return _sortedList.ContainsKey(new LatLonKey(item)); }
 
-        /// <summary>
-        /// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection`1"/> to an <see cref="T:System.Array"/>, starting at a particular <see cref="T:System.Array"/> index.
-        /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from <see cref="T:System.Collections.Generic.ICollection`1"/>. The <see cref="T:System.Array"/> must have zero-based indexing.</param><param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param><exception cref="T:System.ArgumentNullException"><paramref name="array"/> is null.</exception><exception cref="T:System.ArgumentOutOfRangeException"><paramref name="arrayIndex"/> is less than 0.</exception><exception cref="T:System.ArgumentException"><paramref name="array"/> is multidimensional.-or-The number of elements in the source <see cref="T:System.Collections.Generic.ICollection`1"/> is greater than the available space from <paramref name="arrayIndex"/> to the end of the destination <paramref name="array"/>.-or-Type <paramref name="T"></paramref>
-        ///                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     cannot be cast automatically to the type of the destination <paramref name="array"/>.</exception>
         public void CopyTo(T[] array, int arrayIndex) { _sortedList.Values.CopyTo(array, arrayIndex); }
 
         public bool Remove(T item)
         {
             var result = _sortedList.Remove(new LatLonKey(item));
-            if (result) _latitudes = _longitudes = null;
+            if (result) ClearHelperIndices();
             return result;
         }
 
@@ -196,7 +191,7 @@ namespace ESME.Environment
         public void RemoveAt(int index)
         {
             _sortedList.RemoveAt(index);
-            _latitudes = _longitudes = null;
+            ClearHelperIndices();
         }
 
         /// <summary>
@@ -300,22 +295,23 @@ namespace ESME.Environment
         #endregion
     }
 
-    public class LatLonKey : IComparer<LatLonKey>, IComparable<LatLonKey>
+    internal class LatLonKey : IComparer<LatLonKey>, IComparable<LatLonKey>
     {
         public LatLonKey(Geo geo)
         {
-            Latitude = Math.Round(geo.Latitude, 4);
-            Longitude = Math.Round(geo.Longitude, 4);
+            var lat = (int)Math.Round(geo.Latitude * 10000);
+            var lon = (int)Math.Round(geo.Longitude * 10000);
+            _key = (lat * 100000000) + lon;
         }
 
         public LatLonKey(double latitude, double longitude)
         {
-            Latitude = Math.Round(latitude, 4);
-            Longitude = Math.Round(longitude, 4);
+            var lat = (int)Math.Round(latitude * 10000);
+            var lon = (int)Math.Round(longitude * 10000);
+            _key = (lat * 100000000) + lon;
         }
 
-        double Latitude { get; set; }
-        double Longitude { get; set; }
+        readonly long _key;
 
         /// <summary>
         /// Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.
@@ -332,10 +328,8 @@ namespace ESME.Environment
         /// <param name="e2">The second object to compare.</param>
         public static int Compare(LatLonKey e1, LatLonKey e2)
         {
-            if (e1.Latitude < e2.Latitude) return -1;
-            if (e1.Latitude > e2.Latitude) return 1;
-            if (e1.Longitude < e2.Longitude) return -1;
-            return e1.Longitude > e2.Longitude ? 1 : 0;
+            if (e1._key < e2._key) return -1;
+            return e1._key > e2._key ? 1 : 0;
         }
 
         /// <summary>
@@ -345,7 +339,11 @@ namespace ESME.Environment
         /// A signed integer that indicates the relative values of <paramref name="x"/> and <paramref name="y"/>, as shown in the following table.Value Meaning Less than zero<paramref name="x"/> is less than <paramref name="y"/>.Zero<paramref name="x"/> equals <paramref name="y"/>.Greater than zero<paramref name="x"/> is greater than <paramref name="y"/>.
         /// </returns>
         /// <param name="x">The first object to compare.</param><param name="y">The second object to compare.</param>
-        int IComparer<LatLonKey>.Compare(LatLonKey x, LatLonKey y) { return Compare(x, y); }
+        int IComparer<LatLonKey>.Compare(LatLonKey x, LatLonKey y)
+        {
+            if (x._key < y._key) return -1;
+            return x._key > y._key ? 1 : 0;
+        }
 
         /// <summary>
         /// Compares the current object with another object of the same type.
@@ -354,8 +352,13 @@ namespace ESME.Environment
         /// A value that indicates the relative order of the objects being compared. The return value has the following meanings: Value Meaning Less than zero This object is less than the <paramref name="other"/> parameter.Zero This object is equal to <paramref name="other"/>. Greater than zero This object is greater than <paramref name="other"/>. 
         /// </returns>
         /// <param name="other">An object to compare with this object.</param>
-        public int CompareTo(LatLonKey other) { return Compare(this, other); }
-        public override string ToString() { return string.Format("{0:0.#####},{1:0.#####}", Latitude, Longitude); }
+        public int CompareTo(LatLonKey other)
+        {
+            if (_key < other._key) return -1;
+            return _key > other._key ? 1 : 0;
+        }
+
+        public override string ToString() { return _key.ToString(); }
         public override int GetHashCode() { return ToString().GetHashCode(); }
     }
     
