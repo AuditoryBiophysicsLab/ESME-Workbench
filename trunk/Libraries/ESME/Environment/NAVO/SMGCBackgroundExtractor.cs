@@ -70,18 +70,9 @@ namespace ESME.Environment.NAVO
             foreach (var curMonth in uniqueMonths)
             {
                 var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
-                foreach (var selectedFile in selectedFiles)
-                {
-                    if ((selectedFile.Months != null) && (selectedFile[curMonth] != null))
-                        curMonthData.EnvironmentData.Add(new WindSample(selectedFile.EarthCoordinate, selectedFile[curMonth].MeanWindSpeed));
-                }
-                //curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
-                //                                      where
-                //                                              (selectedFile.Months != null) &&
-                //                                              (selectedFile[curMonth] != null)
-                //                                      select
-                //                                              new WindSample(selectedFile.EarthCoordinate,
-                //                                                             selectedFile[curMonth].MeanWindSpeed));
+                curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
+                                                      where (selectedFile.Months != null) && (selectedFile[curMonth] != null)
+                                                      select new WindSample(selectedFile.EarthCoordinate, selectedFile[curMonth].MeanWindSpeed));
                 monthlyWindData.TimePeriods.Add(curMonthData);
                 backgroundExtractor.Value++;
                 if (backgroundExtractor.CancellationPending) return;
@@ -92,6 +83,7 @@ namespace ESME.Environment.NAVO
             {
                 var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = backgroundExtractor.SelectedTimePeriods[timePeriodIndex] };
                 var monthsInCurTimePeriod = requiredMonths[timePeriodIndex];
+                var curTimePeriodEnvironmentData = new List<WindSample>();
                 foreach (var curLocation in selectedLocations)
                 {
                     var sum = 0f;
@@ -103,8 +95,9 @@ namespace ESME.Environment.NAVO
                         sum += monthlyWindData[curMonth].EnvironmentData[curLocation].Data;
                         count++;
                     }
-                    if (count > 0) curTimePeriodData.EnvironmentData.Add(new WindSample(curLocation, sum / count));
+                    if (count > 0) curTimePeriodEnvironmentData.Add(new WindSample(curLocation, sum / count));
                 }
+                curTimePeriodData.EnvironmentData.AddRange(curTimePeriodEnvironmentData);
                 if (!backgroundExtractor.UseExpandedExtractionArea) curTimePeriodData.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
                 Wind.TimePeriods.Add(curTimePeriodData);
                 backgroundExtractor.Value++;

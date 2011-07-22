@@ -123,6 +123,17 @@
   <ItemGroup>
     <Compile Include="Behaviors\NumericTextBoxBehavior.cs" />
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Collections\BinarySearchTree.cs" />
+    <Compile Include="Collections\BinaryTree.cs" />
+    <Compile Include="Collections\BinaryTreeNode.cs" />
+    <Compile Include="Collections\KeyedList.cs" />
+    <Compile Include="Collections\Node.cs" />
+    <Compile Include="Collections\NodeList.cs" />
+    <Compile Include="Collections\RedBlack.cs" />
+    <Compile Include="Collections\RedBlackEnumerator.cs" />
+    <Compile Include="Collections\RedBlackException.cs" />
+    <Compile Include="Collections\RedBlackNode.cs" />
+    <Compile Include="Collections\TraversalMethods.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="Database\MySqlWrapper.cs" />
     <Compile Include="Globals.cs" />

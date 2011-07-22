@@ -740,54 +740,36 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             var vm = new BathymetryExtractionViewModel(Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox));
             var result = _visualizerService.ShowDialog("BathymetryExtractionView", vm);
-            if ((result.HasValue) && (result.Value))
+            if ((!result.HasValue) || (!result.Value)) return;
+            NAEMOBathymetryDescriptors = null;
+            CommandManager.InvalidateRequerySuggested();
+            var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
+            var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
+            if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
+            var destinationPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Bathymetry");
+            var destinationFile = vm.BathymetryName + ".txt";
+            var bathymetryExtractor = new DBDBBackgroundExtractor
             {
-                NAEMOBathymetryDescriptors = null;
-                CommandManager.InvalidateRequerySuggested();
-                var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
-                var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
-                if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
-                var destinationPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Bathymetry", vm.BathymetryName + ".txt");
-                var naemoBathymetryExporter = new CASSBackgroundExporter
-                {
                     WorkerSupportsCancellation = false,
                     ExtractionArea = extractionArea,
                     NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
                     DestinationPath = destinationPath,
                     UseExpandedExtractionArea = false,
-                    TaskName = "Export NAEMO bathymetry",
-                };
-                var bathymetryExtractor = new DBDBBackgroundExtractor
-                {
-                    WorkerSupportsCancellation = false,
-                    ExtractionArea = extractionArea,
-                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                    DestinationPath = tempPath,
-                    UseExpandedExtractionArea = false,
                     SelectedResolution = vm.SelectedResolution,
-                    SaveAsFilename = destinationPath,
+                    SaveAsFilename = destinationFile,
                     TaskName = "Bathymetry data extraction",
-                };
-                bathymetryExtractor.RunWorkerCompleted += (s, e) =>
-                {
-                    Bathymetry bathymetry;
-                    var metadata = NAEMOBathymetryMetadata.FromBathymetryFile(destinationPath, out bathymetry);
-                    naemoBathymetryExporter.Bathymetry = bathymetry;
-                    metadata.OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename);
-                    metadata.Save();
-                    var bt1 = new GenericBackgroundTask();
-                    bt1.DoWork += (s2, e2) => NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(_selectedRangeComplexDescriptor.Data.Name);
-                    bt1.RunWorkerCompleted += (s3, e3) =>
-                    {
-                        SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors.Find(item => item.Key == Path.GetFileNameWithoutExtension(destinationPath)).Value;
-                        CommandManager.InvalidateRequerySuggested();
-                    };
-                    BackgroundTaskAggregator.BackgroundTasks.Add(bt1);
-                };
-                BackgroundTaskAggregator.BackgroundTasks.Add(bathymetryExtractor);
-                BackgroundTaskAggregator.BackgroundTasks.Add(naemoBathymetryExporter);
-                BackgroundTaskAggregator.TaskName = "Bathymetry data extraction";
-            }
+            };
+            bathymetryExtractor.RunWorkerCompleted += (s, e) =>
+            {
+                Bathymetry bathymetry;
+                var bathymetryFilename = Path.Combine(destinationPath, destinationFile);
+                var metadata = NAEMOBathymetryMetadata.FromBathymetryFile(bathymetryFilename, out bathymetry);
+                metadata.OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename);
+                metadata.Save();
+                NAEMOBathymetryDescriptors.Add(bathymetryFilename);
+            };
+            BackgroundTaskAggregator.BackgroundTasks.Add(bathymetryExtractor);
+            BackgroundTaskAggregator.TaskName = "Bathymetry data extraction";
         }
 
         #endregion

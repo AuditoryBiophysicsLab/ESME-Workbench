@@ -45,6 +45,11 @@ namespace ESME.Environment.Descriptors
             
         }
 
+        public void Add(string fileName)
+        {
+            Add(new System.Collections.Generic.KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(fileName), new T { DataFilename = fileName }));            Sort();
+        }
+
         public virtual NAEMODescriptor this[string overlayKey]
         {
             get { return this.FirstOrDefault(f => f.Key == overlayKey).Value; }

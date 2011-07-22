@@ -211,7 +211,7 @@ namespace ImportGDEM
             if (scaleFactorAttName != String.Empty) scaleFactor = dataVar.Attributes[scaleFactorAttName].GetFloat(0);
             if (offsetValueAttName != String.Empty) addOffset = dataVar.Attributes[offsetValueAttName].GetFloat(0);
 
-            var newField = new SoundSpeedField {TimePeriod = month};
+            var newFieldEnvironmentData = new List<SoundSpeedProfile>();
 
             for (lonIndex = 0; lonIndex < lonCount; lonIndex++)
             {
@@ -232,9 +232,11 @@ namespace ImportGDEM
                         if (curValue == missingValue) break;
                         newProfile.Data.Add(new DepthValuePair<float>(depths[depthIndex], ((curValue) * scaleFactor) + addOffset));
                     }
-                    if (newProfile.Data.Count > 0) newField.EnvironmentData.Add(newProfile);
+                    if (newProfile.Data.Count > 0) newFieldEnvironmentData.Add(newProfile);
                 }
             }
+            var newField = new SoundSpeedField { TimePeriod = month};
+            newField.EnvironmentData.AddRange(newFieldEnvironmentData);
             return newField;
         }
 

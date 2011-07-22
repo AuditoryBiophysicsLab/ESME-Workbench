@@ -27,21 +27,26 @@ namespace ESME.Environment
             serializer.Save(filename, ReferencedTypes);
         }
 
-        public static Bathymetry FromYXZ(string fileName, float scaleFactor)
+        public static Bathymetry FromYXZ(string fileName, float scaleFactor, double north = double.NaN, double south = double.NaN, double east = double.NaN, double west = double.NaN)
         {
-            var result = new Bathymetry();
             char[] separators = { ' ' };
+            var samples = new List<EarthCoordinate<float>>();
             using (var stream = new StreamReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 var curLine = stream.ReadLine();
                 while (curLine != null)
                 {
                     var fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-                    result.Samples.Add(new EarthCoordinate<float>(double.Parse(fields[0]), double.Parse(fields[1]), float.Parse(fields[2]) * scaleFactor));
+                    var latitude = double.Parse(fields[0]);
+                    var longitude = double.Parse(fields[1]);
+                    var depth = float.Parse(fields[2]) * scaleFactor;
+                    samples.Add(new EarthCoordinate<float>(latitude, longitude, depth));
                     curLine = stream.ReadLine();
                 }
-                return result;
             }
+            var result = new Bathymetry();
+            result.Samples.AddRange(samples);
+            return result;
         }
 
         public void ToYXZ(string fileName, float scaleFactor)
