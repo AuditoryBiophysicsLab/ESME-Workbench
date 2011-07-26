@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
+using System.Timers;
 using System.Windows.Threading;
 using Cinch;
 
@@ -17,13 +17,10 @@ namespace ESMEWorkBench.ViewModels.NAVO
         public ScenarioSimulatorLogViewModel(string logDirectoryPath, Dispatcher dispatcher)
         {
             _dispatcher = dispatcher;
-            var logFiles = Directory.EnumerateFiles(logDirectoryPath, "*.log.*", SearchOption.TopDirectoryOnly);
-            foreach (var logFile in logFiles)
-            {
-                LogFilePairs.Add(new KeyValuePair<string, string>(Path.GetFileNameWithoutExtension(logFile),logFile));
-            }
+            LogDir = logDirectoryPath;
         }
 
+      
         #region public string LogDir { get; set; }
 
         public string LogDir
@@ -34,15 +31,53 @@ namespace ESMEWorkBench.ViewModels.NAVO
                 if (_logDir == value) return;
                 _logDir = value;
                 NotifyPropertyChanged(LogDirChangedEventArgs);
+                PageDirectory();
+
+                if (_dirWatcher != null)
+                {
+                    _dirWatcher.EnableRaisingEvents = false;
+                    _dirWatcher.Dispose();
+                }
+                _dirWatcher = new FileSystemWatcher(_logDir)
+                {
+                    EnableRaisingEvents = true,
+                    NotifyFilter = (NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.DirectoryName),
+                };
+                _dirWatcher.Created += DirectoryChanged;
+                _dirWatcher.Changed += DirectoryChanged;
+                _dirWatcher.Deleted += DirectoryChanged;
+
             }
         }
+        void DirectoryChanged(object sender, FileSystemEventArgs e)
+        {
 
+            if (_dirTimer != null) return;
+            _dirTimer = new Timer(1000) {AutoReset = false, Enabled = true};
+            _dirTimer.Elapsed += (s1, e1) =>
+                                     {
+                                         _dirTimer = null;
+                                         Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
+                                         _dispatcher.Invoke(DispatcherPriority.Background, (Action) (PageDirectory));
+                                     };
+
+        }
+
+        void PageDirectory()
+        {
+            var logFiles = Directory.EnumerateFiles(LogDir, "*.log.*", SearchOption.TopDirectoryOnly);
+            LogFilePairs.Clear();
+            foreach (var logFile in logFiles)
+            {
+                LogFilePairs.Add(new KeyValuePair<string, string>(Path.GetFileNameWithoutExtension(logFile), logFile));
+            }
+        }
         private static readonly PropertyChangedEventArgs LogDirChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.LogDir);
         private string _logDir;
-
+        private FileSystemWatcher _dirWatcher;
+        private Timer _dirTimer;
         #endregion
-
-
+        
         #region public ObservableCollection<KeyValuePair<string,string>> LogFilePairs { get; set; }
 
         public ObservableCollection<KeyValuePair<string,string>> LogFilePairs
@@ -92,21 +127,21 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                    NotifyFilter = NotifyFilters.LastWrite,
                                };
                 _watcher.Changed += (s, e) =>
-                                        {
-                                            Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
-                                            if (FileReloadTimer == null) FileReloadTimer = new Timer(ReloadLogFile, null, 1000, Timeout.Infinite);
-                                        };
+                {
+                    if (_fileReloadTimer != null) return;
+                    _fileReloadTimer = new Timer(1000) { AutoReset = false, Enabled = true };
+                    _fileReloadTimer.Elapsed += (s1, e1) =>
+                    {
+                        _fileReloadTimer = null;
+                        Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
+                        _dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => SelectedLogFileText = File.ReadAllText(_selectedLogFile)));
+                    };
+                };
             }
         }
 
         private FileSystemWatcher _watcher;
-        Timer FileReloadTimer { get; set; }
-
-        void ReloadLogFile(object state)
-        {
-            FileReloadTimer = null;
-            _dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => SelectedLogFileText = File.ReadAllText(_selectedLogFile)));
-        }
+        Timer _fileReloadTimer;
         
         private static readonly PropertyChangedEventArgs SelectedLogFileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.SelectedLogFile);
         private string _selectedLogFile;
