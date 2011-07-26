@@ -5,16 +5,18 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Windows.Threading;
 using Cinch;
 
 namespace ESMEWorkBench.ViewModels.NAVO
 {
-    class ScenarioSimulatorLogViewModel:ViewModelBase 
+    class ScenarioSimulatorLogViewModel:ViewModelBase
     {
-        public ScenarioSimulatorLogViewModel(string logDirectoryPath)
+        readonly Dispatcher _dispatcher;
+        public ScenarioSimulatorLogViewModel(string logDirectoryPath, Dispatcher dispatcher)
         {
+            _dispatcher = dispatcher;
             var logFiles = Directory.EnumerateFiles(logDirectoryPath, "*.log.*", SearchOption.TopDirectoryOnly);
             foreach (var logFile in logFiles)
             {
@@ -91,14 +93,21 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                };
                 _watcher.Changed += (s, e) =>
                                         {
-                                            Debug.WriteLine("changed");
-                                            SelectedLogFileText = File.ReadAllText(_selectedLogFile);
+                                            Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
+                                            if (FileReloadTimer == null) FileReloadTimer = new Timer(ReloadLogFile, null, 1000, Timeout.Infinite);
                                         };
             }
         }
 
         private FileSystemWatcher _watcher;
+        Timer FileReloadTimer { get; set; }
 
+        void ReloadLogFile(object state)
+        {
+            FileReloadTimer = null;
+            _dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => SelectedLogFileText = File.ReadAllText(_selectedLogFile)));
+        }
+        
         private static readonly PropertyChangedEventArgs SelectedLogFileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.SelectedLogFile);
         private string _selectedLogFile;
 

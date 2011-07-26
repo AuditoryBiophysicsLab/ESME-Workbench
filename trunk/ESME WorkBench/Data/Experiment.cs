@@ -1122,7 +1122,7 @@ namespace ESMEWorkBench.Data
                 }
             }
             analysisPointLayer.Clear();
-            analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5, LineStyle.Solid));
+            analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5));
             analysisPointLayer.Done();
         }
 
@@ -1130,7 +1130,7 @@ namespace ESMEWorkBench.Data
         {
             if ((e.ChangeType & WatcherChangeTypes.Created) == WatcherChangeTypes.Created) { }
             if ((e.ChangeType & WatcherChangeTypes.Deleted) == WatcherChangeTypes.Deleted) { }
-            if ((e.ChangeType & WatcherChangeTypes.Changed) == WatcherChangeTypes.Changed) {}
+            if ((e.ChangeType & WatcherChangeTypes.Changed) == WatcherChangeTypes.Changed) { }
             //ProcessTransmissionLossFieldFile(e.FullPath);}
             if ((e.ChangeType & WatcherChangeTypes.Renamed) == WatcherChangeTypes.Renamed) { }
             if ((e.ChangeType & WatcherChangeTypes.All) == WatcherChangeTypes.All) { }
