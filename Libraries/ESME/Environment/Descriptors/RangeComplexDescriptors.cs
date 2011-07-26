@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ESME.Environment.Descriptors
 {
@@ -21,10 +22,10 @@ namespace ESME.Environment.Descriptors
 
             var lines = File.ReadAllLines(fileName);
             var curLineNumber = 0;
-            foreach (var line in lines)
+            Parallel.ForEach(lines, line =>
             {
                 curLineNumber++;
-                if (line == null) continue;
+                if (line == null) return;
                 var curLine = line.Trim();
                 if ((curLine.Trim() != "") && !curLine.StartsWith("!") && !curLine.StartsWith("#"))
                 {
@@ -49,23 +50,26 @@ namespace ESME.Environment.Descriptors
                     if (!double.TryParse(geoidString, out geoid)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nLine number: {1}\nError: Invalid geoid separation value", fileName, curLineNumber));
                     if (Directory.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, simAreaName)))
                     {
-                        result.Add(new KeyValuePair<string, RangeComplexDescriptor>(simAreaName, new RangeComplexDescriptor
+                        lock (result)
                         {
+                            result.Add(new KeyValuePair<string, RangeComplexDescriptor>(simAreaName, new RangeComplexDescriptor
+                            {
                                 Data = new RangeComplex(latitude, longitude)
                                 {
-                                        Name = simAreaName,
-                                        Height = height,
-                                        GeoidSeparation = geoid,
-                                        OpsLimitFile = opsLimitFile,
-                                        SimLimitFile = simLimitFile,
+                                    Name = simAreaName,
+                                    Height = height,
+                                    GeoidSeparation = geoid,
+                                    OpsLimitFile = opsLimitFile,
+                                    SimLimitFile = simLimitFile,
                                 },
                                 NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(simAreaName),
                                 NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(simAreaName),
                                 NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(simAreaName),
-                        }));
+                            }));
+                        }
                     }
                 }
-            }
+            });
             return result;
         }
 
