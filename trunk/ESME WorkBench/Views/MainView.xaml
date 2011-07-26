@@ -354,8 +354,8 @@
 					                Command="{Binding LaunchExposureReportGeneratorCommand}"/>
                 </r:RibbonGroup>
             </r:RibbonTab>
-			<r:RibbonTab KeyTip="M"
-			             Header="Main">
+			<r:RibbonTab KeyTip="H"
+			             Header="Home">
 				<r:RibbonGroup Header="Scenario">
 					<r:RibbonButton Label="Open"
 					                LargeImageSource="..\Images\LargeIcons\open-icon.png"

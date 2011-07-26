@@ -625,7 +625,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_naemoBathymetryDescriptors == value) return;
                 _naemoBathymetryDescriptors = value;
                 NotifyPropertyChanged(NAEMOBathymetryDescriptorsChangedEventArgs);
-                SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors != null && NAEMOBathymetryDescriptors.Count > 0 ? NAEMOBathymetryDescriptors[0].Value : null;
+                //SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors != null && NAEMOBathymetryDescriptors.Count > 0 ? NAEMOBathymetryDescriptors[0].Value : null;
             }
         }
 
@@ -759,6 +759,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 metadata.OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename);
                 metadata.Save();
                 NAEMOBathymetryDescriptors.Add(bathymetryFilename);
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(NAEMOBathymetryDescriptorsChangedEventArgs), DispatcherPriority.Normal);
+                SelectedBathymetryDescriptor = (NAEMOBathymetryDescriptor)NAEMOEnvironmentDescriptors[Path.GetFileNameWithoutExtension(bathymetryFilename)];
             };
             BackgroundTaskAggregator.BackgroundTasks.Add(bathymetryExtractor);
             BackgroundTaskAggregator.TaskName = "Bathymetry data extraction";
