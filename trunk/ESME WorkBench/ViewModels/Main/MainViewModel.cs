@@ -82,7 +82,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (Designer.IsInDesignMode) return;
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
                 MediatorMessage.Send(MediatorMessage.MainViewModelInitialized, _dispatcher);
-                InitializeEnvironmentTab();
             };
 
             IsLatLonGridVisible = Settings.Default.ShowGrid;

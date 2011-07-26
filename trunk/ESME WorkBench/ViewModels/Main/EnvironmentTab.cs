@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -30,23 +31,14 @@ namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {
-        void InitializeEnvironmentTab()
-        {
-            //if (_simAreaCSVWatcher != null) _simAreaCSVWatcher.Dispose();
-            //_simAreaCSVWatcher = new FileSystemWatcher(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv");
-            //_simAreaCSVWatcher.Changed += (s, e) => RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
-            //_simAreaCSVWatcher.EnableRaisingEvents = true;
-        }
-
-        //FileSystemWatcher _simAreaCSVWatcher;
-
         [MediatorMessageSink(MediatorMessage.AllViewModelsAreReady)]
         void AllViewModelsAreReady(bool allViewModelsAreReady)
         {
             Console.WriteLine("All view models are ready!");
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
-            RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+            Task.Factory.StartNew(() => RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")));
+            
             //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
