@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -20,7 +19,6 @@ using ESME;
 using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
-using ESME.Metadata;
 using ESME.Model;
 using ESME.NEMO;
 using ESME.Overlay;
@@ -1269,15 +1267,15 @@ namespace ESMEWorkBench.Data
                 {
                     Threshold = 0,
                 };
-                var bathysize = Math.Max(Bathymetry.Samples.Longitudes.Count, Bathymetry.Samples.Latitudes.Count);
+                var bathysize = Math.Max(Bathymetry.Samples.Longitudes.Length, Bathymetry.Samples.Latitudes.Length);
                 var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
                 var displayValues = Bathymetry.Samples;
                 if (bathysize > screenSize)
                 {
                     var scaleFactor = screenSize / bathysize;
-                    displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(Bathymetry.Samples, (int)(Bathymetry.Samples.Longitudes.Count * scaleFactor), (int)(Bathymetry.Samples.Latitudes.Count * scaleFactor));
+                    displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(Bathymetry.Samples, (int)(Bathymetry.Samples.Longitudes.Length * scaleFactor), (int)(Bathymetry.Samples.Latitudes.Length * scaleFactor));
                 }
-                var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
+                var bitmapData = new float[displayValues.Longitudes.Length, displayValues.Latitudes.Length];
                 for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++)
                     for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++)
                         bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;

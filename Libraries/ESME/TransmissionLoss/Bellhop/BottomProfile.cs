@@ -77,12 +77,12 @@ namespace ESME.TransmissionLoss.Bellhop
 
         public static double TwoDBilinearApproximation(Bathymetry bathymetry, EarthCoordinate point)
         {
-            if ((point.Latitude < bathymetry.Samples.Latitudes[0]) || (point.Latitude > bathymetry.Samples.Latitudes[bathymetry.Samples.Latitudes.Count - 1]) || (point.Longitude < bathymetry.Samples.Longitudes[0]) || (point.Longitude > bathymetry.Samples.Longitudes[bathymetry.Samples.Longitudes.Count - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
-            for (var i = 0; i < bathymetry.Samples.Latitudes.Count - 1; i++)
+            if ((point.Latitude < bathymetry.Samples.Latitudes[0]) || (point.Latitude > bathymetry.Samples.Latitudes[bathymetry.Samples.Latitudes.Length - 1]) || (point.Longitude < bathymetry.Samples.Longitudes[0]) || (point.Longitude > bathymetry.Samples.Longitudes[bathymetry.Samples.Longitudes.Length - 1])) throw new BathymetryOutOfBoundsException("TwoDBilinearApproximation: XCoord and YCoord must be within the provided data set.  This is an interpolation routine not an extrapolation one.");
+            for (var i = 0; i < bathymetry.Samples.Latitudes.Length - 1; i++)
             {
                 // elevations.Latitudes go from south to north, so a southern elevations.Latitudes come before northern ones
                 if ((bathymetry.Samples.Latitudes[i] > point.Latitude) || (point.Latitude > bathymetry.Samples.Latitudes[i + 1])) continue;
-                for (var j = 0; j < bathymetry.Samples.Longitudes.Count - 1; j++)
+                for (var j = 0; j < bathymetry.Samples.Longitudes.Length - 1; j++)
                 {
                     // elevations.Longitudes go from west to east, so western elevations.Longitudes come before eastern ones
                     if ((bathymetry.Samples.Longitudes[j] > point.Longitude) || (point.Longitude > bathymetry.Samples.Longitudes[j + 1])) continue;

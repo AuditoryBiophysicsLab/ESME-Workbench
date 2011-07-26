@@ -50,8 +50,6 @@ namespace ESME.Environment
     public class SedimentSampleBase : IComparable<SedimentSampleBase>
     {
         public short SampleValue { get; set; }
-        [XmlIgnore]
-        public bool IsHighResolution { get; set; }
         public int CompareTo(SedimentSampleBase other)
         {
             return SampleValue.CompareTo(other.SampleValue);

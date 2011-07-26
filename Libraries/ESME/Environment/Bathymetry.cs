@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ESME.Environment.NAVO;
+using HRC.Collections;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -27,15 +28,18 @@ namespace ESME.Environment
             serializer.Save(filename, ReferencedTypes);
         }
 
-        public static Bathymetry FromYXZ(string fileName, float scaleFactor, double north = double.NaN, double south = double.NaN, double east = double.NaN, double west = double.NaN)
+        public static Bathymetry FromYXZ(string fileName, float scaleFactor)
         {
             char[] separators = { ' ' };
             var samples = new List<EarthCoordinate<float>>();
+            System.Diagnostics.Debug.WriteLine("{0}: FromYXZ: About to read bathymetry file {1}", DateTime.Now, Path.GetFileName(fileName));
+            var lineCount = 0;
             using (var stream = new StreamReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 var curLine = stream.ReadLine();
                 while (curLine != null)
                 {
+                    lineCount++;
                     var fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
                     var latitude = double.Parse(fields[0]);
                     var longitude = double.Parse(fields[1]);
@@ -44,6 +48,7 @@ namespace ESME.Environment
                     curLine = stream.ReadLine();
                 }
             }
+            System.Diagnostics.Debug.WriteLine("{0}: FromYXZ: Finished readying bathymetry file {1}.  Line count: {2}", DateTime.Now, Path.GetFileName(fileName), lineCount);
             var result = new Bathymetry();
             result.Samples.AddRange(samples);
             return result;

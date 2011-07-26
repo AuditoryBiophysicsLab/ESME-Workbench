@@ -3,14 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
+using C5;
 using ESME.Environment.NAVO;
+using HRC.Collections;
 using HRC.LinqStatistics;
 using HRC.Navigation;
 using System.Windows;
 
 namespace ESME.Environment
 {
-    public class EnvironmentData<T> : IList<T> where T : EarthCoordinate
+    public class EnvironmentData<T> : System.Collections.Generic.IList<T> where T : EarthCoordinate, new()
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
@@ -20,9 +22,9 @@ namespace ESME.Environment
                 typeof (T),
         };
 
-        readonly SortedList<LatLonKey, T> _sortedList = new SortedList<LatLonKey, T>();
+        readonly List<T> _arrayList = new List<T>();
 
-        public T this[int index] { get { return _sortedList.Values[index]; } }
+        public T this[int index] { get { return _arrayList[index]; } }
 
         public T this[EarthCoordinate location]
         {
@@ -30,58 +32,78 @@ namespace ESME.Environment
             {
                 var minDistance = double.MaxValue;
                 T closestSample = null;
-                foreach (var item in _sortedList)
+                foreach (var item in _arrayList)
                 {
-                    var curDistance = item.Value.DistanceKilometers(location);
+                    var curDistance = item.DistanceKilometers(location);
                     if (curDistance >= minDistance) continue;
                     minDistance = curDistance;
-                    closestSample = item.Value;
+                    closestSample = item;
                 }
                 return closestSample;
             }
         }
 
-        #region T[,] TwoDIndex { get; set; }
+        public bool IsSorted { get; private set; }
 
-        T[,] TwoDIndex
+        public void Sort()
         {
-            get 
+            if (IsSorted || _arrayList.GetIsSorted())
             {
-                if (_twoDIndex != null) return _twoDIndex;
-                _twoDIndex = new T[Longitudes.Count,Latitudes.Count];
-                for (var lonIndex = 0; lonIndex < Longitudes.Count; lonIndex++)
-                {
-                    var lon = Longitudes[lonIndex];
-                    for (var latIndex = 0; latIndex < Latitudes.Count; latIndex++)
-                    {
-                        var lat = Latitudes[latIndex];
-                        var key = new LatLonKey(lat, lon);
-                        _twoDIndex[lonIndex, latIndex] = _sortedList[key];
-                    }
-                }
-                return _twoDIndex;
+                System.Diagnostics.Debug.WriteLine("{0}: Call to Sort() avoided.  List already sorted.", DateTime.Now);
+                IsSorted = true;
+                return;
             }
+
+            System.Diagnostics.Debug.WriteLine("{0}: About to call ParallelSort", DateTime.Now);
+            var array = _arrayList.ToArray();
+            array.ParallelSort();
+            _arrayList.Clear();
+            _arrayList.AddRange(array);
+            System.Diagnostics.Debug.WriteLine("{0}: Returned from ParallelSort", DateTime.Now);
+            IsSorted = true;
         }
-
-        T[,] _twoDIndex;
-
-        #endregion
-
 
         public T this[uint lonIndex, uint latIndex]
         {
             get
             {
-                return TwoDIndex[lonIndex, latIndex];
+                if (_twoDIndex != null) return _twoDIndex[lonIndex, latIndex];
+                System.Diagnostics.Debug.WriteLine("{0}: EnvironmentData: About to calculate 2D index", DateTime.Now);
+                Sort();
+                var arrayHasNoHoles = _arrayList.Count == (Longitudes.Length * Latitudes.Length);
+                var targetIndex = 0;
+                _twoDIndex = new T[Longitudes.Length, Latitudes.Length];
+                for (var latIdx = 0; latIdx < Latitudes.Length; latIdx++)
+                {
+                    var lat = Latitudes[latIdx];
+                    for (var lonIdx = 0; lonIdx < Longitudes.Length; lonIdx++)
+                    {
+                        var lon = Longitudes[lonIdx];
+                        var target = new T {Latitude = lat, Longitude = lon};
+                        if (arrayHasNoHoles)
+                        {
+                            _twoDIndex[lonIdx, latIdx] = _arrayList[targetIndex++];
+                        }
+                        else
+                        {
+                            targetIndex = _arrayList.BinarySearch(target);
+                            if (targetIndex == -1) throw new IndexOutOfRangeException(string.Format("Could not find item at {0}", target));
+                            _twoDIndex[lonIdx, latIdx] = _arrayList[targetIndex];
+                        }
+                    }
+                }
+                System.Diagnostics.Debug.WriteLine("{0}: EnvironmentData: 2D index calculation complete", DateTime.Now);
+                return _twoDIndex[lonIndex, latIndex];
             }
         }
+        T[,] _twoDIndex;
 
         public static EnvironmentData<T> Decimate(EnvironmentData<T> source, int outputWidth, int outputHeight)
         {
-            if (outputWidth > source.Longitudes.Count || outputHeight > source.Latitudes.Count) throw new DataMisalignedException("Cannot decimate to a larger area.");
+            if (outputWidth > source.Longitudes.Length || outputHeight > source.Latitudes.Length) throw new DataMisalignedException("Cannot decimate to a larger area.");
             var result = new EnvironmentData<T>();
-            var sourceWidth = source.Longitudes.Count;
-            var sourceHeight = source.Latitudes.Count;
+            var sourceWidth = source.Longitudes.Length;
+            var sourceHeight = source.Latitudes.Length;
             var widthStep = (double)sourceWidth / outputWidth;
             var heightStep = (double)sourceHeight / outputHeight;
             var resultList = new List<T>();
@@ -91,7 +113,7 @@ namespace ESME.Environment
                 for (var widthIndex = 0; widthIndex < outputWidth; widthIndex++)
                 {
                     var sourceWidthIndex = (uint)((widthIndex * widthStep) + (widthStep / 2));
-                    resultList.Add(source.TwoDIndex[sourceWidthIndex, sourceHeightIndex]);
+                    resultList.Add(source[sourceWidthIndex, sourceHeightIndex]);
                 }
             }
             result.AddRange(resultList);
@@ -103,50 +125,47 @@ namespace ESME.Environment
             var southWest = this[geoRect.SouthWest];
             var northEast = this[geoRect.NorthEast];
             var trimRect = GeoRect.InflateWithGeo(new GeoRect(northEast.Latitude, southWest.Latitude, northEast.Longitude, southWest.Longitude), 0.01);
-            var matchingPoints = _sortedList.Where(point => trimRect.Contains(point.Value)).ToList();
+            var matchingPoints = _arrayList.Where(trimRect.Contains).ToList();
             var pointsToKeep = from point in matchingPoints
-                               select point.Value;
+                               select point;
             Clear();
             AddRange(pointsToKeep);
         }
 
         #region List<T> overrides
-        public void Add(T item) { throw new NotImplementedException(); }
+        public void Add(T item)
+        {
+            _arrayList.Add(item);
+            ClearHelperIndices();
+        }
 
         void ClearHelperIndices()
         {
             _latitudes = _longitudes = null;
             _twoDIndex = null;
+            IsSorted = false;
         }
 
         public void AddRange(IEnumerable<T> collection)
         {
-            _sortedList.Capacity += collection.Count();
             foreach (var item in collection)
-            {
-                try
-                {
-                    var key = new LatLonKey(item);
-                    _sortedList.Add(key, item);
-                }
-                catch { }
-            }
+                _arrayList.Add(item);
             ClearHelperIndices();
         }
 
         public void Clear()
         {
-            _sortedList.Clear();
+            _arrayList.Clear();
             ClearHelperIndices();
         }
 
-        public bool Contains(T item) { return _sortedList.ContainsKey(new LatLonKey(item)); }
+        public bool Contains(T item) { return _arrayList.Contains(item); }
 
-        public void CopyTo(T[] array, int arrayIndex) { _sortedList.Values.CopyTo(array, arrayIndex); }
+        public void CopyTo(T[] array, int arrayIndex) { _arrayList.CopyTo(array, arrayIndex); }
 
         public bool Remove(T item)
         {
-            var result = _sortedList.Remove(new LatLonKey(item));
+            var result = _arrayList.Remove(item);
             if (result) ClearHelperIndices();
             return result;
         }
@@ -159,7 +178,7 @@ namespace ESME.Environment
         /// </returns>
         public int Count
         {
-            get { return _sortedList.Count; }
+            get { return _arrayList.Count; }
         }
 
         /// <summary>
@@ -170,7 +189,7 @@ namespace ESME.Environment
         /// </returns>
         public bool IsReadOnly
         {
-            get { return _sortedList.Values.IsReadOnly; }
+            get { return false; }
         }
 
         /// <summary>
@@ -180,7 +199,7 @@ namespace ESME.Environment
         /// The index of <paramref name="item"/> if found in the list; otherwise, -1.
         /// </returns>
         /// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.IList`1"/>.</param>
-        public int IndexOf(T item) { return _sortedList.IndexOfKey(new LatLonKey(item)); }
+        public int IndexOf(T item) { return _arrayList.IndexOf(item); }
 
         /// <summary>
         /// Inserts an item to the <see cref="T:System.Collections.Generic.IList`1"/> at the specified index.
@@ -190,7 +209,7 @@ namespace ESME.Environment
 
         public void RemoveAt(int index)
         {
-            _sortedList.RemoveAt(index);
+            _arrayList.RemoveAt(index);
             ClearHelperIndices();
         }
 
@@ -201,18 +220,19 @@ namespace ESME.Environment
         /// The element at the specified index.
         /// </returns>
         /// <param name="index">The zero-based index of the element to get or set.</param><exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the <see cref="T:System.Collections.Generic.IList`1"/>.</exception><exception cref="T:System.NotSupportedException">The property is set and the <see cref="T:System.Collections.Generic.IList`1"/> is read-only.</exception>
-        T IList<T>.this[int index]
+        T System.Collections.Generic.IList<T>.this[int index]
         {
-            get { return _sortedList.Values[index]; }
+            get { return _arrayList[index]; }
             set { throw new NotImplementedException(); }
         }
         #endregion
 
-        private static List<double> SortedList(IEnumerable<double> rawEnumerable)
+        private static double[] SortedList(IEnumerable<double> rawEnumerable)
         {
-            var rawList = rawEnumerable.ToList();
-            rawList.Sort();
-            return rawList;
+            var dedupeList = new HashedArrayList<double>();
+            dedupeList.AddAll(rawEnumerable);
+            dedupeList.Sort();
+            return dedupeList.ToArray();
             //var result = new List<double>();
             //for (var index = 0; index < rawList.Count - 1; index++)
             //{
@@ -225,7 +245,7 @@ namespace ESME.Environment
             //return result;
         }
 
-        static double CalculateResolution(IList<double> axis)
+        static double CalculateResolution(System.Collections.Generic.IList<double> axis)
         {
             var differences = new List<double>();
             for (var index = 0; index < axis.Count - 1; index++)
@@ -244,22 +264,45 @@ namespace ESME.Environment
         }
 
         [XmlIgnore]
-        public List<double> Longitudes
+        public double[] Longitudes
         {
-            get { return _longitudes ?? (_longitudes = SortedList(_sortedList.Select(point => Math.Round(point.Value.Longitude, 4)).Distinct())); }
+            get
+            {
+                if (_longitudes == null) CreateLatLonIndices();
+                return _longitudes;
+            }
         }
 
         [XmlIgnore]
-        List<double> _longitudes;
+        double[] _longitudes;
 
         [XmlIgnore]
-        public List<double> Latitudes
+        public double[] Latitudes
         {
-            get { return _latitudes ?? (_latitudes = SortedList(_sortedList.Select(point => Math.Round(point.Value.Latitude, 4)).Distinct())); }
+            get
+            {
+                if (_latitudes == null) CreateLatLonIndices();
+                return _latitudes;
+            }
         }
 
         [XmlIgnore]
-        List<double> _latitudes;
+        double[] _latitudes;
+
+        void CreateLatLonIndices()
+        {
+            var latitudeList = new HashedArrayList<double>();
+            var longitudeList = new HashedArrayList<double>();
+            foreach (var point in _arrayList)
+            {
+                latitudeList.Add(Math.Round(point.Latitude, 4));
+                longitudeList.Add(Math.Round(point.Longitude, 4));
+            }
+            latitudeList.Sort();
+            longitudeList.Sort();
+            _latitudes = latitudeList.ToArray();
+            _longitudes = longitudeList.ToArray();
+        }
         
         /// <summary>
         /// The GeoRect that contains the field data
@@ -282,7 +325,7 @@ namespace ESME.Environment
         /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
         /// </returns>
         /// <filterpriority>1</filterpriority>
-        public IEnumerator<T> GetEnumerator() { return _sortedList.Values.GetEnumerator(); }
+        public IEnumerator<T> GetEnumerator() { return _arrayList.GetEnumerator(); }
 
         /// <summary>
         /// Returns an enumerator that iterates through a collection.
@@ -362,7 +405,7 @@ namespace ESME.Environment
         public override int GetHashCode() { return ToString().GetHashCode(); }
     }
     
-    public class TimePeriodEnvironmentData<T> where T : EarthCoordinate
+    public class TimePeriodEnvironmentData<T> where T : EarthCoordinate, new()
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<EarthCoordinate<T>>.ReferencedTypes);
         public TimePeriodEnvironmentData() { EnvironmentData = new EnvironmentData<T>(); }

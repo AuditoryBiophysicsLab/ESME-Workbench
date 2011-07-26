@@ -107,7 +107,7 @@ namespace ESME.Environment.NAVO
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
             File.Delete(batchFilename);
             backgroundExtractor.Value = 1;
-            var bathymetry = Bathymetry.FromYXZ(Path.Combine(backgroundExtractor.DestinationPath, yxzFilename), -1, backgroundExtractor.ExtractionArea.North, backgroundExtractor.ExtractionArea.South, backgroundExtractor.ExtractionArea.East, backgroundExtractor.ExtractionArea.West);
+            var bathymetry = Bathymetry.FromYXZ(Path.Combine(backgroundExtractor.DestinationPath, yxzFilename), -1);
             File.Delete(Path.Combine(backgroundExtractor.DestinationPath, yxzFilename));
             return bathymetry;
         }
