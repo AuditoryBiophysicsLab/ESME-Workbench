@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using HRC.Utility;
@@ -47,7 +48,8 @@ namespace ESME.Environment.Descriptors
 
         public void Add(string fileName)
         {
-            Add(new System.Collections.Generic.KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(fileName), new T { DataFilename = fileName }));            Sort();
+            Add(new System.Collections.Generic.KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(fileName), new T { DataFilename = fileName }));  
+            Sort((x, y) => x.Key.CompareTo(y.Key));
         }
 
         public virtual NAEMODescriptor this[string overlayKey]
