@@ -70,6 +70,7 @@ namespace ESME.Environment.Descriptors
                     }
                 }
             });
+            result.Sort();
             return result;
         }
 

@@ -7,8 +7,9 @@ namespace ESME.Environment.Descriptors
 {
     public class NAEMOOverlayDescriptors : NAEMODescriptors<NAEMOOverlayDescriptor>
     {
-        public NAEMOOverlayDescriptors(string selectedRangeComplexName, BackgroundTask backgroundTask = null)
-                : base(selectedRangeComplexName, "Areas", "*.ovr", null, backgroundTask)
+        public NAEMOOverlayDescriptors(string selectedRangeComplexName) : base(selectedRangeComplexName, "Areas", "*.ovr") { Refresh(); }
+
+        public new void Refresh(BackgroundTask backgroundTask = null)
         {
             Parallel.ForEach(this, ovrItem =>
             {

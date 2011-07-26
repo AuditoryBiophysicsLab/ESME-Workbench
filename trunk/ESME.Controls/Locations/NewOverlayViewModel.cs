@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 using Cinch;
 using ESME.Data;
-using ESME.Environment;
-using ESME.Model;
 using ESME.Overlay;
 using HRC.Navigation;
 using HRC.Validation;
@@ -194,10 +188,9 @@ namespace ESME.Views.Locations
 
         void OkCommandHandler()
         {
-            GeoRect bounds;
             List<EarthCoordinate> coords;
             string overlayError;
-            bounds = OverlayFile.ValidateCoordinates(OverlayCoordinates, "Op Limits", out coords, out overlayError);
+            var bounds = OverlayFile.ValidateCoordinates(OverlayCoordinates, "Op Limits", out coords, out overlayError);
             if (bounds != null) OverlayEarthCoordinates = coords;
 
             if (!OverlayName.EndsWith(".ovr")) OverlayName += ".ovr";

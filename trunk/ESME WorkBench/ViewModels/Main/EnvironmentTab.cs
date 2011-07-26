@@ -518,16 +518,11 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                var backgroundTask = new GenericBackgroundTask { WorkerSupportsCancellation = false, TaskName = "Load overlays" };
-                backgroundTask.DoWork += (s, e) => NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplexDescriptor.Data.Name, backgroundTask);
-                backgroundTask.RunWorkerCompleted += (s, e) =>
+                Task.Factory.StartNew(() =>
                 {
-                    SelectedOverlayDescriptor = NAEMOOverlayDescriptors.Find(item => item.Key == vm.OverlayName).Value;
-                    CommandManager.InvalidateRequerySuggested();
-                };
-
-                BackgroundTaskAggregator.BackgroundTasks.Add(backgroundTask);
-                //NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(SelectedRangeComplexDescriptor.Name);
+                    NAEMOOverlayDescriptors.Refresh();
+                    SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[vm.OverlayName];
+                });
             }
         }
 
@@ -567,12 +562,12 @@ namespace ESMEWorkBench.ViewModels.Main
                     writer.WriteLine("green");
                     writer.WriteLine("solid");
                     writer.WriteLine("move");
-                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.NorthWest.Latitude, geoRect.NorthWest.Longitude);
+                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.NorthWest.Latitude, geoRect.NorthWest.Longitude);
                     writer.WriteLine("lines");
-                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.NorthEast.Latitude, geoRect.NorthEast.Longitude);
-                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.SouthEast.Latitude, geoRect.SouthEast.Longitude);
-                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.SouthWest.Latitude, geoRect.SouthWest.Longitude);
-                    writer.WriteLine("{0:0.0000}  {1:0.0000}", geoRect.NorthWest.Latitude, geoRect.NorthWest.Longitude);
+                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.NorthEast.Latitude, geoRect.NorthEast.Longitude);
+                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.SouthEast.Latitude, geoRect.SouthEast.Longitude);
+                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.SouthWest.Latitude, geoRect.SouthWest.Longitude);
+                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.NorthWest.Latitude, geoRect.NorthWest.Longitude);
                 }
 
                 var metadata = new NAEMOOverlayMetadata
@@ -583,10 +578,11 @@ namespace ESMEWorkBench.ViewModels.Main
                     OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename),
                 };
                 metadata.Save();
-
-                NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplexDescriptor.Data.Name);
-                SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(overlayFileName)];
-
+                Task.Factory.StartNew(() =>
+                {
+                    NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplexDescriptor.Data.Name);
+                    SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(overlayFileName)];
+                });
             }
         }
 
@@ -643,7 +639,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 _selectedBathymetryDescriptor = value;
                 NotifyPropertyChanged(SelectedBathymetryDescriptorChangedEventArgs);
-                if (_selectedBathymetryDescriptor != null) SelectedBathymetryInfo = string.Format("Name: {0}\nResolution: {1} min\nSource Overlay: {2}\nNumber of Points: {3}", Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename), _selectedBathymetryDescriptor.Metadata.Resolution, _selectedBathymetryDescriptor.Metadata.OverlayFilename ?? "[Unknown]",_selectedBathymetryDescriptor.Metadata.PointCount);
+                if (_selectedBathymetryDescriptor != null) SelectedBathymetryInfo = string.Format("Name: {0}\nResolution: {1} min\nSource Overlay: {2}\nNumber of Points: {3:n}", Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename), _selectedBathymetryDescriptor.Metadata.Resolution, _selectedBathymetryDescriptor.Metadata.OverlayFilename ?? "[Unknown]",_selectedBathymetryDescriptor.Metadata.PointCount);
                 IsBathymetryFileSelected = _selectedBathymetryDescriptor != null;
                 _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
             }
@@ -751,17 +747,11 @@ namespace ESMEWorkBench.ViewModels.Main
                     SaveAsFilename = destinationFile,
                     TaskName = "Bathymetry data extraction",
             };
-            bathymetryExtractor.RunWorkerCompleted += (s, e) =>
+            bathymetryExtractor.RunWorkerCompleted += (s, e) => Task.Factory.StartNew(() =>
             {
-                Bathymetry bathymetry;
-                var bathymetryFilename = Path.Combine(destinationPath, destinationFile);
-                var metadata = NAEMOBathymetryMetadata.FromBathymetryFile(bathymetryFilename, out bathymetry);
-                metadata.OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename);
-                metadata.Save();
-                NAEMOBathymetryDescriptors.Add(bathymetryFilename);
-                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(NAEMOBathymetryDescriptorsChangedEventArgs), DispatcherPriority.Normal);
-                SelectedBathymetryDescriptor = (NAEMOBathymetryDescriptor)NAEMOEnvironmentDescriptors[Path.GetFileNameWithoutExtension(bathymetryFilename)];
-            };
+                NAEMOBathymetryDescriptors.Refresh();
+                SelectedBathymetryDescriptor = (NAEMOBathymetryDescriptor)NAEMOBathymetryDescriptors[vm.BathymetryName];
+            });
             BackgroundTaskAggregator.BackgroundTasks.Add(bathymetryExtractor);
             BackgroundTaskAggregator.TaskName = "Bathymetry data extraction";
         }
@@ -820,7 +810,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 _selectedEnvironmentDescriptor = value;
                 NotifyPropertyChanged(SelectedEnvironmentDescriptorChangedEventArgs);
-                if ((_selectedEnvironmentDescriptor != null) && (_selectedEnvironmentDescriptor.Metadata != null)) SelectedEnvironmentInfo = string.Format("Name: {0}\nTime Period: {1}\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedEnvironmentDescriptor.DataFilename), _selectedEnvironmentDescriptor.Metadata.TimePeriod, _selectedEnvironmentDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
+                if ((_selectedEnvironmentDescriptor != null) && (_selectedEnvironmentDescriptor.Metadata != null)) SelectedEnvironmentInfo = string.Format("Name: {0}\nTime Period: {1}\nSource Overlay: {2}\nSource Bathymetry: {3}\nPoint count: {4:n}", Path.GetFileNameWithoutExtension(_selectedEnvironmentDescriptor.DataFilename), _selectedEnvironmentDescriptor.Metadata.TimePeriod, _selectedEnvironmentDescriptor.Metadata.OverlayFilename ?? "[Unknown]", _selectedEnvironmentDescriptor.Metadata.BathymetryName, _selectedEnvironmentDescriptor.Data.Locations.Count);
                 IsEnvironmentFileSelected = _selectedEnvironmentDescriptor != null;
                 _dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
             }
@@ -1076,14 +1066,11 @@ namespace ESMEWorkBench.ViewModels.Main
                             bt.RunWorkerCompleted += (s1, e1) =>
                             {
                                 if (loadMetadataTasks.Any(n => n.IsBusy)) return;
-                                var bt1 = new GenericBackgroundTask();
-                                bt1.DoWork += (s2, e2) => NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(_selectedRangeComplexDescriptor.Data.Name);
-                                bt1.RunWorkerCompleted += (s3, e3) =>
+                                Task.Factory.StartNew(() =>
                                 {
-                                    SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors.Find(item => item.Key == vm.EnvironmentDescriptors[0].EnvironmentName).Value;
-                                    CommandManager.InvalidateRequerySuggested();
-                                };
-                                BackgroundTaskAggregator.BackgroundTasks.Add(bt1);
+                                    NAEMOEnvironmentDescriptors.Refresh();
+                                    SelectedEnvironmentDescriptor = (NAEMOEnvironmentDescriptor)NAEMOEnvironmentDescriptors[vm.EnvironmentDescriptors[0].EnvironmentName];
+                                });
                             };
                             loadMetadataTasks.Add(bt);
                             BackgroundTaskAggregator.BackgroundTasks.Add(bt);
