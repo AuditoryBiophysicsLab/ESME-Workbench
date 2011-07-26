@@ -19,17 +19,15 @@
             </Grid.ColumnDefinitions>
             <GroupBox Grid.Column="0"
 			          Header="Log Files">
-                <StackPanel Orientation="Vertical">
-                    
+                <DockPanel LastChildFill="True">                  
                     <ListBox ItemsSource="{Binding LogFilePairs}" SelectedValuePath="Value" SelectedValue="{Binding SelectedLogFile}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Key}"/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
-                    </ListBox>
-                    <Controls:FileOrDirectorySetting Caption="Logfile Directory" Content="{Binding LogDir}"/>
-                </StackPanel>
+                    </ListBox>                    
+                </DockPanel>
             </GroupBox>
             <GridSplitter Name="GridSplitter"
 			              Grid.Column="1"                          
