@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using C5;
 using ESME.Environment.NAVO;
@@ -30,17 +32,40 @@ namespace ESME.Environment
         {
             get
             {
-                var minDistance = double.MaxValue;
-                T closestSample = null;
-                foreach (var item in _arrayList)
+                if (_arrayList.Count < 10000) return FindNearestInSublist(location, _arrayList, 0, _arrayList.Count);
+                var cpuCount = System.Environment.ProcessorCount;
+                var arraySliceLength = _arrayList.Count / cpuCount;
+                var nearestCandidates = new List<T>();
+                Parallel.For(0, cpuCount, () => new T(), (i, loop, j) =>
                 {
-                    var curDistance = item.DistanceKilometers(location);
-                    if (curDistance >= minDistance) continue;
-                    minDistance = curDistance;
-                    closestSample = item;
-                }
-                return closestSample;
+                    if (i < cpuCount)
+                        return FindNearestInSublist(location, _arrayList, arraySliceLength * i, arraySliceLength);
+                    return FindNearestInSublist(location, _arrayList, arraySliceLength * i, _arrayList.Count - (arraySliceLength * i));
+                },
+                returnValue =>
+                {
+                    lock (nearestCandidates)
+                    {
+                        nearestCandidates.Add(returnValue);
+                    }
+                });
+                return FindNearestInSublist(location, nearestCandidates, 0, nearestCandidates.Count - 1);
             }
+        }
+
+        static T FindNearestInSublist(Geo location, System.Collections.Generic.IList<T> list, int startIndex, int itemCount)
+        {
+            var minDistance = double.MaxValue;
+            T closestSample = null;
+            for (var indexOffset = 0; indexOffset < itemCount; indexOffset++)
+            {
+                var item = list[startIndex + indexOffset];
+                var curDistance = item.DistanceKilometers(location);
+                if (curDistance >= minDistance) continue;
+                minDistance = curDistance;
+                closestSample = item;
+            }
+            return closestSample;
         }
 
         public bool IsSorted { get; private set; }
