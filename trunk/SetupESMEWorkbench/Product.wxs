@@ -160,7 +160,12 @@
             <File Id="MEFedMVVM.WPF.dll"
                   Name="MEFedMVVM.WPF.dll"
                   Source="$(var.ESMEPath)\MEFedMVVM.WPF.dll" />
-            
+
+            <!-- C5 assembly -->
+            <File Id="C5.dll"
+                  Name="C5.dll"
+                  Source="$(var.ESMEPath)\C5.dll" />
+
             <!-- Miscellaneous assemblies -->
             <File Id="Kent.Boogaart.Converters.dll"
                   Name="Kent.Boogaart.Converters.dll"
