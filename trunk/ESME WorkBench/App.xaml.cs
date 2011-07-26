@@ -30,6 +30,10 @@ namespace ESMEWorkBench
             Trace.Listeners.Add(new TextWriterTraceListener(Logfile, "logfile"){TraceOutputOptions = TraceOptions.None});
             Trace.AutoFlush = true;
             Trace.WriteLine(Name + " initializing");
+#if DEBUG
+            var tr1 = new TextWriterTraceListener(Console.Out);
+            Debug.Listeners.Add(tr1);
+#endif
             if (OSInfo.OperatingSystemName != "XP")
             {
                 DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "esme_crash.mdmp");

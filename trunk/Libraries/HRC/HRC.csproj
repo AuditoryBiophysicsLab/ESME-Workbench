@@ -129,6 +129,7 @@
     <Compile Include="Collections\KeyedList.cs" />
     <Compile Include="Collections\Node.cs" />
     <Compile Include="Collections\NodeList.cs" />
+    <Compile Include="Collections\ParallelExtensionMethods.cs" />
     <Compile Include="Collections\RedBlack.cs" />
     <Compile Include="Collections\RedBlackEnumerator.cs" />
     <Compile Include="Collections\RedBlackException.cs" />
@@ -246,7 +247,12 @@
     <EmbeddedResource Include="Resources\jet.map" />
     <EmbeddedResource Include="Resources\summer.map" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\C5\C5.csproj">
+      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
+      <Name>C5</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace HRC -class BuildInformation -svnversion "$(ProjectDir) " -output "$(ProjectDir)BuildInformation.cs"

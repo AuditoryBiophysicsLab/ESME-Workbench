@@ -332,6 +332,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\C5\C5.csproj">
+      <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
+      <Name>C5</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HRC\HRC.csproj">
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>

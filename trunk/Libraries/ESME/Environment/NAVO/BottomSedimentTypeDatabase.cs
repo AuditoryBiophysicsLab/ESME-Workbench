@@ -92,11 +92,7 @@ namespace ESME.Environment.NAVO
             var sedimentList = new List<SedimentSample>();
             for (var i = 0; i < result.GetLength(0); i++)
                 for (var j = 0; j < result.GetLength(1); j++)
-                    sedimentList.Add(new SedimentSample(latitude + (i * resolutionStep), longitude + (j * resolutionStep), new SedimentSampleBase
-                                                                                                                           {
-                                                                                                                               SampleValue = result[i, j],
-                                                                                                                               IsHighResolution = isHighResolution,
-                                                                                                                           }));
+                    sedimentList.Add(new SedimentSample(latitude + (i * resolutionStep), longitude + (j * resolutionStep), new SedimentSampleBase{SampleValue = result[i, j]}));
             return sedimentList;
         }
 

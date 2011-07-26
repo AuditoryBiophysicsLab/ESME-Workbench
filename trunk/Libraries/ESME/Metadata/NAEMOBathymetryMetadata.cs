@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -9,7 +8,6 @@ using System.Text;
 using System.Windows;
 using Cinch;
 using ESME.Environment;
-using ESME.Overlay;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -77,15 +75,15 @@ namespace ESME.Metadata
                 Threshold = 0,
             };
 
-            var bathysize = Math.Max(bathymetry.Samples.Longitudes.Count, bathymetry.Samples.Latitudes.Count);
+            var bathysize = Math.Max(bathymetry.Samples.Longitudes.Length, bathymetry.Samples.Latitudes.Length);
             var screenSize = Math.Min(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenHeight);
             var displayValues = bathymetry.Samples;
             if (bathysize > screenSize)
             {
                 var scaleFactor = screenSize / bathysize;
-                displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples, (int)(bathymetry.Samples.Longitudes.Count * scaleFactor), (int)(bathymetry.Samples.Latitudes.Count * scaleFactor));
+                displayValues = EnvironmentData<EarthCoordinate<float>>.Decimate(bathymetry.Samples, (int)(bathymetry.Samples.Longitudes.Length * scaleFactor), (int)(bathymetry.Samples.Latitudes.Length * scaleFactor));
             }
-            var bitmapData = new float[displayValues.Longitudes.Count, displayValues.Latitudes.Count];
+            var bitmapData = new float[displayValues.Longitudes.Length, displayValues.Latitudes.Length];
             for (var latIndex = 0; latIndex < bitmapData.GetLength(1); latIndex++)
                 for (var lonIndex = 0; lonIndex < bitmapData.GetLength(0); lonIndex++)
                     bitmapData[lonIndex, latIndex] = displayValues[(uint)lonIndex, (uint)latIndex].Data;
