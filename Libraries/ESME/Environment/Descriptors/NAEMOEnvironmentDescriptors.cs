@@ -6,8 +6,9 @@ namespace ESME.Environment.Descriptors
 {
     public class NAEMOEnvironmentDescriptors : NAEMODescriptors<NAEMOEnvironmentDescriptor>
     {
-        public NAEMOEnvironmentDescriptors(string selectedRangeComplexName, BackgroundTask backgroundTask = null)
-                : base(selectedRangeComplexName, "Environment", "*.dat", null, backgroundTask)
+        public NAEMOEnvironmentDescriptors(string selectedRangeComplexName) : base(selectedRangeComplexName, "Environment", "*.dat") { Refresh(); }
+
+        public new void Refresh(BackgroundTask backgroundTask = null)
         {
             Parallel.ForEach(this, envItem =>
             {

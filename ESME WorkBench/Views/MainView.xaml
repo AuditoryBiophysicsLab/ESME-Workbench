@@ -425,6 +425,14 @@
 					                ToolTipDescription="Add a new quick look point to the experiment"
 					                Command="{Binding DisabledCommand}" />
                 </r:RibbonGroup>
+                <r:RibbonGroup Header="Log files">
+                    <r:RibbonButton Label="Scenario Simulator"
+					                LargeImageSource="..\Images\LargeIcons\log-icon.png"
+					                SmallImageSource="..\Images\SmallIcons\log-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Export all Analysis Points as CASS jobs"
+					                Command="{Binding ViewSimulatorLogsCommand}" />
+                </r:RibbonGroup>
             </r:RibbonTab>
 			<r:RibbonTab KeyTip="V"
 			             Header="Environment"                         >
@@ -442,8 +450,9 @@
                         </Grid.ColumnDefinitions>
                         <ListView Grid.Column="0"
                                   DockPanel.Dock="Top"
-                                  ItemsSource="{Binding RangeComplexDescriptors}"
-                                  SelectedValue="{Binding SelectedRangeComplexDescriptor}"
+                                  ItemsSource="{Binding RangeComplexDescriptors, Mode=TwoWay}"
+                                  SelectedValue="{Binding SelectedRangeComplexDescriptor, Mode=TwoWay}"
+                                  IsSynchronizedWithCurrentItem="True"
                                   SelectedValuePath="Value"
                                   SelectionMode="Single"
                                   MinWidth="75"
@@ -517,8 +526,9 @@
                         </Grid.ColumnDefinitions>
                         <ListView Grid.Column="0"
                                     DockPanel.Dock="Top"
-                                    ItemsSource="{Binding NAEMOOverlayDescriptors}"
-                                    SelectedValue="{Binding SelectedOverlayDescriptor}"
+                                    ItemsSource="{Binding NAEMOOverlayDescriptors, Mode=TwoWay}"
+                                    SelectedValue="{Binding SelectedOverlayDescriptor, Mode=TwoWay}"
+                                    IsSynchronizedWithCurrentItem="True"
                                     SelectedValuePath="Value"
                                     SelectionMode="Single"
                                     MinWidth="75"
@@ -592,8 +602,9 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
                         <ListView Grid.Column="0"
-                                  ItemsSource="{Binding NAEMOBathymetryDescriptors}"
-                                  SelectedValue="{Binding SelectedBathymetryDescriptor}"
+                                  ItemsSource="{Binding NAEMOBathymetryDescriptors, Mode=TwoWay}"
+                                  SelectedValue="{Binding SelectedBathymetryDescriptor, Mode=TwoWay}"
+                                  IsSynchronizedWithCurrentItem="True"
                                   SelectedValuePath="Value"
                                   SelectionMode="Single"
                                   MinWidth="75"
@@ -661,8 +672,9 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
                         <ListView Grid.Column="0"
-                                  ItemsSource="{Binding NAEMOEnvironmentDescriptors}"
-                                  SelectedValue="{Binding SelectedEnvironmentDescriptor}"
+                                  ItemsSource="{Binding NAEMOEnvironmentDescriptors, Mode=TwoWay}"
+                                  SelectedValue="{Binding SelectedEnvironmentDescriptor, Mode=TwoWay}"
+                                  IsSynchronizedWithCurrentItem="True"
                                   SelectedValuePath="Value"
                                   SelectionMode="Single"
                                   MinWidth="75"

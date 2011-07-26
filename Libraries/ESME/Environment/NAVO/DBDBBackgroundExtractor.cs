@@ -31,27 +31,6 @@ namespace ESME.Environment.NAVO
             TaskName = "Bathymetry data extraction";
             var backgroundExtractor = (DBDBBackgroundExtractor)e.Argument;
             backgroundExtractor.Maximum = 3;
-#if false
-            var resolutions = new List<string>();
-            var commandArgs = string.Format("resolutions \"{0}\"", backgroundExtractor.NAVOConfiguration.DBDBDirectory);
-            var result = NAVOExtractionProgram.Execute(backgroundExtractor.NAVOConfiguration.DBDBEXEPath, commandArgs, null).Trim();
-            var resarray = result.Split('\n');
-            for (var index = 0; index < resarray.Length; index++)
-            {
-                var line = resarray[index].Trim();
-                if (line.Contains("Available resolutions:"))
-                {
-                    for (var j = index + 1; j < resarray.Length; j++)
-                    {
-                        var resline = resarray[j].Trim();
-                        if (resline.Equals("")) break;
-                        resolutions.Add(resline);
-                    }
-                }
-                if (line.Contains("ERROR:"))
-                    throw new ApplicationException("DigitalBathymetricDatabase: Error reading available resolutions: " + line);
-            }
-#endif
             backgroundExtractor.Value++;
 
             //from documentation, area extractions for DBDB are of the form <dbv5_command path> area <database path> <finest_resolution> <coarsest resolution> nearest 0 meters G <south west north east> 
@@ -59,6 +38,7 @@ namespace ESME.Environment.NAVO
             //extract the area and look for success or failure in the output string.
 
             var result = NAVOExtractionProgram.Execute(backgroundExtractor.NAVOConfiguration.DBDBEXEPath, commandArgs, backgroundExtractor.DestinationPath);
+            backgroundExtractor.Value++;
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
             backgroundExtractor.Value++;
