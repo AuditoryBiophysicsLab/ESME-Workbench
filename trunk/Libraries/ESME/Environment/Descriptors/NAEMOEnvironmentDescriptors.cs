@@ -1,4 +1,5 @@
-﻿using ESME.Metadata;
+﻿using System.Threading.Tasks;
+using ESME.Metadata;
 using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
@@ -8,15 +9,15 @@ namespace ESME.Environment.Descriptors
         public NAEMOEnvironmentDescriptors(string selectedRangeComplexName, BackgroundTask backgroundTask = null)
                 : base(selectedRangeComplexName, "Environment", "*.dat", null, backgroundTask)
         {
-            foreach (var envItem in this)
+            Parallel.ForEach(this, envItem =>
             {
                 if ((backgroundTask != null) && (backgroundTask.CancellationPending)) return;
                 if (backgroundTask != null) backgroundTask.Value++;
-                if ((envItem.Value == null) || (envItem.Value.Metadata != null)) continue;
+                if ((envItem.Value == null) || (envItem.Value.Metadata != null)) return;
                 envItem.Value.Metadata = NAEMOEnvironmentMetadata.FromEnvironmentFile(envItem.Value.DataFilename);
-                if (envItem.Value.Metadata == null) continue;
+                if (envItem.Value.Metadata == null) return;
                 envItem.Value.Metadata.Save();
-            }
+            });
         }
     }
 }

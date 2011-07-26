@@ -32,8 +32,6 @@ namespace ESMEWorkBench.ViewModels.Main
     {
         void InitializeEnvironmentTab()
         {
-            if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
-            RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
             //if (_simAreaCSVWatcher != null) _simAreaCSVWatcher.Dispose();
             //_simAreaCSVWatcher = new FileSystemWatcher(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv");
             //_simAreaCSVWatcher.Changed += (s, e) => RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
@@ -47,6 +45,8 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             Console.WriteLine("All view models are ready!");
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
+            if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
+            RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
             //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
@@ -166,11 +166,11 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_rangeComplexDescriptors == value) return;
                 _rangeComplexDescriptors = value;
-                NotifyPropertyChanged(SimAreaCSVChangedEventArgs);
+                NotifyPropertyChanged(RangeComplexDescriptorsChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs SimAreaCSVChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RangeComplexDescriptors);
+        static readonly PropertyChangedEventArgs RangeComplexDescriptorsChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RangeComplexDescriptors);
         RangeComplexDescriptors _rangeComplexDescriptors;
 
         #endregion
