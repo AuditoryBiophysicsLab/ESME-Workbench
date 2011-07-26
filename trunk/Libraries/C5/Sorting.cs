@@ -19,6 +19,7 @@
  SOFTWARE.
 */
 using System;
+using System.Threading.Tasks;
 using SCG = System.Collections.Generic;
 namespace C5
 {
@@ -43,6 +44,22 @@ namespace C5
             if (start < 0 || count < 0 || start + count > array.Length)
                 throw new ArgumentOutOfRangeException();
             new Sorter<T>(array, comparer).IntroSort(start, start + count);
+        }
+
+        /// <summary>
+        /// Sort part of array in place using IntroSort
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">If the <code>start</code>
+        /// and <code>count</code> arguments does not describe a valid range.</exception>
+        /// <param name="array">Array to sort</param>
+        /// <param name="start">Index of first position to sort</param>
+        /// <param name="count">Number of elements to sort</param>
+        /// <param name="comparer">IComparer&lt;T&gt; to sort by</param>
+        public static void ParallelIntroSort<T>(T[] array, int start, int count, SCG.IComparer<T> comparer)
+        {
+            if (start < 0 || count < 0 || start + count > array.Length)
+                throw new ArgumentOutOfRangeException();
+            new Sorter<T>(array, comparer).ParallelIntroSort(start, start + count);
         }
 
         /// <summary>
@@ -92,142 +109,169 @@ namespace C5
 
         class Sorter<T>
         {
-            T[] a;
+            readonly T[] _a;
 
-            SCG.IComparer<T> c;
+            readonly SCG.IComparer<T> _c;
 
 
-            internal Sorter(T[] a, SCG.IComparer<T> c) { this.a = a; this.c = c; }
+            internal Sorter(T[] a, SCG.IComparer<T> c) { _a = a; _c = c; }
 
 
             internal void IntroSort(int f, int b)
             {
                 if (b - f > 31)
                 {
-                    int depth_limit = (int)Math.Floor(2.5 * Math.Log(b - f, 2));
+                    var depthLimit = (int)Math.Floor(2.5 * Math.Log(b - f, 2));
 
-                    introSort(f, b, depth_limit);
+                    IntroSort(f, b, depthLimit);
+                }
+                else
+                    InsertionSort(f, b);
+            }
+
+            internal void ParallelIntroSort(int f, int b)
+            {
+                if (b - f > 31)
+                {
+                    var depthLimit = (int)Math.Floor(2.5 * Math.Log(b - f, 2));
+
+                    ParallelIntroSort(f, b, depthLimit);
                 }
                 else
                     InsertionSort(f, b);
             }
 
 
-            private void introSort(int f, int b, int depth_limit)
+            private void IntroSort(int f, int b, int depthLimit)
             {
-                const int size_threshold = 14;//24;
+                const int sizeThreshold = 14;//24;
 
-                if (depth_limit-- == 0)
+                if (depthLimit-- == 0)
                     HeapSort(f, b);
-                else if (b - f <= size_threshold)
+                else if (b - f <= sizeThreshold)
                     InsertionSort(f, b);
                 else
                 {
-                    int p = partition(f, b);
+                    var p = Partition(f, b);
 
-                    introSort(f, p, depth_limit);
-                    introSort(p, b, depth_limit);
+                    IntroSort(f, p, depthLimit);
+                    IntroSort(p, b, depthLimit);
+                }
+            }
+
+            private void ParallelIntroSort(int f, int b, int depthLimit)
+            {
+                const int sizeThreshold = 14;//24;
+
+                if (depthLimit-- == 0)
+                    HeapSort(f, b);
+                else if (b - f <= sizeThreshold)
+                    InsertionSort(f, b);
+                else
+                {
+                    var p = Partition(f, b);
+                    Parallel.Invoke(() => IntroSort(f, p, depthLimit),
+                                    () => IntroSort(p, b, depthLimit));
                 }
             }
 
 
-            private int compare(T i1, T i2) { return c.Compare(i1, i2); }
+            private int Compare(T i1, T i2) { return _c.Compare(i1, i2); }
 
 
-            private int partition(int f, int b)
+            private int Partition(int f, int b)
             {
                 int bot = f, mid = (b + f) / 2, top = b - 1;
-                T abot = a[bot], amid = a[mid], atop = a[top];
+                T abot = _a[bot], amid = _a[mid], atop = _a[top];
 
-                if (compare(abot, amid) < 0)
+                if (Compare(abot, amid) < 0)
                 {
-                    if (compare(atop, abot) < 0)//atop<abot<amid
-                    { a[top] = amid; amid = a[mid] = abot; a[bot] = atop; }
-                    else if (compare(atop, amid) < 0) //abot<=atop<amid
-                    { a[top] = amid; amid = a[mid] = atop; }
+                    if (Compare(atop, abot) < 0)//atop<abot<amid
+                    { _a[top] = amid; amid = _a[mid] = abot; _a[bot] = atop; }
+                    else if (Compare(atop, amid) < 0) //abot<=atop<amid
+                    { _a[top] = amid; amid = _a[mid] = atop; }
                     //else abot<amid<=atop
                 }
                 else
                 {
-                    if (compare(amid, atop) > 0) //atop<amid<=abot
-                    { a[bot] = atop; a[top] = abot; }
-                    else if (compare(abot, atop) > 0) //amid<=atop<abot
-                    { a[bot] = amid; amid = a[mid] = atop; a[top] = abot; }
+                    if (Compare(amid, atop) > 0) //atop<amid<=abot
+                    { _a[bot] = atop; _a[top] = abot; }
+                    else if (Compare(abot, atop) > 0) //amid<=atop<abot
+                    { _a[bot] = amid; amid = _a[mid] = atop; _a[top] = abot; }
                     else //amid<=abot<=atop
-                    { a[bot] = amid; amid = a[mid] = abot; }
+                    { _a[bot] = amid; amid = _a[mid] = abot; }
                 }
 
                 int i = bot, j = top;
 
                 while (true)
                 {
-                    while (compare(a[++i], amid) < 0) ;
+                    while (Compare(_a[++i], amid) < 0) {}
 
-                    while (compare(amid, a[--j]) < 0) ;
+                    while (Compare(amid, _a[--j]) < 0) {}
 
-                    if (i < j)
-                    {
-                        T tmp = a[i]; a[i] = a[j]; a[j] = tmp;
-                    }
-                    else
-                        return i;
+                    if (i >= j) return i;
+                    var tmp = _a[i];
+                    _a[i] = _a[j];
+                    _a[j] = tmp;
                 }
             }
 
 
             internal void InsertionSort(int f, int b)
             {
-                for (int j = f + 1; j < b; j++)
+                for (var j = f + 1; j < b; j++)
                 {
-                    T key = a[j], other;
-                    int i = j - 1;
+                    T key = _a[j], other;
+                    var i = j - 1;
 
-                    if (c.Compare(other = a[i], key) > 0)
-                    {
-                        a[j] = other;
-                        while (i > f && c.Compare(other = a[i - 1], key) > 0) { a[i--] = other; }
+                    if (_c.Compare(other = _a[i], key) <= 0) continue;
+                    _a[j] = other;
+                    while (i > f && _c.Compare(other = _a[i - 1], key) > 0) { _a[i--] = other; }
 
-                        a[i] = key;
-                    }
+                    _a[i] = key;
                 }
             }
 
 
             internal void HeapSort(int f, int b)
             {
-                for (int i = (b + f) / 2; i >= f; i--) heapify(f, b, i);
+                for (var i = (b + f) / 2; i >= f; i--) Heapify(f, b, i);
 
-                for (int i = b - 1; i > f; i--)
+                for (var i = b - 1; i > f; i--)
                 {
-                    T tmp = a[f]; a[f] = a[i]; a[i] = tmp;
-                    heapify(f, i, f);
+                    var tmp = _a[f]; _a[f] = _a[i]; _a[i] = tmp;
+                    Heapify(f, i, f);
                 }
             }
 
 
-            private void heapify(int f, int b, int i)
+            private void Heapify(int f, int b, int i)
             {
-                T pv = a[i], lv, rv, max = pv;
+                var pv = _a[i];
+                var max = pv;
                 int j = i, maxpt = j;
 
                 while (true)
                 {
                     int l = 2 * j - f + 1, r = l + 1;
 
-                    if (l < b && compare(lv = a[l], max) > 0) { maxpt = l; max = lv; }
+                    T lv;
+                    if (l < b && Compare(lv = _a[l], max) > 0) { maxpt = l; max = lv; }
 
-                    if (r < b && compare(rv = a[r], max) > 0) { maxpt = r; max = rv; }
+                    T rv;
+                    if (r < b && Compare(rv = _a[r], max) > 0) { maxpt = r; max = rv; }
 
                     if (maxpt == j)
                         break;
 
-                    a[j] = max;
+                    _a[j] = max;
                     max = pv;
                     j = maxpt;
                 }
 
                 if (j > i)
-                    a[j] = pv;
+                    _a[j] = pv;
             }
         }
     }

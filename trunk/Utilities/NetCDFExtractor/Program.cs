@@ -237,6 +237,7 @@ namespace ImportGDEM
             }
             var newField = new SoundSpeedField { TimePeriod = month};
             newField.EnvironmentData.AddRange(newFieldEnvironmentData);
+            newField.EnvironmentData.Sort();
             return newField;
         }
 

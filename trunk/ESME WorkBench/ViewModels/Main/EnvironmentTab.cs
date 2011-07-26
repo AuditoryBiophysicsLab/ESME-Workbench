@@ -733,8 +733,8 @@ namespace ESMEWorkBench.ViewModels.Main
             var vm = new BathymetryExtractionViewModel(Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox));
             var result = _visualizerService.ShowDialog("BathymetryExtractionView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
-            NAEMOBathymetryDescriptors = null;
-            CommandManager.InvalidateRequerySuggested();
+            //NAEMOBathymetryDescriptors = null;
+            //CommandManager.InvalidateRequerySuggested();
             var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
             var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
             if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
