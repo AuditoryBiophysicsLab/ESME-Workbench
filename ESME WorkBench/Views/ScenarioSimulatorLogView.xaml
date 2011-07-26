@@ -1,0 +1,50 @@
+﻿<Window x:Class="ESMEWorkBench.Views.ScenarioSimulatorLogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
+        xmlns:Properties="clr-namespace:ESMEWorkBench.Properties" xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views" Title="Available Scenario Simulator Logs" 
+        Top="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewTop, Mode=TwoWay}"
+        Left="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewLeft, Mode=TwoWay}"
+        Height="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewHeight, Mode=TwoWay}"
+        Width="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewWidth, Mode=TwoWay}">
+    <DockPanel Margin="5" LastChildFill="True">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">            
+            <Button Content="Close" Width="75" Margin="5" Command="{Binding CloseCommand}"/>
+        </StackPanel>
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="200"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" MinWidth="500" />
+            </Grid.ColumnDefinitions>
+            <GroupBox Grid.Column="0"
+			          Header="Log Files">
+                <StackPanel Orientation="Vertical">
+                    
+                    <ListBox ItemsSource="{Binding LogFilePairs}" SelectedValuePath="Value" SelectedValue="{Binding SelectedLogFile}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Key}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <Controls:FileOrDirectorySetting Caption="Logfile Directory" Content="{Binding LogDir}"/>
+                </StackPanel>
+            </GroupBox>
+            <GridSplitter Name="GridSplitter"
+			              Grid.Column="1"                          
+			              Width="2"
+			              Background="Black"
+			              HorizontalAlignment="Center"
+			              Margin="5,0,5,0"
+			              VerticalAlignment="Stretch"
+			              ResizeBehavior="BasedOnAlignment"
+			              ResizeDirection="Columns" />
+            <GroupBox Grid.Column="2" Header="{Binding SelectedLogFileHeaderText}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <TextBlock Text="{Binding SelectedLogFileText}"/>
+                </ScrollViewer>
+            </GroupBox>
+        </Grid>       
+    </DockPanel>
+</Window>

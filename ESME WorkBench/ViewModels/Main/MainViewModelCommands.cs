@@ -143,6 +143,34 @@ namespace ESMEWorkBench.ViewModels.Main
 #endif
         #endregion
 
+        #region ViewSimulatorLogsCommand
+
+        public SimpleCommand<object, object> ViewSimulatorLogsCommand
+        {
+            get
+            {
+                return _viewSimulatorLogs ??
+                       (_viewSimulatorLogs =
+                        new SimpleCommand<object, object>(delegate { return IsViewSimulatorLogsCommandEnabled; },
+                                                          delegate { ViewSimulatorLogsHandler(); }));
+            }
+        }
+
+        private SimpleCommand<object, object> _viewSimulatorLogs;
+
+        private bool IsViewSimulatorLogsCommandEnabled
+        {
+            get { return Directory.Exists(@"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\logs"); }
+        }
+
+        private void ViewSimulatorLogsHandler()
+        {
+            var scenarioSimulatorLogViewModel = new ScenarioSimulatorLogViewModel(@"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\logs");
+            _visualizerService.Show("ScenarioSimulatorLogView", scenarioSimulatorLogViewModel, true,null);
+        }
+
+        #endregion
+
         #region ViewScenarioSimulatorLogDirCommand
 
 #if EXPERIMENTS_SUPPORTED

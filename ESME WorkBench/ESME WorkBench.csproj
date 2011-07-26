@@ -143,6 +143,7 @@
     <Compile Include="ViewModels\Map\RasterMapLayer.cs" />
     <Compile Include="ViewModels\NAVO\EnvironmentBuilderViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ExportOptionsViewModel.cs" />
+    <Compile Include="ViewModels\NAVO\ScenarioSimulatorLogViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ScenarioSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticSimulatorOptionsViewModel.cs" />
@@ -207,6 +208,9 @@
     </Compile>
     <Compile Include="Views\QuickLookView.xaml.cs">
       <DependentUpon>QuickLookView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ScenarioSimulatorLogView.xaml.cs">
+      <DependentUpon>ScenarioSimulatorLogView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ScenarioSimulatorOptionsView.xaml.cs">
       <DependentUpon>ScenarioSimulatorOptionsView.xaml</DependentUpon>
@@ -407,6 +411,10 @@
     <Page Include="Views\QuickLookView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ScenarioSimulatorLogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ScenarioSimulatorOptionsView.xaml">
       <SubType>Designer</SubType>
