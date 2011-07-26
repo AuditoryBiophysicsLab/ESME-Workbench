@@ -334,5 +334,53 @@ namespace ESMEWorkBench.Properties {
                 this["SelectedRibbonTabIndex"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double LogViewTop {
+            get {
+                return ((double)(this["LogViewTop"]));
+            }
+            set {
+                this["LogViewTop"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double LogViewLeft {
+            get {
+                return ((double)(this["LogViewLeft"]));
+            }
+            set {
+                this["LogViewLeft"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public double LogViewHeight {
+            get {
+                return ((double)(this["LogViewHeight"]));
+            }
+            set {
+                this["LogViewHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("800")]
+        public double LogViewWidth {
+            get {
+                return ((double)(this["LogViewWidth"]));
+            }
+            set {
+                this["LogViewWidth"] = value;
+            }
+        }
     }
 }

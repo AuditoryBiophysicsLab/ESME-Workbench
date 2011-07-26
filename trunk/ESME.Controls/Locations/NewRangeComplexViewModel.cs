@@ -82,13 +82,13 @@ namespace ESME.Views.Locations
                 {
                     PropertyName = "NewOpAreaOverlayCoordinates", 
                     Description = "Invalid or incomplete data entered", 
-                    RuleDelegate = (o, r) => ValidateOverlayCoordinates(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, r)
+                    RuleDelegate = (o, r) => (string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) && ValidateOverlayCoordinates(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, r)),
                 },
                 new ValidationRule
                 {
                     PropertyName = "NewSimAreaOverlayCoordinates", 
                     Description = "Invalid or incomplete data entered", 
-                    RuleDelegate = (o, r) => ValidateOverlayCoordinates(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, r)
+                    RuleDelegate = (o, r) => ((string.IsNullOrEmpty(ExistingSimAreaOverlayFilename)&& ValidateOverlayCoordinates(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, r))),
                 },
                 new ValidationRule
                 {
