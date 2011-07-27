@@ -17,7 +17,9 @@ namespace ESMEWorkBench.ViewModels.NAVO
         public ScenarioSimulatorLogViewModel(string logDirectory, string filePattern, Dispatcher dispatcher)
         {
             _dispatcher = dispatcher;
+            FilePattern = filePattern;
             LogDirectory = logDirectory;
+            
         }
 
         #region public string LogDirectory { get; set; }
@@ -29,7 +31,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             {
                 if (_logDirectory == value) return;
                 _logDirectory = value;
-                NotifyPropertyChanged(LogDirChangedEventArgs);
+                NotifyPropertyChanged(LogDirectoryChangedEventArgs);
                 RefreshDirectory();
 
                 if (_dirWatcher != null)
@@ -74,7 +76,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             _isRefreshingDirectory = false;
             NotifyPropertyChanged(SelectedLogFileChangedEventArgs);
         }
-        private static readonly PropertyChangedEventArgs LogDirChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.LogDirectory);
+        private static readonly PropertyChangedEventArgs LogDirectoryChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.LogDirectory);
         private string _logDirectory;
         private FileSystemWatcher _dirWatcher;
         private Timer _dirTimer;
