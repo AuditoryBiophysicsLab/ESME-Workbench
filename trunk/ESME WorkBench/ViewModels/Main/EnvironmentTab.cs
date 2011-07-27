@@ -543,27 +543,8 @@ namespace ESMEWorkBench.ViewModels.Main
             var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplexDescriptor.Data.Name);
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
-            var rangeComplexAreasFolder = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Areas");
-            var overlayFileName = vm.OverlayName.EndsWith(".ovr") ? vm.OverlayName : vm.OverlayName + ".ovr";
-            var metadataFileName = string.Format("{0}.xml", overlayFileName);
-            var overlayPath = Path.Combine(rangeComplexAreasFolder, overlayFileName);
-            var metadataPath = Path.Combine(rangeComplexAreasFolder, metadataFileName);
-            OverlayFile.Create(overlayPath, vm.OverlayEarthCoordinates);
-            var metadata = new NAEMOOverlayMetadata
-            {
-                    Bounds = vm.BoundingBox,
-                    BufferZoneSize = 0,
-                    Filename = metadataPath,
-                    OverlayFilename = null,
-            };
-            metadata.Save();
-            NAEMOOverlayDescriptors.Add(new System.Collections.Generic.KeyValuePair<string, NAEMOOverlayDescriptor>(Path.GetFileNameWithoutExtension(overlayFileName), new NAEMOOverlayDescriptor
-            {
-                DataFilename = overlayFileName,
-                Metadata = metadata,
-            }));
-            NAEMOOverlayDescriptors.Sort();
-            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(overlayFileName)];
+            NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, Path.GetFileNameWithoutExtension(vm.OverlayName), vm.OverlayEarthCoordinates, vm.BoundingBox, 0, null);
+            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(vm.OverlayName)];
         }
 
         #endregion
@@ -586,32 +567,16 @@ namespace ESMEWorkBench.ViewModels.Main
             var vm = new OverlayExpandViewModel(SelectedOverlayDescriptor.Metadata);
             var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
-            //vm.BufferZoneSize
+            var overlayName = string.Format("{0}_{1}km", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
+            
             var curOverlay = SelectedOverlayDescriptor.Data;
             var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].BoundingBox));
             var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
-            var geoRect = new GeoRect(expandedLimits.GeoPointList);
-            var overlayFileName = string.Format("{0}_{1}km.ovr", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
-            var metadataFileName = string.Format("{0}_{1}km.xml", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
-            var overlayPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), overlayFileName);
-            var metadataPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), metadataFileName);
-            OverlayFile.Create(overlayPath, new List<EarthCoordinate> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest }, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
+            var boundingBox = new GeoRect(expandedLimits.GeoPointList);
+            var coordinateList = expandedLimits.GeoPointList.Select(geo => new EarthCoordinate(geo)).ToList();
 
-            var metadata = new NAEMOOverlayMetadata
-            {
-                    Bounds = geoRect,
-                    BufferZoneSize = vm.BufferSize,
-                    Filename = metadataPath,
-                    OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename),
-            };
-            metadata.Save();
-            NAEMOOverlayDescriptors.Add(new System.Collections.Generic.KeyValuePair<string, NAEMOOverlayDescriptor>(Path.GetFileNameWithoutExtension(overlayFileName), new NAEMOOverlayDescriptor
-            {
-                DataFilename = overlayFileName,
-                Metadata = metadata,
-            }));
-            NAEMOOverlayDescriptors.Sort();
-            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(overlayFileName)];
+            NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, overlayName, coordinateList, boundingBox, vm.BufferSize, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
+            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[overlayName];
         }
 
         #endregion
