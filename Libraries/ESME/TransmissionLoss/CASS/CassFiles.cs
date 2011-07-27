@@ -73,7 +73,7 @@ namespace ESME.TransmissionLoss.CASS
         static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName)
         {
             var nemoScenario = nemoFile.Scenario;
-            var simAreaFile = RangeComplexDescriptors.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"));
+            var simAreaFile = RangeComplexDescriptors.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"), null);
             var rangeComplex = ((RangeComplexDescriptor)simAreaFile[nemoScenario.SimAreaName]).Data;
 
             var inputFileName = string.Format("base-{0}-{1}-{2}-{3}.inp", simulatorName, platform.Name, platform.Id, timePeriod);

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Windows.Threading;
+using Cinch;
 using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
@@ -13,10 +15,8 @@ namespace ESME.Environment.Descriptors
 
         public delegate IEnumerable<string> FilenameFilter(IEnumerable<string> fileName);
 
-        protected NAEMODescriptors()
-        {
-            
-        }
+        public Dispatcher Dispatcher { get; set; }
+        protected NAEMODescriptors() { }
 
         protected string RangeComplexName;
         protected string SubDirectoryName;
@@ -81,7 +81,12 @@ namespace ESME.Environment.Descriptors
 
         #region Implementation of INotifyCollectionChanged
         public event NotifyCollectionChangedEventHandler CollectionChanged;
-        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e) { if (CollectionChanged != null) CollectionChanged(this, e); }
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            if (CollectionChanged == null) return;
+            if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => CollectionChanged(this, e), DispatcherPriority.Normal);
+            else CollectionChanged(this, e);
+        }
         #endregion
 
         #region Implementation of ICollection<KeyValuePair<string,T>>
