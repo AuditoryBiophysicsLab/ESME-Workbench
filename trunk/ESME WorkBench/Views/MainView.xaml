@@ -450,12 +450,11 @@
                         </Grid.ColumnDefinitions>
                         <ListView Grid.Column="0"
                                   DockPanel.Dock="Top"
-                                  ItemsSource="{Binding RangeComplexDescriptors, Mode=TwoWay}"
-                                  SelectedValue="{Binding SelectedRangeComplexDescriptor, Mode=TwoWay}"
-                                  IsSynchronizedWithCurrentItem="True"
+                                  ItemsSource="{Binding RangeComplexDescriptors}"
+                                  SelectedValue="{Binding SelectedRangeComplexDescriptor}"
                                   SelectedValuePath="Value"
                                   SelectionMode="Single"
-                                  MinWidth="75"
+                                  Width="150"
                                   MinHeight="66">
                             <ListView.ToolTip>
                                 <r:RibbonToolTip Title="Range Complex"
@@ -526,12 +525,11 @@
                         </Grid.ColumnDefinitions>
                         <ListView Grid.Column="0"
                                     DockPanel.Dock="Top"
-                                    ItemsSource="{Binding NAEMOOverlayDescriptors, Mode=TwoWay}"
-                                    SelectedValue="{Binding SelectedOverlayDescriptor, Mode=TwoWay}"
-                                    IsSynchronizedWithCurrentItem="True"
+                                    ItemsSource="{Binding NAEMOOverlayDescriptors}"
+                                    SelectedValue="{Binding SelectedOverlayDescriptor}"
                                     SelectedValuePath="Value"
                                     SelectionMode="Single"
-                                    MinWidth="75"
+                                    Width="150"
                                     MinHeight="66">
                             <ListView.ToolTip>
                                 <r:RibbonToolTip Title="Overlay"
@@ -602,12 +600,11 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
                         <ListView Grid.Column="0"
-                                  ItemsSource="{Binding NAEMOBathymetryDescriptors, Mode=TwoWay}"
-                                  SelectedValue="{Binding SelectedBathymetryDescriptor, Mode=TwoWay}"
-                                  IsSynchronizedWithCurrentItem="True"
+                                  ItemsSource="{Binding NAEMOBathymetryDescriptors}"
+                                  SelectedValue="{Binding SelectedBathymetryDescriptor}"
                                   SelectedValuePath="Value"
                                   SelectionMode="Single"
-                                  MinWidth="75"
+                                  Width="150"
                                   MinHeight="66">
                             <ListBox.ToolTip>
                                 <r:RibbonToolTip Title="Bathymetry"
@@ -672,12 +669,11 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
                         <ListView Grid.Column="0"
-                                  ItemsSource="{Binding NAEMOEnvironmentDescriptors, Mode=TwoWay}"
-                                  SelectedValue="{Binding SelectedEnvironmentDescriptor, Mode=TwoWay}"
-                                  IsSynchronizedWithCurrentItem="True"
+                                  ItemsSource="{Binding NAEMOEnvironmentDescriptors}"
+                                  SelectedValue="{Binding SelectedEnvironmentDescriptor}"
                                   SelectedValuePath="Value"
                                   SelectionMode="Single"
-                                  MinWidth="75"
+                                  Width="150"
                                   MinHeight="66">
                             <ListBox.ToolTip>
                                 <r:RibbonToolTip Title="Environment"
