@@ -120,7 +120,7 @@ namespace ESME.Environment.Descriptors
             NAEMOOverlayDescriptors overlayDescriptors = null;
             NAEMOBathymetryDescriptors bathymetryDescriptors = null;
             NAEMOEnvironmentDescriptors environmentDescriptors = null;
-#if false
+#if true
             Parallel.Invoke(() => overlayDescriptors = new NAEMOOverlayDescriptors(rangeComplexName) { Dispatcher = dispatcher },
                             () => bathymetryDescriptors = new NAEMOBathymetryDescriptors(rangeComplexName) { Dispatcher = dispatcher },
                             () => environmentDescriptors = new NAEMOEnvironmentDescriptors(rangeComplexName) { Dispatcher = dispatcher });
