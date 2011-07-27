@@ -29,6 +29,42 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
+        #region public string BathymetryFileName { get; set; }
+
+        public string BathymetryFileName
+        {
+            get { return _bathymetryFileName; }
+            set
+            {
+                if (_bathymetryFileName == value) return;
+                _bathymetryFileName = value;
+                NotifyPropertyChanged(BathymetryFileNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BathymetryFileNameChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.BathymetryFileName);
+        string _bathymetryFileName;
+
+        #endregion
+
+        #region public string OverlayFileName { get; set; }
+
+        public string OverlayFileName
+        {
+            get { return _overlayFileName; }
+            set
+            {
+                if (_overlayFileName == value) return;
+                _overlayFileName = value;
+                NotifyPropertyChanged(OverlayFileNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OverlayFileNameChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.OverlayFileName);
+        string _overlayFileName;
+
+        #endregion
+
         #region public Sediment Sediment { get; set; }
 
         public Sediment Sediment
@@ -130,7 +166,7 @@ namespace ESME.TransmissionLoss.CASS
                 }
                 TaskName = "Exporting NAEMO environment for " + TimePeriod;
                 var environmentFileName = backgroundExtractor.DestinationPath;
-                CASSFiles.WriteEnvironmentFile(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], backgroundExtractor);
+                CASSFiles.WriteEnvironmentFile(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], backgroundExtractor, BathymetryFileName, OverlayFileName);
             }
 
             backgroundExtractor.Value++;

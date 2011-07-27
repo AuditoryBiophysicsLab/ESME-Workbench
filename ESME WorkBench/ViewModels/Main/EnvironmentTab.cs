@@ -390,6 +390,40 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
+        #region DeleteRangeComplexCommand
+        public SimpleCommand<object, object> DeleteRangeComplexCommand
+        {
+            get { return _deleteRangeComplex ?? (_deleteRangeComplex = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { DeleteRangeComplexHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _deleteRangeComplex;
+
+        void DeleteRangeComplexHandler()
+        {
+            var result =
+                    _messageBoxService.ShowYesNo("Warning: Deleting the range complex \"" + SelectedRangeComplexDescriptor.Data.Name +
+                                                 "\" will also delete any overlays, bathymetry and environment data that have previously been created or extracted.\n\nThis operation CANNOT be undone.\n\nProceed with deletion?", 
+                                                 CustomDialogIcons.Exclamation);
+            if (result == CustomDialogResults.No) return;
+            var rangeComplexName = SelectedRangeComplexDescriptor.Data.Name;
+            var simAreaCSVFileContents = File.ReadAllLines(RangeComplexDescriptors.FileName);
+            var oldCSVFileName = RangeComplexDescriptors.FileName;
+            var newCSVFileName = RangeComplexDescriptors.FileName + ".new";
+
+            SelectedRangeComplexDescriptor = null;
+            RangeComplexDescriptors = null;
+            Task.Factory.StartNew(() =>
+            {
+                using (var streamWriter = new StreamWriter(newCSVFileName)) foreach (var curLine in simAreaCSVFileContents.Where(curLine => !curLine.StartsWith(rangeComplexName))) streamWriter.WriteLine(curLine);
+                File.Delete(oldCSVFileName);
+                File.Move(newCSVFileName, oldCSVFileName);
+                var rangeComplexRoot = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName);
+                Directory.Delete(rangeComplexRoot, true);
+                RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(oldCSVFileName, _dispatcher);
+            });
+        }
+        #endregion
+
         #endregion
 
         #region Overlay ribbon group
@@ -607,6 +641,30 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
+        #region DeleteOverlayCommand
+        public SimpleCommand<object, object> DeleteOverlayCommand
+        {
+            get { return _deleteOverlay ?? (_deleteOverlay = new SimpleCommand<object, object>(delegate { return IsOverlayFileSelected; }, delegate { DeleteOverlayHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _deleteOverlay;
+
+        void DeleteOverlayHandler()
+        {
+            var result =
+                    _messageBoxService.ShowYesNo("Warning: Deleting the overlay \"" + Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.Data.FileName) +
+                                                 "\" will also delete any overlays, bathymetry and environment data that have previously been created or extracted using it, or any of its' derived overlays.\n\nThis operation CANNOT be undone.\n\nProceed with deletion?",
+                                                 CustomDialogIcons.Exclamation);
+            if (result == CustomDialogResults.No) return;
+                
+        }
+
+        List<NAEMOOverlayDescriptor> DependentOverlaysOf(NAEMOOverlayDescriptor sourceOverlay)
+        {
+            
+        }
+        #endregion
+
         #endregion
 
         #region Bathymetry ribbon group
@@ -729,8 +787,6 @@ namespace ESMEWorkBench.ViewModels.Main
             var vm = new BathymetryExtractionViewModel(Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox));
             var result = _visualizerService.ShowDialog("BathymetryExtractionView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
-            //NAEMOBathymetryDescriptors = null;
-            //CommandManager.InvalidateRequerySuggested();
             var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
             var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
             if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
@@ -910,7 +966,6 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("EnvironmentExtractionView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                CommandManager.InvalidateRequerySuggested();
                 var bathymetry = SelectedBathymetryDescriptor.Data;
                 var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
                 var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
@@ -947,6 +1002,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 var naemoEnvironmentExporters = selectedTimePeriods.Select(t => new CASSBackgroundExporter
                 {
                         WorkerSupportsCancellation = false,
+                        BathymetryFileName = Path.GetFileName(SelectedBathymetryDescriptor.DataFilename),
+                        OverlayFileName = Path.GetFileName(SelectedOverlayDescriptor.DataFilename),
                         TimePeriod = t,
                         ExtractionArea = extractionArea,
                         NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
