@@ -103,10 +103,11 @@ namespace ESME.Overlay
             return null;
         }
 
-        public static void Create(string newOverlayFileName, IEnumerable<EarthCoordinate> coords)
+        public static void Create(string newOverlayFileName, IEnumerable<EarthCoordinate> coords, string sourceOverlayFileName = null)
         {
             using (var writer = new StreamWriter(newOverlayFileName))
             {
+                if (!string.IsNullOrEmpty(sourceOverlayFileName)) writer.WriteLine("# sourceOverlay={0}", sourceOverlayFileName);
                 writer.WriteLine("navigation");
                 writer.WriteLine("green");
                 writer.WriteLine("solid");
