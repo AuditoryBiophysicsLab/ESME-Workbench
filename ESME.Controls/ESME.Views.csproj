@@ -93,6 +93,9 @@
     </Compile>
     <Compile Include="AcousticBuilder\AnalysisPointSettingsViewModel.cs" />
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Controls\AutoScrollingTextBlock.xaml.cs">
+      <DependentUpon>AutoScrollingTextBlock.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\BackgroundTaskProgress.xaml.cs">
       <DependentUpon>BackgroundTaskProgress.xaml</DependentUpon>
     </Compile>
@@ -188,6 +191,10 @@
     <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
     <Page Include="AcousticBuilder\AnalysisPointSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AutoScrollingTextBlock.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
