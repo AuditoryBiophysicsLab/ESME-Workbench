@@ -151,21 +151,15 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _viewSimulatorLogs ??
                        (_viewSimulatorLogs =
-                        new SimpleCommand<object, object>(delegate { return IsViewSimulatorLogsCommandEnabled; },
-                                                          delegate { ViewSimulatorLogsHandler(); }));
+                        new SimpleCommand<object, object>(delegate { ViewSimulatorLogsHandler(); }));
             }
         }
 
         private SimpleCommand<object, object> _viewSimulatorLogs;
-
-        private bool IsViewSimulatorLogsCommandEnabled
-        {
-            get { return Directory.Exists(@"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\logs"); }
-        }
-
+        
         private void ViewSimulatorLogsHandler()
         {
-            var scenarioSimulatorLogViewModel = new ScenarioSimulatorLogViewModel(@"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\logs", "*.log.*", _dispatcher);
+            var scenarioSimulatorLogViewModel = new ScenarioSimulatorLogViewModel(Settings.Default.LogLastDir, "*.log.*", _dispatcher);
             _visualizerService.Show("ScenarioSimulatorLogView", scenarioSimulatorLogViewModel, true,null);
         }
 
