@@ -26,10 +26,12 @@
             <GroupBox Grid.Column="0"
                       Padding="5"
 			          Header="Log Files">
-                <DockPanel LastChildFill="True">                  
-                    <ListBox ItemsSource="{Binding LogFilePairs}" 
+                <DockPanel LastChildFill="True">
+                        <Controls:FileOrDirectorySetting Caption="Log File Directory" FileName="{Binding LogDirectory}" IsDirectoryBrowser="True" DockPanel.Dock="Bottom"/>
+                        <ListBox ItemsSource="{Binding LogFilePairs}" 
                              SelectedValuePath="Value" 
                              SelectionMode="Single"
+                             DockPanel.Dock="Top"
                              SelectedValue="{Binding SelectedLogFile}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
