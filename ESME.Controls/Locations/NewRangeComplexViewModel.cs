@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
 using Cinch;
 using ESME.Data;
 using ESME.Overlay;
@@ -46,13 +44,13 @@ namespace ESME.Views.Locations
                 {
                     PropertyName = "Height", 
                     Description = "Invalid value", 
-                    RuleDelegate = (o, r) => RangeCheck(((NewRangeComplexViewModel)o).Height, double.MinValue, double.MaxValue),
+                    RuleDelegate = (o, r) => RangeCheck(((NewRangeComplexViewModel)o).Height, double.MinValue),
                 },
                 new ValidationRule
                 {
                     PropertyName = "GeoidSeparation", 
                     Description = "Invalid value", 
-                    RuleDelegate = (o, r) => RangeCheck(((NewRangeComplexViewModel)o).GeoidSeparation, double.MinValue, double.MaxValue),
+                    RuleDelegate = (o, r) => RangeCheck(((NewRangeComplexViewModel)o).GeoidSeparation, double.MinValue),
                 },
                 new ValidationRule
                 {
@@ -121,9 +119,8 @@ namespace ESME.Views.Locations
         {
             if (string.IsNullOrEmpty(overlayFilename)) return true;
 
-            List<EarthCoordinate> earthCoordinates;
             string validationErrors;
-            var result = OverlayFile.ValidateFile(overlayFilename, "overlay file", out earthCoordinates, out validationErrors);
+            var result = OverlayFile.ValidateFile(overlayFilename, "overlay file", out validationErrors);
             if (result != null) return true;
             rule.ValidationErrorMessage = validationErrors;
             return false;
@@ -333,10 +330,10 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        private List<EarthCoordinate> NewOpAreaOverlayEarthCoordinates { get; set; }
-        private List<EarthCoordinate> NewSimAreaOverlayEarthCoordinates { get; set; }
-        private GeoRect OpBounds { get; set; }
-        private GeoRect SimBounds { get; set; }
+        public List<EarthCoordinate> NewOpAreaOverlayEarthCoordinates { get; private set; }
+        public List<EarthCoordinate> NewSimAreaOverlayEarthCoordinates { get; private set; }
+        public GeoRect OpAreaBoundingBox { get; private set; }
+        public GeoRect SimAreaBoundingBox { get; private set; }
 
         #region OkCommand
 
@@ -353,66 +350,22 @@ namespace ESME.Views.Locations
             }
         }
 
-        private static void WriteOverlayFile(string fileName, IEnumerable<EarthCoordinate> coords)
-        {
-            using (var writer = new StreamWriter(fileName))
-            {
-                writer.WriteLine("navigation");
-                writer.WriteLine("green");
-                writer.WriteLine("solid");
-                writer.WriteLine("move");
-                var first = true;
-                foreach (var coordinate in coords)
-                {
-                    writer.WriteLine("{0:0.0000}  {1:0.0000}", coordinate.Latitude, coordinate.Longitude);
-                    if (first) writer.WriteLine("lines");
-                    first = false;
-                }
-            }
-        }
-
         private void OkCommandHandler()
         {
-            Directory.CreateDirectory(LocationPath);
-            var areasPath = Path.Combine(LocationPath, "Areas");
-            Directory.CreateDirectory(areasPath);
-            Directory.CreateDirectory(Path.Combine(LocationPath, "Bathymetry"));
-            Directory.CreateDirectory(Path.Combine(LocationPath, "Environment"));
-            Directory.CreateDirectory(Path.Combine(LocationPath, "GeographicAreas"));
-            Directory.CreateDirectory(Path.Combine(LocationPath, "Images"));
-            Directory.CreateDirectory(Path.Combine(LocationPath, "Species"));
-
-            List<EarthCoordinate> opCoords;
-            List<EarthCoordinate> simCoords;
+            List<EarthCoordinate> opCoords = null;
+            List<EarthCoordinate> simCoords = null;
             string opErrors;
-            OpBounds = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)
+            OpAreaBoundingBox = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)
                            ? OverlayFile.ValidateCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords, out opErrors)
-                           : OverlayFile.ValidateFile(ExistingOpAreaOverlayFilename, "Op Limits", out opCoords, out opErrors);
+                           : OverlayFile.ValidateFile(ExistingOpAreaOverlayFilename, "Op Limits", out opErrors);
             
             string simErrors;
-            SimBounds = !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)
+            SimAreaBoundingBox = !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)
                             ? OverlayFile.ValidateCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords, out simErrors)
-                            : OverlayFile.ValidateFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simCoords, out simErrors);
+                            : OverlayFile.ValidateFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simErrors);
             
-            if (OpBounds != null) NewOpAreaOverlayEarthCoordinates = opCoords;
-            if (SimBounds != null) NewSimAreaOverlayEarthCoordinates = simCoords;
-
-
-            var opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", LocationName));
-            if (!string.IsNullOrEmpty(ExistingOpAreaOverlayFilename))
-                File.Copy(ExistingOpAreaOverlayFilename, opsOverlayFilename);
-            else WriteOverlayFile(opsOverlayFilename, NewOpAreaOverlayEarthCoordinates);
-
-            var simOverlayFilename = Path.Combine(areasPath, String.Format("{0}_SimArea.ovr", LocationName));
-            if (!string.IsNullOrEmpty(ExistingSimAreaOverlayFilename))
-                File.Copy(ExistingSimAreaOverlayFilename, simOverlayFilename);
-            else WriteOverlayFile(simOverlayFilename, NewSimAreaOverlayEarthCoordinates);
-
-            using (
-                var writer = new StreamWriter(Path.Combine(Path.GetDirectoryName(LocationPath), "SimAreas.csv"), true))
-                writer.WriteLine("{0},{1:0.0###},{2:0.0###},{3:0.0###},{4:0.0###},{5},{6}", LocationName,
-                                 ReferencePointLatitude, ReferencePointLongitude, Height, GeoidSeparation,
-                                 Path.GetFileName(opsOverlayFilename), Path.GetFileName(simOverlayFilename));
+            NewOpAreaOverlayEarthCoordinates = opCoords;
+            NewSimAreaOverlayEarthCoordinates = simCoords;
 
             CloseActivePopUpCommand.Execute(true);
         }

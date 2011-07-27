@@ -450,7 +450,7 @@
                         </Grid.ColumnDefinitions>
                         <ListBox Grid.Column="0"
                                  DockPanel.Dock="Top"
-                                 ItemsSource="{Binding RangeComplexDescriptors}"
+                                 ItemsSource="{Binding RangeComplexes}"
                                  SelectedValue="{Binding SelectedRangeComplexDescriptor}"
                                  SelectedValuePath="Value"
                                  SelectionMode="Single"
@@ -481,7 +481,7 @@
 								             SelectedValue="{Binding SelectedRangeComplexDescriptor}"
                                              SelectedValuePath="Value"
                     			             MaxColumnCount="1">
-                                <r:RibbonGalleryCategory ItemsSource="{Binding RangeComplexDescriptors}">
+                                <r:RibbonGalleryCategory ItemsSource="{Binding RangeComplexes}">
                                     <r:RibbonGalleryCategory.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel Orientation="Vertical"
