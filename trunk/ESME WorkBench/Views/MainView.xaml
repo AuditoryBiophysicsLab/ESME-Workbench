@@ -450,7 +450,7 @@
                         </Grid.ColumnDefinitions>
                         <ListBox Grid.Column="0"
                                  DockPanel.Dock="Top"
-                                 ItemsSource="{Binding RangeComplexes}"
+                                 ItemsSource="{Binding RangeComplexDescriptors}"
                                  SelectedValue="{Binding SelectedRangeComplexDescriptor}"
                                  SelectedValuePath="Value"
                                  SelectionMode="Single"

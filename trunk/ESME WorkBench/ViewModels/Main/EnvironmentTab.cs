@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -157,6 +158,8 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 if (_rangeComplexDescriptors == value) return;
                 _rangeComplexDescriptors = value;
+                Debug.WriteLine("{0}: RangeComplexDescriptors has changed.  New value {1}", DateTime.Now,
+                                _rangeComplexDescriptors == null ? "is NULL" : string.Format("has {0} entries", _rangeComplexDescriptors.Count));
                 NotifyPropertyChanged(RangeComplexesChangedEventArgs);
             }
         }
