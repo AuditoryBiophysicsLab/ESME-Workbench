@@ -27,13 +27,17 @@ namespace ESME.Environment.Descriptors
             var keyName = overlayDescriptor.Key.Split('_');
             var buffer = keyName.Last();
 
-            // If we have more than one field (from Split()), OR if the last field does NOT end in "km"
-            if (keyName.Length == 1 || !buffer.ToLowerInvariant().EndsWith("km"))
+            float bufferZoneSize;
+            if (!float.TryParse(overlayDescriptor.Value.Data.ExpandedRange, out bufferZoneSize)) bufferZoneSize = 0;
+            // If we DO have a SourceOverlay (parsed out of the comments in the overlay file), OR if we have ONLY one field (from Split()), OR if the last field does NOT end in "km"
+            if (!string.IsNullOrEmpty(overlayDescriptor.Value.Data.SourceOverlay) || keyName.Length == 1 || !buffer.ToLowerInvariant().EndsWith("km"))
             {
                 // Create a default set of metadata and save it.
                 overlayDescriptor.Value.Metadata = new NAEMOOverlayMetadata
                 {
                     Filename = NAEMOMetadataBase.MetadataFilename(overlayDescriptor.Value.DataFilename),
+                    OverlayFilename = overlayDescriptor.Value.Data.SourceOverlay,
+                    BufferZoneSize = bufferZoneSize,
                 };
                 overlayDescriptor.Value.Metadata.Save();
                 return;

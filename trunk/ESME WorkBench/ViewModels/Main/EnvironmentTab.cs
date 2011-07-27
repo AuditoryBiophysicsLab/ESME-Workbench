@@ -353,21 +353,24 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _newLocation ??
                        (_newLocation =
-                        new SimpleCommand<object, object>(delegate { NewLocationHandler(); }));
+                        new SimpleCommand<object, object>(delegate { NewRangeComplexHandler(); }));
             }
         }
 
         private SimpleCommand<object, object> _newLocation;
 
-        void NewLocationHandler()
+        void NewRangeComplexHandler()
         {
             var vm = new NewRangeComplexViewModel(Globals.AppSettings);
             var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                RangeComplexDescriptors.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
-                                            vm.NewOpAreaOverlayEarthCoordinates, vm.ExistingSimAreaOverlayFilename, vm.NewSimAreaOverlayEarthCoordinates, _dispatcher);
-                SelectedRangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[vm.LocationName];
+                Task.Factory.StartNew(() =>
+                {
+                    RangeComplexDescriptors.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
+                                                               vm.NewOpAreaOverlayEarthCoordinates, vm.ExistingSimAreaOverlayFilename, vm.NewSimAreaOverlayEarthCoordinates, _dispatcher);
+                    SelectedRangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[vm.LocationName];
+                });
             }
         }
         #endregion
@@ -410,23 +413,6 @@ namespace ESMEWorkBench.ViewModels.Main
             if (result == CustomDialogResults.No) return;
             RangeComplexDescriptors.DeleteRangeComplex(SelectedRangeComplexDescriptor);
             SelectedRangeComplexDescriptor = null;
-            return;
-            var rangeComplexName = SelectedRangeComplexDescriptor.Data.Name;
-            var simAreaCSVFileContents = File.ReadAllLines(RangeComplexDescriptors.FileName);
-            var oldCSVFileName = RangeComplexDescriptors.FileName;
-            var newCSVFileName = RangeComplexDescriptors.FileName + ".new";
-
-            SelectedRangeComplexDescriptor = null;
-            RangeComplexDescriptors = null;
-            Task.Factory.StartNew(() =>
-            {
-                using (var streamWriter = new StreamWriter(newCSVFileName)) foreach (var curLine in simAreaCSVFileContents.Where(curLine => !curLine.StartsWith(rangeComplexName))) streamWriter.WriteLine(curLine);
-                File.Delete(oldCSVFileName);
-                File.Move(newCSVFileName, oldCSVFileName);
-                var rangeComplexRoot = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName);
-                Directory.Delete(rangeComplexRoot, true);
-                RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(oldCSVFileName, _dispatcher);
-            });
         }
         #endregion
 
@@ -556,14 +542,28 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplexDescriptor.Data.Name);
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
-            if ((result.HasValue) && (result.Value))
+            if ((!result.HasValue) || (!result.Value)) return;
+            var rangeComplexAreasFolder = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Areas");
+            var overlayFileName = vm.OverlayName.EndsWith(".ovr") ? vm.OverlayName : vm.OverlayName + ".ovr";
+            var metadataFileName = string.Format("{0}.xml", overlayFileName);
+            var overlayPath = Path.Combine(rangeComplexAreasFolder, overlayFileName);
+            var metadataPath = Path.Combine(rangeComplexAreasFolder, metadataFileName);
+            OverlayFile.Create(overlayPath, vm.OverlayEarthCoordinates);
+            var metadata = new NAEMOOverlayMetadata
             {
-                Task.Factory.StartNew(() =>
-                {
-                    NAEMOOverlayDescriptors.Refresh();
-                    SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[vm.OverlayName];
-                });
-            }
+                    Bounds = vm.BoundingBox,
+                    BufferZoneSize = 0,
+                    Filename = metadataPath,
+                    OverlayFilename = null,
+            };
+            metadata.Save();
+            NAEMOOverlayDescriptors.Add(new System.Collections.Generic.KeyValuePair<string, NAEMOOverlayDescriptor>(Path.GetFileNameWithoutExtension(overlayFileName), new NAEMOOverlayDescriptor
+            {
+                DataFilename = overlayFileName,
+                Metadata = metadata,
+            }));
+            NAEMOOverlayDescriptors.Sort();
+            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(overlayFileName)];
         }
 
         #endregion
@@ -578,40 +578,40 @@ namespace ESMEWorkBench.ViewModels.Main
 
         bool IsExpandOverlayCommandEnabled
         {
-            get { return IsOverlayFileSelected; }
+            get { return IsOverlayFileSelected && string.IsNullOrEmpty(SelectedOverlayDescriptor.Metadata.OverlayFilename); }
         }
 
         void ExpandOverlayHandler()
         {
             var vm = new OverlayExpandViewModel(SelectedOverlayDescriptor.Metadata);
             var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
-            if ((result.HasValue) && (result.Value))
-            {
-                //vm.BufferZoneSize
-                var curOverlay = SelectedOverlayDescriptor.Data;
-                var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].BoundingBox));
-                var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
-                var geoRect = new GeoRect(expandedLimits.GeoPointList);
-                var overlayFileName = string.Format("{0}_{1}km.ovr", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
-                var metadataFileName = string.Format("{0}_{1}km.xml", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
-                var overlayPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), overlayFileName);
-                var metadataPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), metadataFileName);
-                OverlayFile.Create(overlayPath, new List<EarthCoordinate> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest }, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
+            if ((!result.HasValue) || (!result.Value)) return;
+            //vm.BufferZoneSize
+            var curOverlay = SelectedOverlayDescriptor.Data;
+            var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].BoundingBox));
+            var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
+            var geoRect = new GeoRect(expandedLimits.GeoPointList);
+            var overlayFileName = string.Format("{0}_{1}km.ovr", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
+            var metadataFileName = string.Format("{0}_{1}km.xml", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
+            var overlayPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), overlayFileName);
+            var metadataPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), metadataFileName);
+            OverlayFile.Create(overlayPath, new List<EarthCoordinate> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest }, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
 
-                var metadata = new NAEMOOverlayMetadata
-                {
+            var metadata = new NAEMOOverlayMetadata
+            {
                     Bounds = geoRect,
                     BufferZoneSize = vm.BufferSize,
                     Filename = metadataPath,
                     OverlayFilename = Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename),
-                };
-                metadata.Save();
-                Task.Factory.StartNew(() =>
-                {
-                    NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(_selectedRangeComplexDescriptor.Data.Name);
-                    SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(overlayFileName)];
-                });
-            }
+            };
+            metadata.Save();
+            NAEMOOverlayDescriptors.Add(new System.Collections.Generic.KeyValuePair<string, NAEMOOverlayDescriptor>(Path.GetFileNameWithoutExtension(overlayFileName), new NAEMOOverlayDescriptor
+            {
+                DataFilename = overlayFileName,
+                Metadata = metadata,
+            }));
+            NAEMOOverlayDescriptors.Sort();
+            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(overlayFileName)];
         }
 
         #endregion

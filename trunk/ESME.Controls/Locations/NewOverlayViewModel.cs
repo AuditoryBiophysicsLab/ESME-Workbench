@@ -86,7 +86,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public string  RangeComplexAreasFolder { get; set; }
+        #region public string RangeComplexAreasFolder { get; set; }
 
         public string RangeComplexAreasFolder
         {
@@ -166,36 +166,16 @@ namespace ESME.Views.Locations
             }
         }
 
-        static void WriteOverlayFile(string fileName, IEnumerable<EarthCoordinate> coords)
-        {
-            using (var writer = new StreamWriter(fileName))
-            {
-                writer.WriteLine("navigation");
-                writer.WriteLine("green");
-                writer.WriteLine("solid");
-                writer.WriteLine("move");
-                var first = true;
-                foreach (var coordinate in coords)
-                {
-                    writer.WriteLine("{0:0.0000}  {1:0.0000}", coordinate.Latitude, coordinate.Longitude);
-                    if (first) writer.WriteLine("lines");
-                    first = false;
-                }
-            }
-        }
+        public List<EarthCoordinate> OverlayEarthCoordinates { get; private set; }
 
-        List<EarthCoordinate> OverlayEarthCoordinates { get; set; }
+        public GeoRect BoundingBox { get; private set; }
 
         void OkCommandHandler()
         {
             List<EarthCoordinate> coords;
             string overlayError;
-            var bounds = OverlayFile.ValidateCoordinates(OverlayCoordinates, "Op Limits", out coords, out overlayError);
-            if (bounds != null) OverlayEarthCoordinates = coords;
-
-            if (!OverlayName.EndsWith(".ovr")) OverlayName += ".ovr";
-            var overlayFileName = Path.Combine(RangeComplexAreasFolder, OverlayName);
-            WriteOverlayFile(overlayFileName, OverlayEarthCoordinates);
+            BoundingBox = OverlayFile.ValidateCoordinates(OverlayCoordinates, "Op Limits", out coords, out overlayError);
+            OverlayEarthCoordinates = coords;
 
             CloseActivePopUpCommand.Execute(true);
         }
