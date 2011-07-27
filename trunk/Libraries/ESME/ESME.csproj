@@ -184,7 +184,7 @@
     <Compile Include="Metadata\NAEMOMetadataBase.cs" />
     <Compile Include="Metadata\NAEMOOverlayMetadata.cs" />
     <Compile Include="Metadata\NAEMOScenarioMetadata.cs" />
-    <Compile Include="Model\AnimatInterface.cs" />
+    <Compile Include="Animats\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
     <Compile Include="Overlay\Exceptions.cs" />
     <Compile Include="Environment\Descriptors\NAEMODescriptors.cs" />
@@ -267,10 +267,10 @@
     <EmbeddedResource Include="Schema\BellhopRunfile.xsd" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnimatLocationFile\AnimatLocationFile.cs" />
+    <Compile Include="Animats\AnimatLocationFile.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Model\AcousticProperties.cs" />
-    <Compile Include="Model\Animat.cs" />
+    <Compile Include="Animats\Animat.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFile.cs" />
     <Compile Include="Model\DisplayLayers.cs" />
     <Compile Include="Model\EnvironmentInformation.cs" />
@@ -312,7 +312,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Animats\" />
+    <Folder Include="AnimatLocationFile\" />
     <Folder Include="Simulation\" />
   </ItemGroup>
   <ItemGroup>

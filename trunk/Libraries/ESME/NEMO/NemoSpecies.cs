@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Xml;
+using ESME.Animats;
 using ESME.Model;
 
 namespace ESME.NEMO

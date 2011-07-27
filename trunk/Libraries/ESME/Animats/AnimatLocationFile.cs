@@ -9,7 +9,7 @@ using ESME.Overlay;
 using HRC.Navigation;
 using mbs;
 
-namespace ESME.AnimatLocationFile
+namespace ESME.Animats
 {
 #if false
     internal class tester
