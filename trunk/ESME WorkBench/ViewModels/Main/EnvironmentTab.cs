@@ -37,7 +37,7 @@ namespace ESMEWorkBench.ViewModels.Main
             Console.WriteLine("All view models are ready!");
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
-            Task.Factory.StartNew(() => RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")));
+            Task.Factory.StartNew(() => RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"), _dispatcher));
             
             //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
@@ -363,7 +363,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+                RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"), _dispatcher);
                 SelectedRangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[vm.LocationName];
             }
         }
@@ -910,7 +910,6 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("EnvironmentExtractionView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                NAEMOEnvironmentDescriptors = null;
                 CommandManager.InvalidateRequerySuggested();
                 var bathymetry = SelectedBathymetryDescriptor.Data;
                 var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace ESME.Environment.Descriptors
 {
@@ -11,11 +12,12 @@ namespace ESME.Environment.Descriptors
         {
         }
 
-        public static RangeComplexDescriptors ReadCSV(string fileName)
+        public static RangeComplexDescriptors ReadCSV(string fileName, Dispatcher dispatcher)
         {
             var result = new RangeComplexDescriptors()
                          {
-                             FileName = fileName
+                             FileName = fileName,
+                             Dispatcher = dispatcher,
                          };
 
             result.Add(new KeyValuePair<string, RangeComplexDescriptor>("[None]", null));
@@ -52,6 +54,9 @@ namespace ESME.Environment.Descriptors
                     {
                         lock (result)
                         {
+                            var overlays = new NAEMOOverlayDescriptors(simAreaName) { Dispatcher = dispatcher };
+                            var bathymetry = new NAEMOBathymetryDescriptors(simAreaName) { Dispatcher = dispatcher };
+                            var environment = new NAEMOEnvironmentDescriptors(simAreaName) { Dispatcher = dispatcher };
                             result.Add(new KeyValuePair<string, RangeComplexDescriptor>(simAreaName, new RangeComplexDescriptor
                             {
                                 Data = new RangeComplex(latitude, longitude)
@@ -62,9 +67,9 @@ namespace ESME.Environment.Descriptors
                                     OpsLimitFile = opsLimitFile,
                                     SimLimitFile = simLimitFile,
                                 },
-                                NAEMOOverlayDescriptors = new NAEMOOverlayDescriptors(simAreaName),
-                                NAEMOBathymetryDescriptors = new NAEMOBathymetryDescriptors(simAreaName),
-                                NAEMOEnvironmentDescriptors = new NAEMOEnvironmentDescriptors(simAreaName),
+                                NAEMOOverlayDescriptors = overlays,
+                                NAEMOBathymetryDescriptors = bathymetry,
+                                NAEMOEnvironmentDescriptors = environment,
                             }));
                         }
                     }
