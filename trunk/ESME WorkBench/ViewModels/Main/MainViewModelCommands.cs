@@ -165,7 +165,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         private void ViewSimulatorLogsHandler()
         {
-            var scenarioSimulatorLogViewModel = new ScenarioSimulatorLogViewModel(@"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\logs", _dispatcher);
+            var scenarioSimulatorLogViewModel = new ScenarioSimulatorLogViewModel(@"C:\Users\Graham Voysey\Documents\NAEMO\NAEMO demos\BU Test Sample2\logs", "*.log.*", _dispatcher);
             _visualizerService.Show("ScenarioSimulatorLogView", scenarioSimulatorLogViewModel, true,null);
         }
 

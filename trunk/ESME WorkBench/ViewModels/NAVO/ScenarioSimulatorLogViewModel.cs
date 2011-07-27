@@ -14,69 +14,91 @@ namespace ESMEWorkBench.ViewModels.NAVO
     class ScenarioSimulatorLogViewModel:ViewModelBase
     {
         readonly Dispatcher _dispatcher;
-        public ScenarioSimulatorLogViewModel(string logDirectoryPath, Dispatcher dispatcher)
+        public ScenarioSimulatorLogViewModel(string logDirectory, string filePattern, Dispatcher dispatcher)
         {
             _dispatcher = dispatcher;
-            LogDir = logDirectoryPath;
+            LogDirectory = logDirectory;
         }
 
-      
-        #region public string LogDir { get; set; }
+        #region public string LogDirectory { get; set; }
 
-        public string LogDir
+        public string LogDirectory
         {
-            get { return _logDir; }
+            get { return _logDirectory; }
             set
             {
-                if (_logDir == value) return;
-                _logDir = value;
+                if (_logDirectory == value) return;
+                _logDirectory = value;
                 NotifyPropertyChanged(LogDirChangedEventArgs);
-                PageDirectory();
+                RefreshDirectory();
 
                 if (_dirWatcher != null)
                 {
                     _dirWatcher.EnableRaisingEvents = false;
                     _dirWatcher.Dispose();
                 }
-                _dirWatcher = new FileSystemWatcher(_logDir)
+                _dirWatcher = new FileSystemWatcher(_logDirectory)
                 {
                     EnableRaisingEvents = true,
                     NotifyFilter = (NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.DirectoryName),
                 };
                 _dirWatcher.Created += DirectoryChanged;
-                _dirWatcher.Changed += DirectoryChanged;
+                //_dirWatcher.Changed += DirectoryChanged;
                 _dirWatcher.Deleted += DirectoryChanged;
 
             }
         }
         void DirectoryChanged(object sender, FileSystemEventArgs e)
         {
-
+            Debug.WriteLine("[Raw] Directory: " + e.Name + " " + e.ChangeType);
             if (_dirTimer != null) return;
             _dirTimer = new Timer(1000) {AutoReset = false, Enabled = true};
             _dirTimer.Elapsed += (s1, e1) =>
                                      {
                                          _dirTimer = null;
-                                         Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
-                                         _dispatcher.Invoke(DispatcherPriority.Background, (Action) (PageDirectory));
+                                         Debug.WriteLine("Directory: " + e.Name + " " + e.ChangeType);
+                                         _dispatcher.Invoke(DispatcherPriority.Background, (Action) (RefreshDirectory));
                                      };
 
         }
 
-        void PageDirectory()
+        void RefreshDirectory()
         {
-            var logFiles = Directory.EnumerateFiles(LogDir, "*.log.*", SearchOption.TopDirectoryOnly);
+            _isRefreshingDirectory = true;
+            var logFiles = Directory.EnumerateFiles(LogDirectory, FilePattern, SearchOption.TopDirectoryOnly);
             LogFilePairs.Clear();
             foreach (var logFile in logFiles)
             {
                 LogFilePairs.Add(new KeyValuePair<string, string>(Path.GetFileNameWithoutExtension(logFile), logFile));
             }
+            _isRefreshingDirectory = false;
+            NotifyPropertyChanged(SelectedLogFileChangedEventArgs);
         }
-        private static readonly PropertyChangedEventArgs LogDirChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.LogDir);
-        private string _logDir;
+        private static readonly PropertyChangedEventArgs LogDirChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.LogDirectory);
+        private string _logDirectory;
         private FileSystemWatcher _dirWatcher;
         private Timer _dirTimer;
+        bool _isRefreshingDirectory;
         #endregion
+
+        #region public string FilePattern { get; set; }
+
+        public string FilePattern
+        {
+            get { return _filePattern; }
+            set
+            {
+                if (_filePattern == value) return;
+                _filePattern = value;
+                NotifyPropertyChanged(FilePatternChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs FilePatternChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.FilePattern);
+        string _filePattern;
+
+        #endregion
+
         
         #region public ObservableCollection<KeyValuePair<string,string>> LogFilePairs { get; set; }
 
@@ -110,8 +132,10 @@ namespace ESMEWorkBench.ViewModels.NAVO
             get { return _selectedLogFile; }
             set
             {
+                if (_isRefreshingDirectory) return;
                 if (_selectedLogFile == value) return;
                 _selectedLogFile = value;
+                FileIsSelected = !string.IsNullOrEmpty(_selectedLogFile);
                 NotifyPropertyChanged(SelectedLogFileChangedEventArgs);
                 SelectedLogFileHeaderText = string.Format("Most recent contents of log file {0}",
                                                           Path.GetFileName(_selectedLogFile));
@@ -181,6 +205,42 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         private static readonly PropertyChangedEventArgs SelectedLogFileTextChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.SelectedLogFileText);
         private string _selectedLogFileText;
+
+        #endregion
+
+        #region public bool AutoScroll { get; set; }
+
+        public bool AutoScroll
+        {
+            get { return _autoScroll; }
+            set
+            {
+                if (_autoScroll == value) return;
+                _autoScroll = value;
+                NotifyPropertyChanged(AutoScrollChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AutoScrollChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.AutoScroll);
+        bool _autoScroll = true;
+
+        #endregion
+
+        #region public bool FileIsSelected { get; set; }
+
+        public bool FileIsSelected
+        {
+            get { return _fileIsSelected; }
+            set
+            {
+                if (_fileIsSelected == value) return;
+                _fileIsSelected = value;
+                NotifyPropertyChanged(FileIsSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs FileIsSelectedChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.FileIsSelected);
+        bool _fileIsSelected;
 
         #endregion
 

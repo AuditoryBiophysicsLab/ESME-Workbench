@@ -8,7 +8,12 @@
         Height="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewHeight, Mode=TwoWay}"
         Width="{Binding Source={x:Static Properties:Settings.Default}, Path=LogViewWidth, Mode=TwoWay}">
     <DockPanel Margin="5" LastChildFill="True">
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">            
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">   
+            <CheckBox Content="Auto scroll when selected file changes" 
+                      IsChecked="{Binding AutoScroll}"
+                      IsEnabled="{Binding FileIsSelected}"
+                      Margin="0 0 20 0"
+                      VerticalAlignment="Center"/>
             <Button Content="Close" Width="75" Margin="5" Command="{Binding CloseCommand}"/>
         </StackPanel>
         <Grid DockPanel.Dock="Top">
@@ -18,6 +23,7 @@
                 <ColumnDefinition Width="*" MinWidth="500" />
             </Grid.ColumnDefinitions>
             <GroupBox Grid.Column="0"
+                      Padding="5"
 			          Header="Log Files">
                 <DockPanel LastChildFill="True">                  
                     <ListBox ItemsSource="{Binding LogFilePairs}" SelectedValuePath="Value" SelectedValue="{Binding SelectedLogFile}">
@@ -38,10 +44,10 @@
 			              VerticalAlignment="Stretch"
 			              ResizeBehavior="BasedOnAlignment"
 			              ResizeDirection="Columns" />
-            <GroupBox Grid.Column="2" Header="{Binding SelectedLogFileHeaderText}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                    <TextBlock Text="{Binding SelectedLogFileText}"/>
-                </ScrollViewer>
+            <GroupBox Grid.Column="2" 
+                      Padding="5"
+                      Header="{Binding SelectedLogFileHeaderText}">
+                <Controls:AutoScrollingTextBlock Text="{Binding SelectedLogFileText}" AutoScrollingEnabled="{Binding AutoScroll}" />
             </GroupBox>
         </Grid>       
     </DockPanel>
