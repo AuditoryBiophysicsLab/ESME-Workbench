@@ -51,7 +51,7 @@ namespace ESME.Environment.Descriptors
                 if (!double.TryParse(lonString, out longitude)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid longitude", fileName));
                 if (!double.TryParse(heightString, out height)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid height", fileName));
                 if (!double.TryParse(geoidString, out geoid)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid geoid separation value", fileName));
-                result.AddRangeComplex(simAreaName, height, latitude, longitude, geoid, opsLimitFile, null, simLimitFile, null, dispatcher);
+                result.AddRangeComplex(simAreaName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile, dispatcher);
             });
             result.Sort();
             return result;
@@ -59,24 +59,36 @@ namespace ESME.Environment.Descriptors
 
         public string FileName { get; private set; }
 
-        public void DeleteRangeComplex(RangeComplexDescriptor rangeComplexToDelete)
+        public void AddRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, string simLimitFile, Dispatcher dispatcher)
         {
-            var rangeComplexName = rangeComplexToDelete.Data.Name;
-            var simAreaCSVFileContents = File.ReadAllLines(FileName);
-            var oldCSVFileName = FileName;
-            var newCSVFileName = FileName + ".new";
-            using (var streamWriter = new StreamWriter(newCSVFileName)) foreach (var curLine in simAreaCSVFileContents.Where(curLine => !curLine.StartsWith(rangeComplexName))) streamWriter.WriteLine(curLine);
-            File.Delete(oldCSVFileName);
-            File.Move(newCSVFileName, oldCSVFileName);
-
-            Task.Factory.StartNew(() =>
+            NAEMOOverlayDescriptors overlayDescriptors = null;
+            NAEMOBathymetryDescriptors bathymetryDescriptors = null;
+            NAEMOEnvironmentDescriptors environmentDescriptors = null;
+            Parallel.Invoke(() => overlayDescriptors = new NAEMOOverlayDescriptors(rangeComplexName) { Dispatcher = dispatcher },
+                            () => bathymetryDescriptors = new NAEMOBathymetryDescriptors(rangeComplexName) { Dispatcher = dispatcher },
+                            () => environmentDescriptors = new NAEMOEnvironmentDescriptors(rangeComplexName) { Dispatcher = dispatcher });
+            if (overlayDescriptors == null || bathymetryDescriptors == null || environmentDescriptors == null) throw new ApplicationException("Error initializing overlay, bathymetry or environment descriptors");
+            lock (this)
             {
-                Directory.Delete(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName), true);
-                Remove(rangeComplexToDelete);
-            });
+                Debug.WriteLine("{0}: Adding range complex \"{1}\"", DateTime.Now, rangeComplexName);
+                Add(new KeyValuePair<string, RangeComplexDescriptor>(rangeComplexName, new RangeComplexDescriptor
+                {
+                    Data = new RangeComplex(latitude, longitude)
+                    {
+                        Name = rangeComplexName,
+                        Height = height,
+                        GeoidSeparation = geoid,
+                        OpsLimitFile = opsLimitFile,
+                        SimLimitFile = simLimitFile,
+                    },
+                    NAEMOOverlayDescriptors = overlayDescriptors,
+                    NAEMOBathymetryDescriptors = bathymetryDescriptors,
+                    NAEMOEnvironmentDescriptors = environmentDescriptors,
+                }));
+            }
         }
 
-        public bool AddRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, List<EarthCoordinate> opAreaBoundsCoordinates, string simLimitFile, List<EarthCoordinate> simAreaBoundsCoordinates, Dispatcher dispatcher)
+        public void CreateRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, List<EarthCoordinate> opAreaBoundsCoordinates, string simLimitFile, List<EarthCoordinate> simAreaBoundsCoordinates, Dispatcher dispatcher)
         {
             var rangeComplexPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName);
             if (!Directory.Exists(rangeComplexPath))
@@ -117,38 +129,25 @@ namespace ESME.Environment.Descriptors
                     }
                 }
             }
-            NAEMOOverlayDescriptors overlayDescriptors = null;
-            NAEMOBathymetryDescriptors bathymetryDescriptors = null;
-            NAEMOEnvironmentDescriptors environmentDescriptors = null;
-#if true
-            Parallel.Invoke(() => overlayDescriptors = new NAEMOOverlayDescriptors(rangeComplexName) { Dispatcher = dispatcher },
-                            () => bathymetryDescriptors = new NAEMOBathymetryDescriptors(rangeComplexName) { Dispatcher = dispatcher },
-                            () => environmentDescriptors = new NAEMOEnvironmentDescriptors(rangeComplexName) { Dispatcher = dispatcher });
-#else
-            overlayDescriptors = new NAEMOOverlayDescriptors(rangeComplexName) {Dispatcher = dispatcher};
-            bathymetryDescriptors = new NAEMOBathymetryDescriptors(rangeComplexName) {Dispatcher = dispatcher};
-            environmentDescriptors = new NAEMOEnvironmentDescriptors(rangeComplexName) {Dispatcher = dispatcher};
-#endif
-            if (overlayDescriptors == null || bathymetryDescriptors == null || environmentDescriptors == null) throw new ApplicationException("Error initializing overlay, bathymetry or environment descriptors");
-            lock (this)
-            {
-                Debug.WriteLine("{0}: Adding range complex \"{1}\"", DateTime.Now, rangeComplexName);
-                Add(new KeyValuePair<string, RangeComplexDescriptor>(rangeComplexName, new RangeComplexDescriptor
-                {
-                        Data = new RangeComplex(latitude, longitude)
-                        {
-                                Name = rangeComplexName,
-                                Height = height,
-                                GeoidSeparation = geoid,
-                                OpsLimitFile = opsLimitFile,
-                                SimLimitFile = simLimitFile,
-                        },
-                        NAEMOOverlayDescriptors = overlayDescriptors,
-                        NAEMOBathymetryDescriptors = bathymetryDescriptors,
-                        NAEMOEnvironmentDescriptors = environmentDescriptors,
-                }));
-            }
-            return true;
+            AddRangeComplex(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile, dispatcher);
         }
+
+        public void DeleteRangeComplex(RangeComplexDescriptor rangeComplexToDelete)
+        {
+            var rangeComplexName = rangeComplexToDelete.Data.Name;
+            var simAreaCSVFileContents = File.ReadAllLines(FileName);
+            var oldCSVFileName = FileName;
+            var newCSVFileName = FileName + ".new";
+            using (var streamWriter = new StreamWriter(newCSVFileName)) foreach (var curLine in simAreaCSVFileContents.Where(curLine => !curLine.StartsWith(rangeComplexName))) streamWriter.WriteLine(curLine);
+            File.Delete(oldCSVFileName);
+            File.Move(newCSVFileName, oldCSVFileName);
+
+            Task.Factory.StartNew(() =>
+            {
+                Directory.Delete(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName), true);
+                Remove(rangeComplexToDelete);
+            });
+        }
+
     }
 }

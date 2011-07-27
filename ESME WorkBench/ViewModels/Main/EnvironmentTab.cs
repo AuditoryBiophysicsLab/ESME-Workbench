@@ -365,7 +365,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                RangeComplexDescriptors.AddRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
+                RangeComplexDescriptors.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
                                             vm.NewOpAreaOverlayEarthCoordinates, vm.ExistingSimAreaOverlayFilename, vm.NewSimAreaOverlayEarthCoordinates, _dispatcher);
                 SelectedRangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[vm.LocationName];
             }
@@ -596,7 +596,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 var metadataFileName = string.Format("{0}_{1}km.xml", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
                 var overlayPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), overlayFileName);
                 var metadataPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), metadataFileName);
-                OverlayFile.Create(overlayPath, new List<EarthCoordinate> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest }, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
+                OverlayFile.Create(overlayPath, new List<EarthCoordinate> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest }, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
 
                 var metadata = new NAEMOOverlayMetadata
                 {

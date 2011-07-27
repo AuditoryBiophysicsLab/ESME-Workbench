@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ESME.Overlay
 {
@@ -9,6 +10,8 @@ namespace ESME.Overlay
         private readonly Queue<Token> _tokens = new Queue<Token>();
         private LineReader _lineReader;
         //public char TokenSeparators { get; set; }
+
+        public string[] CommentIndicators { get; set; }
 
         public int Count
         {
@@ -21,25 +24,38 @@ namespace ESME.Overlay
             {
                 _lineReader = value;
 
-                string curLine = _lineReader.NextLine();
+                var curLine = _lineReader.NextLine;
                 while (curLine != null)
                 {
-                    string[] tokens = curLine.Split(_sep, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var token in tokens)
+                    var isComment = CommentIndicators.Where(commentIndicator => curLine.StartsWith(commentIndicator)).Any();
+                    if (isComment)
                     {
-                        float f;
-                        if (float.TryParse(token, out f))
-                            _tokens.Enqueue(new Token
-                                                {
-                                                    Value = f,
-                                                    IsNumeric = true,
-                                                    LineNumber = _lineReader.LineNumber,
-                                                    LineReader = _lineReader
-                                                });
-                        else
+                        _tokens.Enqueue(new Token
                         {
-                            switch (token.ToLower())
+                            Value = OverlayKeywords.Comment,
+                            IsNumeric = true,
+                            LineNumber = _lineReader.LineNumber - 1,
+                            LineReader = _lineReader
+                        });
+                    }
+                    else
+                    {
+                        var tokens = curLine.Split(_sep, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var token in tokens)
+                        {
+                            float f;
+                            if (float.TryParse(token, out f))
+                                _tokens.Enqueue(new Token
+                                {
+                                        Value = f,
+                                        IsNumeric = true,
+                                        LineNumber = _lineReader.LineNumber - 1,
+                                        LineReader = _lineReader
+                                });
+                            else
                             {
+                                switch (token.ToLower())
+                                {
                                 case OverlayKeywords.Red:
                                 case OverlayKeywords.Green:
                                 case OverlayKeywords.Purple:
@@ -52,16 +68,17 @@ namespace ESME.Overlay
                                 default:
                                     _tokens.Enqueue(new Token
                                     {
-                                        Value = token,
-                                        IsNumeric = false,
-                                        LineNumber = _lineReader.LineNumber,
-                                        LineReader = _lineReader
+                                            Value = token,
+                                            IsNumeric = false,
+                                            LineNumber = _lineReader.LineNumber - 1,
+                                            LineReader = _lineReader
                                     });
                                     break;
+                                }
                             }
                         }
                     }
-                    curLine = _lineReader.NextLine();
+                    curLine = _lineReader.NextLine;
                 }
             }
         }
