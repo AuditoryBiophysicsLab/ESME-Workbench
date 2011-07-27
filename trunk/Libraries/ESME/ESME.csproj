@@ -312,6 +312,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Animats\" />
     <Folder Include="Simulation\" />
   </ItemGroup>
   <ItemGroup>
