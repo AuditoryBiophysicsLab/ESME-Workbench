@@ -78,27 +78,23 @@ namespace ESME.Overlay
                     else return new GeoRect(overlayLineSegments.BoundingBox);
                 }
             }
+            earthCoordinates = null;
             return null;
         }
 
-        public static GeoRect ValidateFile(string overlayFileName, string overlayName, out List<EarthCoordinate> earthCoordinates, out string errorText)
+        public static GeoRect ValidateFile(string overlayFileName, string overlayName, out string errorText)
         {
             errorText = "";
             if (!File.Exists(overlayName))
             {
                 errorText += "Specified " + overlayName + " does not exist" + System.Environment.NewLine;
             }
-            earthCoordinates = null;
             try
             {
                 var myOvr = new OverlayFile(overlayFileName);
                 if (myOvr.Shapes.Length != 1 || !myOvr.Shapes[0].IsUsableAsPerimeter)
                     errorText += "Specified " + overlayName + " is invalid" + System.Environment.NewLine;
-                else
-                {
-                    earthCoordinates = myOvr.Shapes[0].EarthCoordinates;
-                    return new GeoRect(myOvr.Shapes[0].BoundingBox);
-                }
+                else return new GeoRect(myOvr.Shapes[0].BoundingBox);
             }
             catch (Exception e)
             {
@@ -106,5 +102,25 @@ namespace ESME.Overlay
             }
             return null;
         }
+
+        public static void Create(string newOverlayFileName, IEnumerable<EarthCoordinate> coords)
+        {
+            using (var writer = new StreamWriter(newOverlayFileName))
+            {
+                writer.WriteLine("navigation");
+                writer.WriteLine("green");
+                writer.WriteLine("solid");
+                writer.WriteLine("move");
+                var first = true;
+                foreach (var coordinate in coords)
+                {
+                    writer.WriteLine("{0:0.0000}  {1:0.0000}", coordinate.Latitude, coordinate.Longitude);
+                    if (first) writer.WriteLine("lines");
+                    first = false;
+                }
+            }
+        }
+
+
     }
 }

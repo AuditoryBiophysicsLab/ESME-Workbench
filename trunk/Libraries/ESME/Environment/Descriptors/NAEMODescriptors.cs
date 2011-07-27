@@ -124,6 +124,7 @@ namespace ESME.Environment.Descriptors
             return result;
         }
 
+        public bool Remove(T item) { return Remove(Find(entry => entry.Value == item)); }
         #endregion
 
         #region Implementation of IList<KeyValuePair<string,T>>
