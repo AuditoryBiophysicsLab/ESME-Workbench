@@ -37,7 +37,7 @@ namespace ESMEWorkBench.ViewModels.Main
             Console.WriteLine("All view models are ready!");
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
-            Task.Factory.StartNew(() => RangeComplexes = RangeComplexes.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"), _dispatcher));
+            Task.Factory.StartNew(() => RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"), _dispatcher));
             
             //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
@@ -149,21 +149,21 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region Range Complex ribbon group
 
-        #region public RangeComplexes RangeComplexes { get; set; }
+        #region public RangeComplexDescriptors RangeComplexDescriptors { get; set; }
 
-        public RangeComplexes RangeComplexes
+        public RangeComplexDescriptors RangeComplexDescriptors
         {
-            get { return _rangeComplexes; }
+            get { return _rangeComplexDescriptors; }
             set
             {
-                if (_rangeComplexes == value) return;
-                _rangeComplexes = value;
+                if (_rangeComplexDescriptors == value) return;
+                _rangeComplexDescriptors = value;
                 NotifyPropertyChanged(RangeComplexesChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs RangeComplexesChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RangeComplexes);
-        RangeComplexes _rangeComplexes;
+        static readonly PropertyChangedEventArgs RangeComplexesChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RangeComplexDescriptors);
+        RangeComplexDescriptors _rangeComplexDescriptors;
 
         #endregion
 
@@ -363,9 +363,9 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
             if ((result.HasValue) && (result.Value))
             {
-                RangeComplexes.Add(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
+                RangeComplexDescriptors.AddRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
                                             vm.NewOpAreaOverlayEarthCoordinates, vm.ExistingSimAreaOverlayFilename, vm.NewSimAreaOverlayEarthCoordinates, _dispatcher);
-                SelectedRangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexes[vm.LocationName];
+                SelectedRangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[vm.LocationName];
             }
         }
         #endregion
@@ -406,16 +406,16 @@ namespace ESMEWorkBench.ViewModels.Main
                                                  "\" will also delete any overlays, bathymetry and environment data that have previously been created or extracted.\n\nThis operation CANNOT be undone.\n\nProceed with deletion?", 
                                                  CustomDialogIcons.Exclamation);
             if (result == CustomDialogResults.No) return;
-            RangeComplexes.Delete(SelectedRangeComplexDescriptor);
+            RangeComplexDescriptors.DeleteRangeComplex(SelectedRangeComplexDescriptor);
             SelectedRangeComplexDescriptor = null;
             return;
             var rangeComplexName = SelectedRangeComplexDescriptor.Data.Name;
-            var simAreaCSVFileContents = File.ReadAllLines(RangeComplexes.FileName);
-            var oldCSVFileName = RangeComplexes.FileName;
-            var newCSVFileName = RangeComplexes.FileName + ".new";
+            var simAreaCSVFileContents = File.ReadAllLines(RangeComplexDescriptors.FileName);
+            var oldCSVFileName = RangeComplexDescriptors.FileName;
+            var newCSVFileName = RangeComplexDescriptors.FileName + ".new";
 
             SelectedRangeComplexDescriptor = null;
-            RangeComplexes = null;
+            RangeComplexDescriptors = null;
             Task.Factory.StartNew(() =>
             {
                 using (var streamWriter = new StreamWriter(newCSVFileName)) foreach (var curLine in simAreaCSVFileContents.Where(curLine => !curLine.StartsWith(rangeComplexName))) streamWriter.WriteLine(curLine);
@@ -423,7 +423,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 File.Move(newCSVFileName, oldCSVFileName);
                 var rangeComplexRoot = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName);
                 Directory.Delete(rangeComplexRoot, true);
-                RangeComplexes = RangeComplexes.ReadCSV(oldCSVFileName, _dispatcher);
+                RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(oldCSVFileName, _dispatcher);
             });
         }
         #endregion

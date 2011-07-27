@@ -9,15 +9,15 @@ using HRC.Navigation;
 
 namespace ESME.Environment.Descriptors
 {
-    public class RangeComplexes : NAEMODescriptors<RangeComplexDescriptor>
+    public class RangeComplexDescriptors : NAEMODescriptors<RangeComplexDescriptor>
     {
-        private RangeComplexes()
+        private RangeComplexDescriptors()
         {
         }
 
-        public static RangeComplexes ReadCSV(string fileName, Dispatcher dispatcher)
+        public static RangeComplexDescriptors ReadCSV(string fileName, Dispatcher dispatcher)
         {
-            var result = new RangeComplexes()
+            var result = new RangeComplexDescriptors()
                          {
                              FileName = fileName,
                              Dispatcher = dispatcher,
@@ -43,14 +43,14 @@ namespace ESME.Environment.Descriptors
                 double longitude;
                 double height;
                 double geoid;
-                if (string.IsNullOrEmpty(simAreaName)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid sim area name", fileName));
-                if (string.IsNullOrEmpty(opsLimitFile)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid OpsLimit filename", fileName));
-                if (string.IsNullOrEmpty(simLimitFile)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid SimLimit filename", fileName));
-                if (!double.TryParse(latString, out latitude)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid latitude", fileName));
-                if (!double.TryParse(lonString, out longitude)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid longitude", fileName));
-                if (!double.TryParse(heightString, out height)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid height", fileName));
-                if (!double.TryParse(geoidString, out geoid)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid geoid separation value", fileName));
-                result.Add(simAreaName, height, latitude, longitude, geoid, opsLimitFile, null, simLimitFile, null, dispatcher);
+                if (string.IsNullOrEmpty(simAreaName)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid sim area name", fileName));
+                if (string.IsNullOrEmpty(opsLimitFile)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid OpsLimit filename", fileName));
+                if (string.IsNullOrEmpty(simLimitFile)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid SimLimit filename", fileName));
+                if (!double.TryParse(latString, out latitude)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid latitude", fileName));
+                if (!double.TryParse(lonString, out longitude)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid longitude", fileName));
+                if (!double.TryParse(heightString, out height)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid height", fileName));
+                if (!double.TryParse(geoidString, out geoid)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid geoid separation value", fileName));
+                result.AddRangeComplex(simAreaName, height, latitude, longitude, geoid, opsLimitFile, null, simLimitFile, null, dispatcher);
             });
             result.Sort();
             return result;
@@ -58,7 +58,7 @@ namespace ESME.Environment.Descriptors
 
         public string FileName { get; private set; }
 
-        public void Delete(RangeComplexDescriptor rangeComplexToDelete)
+        public void DeleteRangeComplex(RangeComplexDescriptor rangeComplexToDelete)
         {
             var rangeComplexName = rangeComplexToDelete.Data.Name;
             var simAreaCSVFileContents = File.ReadAllLines(FileName);
@@ -75,7 +75,7 @@ namespace ESME.Environment.Descriptors
             });
         }
 
-        public bool Add(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, List<EarthCoordinate> opAreaBoundsCoordinates, string simLimitFile, List<EarthCoordinate> simAreaBoundsCoordinates, Dispatcher dispatcher)
+        public bool AddRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, List<EarthCoordinate> opAreaBoundsCoordinates, string simLimitFile, List<EarthCoordinate> simAreaBoundsCoordinates, Dispatcher dispatcher)
         {
             var rangeComplexPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName);
             if (!Directory.Exists(rangeComplexPath))
