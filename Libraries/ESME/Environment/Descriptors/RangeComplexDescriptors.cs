@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -119,12 +120,19 @@ namespace ESME.Environment.Descriptors
             NAEMOOverlayDescriptors overlayDescriptors = null;
             NAEMOBathymetryDescriptors bathymetryDescriptors = null;
             NAEMOEnvironmentDescriptors environmentDescriptors = null;
-            Parallel.Invoke(() => overlayDescriptors = new NAEMOOverlayDescriptors(rangeComplexName) {Dispatcher = dispatcher},
-                            () => bathymetryDescriptors = new NAEMOBathymetryDescriptors(rangeComplexName) {Dispatcher = dispatcher},
-                            () => environmentDescriptors = new NAEMOEnvironmentDescriptors(rangeComplexName) {Dispatcher = dispatcher});
+#if false
+            Parallel.Invoke(() => overlayDescriptors = new NAEMOOverlayDescriptors(rangeComplexName) { Dispatcher = dispatcher },
+                            () => bathymetryDescriptors = new NAEMOBathymetryDescriptors(rangeComplexName) { Dispatcher = dispatcher },
+                            () => environmentDescriptors = new NAEMOEnvironmentDescriptors(rangeComplexName) { Dispatcher = dispatcher });
+#else
+            overlayDescriptors = new NAEMOOverlayDescriptors(rangeComplexName) {Dispatcher = dispatcher};
+            bathymetryDescriptors = new NAEMOBathymetryDescriptors(rangeComplexName) {Dispatcher = dispatcher};
+            environmentDescriptors = new NAEMOEnvironmentDescriptors(rangeComplexName) {Dispatcher = dispatcher};
+#endif
             if (overlayDescriptors == null || bathymetryDescriptors == null || environmentDescriptors == null) throw new ApplicationException("Error initializing overlay, bathymetry or environment descriptors");
             lock (this)
             {
+                Debug.WriteLine("{0}: Adding range complex \"{1}\"", DateTime.Now, rangeComplexName);
                 Add(new KeyValuePair<string, RangeComplexDescriptor>(rangeComplexName, new RangeComplexDescriptor
                 {
                         Data = new RangeComplex(latitude, longitude)
