@@ -13,7 +13,8 @@
                     Click="OpenFileClick" />
             <TextBox x:Name="FileOrDirectoryName" 
                      DockPanel.Dock="Left" 
-                     Text="{Binding Path=FileName, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type Controls:FileOrDirectorySetting}}}" />
+                     Text="{Binding Path=FileName, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type Controls:FileOrDirectorySetting}}}"                     
+                     ToolTip="{Binding Path=FileName, RelativeSource={RelativeSource AncestorType={x:Type Controls:FileOrDirectorySetting}}}"/>
 		</DockPanel>
 	</StackPanel>
 </UserControl>

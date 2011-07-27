@@ -382,5 +382,29 @@ namespace ESMEWorkBench.Properties {
                 this["LogViewWidth"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\")]
+        public string LogLastDir {
+            get {
+                return ((string)(this["LogLastDir"]));
+            }
+            set {
+                this["LogLastDir"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public double LogListWidth {
+            get {
+                return ((double)(this["LogListWidth"]));
+            }
+            set {
+                this["LogListWidth"] = value;
+            }
+        }
     }
 }
