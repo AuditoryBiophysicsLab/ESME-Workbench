@@ -16,6 +16,7 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME;
+using ESME.Animats;
 using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;

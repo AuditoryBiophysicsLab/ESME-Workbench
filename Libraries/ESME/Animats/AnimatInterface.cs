@@ -3,10 +3,9 @@ using System.IO;
 using System.Threading;
 using ESME.Environment;
 using ESME.Model;
-using HRC.Navigation;
 using mbs;
 
-namespace ESME.Model
+namespace ESME.Animats
 {
     public class AnimatInterface
     {
@@ -239,7 +238,7 @@ namespace ESME.Model
 
             #region animat location file
 
-            _animatLocationFile = AnimatLocationFile.AnimatLocationFile.Create(AnimatLogFilePath, _timeStep, _simulationDuration, AnimatList);
+            _animatLocationFile = AnimatLocationFile.Create(AnimatLogFilePath, _timeStep, _simulationDuration, AnimatList);
             UpdatePositions();
 
             #endregion
@@ -498,7 +497,7 @@ namespace ESME.Model
 
         readonly C3mbs _mmmbs = new C3mbs();
         readonly C3mbs[] _mmmbsArray = new C3mbs[System.Environment.ProcessorCount]; //todo
-        AnimatLocationFile.AnimatLocationFile _animatLocationFile;
+        AnimatLocationFile _animatLocationFile;
         bool _beenInitialized;
         bool _isStatic;
         double[] _mbsBathymetry;

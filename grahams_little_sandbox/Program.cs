@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ESME;
+using ESME.Animats;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using HRC;
