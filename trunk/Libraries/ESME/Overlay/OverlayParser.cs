@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows.Media;
 using HRC.Navigation;
@@ -10,8 +12,10 @@ namespace ESME.Overlay
     {
         const float YardsToMeters = 0.9144f;
 
-        public static OverlayShape[] Parse(string overlayFileName)
+        public static OverlayShape[] Parse(string overlayFileName, out string sourceOverlay, out string expandedRangeKm)
         {
+            sourceOverlay = null;
+            expandedRangeKm = null;
             var curColor = Colors.Red;
             var shapes = new List<OverlayShape>();
             var locationMode = OverlayLocationMode.LatLong;
@@ -20,9 +24,8 @@ namespace ESME.Overlay
             EarthCoordinate lastPoint = null;
             var curStyle = LineStyle.Solid;
             var reader = new LineReader();
-            var tokenizer = new Tokenizer();
-
-            reader.CommentIndicators = "#";
+            var tokenizer = new Tokenizer {CommentIndicators = new[] {"#"}};
+            var commentSplit = new[] { "=" };
             reader.FileName = overlayFileName;
             tokenizer.LineReader = reader;
 
@@ -33,23 +36,37 @@ namespace ESME.Overlay
                 switch (curState)
                 {
                     case OverlayParseState.Initialization:
-                        var positionMode = OverlayPositionMode.Absolute;
-                        switch (((string) curToken.Value).ToLower())
+                    switch (((string) curToken.Value).ToLower())
                         {
+                            case OverlayKeywords.Comment:
+                                var originalComment = reader.Lines[curToken.LineNumber];
+                                if (originalComment.StartsWith("# "))
+                                {
+                                    var step1 = originalComment.Substring(2, originalComment.Length - 2).Trim();
+                                    var step2 = step1.Split(commentSplit, StringSplitOptions.RemoveEmptyEntries);
+                                    if (step2.Length != 2) break;
+                                    switch (step2[0])
+                                    {
+                                        case "sourceOverlay":
+                                            sourceOverlay = step2[1];
+                                            break;
+                                        case "expandedRangeKm":
+                                            expandedRangeKm = step2[1];
+                                            break;
+                                    }
+                                }
+                                break;
                             case OverlayKeywords.Move:
                                 curPoints = GetPoints(tokenizer, locationMode, null);
                                 lastPoint = curPoints.Last();
                                 curState = OverlayParseState.ShapeBuild; //Change State to ShapeBuild
                                 break;
                             case OverlayKeywords.Absolute:
-                                positionMode = OverlayPositionMode.Absolute; //Set Position Mode to Absolute
-                                break;
+                            break;
                             case OverlayKeywords.Relative:
-                                positionMode = OverlayPositionMode.Relative;
-                                if (positionMode == OverlayPositionMode.Relative) throw new ApplicationException("Unimplemented position mode: Relative");
-                                break;
-                            case OverlayKeywords.DMS:
-                                locationMode = OverlayLocationMode.DMS;
+                                throw new ApplicationException("Unimplemented position mode: Relative");
+                            case OverlayKeywords.DegreesMinutesSeconds:
+                                locationMode = OverlayLocationMode.DegreesMinutesSeconds;
                                 break;
                             case OverlayKeywords.LatLong:
                                 locationMode = OverlayLocationMode.LatLong;
@@ -195,10 +212,10 @@ namespace ESME.Overlay
                         curPoint = GetPoint(tokenizer);
                         resultPoints.Add(curPoint);
                         break;
-                    case OverlayLocationMode.DMS:
+                    case OverlayLocationMode.DegreesMinutesSeconds:
                         if (tokenizer.Count < 2) throw new ApplicationException("OverlayParser.getInitialPoint: missing information for coordinates\n");
 
-                        curPoint = new EarthCoordinate(DecodeDMS(tokenizer), DecodeDMS(tokenizer));
+                        curPoint = new EarthCoordinate(DecodeDegreesMinutesSeconds(tokenizer), DecodeDegreesMinutesSeconds(tokenizer));
                         resultPoints.Add(curPoint);
                         break;
                     default:
@@ -206,19 +223,6 @@ namespace ESME.Overlay
                 }
             }
             return resultPoints.ToArray();
-        }
-
-        /// <summary>
-        ///   Creates an absolute point from a relative one (need info from NUWC)
-        /// </summary>
-        /// <param name = "x">X Offset, in YARDS, from the some location, need info from NUWC</param>
-        /// <param name = "y">Y Offset, in YARDS, from the some location, need info from NUWC</param>
-        /// <returns>PointF with X as longitude, and Y as latitude</returns>
-        static EarthCoordinate GetValueInDegrees(Token x, Token y)
-        {
-            //Dave will tell me to do this with EarthCoordinate Class
-            if ((x.Value == null) || (y.Value == null)) throw new ApplicationException("OverlayParser.GetValueInDegrees: Values for Latitude or Longitude is not present in Overlay File " + x.LineReader.FileName + " at line " + x.LineNumber);
-            return new EarthCoordinate(0, 0);
         }
 
         static EarthCoordinate GetValueInDegrees(Tokenizer tokenizer)
@@ -231,12 +235,6 @@ namespace ESME.Overlay
             return new EarthCoordinate(0, 0);
         }
 
-        static EarthCoordinate GetPoint(Token x, Token y)
-        {
-            if ((x.Value == null) || (y.Value == null)) throw new ApplicationException("OverlayParser.GetPoint: Values for Latitude or Longitude is not present in Overlay File " + x.LineReader.FileName + " at line " + x.LineNumber);
-            return new EarthCoordinate((double)((float?)x.Value), (double)((float?)y.Value));
-        }
-
         static EarthCoordinate GetPoint(Tokenizer tokenizer)
         {
             var x = tokenizer.NextToken();
@@ -246,7 +244,7 @@ namespace ESME.Overlay
             return new EarthCoordinate((double)((float?)x.Value), (double)((float?)y.Value));
         }
 
-        static float DecodeDMS(Tokenizer tokenizer)
+        static float DecodeDegreesMinutesSeconds(Tokenizer tokenizer)
         {
             var degrees = tokenizer.NextToken();
             while (!degrees.IsNumeric) degrees = tokenizer.NextToken();
@@ -275,7 +273,7 @@ namespace ESME.Overlay
     {
         LatLong,
         XYPair,
-        DMS
+        DegreesMinutesSeconds
     }
 
     internal class OverlayKeywords
@@ -287,7 +285,7 @@ namespace ESME.Overlay
         public const string Absolute = "absolute";
         public const string Relative = "relative";
         public const string XYPair = "xyz";
-        public const string DMS = "latlong";
+        public const string DegreesMinutesSeconds = "latlong";
         public const string LatLong = "navigation";
         public const string Color = "rgb";
         public const string Red = "red";
@@ -304,5 +302,6 @@ namespace ESME.Overlay
         public const string Dash = "dash";
         public const string Dot = "dot";
         public const string DashDot = "dashdot";
+        public const string Comment = "#";
     }
 }

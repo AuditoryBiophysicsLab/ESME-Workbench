@@ -4,60 +4,40 @@ namespace ESME.Overlay
 {
     internal class LineReader
     {
-        private int _lineNumber;
-        private StreamReader _reader;
-
-        public string CommentIndicators { get; set; }
-
-        public string FileName { get; set; }
-
-        public int LineNumber
+        public LineReader()
         {
-            get
+            Lines = null;
+            LineNumber = 0;
+        }
+
+        string _fileName;
+        public string FileName
+        {
+            get { return _fileName; }
+            set
             {
-                if (_reader == null)
-                    return 0;
-                return _lineNumber;
+                _fileName = value;
+                if ((string.IsNullOrEmpty(_fileName)) || (!File.Exists(_fileName)))
+                    throw new FileNotFoundException("LineReader.NextLine: Could not open requested file '" + _fileName + "'");
+                Lines = File.ReadAllLines(_fileName);
             }
         }
 
-        public string NextLine()
+        public int LineNumber { get; private set; }
+
+        public string[] Lines { get; private set; }
+
+        public string NextLine
         {
-            if (_reader == null)
+            get
             {
-                if ((string.IsNullOrEmpty(FileName)) || (!File.Exists(FileName)))
-                    throw new FileNotFoundException("LineReader.NextLine: Could not open requested file '" + FileName + "'");
-                _reader = new StreamReader(FileName);
+                // Skip over any blank lines encountered
+                while ((LineNumber < Lines.Length) && string.IsNullOrEmpty(Lines[LineNumber].Trim()))
+                    LineNumber++;
+                if (LineNumber >= Lines.Length) return null;
+                var result = Lines[LineNumber++].Trim().ToLower();
+                return result;
             }
-
-            string curLine = string.Empty;
-
-            while (curLine == string.Empty)
-            {
-                curLine = _reader.ReadLine();
-                if (curLine == null)
-                    return null;
-                curLine = curLine.Trim().ToLower();
-                _lineNumber++;
-            }
-            // Now, curLine contains a non-blank line
-
-            // if (CommentIndicators.Length > 0)
-            //{
-            //  foreach (string curComment in CommentIndicators)
-            // {
-            string comment = CommentIndicators.ToLower();
-            while ((curLine.StartsWith(comment)) || (curLine == string.Empty))
-            {
-                curLine = _reader.ReadLine();
-                if (curLine == null)
-                    return null;
-                curLine = curLine.Trim().ToLower();
-                _lineNumber++;
-            }
-            //}
-            // }
-            return curLine;
         }
     }
 }

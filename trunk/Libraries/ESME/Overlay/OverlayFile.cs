@@ -17,7 +17,7 @@ namespace ESME.Overlay
         public OverlayFile(string fileName)
         {
             _fileName = fileName;
-            Shapes = Parse(fileName);
+            Parse(_fileName);
         }
 
         public OverlayShape[] Shapes { get; private set; }
@@ -28,7 +28,7 @@ namespace ESME.Overlay
             set
             {
                 _fileName = value;
-                Shapes = Parse(value);
+                Parse(_fileName);
             }
         }
 
@@ -40,6 +40,18 @@ namespace ESME.Overlay
                 foreach (var s in Shapes)
                     s.Color = value;
             }
+        }
+
+        public string SourceOverlay { get; private set; }
+
+        public string ExpandedRange { get; private set; }
+
+        void Parse(string fileName)
+        {
+            string sourceOverlay, expandedRange;
+            Shapes = Parse(fileName, out sourceOverlay, out expandedRange);
+            SourceOverlay = sourceOverlay;
+            ExpandedRange = expandedRange;
         }
 
         public override string ToString()
@@ -103,11 +115,12 @@ namespace ESME.Overlay
             return null;
         }
 
-        public static void Create(string newOverlayFileName, IEnumerable<EarthCoordinate> coords, string sourceOverlayFileName = null)
+        public static void Create(string newOverlayFileName, IEnumerable<EarthCoordinate> coords, string sourceOverlayFileName = null, double? expandedRangeInKm = null)
         {
             using (var writer = new StreamWriter(newOverlayFileName))
             {
                 if (!string.IsNullOrEmpty(sourceOverlayFileName)) writer.WriteLine("# sourceOverlay={0}", sourceOverlayFileName);
+                if (expandedRangeInKm.HasValue) writer.WriteLine("# expandedRangeKm={0:0.####}", expandedRangeInKm.Value);
                 writer.WriteLine("navigation");
                 writer.WriteLine("green");
                 writer.WriteLine("solid");
