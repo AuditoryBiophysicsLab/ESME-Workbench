@@ -229,7 +229,7 @@
     <Compile Include="TransmissionLoss\Bellhop\TransmissionLossSettings.cs" />
     <Compile Include="TransmissionLoss\CASS\CassFiles.cs" />
     <Compile Include="TransmissionLoss\CASS\NAEMOEnvironmentLocation.cs" />
-    <Compile Include="Environment\Descriptors\RangeComplexes.cs" />
+    <Compile Include="Environment\Descriptors\RangeComplexDescriptors.cs" />
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>
     </Compile>
