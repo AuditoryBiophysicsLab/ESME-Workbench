@@ -593,19 +593,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 var metadataFileName = string.Format("{0}_{1}km.xml", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
                 var overlayPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), overlayFileName);
                 var metadataPath = Path.Combine(Path.GetDirectoryName(SelectedOverlayDescriptor.DataFilename), metadataFileName);
-                using (var writer = new StreamWriter(overlayPath))
-                {
-                    writer.WriteLine("navigation");
-                    writer.WriteLine("green");
-                    writer.WriteLine("solid");
-                    writer.WriteLine("move");
-                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.NorthWest.Latitude, geoRect.NorthWest.Longitude);
-                    writer.WriteLine("lines");
-                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.NorthEast.Latitude, geoRect.NorthEast.Longitude);
-                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.SouthEast.Latitude, geoRect.SouthEast.Longitude);
-                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.SouthWest.Latitude, geoRect.SouthWest.Longitude);
-                    writer.WriteLine("{0:0.####}  {1:0.####}", geoRect.NorthWest.Latitude, geoRect.NorthWest.Longitude);
-                }
+                OverlayFile.Create(overlayPath, new List<EarthCoordinate> { geoRect.NorthWest, geoRect.NorthEast, geoRect.SouthEast, geoRect.SouthWest, geoRect.NorthWest }, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
 
                 var metadata = new NAEMOOverlayMetadata
                 {
