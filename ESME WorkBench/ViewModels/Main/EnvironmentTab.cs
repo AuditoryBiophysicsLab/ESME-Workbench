@@ -833,24 +833,23 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DeleteBathymetryHandler()
         {
-            var sb = new StringBuilder();
-
-#if false
-            var dependentEnvironments = NAEMOEnvironmentDescriptors.GetDependenEnvironments(SelectedBathymetryDescriptor);
+            var dependentEnvironments = NAEMOEnvironmentDescriptors.GetDependentEnvironments(SelectedBathymetryDescriptor).ToList();
+            var dependentEnvironmentList = new StringBuilder();
             foreach (var environment in dependentEnvironments)
-                sb.Append(Path.GetFileNameWithoutExtension(environment.DataFilename) + ", ");
-#endif
+                dependentEnvironmentList.Append(Path.GetFileNameWithoutExtension(environment.DataFilename) + ", ");
+            if (dependentEnvironmentList.Length > 0) dependentEnvironmentList.Remove(dependentEnvironmentList.Length - 2, 2);
 
-            if (sb.Length > 0) sb.Remove(sb.Length - 2, 2);
-            else sb.Append("[none]");
+            var message = new StringBuilder();
+            message.Append("Warning: You are about to delete the bathymetry data \"" + Path.GetFileNameWithoutExtension(SelectedBathymetryDescriptor.Metadata.Filename) + "\"");
+            if (dependentEnvironments.Count > 0) message.Append(". This will also delete the dependent environment data:\n\n" + dependentEnvironmentList);
 
-            var result =
-                    _messageBoxService.ShowYesNo("Warning: Deleting the bathymetry \"" + Path.GetFileNameWithoutExtension(SelectedBathymetryDescriptor.Metadata.Filename) +
-                                                 "\" will also delete the following dependent environments:\n\n" + sb + "\n\nThis operation CANNOT be undone.\n\nProceed with deletion?",
-                                                 CustomDialogIcons.Exclamation);
+            message.Append("\n\nThis operation CANNOT be undone.\n\nProceed with deletion?");
+
+            var result = _messageBoxService.ShowYesNo(message.ToString(), CustomDialogIcons.Exclamation);
+
             if (result == CustomDialogResults.No) return;
             NAEMOBathymetryDescriptors.DeleteBathymetry(SelectedBathymetryDescriptor);
-            //NAEMOEnvironmentDescriptors.DeleteEnvironments(dependentEnvironments);
+            NAEMOEnvironmentDescriptors.DeleteEnvironment(dependentEnvironments);
         }
         #endregion
 
@@ -1031,6 +1030,30 @@ namespace ESMEWorkBench.ViewModels.Main
                         UseExpandedExtractionArea = false,
                         TaskName = "Export NAEMO environment for " + t,
                 }).ToList();
+                foreach (var exporter in naemoEnvironmentExporters)
+                {
+                    exporter.RunWorkerCompleted += (s, e) =>
+                    {
+                        var curExporter = (CASSBackgroundExporter)s;
+                        var metadataFilename = NAEMOMetadataBase.MetadataFilename(curExporter.DestinationPath);
+                        var metadata = new NAEMOEnvironmentMetadata
+                        {
+                            BathymetryName = Path.GetFileNameWithoutExtension(curExporter.BathymetryFileName),
+                            OverlayFilename = Path.GetFileNameWithoutExtension(curExporter.OverlayFileName),
+                            TimePeriod = curExporter.TimePeriod,
+                            Bounds = extractionArea,
+                            Filename = metadataFilename,
+                        };
+                        metadata.Save();
+                        var environmentDescriptor = new NAEMOEnvironmentDescriptor { DataFilename = curExporter.DestinationPath, Metadata = metadata };
+                        lock (NAEMOEnvironmentDescriptors)
+                        {
+                            NAEMOEnvironmentDescriptors.Add(new System.Collections.Generic.KeyValuePair<string, NAEMOEnvironmentDescriptor>(Path.GetFileNameWithoutExtension(curExporter.DestinationPath),
+                                                                                                                                            environmentDescriptor));
+                            NAEMOBathymetryDescriptors.Sort();
+                        }
+                    };
+                }
 
                 var windExtractor = new SMGCBackgroundExtractor
                 {
@@ -1115,75 +1138,34 @@ namespace ESMEWorkBench.ViewModels.Main
                 }
                 var loadMetadataTasks = new List<GenericBackgroundTask>();
                 foreach (var naemo in naemoEnvironmentExporters)
-                {
                     BackgroundTaskAggregator.BackgroundTasks.Add(naemo);
-                    naemo.RunWorkerCompleted += (s, e) =>
-                    {
-                        if (naemoEnvironmentExporters.Any(n => n.IsBusy)) return;
-                        foreach (var timePeriod in selectedTimePeriods)
-                        {
-                            var curEnvironment = vm.EnvironmentDescriptors.Find(
-                                                                                descriptor =>
-                                                                                descriptor.TimePeriod == timePeriod);
-                            var bt = new GenericBackgroundTask
-                            {
-                                TaskName = "Load environment metadata for " + curEnvironment.EnvironmentName
-                            };
-                            bt.DoWork += (s1, e1) =>
-                            {
-                                var metadataFilename = Path.Combine(environmentPath, curEnvironment.EnvironmentName + ".dat");
-                                var metadata = NAEMOEnvironmentMetadata.FromEnvironmentFile(metadataFilename);
-                                metadata.TimePeriod = timePeriod;
-                                metadata.Bounds = extractionArea;
-                                metadata.OverlayFilename = overlayName;
-                                metadata.BathymetryName = bathymetryName;
-                                metadata.Save();
-                            };
-                            bt.RunWorkerCompleted += (s1, e1) =>
-                            {
-                                if (loadMetadataTasks.Any(n => n.IsBusy)) return;
-                                Task.Factory.StartNew(() =>
-                                {
-                                    NAEMOEnvironmentDescriptors.Refresh();
-                                    SelectedEnvironmentDescriptor = (NAEMOEnvironmentDescriptor)NAEMOEnvironmentDescriptors[vm.EnvironmentDescriptors[0].EnvironmentName];
-                                });
-                            };
-                            loadMetadataTasks.Add(bt);
-                            BackgroundTaskAggregator.BackgroundTasks.Add(bt);
-                        }
-                    };
-                }
                 BackgroundTaskAggregator.TaskName = "Environmental data extraction";
             }
         }
 
         #endregion
 
-        #region EnvironmentPropertiesCommand
-        public SimpleCommand<object, object> EnvironmentPropertiesCommand
+        #region DeleteEnvironmentCommand
+        public SimpleCommand<object, object> DeleteEnvironmentCommand
         {
-            get
-            {
-                return _environmentProperties ??
-                       (_environmentProperties =
-                        new SimpleCommand<object, object>(delegate { return IsEnvironmentFileSelected; },
-                                                          delegate { EnvironmentPropertiesHandler(); }));
-            }
+            get { return _deleteEnvironment ?? (_deleteEnvironment = new SimpleCommand<object, object>(delegate { return IsEnvironmentFileSelected; }, delegate { DeleteEnvironmentHandler(); })); }
         }
 
-        SimpleCommand<object, object> _environmentProperties;
+        SimpleCommand<object, object> _deleteEnvironment;
 
-        void EnvironmentPropertiesHandler()
+        void DeleteEnvironmentHandler()
         {
-            var vm = new MetadataPropertiesViewModel(null, null, SelectedEnvironmentDescriptor.Metadata);
-            var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
-            if ((result.HasValue) && (result.Value))
-            {
-                SelectedEnvironmentDescriptor = _selectedEnvironmentDescriptor;
-            }
+            var message = new StringBuilder();
+            message.Append("Warning: You are about to delete the environment data \"" + Path.GetFileNameWithoutExtension(SelectedEnvironmentDescriptor.Metadata.Filename) + "\"");
+
+            message.Append("\n\nThis operation CANNOT be undone.\n\nProceed with deletion?");
+
+            var result = _messageBoxService.ShowYesNo(message.ToString(), CustomDialogIcons.Exclamation);
+
+            if (result == CustomDialogResults.No) return;
+            NAEMOEnvironmentDescriptors.DeleteEnvironment(SelectedEnvironmentDescriptor);
         }
         #endregion
-
         #endregion
     }
 }

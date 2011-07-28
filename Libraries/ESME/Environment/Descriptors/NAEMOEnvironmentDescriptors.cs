@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -58,8 +59,13 @@ namespace ESME.Environment.Descriptors
         public IEnumerable<NAEMOEnvironmentDescriptor> GetDependentEnvironments(NAEMOBathymetryDescriptor sourceBathymetryDescriptor)
         {
             var sourceBathymetryName = Path.GetFileNameWithoutExtension(sourceBathymetryDescriptor.DataFilename);
+            //foreach (var cur in this)
+            //{
+            //    if (cur.Value == null) continue;
+            //    if (Path.GetFileNameWithoutExtension(cur.Value.Metadata.BathymetryName) == sourceBathymetryName) Console.WriteLine("Matched " + sourceBathymetryName + " in " + Path.GetFileNameWithoutExtension(cur.Value.Metadata.Filename));
+            //}
             var result = (from environmentDescriptor in this
-                          where ((environmentDescriptor.Value != null) && (Path.GetFileNameWithoutExtension(environmentDescriptor.Value.Metadata.BathymetryName) == sourceBathymetryName))
+                          where ((environmentDescriptor.Value != null) && (environmentDescriptor.Value.Metadata.BathymetryName == sourceBathymetryName))
                           select environmentDescriptor.Value).Distinct().ToList();
             result.Sort();
             return result;

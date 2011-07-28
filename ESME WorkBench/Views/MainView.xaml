@@ -732,7 +732,7 @@
 					                        SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
 					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                                             ToolTipDescription="Delete the selected evironment dataset"
-					                        Command="{Binding DisabledCommand}" />
+					                        Command="{Binding DeleteEnvironmentCommand}" />
                         </StackPanel>
                     </Grid>
                 </r:RibbonGroup>
