@@ -40,7 +40,7 @@ namespace HRC.Validation
                     var ruleIsBroken = !rule.Validate(this, rule);
                     if (!ruleIsBroken) continue;
                     allRulesValid = false;
-                    Debug.WriteLine("{0}: Broken rule on {1} : {2}", DateTime.Now, columnName, rule.Description);
+                    Debug.WriteLine("{0}: Broken rule on {1} : {2}{3}", DateTime.Now, rule.PropertyName, rule.Description, !string.IsNullOrEmpty(rule.ValidationErrorMessage) ? "\n" + rule.ValidationErrorMessage : "");
                     if (!string.IsNullOrEmpty(rule.Description)) errStr += rule.Description + Environment.NewLine;
                     if (!string.IsNullOrEmpty(rule.ValidationErrorMessage)) errStr += rule.ValidationErrorMessage + Environment.NewLine;
                     if (string.IsNullOrEmpty(rule.PropertyName) || (rule.PropertyName != columnName)) continue;
@@ -90,7 +90,7 @@ namespace HRC.Validation
             {
                 if (_error == value) return;
                 _error = value;
-                Debug.WriteLine("{0}: Error property is now : {1}", DateTime.Now, !string.IsNullOrEmpty(_error) ? _error : _error == string.Empty ? "(empty)" : "(null)");
+                //Debug.WriteLine("{0}: Error property is now : {1}", DateTime.Now, !string.IsNullOrEmpty(_error) ? _error : _error == string.Empty ? "(empty)" : "(null)");
                 NotifyPropertyChanged(ErrorChangedEventArgs);
             }
         }
