@@ -138,7 +138,7 @@ namespace ESME.Metadata
         }
 
         public string GeneratedBathymetryFilename { get { return GeneratedFilename + ".txt"; } }
-        public string GeneratedMetadataFilename { get { return GeneratedFilename + ".txt"; } }
+        public string GeneratedMetadataFilename { get { return GeneratedFilename + ".xml"; } }
 
         #region public float Resolution { get; set; }
 

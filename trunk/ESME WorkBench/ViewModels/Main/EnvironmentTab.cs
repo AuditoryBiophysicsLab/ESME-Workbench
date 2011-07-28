@@ -582,25 +582,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region OverlayPropertiesCommand
-        public SimpleCommand<object, object> OverlayPropertiesCommand
-        {
-            get { return _overlayProperties ?? (_overlayProperties = new SimpleCommand<object, object>(delegate { return IsOverlayFileSelected; }, delegate { OverlayPropertiesHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _overlayProperties;
-
-        void OverlayPropertiesHandler()
-        {
-            var vm = new MetadataPropertiesViewModel(SelectedOverlayDescriptor.Metadata);
-            var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
-            if ((result.HasValue) && (result.Value))
-            {
-                SelectedOverlayDescriptor = _selectedOverlayDescriptor;
-            }
-        }
-        #endregion
-
         #region DeleteOverlayCommand
         public SimpleCommand<object, object> DeleteOverlayCommand
         {
@@ -622,20 +603,65 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DeleteOverlayHandler()
         {
-            var dependentOverlays = NAEMOOverlayDescriptors.GetDependentOverlays(SelectedOverlayDescriptor);
-            var sb = new StringBuilder();
-            foreach (var overlay in dependentOverlays.Where(overlay => overlay.CompareTo(SelectedOverlayDescriptor) != 0)) 
-                sb.Append(Path.GetFileNameWithoutExtension(overlay.DataFilename) + ", ");
+            var dependentOverlays = NAEMOOverlayDescriptors.GetDependentOverlays(SelectedOverlayDescriptor).ToList();
+            var dependentOverlayCount = dependentOverlays.Count;
+            var dependentOverlayList = new StringBuilder();
+            foreach (var overlay in dependentOverlays) 
+                dependentOverlayList.Append(Path.GetFileNameWithoutExtension(overlay.DataFilename) + ", ");
+            if (dependentOverlayList.Length > 0) dependentOverlayList.Remove(dependentOverlayList.Length - 2, 2);
 
-            if (sb.Length > 0) sb.Remove(sb.Length - 2, 2);
-            else sb.Append("[none]");
+            dependentOverlays.Add(SelectedOverlayDescriptor);
+            dependentOverlays.Sort();
 
-            var result =
-                    _messageBoxService.ShowYesNo("Warning: Deleting the overlay \"" + Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.Data.FileName) +
-                                                 "\" will also delete the following dependent overlays:\n\n" + sb + "\n\nThis operation CANNOT be undone.\n\nProceed with deletion?",
-                                                 CustomDialogIcons.Exclamation);
+            var dependentBathymetries = NAEMOBathymetryDescriptors.GetDependentBathymetries(dependentOverlays).ToList();
+            var dependentBathymetryList = new StringBuilder();
+            foreach (var bathymetry in dependentBathymetries)
+                dependentBathymetryList.Append(Path.GetFileNameWithoutExtension(bathymetry.DataFilename) + ", ");
+            if (dependentBathymetryList.Length > 0) dependentBathymetryList.Remove(dependentBathymetryList.Length - 2, 2);
+
+            var dependentEnvironments = NAEMOEnvironmentDescriptors.GetDependentEnvironments(dependentOverlays, dependentBathymetries).ToList();
+            var dependentEnvironmentList = new StringBuilder();
+            foreach (var environment in dependentEnvironments)
+                dependentEnvironmentList.Append(Path.GetFileNameWithoutExtension(environment.DataFilename) + ", ");
+            if (dependentEnvironmentList.Length > 0) dependentEnvironmentList.Remove(dependentEnvironmentList.Length - 2, 2);
+
+            var message = new StringBuilder();
+            message.Append("Warning: You are about to delete the overlay \"" + Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.Data.FileName) + "\"");
+            if (dependentOverlayCount == 0)
+            {
+                if ((dependentBathymetries.Count > 0) && (dependentEnvironments.Count > 0))
+                {
+                    message.Append(". This will also delete the dependent bathymetry data:\n\n" + dependentBathymetryList + "\n\n");
+                    message.Append("and the dependent environment data:\n\n" + dependentEnvironmentList);
+                }
+                else
+                {
+                    if (dependentBathymetries.Count > 0) message.Append(". This will also delete the dependent bathymetry data:\n\n" + dependentBathymetryList);
+                    if (dependentEnvironments.Count > 0) message.Append(". This will also delete the dependent environment data:\n\n" + dependentEnvironmentList);
+                }
+            }
+            else
+            {
+                message.Append(". This will also delete the dependent overlays:\n\n" + dependentOverlayList);
+                if ((dependentBathymetries.Count > 0) && (dependentEnvironments.Count > 0))
+                {
+                    message.Append("\n\nthe dependent bathymetry data: " + dependentBathymetryList + "\n\n");
+                    message.Append("and the dependent environment data: " + dependentEnvironmentList);
+                }
+                else
+                {
+                    if (dependentBathymetries.Count > 0) message.Append("\n\nand the dependent bathymetry data: " + dependentBathymetryList);
+                    if (dependentEnvironments.Count > 0) message.Append("\n\nand the dependent environment data: " + dependentEnvironmentList);
+                }
+            }
+
+            message.Append("\n\nThis operation CANNOT be undone.\n\nProceed with deletion?");
+
+            var result = _messageBoxService.ShowYesNo(message.ToString(), CustomDialogIcons.Exclamation);
             if (result == CustomDialogResults.No) return;
-            NAEMOOverlayDescriptors.DeleteOverlay(SelectedOverlayDescriptor);
+            NAEMOOverlayDescriptors.DeleteOverlays(dependentOverlays);
+            NAEMOBathymetryDescriptors.DeleteBathymetry(dependentBathymetries);
+            NAEMOEnvironmentDescriptors.DeleteEnvironment(dependentEnvironments);
         }
 
         #endregion
@@ -780,32 +806,51 @@ namespace ESMEWorkBench.ViewModels.Main
             };
             bathymetryExtractor.RunWorkerCompleted += (s, e) => Task.Factory.StartNew(() =>
             {
-                NAEMOBathymetryDescriptors.Refresh();
-                SelectedBathymetryDescriptor = (NAEMOBathymetryDescriptor)NAEMOBathymetryDescriptors[vm.BathymetryName];
+                Bathymetry bathymetry;
+                var bathymetryFilePath = Path.Combine(destinationPath, destinationFile);
+                var metadata = NAEMOBathymetryMetadata.FromBathymetryFile(bathymetryFilePath, out bathymetry);
+                metadata.OverlayFilename = vm.OverlayName;
+                metadata.Bounds = vm.BoundingBox;
+                metadata.Save();
+                var bathymetryDescriptor = new NAEMOBathymetryDescriptor {DataFilename = bathymetryFilePath, Metadata = metadata};
+                NAEMOBathymetryDescriptors.Add(new System.Collections.Generic.KeyValuePair<string, NAEMOBathymetryDescriptor>(vm.BathymetryName, bathymetryDescriptor));
+                NAEMOBathymetryDescriptors.Sort();
+                SelectedBathymetryDescriptor = bathymetryDescriptor;
             });
-            BackgroundTaskAggregator.BackgroundTasks.Add(bathymetryExtractor);
             BackgroundTaskAggregator.TaskName = "Bathymetry data extraction";
+            BackgroundTaskAggregator.BackgroundTasks.Add(bathymetryExtractor);
         }
 
         #endregion
 
-        #region BathymetryPropertiesCommand
-        public SimpleCommand<object, object> BathymetryPropertiesCommand
+        #region DeleteBathymetryCommand
+        public SimpleCommand<object, object> DeleteBathymetryCommand
         {
-            get { return _bathymetryProperties ?? (_bathymetryProperties = new SimpleCommand<object, object>(delegate { return IsBathymetryFileSelected; }, delegate { BathymetryPropertiesHandler(); })); }
+            get { return _deleteBathymetry ?? (_deleteBathymetry = new SimpleCommand<object, object>(delegate { return IsBathymetryFileSelected; }, delegate { DeleteBathymetryHandler(); })); }
         }
 
-        SimpleCommand<object, object> _bathymetryProperties;
+        SimpleCommand<object, object> _deleteBathymetry;
 
-        void BathymetryPropertiesHandler()
+        void DeleteBathymetryHandler()
         {
-            var vm = new MetadataPropertiesViewModel(null, SelectedBathymetryDescriptor.Metadata);
-            var result = _visualizerService.ShowDialog("MetadataPropertiesView", vm);
-            if ((result.HasValue) && (result.Value))
-            {
-                SelectedBathymetryDescriptor = _selectedBathymetryDescriptor;
-            }
+            var sb = new StringBuilder();
 
+#if false
+            var dependentEnvironments = NAEMOEnvironmentDescriptors.GetDependenEnvironments(SelectedBathymetryDescriptor);
+            foreach (var environment in dependentEnvironments)
+                sb.Append(Path.GetFileNameWithoutExtension(environment.DataFilename) + ", ");
+#endif
+
+            if (sb.Length > 0) sb.Remove(sb.Length - 2, 2);
+            else sb.Append("[none]");
+
+            var result =
+                    _messageBoxService.ShowYesNo("Warning: Deleting the bathymetry \"" + Path.GetFileNameWithoutExtension(SelectedBathymetryDescriptor.Metadata.Filename) +
+                                                 "\" will also delete the following dependent environments:\n\n" + sb + "\n\nThis operation CANNOT be undone.\n\nProceed with deletion?",
+                                                 CustomDialogIcons.Exclamation);
+            if (result == CustomDialogResults.No) return;
+            NAEMOBathymetryDescriptors.DeleteBathymetry(SelectedBathymetryDescriptor);
+            //NAEMOEnvironmentDescriptors.DeleteEnvironments(dependentEnvironments);
         }
         #endregion
 

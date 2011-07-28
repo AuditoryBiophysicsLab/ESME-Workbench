@@ -84,12 +84,6 @@ namespace ESME.Environment.Descriptors
         }
 
         /// <summary>
-        /// Deletes the selected overlay and all overlays that were created from it
-        /// </summary>
-        /// <param name="sourceOverlayDescriptor"></param>
-        public void DeleteOverlay(NAEMOOverlayDescriptor sourceOverlayDescriptor) { DeleteOverlays(GetDependentOverlays(sourceOverlayDescriptor)); }
-
-        /// <summary>
         /// Returns an enumerable list of all overlays that depend on the specified overlay, yea unto many generations
         /// </summary>
         /// <param name="sourceOverlayDescriptor"></param>
@@ -98,7 +92,6 @@ namespace ESME.Environment.Descriptors
         {
             var gen1 = OverlaysDependentUpon(sourceOverlayDescriptor);
             var result = OverlaysDependentUpon(gen1).ToList();
-            result.Add(sourceOverlayDescriptor);
             result.Sort();
             return result;
         }
@@ -134,9 +127,9 @@ namespace ESME.Environment.Descriptors
         /// Deletes all overlays in the passed-in list, without checking dependencies
         /// </summary>
         /// <param name="overlaysToDelete"></param>
-        void DeleteOverlays(IEnumerable<NAEMOOverlayDescriptor> overlaysToDelete) { foreach (var targetOverlay in overlaysToDelete) DeleteSingleOverlay(targetOverlay); }
+        public void DeleteOverlays(IEnumerable<NAEMOOverlayDescriptor> overlaysToDelete) { foreach (var targetOverlay in overlaysToDelete) DeleteOverlay(targetOverlay); }
 
-        void DeleteSingleOverlay(NAEMODescriptor<OverlayFile, NAEMOOverlayMetadata> targetOverlayDescriptor)
+        void DeleteOverlay(NAEMOOverlayDescriptor targetOverlayDescriptor)
         {
             var listEntry = Find(item => (item.Value != null) && (item.Value.DataFilename == targetOverlayDescriptor.DataFilename));
             Remove(listEntry);

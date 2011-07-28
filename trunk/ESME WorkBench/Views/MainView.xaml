@@ -662,7 +662,7 @@
 					                        SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
 					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                                             ToolTipDescription="Delete the selected bathymetry dataset, and all environment data that depends on it."
-					                        Command="{Binding DisabledCommand}" />
+					                        Command="{Binding DeleteBathymetryCommand}" />
                         </StackPanel>
                     </Grid>
                 </r:RibbonGroup>

@@ -520,8 +520,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
             aggregator.BackgroundTasks.Add(bathymetryExtractor);
             bathymetryExtractor.RunWorkerCompleted += (s, e) =>
             {
-                var bathymetry = ((DBDBBackgroundExtractor)s).Bathymetry;
-                if (naemoBathymetryExporter != null) naemoBathymetryExporter.Bathymetry = bathymetry;
+                //var bathymetry = ((DBDBBackgroundExtractor)s).Bathymetry;
+                //if (naemoBathymetryExporter != null) naemoBathymetryExporter.Bathymetry = bathymetry;
             };
             // Create a bathymetry extractor
             var temperatureAndSalinityFileWriter = new TemperatureAndSalinityFileWriter
@@ -579,9 +579,9 @@ namespace ESMEWorkBench.ViewModels.NAVO
             {
                 // When the bathymetry extractor has completed, provide the max depth to all the averagers
                 var extractor = (DBDBBackgroundExtractor)sender;
-                var maxDepth = new EarthCoordinate<float>(extractor.Bathymetry.Minimum, Math.Abs(bathymetryExtractor.Bathymetry.Minimum.Data));
+                //var maxDepth = new EarthCoordinate<float>(extractor.Bathymetry.Minimum, Math.Abs(bathymetryExtractor.Bathymetry.Minimum.Data));
                 // The averagers block until the monthly soundspeed dataset is available, AND the bathymetry is available so we know the max depth
-                foreach (var soundSpeedExtractor in soundSpeedExtractors) soundSpeedExtractor.MaxDepth = maxDepth;
+                //foreach (var soundSpeedExtractor in soundSpeedExtractors) soundSpeedExtractor.MaxDepth = maxDepth;
             };
 
             if (averagers != null)
