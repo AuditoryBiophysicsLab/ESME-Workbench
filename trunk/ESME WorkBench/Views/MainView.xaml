@@ -24,7 +24,6 @@
                 mc:Ignorable="d">
 	<r:RibbonWindow.Resources>
 		<app:GridLengthConverter x:Key="gridLengthConverter" />
-        <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter"/>
     </r:RibbonWindow.Resources>
 	<r:RibbonWindow.InputBindings>
 		<KeyBinding Command="{Binding CancelCurrentCommand}"
@@ -61,7 +60,7 @@
 				    <TextBlock Text="{Binding MouseDepth, StringFormat=Depth: {0:0.0}}" />
 			    </StackPanel>
 		    </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right" Visibility="{Binding BackgroundTaskAggregator.IsRunning, Converter={StaticResource boolToVisibilityConverter}}">
+            <StatusBarItem HorizontalAlignment="Right" Visibility="{Binding BackgroundTaskAggregator.IsRunning, Converter={StaticResource TrueVisibleFalseCollapsed}}">
                 <ProgressBar Minimum="{Binding Path=BackgroundTaskAggregator.Minimum}" 
                              Maximum="{Binding Path=BackgroundTaskAggregator.Maximum}" 
                              Value="{Binding Path=BackgroundTaskAggregator.Value}" 
@@ -448,6 +447,24 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                BorderBrush="Black"
+                                BorderThickness="1"
+                                Visibility="{Binding AreRangeComplexesLoaded, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                            <Label Background="White"
+                                   HorizontalContentAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="150"
+                                   Height="66">
+                                <Label.Content>
+                                    <TextBlock TextAlignment="Center">
+                                        Range Complexes<LineBreak/>
+                                        are loading...<LineBreak/>
+                                        (please wait)<LineBreak/>
+                                    </TextBlock>
+                                </Label.Content>
+                            </Label>
+                        </Border>
                         <ListBox Grid.Column="0"
                                  DockPanel.Dock="Top"
                                  ItemsSource="{Binding RangeComplexDescriptors}"
@@ -456,7 +473,8 @@
                                  SelectionMode="Single"
                                  Width="150"
                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                                 MinHeight="66">
+                                 Height="66"
+                                 Visibility="{Binding AreRangeComplexesLoaded, Converter={StaticResource TrueVisibleFalseCollapsed}}">
                             <ListBox.ToolTip>
                                 <r:RibbonToolTip Title="Range Complex"
 					                            Description="Select a pre-defined range complex"
@@ -469,35 +487,6 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <!--
-                        <r:RibbonComboBox Grid.Column="0"
-                                          ToolTipTitle="Range Complex"
-					                      ToolTipDescription="Select a pre-defined range complex"
-                                          ToolTipFooterTitle="Currently selected range complex"
-                                          ToolTipFooterDescription="{Binding SelectedRangeComplexInfo}"
-                                          IsEnabled="{Binding IsRangeComplexListReady}">
-                            <r:RibbonGallery Margin="0"
-                    			             VerticalContentAlignment="Center"
-								             SelectedValue="{Binding SelectedRangeComplexDescriptor}"
-                                             SelectedValuePath="Value"
-                    			             MaxColumnCount="1">
-                                <r:RibbonGalleryCategory ItemsSource="{Binding RangeComplexes}">
-                                    <r:RibbonGalleryCategory.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Vertical"
-											                IsItemsHost="True">
-                                            </StackPanel>
-                                        </ItemsPanelTemplate>
-                                    </r:RibbonGalleryCategory.ItemsPanel>
-                                    <r:RibbonGalleryCategory.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Key}" />
-                                        </DataTemplate>
-                                    </r:RibbonGalleryCategory.ItemTemplate>
-                                </r:RibbonGalleryCategory>
-                            </r:RibbonGallery>
-                        </r:RibbonComboBox>
-                        -->
                         <StackPanel Orientation="Vertical"
                                     Grid.Column="1">
                             <r:RibbonButton Label="New"
@@ -524,6 +513,23 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                BorderBrush="Black"
+                                BorderThickness="1"
+                                Visibility="{Binding IsRangeComplexSelected, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                            <Label Background="White"
+                                   HorizontalContentAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="150"
+                                   Height="66">
+                                <Label.Content>
+                                    <TextBlock TextAlignment="Center">
+                                        No range complex<LineBreak/>
+                                        selected<LineBreak/>
+                                    </TextBlock>
+                                </Label.Content>
+                            </Label>
+                        </Border>
                         <ListBox Grid.Column="0"
                                  DockPanel.Dock="Top"
                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
@@ -532,7 +538,8 @@
                                  SelectedValuePath="Value"
                                  SelectionMode="Single"
                                  Width="150"
-                                 MinHeight="66">
+                                 MinHeight="66"
+                                 Visibility="{Binding IsRangeComplexSelected, Converter={StaticResource TrueVisibleFalseCollapsed}}">
                             <ListBox.ToolTip>
                                 <r:RibbonToolTip Title="Overlay"
     					                            Description="Select a pre-defined overlay"
@@ -545,35 +552,6 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <!--
-                        <r:RibbonComboBox Grid.Column="0" 
-                                          ToolTipTitle="Overlay"
-					                      ToolTipDescription="Select a pre-defined overlay"
-                                          ToolTipFooterTitle="Currently selected overlay"
-                                          ToolTipFooterDescription="{Binding SelectedOverlayInfo}"
-                                          IsEnabled="{Binding IsOverlayListReady}">
-                            <r:RibbonGallery Margin="0"
-                    			             VerticalContentAlignment="Center"
-								             SelectedValue="{Binding SelectedOverlayDescriptor}"
-                                             SelectedValuePath="Value"
-                    			             MaxColumnCount="1">
-                                <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOOverlayDescriptors}">
-                                    <r:RibbonGalleryCategory.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Vertical"
-											            IsItemsHost="True">
-                                            </StackPanel>
-                                        </ItemsPanelTemplate>
-                                    </r:RibbonGalleryCategory.ItemsPanel>
-                                    <r:RibbonGalleryCategory.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Key}" />
-                                        </DataTemplate>
-                                    </r:RibbonGalleryCategory.ItemTemplate>
-                                </r:RibbonGalleryCategory>
-                            </r:RibbonGallery>
-                        </r:RibbonComboBox>
-                        -->
                         <StackPanel Orientation="Vertical"
                                     Grid.Column="1">
                             <r:RibbonButton Label="New"
@@ -602,6 +580,23 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                BorderBrush="Black"
+                                BorderThickness="1"
+                                Visibility="{Binding IsRangeComplexSelected, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                            <Label Background="White"
+                                   HorizontalContentAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="150"
+                                   Height="66">
+                                <Label.Content>
+                                    <TextBlock TextAlignment="Center">
+                                        No range complex<LineBreak/>
+                                        selected<LineBreak/>
+                                    </TextBlock>
+                                </Label.Content>
+                            </Label>
+                        </Border>
                         <ListBox Grid.Column="0"
                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                                  ItemsSource="{Binding NAEMOBathymetryDescriptors}"
@@ -609,7 +604,8 @@
                                  SelectedValuePath="Value"
                                  SelectionMode="Single"
                                  Width="150"
-                                 MinHeight="66">
+                                 MinHeight="66"
+                                 Visibility="{Binding IsRangeComplexSelected, Converter={StaticResource TrueVisibleFalseCollapsed}}">
                             <ListBox.ToolTip>
                                 <r:RibbonToolTip Title="Bathymetry"
 					                             Description="Select a pre-defined bathymetry dataset"
@@ -622,35 +618,6 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                        <!--
-                        <r:RibbonComboBox Grid.Column="0"
-                                          ToolTipTitle="Bathymetry"
-					                      ToolTipDescription="Select a pre-defined bathymetry dataset"
-                                          ToolTipFooterTitle="Currently selected bathymetry"
-                                          ToolTipFooterDescription="{Binding SelectedBathymetryInfo}"
-                                          IsEnabled="{Binding IsBathymetryListReady}">
-                            <r:RibbonGallery Margin="0"
-                    			             VerticalContentAlignment="Center"
-								             SelectedValue="{Binding SelectedBathymetryDescriptor}"
-                                             SelectedValuePath="Value"
-                    			             MaxColumnCount="1">
-                                <r:RibbonGalleryCategory ItemsSource="{Binding NAEMOBathymetryDescriptors}">
-                                    <r:RibbonGalleryCategory.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Vertical"
-											            IsItemsHost="True">
-                                            </StackPanel>
-                                        </ItemsPanelTemplate>
-                                    </r:RibbonGalleryCategory.ItemsPanel>
-                                    <r:RibbonGalleryCategory.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Key}" />
-                                        </DataTemplate>
-                                    </r:RibbonGalleryCategory.ItemTemplate>
-                                </r:RibbonGalleryCategory>
-                            </r:RibbonGallery>
-                        </r:RibbonComboBox>
-                        -->
                         <StackPanel Orientation="Vertical"
                                     Grid.Column="1">
                             <r:RibbonButton Label="New"
@@ -672,14 +639,32 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                BorderBrush="Black"
+                                BorderThickness="1"
+                                Visibility="{Binding IsRangeComplexSelected, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                            <Label Background="White"
+                                   HorizontalContentAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="150"
+                                   Height="66">
+                                <Label.Content>
+                                    <TextBlock TextAlignment="Center">
+                                        No range complex<LineBreak/>
+                                        selected<LineBreak/>
+                                    </TextBlock>
+                                </Label.Content>
+                            </Label>
+                        </Border>
                         <ListBox Grid.Column="0"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
-                                  ItemsSource="{Binding NAEMOEnvironmentDescriptors}"
-                                  SelectedValue="{Binding SelectedEnvironmentDescriptor}"
-                                  SelectedValuePath="Value"
-                                  SelectionMode="Single"
-                                  Width="150"
-                                  MinHeight="66">
+                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                                 ItemsSource="{Binding NAEMOEnvironmentDescriptors}"
+                                 SelectedValue="{Binding SelectedEnvironmentDescriptor}"
+                                 SelectedValuePath="Value"
+                                 SelectionMode="Single"
+                                 Width="150"
+                                 MinHeight="66"
+                                 Visibility="{Binding IsRangeComplexSelected, Converter={StaticResource TrueVisibleFalseCollapsed}}">
                             <ListBox.ToolTip>
                                 <r:RibbonToolTip Title="Environment"
 					                             Description="Select a pre-defined environmental dataset"
