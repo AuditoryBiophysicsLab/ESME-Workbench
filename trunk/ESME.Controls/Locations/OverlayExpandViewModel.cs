@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.IO;
 using Cinch;
 using ESME.Metadata;
 using HRC.Validation;
@@ -10,6 +11,12 @@ namespace ESME.Views.Locations
         public OverlayExpandViewModel(NAEMOOverlayMetadata naemoOverlayMetadata)
         {
             NAEMOOverlayMetadata = naemoOverlayMetadata;
+            ValidationRules.Add(new ValidationRule
+            {
+                PropertyName = "OverlayName",
+                Description = "An overlay with the same name already exists",
+                RuleDelegate = (o, r) => !File.Exists(Path.Combine(Path.GetDirectoryName(NAEMOOverlayMetadata.Filename), OverlayName + ".ovr")),
+            });
             ValidationRules.Add(new ValidationRule
             {
                 PropertyName = "BufferSize",
@@ -28,6 +35,7 @@ namespace ESME.Views.Locations
                 if (_bufferSize == value) return;
                 _bufferSize = value;
                 NotifyPropertyChanged(BufferSizeChangedEventArgs);
+                NotifyPropertyChanged(OverlayNameChangedEventArgs);
             }
         }
 
@@ -51,10 +59,23 @@ namespace ESME.Views.Locations
                 if (_naemoOverlayMetadata == value) return;
                 _naemoOverlayMetadata = value;
                 NotifyPropertyChanged(NAEMOOverlayMetadataChangedEventArgs);
+                NotifyPropertyChanged(OverlayNameChangedEventArgs);
             }
         }
 
         #endregion
+
+        #region public string OverlayName { get; set; }
+
+        public string OverlayName
+        {
+            get { return string.Format("{0}_{1}km", Path.GetFileNameWithoutExtension(NAEMOOverlayMetadata.Filename), BufferSize); }
+        }
+
+        static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.OverlayName);
+
+        #endregion
+
 
         #region OkCommand
 
