@@ -13,7 +13,7 @@ namespace ESME.Views.Locations
             NAEMOOverlayMetadata = naemoOverlayMetadata;
             ValidationRules.Add(new ValidationRule
             {
-                PropertyName = "OverlayName",
+                PropertyName = "BufferSize",
                 Description = "An overlay with the same name already exists",
                 RuleDelegate = (o, r) => !File.Exists(Path.Combine(Path.GetDirectoryName(NAEMOOverlayMetadata.Filename), OverlayName + ".ovr")),
             });

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -47,6 +48,7 @@ namespace HRC.Validation
                 }
                 IsValid = allRulesValid;
                 Error = !string.IsNullOrEmpty(errStr) ? errStr.Remove(errStr.Length - 2, 2) : errStr;
+                Debug.WriteLine("{0}: this[{1}] : {2}", DateTime.Now, columnName, !string.IsNullOrEmpty(result) ? result.Remove(result.Length - 2, 2) : result == string.Empty ? "(empty)" : "(null)");
                 return !string.IsNullOrEmpty(result) ? result.Remove(result.Length - 2, 2) : result;
             }
         }
@@ -61,6 +63,7 @@ namespace HRC.Validation
             {
                 if (_isValid == value) return;
                 _isValid = value;
+                Debug.WriteLine("{0}: IsValid property is now : {1}", DateTime.Now, _isValid);
                 NotifyPropertyChanged(IsValidChangedEventArgs);
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -86,6 +89,7 @@ namespace HRC.Validation
             {
                 if (_error == value) return;
                 _error = value;
+                Debug.WriteLine("{0}: Error property is now : {1}", DateTime.Now, !string.IsNullOrEmpty(_error) ? _error : _error == string.Empty ? "(empty)" : "(null)");
                 NotifyPropertyChanged(ErrorChangedEventArgs);
             }
         }
