@@ -568,7 +568,6 @@ namespace ESMEWorkBench.ViewModels.Main
             var vm = new OverlayExpandViewModel(SelectedOverlayDescriptor.Metadata);
             var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
-            var overlayName = string.Format("{0}_{1}km", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
             
             var curOverlay = SelectedOverlayDescriptor.Data;
             //var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].EarthCoordinates));
@@ -577,8 +576,8 @@ namespace ESMEWorkBench.ViewModels.Main
             var boundingBox = new GeoRect(expandedLimits.GeoPointList);
             var coordinateList = expandedLimits.GeoPointList.Select(geo => new EarthCoordinate(geo)).ToList();
 
-            NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, overlayName, coordinateList, boundingBox, vm.BufferSize, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
-            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[overlayName];
+            NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, vm.OverlayName, coordinateList, boundingBox, vm.BufferSize, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
+            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[vm.OverlayName];
         }
 
         #endregion

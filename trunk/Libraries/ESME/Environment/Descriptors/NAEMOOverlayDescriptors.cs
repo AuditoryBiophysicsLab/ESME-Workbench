@@ -36,6 +36,7 @@ namespace ESME.Environment.Descriptors
                         Filename = NAEMOMetadataBase.MetadataFilename(ovrItem.Value.DataFilename),
                         OverlayFilename = ovrItem.Value.Data.SourceOverlay,
                         BufferZoneSize = bufferZoneSize,
+                        Bounds = new GeoRect(ovrItem.Value.Data.Shapes[0].EarthCoordinates),
                     };
                     ovrItem.Value.Metadata.Save();
                     return;
@@ -52,6 +53,7 @@ namespace ESME.Environment.Descriptors
                     Filename = NAEMOMetadataBase.MetadataFilename(ovrItem.Value.DataFilename),
                     OverlayFilename = sourceOverlay,
                     BufferZoneSize = bufferSize,
+                    Bounds = new GeoRect(ovrItem.Value.Data.Shapes[0].EarthCoordinates),
                 };
                 ovrItem.Value.Metadata.Save();
             });
@@ -67,10 +69,10 @@ namespace ESME.Environment.Descriptors
             if (coordinates != null) OverlayFile.Create(overlayPath, coordinates, sourceOverlayName, bufferZoneSize);
             var metadata = new NAEMOOverlayMetadata
             {
-                Bounds = boundingBox,
-                BufferZoneSize = bufferZoneSize,
                 Filename = metadataPath,
                 OverlayFilename = sourceOverlayName,
+                BufferZoneSize = bufferZoneSize,
+                Bounds = boundingBox,
             };
             metadata.Save();
             Add(new System.Collections.Generic.KeyValuePair<string, NAEMOOverlayDescriptor>(overlayName, new NAEMOOverlayDescriptor
