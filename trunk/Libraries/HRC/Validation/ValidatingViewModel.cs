@@ -150,16 +150,33 @@ namespace HRC.Validation
             return ((valueToCheck > minimum)) && (valueToCheck < maximum);
         }
 
-        public static bool AtLeastOneIsNotEmpty(params string[] fields)
+        public static bool AllAreFull(params string[] fields)
         {
-            var result = fields.Any(field => !string.IsNullOrEmpty(field));
-            return result;
+            return EmptyCount(fields) == 0;
         }
 
-        public static bool OnlyOneIsNotEmpty(params string[] fields)
+        public static bool AllAreEmpty(params string[] fields)
+        {
+            return FullCount(fields) == 0;
+        }
+        public static bool OnlyOneIsFull(params string[] fields)
+        {
+            return FullCount(fields) == 1;
+        }
+        public static bool OnlyOneIsEmpty(params string[] fields)
+        {
+            return EmptyCount(fields) == 1;
+        }
+        public static int FullCount(params string[] fields)
         {
             var nonEmptyCount = fields.Where(field => !string.IsNullOrEmpty(field)).Count();
-            return nonEmptyCount == 1;
+            return nonEmptyCount;
+        }
+
+        public static int EmptyCount(params string[] fields)
+        {
+            var emptyCount = fields.Where(field => string.IsNullOrEmpty(field)).Count();
+            return emptyCount;
         }
     }
 }

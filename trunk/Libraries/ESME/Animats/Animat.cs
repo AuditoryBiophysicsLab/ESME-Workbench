@@ -692,11 +692,11 @@ namespace ESME.Animats
         /// <summary>
         /// the header load procedure terminates once we have determined the species name, output configuration, and total number of animats -- it's all we need to display points on a map.
         /// </summary>
-        /// <param name="fileName">the full path to the .ddb file</param>
+        /// <param name="fileName">the full path to the .3mb file</param>
         /// <returns></returns>
         public static MMMB Load(string fileName)
         {
-            if (Path.GetExtension(fileName) != ".ddb") throw new FileFormatException("only ddb files are supported.");
+            if (Path.GetExtension(fileName) != ".3mb") throw new FileFormatException("only 3mb files are supported.");
             var result = new MMMB();
             result.Filename = fileName;
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
