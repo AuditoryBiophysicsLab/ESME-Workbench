@@ -162,11 +162,23 @@ namespace ESMEWorkBench.ViewModels.Main
                 Debug.WriteLine("{0}: RangeComplexDescriptors has changed.  New value {1}", DateTime.Now,
                                 _rangeComplexDescriptors == null ? "is NULL" : string.Format("has {0} entries", _rangeComplexDescriptors.Count));
                 NotifyPropertyChanged(RangeComplexesChangedEventArgs);
+                NotifyPropertyChanged(AreRangeComplexesLoadedChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs RangeComplexesChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.RangeComplexDescriptors);
         RangeComplexDescriptors _rangeComplexDescriptors;
+
+        #endregion
+
+        #region public bool AreRangeComplexesLoaded { get; set; }
+
+        public bool AreRangeComplexesLoaded
+        {
+            get { return RangeComplexDescriptors != null; }
+        }
+
+        static readonly PropertyChangedEventArgs AreRangeComplexesLoadedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.AreRangeComplexesLoaded);
 
         #endregion
 
