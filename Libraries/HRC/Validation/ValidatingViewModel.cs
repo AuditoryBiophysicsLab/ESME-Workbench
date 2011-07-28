@@ -40,6 +40,7 @@ namespace HRC.Validation
                     var ruleIsBroken = !rule.Validate(this, rule);
                     if (!ruleIsBroken) continue;
                     allRulesValid = false;
+                    Debug.WriteLine("{0}: Broken rule on {1} : {2}", DateTime.Now, columnName, rule.Description);
                     if (!string.IsNullOrEmpty(rule.Description)) errStr += rule.Description + Environment.NewLine;
                     if (!string.IsNullOrEmpty(rule.ValidationErrorMessage)) errStr += rule.ValidationErrorMessage + Environment.NewLine;
                     if (string.IsNullOrEmpty(rule.PropertyName) || (rule.PropertyName != columnName)) continue;
