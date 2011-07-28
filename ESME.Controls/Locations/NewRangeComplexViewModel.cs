@@ -55,38 +55,62 @@ namespace ESME.Views.Locations
                 new ValidationRule
                 {
                     PropertyName = "ExistingOpAreaOverlayFilename", 
-                    Description = "If coordinates are not specified, you must provide an overlay file", 
-                    RuleDelegate = (o, r) => OnlyOneIsNotEmpty(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename),
+                    Description = "If coordinates are not specified, you must provide an overlay file",
+                    RuleDelegate = (o, r) =>!string.IsNullOrEmpty(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates) || !string.IsNullOrEmpty(((NewRangeComplexViewModel) o).ExistingOpAreaOverlayFilename)
                 },
                 new ValidationRule
                 {
                     PropertyName = "NewOpAreaOverlayCoordinates", 
                     Description = "If an overlay file is not specified, you must provide coordinates", 
-                    RuleDelegate = (o, r) => AtLeastOneIsNotEmpty(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename)
+                    RuleDelegate = (o, r) => !string.IsNullOrEmpty(((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename) || !string.IsNullOrEmpty(((NewRangeComplexViewModel) o).NewOpAreaOverlayCoordinates)
+                },
+                new ValidationRule
+                {
+                    PropertyName = "ExistingOpAreaOverlayFilename", 
+                    Description = "If coordinates are specified, you cannot provide an overlay file",
+                    RuleDelegate = (o, r) => string.IsNullOrEmpty(((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename) || string.IsNullOrEmpty(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates)
+                },
+                 new ValidationRule
+                {
+                    PropertyName = "NewOpAreaOverlayCoordinates", 
+                    Description = "If an overlay file is specified, you cannot provide coordinates", 
+                    RuleDelegate = (o, r) => string.IsNullOrEmpty(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates) || string.IsNullOrEmpty(((NewRangeComplexViewModel)o).ExistingOpAreaOverlayFilename)
+                },
+               new ValidationRule
+                {
+                    PropertyName = "ExistingSimAreaOverlayFilename", 
+                    Description = "If coordinates are not specified, you must provide an overlay file",
+                    RuleDelegate = (o, r) =>!string.IsNullOrEmpty(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates) || !string.IsNullOrEmpty(((NewRangeComplexViewModel) o).ExistingSimAreaOverlayFilename)
+                },
+                new ValidationRule
+                {
+                    PropertyName = "NewSimAreaOverlayCoordinates", 
+                    Description = "If an overlay file is not specified, you must provide coordinates", 
+                    RuleDelegate = (o, r) => !string.IsNullOrEmpty(((NewRangeComplexViewModel)o).ExistingSimAreaOverlayFilename) || !string.IsNullOrEmpty(((NewRangeComplexViewModel) o).NewSimAreaOverlayCoordinates)
                 },
                 new ValidationRule
                 {
                     PropertyName = "ExistingSimAreaOverlayFilename", 
-                    Description = "If coordinates are not specified, you must provide an overlay file", 
-                    RuleDelegate = (o, r) => OnlyOneIsNotEmpty(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingSimAreaOverlayFilename),
+                    Description = "If coordinates are specified, you cannot provide an overlay file",
+                    RuleDelegate = (o, r) => string.IsNullOrEmpty(((NewRangeComplexViewModel)o).ExistingSimAreaOverlayFilename) || string.IsNullOrEmpty(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates)
                 },
-                new ValidationRule
+                 new ValidationRule
                 {
                     PropertyName = "NewSimAreaOverlayCoordinates", 
-                    Description = "If an overlay file is not specified, you must provide coordinates", 
-                    RuleDelegate = (o, r) => AtLeastOneIsNotEmpty(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, ((NewRangeComplexViewModel)o).ExistingSimAreaOverlayFilename),
+                    Description = "If an overlay file is specified, you cannot provide coordinates", 
+                    RuleDelegate = (o, r) => string.IsNullOrEmpty(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates) || string.IsNullOrEmpty(((NewRangeComplexViewModel)o).ExistingSimAreaOverlayFilename)
                 },
                 new ValidationRule
                 {
                     PropertyName = "NewOpAreaOverlayCoordinates", 
                     Description = "Invalid or incomplete data entered", 
-                    RuleDelegate = (o, r) => (string.IsNullOrEmpty(ExistingOpAreaOverlayFilename) && ValidateOverlayCoordinates(((NewRangeComplexViewModel)o).NewOpAreaOverlayCoordinates, r)),
+                    RuleDelegate = (o, r) => string.IsNullOrEmpty(NewOpAreaOverlayCoordinates) || ValidateOverlayCoordinates(((NewRangeComplexViewModel) o).NewOpAreaOverlayCoordinates, r),
                 },
                 new ValidationRule
                 {
                     PropertyName = "NewSimAreaOverlayCoordinates", 
                     Description = "Invalid or incomplete data entered", 
-                    RuleDelegate = (o, r) => ((string.IsNullOrEmpty(ExistingSimAreaOverlayFilename)&& ValidateOverlayCoordinates(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, r))),
+                    RuleDelegate = (o, r) => string.IsNullOrEmpty(NewSimAreaOverlayCoordinates) || ValidateOverlayCoordinates(((NewRangeComplexViewModel)o).NewSimAreaOverlayCoordinates, r),
                 },
                 new ValidationRule
                 {
@@ -126,7 +150,7 @@ namespace ESME.Views.Locations
             return false;
         }
 
-        #region public string LocationName { get; set; } 
+        #region public string LocationName { get; set; }
 
         private static readonly PropertyChangedEventArgs LocationNameChangedEventArgs =
             ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.LocationName);
@@ -176,7 +200,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public string NewOpAreaOverlayCoordinates { get; set; } 
+        #region public string NewOpAreaOverlayCoordinates { get; set; }
 
         private static readonly PropertyChangedEventArgs NewOverlayCoordinatesChangedEventArgs =
             ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.NewOpAreaOverlayCoordinates);
@@ -194,7 +218,7 @@ namespace ESME.Views.Locations
                 NotifyPropertyChanged(ExistingOverlayFilenameChangedEventArgs);
             }
         }
-     
+
         #endregion
 
         #region public string ExistingSimAreaOverlayFilename { get; set; }
@@ -239,7 +263,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public float ReferencePointLatitude { get; set; } 
+        #region public float ReferencePointLatitude { get; set; }
 
         public float ReferencePointLatitude
         {
@@ -256,7 +280,7 @@ namespace ESME.Views.Locations
         private float _referencePointLatitude;
         #endregion
 
-        #region public float ReferencePointLongitude { get; set; } 
+        #region public float ReferencePointLongitude { get; set; }
 
         public float ReferencePointLongitude
         {
@@ -274,7 +298,7 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public float Height { get; set; } 
+        #region public float Height { get; set; }
 
         public float Height
         {
@@ -289,7 +313,7 @@ namespace ESME.Views.Locations
 
         private static readonly PropertyChangedEventArgs HeightChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.Height);
         private float _height;
-        
+
         #endregion
 
         #region public float GeoidSeparation { get; set; }
@@ -307,7 +331,7 @@ namespace ESME.Views.Locations
 
         private static readonly PropertyChangedEventArgs GeoidSeparationChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplexViewModel>(x => x.GeoidSeparation);
         private float _geoidSeparation;
-        
+
         #endregion
 
         #region public string SimAreaFolder { get; set; }
@@ -358,12 +382,12 @@ namespace ESME.Views.Locations
             OpAreaBoundingBox = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)
                            ? OverlayFile.ValidateCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords, out opErrors)
                            : OverlayFile.ValidateFile(ExistingOpAreaOverlayFilename, "Op Limits", out opErrors);
-            
+
             string simErrors;
             SimAreaBoundingBox = !string.IsNullOrEmpty(NewSimAreaOverlayCoordinates)
                             ? OverlayFile.ValidateCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords, out simErrors)
                             : OverlayFile.ValidateFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simErrors);
-            
+
             NewOpAreaOverlayEarthCoordinates = opCoords;
             NewSimAreaOverlayEarthCoordinates = simCoords;
 
@@ -521,7 +545,7 @@ namespace ESME.Views.Locations
             }
         }
 
-        #endregion 
+        #endregion
 #endif
     }
 }
