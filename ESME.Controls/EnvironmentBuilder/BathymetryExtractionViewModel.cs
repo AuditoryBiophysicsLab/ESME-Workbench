@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows;
 using Cinch;
 using HRC.Navigation;
 
@@ -8,15 +7,32 @@ namespace ESME.Views.EnvironmentBuilder
 {
     public class BathymetryExtractionViewModel : ViewModelBase
     {
-        readonly string _selectedOverlay;
-        public BathymetryExtractionViewModel(string selectedOverlay, GeoRect boundingBox)
+        public BathymetryExtractionViewModel(string overlayName, GeoRect boundingBox)
         {
-            _selectedOverlay = selectedOverlay;
-            _boundingBox = boundingBox;
+            OverlayName = overlayName;
+            BoundingBox = boundingBox;
             SelectedResolution = 2.0f;
             UpdateNote();
             UpdatePointNote();
         }
+
+        #region public string OverlayName { get; private set; }
+
+        public string OverlayName
+        {
+            get { return _overlayName; }
+            private set
+            {
+                if (_overlayName == value) return;
+                _overlayName = value;
+                NotifyPropertyChanged(OverlayNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<BathymetryExtractionViewModel>(x => x.OverlayName);
+        string _overlayName;
+
+        #endregion
 
         #region public string Note { get; set; }
 
@@ -36,13 +52,29 @@ namespace ESME.Views.EnvironmentBuilder
 
         void UpdateNote()
         {
-            BathymetryName = string.Format("{0}_{1:0.00}min", _selectedOverlay, SelectedResolution);
-            Note = string.Format("Note: Bathymetry data will be extracted within the bounds of the overlay {0}. The resulting bathymetry file will be named {1}", _selectedOverlay, BathymetryName);
+            BathymetryName = string.Format("{0}_{1:0.00}min", OverlayName, SelectedResolution);
+            Note = string.Format("Note: Bathymetry data will be extracted within the bounds of the overlay {0}. The resulting bathymetry file will be named {1}", OverlayName, BathymetryName);
         }
 
         #endregion
 
-        private readonly GeoRect _boundingBox;
+        #region public GeoRect BoundingBox { get; set; }
+
+        public GeoRect BoundingBox
+        {
+            get { return _boundingBox; }
+            set
+            {
+                if (_boundingBox == value) return;
+                _boundingBox = value;
+                NotifyPropertyChanged(BoundingBoxChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BoundingBoxChangedEventArgs = ObservableHelper.CreateArgs<BathymetryExtractionViewModel>(x => x.BoundingBox);
+        GeoRect _boundingBox;
+
+        #endregion
 
         #region public string PointNote { get; set; }
 
