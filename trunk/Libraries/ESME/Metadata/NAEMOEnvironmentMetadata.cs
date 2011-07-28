@@ -5,7 +5,6 @@ using System.IO;
 using Cinch;
 using ESME.Environment.NAVO;
 using ESME.TransmissionLoss.CASS;
-using HRC.Navigation;
 
 namespace ESME.Metadata
 {
@@ -19,19 +18,29 @@ namespace ESME.Metadata
         {
             var metaDataFilename = Path.Combine(Path.GetDirectoryName(naemoEnvironmentFilename), Path.GetFileNameWithoutExtension(naemoEnvironmentFilename) + ".xml");
             NAEMOEnvironmentMetadata result = null;
-            try
+            var tryCount = 10;
+            while (tryCount > 0)
             {
-                var environmentFile = NAEMOEnvironmentFile.Load(naemoEnvironmentFilename);
-                if (environmentFile == null) return null;
-                result = new NAEMOEnvironmentMetadata
+                try
                 {
-                    TimePeriod = environmentFile.TimePeriod,
-                    Filename = metaDataFilename,
-                };
-            }
-            catch
-            {
-                File.Delete(naemoEnvironmentFilename);
+                    var environmentFile = NAEMOEnvironmentFile.Load(naemoEnvironmentFilename);
+                    if (environmentFile == null) return null;
+                    result = new NAEMOEnvironmentMetadata
+                    {
+                        TimePeriod = environmentFile.TimePeriod,
+                        Filename = metaDataFilename,
+                    };
+                    break;
+                }
+                catch (IOException)
+                {
+                    tryCount--;
+                }
+                catch
+                {
+                    File.Delete(naemoEnvironmentFilename);
+                    break;
+                }
             }
 
             return result;
