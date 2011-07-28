@@ -591,6 +591,7 @@
 					                        SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
 					                        ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                                             ToolTipDescription="Delete the selected overlay, and all overlays, bathymetry and environment data that depends on it."
+                                            ToolTipFooterDescription="Note: Operational and simulation limit overlays for the currently selected range complex cannot be deleted."
 					                        Command="{Binding DeleteOverlayCommand}" />
                         </StackPanel>
                     </Grid>

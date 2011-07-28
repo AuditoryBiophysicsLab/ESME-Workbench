@@ -64,7 +64,7 @@ namespace ESME.Environment.Descriptors
             var metadataFileName = overlayName + ".xml";
             var overlayPath = Path.Combine(rangeComplexAreasFolder, overlayFileName);
             var metadataPath = Path.Combine(rangeComplexAreasFolder, metadataFileName);
-            if (coordinates != null) OverlayFile.Create(overlayPath, coordinates);
+            if (coordinates != null) OverlayFile.Create(overlayPath, coordinates, sourceOverlayName, bufferZoneSize);
             var metadata = new NAEMOOverlayMetadata
             {
                 Bounds = boundingBox,
@@ -79,6 +79,67 @@ namespace ESME.Environment.Descriptors
                 Metadata = metadata,
             }));
             Sort();
+        }
+
+        /// <summary>
+        /// Deletes the selected overlay and all overlays that were created from it
+        /// </summary>
+        /// <param name="sourceOverlayDescriptor"></param>
+        public void DeleteOverlay(NAEMOOverlayDescriptor sourceOverlayDescriptor) { DeleteOverlays(GetDependentOverlays(sourceOverlayDescriptor)); }
+
+        /// <summary>
+        /// Returns an enumerable list of all overlays that depend on the specified overlay, yea unto many generations
+        /// </summary>
+        /// <param name="sourceOverlayDescriptor"></param>
+        /// <returns></returns>
+        public IEnumerable<NAEMOOverlayDescriptor> GetDependentOverlays(NAEMOOverlayDescriptor sourceOverlayDescriptor)
+        {
+            var gen1 = OverlaysDependentUpon(sourceOverlayDescriptor);
+            var result = OverlaysDependentUpon(gen1).ToList();
+            result.Add(sourceOverlayDescriptor);
+            result.Sort();
+            return result;
+        }
+
+        IEnumerable<NAEMOOverlayDescriptor> OverlaysDependentUpon(NAEMODescriptor sourceOverlayDescriptor)
+        {
+            var sourceOverlayName = Path.GetFileNameWithoutExtension(sourceOverlayDescriptor.DataFilename);
+            return (from overlayDescriptor in this
+                    where ((overlayDescriptor.Value != null) && (Path.GetFileNameWithoutExtension(overlayDescriptor.Value.Metadata.OverlayFilename) == sourceOverlayName))
+                    select overlayDescriptor.Value).Distinct();
+        }
+
+        IEnumerable<NAEMOOverlayDescriptor> OverlaysDependentUpon(IEnumerable<NAEMOOverlayDescriptor> sourceOverlays)
+        {
+            var results = new List<NAEMOOverlayDescriptor>();
+            foreach (var curOverlay in sourceOverlays) results.AddRange(OverlaysDependentUpon(curOverlay));
+            var curList = results.Distinct().ToList();
+            var curCount = curList.Count;
+            var lastCount = 0;
+            while (lastCount != curCount)
+            {
+                lastCount = curCount;
+                results = new List<NAEMOOverlayDescriptor>();
+                foreach (var item in curList) results.AddRange(OverlaysDependentUpon(item));
+                curList = results.Distinct().ToList();
+                curCount = curList.Count;
+            }
+            curList.AddRange(sourceOverlays);
+            return curList;
+        }
+
+        /// <summary>
+        /// Deletes all overlays in the passed-in list, without checking dependencies
+        /// </summary>
+        /// <param name="overlaysToDelete"></param>
+        void DeleteOverlays(IEnumerable<NAEMOOverlayDescriptor> overlaysToDelete) { foreach (var targetOverlay in overlaysToDelete) DeleteSingleOverlay(targetOverlay); }
+
+        void DeleteSingleOverlay(NAEMODescriptor<OverlayFile, NAEMOOverlayMetadata> targetOverlayDescriptor)
+        {
+            var listEntry = Find(item => (item.Value != null) && (item.Value.DataFilename == targetOverlayDescriptor.DataFilename));
+            Remove(listEntry);
+            File.Delete(targetOverlayDescriptor.DataFilename);
+            File.Delete(targetOverlayDescriptor.Metadata.Filename);
         }
     }
 }

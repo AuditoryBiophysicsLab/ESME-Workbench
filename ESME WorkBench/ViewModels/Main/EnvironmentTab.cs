@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -570,7 +571,8 @@ namespace ESMEWorkBench.ViewModels.Main
             var overlayName = string.Format("{0}_{1}km", Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename), vm.BufferSize);
             
             var curOverlay = SelectedOverlayDescriptor.Data;
-            var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].BoundingBox));
+            //var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].EarthCoordinates));
+            var limits = new Limits(curOverlay.Shapes[0].EarthCoordinates);
             var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
             var boundingBox = new GeoRect(expandedLimits.GeoPointList);
             var coordinateList = expandedLimits.GeoPointList.Select(geo => new EarthCoordinate(geo)).ToList();
@@ -603,19 +605,38 @@ namespace ESMEWorkBench.ViewModels.Main
         #region DeleteOverlayCommand
         public SimpleCommand<object, object> DeleteOverlayCommand
         {
-            get { return _deleteOverlay ?? (_deleteOverlay = new SimpleCommand<object, object>(delegate { return IsOverlayFileSelected; }, delegate { DeleteOverlayHandler(); })); }
+            get { return _deleteOverlay ?? (_deleteOverlay = new SimpleCommand<object, object>(delegate { return IsDeleteOverlayCommandEnabled; }, delegate { DeleteOverlayHandler(); })); }
         }
 
         SimpleCommand<object, object> _deleteOverlay;
 
+        bool IsDeleteOverlayCommandEnabled
+        {
+            get
+            {
+                if (SelectedOverlayDescriptor == null) return false;
+                var selectedOverlayFilename = Path.GetFileName(SelectedOverlayDescriptor.DataFilename);
+                return IsOverlayFileSelected && (selectedOverlayFilename != SelectedRangeComplexDescriptor.Data.OpsLimitFile) && (selectedOverlayFilename != SelectedRangeComplexDescriptor.Data.SimLimitFile);
+            }
+        }
+
+
         void DeleteOverlayHandler()
         {
+            var dependentOverlays = NAEMOOverlayDescriptors.GetDependentOverlays(SelectedOverlayDescriptor);
+            var sb = new StringBuilder();
+            foreach (var overlay in dependentOverlays.Where(overlay => overlay.CompareTo(SelectedOverlayDescriptor) != 0)) 
+                sb.Append(Path.GetFileNameWithoutExtension(overlay.DataFilename) + ", ");
+
+            if (sb.Length > 0) sb.Remove(sb.Length - 2, 2);
+            else sb.Append("[none]");
+
             var result =
                     _messageBoxService.ShowYesNo("Warning: Deleting the overlay \"" + Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.Data.FileName) +
-                                                 "\" will also delete any overlays, bathymetry and environment data that have previously been created or extracted using it, or any of its' derived overlays.\n\nThis operation CANNOT be undone.\n\nProceed with deletion?",
+                                                 "\" will also delete the following dependent overlays:\n\n" + sb + "\n\nThis operation CANNOT be undone.\n\nProceed with deletion?",
                                                  CustomDialogIcons.Exclamation);
             if (result == CustomDialogResults.No) return;
-                
+            NAEMOOverlayDescriptors.DeleteOverlay(SelectedOverlayDescriptor);
         }
 
         #endregion
