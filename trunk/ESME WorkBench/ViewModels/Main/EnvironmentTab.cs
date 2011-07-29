@@ -848,6 +848,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("BathymetryExtractionView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
             var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
+            var selectedOverlayName = SelectedOverlayName;
             var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
             if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
             var destinationPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Bathymetry");
