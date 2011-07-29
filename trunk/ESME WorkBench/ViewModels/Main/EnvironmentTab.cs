@@ -1137,6 +1137,7 @@ namespace ESMEWorkBench.ViewModels.Main
                             NAEMOEnvironmentDescriptors.Add(new System.Collections.Generic.KeyValuePair<string, NAEMOEnvironmentDescriptor>(Path.GetFileNameWithoutExtension(curExporter.DestinationPath),
                                                                                                                                             environmentDescriptor));
                             NAEMOBathymetryDescriptors.Sort();
+                            SelectedEnvironmentDescriptor = environmentDescriptor;
                         }
                     };
                 }
