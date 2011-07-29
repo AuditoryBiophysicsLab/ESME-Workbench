@@ -58,8 +58,10 @@ namespace ESME.Environment.NAVO
                 {
                     var northSouth = (lat >= 0) ? "n" : "s";
                     var eastWest = (lon >= 0) ? "e" : "w";
-                    var curFile = string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon));
-                    var selectedFile = new SMGCFile(Directory.GetFiles(backgroundExtractor.NAVOConfiguration.SMGCDirectory, curFile, SearchOption.AllDirectories).First());
+                    var curFileName = string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon));
+                    var matchingFiles = Directory.GetFiles(backgroundExtractor.NAVOConfiguration.SMGCDirectory, curFileName, SearchOption.AllDirectories);
+                    if (matchingFiles.Length == 0) continue;
+                    var selectedFile = new SMGCFile(matchingFiles.First());
                     selectedFiles.Add(selectedFile);
                     selectedLocations.Add(new EarthCoordinate(lat, lon));
                     backgroundExtractor.Value++;

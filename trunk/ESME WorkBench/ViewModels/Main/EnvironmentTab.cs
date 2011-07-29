@@ -380,9 +380,9 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 Task.Factory.StartNew(() =>
                 {
-                    RangeComplexDescriptors.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
+                    SelectedRangeComplexDescriptor = RangeComplexDescriptors.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
                                                                vm.NewOpAreaOverlayEarthCoordinates, vm.ExistingSimAreaOverlayFilename, vm.NewSimAreaOverlayEarthCoordinates, _dispatcher);
-                    SelectedRangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[vm.LocationName];
+                    RangeComplexDescriptors.Sort();
                 });
             }
 
@@ -601,24 +601,13 @@ namespace ESMEWorkBench.ViewModels.Main
             
             var curOverlay = SelectedOverlayDescriptor.Data;
             //var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].EarthCoordinates));
-            var limits = new Limits(curOverlay.Shapes[0].EarthCoordinates);
+            var limits = new Limits(ConvexHull.Create(curOverlay.Shapes[0].EarthCoordinates, true));
             var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
             var boundingBox = new GeoRect(expandedLimits.GeoPointList);
             var coordinateList = expandedLimits.GeoPointList.Select(geo => new EarthCoordinate(geo)).ToList();
             var testShape = new OverlayLineSegments(coordinateList.ToArray(), Colors.Black);
 
-            if (!testShape.IsUsableAsPerimeter)
-            {
-                // If the original shape is not convex, the resulting expansion can be a tangled mess.
-                // This is intended to be a temporary fix for this problem.  Longer term we should compute
-                // the convex hull of the points and then use that as the boundary to expand.
-
-                var boundingBoxShape = new GeoRect(curOverlay.Shapes[0].BoundingBox).ClosedBoundaryCoordinates.ToList();
-                limits = new Limits(boundingBoxShape);
-                expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
-                boundingBox = new GeoRect(expandedLimits.GeoPointList);
-                coordinateList = expandedLimits.GeoPointList.Select(geo => new EarthCoordinate(geo)).ToList();
-            }
+            if (!testShape.IsUsableAsPerimeter) coordinateList = ConvexHull.Create(coordinateList, true);
 
             NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, vm.OverlayName, coordinateList, boundingBox, vm.BufferSize, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
             SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[vm.OverlayName];
@@ -643,7 +632,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 return IsOverlayFileSelected && (selectedOverlayFilename != SelectedRangeComplexDescriptor.Data.OpsLimitFile) && (selectedOverlayFilename != SelectedRangeComplexDescriptor.Data.SimLimitFile);
             }
         }
-
 
         void DeleteOverlayHandler()
         {

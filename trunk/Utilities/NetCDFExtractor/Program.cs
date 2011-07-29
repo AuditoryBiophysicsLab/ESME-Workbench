@@ -126,15 +126,30 @@ namespace ImportGDEM
             var salinityFile = new SoundSpeed();
             const string temperatureVariableName = "water_temp";
             const string salinityVariableName = "salinity";
+            var dataCrossesGreenwich = false;
 
+            if ((west < 0) && (east >= 0)) dataCrossesGreenwich = true;
             for (var monthIndex = 0; monthIndex < months.Count; monthIndex++)
             {
+                SoundSpeedField temperatureField, salinityField;
                 Console.WriteLine("Importing temperature data for {0}...", months[monthIndex]);
-                var temperatureField = ImportGDEM(temperatureFiles[monthIndex], temperatureVariableName, months[monthIndex], north, south, east, west);
+                if (dataCrossesGreenwich)
+                {
+                    temperatureField = ImportGDEM(temperatureFiles[monthIndex], temperatureVariableName, months[monthIndex], north, south, -0.25f, west);
+                    temperatureField.EnvironmentData.AddRange(ImportGDEM(temperatureFiles[monthIndex], temperatureVariableName, months[monthIndex], north, south, east, 0).EnvironmentData);
+                    temperatureField.EnvironmentData.Sort();
+                }
+                else temperatureField = ImportGDEM(temperatureFiles[monthIndex], temperatureVariableName, months[monthIndex], north, south, east, west);
                 temperatureFile.SoundSpeedFields.Add(temperatureField);
 
                 Console.WriteLine("Importing salinity data for {0}...", months[monthIndex]);
-                var salinityField = ImportGDEM(salinityFiles[monthIndex], salinityVariableName, months[monthIndex], north, south, east, west);
+                if (dataCrossesGreenwich)
+                {
+                    salinityField = ImportGDEM(salinityFiles[monthIndex], salinityVariableName, months[monthIndex], north, south, -0.25f, west);
+                    salinityField.EnvironmentData.AddRange(ImportGDEM(salinityFiles[monthIndex], salinityVariableName, months[monthIndex], north, south, east, 0).EnvironmentData);
+                    salinityField.EnvironmentData.Sort();
+                }
+                else salinityField = ImportGDEM(salinityFiles[monthIndex], salinityVariableName, months[monthIndex], north, south, east, west);
                 salinityFile.SoundSpeedFields.Add(salinityField);
             }
 

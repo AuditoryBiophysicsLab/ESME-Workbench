@@ -164,6 +164,7 @@
     <Compile Include="LinqStatistics\EnumerableStatsVariance.cs" />
     <Compile Include="LinqStatistics\EnumerableStatsVarianceP.cs" />
     <Compile Include="Navigation\BoundingCircle.cs" />
+    <Compile Include="Navigation\ConvexHull.cs" />
     <Compile Include="Navigation\Course.cs" />
     <Compile Include="Navigation\EarthCoordinate.cs" />
     <Compile Include="Navigation\EarthCoordinate3DTypeConverter.cs" />

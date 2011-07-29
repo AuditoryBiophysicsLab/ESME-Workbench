@@ -59,7 +59,7 @@ namespace ESME.Environment.Descriptors
 
         public string FileName { get; private set; }
 
-        public void AddRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, string simLimitFile, Dispatcher dispatcher)
+        public RangeComplexDescriptor AddRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, string simLimitFile, Dispatcher dispatcher)
         {
             NAEMOOverlayDescriptors overlayDescriptors = null;
             NAEMOBathymetryDescriptors bathymetryDescriptors = null;
@@ -68,27 +68,29 @@ namespace ESME.Environment.Descriptors
                             () => bathymetryDescriptors = new NAEMOBathymetryDescriptors(rangeComplexName) { Dispatcher = dispatcher },
                             () => environmentDescriptors = new NAEMOEnvironmentDescriptors(rangeComplexName) { Dispatcher = dispatcher });
             if (overlayDescriptors == null || bathymetryDescriptors == null || environmentDescriptors == null) throw new ApplicationException("Error initializing overlay, bathymetry or environment descriptors");
-            lock (this)
+            var rangeComplexDescriptor = new RangeComplexDescriptor
             {
-                Debug.WriteLine("{0}: Adding range complex \"{1}\"", DateTime.Now, rangeComplexName);
-                Add(new KeyValuePair<string, RangeComplexDescriptor>(rangeComplexName, new RangeComplexDescriptor
+                Data = new RangeComplex(latitude, longitude)
                 {
-                    Data = new RangeComplex(latitude, longitude)
-                    {
                         Name = rangeComplexName,
                         Height = height,
                         GeoidSeparation = geoid,
                         OpsLimitFile = opsLimitFile,
                         SimLimitFile = simLimitFile,
-                    },
-                    NAEMOOverlayDescriptors = overlayDescriptors,
-                    NAEMOBathymetryDescriptors = bathymetryDescriptors,
-                    NAEMOEnvironmentDescriptors = environmentDescriptors,
-                }));
+                },
+                NAEMOOverlayDescriptors = overlayDescriptors,
+                NAEMOBathymetryDescriptors = bathymetryDescriptors,
+                NAEMOEnvironmentDescriptors = environmentDescriptors,
+            };
+            lock (this)
+            {
+                Debug.WriteLine("{0}: Adding range complex \"{1}\"", DateTime.Now, rangeComplexName);
+                Add(new KeyValuePair<string, RangeComplexDescriptor>(rangeComplexName, rangeComplexDescriptor));
             }
+            return rangeComplexDescriptor;
         }
 
-        public void CreateRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, List<EarthCoordinate> opAreaBoundsCoordinates, string simLimitFile, List<EarthCoordinate> simAreaBoundsCoordinates, Dispatcher dispatcher)
+        public RangeComplexDescriptor CreateRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, List<EarthCoordinate> opAreaBoundsCoordinates, string simLimitFile, List<EarthCoordinate> simAreaBoundsCoordinates, Dispatcher dispatcher)
         {
             var rangeComplexPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName);
             if (!Directory.Exists(rangeComplexPath))
@@ -129,7 +131,7 @@ namespace ESME.Environment.Descriptors
                     }
                 }
             }
-            AddRangeComplex(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile, dispatcher);
+            return AddRangeComplex(rangeComplexName, height, latitude, longitude, geoid, Path.GetFileName(opsLimitFile), Path.GetFileName(simLimitFile), dispatcher);
         }
 
         public void DeleteRangeComplex(RangeComplexDescriptor rangeComplexToDelete)
