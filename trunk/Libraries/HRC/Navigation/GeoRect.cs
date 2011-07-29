@@ -143,6 +143,22 @@ namespace HRC.Navigation
         public void Union(EarthCoordinate earthCoordinate) { FromRect(Rect.Union(this, earthCoordinate)); }
 
         /// <summary>
+        /// Returns an enumerable that will result in a closed, clockwise polygon
+        /// NorthWest, NorthEast, SouthEast, SouthWest, NorthWest
+        /// </summary>
+        public IEnumerable<EarthCoordinate> ClosedBoundaryCoordinates
+        {
+            get
+            {
+                yield return NorthWest;
+                yield return NorthEast;
+                yield return SouthEast;
+                yield return SouthWest;
+                yield return NorthWest;
+            }
+        }
+
+        /// <summary>
         ///   Creates a GeoRect that is exactly large enough to contain the two specified GeoRects.
         /// </summary>
         /// <param name = "geoRect1"></param>

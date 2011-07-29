@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -61,25 +62,29 @@ namespace ESME.Environment.Descriptors
 
         public void CreateNewOverlay(string rangeComplexName, string overlayName, List<EarthCoordinate> coordinates, GeoRect boundingBox, float bufferZoneSize, string sourceOverlayName)
         {
+            if (coordinates == null) throw new ApplicationException("Cannot create a new overlay without coordinates");
             var rangeComplexAreasFolder = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName, "Areas");
             var overlayFileName = overlayName + ".ovr";
             var metadataFileName = overlayName + ".xml";
             var overlayPath = Path.Combine(rangeComplexAreasFolder, overlayFileName);
             var metadataPath = Path.Combine(rangeComplexAreasFolder, metadataFileName);
-            if (coordinates != null) OverlayFile.Create(overlayPath, coordinates, sourceOverlayName, bufferZoneSize);
+            OverlayFile.Create(overlayPath, coordinates, sourceOverlayName, bufferZoneSize);
             var metadata = new NAEMOOverlayMetadata
             {
-                Filename = metadataPath,
-                OverlayFilename = sourceOverlayName,
-                BufferZoneSize = bufferZoneSize,
-                Bounds = boundingBox,
+                    Filename = metadataPath,
+                    OverlayFilename = sourceOverlayName,
+                    BufferZoneSize = bufferZoneSize,
+                    Bounds = boundingBox,
             };
             metadata.Save();
-            Add(new System.Collections.Generic.KeyValuePair<string, NAEMOOverlayDescriptor>(overlayName, new NAEMOOverlayDescriptor
-            {
-                DataFilename = overlayPath,
-                Metadata = metadata,
-            }));
+            Add(new System.Collections.Generic.KeyValuePair<string, NAEMOOverlayDescriptor>(overlayName,
+                                                                                            new NAEMOOverlayDescriptor
+                                                                                            {
+                                                                                                    DataFilename =
+                                                                                                    overlayPath,
+                                                                                                    Metadata =
+                                                                                                    metadata,
+                                                                                            }));
             Sort();
         }
 

@@ -451,7 +451,8 @@
                                 BorderBrush="Black"
                                 BorderThickness="1"
                                 Visibility="{Binding AreRangeComplexesLoaded, Converter={StaticResource FalseVisibleTrueCollapsed}}">
-                            <Label Background="White"
+                            <Label Background="Gainsboro"
+                                   Foreground="DimGray"
                                    HorizontalContentAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="150"
@@ -460,7 +461,7 @@
                                     <TextBlock TextAlignment="Center">
                                         Range Complexes<LineBreak/>
                                         are loading...<LineBreak/>
-                                        (please wait)<LineBreak/>
+                                        (please wait)
                                     </TextBlock>
                                 </Label.Content>
                             </Label>
@@ -517,7 +518,8 @@
                                 BorderBrush="Black"
                                 BorderThickness="1"
                                 Visibility="{Binding IsRangeComplexSelected, Converter={StaticResource FalseVisibleTrueCollapsed}}">
-                            <Label Background="White"
+                            <Label Background="Gainsboro"
+                                   Foreground="DimGray"
                                    HorizontalContentAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="150"
@@ -525,7 +527,7 @@
                                 <Label.Content>
                                     <TextBlock TextAlignment="Center">
                                         No range complex<LineBreak/>
-                                        selected<LineBreak/>
+                                        selected
                                     </TextBlock>
                                 </Label.Content>
                             </Label>
@@ -584,7 +586,8 @@
                                 BorderBrush="Black"
                                 BorderThickness="1"
                                 Visibility="{Binding IsRangeComplexSelected, Converter={StaticResource FalseVisibleTrueCollapsed}}">
-                            <Label Background="White"
+                            <Label Background="Gainsboro"
+                                   Foreground="DimGray"
                                    HorizontalContentAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="150"
@@ -592,7 +595,7 @@
                                 <Label.Content>
                                     <TextBlock TextAlignment="Center">
                                         No range complex<LineBreak/>
-                                        selected<LineBreak/>
+                                        selected
                                     </TextBlock>
                                 </Label.Content>
                             </Label>
@@ -643,7 +646,8 @@
                                 BorderBrush="Black"
                                 BorderThickness="1"
                                 Visibility="{Binding IsRangeComplexSelected, Converter={StaticResource FalseVisibleTrueCollapsed}}">
-                            <Label Background="White"
+                            <Label Background="Gainsboro"
+                                   Foreground="DimGray"
                                    HorizontalContentAlignment="Center"
                                    VerticalContentAlignment="Center"
                                    Width="150"
@@ -651,7 +655,7 @@
                                 <Label.Content>
                                     <TextBlock TextAlignment="Center">
                                         No range complex<LineBreak/>
-                                        selected<LineBreak/>
+                                        selected
                                     </TextBlock>
                                 </Label.Content>
                             </Label>

@@ -359,18 +359,18 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region NewRangeComplexCommand
-
         public SimpleCommand<object, object> NewRangeComplexCommand
         {
             get
             {
-                return _newLocation ??
-                       (_newLocation =
-                        new SimpleCommand<object, object>(delegate { NewRangeComplexHandler(); }));
+                return _newRangeComplex ??
+                       (_newRangeComplex =
+                        new SimpleCommand<object, object>(delegate { return AreRangeComplexesLoaded; },
+                                                          delegate { NewRangeComplexHandler(); }));
             }
         }
 
-        private SimpleCommand<object, object> _newLocation;
+        SimpleCommand<object, object> _newRangeComplex;
 
         void NewRangeComplexHandler()
         {
@@ -385,6 +385,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     SelectedRangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[vm.LocationName];
                 });
             }
+
         }
         #endregion
 
@@ -463,12 +464,22 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedOverlayDescriptorChangedEventArgs);
                 if (_selectedOverlayDescriptor != null) SelectedOverlayInfo = string.Format("Name: {0}\nBuffer: {1}\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename), _selectedOverlayDescriptor.Metadata.BufferZoneSize > 0 ? _selectedOverlayDescriptor.Metadata.BufferZoneSize + " km" : "[N/A]", _selectedOverlayDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
                 IsOverlayFileSelected = _selectedOverlayDescriptor != null;
+                if (SelectedBathymetryOverlayName != SelectedOverlayName) Task.Factory.StartNew(() => SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors[0].Value);
                 _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedOverlayDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedOverlayDescriptor);
         NAEMOOverlayDescriptor _selectedOverlayDescriptor;
+
+        public string SelectedOverlayName
+        {
+            get
+            {
+                return (_selectedOverlayDescriptor != null) && (_selectedOverlayDescriptor.Metadata != null)
+                    ? Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.Metadata.Filename) : null;
+            }
+        }
 
         void DisplayOverlay()
         {
@@ -587,6 +598,20 @@ namespace ESMEWorkBench.ViewModels.Main
             var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
             var boundingBox = new GeoRect(expandedLimits.GeoPointList);
             var coordinateList = expandedLimits.GeoPointList.Select(geo => new EarthCoordinate(geo)).ToList();
+            var testShape = new OverlayLineSegments(coordinateList.ToArray(), Colors.Black);
+
+            if (!testShape.IsUsableAsPerimeter)
+            {
+                // If the original shape is not convex, the resulting expansion can be a tangled mess.
+                // This is intended to be a temporary fix for this problem.  Longer term we should compute
+                // the convex hull of the points and then use that as the boundary to expand.
+
+                var boundingBoxShape = new GeoRect(curOverlay.Shapes[0].BoundingBox).ClosedBoundaryCoordinates.ToList();
+                limits = new Limits(boundingBoxShape);
+                expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
+                boundingBox = new GeoRect(expandedLimits.GeoPointList);
+                coordinateList = expandedLimits.GeoPointList.Select(geo => new EarthCoordinate(geo)).ToList();
+            }
 
             NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, vm.OverlayName, coordinateList, boundingBox, vm.BufferSize, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
             SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[vm.OverlayName];
@@ -712,12 +737,34 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedBathymetryDescriptorChangedEventArgs);
                 if (_selectedBathymetryDescriptor != null) SelectedBathymetryInfo = string.Format("Name: {0}\nResolution: {1} min\nSource Overlay: {2}\nNumber of Points: {3:n}", Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename), _selectedBathymetryDescriptor.Metadata.Resolution, _selectedBathymetryDescriptor.Metadata.OverlayFilename ?? "[Unknown]",_selectedBathymetryDescriptor.Metadata.PointCount);
                 IsBathymetryFileSelected = _selectedBathymetryDescriptor != null;
-                _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
+                if (SelectedBathymetryOverlayName != null) Task.Factory.StartNew(() => SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[SelectedBathymetryOverlayName]);
+                if (SelectedEnvironmentBathymetryName != SelectedBathymetryName) Task.Factory.StartNew(() => SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors[0].Value);
+                Task.Factory.StartNew(() => _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal));
+
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedBathymetryDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedBathymetryDescriptor);
         NAEMOBathymetryDescriptor _selectedBathymetryDescriptor;
+
+        public string SelectedBathymetryOverlayName
+        {
+            get
+            {
+                return (_selectedBathymetryDescriptor != null) && (_selectedBathymetryDescriptor.Metadata != null)
+                               ? _selectedBathymetryDescriptor.Metadata.OverlayFilename : null;
+            }
+        }
+
+        public string SelectedBathymetryName
+        {
+            get
+            {
+                return (_selectedBathymetryDescriptor != null) && (_selectedBathymetryDescriptor.Metadata != null)
+                    ? Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.Metadata.Filename) : null;
+            }
+        }
+
         void DisplayBathymetry()
         {
             if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
@@ -899,12 +946,31 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedEnvironmentDescriptorChangedEventArgs);
                 if ((_selectedEnvironmentDescriptor != null) && (_selectedEnvironmentDescriptor.Metadata != null)) SelectedEnvironmentInfo = string.Format("Name: {0}\nTime Period: {1}\nSource Overlay: {2}\nSource Bathymetry: {3}\nPoint count: {4:n}", Path.GetFileNameWithoutExtension(_selectedEnvironmentDescriptor.DataFilename), _selectedEnvironmentDescriptor.Metadata.TimePeriod, _selectedEnvironmentDescriptor.Metadata.OverlayFilename ?? "[Unknown]", _selectedEnvironmentDescriptor.Metadata.BathymetryName, _selectedEnvironmentDescriptor.Data.Locations.Count);
                 IsEnvironmentFileSelected = _selectedEnvironmentDescriptor != null;
-                _dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
+                if (SelectedEnvironmentBathymetryName != null) Task.Factory.StartNew(() => SelectedBathymetryDescriptor = (NAEMOBathymetryDescriptor)NAEMOBathymetryDescriptors[SelectedEnvironmentBathymetryName]);
+                Task.Factory.StartNew(() => _dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal));
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedEnvironmentDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedEnvironmentDescriptor);
         NAEMOEnvironmentDescriptor _selectedEnvironmentDescriptor;
+
+        public string SelectedEnvironmentBathymetryName
+        {
+            get
+            {
+                return (_selectedEnvironmentDescriptor != null) && (_selectedEnvironmentDescriptor.Metadata != null)
+                               ? _selectedEnvironmentDescriptor.Metadata.BathymetryName : null;
+            }
+        }
+
+        public string SelectedEnvironmentName
+        {
+            get
+            {
+                return (_selectedEnvironmentDescriptor != null) && (_selectedEnvironmentDescriptor.Metadata != null)
+                    ? Path.GetFileNameWithoutExtension(_selectedEnvironmentDescriptor.Metadata.Filename) : null;
+            }
+        }
 
         void DisplayEnvironment()
         {
