@@ -583,12 +583,19 @@ namespace ESMEWorkBench.ViewModels.Main
 
         bool IsExpandOverlayCommandEnabled
         {
-            get { return IsOverlayFileSelected && string.IsNullOrEmpty(SelectedOverlayDescriptor.Metadata.OverlayFilename); }
+            get { return IsOverlayFileSelected; }
         }
 
         void ExpandOverlayHandler()
         {
-            var vm = new OverlayExpandViewModel(SelectedOverlayDescriptor.Metadata);
+            var originalBufferSize = 0f;
+            if (!string.IsNullOrEmpty(SelectedOverlayDescriptor.Metadata.OverlayFilename))
+            {
+                originalBufferSize = SelectedOverlayDescriptor.Metadata.BufferZoneSize;
+                SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[SelectedOverlayDescriptor.Metadata.OverlayFilename];
+            }
+            if (!IsOverlayFileSelected) return;
+            var vm = new OverlayExpandViewModel(SelectedOverlayDescriptor.Metadata) {BufferSize = originalBufferSize};
             var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
             
