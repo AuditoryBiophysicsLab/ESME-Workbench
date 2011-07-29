@@ -121,6 +121,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behaviors\BusyIndicatorBehavior.cs" />
+    <Compile Include="Behaviors\CircularProgressBar.xaml.cs">
+      <DependentUpon>CircularProgressBar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Behaviors\NumericTextBoxBehavior.cs" />
     <Compile Include="BuildInformation.cs" />
     <Compile Include="Collections\BinarySearchTree.cs" />
@@ -252,6 +256,12 @@
       <Project>{7029F5D5-ABBB-4564-B170-39802AD65C62}</Project>
       <Name>C5</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Behaviors\CircularProgressBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
