@@ -76,7 +76,6 @@ namespace ESME.Views.Locations
 
         #endregion
 
-
         #region OkCommand
 
         private SimpleCommand<object, object> _ok;
