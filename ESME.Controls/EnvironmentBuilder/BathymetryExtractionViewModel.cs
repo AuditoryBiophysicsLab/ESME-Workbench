@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using Cinch;
 using HRC.Navigation;
 
@@ -52,7 +53,7 @@ namespace ESME.Views.EnvironmentBuilder
 
         void UpdateNote()
         {
-            BathymetryName = string.Format("{0}_{1:0.00}min", OverlayName, SelectedResolution);
+            BathymetryName = string.Format("{0}_{1:0.00}min", OverlayName.Replace(' ', '_'), SelectedResolution);
             Note = string.Format("Note: Bathymetry data will be extracted within the bounds of the overlay {0}. The resulting bathymetry file will be named {1}", OverlayName, BathymetryName);
         }
 

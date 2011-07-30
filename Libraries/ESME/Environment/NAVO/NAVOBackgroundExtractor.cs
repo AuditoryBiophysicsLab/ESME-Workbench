@@ -169,6 +169,7 @@ namespace ESME.Environment.NAVO
             {
                 if (_saveAsFilename == value) return;
                 _saveAsFilename = value;
+                if (_saveAsFilename != null) _saveAsFilename = _saveAsFilename.Replace(' ', '_');
                 NotifyPropertyChanged(SaveAsFilenameChangedEventArgs);
             }
         }
