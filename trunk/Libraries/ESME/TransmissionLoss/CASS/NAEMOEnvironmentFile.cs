@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
@@ -86,7 +87,7 @@ namespace ESME.TransmissionLoss.CASS
         #endregion
 
         #region public Dictionary<string, List<EarthCoordinate>> SedimentTypes { get; set; }
-
+        [XmlIgnore]
         public Dictionary<string, List<EarthCoordinate>> SedimentTypes
         {
             get { return _sedimentTypes ?? (_sedimentTypes = CreateSedimentDictionary()); }

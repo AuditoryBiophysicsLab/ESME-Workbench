@@ -83,6 +83,7 @@
 
             <r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
+                    <!--
 					<r:RibbonApplicationMenuItem Header="Save Experiment"
 					                             InputGestureText="Ctrl+S"
 					                             ImageSource="..\Images\LargeIcons\save-icon.png"
@@ -112,6 +113,7 @@
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Create a new experiment"
 					                             Command="{Binding NewExperimentCommand}" />
+                    -->
 					<r:RibbonApplicationMenuItem Header="Info"
 					                             ImageSource="..\Images\LargeIcons\about-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
