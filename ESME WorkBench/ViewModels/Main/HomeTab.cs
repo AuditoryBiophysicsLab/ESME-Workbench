@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Cinch;
 using ESME;
+using ESME.NEMO;
 using ESMEWorkBench.ViewModels.Map;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -12,7 +13,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #region public ObservableCollection<MapLayerViewModel> HomeTabMapLayers { get; set; }
 
         static readonly PropertyChangedEventArgs HomeTabMapLayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.HomeTabMapLayers);
-        ObservableCollection<MapLayerViewModel> _homeTabMapLayers = new ObservableCollection<MapLayerViewModel>();
+        ObservableCollection<MapLayerViewModel> _homeTabMapLayers;
 
         public ObservableCollection<MapLayerViewModel> HomeTabMapLayers
         {
@@ -47,6 +48,44 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         #endregion
+
+        #region public NemoFile Scenario { get; set; }
+
+        public NemoFile Scenario
+        {
+            get { return _scenario; }
+            set
+            {
+                if (_scenario == value) return;
+                _scenario = value;
+                NotifyPropertyChanged(ScenarioChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ScenarioChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.Scenario);
+        NemoFile _scenario;
+
+        #endregion
+
+        #region public string ScenarioFilename { get; set; }
+
+        public string ScenarioFilename
+        {
+            get { return _scenarioFilename; }
+            set
+            {
+                if (_scenarioFilename == value) return;
+                _scenarioFilename = value;
+                NotifyPropertyChanged(ScenarioFilenameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ScenarioFilenameChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioFilename);
+        string _scenarioFilename;
+
+        #endregion
+
+
 
     }
 }

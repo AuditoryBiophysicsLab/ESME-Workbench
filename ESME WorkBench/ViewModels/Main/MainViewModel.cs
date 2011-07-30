@@ -682,8 +682,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void UpdateMapLayerVisibility()
         {
-            //var currentMapLayers = HomeTabMapLayers;
-            var currentMapLayers = EnvironmentTabMapLayers;
+            var currentMapLayers = HomeTabMapLayers;
+            //var currentMapLayers = EnvironmentTabMapLayers;
             if (!IsLayerListViewVisible) currentMapLayers = EnvironmentTabMapLayers;
             MapLayerViewModel.Layers = currentMapLayers;
             MediatorMessage.Send(MediatorMessage.SetMapLayers, currentMapLayers);

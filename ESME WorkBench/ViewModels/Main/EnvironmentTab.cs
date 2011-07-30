@@ -241,9 +241,10 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DisplayWorldMap()
         {
-            var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string appPath;
             if (EnvironmentTabMapLayers == null)
             {
+                appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 EnvironmentTabMapLayers = new ObservableCollection<MapLayerViewModel>
                 {
                         new ShapefileMapLayer
@@ -263,6 +264,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             if (HomeTabMapLayers == null)
             {
+                appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 HomeTabMapLayers = new ObservableCollection<MapLayerViewModel>
                 {
                         new ShapefileMapLayer
