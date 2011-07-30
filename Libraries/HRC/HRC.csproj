@@ -213,7 +213,7 @@
     <Compile Include="Utility\BackgroundTask.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Utility\KeyValuePair.cs" />
+    <Compile Include="Collections\KeyValuePair.cs" />
     <Compile Include="Utility\MediatorBase.cs" />
     <Compile Include="Utility\Minidump.cs" />
     <Compile Include="Utility\NotifyIcon.cs" />

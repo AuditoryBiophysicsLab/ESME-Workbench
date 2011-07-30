@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HRC.Utility
+namespace HRC.Collections
 {
     [Serializable]
     public class KeyValuePair<TKey, TValue>

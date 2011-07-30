@@ -85,13 +85,36 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
+        #region public Dictionary<string, List<EarthCoordinate>> SedimentTypes { get; set; }
+
+        public Dictionary<string, List<EarthCoordinate>> SedimentTypes
+        {
+            get { return _sedimentTypes ?? (_sedimentTypes = CreateSedimentDictionary()); }
+        }
+
+        Dictionary<string, List<EarthCoordinate>> _sedimentTypes;
+
+        Dictionary<string, List<EarthCoordinate>> CreateSedimentDictionary()
+        {
+            var result = new Dictionary<string, List<EarthCoordinate>>();
+            foreach (var location in Locations)
+            {
+                var curSedimentType = location.BottomType;
+                if (!result.ContainsKey(curSedimentType)) result.Add(curSedimentType, new List<EarthCoordinate>());
+                result[curSedimentType].Add(new EarthCoordinate(location));
+            }
+            return result;
+        }
+
+        #endregion
+
         #region Parser
 
-        static System.Collections.Generic.KeyValuePair<string, string> ParseKeyValuePair(string line)
+        static KeyValuePair<string, string> ParseKeyValuePair(string line)
         {
             var result = line.Split('=');
             if (result.Length != 2) throw new FormatException("Invalid key/value pair");
-            return new System.Collections.Generic.KeyValuePair<string, string>(result[0], result[1]);
+            return new KeyValuePair<string, string>(result[0], result[1]);
         }
 
         public static NAEMOEnvironmentFile Load(string environmentFileName)
@@ -117,19 +140,14 @@ namespace ESME.TransmissionLoss.CASS
                     }
                 }
                 //if the line starts with 'ENVIRONMENT LATITUDE', add it plus everything up to the next blank line to rawvalues[i].
-                if (thisline.StartsWith("ENVIRONMENT LATITUDE"))
+                if (!thisline.StartsWith("ENVIRONMENT LATITUDE")) continue;
+                var curGroup = new List<string> { thisline.Trim() };
+                while (!string.IsNullOrEmpty(thisline = resarray[curLineIndex++].Trim()))
                 {
-                    var curGroup = new List<string>
-                                   {
-                                       thisline.Trim()
-                                   };
-                    while (!string.IsNullOrEmpty(thisline = resarray[curLineIndex++].Trim()))
-                    {
-                        if (curLineIndex >= resarray.Count) break;
-                        curGroup.Add(thisline);
-                    }
-                    rawvalues.Add(curGroup);
+                    if (curLineIndex >= resarray.Count) break;
+                    curGroup.Add(thisline);
                 }
+                rawvalues.Add(curGroup);
             }
 
             foreach (var packet in rawvalues)
@@ -166,23 +184,21 @@ namespace ESME.TransmissionLoss.CASS
                         retpacket.Depths = depths;
                         retpacket.Soundspeeds = speeds;
                     }
-                    if (curLine.StartsWith("BOTTOM REFLECTION"))
+                    if (!curLine.StartsWith("BOTTOM REFLECTION")) continue;
+                    var bottom = packet[curGroupLineIndex++];
+                    if (bottom.Contains("WIND SPEED"))
                     {
-                        var bottom = packet[curGroupLineIndex++];
-                        if (bottom.Contains("WIND SPEED"))
-                        {
-                            double wind;
-                            if (!double.TryParse(bottom.Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
-                            retpacket.WindSpeed = wind;
-                        }
-                        else
-                        {
-                            retpacket.BottomType = bottom;
-                            var speed = packet[curGroupLineIndex];
-                            double wind;
-                            if (!double.TryParse(speed.Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
-                            retpacket.WindSpeed = wind;
-                        }
+                        double wind;
+                        if (!double.TryParse(bottom.Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
+                        retpacket.WindSpeed = wind;
+                    }
+                    else
+                    {
+                        retpacket.BottomType = bottom;
+                        var speed = packet[curGroupLineIndex];
+                        double wind;
+                        if (!double.TryParse(speed.Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
+                        retpacket.WindSpeed = wind;
                     }
                 }
                 result.Locations.Add(retpacket);
