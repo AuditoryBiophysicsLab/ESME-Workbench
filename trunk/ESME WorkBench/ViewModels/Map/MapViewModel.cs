@@ -75,11 +75,9 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                                  MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, false);
                                                                                  MediatorMessage.Send(MediatorMessage.SetupAndRunAnalysisPoint);
                                                                              }
-                                                                             if (IsQuickLookPointMode)
-                                                                             {
-                                                                                 IsQuickLookPointMode = false;
-                                                                                 MediatorMessage.Send(MediatorMessage.SetupAndRunQuickLookPoint);
-                                                                             }
+                                                                             if (!IsQuickLookPointMode) return;
+                                                                             IsQuickLookPointMode = false;
+                                                                             MediatorMessage.Send(MediatorMessage.SetupAndRunQuickLookPoint);
                                                                          });
         }
 

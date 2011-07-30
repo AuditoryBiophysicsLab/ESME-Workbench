@@ -83,6 +83,17 @@
 
             <r:Ribbon.ApplicationMenu>
 				<r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
+                    <r:RibbonApplicationMenuItem Header="Open Scenario"
+					                             InputGestureText="Ctrl+O"
+					                             ImageSource="..\Images\LargeIcons\open-icon.png"
+					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
+					                             ToolTipDescription="Open a scenario file"
+					                             Command="{Binding OpenScenarioCommand}" />
+                    <r:RibbonApplicationMenuItem Header="Close Experiment"
+					                             ImageSource="..\Images\LargeIcons\close-icon.png"
+					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
+					                             ToolTipDescription="Close the current scenario file"
+					                             Command="{Binding CloseScenarioCommand}" />
                     <!--
 					<r:RibbonApplicationMenuItem Header="Save Experiment"
 					                             InputGestureText="Ctrl+S"
@@ -147,6 +158,7 @@
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Close the ESME WorkBench"
 					                             Command="Close" />
+                    
 					<r:RibbonApplicationMenu.AuxiliaryPaneContent>
 						<Grid>
 							<Grid.RowDefinitions>
@@ -155,7 +167,7 @@
 								<RowDefinition Height="*" />
 							</Grid.RowDefinitions>
 							<r:RibbonSeparator Grid.Row="0"
-							                   Label="Recent Experiments" />
+							                   Label="Recent Scenarios" />
 							<r:RibbonGallery ScrollViewer.VerticalScrollBarVisibility="Auto"
                                              Grid.Row="2"
 							                 SelectedItem="{Binding RecentFilesSelectedItem}"
