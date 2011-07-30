@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
+using System.Linq;
 using HRC.Navigation;
 
 namespace HRC.Utility
@@ -263,6 +266,16 @@ namespace HRC.Utility
             }
 
             return result;
+        }
+
+        public static bool IsValidFilename(this string fileName)
+        {
+            var charList = new List<char>();
+            charList.AddRange(Path.GetInvalidFileNameChars());
+            charList.AddRange(Path.GetInvalidPathChars());
+            var invalidChars = charList.Distinct().ToList();
+            var charsToCheck = fileName.ToCharArray();
+            return !(from cur in charsToCheck from invalid in invalidChars where cur == invalid select cur).Any();
         }
     }
 }

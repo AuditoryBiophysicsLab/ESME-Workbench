@@ -5,6 +5,7 @@ using Cinch;
 using ESME.Data;
 using ESME.Overlay;
 using HRC.Navigation;
+using HRC.Utility;
 using HRC.Validation;
 using ValidationRule = HRC.Validation.ValidationRule;
 
@@ -46,6 +47,16 @@ namespace ESME.Views.Locations
                                                                                 ruleTarget, r);
                                                                         },
                                                  },
+                                            new ValidationRule
+                                                 {
+                                                     PropertyName = "OverlayName",
+                                                     Description = "The overlay name contains illegal path or filename characters.",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((NewOverlayViewModel) o).OverlayName;
+                                                                            return string.IsNullOrEmpty(ruleTarget) || ruleTarget.IsValidFilename();
+                                                                        },
+                                                 },
                                              new ValidationRule
                                                  {
                                                      PropertyName = "OverlayName",
@@ -54,7 +65,7 @@ namespace ESME.Views.Locations
                                                                         {
                                                                             
                                                                             var ruleTarget = ((NewOverlayViewModel) o).OverlayName;
-                                                                            if (string.IsNullOrEmpty(ruleTarget))
+                                                                            if (string.IsNullOrEmpty(ruleTarget) || !ruleTarget.IsValidFilename())
                                                                                 return true;
                                                                             if(ruleTarget.ToLower().EndsWith(".ovr"))
                                                                                 ruleTarget = Path.GetFileNameWithoutExtension(ruleTarget);

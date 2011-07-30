@@ -862,7 +862,7 @@ namespace ESMEWorkBench.ViewModels.Main
             bathymetryExtractor.RunWorkerCompleted += (s, e) => Task.Factory.StartNew(() =>
             {
                 Bathymetry bathymetry;
-                var bathymetryFilePath = Path.Combine(destinationPath, destinationFile);
+                var bathymetryFilePath = Path.Combine(destinationPath, bathymetryExtractor.SaveAsFilename);
                 var metadata = NAEMOBathymetryMetadata.FromBathymetryFile(bathymetryFilePath, out bathymetry);
                 metadata.OverlayFilename = vm.OverlayName;
                 metadata.Bounds = vm.BoundingBox;
