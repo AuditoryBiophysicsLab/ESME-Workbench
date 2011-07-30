@@ -13,6 +13,7 @@ using Cinch;
 using ESME;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.RecentFiles;
 using HRC.Collections;
@@ -88,7 +89,6 @@ namespace ESMEWorkBench.ViewModels.Main
             IsScaleBarVisible = Settings.Default.ShowScaleBar;
             IsPanZoomVisible = Settings.Default.ShowPanZoom;
 
-            //TestSorting();
 #if EXPERIMENTS_SUPPORTED
             var args = Environment.GetCommandLineArgs();
             if (args.Length == 2)
@@ -118,43 +118,6 @@ namespace ESMEWorkBench.ViewModels.Main
             //HookPropertyChanged(_experiment);
             //TestRecentFiles();
 #endif
-        }
-
-
-        static void TestSorting()
-        {
-            var comparer = ComparerFactory<EarthCoordinate<float>>.CreateComparer((x, y) =>
-            {
-                var xLat = (int)(x.Latitude * 10000);
-                var yLat = (int)(y.Latitude * 10000);
-                if (xLat < yLat) return -1;
-                if (xLat > yLat) return 1;
-                var xLon = (int)(x.Longitude * 10000);
-                var yLon = (int)(y.Longitude * 10000);
-                if (xLon < yLon) return -1;
-                return xLon > yLon ? 1 : 0;
-            });
-            var set = new TreeSet<EarthCoordinate<float>>(comparer);
-
-            char[] separators = { ' ' };
-            var curLineCount = 0;
-            using (var stream = new StreamReader(File.Open(@"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Bathymetry\Jax_Ops_Area_75km_200km_0.10min.txt", FileMode.Open, FileAccess.Read, FileShare.Read)))
-            {
-                var curLine = stream.ReadLine();
-                while (curLine != null)
-                {
-                    curLineCount++;
-                    var fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-                    var latitude = double.Parse(fields[0]);
-                    var longitude = double.Parse(fields[1]);
-                    var depth = float.Parse(fields[2]) * -1;
-                    set.Add(new EarthCoordinate<float>(latitude, longitude, depth));
-                    curLine = stream.ReadLine();
-                }
-            }
-            Console.WriteLine(curLineCount + " items added to set");
-            var result = set.ToArray();
-            Console.WriteLine(result.Length + " items returned by ToArray()");
         }
 
         void HookPropertyChanged(INotifyPropertyChanged experiment)
@@ -708,6 +671,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _isLayerListViewVisible = value;
                 NotifyPropertyChanged(IsLayerListViewVisibleChangedEventArgs);
                 NotifyPropertyChanged(LayersListWidthChangedEventArgs);
+                UpdateMapLayerVisibility();
             }
         }
 
@@ -715,6 +679,15 @@ namespace ESMEWorkBench.ViewModels.Main
         bool _isLayerListViewVisible;
 
         #endregion
+
+        void UpdateMapLayerVisibility()
+        {
+            //var currentMapLayers = HomeTabMapLayers;
+            var currentMapLayers = EnvironmentTabMapLayers;
+            if (!IsLayerListViewVisible) currentMapLayers = EnvironmentTabMapLayers;
+            MapLayerViewModel.Layers = currentMapLayers;
+            MediatorMessage.Send(MediatorMessage.SetMapLayers, currentMapLayers);
+        }
 
         #region public double LayersListWidth { get; set; }
 
