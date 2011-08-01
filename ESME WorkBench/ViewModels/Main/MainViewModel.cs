@@ -683,11 +683,24 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void UpdateMapLayerVisibility()
         {
+#if true
+            if ((!IsLayerListViewVisible) && EnvironmentTabMapLayers != null)
+            {
+                EnvironmentTabMapLayers.IsActive = true;
+                HomeTabMapLayers.IsActive = false;
+            }
+            else if (HomeTabMapLayers != null)
+            {
+                HomeTabMapLayers.IsActive = true;
+                EnvironmentTabMapLayers.IsActive = false;
+            }
+#else
             var currentMapLayers = HomeTabMapLayers;
             //var currentMapLayers = EnvironmentTabMapLayers;
             if (!IsLayerListViewVisible) currentMapLayers = EnvironmentTabMapLayers;
             MapLayerViewModel.Layers = currentMapLayers;
             MediatorMessage.Send(MediatorMessage.SetMapLayers, currentMapLayers);
+#endif
         }
 
         #region public double LayersListWidth { get; set; }

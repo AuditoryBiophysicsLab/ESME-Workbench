@@ -89,7 +89,7 @@
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Open a scenario file"
 					                             Command="{Binding OpenScenarioCommand}" />
-                    <r:RibbonApplicationMenuItem Header="Close Experiment"
+                    <r:RibbonApplicationMenuItem Header="Close Scenario"
 					                             ImageSource="..\Images\LargeIcons\close-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Close the current scenario file"

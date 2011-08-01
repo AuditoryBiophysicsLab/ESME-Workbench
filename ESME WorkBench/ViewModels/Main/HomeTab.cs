@@ -49,7 +49,5 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-
-
     }
 }

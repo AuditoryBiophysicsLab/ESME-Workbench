@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -47,11 +45,13 @@ namespace ESMEWorkBench.ViewModels.Main
             //_dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
         }
 
+#if false
         T FindEnvironmentTabMapLayer<T>(LayerType layerType, string layerName) where T : class
         {
             if (EnvironmentTabMapLayers == null) return null;
             return EnvironmentTabMapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
         }
+#endif
 
         #region public bool AreAllViewModelsReady { get; set; }
 
@@ -186,6 +186,10 @@ namespace ESMEWorkBench.ViewModels.Main
             string appPath;
             if (EnvironmentTabMapLayers == null)
             {
+#if true
+                EnvironmentTabMapLayers = new MapLayerCollection();
+                EnvironmentTabMapLayers.DisplayShapeFile("Base Map", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"), Colors.Transparent, AreaStyles.Country2, true, 1f, false);
+#else
                 appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 EnvironmentTabMapLayers = new MapLayerCollection
                 {
@@ -202,9 +206,14 @@ namespace ESMEWorkBench.ViewModels.Main
                                 Name = "Base Map",
                         },
                 };
+#endif
                 ZoomToWorldMap();
             }
             if (HomeTabMapLayers != null) return;
+#if false
+            HomeTabMapLayers = new MapLayerCollection();
+            HomeTabMapLayers.DisplayShapeFile("Base Map", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"), Colors.Transparent, AreaStyles.Country2, true, 1f, false);
+#else
             appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             HomeTabMapLayers = new MapLayerCollection
             {
@@ -221,6 +230,7 @@ namespace ESMEWorkBench.ViewModels.Main
                             Name = "Base Map",
                     },
             };
+#endif
         }
 
         void DisplayRangeComplex()
@@ -230,9 +240,9 @@ namespace ESMEWorkBench.ViewModels.Main
             OverlayShapeMapLayer simAreaLayer;
             if (_selectedRangeComplexDescriptor == null)
             {
-                opAreaLayer = FindEnvironmentTabMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
+                opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
                 if (opAreaLayer != null) opAreaLayer.IsChecked = false;
-                simAreaLayer = FindEnvironmentTabMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
+                simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
                 if (simAreaLayer != null) simAreaLayer.IsChecked = false;
                 return;
             }
@@ -240,7 +250,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.OpsLimitFile);
             var simAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.SimLimitFile);
             ZoomToRangeComplex();
-            opAreaLayer = FindEnvironmentTabMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area") ?? new OverlayShapeMapLayer
+            opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area") ?? new OverlayShapeMapLayer
                 {
                         Name = "Op Area",
                         CanBeRemoved = true,
@@ -260,7 +270,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
             if (simAreaOverlayFilename != opAreaOverlayFilename)
             {
-                simAreaLayer = FindEnvironmentTabMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area") ?? new OverlayShapeMapLayer
+                simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area") ?? new OverlayShapeMapLayer
                 {
                     Name = "Sim Area",
                     CanBeRemoved = true,
@@ -444,7 +454,11 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedOverlayDescriptorChangedEventArgs);
                 if (_selectedOverlayDescriptor != null) SelectedOverlayInfo = string.Format("Name: {0}\nBuffer: {1}\nSource Overlay: {2}", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename), _selectedOverlayDescriptor.Metadata.BufferZoneSize > 0 ? _selectedOverlayDescriptor.Metadata.BufferZoneSize + " km" : "[N/A]", _selectedOverlayDescriptor.Metadata.OverlayFilename ?? "[Unknown]");
                 IsOverlayFileSelected = _selectedOverlayDescriptor != null;
-                if (SelectedBathymetryOverlayName != SelectedOverlayName) Task.Factory.StartNew(() => SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors[0].Value);
+                if (SelectedBathymetryOverlayName != SelectedOverlayName)
+                    Task.Factory.StartNew(() =>
+                    {
+                        if (NAEMOBathymetryDescriptors != null) SelectedBathymetryDescriptor = NAEMOBathymetryDescriptors[0].Value;
+                    });
                 _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
             }
         }
@@ -467,13 +481,13 @@ namespace ESMEWorkBench.ViewModels.Main
             OverlayShapeMapLayer overlayLayer;
             if (_selectedOverlayDescriptor == null)
             {
-                overlayLayer = FindEnvironmentTabMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
+                overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
                 if (overlayLayer != null) overlayLayer.IsChecked = false;
                 return;
             }
             //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             var overlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename) + ".ovr");
-            overlayLayer = FindEnvironmentTabMapLayer<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
+            overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
             {
                 Name = "Overlay",
                 CanBeRemoved = true,
@@ -713,7 +727,10 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_selectedBathymetryDescriptor != null) SelectedBathymetryInfo = string.Format("Name: {0}\nResolution: {1} min\nSource Overlay: {2}\nNumber of Points: {3:n}", Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename), _selectedBathymetryDescriptor.Metadata.Resolution, _selectedBathymetryDescriptor.Metadata.OverlayFilename ?? "[Unknown]",_selectedBathymetryDescriptor.Metadata.PointCount);
                 IsBathymetryFileSelected = _selectedBathymetryDescriptor != null;
                 if (SelectedBathymetryOverlayName != null) Task.Factory.StartNew(() => SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[SelectedBathymetryOverlayName]);
-                if (SelectedEnvironmentBathymetryName != SelectedBathymetryName) Task.Factory.StartNew(() => SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors[0].Value);
+                if (SelectedEnvironmentBathymetryName != SelectedBathymetryName) Task.Factory.StartNew(() =>
+                {
+                    if (NAEMOEnvironmentDescriptors != null) SelectedEnvironmentDescriptor = NAEMOEnvironmentDescriptors[0].Value;
+                });
                 Task.Factory.StartNew(() => _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal));
 
             }
@@ -746,12 +763,12 @@ namespace ESMEWorkBench.ViewModels.Main
             RasterMapLayer bathyBitmapLayer;
             if (_selectedBathymetryDescriptor == null)
             {
-                bathyBitmapLayer = FindEnvironmentTabMapLayer<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry");
+                bathyBitmapLayer = EnvironmentTabMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry");
                 if (bathyBitmapLayer != null) bathyBitmapLayer.IsChecked = false;
                 return;
             }
             //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
-            bathyBitmapLayer = FindEnvironmentTabMapLayer<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry") ?? new RasterMapLayer
+            bathyBitmapLayer = EnvironmentTabMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry") ?? new RasterMapLayer
             {
                 Name = "Bathymetry",
                 CanBeReordered = true,
@@ -846,7 +863,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 metadata.OverlayFilename = vm.OverlayName;
                 metadata.Bounds = vm.BoundingBox;
                 metadata.Save();
-                var bathymetryDescriptor = new NAEMOBathymetryDescriptor {DataFilename = bathymetryFilePath, Metadata = metadata};
+                var bathymetryDescriptor = new NAEMOBathymetryDescriptor { DataFilename = bathymetryFilePath, Metadata = metadata };
                 NAEMOBathymetryDescriptors.Add(new KeyValuePair<string, NAEMOBathymetryDescriptor>(vm.BathymetryName, bathymetryDescriptor));
                 NAEMOBathymetryDescriptors.Sort();
                 SelectedBathymetryDescriptor = bathymetryDescriptor;
@@ -953,12 +970,12 @@ namespace ESMEWorkBench.ViewModels.Main
             OverlayShapeMapLayer overlayLayer;
             if (_selectedEnvironmentDescriptor == null)
             {
-                overlayLayer = FindEnvironmentTabMapLayer<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment");
+                overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment");
                 if (overlayLayer != null) overlayLayer.IsChecked = false;
                 return;
             }
             //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
-            overlayLayer = FindEnvironmentTabMapLayer<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment") ?? new OverlayShapeMapLayer
+            overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment") ?? new OverlayShapeMapLayer
             {
                 Name = "Environment",
                 CanBeRemoved = true,
