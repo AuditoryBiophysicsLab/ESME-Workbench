@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Windows.Media;
 using ESME.NEMO.Overlay;
@@ -48,14 +47,14 @@ namespace ESME.Mapping
         {
             var shapeFileLayer = Find<ShapefileMapLayer>(LayerType.Shapefile, layerName) ?? new ShapefileMapLayer
             {
-                    LayerType = LayerType.BaseMap,
-                    Name = layerName,
-                    AreaStyle = areaStyle,
-                    CanBeRemoved = canBeRemoved,
-                    CanBeReordered = canBeReordered,
-                    CanChangeAreaColor = canChangeAreaColor,
-                    CanChangeLineColor = canChangeLineColor,
-                    ShapefileName = shapeFileName,
+                LayerType = LayerType.BaseMap,
+                Name = layerName,
+                AreaStyle = areaStyle,
+                CanBeRemoved = canBeRemoved,
+                CanBeReordered = canBeReordered,
+                CanChangeAreaColor = canChangeAreaColor,
+                CanChangeLineColor = canChangeLineColor,
+                ShapefileName = shapeFileName,
             };
             if (lineColor != Colors.Transparent) shapeFileLayer.LineColor = lineColor;
             shapeFileLayer.IsChecked = isVisible;
