@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ESME.Metadata;
-using ESME.Overlay;
+using ESME.NEMO.Overlay;
 
 namespace ESME.Environment.Descriptors
 {

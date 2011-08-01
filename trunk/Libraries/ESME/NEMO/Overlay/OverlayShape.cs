@@ -4,9 +4,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using HRC.Navigation;
-using Color = System.Windows.Media.Color;
 
-namespace ESME.Overlay
+namespace ESME.NEMO.Overlay
 {
     public abstract class OverlayShape
     {
@@ -87,8 +86,8 @@ namespace ESME.Overlay
 
         private void Move(EarthCoordinate newLocation)
         {
-            double bearingDegrees = _earthCoordinates[0].BearingTo(newLocation);
-            double distanceMeters = _earthCoordinates[0].DistanceTo(newLocation);
+            var bearingDegrees = _earthCoordinates[0].BearingTo(newLocation);
+            var distanceMeters = _earthCoordinates[0].DistanceTo(newLocation);
 
             Move(bearingDegrees, distanceMeters);
         }

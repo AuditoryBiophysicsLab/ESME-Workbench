@@ -13,6 +13,7 @@ using System.Windows.Markup;
 using System.Xml.Serialization;
 using Cinch;
 using ESME;
+using ESME.Mapping;
 using ESMEWorkBench.Controls;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;

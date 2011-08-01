@@ -20,16 +20,13 @@ using ESME.Animats;
 using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
-using ESME.Model;
+using ESME.Mapping;
 using ESME.NEMO;
-using ESME.Overlay;
+using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
-using ESMEWorkBench.ViewModels.Layers;
-using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
-using LineStyle = ESME.Overlay.LineStyle;
 
 namespace ESMEWorkBench.Data
 {
@@ -287,44 +284,7 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        #region public ObservableCollection<MapLayerViewModel> MapLayers { get; set; }
-
-        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.MapLayers);
-        ObservableCollection<MapLayerViewModel> _mapLayers;
-
-        public ObservableCollection<MapLayerViewModel> MapLayers
-        {
-            get { return _mapLayers; }
-            set
-            {
-                if (_mapLayers == value) return;
-                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
-                _mapLayers = value;
-                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
-                NotifyPropertyChanged(MapLayersChangedEventArgs);
-            }
-        }
-
-        void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null) {}
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    break;
-                case NotifyCollectionChangedAction.Move:
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    break;
-            }
-            NotifyPropertyChanged(MapLayersChangedEventArgs);
-        }
-
-        #endregion
+        public MapLayerCollection MapLayers { get; set; }
 
         #region public ObservableCollection<AnalysisPoint> AnalysisPoints { get; set; }
 
@@ -481,7 +441,6 @@ namespace ESMEWorkBench.Data
                 case NotifyCollectionChangedAction.Reset:
                     break;
             }
-            NotifyPropertyChanged(MapLayersChangedEventArgs);
         }
 
         #endregion
@@ -905,11 +864,9 @@ namespace ESMEWorkBench.Data
                 ScenarioFileWatcher.EnableRaisingEvents = false;
                 ScenarioFileWatcher = null;
             }
-            if (TransmissionLossFileWatcher != null)
-            {
-                TransmissionLossFileWatcher.EnableRaisingEvents = false;
-                TransmissionLossFileWatcher = null;
-            }
+            if (TransmissionLossFileWatcher == null) return;
+            TransmissionLossFileWatcher.EnableRaisingEvents = false;
+            TransmissionLossFileWatcher = null;
         }
 
         public static void CopyAllPrivateFiles(DirectoryInfo source, DirectoryInfo target)
@@ -940,7 +897,7 @@ namespace ESMEWorkBench.Data
             if (MapLayers == null)
             {
                 var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                MapLayers = new ObservableCollection<MapLayerViewModel>
+                MapLayers = new MapLayerCollection
                             {
                                 new ShapefileMapLayer
                                 {
@@ -962,7 +919,6 @@ namespace ESMEWorkBench.Data
                 backgroundWorker.DoWork += delegate { ProcessTransmissionLossFieldFiles(LocalStorageRoot); };
                 backgroundWorker.RunWorkerAsync();
             }
-            MapLayerViewModel.Layers = MapLayers;
             InitializeEnvironment(true);
             AddScenarioFileCommand(ScenarioFileName);
             IsChanged = false;
@@ -1110,16 +1066,14 @@ namespace ESMEWorkBench.Data
             var sourcePoints = new List<EarthCoordinate>();
             foreach (var soundSource in curPoint.SoundSources)
             {
-                if (soundSource.ShouldBeCalculated)
+                if (!soundSource.ShouldBeCalculated) continue;
+                sourcePoints.Add(curPoint);
+                foreach (var radialBearing in soundSource.RadialBearings)
                 {
+                    var endPoint = new EarthCoordinate(curPoint);
+                    endPoint.Move(radialBearing, soundSource.Radius);
+                    sourcePoints.Add(endPoint);
                     sourcePoints.Add(curPoint);
-                    foreach (var radialBearing in soundSource.RadialBearings)
-                    {
-                        var endPoint = new EarthCoordinate(curPoint);
-                        endPoint.Move(radialBearing, soundSource.Radius);
-                        sourcePoints.Add(endPoint);
-                        sourcePoints.Add(curPoint);
-                    }
                 }
             }
             analysisPointLayer.Clear();

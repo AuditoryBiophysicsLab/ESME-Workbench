@@ -1,9 +1,8 @@
 ﻿using System.IO;
 using System.Xml.Serialization;
-using ESMEWorkBench.ViewModels.Layers;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Map
+namespace ESME.Mapping
 {
     public class ShapefileMapLayer : MapLayerViewModel
     {

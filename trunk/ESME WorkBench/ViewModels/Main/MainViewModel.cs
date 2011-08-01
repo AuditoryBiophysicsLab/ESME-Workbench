@@ -11,6 +11,7 @@ using C5;
 using C5.Comparers;
 using Cinch;
 using ESME;
+using ESME.Mapping;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Map;

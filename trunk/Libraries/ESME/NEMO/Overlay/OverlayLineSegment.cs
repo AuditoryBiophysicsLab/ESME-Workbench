@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Windows;
 using System.Windows.Media;
 using System.Text;
 using HRC.Navigation;
 
-namespace ESME.Overlay
+namespace ESME.NEMO.Overlay
 {
     public class OverlayLineSegment : OverlayShape
     {
@@ -128,16 +127,16 @@ namespace ESME.Overlay
             if (IsColinearWith(that))
             {
                 // If they are colinear, check if our bounding box contains either of the other segment's endpoints
-                if (BoundingBox.Contains((Point)that._earthCoordinates[0]) ||
-                    (BoundingBox.Contains((Point)that._earthCoordinates[1])))
+                if (BoundingBox.Contains(that._earthCoordinates[0]) ||
+                    (BoundingBox.Contains(that._earthCoordinates[1])))
                     // If it does, we overlap the other segment
                     return true;
 
                 // If it doesn't, then check if the other segment overlaps us.  This can happen if the other segment
                 // completely contains us, and is also longer than us. If that turns out to be the case, then one or
                 // both of our endpoints will be contained in the other segment's bounding box.
-                if (that.BoundingBox.Contains((Point)_earthCoordinates[0]) ||
-                    (that.BoundingBox.Contains((Point)_earthCoordinates[1])))
+                if (that.BoundingBox.Contains(_earthCoordinates[0]) ||
+                    (that.BoundingBox.Contains(_earthCoordinates[1])))
                     // If it does, we overlap the other segment
                     return true;
             }

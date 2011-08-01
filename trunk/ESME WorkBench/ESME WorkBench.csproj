@@ -133,15 +133,14 @@
     <Compile Include="ViewModels\Main\AboutViewModel.cs" />
     <Compile Include="ViewModels\Main\BackgroundTaskSupport.cs" />
     <Compile Include="ViewModels\Main\EditableLabelListViewModel.cs" />
-    <Compile Include="ViewModels\Main\EnvironmentTab.cs" />
+    <Compile Include="ViewModels\Main\EnvironmentTab.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ViewModels\Main\HomeTab.cs" />
     <Compile Include="ViewModels\Main\MainViewModelListeners.cs" />
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\Main\SimulationViewModel.cs" />
-    <Compile Include="ViewModels\Map\MarkerLayerViewModel.cs" />
-    <Compile Include="ViewModels\Map\MapLayerViewModel.cs" />
     <Compile Include="ViewModels\Map\MapShape.cs" />
-    <Compile Include="ViewModels\Map\RasterMapLayer.cs" />
     <Compile Include="ViewModels\NAVO\EnvironmentBuilderViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ExportOptionsViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ScenarioSimulatorLogViewModel.cs" />
@@ -237,10 +236,8 @@
     <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\Layers\CustomStartEndLineStyle.cs" />
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
-    <Compile Include="ViewModels\Layers\LayerType.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
-    <Compile Include="ViewModels\Map\OverlayFileMapLayer.cs" />
     <Compile Include="ViewModels\Main\MainViewModelCommands.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
     <Compile Include="ViewModels\Main\LayerListViewModel.cs">
@@ -252,7 +249,6 @@
     <Compile Include="ViewModels\Map\MapViewModel.cs" />
     <Compile Include="ViewModels\Main\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\Main\ApplicationOptionsViewModel.cs" />
-    <Compile Include="ViewModels\Map\ShapefileMapLayer.cs" />
     <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
     <Compile Include="ViewModels\RecentFiles\IPersist.cs" />
     <Compile Include="ViewModels\RecentFiles\RecentFileList.cs" />

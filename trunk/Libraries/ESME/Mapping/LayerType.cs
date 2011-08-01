@@ -1,4 +1,4 @@
-﻿namespace ESMEWorkBench.ViewModels.Layers
+﻿namespace ESME.Mapping
 {
     public enum LayerType
     {

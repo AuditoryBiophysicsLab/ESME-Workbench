@@ -80,6 +80,9 @@
     <Reference Include="Cinch.WPF">
       <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
     </Reference>
+    <Reference Include="MapSuiteCore">
+      <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
+    </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
     </Reference>
@@ -229,6 +232,7 @@
     <Compile Include="Validation\ValidationRule.cs" />
     <Compile Include="Validation\ValidatingViewModel.cs" />
     <Compile Include="Triggers\ValidationErrorEventTrigger.cs" />
+    <Compile Include="ViewModels\MenuItemViewModelBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace ESME.Overlay
+namespace ESME.NEMO.Overlay
 {
     internal class LineReader
     {

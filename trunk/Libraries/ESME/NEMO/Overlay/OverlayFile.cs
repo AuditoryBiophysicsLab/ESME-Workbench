@@ -4,7 +4,7 @@ using System.Windows.Media;
 using System.IO;
 using HRC.Navigation;
 
-namespace ESME.Overlay
+namespace ESME.NEMO.Overlay
 {
     public partial class OverlayFile
     {

@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using ESME.Model;
 
-namespace ESME.Overlay
+namespace ESME.NEMO.Overlay
 {
     public class GeometricException : ESMEModelException
     {

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ESME.Metadata;
-using ESME.Overlay;
+using ESME.NEMO.Overlay;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -77,14 +77,14 @@ namespace ESME.Environment.Descriptors
                     Bounds = boundingBox,
             };
             metadata.Save();
-            Add(new System.Collections.Generic.KeyValuePair<string, NAEMOOverlayDescriptor>(overlayName,
-                                                                                            new NAEMOOverlayDescriptor
-                                                                                            {
-                                                                                                    DataFilename =
-                                                                                                    overlayPath,
-                                                                                                    Metadata =
-                                                                                                    metadata,
-                                                                                            }));
+            Add(new KeyValuePair<string, NAEMOOverlayDescriptor>(overlayName,
+                                                                 new NAEMOOverlayDescriptor
+                                                                 {
+                                                                         DataFilename =
+                                                                         overlayPath,
+                                                                         Metadata =
+                                                                         metadata,
+                                                                 }));
             Sort();
         }
 

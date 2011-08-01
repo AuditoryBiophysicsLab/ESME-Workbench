@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
-using ESME.Overlay;
-using ESMEWorkBench.ViewModels.Layers;
+using ESME.NEMO.Overlay;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Map
+namespace ESME.Mapping
 {
     public class OverlayFileMapLayer : OverlayShapeMapLayer
     {

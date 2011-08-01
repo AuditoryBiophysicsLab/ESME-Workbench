@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 using ESME.Model;
-using ESME.Overlay;
+using ESME.NEMO.Overlay;
 using HRC.Navigation;
 using mbs;
 
@@ -49,7 +49,7 @@ namespace ESME.Animats
 
             var result = new AnimatLocationFile();
 
-            foreach (Species s in animatList.SpeciesList.ReferencedSpecies)
+            foreach (var s in animatList.SpeciesList.ReferencedSpecies)
                 result.SpeciesDescriptors.Add(new SpeciesDescriptor { Species = s });
 
             result.Duration = simulationDuration;
@@ -89,11 +89,9 @@ namespace ESME.Animats
                 _writer.Close();
                 _writer = null;
             }
-            if (_reader != null && _reader.BaseStream.CanWrite)
-            {
-                _reader.Close();
-                _reader = null;
-            }
+            if (_reader == null || !_reader.BaseStream.CanWrite) return;
+            _reader.Close();
+            _reader = null;
         }
 
         #endregion
@@ -118,12 +116,12 @@ namespace ESME.Animats
                     throw new IndexOutOfRangeException("Index exceeds animat bounds");
                 //calculate file position
                 long timeRecordLength = _totalAnimatCount * EarthCoordinate3D.Size;
-                long filePosition = (timeRecordLength * timeIndex) + _sizeOfHeader;
+                var filePosition = (timeRecordLength * timeIndex) + _sizeOfHeader;
                 //skip to that position
                 _reader.BaseStream.Position = filePosition;
                 //go get it.
                 var retval = new EarthCoordinate3D[_totalAnimatCount];
-                for (int i = 0; i < _totalAnimatCount; i++)
+                for (var i = 0; i < _totalAnimatCount; i++)
                     retval[i] = new EarthCoordinate3D(_reader.ReadDouble(), _reader.ReadDouble(), _reader.ReadDouble());
                 return retval;
             }
@@ -153,9 +151,9 @@ namespace ESME.Animats
                     throw new AnimatLocationFileException("AnimatLocationFile:this[speciesname];species requested has zero animats");
                 long speciesStartIndex = 0;
                 long speciesEndIndex = 0;
-                int speciesCount = 0;
+                var speciesCount = 0;
 
-                foreach (SpeciesDescriptor species in SpeciesDescriptors)
+                foreach (var species in SpeciesDescriptors)
                 {
                     if (species.SpeciesName == speciesName)
                     {
@@ -165,8 +163,8 @@ namespace ESME.Animats
                     }
                     speciesStartIndex += species.AnimatCount;
                 }
-                long startOffset = speciesStartIndex * EarthCoordinate3D.Size;
-                long endOffset = (_totalAnimatCount - speciesEndIndex) * EarthCoordinate3D.Size;
+                var startOffset = speciesStartIndex * EarthCoordinate3D.Size;
+                var endOffset = (_totalAnimatCount - speciesEndIndex) * EarthCoordinate3D.Size;
 
                 // number of species in the list prior to target species * number of animats per species
                 _reader.BaseStream.Position = _sizeOfHeader;
@@ -175,7 +173,7 @@ namespace ESME.Animats
                 {
                     _reader.BaseStream.Seek(startOffset, SeekOrigin.Current);
                     var retval = new EarthCoordinate3D[speciesCount];
-                    for (int j = 0; j < speciesCount; j++) //read only the given species' positions, skip the others.
+                    for (var j = 0; j < speciesCount; j++) //read only the given species' positions, skip the others.
                         retval[j] = new EarthCoordinate3D(_reader.ReadDouble(), _reader.ReadDouble(),
                                                           _reader.ReadDouble());
                     //...and skip through the rest of the species for this time.
@@ -205,7 +203,7 @@ namespace ESME.Animats
                     trackpoints[i].Add(curTimeRecord[animatIDs[i]]);
                 }
             }
-            return trackpoints.Select(track => new OverlayLineSegments(track.ToArray(), Colors.Red, 1, LineStyle.Solid));
+            return trackpoints.Select(track => new OverlayLineSegments(track.ToArray(), Colors.Red, 1));
         }
         /// <summary>
         /// Get position information about all animats at all times.
@@ -240,7 +238,7 @@ namespace ESME.Animats
 
             _totalTimeRecords++;
             _writer.BaseStream.Seek(0, SeekOrigin.End);
-            foreach (EarthCoordinate3D location in animatLocations)
+            foreach (var location in animatLocations)
             {
                 _writer.Write(location.Latitude);
                 _writer.Write(location.Longitude);
@@ -261,7 +259,7 @@ namespace ESME.Animats
 
             _totalTimeRecords++;
             _writer.BaseStream.Seek(0, SeekOrigin.End);
-            foreach (mbsPosition location in animatLocations)
+            foreach (var location in animatLocations)
             {
                 _writer.Write(location.latitude);
                 _writer.Write(location.longitude);
@@ -281,7 +279,7 @@ namespace ESME.Animats
             sb.Append(String.Format("Total number of time records: {0}\n", _totalTimeRecords));
             sb.Append(String.Format("Simulation time resolution was {0}.\n", _timeStepLength));
             sb.Append(String.Format("Simulation Duration was {0}.\n", Duration));
-            foreach (SpeciesDescriptor s in SpeciesDescriptors)
+            foreach (var s in SpeciesDescriptors)
             {
                 sb.Append(String.Format("Species {0} contained {1} animats\n", s.SpeciesName, s.AnimatCount));
             }
@@ -308,7 +306,7 @@ namespace ESME.Animats
             try
             {
                 Console.WriteLine(@"--asking for a species that does not exist.");
-                IEnumerable<EarthCoordinate3D[]> badspecies = this["species that doesn't exist"];
+                var badspecies = this["species that doesn't exist"];
                 Console.WriteLine(badspecies.Count()); //this will chuck an exception.                
             }
             catch (ApplicationException e)
@@ -317,7 +315,7 @@ namespace ESME.Animats
                 Console.WriteLine(@"---Congrats, a known-false species doesn't exist and we know about it and threw an error. PASS.");
             }
 
-            IEnumerable<EarthCoordinate3D[]> goodspecies = this["generic_odontocete_3"];
+            var goodspecies = this["generic_odontocete_3"];
             if (goodspecies.Count() == _totalTimeRecords)
                 Console.WriteLine(@"--A known-good species was found and has the correct number of time records in it. PASS.");
             else
@@ -327,9 +325,9 @@ namespace ESME.Animats
             Console.WriteLine(@"Testing timespan versus index this. accessors at a random index value...");
 
             long tmp = r.Next(0, _totalTimeRecords / (int)_timeStepLength.TotalSeconds);
-            EarthCoordinate3D[] indexed = this[tmp];
-            EarthCoordinate3D[] timestepped = this[TimeSpan.FromSeconds(tmp * _timeStepLength.TotalSeconds)];
-            bool fail = false;
+            var indexed = this[tmp];
+            var timestepped = this[TimeSpan.FromSeconds(tmp * _timeStepLength.TotalSeconds)];
+            var fail = false;
             if (indexed.Where((t, i) => !t.Equals(timestepped[i])).Any()) {
                 Console.WriteLine(@"--index and timespan accessors return inconsistent records. FAIL.");
                 fail = true;
@@ -377,7 +375,7 @@ namespace ESME.Animats
             _writer.Write(_timeStepLength.Ticks);
             _writer.Write(Duration.Ticks);
             _writer.Write(SpeciesDescriptors.Count());
-            foreach (SpeciesDescriptor species in SpeciesDescriptors)
+            foreach (var species in SpeciesDescriptors)
             {
                 species.Write(_writer);
             }
@@ -401,7 +399,7 @@ namespace ESME.Animats
             Duration = new TimeSpan(_reader.ReadInt64());//read simulation duration
             var speciesCount = _reader.ReadInt32(); //read species count
             SpeciesDescriptors = new List<SpeciesDescriptor>();
-            for (int i = 0; i < speciesCount; i++)
+            for (var i = 0; i < speciesCount; i++)
                 SpeciesDescriptors.Add(new SpeciesDescriptor(_reader));
 
             _sizeOfHeader = _reader.BaseStream.Position;
