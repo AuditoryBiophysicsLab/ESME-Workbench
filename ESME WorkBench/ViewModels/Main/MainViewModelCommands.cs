@@ -3,21 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Windows.Input;
 using Cinch;
 using ESME;
 using ESME.Data;
-using ESME.Environment;
-using ESME.Environment.NAVO;
-using ESME.TransmissionLoss;
-using ESME.TransmissionLoss.CASS;
+using ESME.Mapping;
 using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
-using HRC.Navigation;
 using ExportOptionsViewModel = ESMEWorkBench.ViewModels.NAVO.ExportOptionsViewModel;
 
 namespace ESMEWorkBench.ViewModels.Main

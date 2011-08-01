@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 using ESME.NEMO;
-using ESME.Overlay;
+using ESME.NEMO.Overlay;
 using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.Platform
 {
-    public partial class BehaviorModel
+    public class BehaviorModel
     {
         public BehaviorModel(NemoPlatform nemoPlatform)
         {

@@ -3,7 +3,7 @@ using System.Text;
 using System.Xml.Serialization;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Map
+namespace ESME.Mapping
 {
     public class MyGdiPlusRasterLayer : GdiPlusRasterLayer
     {

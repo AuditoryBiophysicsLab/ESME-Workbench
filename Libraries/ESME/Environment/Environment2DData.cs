@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Media;
-using ESME.Overlay;
 using HRC.Navigation;
 using FileFormatException = ESME.Model.FileFormatException;
 

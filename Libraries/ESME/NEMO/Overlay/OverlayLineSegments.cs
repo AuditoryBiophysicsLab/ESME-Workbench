@@ -6,7 +6,7 @@ using System.Text;
 using System.Windows.Media;
 using HRC.Navigation;
 
-namespace ESME.Overlay
+namespace ESME.NEMO.Overlay
 {
     public class OverlayLineSegments : OverlayShape
     {

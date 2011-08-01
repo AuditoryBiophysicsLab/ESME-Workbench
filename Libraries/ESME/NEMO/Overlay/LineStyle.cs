@@ -1,4 +1,4 @@
-﻿namespace ESME.Overlay
+﻿namespace ESME.NEMO.Overlay
 {
     public enum LineStyle
     {

@@ -16,13 +16,12 @@ using ESME;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
+using ESME.Mapping;
 using ESME.Metadata;
-using ESME.Overlay;
+using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.EnvironmentBuilder;
 using ESME.Views.Locations;
-using ESMEWorkBench.ViewModels.Layers;
-using ESMEWorkBench.ViewModels.Map;
 using HRC.Navigation;
 using HRC.Utility;
 using Microsoft.Windows.Controls.Ribbon;
@@ -108,64 +107,7 @@ namespace ESMEWorkBench.ViewModels.Main
         bool _viewIsActivated;
         #endregion
 
-        #region public bool EnvironmentTabIsActive { get; set; }
-
-        public bool EnvironmentTabIsActive
-        {
-            get { return _environmentTabIsActive; }
-            set
-            {
-                if (_environmentTabIsActive == value) return;
-                _environmentTabIsActive = value;
-                NotifyPropertyChanged(EnvironmentTabIsActiveChangedEventArgs);
-                EnvironmentTabMapLayers = _environmentTabIsActive ? new ObservableCollection<MapLayerViewModel>() : null;
-            }
-        }
-
-        static readonly PropertyChangedEventArgs EnvironmentTabIsActiveChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.EnvironmentTabIsActive);
-        bool _environmentTabIsActive;
-
-        #endregion
-
-        #region public ObservableCollection<MapLayerViewModel> EnvironmentTabMapLayers { get; set; }
-
-        static readonly PropertyChangedEventArgs EnvironmentTabMapLayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.EnvironmentTabMapLayers);
-        ObservableCollection<MapLayerViewModel> _environmentTabMapLayers;
-
-        public ObservableCollection<MapLayerViewModel> EnvironmentTabMapLayers
-        {
-            get { return _environmentTabMapLayers; }
-            set
-            {
-                if (_environmentTabMapLayers == value) return;
-                if (_environmentTabMapLayers != null) _environmentTabMapLayers.CollectionChanged -= EnvironmentTabMapLayersCollectionChanged;
-                _environmentTabMapLayers = value;
-                if (_environmentTabMapLayers != null) _environmentTabMapLayers.CollectionChanged += EnvironmentTabMapLayersCollectionChanged;
-                NotifyPropertyChanged(EnvironmentTabMapLayersChangedEventArgs);
-            }
-        }
-
-        void EnvironmentTabMapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null) { }
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    break;
-                case NotifyCollectionChangedAction.Move:
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    break;
-            }
-            NotifyPropertyChanged(EnvironmentTabMapLayersChangedEventArgs);
-        }
-
-        #endregion
-
+        public MapLayerCollection EnvironmentTabMapLayers { get; set; }
         #region Range Complex ribbon group
 
         #region public RangeComplexDescriptors RangeComplexDescriptors { get; set; }
@@ -245,7 +187,7 @@ namespace ESMEWorkBench.ViewModels.Main
             if (EnvironmentTabMapLayers == null)
             {
                 appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                EnvironmentTabMapLayers = new ObservableCollection<MapLayerViewModel>
+                EnvironmentTabMapLayers = new MapLayerCollection
                 {
                         new ShapefileMapLayer
                         {
@@ -262,25 +204,23 @@ namespace ESMEWorkBench.ViewModels.Main
                 };
                 ZoomToWorldMap();
             }
-            if (HomeTabMapLayers == null)
+            if (HomeTabMapLayers != null) return;
+            appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            HomeTabMapLayers = new MapLayerCollection
             {
-                appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                HomeTabMapLayers = new ObservableCollection<MapLayerViewModel>
-                {
-                        new ShapefileMapLayer
-                        {
-                                LayerType = LayerType.BaseMap,
-                                LineColor = Colors.Beige,
-                                AreaStyle = AreaStyles.Country2,
-                                CanBeRemoved = false,
-                                CanBeReordered = true,
-                                CanChangeAreaColor = true,
-                                CanChangeLineColor = true,
-                                ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
-                                Name = "Base Map",
-                        },
-                };
-            }
+                    new ShapefileMapLayer
+                    {
+                            LayerType = LayerType.BaseMap,
+                            LineColor = Colors.Beige,
+                            AreaStyle = AreaStyles.Country2,
+                            CanBeRemoved = false,
+                            CanBeReordered = true,
+                            CanChangeAreaColor = true,
+                            CanChangeLineColor = true,
+                            ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
+                            Name = "Base Map",
+                    },
+            };
         }
 
         void DisplayRangeComplex()
@@ -883,7 +823,6 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _visualizerService.ShowDialog("BathymetryExtractionView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
             var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
-            var selectedOverlayName = SelectedOverlayName;
             var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
             if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
             var destinationPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Bathymetry");
@@ -908,7 +847,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 metadata.Bounds = vm.BoundingBox;
                 metadata.Save();
                 var bathymetryDescriptor = new NAEMOBathymetryDescriptor {DataFilename = bathymetryFilePath, Metadata = metadata};
-                NAEMOBathymetryDescriptors.Add(new System.Collections.Generic.KeyValuePair<string, NAEMOBathymetryDescriptor>(vm.BathymetryName, bathymetryDescriptor));
+                NAEMOBathymetryDescriptors.Add(new KeyValuePair<string, NAEMOBathymetryDescriptor>(vm.BathymetryName, bathymetryDescriptor));
                 NAEMOBathymetryDescriptors.Sort();
                 SelectedBathymetryDescriptor = bathymetryDescriptor;
             });
@@ -1097,165 +1036,162 @@ namespace ESMEWorkBench.ViewModels.Main
             var bathymetryName = Path.GetFileNameWithoutExtension(SelectedBathymetryDescriptor.DataFilename);
             var vm = new EnvironmentExtractionViewModel(overlayName, bathymetryName);
             var result = _visualizerService.ShowDialog("EnvironmentExtractionView", vm);
-            if ((result.HasValue) && (result.Value))
+            if ((!result.HasValue) || (!result.Value)) return;
+            var bathymetry = SelectedBathymetryDescriptor.Data;
+            var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
+            var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
+            var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
+            if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
+
+            var assemblyLocation = Assembly.GetCallingAssembly().Location;
+            var extractionPath = Path.GetDirectoryName(assemblyLocation);
+            if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
+
+            var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
+            var gdemRequiredSupportFiles = new List<string>
             {
-                var bathymetry = SelectedBathymetryDescriptor.Data;
-                var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
-                var extractionArea = new GeoRect(SelectedOverlayDescriptor.Data.Shapes[0].BoundingBox);
-                var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
-                if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
+                    Path.Combine(extractionPath, "netcdf.dll"),
+                    Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
+            };
 
-                var assemblyLocation = Assembly.GetCallingAssembly().Location;
-                var extractionPath = Path.GetDirectoryName(assemblyLocation);
-                if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
+            var extendedMonthlySoundSpeeds = new SoundSpeed();
+            var extendedAndAveragedSoundSpeeds = new SoundSpeed();
+            var monthlyTemperature = new SoundSpeed();
+            var monthlySalinity = new SoundSpeed();
 
-                var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
-                var gdemRequiredSupportFiles = new List<string>
+            var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
+
+            var selectedTimePeriods = vm.EnvironmentDescriptors.Select(t => t.TimePeriod).ToList();
+            var requiredMonths = selectedTimePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
+            var allMonths = new List<NAVOTimePeriod>();
+            foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
+            var uniqueMonths = allMonths.Distinct().ToList();
+            uniqueMonths.Sort();
+            var environmentPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Environment");
+            BackgroundTaskAggregator = new BackgroundTaskAggregator();
+
+            var naemoEnvironmentExporters = selectedTimePeriods.Select(t => new CASSBackgroundExporter
+            {
+                    WorkerSupportsCancellation = false,
+                    BathymetryFileName = Path.GetFileName(SelectedBathymetryDescriptor.DataFilename),
+                    OverlayFileName = Path.GetFileName(SelectedOverlayDescriptor.DataFilename),
+                    TimePeriod = t,
+                    ExtractionArea = extractionArea,
+                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                    DestinationPath = Path.Combine(environmentPath, vm.EnvironmentDescriptors.Find(descriptor => descriptor.TimePeriod == t).EnvironmentName + ".dat"),
+                    UseExpandedExtractionArea = false,
+                    TaskName = "Export NAEMO environment for " + t,
+            }).ToList();
+            foreach (var exporter in naemoEnvironmentExporters)
+            {
+                exporter.RunWorkerCompleted += (s, e) =>
                 {
-                        Path.Combine(extractionPath, "netcdf.dll"),
-                        Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
-                };
-
-                var extendedMonthlySoundSpeeds = new SoundSpeed();
-                var extendedAndAveragedSoundSpeeds = new SoundSpeed();
-                var monthlyTemperature = new SoundSpeed();
-                var monthlySalinity = new SoundSpeed();
-
-                var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
-
-                var selectedTimePeriods = vm.EnvironmentDescriptors.Select(t => t.TimePeriod).ToList();
-                var requiredMonths = selectedTimePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
-                var allMonths = new List<NAVOTimePeriod>();
-                foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
-                var uniqueMonths = allMonths.Distinct().ToList();
-                uniqueMonths.Sort();
-                var environmentPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Environment");
-                BackgroundTaskAggregator = new BackgroundTaskAggregator();
-
-                var naemoEnvironmentExporters = selectedTimePeriods.Select(t => new CASSBackgroundExporter
-                {
-                        WorkerSupportsCancellation = false,
-                        BathymetryFileName = Path.GetFileName(SelectedBathymetryDescriptor.DataFilename),
-                        OverlayFileName = Path.GetFileName(SelectedOverlayDescriptor.DataFilename),
-                        TimePeriod = t,
-                        ExtractionArea = extractionArea,
-                        NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                        DestinationPath = Path.Combine(environmentPath, vm.EnvironmentDescriptors.Find(descriptor => descriptor.TimePeriod == t).EnvironmentName + ".dat"),
-                        UseExpandedExtractionArea = false,
-                        TaskName = "Export NAEMO environment for " + t,
-                }).ToList();
-                foreach (var exporter in naemoEnvironmentExporters)
-                {
-                    exporter.RunWorkerCompleted += (s, e) =>
+                    var curExporter = (CASSBackgroundExporter)s;
+                    var metadataFilename = NAEMOMetadataBase.MetadataFilename(curExporter.DestinationPath);
+                    var metadata = new NAEMOEnvironmentMetadata
                     {
-                        var curExporter = (CASSBackgroundExporter)s;
-                        var metadataFilename = NAEMOMetadataBase.MetadataFilename(curExporter.DestinationPath);
-                        var metadata = new NAEMOEnvironmentMetadata
-                        {
                             BathymetryName = Path.GetFileNameWithoutExtension(curExporter.BathymetryFileName),
                             OverlayFilename = Path.GetFileNameWithoutExtension(curExporter.OverlayFileName),
                             TimePeriod = curExporter.TimePeriod,
                             Bounds = extractionArea,
                             Filename = metadataFilename,
-                        };
-                        metadata.Save();
-                        var environmentDescriptor = new NAEMOEnvironmentDescriptor { DataFilename = curExporter.DestinationPath, Metadata = metadata };
-                        lock (NAEMOEnvironmentDescriptors)
-                        {
-                            NAEMOEnvironmentDescriptors.Add(new System.Collections.Generic.KeyValuePair<string, NAEMOEnvironmentDescriptor>(Path.GetFileNameWithoutExtension(curExporter.DestinationPath),
-                                                                                                                                            environmentDescriptor));
-                            NAEMOBathymetryDescriptors.Sort();
-                            SelectedEnvironmentDescriptor = environmentDescriptor;
-                        }
                     };
-                }
-
-                var windExtractor = new SMGCBackgroundExtractor
-                {
-                        WorkerSupportsCancellation = false,
-                        ExtractionArea = extractionArea,
-                        SelectedTimePeriods = selectedTimePeriods,
-                        NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                        UseExpandedExtractionArea = false,
-                        TaskName = "Wind data extraction",
+                    metadata.Save();
+                    var environmentDescriptor = new NAEMOEnvironmentDescriptor { DataFilename = curExporter.DestinationPath, Metadata = metadata };
+                    lock (NAEMOEnvironmentDescriptors)
+                    {
+                        NAEMOEnvironmentDescriptors.Add(new KeyValuePair<string, NAEMOEnvironmentDescriptor>(Path.GetFileNameWithoutExtension(curExporter.DestinationPath),
+                                                                                                                                        environmentDescriptor));
+                        NAEMOBathymetryDescriptors.Sort();
+                        SelectedEnvironmentDescriptor = environmentDescriptor;
+                    }
                 };
-                BackgroundTaskAggregator.BackgroundTasks.Add(windExtractor);
-                windExtractor.RunWorkerCompleted += (s, e) => { foreach (var naemo in naemoEnvironmentExporters) naemo.Wind = ((SMGCBackgroundExtractor)s).Wind; };
-
-                // Create a sediment extractor
-                var sedimentExtractor = new BSTBackgroundExtractor
-                {
-                        WorkerSupportsCancellation = false,
-                        ExtractionArea = extractionArea,
-                        NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                        UseExpandedExtractionArea = false,
-                        TaskName = "Sediment data extraction",
-                };
-                BackgroundTaskAggregator.BackgroundTasks.Add(sedimentExtractor);
-                sedimentExtractor.RunWorkerCompleted += (s, e) => { foreach (var naemo in naemoEnvironmentExporters) naemo.Sediment = ((BSTBackgroundExtractor)s).Sediment; };
-
-                //var temperatureAndSalinityFileWriter = new TemperatureAndSalinityFileWriter
-                //{
-                //        WorkerSupportsCancellation = false,
-                //        DestinationPath = tempPath,
-                //        TaskName = "Save soundspeed data"
-                //};
-                var averagers = selectedTimePeriods.Select(timePeriod => new SoundSpeedBackgroundAverager
-                {
-                        WorkerSupportsCancellation = false,
-                        TimePeriod = timePeriod,
-                        ExtractionArea = extractionArea,
-                        NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                        UseExpandedExtractionArea = false,
-                        TaskName = "Calculate extended sound speeds for " + timePeriod,
-                }).ToList();
-
-                foreach (var month in uniqueMonths)
-                {
-                    var soundSpeedExtractor = new GDEMBackgroundExtractor
-                    {
-                            WorkerSupportsCancellation = false,
-                            TimePeriod = month,
-                            ExtractionArea = extractionArea,
-                            NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                            DestinationPath = tempPath,
-                            UseExpandedExtractionArea = false,
-                            ExtractionProgramPath = gdemExtractionProgramPath,
-                            RequiredSupportFiles = gdemRequiredSupportFiles,
-                            MaxDepth = maxDepth,
-                    };
-                    soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
-                    {
-                        var extractor = (GDEMBackgroundExtractor)sender;
-                        monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
-                        monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
-                        extendedMonthlySoundSpeeds.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
-                        //Console.WriteLine("soundspeed extractor for {0} complete. {1} extractors are still busy", extractor.TimePeriod, soundSpeedExtractors.Where(s => s.IsBusy).Count());
-                        if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
-                        //temperatureAndSalinityFileWriter.Temperature = monthlyTemperature;
-                        //temperatureAndSalinityFileWriter.Salinity = monthlySalinity;
-                        foreach (var averager in averagers) averager.ExtendedMonthlySoundSpeeds = extendedMonthlySoundSpeeds;
-                    };
-                    soundSpeedExtractors.Add(soundSpeedExtractor);
-                    BackgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
-                }
-                //BackgroundTaskAggregator.BackgroundTasks.Add(temperatureAndSalinityFileWriter);
-                foreach (var averager in averagers)
-                {
-                    BackgroundTaskAggregator.BackgroundTasks.Add(averager);
-                    averager.RunWorkerCompleted += (sender, e) =>
-                    {
-                        var avg = (SoundSpeedBackgroundAverager)sender;
-                        extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(avg.ExtendedAverageSoundSpeedField);
-                        if (averagers.Any(a => a.IsBusy)) return;
-                        foreach (var naemo in naemoEnvironmentExporters) naemo.ExtendedAndAveragedSoundSpeeds = extendedAndAveragedSoundSpeeds;
-                    };
-                }
-                var loadMetadataTasks = new List<GenericBackgroundTask>();
-                foreach (var naemo in naemoEnvironmentExporters)
-                    BackgroundTaskAggregator.BackgroundTasks.Add(naemo);
-                BackgroundTaskAggregator.TaskName = "Environmental data extraction";
             }
+
+            var windExtractor = new SMGCBackgroundExtractor
+            {
+                    WorkerSupportsCancellation = false,
+                    ExtractionArea = extractionArea,
+                    SelectedTimePeriods = selectedTimePeriods,
+                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                    UseExpandedExtractionArea = false,
+                    TaskName = "Wind data extraction",
+            };
+            BackgroundTaskAggregator.BackgroundTasks.Add(windExtractor);
+            windExtractor.RunWorkerCompleted += (s, e) => { foreach (var naemo in naemoEnvironmentExporters) naemo.Wind = ((SMGCBackgroundExtractor)s).Wind; };
+
+            // Create a sediment extractor
+            var sedimentExtractor = new BSTBackgroundExtractor
+            {
+                    WorkerSupportsCancellation = false,
+                    ExtractionArea = extractionArea,
+                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                    UseExpandedExtractionArea = false,
+                    TaskName = "Sediment data extraction",
+            };
+            BackgroundTaskAggregator.BackgroundTasks.Add(sedimentExtractor);
+            sedimentExtractor.RunWorkerCompleted += (s, e) => { foreach (var naemo in naemoEnvironmentExporters) naemo.Sediment = ((BSTBackgroundExtractor)s).Sediment; };
+
+            //var temperatureAndSalinityFileWriter = new TemperatureAndSalinityFileWriter
+            //{
+            //        WorkerSupportsCancellation = false,
+            //        DestinationPath = tempPath,
+            //        TaskName = "Save soundspeed data"
+            //};
+            var averagers = selectedTimePeriods.Select(timePeriod => new SoundSpeedBackgroundAverager
+            {
+                    WorkerSupportsCancellation = false,
+                    TimePeriod = timePeriod,
+                    ExtractionArea = extractionArea,
+                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                    UseExpandedExtractionArea = false,
+                    TaskName = "Calculate extended sound speeds for " + timePeriod,
+            }).ToList();
+
+            foreach (var month in uniqueMonths)
+            {
+                var soundSpeedExtractor = new GDEMBackgroundExtractor
+                {
+                        WorkerSupportsCancellation = false,
+                        TimePeriod = month,
+                        ExtractionArea = extractionArea,
+                        NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                        DestinationPath = tempPath,
+                        UseExpandedExtractionArea = false,
+                        ExtractionProgramPath = gdemExtractionProgramPath,
+                        RequiredSupportFiles = gdemRequiredSupportFiles,
+                        MaxDepth = maxDepth,
+                };
+                soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
+                {
+                    var extractor = (GDEMBackgroundExtractor)sender;
+                    monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
+                    monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
+                    extendedMonthlySoundSpeeds.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
+                    //Console.WriteLine("soundspeed extractor for {0} complete. {1} extractors are still busy", extractor.TimePeriod, soundSpeedExtractors.Where(s => s.IsBusy).Count());
+                    if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
+                    //temperatureAndSalinityFileWriter.Temperature = monthlyTemperature;
+                    //temperatureAndSalinityFileWriter.Salinity = monthlySalinity;
+                    foreach (var averager in averagers) averager.ExtendedMonthlySoundSpeeds = extendedMonthlySoundSpeeds;
+                };
+                soundSpeedExtractors.Add(soundSpeedExtractor);
+                BackgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
+            }
+            //BackgroundTaskAggregator.BackgroundTasks.Add(temperatureAndSalinityFileWriter);
+            foreach (var averager in averagers)
+            {
+                BackgroundTaskAggregator.BackgroundTasks.Add(averager);
+                averager.RunWorkerCompleted += (sender, e) =>
+                {
+                    var avg = (SoundSpeedBackgroundAverager)sender;
+                    extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(avg.ExtendedAverageSoundSpeedField);
+                    if (averagers.Any(a => a.IsBusy)) return;
+                    foreach (var naemo in naemoEnvironmentExporters) naemo.ExtendedAndAveragedSoundSpeeds = extendedAndAveragedSoundSpeeds;
+                };
+            }
+            foreach (var naemo in naemoEnvironmentExporters)
+                BackgroundTaskAggregator.BackgroundTasks.Add(naemo);
+            BackgroundTaskAggregator.TaskName = "Environmental data extraction";
         }
 
         #endregion

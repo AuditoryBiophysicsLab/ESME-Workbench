@@ -87,9 +87,18 @@
     <Reference Include="Cinch.WPF">
       <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
     </Reference>
+    <Reference Include="GeoAPI">
+      <HintPath>..\..\ESME WorkBench\External References\GeoAPI.dll</HintPath>
+    </Reference>
     <Reference Include="HDF5DotNet, Version=1.8.7.0, Culture=neutral, processorArchitecture=AMD64" />
+    <Reference Include="MapSuiteCore">
+      <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
+    </Reference>
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
+    </Reference>
+    <Reference Include="NetTopologySuite">
+      <HintPath>..\..\ESME WorkBench\External References\NetTopologySuite.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
@@ -118,6 +127,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WpfDesktopEdition">
+      <HintPath>..\..\ESME WorkBench\External References\WpfDesktopEdition.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +180,15 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Environment\Descriptors\RangeComplexDescriptor.cs" />
+    <Compile Include="Mapping\LayerType.cs" />
+    <Compile Include="Mapping\LineWeightMenuItemViewModel.cs" />
+    <Compile Include="Mapping\MapLayerCollection.cs" />
+    <Compile Include="Mapping\MapLayerViewModel.cs" />
+    <Compile Include="Mapping\MarkerLayerViewModel.cs" />
+    <Compile Include="Mapping\OverlayFileMapLayer.cs" />
+    <Compile Include="Mapping\PointSymbolTypeMenuItemViewModel.cs" />
+    <Compile Include="Mapping\RasterMapLayer.cs" />
+    <Compile Include="Mapping\ShapefileMapLayer.cs" />
     <Compile Include="Metadata\RangeComplexMetadata.cs" />
     <Compile Include="Environment\Sediment.cs" />
     <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />
@@ -186,17 +207,17 @@
     <Compile Include="Metadata\NAEMOScenarioMetadata.cs" />
     <Compile Include="Animats\AnimatInterface.cs" />
     <Compile Include="NEMO\Exceptions.cs" />
-    <Compile Include="Overlay\Exceptions.cs" />
+    <Compile Include="NEMO\Overlay\Exceptions.cs" />
     <Compile Include="Environment\Descriptors\NAEMODescriptors.cs" />
-    <Compile Include="Overlay\OverlayCircle.cs" />
-    <Compile Include="Overlay\OverlayFile.cs" />
+    <Compile Include="NEMO\Overlay\OverlayCircle.cs" />
+    <Compile Include="NEMO\Overlay\OverlayFile.cs" />
     <Compile Include="Environment\Descriptors\NAEMOEnvironmentDescriptor.cs" />
-    <Compile Include="Overlay\OverlayLabel.cs" />
-    <Compile Include="Overlay\OverlayLineSegments.cs" />
-    <Compile Include="Overlay\OverlayParser.cs" />
-    <Compile Include="Overlay\OverlayPoint.cs" />
-    <Compile Include="Overlay\OverlayShape.cs" />
-    <Compile Include="Overlay\LineStyle.cs" />
+    <Compile Include="NEMO\Overlay\OverlayLabel.cs" />
+    <Compile Include="NEMO\Overlay\OverlayLineSegments.cs" />
+    <Compile Include="NEMO\Overlay\OverlayParser.cs" />
+    <Compile Include="NEMO\Overlay\OverlayPoint.cs" />
+    <Compile Include="NEMO\Overlay\OverlayShape.cs" />
+    <Compile Include="NEMO\Overlay\LineStyle.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="NEMO\NemoAnimals.cs" />
     <Compile Include="NEMO\NemoMode.cs" />
@@ -294,9 +315,9 @@
     <Compile Include="NEMO\NemoBase.cs" />
     <Compile Include="NEMO\NemoFile.cs" />
     <Compile Include="NEMO\NemoPSM.cs" />
-    <Compile Include="Overlay\LineReader.cs" />
-    <Compile Include="Overlay\OverlayLineSegment.cs" />
-    <Compile Include="Overlay\Tokenizer.cs" />
+    <Compile Include="NEMO\Overlay\LineReader.cs" />
+    <Compile Include="NEMO\Overlay\OverlayLineSegment.cs" />
+    <Compile Include="NEMO\Overlay\Tokenizer.cs" />
     <Compile Include="Shapes\TransmissionLossFieldShape.cs" />
     <Compile Include="TransmissionLoss\Bellhop\Bellhop.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFieldCache.cs" />

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ESME.Overlay
+namespace ESME.NEMO.Overlay
 {
     internal class Tokenizer
     {

@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.WpfDesktopEdition;
 
-namespace ESMEWorkBench.ViewModels.Map
+namespace ESME.Mapping
 {
     public class MarkerLayerViewModel : MapLayerViewModel
     {

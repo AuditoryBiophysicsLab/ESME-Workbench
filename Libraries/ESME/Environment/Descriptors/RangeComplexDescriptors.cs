@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Threading;
-using ESME.Overlay;
+using ESME.NEMO.Overlay;
 using HRC.Navigation;
 
 namespace ESME.Environment.Descriptors
@@ -18,8 +18,8 @@ namespace ESME.Environment.Descriptors
 
         public static RangeComplexDescriptors ReadCSV(string fileName, Dispatcher dispatcher)
         {
-            var result = new RangeComplexDescriptors()
-                         {
+            var result = new RangeComplexDescriptors
+            {
                              FileName = fileName,
                              Dispatcher = dispatcher,
                          };

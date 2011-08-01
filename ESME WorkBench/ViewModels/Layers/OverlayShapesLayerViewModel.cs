@@ -4,7 +4,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Media;
 using Cinch;
-using ESME.Overlay;
 using ESMEWorkBench.ViewModels.Main;
 using ThinkGeo.MapSuite.Core;
 using ThinkGeo.MapSuite.WpfDesktopEdition;

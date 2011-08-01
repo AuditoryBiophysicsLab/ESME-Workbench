@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using Cinch;
 using ESME.Data;
-using ESME.Overlay;
+using ESME.NEMO.Overlay;
 using HRC.Navigation;
 using HRC.Validation;
 
