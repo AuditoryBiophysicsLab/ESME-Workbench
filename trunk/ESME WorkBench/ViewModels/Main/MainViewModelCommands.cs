@@ -263,6 +263,7 @@ namespace ESMEWorkBench.ViewModels.Main
                                                                                                              ea.Cancel = true;
                                                                                                              return;
                                                                                                          }
+                                                                                                         ScenarioMetadata = null;
                                                                                                      }));
             }
         }
@@ -594,7 +595,7 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region ConfigureAcousticModelsCommand
-#if EXPERIMENTS_SUPPORTED
+#if false
 
         public SimpleCommand<object, object> ConfigureAcousticModelsCommand
         {

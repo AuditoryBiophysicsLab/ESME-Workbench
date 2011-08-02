@@ -13,10 +13,13 @@ using ESME;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Mapping;
+using ESME.Metadata;
 using ESME.NEMO;
 using ESME.NEMO.Overlay;
+using ESME.TransmissionLoss;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Layers;
+using ESMEWorkBench.ViewModels.TransmissionLoss;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
@@ -34,8 +37,6 @@ namespace ESMEWorkBench.ViewModels.Main
             set
             {
                 if (_nemoFile == value) return;
-                if (_nemoFile != null) ClearScenario(_nemoFile);
-                
                 _nemoFile = value;
                 if (_nemoFile != null)
                 {
@@ -51,12 +52,16 @@ namespace ESMEWorkBench.ViewModels.Main
                     AvailableEnvironments.AddRange(from environment in _rangeComplexDescriptor.NAEMOEnvironmentDescriptors
                                                    where (environment.Value != null) && (environment.Value.Metadata.TimePeriod == curTimePeriod) && (!string.IsNullOrEmpty(environment.Value.Metadata.BathymetryName))
                                                    select environment);
+                    if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
+                    else NemoModeToAcousticModelNameMap.UpdateModes(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                 }
                 else
                 {
+                    ClearScenario();
                     _rangeComplexPath = _areasPath = _bathymetryPath = _environmentPath = _imagesPath = null;
                     _rangeComplexDescriptor = null;
                     _scenarioBounds = null;
+                    NemoModeToAcousticModelNameMap = null;
                     AvailableEnvironments = null;
                 }
                     
@@ -75,11 +80,11 @@ namespace ESMEWorkBench.ViewModels.Main
         RangeComplexDescriptor _rangeComplexDescriptor;
         GeoRect _scenarioBounds;
 
-        void ClearScenario(NemoFile nemoFile)
+        void ClearScenario()
         {
-            var layersToDelete = from layer in HomeTabMapLayers
-                                 where layer.LayerType != LayerType.BaseMap
-                                 select layer;
+            var layersToDelete = (from layer in HomeTabMapLayers
+                                  where layer.LayerType != LayerType.BaseMap
+                                  select layer).ToList();
             foreach (var layer in layersToDelete) HomeTabMapLayers.Remove(layer);
         }
 
@@ -96,7 +101,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     platform.CalculateBehavior();
                     if (platform.BehaviorModel != null && platform.BehaviorModel.CourseOverlay != null)
                         HomeTabMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} track", platform.Name), LayerType.Track, Colors.Transparent,
-                                                              new List<OverlayShape> {platform.BehaviorModel.CourseOverlay}, 1, PointSymbolType.Circle, true, new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1));
+                                                              new List<OverlayShape> {platform.BehaviorModel.CourseOverlay}, 0, PointSymbolType.Circle, true, new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1));
                 }
                 else
                     for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
@@ -111,6 +116,25 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public NAEMOScenarioMetadata ScenarioMetadata { get; set; }
+
+        public NAEMOScenarioMetadata ScenarioMetadata
+        {
+            get { return _scenarioMetadata; }
+            set
+            {
+                if (_scenarioMetadata == value) return;
+                if (_scenarioMetadata != null) _scenarioMetadata.Save();
+                _scenarioMetadata = value;
+                NotifyPropertyChanged(ScenarioMetadataChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ScenarioMetadataChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioMetadata);
+        NAEMOScenarioMetadata _scenarioMetadata;
+
+        #endregion
+
         #region public string ScenarioFilename { get; set; }
 
         public string ScenarioFilename
@@ -121,7 +145,19 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_scenarioFilename == value) return;
                 _scenarioFilename = value;
                 NotifyPropertyChanged(ScenarioFilenameChangedEventArgs);
-                NemoFile = _scenarioFilename != null ? new NemoFile(_scenarioFilename, ESME.Globals.AppSettings.ScenarioDataDirectory) : null;
+                if (_scenarioFilename != null)
+                {
+                    NemoFile = new NemoFile(_scenarioFilename, ESME.Globals.AppSettings.ScenarioDataDirectory);
+                    var metadataFilename = NAEMOMetadataBase.MetadataFilename(_scenarioFilename);
+                    ScenarioMetadata = NAEMOScenarioMetadata.Load(metadataFilename) ?? new NAEMOScenarioMetadata { Filename = metadataFilename };
+                    if (ScenarioMetadata.EnvironmentName != null) SelectedEnvironment = (NAEMOEnvironmentDescriptor)AvailableEnvironments[ScenarioMetadata.EnvironmentName];
+                }
+                else
+                {
+                    NemoFile = null;
+                    ScenarioMetadata = null;
+                }
+
             }
         }
 
@@ -176,6 +212,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_selectedEnvironment == value) return;
                 _selectedEnvironment = value;
                 NotifyPropertyChanged(SelectedEnvironmentChangedEventArgs);
+                if (ScenarioMetadata != null && _selectedEnvironment != null) ScenarioMetadata.EnvironmentName = Path.GetFileNameWithoutExtension(_selectedEnvironment.Metadata.Filename);
                 Task.Factory.StartNew(() => _dispatcher.InvokeIfRequired(DisplaySelectedEnvironment, DispatcherPriority.Normal));
             }
         }
@@ -187,9 +224,10 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if ((!_allViewModelsAreReady) || (!_viewIsActivated) || (_selectedEnvironment == null)) return;
             var samplePoints = _selectedEnvironment.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
-            //_selectedEnvironment.Metadata.BathymetryName
-            var bathyBitmapLayer = HomeTabMapLayers.DisplayBathymetryRaster("Bathymetry", Path.Combine(_imagesPath, _selectedEnvironment.Metadata.BathymetryName + ".bmp"), true, false, true, ((NAEMOBathymetryDescriptor)(_rangeComplexDescriptor.NAEMOBathymetryDescriptors[ _selectedEnvironment.Metadata.BathymetryName])).Metadata.Bounds);
-            //MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+            var bathymetryBounds = ((NAEMOBathymetryDescriptor)(_rangeComplexDescriptor.NAEMOBathymetryDescriptors[_selectedEnvironment.Metadata.BathymetryName])).Metadata.Bounds;
+            _scenarioBounds.Union(bathymetryBounds);
+            var bathyBitmapLayer = HomeTabMapLayers.DisplayBathymetryRaster("Bathymetry", Path.Combine(_imagesPath, _selectedEnvironment.Metadata.BathymetryName + ".bmp"), true, false, true, bathymetryBounds);
+            MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
             HomeTabMapLayers.DisplayOverlayShapes("Sound Speed", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Circle, false, null, false);
             HomeTabMapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
             foreach (var sedimentType in _selectedEnvironment.Data.SedimentTypes)
@@ -197,6 +235,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 samplePoints = sedimentType.Value.Select(samplePoint => new OverlayPoint(samplePoint));
                 HomeTabMapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", sedimentType.Key.ToLower()), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
             }
+            ZoomToScenarioHandler();
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 
@@ -223,6 +262,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 fileName = _openFileService.FileName;
                 Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
             }
+            ScenarioFilename = null;
             RecentFiles.InsertFile(fileName); 
             ScenarioFilename = fileName;
         }
@@ -279,5 +319,44 @@ namespace ESMEWorkBench.ViewModels.Main
             }.Start();
         }
         #endregion
+
+        #region ConfigureAcousticModelsCommand
+        public SimpleCommand<object, object> ConfigureAcousticModelsCommand
+        {
+            get { return _configureAcousticModels ?? (_configureAcousticModels = new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; }, delegate { ConfigureAcousticModelsHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _configureAcousticModels;
+
+        void ConfigureAcousticModelsHandler()
+        {
+            var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(NemoModeToAcousticModelNameMap, Globals.ValidTransmissionLossAlgorithms);
+            var result = _visualizerService.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);
+            if (result.HasValue && result.Value)
+            {
+                _experiment.IsChanged = true;
+            }
+        }
+
+        #endregion
+
+        #region public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap { get; set; }
+
+        public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap
+        {
+            get { return _nemoModeToAcousticModelNameMap; }
+            set
+            {
+                if (_nemoModeToAcousticModelNameMap == value) return;
+                _nemoModeToAcousticModelNameMap = value;
+                NotifyPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NemoModeToAcousticModelNameMapChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.NemoModeToAcousticModelNameMap);
+        NemoModeToAcousticModelNameMap _nemoModeToAcousticModelNameMap;
+
+        #endregion
+
     }
 }
