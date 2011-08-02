@@ -68,6 +68,7 @@ namespace ESME.Environment.Descriptors
                             () => bathymetryDescriptors = new NAEMOBathymetryDescriptors(rangeComplexName) { Dispatcher = dispatcher },
                             () => environmentDescriptors = new NAEMOEnvironmentDescriptors(rangeComplexName) { Dispatcher = dispatcher });
             if (overlayDescriptors == null || bathymetryDescriptors == null || environmentDescriptors == null) throw new ApplicationException("Error initializing overlay, bathymetry or environment descriptors");
+            CreateRangeComplexDirectories(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName));
             var rangeComplexDescriptor = new RangeComplexDescriptor
             {
                 Data = new RangeComplex(latitude, longitude)
@@ -90,21 +91,24 @@ namespace ESME.Environment.Descriptors
             return rangeComplexDescriptor;
         }
 
+        static void CreateRangeComplexDirectories(string rangeComplexPath)
+        {
+            Directory.CreateDirectory(rangeComplexPath);
+            Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Areas"));
+            Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Bathymetry"));
+            Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Environment"));
+            Directory.CreateDirectory(Path.Combine(rangeComplexPath, "GeographicAreas"));
+            Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Images"));
+            Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Species"));
+        }
+
         public RangeComplexDescriptor CreateRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, List<EarthCoordinate> opAreaBoundsCoordinates, string simLimitFile, List<EarthCoordinate> simAreaBoundsCoordinates, Dispatcher dispatcher)
         {
             var rangeComplexPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName);
             if (!Directory.Exists(rangeComplexPath))
             {
-                Directory.CreateDirectory(rangeComplexPath);
+                CreateRangeComplexDirectories(rangeComplexPath);
                 var areasPath = Path.Combine(rangeComplexPath, "Areas");
-                Directory.CreateDirectory(areasPath);
-                Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Bathymetry"));
-                Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Environment"));
-                Directory.CreateDirectory(Path.Combine(rangeComplexPath, "GeographicAreas"));
-                Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Images"));
-
-                Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Species"));
-
                 if (string.IsNullOrEmpty(opsLimitFile) && opAreaBoundsCoordinates == null) throw new ApplicationException("Operational area limit file OR operational area bounds MUST be provided, but neither were");
                 if (!string.IsNullOrEmpty(opsLimitFile) && opAreaBoundsCoordinates != null) throw new ApplicationException("Operational area limit file OR operational area bounds MUST be provided, but not both");
                 var opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", rangeComplexName));
