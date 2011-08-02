@@ -175,14 +175,18 @@ namespace ESMEWorkBench.ViewModels.Map
             get { return _wpfMap.AdornmentOverlay; }
         }
 
-        #region public ObservableCollection<MapLayerViewModel> MapLayers { get; set; }
+        #region public MapLayerCollection MapLayers { get; set; }
 
         [MediatorMessageSink(MediatorMessage.SetMapLayers)]
-        void SetMapLayers(ObservableCollection<MapLayerViewModel> mapLayers) { MapLayers = mapLayers; }
-
-        public ObservableCollection<MapLayerViewModel> MapLayers
+        void SetMapLayers(MapLayerCollection mapLayers)
         {
-            get { return _mapLayers ?? (_mapLayers = new ObservableCollection<MapLayerViewModel>()); }
+            if (MapLayers != null) MapLayers.CurrentExtent = _wpfMap.CurrentExtent;
+            MapLayers = mapLayers;
+        }
+
+        public MapLayerCollection MapLayers
+        {
+            get { return _mapLayers ?? (_mapLayers = new MapLayerCollection()); }
             set
             {
                 if (_mapLayers == value) return;
@@ -208,7 +212,7 @@ namespace ESMEWorkBench.ViewModels.Map
         }
 
         static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.MapLayers);
-        ObservableCollection<MapLayerViewModel> _mapLayers;
+        MapLayerCollection _mapLayers;
 
         #endregion
 
@@ -312,7 +316,7 @@ namespace ESMEWorkBench.ViewModels.Map
                 NotifyPropertyChanged(CurrentExtentChangedEventArgs);
                 _wpfMap.CurrentExtent = _currentExtent;
                 _wpfMap.Refresh();
-                SetCurrentExtent(_currentExtent);
+                if (MapLayers != null) MapLayers.CurrentExtent = _currentExtent;
             }
         }
 
