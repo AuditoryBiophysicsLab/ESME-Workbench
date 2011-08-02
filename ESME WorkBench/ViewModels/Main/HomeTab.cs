@@ -1,14 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Cinch;
+using ESME;
+using ESME.Environment.Descriptors;
+using ESME.Environment.NAVO;
 using ESME.Mapping;
 using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Layers;
+using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -36,8 +45,20 @@ namespace ESMEWorkBench.ViewModels.Main
                     _environmentPath = Path.Combine(_rangeComplexPath, "Environment");
                     _imagesPath = Path.Combine(_rangeComplexPath, "Images");
                     DisplayScenario(_nemoFile);
+                    _rangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[_nemoFile.Scenario.SimAreaName];
+                    var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
+                    AvailableEnvironments = new NAEMOEnvironmentDescriptors();
+                    AvailableEnvironments.AddRange(from environment in _rangeComplexDescriptor.NAEMOEnvironmentDescriptors
+                                                   where (environment.Value != null) && (environment.Value.Metadata.TimePeriod == curTimePeriod) && (!string.IsNullOrEmpty(environment.Value.Metadata.BathymetryName))
+                                                   select environment);
                 }
-                else _rangeComplexPath = _areasPath = _bathymetryPath = _environmentPath = _imagesPath = null;
+                else
+                {
+                    _rangeComplexPath = _areasPath = _bathymetryPath = _environmentPath = _imagesPath = null;
+                    _rangeComplexDescriptor = null;
+                    _scenarioBounds = null;
+                    AvailableEnvironments = null;
+                }
                     
                 NotifyPropertyChanged(NemoFileChangedEventArgs);
                 IsScenarioLoaded = _nemoFile != null;
@@ -51,21 +72,15 @@ namespace ESMEWorkBench.ViewModels.Main
         string _bathymetryPath;
         string _environmentPath;
         string _imagesPath;
+        RangeComplexDescriptor _rangeComplexDescriptor;
+        GeoRect _scenarioBounds;
 
         void ClearScenario(NemoFile nemoFile)
         {
-            HomeTabMapLayers.Remove(string.Format("{0} sim area", nemoFile.Scenario.SimAreaName));
-            foreach (var platform in nemoFile.Scenario.Platforms)
-            {
-                if (platform.Trackdefs.Count == 1)
-                {
-                    HomeTabMapLayers.Remove(string.Format("Platform: {0} op area", platform.Name));
-                    HomeTabMapLayers.Remove(string.Format("Platform: {0} track", platform.Name));
-                }
-                else
-                    for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
-                        HomeTabMapLayers.Remove(string.Format("Platform: {0} OpArea{1}", platform.Name, trackIndex + 1));
-            }
+            var layersToDelete = from layer in HomeTabMapLayers
+                                 where layer.LayerType != LayerType.BaseMap
+                                 select layer;
+            foreach (var layer in layersToDelete) HomeTabMapLayers.Remove(layer);
         }
 
         void DisplayScenario(NemoFile nemoFile)
@@ -76,14 +91,21 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (platform.Trackdefs.Count == 1)
                 {
                     HomeTabMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} op area", platform.Name), LayerType.OpArea, Colors.Transparent, platform.Trackdefs[0].OverlayFile.Shapes);
+                    if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
+                    else _scenarioBounds.Union(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
                     platform.CalculateBehavior();
                     if (platform.BehaviorModel != null && platform.BehaviorModel.CourseOverlay != null)
                         HomeTabMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} track", platform.Name), LayerType.Track, Colors.Transparent,
                                                               new List<OverlayShape> {platform.BehaviorModel.CourseOverlay}, 1, PointSymbolType.Circle, true, new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1));
                 }
-                else for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
+                else
+                    for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
+                    {
                         HomeTabMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} OpArea{1}", platform.Name, trackIndex + 1), LayerType.OpArea, Colors.Transparent,
                                                               platform.Trackdefs[0].OverlayFile.Shapes);
+                        if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
+                        else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
+                    }
             }
         }
 
@@ -126,6 +148,60 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public NAEMOEnvironmentDescriptors AvailableEnvironments { get; set; }
+
+        public NAEMOEnvironmentDescriptors AvailableEnvironments
+        {
+            get { return _availableEnvironments; }
+            set
+            {
+                if (_availableEnvironments == value) return;
+                _availableEnvironments = value;
+                NotifyPropertyChanged(AvailableEnvironmentsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AvailableEnvironmentsChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.AvailableEnvironments);
+        NAEMOEnvironmentDescriptors _availableEnvironments;
+
+        #endregion
+
+        #region public NAEMOEnvironmentDescriptor SelectedEnvironment { get; set; }
+
+        public NAEMOEnvironmentDescriptor SelectedEnvironment
+        {
+            get { return _selectedEnvironment; }
+            set
+            {
+                if (_selectedEnvironment == value) return;
+                _selectedEnvironment = value;
+                NotifyPropertyChanged(SelectedEnvironmentChangedEventArgs);
+                Task.Factory.StartNew(() => _dispatcher.InvokeIfRequired(DisplaySelectedEnvironment, DispatcherPriority.Normal));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedEnvironmentChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedEnvironment);
+        NAEMOEnvironmentDescriptor _selectedEnvironment;
+
+        void DisplaySelectedEnvironment()
+        {
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated) || (_selectedEnvironment == null)) return;
+            var samplePoints = _selectedEnvironment.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
+            //_selectedEnvironment.Metadata.BathymetryName
+            var bathyBitmapLayer = HomeTabMapLayers.DisplayBathymetryRaster("Bathymetry", Path.Combine(_imagesPath, _selectedEnvironment.Metadata.BathymetryName + ".bmp"), true, false, true, ((NAEMOBathymetryDescriptor)(_rangeComplexDescriptor.NAEMOBathymetryDescriptors[ _selectedEnvironment.Metadata.BathymetryName])).Metadata.Bounds);
+            //MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+            HomeTabMapLayers.DisplayOverlayShapes("Sound Speed", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Circle, false, null, false);
+            HomeTabMapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
+            foreach (var sedimentType in _selectedEnvironment.Data.SedimentTypes)
+            {
+                samplePoints = sedimentType.Value.Select(samplePoint => new OverlayPoint(samplePoint));
+                HomeTabMapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", sedimentType.Key.ToLower()), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
+            }
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+        }
+
+        #endregion
+
         #region OpenScenarioCommand
         public SimpleCommand<object, object> OpenScenarioCommand
         {
@@ -163,5 +239,45 @@ namespace ESMEWorkBench.ViewModels.Main
         void CloseScenarioHandler() { ScenarioFilename = null; }
         #endregion
 
+        #region ZoomToScenarioCommand
+        public SimpleCommand<object, object> ZoomToScenarioCommand
+        {
+            get { return _zoomToScenario ?? (_zoomToScenario = new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; }, delegate { ZoomToScenarioHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _zoomToScenario;
+
+        void ZoomToScenarioHandler()
+        {
+            var mapExtent = new RectangleShape(_scenarioBounds.West, _scenarioBounds.North, _scenarioBounds.East, _scenarioBounds.South);
+            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
+        }
+        #endregion
+
+        #region EditScenarioCommand
+        public SimpleCommand<object, object> EditScenarioCommand
+        {
+            get { return _editScenario ?? (_editScenario = new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; }, delegate { EditScenarioHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _editScenario;
+
+        void EditScenarioHandler()
+        {
+            string arguments;
+
+            if ((ScenarioFilename == null) || (!File.Exists(ScenarioFilename))) arguments = null;
+            else arguments = "\"" + ScenarioFilename + "\"";
+            new Process
+            {
+                StartInfo =
+                        {
+                            FileName = Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
+                            WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
+                            Arguments = arguments,
+                        }
+            }.Start();
+        }
+        #endregion
     }
 }

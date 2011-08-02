@@ -10,6 +10,8 @@ namespace ESME.Environment.Descriptors
 {
     public class NAEMOEnvironmentDescriptors : NAEMODescriptors<NAEMOEnvironmentDescriptor>
     {
+        public NAEMOEnvironmentDescriptors() {  }
+
         public NAEMOEnvironmentDescriptors(string selectedRangeComplexName) : base(selectedRangeComplexName, "Environment", "*.dat") { Refresh(); }
 
         public new void Refresh(BackgroundTask backgroundTask = null)
