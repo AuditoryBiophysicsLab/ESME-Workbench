@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
@@ -21,8 +20,6 @@ namespace ESME.Mapping
         static readonly Random Random;
         static readonly Color[] Palette;
         static int _paletteIndex;
-
-        public static ObservableCollection<MapLayerViewModel> Layers;
 
         #region Menu Initializers
         readonly MenuItemViewModelBase _areaColorMenu = new MenuItemViewModelBase
@@ -587,12 +584,12 @@ namespace ESME.Mapping
                                                                                                   });
             _pointColorMenu.Command = _lineColorMenu.Command;
 
-            _moveToTopMenu.Command = new SimpleCommand<object, object>(arg => Index < (Layers.Count - 1), obj =>
+            _moveToTopMenu.Command = new SimpleCommand<object, object>(arg => Index < (MapLayers.Count - 1), obj =>
                                                                                                           {
                                                                                                               MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                                                                                                               MediatorMessage.Send(MediatorMessage.MoveLayerToTop, this);
                                                                                                           });
-            _moveUpMenu.Command = new SimpleCommand<object, object>(arg => Index < (Layers.Count - 1), obj =>
+            _moveUpMenu.Command = new SimpleCommand<object, object>(arg => Index < (MapLayers.Count - 1), obj =>
                                                                                                        {
                                                                                                            MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
                                                                                                            MediatorMessage.Send(MediatorMessage.MoveLayerUp, this);
