@@ -170,7 +170,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     NAEMOOverlayDescriptors = null;
                     NAEMOBathymetryDescriptors = null;
                     NAEMOEnvironmentDescriptors = null;
-                    ZoomToWorldMap();
+                    if ((!IsLayerListViewVisible) && EnvironmentTabMapLayers != null) ZoomToWorldMap();
                 }
                 NotifyPropertyChanged(SelectedRangeComplexDescriptorChangedEventArgs);
                 _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
@@ -183,12 +183,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DisplayWorldMap()
         {
-            string appPath;
             if (EnvironmentTabMapLayers == null)
             {
 #if true
-                EnvironmentTabMapLayers = new MapLayerCollection();
-                EnvironmentTabMapLayers.DisplayShapeFile("Base Map", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"), Colors.Transparent, AreaStyles.Country2, true, 1f, false);
+                EnvironmentTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+                ZoomToWorldMap();
 #else
                 appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 EnvironmentTabMapLayers = new MapLayerCollection
@@ -206,13 +205,12 @@ namespace ESMEWorkBench.ViewModels.Main
                                 Name = "Base Map",
                         },
                 };
-#endif
                 ZoomToWorldMap();
+#endif
             }
             if (HomeTabMapLayers != null) return;
-#if false
-            HomeTabMapLayers = new MapLayerCollection();
-            HomeTabMapLayers.DisplayShapeFile("Base Map", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"), Colors.Transparent, AreaStyles.Country2, true, 1f, false);
+#if true
+            HomeTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
 #else
             appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             HomeTabMapLayers = new MapLayerCollection
@@ -250,6 +248,9 @@ namespace ESMEWorkBench.ViewModels.Main
             var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.OpsLimitFile);
             var simAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.SimLimitFile);
             ZoomToRangeComplex();
+#if true
+            EnvironmentTabMapLayers.DisplayOverlayFile("Op Area", opAreaOverlayFilename);
+#else
             opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area") ?? new OverlayShapeMapLayer
                 {
                         Name = "Op Area",
@@ -267,9 +268,13 @@ namespace ESMEWorkBench.ViewModels.Main
             opAreaLayer.Done();
             opAreaLayer.IsChecked = true;
             if (EnvironmentTabMapLayers.IndexOf(opAreaLayer) == -1) EnvironmentTabMapLayers.Add(opAreaLayer);
+#endif
 
             if (simAreaOverlayFilename != opAreaOverlayFilename)
             {
+#if true
+                EnvironmentTabMapLayers.DisplayOverlayFile("Sim Area", simAreaOverlayFilename);
+#else
                 simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area") ?? new OverlayShapeMapLayer
                 {
                     Name = "Sim Area",
@@ -287,6 +292,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 simAreaLayer.Done();
                 simAreaLayer.IsChecked = true;
                 if (EnvironmentTabMapLayers.IndexOf(simAreaLayer) == -1) EnvironmentTabMapLayers.Add(simAreaLayer);
+#endif
             }
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
@@ -487,7 +493,9 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             var overlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename) + ".ovr");
-            overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
+            EnvironmentTabMapLayers.DisplayOverlayFile("Overlay", overlayFilename);
+#if false
+		    overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
             {
                 Name = "Overlay",
                 CanBeRemoved = true,
@@ -504,6 +512,8 @@ namespace ESMEWorkBench.ViewModels.Main
             overlayLayer.Done();
             overlayLayer.IsChecked = true;
             if (EnvironmentTabMapLayers.IndexOf(overlayLayer) == -1) EnvironmentTabMapLayers.Add(overlayLayer);
+  
+#endif            
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
         #endregion
@@ -767,6 +777,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (bathyBitmapLayer != null) bathyBitmapLayer.IsChecked = false;
                 return;
             }
+#if false
             //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             bathyBitmapLayer = EnvironmentTabMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry") ?? new RasterMapLayer
             {
@@ -785,6 +796,11 @@ namespace ESMEWorkBench.ViewModels.Main
                                                            Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp");
             bathyBitmapLayer.IsChecked = true;
             if (EnvironmentTabMapLayers.IndexOf(bathyBitmapLayer) == -1) EnvironmentTabMapLayers.Add(bathyBitmapLayer);
+            MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+#endif
+            bathyBitmapLayer = EnvironmentTabMapLayers.DisplayBathymetryRaster("Bathymetry",
+                                                                                   Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Images",
+                                                                                                Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp"), true, false, true, _selectedBathymetryDescriptor.Metadata.Bounds);
             MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
         }
 
@@ -974,6 +990,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (overlayLayer != null) overlayLayer.IsChecked = false;
                 return;
             }
+            var samplePoints = _selectedEnvironmentDescriptor.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
+            overlayLayer = EnvironmentTabMapLayers.DisplayOverlayShapes("Environment", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 6, PointSymbolType.Circle, true, false);
+#if false
             //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment") ?? new OverlayShapeMapLayer
             {
@@ -987,12 +1006,12 @@ namespace ESMEWorkBench.ViewModels.Main
                 LayerType = LayerType.SoundSpeed,
             };
             if (_selectedEnvironmentDescriptor.Metadata == null) return;
-            var samplePoints = _selectedEnvironmentDescriptor.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
             overlayLayer.Clear();
             overlayLayer.Add(samplePoints);
             overlayLayer.Done();
             overlayLayer.IsChecked = true;
             if (EnvironmentTabMapLayers.IndexOf(overlayLayer) == -1) EnvironmentTabMapLayers.Add(overlayLayer);
+#endif
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
         #endregion

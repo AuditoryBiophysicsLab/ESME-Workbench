@@ -24,7 +24,7 @@ using HRC.Utility;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Views.AcousticBuilder;
-
+using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -686,13 +686,15 @@ namespace ESMEWorkBench.ViewModels.Main
 #if true
             if ((!IsLayerListViewVisible) && EnvironmentTabMapLayers != null)
             {
+                if (HomeTabMapLayers != null) HomeTabMapLayers.IsActive = false;
                 EnvironmentTabMapLayers.IsActive = true;
-                HomeTabMapLayers.IsActive = false;
+                if (SelectedRangeComplexDescriptor == null) ZoomToWorldMap();
+                else ZoomToRangeComplex();
             }
             else if (HomeTabMapLayers != null)
             {
+                if (EnvironmentTabMapLayers != null) EnvironmentTabMapLayers.IsActive = false;
                 HomeTabMapLayers.IsActive = true;
-                EnvironmentTabMapLayers.IsActive = false;
             }
 #else
             var currentMapLayers = HomeTabMapLayers;

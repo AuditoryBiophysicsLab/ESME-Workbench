@@ -50,10 +50,13 @@ namespace ESME
         public const string TransmissionLossRadialEarthCoordinate = "TransmissionLossRadialEarthCoordinateMessage";
         public const string CancelCurrentTransmissionLossCalculation = "CancelCurrentTransmissionLossCalculationMessage";
 
-        public const string CurrentScaleChanged = "CurrentScaleChangedMessage";
-        public const string CurrentExtentChanged = "CurrentExtentChangedMessage";
         public const string SetCurrentScale = "SetCurrentScaleMessage";
+        public const string GetCurrentScale = "GetCurrentScaleMessage";
+        public const string CurrentScale = "CurrentScaleMessage";
+
         public const string SetCurrentExtent = "SetCurrentExtentMessage";
+        public const string GetCurrentExtent = "GetCurrentExtentMessage";
+        public const string CurrentExtent = "CurrentExtentMessage";
 
         public const string SetLayerIndex = "SetLayerIndexMessage";
 
