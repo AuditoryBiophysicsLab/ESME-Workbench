@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Windows.Media;
 using ESME.NEMO.Overlay;
@@ -98,10 +97,10 @@ namespace ESME.Mapping
 
         public OverlayShapeMapLayer DisplayOverlayFile(string layerName, string overlayFileName, Color lineColor, bool isVisible = true, float lineWidth = 1f, PointSymbolType pointSymbolType = PointSymbolType.Circle, bool canBeRemoved = true, bool canBeReordered = true, bool canChangeLineColor = true)
         {
-            return DisplayOverlayShapes(layerName, LayerType.OverlayFile, lineColor, new OverlayFile(overlayFileName).Shapes, lineWidth, pointSymbolType, isVisible, canBeRemoved, canBeReordered, canChangeLineColor);
+            return DisplayOverlayShapes(layerName, LayerType.OverlayFile, lineColor, new OverlayFile(overlayFileName).Shapes, lineWidth, pointSymbolType, isVisible, null, canBeRemoved, canBeReordered, canChangeLineColor);
         }
 
-        public OverlayShapeMapLayer DisplayOverlayShapes(string layerName, LayerType layerType, Color lineColor, IEnumerable<OverlayShape> overlayShapes, float lineWidth = 1f, PointSymbolType pointSymbolType = PointSymbolType.Circle, bool isVisible = true, bool canBeRemoved = true, bool canBeReordered = true, bool canChangeLineColor = true)
+        public OverlayShapeMapLayer DisplayOverlayShapes(string layerName, LayerType layerType, Color lineColor, IEnumerable<OverlayShape> overlayShapes, float lineWidth = 1f, PointSymbolType pointSymbolType = PointSymbolType.Circle, bool isVisible = true, ThinkGeo.MapSuite.Core.LineStyle customLineStyle = null, bool canBeRemoved = true, bool canBeReordered = true, bool canChangeLineColor = true)
         {
             var overlayShapeLayer = Find<OverlayShapeMapLayer>(layerType, layerName) ?? new OverlayShapeMapLayer
             {
@@ -112,10 +111,11 @@ namespace ESME.Mapping
                 CanChangeAreaColor = false,
                 CanChangeLineColor = canChangeLineColor,
                 LineWidth = lineWidth,
-                PointSymbolType = pointSymbolType,
                 MapLayers = this,
             };
             if (lineColor != Colors.Transparent) overlayShapeLayer.LineColor = lineColor;
+            if (customLineStyle == null) overlayShapeLayer.PointSymbolType = pointSymbolType;
+            else overlayShapeLayer.CustomLineStyle = customLineStyle;
             overlayShapeLayer.Clear();
             overlayShapeLayer.Add(overlayShapes);
             overlayShapeLayer.Done();
@@ -149,6 +149,14 @@ namespace ESME.Mapping
         }
 
         public RectangleShape CurrentExtent { get; set; }
-    }
 
+        public void Remove(string layerName)
+        {
+            foreach (var layer in this.Where(layer => layer.Name == layerName)) 
+            {
+                Remove(layer);
+                break;
+            }
+        }
+    }
 }

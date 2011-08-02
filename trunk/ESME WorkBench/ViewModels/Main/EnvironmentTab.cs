@@ -991,7 +991,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 return;
             }
             var samplePoints = _selectedEnvironmentDescriptor.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
-            overlayLayer = EnvironmentTabMapLayers.DisplayOverlayShapes("Environment", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 6, PointSymbolType.Circle, true, false);
+            EnvironmentTabMapLayers.DisplayOverlayShapes("Environment", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 6, PointSymbolType.Circle, true, null, false);
 #if false
             //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment") ?? new OverlayShapeMapLayer
