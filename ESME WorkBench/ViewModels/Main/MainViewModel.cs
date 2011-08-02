@@ -548,16 +548,27 @@ namespace ESMEWorkBench.ViewModels.Main
             get { return null; }
             set
             {
+                if (_recentFilesSelectedItem == value) return;
                 _recentFilesSelectedItem = value;
-                if (_recentFilesSelectedItem == null) return;
-                try
+                if (_recentFilesSelectedItem != null)
                 {
-                    LoadExperimentFile(_recentFilesSelectedItem.LongName);
-                }
-                catch (Exception e)
-                {
-                    _messageBoxService.ShowError("Error opening experiment: " + e.Message);
-                    RecentFiles.RemoveFile(_recentFilesSelectedItem.LongName);
+                    if (!_recentFilesSelectedItem.LongName.EndsWith(".nemo"))
+                    {
+                        RecentFiles.RemoveFile(_recentFilesSelectedItem.LongName);
+                        _recentFilesSelectedItem = null;
+                        return;
+                    }
+                    try
+                    {
+                        OpenScenarioHandler(_recentFilesSelectedItem.LongName);
+                        NotifyPropertyChanged(RecentFilesSelectedItemChangedEventArgs);
+                        return;
+                    }
+                    catch (Exception e)
+                    {
+                        _messageBoxService.ShowError("Error opening scenario: " + e.Message);
+                        RecentFiles.RemoveFile(_recentFilesSelectedItem.LongName);
+                    }
                 }
                 NotifyPropertyChanged(RecentFilesSelectedItemChangedEventArgs);
             }
