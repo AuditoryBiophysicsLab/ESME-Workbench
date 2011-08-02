@@ -28,15 +28,9 @@
 	<r:RibbonWindow.InputBindings>
 		<KeyBinding Command="{Binding CancelCurrentCommand}"
 		            Key="Escape" />
-		<KeyBinding Command="{Binding SaveExperimentCommand}"
-		            Modifiers="Control"
-		            Key="S" />
-		<KeyBinding Command="{Binding OpenExperimentCommand}"
+		<KeyBinding Command="{Binding OpenScenarioCommand}"
 		            Modifiers="Control"
 		            Key="O" />
-		<KeyBinding Command="{Binding NewExperimentCommand}"
-		            Modifiers="Control"
-		            Key="N" />
 	</r:RibbonWindow.InputBindings>
 	<i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
@@ -375,12 +369,12 @@
 					                SmallImageSource="..\Images\SmallIcons\open-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Associate a scenario file with the current experiment"
-					                Command="{Binding AddScenarioFileCommand}" />
+					                Command="{Binding OpenScenarioCommand}" />
 					<r:RibbonButton Label="Edit"
 					                SmallImageSource="..\Images\SmallIcons\application-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launch the scenario editor"
-					                Command="{Binding LaunchScenarioEditorCommand}" />
+					                Command="{Binding EditScenarioCommand}" />
 					<r:RibbonButton Label="Run"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -390,7 +384,7 @@
 					                SmallImageSource="..\Images\SmallIcons\Magnifying-Glass-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Resets the map position to the current scenario"
-					                Command="{Binding ResetScenarioZoomLevelCommand}" />
+					                Command="{Binding ZoomToScenarioCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Overlays">
                     <r:RibbonCheckBox Label="Lat/Lon Grid"
@@ -445,6 +439,61 @@
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Export all Analysis Points as CASS jobs"
 					                Command="{Binding ViewSimulatorLogsCommand}" />
+                </r:RibbonGroup>
+                <r:RibbonGroup Header="Environment">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                BorderBrush="Black"
+                                BorderThickness="1"
+                                Visibility="{Binding IsScenarioLoaded, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                            <Label Background="Gainsboro"
+                                   Foreground="DimGray"
+                                   HorizontalContentAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   Width="150"
+                                   Height="66">
+                                <Label.Content>
+                                    <TextBlock TextAlignment="Center">
+                                        No scenario<LineBreak/>
+                                        loaded
+                                    </TextBlock>
+                                </Label.Content>
+                            </Label>
+                        </Border>
+                        <ListBox Grid.Column="0"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                                 ItemsSource="{Binding AvailableEnvironments}"
+                                 SelectedValue="{Binding SelectedEnvironment}"
+                                 SelectedValuePath="Value"
+                                 SelectionMode="Single"
+                                 Width="150"
+                                 MinHeight="66"
+                                 Visibility="{Binding IsScenarioLoaded, Converter={StaticResource TrueVisibleFalseCollapsed}}">
+                            <ListBox.ToolTip>
+                                <r:RibbonToolTip Title="Environment"
+					                             Description="Select a pre-defined environmental dataset"
+                                                 FooterTitle="Currently selected environment"
+                                                 FooterDescription="{Binding SelectedEnvironmentInfo}"/>
+                            </ListBox.ToolTip>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Key}" Width="125" TextTrimming="CharacterEllipsis" ToolTip="{Binding Key}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel Orientation="Vertical"
+                                    Grid.Column="1">
+                            <r:RibbonButton Label="Edit"
+					                        SmallImageSource="..\Images\SmallIcons\breeze.png"
+					                        ToolTipTitle="Edit environment"
+					                        ToolTipDescription="Edit the available environment datasets"
+					                        Command="{Binding EditEnvironmentCommand}" />
+                        </StackPanel>
+                    </Grid>
                 </r:RibbonGroup>
             </r:RibbonTab>
 			<r:RibbonTab KeyTip="V"
@@ -728,8 +777,8 @@
                                     Grid.Column="1">
                             <r:RibbonButton Label="New"
 					                        SmallImageSource="..\Images\SmallIcons\breeze.png"
-					                        ToolTipTitle="New Bathymetry"
-					                        ToolTipDescription="Extract a new bathymetry dataset"
+					                        ToolTipTitle="New Environment"
+					                        ToolTipDescription="Extract a new environment dataset"
 					                        Command="{Binding NewEnvironmentCommand}" />
                             <r:RibbonButton Label="Delete"
 					                        SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"

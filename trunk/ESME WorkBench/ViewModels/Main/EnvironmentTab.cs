@@ -99,10 +99,10 @@ namespace ESMEWorkBench.ViewModels.Main
             if (_viewIsActivated) return;
             Console.WriteLine("The window has been activated!");
             _viewIsActivated = true;
-            _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
-            _dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
-            _dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
-            _dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
+            //_dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
         }
         bool _viewIsActivated;
         #endregion
