@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Windows.Controls;
@@ -37,7 +38,23 @@ namespace ESMEWorkBench.ViewModels.Main
             _viewAwareStatus.ViewLoaded += ViewLoaded;
         }
 
-        public MapLayerCollection MapLayers { get; set; }
+        #region public MapLayerCollection MapLayers { get; set; }
+
+        public MapLayerCollection MapLayers
+        {
+            get { return _mapLayers; }
+            set
+            {
+                if (_mapLayers == value) return;
+                _mapLayers = value;
+                NotifyPropertyChanged(MapLayersChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<LayerListViewModel>(x => x.MapLayers);
+        MapLayerCollection _mapLayers;
+
+        #endregion
 
         [MediatorMessageSink(MediatorMessage.SetMapLayers)]
         void SetMapLayers(MapLayerCollection mapLayers) { MapLayers = mapLayers; }
