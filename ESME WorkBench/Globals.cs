@@ -68,13 +68,5 @@ namespace ESMEWorkBench
             }
             return s;
         }
-
-        public static List<TransmissionLossAlgorithm> ValidTransmissionLossAlgorithms = new List<TransmissionLossAlgorithm>
-                                                                                        {
-                                                                                            TransmissionLossAlgorithm.CASS,
-                                                                                            TransmissionLossAlgorithm.RAM,
-                                                                                            TransmissionLossAlgorithm.Bellhop,
-                                                                                            TransmissionLossAlgorithm.RAMGEO
-                                                                                        };
     }
 }

@@ -153,7 +153,6 @@
     <Compile Include="ViewModels\TransmissionLoss\BellhopRadialCalculatorViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\ExportOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\LabeledDataWrapper.cs" />
-    <Compile Include="ViewModels\TransmissionLoss\ModeAcousticModelSelectionView.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\SoundPressureLevelRadialViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldListItemViewModel.cs" />
@@ -233,7 +232,6 @@
       <DependentUpon>AnalysisPointVisualizerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ValueConverters.cs" />
-    <Compile Include="ViewModels\Layers\CustomStartEndLineStyle.cs" />
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />

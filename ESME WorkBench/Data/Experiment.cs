@@ -897,6 +897,7 @@ namespace ESMEWorkBench.Data
             if (MapLayers == null)
             {
                 var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+#if false
                 MapLayers = new MapLayerCollection
                             {
                                 new ShapefileMapLayer
@@ -912,6 +913,7 @@ namespace ESMEWorkBench.Data
                                     LayerType = LayerType.BaseMap,
                                 },
                             };
+#endif
             }
             if (FileName != null)
             {

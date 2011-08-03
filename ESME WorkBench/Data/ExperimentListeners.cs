@@ -16,6 +16,7 @@ using ESME.TransmissionLoss;
 using ESMEWorkBench.ViewModels.Layers;
 using ThinkGeo.MapSuite.Core;
 using ESME.Views.AcousticBuilder;
+using ESME.Mapping;
 using BehaviorModel = ESME.Platform.BehaviorModel;
 
 namespace ESMEWorkBench.Data

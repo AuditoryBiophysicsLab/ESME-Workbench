@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -7,24 +6,19 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using C5;
-using C5.Comparers;
 using Cinch;
 using ESME;
 using ESME.Mapping;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.Map;
 using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.RecentFiles;
-using HRC.Collections;
 using HRC.Navigation;
 using HRC.Services;
 using HRC.Utility;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Views.AcousticBuilder;
-using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -46,7 +40,7 @@ namespace ESMEWorkBench.ViewModels.Main
         public const bool ExperimentsCurrentlySupported = false;
         #endregion
 
-        #region Constructors
+        #region Constructor
         [ImportingConstructor]
         public MainViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
         {
@@ -692,20 +686,43 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public MapLayerCollections MapLayerCollections { get; set; }
+
+        public MapLayerCollections MapLayerCollections
+        {
+            get { return _mapLayerCollections ?? (_mapLayerCollections = new MapLayerCollections()); }
+            set
+            {
+                if (_mapLayerCollections == value) return;
+                _mapLayerCollections = value;
+                NotifyPropertyChanged(MapLayerCollectionsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MapLayerCollectionsChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MapLayerCollections);
+        MapLayerCollections _mapLayerCollections;
+
+        #endregion
+
         void UpdateMapLayerVisibility()
         {
 #if true
-            if ((!IsLayerListViewVisible) && EnvironmentTabMapLayers != null)
+            if ((!IsLayerListViewVisible) && MapLayerCollections["Environment"] != null)
             {
-                if (HomeTabMapLayers != null) HomeTabMapLayers.IsActive = false;
-                EnvironmentTabMapLayers.IsActive = true;
+                MapLayerCollections.ActiveLayer = MapLayerCollections["Environment"];
                 if (SelectedRangeComplexDescriptor == null) ZoomToWorldMap();
                 else ZoomToRangeComplex();
             }
-            else if (HomeTabMapLayers != null)
+            else 
             {
-                if (EnvironmentTabMapLayers != null) EnvironmentTabMapLayers.IsActive = false;
-                HomeTabMapLayers.IsActive = true;
+                if (MapLayerCollections["Scenario"] != null)
+                {
+                    MapLayerCollections.ActiveLayer = MapLayerCollections["Scenario"];
+                }
+                else if (MapLayerCollections["Home"] != null)
+                {
+                    MapLayerCollections.ActiveLayer = MapLayerCollections["Home"];
+                }
             }
 #else
             var currentMapLayers = HomeTabMapLayers;

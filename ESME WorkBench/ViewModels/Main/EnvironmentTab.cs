@@ -45,6 +45,8 @@ namespace ESMEWorkBench.ViewModels.Main
             //_dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
         }
 
+        public MapLayerCollection EnvironmentTabMapLayers { get; set; }
+
 #if false
         T FindEnvironmentTabMapLayer<T>(LayerType layerType, string layerName) where T : class
         {
@@ -107,7 +109,6 @@ namespace ESMEWorkBench.ViewModels.Main
         bool _viewIsActivated;
         #endregion
 
-        public MapLayerCollection EnvironmentTabMapLayers { get; set; }
         #region Range Complex ribbon group
 
         #region public RangeComplexDescriptors RangeComplexDescriptors { get; set; }
@@ -170,7 +171,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     NAEMOOverlayDescriptors = null;
                     NAEMOBathymetryDescriptors = null;
                     NAEMOEnvironmentDescriptors = null;
-                    if ((!IsLayerListViewVisible) && EnvironmentTabMapLayers != null) ZoomToWorldMap();
+                    if (MapLayerCollections.ActiveLayer.Name == "Environment") ZoomToWorldMap();
                 }
                 NotifyPropertyChanged(SelectedRangeComplexDescriptorChangedEventArgs);
                 _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
@@ -183,10 +184,12 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DisplayWorldMap()
         {
-            if (EnvironmentTabMapLayers == null)
+            if (MapLayerCollections["Environment"] == null)
             {
 #if true
-                EnvironmentTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+                MapLayerCollections.Add("Environment", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+                EnvironmentTabMapLayers = MapLayerCollections["Environment"];
+                //EnvironmentTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
                 ZoomToWorldMap();
 #else
                 appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -208,9 +211,10 @@ namespace ESMEWorkBench.ViewModels.Main
                 ZoomToWorldMap();
 #endif
             }
-            if (HomeTabMapLayers != null) return;
+            if (MapLayerCollections["Home"] != null) return;
 #if true
-            HomeTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+            MapLayerCollections.Add("Home", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+            //HomeTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
 #else
             appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             HomeTabMapLayers = new MapLayerCollection

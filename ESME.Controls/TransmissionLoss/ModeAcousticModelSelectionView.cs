@@ -3,7 +3,7 @@ using System.ComponentModel;
 using Cinch;
 using ESME.TransmissionLoss;
 
-namespace ESMEWorkBench.ViewModels.TransmissionLoss
+namespace ESME.Views.TransmissionLoss
 {
     public class ModeAcousticModelSelectionViewModel : ViewModelBase
     {

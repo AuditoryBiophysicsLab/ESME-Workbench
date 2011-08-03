@@ -9,9 +9,9 @@ using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
-    public abstract class NAEMODescriptors<T> : List<System.Collections.Generic.KeyValuePair<string, T>>, INotifyCollectionChanged where T : NAEMODescriptor, new()
+    public abstract class NAEMODescriptors<T> : List<KeyValuePair<string, T>>, INotifyCollectionChanged where T : NAEMODescriptor, new()
     {
-        public delegate System.Collections.Generic.KeyValuePair<string, T> NewDescriptor(string sourceFilename);
+        public delegate KeyValuePair<string, T> NewDescriptor(string sourceFilename);
 
         public delegate IEnumerable<string> FilenameFilter(IEnumerable<string> fileName);
 
@@ -51,10 +51,10 @@ namespace ESME.Environment.Descriptors
                 backgroundTask.Value = 0;
             }
             //Console.WriteLine("{0} About to call AddRange", DateTime.Now);
-            Add(new System.Collections.Generic.KeyValuePair<string, T>("[None]", null));
+            Add(new KeyValuePair<string, T>("[None]", null));
             foreach (var file in filteredFiles)
             {
-                Add(new System.Collections.Generic.KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(file), new T {DataFilename = file}));
+                Add(new KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(file), new T {DataFilename = file}));
                 if (backgroundTask != null) backgroundTask.Value++;
             }
             Sort();
@@ -63,7 +63,7 @@ namespace ESME.Environment.Descriptors
 
         public void Add(string fileName)
         {
-            Add(new System.Collections.Generic.KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(fileName), new T { DataFilename = fileName }));  
+            Add(new KeyValuePair<string, T>(Path.GetFileNameWithoutExtension(fileName), new T { DataFilename = fileName }));  
             Sort((x, y) => x.Key.CompareTo(y.Key));
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
@@ -94,7 +94,7 @@ namespace ESME.Environment.Descriptors
         /// Adds an item to the <see cref="T:System.Collections.Generic.ICollection`1"/>.
         /// </summary>
         /// <param name="item">The object to add to the <see cref="T:System.Collections.Generic.ICollection`1"/>.</param><exception cref="T:System.NotSupportedException">The <see cref="T:System.Collections.Generic.ICollection`1"/> is read-only.</exception>
-        public new void Add(System.Collections.Generic.KeyValuePair<string, T> item)
+        public new void Add(KeyValuePair<string, T> item)
         {
             base.Add(item);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
@@ -117,7 +117,7 @@ namespace ESME.Environment.Descriptors
         /// true if <paramref name="item"/> was successfully removed from the <see cref="T:System.Collections.Generic.ICollection`1"/>; otherwise, false. This method also returns false if <paramref name="item"/> is not found in the original <see cref="T:System.Collections.Generic.ICollection`1"/>.
         /// </returns>
         /// <param name="item">The object to remove from the <see cref="T:System.Collections.Generic.ICollection`1"/>.</param><exception cref="T:System.NotSupportedException">The <see cref="T:System.Collections.Generic.ICollection`1"/> is read-only.</exception>
-        public new bool Remove(System.Collections.Generic.KeyValuePair<string, T> item)
+        public new bool Remove(KeyValuePair<string, T> item)
         {
             var result = base.Remove(item);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
@@ -132,7 +132,7 @@ namespace ESME.Environment.Descriptors
         /// Inserts an item to the <see cref="T:System.Collections.Generic.IList`1"/> at the specified index.
         /// </summary>
         /// <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param><param name="item">The object to insert into the <see cref="T:System.Collections.Generic.IList`1"/>.</param><exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the <see cref="T:System.Collections.Generic.IList`1"/>.</exception><exception cref="T:System.NotSupportedException">The <see cref="T:System.Collections.Generic.IList`1"/> is read-only.</exception>
-        public new void Insert(int index, System.Collections.Generic.KeyValuePair<string, T> item) { throw new NotImplementedException(); }
+        public new void Insert(int index, KeyValuePair<string, T> item) { throw new NotImplementedException(); }
 
         /// <summary>
         /// Removes the <see cref="T:System.Collections.Generic.IList`1"/> item at the specified index.
