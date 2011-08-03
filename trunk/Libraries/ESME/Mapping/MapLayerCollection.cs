@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.Linq;
 using System.Linq;
 using System.Windows.Media;
 using ESME.NEMO.Overlay;
+using ESME.TransmissionLoss;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
@@ -10,12 +13,13 @@ namespace ESME.Mapping
 {
     public class MapLayerCollection : ObservableCollection<MapLayerViewModel>
     {
-        public MapLayerCollection()
+        internal MapLayerCollection(string collectionName)
         {
+            Name = collectionName;
             CurrentExtent = new RectangleShape(-180, 90, 180, -90);
         }
 
-        public MapLayerCollection(string baseMapShapefileName, string baseMapLayerName = "Base Map") : this()
+        internal MapLayerCollection(string collectionName, string baseMapShapefileName, string baseMapLayerName = "Base Map") : this(collectionName)
         {
             base.Add(new ShapefileMapLayer
             {
@@ -37,26 +41,7 @@ namespace ESME.Mapping
             return this.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
         }
 
-        #region public bool IsActive { get; set; }
-
-        public bool IsActive
-        {
-            get { return _isActive; }
-            set
-            {
-                if (_isActive == value) return;
-                _isActive = value;
-                if (_isActive)
-                {
-                    MediatorMessage.Send(MediatorMessage.SetMapLayers, this);
-                    MediatorMessage.Send(MediatorMessage.SetCurrentExtent, CurrentExtent);
-                }
-            }
-        }
-
-        bool _isActive;
-
-        #endregion
+        public string Name { get; private set; }
 
         public new void Add(MapLayerViewModel item)
         {
@@ -148,6 +133,53 @@ namespace ESME.Mapping
             return bitmapLayer;
         }
 
+        public void DisplayAnalysisPoint(AnalysisPoint curPoint)
+        {
+            var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
+            var analysisPointLayer = Find<OverlayShapeMapLayer>(LayerType.AnalysisPoint, analysisPointName);
+            if (analysisPointLayer == null)
+            {
+                analysisPointLayer = new OverlayShapeMapLayer
+                {
+                        Name = analysisPointName,
+                        LayerType = LayerType.AnalysisPoint,
+                        LineWidth = 1,
+                        CanBeRemoved = true,
+                        CanBeReordered = true,
+                        HasSettings = true,
+                        CanChangeLineColor = true,
+                        CanChangeLineWidth = true,
+                        CanChangeAreaColor = false,
+                };
+                Add(analysisPointLayer);
+            }
+
+            analysisPointLayer.AnalysisPoint = curPoint;
+            analysisPointLayer.Validate();
+
+            analysisPointLayer.Clear();
+            foreach (var soundSource in curPoint.SoundSources)
+            {
+                var sourcePoints = new List<EarthCoordinate>();
+                var circlePoints = new List<EarthCoordinate>();
+                if (!soundSource.ShouldBeCalculated) continue;
+                sourcePoints.Add(curPoint);
+                foreach (var radialBearing in soundSource.RadialBearings)
+                {
+                    sourcePoints.Add(EarthCoordinate.Move(curPoint, radialBearing, soundSource.Radius));
+                    sourcePoints.Add(curPoint);
+                }
+
+                for (var angle = 0; angle < 360; angle++)
+                    circlePoints.Add(EarthCoordinate.Move(curPoint, angle, soundSource.Radius));
+
+                analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5));
+                analysisPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
+            }
+            analysisPointLayer.Done();
+        }
+
+
         public RectangleShape CurrentExtent { get; set; }
 
         public void Remove(string layerName)
@@ -158,5 +190,47 @@ namespace ESME.Mapping
                 break;
             }
         }
+    }
+
+    public class MapLayerCollections : List<MapLayerCollection>
+    {
+        public MapLayerCollection this[string collectionName] { get { return Find(collection => collection.Name == collectionName); } }
+
+        public void Add(string collectionName)
+        {
+            Add(new MapLayerCollection(collectionName));
+        }
+
+        public void Add(string collectionName, string baseMapShapefileName, string baseMapLayerName = "Base Map")
+        {
+            Add(new MapLayerCollection(collectionName, baseMapShapefileName, baseMapLayerName));
+        }
+
+        public new void Add(MapLayerCollection mapLayerCollection)
+        {
+            var result = Find(collection => collection.Name == mapLayerCollection.Name);
+            if (result != null) throw new DuplicateKeyException("MapLayerCollections: \"" + mapLayerCollection.Name + "\" already exists");
+            base.Add(mapLayerCollection);
+        }
+
+        public new bool Remove(MapLayerCollection collectionToRemove)
+        {
+            if (collectionToRemove == ActiveLayer) throw new InvalidOperationException("MapLayerCollections: Cannot remove the active layer");
+            return base.Remove(collectionToRemove);
+        }
+
+        public MapLayerCollection ActiveLayer
+        {
+            get { return _activeLayer; }
+            set
+            {
+                if (_activeLayer == value) return;
+                _activeLayer = value;
+                MediatorMessage.Send(MediatorMessage.SetMapLayers, _activeLayer);
+                MediatorMessage.Send(MediatorMessage.SetCurrentExtent, _activeLayer.CurrentExtent);
+            }
+        }
+
+        MapLayerCollection _activeLayer;
     }
 }

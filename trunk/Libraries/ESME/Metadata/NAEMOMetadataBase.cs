@@ -31,16 +31,9 @@ namespace ESME.Metadata
         {
             var metaDataFilename = MetadataFilename(sourceFilename);
             if (!File.Exists(metaDataFilename)) return null;
-            try
-            {
-                var result = XmlSerializer<T>.Load(metaDataFilename, referencedTypes ?? ReferencedTypes);
-                result.Filename = metaDataFilename;
-                return result;
-            }
-            catch
-            {
-                return null;
-            }
+            var result = XmlSerializer<T>.Load(metaDataFilename, referencedTypes ?? ReferencedTypes);
+            result.Filename = metaDataFilename;
+            return result;
         }
 
         public virtual void Save<T>(T data, List<Type> referencedTypes = null, string filename = null) where T : NAEMOMetadataBase, new()

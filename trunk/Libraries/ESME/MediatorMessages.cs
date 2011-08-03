@@ -81,7 +81,7 @@ namespace ESME
         public const string ToggleLayerVisibility = "ToggleLayerVisibilityMessage";
 
         public const string SetupAndRunQuickLookPoint = "SetupAndRunQuickLookPointMessage";
-        public const string SetupAndRunAnalysisPoint = "SetupAndRunAnalysisPointMessage";
+        public const string PlaceAnalysisPoint = "SetupAndRunAnalysisPointMessage";
         public const string RunExperimentCommand = "RunExperimentCommandMessage";
 
         public const string SetMouseEarthCoordinate = "SetMouseEarthCoordinateMessage";

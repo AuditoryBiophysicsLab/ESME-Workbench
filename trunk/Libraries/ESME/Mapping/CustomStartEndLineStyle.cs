@@ -3,9 +3,9 @@ using System.Collections.ObjectModel;
 using System.Windows.Media;
 using ThinkGeo.MapSuite.Core;
 
-namespace ESMEWorkBench.ViewModels.Layers
+namespace ESME.Mapping
 {
-    class CustomStartEndLineStyle : LineStyle
+    public class CustomStartEndLineStyle : LineStyle
     {
         readonly PointStyle _startPointStyle;
         readonly PointStyle _endPointStyle;

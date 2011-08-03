@@ -180,6 +180,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Environment\Descriptors\RangeComplexDescriptor.cs" />
+    <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
     <Compile Include="Mapping\LayerType.cs" />
     <Compile Include="Mapping\LineWeightMenuItemViewModel.cs" />
     <Compile Include="Mapping\MapLayerCollection.cs" />

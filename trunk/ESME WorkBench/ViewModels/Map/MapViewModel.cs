@@ -74,7 +74,7 @@ namespace ESMEWorkBench.ViewModels.Map
                                                                              {
                                                                                  IsInAnalysisPointMode = false;
                                                                                  MediatorMessage.Send(MediatorMessage.SetAnalysisPointMode, false);
-                                                                                 MediatorMessage.Send(MediatorMessage.SetupAndRunAnalysisPoint);
+                                                                                 MediatorMessage.Send(MediatorMessage.PlaceAnalysisPoint);
                                                                              }
                                                                              if (!IsQuickLookPointMode) return;
                                                                              IsQuickLookPointMode = false;
@@ -186,7 +186,7 @@ namespace ESMEWorkBench.ViewModels.Map
 
         public MapLayerCollection MapLayers
         {
-            get { return _mapLayers ?? (_mapLayers = new MapLayerCollection()); }
+            get { return _mapLayers; }
             set
             {
                 if (_mapLayers == value) return;

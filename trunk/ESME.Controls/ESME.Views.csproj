@@ -178,6 +178,7 @@
       <DependentUpon>TwoDimensionColorMapView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TwoDimensionColorMapViewModel.cs" />
+    <Compile Include="TransmissionLoss\ModeAcousticModelSelectionView.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossQueueViewOld.xaml.cs">
       <DependentUpon>TransmissionLossQueueViewOld.xaml</DependentUpon>
     </Compile>

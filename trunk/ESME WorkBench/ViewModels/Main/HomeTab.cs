@@ -1,120 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel;
+using System.IO;
+using System.Reflection;
+using System.Text;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Threading;
+using System.Windows.Input;
 using Cinch;
 using ESME;
-using ESME.Environment.Descriptors;
-using ESME.Environment.NAVO;
 using ESME.Mapping;
 using ESME.Metadata;
-using ESME.NEMO;
-using ESME.NEMO.Overlay;
+using ESME.Model;
 using ESME.TransmissionLoss;
+using ESME.Views.AcousticBuilder;
+using ESME.Views.TransmissionLoss;
 using ESMEWorkBench.Properties;
-using ESMEWorkBench.ViewModels.Layers;
-using ESMEWorkBench.ViewModels.TransmissionLoss;
-using HRC.Navigation;
-using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {
-        public MapLayerCollection HomeTabMapLayers { get; set; }
-
-        #region public NemoFile NemoFile { get; set; }
-
-        public NemoFile NemoFile
-        {
-            get { return _nemoFile; }
-            set
-            {
-                if (_nemoFile == value) return;
-                _nemoFile = value;
-                if (_nemoFile != null)
-                {
-                    _rangeComplexPath = Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, _nemoFile.Scenario.SimAreaName);
-                    _areasPath = Path.Combine(_rangeComplexPath, "Areas");
-                    _bathymetryPath = Path.Combine(_rangeComplexPath, "Bathymetry");
-                    _environmentPath = Path.Combine(_rangeComplexPath, "Environment");
-                    _imagesPath = Path.Combine(_rangeComplexPath, "Images");
-                    DisplayScenario(_nemoFile);
-                    _rangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[_nemoFile.Scenario.SimAreaName];
-                    var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
-                    AvailableEnvironments = new NAEMOEnvironmentDescriptors();
-                    AvailableEnvironments.AddRange(from environment in _rangeComplexDescriptor.NAEMOEnvironmentDescriptors
-                                                   where (environment.Value != null) && (environment.Value.Metadata.TimePeriod == curTimePeriod) && (!string.IsNullOrEmpty(environment.Value.Metadata.BathymetryName))
-                                                   select environment);
-                    if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
-                    else NemoModeToAcousticModelNameMap.UpdateModes(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
-                }
-                else
-                {
-                    ClearScenario();
-                    _rangeComplexPath = _areasPath = _bathymetryPath = _environmentPath = _imagesPath = null;
-                    _rangeComplexDescriptor = null;
-                    _scenarioBounds = null;
-                    NemoModeToAcousticModelNameMap = null;
-                    AvailableEnvironments = null;
-                }
-                    
-                NotifyPropertyChanged(NemoFileChangedEventArgs);
-                IsScenarioLoaded = _nemoFile != null;
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NemoFileChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.NemoFile);
-        NemoFile _nemoFile;
-        string _rangeComplexPath;
-        string _areasPath;
-        string _bathymetryPath;
-        string _environmentPath;
-        string _imagesPath;
-        RangeComplexDescriptor _rangeComplexDescriptor;
-        GeoRect _scenarioBounds;
-
-        void ClearScenario()
-        {
-            var layersToDelete = (from layer in HomeTabMapLayers
-                                  where layer.LayerType != LayerType.BaseMap
-                                  select layer).ToList();
-            foreach (var layer in layersToDelete) HomeTabMapLayers.Remove(layer);
-        }
-
-        void DisplayScenario(NemoFile nemoFile)
-        {
-            if (nemoFile.Scenario.OverlayFile != null) HomeTabMapLayers.DisplayOverlayShapes(string.Format("{0} sim area", nemoFile.Scenario.SimAreaName), LayerType.SimArea, Colors.Transparent, nemoFile.Scenario.OverlayFile.Shapes);
-            foreach (var platform in nemoFile.Scenario.Platforms)
-            {
-                if (platform.Trackdefs.Count == 1)
-                {
-                    HomeTabMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} op area", platform.Name), LayerType.OpArea, Colors.Transparent, platform.Trackdefs[0].OverlayFile.Shapes);
-                    if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
-                    else _scenarioBounds.Union(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
-                    platform.CalculateBehavior();
-                    if (platform.BehaviorModel != null && platform.BehaviorModel.CourseOverlay != null)
-                        HomeTabMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} track", platform.Name), LayerType.Track, Colors.Transparent,
-                                                              new List<OverlayShape> {platform.BehaviorModel.CourseOverlay}, 0, PointSymbolType.Circle, true, new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1));
-                }
-                else
-                    for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
-                    {
-                        HomeTabMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} OpArea{1}", platform.Name, trackIndex + 1), LayerType.OpArea, Colors.Transparent,
-                                                              platform.Trackdefs[0].OverlayFile.Shapes);
-                        if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
-                        else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
-                    }
-            }
-        }
-
-        #endregion
+        public MapLayerCollection ScenarioMapLayers { get; set; }
 
         #region public NAEMOScenarioMetadata ScenarioMetadata { get; set; }
 
@@ -127,42 +33,27 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_scenarioMetadata != null) _scenarioMetadata.Save();
                 _scenarioMetadata = value;
                 NotifyPropertyChanged(ScenarioMetadataChangedEventArgs);
+                if (_scenarioMetadata != null)
+                {
+                    MapLayerCollections.Add("Scenario", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+                    ScenarioMapLayers = MapLayerCollections["Scenario"];
+                    MapLayerCollections.ActiveLayer = ScenarioMapLayers;
+                    _scenarioMetadata.RangeComplexDescriptors = RangeComplexDescriptors;
+                    _scenarioMetadata.MapLayers = ScenarioMapLayers;
+                    _scenarioMetadata.Dispatcher = _dispatcher;
+                    _scenarioMetadata.VisualizerService = _visualizerService;
+                }
+                else
+                {
+                    MapLayerCollections.ActiveLayer = MapLayerCollections["Home"];
+                    if (ScenarioMapLayers != null) MapLayerCollections.Remove(ScenarioMapLayers);
+                }
+                IsScenarioLoaded = _scenarioMetadata != null;
             }
         }
 
         static readonly PropertyChangedEventArgs ScenarioMetadataChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioMetadata);
         NAEMOScenarioMetadata _scenarioMetadata;
-
-        #endregion
-
-        #region public string ScenarioFilename { get; set; }
-
-        public string ScenarioFilename
-        {
-            get { return _scenarioFilename; }
-            set
-            {
-                if (_scenarioFilename == value) return;
-                _scenarioFilename = value;
-                NotifyPropertyChanged(ScenarioFilenameChangedEventArgs);
-                if (_scenarioFilename != null)
-                {
-                    NemoFile = new NemoFile(_scenarioFilename, ESME.Globals.AppSettings.ScenarioDataDirectory);
-                    var metadataFilename = NAEMOMetadataBase.MetadataFilename(_scenarioFilename);
-                    ScenarioMetadata = NAEMOScenarioMetadata.Load(metadataFilename) ?? new NAEMOScenarioMetadata { Filename = metadataFilename };
-                    if (ScenarioMetadata.EnvironmentName != null) SelectedEnvironment = (NAEMOEnvironmentDescriptor)AvailableEnvironments[ScenarioMetadata.EnvironmentName];
-                }
-                else
-                {
-                    NemoFile = null;
-                    ScenarioMetadata = null;
-                }
-
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ScenarioFilenameChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioFilename);
-        string _scenarioFilename;
 
         #endregion
 
@@ -181,63 +72,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         static readonly PropertyChangedEventArgs IsScenarioLoadedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsScenarioLoaded);
         bool _isScenarioLoaded;
-
-        #endregion
-
-        #region public NAEMOEnvironmentDescriptors AvailableEnvironments { get; set; }
-
-        public NAEMOEnvironmentDescriptors AvailableEnvironments
-        {
-            get { return _availableEnvironments; }
-            set
-            {
-                if (_availableEnvironments == value) return;
-                _availableEnvironments = value;
-                NotifyPropertyChanged(AvailableEnvironmentsChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs AvailableEnvironmentsChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.AvailableEnvironments);
-        NAEMOEnvironmentDescriptors _availableEnvironments;
-
-        #endregion
-
-        #region public NAEMOEnvironmentDescriptor SelectedEnvironment { get; set; }
-
-        public NAEMOEnvironmentDescriptor SelectedEnvironment
-        {
-            get { return _selectedEnvironment; }
-            set
-            {
-                if (_selectedEnvironment == value) return;
-                _selectedEnvironment = value;
-                NotifyPropertyChanged(SelectedEnvironmentChangedEventArgs);
-                if (ScenarioMetadata != null && _selectedEnvironment != null) ScenarioMetadata.EnvironmentName = Path.GetFileNameWithoutExtension(_selectedEnvironment.Metadata.Filename);
-                Task.Factory.StartNew(() => _dispatcher.InvokeIfRequired(DisplaySelectedEnvironment, DispatcherPriority.Normal));
-            }
-        }
-
-        static readonly PropertyChangedEventArgs SelectedEnvironmentChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedEnvironment);
-        NAEMOEnvironmentDescriptor _selectedEnvironment;
-
-        void DisplaySelectedEnvironment()
-        {
-            if ((!_allViewModelsAreReady) || (!_viewIsActivated) || (_selectedEnvironment == null)) return;
-            var samplePoints = _selectedEnvironment.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
-            var bathymetryBounds = ((NAEMOBathymetryDescriptor)(_rangeComplexDescriptor.NAEMOBathymetryDescriptors[_selectedEnvironment.Metadata.BathymetryName])).Metadata.Bounds;
-            _scenarioBounds.Union(bathymetryBounds);
-            var bathyBitmapLayer = HomeTabMapLayers.DisplayBathymetryRaster("Bathymetry", Path.Combine(_imagesPath, _selectedEnvironment.Metadata.BathymetryName + ".bmp"), true, false, true, bathymetryBounds);
-            MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
-            HomeTabMapLayers.DisplayOverlayShapes("Sound Speed", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Circle, false, null, false);
-            HomeTabMapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
-            foreach (var sedimentType in _selectedEnvironment.Data.SedimentTypes)
-            {
-                samplePoints = sedimentType.Value.Select(samplePoint => new OverlayPoint(samplePoint));
-                HomeTabMapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", sedimentType.Key.ToLower()), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
-            }
-            ZoomToScenarioHandler();
-            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
-        }
 
         #endregion
 
@@ -262,9 +96,26 @@ namespace ESMEWorkBench.ViewModels.Main
                 fileName = _openFileService.FileName;
                 Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
             }
-            ScenarioFilename = null;
-            RecentFiles.InsertFile(fileName); 
-            ScenarioFilename = fileName;
+            ScenarioMetadata = null;
+            RecentFiles.InsertFile(fileName);
+            try
+            {
+                ScenarioMetadata = NAEMOScenarioMetadata.Load(NAEMOMetadataBase.MetadataFilename(fileName)) ?? new NAEMOScenarioMetadata { Filename = NAEMOMetadataBase.MetadataFilename(fileName) };
+                ScenarioMetadata.ScenarioFilename = fileName;
+            }
+            catch (Exception ex)
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine(ex.Message);
+                var inner = ex.InnerException;
+                while (inner != null)
+                {
+                    sb.AppendLine(inner.Message);
+                    inner = inner.InnerException;
+                }
+                _messageBoxService.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\": " + sb);
+                ScenarioMetadata = null;
+            }
         }
         #endregion
 
@@ -276,87 +127,142 @@ namespace ESMEWorkBench.ViewModels.Main
 
         SimpleCommand<object, object> _closeScenario;
 
-        void CloseScenarioHandler() { ScenarioFilename = null; }
-        #endregion
-
-        #region ZoomToScenarioCommand
-        public SimpleCommand<object, object> ZoomToScenarioCommand
+        void CloseScenarioHandler()
         {
-            get { return _zoomToScenario ?? (_zoomToScenario = new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; }, delegate { ZoomToScenarioHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _zoomToScenario;
-
-        void ZoomToScenarioHandler()
-        {
-            var mapExtent = new RectangleShape(_scenarioBounds.West, _scenarioBounds.North, _scenarioBounds.East, _scenarioBounds.South);
-            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
-        }
-        #endregion
-
-        #region EditScenarioCommand
-        public SimpleCommand<object, object> EditScenarioCommand
-        {
-            get { return _editScenario ?? (_editScenario = new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; }, delegate { EditScenarioHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _editScenario;
-
-        void EditScenarioHandler()
-        {
-            string arguments;
-
-            if ((ScenarioFilename == null) || (!File.Exists(ScenarioFilename))) arguments = null;
-            else arguments = "\"" + ScenarioFilename + "\"";
-            new Process
-            {
-                StartInfo =
-                        {
-                            FileName = Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
-                            WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
-                            Arguments = arguments,
-                        }
-            }.Start();
+            ScenarioMetadata = null;
         }
         #endregion
 
         #region ConfigureAcousticModelsCommand
         public SimpleCommand<object, object> ConfigureAcousticModelsCommand
         {
-            get { return _configureAcousticModels ?? (_configureAcousticModels = new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; }, delegate { ConfigureAcousticModelsHandler(); })); }
+            get { return _configureAcousticModels ?? (_configureAcousticModels = new SimpleCommand<object, object>(delegate { ConfigureAcousticModelsHandler(); })); }
         }
 
         SimpleCommand<object, object> _configureAcousticModels;
 
         void ConfigureAcousticModelsHandler()
         {
-            var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(NemoModeToAcousticModelNameMap, Globals.ValidTransmissionLossAlgorithms);
-            var result = _visualizerService.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);
-            if (result.HasValue && result.Value)
-            {
-                _experiment.IsChanged = true;
-            }
+            var modeAcousticModelSelectionViewModel = new ModeAcousticModelSelectionViewModel(ScenarioMetadata.NemoModeToAcousticModelNameMap, ESME.Globals.ValidTransmissionLossAlgorithms);
+            _visualizerService.ShowDialog("ModeAcousticModelSelectionView", modeAcousticModelSelectionViewModel);
         }
 
         #endregion
 
-        #region public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap { get; set; }
-
-        public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap
+        [MediatorMessageSink(MediatorMessage.PlaceAnalysisPoint)]
+        void PlaceAnalysisPoint(bool dummy)
         {
-            get { return _nemoModeToAcousticModelNameMap; }
-            set
+            if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
+            if (ScenarioMetadata == null) return;
+            ScenarioMetadata.PlaceAnalysisPoint(MouseEarthCoordinate);
+            return;
+            try
             {
-                if (_nemoModeToAcousticModelNameMap == value) return;
-                _nemoModeToAcousticModelNameMap = value;
-                NotifyPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
+#if false
+            var environmentInformation = new EnvironmentInformation
+                                         {
+                                             Bathymetry = _experiment.Bathymetry,
+                                             SoundSpeedField = _experiment.SoundSpeedField,
+                                             Sediment = SedimentTypes.SedimentArray[0],
+                                         };
+
+            var transmissionLossSettings = new TransmissionLossSettings
+                                           {
+                                               DepthCellSize = (float)_experiment.BellhopDepthCellSize,
+                                               RangeCellSize = (float)_experiment.BellhopRangeCellSize,
+                                           };
+
+#endif
+                //if(!_experiment.Bathymetry.BoundingBox.Contains(MouseEarthCoordinate)) throw new AnalysisPointLocationException("Analysis Points cannot be placed outside the bathymetry bounds.");
+                var analysisPoint = new AnalysisPoint(MouseEarthCoordinate);
+#if false
+            var analysisPointViewModel = new AnalysisPointCalculationPreviewViewModel
+            {
+                AnalysisPoint = analysisPoint,
+            };
+#endif
+
+                var distinctModes = (from platform in _experiment.NemoFile.Scenario.Platforms
+                                     from source in platform.Sources
+                                     from mode in source.Modes
+                                     select mode).Distinct();
+                foreach (var mode in distinctModes)
+                {
+                    analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode, 16));
+#if false
+                var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, mode, 16, 3000)
+                                                   {
+                                                       Name = string.Format("{0}", mode.PSMName),
+                                                       IDField = _experiment.NextObjectID,
+                                                   };
+                try
+                {
+                    analysisPointViewModel.AnalysisPoint.SoundSources.Add(transmissionLossJobViewModel.TransmissionLossJob.SoundSource);
+                    //var cassRunFile = CassRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings, _experiment.NemoFile.Scenario.TimeFrame);
+                    //cassRunFile.Save(Path.GetDirectoryName(_experiment.FileName));
+                    var ramRunFile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.RAM, transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
+                    ramRunFile.Save(_experiment.LocalStorageRoot);
+                    var bellhopRunFile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.Bellhop, transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
+                    bellhopRunFile.Save(_experiment.LocalStorageRoot);
+                    analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
+                    analysisPointViewModel.TransmissionLossRunFiles.Add(bellhopRunFile);
+                }
+                catch (BathymetryOutOfBoundsException ex)
+                {
+                    _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("Unable to add analysis point.\nDid you click outside the bounds of the simulation area?\n\n" + ex.Message));
+                    _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
+                    return;
+                }
+                catch (BathymetryTooShallowException ex)
+                {
+                    _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("This area is too shallow to place an analysis point.  Pick a different area.\n\n" + ex.Message));
+                    _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
+                    return;
+                }
+#endif
+                }
+                var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
+                var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
+                IsInAnalysisPointMode = false;
+                if ((!settingsResult.HasValue) || (!settingsResult.Value))
+                    return;
+                var maxRadial = analysisPoint.SoundSources.Where(s => s.ShouldBeCalculated).Aggregate(0, (current, soundSource) => Math.Max(current, soundSource.Radius));
+                //for (var i = 0; i < 360; i += 90) if (!_experiment.Bathymetry.BoundingBox.Contains(new EarthCoordinate(MouseEarthCoordinate, i, maxRadial))) throw new AnalysisPointLocationException("One or more radial endpoints extends beyond the bounds of the bathymetry.");
+
+                MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPoint);
+#if false
+            var result = _visualizerService.ShowDialog("AnalysisPointCalculationPreviewView", analysisPointViewModel);
+            if ((!result.HasValue) || (!result.Value))
+            {
+                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
+                return;
+            }
+            MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPointViewModel.AnalysisPoint);
+            if (_bellhopQueueCalculatorViewModel == null)
+            {
+                _bellhopQueueCalculatorViewModel = new BellhopQueueCalculatorViewModel(_experiment.LocalStorageRoot, _messageBoxService);
+                _visualizerService.Show("BellhopQueueCalculatorView", _bellhopQueueCalculatorViewModel, false, null);
+            }
+
+            var backgroundWorker = new BackgroundWorker();
+            backgroundWorker.DoWork += delegate
+                                        {
+                                            foreach (var bellhopRunFile in analysisPointViewModel.TransmissionLossRunFiles) 
+                                                _dispatcher.BeginInvoke(new MediatorSendDelegate(MediatorMessage.Send), DispatcherPriority.Background, MediatorMessage.QueueTransmissionLossJob, bellhopRunFile);
+                                        };
+            backgroundWorker.RunWorkerAsync();
+#endif
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError("Error placing Analysis Point: " + e.Message);
+            }
+            finally
+            {
+                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
             }
         }
 
-        static readonly PropertyChangedEventArgs NemoModeToAcousticModelNameMapChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.NemoModeToAcousticModelNameMap);
-        NemoModeToAcousticModelNameMap _nemoModeToAcousticModelNameMap;
-
-        #endregion
 
     }
 }

@@ -374,17 +374,20 @@
 					                SmallImageSource="..\Images\SmallIcons\application-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launch the scenario editor"
-					                Command="{Binding EditScenarioCommand}" />
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+					                Command="{Binding ScenarioMetadata.EditScenarioCommand}" />
 					<r:RibbonButton Label="Run"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Run the scenario"
-					                Command="{Binding RunExperimentCommand}" />
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+					                Command="{Binding ScenarioMetadata.RunExperimentCommand}" />
                     <r:RibbonButton Label="Zoom"
 					                SmallImageSource="..\Images\SmallIcons\Magnifying-Glass-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Resets the map position to the current scenario"
-					                Command="{Binding ZoomToScenarioCommand}" />
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+					                Command="{Binding ScenarioMetadata.ZoomToScenarioCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Overlays">
                     <r:RibbonCheckBox Label="Lat/Lon Grid"
@@ -408,11 +411,12 @@
 					                ToolTipDescription="Export all Analysis Points as CASS jobs"
 					                Command="{Binding ExportAnalysisPointsToCASSCommand}" />
                     <r:RibbonToggleButton Label="Analysis Point"
-					                SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Add a new analysis point to the experiment"
-                                    IsChecked="{Binding IsInAnalysisPointMode}"
-					                Command="{Binding AnalysisPointCommand}" />
+					                      SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
+					                      ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                      ToolTipDescription="Add a new analysis point to the experiment"
+                                          IsEnabled="{Binding ScenarioMetadata.CanPlaceAnalysisPoint}"
+                                          IsChecked="{Binding ScenarioMetadata.IsInAnalysisPointMode}"
+					                      Command="{Binding ScenarioMetadata.AnalysisPointCommand}" />
                     <!--
                     <r:RibbonButton Label="Fixed Source"
 					                LargeImageSource="..\Images\LargeIcons\Sound.png"
@@ -425,7 +429,8 @@
 					                SmallImageSource="..\Images\SmallIcons\gnome_sound_recorder.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Choose an acoustic model for each distinct mode in the experiment"
-					                Command="{Binding ConfigureAcousticModelsCommand}" />
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+					                Command="{Binding ScenarioMetadata.ConfigureAcousticModelsCommand}" />
                     <r:RibbonButton Label="Quick Look"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -465,6 +470,7 @@
                             </Label>
                         </Border>
                         <ListBox Grid.Column="0"
+                                 DataContext="{Binding ScenarioMetadata}"
                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                                  ItemsSource="{Binding AvailableEnvironments}"
                                  SelectedValue="{Binding SelectedEnvironment}"

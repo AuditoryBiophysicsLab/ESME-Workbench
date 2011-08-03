@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using ESME.Data;
+using ESME.TransmissionLoss;
 
 namespace ESME
 {
@@ -27,5 +29,13 @@ namespace ESME
         }
 
         public static AppSettings AppSettings { get; set; }
+
+        public static List<TransmissionLossAlgorithm> ValidTransmissionLossAlgorithms = new List<TransmissionLossAlgorithm>
+                                                                                        {
+                                                                                            TransmissionLossAlgorithm.CASS,
+                                                                                            TransmissionLossAlgorithm.RAM,
+                                                                                            TransmissionLossAlgorithm.Bellhop,
+                                                                                            TransmissionLossAlgorithm.RAMGEO
+                                                                                        };
     }
 }
