@@ -141,10 +141,12 @@ namespace ESME.TransmissionLoss.CASS
                     if (simulatorName == TransmissionLossAlgorithm.RAM)
                     {
                         writer.WriteLine("*RAM Parms");
+#if false
                         writer.WriteLine("Speed Dial                              ,{0}", appSettings.RAMSettings.SpeedDial);
                         writer.WriteLine("SSP Units                               ,{0}", appSettings.RAMSettings.SSPUnits);
                         writer.WriteLine("Cass Level                              ,{0}", appSettings.RAMSettings.CASSLevel);
                         writer.WriteLine("Bathymetry Metric                       ,{0}", appSettings.RAMSettings.BathymetryMetric);
+#endif
                         writer.WriteLine("*end RAM Parms");
                     }
                     writer.WriteLine();
