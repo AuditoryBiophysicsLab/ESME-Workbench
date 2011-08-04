@@ -12,13 +12,17 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
+using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Mapping;
+using ESME.Model;
 using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
+using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Metadata
@@ -64,6 +68,9 @@ namespace ESME.Metadata
                     _bathymetryPath = Path.Combine(_rangeComplexPath, "Bathymetry");
                     _environmentPath = Path.Combine(_rangeComplexPath, "Environment");
                     _imagesPath = Path.Combine(_rangeComplexPath, "Images");
+                    _scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
+                    _propagationPath = Path.Combine(_scenarioPath, "Propagation");
+                    _pressurePath = Path.Combine(_scenarioPath, "Pressure");
                     DisplayScenario();
                     _rangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[_nemoFile.Scenario.SimAreaName];
                     var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
@@ -98,6 +105,9 @@ namespace ESME.Metadata
         string _bathymetryPath;
         string _environmentPath;
         string _imagesPath;
+        string _scenarioPath;
+        string _propagationPath;
+        string _pressurePath;
         RangeComplexDescriptor _rangeComplexDescriptor;
         GeoRect _scenarioBounds;
 
@@ -255,11 +265,14 @@ namespace ESME.Metadata
                 _selectedBathymetry = value;
                 NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
                 NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
+                _bathymetry = _selectedBathymetry == null ? null : new WeakReference<Bathymetry>(_selectedBathymetry.Data);
+                if ((_selectedBathymetry != null) && (AnalysisPoints != null)) SetBathymetryForAnalysisPoints();
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedBathymetryChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.SelectedBathymetry);
         NAEMOBathymetryDescriptor _selectedBathymetry;
+        WeakReference<Bathymetry> _bathymetry;
 
         #endregion
 
@@ -353,7 +366,15 @@ namespace ESME.Metadata
                 _analysisPoints = value;
                 if (_analysisPoints != null) _analysisPoints.CollectionChanged += AnalysisPointsCollectionChanged;
                 NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
+                SetBathymetryForAnalysisPoints();
             }
+        }
+
+        void SetBathymetryForAnalysisPoints()
+        {
+            if ((AnalysisPoints == null) || (AnalysisPoints.Count == 0) || (SelectedBathymetry == null) || (SelectedBathymetry.Data == null)) return;
+            if ((_bathymetry == null) || (!_bathymetry.IsAlive)) _bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
+            foreach (var analysisPoint in AnalysisPoints) analysisPoint.Bathymetry = _bathymetry;
         }
 
         void DisplayExistingAnalysisPoints()
@@ -371,7 +392,12 @@ namespace ESME.Metadata
                     if (e.NewItems != null)
                     {
                         foreach (var newPoint in e.NewItems)
+                        {
                             if (MapLayers != null) MapLayers.DisplayAnalysisPoint((AnalysisPoint)newPoint);
+                            if ((SelectedBathymetry == null) || (SelectedBathymetry.Data == null)) continue;
+                            if ((_bathymetry == null) || (!_bathymetry.IsAlive)) _bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
+                            ((AnalysisPoint)newPoint).Bathymetry = _bathymetry;
+                        }
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -391,5 +417,19 @@ namespace ESME.Metadata
         ObservableCollection<AnalysisPoint> _analysisPoints;
 
         #endregion
+
+        public void ExportAnalysisPoints()
+        {
+            var propagationTimePath = Path.Combine(_propagationPath, NemoFile.Scenario.TimeFrame);
+            var pressureTimePath = Path.Combine(_pressurePath, NemoFile.Scenario.TimeFrame);
+            Directory.CreateDirectory(propagationTimePath);
+            //Directory.CreateDirectory(pressureTimePath);
+            SelectedEnvironment.Data.EnvironmentInformation.Bathymetry = SelectedBathymetry.Data;
+            CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, new List<string> {NemoFile.Scenario.TimeFrame},
+                                                  AnalysisPoints, NemoFile,
+                                                  SelectedBathymetry.DataFilename, SelectedEnvironment.DataFilename,
+                                                  NemoModeToAcousticModelNameMap,
+                                                  SelectedEnvironment.Data.EnvironmentInformation);
+        }
     }
 }

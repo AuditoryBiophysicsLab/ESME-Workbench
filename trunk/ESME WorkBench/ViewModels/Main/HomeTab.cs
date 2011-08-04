@@ -149,6 +149,23 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region ExportAnalysisPointsCommand
+        public SimpleCommand<object, object> ExportAnalysisPointsCommand
+        {
+            get
+            {
+                return _exportAnalysisPoints ??
+                       (_exportAnalysisPoints =
+                        new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; },
+                                                          delegate { ExportAnalysisPointsHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _exportAnalysisPoints;
+
+        void ExportAnalysisPointsHandler() { ScenarioMetadata.ExportAnalysisPoints(); }
+        #endregion
+
         [MediatorMessageSink(MediatorMessage.PlaceAnalysisPoint)]
         void PlaceAnalysisPoint(bool dummy)
         {
@@ -263,6 +280,23 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
+        [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
+        void EditAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
+            var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
+            if (settingsResult.HasValue && settingsResult.Value)
+            {
+                ScenarioMetadata.MapLayers.DisplayAnalysisPoint(analysisPoint);
+                MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+            }
+            analysisPoint.Validate();
+        }
 
+        [MediatorMessageSink(MediatorMessage.RemoveAnalysisPoint)]
+        void RemoveAnalysisPoint(AnalysisPoint analysisPoint)
+        {
+            ScenarioMetadata.AnalysisPoints.Remove(analysisPoint);
+        }
     }
 }

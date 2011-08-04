@@ -409,7 +409,7 @@
 					                SmallImageSource="..\Images\SmallIcons\export-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Export all Analysis Points as CASS jobs"
-					                Command="{Binding ExportAnalysisPointsToCASSCommand}" />
+					                Command="{Binding ExportAnalysisPointsCommand}" />
                     <r:RibbonToggleButton Label="Analysis Point"
 					                      SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
 					                      ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -430,7 +430,7 @@
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Choose an acoustic model for each distinct mode in the experiment"
                                     IsEnabled="{Binding IsScenarioLoaded}"
-					                Command="{Binding ScenarioMetadata.ConfigureAcousticModelsCommand}" />
+					                Command="{Binding ConfigureAcousticModelsCommand}" />
                     <r:RibbonButton Label="Quick Look"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"

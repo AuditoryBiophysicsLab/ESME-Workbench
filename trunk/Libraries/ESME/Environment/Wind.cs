@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ESME.Environment.NAVO;
-using ESME.Model;
 using HRC.Navigation;
 using HRC.Utility;
 

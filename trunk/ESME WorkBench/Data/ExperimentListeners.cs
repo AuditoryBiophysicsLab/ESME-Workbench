@@ -233,11 +233,9 @@ namespace ESMEWorkBench.Data
                 var windSpeedField = wind[navoTimePeriod];
                 var environmentInfo = new EnvironmentInformation
                                       {
-                                          LocationName = NemoFile.Scenario.SimAreaName,
-                                          SoundSpeedFieldName = timePeriod,
                                           Bathymetry = Bathymetry,
                                           Sediment = bottomTypeData,
-                                          WindSpeed = windSpeedField.EnvironmentData,
+                                          //Wind = windSpeedField.EnvironmentData,
                                           SoundSpeedField = soundSpeedField,
                                       };
                 foreach (var analysisPoint in AnalysisPoints)

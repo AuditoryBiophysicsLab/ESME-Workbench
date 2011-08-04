@@ -16,8 +16,6 @@ namespace ESME.TransmissionLoss
 {
     public class SoundSource : EarthCoordinate, IEquatable<SoundSource>, ISupportValidation
     {
-        public static WeakReference<Bathymetry> Bathymetry = new WeakReference<Bathymetry>(null);
-
         protected SoundSource()
         {
             RadialBearings = new List<float>();
@@ -48,6 +46,22 @@ namespace ESME.TransmissionLoss
         ///   Source Level in dB SPL re: 1uPa
         /// </summary>
         public float SourceLevel { get; set; }
+
+        #region public WeakReference<Bathymetry> Bathymetry { get; set; }
+        [XmlIgnore]
+        public WeakReference<Bathymetry> Bathymetry
+        {
+            get { return _bathymetry ?? (_bathymetry = new WeakReference<Bathymetry>(null)); }
+            set
+            {
+                if (_bathymetry == value) return;
+                _bathymetry = value;
+            }
+        }
+
+        WeakReference<Bathymetry> _bathymetry;
+
+        #endregion
 
         #region public List<float> RadialBearings { get; set; }
 

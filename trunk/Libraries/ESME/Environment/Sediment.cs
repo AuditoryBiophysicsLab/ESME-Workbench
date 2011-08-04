@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 using ESME.Model;
 using HRC.Navigation;
 using HRC.Utility;
@@ -34,6 +33,7 @@ namespace ESME.Environment
     {
         public SedimentSample() { }
 
+        public SedimentSample(Geo location, SedimentSampleBase sample) : base(location.Latitude, location.Longitude, sample) { }
         public SedimentSample(double latitude, double longitude, SedimentSampleBase sample) : base(latitude, longitude, sample) { }
 
         public static implicit operator SedimentType(SedimentSample sedimentSample)
