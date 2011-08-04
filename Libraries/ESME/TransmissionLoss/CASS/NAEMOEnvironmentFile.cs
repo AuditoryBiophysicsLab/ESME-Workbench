@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using Cinch;
+using ESME.Environment;
 using ESME.Environment.NAVO;
+using ESME.Model;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -109,6 +111,8 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
+        public EnvironmentInformation EnvironmentInformation { get; set; }
+
         #region Parser
 
         static KeyValuePair<string, string> ParseKeyValuePair(string line)
@@ -204,6 +208,28 @@ namespace ESME.TransmissionLoss.CASS
                 }
                 result.Locations.Add(retpacket);
             }
+            result.EnvironmentInformation = new EnvironmentInformation
+            {
+                Wind = new Wind(),
+                SoundSpeedField = new SoundSpeedField {TimePeriod = result.TimePeriod},
+                Sediment = new Sediment(),
+            };
+            var windData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = result.TimePeriod };
+            foreach (var location in result.Locations)
+            {
+                windData.EnvironmentData.Add(new WindSample(location, (float)location.WindSpeed));
+                var bottomType = location.BottomType == "SAND" ? "Medium Sand or Sand" : location.BottomType;
+                result.EnvironmentInformation.Sediment.Samples.Add(new SedimentSample(location,
+                                                               new SedimentSampleBase
+                                                               {
+                                                                    SampleValue = (short)Model.SedimentTypes.Find(bottomType).HFEVACategory
+                                                               }));
+                var profileData = new DepthValuePairs<float>();
+                for (var depthIndex = 0; depthIndex < location.Depths.Count; depthIndex++)
+                    profileData.Add(new DepthValuePair<float>((float)location.Depths[depthIndex], (float)location.Soundspeeds[depthIndex]));
+                result.EnvironmentInformation.SoundSpeedField.EnvironmentData.Add(new SoundSpeedProfile(location) { Data = profileData });
+            }
+            result.EnvironmentInformation.Wind.TimePeriods.Add(windData); 
             return result;
         }
         #endregion

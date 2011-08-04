@@ -618,8 +618,8 @@ namespace ESMEWorkBench.Data
                 if (_bathymetry == value) return;
                 _bathymetry = value;
                 NotifyPropertyChanged(BathymetryChangedEventArgs);
-                AnalysisPoint.Bathymetry.Target = _bathymetry;
-                SoundSource.Bathymetry.Target = _bathymetry;
+                //AnalysisPoint.Bathymetry.Target = _bathymetry;
+                //SoundSource.Bathymetry.Target = _bathymetry;
                 if ((_bathymetry == null) || (AnalysisPoints == null)) return;
                 foreach (var analysisPoint in AnalysisPoints)
                     analysisPoint.Validate();

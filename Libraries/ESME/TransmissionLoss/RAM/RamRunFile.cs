@@ -26,7 +26,7 @@ namespace ESME.TransmissionLoss.RAM
 
         public override void Save(string path)
         {
-            var fileWriter = new StreamWriter(Path.Combine(path, Filename + ".ramgeo"), false);
+            var fileWriter = new StreamWriter(Path.Combine(path, Name + ".ramgeo"), false);
             fileWriter.Write(Serialize());
             fileWriter.Close();
         }

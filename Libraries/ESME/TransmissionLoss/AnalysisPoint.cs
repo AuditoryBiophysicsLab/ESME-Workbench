@@ -16,8 +16,6 @@ namespace ESME.TransmissionLoss
 {
     public class AnalysisPoint : EarthCoordinate, IEquatable<AnalysisPoint>, ISupportValidation
     {
-        public static WeakReference<Bathymetry> Bathymetry = new WeakReference<Bathymetry>(null);
-
         private AnalysisPoint()
         {
             TransmissionLossJobs = new ObservableCollection<TransmissionLossJob>();
@@ -38,6 +36,24 @@ namespace ESME.TransmissionLoss
         public string AnalysisPointID { get; set; }
 
         public List<SoundSource> SoundSources { get; set; }
+
+        #region public WeakReference<Bathymetry> Bathymetry { get; set; }
+
+        [XmlIgnore]
+        public WeakReference<Bathymetry> Bathymetry
+        {
+            get { return _bathymetry ?? (_bathymetry = new WeakReference<Bathymetry>(null)); }
+            set
+            {
+                if (_bathymetry == value) return;
+                _bathymetry = value;
+                foreach (var soundSource in SoundSources) soundSource.Bathymetry = _bathymetry;
+            }
+        }
+
+        WeakReference<Bathymetry> _bathymetry;
+
+        #endregion
 
         #region public ObservableCollection<TransmissionLossJob> TransmissionLossJobs { get; set; }
         [XmlIgnore]
