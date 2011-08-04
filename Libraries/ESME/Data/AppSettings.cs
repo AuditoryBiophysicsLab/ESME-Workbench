@@ -758,16 +758,6 @@ namespace ESME.Data
                                                  },
                                              new ValidationRule
                                                  {
-                                                     PropertyName = "RangeStepSize",
-                                                     Description = "Must be positive",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((RAMSettings) o).RangeStepSize;
-                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
                                                      PropertyName = "DepthStepSize",
                                                      Description = "Must be positive",
                                                      RuleDelegate = (o, r) =>
@@ -776,7 +766,27 @@ namespace ESME.Data
                                                                             return RangeCheck(ruleTarget, 0,float.MaxValue,false);
                                                                         },
                                                  },
-
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "MaximumRange",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((RAMSettings)o).MaximumRange;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "RangeStepSize",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((RAMSettings) o).RangeStepSize;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+#if false
                                              new ValidationRule
                                                  {
                                                      PropertyName = "SpeedDial",
@@ -817,6 +827,7 @@ namespace ESME.Data
                                                                             return RangeCheck(ruleTarget);
                                                                         },
                                                  },
+#endif
                                          }
 
                 );
@@ -824,12 +835,9 @@ namespace ESME.Data
         public void SetDefaults()
         {
             MaximumDepth = 2000;
-            RangeStepSize = 25;
             DepthStepSize = 25;
-            SpeedDial = 1;
-            SSPUnits = 0;
-            CASSLevel = 200;
-            BathymetryMetric = 1;
+            RangeStepSize = 50;
+            MaximumRange = 100000;
         }
 
         #region public float MaximumDepth { get; set; }
@@ -847,24 +855,6 @@ namespace ESME.Data
 
         static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.MaximumDepth);
         float _maximumDepth = 2000;
-
-        #endregion
-
-        #region public float RangeStepSize { get; set; }
-
-        public float RangeStepSize
-        {
-            get { return _rangeStepSize; }
-            set
-            {
-                if (_rangeStepSize == value) return;
-                _rangeStepSize = value;
-                NotifyPropertyChanged(RangeCellSizeChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RangeStepSize);
-        float _rangeStepSize = 25;
 
         #endregion
 
@@ -886,75 +876,39 @@ namespace ESME.Data
 
         #endregion
 
-        #region public int SpeedDial { get; set; }
+        #region public float MaximumRange { get; set; }
 
-        public int SpeedDial
+        public float MaximumRange
         {
-            get { return _speedDial; }
+            get { return _maximumRange; }
             set
             {
-                if (_speedDial == value) return;
-                _speedDial = value;
-                NotifyPropertyChanged(SpeedDialChangedEventArgs);
+                if (_maximumRange == value) return;
+                _maximumRange = value;
+                NotifyPropertyChanged(MaximumRangeChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs SpeedDialChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.SpeedDial);
-        int _speedDial = 1;
+        static readonly PropertyChangedEventArgs MaximumRangeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.MaximumRange);
+        float _maximumRange;
 
         #endregion
 
-        #region public int SSPUnits { get; set; }
+        #region public float RangeStepSize { get; set; }
 
-        public int SSPUnits
+        public float RangeStepSize
         {
-            get { return _sspUnits; }
+            get { return _rangeStepSize; }
             set
             {
-                if (_sspUnits == value) return;
-                _sspUnits = value;
-                NotifyPropertyChanged(SSPUnitsChangedEventArgs);
+                if (_rangeStepSize == value) return;
+                _rangeStepSize = value;
+                NotifyPropertyChanged(RangeCellSizeChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs SSPUnitsChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.SSPUnits);
-        int _sspUnits = 0;
-
-        #endregion
-
-        #region public int CASSLevel { get; set; }
-
-        public int CASSLevel
-        {
-            get { return _cassLevel; }
-            set
-            {
-                if (_cassLevel == value) return;
-                _cassLevel = value;
-                NotifyPropertyChanged(CASSLevelChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs CASSLevelChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.CASSLevel);
-        int _cassLevel = 200;
-
-        #endregion
-
-        #region public int BathymetryMetric { get; set; }
-
-        public int BathymetryMetric
-        {
-            get { return _bathymetryMetric; }
-            set
-            {
-                if (_bathymetryMetric == value) return;
-                _bathymetryMetric = value;
-                NotifyPropertyChanged(BathymetryMetricChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs BathymetryMetricChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.BathymetryMetric);
-        int _bathymetryMetric = 1;
+        static readonly PropertyChangedEventArgs RangeCellSizeChangedEventArgs = ObservableHelper.CreateArgs<RAMSettings>(x => x.RangeStepSize);
+        float _rangeStepSize = 50;
 
         #endregion
     }
@@ -1019,6 +973,26 @@ namespace ESME.Data
                                                  },
                                              new ValidationRule
                                                  {
+                                                     PropertyName = "SPLCutoffSingleSource",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((REFMSSettings)o).SPLCutoffSingleSource;
+                                                                            return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
+                                                     PropertyName = "SPLCutoffMultiSource",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((REFMSSettings)o).SPLCutoffMultiSource;
+                                                                            return RangeCheck(ruleTarget,0,int.MaxValue,false);
+                                                                        },
+                                                 },
+                                             new ValidationRule
+                                                 {
                                                      PropertyName = "REFMSExecutablePath",
                                                      Description = "File must exist.",
                                                      RuleDelegate = (o, r) =>
@@ -1029,24 +1003,6 @@ namespace ESME.Data
                                                  },
                                          });
         }
-
-        #region public bool ScaleI { get; set; }
-
-        public bool ScaleI
-        {
-            get { return _scaleI; }
-            set
-            {
-                if (_scaleI == value) return;
-                _scaleI = value;
-                NotifyPropertyChanged(ScaleIChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ScaleIChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.ScaleI);
-        bool _scaleI;
-
-        #endregion
 
         #region public float DefaultMinimumRange { get; set; }
 
@@ -1063,7 +1019,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs DefaultMinimumRangeChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.DefaultMinimumRange);
-        float _defaultMinimumRange = 50f;
+        float _defaultMinimumRange = 15.24f;
 
         #endregion
 
@@ -1082,7 +1038,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs DefaultMaximumRangeChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.DefaultMaximumRange);
-        float _defaultMaximumRange = 5280f;
+        float _defaultMaximumRange = 1609.344f;
 
         #endregion
 
@@ -1118,7 +1074,7 @@ namespace ESME.Data
         }
 
         static readonly PropertyChangedEventArgs MinimumDepthChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.MinimumDepth);
-        float _minimumDepth = 1.57f;
+        float _minimumDepth = 0.478536f;
 
         #endregion
 
@@ -1140,21 +1096,75 @@ namespace ESME.Data
 
         #endregion
 
+        #region public float SPLCutoffSingleSource { get; set; }
+
+        public float SPLCutoffSingleSource
+        {
+            get { return _splCutoffSingleSource; }
+            set
+            {
+                if (_splCutoffSingleSource == value) return;
+                _splCutoffSingleSource = value;
+                NotifyPropertyChanged(SPLCutoffSingleSourceChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SPLCutoffSingleSourceChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.SPLCutoffSingleSource);
+        float _splCutoffSingleSource = 200;
+
+        #endregion
+
+        #region public float SPLCutoffMultiSource { get; set; }
+
+        public float SPLCutoffMultiSource
+        {
+            get { return _splCutoffMultiSource; }
+            set
+            {
+                if (_splCutoffMultiSource == value) return;
+                _splCutoffMultiSource = value;
+                NotifyPropertyChanged(SPLCutoffMultiSourceChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SPLCutoffMultiSourceChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.SPLCutoffMultiSource);
+        float _splCutoffMultiSource;
+
+        #endregion
+
+        #region public string SELCutoffLine { get; set; }
+
+        public string SELCutoffLine
+        {
+            get { return _selCutoffLine; }
+            set
+            {
+                if (_selCutoffLine == value) return;
+                _selCutoffLine = value;
+                NotifyPropertyChanged(SELCutoffLineChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SELCutoffLineChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.SELCutoffLine);
+        string _selCutoffLine = "163  800  171  1100  183";
+
+        #endregion
+
         #region public string REFMSExecutablePath { get; set; }
 
         public string REFMSExecutablePath
         {
-            get { return _rEFMSExecutablePath; }
+            get { return _refmsExecutablePath; }
             set
             {
-                if (_rEFMSExecutablePath == value) return;
-                _rEFMSExecutablePath = value;
+                if (_refmsExecutablePath == value) return;
+                _refmsExecutablePath = value;
                 NotifyPropertyChanged(REFMSExecutablePathChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs REFMSExecutablePathChangedEventArgs = ObservableHelper.CreateArgs<REFMSSettings>(x => x.REFMSExecutablePath);
-        string _rEFMSExecutablePath;
+        string _refmsExecutablePath;
 
         #endregion
     }
