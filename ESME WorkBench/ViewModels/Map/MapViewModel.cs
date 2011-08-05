@@ -141,8 +141,6 @@ namespace ESMEWorkBench.ViewModels.Map
             _wpfMap.MapTools.PanZoomBar.VerticalAlignment = VerticalAlignment.Top;
             _wpfMap.MapTools.Logo.IsEnabled = false;
 
-            _wpfMap.CurrentScaleChanged += (s, e) => { if (_experiment != null) _experiment.CurrentScale = e.CurrentScale; };
-            _wpfMap.CurrentExtentChanged += (s, e) => { if (_experiment != null) _experiment.CurrentExtent = e.CurrentExtent.GetWellKnownText(); };
             _wpfMap.BackgroundOverlay.BackgroundBrush = new GeoSolidBrush(GeoColor.StandardColors.Black);
             AdornmentOverlay.Layers.Add("Grid", new MyGraticuleAdornmentLayer());
             AdornmentOverlay.Layers["Grid"].IsVisible = Settings.Default.ShowGrid;
@@ -213,46 +211,6 @@ namespace ESMEWorkBench.ViewModels.Map
 
         static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.MapLayers);
         MapLayerCollection _mapLayers;
-
-        #endregion
-
-        #region public Experiment Experiment { get; set; }
-
-        [MediatorMessageSink(MediatorMessage.SetExperiment)]
-        void SetExperiment(Experiment experiment) { Experiment = experiment; }
-
-        public Experiment Experiment
-        {
-            get { return _experiment; }
-            set
-            {
-                if (_experiment == value) return;
-                if (_experiment != null) _experiment.MapLayers.CollectionChanged -= MapLayersCollectionChanged;
-                _wpfMap.Overlays.Clear();
-                _experiment = value;
-                if (_experiment != null)
-                {
-                    foreach (var layer in _experiment.MapLayers.Where(layer => layer.Overlay != null))
-                    {
-                        //if (layer.LayerType == LayerType.BathymetryRaster) continue;
-                        if (!_wpfMap.Overlays.Contains(layer.Name)) _wpfMap.Overlays.Add(layer.Name, layer.Overlay);
-                        try
-                        {
-                            _wpfMap.Refresh(layer.Overlay);
-                        }
-                        catch(Exception) {}
-                    }
-                    _experiment.MapLayers.CollectionChanged += MapLayersCollectionChanged;
-                    _wpfMap.CurrentExtent = new RectangleShape(_experiment.CurrentExtent);
-                    _wpfMap.CurrentScale = _experiment.CurrentScale;
-                    _wpfMap.Refresh();
-                }
-                NotifyPropertyChanged(ExperimentChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs ExperimentChangedEventArgs = ObservableHelper.CreateArgs<MapViewModel>(x => x.Experiment);
-        Experiment _experiment;
 
         void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {

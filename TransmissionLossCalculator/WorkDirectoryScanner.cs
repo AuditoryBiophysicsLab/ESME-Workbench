@@ -1,31 +1,112 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
+using System.Timers;
 using Cinch;
 
 namespace TransmissionLossCalculator
 {
     public class WorkDirectoryScanner : ViewModelBase
     {
-        #region public string DirectoryPath { get; set; }
+        internal WorkDirectoryScanner(string directoryToScan, string filePattern, ObservableCollection<string> matchingFileCollection)
+        {
+            _matchingFiles = matchingFileCollection;
+            _filePattern = filePattern;
+            DirectoryPath = directoryToScan;
+        }
 
-        public string DirectoryPath
+        #region internal string DirectoryPath { get; set; }
+
+        internal string DirectoryPath
         {
             get { return _directoryPath; }
             set
             {
                 if (_directoryPath == value) return;
                 _directoryPath = value;
-                NotifyPropertyChanged(DirectoryPathChangedEventArgs);
+                _dirWatcher = new FileSystemWatcher(_directoryPath)
+                {
+                    EnableRaisingEvents = true,
+                    NotifyFilter = (NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.DirectoryName),
+                };
+                _dirWatcher.Created += DirectoryChanged;
+                //_dirWatcher.Changed += DirectoryChanged;
+                _dirWatcher.Deleted += DirectoryChanged;
+                var matchingFiles = Directory.EnumerateFiles(DirectoryPath, _filePattern, SearchOption.TopDirectoryOnly);
+                foreach (var file in matchingFiles.Where(file => !_matchingFiles.Any(match => match == file))) 
+                    _matchingFiles.Add(file);
             }
         }
 
-        static readonly PropertyChangedEventArgs DirectoryPathChangedEventArgs = ObservableHelper.CreateArgs<WorkDirectoryScanner>(x => x.DirectoryPath);
         string _directoryPath;
+        FileSystemWatcher _dirWatcher;
+        private Timer _dirTimer;
+        readonly string _filePattern;
+        ObservableCollection<string> _matchingFiles;
+
+        void DirectoryChanged(object sender, FileSystemEventArgs e)
+        {
+            Debug.WriteLine("[Raw] Directory: " + e.Name + " " + e.ChangeType);
+            if (_dirTimer != null) return;
+            _dirTimer = new Timer(1000) { AutoReset = false, Enabled = true };
+            _dirTimer.Elapsed += (s1, e1) =>
+            {
+                _dirTimer = null;
+                Debug.WriteLine("Directory: " + e.Name + " " + e.ChangeType);
+                switch (e.ChangeType)
+                {
+                    case WatcherChangeTypes.Created:
+                        _matchingFiles.Add(e.FullPath);
+                        break;
+                    case WatcherChangeTypes.Changed:
+                        break;
+                    case WatcherChangeTypes.Deleted:
+                        foreach (var file in _matchingFiles.Where(file => file == e.FullPath)) 
+                            _matchingFiles.Remove(file);
+                        break;
+                }
+            };
+        }
 
         #endregion
 
+        internal void Stop()
+        {
+            if (_dirWatcher != null) _dirWatcher.EnableRaisingEvents = false;
+            if (_dirTimer != null) _dirTimer.Stop();
+        }
+
+        protected override void OnDispose()
+        {
+            Stop();
+            _dirWatcher = null;
+            _dirTimer = null;
+            _matchingFiles = null;
+            base.OnDispose();
+        }
+    }
+
+    public class WorkDirectoryScanners : List<WorkDirectoryScanner>
+    {
+        public WorkDirectoryScanners(ObservableCollection<string> matchingFileCollection) { _matchingFileCollection = matchingFileCollection; }
+
+        readonly ObservableCollection<string> _matchingFileCollection;
+
+        public void Add(string directoryToScan, string filePattern)
+        {
+            Add(new WorkDirectoryScanner(directoryToScan, filePattern, _matchingFileCollection));
+        }
+
+        public void Remove(string directoryToScan)
+        {
+            foreach (var scanner in this.Where(scanner => scanner.DirectoryPath == directoryToScan))
+            {
+                scanner.Stop();
+                Remove(scanner);
+                break;
+            }
+        }
     }
 }

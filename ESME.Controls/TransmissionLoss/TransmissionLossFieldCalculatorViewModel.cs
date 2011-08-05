@@ -19,12 +19,31 @@ namespace ESME.Views.TransmissionLoss
 
         #region public constructor
 
-        public TransmissionLossFieldCalculatorViewModel() { }
-
-        public TransmissionLossFieldCalculatorViewModel(Dispatcher dispatcher)
+        public TransmissionLossFieldCalculatorViewModel(string runfileName, Dispatcher dispatcher)
         {
+            RunfileName = runfileName;
             _dispatcher = dispatcher;
+            TransmissionLossAlgorithm algorithm;
+            TransmissionLossRunFile = TransmissionLossRunFile.Load(runfileName, out algorithm);
         }
+
+        #endregion
+
+        #region public string RunfileName { get; set; }
+
+        public string RunfileName
+        {
+            get { return _runfileName; }
+            set
+            {
+                if (_runfileName == value) return;
+                _runfileName = value;
+                NotifyPropertyChanged(RunfileFilenameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RunfileFilenameChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldCalculatorViewModel>(x => x.RunfileName);
+        string _runfileName;
 
         #endregion
 
@@ -68,19 +87,19 @@ namespace ESME.Views.TransmissionLoss
 
         public TransmissionLossRunFile TransmissionLossRunFile
         {
-            get { return _bellhopRunFile; }
+            get { return _runFile; }
             set
             {
-                if (_bellhopRunFile == value) return;
-                _bellhopRunFile = value;
-                Name = _bellhopRunFile.Name;
+                if (_runFile == value) return;
+                _runFile = value;
+                Name = _runFile.Name;
                 NotifyPropertyChanged(TransmissionLossRunFileChangedEventArgs);
                 if (_dispatcher != null) SetupRadialViewModels();
             }
         }
 
         static readonly PropertyChangedEventArgs TransmissionLossRunFileChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldCalculatorViewModel>(x => x.TransmissionLossRunFile);
-        TransmissionLossRunFile _bellhopRunFile;
+        TransmissionLossRunFile _runFile;
 
         void SetupRadialViewModels()
         {
@@ -89,7 +108,7 @@ namespace ESME.Views.TransmissionLoss
             TransmissionLossField = new TransmissionLossField(TransmissionLossRunFile);
             for (var i = 0; i < TransmissionLossRunFile.TransmissionLossRunFileRadials.Count; i++)
             {
-                var radialViewModel = new BellhopRadialCalculatorViewModel((BellhopRunFileRadial)_bellhopRunFile.TransmissionLossRunFileRadials[i], i, _dispatcher);
+                var radialViewModel = new BellhopRadialCalculatorViewModel((BellhopRunFileRadial)_runFile.TransmissionLossRunFileRadials[i], i, _dispatcher);
                 radialViewModel.PropertyChanged += (s, e) =>
                                                    {
                                                        if (e.PropertyName != "ProgressPercent") return;
@@ -111,7 +130,7 @@ namespace ESME.Views.TransmissionLoss
                 bw.DoWork += Calculate;
                 bw.RunWorkerCompleted += delegate { IsCompleted = true; };
                 if (runWorkerCompletedEventHandler != null) bw.RunWorkerCompleted += runWorkerCompletedEventHandler;
-                bw.RunWorkerAsync(_bellhopRunFile);
+                bw.RunWorkerAsync(_runFile);
             }
         }
         #endregion

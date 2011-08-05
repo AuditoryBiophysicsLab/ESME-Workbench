@@ -15,11 +15,8 @@ namespace ESME.Views.TransmissionLoss
     {
         #region public constructor
 
-        readonly string _outputDirectory;
-        readonly IMessageBoxService _messageBoxService;
-        public TransmissionLossQueueCalculatorViewModel(string outputDirectory, IMessageBoxService messageBoxService)
+        public TransmissionLossQueueCalculatorViewModel()
         {
-            _messageBoxService = messageBoxService;
             try
             {
                 Mediator.Instance.Register(this);
@@ -29,31 +26,30 @@ namespace ESME.Views.TransmissionLoss
                 Debug.WriteLine("***********\nBellhopQueueCalculatorViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
-            _outputDirectory = outputDirectory;
-            BellhopFieldCalculatorViewModels = new ObservableCollection<TransmissionLossFieldCalculatorViewModel>();
+            FieldCalculatorViewModels = new ObservableCollection<TransmissionLossFieldCalculatorViewModel>();
         }
 
         #endregion
 
-        #region public ObservableCollection<BellhopFieldCalculatorViewModel> BellhopFieldCalculatorViewModels { get; set; }
+        #region public ObservableCollection<TransmissionLossFieldCalculatorViewModel> FieldCalculatorViewModels { get; set; }
 
-        public ObservableCollection<TransmissionLossFieldCalculatorViewModel> BellhopFieldCalculatorViewModels
+        public ObservableCollection<TransmissionLossFieldCalculatorViewModel> FieldCalculatorViewModels
         {
-            get { return _bellhopFieldCalculatorViewModels; }
+            get { return _fieldCalculatorViewModels; }
             set
             {
-                if (_bellhopFieldCalculatorViewModels == value) return;
-                if (_bellhopFieldCalculatorViewModels != null) _bellhopFieldCalculatorViewModels.CollectionChanged -= BellhopFieldCalculatorViewModelsCollectionChanged;
-                _bellhopFieldCalculatorViewModels = value;
-                if (_bellhopFieldCalculatorViewModels != null) _bellhopFieldCalculatorViewModels.CollectionChanged += BellhopFieldCalculatorViewModelsCollectionChanged;
-                NotifyPropertyChanged(BellhopFieldCalculatorViewModelsChangedEventArgs);
+                if (_fieldCalculatorViewModels == value) return;
+                if (_fieldCalculatorViewModels != null) _fieldCalculatorViewModels.CollectionChanged -= FieldCalculatorViewModelsCollectionChanged;
+                _fieldCalculatorViewModels = value;
+                if (_fieldCalculatorViewModels != null) _fieldCalculatorViewModels.CollectionChanged += FieldCalculatorViewModelsCollectionChanged;
+                NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs BellhopFieldCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.BellhopFieldCalculatorViewModels);
-        ObservableCollection<TransmissionLossFieldCalculatorViewModel> _bellhopFieldCalculatorViewModels;
+        static readonly PropertyChangedEventArgs FieldCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.FieldCalculatorViewModels);
+        ObservableCollection<TransmissionLossFieldCalculatorViewModel> _fieldCalculatorViewModels;
 
-        void BellhopFieldCalculatorViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        void FieldCalculatorViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -71,27 +67,29 @@ namespace ESME.Views.TransmissionLoss
                 case NotifyCollectionChangedAction.Reset:
                     break;
             }
-            if (BellhopFieldCalculatorViewModels.Count < 1) _window.Visibility = Visibility.Collapsed;
+            if (FieldCalculatorViewModels.Count < 1) _window.Visibility = Visibility.Collapsed;
             else _window.Show();
             StartWorkIfNeeded();
-            NotifyPropertyChanged(BellhopFieldCalculatorViewModelsChangedEventArgs);
+            NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs);
         }
 
         void StartWorkIfNeeded()
         {
-            if (BellhopFieldCalculatorViewModels.Count > 0)
-                BellhopFieldCalculatorViewModels[0].Start(delegate { HandleCompletedQueueItem(); });
+            if (FieldCalculatorViewModels.Count > 0)
+                FieldCalculatorViewModels[0].Start(delegate { HandleCompletedQueueItem(); });
         }
 
         void HandleCompletedQueueItem()
         {
-            while ((BellhopFieldCalculatorViewModels.Count > 0) && (BellhopFieldCalculatorViewModels[0].IsCompleted))
+            while ((FieldCalculatorViewModels.Count > 0) && (FieldCalculatorViewModels[0].IsCompleted))
             {
-                var transmissionLossField = BellhopFieldCalculatorViewModels[0].TransmissionLossField;
-                var fileName = Path.Combine(_outputDirectory, Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".tlf");
-                transmissionLossField.Filename = fileName;
+                var runfileName = FieldCalculatorViewModels[0].RunfileName;
+                var runfilePath = Path.GetDirectoryName(runfileName);
+                var outputFile = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runfileName) + ".tlf");
+                var transmissionLossField = FieldCalculatorViewModels[0].TransmissionLossField;
+                transmissionLossField.Filename = outputFile;
                 transmissionLossField.Save();
-                BellhopFieldCalculatorViewModels.Remove(BellhopFieldCalculatorViewModels[0]);
+                FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
             }
             StartWorkIfNeeded();
         }
@@ -106,7 +104,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
                 {
-                    if (BellhopFieldCalculatorViewModels.Count == 0) return;
+                    if (FieldCalculatorViewModels.Count == 0) return;
 
                     var ea = (CancelEventArgs)vcArgs.EventArgs;
                     ea.Cancel = true;
