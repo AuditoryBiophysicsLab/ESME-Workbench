@@ -430,6 +430,7 @@ namespace ESME.Metadata
                                                   SelectedBathymetry.DataFilename, SelectedEnvironment.DataFilename,
                                                   NemoModeToAcousticModelNameMap,
                                                   SelectedEnvironment.Data.EnvironmentInformation);
+            Globals.WorkDirectories.Add(propagationTimePath);
         }
     }
 }

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using Cinch;
 using ESME.Data;
-using ESME.TransmissionLoss;
 
 namespace ESMEWorkBench
 {
@@ -16,12 +13,17 @@ namespace ESMEWorkBench
         static Globals()
         {
             AppSettings.ApplicationName = App.Name;
+            WorkDirectories.ApplicationName = App.Name;
+            WorkDirectories = WorkDirectories.Load();
             AppSettings = AppSettings.Load(AppSettings.AppSettingsFile);
             AppSettings.SetDefaults();
+            ESME.Globals.WorkDirectories = WorkDirectories;
             ESME.Globals.AppSettings = AppSettings;
         }
 
         public static AppSettings AppSettings { get; set; }
+
+        public static WorkDirectories WorkDirectories { get; set; }
 
         public static void DisplayException(IMessageBoxService messageBoxService, Exception ex, string format, params object[] args)
         {

@@ -30,12 +30,13 @@ namespace ESME
 
         public static AppSettings AppSettings { get; set; }
 
+        public static WorkDirectories WorkDirectories { get; set; }
+
         public static List<TransmissionLossAlgorithm> ValidTransmissionLossAlgorithms = new List<TransmissionLossAlgorithm>
                                                                                         {
                                                                                             TransmissionLossAlgorithm.CASS,
                                                                                             TransmissionLossAlgorithm.RAM,
                                                                                             TransmissionLossAlgorithm.Bellhop,
                                                                                             TransmissionLossAlgorithm.RAMGEO
-                                                                                        };
-    }
+                                                                                        };    }
 }
