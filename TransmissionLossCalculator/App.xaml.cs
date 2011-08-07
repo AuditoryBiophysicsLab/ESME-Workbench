@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using Cinch;
+using ESME.Data;
 using ESME.Views;
 using HRC.Utility;
 using TransmissionLossCalculator.Properties;
@@ -25,7 +26,8 @@ namespace TransmissionLossCalculator
 
         static App()
         {
-            Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Name), "app.log");
+            WorkDirectories.ApplicationName = Name;
+            Logfile = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Name), "tlcalc.log");
             if (File.Exists(Logfile)) File.Delete(Logfile);
             Trace.Listeners.Add(new TextWriterTraceListener(Logfile, "logfile") { TraceOutputOptions = TraceOptions.None });
             Trace.AutoFlush = true;
@@ -111,7 +113,7 @@ namespace TransmissionLossCalculator
 
         static void LastChanceExceptionHandler(object sender, UnhandledExceptionEventArgs ex)
         {
-            Trace.TraceError("{0} encountered an unhandled exception and is exiting.  A dump file will be created in {1}", Name, DumpFile);
+            Trace.TraceError("Transmission Loss Calculator encountered an unhandled exception and is exiting.  A dump file will be created in {0}", DumpFile);
 
             MiniDump.Write(DumpFile, MiniDump.Option.Normal, MiniDump.ExceptionInfo.Present);
         }

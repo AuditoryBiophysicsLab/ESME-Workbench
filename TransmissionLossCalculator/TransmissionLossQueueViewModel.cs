@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Mapping;
-using ESME.TransmissionLoss;
+using ESME.Data;
 using ESME.Views.TransmissionLoss;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
@@ -24,9 +20,35 @@ namespace TransmissionLossCalculator
         [ImportingConstructor]
         public TransmissionLossQueueViewModel(IViewAwareStatus viewAwareStatus)
         {
+            QueueViewModel = new TransmissionLossQueueCalculatorViewModel();
             WorkItems = new ObservableCollection<string>();
             DirectoryScanners = new WorkDirectoryScanners(WorkItems);
-            QueueViewModel = new TransmissionLossQueueCalculatorViewModel();
+            WorkDirectories = WorkDirectories.Load(true);
+            WorkDirectories.CollectionChanged += (s, e) =>
+                                                     {
+                                                         switch (e.Action)
+                                                         {
+                                                             case NotifyCollectionChangedAction.Add:
+                                                                 foreach (var item in e.NewItems)
+                                                                     AddWorkDirectory((string)item);
+                                                                 break;
+                                                             case NotifyCollectionChangedAction.Remove:
+                                                                 foreach (var item in e.OldItems)
+                                                                     RemoveWorkDirectory((string) item);
+                                                                 break;
+                                                             case NotifyCollectionChangedAction.Replace:
+                                                                 foreach (var item in e.OldItems)
+                                                                     RemoveWorkDirectory((string) item);
+                                                                 foreach (var item in e.NewItems)
+                                                                     AddWorkDirectory((string)item);
+                                                                 break;
+                                                             case NotifyCollectionChangedAction.Reset:
+                                                                 ClearWorkDirectories();
+                                                                 AddWorkDirectories(WorkDirectories);
+                                                                 break;
+                                                         }
+                                                     };
+            AddWorkDirectories(WorkDirectories);
             _viewAwareStatus = viewAwareStatus;
             _viewAwareStatus.ViewLoaded += () =>
             {
@@ -35,10 +57,24 @@ namespace TransmissionLossCalculator
             };
         }
 
+        WorkDirectories WorkDirectories { get; set; }
         WorkDirectoryScanners DirectoryScanners { get; set; }
         Dispatcher _dispatcher;
         readonly IViewAwareStatus _viewAwareStatus;
 
+        void AddWorkDirectories(IEnumerable<string> workDirectories) { foreach (var directory in workDirectories) AddWorkDirectory(directory); }
+        void AddWorkDirectory(string workDirectory)
+        {
+            DirectoryScanners.Add(workDirectory, "*.bellhop");
+            DirectoryScanners.Add(workDirectory, "*.ramgeo");
+        }
+        
+        void ClearWorkDirectories() { RemoveWorkDirectories(WorkDirectories); }
+        void RemoveWorkDirectories(IEnumerable<string> workDirectories) { foreach (var directory in workDirectories) RemoveWorkDirectory(directory); }
+        void RemoveWorkDirectory(string workDirectory)
+        {
+            DirectoryScanners.Remove(workDirectory);
+        }
 
         #region public ObservableCollection<string> WorkItems { get; set; }
 
