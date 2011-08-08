@@ -11,22 +11,13 @@ using Cinch;
 
 namespace ESME.Views.TransmissionLoss
 {
-    public class TransmissionLossQueueCalculatorViewModel : ViewModelBase, IViewStatusAwareInjectionAware
+    public class TransmissionLossQueueCalculatorViewModel : ViewModelBase
     {
         #region public constructor
 
         public TransmissionLossQueueCalculatorViewModel()
         {
-            try
-            {
-                Mediator.Instance.Register(this);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("***********\nBellhopQueueCalculatorViewModel: Mediator registration failed: " + ex.Message + "\n***********");
-                throw;
-            }
-            FieldCalculatorViewModels = new ObservableCollection<TransmissionLossFieldCalculatorViewModel>();
+             FieldCalculatorViewModels = new ObservableCollection<TransmissionLossFieldCalculatorViewModel>();
         }
 
         #endregion
@@ -67,8 +58,6 @@ namespace ESME.Views.TransmissionLoss
                 case NotifyCollectionChangedAction.Reset:
                     break;
             }
-            if (FieldCalculatorViewModels.Count < 1) _window.Visibility = Visibility.Collapsed;
-            else _window.Show();
             StartWorkIfNeeded();
             NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs);
         }
@@ -96,41 +85,6 @@ namespace ESME.Views.TransmissionLoss
 
         #endregion
 
-        #region ViewClosingCommand
 
-        public SimpleCommand<object, EventToCommandArgs> ViewClosingCommand
-        {
-            get
-            {
-                return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
-                {
-                    if (FieldCalculatorViewModels.Count == 0) return;
-
-                    var ea = (CancelEventArgs)vcArgs.EventArgs;
-                    ea.Cancel = true;
-                    ((Window) _viewAwareStatus.View).WindowState = WindowState.Minimized;
-                }));
-            }
-        }
-
-        SimpleCommand<object, EventToCommandArgs> _viewClosing;
-
-        #endregion
-
-        #region IViewStatusAwareInjectionAware Members
-
-        IViewAwareStatus _viewAwareStatus;
-        Dispatcher _dispatcher;
-        Window _window;
-
-        public void InitialiseViewAwareService(IViewAwareStatus viewAwareStatusService)
-        {
-            _viewAwareStatus = viewAwareStatusService;
-            _window = (Window) _viewAwareStatus.View;
-            _dispatcher = _window.Dispatcher;
-            //_window.Visibility = Visibility.Collapsed;
-        }
-
-        #endregion
     }
 }
