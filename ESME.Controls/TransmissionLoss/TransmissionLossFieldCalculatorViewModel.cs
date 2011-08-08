@@ -124,10 +124,11 @@ namespace ESME.Views.TransmissionLoss
 
         void LoadEnvironment()
         {
-            var bathymetryPath = Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, "Bathymetry", TransmissionLossRunFile.BathymetryName + ".txt");
-            var environmentPath = Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, "Environment", TransmissionLossRunFile.EnvironmentName + ".dat");
+            var bathymetryPath = Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, TransmissionLossRunFile.RangeComplexName, "Bathymetry", TransmissionLossRunFile.BathymetryName + ".txt");
+            var environmentPath = Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, TransmissionLossRunFile.RangeComplexName, "Environment", TransmissionLossRunFile.EnvironmentName + ".dat");
             Status = "Loading environment";
             _environment = NAEMOEnvironmentFile.Load(environmentPath);
+            _environment.EnvironmentInformation.Bathymetry = Bathymetry.FromYXZ(bathymetryPath, -1);
         }
 
         void SetupRadialViewModels()
@@ -188,6 +189,8 @@ namespace ESME.Views.TransmissionLoss
                         RadialCalculatorViewModels.Add(radialViewModel);
                         break;
                     case TransmissionLossAlgorithm.RAMGEO:
+                        var ramConfig = Ram.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], bottomProfiles[bearingIndex], sedimentType, maxCalculationDepthMeters, rangeCellCount, depthCellCount);
+                        TransmissionLossRunFile.TransmissionLossRunFileRadials.Add(new RamRunFileRadial { BearingFromSourceDegrees = radialBearing, Configuration = ramConfig });
                         break;
                     default:
                         break;
@@ -311,6 +314,8 @@ namespace ESME.Views.TransmissionLoss
 
         void Calculate(object sender, DoWorkEventArgs args)
         {
+            if (TransmissionLossField.Radials == null) throw new ApplicationException("Radials are null");
+
             var runFile = (TransmissionLossRunFile) args.Argument;
             var radialNum = 0;
             var radialProgress = 100f/runFile.TransmissionLossRunFileRadials.Count;
