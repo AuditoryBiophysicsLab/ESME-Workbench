@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Data;
+using ESME.TransmissionLoss;
 using ESME.Views.TransmissionLoss;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
@@ -28,33 +29,33 @@ namespace TransmissionLossCalculator
             {
                 if (Designer.IsInDesignMode) return;
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-                WorkDirectories = WorkDirectories.Load(true);
-                WorkDirectories.CollectionChanged += (s, e) =>
-                {
-                    switch (e.Action)
-                    {
-                        case NotifyCollectionChangedAction.Add:
-                            foreach (var item in e.NewItems)
-                                AddWorkDirectory((string)item);
-                            break;
-                        case NotifyCollectionChangedAction.Remove:
-                            foreach (var item in e.OldItems)
-                                RemoveWorkDirectory((string)item);
-                            break;
-                        case NotifyCollectionChangedAction.Replace:
-                            foreach (var item in e.OldItems)
-                                RemoveWorkDirectory((string)item);
-                            foreach (var item in e.NewItems)
-                                AddWorkDirectory((string)item);
-                            break;
-                        case NotifyCollectionChangedAction.Reset:
-                            ClearWorkDirectories();
-                            AddWorkDirectories(WorkDirectories);
-                            break;
-                    }
-                };
-                AddWorkDirectories(WorkDirectories);
             };
+            WorkDirectories = WorkDirectories.Load(true);
+            WorkDirectories.CollectionChanged += (s, e) =>
+            {
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        foreach (var item in e.NewItems)
+                            AddWorkDirectory((string)item);
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        foreach (var item in e.OldItems)
+                            RemoveWorkDirectory((string)item);
+                        break;
+                    case NotifyCollectionChangedAction.Replace:
+                        foreach (var item in e.OldItems)
+                            RemoveWorkDirectory((string)item);
+                        foreach (var item in e.NewItems)
+                            AddWorkDirectory((string)item);
+                        break;
+                    case NotifyCollectionChangedAction.Reset:
+                        ClearWorkDirectories();
+                        AddWorkDirectories(WorkDirectories);
+                        break;
+                }
+            };
+            AddWorkDirectories(WorkDirectories);
         }
 
         WorkDirectories WorkDirectories { get; set; }
@@ -65,8 +66,7 @@ namespace TransmissionLossCalculator
         void AddWorkDirectories(IEnumerable<string> workDirectories) { foreach (var directory in workDirectories) AddWorkDirectory(directory); }
         void AddWorkDirectory(string workDirectory)
         {
-            DirectoryScanners.Add(workDirectory, "*.bellhop");
-            DirectoryScanners.Add(workDirectory, "*.ramgeo");
+            DirectoryScanners.Add(workDirectory, "*.tljob");
         }
         
         void ClearWorkDirectories() { RemoveWorkDirectories(WorkDirectories); }
@@ -101,8 +101,9 @@ namespace TransmissionLossCalculator
                     if (e.NewItems != null)
                         foreach (var item in e.NewItems)
                         {
-                            var newFile = (string)item;
-                            QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(newFile, _dispatcher));
+                            var newFileName = (string)item;
+                            //var runFile = TransmissionLossRunFile.Load(newFileName);
+                            QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(newFileName, _dispatcher));
                         }
                     break;
                 case NotifyCollectionChangedAction.Move:

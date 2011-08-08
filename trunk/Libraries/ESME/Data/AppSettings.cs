@@ -1492,6 +1492,17 @@ namespace ESME.Data
                                          {
                                              new ValidationRule
                                                  {
+                                                     PropertyName = "MaximumDepth",
+                                                     Description = "Must be positive",
+                                                     RuleDelegate = (o, r) =>
+                                                                        {
+                                                                            var ruleTarget = ((BellhopSettings)o).MaximumDepth;
+                                                                            return RangeCheck(ruleTarget,0,float.MaxValue,false);
+                                                                        },
+                                                 },
+
+                                             new ValidationRule
+                                                 {
                                                      PropertyName = "RangeCellSize",
                                                      Description = "Must be positive",
                                                      RuleDelegate = (o, r) =>
@@ -1514,6 +1525,25 @@ namespace ESME.Data
                                          });
 
         }
+
+        #region public float MaximumDepth { get; set; }
+
+        public float MaximumDepth
+        {
+            get { return _maximumDepth; }
+            set
+            {
+                if (_maximumDepth == value) return;
+                _maximumDepth = value;
+                NotifyPropertyChanged(MaximumDepthChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MaximumDepthChangedEventArgs = ObservableHelper.CreateArgs<BellhopSettings>(x => x.MaximumDepth);
+        float _maximumDepth = 2000;
+
+        #endregion
+
         #region public float RangeCellSize { get; set; }
 
         public float RangeCellSize

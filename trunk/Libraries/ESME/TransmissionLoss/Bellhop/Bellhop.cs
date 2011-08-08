@@ -5,7 +5,7 @@ using ESME.Environment;
 
 namespace ESME.TransmissionLoss.Bellhop
 {
-    internal class Bellhop
+    public static class Bellhop
     {
         //public static string GenerateBellhopRunInfo(SoundSource soundSource, bool SurfaceReflection, 
         //    bool UseVerticalBeamforming, bool GenerateArrivalsFile, double DepthCellSize_meters, 

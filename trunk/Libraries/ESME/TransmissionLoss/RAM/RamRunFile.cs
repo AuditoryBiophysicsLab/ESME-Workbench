@@ -1,74 +1,25 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Xml;
-using System.Xml.Serialization;
-using ESME.Data;
-using ESME.Environment;
+﻿using ESME.Data;
 using ESME.Model;
-using ESME.TransmissionLoss.Bellhop;
+using HRC.Utility;
 
 namespace ESME.TransmissionLoss.RAM
 {
     public class RamRunFile : TransmissionLossRunFile
     {
-        #region Load and Save
+        public RamRunFile() {  }
 
-        public static RamRunFile Load(string filename)
+        public override void Save(string fileName = null)
         {
-            var fileReader = new StreamReader(filename);
-            var file = fileReader.ReadToEnd();
-            fileReader.Close();
-            var runFile = Deserialize(file);
-            runFile.OriginalFilename = file;
-            return runFile;
+            if (fileName == null) fileName = Filename;
+            if (fileName == null) throw new FileNameFormatException("Null file name passed to RamRunFile.Save()");
+            var serializer = new XmlSerializer<RamRunFile> { Data = this };
+            serializer.Save(fileName, ReferencedTypes);
+            Filename = fileName;
         }
 
-        public override void Save(string path)
-        {
-            var fileWriter = new StreamWriter(Path.Combine(path, Name + ".ramgeo"), false);
-            fileWriter.Write(Serialize());
-            fileWriter.Close();
-        }
+        public RAMSettings RAMSettings { get; set; }
 
-        #endregion
-
-        #region Serialize/Deserialize
-
-        public string Serialize()
-        {
-            var ms = new MemoryStream();
-            var serializer = new XmlSerializer(GetType(), ReferencedTypes);
-            var settings = new XmlWriterSettings
-                           {
-                               Encoding = Encoding.UTF8,
-                               Indent = true,
-                           };
-            var writer = XmlWriter.Create(ms, settings);
-
-            serializer.Serialize(writer, this);
-            return Encoding.UTF8.GetString(ms.ToArray());
-        }
-
-        public static RamRunFile Deserialize(string xmlString)
-        {
-            var reader = new StringReader(xmlString);
-            var serializer = new XmlSerializer(typeof (RamRunFile), ReferencedTypes);
-            var runfile = (RamRunFile) serializer.Deserialize(reader);
-            return runfile;
-        }
-
-        #endregion
-
-        [XmlIgnore]
-        public string OriginalFilename { get; private set; }
-
-        /// <summary>
-        /// </summary>
-        /// <param name = "transmissionLossJob"></param>
-        /// <param name = "environmentInformation"></param>
-        /// <param name="appSettings"></param>
-        /// <returns></returns>
+#if false
         public static RamRunFile Create(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
         {
             var rangeCellCount = (int)Math.Round((transmissionLossJob.SoundSource.Radius / appSettings.BellhopSettings.RangeCellSize)) + 1;
@@ -105,5 +56,6 @@ namespace ESME.TransmissionLoss.RAM
             }
             return ramRunFile;
         }
+#endif
     }
 }

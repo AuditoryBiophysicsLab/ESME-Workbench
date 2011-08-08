@@ -259,15 +259,15 @@ namespace ESMEWorkBench.Data
                                               MaxDepth = (int) Globals.AppSettings.CASSSettings.MaximumDepth,
                                           };
                                 // Create the job
-                                var runfile = TransmissionLossRunFile.Create(algorithm, job, environmentInfo, Globals.AppSettings);
+                                //var runfile = TransmissionLossRunFile.Create(algorithm, job, environmentInfo, Globals.AppSettings);
 
                                 // delete any files that have the same base filename
-                                var filesToDelete = Directory.GetFiles(TransmissionLossJobRoot, runfile.Name + ".*");
-                                foreach (var file in filesToDelete)
-                                    File.Delete(file);
+                               // var filesToDelete = Directory.GetFiles(TransmissionLossJobRoot, runfile.Name + ".*");
+                               // foreach (var file in filesToDelete)
+                               //     File.Delete(file);
 
                                 // Save the job
-                                runfile.Save(TransmissionLossJobRoot);
+                                //runfile.Save(TransmissionLossJobRoot);
                                 break;
                             default:
                                 break;

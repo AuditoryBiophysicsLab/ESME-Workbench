@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Windows;
-using System.Windows.Threading;
 using Cinch;
 
 namespace ESME.Views.TransmissionLoss
@@ -84,7 +80,5 @@ namespace ESME.Views.TransmissionLoss
         }
 
         #endregion
-
-
     }
 }

@@ -2,65 +2,94 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
-using ESME.Data;
+using System.Xml.Serialization;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.RAM;
 using HRC.Navigation;
+using HRC.Utility;
+using FileFormatException = System.IO.FileFormatException;
 
 namespace ESME.TransmissionLoss
 {
     public abstract class TransmissionLossRunFile : IEquatable<TransmissionLossField>
     {
+        protected static readonly List<Type> ReferencedTypes = new List<Type> { typeof(TransmissionLossAlgorithm), typeof(EarthCoordinate), typeof(AnalysisPoint), typeof(AcousticProperties), typeof(TransmissionLossRunFile), typeof(Point) };
+
         protected TransmissionLossRunFile()
         {
             TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>();
         }
 
-        public static Type[] ReferencedTypes
+        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, string bathymetryName, string environmentName)
         {
-            get
+            var lat = soundSource.Latitude;
+            var lon = soundSource.Longitude;
+            var baseFilename = string.Format("{0}_{1}{2:0.####}_{3}{4:0.####}",
+                                             soundSource.Name.Replace('|', '_'),
+                                             lat >= 0 ? "n" : "s", Math.Abs(lat),
+                                             lon >= 0 ? "e" : "w", Math.Abs(lon));
+            TransmissionLossRunFile result = null;
+            switch (algorithm)
             {
-                return _referencedTypes ?? (_referencedTypes = new[]
-                                                               {
-                                                                   typeof (EarthCoordinate), typeof (AnalysisPoint), typeof (AcousticProperties), typeof (TransmissionLossRunFile), typeof(BellhopRunFile), typeof(RamRunFile), typeof(BellhopRunFileRadial), typeof(RamRunFileRadial), typeof(Point)
-                                                               });
+                case TransmissionLossAlgorithm.Bellhop:
+                    result = new BellhopRunFile
+                    {
+                        BellhopSettings = Globals.AppSettings.BellhopSettings,
+                        Filename = baseFilename + ".bellhop"
+                    };
+                    break;
+                case TransmissionLossAlgorithm.RAMGEO:
+                    result = new RamRunFile
+                    {
+                        RAMSettings = Globals.AppSettings.RAMSettings,
+                        Filename = baseFilename + ".ramgeo",
+                    };
+                    break;
+                case TransmissionLossAlgorithm.RAM:
+                case TransmissionLossAlgorithm.REFMS:
+                case TransmissionLossAlgorithm.CASS:
+                    throw new FileFormatException(string.Format("TransmissionLossRunFile.Create: Transmission loss algorithm {0} is not supported", algorithm));
             }
+            if (result == null) throw new ApplicationException("Result is null");
+            result.ScenarioDataDirectory = Globals.AppSettings.ScenarioDataDirectory;
+            result.TransmissionLossJob = new TransmissionLossJob
+            {
+                SoundSource = soundSource,
+            };
+            result.RangeComplexName = rangeComplexName;
+            result.BathymetryName = bathymetryName;
+            result.EnvironmentName = environmentName;
+            return result;
         }
 
-        static Type[] _referencedTypes;
-
-        public static TransmissionLossRunFile Load(string filename, out TransmissionLossAlgorithm transmissionLossAlgorithm)
+        public static TransmissionLossRunFile Load(string filename)
         {
-            if (filename == null) throw new ArgumentNullException("TransmissionLossRunFile.Load: filename is null");
-            var extension = (Path.GetExtension(filename) ?? "").ToLower();
-            switch (extension)
+            if (string.IsNullOrEmpty(filename)) throw new ArgumentNullException("filename", "TransmissionLossRunFile.Load: filename is null");
+            switch (Path.GetExtension(filename).ToLower())
             {
                 case ".bellhop":
-                    transmissionLossAlgorithm = TransmissionLossAlgorithm.Bellhop;
-                    return BellhopRunFile.Load(filename);
+                    return XmlSerializer<BellhopRunFile>.Load(filename, ReferencedTypes);
                 case ".ramgeo":
-                    transmissionLossAlgorithm = TransmissionLossAlgorithm.RAMGEO;
-                    return RamRunFile.Load(filename);
-                case ".cass":
-                    transmissionLossAlgorithm = TransmissionLossAlgorithm.CASS;
-                    break;
-                case ".ram":
-                    transmissionLossAlgorithm = TransmissionLossAlgorithm.RAM;
-                    break;
-                case ".refms":
-                    transmissionLossAlgorithm = TransmissionLossAlgorithm.REFMS;
-                    break;
+                    return XmlSerializer<RamRunFile>.Load(filename, ReferencedTypes);
                 default:
-                    transmissionLossAlgorithm = TransmissionLossAlgorithm.NoneAssigned;
-                    break;
+                    throw new FileFormatException(string.Format("TransmissionLossRunFile.Load: Transmission loss algorithm {0} is not supported", Path.GetExtension(filename).ToLower()));
             }
-            return null;
         }
 
+        public string ScenarioDataDirectory { get; set; }
+        public string RangeComplexName { get; set; }
+        public string BathymetryName { get; set; }
+        public string EnvironmentName { get; set; }
+        public TransmissionLossAlgorithm TransmissionLossAlgorithm { get; set; }
+#if false
         public static TransmissionLossRunFile Create(TransmissionLossAlgorithm transmissionLossAlgorithm, TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
         {
-            TransmissionLossRunFile result;
+            var result = new TransmissionLossRunFile
+            {
+                TransmissionLossAlgorithm = transmissionLossAlgorithm,
+                TransmissionLossJob = transmissionLossJob,
+            };
             switch (transmissionLossAlgorithm)
             {
                 case TransmissionLossAlgorithm.Bellhop:
@@ -78,8 +107,9 @@ namespace ESME.TransmissionLoss
             result.Filename = transmissionLossJob.Filename;
             return result;
         }
+#endif
 
-        public abstract void Save(string path);
+        public abstract void Save(string fileName = null);
 
         TransmissionLossJob _transmissionLossJob;
         public TransmissionLossJob TransmissionLossJob
@@ -89,7 +119,6 @@ namespace ESME.TransmissionLoss
             {
                 if (value == _transmissionLossJob) return;
                 _transmissionLossJob = value;
-                Name = _transmissionLossJob.Name;
                 Metadata = _transmissionLossJob.Metadata;
             }
         }
@@ -99,8 +128,8 @@ namespace ESME.TransmissionLoss
             return Path.Combine(path, Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + extension);
         }
 
-        public string Name { get; set; }
         public string Metadata { get; set; }
+        [XmlIgnore]
         public string Filename { get; set; }
 
         public List<TransmissionLossRunFileRadial> TransmissionLossRunFileRadials { get; set; }

@@ -9,12 +9,11 @@ namespace ESME.Views.TransmissionLoss
 {
     public abstract class TransmissionLossRadialCalculatorViewModel : ViewModelBase
     {
-        readonly Dispatcher _dispatcher;
         protected readonly StringBuilder OutputData = new StringBuilder();
 
         protected TransmissionLossRadialCalculatorViewModel(int radialNumber, Dispatcher dispatcher)
         {
-            _dispatcher = dispatcher;
+            Dispatcher = dispatcher;
             RadialNumber = radialNumber;
             Status = "Queued";
         }
@@ -26,6 +25,8 @@ namespace ESME.Views.TransmissionLoss
             return workingDirectory;
         }
 
+        public Dispatcher Dispatcher { get; set; }
+
         #region public double BearingFromSource { get; set; }
 
         public double BearingFromSource
@@ -35,7 +36,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_bearingFromSource == value) return;
                 _bearingFromSource = value;
-                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(BearingFromSourceChangedEventArgs));
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(BearingFromSourceChangedEventArgs));
             }
         }
 
@@ -53,7 +54,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_transmissionLossRadial == value) return;
                 _transmissionLossRadial = value;
-                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(TransmissionLossRadialChangedEventArgs));
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(TransmissionLossRadialChangedEventArgs));
             }
         }
 
@@ -71,7 +72,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_radialNumber == value) return;
                 _radialNumber = value;
-                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(RadialNumberChangedEventArgs));
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(RadialNumberChangedEventArgs));
             }
         }
 
@@ -89,7 +90,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_status == value) return;
                 _status = value;
-                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(StatusChangedEventArgs));
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(StatusChangedEventArgs));
             }
         }
 
@@ -107,7 +108,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_progressPercent == value) return;
                 _progressPercent = value;
-                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ProgressPercentChangedEventArgs));
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ProgressPercentChangedEventArgs));
             }
         }
 
@@ -125,7 +126,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_errorText == value) return;
                 _errorText = value;
-                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ErrorTextChangedEventArgs));
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ErrorTextChangedEventArgs));
             }
         }
 
@@ -134,5 +135,6 @@ namespace ESME.Views.TransmissionLoss
 
         #endregion
 
+        public abstract void Start();
     }
 }

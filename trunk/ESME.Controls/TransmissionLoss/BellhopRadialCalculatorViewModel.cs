@@ -19,7 +19,7 @@ namespace ESME.Views.TransmissionLoss
             BearingFromSource = bellhopRunFileRadial.BearingFromSourceDegrees;
         }
 
-        public void Start()
+        public override void Start()
         {
             Status = "Starting";
             TransmissionLossRadial = ComputeRadial(_bellhopRunFileRadial.Configuration, _bellhopRunFileRadial.BottomProfile, _bellhopRunFileRadial.BearingFromSourceDegrees);
@@ -73,6 +73,14 @@ namespace ESME.Views.TransmissionLoss
             {
                 Thread.Sleep(200);
                 count++;
+            }
+
+            if (ErrorText.Contains("forrtl"))
+            {
+                Debug.WriteLine("{0}: Bellhop failure: {1}", DateTime.Now, ErrorText);
+                Debug.WriteLine("{0}: Bellhop input: {1}", DateTime.Now, bellhopConfiguration);
+                Status = "Error";
+                return null;
             }
             var result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
             File.Delete(Path.Combine(workingDirectory, "SHDFIL"));

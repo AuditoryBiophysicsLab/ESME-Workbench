@@ -108,7 +108,7 @@
     </i:Interaction.Triggers>
 
     <DockPanel LastChildFill="True">
-        <TreeView ItemsSource="{Binding BellhopFieldCalculatorViewModels}"
+        <TreeView ItemsSource="{Binding QueueViewModel.BellhopFieldCalculatorViewModels}"
                   ItemTemplate="{StaticResource BellhopQueueTreeViewTemplate}"/>
         <local:NotificationAreaIcon Text="ESME Transmission Loss Calculator"
 		                        Icon="Resources\orbz_water.ico"

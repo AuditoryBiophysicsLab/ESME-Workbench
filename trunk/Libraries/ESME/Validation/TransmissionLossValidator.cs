@@ -41,9 +41,8 @@ namespace ESME.Validation
                 // Read the header of the TLF file
                 var field = TransmissionLossField.Load(tlfFile);
                 // Read the header of the runfile
-                TransmissionLossAlgorithm algorithm;
                 var tljFile = tljFiles.First();
-                var runFile = TransmissionLossRunFile.Load(tljFile, out algorithm);
+                var runFile = TransmissionLossRunFile.Load(tljFile);
                 if (runFile == null)
                 {
                     // Algorithm not supported, delete the file and check the next one
@@ -68,8 +67,7 @@ namespace ESME.Validation
             foreach (var tljFile in tljFiles)
             {
                 var soundSourceID = Path.GetFileNameWithoutExtension(tljFile);
-                TransmissionLossAlgorithm algorithm;
-                var runFile = TransmissionLossRunFile.Load(tljFile, out algorithm);
+                var runFile = TransmissionLossRunFile.Load(tljFile);
                 if (runFile == null)
                 {
                     // Algorithm not supported, delete the file and check the next one
@@ -141,8 +139,7 @@ namespace ESME.Validation
             foreach (var tljFile in tljFiles)
             {
                 var soundSourceID = Path.GetFileNameWithoutExtension(tljFile);
-                TransmissionLossAlgorithm algorithm;
-                var runFile = TransmissionLossRunFile.Load(tljFile, out algorithm);
+                var runFile = TransmissionLossRunFile.Load(tljFile);
                 if (runFile == null)
                 {
                     // Algorithm not supported, delete the file and check the next one

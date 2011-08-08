@@ -39,6 +39,7 @@ namespace ESME.TransmissionLoss
                     {
                         string runFile;
                         var tlFile = Path.Combine(curTLPath, soundSource.SoundSourceID + ".tlf");
+#if false
                         switch (soundSource.TransmissionLossAlgorithm)
                         {
                             case TransmissionLossAlgorithm.Bellhop:
@@ -50,6 +51,7 @@ namespace ESME.TransmissionLoss
                                 if (!IsTLCalculatedOrQueued(tlFile, runFile)) _ramSources.Add(new SoundSourceTimePeriod { SoundSource = soundSource, TimePeriod = timePeriod });
                                 break;
                         }
+#endif
                     }
                 }
             }
