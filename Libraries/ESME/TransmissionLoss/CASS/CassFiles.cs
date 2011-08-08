@@ -60,18 +60,30 @@ namespace ESME.TransmissionLoss.CASS
                                     case TransmissionLossAlgorithm.RAMGEO:
                                         foreach (var curSource in modeSources)
                                         {
-                                            var jobName = string.Format("{0}_{1:0.####}_{2:0.####}",
-                                                                        curSource.Name.Replace('|', '_'),
-                                                                        curSource.Latitude, curSource.Longitude);
+#if true
+                                            var runFile = TransmissionLossRunFile.Create(thisModel, curSource,
+                                                                                         nemoFile.Scenario.SimAreaName,
+                                                                                         Path.GetFileNameWithoutExtension(cassBathymetryFileName),
+                                                                                         Path.GetFileNameWithoutExtension(cassEnvironmentFileName));
+                                            runFile.Save(Path.Combine(curTimePeriodPath, runFile.Filename));
+#else
+                                            var lat = curSource.Latitude;
+                                            var lon = curSource.Longitude;
+                                            var northSouth = lat >= 0 ? "n" : "s";
+                                            var eastWest = lon >= 0 ? "e" : "w";
+                                            var jobName = string.Format("{0}_{1}{2:0.####}_{3}{4:0.####}",
+                                                                        curSource.Name.Replace('|', '_'), northSouth, Math.Abs(lat),
+                                                                        eastWest, Math.Abs(lon));
                                             var runfile = TransmissionLossRunFile.Create(thisModel,
                                                                                          new TransmissionLossJob
                                                                                          {
-                                                                                                 SoundSource = curSource,
-                                                                                                 Name = jobName,
+                                                                                             SoundSource = curSource,
+                                                                                             Name = jobName,
                                                                                          },
                                                                                          environmentInformation,
                                                                                          Globals.AppSettings);
                                             runfile.Save(curTimePeriodPath);
+#endif
                                         }
                                         break;
                                 }

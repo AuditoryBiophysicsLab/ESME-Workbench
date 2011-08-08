@@ -1,63 +1,27 @@
 ﻿using System;
-using System.IO;
-using System.Text;
-using System.Xml;
-using System.Xml.Serialization;
 using ESME.Data;
 using ESME.Environment;
 using ESME.Model;
+using HRC.Utility;
 
 namespace ESME.TransmissionLoss.Bellhop
 {
     public class BellhopRunFile : TransmissionLossRunFile
     {
-        #region Load and Save
-
-        public static BellhopRunFile Load(string filename)
+        public BellhopRunFile() {  }
+        
+        public override void Save(string fileName = null)
         {
-            var fileReader = new StreamReader(filename);
-            var file = fileReader.ReadToEnd();
-            fileReader.Close();
-            var runFile = Deserialize(file);
-            runFile.OriginalFilename = file;
-            return runFile;
+            if (fileName == null) fileName = Filename;
+            if (fileName == null) throw new FileNameFormatException("Null file name passed to BellhopRunFile.Save()");
+            var serializer = new XmlSerializer<BellhopRunFile> { Data = this };
+            serializer.Save(fileName, ReferencedTypes);
+            Filename = fileName;
         }
 
-        public override void Save(string path)
-        {
-            var fileWriter = new StreamWriter(Path.Combine(path, Name + ".bellhop"), false);
-            fileWriter.Write(Serialize());
-            fileWriter.Close();
-        }
+        public BellhopSettings BellhopSettings { get; set; }
 
-        #endregion
-
-        #region Serialize/Deserialize
-
-        public string Serialize()
-        {
-            var ms = new MemoryStream();
-            var serializer = new XmlSerializer(GetType(), ReferencedTypes);
-            var settings = new XmlWriterSettings {Encoding = Encoding.UTF8, Indent = true,};
-            var writer = XmlWriter.Create(ms, settings);
-
-            serializer.Serialize(writer, this);
-            return Encoding.UTF8.GetString(ms.ToArray());
-        }
-
-        public static BellhopRunFile Deserialize(string xmlString)
-        {
-            var reader = new StringReader(xmlString);
-            var serializer = new XmlSerializer(typeof(BellhopRunFile), ReferencedTypes);
-            var runfile = (BellhopRunFile) serializer.Deserialize(reader);
-            return runfile;
-        }
-
-        #endregion
-
-        [XmlIgnore]
-        public string OriginalFilename { get; private set; }
-
+#if true
         public static BellhopRunFile Create(TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
         {
             var rangeCellCount = (int)Math.Round((transmissionLossJob.SoundSource.Radius / appSettings.BellhopSettings.RangeCellSize)) + 1;
@@ -87,5 +51,6 @@ namespace ESME.TransmissionLoss.Bellhop
             }
             return bellhopRunFile;
         }
+#endif
     }
 }

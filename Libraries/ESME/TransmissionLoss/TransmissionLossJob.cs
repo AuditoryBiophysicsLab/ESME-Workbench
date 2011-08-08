@@ -7,6 +7,7 @@ namespace ESME.TransmissionLoss
     {
         public SoundSource SoundSource { get; set; }
 
+        [XmlIgnore]
         public string Name { get; set; }
 
         public string Metadata { get; set; }
@@ -14,8 +15,10 @@ namespace ESME.TransmissionLoss
         /// <summary>
         ///   the maximum depth to which resulting TL field will be kept, in meters. Usually less than max bathymetric depth.
         /// </summary>
+        [XmlIgnore]
         public int MaxDepth { get; set; }
 
+        [XmlIgnore]
         public string Filename { get; set; }
 
         /// <summary>

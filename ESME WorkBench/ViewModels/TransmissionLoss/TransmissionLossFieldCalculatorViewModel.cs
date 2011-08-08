@@ -196,7 +196,7 @@ namespace ESMEWorkBench.ViewModels.TransmissionLoss
 
         #endregion
 
-        #region public ObservableCollection<BellhopRadialCalculatorViewModel> BellhopRadialCalculatorViewModels { get; set; }
+        #region public ObservableCollection<BellhopRadialCalculatorViewModel> RadialCalculatorViewModels { get; set; }
 
         public ObservableCollection<BellhopRadialCalculatorViewModel> BellhopRadialCalculatorViewModels
         {

@@ -92,7 +92,6 @@ namespace ESME.TransmissionLoss
 
         public TransmissionLossField(TransmissionLossRunFile runFile)
         {
-            Name = runFile.Name ?? "";
             Metadata = runFile.Metadata ?? "";
             SourceLevel = runFile.TransmissionLossJob.SoundSource.SourceLevel;
             Latitude = (float)runFile.TransmissionLossJob.SoundSource.Latitude;

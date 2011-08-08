@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace ESME.TransmissionLoss
 {
-    public class TransmissionLossRunFileRadial
+    public abstract class TransmissionLossRunFileRadial
     {
         public string Base64EncodedConfiguration { get; set; }
         public float BearingFromSourceDegrees { get; set; }

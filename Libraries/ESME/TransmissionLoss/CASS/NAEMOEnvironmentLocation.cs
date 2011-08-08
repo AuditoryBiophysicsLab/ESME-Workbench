@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ESME.Environment;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.CASS
