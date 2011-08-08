@@ -52,6 +52,7 @@ namespace ESME.TransmissionLoss
                     throw new FileFormatException(string.Format("TransmissionLossRunFile.Create: Transmission loss algorithm {0} is not supported", algorithm));
             }
             if (result == null) throw new ApplicationException("Result is null");
+            result.TransmissionLossAlgorithm = algorithm;
             result.ScenarioDataDirectory = Globals.AppSettings.ScenarioDataDirectory;
             result.TransmissionLossJob = new TransmissionLossJob
             {
