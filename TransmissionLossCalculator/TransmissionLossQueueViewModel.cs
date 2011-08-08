@@ -23,37 +23,37 @@ namespace TransmissionLossCalculator
             QueueViewModel = new TransmissionLossQueueCalculatorViewModel();
             WorkItems = new ObservableCollection<string>();
             DirectoryScanners = new WorkDirectoryScanners(WorkItems);
-            WorkDirectories = WorkDirectories.Load(true);
-            WorkDirectories.CollectionChanged += (s, e) =>
-                                                     {
-                                                         switch (e.Action)
-                                                         {
-                                                             case NotifyCollectionChangedAction.Add:
-                                                                 foreach (var item in e.NewItems)
-                                                                     AddWorkDirectory((string)item);
-                                                                 break;
-                                                             case NotifyCollectionChangedAction.Remove:
-                                                                 foreach (var item in e.OldItems)
-                                                                     RemoveWorkDirectory((string) item);
-                                                                 break;
-                                                             case NotifyCollectionChangedAction.Replace:
-                                                                 foreach (var item in e.OldItems)
-                                                                     RemoveWorkDirectory((string) item);
-                                                                 foreach (var item in e.NewItems)
-                                                                     AddWorkDirectory((string)item);
-                                                                 break;
-                                                             case NotifyCollectionChangedAction.Reset:
-                                                                 ClearWorkDirectories();
-                                                                 AddWorkDirectories(WorkDirectories);
-                                                                 break;
-                                                         }
-                                                     };
-            AddWorkDirectories(WorkDirectories);
             _viewAwareStatus = viewAwareStatus;
             _viewAwareStatus.ViewLoaded += () =>
             {
                 if (Designer.IsInDesignMode) return;
                 _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
+                WorkDirectories = WorkDirectories.Load(true);
+                WorkDirectories.CollectionChanged += (s, e) =>
+                {
+                    switch (e.Action)
+                    {
+                        case NotifyCollectionChangedAction.Add:
+                            foreach (var item in e.NewItems)
+                                AddWorkDirectory((string)item);
+                            break;
+                        case NotifyCollectionChangedAction.Remove:
+                            foreach (var item in e.OldItems)
+                                RemoveWorkDirectory((string)item);
+                            break;
+                        case NotifyCollectionChangedAction.Replace:
+                            foreach (var item in e.OldItems)
+                                RemoveWorkDirectory((string)item);
+                            foreach (var item in e.NewItems)
+                                AddWorkDirectory((string)item);
+                            break;
+                        case NotifyCollectionChangedAction.Reset:
+                            ClearWorkDirectories();
+                            AddWorkDirectories(WorkDirectories);
+                            break;
+                    }
+                };
+                AddWorkDirectories(WorkDirectories);
             };
         }
 
@@ -141,6 +141,5 @@ namespace TransmissionLossCalculator
         TransmissionLossQueueCalculatorViewModel _queueViewModel;
 
         #endregion
-
     }
 }
