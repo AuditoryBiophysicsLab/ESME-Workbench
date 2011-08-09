@@ -106,7 +106,6 @@ Global
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|Any CPU.ActiveCfg = Release|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|Any CPU.Build.0 = Release|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|Mixed Platforms.Build.0 = Release|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|Win32.ActiveCfg = Release|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|x64.ActiveCfg = Release|x86
 		{68A96070-B68E-41C3-8B29-A4D21100CCA4}.Release|x86.ActiveCfg = Release|x86
@@ -297,8 +296,8 @@ Global
 		{3053A877-F252-4AB5-B6A8-687C2989301C}.Debug|x64.ActiveCfg = Debug|Win32
 		{3053A877-F252-4AB5-B6A8-687C2989301C}.Debug|x86.ActiveCfg = Debug|Win32
 		{3053A877-F252-4AB5-B6A8-687C2989301C}.Release|Any CPU.ActiveCfg = Release|Win32
-		{3053A877-F252-4AB5-B6A8-687C2989301C}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{3053A877-F252-4AB5-B6A8-687C2989301C}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{3053A877-F252-4AB5-B6A8-687C2989301C}.Release|Mixed Platforms.ActiveCfg = Release|x64
+		{3053A877-F252-4AB5-B6A8-687C2989301C}.Release|Mixed Platforms.Build.0 = Release|x64
 		{3053A877-F252-4AB5-B6A8-687C2989301C}.Release|Win32.ActiveCfg = Release|Win32
 		{3053A877-F252-4AB5-B6A8-687C2989301C}.Release|Win32.Build.0 = Release|Win32
 		{3053A877-F252-4AB5-B6A8-687C2989301C}.Release|x64.ActiveCfg = Release|Win32
@@ -311,8 +310,8 @@ Global
 		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Debug|x64.ActiveCfg = Debug|Win32
 		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Debug|x86.ActiveCfg = Debug|Win32
 		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Release|Any CPU.ActiveCfg = Release|Win32
-		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Release|Mixed Platforms.ActiveCfg = Release|x64
+		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Release|Mixed Platforms.Build.0 = Release|x64
 		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Release|Win32.ActiveCfg = Release|Win32
 		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Release|Win32.Build.0 = Release|Win32
 		{9F78B8CA-FDD3-474D-8DC0-3F50BB94E7D0}.Release|x64.ActiveCfg = Release|Win32
