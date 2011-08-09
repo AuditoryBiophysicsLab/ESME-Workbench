@@ -76,6 +76,7 @@ namespace ESME.Views.TransmissionLoss
                 var runfilePath = Path.GetDirectoryName(runfileName);
                 var outputFileName = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runfileName) + ".bin");
                 var runFile = FieldCalculatorViewModels[0].TransmissionLossRunFile;
+                var meanFrequency = Math.Sqrt(runFile.TransmissionLossJob.SoundSource.AcousticProperties.HighFrequency * runFile.TransmissionLossJob.SoundSource.AcousticProperties.LowFrequency);
                 var output = new CASSOutput
                 {
                     RunDateTime = DateTime.Now.ToString(),
@@ -94,7 +95,7 @@ namespace ESME.Views.TransmissionLoss
                     PlatformName = runFile.TransmissionLossJob.PlatformName,
                     SourceName = runFile.TransmissionLossJob.SourceName,
                     ModeName = runFile.TransmissionLossJob.ModeName,
-                    Frequency = runFile.TransmissionLossJob.SoundSource.AcousticProperties.HighFrequency,
+                    Frequency = (float)meanFrequency,
                     DepressionElevationAngle = runFile.TransmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle,
                     VerticalBeamPattern = runFile.TransmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth,
                     SourceDepth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.SourceDepth,
@@ -109,21 +110,22 @@ namespace ESME.Views.TransmissionLoss
                     Season = runFile.TransmissionLossJob.TimePeriodName,
                     WindSpeed = runFile.TransmissionLossJob.WindSpeed,
                     CASSLevel = 1,
-                    RadialCount = runFile.TransmissionLossJob.SoundSource.RadialBearings.Count,
+                    RadialCount = FieldCalculatorViewModels[0].RadialCalculatorViewModels.Count,
                     RadialBearings = runFile.TransmissionLossJob.SoundSource.RadialBearings.ToArray(),
-                    RangeCellCount = FieldCalculatorViewModels[0].TransmissionLossField.Radials[0].Ranges.Count,
-                    RangeCells = FieldCalculatorViewModels[0].TransmissionLossField.Radials[0].Ranges.ToArray(),
-                    DepthCellCount = FieldCalculatorViewModels[0].TransmissionLossField.Radials[0].Depths.Count,
-                    DepthCells = FieldCalculatorViewModels[0].TransmissionLossField.Radials[0].Depths.ToArray(),
+                    RangeCellCount = FieldCalculatorViewModels[0].RadialCalculatorViewModels[0].TransmissionLossRadial.Ranges.Count,
+                    RangeCells = FieldCalculatorViewModels[0].RadialCalculatorViewModels[0].TransmissionLossRadial.Ranges.ToArray(),
+                    DepthCellCount = FieldCalculatorViewModels[0].RadialCalculatorViewModels[0].TransmissionLossRadial.Depths.Count,
+                    DepthCells = FieldCalculatorViewModels[0].RadialCalculatorViewModels[0].TransmissionLossRadial.Depths.ToArray(),
                     Pressures = new List<float[,]>(),
                     Filename = outputFileName,
                 };
-                foreach (var radial in FieldCalculatorViewModels[0].TransmissionLossField.Radials)
+                foreach (var radialViewModel in FieldCalculatorViewModels[0].RadialCalculatorViewModels)
                 {
+                    var radial = radialViewModel.TransmissionLossRadial;
                     var buffer = new float[radial.Depths.Count, radial.Ranges.Count];
                     for (var rangeIndex = 0; rangeIndex < radial.Ranges.Count; rangeIndex++)
                         for (var depthIndex = 0; depthIndex < radial.Depths.Count; depthIndex++)
-                            buffer[depthIndex, rangeIndex] = radial[depthIndex, rangeIndex];
+                            buffer[depthIndex, rangeIndex] = runFile.TransmissionLossJob.SoundSource.SourceLevel - radial[depthIndex, rangeIndex];
                     output.Pressures.Add(buffer);
                 }
                 output.Write();
