@@ -423,21 +423,21 @@ namespace ESME.TransmissionLoss.CASS
 
                 #region bearing header
 
-                writer.Write(RadialCount);
+                writer.Write((float)RadialCount);
                 foreach (var radial in RadialBearings) writer.Write(radial);
 
                 #endregion
 
                 #region range header
 
-                writer.Write(RangeCellCount);
+                writer.Write((float)RangeCellCount);
                 foreach (var range in RangeCells) writer.Write(range);
 
                 #endregion
 
                 #region depth header
 
-                writer.Write(DepthCellCount);
+                writer.Write((float)DepthCellCount);
                 foreach (var depth in DepthCells) writer.Write(depth);
 
                 #endregion

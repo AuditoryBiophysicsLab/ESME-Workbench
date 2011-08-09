@@ -14,11 +14,12 @@ namespace ESME.TransmissionLoss.Bellhop
         {
             double angle1,
                    angle2;
+            var meanFrequency = Math.Sqrt(transmissionLossJob.SoundSource.AcousticProperties.HighFrequency * transmissionLossJob.SoundSource.AcousticProperties.LowFrequency);
 
             using (var sw = new StringWriter())
             {
                 sw.WriteLine("'TL'");
-                sw.WriteLine("{0:F},", transmissionLossJob.SoundSource.AcousticProperties.HighFrequency);
+                sw.WriteLine("{0:F},", meanFrequency);
                 sw.WriteLine("1,"); // was NMEDIA in gui_genbellhopenv.m
                 sw.WriteLine(useSurfaceReflection ? "'CFMT'," : "'CVMT',");
 

@@ -63,8 +63,8 @@ namespace TransmissionLossCalculator
                     case WatcherChangeTypes.Changed:
                         break;
                     case WatcherChangeTypes.Deleted:
-                        foreach (var file in _matchingFiles.Where(file => file == e.FullPath)) 
-                            _matchingFiles.Remove(file);
+                        var matchedFiles = _matchingFiles.Where(file => file == e.FullPath).ToList();
+                        foreach (var matchedFile in matchedFiles) _matchingFiles.Remove(matchedFile);
                         break;
                 }
             };

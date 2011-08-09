@@ -66,7 +66,7 @@ namespace ESME.TransmissionLoss.CASS
                                                                                          Path.GetFileNameWithoutExtension(cassBathymetryFileName),
                                                                                          Path.GetFileNameWithoutExtension(cassEnvironmentFileName),
                                                                                          platform.Name,
-                                                                                         curSource.Name,
+                                                                                         source.Name,
                                                                                          mode.Name,
                                                                                          timePeriod);
                                             runFile.Save(Path.Combine(curTimePeriodPath, runFile.Filename));
