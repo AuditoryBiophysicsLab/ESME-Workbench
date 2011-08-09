@@ -157,6 +157,8 @@ namespace ESME.Views.TransmissionLoss
             var radialCount = transmissionLossJob.SoundSource.RadialBearings.Count;
             var bottomProfiles = new BottomProfile[radialCount];
             var soundSpeedProfiles = new SoundSpeedProfile[radialCount];
+            var windSpeeds = new float[radialCount];
+            var useWindSpeed = false;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
@@ -164,6 +166,7 @@ namespace ESME.Views.TransmissionLoss
                 bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, _environment.EnvironmentInformation.Bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
                 soundSpeedProfiles[bearingIndex] = _environment.EnvironmentInformation.SoundSpeedField.EnvironmentData[curTransect.MidPoint];
+                windSpeeds[bearingIndex] = _environment.EnvironmentInformation.Wind[0].EnvironmentData[curTransect.MidPoint].Data;
             }
 
             var depthCellCount = (int)Math.Round((maxCalculationDepthMeters /depthCellSize)) + 1;
@@ -176,7 +179,9 @@ namespace ESME.Views.TransmissionLoss
                 {
                     case TransmissionLossAlgorithm.Bellhop:
                         var bellhopConfig = Bellhop.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], sedimentType, maxCalculationDepthMeters, rangeCellCount, depthCellCount, false, false, false, 1500);
-                        TransmissionLossRunFile.TransmissionLossRunFileRadials.Add(new BellhopRunFileRadial {BearingFromSourceDegrees = radialBearing, Configuration = bellhopConfig, BottomProfile = bottomProfiles[bearingIndex].ToBellhopString(),});
+                        TransmissionLossRunFile.TransmissionLossRunFileRadials.Add(new BellhopRunFileRadial {BearingFromSourceDegrees = radialBearing, Configuration = bellhopConfig, BottomProfile = bottomProfiles[bearingIndex].ToBellhopString()});
+                        // todo: Once we know how to calculate the Top Reflection Coefficients for Bellhop, put them in here
+                        // 
                         radialViewModel = new BellhopRadialCalculatorViewModel((BellhopRunFileRadial)_runFile.TransmissionLossRunFileRadials[bearingIndex], bearingIndex, _dispatcher);
                         radialViewModel.PropertyChanged += (s, e) =>
                                                            {

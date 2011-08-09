@@ -76,7 +76,6 @@ namespace ESME.Views.TransmissionLoss
                 var runfilePath = Path.GetDirectoryName(runfileName);
                 var outputFileName = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runfileName) + ".bin");
                 var runFile = FieldCalculatorViewModels[0].TransmissionLossRunFile;
-                var meanFrequency = Math.Sqrt(runFile.TransmissionLossJob.SoundSource.AcousticProperties.HighFrequency * runFile.TransmissionLossJob.SoundSource.AcousticProperties.LowFrequency);
                 var output = new CASSOutput
                 {
                     RunDateTime = DateTime.Now.ToString(),
@@ -95,7 +94,7 @@ namespace ESME.Views.TransmissionLoss
                     PlatformName = runFile.TransmissionLossJob.PlatformName,
                     SourceName = runFile.TransmissionLossJob.SourceName,
                     ModeName = runFile.TransmissionLossJob.ModeName,
-                    Frequency = (float)meanFrequency,
+                    Frequency = runFile.TransmissionLossJob.SoundSource.AcousticProperties.Frequency,
                     DepressionElevationAngle = runFile.TransmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle,
                     VerticalBeamPattern = runFile.TransmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth,
                     SourceDepth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.SourceDepth,
