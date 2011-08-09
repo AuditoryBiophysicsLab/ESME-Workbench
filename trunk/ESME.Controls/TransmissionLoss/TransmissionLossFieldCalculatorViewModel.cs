@@ -166,7 +166,7 @@ namespace ESME.Views.TransmissionLoss
                 bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, _environment.EnvironmentInformation.Bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
                 soundSpeedProfiles[bearingIndex] = _environment.EnvironmentInformation.SoundSpeedField.EnvironmentData[curTransect.MidPoint];
-                windSpeeds[bearingIndex] = _environment.EnvironmentInformation.Wind[0].EnvironmentData[curTransect.MidPoint].Data;
+                windSpeeds[bearingIndex] = _environment.EnvironmentInformation.Wind.TimePeriods[0].EnvironmentData[curTransect.MidPoint].Data;
             }
 
             var depthCellCount = (int)Math.Round((maxCalculationDepthMeters /depthCellSize)) + 1;

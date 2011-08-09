@@ -17,7 +17,7 @@ namespace ESME.TransmissionLoss.CASS
 {
     public static class CASSFiles
     {
-        public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IEnumerable<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, NemoModeToAcousticModelNameMap modeToAcousticModelNameMap, EnvironmentInformation environmentInformation)
+        public static void WriteAcousticSimulatorFiles(AppSettings appSettings, IEnumerable<string> timePeriods, IList<AnalysisPoint> analysisPoints, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, NemoModeToAcousticModelNameMap modeToAcousticModelNameMap, EnvironmentInformation environmentInformation, RangeComplex rangeComplex)
         {
             if ((analysisPoints == null) || (analysisPoints.Count == 0)) return;
             var nemoScenario = nemoFile.Scenario;
@@ -54,7 +54,7 @@ namespace ESME.TransmissionLoss.CASS
                                     case TransmissionLossAlgorithm.CASS:
                                     case TransmissionLossAlgorithm.RAM:
                                     //case TransmissionLossAlgorithm.REFMS:
-                                        WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, thisModel, timePeriod, appSettings, nemoFile, cassBathymetryFileName, cassEnvironmentFileName);
+                                        WriteAcousticSimulatorFiles(curTimePeriodPath, platform, source, mode, modeSources, thisModel, timePeriod, appSettings, nemoFile, cassBathymetryFileName, cassEnvironmentFileName, rangeComplex);
                                         break;
                                     case TransmissionLossAlgorithm.Bellhop:
                                     case TransmissionLossAlgorithm.RAMGEO:
@@ -65,10 +65,8 @@ namespace ESME.TransmissionLoss.CASS
                                                                                          nemoFile.Scenario.SimAreaName,
                                                                                          Path.GetFileNameWithoutExtension(cassBathymetryFileName),
                                                                                          Path.GetFileNameWithoutExtension(cassEnvironmentFileName),
-                                                                                         platform.Name,
-                                                                                         source.Name,
-                                                                                         mode.Name,
-                                                                                         timePeriod);
+                                                                                         platform.Name, source.Name, mode.Name,
+                                                                                         timePeriod, rangeComplex);
                                             runFile.Save(Path.Combine(curTimePeriodPath, runFile.Filename));
 #else
                                             var lat = curSource.Latitude;
@@ -105,11 +103,9 @@ namespace ESME.TransmissionLoss.CASS
             foreach (var matchingFile in matchingFiles) File.Delete(matchingFile);
         }
 
-        public static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName)
+        public static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, RangeComplex rangeComplex)
         {
             var nemoScenario = nemoFile.Scenario;
-            var simAreaFile = RangeComplexDescriptors.ReadCSV(Path.Combine(appSettings.ScenarioDataDirectory, "SimAreas.csv"), null);
-            var rangeComplex = ((RangeComplexDescriptor)simAreaFile[nemoScenario.SimAreaName]).Data;
 
             var inputFileName = string.Format("base-{0}-{1}-{2}-{3}.inp", simulatorName, platform.Name, platform.Id, timePeriod);
             var batchFileName = "run_" + Path.GetFileNameWithoutExtension(inputFileName) + ".bat";
