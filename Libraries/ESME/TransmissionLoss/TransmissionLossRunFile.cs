@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Xml.Serialization;
+using ESME.Environment;
 using ESME.Model;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.RAM;
@@ -21,15 +22,10 @@ namespace ESME.TransmissionLoss
             TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>();
         }
 
-        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, string bathymetryName, string environmentName, string platformName, string sourceName, string modeName, string timePeriodName)
+        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, string bathymetryName, string environmentName, string platformName, string sourceName, string modeName, string timePeriodName, RangeComplex rangeComplex)
         {
-            var lat = soundSource.Latitude;
-            var lon = soundSource.Longitude;
-            var baseFilename = string.Format("{0}_{1}{2:0.####}_{3}{4:0.####}",
-                                             soundSource.Name.Replace('|', '_'),
-                                             lat >= 0 ? "n" : "s", Math.Abs(lat),
-                                             lon >= 0 ? "e" : "w", Math.Abs(lon));
             TransmissionLossRunFile result = null;
+            string fileType = null;
             switch (algorithm)
             {
                 case TransmissionLossAlgorithm.Bellhop:
@@ -38,8 +34,8 @@ namespace ESME.TransmissionLoss
                         BellhopSettings = Globals.AppSettings.BellhopSettings,
                         WaterDepthIncrement = Globals.AppSettings.BellhopSettings.DepthCellSize,
                         RangeDistanceIncrement = Globals.AppSettings.BellhopSettings.RangeCellSize,
-                        Filename = baseFilename + ".bellhop"
                     };
+                    fileType = "bellhop";
                     break;
                 case TransmissionLossAlgorithm.RAMGEO:
                     result = new RamRunFile
@@ -47,8 +43,8 @@ namespace ESME.TransmissionLoss
                         RAMSettings = Globals.AppSettings.RAMSettings,
                         WaterDepthIncrement = Globals.AppSettings.RAMSettings.DepthStepSize,
                         RangeDistanceIncrement = Globals.AppSettings.RAMSettings.RangeStepSize,
-                        Filename = baseFilename + ".ramgeo",
                     };
+                    fileType = "ramgeo";
                     break;
                 case TransmissionLossAlgorithm.RAM:
                 case TransmissionLossAlgorithm.REFMS:
@@ -69,21 +65,35 @@ namespace ESME.TransmissionLoss
             result.RangeComplexName = rangeComplexName;
             result.BathymetryName = bathymetryName;
             result.EnvironmentName = environmentName;
+            result.ReferenceLocation = new EarthCoordinate(rangeComplex);
+            var lat = soundSource.Latitude;
+            var lon = soundSource.Longitude;
+            var locationString = string.Format("{0}{1:0.####}_{2}{3:0.####}",
+                                               lat >= 0 ? "n" : "s", Math.Abs(lat),
+                                               lon >= 0 ? "e" : "w", Math.Abs(lon));
+            result.Filename = string.Format("{0}_{1}_{2}_{3}_{4}_{5}.{6}", rangeComplexName, platformName, sourceName, modeName,
+                timePeriodName, locationString, fileType);
+
             return result;
         }
 
         public static TransmissionLossRunFile Load(string filename)
         {
             if (string.IsNullOrEmpty(filename)) throw new ArgumentNullException("filename", "TransmissionLossRunFile.Load: filename is null");
+            TransmissionLossRunFile result;
             switch (Path.GetExtension(filename).ToLower())
             {
                 case ".bellhop":
-                    return XmlSerializer<BellhopRunFile>.Load(filename, ReferencedTypes);
+                    result = XmlSerializer<BellhopRunFile>.Load(filename, ReferencedTypes);
+                    break;
                 case ".ramgeo":
-                    return XmlSerializer<RamRunFile>.Load(filename, ReferencedTypes);
+                    result = XmlSerializer<RamRunFile>.Load(filename, ReferencedTypes);
+                    break;
                 default:
                     throw new FileFormatException(string.Format("TransmissionLossRunFile.Load: Transmission loss algorithm {0} is not supported", Path.GetExtension(filename).ToLower()));
             }
+            result.Filename = filename;
+            return result;
         }
 
         public string ScenarioDataDirectory { get; set; }
@@ -93,6 +103,7 @@ namespace ESME.TransmissionLoss
         public TransmissionLossAlgorithm TransmissionLossAlgorithm { get; set; }
         public float WaterDepthIncrement { get; set; }
         public float RangeDistanceIncrement { get; set; }
+        public EarthCoordinate ReferenceLocation { get; set; }
 #if false
         public static TransmissionLossRunFile Create(TransmissionLossAlgorithm transmissionLossAlgorithm, TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
         {

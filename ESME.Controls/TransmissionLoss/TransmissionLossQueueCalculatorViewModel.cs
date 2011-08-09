@@ -4,9 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using Cinch;
-using ESME.TransmissionLoss.Bellhop;
 using ESME.TransmissionLoss.CASS;
 
 namespace ESME.Views.TransmissionLoss
@@ -45,13 +43,13 @@ namespace ESME.Views.TransmissionLoss
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null)
-                        foreach (var newItem in e.NewItems.Cast<TransmissionLossFieldCalculatorViewModel>()) {}
+                    //if (e.NewItems != null)
+                    //    foreach (var newItem in e.NewItems.Cast<TransmissionLossFieldCalculatorViewModel>()) {}
                     break;
                 case NotifyCollectionChangedAction.Move:
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    if (e.OldItems != null) foreach (var oldItem in e.OldItems.Cast<TransmissionLossFieldCalculatorViewModel>()) {}
+                    //if (e.OldItems != null) foreach (var oldItem in e.OldItems.Cast<TransmissionLossFieldCalculatorViewModel>()) {}
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     break;
@@ -74,8 +72,9 @@ namespace ESME.Views.TransmissionLoss
             {
                 var runfileName = FieldCalculatorViewModels[0].RunfileName;
                 var runfilePath = Path.GetDirectoryName(runfileName);
-                var outputFileName = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runfileName) + ".bin");
+                //var outputFileName = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runfileName) + ".bin");
                 var runFile = FieldCalculatorViewModels[0].TransmissionLossRunFile;
+                var outputFileName = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runFile.Filename) + ".bin");
                 var output = new CASSOutput
                 {
                     RunDateTime = DateTime.Now.ToString(),
@@ -87,8 +86,8 @@ namespace ESME.Views.TransmissionLoss
                     ProcessorType = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"),
                     Title = Path.GetFileNameWithoutExtension(runfileName),
                     SiteName = FieldCalculatorViewModels[0].TransmissionLossRunFile.RangeComplexName,
-                    SiteRefLatLocation = 0,     // todo
-                    SiteRefLonLocation = 0,     // todo
+                    SiteRefLatLocation = (float)runFile.ReferenceLocation.Latitude,
+                    SiteRefLonLocation = (float)runFile.ReferenceLocation.Longitude,
                     SourceRefLatLocation = (float)runFile.TransmissionLossJob.SoundSource.Latitude,
                     SourceRefLonLocation = (float)runFile.TransmissionLossJob.SoundSource.Longitude,
                     PlatformName = runFile.TransmissionLossJob.PlatformName,
@@ -99,7 +98,7 @@ namespace ESME.Views.TransmissionLoss
                     VerticalBeamPattern = runFile.TransmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth,
                     SourceDepth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.SourceDepth,
                     SourceLevel = runFile.TransmissionLossJob.SoundSource.SourceLevel,
-                    MinWaterDepth = 0,  // todo
+                    MinWaterDepth = 0,  // Seems to be always zero
                     MaxWaterDepth = runFile.TransmissionLossJob.MaxDepth,
                     WaterDepthIncrement = runFile.WaterDepthIncrement,
                     MinRangeDistance = 0,

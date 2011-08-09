@@ -26,7 +26,7 @@ namespace TransmissionLossCalculator
             {
                 if (_directoryPath == value) return;
                 _directoryPath = value;
-                _dirWatcher = new FileSystemWatcher(_directoryPath)
+                _dirWatcher = new FileSystemWatcher(_directoryPath, _filePattern)
                 {
                     EnableRaisingEvents = true,
                     NotifyFilter = (NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.DirectoryName),

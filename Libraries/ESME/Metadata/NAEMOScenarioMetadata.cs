@@ -424,12 +424,13 @@ namespace ESME.Metadata
             var pressureTimePath = Path.Combine(_pressurePath, NemoFile.Scenario.TimeFrame);
             Directory.CreateDirectory(propagationTimePath);
             //Directory.CreateDirectory(pressureTimePath);
+            var rangeComplex = ((RangeComplexDescriptor)RangeComplexDescriptors[NemoFile.Scenario.SimAreaName]).Data;
             SelectedEnvironment.Data.EnvironmentInformation.Bathymetry = SelectedBathymetry.Data;
             CASSFiles.WriteAcousticSimulatorFiles(Globals.AppSettings, new List<string> {NemoFile.Scenario.TimeFrame},
                                                   AnalysisPoints, NemoFile,
                                                   SelectedBathymetry.DataFilename, SelectedEnvironment.DataFilename,
                                                   NemoModeToAcousticModelNameMap,
-                                                  SelectedEnvironment.Data.EnvironmentInformation);
+                                                  SelectedEnvironment.Data.EnvironmentInformation, rangeComplex);
             Globals.WorkDirectories.Add(propagationTimePath);
         }
     }

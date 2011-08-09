@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
@@ -102,9 +103,21 @@ namespace TransmissionLossCalculator
                     if (e.NewItems != null)
                         foreach (var item in e.NewItems)
                         {
-                            var newFileName = (string)item;
+                            var runFileName = (string)item;
                             //var runFile = TransmissionLossRunFile.Load(newFileName);
-                            QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(newFileName, _dispatcher));
+                            var binFileName = Path.Combine(Path.GetDirectoryName(runFileName), Path.GetFileNameWithoutExtension(runFileName) + ".bin");
+                            var doCalculation = true;
+                            if (File.Exists(binFileName))
+                            {
+                                var runInfo = new FileInfo(runFileName);
+                                var binInfo = new FileInfo(binFileName);
+                                if (runInfo.LastWriteTime < binInfo.LastWriteTime)
+                                {
+                                    Debug.WriteLine("Skipping " + Path.GetFileName(runFileName));
+                                    doCalculation = false;
+                                }
+                            }
+                            if (doCalculation) QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName, _dispatcher));
                         }
                     break;
                 case NotifyCollectionChangedAction.Move:
