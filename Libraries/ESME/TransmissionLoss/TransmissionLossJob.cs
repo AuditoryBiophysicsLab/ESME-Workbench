@@ -21,6 +21,17 @@ namespace ESME.TransmissionLoss
         [XmlIgnore]
         public string Filename { get; set; }
 
+        public string PlatformName { get; set; }
+        public string SourceName { get; set; }
+        public string ModeName { get; set; }
+
+        public string TimePeriodName { get; set; }
+
+        [XmlIgnore]
+        public string BottomTypeName { get; set; }
+        [XmlIgnore]
+        public float WindSpeed { get; set; }
+
         /// <summary>
         ///   The presumptively-unique analysis point ID.
         /// </summary>

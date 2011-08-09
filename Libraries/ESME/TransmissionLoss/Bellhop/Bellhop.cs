@@ -24,7 +24,7 @@ namespace ESME.TransmissionLoss.Bellhop
 
                 if (depthCellCount < 5) throw new BathymetryTooShallowException("Error: Maximum depth of transect (" + maxCalculationDepthMeters + " meters) less than minimum required for transmission loss calculations.\nPlease choose a different location for this transect.");
 
-                sw.WriteLine("{0}, 0.0, {1:F}, !NMESH SIGMA Z(NSSP)", rangeCellCount, maxCalculationDepthMeters);
+                sw.WriteLine("0.0, 0.0, {0:F}, !NMESH SIGMA Z(NSSP)", ssp.Data[ssp.Data.Count - 1].Depth);
 
                 // If SSP is shallower than the bathymetry then extrapolate an SSP entry for the deepest part of the water
                 //if (SSP.DepthVector[SSP.DepthVector.Length - 1] < RealBottomDepth_Meters)

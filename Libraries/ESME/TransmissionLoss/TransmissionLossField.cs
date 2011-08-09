@@ -10,8 +10,8 @@ namespace ESME.TransmissionLoss
 {
     public class TransmissionLossField : IEquatable<SoundSource>
     {
-        public string Name { get; private set; }
-        public string Metadata { get; private set; }
+        public string Name { get; set; }
+        public string Metadata { get; set; }
         public float SourceLevel { get; private set; }
         public float Latitude { get; private set; }
         public float Longitude { get; private set; }
@@ -225,6 +225,7 @@ namespace ESME.TransmissionLoss
                 Depths = radial.Depths;
                 Ranges = radial.Ranges;
             }
+            if (Radials == null) Radials = new List<TransmissionLossRadial>();
             Radials.Add(radial);
             Radials.Sort();
         }

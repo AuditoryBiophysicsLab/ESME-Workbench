@@ -21,7 +21,7 @@ namespace ESME.TransmissionLoss
             TransmissionLossRunFileRadials = new List<TransmissionLossRunFileRadial>();
         }
 
-        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, string bathymetryName, string environmentName)
+        public static TransmissionLossRunFile Create(TransmissionLossAlgorithm algorithm, SoundSource soundSource, string rangeComplexName, string bathymetryName, string environmentName, string platformName, string sourceName, string modeName, string timePeriodName)
         {
             var lat = soundSource.Latitude;
             var lon = soundSource.Longitude;
@@ -36,6 +36,8 @@ namespace ESME.TransmissionLoss
                     result = new BellhopRunFile
                     {
                         BellhopSettings = Globals.AppSettings.BellhopSettings,
+                        WaterDepthIncrement = Globals.AppSettings.BellhopSettings.DepthCellSize,
+                        RangeDistanceIncrement = Globals.AppSettings.BellhopSettings.RangeCellSize,
                         Filename = baseFilename + ".bellhop"
                     };
                     break;
@@ -43,6 +45,8 @@ namespace ESME.TransmissionLoss
                     result = new RamRunFile
                     {
                         RAMSettings = Globals.AppSettings.RAMSettings,
+                        WaterDepthIncrement = Globals.AppSettings.RAMSettings.DepthStepSize,
+                        RangeDistanceIncrement = Globals.AppSettings.RAMSettings.RangeStepSize,
                         Filename = baseFilename + ".ramgeo",
                     };
                     break;
@@ -57,6 +61,10 @@ namespace ESME.TransmissionLoss
             result.TransmissionLossJob = new TransmissionLossJob
             {
                 SoundSource = soundSource,
+                PlatformName = platformName,
+                SourceName = sourceName,
+                ModeName = modeName,
+                TimePeriodName = timePeriodName,
             };
             result.RangeComplexName = rangeComplexName;
             result.BathymetryName = bathymetryName;
@@ -83,6 +91,8 @@ namespace ESME.TransmissionLoss
         public string BathymetryName { get; set; }
         public string EnvironmentName { get; set; }
         public TransmissionLossAlgorithm TransmissionLossAlgorithm { get; set; }
+        public float WaterDepthIncrement { get; set; }
+        public float RangeDistanceIncrement { get; set; }
 #if false
         public static TransmissionLossRunFile Create(TransmissionLossAlgorithm transmissionLossAlgorithm, TransmissionLossJob transmissionLossJob, EnvironmentInformation environmentInformation, AppSettings appSettings)
         {

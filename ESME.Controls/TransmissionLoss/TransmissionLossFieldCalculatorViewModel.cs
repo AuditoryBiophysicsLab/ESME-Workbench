@@ -310,7 +310,7 @@ namespace ESME.Views.TransmissionLoss
 
         void Calculate(object sender, DoWorkEventArgs args)
         {
-            if (TransmissionLossField.Radials == null) throw new ApplicationException("Radials are null");
+            //if (TransmissionLossField.Radials == null) throw new ApplicationException("Radials are null");
 
             var runFile = (TransmissionLossRunFile) args.Argument;
             var radialNum = 0;
