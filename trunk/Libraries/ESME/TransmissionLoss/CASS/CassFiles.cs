@@ -67,7 +67,10 @@ namespace ESME.TransmissionLoss.CASS
                                                                                          Path.GetFileNameWithoutExtension(cassEnvironmentFileName),
                                                                                          platform.Name, source.Name, mode.Name,
                                                                                          timePeriod, rangeComplex);
-                                            runFile.Save(Path.Combine(curTimePeriodPath, runFile.Filename));
+                                            var runFileName = Path.Combine(curTimePeriodPath, runFile.Filename);
+                                            // todo: If the file already exists, load it and see if it's the same as the one we just
+                                            // created.  If it is, don't write a new one.
+                                            if (!File.Exists(runFileName)) runFile.Save(runFileName);
 #else
                                             var lat = curSource.Latitude;
                                             var lon = curSource.Longitude;
