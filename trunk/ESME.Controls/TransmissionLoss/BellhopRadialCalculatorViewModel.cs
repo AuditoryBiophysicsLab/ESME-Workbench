@@ -49,6 +49,9 @@ namespace ESME.Views.TransmissionLoss
             };
             bellhopProcess.PropertyChanged += (sender, e) => { if (e.PropertyName == "ProgressPercent") 
                 ProgressPercent = Math.Max(ProgressPercent, ((TransmissionLossProcess) sender).ProgressPercent); };
+#if DEBUG
+            File.WriteAllText(Path.Combine(workingDirectory, "bellhop.config"), bellhopConfiguration);
+#endif
             bellhopProcess.OutputDataReceived += OutputDataRecieved;
             bellhopProcess.Start();
             bellhopProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
@@ -77,8 +80,8 @@ namespace ESME.Views.TransmissionLoss
 
             if (ErrorText.Contains("forrtl"))
             {
-                Debug.WriteLine("{0}: Bellhop failure: {1}", DateTime.Now, ErrorText);
-                Debug.WriteLine("{0}: Bellhop input: {1}", DateTime.Now, bellhopConfiguration);
+                Console.WriteLine("{0}: Bellhop failure: {1}", DateTime.Now, ErrorText);
+                Console.WriteLine("{0}: Bellhop input: {1}", DateTime.Now, bellhopConfiguration);
                 Status = "Error";
                 return null;
             }

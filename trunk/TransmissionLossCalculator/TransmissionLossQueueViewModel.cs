@@ -67,7 +67,7 @@ namespace TransmissionLossCalculator
         void AddWorkDirectory(string workDirectory)
         {
             DirectoryScanners.Add(workDirectory, "*.bellhop");
-            DirectoryScanners.Add(workDirectory, "*.ramgeo");
+            //DirectoryScanners.Add(workDirectory, "*.ramgeo");
         }
         
         void ClearWorkDirectories() { RemoveWorkDirectories(WorkDirectories); }

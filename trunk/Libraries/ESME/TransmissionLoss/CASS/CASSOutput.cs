@@ -11,87 +11,87 @@ namespace ESME.TransmissionLoss.CASS
 
         #region file header
 
-        public string RunDateTime { get; private set; }
-        public string OperatingSystemName { get; private set; }
-        public string SystemNodeName { get; private set; }
-        public string OperatingSystemRelease { get; private set; }
-        public string OperatingSystemVersion { get; private set; }
-        public string MachineType { get; private set; }
-        public string ProcessorType { get; private set; }
+        public string RunDateTime { get; set; }
+        public string OperatingSystemName { get; set; }
+        public string SystemNodeName { get; set; }
+        public string OperatingSystemRelease { get; set; }
+        public string OperatingSystemVersion { get; set; }
+        public string MachineType { get; set; }
+        public string ProcessorType { get; set; }
 
-        public string Title { get; private set; }
-        public string SiteName { get; private set; }
-        public float SiteRefLatLocation { get; private set; }
-        public string SiteRefLatLocationUnits { get; private set; }
-        public float SiteRefLonLocation { get; private set; }
-        public string SiteRefLonLocationUnits { get; private set; }
+        public string Title { get; set; }
+        public string SiteName { get; set; }
+        public float SiteRefLatLocation { get; set; }
+        public string SiteRefLatLocationUnits { get; set; }
+        public float SiteRefLonLocation { get; set; }
+        public string SiteRefLonLocationUnits { get; set; }
 
-        public float SourceRefLatLocation { get; private set; }
-        public string SourceRefLatLocationUnits { get; private set; }
-        public float SourceRefLonLocation { get; private set; }
-        public string SourceRefLonLocationUnits { get; private set; }
+        public float SourceRefLatLocation { get; set; }
+        public string SourceRefLatLocationUnits { get; set; }
+        public float SourceRefLonLocation { get; set; }
+        public string SourceRefLonLocationUnits { get; set; }
 
-        public string PlatformName { get; private set; }
-        public string SourceName { get; private set; }
-        public string ModeName { get; private set; }
-        public float Frequency { get; private set; }
-        public string FrequencyUnits { get; private set; }
-        public float DepressionElevationAngle { get; private set; }
-        public string DepressionElevationAngleUnits { get; private set; }
-        public float VerticalBeamPattern { get; private set; }
-        public string VerticalBeamPatternUnits { get; private set; }
-        public float SourceDepth { get; private set; }
-        public string SourceDepthUnits { get; private set; }
-        public float SourceLevel { get; private set; }
-        public string SourceLevelUnits { get; private set; }
-        public float MinWaterDepth { get; private set; }
-        public string MinWaterDepthUnits { get; private set; }
-        public float MaxWaterDepth { get; private set; }
-        public string MaxWaterDepthUnits { get; private set; }
-        public float WaterDepthIncrement { get; private set; }
-        public string WaterDepthIncrementUnits { get; private set; }
-        public float MinRangeDistance { get; private set; }
-        public string MinRangeDistanceUnits { get; private set; }
-        public float MaxRangeDistance { get; private set; }
-        public string MaxRangeDistanceUnits { get; private set; }
-        public float RangeDistanceIncrement { get; private set; }
-        public string RangeDistanceIncrementUnits { get; private set; }
+        public string PlatformName { get; set; }
+        public string SourceName { get; set; }
+        public string ModeName { get; set; }
+        public float Frequency { get; set; }
+        public string FrequencyUnits { get; set; }
+        public float DepressionElevationAngle { get; set; }
+        public string DepressionElevationAngleUnits { get; set; }
+        public float VerticalBeamPattern { get; set; }
+        public string VerticalBeamPatternUnits { get; set; }
+        public float SourceDepth { get; set; }
+        public string SourceDepthUnits { get; set; }
+        public float SourceLevel { get; set; }
+        public string SourceLevelUnits { get; set; }
+        public float MinWaterDepth { get; set; }
+        public string MinWaterDepthUnits { get; set; }
+        public float MaxWaterDepth { get; set; }
+        public string MaxWaterDepthUnits { get; set; }
+        public float WaterDepthIncrement { get; set; }
+        public string WaterDepthIncrementUnits { get; set; }
+        public float MinRangeDistance { get; set; }
+        public string MinRangeDistanceUnits { get; set; }
+        public float MaxRangeDistance { get; set; }
+        public string MaxRangeDistanceUnits { get; set; }
+        public float RangeDistanceIncrement { get; set; }
+        public string RangeDistanceIncrementUnits { get; set; }
 
-        public string BottomType { get; private set; }
-        public string Season { get; private set; }
-        public float WindSpeed { get; private set; }
-        public string WindSpeedUnits { get; private set; }
+        public string BottomType { get; set; }
+        public string Season { get; set; }
+        public float WindSpeed { get; set; }
+        public string WindSpeedUnits { get; set; }
 
-        public float CASSLevel { get; private set; }
+        public float CASSLevel { get; set; }
 
         #endregion
 
         #region bearing header
 
-        public int RadialCount { get; private set; }
-        public float[] RadialBearings { get; private set; }
+        public int RadialCount { get; set; }
+        public float[] RadialBearings { get; set; }
 
         #endregion
 
         #region range header
 
-        public int RangeCellCount { get; private set; }
-        public float[] RangeCells { get; private set; }
+        public int RangeCellCount { get; set; }
+        public float[] RangeCells { get; set; }
 
         #endregion
 
         #region depth header
 
-        public int DepthCellCount { get; private set; }
-        public float[] DepthCells { get; private set; }
+        public int DepthCellCount { get; set; }
+        public float[] DepthCells { get; set; }
 
         #endregion
 
-        public List<float[,]> Pressures { get; private set; }
+        public List<float[,]> Pressures { get; set; }
 
         #endregion
 
-        public string Filename { get; private set; }
+        public string Filename { get; set; }
 
         public static CASSOutput Load(string fileName, bool headerOnly)
         {
@@ -236,14 +236,14 @@ namespace ESME.TransmissionLoss.CASS
                 WriteCASSField(writer, "Processor Type", 25);
                 WriteCASSField(writer, "Title", 50);
                 WriteCASSField(writer, "Site Name", 50);
-                
+
                 const float siteRefLatLocation = 0;
                 writer.Write(siteRefLatLocation);
-                WriteCASSField(writer, "SiteRefLatLocation Units", 10);
-                
+                WriteCASSField(writer, "DEG", 10);
+
                 const float siteRefLonLocation = 0;
                 writer.Write(siteRefLonLocation);
-                WriteCASSField(writer, "SiteRefLonLocation Units", 10);
+                WriteCASSField(writer, "DEG", 10);
 
                 var sourceRefLatLocation = transmissionLossField.Latitude;
                 writer.Write(sourceRefLatLocation);
@@ -265,31 +265,31 @@ namespace ESME.TransmissionLoss.CASS
 
                 writer.Write(transmissionLossField.VerticalBeamWidth);
                 WriteCASSField(writer, "DEG", 10);
-                
+
                 writer.Write(transmissionLossField.SourceDepth);
                 WriteCASSField(writer, "M", 10);
 
                 writer.Write(transmissionLossField.SourceLevel);
                 WriteCASSField(writer, "DB", 10);
-                
+
                 writer.Write(transmissionLossField.Depths[0]);
                 WriteCASSField(writer, "M", 10);
-                
-                writer.Write(transmissionLossField.Depths[transmissionLossField.Depths.Count-1]);
+
+                writer.Write(transmissionLossField.Depths[transmissionLossField.Depths.Count - 1]);
                 WriteCASSField(writer, "M", 10);
 
-                var waterDepthIncrement = transmissionLossField.Depths[1]-transmissionLossField.Depths[0];
+                var waterDepthIncrement = transmissionLossField.Depths[1] - transmissionLossField.Depths[0];
                 writer.Write(waterDepthIncrement);
                 WriteCASSField(writer, "M", 10);
 
                 writer.Write(transmissionLossField.Ranges[0]);
                 WriteCASSField(writer, "M", 10);
 
-                
-                writer.Write(transmissionLossField.Ranges[transmissionLossField.Ranges.Count-1]);
+
+                writer.Write(transmissionLossField.Ranges[transmissionLossField.Ranges.Count - 1]);
                 WriteCASSField(writer, "M", 10);
 
-                var rangeDistanceIncrement = transmissionLossField.Ranges[1]-transmissionLossField.Ranges[0];
+                var rangeDistanceIncrement = transmissionLossField.Ranges[1] - transmissionLossField.Ranges[0];
                 writer.Write(rangeDistanceIncrement);
                 WriteCASSField(writer, "M", 10);
 
@@ -302,7 +302,7 @@ namespace ESME.TransmissionLoss.CASS
                 const float cassLevel = 0;
                 writer.Write(cassLevel);
 
-                if(writer.BaseStream.Position != 713) throw new FileFormatException("Cass Write: header is of incorrect length.");
+                if (writer.BaseStream.Position != 713) throw new FileFormatException("Cass Write: header is of incorrect length.");
                 #endregion
                 #region bearing header
 
@@ -341,10 +341,113 @@ namespace ESME.TransmissionLoss.CASS
                     {
                         for (var j = 0; j < radial.Depths.Count; j++)
                         {
-                            writer.Write(radial.TransmissionLoss[j,i]);
+                            writer.Write(radial.TransmissionLoss[j, i]);
                         }
                     }
                 }
+                #endregion
+            }
+        }
+
+        public void Write(string cassOutputFileName = null)
+        {
+            if (cassOutputFileName == null) cassOutputFileName = Filename;
+            using (var writer = new BinaryWriter(new FileStream(cassOutputFileName, FileMode.Create, FileAccess.Write)))
+            {
+                #region file header write
+                WriteCASSField(writer, RunDateTime, 25);
+                WriteCASSField(writer, OperatingSystemName, 25);
+                WriteCASSField(writer, SystemNodeName, 25);
+                WriteCASSField(writer, OperatingSystemRelease, 25);
+                WriteCASSField(writer, OperatingSystemVersion, 25);
+                WriteCASSField(writer, MachineType, 25);
+                WriteCASSField(writer, ProcessorType, 25);
+                WriteCASSField(writer, Title, 50);
+                WriteCASSField(writer, SiteName, 50);
+                writer.Write(SiteRefLatLocation);
+                WriteCASSField(writer, "DEG", 10);
+                writer.Write(SiteRefLonLocation);
+                WriteCASSField(writer, "DEG", 10);
+
+                writer.Write(SourceRefLatLocation);
+                WriteCASSField(writer, "DEG", 10);
+                writer.Write(SourceRefLonLocation);
+                WriteCASSField(writer, "DEG", 10);
+
+                WriteCASSField(writer, PlatformName, 50);
+                WriteCASSField(writer, SourceName, 50);
+                WriteCASSField(writer, ModeName, 50);
+
+                writer.Write(Frequency);
+                WriteCASSField(writer, "HZ", 10);
+
+                writer.Write(DepressionElevationAngle);
+                WriteCASSField(writer, "DEG", 10);
+
+                writer.Write(VerticalBeamPattern);
+                WriteCASSField(writer, "DEG", 10);
+
+                writer.Write(SourceDepth);
+                WriteCASSField(writer, "M", 10);
+
+                writer.Write(SourceLevel);
+                WriteCASSField(writer, "DB", 10);
+
+                writer.Write(MinWaterDepth);
+                WriteCASSField(writer, "M", 10);
+
+                writer.Write(MaxWaterDepth);
+                WriteCASSField(writer, "M", 10);
+
+                writer.Write(WaterDepthIncrement);
+                WriteCASSField(writer, "M", 10);
+
+                writer.Write(MinRangeDistance);
+                WriteCASSField(writer, "M", 10);
+
+                writer.Write(MaxRangeDistance);
+                WriteCASSField(writer, "M", 10);
+
+                writer.Write(RangeDistanceIncrement);
+                WriteCASSField(writer, "M", 10);
+
+                WriteCASSField(writer, BottomType, 50);
+                WriteCASSField(writer, Season, 10);
+                writer.Write(WindSpeed);
+                WriteCASSField(writer, "M/S", 10);
+
+                writer.Write(CASSLevel);
+
+                if (writer.BaseStream.Position != 713) throw new FileFormatException("Cass Write: header is of incorrect length.");
+                #endregion
+
+                #region bearing header
+
+                writer.Write(RadialCount);
+                foreach (var radial in RadialBearings) writer.Write(radial);
+
+                #endregion
+
+                #region range header
+
+                writer.Write(RangeCellCount);
+                foreach (var range in RangeCells) writer.Write(range);
+
+                #endregion
+
+                #region depth header
+
+                writer.Write(DepthCellCount);
+                foreach (var depth in DepthCells) writer.Write(depth);
+
+                #endregion
+                
+                #region payload pressure data
+
+                foreach (var radial in Pressures)
+                    for (var i = 0; i < radial.GetLength(1); i++)
+                        for (var j = 0; j < radial.GetLength(0); j++) writer.Write(radial[j, i]);
+
                 #endregion
             }
         }
@@ -359,6 +462,7 @@ namespace ESME.TransmissionLoss.CASS
         {
             var buf = new byte[fieldLength];
             for (var i = 0; i < fieldLength; i++) buf[i] = 0;
+            s = s ?? "";
             var result = Encoding.ASCII.GetBytes(s, 0, s.Length <= fieldLength ? s.Length : fieldLength, buf, 0); //truncates or zero-pads output to fixed fieldLength.
             w.Write(buf, 0, fieldLength);
         }
