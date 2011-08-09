@@ -22,18 +22,19 @@ namespace ESME.Views.TransmissionLoss
         public override void Start()
         {
             Status = "Starting";
-            TransmissionLossRadial = ComputeRadial(_bellhopRunFileRadial.Configuration, _bellhopRunFileRadial.BottomProfile, _bellhopRunFileRadial.BearingFromSourceDegrees);
+            TransmissionLossRadial = ComputeRadial(_bellhopRunFileRadial.Configuration, _bellhopRunFileRadial.BottomProfile,_bellhopRunFileRadial.TopReflectionCoefficient, _bellhopRunFileRadial.BearingFromSourceDegrees);
             Status = "Complete";
         }
 
         #region Code that computes the radial by running bellhop and reading the output files it creates
 
-        TransmissionLossRadial ComputeRadial(string bellhopConfiguration, string bottomProfile, float bearing)
+        TransmissionLossRadial ComputeRadial(string bellhopConfiguration, string bottomProfile, string topReflectionCoefficients, float bearing)
         {
             var workingDirectory = CreateTemporaryDirectory();
 
-            // Write the bottom profile file that will be read by BELLHOP
-            using (var writer = new StreamWriter(Path.Combine(workingDirectory, "BTYFIL"))) writer.Write(bottomProfile);
+            // Write the bottom profile file that will be read by BELLHOP);
+            File.WriteAllText(Path.Combine(workingDirectory, "BTYFIL"), bottomProfile);
+            if (!string.IsNullOrEmpty(topReflectionCoefficients)) File.WriteAllText(Path.Combine(workingDirectory, "TRCFIL"), topReflectionCoefficients);
 
             var bellhopProcess = new TransmissionLossProcess
             {
@@ -50,7 +51,7 @@ namespace ESME.Views.TransmissionLoss
             bellhopProcess.PropertyChanged += (sender, e) => { if (e.PropertyName == "ProgressPercent") 
                 ProgressPercent = Math.Max(ProgressPercent, ((TransmissionLossProcess) sender).ProgressPercent); };
 #if DEBUG
-            File.WriteAllText(Path.Combine(workingDirectory, "bellhop.config"), bellhopConfiguration);
+            File.WriteAllText(Path.Combine(workingDirectory, "BellhopEnvironmentFile.txt"), bellhopConfiguration);
 #endif
             bellhopProcess.OutputDataReceived += OutputDataRecieved;
             bellhopProcess.Start();
@@ -85,6 +86,9 @@ namespace ESME.Views.TransmissionLoss
                 Status = "Error";
                 return null;
             }
+#if DEBUG
+            File.WriteAllText(Path.Combine(workingDirectory, "BellhopStandardOutput.txt"), OutputData.ToString());
+#endif
             var result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
             File.Delete(Path.Combine(workingDirectory, "SHDFIL"));
             Directory.Delete(workingDirectory, true);

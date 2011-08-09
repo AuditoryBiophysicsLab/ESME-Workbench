@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Serialization;
 using ESME.NEMO;
 using ESME.TransmissionLoss;
 
@@ -52,6 +53,26 @@ namespace ESME.Model
         /// For narrowband sources, please specify LowFrequency and HighFrequency as the same value
         /// </summary>
         public float HighFrequency { get; set; }
+
+        /// <summary>
+        /// If HighFrequency and LowFrequency are both non-zero, 
+        ///   the geometric mean of HighFrequency and LowFrequency is returned
+        /// Otherwise:
+        ///   If HighFrequency is zero, LowFrequency is returned
+        ///   If LowFrequency is zero, HighFrequency is returned
+        ///   If both are zero, zero is returned
+        /// </summary>
+        [XmlIgnore]
+        public float Frequency
+        {
+            get
+            {
+                if ((LowFrequency == 0) && (HighFrequency == 0)) return 0;
+                if (LowFrequency == 0) return HighFrequency;
+                if (HighFrequency == 0) return LowFrequency;
+                return (float)Math.Sqrt(HighFrequency * LowFrequency);
+            }
+        }
 
         #region IEquatable<AcousticProperties> Members
 
