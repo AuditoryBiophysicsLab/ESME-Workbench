@@ -196,10 +196,6 @@ namespace ESME.Views.TransmissionLoss
                         break;
                 }
             }
-
-            for (var i = 0; i < TransmissionLossRunFile.TransmissionLossRunFileRadials.Count; i++)
-            {
-            }
         }
 
         public void Start(RunWorkerCompletedEventHandler runWorkerCompletedEventHandler)
