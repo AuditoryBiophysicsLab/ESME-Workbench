@@ -242,6 +242,7 @@
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
     <Compile Include="Environment\RangeComplex.cs" />
     <Compile Include="TransmissionLoss\NemoModeToAcousticModelNameMap.cs" />
+    <Compile Include="TransmissionLoss\RAM\BellhopOutput1.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFileManager.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
