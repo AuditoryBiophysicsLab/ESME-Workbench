@@ -168,7 +168,7 @@ namespace ESME.Views.TransmissionLoss
                 soundSpeedProfiles[bearingIndex] = _environment.EnvironmentInformation.SoundSpeedField.EnvironmentData[curTransect.MidPoint];
                 windSpeeds[bearingIndex] = _environment.EnvironmentInformation.Wind.TimePeriods[0].EnvironmentData[curTransect.MidPoint].Data;
             }
-
+            maxCalculationDepthMeters *= 1.1f;
             var depthCellCount = (int)Math.Round((maxCalculationDepthMeters /depthCellSize)) + 1;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {

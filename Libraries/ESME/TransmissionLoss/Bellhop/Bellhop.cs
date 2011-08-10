@@ -43,7 +43,7 @@ namespace ESME.TransmissionLoss.Bellhop
                 sw.WriteLine("{0}  ! NRR", rangeCellCount); // Number of receiver ranges
                 sw.WriteLine("  0.0 {0:F} /  ! start_range (0.0) to max_range (in km)", transmissionLossJob.SoundSource.Radius/1000.0);
 
-                if (generateArrivalsFile) sw.WriteLine("'aB'"); 
+                if (generateArrivalsFile) sw.WriteLine("'AB'");  // aB
                 else sw.WriteLine(useVerticalBeamforming ? "'IG*'" : "'I'");
                 // if useVerticalBeamforming is true, then SBPFIL must be present (Source Beam Pattern file)
                 sw.WriteLine("{0}", beamCount); // Number of beams
