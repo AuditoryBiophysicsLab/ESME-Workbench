@@ -34,10 +34,15 @@ namespace TransmissionLossCalculator
                 _dirWatcher.Created += DirectoryChanged;
                 //_dirWatcher.Changed += DirectoryChanged;
                 _dirWatcher.Deleted += DirectoryChanged;
-                var matchingFiles = Directory.EnumerateFiles(DirectoryPath, _filePattern, SearchOption.TopDirectoryOnly);
-                foreach (var file in matchingFiles.Where(file => !_matchingFiles.Any(match => match == file))) 
-                    _matchingFiles.Add(file);
+                ScanDirectory();
             }
+        }
+
+        void ScanDirectory()
+        {
+            var matchingFiles = Directory.EnumerateFiles(DirectoryPath, _filePattern, SearchOption.TopDirectoryOnly);
+            foreach (var file in matchingFiles.Where(file => !_matchingFiles.Any(match => match == file)))
+                _matchingFiles.Add(file);
         }
 
         string _directoryPath;
@@ -48,6 +53,22 @@ namespace TransmissionLossCalculator
 
         void DirectoryChanged(object sender, FileSystemEventArgs e)
         {
+#if true
+            Debug.WriteLine("Directory: " + e.Name + " " + e.ChangeType);
+            switch (e.ChangeType)
+            {
+                case WatcherChangeTypes.Created:
+                    if (!_matchingFiles.Any(match => match == e.FullPath)) _matchingFiles.Add(e.FullPath);
+                    _matchingFiles.Add(e.FullPath);
+                    break;
+                case WatcherChangeTypes.Changed:
+                    break;
+                case WatcherChangeTypes.Deleted:
+                    var matchedFiles = _matchingFiles.Where(file => file == e.FullPath).ToList();
+                    foreach (var matchedFile in matchedFiles) _matchingFiles.Remove(matchedFile);
+                    break;
+            }
+#else
             Debug.WriteLine("[Raw] Directory: " + e.Name + " " + e.ChangeType);
             if (_dirTimer != null) return;
             _dirTimer = new Timer(1000) { AutoReset = false, Enabled = true };
@@ -58,6 +79,7 @@ namespace TransmissionLossCalculator
                 switch (e.ChangeType)
                 {
                     case WatcherChangeTypes.Created:
+                        if (!_matchingFiles.Any(match => match == e.FullPath)) _matchingFiles.Add(e.FullPath);
                         _matchingFiles.Add(e.FullPath);
                         break;
                     case WatcherChangeTypes.Changed:
@@ -68,6 +90,7 @@ namespace TransmissionLossCalculator
                         break;
                 }
             };
+#endif
         }
 
         #endregion
