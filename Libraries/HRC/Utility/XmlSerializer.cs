@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
+using System.Security.AccessControl;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
@@ -41,7 +42,8 @@ namespace HRC.Utility
 
             String file;
 
-            using (var fileReader = new StreamReader(filename))
+            var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using (var fileReader = new StreamReader(stream))
                 file = fileReader.ReadToEnd();
 
             if (schemaResourceNames != null)
@@ -77,9 +79,7 @@ namespace HRC.Utility
         /// <param name="referencedTypes"></param>
         public void Save(string fileName, List<Type> referencedTypes)
         {
-            var fileWriter = new StreamWriter(fileName, false);
-            fileWriter.Write(Serialize(referencedTypes));
-            fileWriter.Close();
+            File.WriteAllText(fileName, Serialize(referencedTypes));
         }
 
         #endregion

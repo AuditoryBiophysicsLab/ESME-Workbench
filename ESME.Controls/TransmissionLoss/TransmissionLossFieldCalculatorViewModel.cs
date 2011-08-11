@@ -23,12 +23,24 @@ namespace ESME.Views.TransmissionLoss
 
         public TransmissionLossFieldCalculatorViewModel(string runfileName, Dispatcher dispatcher)
         {
+            Status = "Loading";
             RunfileName = runfileName;
             _dispatcher = dispatcher;
-            TransmissionLossRunFile = TransmissionLossRunFile.Load(runfileName);
+            TransmissionLossRunFile = TransmissionLossRunFile.Load(RunfileName);
+            Status = "Waiting";
         }
 
         #endregion
+
+        public void PrepareRadials()
+        {
+            if (Status != "Waiting") return;
+            Status = "Loading environment";
+            LoadEnvironment();
+            Status = "Preparing radial calculation threads";
+            SetupRadialViewModels();
+            Status = "Ready";
+        }
 
         #region public string RunfileName { get; set; }
 
@@ -39,7 +51,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_runfileName == value) return;
                 _runfileName = value;
-                NotifyPropertyChanged(RunfileFilenameChangedEventArgs);
+                if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(RunfileFilenameChangedEventArgs));
             }
         }
 
@@ -57,11 +69,10 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_dispatcher == value) return;
                 _dispatcher = value;
-                NotifyPropertyChanged(DispatcherChangedEventArgs);
+                foreach (var radial in RadialCalculatorViewModels) radial.Dispatcher = _dispatcher;
             }
         }
 
-        static readonly PropertyChangedEventArgs DispatcherChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldCalculatorViewModel>(x => x.Dispatcher);
         Dispatcher _dispatcher;
 
         #endregion
@@ -75,7 +86,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_transmissionLossField == value) return;
                 _transmissionLossField = value;
-                NotifyPropertyChanged(TransmissionLossFieldChangedEventArgs);
+                if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(TransmissionLossFieldChangedEventArgs));
             }
         }
 
@@ -102,6 +113,24 @@ namespace ESME.Views.TransmissionLoss
 
         #endregion
 
+        #region public int RadialCount { get; set; }
+
+        public int RadialCount
+        {
+            get { return _radialCount; }
+            set
+            {
+                if (_radialCount == value) return;
+                _radialCount = value;
+                if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(RadialCountChangedEventArgs));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RadialCountChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldCalculatorViewModel>(x => x.RadialCount);
+        int _radialCount;
+
+        #endregion
+
         #region public TransmissionLossRunFile TransmissionLossRunFile { get; set; }
 
         public TransmissionLossRunFile TransmissionLossRunFile
@@ -111,10 +140,9 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (_runFile == value) return;
                 _runFile = value;
-                NotifyPropertyChanged(TransmissionLossRunFileChangedEventArgs);
+                if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(TransmissionLossRunFileChangedEventArgs));
                 if (_runFile == null) return;
-                LoadEnvironment();
-                SetupRadialViewModels();
+                RadialCount = _runFile.TransmissionLossJob.SoundSource.RadialBearings.Count;
             }
         }
 
@@ -126,7 +154,6 @@ namespace ESME.Views.TransmissionLoss
         {
             var bathymetryPath = Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, TransmissionLossRunFile.RangeComplexName, "Bathymetry", TransmissionLossRunFile.BathymetryName + ".txt");
             var environmentPath = Path.Combine(TransmissionLossRunFile.ScenarioDataDirectory, TransmissionLossRunFile.RangeComplexName, "Environment", TransmissionLossRunFile.EnvironmentName + ".dat");
-            Status = "Loading environment";
             _environment = NAEMOEnvironmentFile.Load(environmentPath);
             _environment.EnvironmentInformation.Bathymetry = Bathymetry.FromYXZ(bathymetryPath, -1);
         }
@@ -143,7 +170,9 @@ namespace ESME.Views.TransmissionLoss
                 case TransmissionLossAlgorithm.Bellhop:
                     bellhopSettings = ((BellhopRunFile)TransmissionLossRunFile).BellhopSettings;
                     depthCellSize = bellhopSettings.DepthCellSize;
-                    rangeCellCount = (int)Math.Round((transmissionLossJob.SoundSource.Radius / bellhopSettings.RangeCellSize)) + 1;
+                    rangeCellCount =
+                            (int)
+                            Math.Round((transmissionLossJob.SoundSource.Radius / bellhopSettings.RangeCellSize)) + 1;
                     break;
                 case TransmissionLossAlgorithm.RAMGEO:
                     ramSettings = ((RamRunFile)TransmissionLossRunFile).RAMSettings;
@@ -162,14 +191,15 @@ namespace ESME.Views.TransmissionLoss
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
-                var curTransect = new Transect(null, transmissionLossJob.SoundSource, radialBearing, transmissionLossJob.SoundSource.Radius);
+                var curTransect = new Transect(null, transmissionLossJob.SoundSource, radialBearing,
+                                               transmissionLossJob.SoundSource.Radius);
                 bottomProfiles[bearingIndex] = new BottomProfile(rangeCellCount, curTransect, _environment.EnvironmentInformation.Bathymetry);
                 maxCalculationDepthMeters = Math.Max((float)bottomProfiles[bearingIndex].MaxDepth, maxCalculationDepthMeters);
                 soundSpeedProfiles[bearingIndex] = _environment.EnvironmentInformation.SoundSpeedField.EnvironmentData[curTransect.MidPoint];
                 windSpeeds[bearingIndex] = _environment.EnvironmentInformation.Wind.TimePeriods[0].EnvironmentData[curTransect.MidPoint].Data;
             }
             maxCalculationDepthMeters *= 1.1f;
-            var depthCellCount = (int)Math.Round((maxCalculationDepthMeters /depthCellSize)) + 1;
+            var depthCellCount = (int)Math.Round((maxCalculationDepthMeters / depthCellSize)) + 1;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];
@@ -178,33 +208,56 @@ namespace ESME.Views.TransmissionLoss
                 switch (TransmissionLossRunFile.TransmissionLossAlgorithm)
                 {
                     case TransmissionLossAlgorithm.Bellhop:
-                        var bellhopConfig = Bellhop.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], sedimentType, maxCalculationDepthMeters, rangeCellCount, depthCellCount, false, false, false, 1500);
-                        TransmissionLossRunFile.TransmissionLossRunFileRadials.Add(new BellhopRunFileRadial {BearingFromSourceDegrees = radialBearing, Configuration = bellhopConfig, BottomProfile = bottomProfiles[bearingIndex].ToBellhopString()});
+                        var bellhopConfig = Bellhop.GetRadialConfiguration(transmissionLossJob,
+                                                                           soundSpeedProfiles[bearingIndex],
+                                                                           sedimentType, maxCalculationDepthMeters,
+                                                                           rangeCellCount, depthCellCount, false,
+                                                                           false, false, 1500);
+                        TransmissionLossRunFile.TransmissionLossRunFileRadials.Add(new BellhopRunFileRadial
+                        {
+                                BearingFromSourceDegrees = radialBearing,
+                                Configuration = bellhopConfig,
+                                BottomProfile = bottomProfiles[bearingIndex].ToBellhopString()
+                        });
                         // todo: Once we know how to calculate the Top Reflection Coefficients for Bellhop, put them in here
                         // 
-                        radialViewModel = new BellhopRadialCalculatorViewModel((BellhopRunFileRadial)_runFile.TransmissionLossRunFileRadials[bearingIndex], bearingIndex, _dispatcher);
+                        radialViewModel =
+                                new BellhopRadialCalculatorViewModel(
+                                        (BellhopRunFileRadial)_runFile.TransmissionLossRunFileRadials[bearingIndex],
+                                        bearingIndex, _dispatcher);
                         radialViewModel.PropertyChanged += (s, e) =>
-                                                           {
-                                                               if (_dispatcher != null) ((BellhopRadialCalculatorViewModel)s).Dispatcher = _dispatcher;
-                                                               if (e.PropertyName != "ProgressPercent") return;
-                                                               //float radialCount = RadialCalculatorViewModels.Count;
-                                                               var progress = RadialCalculatorViewModels.Sum(radial => radial.ProgressPercent/radialCount);
-                                                               TotalProgress = progress;
-                                                           };
-                        RadialCalculatorViewModels.Add(radialViewModel);
+                        {
+                            if (_dispatcher != null) ((BellhopRadialCalculatorViewModel)s).Dispatcher = _dispatcher;
+                            if (e.PropertyName != "ProgressPercent") return;
+                            //float radialCount = RadialCalculatorViewModels.Count;
+                            var progress =
+                                    RadialCalculatorViewModels.Sum(radial => radial.ProgressPercent / radialCount);
+                            TotalProgress = progress;
+                        };
+                        if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => RadialCalculatorViewModels.Add(radialViewModel));
+                        else RadialCalculatorViewModels.Add(radialViewModel);
                         break;
                     case TransmissionLossAlgorithm.RAMGEO:
-                        var ramConfig = Ram.GetRadialConfiguration(transmissionLossJob, soundSpeedProfiles[bearingIndex], bottomProfiles[bearingIndex], sedimentType, maxCalculationDepthMeters, rangeCellCount, depthCellCount);
-                        TransmissionLossRunFile.TransmissionLossRunFileRadials.Add(new RamRunFileRadial { BearingFromSourceDegrees = radialBearing, Configuration = ramConfig });
+                        var ramConfig = Ram.GetRadialConfiguration(transmissionLossJob,
+                                                                   soundSpeedProfiles[bearingIndex],
+                                                                   bottomProfiles[bearingIndex], sedimentType,
+                                                                   maxCalculationDepthMeters, rangeCellCount,
+                                                                   depthCellCount);
+                        TransmissionLossRunFile.TransmissionLossRunFileRadials.Add(new RamRunFileRadial
+                        {BearingFromSourceDegrees = radialBearing, Configuration = ramConfig});
                         break;
                     default:
                         break;
                 }
             }
+            _environment = null;
         }
 
         public void Start(RunWorkerCompletedEventHandler runWorkerCompletedEventHandler)
         {
+            PrepareRadials();
+            while (Status != "Ready")
+                Thread.Sleep(100);
             lock (this)
             {
                 if (IsStarted) return;
@@ -254,24 +307,6 @@ namespace ESME.Views.TransmissionLoss
 
         #endregion
 
-        #region public string Name { get; set; }
-
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                if (_name == value) return;
-                _name = value;
-                if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(NameChangedEventArgs));
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldCalculatorViewModel>(x => x.Name);
-        string _name;
-
-        #endregion
-
         #region public ObservableCollection<TransmissionLossRadialCalculatorViewModel> RadialCalculatorViewModels { get; set; }
 
         public ObservableCollection<TransmissionLossRadialCalculatorViewModel> RadialCalculatorViewModels
@@ -311,16 +346,37 @@ namespace ESME.Views.TransmissionLoss
 
         #endregion
 
+        #region public bool CancelRequested { get; set; }
+
+        public bool CancelRequested
+        {
+            get { return _cancelRequested; }
+            set
+            {
+                if (_cancelRequested == value) return;
+                _cancelRequested = value;
+                foreach (var radial in RadialCalculatorViewModels) radial.CancelRequested = _cancelRequested;
+                NotifyPropertyChanged(CancelRequestedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CancelRequestedChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldCalculatorViewModel>(x => x.CancelRequested);
+        bool _cancelRequested;
+
+        #endregion
+
         #region BackgroundWorker thread that computes the TransmissionLossField in parallel
 
         void Calculate(object sender, DoWorkEventArgs args)
         {
+            PrepareRadials();
             //if (TransmissionLossField.Radials == null) throw new ApplicationException("Radials are null");
-
             var runFile = (TransmissionLossRunFile) args.Argument;
             var radialNum = 0;
             var radialProgress = 100f/runFile.TransmissionLossRunFileRadials.Count;
             TotalProgress = 0f;
+
+            Status = "Calculating";
 
             Parallel.ForEach<TransmissionLossRunFileRadial, float>(runFile.TransmissionLossRunFileRadials, () => 0, (radial, loopstate, progress) =>
             {
@@ -329,6 +385,9 @@ namespace ESME.Views.TransmissionLoss
                 radialViewModel.Start();
                 return radialProgress;
             }, finalResult => TotalProgress += finalResult);
+
+            Status = "Finishing";
+            if (CancelRequested) return;
             foreach (var radial in RadialCalculatorViewModels) if (radial.TransmissionLossRadial != null) TransmissionLossField.AddRadial(radial.TransmissionLossRadial);
             TransmissionLossField.Depths = TransmissionLossField.Radials[0].Depths;
             TransmissionLossField.Ranges = TransmissionLossField.Radials[0].Ranges;
