@@ -40,6 +40,25 @@ namespace ESME.Views.TransmissionLoss
 
         #endregion
 
+        #region public string WindowTitle { get; set; }
+
+        public string WindowTitle
+        {
+            get { return _windowTitle; }
+            set
+            {
+                if (_windowTitle == value) return;
+                _windowTitle = value;
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(WindowTitleChangedEventArgs));
+            }
+        }
+
+        static readonly PropertyChangedEventArgs WindowTitleChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.WindowTitle);
+        string _windowTitle;
+        const string BaseWindowName = "ESME Transmission Loss Calculator : Work queue : ";
+
+        #endregion
+
         #region public bool CancelRequested { get; set; }
 
         public bool CancelRequested
@@ -70,7 +89,7 @@ namespace ESME.Views.TransmissionLoss
                 if (_fieldCalculatorViewModels != null) _fieldCalculatorViewModels.CollectionChanged -= FieldCalculatorViewModelsCollectionChanged;
                 _fieldCalculatorViewModels = value;
                 if (_fieldCalculatorViewModels != null) _fieldCalculatorViewModels.CollectionChanged += FieldCalculatorViewModelsCollectionChanged;
-                NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs);
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs));
             }
         }
 
@@ -96,7 +115,21 @@ namespace ESME.Views.TransmissionLoss
                     break;
             }
             StartWorkIfNeeded();
-            NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs);
+            var itemCount = FieldCalculatorViewModels.Count;
+            switch (itemCount)
+            {
+                case 0:
+                    WindowTitle = BaseWindowName + "EMPTY";
+                    break;
+                case 1:
+                    WindowTitle = BaseWindowName + "1 item";
+                    break;
+                default:
+                    WindowTitle = BaseWindowName + itemCount + " items";
+                    break;
+            }
+
+            if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs));
         }
 
         void StartWorkIfNeeded()

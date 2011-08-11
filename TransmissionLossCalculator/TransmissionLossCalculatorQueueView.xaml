@@ -10,13 +10,14 @@
         xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
         mef:ViewModelLocator.ViewModel="TransmissionLossQueueViewModel"
-        Title="ESME Transmission Loss Calculator - Work Queue" 
+        Title="{Binding QueueViewModel.WindowTitle}" 
         Visibility="Hidden"
         Icon="Resources\orbz_water.ico"
         Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
         Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
-        Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
-        Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <Window.Resources>
         <Style x:Key="RadialCalculatorStatusStyle"
@@ -89,7 +90,7 @@
 				             Value="0">
                     <Setter TargetName="FieldProgress"
 						    Property="Visibility"
-						    Value="Hidden" />
+						    Value="Collapsed" />
                 </DataTrigger>
             </HierarchicalDataTemplate.Triggers>
             <HierarchicalDataTemplate.ItemTemplate>
@@ -125,13 +126,13 @@
 				                     Value="0">
                             <Setter TargetName="RadialProgress"
 						            Property="Visibility"
-						            Value="Hidden" />
+						            Value="Collapsed" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding ProgressPercent}"
 				                     Value="100">
                             <Setter TargetName="RadialProgress"
 						            Property="Visibility"
-						            Value="Hidden" />
+						            Value="Collapsed" />
                         </DataTrigger>
                     </DataTemplate.Triggers>
                 </DataTemplate>

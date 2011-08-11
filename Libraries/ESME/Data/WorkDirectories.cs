@@ -5,8 +5,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Timers;
+using System.Threading;
 using HRC.Utility;
+using Timer = System.Timers.Timer;
 
 namespace ESME.Data
 {
@@ -18,8 +19,25 @@ namespace ESME.Data
         {
             if (AppSettingsFile == null) throw new ApplicationException("WorkDirectories: ApplicationName has not been set!");
             if (!File.Exists(AppSettingsFile)) return new WorkDirectories();
-            var result = XmlSerializer<WorkDirectories>.Load(AppSettingsFile, ReferencedTypes);
-            result.DiscardInvalidDirectories();
+            WorkDirectories result = null;
+            var tries = 10;
+            Exception fail = null;
+            while (tries > 0)
+            {
+                try
+                {
+                    result = XmlSerializer<WorkDirectories>.Load(AppSettingsFile, ReferencedTypes);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Thread.Sleep(100);
+                    tries--;
+                    fail = e;
+                }
+            }
+            if (fail != null) throw fail;
+            result.DiscardInvalidDirectories(true);
             if (reloadOnFileChanged)
                 result.ReloadOnFileChange = true;
             return result;
@@ -29,14 +47,30 @@ namespace ESME.Data
         {
             var result = Load();
             foreach (var directory in result)
-                Add(directory);
+                Add(directory, false);
         }
 
         public void Save()
         {
-            DiscardInvalidDirectories();
+            DiscardInvalidDirectories(false);
             var serializer = new XmlSerializer<WorkDirectories> { Data = this };
-            serializer.Save(AppSettingsFile, ReferencedTypes);
+            var tries = 10;
+            Exception fail = null;
+            while (tries > 0)
+            {
+                try
+                {
+                    serializer.Save(AppSettingsFile, ReferencedTypes);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Thread.Sleep(100);
+                    tries--;
+                    fail = e;
+                }
+            }
+            if (fail != null) throw fail;
         }
 
         public static string ApplicationName
@@ -56,9 +90,17 @@ namespace ESME.Data
 
         public static string AppSettingsFile { get; private set; }
 
-        public void DiscardInvalidDirectories()
+        void DiscardInvalidDirectories(bool saveAfterDiscard)
         {
-            RemoveAll(directory => !Directory.Exists(directory));
+            var itemsToDiscard = new List<string>();
+            foreach (var directory in this)
+                if (!Directory.Exists(directory))
+                {
+                    Debug.WriteLine("DiscardInvalidDirectories: \"" + directory + "\" does not exist.");
+                    itemsToDiscard.Add(directory);
+                }
+            foreach (var item in itemsToDiscard) Remove(item);
+            if (saveAfterDiscard && (itemsToDiscard.Count > 0)) Save();
         }
 
         public bool ReloadOnFileChange
@@ -116,11 +158,11 @@ namespace ESME.Data
             if (CollectionChanged != null) CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newItems));
         }
 
-        public new void Add(string workDirectory)
+        public void Add(string workDirectory, bool saveOnAdd)
         {
             if (this.Any(directory => directory == workDirectory)) return;
-            base.Add(workDirectory);
-            Save();
+            Add(workDirectory);
+            if (saveOnAdd) Save();
             if (CollectionChanged != null) CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, workDirectory));
         }
 
