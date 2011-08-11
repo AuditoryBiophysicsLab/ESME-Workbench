@@ -56,7 +56,7 @@ namespace ESME.Views.TransmissionLoss
 #endif
             TransmissionLossProcess.OutputDataReceived += OutputDataRecieved;
             TransmissionLossProcess.Start();
-            TransmissionLossProcess.PriorityClass = ProcessPriorityClass.Idle;
+            TransmissionLossProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
             TransmissionLossProcess.StandardInput.WriteLine(bellhopConfiguration);
             TransmissionLossProcess.BeginOutputReadLine();
             Status = "Running";
