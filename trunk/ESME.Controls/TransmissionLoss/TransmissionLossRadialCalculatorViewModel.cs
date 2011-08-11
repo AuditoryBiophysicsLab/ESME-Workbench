@@ -135,6 +135,29 @@ namespace ESME.Views.TransmissionLoss
 
         #endregion
 
+        #region public bool CancelRequested { get; set; }
+
+        public bool CancelRequested
+        {
+            get { return _cancelRequested; }
+            set
+            {
+                if (_cancelRequested == value) return;
+                _cancelRequested = value;
+                NotifyPropertyChanged(CancelRequestedChangedEventArgs);
+                if (!_cancelRequested || (TransmissionLossProcess == null)) return;
+                TransmissionLossProcess.Kill();
+                Status = "Canceling";
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CancelRequestedChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialCalculatorViewModel>(x => x.CancelRequested);
+        bool _cancelRequested;
+
+        #endregion
+
+        protected TransmissionLossProcess TransmissionLossProcess;
+
         public abstract void Start();
     }
 }

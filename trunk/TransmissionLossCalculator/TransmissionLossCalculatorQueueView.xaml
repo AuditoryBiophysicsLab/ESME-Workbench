@@ -41,30 +41,39 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="RadialCalculatorProgressStyle"
-               TargetType="ProgressBar">
-            <Style.Triggers>
-                <Trigger Property="Value"
-                         Value="100">
-                    <Setter Property="Visibility"
-                            Value="Hidden" />
-                </Trigger>
-                <Trigger Property="Value"
-                         Value="0">
-                    <Setter Property="Visibility"
-                            Value="Hidden" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <HierarchicalDataTemplate x:Key="BellhopQueueTreeViewTemplate"
-		                          ItemsSource="{Binding BellhopRadialCalculatorViewModels}">
+        <HierarchicalDataTemplate x:Key="QueueTreeViewTemplate"
+		                          ItemsSource="{Binding RadialCalculatorViewModels}">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="RangeComplex"/>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="PSM"/>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Algorithm"/>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding Name}" Grid.Column="0"/>
-                <ProgressBar x:Name="FieldProgress" Value="{Binding TotalProgress}" Width="100" Grid.Column="1"/>
+                <TextBlock Grid.Column="0"
+                           Margin="5 2 5 0">
+                    <Run Text="{Binding TransmissionLossRunFile.RangeComplexName}" />
+                </TextBlock>
+                <TextBlock Grid.Column="1"
+                           Margin="5 2 5 0">
+                    <Run Text="{Binding TransmissionLossRunFile.TransmissionLossJob.PlatformName}" />
+                    <Run Text="|" />
+                    <Run Text="{Binding TransmissionLossRunFile.TransmissionLossJob.SourceName}" />
+                    <Run Text="|" />
+                    <Run Text="{Binding TransmissionLossRunFile.TransmissionLossJob.ModeName}" />
+                </TextBlock>
+                <TextBlock Grid.Column="2"
+                           Margin="5 2 5 0"
+                           Text="{Binding TransmissionLossRunFile.TransmissionLossAlgorithm}" />
+                <TextBlock Grid.Column="3"
+                           Margin="5 2 5 0"
+                           Text="{Binding Status}" />
+                <ProgressBar Grid.Column="4"
+                             Margin="5 2 5 0"
+                             x:Name="FieldProgress" 
+                             Value="{Binding TotalProgress}" 
+                             Width="100" />
             </Grid>
             <HierarchicalDataTemplate.Triggers>
                 <DataTrigger Binding="{Binding TotalProgress}"
@@ -78,25 +87,44 @@
                 <DataTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="75"/>
-                            <ColumnDefinition Width="75" />
-                            <ColumnDefinition Width="75" />
-                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="RadialNumber" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="RadialBearing" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="RadialStatus" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="RadialProgress" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding RadialNumber, StringFormat=Radial {00}}"
-                           TextAlignment="Right"
-                           Grid.Column="0"/>
+                                   TextAlignment="Right"
+                                   Margin="5 2 5 0"
+                                   Grid.Column="0"/>
                         <TextBlock Text="{Binding BearingFromSource, StringFormat={}{0:0.0} deg}" 
-                           TextAlignment="Right"
-                           Grid.Column="1"/>
+                                   TextAlignment="Right"
+                                   Margin="5 2 5 0"
+                                   Grid.Column="1"/>
                         <TextBlock Text="{Binding Status}" 
-                           TextAlignment="Center"
-                           Style="{StaticResource RadialCalculatorStatusStyle}"
-                           Grid.Column="2"/>
+                                   TextAlignment="Center"
+                                   Margin="5 2 5 0"
+                                   Style="{StaticResource RadialCalculatorStatusStyle}"
+                                   Grid.Column="2"/>
                         <ProgressBar Value="{Binding ProgressPercent}" 
-                             Style="{StaticResource RadialCalculatorProgressStyle}"
-                             Grid.Column="3"/>
+                                     x:Name="RadialProgress"
+                                     Margin="5 2 5 0"
+                                     Width="100"
+                                     Grid.Column="3"/>
                     </Grid>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding ProgressPercent}"
+				                     Value="0">
+                            <Setter TargetName="RadialProgress"
+						            Property="Visibility"
+						            Value="Hidden" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ProgressPercent}"
+				                     Value="100">
+                            <Setter TargetName="RadialProgress"
+						            Property="Visibility"
+						            Value="Hidden" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
                 </DataTemplate>
             </HierarchicalDataTemplate.ItemTemplate>
         </HierarchicalDataTemplate>
@@ -108,8 +136,14 @@
     </i:Interaction.Triggers>
 
     <DockPanel LastChildFill="True">
-        <TreeView ItemsSource="{Binding QueueViewModel.BellhopFieldCalculatorViewModels}"
-                  ItemTemplate="{StaticResource BellhopQueueTreeViewTemplate}"/>
+
+        
+        <TreeView DockPanel.Dock="Top" 
+                  Grid.IsSharedSizeScope="True"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  ItemsSource="{Binding QueueViewModel.FieldCalculatorViewModels}"
+                  ItemTemplate="{StaticResource QueueTreeViewTemplate}"/>
         <local:NotificationAreaIcon Text="ESME Transmission Loss Calculator"
 		                        Icon="Resources\orbz_water.ico"
 		                        MouseDoubleClick="OnNotificationAreaIconDoubleClick">

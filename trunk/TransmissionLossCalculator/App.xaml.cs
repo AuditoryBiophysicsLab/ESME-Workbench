@@ -9,9 +9,6 @@ using ESME.Data;
 using ESME.Views;
 using HRC.Utility;
 using TransmissionLossCalculator.Properties;
-#if DEBUG
-using System.Security.Principal;
-#endif
 
 namespace TransmissionLossCalculator
 {
@@ -23,7 +20,6 @@ namespace TransmissionLossCalculator
         public static AppEventLog Log { get; private set; }
         public static readonly string Logfile, DumpFile;
         public const string Name = "ESME WorkBench";
-
         static App()
         {
             WorkDirectories.ApplicationName = Name;
@@ -36,7 +32,6 @@ namespace TransmissionLossCalculator
             {
                 DumpFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "tlcalc_crash.mdmp");
                 AppDomain.CurrentDomain.UnhandledException += LastChanceExceptionHandler;
-
             }
 #if DEBUG
             Log = new AppEventLog(Name);
@@ -51,13 +46,16 @@ namespace TransmissionLossCalculator
         /// </summary>
         public App()
         {
+            // Wait 5 seconds if contended – in case another instance
+            // of the program is in the process of shutting down.
             // You must close or flush the trace to empty the output buffer.
             Trace.WriteLine(Name + " starting up");
 
             if (OSInfo.OperatingSystemName == "XP")
             {
                 Trace.TraceError("This application is not supported under Windows XP");
-                MessageBox.Show("Windows XP is not currently supported by this application, pending satisfactory resolution of application startup crash");
+                MessageBox.Show(
+                                "Windows XP is not currently supported by this application, pending satisfactory resolution of application startup crash");
                 Current.Shutdown();
                 return;
             }
@@ -66,10 +64,10 @@ namespace TransmissionLossCalculator
                 //ExperimentData.Test();
 
                 CinchBootStrapper.Initialise(new List<Assembly>
-                                             {
-                                                 typeof (App).Assembly,
-                                                 typeof (TestView).Assembly,
-                                             });
+                {
+                        typeof (App).Assembly,
+                        typeof (TestView).Assembly,
+                });
             }
             catch (Exception e)
             {
@@ -87,8 +85,7 @@ namespace TransmissionLossCalculator
                         foreach (var exception in rtl.LoaderExceptions)
                         {
                             Trace.TraceError("Loader Exception: {0}", exception.Message);
-                            if (exception.InnerException != null)
-                                Trace.TraceError("Inner Exception: {0}", exception.InnerException.Message);
+                            if (exception.InnerException != null) Trace.TraceError("Inner Exception: {0}", exception.InnerException.Message);
                         }
                         Trace.Unindent();
                     }
@@ -117,18 +114,5 @@ namespace TransmissionLossCalculator
 
             MiniDump.Write(DumpFile, MiniDump.Option.Normal, MiniDump.ExceptionInfo.Present);
         }
-
-#if DEBUG
-        private static bool IsAdministrator
-        {
-            get
-            {
-                var wi = WindowsIdentity.GetCurrent();
-                if (wi == null) return false;
-                var wp = new WindowsPrincipal(wi);
-                return wp.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-        }
-#endif
     }
 }

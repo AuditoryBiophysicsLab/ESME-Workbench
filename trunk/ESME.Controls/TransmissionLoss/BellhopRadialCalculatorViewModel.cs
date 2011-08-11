@@ -31,12 +31,13 @@ namespace ESME.Views.TransmissionLoss
         TransmissionLossRadial ComputeRadial(string bellhopConfiguration, string bottomProfile, string topReflectionCoefficients, float bearing)
         {
             var workingDirectory = CreateTemporaryDirectory();
+            TransmissionLossRadial result = null;
 
             // Write the bottom profile file that will be read by BELLHOP);
             File.WriteAllText(Path.Combine(workingDirectory, "BTYFIL"), bottomProfile);
             if (!string.IsNullOrEmpty(topReflectionCoefficients)) File.WriteAllText(Path.Combine(workingDirectory, "TRCFIL"), topReflectionCoefficients);
 
-            var bellhopProcess = new TransmissionLossProcess
+            TransmissionLossProcess = new TransmissionLossProcess
             {
                 StartInfo = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "Bellhop.exe"))
                 {
@@ -48,51 +49,50 @@ namespace ESME.Views.TransmissionLoss
                     WorkingDirectory = workingDirectory
                 },
             };
-            bellhopProcess.PropertyChanged += (sender, e) => { if (e.PropertyName == "ProgressPercent") 
+            TransmissionLossProcess.PropertyChanged += (sender, e) => { if (e.PropertyName == "ProgressPercent") 
                 ProgressPercent = Math.Max(ProgressPercent, ((TransmissionLossProcess) sender).ProgressPercent); };
 #if DEBUG
-            File.WriteAllText(Path.Combine(workingDirectory, "BellhopEnvironmentFile.txt"), bellhopConfiguration);
+            //File.WriteAllText(Path.Combine(workingDirectory, "BellhopEnvironmentFile.txt"), bellhopConfiguration);
 #endif
-            bellhopProcess.OutputDataReceived += OutputDataRecieved;
-            bellhopProcess.Start();
-            bellhopProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
-            bellhopProcess.StandardInput.WriteLine(bellhopConfiguration);
-            bellhopProcess.BeginOutputReadLine();
+            TransmissionLossProcess.OutputDataReceived += OutputDataRecieved;
+            TransmissionLossProcess.Start();
+            TransmissionLossProcess.PriorityClass = ProcessPriorityClass.Idle;
+            TransmissionLossProcess.StandardInput.WriteLine(bellhopConfiguration);
+            TransmissionLossProcess.BeginOutputReadLine();
             Status = "Running";
-            while (!bellhopProcess.HasExited)
+            while (!TransmissionLossProcess.HasExited)
             {
                 Thread.Sleep(100);
             }
-            ErrorText = bellhopProcess.StandardError.ReadToEnd();
-            //Debug.WriteLine("Bellhop error output for radial bearing " + bearing + " deg: \n" + ErrorText);
-
-            // We don't need to keep the results files around anymore, we're finished with them
-            File.Delete(Path.Combine(workingDirectory, "BTYFIL"));
-            foreach (var s in Directory.GetFiles(workingDirectory, "ARRFIL_*")) File.Delete(s);
-
-            // Convert the Bellhop output file into a Radial binary file
-            var shdfile = Path.Combine(workingDirectory, "SHDFIL");
-            var count = 0;
-            while (!File.Exists(shdfile) && (count < 10))
+            if (!CancelRequested)
             {
-                Thread.Sleep(200);
-                count++;
-            }
+                ErrorText = TransmissionLossProcess.StandardError.ReadToEnd();
+                //Debug.WriteLine("Bellhop error output for radial bearing " + bearing + " deg: \n" + ErrorText);
 
-            if (ErrorText.Contains("forrtl"))
-            {
-                Console.WriteLine("{0}: Bellhop failure: {1}", DateTime.Now, ErrorText);
-                Console.WriteLine("{0}: Bellhop input: {1}", DateTime.Now, bellhopConfiguration);
-                Status = "Error";
-                return null;
-            }
+                // Convert the Bellhop output file into a Radial binary file
+                var shdfile = Path.Combine(workingDirectory, "SHDFIL");
+                var count = 0;
+                while (!File.Exists(shdfile) && (count < 10))
+                {
+                    Thread.Sleep(200);
+                    count++;
+                }
+
+                if (ErrorText.Contains("forrtl"))
+                {
+                    Console.WriteLine("{0}: Bellhop failure: {1}", DateTime.Now, ErrorText);
+                    Console.WriteLine("{0}: Bellhop input: {1}", DateTime.Now, bellhopConfiguration);
+                    Status = "Error";
+                    return null;
+                }
 #if DEBUG
-            File.WriteAllText(Path.Combine(workingDirectory, "BellhopStandardOutput.txt"), OutputData.ToString());
+                //File.WriteAllText(Path.Combine(workingDirectory, "BellhopStandardOutput.txt"), OutputData.ToString());
 #endif
-            var result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
-            File.Delete(Path.Combine(workingDirectory, "SHDFIL"));
+                result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
+            }
+            foreach (var file in Directory.EnumerateFiles(workingDirectory)) File.Delete(file);
             Directory.Delete(workingDirectory, true);
-            bellhopProcess.ProgressPercent = 100;
+            TransmissionLossProcess.ProgressPercent = 100;
             return result;
         }
 

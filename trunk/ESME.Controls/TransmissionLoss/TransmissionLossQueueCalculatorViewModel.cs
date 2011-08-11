@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Threading.Tasks;
+using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss.CASS;
 
@@ -15,8 +17,45 @@ namespace ESME.Views.TransmissionLoss
 
         public TransmissionLossQueueCalculatorViewModel()
         {
-             FieldCalculatorViewModels = new ObservableCollection<TransmissionLossFieldCalculatorViewModel>();
+            FieldCalculatorViewModels = new ObservableCollection<TransmissionLossFieldCalculatorViewModel>();
+            Dispatcher = Dispatcher.CurrentDispatcher;
         }
+
+        #endregion
+
+        #region public Dispatcher Dispatcher { get; set; }
+
+        public Dispatcher Dispatcher
+        {
+            get { return _dispatcher; }
+            set
+            {
+                if (_dispatcher == value) return;
+                _dispatcher = value;
+                foreach (var field in FieldCalculatorViewModels) field.Dispatcher = _dispatcher;
+            }
+        }
+
+        Dispatcher _dispatcher;
+
+        #endregion
+
+        #region public bool CancelRequested { get; set; }
+
+        public bool CancelRequested
+        {
+            get { return _cancelRequested; }
+            set
+            {
+                if (_cancelRequested == value) return;
+                _cancelRequested = value;
+                foreach (var field in FieldCalculatorViewModels) field.CancelRequested = _cancelRequested;
+                NotifyPropertyChanged(CancelRequestedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CancelRequestedChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.CancelRequested);
+        bool _cancelRequested;
 
         #endregion
 
@@ -63,7 +102,9 @@ namespace ESME.Views.TransmissionLoss
         void StartWorkIfNeeded()
         {
             if (FieldCalculatorViewModels.Count > 0)
-                FieldCalculatorViewModels[0].Start(delegate { HandleCompletedQueueItem(); });
+                Task.Factory.StartNew(() => FieldCalculatorViewModels[0].Start(delegate { HandleCompletedQueueItem(); }));
+            if (FieldCalculatorViewModels.Count > 1) Task.Factory.StartNew(() => FieldCalculatorViewModels[1].PrepareRadials());
+            //if (FieldCalculatorViewModels.Count > 2) Task.Factory.StartNew(() => FieldCalculatorViewModels[2].PrepareRadials());
         }
 
         void HandleCompletedQueueItem()
@@ -127,7 +168,8 @@ namespace ESME.Views.TransmissionLoss
                     output.Pressures.Add(buffer);
                 }
                 output.Write();
-                FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]));
+                else FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
             }
             StartWorkIfNeeded();
         }

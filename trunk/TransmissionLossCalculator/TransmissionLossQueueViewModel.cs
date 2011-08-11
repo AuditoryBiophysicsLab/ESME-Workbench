@@ -5,11 +5,9 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
 using System.Windows.Threading;
 using Cinch;
-using ESME.Data;
-using ESME.TransmissionLoss;
+using ESME.Data;    
 using ESME.Views.TransmissionLoss;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
@@ -20,18 +18,15 @@ namespace TransmissionLossCalculator
     public class TransmissionLossQueueViewModel : ViewModelBase
     {
         [ImportingConstructor]
-        public TransmissionLossQueueViewModel(IViewAwareStatus viewAwareStatus)
+        public TransmissionLossQueueViewModel()
         {
             QueueViewModel = new TransmissionLossQueueCalculatorViewModel();
             WorkItems = new ObservableCollection<string>();
             DirectoryScanners = new WorkDirectoryScanners(WorkItems);
-            _viewAwareStatus = viewAwareStatus;
-            _viewAwareStatus.ViewLoaded += () =>
-            {
-                if (Designer.IsInDesignMode) return;
-                _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-            };
+            _dispatcher = Dispatcher.CurrentDispatcher;
+            if (Designer.IsInDesignMode) return;
             WorkDirectories = WorkDirectories.Load(true);
+            WorkDirectories.ReloadOnFileChange = true;
             WorkDirectories.CollectionChanged += (s, e) =>
             {
                 switch (e.Action)
@@ -61,8 +56,7 @@ namespace TransmissionLossCalculator
 
         WorkDirectories WorkDirectories { get; set; }
         WorkDirectoryScanners DirectoryScanners { get; set; }
-        Dispatcher _dispatcher;
-        readonly IViewAwareStatus _viewAwareStatus;
+        readonly Dispatcher _dispatcher;
 
         void AddWorkDirectories(IEnumerable<string> workDirectories) { foreach (var directory in workDirectories) AddWorkDirectory(directory); }
         void AddWorkDirectory(string workDirectory)
@@ -117,7 +111,9 @@ namespace TransmissionLossCalculator
                                     doCalculation = false;
                                 }
                             }
-                            if (doCalculation) QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName, _dispatcher));
+                            if (!doCalculation) continue;
+                            if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName, _dispatcher)));
+                            else QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName, _dispatcher));
                         }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -155,6 +151,22 @@ namespace TransmissionLossCalculator
         static readonly PropertyChangedEventArgs QueueViewModelChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueViewModel>(x => x.QueueViewModel);
         TransmissionLossQueueCalculatorViewModel _queueViewModel;
 
+        #endregion
+
+        #region ViewClosingCommand
+        public SimpleCommand<object, object> ViewClosingCommand
+        {
+            get
+            {
+                return _viewClosing ??
+                       (_viewClosing =
+                        new SimpleCommand<object, object>(delegate { ViewClosingHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _viewClosing;
+
+        void ViewClosingHandler() { QueueViewModel.CancelRequested = true; }
         #endregion
     }
 }

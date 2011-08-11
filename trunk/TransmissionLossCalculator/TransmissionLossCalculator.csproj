@@ -39,8 +39,10 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>orbz_water.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>TransmissionLossCalculator.SingleInstanceApplication</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cinch.WPF">
@@ -49,6 +51,7 @@
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
@@ -74,6 +77,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="SingleInstanceApplication.cs" />
     <Compile Include="TransmissionLossQueueViewModel.cs" />
     <Compile Include="WorkDirectoryScanner.cs" />
     <Page Include="TransmissionLossCalculatorQueueView.xaml">
@@ -141,7 +145,13 @@
   <ItemGroup>
     <Resource Include="Resources\orbz_water.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="orbz_water.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /y "$(TargetPath)" "$(SolutionDir)$(SolutionName)\bin\$(ConfigurationName)\$(TargetFileName)"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
