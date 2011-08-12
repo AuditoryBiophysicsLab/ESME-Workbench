@@ -3,12 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:p="clr-namespace:TransmissionLossCalculator.Properties"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
         xmlns:local="clr-namespace:TransmissionLossCalculator"
         xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC" mef:ViewModelLocator.ViewModel="TransmissionLossQueueViewModel"
+        xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC" 
+        mef:ViewModelLocator.ViewModel="TransmissionLossQueueViewModel"
         Title="{Binding QueueViewModel.WindowTitle}" 
         Visibility="Hidden"
         Icon="Resources\orbz_water.ico"
@@ -240,7 +240,7 @@
                     <StackPanel>
                         <Image Source="Resources\Button-Turn-On-icon.png" />
                         <TextBlock HorizontalAlignment="Center"  
-                                   Text="Autostart" />
+                                   Text="Autostart is ON" />
                     </StackPanel>
                 </Button>
                 <Button Command="{Binding AutoStartCommand}"
@@ -249,7 +249,7 @@
                     <StackPanel>
                         <Image Source="Resources\Button-Turn-Off-icon.png" />
                         <TextBlock HorizontalAlignment="Center"  
-                                   Text="Autostart" />
+                                   Text="Autostart is OFF" />
                     </StackPanel>
                 </Button>
                 <Separator Width="50" />

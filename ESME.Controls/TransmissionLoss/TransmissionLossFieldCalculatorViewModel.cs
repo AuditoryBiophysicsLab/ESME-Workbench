@@ -103,7 +103,7 @@ namespace ESME.Views.TransmissionLoss
             get { return _totalProgress; }
             set
             {
-                if (_totalProgress >= value) return;
+                if (_totalProgress == value) return;
                 _totalProgress = value;
                 if (_dispatcher != null) _dispatcher.InvokeIfRequired(() =>
                 {
