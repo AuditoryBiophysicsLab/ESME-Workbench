@@ -148,6 +148,27 @@
   <ItemGroup>
     <Resource Include="orbz_water.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Button-Play-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Button-Close-icon.png" />
+    <Resource Include="Resources\Button-Help-icon.png" />
+    <Resource Include="Resources\Button-Pause-icon.png" />
+    <Resource Include="Resources\Button-Refresh-icon.png" />
+    <Resource Include="Resources\Button-Stop-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Button-Info-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\folder-preferences-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Button-Turn-Off-icon.png" />
+    <Resource Include="Resources\Button-Turn-On-icon.png" />
+    <Resource Include="Resources\Windows-Restart-icon.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /y "$(TargetPath)" "$(SolutionDir)$(SolutionName)\bin\$(ConfigurationName)\$(TargetFileName)"</PostBuildEvent>

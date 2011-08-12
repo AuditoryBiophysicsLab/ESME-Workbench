@@ -34,11 +34,11 @@ namespace TransmissionLossCalculator
                 _dirWatcher.Created += DirectoryChanged;
                 //_dirWatcher.Changed += DirectoryChanged;
                 _dirWatcher.Deleted += DirectoryChanged;
-                ScanDirectory();
+                Scan();
             }
         }
 
-        void ScanDirectory()
+        public void Scan()
         {
             var matchingFiles = Directory.EnumerateFiles(DirectoryPath, _filePattern, SearchOption.TopDirectoryOnly);
             foreach (var file in matchingFiles.Where(file => !_matchingFiles.Any(match => match == file)))
@@ -130,6 +130,11 @@ namespace TransmissionLossCalculator
                 Remove(scanner);
                 break;
             }
+        }
+
+        public void Rescan()
+        {
+            foreach (var scanner in this) scanner.Scan();
         }
     }
 }

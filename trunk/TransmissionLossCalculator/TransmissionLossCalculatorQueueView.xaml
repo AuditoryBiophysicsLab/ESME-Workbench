@@ -8,15 +8,16 @@
         xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
         xmlns:local="clr-namespace:TransmissionLossCalculator"
         xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
-        mef:ViewModelLocator.ViewModel="TransmissionLossQueueViewModel"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC" mef:ViewModelLocator.ViewModel="TransmissionLossQueueViewModel"
         Title="{Binding QueueViewModel.WindowTitle}" 
         Visibility="Hidden"
         Icon="Resources\orbz_water.ico"
         Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
         Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
-        SizeToContent="WidthAndHeight"
-        ResizeMode="NoResize"
+        Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}"
+        Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
+        MinWidth="500"
+        MinHeight="200"
         WindowStyle="ToolWindow"
         mc:Ignorable="d">
     <Window.Resources>
@@ -29,6 +30,13 @@
 					        Value="Bold" />
                     <Setter Property="Foreground"
 					        Value="Black" />
+                </Trigger>
+                <Trigger Property="Text"
+				         Value="Canceled">
+                    <Setter Property="FontWeight"
+					        Value="Bold" />
+                    <Setter Property="Foreground"
+					        Value="DarkRed" />
                 </Trigger>
                 <Trigger Property="Text"
 				         Value="Starting">
@@ -51,6 +59,7 @@
                     <ColumnDefinition Width="Auto" SharedSizeGroup="PSM"/>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="RadialCount"/>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="Algorithm"/>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
@@ -84,11 +93,19 @@
                              x:Name="FieldProgress" 
                              Value="{Binding TotalProgress}" 
                              Width="100" />
+                <Button x:Name="CancelButton" 
+                        Grid.Column="7"
+                        Margin="5 2 5 0"
+                        Content="Cancel" 
+                        Command="{Binding CancelCommand}" />
             </Grid>
             <HierarchicalDataTemplate.Triggers>
                 <DataTrigger Binding="{Binding TotalProgress}"
 				             Value="0">
                     <Setter TargetName="FieldProgress"
+						    Property="Visibility"
+						    Value="Collapsed" />
+                    <Setter TargetName="CancelButton"
 						    Property="Visibility"
 						    Value="Collapsed" />
                 </DataTrigger>
@@ -138,34 +155,120 @@
                 </DataTemplate>
             </HierarchicalDataTemplate.ItemTemplate>
         </HierarchicalDataTemplate>
+        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" TrueValue="Visible" FalseValue="Collapsed"/>
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" TrueValue="Collapsed" FalseValue="Visible"/>
+        <Style x:Key="{x:Static ToolBar.SeparatorStyleKey}" TargetType="Separator">
+            <Setter Property="Background" Value="Gainsboro"/>
+            <Setter Property="Width" Value="5"/>
+        </Style>
     </Window.Resources>
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Closing">
-            <cinch:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
 
     <DockPanel LastChildFill="True">
-
-        
-        <TreeView DockPanel.Dock="Top" 
-                  Grid.IsSharedSizeScope="True"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  ItemsSource="{Binding QueueViewModel.FieldCalculatorViewModels}"
-                  ItemTemplate="{StaticResource QueueTreeViewTemplate}"/>
-        <local:NotificationAreaIcon Text="ESME Transmission Loss Calculator"
+        <local:NotificationAreaIcon Text="{Binding QueueViewModel.WindowTitle}"
 		                        Icon="Resources\orbz_water.ico"
 		                        MouseDoubleClick="OnNotificationAreaIconDoubleClick">
             <local:NotificationAreaIcon.MenuItems>
                 <forms:MenuItem Text="Open"
 				                Click="OnMenuItemOpenClick"
 				                DefaultItem="True" />
+                <!--
                 <forms:MenuItem Text="-" />
                 <forms:MenuItem Text="Exit"
 				                Click="OnMenuItemExitClick" />
+                -->
             </local:NotificationAreaIcon.MenuItems>
         </local:NotificationAreaIcon>
-
+        <ToolBarTray Orientation="Horizontal"
+                     Background="Gainsboro"
+                     DockPanel.Dock="Top">
+            <ToolBar Band="0" BandIndex="0" Background="Gainsboro">
+                <Button Command="{Binding RunCommand}"
+                        ToolTip="Start or resume processing the items in the work queue">
+                    <StackPanel>
+                        <Image Source="Resources\Button-Play-icon.png" />
+                        <TextBlock HorizontalAlignment="Center"  
+                                   Text="Run" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding PauseCommand}"
+                        ToolTip="Stop processing new items in the work queue.  If an item is currently calculating, the calculation will be allowed to complete normally">
+                    <StackPanel>
+                        <Image Source="Resources\Button-Pause-icon.png" />
+                        <TextBlock HorizontalAlignment="Center"  
+                                   Text="Pause" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding StopCommand}"
+                        ToolTip="Stop processing the work queue immediately.  If an item is currently calculating, the calculation will be terminated and the item will be removed from the work queue">
+                    <StackPanel>
+                        <Image Source="Resources\Button-Stop-icon.png" />
+                        <TextBlock HorizontalAlignment="Center"  
+                                   Text="Stop" />
+                    </StackPanel>
+                </Button>
+                <Separator Width="10" />
+                <Button Command="{Binding RescanCommand}"
+                        ToolTip="Check all work item folders for uncalculated items.  This normally happens when Transmission Loss Calculator starts up.">
+                    <StackPanel>
+                        <Image Source="Resources\Button-Refresh-icon.png" />
+                        <TextBlock HorizontalAlignment="Center"  
+                                   Text="Rescan" />
+                    </StackPanel>
+                </Button>
+                <Separator Width="20" />
+                <Button Command="{Binding FoldersCommand}"
+                        ToolTip="View or edit the list of work item folders for uncalculated items">
+                    <StackPanel>
+                        <Image Source="Resources\folder-preferences-icon.png" />
+                        <TextBlock HorizontalAlignment="Center"  
+                                   Text="Folders" />
+                    </StackPanel>
+                </Button>
+                <Separator Width="10" />
+                <Button Command="{Binding HelpCommand}"
+                        ToolTip="Get help on the Transmission Loss Calculator">
+                    <StackPanel>
+                        <Image Source="Resources\Button-Help-icon.png" />
+                        <TextBlock HorizontalAlignment="Center"  
+                                   Text="Help" />
+                    </StackPanel>
+                </Button>
+                <Separator Width="10" />
+                <Button Command="{Binding AutoStartCommand}"
+                        Visibility="{Binding IsAutoStart, Converter={StaticResource TrueVisibleFalseCollapsed}}"
+                        ToolTip="The Transmission Loss Calculator WILL begin calculating as soon as it's started">
+                    <StackPanel>
+                        <Image Source="Resources\Button-Turn-On-icon.png" />
+                        <TextBlock HorizontalAlignment="Center"  
+                                   Text="Autostart" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding AutoStartCommand}"
+                        Visibility="{Binding IsAutoStart, Converter={StaticResource FalseVisibleTrueCollapsed}}"
+                        ToolTip="The Transmission Loss Calculator WILL NOT begin calculating when it's started">
+                    <StackPanel>
+                        <Image Source="Resources\Button-Turn-Off-icon.png" />
+                        <TextBlock HorizontalAlignment="Center"  
+                                   Text="Autostart" />
+                    </StackPanel>
+                </Button>
+                <Separator Width="50" />
+                <Button Command="{Binding QuitCommand}"
+                        ToolTip="Close and exit the Transmission Loss Calculator.">
+                    <StackPanel>
+                        <Image Source="Resources\Button-Close-icon.png" />
+                        <TextBlock HorizontalAlignment="Center"  
+                                   Text="Quit" />
+                    </StackPanel>
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
+        <TreeView DockPanel.Dock="Top" 
+                  DataContext="{Binding QueueViewModel}"
+                  Grid.IsSharedSizeScope="True"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  ItemsSource="{Binding FieldCalculatorViewModels}"
+                  ItemTemplate="{StaticResource QueueTreeViewTemplate}"/>
     </DockPanel>
 </Window>

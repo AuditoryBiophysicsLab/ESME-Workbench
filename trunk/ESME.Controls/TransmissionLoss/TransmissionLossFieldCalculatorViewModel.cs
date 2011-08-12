@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Data;
@@ -102,9 +103,13 @@ namespace ESME.Views.TransmissionLoss
             get { return _totalProgress; }
             set
             {
-                if (_totalProgress == value) return;
+                if (_totalProgress >= value) return;
                 _totalProgress = value;
-                if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(TotalProgressChangedEventArgs));
+                if (_dispatcher != null) _dispatcher.InvokeIfRequired(() =>
+                {
+                    NotifyPropertyChanged(TotalProgressChangedEventArgs);
+                    CommandManager.InvalidateRequerySuggested();
+                });
             }
         }
 
@@ -234,6 +239,7 @@ namespace ESME.Views.TransmissionLoss
                                     RadialCalculatorViewModels.Sum(radial => radial.ProgressPercent / radialCount);
                             TotalProgress = progress;
                         };
+                        radialViewModel.CalculationCompleted += (s, e) => RadialCount = RadialCalculatorViewModels.Count(radial => radial.ProgressPercent < 100);
                         if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => RadialCalculatorViewModels.Add(radialViewModel));
                         else RadialCalculatorViewModels.Add(radialViewModel);
                         break;
@@ -346,6 +352,28 @@ namespace ESME.Views.TransmissionLoss
 
         #endregion
 
+        #region CancelCommand
+        public SimpleCommand<object, object> CancelCommand
+        {
+            get
+            {
+                return _cancel ??
+                       (_cancel =
+                        new SimpleCommand<object, object>(delegate { return IsCancelCommandEnabled; },
+                                                          delegate { CancelHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _cancel;
+
+        bool IsCancelCommandEnabled
+        {
+            get { return (!CancelRequested) && (TotalProgress < 100); }
+        }
+
+        void CancelHandler() { CancelRequested = true; }
+        #endregion
+
         #region public bool CancelRequested { get; set; }
 
         public bool CancelRequested
@@ -386,8 +414,13 @@ namespace ESME.Views.TransmissionLoss
                 return radialProgress;
             }, finalResult => TotalProgress += finalResult);
 
+            if (CancelRequested)
+            {
+                Status = "Canceling";
+                return;
+            }
+
             Status = "Finishing";
-            if (CancelRequested) return;
             foreach (var radial in RadialCalculatorViewModels) if (radial.TransmissionLossRadial != null) TransmissionLossField.AddRadial(radial.TransmissionLossRadial);
             TransmissionLossField.Depths = TransmissionLossField.Radials[0].Depths;
             TransmissionLossField.Ranges = TransmissionLossField.Radials[0].Ranges;

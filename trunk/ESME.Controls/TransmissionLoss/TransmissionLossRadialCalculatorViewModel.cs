@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows.Threading;
@@ -15,7 +16,7 @@ namespace ESME.Views.TransmissionLoss
         {
             Dispatcher = dispatcher;
             RadialNumber = radialNumber;
-            Status = "Queued";
+            Status = "Ready";
         }
 
         protected string CreateTemporaryDirectory()
@@ -26,6 +27,12 @@ namespace ESME.Views.TransmissionLoss
         }
 
         public Dispatcher Dispatcher { get; set; }
+
+        public event EventHandler CalculationCompleted;
+        protected virtual void OnCalculationCompleted()
+        {
+            if (CalculationCompleted != null) CalculationCompleted(this, new EventArgs());
+        }
 
         #region public double BearingFromSource { get; set; }
 
@@ -106,7 +113,7 @@ namespace ESME.Views.TransmissionLoss
             get { return _progressPercent; }
             set
             {
-                if (_progressPercent == value) return;
+                if (_progressPercent >= value) return;
                 _progressPercent = value;
                 if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ProgressPercentChangedEventArgs));
             }
@@ -146,7 +153,7 @@ namespace ESME.Views.TransmissionLoss
                 _cancelRequested = value;
                 NotifyPropertyChanged(CancelRequestedChangedEventArgs);
                 if (!_cancelRequested || (TransmissionLossProcess == null)) return;
-                TransmissionLossProcess.Kill();
+                if (!TransmissionLossProcess.HasExited) TransmissionLossProcess.Kill();
                 Status = "Canceling";
             }
         }

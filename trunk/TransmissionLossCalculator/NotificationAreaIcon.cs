@@ -19,7 +19,7 @@ namespace TransmissionLossCalculator
     [DefaultEvent("MouseDoubleClick")]
     public class NotificationAreaIcon : FrameworkElement
     {
-        System.Windows.Forms.NotifyIcon _notifyIcon;
+        NotifyIcon _notifyIcon;
 
         public static readonly RoutedEvent MouseClickEvent = EventManager.RegisterRoutedEvent("MouseClick", RoutingStrategy.Bubble, typeof (MouseButtonEventHandler), typeof (NotificationAreaIcon));
 
@@ -37,7 +37,7 @@ namespace TransmissionLossCalculator
 
 
             // Create and initialize the window forms notify icon based
-            _notifyIcon = new System.Windows.Forms.NotifyIcon
+            _notifyIcon = new NotifyIcon
                           {
                               Text = Text
                           };
@@ -118,9 +118,9 @@ namespace TransmissionLossCalculator
             return new Icon(Application.GetResourceStream(iconUri).Stream);
         }
 
-        static bool FromVisibility(Visibility visibility) { return visibility == Visibility.Visible; }
+        static bool FromVisibility(Visibility visibility) { return visibility == System.Windows.Visibility.Visible; }
 
-        MouseButton ToMouseButton(MouseButtons button)
+        static MouseButton ToMouseButton(MouseButtons button)
         {
             switch (button)
             {
