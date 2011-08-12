@@ -63,6 +63,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
             }
         }
+
         void DirectoryChanged(object sender, FileSystemEventArgs e)
         {
             Debug.WriteLine("[Raw] Directory: " + e.Name + " " + e.ChangeType);

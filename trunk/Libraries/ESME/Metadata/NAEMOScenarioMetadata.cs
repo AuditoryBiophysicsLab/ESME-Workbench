@@ -16,7 +16,6 @@ using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Mapping;
-using ESME.Model;
 using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
@@ -51,6 +50,29 @@ namespace ESME.Metadata
         public IUIVisualizerService VisualizerService { get; set; }
         #endregion
 
+        #region public CASSOutputs CASSOutputs { get; set; }
+        [XmlIgnore]
+        public CASSOutputs CASSOutputs
+        {
+            get { return _cassOutputs; }
+            set
+            {
+                if (_cassOutputs == value) return;
+                _cassOutputs = value;
+                NotifyPropertyChanged(CASSOutputsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CASSOutputsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.CASSOutputs);
+        CASSOutputs _cassOutputs;
+        void CASSOutputsUpdated(object sender, EventArgs args)
+        {
+            
+        }
+
+        #endregion
+
+
         #region public NemoFile NemoFile { get; set; }
         [XmlIgnore]
         public NemoFile NemoFile
@@ -69,8 +91,9 @@ namespace ESME.Metadata
                     _environmentPath = Path.Combine(_rangeComplexPath, "Environment");
                     _imagesPath = Path.Combine(_rangeComplexPath, "Images");
                     _scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
-                    _propagationPath = Path.Combine(_scenarioPath, "Propagation");
-                    _pressurePath = Path.Combine(_scenarioPath, "Pressure");
+                    _propagationPath = Path.Combine(_scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame);
+                    _pressurePath = Path.Combine(_scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame);
+                    //CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsUpdated);
                     DisplayScenario();
                     _rangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[_nemoFile.Scenario.SimAreaName];
                     var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
@@ -420,9 +443,7 @@ namespace ESME.Metadata
 
         public void ExportAnalysisPoints()
         {
-            var propagationTimePath = Path.Combine(_propagationPath, NemoFile.Scenario.TimeFrame);
-            var pressureTimePath = Path.Combine(_pressurePath, NemoFile.Scenario.TimeFrame);
-            Directory.CreateDirectory(propagationTimePath);
+            Directory.CreateDirectory(_propagationPath);
             //Directory.CreateDirectory(pressureTimePath);
             var rangeComplex = ((RangeComplexDescriptor)RangeComplexDescriptors[NemoFile.Scenario.SimAreaName]).Data;
             SelectedEnvironment.Data.EnvironmentInformation.Bathymetry = SelectedBathymetry.Data;
@@ -431,7 +452,7 @@ namespace ESME.Metadata
                                                   SelectedBathymetry.DataFilename, SelectedEnvironment.DataFilename,
                                                   NemoModeToAcousticModelNameMap,
                                                   SelectedEnvironment.Data.EnvironmentInformation, rangeComplex);
-            Globals.WorkDirectories.Add(propagationTimePath, true);
+            Globals.WorkDirectories.Add(_propagationPath, true);
         }
     }
 }

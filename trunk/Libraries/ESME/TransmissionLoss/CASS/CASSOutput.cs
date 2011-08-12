@@ -1,6 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Timers;
 using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss.CASS
@@ -98,79 +103,6 @@ namespace ESME.TransmissionLoss.CASS
             var result = new CASSOutput {Filename = fileName};
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
-#if false
-
-                #region file header read
-
-                result.RunDateTime = ParseCASSString(reader, 25, '\0');
-                result.OperatingSystemName = ParseCASSString(reader, 25, '\0');
-                result.SystemNodeName = ParseCASSString(reader, 25, '\0');
-                result.OperatingSystemRelease = ParseCASSString(reader, 25, '\0');
-                result.OperatingSystemVersion = ParseCASSString(reader, 25, '\0');
-                result.MachineType = ParseCASSString(reader, 25, '\0');
-                result.ProcessorType = ParseCASSString(reader, 25, '\0');
-
-                result.Title = ParseCASSString(reader, 50, '\0');
-                result.SiteName = ParseCASSString(reader, 50, '\0');
-
-                result.SiteRefLatLocation = reader.ReadSingle();
-                result.SiteRefLatLocationUnits = ParseCASSString(reader, 10, '\0');
-                result.SiteRefLonLocation = reader.ReadSingle();
-                result.SiteRefLonLocationUnits = ParseCASSString(reader, 10, '\0');
-
-                result.SourceRefLatLocation = reader.ReadSingle();
-                result.SourceRefLatLocationUnits = ParseCASSString(reader, 10, '\0');
-                result.SourceRefLonLocation = reader.ReadSingle();
-                result.SourceRefLonLocationUnits = ParseCASSString(reader, 10, '\0');
-
-                result.PlatformName = ParseCASSString(reader, 50, '\0');
-                result.SourceName = ParseCASSString(reader, 50, '\0');
-                result.ModeName = ParseCASSString(reader, 50, '\0');
-
-                result.Frequency = reader.ReadSingle();
-                result.FrequencyUnits = ParseCASSString(reader, 10, '\0');
-
-                result.DepressionElevationAngle = reader.ReadSingle();
-                result.DepressionElevationAngleUnits = ParseCASSString(reader, 10, '\0');
-
-                result.VerticalBeamPattern = reader.ReadSingle();
-                result.VerticalBeamPatternUnits = ParseCASSString(reader, 10, '\0');
-
-                result.SourceDepth = reader.ReadSingle();
-                result.SourceDepthUnits = ParseCASSString(reader, 10, '\0');
-
-                result.SourceLevel = reader.ReadSingle();
-                result.SourceLevelUnits = ParseCASSString(reader, 10, '\0');
-
-                result.MinWaterDepth = reader.ReadSingle();
-                result.MinWaterDepthUnits = ParseCASSString(reader, 10, '\0');
-
-                result.MaxWaterDepth = reader.ReadSingle();
-                result.MaxWaterDepthUnits = ParseCASSString(reader, 10, '\0');
-
-                result.WaterDepthIncrement = reader.ReadSingle();
-                result.WaterDepthIncrementUnits = ParseCASSString(reader, 10, '\0');
-
-                result.MinRangeDistance = reader.ReadSingle();
-                result.MinRangeDistanceUnits = ParseCASSString(reader, 10, '\0');
-
-                result.MaxRangeDistance = reader.ReadSingle();
-                result.MaxRangeDistanceUnits = ParseCASSString(reader, 10, '\0');
-
-                result.RangeDistanceIncrement = reader.ReadSingle();
-                result.RangeDistanceIncrementUnits = ParseCASSString(reader, 10, '\0');
-
-                result.BottomType = ParseCASSString(reader, 50, '\0');
-                result.Season = ParseCASSString(reader, 10, '\0');
-                result.WindSpeed = reader.ReadSingle();
-                result.WindSpeedUnits = ParseCASSString(reader, 10, '\0');
-
-                result.CASSLevel = reader.ReadSingle();
-
-                if (reader.BaseStream.Position != 713) throw new FileFormatException("CASSOutput: file header of incorrect length.");
-
-                #endregion
-#endif
                 result.ReadFileHeader(reader);
                 if (headerOnly) return result;
                 
@@ -202,17 +134,11 @@ namespace ESME.TransmissionLoss.CASS
                 #region pressure data read
 
                 result.Pressures = new List<float[,]>();
-                foreach (var bearing in result.RadialBearings)
+                foreach (var pressure in result.RadialBearings.Select(bearing => new float[result.DepthCellCount,result.RangeCellCount])) 
                 {
-                    var pressure = new float[result.DepthCellCount, result.RangeCellCount];
-
                     for (var i = 0; i < result.RangeCellCount; i++)
-                    {
                         for (var j = 0; j < result.DepthCellCount; j++)
-                        {
                             pressure[j, i] = reader.ReadSingle();
-                        }
-                    }
                     result.Pressures.Add(pressure);
                 }
 
@@ -249,7 +175,7 @@ namespace ESME.TransmissionLoss.CASS
                 writer.Write(sourceRefLatLocation);
                 WriteCASSField(writer, "DEG", 10);
 
-                float sourceRefLonLocation = transmissionLossField.Longitude;
+                var sourceRefLonLocation = transmissionLossField.Longitude;
                 writer.Write(sourceRefLonLocation);
                 WriteCASSField(writer, "DEG", 10);
 
@@ -463,7 +389,7 @@ namespace ESME.TransmissionLoss.CASS
             var buf = new byte[fieldLength];
             for (var i = 0; i < fieldLength; i++) buf[i] = 0;
             s = s ?? "";
-            var result = Encoding.ASCII.GetBytes(s, 0, s.Length <= fieldLength ? s.Length : fieldLength, buf, 0); //truncates or zero-pads output to fixed fieldLength.
+            Encoding.ASCII.GetBytes(s, 0, s.Length <= fieldLength ? s.Length : fieldLength, buf, 0);
             w.Write(buf, 0, fieldLength);
         }
 
@@ -541,5 +467,81 @@ namespace ESME.TransmissionLoss.CASS
 
             #endregion
         }
+    }
+
+    public class CASSOutputs : List<CASSOutput>
+    {
+        public CASSOutputs(string directoryToScan, string filePattern, EventHandler listUpdatedHandler = null)
+        {
+            _directory = directoryToScan;
+            _pattern = filePattern;
+            if (listUpdatedHandler != null)
+            {
+                ListUpdated += listUpdatedHandler;
+                Task.Factory.StartNew(() =>
+                {
+                    SetWatch();
+                    Refresh();
+                });
+            }
+            else
+            {
+                SetWatch();
+                Refresh();
+            }
+        }
+
+        readonly string _directory;
+        readonly string _pattern;
+
+        public void RefreshInBackground() { Task.Factory.StartNew(Refresh); }
+
+        public void Refresh()
+        {
+            if (_isRefreshing) return;
+            _isRefreshing = true;
+            Clear();
+            var files = Directory.EnumerateFiles(_directory, _pattern);
+            foreach (var file in files)
+                Add(CASSOutput.Load(file, true));
+            OnListUpdated();
+            _isRefreshing = false;
+        }
+
+        public event EventHandler ListUpdated;
+
+        protected virtual void OnListUpdated()
+        {
+            if (ListUpdated != null) ListUpdated(this, new EventArgs());
+        }
+
+        FileSystemWatcher _dirWatcher;
+        Timer _dirTimer;
+        bool _isRefreshing;
+
+        void SetWatch()
+        {
+            _dirWatcher = new FileSystemWatcher(_directory, _pattern)
+            {
+                EnableRaisingEvents = true,
+                NotifyFilter = (NotifyFilters.FileName | NotifyFilters.DirectoryName),
+            };
+            _dirWatcher.Created += DirectoryChanged;
+            _dirWatcher.Deleted += DirectoryChanged;
+        }
+
+        void DirectoryChanged(object sender, FileSystemEventArgs e)
+        {
+            Debug.WriteLine("[Raw] Directory: " + e.Name + " " + e.ChangeType);
+            if (_dirTimer != null) return;
+            _dirTimer = new Timer(1000) { AutoReset = false, Enabled = true };
+            _dirTimer.Elapsed += (s1, e1) =>
+            {
+                _dirTimer = null;
+                Debug.WriteLine("Directory: " + e.Name + " " + e.ChangeType);
+                Task.Factory.StartNew(Refresh);
+            };
+        }
+
     }
 }
