@@ -94,7 +94,7 @@ namespace ESME.Model
         public static SedimentType Find(string name)
         {
             var q = from s in SedimentArray where s.Name.ToLower() == name.ToLower() select s;
-            return q.First();
+            return q.FirstOrDefault();
         }
 
         public static SedimentType Find(int hfevaCategory)

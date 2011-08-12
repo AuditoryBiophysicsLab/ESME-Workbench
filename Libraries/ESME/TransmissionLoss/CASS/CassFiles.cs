@@ -102,7 +102,15 @@ namespace ESME.TransmissionLoss.CASS
         {
             var inputFilePattern = string.Format("*{0}-{1}-{2}.*", platform.Name, platform.Id, timePeriod);
             var matchingFiles = Directory.GetFiles(curTimePeriodPath, inputFilePattern);
-            foreach (var matchingFile in matchingFiles) File.Delete(matchingFile);
+            foreach (var matchingFile in matchingFiles)
+                try
+                {
+                    File.Delete(matchingFile);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
         }
 
         public static void WriteAcousticSimulatorFiles(string curTimePeriodPath, NemoPSM platform, NemoPSM source, NemoMode mode, IList<SoundSource> soundSources, TransmissionLossAlgorithm simulatorName, string timePeriod, AppSettings appSettings, NemoFile nemoFile, string cassBathymetryFileName, string cassEnvironmentFileName, RangeComplex rangeComplex)

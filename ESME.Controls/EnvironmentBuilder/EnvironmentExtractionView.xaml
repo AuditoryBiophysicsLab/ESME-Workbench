@@ -6,13 +6,29 @@
         ResizeMode="NoResize" 
         WindowStyle="ToolWindow">
     <StackPanel Orientation="Vertical">
+        <GroupBox Header="Bottom Type"
+                  Padding="5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Column="0" Content="HFEVA" IsChecked="{Binding GenerateHFEVA}" />
+                <CheckBox Grid.Column="1" Content="HFBL" IsChecked="{Binding GenerateHFEVA}" />
+                <CheckBox Grid.Column="2" Content="LFBL__HFB" IsChecked="{Binding GenerateHFEVA}" />
+                <CheckBox Grid.Column="3" Content="LFBL__PE" IsChecked="{Binding GenerateHFEVA}" />
+            </Grid>
+        </GroupBox>
         <Grid IsEnabled="{Binding NotExtractingData}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <GroupBox Grid.Column="0"
-			          Header="Months">
+			          Header="Months"
+                      Padding="5">
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Top">
                         <StackPanel Orientation="Horizontal">
@@ -45,7 +61,8 @@
                 </DockPanel>
             </GroupBox>
             <GroupBox Grid.Column="1"
-			          Header="Seasons">
+			          Header="Seasons"
+                      Padding="5">
                 <DockPanel>
                     <StackPanel Orientation="Horizontal"
 					            DockPanel.Dock="Top">
