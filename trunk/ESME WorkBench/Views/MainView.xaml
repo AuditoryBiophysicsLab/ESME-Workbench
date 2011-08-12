@@ -879,14 +879,12 @@
 			<r:RibbonTab KeyTip="C"
 			             Header="Acoustics">
 				<r:RibbonGroup Header="Simulator">
-                    <!--
-                    <r:RibbonButton Label="Show Queue"
+                    <r:RibbonButton Label="Run"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                SmallImageSource="..\Images\SmallIcons\Database-Process-icon.png"
-					                LargeImageSource="..\Images\LargeIcons\Database-Process-icon.png"
-					                ToolTipDescription="Displays the current work queue for acoustic simulation"
-					                Command="{Binding DisabledCommand}" />
-                    -->
+					                SmallImageSource="..\Images\SmallIcons\orbz_water.png"
+					                LargeImageSource="..\Images\LargeIcons\orbz_water.png"
+					                ToolTipDescription="Runs the Transmission Loss Calculator. The icon will appear in your system tray."
+					                Command="{Binding RunTransmissionLossCalculatorCommand}" />
 					<r:RibbonButton Label="Options"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                SmallImageSource="..\Images\SmallIcons\gear-icon.png"
