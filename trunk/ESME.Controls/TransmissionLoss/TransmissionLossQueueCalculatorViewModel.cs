@@ -88,6 +88,7 @@ namespace ESME.Views.TransmissionLoss
                 if (_isPaused == value) return;
                 _isPaused = value;
                 NotifyPropertyChanged(IsPausedChangedEventArgs);
+                WindowTitle = GetCurrentWindowTitleString();
                 if (!_isPaused) StartWorkIfNeeded();
             }
         }
@@ -145,6 +146,7 @@ namespace ESME.Views.TransmissionLoss
 
         void StartWorkIfNeeded()
         {
+            WindowTitle = GetCurrentWindowTitleString();
             if (FieldCalculatorViewModels.Count > 0)
                 Task.Factory.StartNew(() => FieldCalculatorViewModels[0].Start(delegate { HandleCompletedQueueItem(); }));
             if (FieldCalculatorViewModels.Count > 1) Task.Factory.StartNew(() => FieldCalculatorViewModels[1].PrepareRadials());
