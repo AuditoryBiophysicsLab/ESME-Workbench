@@ -556,6 +556,8 @@
   <ItemGroup>
     <Content Include="External References\Kent.Boogaart.Converters.dll" />
     <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
+    <Resource Include="Images\SmallIcons\orbz_water.png" />
+    <Resource Include="Images\LargeIcons\orbz_water.png" />
     <Resource Include="Images\SmallIcons\log-icon.png" />
     <Resource Include="Images\LargeIcons\log-icon.png" />
     <Resource Include="Images\LargeIcons\globe-icon.png" />

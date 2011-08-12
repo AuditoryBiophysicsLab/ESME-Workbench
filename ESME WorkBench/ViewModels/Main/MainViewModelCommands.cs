@@ -641,6 +641,26 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region RunTransmissionLossCalculatorCommand
+        public SimpleCommand<object, object> RunTransmissionLossCalculatorCommand
+        {
+            get
+            {
+                return _runTransmissionLossCalculator ??
+                       (_runTransmissionLossCalculator =
+                        new SimpleCommand<object, object>(delegate { RunTransmissionLossCalculatorHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _runTransmissionLossCalculator;
+
+        static void RunTransmissionLossCalculatorHandler()
+        {
+            Process.Start(Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location),
+                                       "TransmissionLossCalculator.exe"));
+        }
+        #endregion
+
         #endregion
     }
 }

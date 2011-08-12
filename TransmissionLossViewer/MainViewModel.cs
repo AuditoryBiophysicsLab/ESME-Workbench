@@ -348,9 +348,28 @@ namespace TransmissionLossViewer
             }
         }
 
+        #region public CASSOutput CASSOutput { get; set; }
+
+        public CASSOutput CASSOutput
+        {
+            get { return _cassOutput; }
+            set
+            {
+                if (_cassOutput == value) return;
+                _cassOutput = value;
+                NotifyPropertyChanged(CASSOutputChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CASSOutputChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.CASSOutput);
+        CASSOutput _cassOutput;
+
+        #endregion
+
         void OpenCASSFile(string filename)
         {
-            var tlf = TransmissionLossField.FromCASS(CASSOutput.Load(filename, false));
+            CASSOutput = CASSOutput.Load(filename, false);
+            var tlf = TransmissionLossField.FromCASS(CASSOutput);
             MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, tlf);
         }
 

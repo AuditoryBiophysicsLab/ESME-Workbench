@@ -179,6 +179,9 @@
     </Compile>
     <Compile Include="Controls\TwoDimensionColorMapViewModel.cs" />
     <Compile Include="TransmissionLoss\ModeAcousticModelSelectionView.cs" />
+    <Compile Include="TransmissionLoss\TransmissionLossMetadataView.xaml.cs">
+      <DependentUpon>TransmissionLossMetadataView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TransmissionLoss\TransmissionLossQueueViewOld.xaml.cs">
       <DependentUpon>TransmissionLossQueueViewOld.xaml</DependentUpon>
     </Compile>
@@ -280,6 +283,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\TwoDimensionColorMapView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLoss\TransmissionLossMetadataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

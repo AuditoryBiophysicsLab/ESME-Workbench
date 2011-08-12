@@ -170,7 +170,7 @@ namespace ESME.Mapping
                     sourcePoints.Add(curPoint);
                 }
 
-                for (var angle = 0; angle < 360; angle++)
+                for (var angle = 0; angle <= 360; angle++)
                     circlePoints.Add(EarthCoordinate.Move(curPoint, angle, soundSource.Radius));
 
                 analysisPointLayer.Add(new OverlayLineSegments(sourcePoints.ToArray(), Colors.Red, 5));
