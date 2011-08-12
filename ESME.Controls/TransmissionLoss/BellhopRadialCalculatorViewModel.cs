@@ -23,7 +23,8 @@ namespace ESME.Views.TransmissionLoss
         {
             Status = "Starting";
             TransmissionLossRadial = ComputeRadial(_bellhopRunFileRadial.Configuration, _bellhopRunFileRadial.BottomProfile,_bellhopRunFileRadial.TopReflectionCoefficient, _bellhopRunFileRadial.BearingFromSourceDegrees);
-            Status = "Complete";
+            Status = CancelRequested ? "Canceled" : "Complete";
+            OnCalculationCompleted();
         }
 
         #region Code that computes the radial by running bellhop and reading the output files it creates
@@ -63,6 +64,9 @@ namespace ESME.Views.TransmissionLoss
             while (!TransmissionLossProcess.HasExited)
             {
                 Thread.Sleep(100);
+                if ((!CancelRequested) || (TransmissionLossProcess.HasExited)) continue;
+                TransmissionLossProcess.Kill();
+                break;
             }
             if (!CancelRequested)
             {
@@ -90,8 +94,21 @@ namespace ESME.Views.TransmissionLoss
 #endif
                 result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
             }
-            foreach (var file in Directory.EnumerateFiles(workingDirectory)) File.Delete(file);
-            Directory.Delete(workingDirectory, true);
+            var tries = 10;
+            while (tries > 0)
+            {
+                try
+                {
+                    foreach (var file in Directory.EnumerateFiles(workingDirectory)) File.Delete(file);
+                    Directory.Delete(workingDirectory, true);
+                    break;
+                }
+                catch (Exception)
+                {
+                    tries--;
+                    Thread.Sleep(100);
+                }
+            }
             TransmissionLossProcess.ProgressPercent = 100;
             return result;
         }

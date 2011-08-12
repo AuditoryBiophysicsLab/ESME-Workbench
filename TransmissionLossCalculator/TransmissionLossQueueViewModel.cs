@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Data;    
@@ -17,10 +19,13 @@ namespace TransmissionLossCalculator
     [ExportViewModel("TransmissionLossQueueViewModel")]
     public class TransmissionLossQueueViewModel : ViewModelBase
     {
+        IMessageBoxService _messageBoxService;
+
         [ImportingConstructor]
-        public TransmissionLossQueueViewModel()
+        public TransmissionLossQueueViewModel(IMessageBoxService messageBoxService)
         {
-            QueueViewModel = new TransmissionLossQueueCalculatorViewModel();
+            _messageBoxService = messageBoxService;
+            QueueViewModel = new TransmissionLossQueueCalculatorViewModel {IsPaused = !IsAutoStart};
             WorkItems = new ObservableCollection<string>();
             DirectoryScanners = new WorkDirectoryScanners(WorkItems);
             _dispatcher = Dispatcher.CurrentDispatcher;
@@ -111,6 +116,8 @@ namespace TransmissionLossCalculator
                                     doCalculation = false;
                                 }
                             }
+                            if (QueueViewModel.FieldCalculatorViewModels.Any(curJob => curJob.TransmissionLossRunFile.Filename == runFileName))
+                                doCalculation = false;
                             if (!doCalculation) continue;
                             if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName, _dispatcher)));
                             else QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName, _dispatcher));
@@ -153,20 +160,190 @@ namespace TransmissionLossCalculator
 
         #endregion
 
-        #region ViewClosingCommand
-        public SimpleCommand<object, object> ViewClosingCommand
+        #region AutoStartCommand
+        public SimpleCommand<object, object> AutoStartCommand
         {
             get
             {
-                return _viewClosing ??
-                       (_viewClosing =
-                        new SimpleCommand<object, object>(delegate { ViewClosingHandler(); }));
+                return _autoStart ??
+                       (_autoStart =
+                        new SimpleCommand<object, object>(delegate { AutoStartHandler(); }));
             }
         }
 
-        SimpleCommand<object, object> _viewClosing;
+        SimpleCommand<object, object> _autoStart;
 
-        void ViewClosingHandler() { QueueViewModel.CancelRequested = true; }
+        void AutoStartHandler() { IsAutoStart = !IsAutoStart; }
+        #endregion
+
+        #region public bool IsAutoStart { get; set; }
+
+        public bool IsAutoStart
+        {
+            get { return Properties.Settings.Default.AutoStart; }
+            set
+            {
+                if (Properties.Settings.Default.AutoStart == value) return;
+                Properties.Settings.Default.AutoStart = value;
+                NotifyPropertyChanged(IsAutoStartChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsAutoStartChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueViewModel>(x => x.IsAutoStart);
+
+        #endregion
+
+        #region RunCommand
+        public SimpleCommand<object, object> RunCommand
+        {
+            get
+            {
+                return _run ??
+                       (_run =
+                        new SimpleCommand<object, object>(delegate { return IsRunCommandEnabled; },
+                                                          delegate { RunHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _run;
+
+        bool IsRunCommandEnabled
+        {
+            get { return QueueViewModel.IsPaused; }
+        }
+
+        void RunHandler() { QueueViewModel.IsPaused = false; }
+        #endregion
+
+        #region PauseCommand
+        public SimpleCommand<object, object> PauseCommand
+        {
+            get
+            {
+                return _pause ??
+                       (_pause =
+                        new SimpleCommand<object, object>(delegate { return IsPauseCommandEnabled; },
+                                                          delegate { PauseHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _pause;
+
+        bool IsPauseCommandEnabled
+        {
+            get { return !QueueViewModel.IsPaused; }
+        }
+
+        void PauseHandler() { QueueViewModel.IsPaused = true; }
+        #endregion
+
+        #region StopCommand
+        public SimpleCommand<object, object> StopCommand
+        {
+            get
+            {
+                return _stop ??
+                       (_stop =
+                        new SimpleCommand<object, object>(delegate { return IsStopCommandEnabled; },
+                                                          delegate { StopHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _stop;
+
+        bool IsStopCommandEnabled
+        {
+            get { return !QueueViewModel.IsPaused; }
+        }
+
+        void StopHandler() 
+        {
+            var result = _messageBoxService.ShowYesNo("Really stop transmission loss calculations immediately?\r\nWarning: This will cancel and discard the currently active calculation.", CustomDialogIcons.Warning);
+            if (result != CustomDialogResults.Yes) return;
+            QueueViewModel.IsPaused = true;
+            QueueViewModel.CancelActiveCalculation();
+        }
+        #endregion
+
+        #region RescanCommand
+        public SimpleCommand<object, object> RescanCommand
+        {
+            get
+            {
+                return _rescan ??
+                       (_rescan =
+                        new SimpleCommand<object, object>(delegate { RescanHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _rescan;
+
+        void RescanHandler()
+        {
+            WorkItems.Clear();
+            DirectoryScanners.Rescan();
+        }
+        #endregion
+
+        #region QuitCommand
+        public SimpleCommand<object, object> QuitCommand
+        {
+            get
+            {
+                return _close ??
+                       (_close =
+                        new SimpleCommand<object, object>(delegate { QuitHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _close;
+
+        void QuitHandler()
+        {
+            var result = _messageBoxService.ShowYesNo("Really exit Transmission Loss Calculator?", CustomDialogIcons.Question);
+            if (result != CustomDialogResults.Yes) return;
+            QueueViewModel.IsPaused = true;
+            QueueViewModel.CancelActiveCalculation();
+            Application.Current.Shutdown();
+        }
+        #endregion
+
+        #region FoldersCommand
+        public SimpleCommand<object, object> FoldersCommand
+        {
+            get
+            {
+                return _folders ??
+                       (_folders =
+                        new SimpleCommand<object, object>(delegate { FoldersHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _folders;
+
+        void FoldersHandler()
+        {
+            _messageBoxService.ShowInformation("Not yet implemented");
+        }
+        #endregion
+
+        #region HelpCommand
+        public SimpleCommand<object, object> HelpCommand
+        {
+            get
+            {
+                return _help ??
+                       (_help =
+                        new SimpleCommand<object, object>(delegate { HelpHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _help;
+
+        void HelpHandler()
+        {
+            _messageBoxService.ShowInformation("Not yet implemented");
+        }
         #endregion
     }
 }

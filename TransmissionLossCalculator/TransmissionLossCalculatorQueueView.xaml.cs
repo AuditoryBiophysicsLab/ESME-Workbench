@@ -48,6 +48,7 @@ namespace TransmissionLossCalculator
         private void OnMenuItemExitClick(object sender, EventArgs e)
         {
             _shouldClose = true;
+            Properties.Settings.Default.Save();
             Close();
         }
 

@@ -44,7 +44,13 @@ namespace ESME.Views.TransmissionLoss
 
         public string WindowTitle
         {
-            get { return _windowTitle; }
+            get
+            {
+                if (!string.IsNullOrEmpty(_windowTitle)) return _windowTitle;
+                _windowTitle = GetCurrentWindowTitleString();
+                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(WindowTitleChangedEventArgs));
+                return _windowTitle;
+            }
             set
             {
                 if (_windowTitle == value) return;
@@ -55,28 +61,46 @@ namespace ESME.Views.TransmissionLoss
 
         static readonly PropertyChangedEventArgs WindowTitleChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.WindowTitle);
         string _windowTitle;
-        const string BaseWindowName = "ESME Transmission Loss Calculator : Work queue : ";
-
-        #endregion
-
-        #region public bool CancelRequested { get; set; }
-
-        public bool CancelRequested
+        const string BaseWindowName = "ESME Transmission Loss Calculator : ";
+        string GetCurrentWindowTitleString()
         {
-            get { return _cancelRequested; }
-            set
+            var itemCount = FieldCalculatorViewModels.Count;
+            switch (itemCount)
             {
-                if (_cancelRequested == value) return;
-                _cancelRequested = value;
-                foreach (var field in FieldCalculatorViewModels) field.CancelRequested = _cancelRequested;
-                NotifyPropertyChanged(CancelRequestedChangedEventArgs);
+                case 0:
+                    return IsPaused ? BaseWindowName + "Paused (queue empty)" : BaseWindowName + "Idle";
+                case 1:
+                    return IsPaused ? BaseWindowName + "Paused (1 item queued)" : BaseWindowName + "1 item in queue";
+                default:
+                    return IsPaused ? BaseWindowName + "Paused (" + itemCount + " items queued)" : BaseWindowName + itemCount + " items in queue";
             }
         }
 
-        static readonly PropertyChangedEventArgs CancelRequestedChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.CancelRequested);
-        bool _cancelRequested;
+        #endregion
+
+        #region public bool IsPaused { get; set; }
+
+        public bool IsPaused
+        {
+            get { return _isPaused; }
+            set
+            {
+                if (_isPaused == value) return;
+                _isPaused = value;
+                NotifyPropertyChanged(IsPausedChangedEventArgs);
+                if (!_isPaused) StartWorkIfNeeded();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsPausedChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.IsPaused);
+        bool _isPaused;
 
         #endregion
+
+        public void CancelActiveCalculation()
+        {
+            if ((FieldCalculatorViewModels != null) && (FieldCalculatorViewModels.Count > 0)) FieldCalculatorViewModels[0].CancelRequested = true;
+        }
 
         #region public ObservableCollection<TransmissionLossFieldCalculatorViewModel> FieldCalculatorViewModels { get; set; }
 
@@ -114,21 +138,8 @@ namespace ESME.Views.TransmissionLoss
                 case NotifyCollectionChangedAction.Reset:
                     break;
             }
-            StartWorkIfNeeded();
-            var itemCount = FieldCalculatorViewModels.Count;
-            switch (itemCount)
-            {
-                case 0:
-                    WindowTitle = BaseWindowName + "EMPTY";
-                    break;
-                case 1:
-                    WindowTitle = BaseWindowName + "1 item";
-                    break;
-                default:
-                    WindowTitle = BaseWindowName + itemCount + " items";
-                    break;
-            }
-
+            if (!IsPaused) StartWorkIfNeeded();
+            WindowTitle = GetCurrentWindowTitleString();
             if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs));
         }
 
@@ -144,6 +155,12 @@ namespace ESME.Views.TransmissionLoss
         {
             while ((FieldCalculatorViewModels.Count > 0) && (FieldCalculatorViewModels[0].IsCompleted))
             {
+                if (FieldCalculatorViewModels[0].CancelRequested)
+                {
+                    if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]));
+                    else FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
+                    continue;
+                }
                 var runfileName = FieldCalculatorViewModels[0].RunfileName;
                 var runfilePath = Path.GetDirectoryName(runfileName);
                 //var outputFileName = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runfileName) + ".bin");
@@ -204,7 +221,7 @@ namespace ESME.Views.TransmissionLoss
                 if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]));
                 else FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
             }
-            StartWorkIfNeeded();
+            if (!IsPaused) StartWorkIfNeeded();
         }
 
         #endregion
