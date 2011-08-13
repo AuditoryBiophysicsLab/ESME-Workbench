@@ -69,7 +69,7 @@
 			          HorizontalAlignment="Right"
 			          IsEnabled="False" />
 		</Menu>
-        <TransmissionLoss:TransmissionLossMetadataView DataContext="{Binding CASSOutput}" />
+        <TransmissionLoss:TransmissionLossMetadataView DataContext="{Binding CASSOutput}"/>
 		<View:TransmissionLossFieldView DockPanel.Dock="Bottom" />
 
 	</DockPanel>

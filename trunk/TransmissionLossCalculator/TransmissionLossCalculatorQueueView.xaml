@@ -92,6 +92,7 @@
                              Margin="5 2 5 0"
                              x:Name="FieldProgress" 
                              Value="{Binding TotalProgress}" 
+                             Maximum="{Binding MaxTotalProgressValue}"
                              Width="100" />
                 <Button x:Name="CancelButton" 
                         Grid.Column="7"
@@ -164,6 +165,17 @@
     </Window.Resources>
 
     <DockPanel LastChildFill="True">
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Margin="5 2 5 2">
+                    <TextBlock.Text>
+		                <MultiBinding StringFormat="CPU Usage: {0}%">
+			                <Binding Path="CpuUtilization" />
+		                </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </StatusBarItem>
+        </StatusBar>
         <local:NotificationAreaIcon Text="{Binding QueueViewModel.WindowTitle}"
 		                        Icon="Resources\orbz_water.ico"
 		                        MouseDoubleClick="OnNotificationAreaIconDoubleClick">
@@ -240,7 +252,7 @@
                     <StackPanel>
                         <Image Source="Resources\Button-Turn-On-icon.png" />
                         <TextBlock HorizontalAlignment="Center"  
-                                   Text="Autostart is ON" />
+                                   Text="Autostart is ON  " />
                     </StackPanel>
                 </Button>
                 <Button Command="{Binding AutoStartCommand}"

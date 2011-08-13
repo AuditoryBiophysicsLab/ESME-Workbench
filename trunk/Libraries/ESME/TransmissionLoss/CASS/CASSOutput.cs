@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Xml.Serialization;
 using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss.CASS
@@ -97,6 +98,41 @@ namespace ESME.TransmissionLoss.CASS
         #endregion
 
         public string Filename { get; set; }
+
+        #region Calculated properties, not written into the file header
+        [XmlIgnore]
+        public string RadialBearingsString
+        {
+            get
+            {
+                if (_radialBearingsString != null) return _radialBearingsString;
+                var sb = new StringBuilder();
+                foreach (var bearing in RadialBearings)
+                    sb.AppendFormat("{0:0.##}, ", bearing);
+                sb.Remove(sb.Length - 2, 2);    // Remove last comma and space
+                _radialBearingsString = sb.ToString();
+                return _radialBearingsString;
+            }
+        }
+
+        [XmlIgnore]
+        string _radialBearingsString;
+
+        [XmlIgnore]
+        public FileInfo FileInfo
+        {
+            get
+            {
+                return _fileInfo ?? (_fileInfo = new FileInfo(Filename));
+            }
+        }
+
+        [XmlIgnore]
+        FileInfo _fileInfo;
+
+        [XmlIgnore]
+        public int CellCount { get { return RadialCount * DepthCellCount * RangeCellCount; } }
+        #endregion
 
         public static CASSOutput Load(string fileName, bool headerOnly)
         {

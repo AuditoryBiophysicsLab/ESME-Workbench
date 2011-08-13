@@ -79,8 +79,8 @@ namespace ESME.TransmissionLoss.RAM
                 sw.WriteLine("{0:F2} {1:D} {2:D} {3:D}", c0, 6, 0, transmissionLossJob.SoundSource.Radius);
                 sw.WriteLine();
 
-                if (bottomProfile.Profile.Length != rangeCellCount) throw new IndexOutOfRangeException("Ram: Generating a radial configuration requires that the number of range cells be equal to the number of points in the bottom profile");
-                for (var i = 0; i < bottomProfile.Profile.Length; i++)
+                if (bottomProfile.Profile.Count != rangeCellCount) throw new IndexOutOfRangeException("Ram: Generating a radial configuration requires that the number of range cells be equal to the number of points in the bottom profile");
+                for (var i = 0; i < bottomProfile.Profile.Count; i++)
                 {
                     var range = rangeStep * i;
                     var depth = bottomProfile.Profile[i];

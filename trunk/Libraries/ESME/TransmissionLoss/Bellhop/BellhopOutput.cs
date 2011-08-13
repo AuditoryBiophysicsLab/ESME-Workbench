@@ -55,7 +55,10 @@ namespace ESME.TransmissionLoss.Bellhop
                                 if (double.IsNaN(real)) real = 0;
                                 if (double.IsNaN(imag)) imag = 0;
                                 if (source == 0) // Currently we only support a single source with this code
-                                    TransmissionLoss[depth, range] = (float) Math.Abs(Math.Sqrt((real*real) + (imag*imag)));
+                                    TransmissionLoss[depth, range] = (float)Math.Abs(Math.Sqrt((real * real) + (imag * imag)));
+                                else 
+                                    TransmissionLoss[depth, range] = float.NaN;
+                                if (TransmissionLoss[depth, range] < 0) Debugger.Break();
                             } // for Range
                         } // for Depth
                     } // for Source
@@ -94,11 +97,12 @@ namespace ESME.TransmissionLoss.Bellhop
             {
                 for (var range = 0; range < ReceiverRanges.Length; range++)
                 {
-                    curData = TransmissionLoss[ReceiverDepths.Length - depth - 1, range];
-                    if (double.IsNaN(curData)) 
-                        Debug.WriteLine("NaN!");
-
-                    curData = (float) (-20*Math.Log10(Math.Max(curData, 1e-10)));
+                    var originalData = TransmissionLoss[depth, range];
+                    if (double.IsNaN(originalData)) Debugger.Break();
+                    //curData = (float)(-20 * Math.Log10(Math.Max(originalData, 1e-10)));
+                    curData = (float)(-20 * Math.Log10(originalData));
+                    // This is where we're ending up with negative TL values.  Don't think that should happen...
+                    //if (curData < 0) Debugger.Break();
 
                     DataMin = Math.Min(curData, DataMin);
                     DataMax = Math.Max(curData, DataMax);
@@ -107,7 +111,7 @@ namespace ESME.TransmissionLoss.Bellhop
                         total += curData;
                         statValues.Add(curData);
                     }
-                    TransmissionLoss[ReceiverDepths.Length - depth - 1, range] = curData;
+                    TransmissionLoss[depth, range] = curData;
                 } // for (Range)
             } // for (Receiver)
             if (statValues.Count > 0)
