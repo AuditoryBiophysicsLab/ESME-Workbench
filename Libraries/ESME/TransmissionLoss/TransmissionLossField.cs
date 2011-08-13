@@ -113,7 +113,7 @@ namespace ESME.TransmissionLoss
 
         public static TransmissionLossField FromCASS(string cassFileName, bool headerOnly)
         {
-            var cassOutput = CASSOutput.Load(cassFileName, headerOnly);
+            var cassOutput = CASSOutput.FromBinaryFile(cassFileName, headerOnly);
             return FromCASS(cassOutput);
         }
 

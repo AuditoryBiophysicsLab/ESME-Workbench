@@ -228,7 +228,7 @@ namespace ESME.Views.TransmissionLoss
                         }
                     output.Pressures.Add(buffer);
                 }
-                output.Write();
+                output.ToBinaryFile();
                 if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]));
                 else FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
             }
