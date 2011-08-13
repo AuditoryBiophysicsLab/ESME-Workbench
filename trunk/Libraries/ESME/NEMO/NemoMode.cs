@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Xml;
+using System.Xml.Serialization;
+using ESME.Model;
 using HRC.Utility;
 
 namespace ESME.NEMO
 {
-    public class NemoMode : NemoPSM, IEquatable<NemoMode>
+    public class NemoMode : NemoPSM, IEquatable<NemoMode>, IEquatable<AcousticProperties>
     {
         public NemoMode(XmlNode mode, float platformHeight, int modeID) : base(mode)
         {
@@ -97,6 +99,29 @@ namespace ESME.NEMO
                    Compare(DepressionElevationAngle, other.DepressionElevationAngle, tolerance) && 
                    Compare(Radius, other.Radius, tolerance);
         }
+
+        #region public AcousticProperties AcousticProperties { get; set; }
+        [XmlIgnore]
+        public AcousticProperties AcousticProperties
+        {
+            get
+            {
+                return _acousticProperties ?? (_acousticProperties = new AcousticProperties
+                {
+                        DepressionElevationAngle = DepressionElevationAngle,
+                        HighFrequency = HighFrequency,
+                        LowFrequency = LowFrequency,
+                        SourceDepth = SourceDepth,
+                        VerticalBeamWidth = VerticalBeamWidth
+                });
+            }
+        }
+
+        AcousticProperties _acousticProperties;
+        public bool Equals(AcousticProperties other) { return AcousticProperties.Equals(other); }
+
+        #endregion
+
 
         readonly int _hashCode;
         public override int GetHashCode() { return _hashCode; }
