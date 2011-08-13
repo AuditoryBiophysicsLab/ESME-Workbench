@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME.Model;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.CASS;
 using HRC.Services;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -298,18 +299,30 @@ namespace ESME.Mapping
 
         public void Validate()
         {
-            if (LayerType != LayerType.AnalysisPoint)
+            switch (LayerType)
             {
-                ValidationErrorText = null;
-                return;
+                case LayerType.AnalysisPoint:
+                    if (AnalysisPoint == null)
+                    {
+                        ValidationErrorText = "Unable to validate - AnalysisPoint is null";
+                        return;
+                    }
+                    AnalysisPoint.Validate();
+                    ValidationErrorText = AnalysisPoint.ValidationErrorText;
+                    break;
+                case LayerType.Propagation:
+                    if (CASSOutput == null)
+                    {
+                        ValidationErrorText = "Unable to validate - CASSOutput is null";
+                        return;
+                    }
+                    CASSOutput.Validate();
+                    ValidationErrorText = CASSOutput.ValidationErrorText;
+                    break;
+                default:
+                    ValidationErrorText = null;
+                    break;
             }
-            if (AnalysisPoint == null)
-            {
-                ValidationErrorText = "Unable to validate - AnalysisPoint is null";
-                return;
-            }
-            AnalysisPoint.Validate();
-            ValidationErrorText = AnalysisPoint.ValidationErrorText;
         }
 
         #region public AreaStyle AreaStyle { get; set; }
@@ -504,6 +517,33 @@ namespace ESME.Mapping
 
         static readonly PropertyChangedEventArgs LineColorBrushChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.LineColorBrush);
         Color _lineColor = RandomColor;
+
+        #endregion
+
+        #region public CASSOutput CASSOutput { get; set; }
+
+        public CASSOutput CASSOutput
+        {
+            get { return _cassOutput; }
+            set
+            {
+                if (_cassOutput == value) return;
+                if ((value != null) && (_cassOutput != null)) _cassOutput.PropertyChanged -= CASSOutputChanged;
+                _cassOutput = value;
+                NotifyPropertyChanged(CASSOutputChangedEventArgs);
+                if (_cassOutput != null) _cassOutput.PropertyChanged += CASSOutputChanged;
+            }
+        }
+
+        void CASSOutputChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var point = (CASSOutput)sender;
+            point.Validate();
+            ValidationErrorText = point.ValidationErrorText;
+        }
+
+        static readonly PropertyChangedEventArgs CASSOutputChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CASSOutput);
+        CASSOutput _cassOutput;
 
         #endregion
 

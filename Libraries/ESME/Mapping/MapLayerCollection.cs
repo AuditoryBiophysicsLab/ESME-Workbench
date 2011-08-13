@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Media;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 using ThinkGeo.MapSuite.Core;
 
@@ -141,15 +142,15 @@ namespace ESME.Mapping
             {
                 analysisPointLayer = new OverlayShapeMapLayer
                 {
-                        Name = analysisPointName,
-                        LayerType = LayerType.AnalysisPoint,
-                        LineWidth = 1,
-                        CanBeRemoved = true,
-                        CanBeReordered = true,
-                        HasSettings = true,
-                        CanChangeLineColor = true,
-                        CanChangeLineWidth = true,
-                        CanChangeAreaColor = false,
+                    Name = analysisPointName,
+                    LayerType = LayerType.AnalysisPoint,
+                    LineWidth = 1,
+                    CanBeRemoved = true,
+                    CanBeReordered = true,
+                    HasSettings = true,
+                    CanChangeLineColor = true,
+                    CanChangeLineWidth = true,
+                    CanChangeAreaColor = false,
                 };
                 Add(analysisPointLayer);
             }
@@ -177,6 +178,56 @@ namespace ESME.Mapping
                 analysisPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
             }
             analysisPointLayer.Done();
+        }
+
+        public void RemovePropagationPoint(CASSOutput curPoint)
+        {
+            var layerName = string.Format("Prop {0}|{1}|{2}: [{3:0.###}, {4:0.###}]", curPoint.PlatformName, curPoint.SourceName, curPoint.ModeName, curPoint.Latitude, curPoint.Longitude);
+            var propagationPointLayer = Find<OverlayShapeMapLayer>(LayerType.Propagation, layerName);
+            if (propagationPointLayer != null) Remove(propagationPointLayer);
+        }
+
+        public void DisplayPropagationPoint(CASSOutput curPoint)
+        {
+            var layerName = string.Format("Prop {0}|{1}|{2}: [{3:0.###}, {4:0.###}]", curPoint.PlatformName, curPoint.SourceName, curPoint.ModeName, curPoint.Latitude, curPoint.Longitude);
+            var propagationPointLayer = Find<OverlayShapeMapLayer>(LayerType.Propagation, layerName);
+            if (propagationPointLayer == null)
+            {
+                propagationPointLayer = new OverlayShapeMapLayer
+                {
+                    Name = layerName,
+                    LayerType = LayerType.Propagation,
+                    LineWidth = 1,
+                    CanBeRemoved = false,
+                    CanBeReordered = true,
+                    HasSettings = false,
+                    CanChangeLineColor = true,
+                    CanChangeLineWidth = true,
+                    CanChangeAreaColor = false,
+                    IsChecked = false,
+                };
+                Add(propagationPointLayer);
+            }
+
+            propagationPointLayer.CASSOutput = curPoint;
+            propagationPointLayer.Validate();
+
+            propagationPointLayer.Clear();
+            var displayPoints = new List<EarthCoordinate>();
+            var circlePoints = new List<EarthCoordinate>();
+            displayPoints.Add(curPoint);
+            foreach (var radialBearing in curPoint.RadialBearings)
+            {
+                displayPoints.Add(EarthCoordinate.Move(curPoint, radialBearing, curPoint.MaxRangeDistance));
+                displayPoints.Add(curPoint);
+            }
+
+            for (var angle = 0; angle <= 360; angle++)
+                circlePoints.Add(EarthCoordinate.Move(curPoint, angle, curPoint.MaxRangeDistance));
+
+            propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
+            propagationPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
+            propagationPointLayer.Done();
         }
 
 

@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Xml.Serialization;
+using Cinch;
+using ESME.Environment;
+using ESME.Model;
+using HRC.Navigation;
+using HRC.Utility;
 using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.TransmissionLoss.CASS
 {
-    public class CASSOutput
+    public class CASSOutput : EarthCoordinate, IEquatable<AcousticProperties>, ISupportValidation
     {
         #region Public Properties
 
@@ -100,6 +106,30 @@ namespace ESME.TransmissionLoss.CASS
         public string Filename { get; set; }
 
         #region Calculated properties, not written into the file header
+
+        #region public AcousticProperties AcousticProperties { get; set; }
+
+        public AcousticProperties AcousticProperties
+        {
+            get
+            {
+                return _acousticProperties ?? (_acousticProperties = new AcousticProperties
+                {
+                    DepressionElevationAngle = DepressionElevationAngle,
+                    HighFrequency = Frequency,
+                    LowFrequency = 0,
+                    SourceDepth = SourceDepth,
+                    VerticalBeamWidth = VerticalBeamPattern,
+                });
+            }
+        }
+
+        public bool Equals(AcousticProperties other) { return AcousticProperties.Equals(other); }
+
+        AcousticProperties _acousticProperties;
+
+        #endregion
+
         [XmlIgnore]
         public string RadialBearingsString
         {
@@ -133,15 +163,120 @@ namespace ESME.TransmissionLoss.CASS
         [XmlIgnore]
         public int CellCount { get { return RadialCount * DepthCellCount * RangeCellCount; } }
         #endregion
+        #region Validation
+        [XmlIgnore]
+        public WeakReference<Bathymetry> Bathymetry
+        {
+            get { return _bathymetry ?? (_bathymetry = new WeakReference<Bathymetry>(null)); }
+            set
+            {
+                if (_bathymetry == value) return;
+                _bathymetry = value;
+            }
+        }
+
+        WeakReference<Bathymetry> _bathymetry;
+        #region public bool IsValid { get; set; }
+
+        [XmlIgnore]
+        public bool IsValid
+        {
+            get
+            {
+                Validate();
+                return _isValid;
+            }
+            private set
+            {
+                if (_isValid == value) return;
+                _isValid = value;
+                NotifyPropertyChanged(IsValidChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsValidChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPoint>(x => x.IsValid);
+        bool _isValid;
+
+        #endregion
+
+        #region public string ValidationErrorText { get; set; }
+        [XmlIgnore]
+        public string ValidationErrorText
+        {
+            get
+            {
+                Validate();
+                return _validationErrorText;
+            }
+            private set
+            {
+                if (_validationErrorText == value) return;
+                _validationErrorText = value;
+                IsValid = string.IsNullOrEmpty(_validationErrorText);
+                NotifyPropertyChanged(ValidationErrorTextChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ValidationErrorTextChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPoint>(x => x.ValidationErrorText);
+        string _validationErrorText;
+
+        #endregion
+
+        public void Validate()
+        {
+            if ((Bathymetry == null) || (Bathymetry.Target == null))
+            {
+                ValidationErrorText = "Unable to validate";
+                return;
+            }
+
+            var bathymetry = Bathymetry.Target;
+            if (!bathymetry.Samples.GeoRect.Contains(this))
+            {
+                ValidationErrorText = "Propagation point not contained within bathymetry bounds";
+                return;
+            }
+
+            var errors = new StringBuilder();
+
+            foreach (var radialBearing in RadialBearings)
+            {
+                var radialEndPoint = new EarthCoordinate(this, radialBearing, MaxRangeDistance);
+                if (!bathymetry.Samples.GeoRect.Contains(radialEndPoint))
+                {
+                    //Console.WriteLine("Source name {0} location ({1}, {2}) bearing {3} endpoint ({4}, {5}) outside of bathymetry", Name, Latitude, Longitude, radialBearing, radialEndPoint.Latitude, radialEndPoint.Longitude);
+                    errors.AppendLine(string.Format("Radial with bearing {0} extends beyond bathymetry bounds", radialBearing));
+                }
+            }
+            ValidationErrorText = errors.ToString();
+        }
+
+        #endregion
 
         public static CASSOutput Load(string fileName, bool headerOnly)
         {
             var result = new CASSOutput {Filename = fileName};
-            using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
+            FileStream stream = null;
+            var count = 10;
+            var lastException = new Exception("No exception.  Isn't that wierd?");
+            while (count > 0)
+            {
+                try
+                {
+                    stream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Thread.Sleep(100);
+                    lastException = e;
+                }
+                count--;
+            }
+            if (stream == null) throw (lastException);
+            using (var reader = new BinaryReader(stream))
             {
                 result.ReadFileHeader(reader);
-                if (headerOnly) return result;
-                
                 
                 #region bearing header read
 
@@ -166,6 +301,8 @@ namespace ESME.TransmissionLoss.CASS
                 for (var i = 0; i < result.DepthCellCount; i++) result.DepthCells[i] = reader.ReadSingle();
 
                 #endregion
+
+                if (headerOnly) return result;
 
                 #region pressure data read
 
@@ -454,6 +591,9 @@ namespace ESME.TransmissionLoss.CASS
             SourceRefLonLocation = reader.ReadSingle();
             SourceRefLonLocationUnits = ParseCASSString(reader, 10, '\0');
 
+            Latitude = SourceRefLatLocation;
+            Longitude = SourceRefLonLocation;
+
             PlatformName = ParseCASSString(reader, 50, '\0');
             SourceName = ParseCASSString(reader, 50, '\0');
             ModeName = ParseCASSString(reader, 50, '\0');
@@ -503,17 +643,26 @@ namespace ESME.TransmissionLoss.CASS
 
             #endregion
         }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
+
+        #endregion
+
     }
 
-    public class CASSOutputs : List<CASSOutput>
+    public class CASSOutputs : List<CASSOutput>, INotifyCollectionChanged
     {
-        public CASSOutputs(string directoryToScan, string filePattern, EventHandler listUpdatedHandler = null)
+        public CASSOutputs(string directoryToScan, string filePattern, NotifyCollectionChangedEventHandler collectionChangedHandler = null, List<AcousticProperties> propertiesToMatch = null)
         {
             _directory = directoryToScan;
             _pattern = filePattern;
-            if (listUpdatedHandler != null)
+            _propertiesToMatch = propertiesToMatch;
+            if (collectionChangedHandler != null)
             {
-                ListUpdated += listUpdatedHandler;
+                CollectionChanged += collectionChangedHandler;
                 Task.Factory.StartNew(() =>
                 {
                     SetWatch();
@@ -529,6 +678,8 @@ namespace ESME.TransmissionLoss.CASS
 
         readonly string _directory;
         readonly string _pattern;
+        readonly List<AcousticProperties> _propertiesToMatch;
+        readonly object _lockObject = new object();
 
         public void RefreshInBackground() { Task.Factory.StartNew(Refresh); }
 
@@ -537,22 +688,50 @@ namespace ESME.TransmissionLoss.CASS
             if (_isRefreshing) return;
             _isRefreshing = true;
             Clear();
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             var files = Directory.EnumerateFiles(_directory, _pattern);
             foreach (var file in files)
-                Add(CASSOutput.Load(file, true));
-            OnListUpdated();
+                Add(file);
             _isRefreshing = false;
         }
 
-        public event EventHandler ListUpdated;
-
-        protected virtual void OnListUpdated()
+        void Remove(string fileName)
         {
-            if (ListUpdated != null) ListUpdated(this, new EventArgs());
+            CASSOutput target;
+            lock (_lockObject)
+            {
+                target = Find(item => item.Filename == fileName);
+                if (target == null) return;
+                Remove(target);
+            }
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, target));
+        }
+
+        void Add(string fileName)
+        {
+            CASSOutput target;
+            var itemAdded = false;
+            lock (_lockObject)
+            {
+                target = Find(item => item.Filename == fileName);
+                if (target != null) return;
+                target = CASSOutput.Load(fileName, true);
+                if (_propertiesToMatch == null)
+                {
+                    Add(target);
+                    itemAdded = true;
+                }
+                else if (_propertiesToMatch.Any(property => property.Equals(target.AcousticProperties)))
+                {
+                    Add(target);
+                    itemAdded = true;
+                }
+            }
+            if (!itemAdded) return;
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, target));
         }
 
         FileSystemWatcher _dirWatcher;
-        Timer _dirTimer;
         bool _isRefreshing;
 
         void SetWatch()
@@ -568,15 +747,22 @@ namespace ESME.TransmissionLoss.CASS
 
         void DirectoryChanged(object sender, FileSystemEventArgs e)
         {
-            Debug.WriteLine("[Raw] Directory: " + e.Name + " " + e.ChangeType);
-            if (_dirTimer != null) return;
-            _dirTimer = new Timer(1000) { AutoReset = false, Enabled = true };
-            _dirTimer.Elapsed += (s1, e1) =>
+            //Debug.WriteLine("[Raw] Directory: " + e.Name + " " + e.ChangeType);
+            switch (e.ChangeType)
             {
-                _dirTimer = null;
-                Debug.WriteLine("Directory: " + e.Name + " " + e.ChangeType);
-                Task.Factory.StartNew(Refresh);
-            };
+                case WatcherChangeTypes.Created:
+                    Task.Factory.StartNew(() => Add(e.FullPath));
+                    break;
+                case WatcherChangeTypes.Deleted:
+                    Task.Factory.StartNew(() => Remove(e.FullPath));
+                    break;
+            }
+        }
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            if (CollectionChanged != null) CollectionChanged(this, e);
         }
 
     }

@@ -15,5 +15,7 @@
         BathymetryRaster,
         AnalysisPoint,
         Animal,
+        Propagation,
+        Pressure,
     }
 }

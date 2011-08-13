@@ -16,6 +16,7 @@ using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Mapping;
+using ESME.Model;
 using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
@@ -65,9 +66,31 @@ namespace ESME.Metadata
 
         static readonly PropertyChangedEventArgs CASSOutputsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.CASSOutputs);
         CASSOutputs _cassOutputs;
-        void CASSOutputsUpdated(object sender, EventArgs args)
+
+        void CASSOutputsChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            Debug.WriteLine("CASSOutputsUpdated");
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (CASSOutput newItem in args.NewItems)
+                    {
+                        Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
+                        if ((_bathymetry == null) || (!_bathymetry.IsAlive)) _bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
+                        newItem.Bathymetry = _bathymetry;
+                        Dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (CASSOutput oldItem in args.OldItems)
+                    {
+                        Debug.WriteLine("Removed CASSOutput: {0}|{1}|{2}", oldItem.PlatformName, oldItem.SourceName, oldItem.ModeName);
+                        Dispatcher.InvokeIfRequired(() => MapLayers.RemovePropagationPoint(oldItem));
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    Debug.WriteLine("CASSOutputs has been cleared");
+                    break;
+            }
         }
 
         #endregion
@@ -92,7 +115,12 @@ namespace ESME.Metadata
                     _scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
                     _propagationPath = Path.Combine(_scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame);
                     _pressurePath = Path.Combine(_scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame);
-                    CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsUpdated);
+                    if (_nemoFile.Scenario.DistinctModes != null)
+                    {
+                        _distinctModeProperties = new List<AcousticProperties>();
+                        foreach (var mode in _nemoFile.Scenario.DistinctModes)
+                            _distinctModeProperties.Add(mode.AcousticProperties);
+                    }
                     DisplayScenario();
                     _rangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[_nemoFile.Scenario.SimAreaName];
                     var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
@@ -121,6 +149,7 @@ namespace ESME.Metadata
 
         static readonly PropertyChangedEventArgs NemoFileChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.NemoFile);
         NemoFile _nemoFile;
+        List<AcousticProperties> _distinctModeProperties;
 
         string _rangeComplexPath;
         string _areasPath;
@@ -272,6 +301,8 @@ namespace ESME.Metadata
             }
             ZoomToScenarioHandler();
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+            // Get a list of transmission loss files that match the modes in the current scenario
+            CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
         }
 
         #endregion
