@@ -197,10 +197,10 @@ namespace ESME.Mapping
                 {
                     Name = layerName,
                     LayerType = LayerType.Propagation,
-                    LineWidth = 1,
+                    LineWidth = 4,
                     CanBeRemoved = false,
                     CanBeReordered = true,
-                    HasSettings = false,
+                    HasSettings = true,
                     CanChangeLineColor = true,
                     CanChangeLineWidth = true,
                     CanChangeAreaColor = false,
@@ -215,18 +215,52 @@ namespace ESME.Mapping
             propagationPointLayer.Clear();
             var displayPoints = new List<EarthCoordinate>();
             var circlePoints = new List<EarthCoordinate>();
-            displayPoints.Add(curPoint);
-            foreach (var radialBearing in curPoint.RadialBearings)
+            var radialCount = curPoint.RadialBearings.Count();
+            for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
             {
-                displayPoints.Add(EarthCoordinate.Move(curPoint, radialBearing, curPoint.MaxRangeDistance));
+                displayPoints.Clear();
+#if false
                 displayPoints.Add(curPoint);
+                const float wiggleSize = 5;
+                var wiggleOffset = -wiggleSize;
+                var wiggleDirection = 1;
+                const int wiggleSteps = 8;
+                for (var wiggleIndex = 0; wiggleIndex < wiggleSteps; wiggleIndex++)
+                {
+                    displayPoints.Add(EarthCoordinate.Move(curPoint, curPoint.RadialBearings[radialIndex] + wiggleOffset, (curPoint.MaxRangeDistance / wiggleSteps) * (wiggleIndex + 1)));
+                    wiggleOffset += wiggleSize * wiggleDirection;
+                    if (Math.Abs(wiggleOffset) == wiggleSize) wiggleDirection *= -1;
+                }
+#endif
+                var curRadialBearing = curPoint.RadialBearings[radialIndex];
+                // Line from center to radius
+                displayPoints.Add(curPoint);
+                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
+                propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
+                displayPoints.Clear();
+#if false
+                // arrow halfway along radial
+                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance * .5));
+                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing + 10, curPoint.MaxRangeDistance * .4));
+                propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
+                displayPoints.Clear();
+                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance * .5));
+                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing - 10, curPoint.MaxRangeDistance * .4));
+                propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
+                displayPoints.Clear();
+#endif
+                // arrow at end of radial
+                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing + 5, curPoint.MaxRangeDistance * .9));
+                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
+                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing - 5, curPoint.MaxRangeDistance * .9));
+                propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
+                displayPoints.Clear();
             }
 
-            for (var angle = 0; angle <= 360; angle++)
-                circlePoints.Add(EarthCoordinate.Move(curPoint, angle, curPoint.MaxRangeDistance));
+            //for (var angle = 0; angle <= 360; angle++)
+            //    circlePoints.Add(EarthCoordinate.Move(curPoint, angle, curPoint.MaxRangeDistance));
 
-            propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
-            propagationPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
+            //propagationPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
             propagationPointLayer.Done();
         }
 
