@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Navigation;
@@ -25,6 +26,9 @@ namespace ESME.TransmissionLoss
             StandardDeviation = bellhopOutput.StandardDeviation;
 
             TransmissionLoss = bellhopOutput.TransmissionLoss;
+            //for (var depth = 0; depth < TransmissionLoss.GetLength(0); depth++)
+            //    for (var range = 0; range < TransmissionLoss.GetLength(1); range++)
+            //        if (TransmissionLoss[depth, range] < 0) Debugger.Break();
 
             _rangeStride = sizeof(float) * TransmissionLoss.GetLength(1);
 

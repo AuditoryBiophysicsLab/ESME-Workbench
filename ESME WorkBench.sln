@@ -207,6 +207,7 @@ Global
 		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|Win32.ActiveCfg = Release|Any CPU
 		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|x64.ActiveCfg = Release|Any CPU
 		{DBCCF1ED-1425-4722-AF28-1F0620DCE19C}.Release|x86.ActiveCfg = Release|Any CPU

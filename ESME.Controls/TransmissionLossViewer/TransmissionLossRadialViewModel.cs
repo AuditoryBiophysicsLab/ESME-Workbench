@@ -378,7 +378,9 @@ namespace ESME.Views.TransmissionLossViewer
             
             var profile = new BottomProfile(_transmissionLossRadial.Ranges.Count, transect, _bathymetry);
             //todo ; later try to subtract half a depth cell from each depth (off-by-1/2 error on display)
-            var depths = profile.Profile.Select(depth => depth * (actualControlHeight / _transmissionLossRadial.Depths.Last())).ToList();
+            //todo: Dave changed the bottom profile format on 13 Aug 2011.  New format is a list of range/depth pairs where depth changes by more than 1cm
+            // this algorithm will need to change if it's ever used again
+            var depths = profile.Profile.Select(point => point.Depth * (actualControlHeight / _transmissionLossRadial.Depths.Last())).ToList();
             var pixelsPerRange = (actualControlWidth / _transmissionLossRadial.Ranges.Count);
             var sb = new StringBuilder();
 

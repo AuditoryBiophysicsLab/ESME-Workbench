@@ -23,7 +23,7 @@ namespace ESME.Views.TransmissionLoss
         {
             Status = "Starting";
             TransmissionLossRadial = ComputeRadial(_bellhopRunFileRadial.Configuration, _bellhopRunFileRadial.BottomProfile,_bellhopRunFileRadial.TopReflectionCoefficient, _bellhopRunFileRadial.BearingFromSourceDegrees);
-            Status = CancelRequested ? "Canceled" : "Complete";
+            Status = TransmissionLossRadial == null ? "Error" : CancelRequested ? "Canceled" : "Complete";
             OnCalculationCompleted();
         }
 
@@ -82,7 +82,7 @@ namespace ESME.Views.TransmissionLoss
                     count++;
                 }
 
-                if (ErrorText.Contains("forrtl"))
+                if (ErrorText.Contains("forrtl") || (ErrorText.Contains("Error")))
                 {
                     Console.WriteLine("{0}: Bellhop failure: {1}", DateTime.Now, ErrorText);
                     Console.WriteLine("{0}: Bellhop input: {1}", DateTime.Now, bellhopConfiguration);

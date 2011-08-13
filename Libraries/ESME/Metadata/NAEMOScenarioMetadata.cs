@@ -67,11 +67,10 @@ namespace ESME.Metadata
         CASSOutputs _cassOutputs;
         void CASSOutputsUpdated(object sender, EventArgs args)
         {
-            
+            Debug.WriteLine("CASSOutputsUpdated");
         }
 
         #endregion
-
 
         #region public NemoFile NemoFile { get; set; }
         [XmlIgnore]
@@ -93,7 +92,7 @@ namespace ESME.Metadata
                     _scenarioPath = Path.GetDirectoryName(_nemoFile.FileName);
                     _propagationPath = Path.Combine(_scenarioPath, "Propagation", _nemoFile.Scenario.TimeFrame);
                     _pressurePath = Path.Combine(_scenarioPath, "Pressure", _nemoFile.Scenario.TimeFrame);
-                    //CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsUpdated);
+                    CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsUpdated);
                     DisplayScenario();
                     _rangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[_nemoFile.Scenario.SimAreaName];
                     var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -6,11 +7,13 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Timers;
 using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Data;    
 using ESME.Views.TransmissionLoss;
+using HRC.Utility;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 
@@ -19,13 +22,24 @@ namespace TransmissionLossCalculator
     [ExportViewModel("TransmissionLossQueueViewModel")]
     public class TransmissionLossQueueViewModel : ViewModelBase
     {
-        IMessageBoxService _messageBoxService;
+        readonly IMessageBoxService _messageBoxService;
+        readonly CpuInfo _cpuInfo;
+        readonly DispatcherTimer _dispatcherTimer;
+        readonly Timer _timer;
 
         [ImportingConstructor]
         public TransmissionLossQueueViewModel(IMessageBoxService messageBoxService)
         {
             _messageBoxService = messageBoxService;
-            QueueViewModel = new TransmissionLossQueueCalculatorViewModel {IsPaused = !IsAutoStart};
+            _cpuInfo = new CpuInfo();
+            QueueViewModel = new TransmissionLossQueueCalculatorViewModel
+            {
+                IsPaused = !IsAutoStart,
+                PhysicalCores = _cpuInfo.PhysicalCores,
+                LogicalCores = _cpuInfo.LogicalCores,
+                CpuDescription = _cpuInfo.CpuDescriptions[0],
+            };
+
             WorkItems = new ObservableCollection<string>();
             DirectoryScanners = new WorkDirectoryScanners(WorkItems);
             _dispatcher = Dispatcher.CurrentDispatcher;
@@ -57,6 +71,34 @@ namespace TransmissionLossCalculator
                 }
             };
             AddWorkDirectories(WorkDirectories);
+            _timer = new Timer {Interval = 1000, Enabled = true, AutoReset = true};
+            _timer.Elapsed += (s, e) =>
+            {
+                try
+                {
+                    CpuUtilization = (int)_cpuInfo.CurrentLoad;
+                    if (CpuUtilization < 90)
+                    {
+                        _timer.Interval = 1000;
+                        _dispatcherTimer.Interval = OneSecond;
+                    }
+                    else
+                    {
+                        _timer.Interval = 5000;
+                        _dispatcherTimer.Interval = FiveSeconds;
+                    }
+                }
+                catch {}
+            };
+            _dispatcherTimer = new DispatcherTimer(OneSecond, DispatcherPriority.ApplicationIdle, TimerTick, _dispatcher);
+        }
+
+        static readonly TimeSpan OneSecond = new TimeSpan(0, 0, 0, 1);
+        static readonly TimeSpan FiveSeconds = new TimeSpan(0, 0, 0, 5);
+
+        void TimerTick(object sender, EventArgs args)
+        {
+            NotifyPropertyChanged(CpuUtilizationChangedEventArgs);
         }
 
         WorkDirectories WorkDirectories { get; set; }
@@ -76,6 +118,12 @@ namespace TransmissionLossCalculator
         {
             DirectoryScanners.Remove(workDirectory);
         }
+
+        #region public int CpuUtilization { get; set; }
+        public int CpuUtilization { get; private set; }
+
+        static readonly PropertyChangedEventArgs CpuUtilizationChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueViewModel>(x => x.CpuUtilization);
+        #endregion
 
         #region public ObservableCollection<string> WorkItems { get; set; }
 
@@ -300,8 +348,10 @@ namespace TransmissionLossCalculator
 
         void QuitHandler()
         {
-            var result = _messageBoxService.ShowYesNo("Really exit Transmission Loss Calculator?", CustomDialogIcons.Question);
+            var result = _messageBoxService.ShowYesNo("Really quit Transmission Loss Calculator?", CustomDialogIcons.Question);
             if (result != CustomDialogResults.Yes) return;
+            _dispatcherTimer.Stop();
+            _timer.Stop();
             QueueViewModel.IsPaused = true;
             QueueViewModel.CancelActiveCalculation();
             Application.Current.Shutdown();

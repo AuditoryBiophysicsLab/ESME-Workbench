@@ -12,9 +12,6 @@ namespace ESME.TransmissionLoss.Bellhop
         //    SedimentProperties Sediment, BottomProfile bottomProfile, SoundSpeedProfileProperties SSP, int NumRangeCells, int NumDepthCells, int NumBeams)
         public static string GetRadialConfiguration(TransmissionLossJob transmissionLossJob, SoundSpeedProfile ssp, SedimentType sediment, float maxCalculationDepthMeters, int rangeCellCount, int depthCellCount, bool useSurfaceReflection, bool useVerticalBeamforming, bool generateArrivalsFile, int beamCount)
         {
-            double angle1,
-                   angle2;
-
             using (var sw = new StringWriter())
             {
                 sw.WriteLine("'TL'");
@@ -33,8 +30,9 @@ namespace ESME.TransmissionLoss.Bellhop
                 foreach (var depthValuePair in ssp.Data)
                     sw.WriteLine("{0:F} {1:F} /", depthValuePair.Depth, depthValuePair.Value);
 
+                //sw.WriteLine("'V*', 0.0"); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)
                 sw.WriteLine("'A*', 0.0"); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)
-                sw.WriteLine("{0:F} {1:F} {2:F} {3:F} {4:F} {5:F} /", maxCalculationDepthMeters, sediment.CompressionWaveSpeed, 0, sediment.Density, sediment.CompressionWaveCoefficient, 0);
+                sw.WriteLine("{0:F} {1:F} {2:F} {3:F} {4:F} {5:F} /", maxCalculationDepthMeters, sediment.CompressionWaveSpeed, sediment.ShearWaveSpeed, sediment.Density, sediment.LossParameter, 0);
                 // Source and Receiver Depths and Ranges
                 sw.WriteLine("1    !NSD"); // Number of Source Depths
                 sw.WriteLine("  {0:F} / ! source_depth", Math.Max(1, transmissionLossJob.SoundSource.AcousticProperties.SourceDepth)); // source depth
@@ -44,15 +42,17 @@ namespace ESME.TransmissionLoss.Bellhop
                 sw.WriteLine("  0.0 {0:F} /  ! start_range (0.0) to max_range (in km)", transmissionLossJob.SoundSource.Radius/1000.0);
 
                 if (generateArrivalsFile) sw.WriteLine("'AB'");  // aB
-                else sw.WriteLine(useVerticalBeamforming ? "'IG*'" : "'I'");
+                else sw.WriteLine(useVerticalBeamforming ? "'CG*'" : "'C'");
                 // if useVerticalBeamforming is true, then SBPFIL must be present (Source Beam Pattern file)
                 sw.WriteLine("{0}", beamCount); // Number of beams
-                angle1 = transmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle - (transmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth / 2);
-                angle2 = transmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle + (transmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth / 2);
-                sw.WriteLine(angle1.ToString("###0.00") + " " + angle2.ToString("###0.00") + " /"); // Beam fan half-angles (negative angles are toward the surface
+                //sw.WriteLine("0"); // Number of beams
+                var verticalHalfAngle = transmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth / 2;
+                var angle1 = transmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle - verticalHalfAngle;
+                var angle2 = transmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle + verticalHalfAngle;
+                sw.WriteLine("{0:F} {1:F} /", angle1, angle2); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("-60.00 60.00 /"); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("{0:F} {1:F} {2:F} ! step zbox(meters) rbox(km)", experiment.TransmissionLossSettings.DepthCellSize, RealBottomDepth_Meters + 100, (bottomProfile.Length / 1000.0) * 1.01);
-                sw.WriteLine("0 {0:F} {1:F} ! step zbox(meters) rbox(km)", maxCalculationDepthMeters + 100, (transmissionLossJob.SoundSource.Radius / 1000.0) * 1.01);
+                sw.WriteLine("2.0 {0:F} {1:F} ! step zbox(meters) rbox(km)", maxCalculationDepthMeters * 1.01, (transmissionLossJob.SoundSource.Radius / 1000.0) * 1.01);
                 return sw.ToString();
             }
         }

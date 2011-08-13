@@ -118,6 +118,24 @@ namespace ESME.Views.TransmissionLoss
 
         #endregion
 
+        #region public float MaxTotalProgressValue { get; set; }
+
+        public float MaxTotalProgressValue
+        {
+            get { return _maxTotalProgressValue; }
+            set
+            {
+                if (_maxTotalProgressValue == value) return;
+                _maxTotalProgressValue = value;
+                NotifyPropertyChanged(MaxTotalProgressValueChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MaxTotalProgressValueChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossFieldCalculatorViewModel>(x => x.MaxTotalProgressValue);
+        float _maxTotalProgressValue;
+
+        #endregion
+
         #region public int RadialCount { get; set; }
 
         public int RadialCount
@@ -204,6 +222,7 @@ namespace ESME.Views.TransmissionLoss
                 windSpeeds[bearingIndex] = _environment.EnvironmentInformation.Wind.TimePeriods[0].EnvironmentData[curTransect.MidPoint].Data;
             }
             maxCalculationDepthMeters *= 1.1f;
+            //maxCalculationDepthMeters = 2000;
             var depthCellCount = (int)Math.Round((maxCalculationDepthMeters / depthCellSize)) + 1;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
@@ -235,9 +254,7 @@ namespace ESME.Views.TransmissionLoss
                             if (_dispatcher != null) ((BellhopRadialCalculatorViewModel)s).Dispatcher = _dispatcher;
                             if (e.PropertyName != "ProgressPercent") return;
                             //float radialCount = RadialCalculatorViewModels.Count;
-                            var progress =
-                                    RadialCalculatorViewModels.Sum(radial => radial.ProgressPercent / radialCount);
-                            TotalProgress = progress;
+                            TotalProgress = RadialCalculatorViewModels.Sum(radial => radial.ProgressPercent);
                         };
                         radialViewModel.CalculationCompleted += (s, e) => RadialCount = RadialCalculatorViewModels.Count(radial => radial.ProgressPercent < 100);
                         if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => RadialCalculatorViewModels.Add(radialViewModel));
@@ -368,7 +385,7 @@ namespace ESME.Views.TransmissionLoss
 
         bool IsCancelCommandEnabled
         {
-            get { return (!CancelRequested) && (TotalProgress < 100); }
+            get { return (!CancelRequested) && (TotalProgress < MaxTotalProgressValue); }
         }
 
         void CancelHandler() { CancelRequested = true; }
@@ -401,8 +418,8 @@ namespace ESME.Views.TransmissionLoss
             //if (TransmissionLossField.Radials == null) throw new ApplicationException("Radials are null");
             var runFile = (TransmissionLossRunFile) args.Argument;
             var radialNum = 0;
-            var radialProgress = 100f/runFile.TransmissionLossRunFileRadials.Count;
             TotalProgress = 0f;
+            MaxTotalProgressValue = 100 * runFile.TransmissionLossRunFileRadials.Count;
 
             Status = "Calculating";
 
@@ -411,7 +428,7 @@ namespace ESME.Views.TransmissionLoss
                 var localRadialNum = Interlocked.Increment(ref radialNum);
                 var radialViewModel = RadialCalculatorViewModels[localRadialNum - 1];
                 radialViewModel.Start();
-                return radialProgress;
+                return 100;
             }, finalResult => TotalProgress += finalResult);
 
             if (CancelRequested)

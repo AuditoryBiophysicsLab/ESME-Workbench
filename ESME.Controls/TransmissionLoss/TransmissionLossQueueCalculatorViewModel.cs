@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Threading;
@@ -21,6 +22,9 @@ namespace ESME.Views.TransmissionLoss
             Dispatcher = Dispatcher.CurrentDispatcher;
         }
 
+        public uint PhysicalCores { get; set; }
+        public uint LogicalCores { get; set; }
+        public string CpuDescription { get; set; }
         #endregion
 
         #region public Dispatcher Dispatcher { get; set; }
@@ -175,8 +179,8 @@ namespace ESME.Views.TransmissionLoss
                     SystemNodeName = System.Environment.MachineName,
                     OperatingSystemRelease = System.Environment.OSVersion.ServicePack,
                     OperatingSystemVersion = System.Environment.OSVersion.Platform.ToString(),
-                    MachineType = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"),
-                    ProcessorType = System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"),
+                    MachineType = string.Format("{0}/{1} phys/logical core(s)", PhysicalCores, LogicalCores),
+                    ProcessorType = CpuDescription,
                     Title = Path.GetFileNameWithoutExtension(runfileName),
                     SiteName = FieldCalculatorViewModels[0].TransmissionLossRunFile.RangeComplexName,
                     SiteRefLatLocation = (float)runFile.ReferenceLocation.Latitude,
@@ -216,7 +220,12 @@ namespace ESME.Views.TransmissionLoss
                     var buffer = new float[radial.Depths.Count, radial.Ranges.Count];
                     for (var rangeIndex = 0; rangeIndex < radial.Ranges.Count; rangeIndex++)
                         for (var depthIndex = 0; depthIndex < radial.Depths.Count; depthIndex++)
-                            buffer[depthIndex, rangeIndex] = runFile.TransmissionLossJob.SoundSource.SourceLevel - radial[depthIndex, rangeIndex];
+                        {
+                            var spl = runFile.TransmissionLossJob.SoundSource.SourceLevel -
+                                                             radial[depthIndex, rangeIndex];
+                            //if (spl > runFile.TransmissionLossJob.SoundSource.SourceLevel) Debugger.Break();
+                            buffer[depthIndex, rangeIndex] = spl;
+                        }
                     output.Pressures.Add(buffer);
                 }
                 output.Write();
