@@ -802,6 +802,8 @@ namespace ESME.Mapping
                     case LayerType.BottomType:
                     case LayerType.WindSpeed:
                     case LayerType.AnalysisPoint:
+                    case LayerType.Propagation:
+                    case LayerType.Pressure:
                         return Visibility.Visible;
                 }
             }
