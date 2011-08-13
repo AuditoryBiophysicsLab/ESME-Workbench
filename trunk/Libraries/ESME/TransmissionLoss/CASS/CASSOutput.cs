@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
@@ -163,6 +164,7 @@ namespace ESME.TransmissionLoss.CASS
         [XmlIgnore]
         public int CellCount { get { return RadialCount * DepthCellCount * RangeCellCount; } }
         #endregion
+
         #region Validation
         [XmlIgnore]
         public WeakReference<Bathymetry> Bathymetry
@@ -253,9 +255,91 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
-        public static CASSOutput Load(string fileName, bool headerOnly)
+        #region public bool IsRadiusSufficient { get; set; }
+        public bool IsRadiusSufficient
         {
-            var result = new CASSOutput {Filename = fileName};
+            get { return _isRadiusSufficient; }
+            set
+            {
+                if (_isRadiusSufficient == value) return;
+                _isRadiusSufficient = value;
+                NotifyPropertyChanged(IsRadiusSufficientChangedEventArgs);
+                if (_isRadiusSufficient) return;
+                if (string.IsNullOrEmpty(ValidationErrorText)) ValidationErrorText = "Calculation radius too small";
+                else ValidationErrorText += "\r\nCalculation radius too small";
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsRadiusSufficientChangedEventArgs = ObservableHelper.CreateArgs<CASSOutput>(x => x.IsRadiusSufficient);
+        bool _isRadiusSufficient;
+
+        #endregion
+
+        #region public float ThresholdRadius { get; set; }
+
+        public float ThresholdRadius
+        {
+            get { return _thresholdRadius; }
+            set
+            {
+                if (_thresholdRadius == value) return;
+                _thresholdRadius = value;
+                NotifyPropertyChanged(ThresholdRadiusChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ThresholdRadiusChangedEventArgs = ObservableHelper.CreateArgs<CASSOutput>(x => x.ThresholdRadius);
+        float _thresholdRadius;
+
+        #endregion
+
+        public void CheckThreshold(float threshold, Dispatcher dispatcher)
+        {
+            if (SourceLevel < threshold)
+            {
+                
+            }
+            var unloadAfterCheck = false;
+            if (Pressures == null)
+            {
+                Load();
+                unloadAfterCheck = true;
+            }
+            if (Pressures == null) throw new ApplicationException("No radial data found");
+            var allRadialsBelowThreshold = true;
+            var thresholdRadii = new List<float>();
+            Parallel.ForEach(Pressures, currentRadial =>
+            {
+                float rangeBelowThreshold;
+                var isBelowThreshold = IsRadialBelowThreshold(currentRadial, threshold, out rangeBelowThreshold);
+                if (!isBelowThreshold) allRadialsBelowThreshold = false;
+                lock (thresholdRadii) thresholdRadii.Add(rangeBelowThreshold);
+            });
+            ThresholdRadius = thresholdRadii.Max();
+            dispatcher.InvokeIfRequired(() => IsRadiusSufficient = allRadialsBelowThreshold);
+            if (unloadAfterCheck) Pressures = null;
+        }
+
+        public bool IsRadialBelowThreshold(float[,] radial, float thresholdValue, out float rangeBelowThreshold)
+        {
+            rangeBelowThreshold = MaxRangeDistance;
+            var initialCheck = true;
+            float maxPressure;
+            for (var rangeIndex = RangeCellCount - 1; rangeIndex > 0; rangeIndex--)    // Start at the end and work backwards
+            {
+                maxPressure = float.MinValue;
+                for (var depthIndex = 0; depthIndex < DepthCellCount; depthIndex++)
+                    maxPressure = Math.Max(maxPressure, radial[depthIndex, rangeIndex]);
+                if ((initialCheck) && (maxPressure >= thresholdValue)) return false;
+                initialCheck = false;
+                if (maxPressure >= thresholdValue) return true;
+                rangeBelowThreshold = RangeDistanceIncrement * rangeIndex;
+            }
+            return true;
+        }
+
+        public static CASSOutput FromBinaryFile(string fileName, bool headerOnly)
+        {
             FileStream stream = null;
             var count = 10;
             var lastException = new Exception("No exception.  Isn't that wierd?");
@@ -276,52 +360,42 @@ namespace ESME.TransmissionLoss.CASS
             if (stream == null) throw (lastException);
             using (var reader = new BinaryReader(stream))
             {
-                result.ReadFileHeader(reader);
-                
-                #region bearing header read
-
-                result.RadialCount = (int)reader.ReadSingle(); //note: comes in as a float, cast to int. See PH's docs
-                result.RadialBearings = new float[result.RadialCount];
-                for (var i = 0; i < result.RadialCount; i++) result.RadialBearings[i] = reader.ReadSingle();
-
-                #endregion
-
-                #region range header read
-
-                result.RangeCellCount = (int)reader.ReadSingle();
-                result.RangeCells = new float[result.RangeCellCount];
-                for (var i = 0; i < result.RangeCellCount; i++) result.RangeCells[i] = reader.ReadSingle();
-
-                #endregion
-
-                #region depth header read
-
-                result.DepthCellCount = (int)reader.ReadSingle();
-                result.DepthCells = new float[result.DepthCellCount];
-                for (var i = 0; i < result.DepthCellCount; i++) result.DepthCells[i] = reader.ReadSingle();
-
-                #endregion
-
-                if (headerOnly) return result;
-
-                #region pressure data read
-
-                result.Pressures = new List<float[,]>();
-                foreach (var pressure in result.RadialBearings.Select(bearing => new float[result.DepthCellCount,result.RangeCellCount])) 
-                {
-                    for (var i = 0; i < result.RangeCellCount; i++)
-                        for (var j = 0; j < result.DepthCellCount; j++)
-                            pressure[j, i] = reader.ReadSingle();
-                    result.Pressures.Add(pressure);
-                }
-
-                #endregion
+                var result = new CASSOutput { Filename = fileName };
+                result.Load(reader, headerOnly);
+                return result;
             }
-
-            return result;
         }
 
-        public static void Write(string cassOutputFileName, TransmissionLossField transmissionLossField)
+        public void Load(string fileName = null, bool headerOnly = false)
+        {
+            if (fileName != null) Filename = fileName;
+            if (string.IsNullOrEmpty(Filename)) throw new NullReferenceException("Filename is null or empty");
+
+            FileStream stream = null;
+            var count = 10;
+            var lastException = new Exception("No exception.  Isn't that wierd?");
+            while (count > 0)
+            {
+                try
+                {
+                    stream = new FileStream(Filename, FileMode.Open, FileAccess.Read);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Thread.Sleep(100);
+                    lastException = e;
+                }
+                count--;
+            }
+            if (stream == null) throw (lastException);
+            using (var reader = new BinaryReader(stream))
+            {
+                Load(reader, headerOnly);
+            }
+        }
+
+        public static void ToBinaryFile(string cassOutputFileName, TransmissionLossField transmissionLossField)
         {
             using (var writer = new BinaryWriter(new FileStream(cassOutputFileName, FileMode.Create, FileAccess.Write)))
             {
@@ -448,7 +522,7 @@ namespace ESME.TransmissionLoss.CASS
             }
         }
 
-        public void Write(string cassOutputFileName = null)
+        public void ToBinaryFile(string cassOutputFileName = null)
         {
             if (cassOutputFileName == null) cassOutputFileName = Filename;
             using (var writer = new BinaryWriter(new FileStream(cassOutputFileName, FileMode.Create, FileAccess.Write)))
@@ -566,6 +640,13 @@ namespace ESME.TransmissionLoss.CASS
             w.Write(buf, 0, fieldLength);
         }
 
+        void Load(BinaryReader reader, bool headerOnly)
+        {
+            ReadFileHeader(reader);
+            if (headerOnly) return;
+            ReadFileContents(reader);
+        }
+
         void ReadFileHeader(BinaryReader reader)
         {
             #region file header read
@@ -639,9 +720,45 @@ namespace ESME.TransmissionLoss.CASS
             CASSLevel = reader.ReadSingle();
 
             if (reader.BaseStream.Position != 713) throw new FileFormatException("CASSOutput: file header of incorrect length.");
-            
+
+            #region bearing header read
+
+            RadialCount = (int)reader.ReadSingle(); //note: comes in as a float, cast to int. See PH's docs
+            RadialBearings = new float[RadialCount];
+            for (var i = 0; i < RadialCount; i++) RadialBearings[i] = reader.ReadSingle();
 
             #endregion
+
+            #region range header read
+
+            RangeCellCount = (int)reader.ReadSingle();
+            RangeCells = new float[RangeCellCount];
+            for (var i = 0; i < RangeCellCount; i++) RangeCells[i] = reader.ReadSingle();
+
+            #endregion
+
+            #region depth header read
+
+            DepthCellCount = (int)reader.ReadSingle();
+            DepthCells = new float[DepthCellCount];
+            for (var i = 0; i < DepthCellCount; i++) DepthCells[i] = reader.ReadSingle();
+
+            #endregion
+
+
+            #endregion
+        }
+
+        void ReadFileContents(BinaryReader reader)
+        {
+            Pressures = new List<float[,]>();
+            foreach (var pressure in RadialBearings.Select(bearing => new float[DepthCellCount, RangeCellCount]))
+            {
+                for (var i = 0; i < RangeCellCount; i++)
+                    for (var j = 0; j < DepthCellCount; j++)
+                        pressure[j, i] = reader.ReadSingle();
+                Pressures.Add(pressure);
+            }
         }
 
         #region INotifyPropertyChanged Members
@@ -715,7 +832,7 @@ namespace ESME.TransmissionLoss.CASS
             {
                 target = Find(item => item.Filename == fileName);
                 if (target != null) return;
-                target = CASSOutput.Load(fileName, true);
+                target = CASSOutput.FromBinaryFile(fileName, true);
                 if (_propertiesToMatch == null)
                 {
                     Add(target);

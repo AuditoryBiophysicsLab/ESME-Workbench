@@ -368,7 +368,7 @@ namespace TransmissionLossViewer
 
         void OpenCASSFile(string filename)
         {
-            CASSOutput = CASSOutput.Load(filename, false);
+            CASSOutput = CASSOutput.FromBinaryFile(filename, false);
             var tlf = TransmissionLossField.FromCASS(CASSOutput);
             MediatorMessage.Send(MediatorMessage.TransmissionLossFieldChanged, tlf);
         }

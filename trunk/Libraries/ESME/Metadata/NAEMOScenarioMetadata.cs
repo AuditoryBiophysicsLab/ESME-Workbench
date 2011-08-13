@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -78,6 +79,7 @@ namespace ESME.Metadata
                         if ((_bathymetry == null) || (!_bathymetry.IsAlive)) _bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
                         newItem.Bathymetry = _bathymetry;
                         Dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
+                        Task.Factory.StartNew(() => newItem.CheckThreshold(120, Dispatcher));
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
