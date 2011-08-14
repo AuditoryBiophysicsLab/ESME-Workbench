@@ -117,6 +117,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Controls\LayerListView.xaml.cs">
+      <DependentUpon>LayerListView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\EditableTextBlock.xaml.cs">
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
     </Compile>
@@ -278,6 +281,10 @@
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossFieldViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossJobViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\TransmissionLossRadialViewModel.cs" />
+    <Page Include="Controls\LayerListView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\EditableTextBlock.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
