@@ -73,31 +73,41 @@
 			</Style.Triggers>
 		</Style>
 
-        <DataTemplate x:Key="CheckBoxItemTemplate" DataType="{x:Type Mapping:MapLayerViewModel}">
-			<Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="16" />
-					<ColumnDefinition Width="*" />
-					<ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="10" />
-				</Grid.ColumnDefinitions>
-				<CheckBox Focusable="False"
+
+    </UserControl.Resources>
+    <TreeView DockPanel.Dock="Top"
+	         x:Name="ListBox"
+	         ItemsSource="{Binding TreeViewRootNodes}">
+        <TreeView.Resources>
+            <HierarchicalDataTemplate DataType="{x:Type Mapping:TreeNode}"
+                                  ItemsSource="{Binding Items}">
+                <TextBlock Text="{Binding Name}" />
+            </HierarchicalDataTemplate>
+            <DataTemplate DataType="{x:Type Mapping:MapLayerViewModel}">
+                <Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="10" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Focusable="False"
 				          Grid.Column="0"
 				          IsChecked="{Binding IsChecked}"
 				          VerticalAlignment="Center" />
-				<TextBlock Text="{Binding Name, Mode=OneTime}"
+                    <TextBlock Text="{Binding Name, Mode=OneTime}"
                            x:Name="LayerName"
 				           Grid.Column="1"
     				       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
 
-                <Image Source="..\Images\SmallIcons\12px-red-circle.png" 
+                    <Image Source="..\Images\SmallIcons\12px-red-circle.png" 
                        Grid.Column="2"
                        ToolTip="{Binding AnalysisPointCompletionTooltip}"
                        Visibility="{Binding VisibleIfAnalysisPointLayer}" />
 
-                <Rectangle Width="12"
+                    <Rectangle Width="12"
 				           RadiusX="3"
 				           RadiusY="3"
 				           Grid.Column="3"
@@ -107,14 +117,14 @@
 				           VerticalAlignment="Center"
 				           ToolTip="Area color: Right click to change"
 				           Name="LineColor">
-                    <Rectangle.ContextMenu>
-                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+                        <Rectangle.ContextMenu>
+                            <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 						             ItemsSource="{Binding AreaColorPickerMenu}" />
 
-                    </Rectangle.ContextMenu>
-                </Rectangle>
-                
-                <Rectangle Width="12"
+                        </Rectangle.ContextMenu>
+                    </Rectangle>
+
+                    <Rectangle Width="12"
 				           RadiusX="3"
 				           RadiusY="3"
 				           Grid.Column="4"
@@ -123,36 +133,27 @@
 				           Visibility="{Binding IsLineColorVisible}"
 				           VerticalAlignment="Center"
 				           ToolTip="{Binding PointLineTooltip}">
-					<Rectangle.ContextMenu>
-						<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+                        <Rectangle.ContextMenu>
+                            <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 						             ItemsSource="{Binding LineOrPointPickerMenu}" />
 
-					</Rectangle.ContextMenu>
-				</Rectangle>
+                        </Rectangle.ContextMenu>
+                    </Rectangle>
 
-                <Grid.ContextMenu>
-					<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+                    <Grid.ContextMenu>
+                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 					             ItemsSource="{Binding ContextMenu}" />
-				</Grid.ContextMenu>
-			</Grid>
-            <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding IsValid}" Value="False">
-                    <DataTrigger.Setters>
-                        <Setter TargetName="LayerName" Property="Foreground" Value="Red"/>
-                        <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ValidationErrorText}" />
-                    </DataTrigger.Setters>
-                </DataTrigger>
-            </DataTemplate.Triggers>
-		</DataTemplate>
-        <HierarchicalDataTemplate DataType="{x:Type Mapping:TreeNode}"
-                      	          ItemContainerStyle="{StaticResource LayersViewItemStyle}"
-                                  ItemsSource="{Binding Children}"
-                                  ItemTemplate="{StaticResource CheckBoxItemTemplate}">
-            <TextBlock Text="{Binding Name}" />
-        </HierarchicalDataTemplate>
-
-    </UserControl.Resources>
-    <TreeView DockPanel.Dock="Top"
-	         x:Name="ListBox"
-	         ItemsSource="{Binding TreeViewRootNodes}"/>
+                    </Grid.ContextMenu>
+                </Grid>
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding IsValid}" Value="False">
+                        <DataTrigger.Setters>
+                            <Setter TargetName="LayerName" Property="Foreground" Value="Red"/>
+                            <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ValidationErrorText}" />
+                        </DataTrigger.Setters>
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
+        </TreeView.Resources>
+    </TreeView>
 </UserControl>

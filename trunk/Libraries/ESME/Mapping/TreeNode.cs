@@ -15,8 +15,11 @@ namespace ESME.Mapping
         public TreeNode()
         {
             MapLayers = new ObservableList<MapLayerViewModel>();
-            Children = new TreeNodeList();
+            Nodes = new TreeNodeList();
         }
+
+        public TreeNode(string format, params object[] args) : this() { Name = string.Format(format, args); }
+
         #region public string Name { get; set; }
 
         public string Name
@@ -39,13 +42,13 @@ namespace ESME.Mapping
 
         public ObservableList<MapLayerViewModel> MapLayers
         {
-            get { return _mapLayers ?? (_mapLayers = new ObservableList<MapLayerViewModel>()); }
+            get { return _mapLayers; }
             set
             {
                 if (_mapLayers == value) return;
-                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
+                // if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
                 _mapLayers = value;
-                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
+                // if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
                 NotifyPropertyChanged(MapLayersChangedEventArgs);
             }
         }
@@ -58,7 +61,6 @@ namespace ESME.Mapping
                     if (e.NewItems != null)
                         foreach (MapLayerViewModel item in e.NewItems)
                         {
-                            Children.Add(item);
                         }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -67,17 +69,14 @@ namespace ESME.Mapping
                 case NotifyCollectionChangedAction.Remove:
                         foreach (MapLayerViewModel item in e.OldItems)
                         {
-                            Children.Remove(item);
                         }
                     break;
                 case NotifyCollectionChangedAction.Replace:
                         foreach (MapLayerViewModel item in e.OldItems)
                         {
-                            Children.Remove(item);
                         }
                         foreach (MapLayerViewModel item in e.NewItems)
                         {
-                            Children.Add(item);
                         }
                     break;
                 case NotifyCollectionChangedAction.Reset:
@@ -123,21 +122,34 @@ namespace ESME.Mapping
 
         #endregion
 
-        #region public TreeNodeList Children { get; set; }
+        #region public IEnumerable<object> Items { get; set; }
 
-        public TreeNodeList Children
+        public IEnumerable<object> Items
         {
-            get { return _children; }
+            get
+            {
+                foreach (var layer in MapLayers) yield return layer;
+                foreach (var node in Nodes) yield return node;
+            }
+        }
+
+        #endregion
+
+        #region public TreeNodeList Nodes { get; set; }
+
+        public TreeNodeList Nodes
+        {
+            get { return _nodes; }
             set
             {
-                if (_children == value) return;
-                _children = value;
+                if (_nodes == value) return;
+                _nodes = value;
                 NotifyPropertyChanged(ChildrenChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.Children);
-        TreeNodeList _children;
+        static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.Nodes);
+        TreeNodeList _nodes;
 
         #endregion
 
