@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Cinch;
@@ -32,21 +33,27 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_scenarioMetadata == value) return;
                 if (_scenarioMetadata != null) _scenarioMetadata.Save();
                 _scenarioMetadata = value;
-                NotifyPropertyChanged(ScenarioMetadataChangedEventArgs);
+                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ScenarioMetadataChangedEventArgs));
                 if (_scenarioMetadata != null)
                 {
-                    MapLayerCollections.Add("Scenario", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-                    ScenarioMapLayers = MapLayerCollections["Scenario"];
-                    MapLayerCollections.ActiveLayer = ScenarioMapLayers;
-                    _scenarioMetadata.RangeComplexDescriptors = RangeComplexDescriptors;
-                    _scenarioMetadata.MapLayers = ScenarioMapLayers;
                     _scenarioMetadata.Dispatcher = _dispatcher;
                     _scenarioMetadata.VisualizerService = _visualizerService;
+                    _scenarioMetadata.RangeComplexDescriptors = RangeComplexDescriptors;
+                    _dispatcher.InvokeIfRequired(() =>
+                    {
+                        MapLayerCollections.Add("Scenario", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+                        ScenarioMapLayers = MapLayerCollections["Scenario"];
+                        _scenarioMetadata.MapLayers = ScenarioMapLayers;
+                        MapLayerCollections.ActiveLayer = ScenarioMapLayers;
+                    });
                 }
                 else
                 {
-                    MapLayerCollections.ActiveLayer = MapLayerCollections["Home"];
-                    if (ScenarioMapLayers != null) MapLayerCollections.Remove(ScenarioMapLayers);
+                    _dispatcher.InvokeIfRequired(() =>
+                    {
+                        MapLayerCollections.ActiveLayer = MapLayerCollections["Home"];
+                        if (ScenarioMapLayers != null) MapLayerCollections.Remove(ScenarioMapLayers);
+                    });
                 }
                 IsScenarioLoaded = _scenarioMetadata != null;
             }
@@ -100,8 +107,11 @@ namespace ESMEWorkBench.ViewModels.Main
             RecentFiles.InsertFile(fileName);
             try
             {
-                ScenarioMetadata = NAEMOScenarioMetadata.Load(NAEMOMetadataBase.MetadataFilename(fileName)) ?? new NAEMOScenarioMetadata { Filename = NAEMOMetadataBase.MetadataFilename(fileName) };
-                ScenarioMetadata.ScenarioFilename = fileName;
+                Task.Factory.StartNew(() =>
+                {
+                    ScenarioMetadata = NAEMOScenarioMetadata.Load(NAEMOMetadataBase.MetadataFilename(fileName)) ?? new NAEMOScenarioMetadata { Filename = NAEMOMetadataBase.MetadataFilename(fileName) };
+                    _dispatcher.InvokeIfRequired(() => ScenarioMetadata.ScenarioFilename = fileName);
+                });
             }
             catch (Exception ex)
             {
