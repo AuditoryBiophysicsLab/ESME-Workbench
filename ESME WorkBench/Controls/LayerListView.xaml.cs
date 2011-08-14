@@ -3,9 +3,9 @@
     /// <summary>
     /// Interaction logic for LayerTreeView.xaml
     /// </summary>
-    public partial class LayerTreeView
+    public partial class LayerListView
     {
-        public LayerTreeView()
+        public LayerListView()
         {
             InitializeComponent();
         }

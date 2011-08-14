@@ -989,11 +989,14 @@
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition Width="*" MinWidth="500" />
 			</Grid.ColumnDefinitions>
-			<GroupBox Grid.Column="0"
-			          Header="Layers"
-                      Visibility="{Binding IsLayerListViewVisible, Converter={StaticResource TrueVisibleFalseCollapsed}}">
-				<LocalControls:LayerTreeView />
-			</GroupBox>
+            <TabControl Visibility="{Binding IsLayerListViewVisible, Converter={StaticResource TrueVisibleFalseCollapsed}}">
+                <TabItem Header="Map Layers">
+                    <LocalControls:LayerListView />
+                </TabItem>
+                <TabItem Header="Scenario View">
+                    <LocalControls:LayerTreeView />
+                </TabItem>
+            </TabControl>
 			<GridSplitter Name="GridSplitter"
 			              Grid.Column="1"
                           Visibility="{Binding IsLayerListViewVisible, Converter={StaticResource TrueVisibleFalseCollapsed}}"
