@@ -10,7 +10,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("ControlDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class ControlDataViewModel : ViewModelBase, IHasName
+    public class ControlDataViewModel : ViewModelBase, IHaveAName
     {
         static readonly PropertyChangedEventArgs LabelChangedEventArgs = ObservableHelper.CreateArgs<ControlDataViewModel>(x => x.Label);
 
@@ -210,7 +210,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
 
         #region IHasName Members
 
-        string IHasName.Name
+        string IHaveAName.Name
         {
             get { return Label; }
             set { Label = value; }

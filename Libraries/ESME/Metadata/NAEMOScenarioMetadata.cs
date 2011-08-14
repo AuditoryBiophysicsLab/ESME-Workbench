@@ -6,9 +6,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Serialization;
@@ -25,6 +26,8 @@ using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
 using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
+using Cursors = System.Windows.Input.Cursors;
+using TreeNode = ESME.Mapping.TreeNode;
 
 namespace ESME.Metadata
 {
@@ -305,10 +308,13 @@ namespace ESME.Metadata
             ZoomToScenarioHandler();
             Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
             // Get a list of transmission loss files that match the modes in the current scenario
-            CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
+            if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
+            else CASSOutputs.RefreshInBackground();
+            UpdateEnvironmentTreeRoot();
         }
 
         #endregion
+
 
         #region public NAEMOBathymetryDescriptor SelectedBathymetry { get; set; }
         [XmlIgnore]
@@ -473,6 +479,58 @@ namespace ESME.Metadata
         ObservableCollection<AnalysisPoint> _analysisPoints;
 
         #endregion
+
+        #region public TreeNodeList TreeViewRootNodes { get; set; }
+        [XmlIgnore]
+        public TreeNodeList TreeViewRootNodes
+        {
+            get { return _treeViewRootNodes ?? (_treeViewRootNodes = new TreeNodeList()); }
+            set
+            {
+                if (_treeViewRootNodes == value) return;
+                _treeViewRootNodes = value;
+                NotifyPropertyChanged(TreeViewRootNodesChangedEventArgs);
+                MediatorMessage.Send(MediatorMessage.SetTreeRoots, TreeViewRootNodes);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TreeViewRootNodesChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.TreeViewRootNodes);
+        TreeNodeList _treeViewRootNodes;
+
+        void UpdateEnvironmentTreeRoot()
+        {
+            if (TreeViewRootNodes == null) TreeViewRootNodes = new TreeNodeList();
+            TreeViewRootNodes.Remove("Environment");
+            TreeViewRootNodes.Add(new TreeNode { Name = "Environment" });
+            var environmentRoot = (TreeNode)TreeViewRootNodes["Environment"];
+            environmentRoot.Children.Add(MapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault());
+            environmentRoot.Children.Add(MapLayers.Find(LayerType.BathymetryRaster, "Bathymetry").FirstOrDefault());
+            environmentRoot.Children.Add(MapLayers.Find(LayerType.SoundSpeed, "Sound Speed").FirstOrDefault());
+            environmentRoot.Children.Add(MapLayers.Find(LayerType.WindSpeed, "Wind").FirstOrDefault());
+            //var sedimentRegex = new Regex(@"Sediment: \S+$", RegexOptions.Singleline);
+            //environmentRoot.UpdateMapLayers(MapLayers, LayerType.BottomType, sedimentRegex);
+            //if (environmentRoot.MapLayers.Count == 0) TreeViewRootNodes.Remove(environmentRoot);
+        }
+
+        void UpdateScenarioTreeRoot()
+        {
+            if (TreeViewRootNodes == null) TreeViewRootNodes = new TreeNodeList();
+            TreeViewRootNodes.Remove(new Regex(@"Scenario: [\s\S]+$", RegexOptions.Singleline));
+
+            var nemoScenario = NemoFile.Scenario;
+            var scenarioNodeName = string.Format("Scenario: {0}", nemoScenario.EventName);
+            if (TreeViewRootNodes[scenarioNodeName] == null) TreeViewRootNodes.Add(new TreeNode
+            {
+                    Name = scenarioNodeName, 
+                    Children = new TreeNodeList(),
+            });
+            var scenarioRoot = TreeViewRootNodes[scenarioNodeName];
+            //scenarioRoot.Children.Add(new TreeNode{Name = string.Format("", )});
+        }
+
+        #endregion
+
+
 
         public void ExportAnalysisPoints()
         {

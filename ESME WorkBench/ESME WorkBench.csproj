@@ -240,9 +240,6 @@
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />
     <Compile Include="ViewModels\Main\MainViewModelCommands.cs" />
     <Compile Include="ViewModels\Main\FileOrDirectorySettingsViewModel.cs" />
-    <Compile Include="ViewModels\Main\LayerListViewModel.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ViewModels\Main\MainViewModel.cs" />
     <Compile Include="ViewModels\Layers\OffsetProjection.cs" />
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />

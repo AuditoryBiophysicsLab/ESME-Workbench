@@ -14,7 +14,7 @@ using HRC.Utility;
 namespace ESME.Environment
 {
     [Serializable]
-    public class EnvironmentMetadata : PropertyChangedBase, IHasName, ISupportValidation, IMightBeDirty, IHaveBasePath
+    public class EnvironmentMetadata : PropertyChangedBase, IHaveAName, ISupportValidation, IMightBeDirty, IHaveBasePath
     {
         public EnvironmentMetadata() { PropertyChanged += delegate { IsDirty = true; }; }
 
@@ -250,7 +250,7 @@ namespace ESME.Environment
 
 
     [Serializable]
-    public class BathymetryMetadata : PropertyChangedBase, IHasName, ISupportValidation, IMightBeDirty, IHaveBasePath
+    public class BathymetryMetadata : PropertyChangedBase, IHaveAName, ISupportValidation, IMightBeDirty, IHaveBasePath
     {
         public BathymetryMetadata() { PropertyChanged += delegate { IsDirty = true; }; }
 
@@ -457,7 +457,7 @@ namespace ESME.Environment
 
     [Serializable]
     public class MetadataFile<T> : PropertyChangedBase, IList<T>, IMightBeDirty
-        where T : class, IHasName, ISupportValidation, IMightBeDirty, IHaveBasePath, new()
+        where T : class, IHaveAName, ISupportValidation, IMightBeDirty, IHaveBasePath, new()
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {

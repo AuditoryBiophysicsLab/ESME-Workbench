@@ -133,6 +133,7 @@
     <Compile Include="Collections\BinarySearchTree.cs" />
     <Compile Include="Collections\BinaryTree.cs" />
     <Compile Include="Collections\BinaryTreeNode.cs" />
+    <Compile Include="Collections\HeaderedKeyValuePairListBase.cs" />
     <Compile Include="Collections\KeyedList.cs" />
     <Compile Include="Collections\Node.cs" />
     <Compile Include="Collections\NodeList.cs" />
@@ -217,7 +218,7 @@
     <Compile Include="Utility\BackgroundTask.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Collections\KeyValuePair.cs" />
+    <Compile Include="Collections\EditableKeyValuePair.cs" />
     <Compile Include="Utility\MediatorBase.cs" />
     <Compile Include="Utility\Minidump.cs" />
     <Compile Include="Utility\NotifyIcon.cs" />
@@ -226,7 +227,7 @@
     <Compile Include="Utility\PropertyChangedBase.cs" />
     <Compile Include="Utility\TriggerTracing.cs" />
     <Compile Include="Utility\XmlSerializer.cs" />
-    <Compile Include="Utility\HRCObservableCollection.cs" />
+    <Compile Include="Utility\ObservableList.cs" />
     <Compile Include="Triggers\RoutedEventTrigger.cs" />
     <Compile Include="Validation\RegexRule.cs" />
     <Compile Include="Validation\ValidationRuleBase.cs" />

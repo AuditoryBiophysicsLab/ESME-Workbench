@@ -8,7 +8,7 @@ namespace ESME.TransmissionLoss.Bellhop
 {
     public static class FieldCalculator
     {
-        public static TransmissionLossField ComputeField(BellhopRunFile runFile, IHasLog viewModel)
+        public static TransmissionLossField ComputeField(BellhopRunFile runFile, IHaveALog viewModel)
         {
             var stringBuilder = new StringBuilder();
             var fieldData = new TransmissionLossField(runFile);

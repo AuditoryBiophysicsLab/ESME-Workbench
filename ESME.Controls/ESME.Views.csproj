@@ -111,6 +111,9 @@
     <Compile Include="Controls\FileOrDirectorySetting.xaml.cs">
       <DependentUpon>FileOrDirectorySetting.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\HeaderedPropertyDisplayPopup.xaml.cs">
+      <DependentUpon>HeaderedPropertyDisplayPopup.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ScatterPlot.xaml.cs">
       <DependentUpon>ScatterPlot.xaml</DependentUpon>
     </Compile>
@@ -218,6 +221,10 @@
     <Page Include="Controls\FileOrDirectorySetting.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\HeaderedPropertyDisplayPopup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ScatterPlot.xaml">
       <Generator>MSBuild:Compile</Generator>

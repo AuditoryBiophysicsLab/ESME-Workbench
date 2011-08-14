@@ -24,6 +24,7 @@ namespace ESME
 
         public const string SetExperiment = "SetExperimentMessage";
         public const string SetMapLayers = "SetMapLayersMessage";
+        public const string SetTreeRoots = "SetTreeRootsMessage";
         public const string EnableGUI = "EnableGUIMessage";
 
         public const string LayerListViewModelInitialized = "LayerListViewModelInitializedMessage";

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Linq;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Media;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
@@ -12,6 +13,52 @@ using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Mapping
 {
+    public static class MapCollectionExtensions
+    {
+        public static IEnumerable<T> Find<T>(this IEnumerable<T> source) where T : MapLayerViewModel
+        {
+            return source.OfType<T>();
+        }
+
+        public static IEnumerable<T> Find<T>(this IEnumerable<T> source, LayerType layerType) where T : MapLayerViewModel
+        {
+            return source.OfType<T>().Where(layer => layer.LayerType == layerType);
+        }
+
+        public static IEnumerable<T> Find<T>(this IEnumerable<T> source, string layerName) where T : MapLayerViewModel
+        {
+            return source.OfType<T>().Where(layer => layer.Name == layerName);
+        }
+
+        public static IEnumerable<T> Find<T>(this IEnumerable<T> source, Regex nameRegex) where T : MapLayerViewModel
+        {
+            return source.OfType<T>().Where(layer => nameRegex.IsMatch(layer.Name));
+        }
+
+        public static IEnumerable<T> Find<T>(this IEnumerable<T> source, LayerType layerType, string layerName) where T : MapLayerViewModel
+        {
+            return source.Find<T>(layerType).Find<T>(layerName);
+        }
+
+        public static IEnumerable<T> Find<T>(this IEnumerable<T> source, LayerType layerType, Regex nameRegex) where T : MapLayerViewModel
+        {
+            return source.Find(layerType).Find(nameRegex);
+        }
+
+        public static void AddOrReplace<T>(this List<T> source, LayerType layerType, string layerName, T newLayer) where T : MapLayerViewModel
+        {
+            var result = source.Find(layerType, layerName).ToList();
+            if (result.Count > 1) throw new ApplicationException(string.Format("More than one layer matches type {0} and name \"{1}\", which should be impossible", layerType, layerName));
+            if (result.Count == 1) source.Remove(result[0]);
+            source.Add(newLayer);
+        }
+
+        public static int RemoveLayerType<T>(this List<T> source, LayerType layerType) where T : MapLayerViewModel
+        {
+            return source.RemoveAll(item => item.LayerType == layerType);
+        }
+    }
+
     public class MapLayerCollection : ObservableCollection<MapLayerViewModel>
     {
         internal MapLayerCollection(string collectionName)
@@ -34,6 +81,16 @@ namespace ESME.Mapping
                 Name = baseMapLayerName,
                 MapLayers = this,
             });
+        }
+
+        public IEnumerable<MapLayerViewModel> Find(LayerType layerType)
+        {
+            return this.Where(layer => layer.LayerType == layerType);
+        }
+
+        public IEnumerable<MapLayerViewModel> Find(string layerName)
+        {
+            return this.Where(layer => layer.Name == layerName);
         }
 
         public T Find<T>(LayerType layerType, string layerName) where T : MapLayerViewModel

@@ -3,15 +3,15 @@
 namespace HRC.Collections
 {
     [Serializable]
-    public class KeyValuePair<TKey, TValue>
+    public class EditableKeyValuePair<TKey, TValue>
     {
-        public KeyValuePair()
+        public EditableKeyValuePair()
         {
             Key = default(TKey);
             Value = default(TValue);
         }
 
-        public KeyValuePair(TKey key, TValue value)
+        public EditableKeyValuePair(TKey key, TValue value)
         {
             Key = key;
             Value = value;

@@ -16,7 +16,7 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESME.Mapping
 {
-    public class MapLayerViewModel : PropertyChangedBase, ISupportValidation 
+    public class MapLayerViewModel : PropertyChangedBase, ISupportValidation, IHaveAName
     {
         static readonly Random Random;
         static readonly Color[] Palette;
@@ -249,6 +249,24 @@ namespace ESME.Mapping
         int _percentComplete;
 
         #endregion
+
+        #endregion
+
+        #region public TreeNode TreeViewParent { get; set; }
+
+        public TreeNode TreeViewParent
+        {
+            get { return _treeViewParent; }
+            set
+            {
+                if (_treeViewParent == value) return;
+                _treeViewParent = value;
+                NotifyPropertyChanged(TreeViewParentChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TreeViewParentChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.TreeViewParent);
+        TreeNode _treeViewParent;
 
         #endregion
 
