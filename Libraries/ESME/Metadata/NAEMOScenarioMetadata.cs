@@ -7,9 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Serialization;
@@ -34,6 +32,11 @@ namespace ESME.Metadata
     public class NAEMOScenarioMetadata : NAEMOMetadataBase
     {
         new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes) {typeof(NemoModeToAcousticModelNameMap)};
+
+        public NAEMOScenarioMetadata()
+        {
+            TreeViewRootNodes = new TreeNodeList();
+        }
 
         public static NAEMOScenarioMetadata Load(string metaDataFilename)
         {
@@ -191,6 +194,7 @@ namespace ESME.Metadata
                         if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
                         else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
                     }
+                UpdateScenarioTreeRoot();
             }
         }
 
@@ -484,7 +488,7 @@ namespace ESME.Metadata
         [XmlIgnore]
         public TreeNodeList TreeViewRootNodes
         {
-            get { return _treeViewRootNodes ?? (_treeViewRootNodes = new TreeNodeList()); }
+            get { return _treeViewRootNodes; }
             set
             {
                 if (_treeViewRootNodes == value) return;
@@ -499,33 +503,60 @@ namespace ESME.Metadata
 
         void UpdateEnvironmentTreeRoot()
         {
-            if (TreeViewRootNodes == null) TreeViewRootNodes = new TreeNodeList();
-            TreeViewRootNodes.Remove("Environment");
-            TreeViewRootNodes.Add(new TreeNode { Name = "Environment" });
-            var environmentRoot = (TreeNode)TreeViewRootNodes["Environment"];
-            environmentRoot.Children.Add(MapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault());
-            environmentRoot.Children.Add(MapLayers.Find(LayerType.BathymetryRaster, "Bathymetry").FirstOrDefault());
-            environmentRoot.Children.Add(MapLayers.Find(LayerType.SoundSpeed, "Sound Speed").FirstOrDefault());
-            environmentRoot.Children.Add(MapLayers.Find(LayerType.WindSpeed, "Wind").FirstOrDefault());
-            //var sedimentRegex = new Regex(@"Sediment: \S+$", RegexOptions.Singleline);
-            //environmentRoot.UpdateMapLayers(MapLayers, LayerType.BottomType, sedimentRegex);
-            //if (environmentRoot.MapLayers.Count == 0) TreeViewRootNodes.Remove(environmentRoot);
+            TreeViewRootNodes.RemoveAll(new Regex(@"Environment: [\s\S]+$"));
+            var environmentRoot = new TreeNode("Environment: {0}", Path.GetFileNameWithoutExtension(_selectedEnvironment.DataFilename));
+            TreeViewRootNodes.Add(environmentRoot);
+            environmentRoot.MapLayers.Add(MapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault());
+            environmentRoot.MapLayers.Add(MapLayers.Find(LayerType.BathymetryRaster, "Bathymetry").FirstOrDefault());
+            environmentRoot.MapLayers.Add(MapLayers.Find(LayerType.SoundSpeed, "Sound Speed").FirstOrDefault());
+            environmentRoot.MapLayers.Add(MapLayers.Find(LayerType.WindSpeed, "Wind").FirstOrDefault());
+            environmentRoot.MapLayers.AddRange(MapLayers.Find(LayerType.WindSpeed, new Regex(@"Sediment: \S+$", RegexOptions.Singleline)));
         }
 
         void UpdateScenarioTreeRoot()
         {
-            if (TreeViewRootNodes == null) TreeViewRootNodes = new TreeNodeList();
-            TreeViewRootNodes.Remove(new Regex(@"Scenario: [\s\S]+$", RegexOptions.Singleline));
+            TreeViewRootNodes.RemoveAll(new Regex(@"Scenario: [\s\S]+$"));
 
             var nemoScenario = NemoFile.Scenario;
-            var scenarioNodeName = string.Format("Scenario: {0}", nemoScenario.EventName);
-            if (TreeViewRootNodes[scenarioNodeName] == null) TreeViewRootNodes.Add(new TreeNode
+            var scenarioRoot = new TreeNode("Scenario: {0}", nemoScenario.EventName);
+            TreeViewRootNodes.Add(scenarioRoot);
+            TreeNode platformsRoot;
+            if (nemoScenario.Platforms.Count < 3) platformsRoot = scenarioRoot;
+            else
             {
-                    Name = scenarioNodeName, 
-                    Children = new TreeNodeList(),
-            });
-            var scenarioRoot = TreeViewRootNodes[scenarioNodeName];
-            //scenarioRoot.Children.Add(new TreeNode{Name = string.Format("", )});
+                platformsRoot = new TreeNode("Platforms");
+                scenarioRoot.Nodes.Add(platformsRoot);
+            }
+            foreach (var platform in nemoScenario.Platforms)
+            {
+                TreeNode sourceRoot;
+                var platformNode = new TreeNode("Platform: {0}", platform.Name);
+                platformNode.MapLayers.AddRange(MapLayers.Find(new Regex(string.Format(@"{0} [\s\S]+$", platformNode.Name))));
+                platformsRoot.Nodes.Add(platformNode);
+                if (platform.Sources.Count < 3) sourceRoot = platformNode; 
+                else
+                {
+                    sourceRoot = new TreeNode("Sources");
+                    platformNode.Nodes.Add(sourceRoot);
+                }
+                foreach (var source in platform.Sources)
+                {
+                    TreeNode modeRoot;
+                    var sourceNode = new TreeNode("Source: {0}", source.Name);
+                    sourceRoot.Nodes.Add(sourceNode);
+                    if (source.Modes.Count < 3) modeRoot = sourceNode;
+                    else
+                    {
+                        modeRoot = new TreeNode("Modes");
+                        sourceNode.Nodes.Add(modeRoot);
+                    }
+                    foreach (var mode in source.Modes)
+                    {
+                        var modeNode = new TreeNode("Mode: {0}", mode.Name);
+                        modeRoot.Nodes.Add(modeNode);
+                    }
+                }
+            }
         }
 
         #endregion
