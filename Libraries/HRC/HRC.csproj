@@ -235,6 +235,7 @@
     <Compile Include="Validation\ValidatingViewModel.cs" />
     <Compile Include="Triggers\ValidationErrorEventTrigger.cs" />
     <Compile Include="ViewModels\MenuItemViewModelBase.cs" />
+    <Compile Include="WPF\ViewPropertyBinding.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
