@@ -48,8 +48,60 @@ namespace ESME.Metadata
         public void Save(string filename = null) { Save(this, ReferencedTypes, filename); }
 
         #region Properties that MUST be initialized before setting the ScenarioFilename property
+
+        #region public MapLayerCollection MapLayers { get; set; }
         [XmlIgnore]
-        public MapLayerCollection MapLayers { get; set; }
+        public MapLayerCollection MapLayers
+        {
+            get { return _mapLayers; }
+            set
+            {
+                if (_mapLayers == value) return;
+                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
+                _mapLayers = value;
+                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
+                NotifyPropertyChanged(MapLayersChangedEventArgs);
+            }
+        }
+
+        void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null)
+                        foreach (MapLayerViewModel item in e.NewItems)
+                        {
+                            PlaceMapLayerInTree(item);
+                        }
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    Debug.WriteLine("NotifyCollectionChangedAction.Move");
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (MapLayerViewModel item in e.OldItems)
+                    {
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (MapLayerViewModel item in e.OldItems)
+                    {
+                    }
+                    foreach (MapLayerViewModel item in e.NewItems)
+                    {
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    Debug.WriteLine("NotifyCollectionChangedAction.Reset");
+                    break;
+            }
+        }
+        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.MapLayers);
+        [XmlIgnore]
+        MapLayerCollection _mapLayers;
+
+        #endregion
+   
         [XmlIgnore]
         public Dispatcher Dispatcher { get; set; }
         [XmlIgnore]
@@ -86,7 +138,11 @@ namespace ESME.Metadata
                         newItem.Bathymetry = _bathymetry;
                         newItem.ThresholdRadiusChanged += (s, e) => Dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
                         Dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
-                        Task.Factory.StartNew(() => newItem.CheckThreshold(120, Dispatcher));
+                        Task.Factory.StartNew(() =>
+                        {
+                            newItem.CheckThreshold(120, Dispatcher);
+
+                        });
                     }
                     break;
                 case NotifyCollectionChangedAction.Remove:
@@ -501,6 +557,12 @@ namespace ESME.Metadata
         static readonly PropertyChangedEventArgs TreeViewRootNodesChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.TreeViewRootNodes);
         TreeNodeList _treeViewRootNodes;
 
+        void PlaceMapLayerInTree(MapLayerViewModel mapLayer)
+        {
+            foreach (var tree in TreeViewRootNodes)
+                if (tree.FindNodeForMapLayer(mapLayer) != null) return;
+        }
+
         void UpdateEnvironmentTreeRoot()
         {
             TreeViewRootNodes.RemoveAll(new Regex(@"Environment: [\s\S]+$"));
@@ -515,10 +577,14 @@ namespace ESME.Metadata
 
         void UpdateScenarioTreeRoot()
         {
-            TreeViewRootNodes.RemoveAll(new Regex(@"Scenario: [\s\S]+$"));
-
+            var scenarioRoot = TreeViewRootNodes.Find(node => node is ScenarioNode);
+            if (scenarioRoot == null)
+            {
+                scenarioRoot = new ScenarioNode(NemoFile.Scenario);
+                TreeViewRootNodes.Add(scenarioRoot);
+            }
+#if false
             var nemoScenario = NemoFile.Scenario;
-            var scenarioRoot = new TreeNode("Scenario: {0}", nemoScenario.EventName);
             TreeViewRootNodes.Add(scenarioRoot);
             TreeNode platformsRoot;
             if (nemoScenario.Platforms.Count < 3) platformsRoot = scenarioRoot;
@@ -557,6 +623,12 @@ namespace ESME.Metadata
                     }
                 }
             }
+#endif
+        }
+
+        void UpdateAnimalsTreeRoot()
+        {
+            TreeViewRootNodes.RemoveAll(new Regex(@"Animals: [\s\S]+$"));
         }
 
         #endregion

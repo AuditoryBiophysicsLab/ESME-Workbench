@@ -4,8 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
-             mef:ViewModelLocator.ViewModel="LayerListViewModel"
+             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views" xmlns:Mapping="clr-namespace:ESME.Mapping;assembly=ESME" mef:ViewModelLocator.ViewModel="LayerListViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300">
@@ -47,7 +46,7 @@
 			</Style.Triggers>
 		</Style>
 
-		<DataTemplate x:Key="CheckBoxItemTemplate" DataType="{x:Type ListViewItem}">
+		<DataTemplate x:Key="CheckBoxItemTemplate">
 			<Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="16" />
@@ -120,9 +119,71 @@
 		</DataTemplate>
 	</UserControl.Resources>
 	<ListView DockPanel.Dock="Top"
-	         x:Name="ListBox"
-	         ItemContainerStyle="{StaticResource LayersViewItemStyle}"
-	         ItemsSource="{Binding MapLayers}"
-	         ItemTemplate="{StaticResource CheckBoxItemTemplate}">
+	          x:Name="ListBox"
+              Grid.IsSharedSizeScope="True"
+	          ItemsSource="{Binding MapLayers}">
+        <ListView.Resources>
+            <DataTemplate DataType="{x:Type Mapping:MapLayerViewModel}">
+                <Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" SharedSizeGroup="LayerName" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="10" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Focusable="False"
+				              Grid.Column="0"
+				              IsChecked="{Binding IsChecked}"
+				              VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Name, Mode=OneTime}"
+                               x:Name="LayerName"
+				               Grid.Column="1"/>
+                    <Rectangle Width="12"
+				               RadiusX="3"
+				               RadiusY="3"
+				               Grid.Column="2"
+				               Height="12"
+				               Fill="{Binding AreaColorBrush}"
+				               Visibility="{Binding IsAreaColorVisible}"
+				               VerticalAlignment="Center"
+				               ToolTip="Area color: Right click to change"
+				               Name="LineColor">
+                        <Rectangle.ContextMenu>
+                            <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+						             ItemsSource="{Binding AreaColorPickerMenu}" />
+                        </Rectangle.ContextMenu>
+                    </Rectangle>
+
+                    <Rectangle Width="12"
+				               RadiusX="3"
+				               RadiusY="3"
+				               Grid.Column="3"
+				               Height="12"
+				               Fill="{Binding LineColorBrush}"
+				               Visibility="{Binding IsLineColorVisible}"
+				               VerticalAlignment="Center"
+				               ToolTip="{Binding PointLineTooltip}">
+                        <Rectangle.ContextMenu>
+                            <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+						             ItemsSource="{Binding LineOrPointPickerMenu}" />
+                        </Rectangle.ContextMenu>
+                    </Rectangle>
+
+                    <Grid.ContextMenu>
+                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+					             ItemsSource="{Binding ContextMenu}" />
+                    </Grid.ContextMenu>
+                </Grid>
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding IsValid}" Value="False">
+                        <DataTrigger.Setters>
+                            <Setter TargetName="LayerName" Property="Foreground" Value="Red"/>
+                            <Setter TargetName="LayerName" Property="ToolTip" Value="{Binding ValidationErrorText}" />
+                        </DataTrigger.Setters>
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
+        </ListView.Resources>
     </ListView>
 </UserControl>

@@ -6,8 +6,7 @@
              xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
              xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views" 
              xmlns:Collections="clr-namespace:HRC.Collections;assembly=HRC" 
-             xmlns:Mapping="clr-namespace:ESME.Mapping;assembly=ESME" 
-             mef:ViewModelLocator.ViewModel="LayerListViewModel"
+             xmlns:Mapping="clr-namespace:ESME.Mapping;assembly=ESME" xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" mef:ViewModelLocator.ViewModel="LayerListViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300">
@@ -76,67 +75,57 @@
 
     </UserControl.Resources>
     <TreeView DockPanel.Dock="Top"
-	         x:Name="ListBox"
-	         ItemsSource="{Binding TreeViewRootNodes}">
+              Grid.IsSharedSizeScope="True"
+ 	          ItemsSource="{Binding TreeViewRootNodes}">
         <TreeView.Resources>
             <HierarchicalDataTemplate DataType="{x:Type Mapping:TreeNode}"
-                                  ItemsSource="{Binding Items}">
+                                  ItemsSource="{Binding Children}">
                 <TextBlock Text="{Binding Name}" />
             </HierarchicalDataTemplate>
             <DataTemplate DataType="{x:Type Mapping:MapLayerViewModel}">
                 <Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" SharedSizeGroup="LayerName" />
                         <ColumnDefinition Width="16" />
                         <ColumnDefinition Width="16" />
                         <ColumnDefinition Width="10" />
                     </Grid.ColumnDefinitions>
                     <CheckBox Focusable="False"
-				          Grid.Column="0"
-				          IsChecked="{Binding IsChecked}"
-				          VerticalAlignment="Center" />
+				              Grid.Column="0"
+				              IsChecked="{Binding IsChecked}"
+				              VerticalAlignment="Center" />
                     <TextBlock Text="{Binding Name, Mode=OneTime}"
-                           x:Name="LayerName"
-				           Grid.Column="1"
-    				       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
-
-                    <Image Source="..\Images\SmallIcons\12px-red-circle.png" 
-                       Grid.Column="2"
-                       ToolTip="{Binding AnalysisPointCompletionTooltip}"
-                       Visibility="{Binding VisibleIfAnalysisPointLayer}" />
-
+                               x:Name="LayerName"
+				               Grid.Column="1"/>
                     <Rectangle Width="12"
-				           RadiusX="3"
-				           RadiusY="3"
-				           Grid.Column="3"
-				           Height="12"
-				           Fill="{Binding AreaColorBrush}"
-				           Visibility="{Binding IsAreaColorVisible}"
-				           VerticalAlignment="Center"
-				           ToolTip="Area color: Right click to change"
-				           Name="LineColor">
+				               RadiusX="3"
+				               RadiusY="3"
+				               Grid.Column="2"
+				               Height="12"
+				               Fill="{Binding AreaColorBrush}"
+				               Visibility="{Binding IsAreaColorVisible}"
+				               VerticalAlignment="Center"
+				               ToolTip="Area color: Right click to change"
+				               Name="LineColor">
                         <Rectangle.ContextMenu>
                             <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 						             ItemsSource="{Binding AreaColorPickerMenu}" />
-
                         </Rectangle.ContextMenu>
                     </Rectangle>
 
                     <Rectangle Width="12"
-				           RadiusX="3"
-				           RadiusY="3"
-				           Grid.Column="4"
-				           Height="12"
-				           Fill="{Binding LineColorBrush}"
-				           Visibility="{Binding IsLineColorVisible}"
-				           VerticalAlignment="Center"
-				           ToolTip="{Binding PointLineTooltip}">
+				               RadiusX="3"
+				               RadiusY="3"
+				               Grid.Column="3"
+				               Height="12"
+				               Fill="{Binding LineColorBrush}"
+				               Visibility="{Binding IsLineColorVisible}"
+				               VerticalAlignment="Center"
+				               ToolTip="{Binding PointLineTooltip}">
                         <Rectangle.ContextMenu>
                             <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 						             ItemsSource="{Binding LineOrPointPickerMenu}" />
-
                         </Rectangle.ContextMenu>
                     </Rectangle>
 
@@ -155,5 +144,11 @@
                 </DataTemplate.Triggers>
             </DataTemplate>
         </TreeView.Resources>
+        <WPF:ViewPropertyBinding.ViewPropertyBindings>
+            <WPF:ViewPropertyCollection>
+                <WPF:ViewProperty Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type TreeView}}, Path=ActualWidth}"
+                              Target="{Binding Path=TreeViewWidth, Mode=OneWayToSource}" />
+            </WPF:ViewPropertyCollection>
+        </WPF:ViewPropertyBinding.ViewPropertyBindings>
     </TreeView>
 </UserControl>

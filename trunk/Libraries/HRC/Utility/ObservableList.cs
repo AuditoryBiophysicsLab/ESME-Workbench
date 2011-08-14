@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Windows.Data;
 using System.Xml.Serialization;
 
@@ -124,5 +125,38 @@ namespace HRC.Utility
                     handler(this, e);
             }
         }
+
+        void CollectionChangedHandler(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null)
+                        foreach (T item in e.NewItems)
+                        {
+                        }
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    Debug.WriteLine("NotifyCollectionChangedAction.Move");
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (T item in e.OldItems)
+                    {
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (T item in e.OldItems)
+                    {
+                    }
+                    foreach (T item in e.NewItems)
+                    {
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    Debug.WriteLine("NotifyCollectionChangedAction.Reset");
+                    break;
+            }
+        }
+ 
     }
 }
