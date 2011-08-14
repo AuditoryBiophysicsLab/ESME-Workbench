@@ -78,6 +78,7 @@ namespace ESME.Metadata
                         Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
                         if ((_bathymetry == null) || (!_bathymetry.IsAlive)) _bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
                         newItem.Bathymetry = _bathymetry;
+                        newItem.ThresholdRadiusChanged += (s, e) => Dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
                         Dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
                         Task.Factory.StartNew(() => newItem.CheckThreshold(120, Dispatcher));
                     }
@@ -293,7 +294,7 @@ namespace ESME.Metadata
             var bathymetryBounds = SelectedBathymetry.Metadata.Bounds;
             _scenarioBounds.Union(bathymetryBounds);
             var bathyBitmapLayer = MapLayers.DisplayBathymetryRaster("Bathymetry", Path.Combine(_imagesPath, _selectedEnvironment.Metadata.BathymetryName + ".bmp"), true, false, true, bathymetryBounds);
-            MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer));
             MapLayers.DisplayOverlayShapes("Sound Speed", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Circle, false, null, false);
             MapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
             foreach (var sedimentType in _selectedEnvironment.Data.SedimentTypes)
@@ -302,7 +303,7 @@ namespace ESME.Metadata
                 MapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", sedimentType.Key.ToLower()), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
             }
             ZoomToScenarioHandler();
-            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
             // Get a list of transmission loss files that match the modes in the current scenario
             CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
         }
@@ -406,7 +407,7 @@ namespace ESME.Metadata
                                  select mode).Distinct();
             foreach (var mode in distinctModes) analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode, 16));
             AnalysisPoints.Add(analysisPoint);
-            MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
+            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
         }
 
         #region public ObservableCollection<AnalysisPoint> AnalysisPoints { get; set; }
@@ -465,7 +466,7 @@ namespace ESME.Metadata
                 case NotifyCollectionChangedAction.Reset:
                     break;
             }
-            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+            if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
         }
 
         static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.AnalysisPoints);

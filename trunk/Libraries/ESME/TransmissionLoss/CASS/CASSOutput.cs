@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -250,7 +251,9 @@ namespace ESME.TransmissionLoss.CASS
                     errors.AppendLine(string.Format("Radial with bearing {0} extends beyond bathymetry bounds", radialBearing));
                 }
             }
-            ValidationErrorText = errors.ToString();
+            if (float.IsNaN(ThresholdRadius)) errors.AppendLine("Checking radials for threshold value, please wait...");
+            else if (!IsRadiusSufficient) errors.AppendLine("Calculation radius too small");
+            ValidationErrorText = errors.ToString().Trim();
         }
 
         #endregion
@@ -265,8 +268,7 @@ namespace ESME.TransmissionLoss.CASS
                 _isRadiusSufficient = value;
                 NotifyPropertyChanged(IsRadiusSufficientChangedEventArgs);
                 if (_isRadiusSufficient) return;
-                if (string.IsNullOrEmpty(ValidationErrorText)) ValidationErrorText = "Calculation radius too small";
-                else ValidationErrorText += "\r\nCalculation radius too small";
+                Validate();
             }
         }
 
@@ -285,11 +287,18 @@ namespace ESME.TransmissionLoss.CASS
                 if (_thresholdRadius == value) return;
                 _thresholdRadius = value;
                 NotifyPropertyChanged(ThresholdRadiusChangedEventArgs);
+                Debug.WriteLine("{0}: [{1:0.####}, {2:0.####}] {3}|{4}|{5} threshold radius {6:0.##}m", DateTime.Now, Latitude, Longitude, PlatformName, SourceName, ModeName, _thresholdRadius);
+                OnThresholdRadiusChanged();
             }
         }
 
         static readonly PropertyChangedEventArgs ThresholdRadiusChangedEventArgs = ObservableHelper.CreateArgs<CASSOutput>(x => x.ThresholdRadius);
-        float _thresholdRadius;
+        float _thresholdRadius = float.NaN;
+        public event EventHandler ThresholdRadiusChanged;
+        protected virtual void OnThresholdRadiusChanged()
+        {
+            if (ThresholdRadiusChanged != null) ThresholdRadiusChanged(this, new EventArgs());
+        }
 
         #endregion
 
@@ -297,7 +306,9 @@ namespace ESME.TransmissionLoss.CASS
         {
             if (SourceLevel < threshold)
             {
-                
+                ThresholdRadius = 0;
+                dispatcher.InvokeIfRequired(() => IsRadiusSufficient = true);
+                return;
             }
             var unloadAfterCheck = false;
             if (Pressures == null)

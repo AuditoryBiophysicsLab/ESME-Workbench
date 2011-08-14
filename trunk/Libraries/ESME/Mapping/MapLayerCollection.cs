@@ -257,10 +257,11 @@ namespace ESME.Mapping
                 displayPoints.Clear();
             }
 
-            //for (var angle = 0; angle <= 360; angle++)
-            //    circlePoints.Add(EarthCoordinate.Move(curPoint, angle, curPoint.MaxRangeDistance));
-
-            //propagationPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
+            if (!float.IsNaN(curPoint.ThresholdRadius))
+            {
+                for (var angle = 0; angle <= 360; angle++) circlePoints.Add(EarthCoordinate.Move(curPoint, angle, curPoint.ThresholdRadius));
+                propagationPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
+            }
             propagationPointLayer.Done();
         }
 
