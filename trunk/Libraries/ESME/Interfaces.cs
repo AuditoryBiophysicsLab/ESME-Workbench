@@ -14,12 +14,12 @@ namespace ESME
         bool? ShowDialog();
     }
 
-    public interface IHasLog
+    public interface IHaveALog
     {
         string Log { get; set; }
     }
 
-    public interface IHasName
+    public interface IHaveAName
     {
         string Name { get; set; }
     }

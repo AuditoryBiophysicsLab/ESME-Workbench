@@ -107,6 +107,7 @@
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -182,6 +183,7 @@
     </Compile>
     <Compile Include="Environment\Descriptors\RangeComplexDescriptor.cs" />
     <Compile Include="Mapping\CustomStartEndLineStyle.cs" />
+    <Compile Include="Mapping\LayerListViewModel.cs" />
     <Compile Include="Mapping\LayerType.cs" />
     <Compile Include="Mapping\LineWeightMenuItemViewModel.cs" />
     <Compile Include="Mapping\MapLayerCollection.cs" />
@@ -190,7 +192,10 @@
     <Compile Include="Mapping\OverlayFileMapLayer.cs" />
     <Compile Include="Mapping\PointSymbolTypeMenuItemViewModel.cs" />
     <Compile Include="Mapping\RasterMapLayer.cs" />
+    <Compile Include="Mapping\ScenarioTreeViewModel.cs" />
     <Compile Include="Mapping\ShapefileMapLayer.cs" />
+    <Compile Include="Mapping\TreeNode.cs" />
+    <Compile Include="Mapping\TreeNodeList.cs" />
     <Compile Include="Metadata\RangeComplexMetadata.cs" />
     <Compile Include="Environment\Sediment.cs" />
     <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />

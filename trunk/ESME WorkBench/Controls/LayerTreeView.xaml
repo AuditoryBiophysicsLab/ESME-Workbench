@@ -4,12 +4,38 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views"
+             xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views" 
+             xmlns:Collections="clr-namespace:HRC.Collections;assembly=HRC" 
+             xmlns:Mapping="clr-namespace:ESME.Mapping;assembly=ESME" 
              mef:ViewModelLocator.ViewModel="LayerListViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300">
 	<UserControl.Resources>
+        <Style x:Key="HeaderedToolTip" TargetType="ToolTip">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="HasDropShadow" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="HeaderedContentControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Border HorizontalAlignment="Stretch" 
+                                    BorderThickness="0 0 0 1"
+                                    BorderBrush="Black"
+                                    Margin="5"
+                                    Grid.Row="0">
+                                <ContentPresenter ContentSource="{TemplateBinding Header}" />
+                            </Border>
+                            <ContentPresenter Grid.Row="1" ContentSource="{TemplateBinding Content}" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 		<Style x:Key="ContextMenuItemStyle">
 			<Setter Property="MenuItem.Header"
 			        Value="{Binding Header}" />
@@ -47,7 +73,7 @@
 			</Style.Triggers>
 		</Style>
 
-		<DataTemplate x:Key="CheckBoxItemTemplate" DataType="{x:Type TreeViewItem}">
+        <DataTemplate x:Key="CheckBoxItemTemplate" DataType="{x:Type Mapping:MapLayerViewModel}">
 			<Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="16" />
@@ -118,11 +144,15 @@
                 </DataTrigger>
             </DataTemplate.Triggers>
 		</DataTemplate>
-	</UserControl.Resources>
-	<TreeView DockPanel.Dock="Top"
+        <HierarchicalDataTemplate DataType="{x:Type Mapping:TreeNode}"
+                      	          ItemContainerStyle="{StaticResource LayersViewItemStyle}"
+                                  ItemsSource="{Binding Children}"
+                                  ItemTemplate="{StaticResource CheckBoxItemTemplate}">
+            <TextBlock Text="{Binding Name}" />
+        </HierarchicalDataTemplate>
+
+    </UserControl.Resources>
+    <TreeView DockPanel.Dock="Top"
 	         x:Name="ListBox"
-	         ItemContainerStyle="{StaticResource LayersViewItemStyle}"
-	         ItemsSource="{Binding ScenarioTreeViewModel}"
-	         ItemTemplate="{StaticResource CheckBoxItemTemplate}">
-    </TreeView>
+	         ItemsSource="{Binding TreeViewRootNodes}"/>
 </UserControl>

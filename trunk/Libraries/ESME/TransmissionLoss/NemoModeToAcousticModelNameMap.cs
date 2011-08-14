@@ -2,13 +2,13 @@
 using System.Linq;
 namespace ESME.TransmissionLoss
 {
-    public class NemoModeToAcousticModelNameMap : List<HRC.Collections.KeyValuePair<string, TransmissionLossAlgorithm>>
+    public class NemoModeToAcousticModelNameMap : List<HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>>
     {
         public NemoModeToAcousticModelNameMap() {  }
         public NemoModeToAcousticModelNameMap(IEnumerable<string> distinctModePSMNames, TransmissionLossAlgorithm defaultAcousticModel)
         {
             foreach (var curMode in distinctModePSMNames)
-                Add(new HRC.Collections.KeyValuePair<string, TransmissionLossAlgorithm>(curMode, defaultAcousticModel));
+                Add(new HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>(curMode, defaultAcousticModel));
         }
 
         public void UpdateModes(IEnumerable<string> distinctModePSMNames, TransmissionLossAlgorithm defaultAcousticModel)
@@ -36,7 +36,7 @@ namespace ESME.TransmissionLoss
 
             // Add any modes in the new master list that are not already in the dictionary
             foreach (var curMode in distinctModePSMNames)
-                if (this[curMode] == TransmissionLossAlgorithm.NoneAssigned) Add(new HRC.Collections.KeyValuePair<string, TransmissionLossAlgorithm>(curMode, defaultAcousticModel));
+                if (this[curMode] == TransmissionLossAlgorithm.NoneAssigned) Add(new HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>(curMode, defaultAcousticModel));
         }
 
         public TransmissionLossAlgorithm this[string key]
@@ -49,7 +49,7 @@ namespace ESME.TransmissionLoss
                     curEntry.Value = value;
                     return;
                 }
-                Add(new HRC.Collections.KeyValuePair<string, TransmissionLossAlgorithm>(key, value));
+                Add(new HRC.Collections.EditableKeyValuePair<string, TransmissionLossAlgorithm>(key, value));
             }
         }
     }

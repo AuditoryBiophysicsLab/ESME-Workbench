@@ -8,7 +8,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
 {
     [ExportViewModel("TabDataViewModel")]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class TabDataViewModel : ViewModelBase, IHasName
+    public class TabDataViewModel : ViewModelBase, IHaveAName
     {
         static readonly PropertyChangedEventArgs HeaderChangedEventArgs = ObservableHelper.CreateArgs<TabDataViewModel>(x => x.Header);
 
@@ -83,7 +83,7 @@ namespace ESMEWorkBench.ViewModels.Ribbon
 
         #region IHasName Members
 
-        string IHasName.Name
+        string IHaveAName.Name
         {
             get { return Header; }
             set { Header = value; }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,7 +10,7 @@ using Timer = System.Timers.Timer;
 
 namespace ESME.Data
 {
-    public class WorkDirectories : List<string>, INotifyCollectionChanged, INotifyPropertyChanged
+    public class WorkDirectories : ObservableList<string>
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>();
 
@@ -142,8 +141,6 @@ namespace ESME.Data
         Timer _fileReloadTimer;
 
         #region ObservableCollection stuff
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public new void AddRange(IEnumerable<string> items)
         {
@@ -152,10 +149,10 @@ namespace ESME.Data
             {
                 if (this.Any(directory => directory == item)) continue;
                 newItems.Add(item);
-                base.Add(item);
+                Add(item);
             }
             Save();
-            if (CollectionChanged != null) CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newItems));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, newItems));
         }
 
         public void Add(string workDirectory, bool saveOnAdd)
@@ -163,33 +160,33 @@ namespace ESME.Data
             if (this.Any(directory => directory == workDirectory)) return;
             Add(workDirectory);
             if (saveOnAdd) Save();
-            if (CollectionChanged != null) CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, workDirectory));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, workDirectory));
         }
 
         public new void Clear()
         {
             base.Clear();
-            if (CollectionChanged != null) CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public new bool Remove(string item)
         {
             var result = base.Remove(item);
-            if (result && (CollectionChanged != null)) CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
             return result;
         }
 
         public new void Insert(int index, string workDirectory)
         {
             base.Insert(index, workDirectory);
-            if (CollectionChanged != null) CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, workDirectory));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, workDirectory));
         }
 
         public new void RemoveAt(int index)
         {
             var item = this[index];
             base.RemoveAt(index);
-            if (CollectionChanged != null) CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
         }
 
         public new string this[int index]
@@ -198,7 +195,7 @@ namespace ESME.Data
             set
             {
                 base[index] = value;
-                if (CollectionChanged != null) CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value));
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value));
             }
         }
         #endregion

@@ -335,10 +335,9 @@ namespace ESME.TransmissionLoss.CASS
         {
             rangeBelowThreshold = MaxRangeDistance;
             var initialCheck = true;
-            float maxPressure;
             for (var rangeIndex = RangeCellCount - 1; rangeIndex > 0; rangeIndex--)    // Start at the end and work backwards
             {
-                maxPressure = float.MinValue;
+                var maxPressure = float.MinValue;
                 for (var depthIndex = 0; depthIndex < DepthCellCount; depthIndex++)
                     maxPressure = Math.Max(maxPressure, radial[depthIndex, rangeIndex]);
                 if ((initialCheck) && (maxPressure >= thresholdValue)) return false;
@@ -441,7 +440,7 @@ namespace ESME.TransmissionLoss.CASS
                 WriteCASSField(writer, "Source Name", 50);
                 WriteCASSField(writer, "Mode Name", 50);
 
-                writer.Write(transmissionLossField.HighFrequency); //todo: yes?
+                writer.Write(transmissionLossField.HighFrequency); 
                 WriteCASSField(writer, "HZ", 10);
 
                 writer.Write(transmissionLossField.DepressionElevationAngle);
@@ -734,7 +733,7 @@ namespace ESME.TransmissionLoss.CASS
 
             #region bearing header read
 
-            RadialCount = (int)reader.ReadSingle(); //note: comes in as a float, cast to int. See PH's docs
+            RadialCount = (int)reader.ReadSingle(); //comes in as a float, cast to int. See Peter Hulton's docs
             RadialBearings = new float[RadialCount];
             for (var i = 0; i < RadialCount; i++) RadialBearings[i] = reader.ReadSingle();
 
@@ -781,7 +780,7 @@ namespace ESME.TransmissionLoss.CASS
 
     }
 
-    public class CASSOutputs : List<CASSOutput>, INotifyCollectionChanged
+    public class CASSOutputs : ObservableList<CASSOutput>
     {
         public CASSOutputs(string directoryToScan, string filePattern, NotifyCollectionChangedEventHandler collectionChangedHandler = null, List<AcousticProperties> propertiesToMatch = null)
         {
@@ -816,7 +815,6 @@ namespace ESME.TransmissionLoss.CASS
             if (_isRefreshing) return;
             _isRefreshing = true;
             Clear();
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             var files = Directory.EnumerateFiles(_directory, _pattern);
             foreach (var file in files)
                 Add(file);
@@ -825,38 +823,30 @@ namespace ESME.TransmissionLoss.CASS
 
         void Remove(string fileName)
         {
-            CASSOutput target;
             lock (_lockObject)
             {
-                target = Find(item => item.Filename == fileName);
+                var target = Find(item => item.Filename == fileName);
                 if (target == null) return;
                 Remove(target);
             }
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, target));
         }
 
         void Add(string fileName)
         {
-            CASSOutput target;
-            var itemAdded = false;
             lock (_lockObject)
             {
-                target = Find(item => item.Filename == fileName);
+                var target = Find(item => item.Filename == fileName);
                 if (target != null) return;
                 target = CASSOutput.FromBinaryFile(fileName, true);
                 if (_propertiesToMatch == null)
                 {
                     Add(target);
-                    itemAdded = true;
                 }
                 else if (_propertiesToMatch.Any(property => property.Equals(target.AcousticProperties)))
                 {
                     Add(target);
-                    itemAdded = true;
                 }
             }
-            if (!itemAdded) return;
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, target));
         }
 
         FileSystemWatcher _dirWatcher;
@@ -886,12 +876,5 @@ namespace ESME.TransmissionLoss.CASS
                     break;
             }
         }
-
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
-        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
-        {
-            if (CollectionChanged != null) CollectionChanged(this, e);
-        }
-
     }
 }

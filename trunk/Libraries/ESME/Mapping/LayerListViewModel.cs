@@ -4,13 +4,12 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Windows.Controls;
 using Cinch;
-using ESME;
-using ESME.Mapping;
 using MEFedMVVM.ViewModelLocator;
 
-namespace ESMEWorkBench.ViewModels.Main
+namespace ESME.Mapping
 {
     [ExportViewModel("LayerListViewModel")]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     public class LayerListViewModel : ViewModelBase
     {
         #region Private fields
@@ -29,7 +28,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("***********\nLayerTreeViewModel: Mediator registration failed: " + ex.Message + "\n***********");
+                Debug.WriteLine("***********\nLayerListViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
             _viewAwareStatus = viewAwareStatus;
@@ -56,6 +55,27 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public TreeNodeList TreeViewRootNodes { get; set; }
+
+        public TreeNodeList TreeViewRootNodes
+        {
+            get { return _treeViewRootNodes; }
+            set
+            {
+                if (_treeViewRootNodes == value) return;
+                _treeViewRootNodes = value;
+                NotifyPropertyChanged(TreeViewRootNodesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TreeViewRootNodesChangedEventArgs = ObservableHelper.CreateArgs<LayerListViewModel>(x => x.TreeViewRootNodes);
+        TreeNodeList _treeViewRootNodes;
+
+        #endregion
+
+        [MediatorMessageSink(MediatorMessage.SetTreeRoots)]
+        void SetTreeRoots(TreeNodeList rootNodes) { TreeViewRootNodes = rootNodes; }
+
         [MediatorMessageSink(MediatorMessage.SetMapLayers)]
         void SetMapLayers(MapLayerCollection mapLayers) { MapLayers = mapLayers; }
 
@@ -76,7 +96,7 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             var layerIndex = MapLayers.IndexOf(layer);
             if (layerIndex == -1) return;
-            MapLayers.Move(layerIndex, layer.Index); 
+            MapLayers.Move(layerIndex, layer.Index);
         }
 
         [MediatorMessageSink(MediatorMessage.EnableGUI)]

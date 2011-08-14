@@ -15,7 +15,6 @@ using Cinch;
 using ESME;
 using ESME.Mapping;
 using ESMEWorkBench.Controls;
-using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.Layers;
 using HRC.Navigation;

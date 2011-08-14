@@ -3,7 +3,7 @@ using ESME;
 
 namespace ESMEWorkBench.ViewModels.Ribbon
 {
-    public class NamedList<T> : List<T> where T : IHasName
+    public class NamedList<T> : List<T> where T : IHaveAName
     {
         public T this[string name]
         {
