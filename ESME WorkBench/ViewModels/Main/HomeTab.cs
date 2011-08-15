@@ -12,6 +12,7 @@ using ESME;
 using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
+using ESME.NewNEMO;
 using ESME.TransmissionLoss;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
@@ -105,6 +106,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             ScenarioMetadata = null;
             RecentFiles.InsertFile(fileName);
+            NemoScenario.Test(fileName);
             try
             {
                 Task.Factory.StartNew(() =>
