@@ -71,7 +71,17 @@
 				</Trigger>
 			</Style.Triggers>
 		</Style>
-
+        <Style x:Key="KeyValuePairStyle" TargetType="StackPanel">
+            
+        </Style>
+        <DataTemplate x:Key="ScenarioNodeTooltipTemplate" DataType="{x:Type Mapping:ScenarioNode}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+            </Grid>
+        </DataTemplate>
 
     </UserControl.Resources>
     <TreeView DockPanel.Dock="Top"
@@ -82,23 +92,59 @@
                                   ItemsSource="{Binding Children}">
                 <TextBlock Text="{Binding Name}" />
             </HierarchicalDataTemplate>
+            <HierarchicalDataTemplate DataType="{x:Type Mapping:ScenarioNode}"
+                                  ItemsSource="{Binding Children}">
+                <TextBlock Text="{Binding Name}">
+                    <TextBlock.ToolTip>
+                        <ToolTip DataContext="{Binding Path=DataContext.WrappedObject, RelativeSource={RelativeSource TemplatedParent}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <ListView Grid.Column="0" HorizontalContentAlignment="Right" Margin="5">
+                                    <ListViewItem Content="Range complex" />
+                                    <ListViewItem Content="Description" />
+                                    <ListViewItem Content="Time frame" />
+                                    <ListViewItem Content="Start time" />
+                                    <ListViewItem Content="Duration" />
+                                    <ListViewItem Content="Created on" />
+                                    <ListViewItem Content="Created by" />
+                                    <ListViewItem Content="Builder version" />
+                                </ListView>
+                                <ListView Grid.Column="1" HorizontalContentAlignment="Left" Margin="0 5 5 5">
+                                    <ListViewItem Content="{Binding SimAreaName}" />
+                                    <ListViewItem Content="{Binding Description}" />
+                                    <ListViewItem Content="{Binding TimeFrame}" />
+                                    <ListViewItem Content="{Binding StartTime}" />
+                                    <ListViewItem Content="{Binding Duration}" />
+                                    <ListViewItem Content="{Binding CreationTime}" />
+                                    <ListViewItem Content="{Binding AnalystName}" />
+                                    <ListViewItem Content="{Binding BuilderVersion}" />
+                                </ListView>
+                            </Grid>
+                        </ToolTip>
+                    </TextBlock.ToolTip>
+                </TextBlock>
+            </HierarchicalDataTemplate>
             <DataTemplate DataType="{x:Type Mapping:MapLayerViewModel}">
-                <Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="*" SharedSizeGroup="LayerName" />
-                        <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="16" />
-                        <ColumnDefinition Width="10" />
-                    </Grid.ColumnDefinitions>
-                    <CheckBox Focusable="False"
+                <DockPanel LastChildFill="True">
+                    <Grid DockPanel.Dock="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" SharedSizeGroup="LayerName" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="10" />
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Focusable="False"
 				              Grid.Column="0"
 				              IsChecked="{Binding IsChecked}"
 				              VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Name, Mode=OneTime}"
+                        <TextBlock Text="{Binding Name, Mode=OneTime}"
                                x:Name="LayerName"
 				               Grid.Column="1"/>
-                    <Rectangle Width="12"
+                        <Rectangle Width="12"
 				               RadiusX="3"
 				               RadiusY="3"
 				               Grid.Column="2"
@@ -108,13 +154,13 @@
 				               VerticalAlignment="Center"
 				               ToolTip="Area color: Right click to change"
 				               Name="LineColor">
-                        <Rectangle.ContextMenu>
-                            <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+                            <Rectangle.ContextMenu>
+                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 						             ItemsSource="{Binding AreaColorPickerMenu}" />
-                        </Rectangle.ContextMenu>
-                    </Rectangle>
+                            </Rectangle.ContextMenu>
+                        </Rectangle>
 
-                    <Rectangle Width="12"
+                        <Rectangle Width="12"
 				               RadiusX="3"
 				               RadiusY="3"
 				               Grid.Column="3"
@@ -123,17 +169,18 @@
 				               Visibility="{Binding IsLineColorVisible}"
 				               VerticalAlignment="Center"
 				               ToolTip="{Binding PointLineTooltip}">
-                        <Rectangle.ContextMenu>
-                            <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+                            <Rectangle.ContextMenu>
+                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 						             ItemsSource="{Binding LineOrPointPickerMenu}" />
-                        </Rectangle.ContextMenu>
-                    </Rectangle>
+                            </Rectangle.ContextMenu>
+                        </Rectangle>
 
-                    <Grid.ContextMenu>
-                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+                        <Grid.ContextMenu>
+                            <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 					             ItemsSource="{Binding ContextMenu}" />
-                    </Grid.ContextMenu>
-                </Grid>
+                        </Grid.ContextMenu>
+                    </Grid>
+                </DockPanel>
                 <DataTemplate.Triggers>
                     <DataTrigger Binding="{Binding IsValid}" Value="False">
                         <DataTrigger.Setters>
