@@ -233,16 +233,7 @@
     <Compile Include="NEMO\NemoSource.cs" />
     <Compile Include="NEMO\NemoSpecies.cs" />
     <Compile Include="NEMO\NemoTrackdef.cs" />
-    <Compile Include="NewNEMO\NemoFile.cs">
-      <DependentUpon>NemoFile.xsd</DependentUpon>
-    </Compile>
-    <Compile Include="NewNEMO\NemoFile.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NemoFile.xsd</DependentUpon>
-    </Compile>
     <Compile Include="NewNEMO\NemoScenario.cs" />
-    <Compile Include="NewNEMO\NewNEMOTest.cs" />
     <Compile Include="Platform\ActiveMode.cs" />
     <Compile Include="NEMO\ActiveTimeStep.cs" />
     <Compile Include="Platform\BehaviorModel.cs" />
@@ -346,17 +337,6 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="NewNEMO\NemoFile.xsc">
-      <DependentUpon>NemoFile.xsd</DependentUpon>
-    </None>
-    <None Include="NewNEMO\NemoFile.xsd">
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>NemoFile.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="NewNEMO\NemoFile.xss">
-      <DependentUpon>NemoFile.xsd</DependentUpon>
-    </None>
     <None Include="Resources\Strings.resx">
       <SubType>Designer</SubType>
     </None>
@@ -407,7 +387,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="prebuild.bat" />
-    <Content Include="NewNEMO\NemoFile.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
