@@ -11,11 +11,12 @@
   <?define ESMEPath="$(var.ESMERoot)\ESME WorkBench\bin\Release"?>
   <?define HDFPath="$(var.ESMERoot)\Libraries\ESME\External References"?>
   <?define ESMEViewsPath="$(var.ESMERoot)\ESME.Controls\bin\Release"?>
-  <?define BellhopPath="$(var.ESMERoot)\Utilities\Bellhop"?>
+  <?define BellhopPath="$(var.ESMERoot)\Utilities"?>
   <?define MMMBSPath="$(var.ESMERoot)\Utilities\MMMBS\demoProjects"?>
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define ReleaseNotesPath="$(var.ESMERoot)\Release Notes"?>
   <?define TransmissionLossViewerPath="$(var.ESMERoot)\TransmissionLossViewer\bin\Release"?>
+  <?define TransmissionLossCalculatorPath="$(var.ESMERoot)\TransmissionLossCalculator\bin\Release"?>
   <Product Id="$(var.ProductCode)" 
            Name="$(var.ProductName)" 
            Version="$(var.ProductVersion)" 
@@ -97,6 +98,9 @@
             <File Id="UserGuide"
                   Name="ESME Workbench 2011 User Guide.pdf"
                   Source="$(var.ReleaseNotesPath)\ESME Workbench 2011 User Guide.pdf" />
+            <File Id="TransmissionLossCalculator.exe"
+                  Name="TransmissionLossCalculator.exe"
+                  Source="$(var.TransmissionLossCalculatorPath)\TransmissionLossCalculator.exe" />
             <File Id="TransmissionLossViewer.exe"
                   Name="TransmissionLossViewer.exe"
                   Source="$(var.TransmissionLossViewerPath)\TransmissionLossViewer.exe" />
