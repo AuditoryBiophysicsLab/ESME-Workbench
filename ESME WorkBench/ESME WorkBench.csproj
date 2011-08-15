@@ -17,7 +17,7 @@
     <WarningLevel>4</WarningLevel>
     <ApplicationIcon>Wave.ico</ApplicationIcon>
     <Utf8Output>true</Utf8Output>
-    <TargetFrameworkProfile />
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>

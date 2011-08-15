@@ -311,10 +311,17 @@ namespace ESME.TransmissionLoss.CASS
                 return;
             }
             var unloadAfterCheck = false;
-            if (Pressures == null)
+            try
             {
-                Load();
-                unloadAfterCheck = true;
+                if (Pressures == null)
+                {
+                    Load();
+                    unloadAfterCheck = true;
+                }
+            }
+            catch (Exception)
+            {
+                return;    
             }
             if (Pressures == null) throw new ApplicationException("No radial data found");
             var allRadialsBelowThreshold = true;
