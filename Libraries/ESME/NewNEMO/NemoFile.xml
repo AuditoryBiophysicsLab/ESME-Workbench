@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Scenario>
+  <builderVersion>Scenario Builder 1.18.0 build.847</builderVersion>
+  <psmVersion>3.3</psmVersion>
+  <eventName>JAX Text</eventName>
+  <creationTime>2011-02-01 12:00:00.0 GMT</creationTime>
+  <description>BU Test Case</description>
+  <analystName>HultonPH</analystName>
+  <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+  <duration>0 01:00:00.0</duration>
+  <simAreaName>Jacksonville</simAreaName>
+  <timeFrame>April</timeFrame>
+  <Platform>
+    <psmName>688i</psmName>
+    <psmId>688i:1</psmId>
+    <name>688i</name>
+    <id>1</id>
+    <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+    <duration>0 01:00:00.0</duration>
+    <priority>-9</priority>
+    <useParentTimeSpan>true</useParentTimeSpan>
+    <type>Submarine</type>
+    <description>Nov 30, 2009 7:42:14 PM</description>
+    <launcher></launcher>
+    <towwer></towwer>
+    <repeatCount>1</repeatCount>
+    <Source>
+      <psmName>688i|CW Tracking Pinger</psmName>
+      <psmId>688i:1|CW Tracking Pinger:1</psmId>
+      <name>CW Tracking Pinger</name>
+      <id>1</id>
+      <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+      <duration>0 01:00:00.0</duration>
+      <priority>0</priority>
+      <useParentTimeSpan>true</useParentTimeSpan>
+      <type>Pinger</type>
+      <description>Jan 31, 2011 4:35:38 PM</description>
+      <Mode>
+        <psmName>688i|CW Tracking Pinger|A</psmName>
+        <psmId>688i:1|CW Tracking Pinger:1|A:1</psmId>
+        <name>A</name>
+        <id>1</id>
+        <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+        <duration>0 01:00:00.0</duration>
+        <priority>0</priority>
+        <useParentTimeSpan>true</useParentTimeSpan>
+        <type>A</type>
+        <state></state>
+        <linked></linked>
+        <activeTime>0.0</activeTime>
+        <depthOffset>0.0</depthOffset>
+        <sourceLevel>170.0</sourceLevel>
+        <lowFrequency>1000.0</lowFrequency>
+        <highFrequency>11000.0</highFrequency>
+        <pulseInterval>0 00:00:01.0</pulseInterval>
+        <pulseLength>100.0</pulseLength>
+        <horizontalBeamWidth>180.0</horizontalBeamWidth>
+        <verticalBeamWidth>180.0</verticalBeamWidth>
+        <depthElAngle>0.0</depthElAngle>
+        <relativeBeamAngle>0.0</relativeBeamAngle>
+        <radius>50000.0</radius>
+      </Mode>
+    </Source>
+    <Source>
+      <psmName>688i|Fathometer</psmName>
+      <psmId>688i:1|Fathometer:1</psmId>
+      <name>Fathometer</name>
+      <id>1</id>
+      <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+      <duration>0 01:00:00.0</duration>
+      <priority>0</priority>
+      <useParentTimeSpan>true</useParentTimeSpan>
+      <type>Fathometer</type>
+      <description>Nov 30, 2009 7:43:07 PM</description>
+      <Mode>
+        <psmName>688i|Fathometer|Nonsecure Deep</psmName>
+        <psmId>688i:1|Fathometer:1|Nonsecure Deep:</psmId>
+        <name>Nonsecure Deep</name>
+        <id></id>
+        <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+        <duration>0 01:00:00.0</duration>
+        <priority>0</priority>
+        <useParentTimeSpan>true</useParentTimeSpan>
+        <type>Nonsecure Deep</type>
+        <state></state>
+        <linked></linked>
+        <activeTime>0.0</activeTime>
+        <depthOffset>0.0</depthOffset>
+        <sourceLevel>160.0</sourceLevel>
+        <lowFrequency>1000.0</lowFrequency>
+        <highFrequency>10000.0</highFrequency>
+        <pulseInterval>0 00:00:05.5</pulseInterval>
+        <pulseLength>100.0</pulseLength>
+        <horizontalBeamWidth>60.0</horizontalBeamWidth>
+        <verticalBeamWidth>20.0</verticalBeamWidth>
+        <depthElAngle>90.0</depthElAngle>
+        <relativeBeamAngle>0.0</relativeBeamAngle>
+        <radius>20000.0</radius>
+      </Mode>
+    </Source>
+    <trackDef>
+      <trackType>PERIMETER_BOUNCE</trackType>
+      <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+      <duration>0 01:00:00.0</duration>
+      <random>true</random>
+      <opsBounds>false</opsBounds>
+      <opsTimes>true</opsTimes>
+      <initialLatitude>29.4658736240582</initialLatitude>
+      <initialLongitude>-79.50554228876071</initialLongitude>
+      <initialHeight>-100.0</initialHeight>
+      <initialCourse>160.49464531550322</initialCourse>
+      <initialSpeed>10.0</initialSpeed>
+      <limitFileName>Jax_Ops_Area_Deep.ovr</limitFileName>
+    </trackDef>
+  </Platform>
+  <Platform>
+    <psmName>MK46</psmName>
+    <psmId>MK46:2</psmId>
+    <name>MK46</name>
+    <id>2</id>
+    <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+    <duration>0 01:00:00.0</duration>
+    <priority>0</priority>
+    <useParentTimeSpan>true</useParentTimeSpan>
+    <type>Torpedo - Lightweight</type>
+    <description>Jan 31, 2011 4:44:20 PM</description>
+    <launcher></launcher>
+    <towwer></towwer>
+    <repeatCount>1</repeatCount>
+    <Source>
+      <psmName>MK46|CW Tracking Pinger</psmName>
+      <psmId>MK46:2|CW Tracking Pinger:1</psmId>
+      <name>CW Tracking Pinger</name>
+      <id>1</id>
+      <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+      <duration>0 01:00:00.0</duration>
+      <priority>0</priority>
+      <useParentTimeSpan>true</useParentTimeSpan>
+      <type>Pinger</type>
+      <description>Jan 31, 2011 4:46:05 PM</description>
+      <Mode>
+        <psmName>MK46|CW Tracking Pinger|B</psmName>
+        <psmId>MK46:2|CW Tracking Pinger:1|B:1</psmId>
+        <name>B</name>
+        <id>1</id>
+        <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+        <duration>0 01:00:00.0</duration>
+        <priority>0</priority>
+        <useParentTimeSpan>true</useParentTimeSpan>
+        <type>B</type>
+        <state></state>
+        <linked></linked>
+        <activeTime>0.0</activeTime>
+        <depthOffset>0.0</depthOffset>
+        <sourceLevel>170.0</sourceLevel>
+        <lowFrequency>1000.0</lowFrequency>
+        <highFrequency>10000.0</highFrequency>
+        <pulseInterval>0 00:00:02.0</pulseInterval>
+        <pulseLength>100.0</pulseLength>
+        <horizontalBeamWidth>360.0</horizontalBeamWidth>
+        <verticalBeamWidth>180.0</verticalBeamWidth>
+        <depthElAngle>0.0</depthElAngle>
+        <relativeBeamAngle>0.0</relativeBeamAngle>
+        <radius>50000.0</radius>
+      </Mode>
+    </Source>
+    <Source>
+      <psmName>MK46|Sonar</psmName>
+      <psmId>MK46:2|Sonar:1</psmId>
+      <name>Sonar</name>
+      <id>1</id>
+      <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+      <duration>0 01:00:00.0</duration>
+      <priority>0</priority>
+      <useParentTimeSpan>true</useParentTimeSpan>
+      <type>Sonar</type>
+      <description>PSM default</description>
+      <Mode>
+        <psmName>MK46|Sonar|Homing</psmName>
+        <psmId>MK46:2|Sonar:1|Homing:1</psmId>
+        <name>Homing</name>
+        <id>1</id>
+        <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+        <duration>0 00:08:00.0</duration>
+        <priority>0</priority>
+        <useParentTimeSpan>true</useParentTimeSpan>
+        <type>Homing</type>
+        <state></state>
+        <linked></linked>
+        <activeTime>480.0</activeTime>
+        <depthOffset>0.0</depthOffset>
+        <sourceLevel>200.0</sourceLevel>
+        <lowFrequency>1000.0</lowFrequency>
+        <highFrequency>10000.0</highFrequency>
+        <pulseInterval>0 00:00:10.0</pulseInterval>
+        <pulseLength>500.0</pulseLength>
+        <horizontalBeamWidth>105.0</horizontalBeamWidth>
+        <verticalBeamWidth>95.0</verticalBeamWidth>
+        <depthElAngle>0.0</depthElAngle>
+        <relativeBeamAngle>0.0</relativeBeamAngle>
+        <radius>100000.0</radius>
+      </Mode>
+      <Mode>
+        <psmName>MK46|Sonar|Lost Target</psmName>
+        <psmId>MK46:2|Sonar:1|Lost Target:1</psmId>
+        <name>Lost Target</name>
+        <id>1</id>
+        <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+        <duration>0 00:04:00.0</duration>
+        <priority>0</priority>
+        <useParentTimeSpan>true</useParentTimeSpan>
+        <type>Lost Target</type>
+        <state></state>
+        <linked></linked>
+        <activeTime>240.0</activeTime>
+        <depthOffset>0.0</depthOffset>
+        <sourceLevel>200.0</sourceLevel>
+        <lowFrequency>1000.0</lowFrequency>
+        <highFrequency>10000.0</highFrequency>
+        <pulseInterval>0 00:00:10.0</pulseInterval>
+        <pulseLength>500.0</pulseLength>
+        <horizontalBeamWidth>110.0</horizontalBeamWidth>
+        <verticalBeamWidth>100.0</verticalBeamWidth>
+        <depthElAngle>0.0</depthElAngle>
+        <relativeBeamAngle>0.0</relativeBeamAngle>
+        <radius>100000.0</radius>
+      </Mode>
+      <Mode>
+        <psmName>MK46|Sonar|Search</psmName>
+        <psmId>MK46:2|Sonar:1|Search:1</psmId>
+        <name>Search</name>
+        <id>1</id>
+        <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+        <duration>0 00:09:20.0</duration>
+        <priority>0</priority>
+        <useParentTimeSpan>true</useParentTimeSpan>
+        <type>Search</type>
+        <state></state>
+        <linked></linked>
+        <activeTime>560.0</activeTime>
+        <depthOffset>0.0</depthOffset>
+        <sourceLevel>200.0</sourceLevel>
+        <lowFrequency>1000.0</lowFrequency>
+        <highFrequency>10000.0</highFrequency>
+        <pulseInterval>0 00:00:10.0</pulseInterval>
+        <pulseLength>500.0</pulseLength>
+        <horizontalBeamWidth>115.0</horizontalBeamWidth>
+        <verticalBeamWidth>105.0</verticalBeamWidth>
+        <depthElAngle>0.0</depthElAngle>
+        <relativeBeamAngle>0.0</relativeBeamAngle>
+        <radius>100000.0</radius>
+      </Mode>
+    </Source>
+    <trackDef>
+      <trackType>PERIMETER_BOUNCE</trackType>
+      <startTime>2010-04-01 12:00:00.0 GMT</startTime>
+      <duration>0 01:00:00.0</duration>
+      <random>true</random>
+      <opsBounds>true</opsBounds>
+      <opsTimes>true</opsTimes>
+      <initialLatitude>30.165557233961426</initialLatitude>
+      <initialLongitude>-80.61176137672796</initialLongitude>
+      <initialHeight>-100.0</initialHeight>
+      <initialCourse>61.4448437137263</initialCourse>
+      <initialSpeed>50.0</initialSpeed>
+      <limitFileName>Jax_Ops_Area.ovr</limitFileName>
+    </trackDef>
+  </Platform>
+  <animals>
+    <Species>
+      <recordVersion></recordVersion>
+      <speciesName>Balaenoptera physalus</speciesName>
+      <speciesFile>April\JAXOA_OpArea1_30x30nm_200km_BPHY_April_4min_4h0m0s_15shiptracks.ddb</speciesFile>
+      <speciesCode>8</speciesCode>
+      <totalAnimats>367</totalAnimats>
+      <population>147</population>
+      <trackAreaPopulation>5.0</trackAreaPopulation>
+      <trackAreaTotal>225</trackAreaTotal>
+      <simAreaPopulation>142.0</simAreaPopulation>
+      <simAreaTotal>142</simAreaTotal>
+    </Species>
+    <Species>
+      <recordVersion></recordVersion>
+      <speciesName>Stenella frontalis</speciesName>
+      <speciesFile>April\JAXOA_OpArea1_30x30nm_200km_SFRO_April_4min_4h0m0s_15shiptracks.ddb</speciesFile>
+      <speciesCode>26</speciesCode>
+      <totalAnimats>23280</totalAnimats>
+      <population>23280</population>
+      <trackAreaPopulation>1368.0</trackAreaPopulation>
+      <trackAreaTotal>1368</trackAreaTotal>
+      <simAreaPopulation>21912.0</simAreaPopulation>
+      <simAreaTotal>21912</simAreaTotal>
+    </Species>
+  </animals>
+</Scenario>

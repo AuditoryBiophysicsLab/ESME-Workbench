@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xs:element name="Scenario">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="builderVersion" type="xs:string" minOccurs="0" />
+        <xs:element name="psmVersion" type="xs:string" minOccurs="0" />
+        <xs:element name="eventName" type="xs:string" minOccurs="0" />
+        <xs:element name="creationTime" type="xs:string" minOccurs="0" />
+        <xs:element name="description" type="xs:string" minOccurs="0" />
+        <xs:element name="analystName" type="xs:string" minOccurs="0" />
+        <xs:element name="startTime" type="xs:string" minOccurs="0" />
+        <xs:element name="duration" type="xs:string" minOccurs="0" />
+        <xs:element name="simAreaName" type="xs:string" minOccurs="0" />
+        <xs:element name="timeFrame" type="xs:string" minOccurs="0" />
+        <xs:element name="Platform" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="psmName" type="xs:string" minOccurs="0" />
+              <xs:element name="psmId" type="xs:string" minOccurs="0" />
+              <xs:element name="name" type="xs:string" minOccurs="0" />
+              <xs:element name="id" type="xs:string" minOccurs="0" />
+              <xs:element name="startTime" type="xs:string" minOccurs="0" />
+              <xs:element name="duration" type="xs:string" minOccurs="0" />
+              <xs:element name="priority" type="xs:string" minOccurs="0" />
+              <xs:element name="useParentTimeSpan" type="xs:string" minOccurs="0" />
+              <xs:element name="type" type="xs:string" minOccurs="0" />
+              <xs:element name="description" type="xs:string" minOccurs="0" />
+              <xs:element name="launcher" type="xs:string" minOccurs="0" />
+              <xs:element name="towwer" type="xs:string" minOccurs="0" />
+              <xs:element name="repeatCount" type="xs:string" minOccurs="0" />
+              <xs:element name="Source" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="psmName" type="xs:string" minOccurs="0" />
+                    <xs:element name="psmId" type="xs:string" minOccurs="0" />
+                    <xs:element name="name" type="xs:string" minOccurs="0" />
+                    <xs:element name="id" type="xs:string" minOccurs="0" />
+                    <xs:element name="startTime" type="xs:string" minOccurs="0" />
+                    <xs:element name="duration" type="xs:string" minOccurs="0" />
+                    <xs:element name="priority" type="xs:string" minOccurs="0" />
+                    <xs:element name="useParentTimeSpan" type="xs:string" minOccurs="0" />
+                    <xs:element name="type" type="xs:string" minOccurs="0" />
+                    <xs:element name="description" type="xs:string" minOccurs="0" />
+                    <xs:element name="Mode" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="psmName" type="xs:string" minOccurs="0" />
+                          <xs:element name="psmId" type="xs:string" minOccurs="0" />
+                          <xs:element name="name" type="xs:string" minOccurs="0" />
+                          <xs:element name="id" type="xs:string" minOccurs="0" />
+                          <xs:element name="startTime" type="xs:string" minOccurs="0" />
+                          <xs:element name="duration" type="xs:string" minOccurs="0" />
+                          <xs:element name="priority" type="xs:string" minOccurs="0" />
+                          <xs:element name="useParentTimeSpan" type="xs:string" minOccurs="0" />
+                          <xs:element name="type" type="xs:string" minOccurs="0" />
+                          <xs:element name="state" type="xs:string" minOccurs="0" />
+                          <xs:element name="linked" type="xs:string" minOccurs="0" />
+                          <xs:element name="activeTime" type="xs:string" minOccurs="0" />
+                          <xs:element name="depthOffset" type="xs:string" minOccurs="0" />
+                          <xs:element name="sourceLevel" type="xs:string" minOccurs="0" />
+                          <xs:element name="lowFrequency" type="xs:string" minOccurs="0" />
+                          <xs:element name="highFrequency" type="xs:string" minOccurs="0" />
+                          <xs:element name="pulseInterval" type="xs:string" minOccurs="0" />
+                          <xs:element name="pulseLength" type="xs:string" minOccurs="0" />
+                          <xs:element name="horizontalBeamWidth" type="xs:string" minOccurs="0" />
+                          <xs:element name="verticalBeamWidth" type="xs:string" minOccurs="0" />
+                          <xs:element name="depthElAngle" type="xs:string" minOccurs="0" />
+                          <xs:element name="relativeBeamAngle" type="xs:string" minOccurs="0" />
+                          <xs:element name="radius" type="xs:string" minOccurs="0" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="trackDef" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="trackType" type="xs:string" minOccurs="0" />
+                    <xs:element name="startTime" type="xs:string" minOccurs="0" />
+                    <xs:element name="duration" type="xs:string" minOccurs="0" />
+                    <xs:element name="random" type="xs:string" minOccurs="0" />
+                    <xs:element name="opsBounds" type="xs:string" minOccurs="0" />
+                    <xs:element name="opsTimes" type="xs:string" minOccurs="0" />
+                    <xs:element name="initialLatitude" type="xs:string" minOccurs="0" />
+                    <xs:element name="initialLongitude" type="xs:string" minOccurs="0" />
+                    <xs:element name="initialHeight" type="xs:string" minOccurs="0" />
+                    <xs:element name="initialCourse" type="xs:string" minOccurs="0" />
+                    <xs:element name="initialSpeed" type="xs:string" minOccurs="0" />
+                    <xs:element name="limitFileName" type="xs:string" minOccurs="0" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="animals" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Species" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="recordVersion" type="xs:string" minOccurs="0" />
+                    <xs:element name="speciesName" type="xs:string" minOccurs="0" />
+                    <xs:element name="speciesFile" type="xs:string" minOccurs="0" />
+                    <xs:element name="speciesCode" type="xs:string" minOccurs="0" />
+                    <xs:element name="totalAnimats" type="xs:string" minOccurs="0" />
+                    <xs:element name="population" type="xs:string" minOccurs="0" />
+                    <xs:element name="trackAreaPopulation" type="xs:string" minOccurs="0" />
+                    <xs:element name="trackAreaTotal" type="xs:string" minOccurs="0" />
+                    <xs:element name="simAreaPopulation" type="xs:string" minOccurs="0" />
+                    <xs:element name="simAreaTotal" type="xs:string" minOccurs="0" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Scenario" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
