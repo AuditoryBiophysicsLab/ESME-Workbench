@@ -106,7 +106,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             ScenarioMetadata = null;
             RecentFiles.InsertFile(fileName);
-            NemoScenario.Test(fileName);
+            //NemoScenario.Test(fileName);
             try
             {
                 Task.Factory.StartNew(() =>
