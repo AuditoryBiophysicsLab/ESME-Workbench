@@ -141,7 +141,6 @@ namespace ESME.Metadata
                         Task.Factory.StartNew(() =>
                         {
                             newItem.CheckThreshold(120, Dispatcher);
-
                         });
                     }
                     break;
@@ -375,7 +374,6 @@ namespace ESME.Metadata
 
         #endregion
 
-
         #region public NAEMOBathymetryDescriptor SelectedBathymetry { get; set; }
         [XmlIgnore]
         public NAEMOBathymetryDescriptor SelectedBathymetry
@@ -583,47 +581,6 @@ namespace ESME.Metadata
                 scenarioRoot = new ScenarioNode(NemoFile.Scenario);
                 TreeViewRootNodes.Add(scenarioRoot);
             }
-#if false
-            var nemoScenario = NemoFile.Scenario;
-            TreeViewRootNodes.Add(scenarioRoot);
-            TreeNode platformsRoot;
-            if (nemoScenario.Platforms.Count < 3) platformsRoot = scenarioRoot;
-            else
-            {
-                platformsRoot = new TreeNode("Platforms");
-                scenarioRoot.Nodes.Add(platformsRoot);
-            }
-            foreach (var platform in nemoScenario.Platforms)
-            {
-                TreeNode sourceRoot;
-                var platformNode = new TreeNode("Platform: {0}", platform.Name);
-                platformNode.MapLayers.AddRange(MapLayers.Find(new Regex(string.Format(@"{0} [\s\S]+$", platformNode.Name))));
-                platformsRoot.Nodes.Add(platformNode);
-                if (platform.Sources.Count < 3) sourceRoot = platformNode; 
-                else
-                {
-                    sourceRoot = new TreeNode("Sources");
-                    platformNode.Nodes.Add(sourceRoot);
-                }
-                foreach (var source in platform.Sources)
-                {
-                    TreeNode modeRoot;
-                    var sourceNode = new TreeNode("Source: {0}", source.Name);
-                    sourceRoot.Nodes.Add(sourceNode);
-                    if (source.Modes.Count < 3) modeRoot = sourceNode;
-                    else
-                    {
-                        modeRoot = new TreeNode("Modes");
-                        sourceNode.Nodes.Add(modeRoot);
-                    }
-                    foreach (var mode in source.Modes)
-                    {
-                        var modeNode = new TreeNode("Mode: {0}", mode.Name);
-                        modeRoot.Nodes.Add(modeNode);
-                    }
-                }
-            }
-#endif
         }
 
         void UpdateAnimalsTreeRoot()

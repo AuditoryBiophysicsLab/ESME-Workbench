@@ -119,10 +119,10 @@
 					                             ToolTipDescription="Create a new experiment"
 					                             Command="{Binding NewExperimentCommand}" />
                     -->
-					<r:RibbonApplicationMenuItem Header="Info"
+					<r:RibbonApplicationMenuItem Header="About"
 					                             ImageSource="..\Images\LargeIcons\about-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
-					                             ToolTipDescription="Information about the current experiment"
+					                             ToolTipDescription="Information about ESME WorkBench 2011"
 					                             Command="{Binding AboutCommand}" />
 					<r:RibbonSeparator />
 					<!--<r:RibbonApplicationMenuItem Header="Test"
@@ -144,8 +144,8 @@
 					<r:RibbonApplicationMenuItem Header="Help"
 					                             ImageSource="..\Images\LargeIcons\Button-Help-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
-					                             ToolTipDescription="Help and About information for ESME WorkBench"
-					                             Command="Help" />
+					                             ToolTipDescription="Opens the user manual for ESME WorkBench 2011"
+					                             Command="{Binding HelpCommand}" />
 					<r:RibbonSeparator />
 					<r:RibbonApplicationMenuItem Header="Exit"
 					                             ImageSource="..\Images\LargeIcons\Button-Close-icon.png"

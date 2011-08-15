@@ -98,6 +98,9 @@
             <File Id="UserGuide"
                   Name="ESME Workbench 2011 User Guide.pdf"
                   Source="$(var.ReleaseNotesPath)\ESME Workbench 2011 User Guide.pdf" />
+            <File Id="ReadMe"
+                  Name="Read Me.pdf"
+                  Source="$(var.ReleaseNotesPath)\Read Me.pdf" />
             <File Id="TransmissionLossCalculator.exe"
                   Name="TransmissionLossCalculator.exe"
                   Source="$(var.TransmissionLossCalculatorPath)\TransmissionLossCalculator.exe" />
@@ -247,6 +250,12 @@
                       Name="User Manual"
                       WorkingDirectory="INSTALLLOCATION"
                       Target="[INSTALLLOCATION]ESME Workbench 2011 User Manual V1.pdf"
+                      Advertise="no" />
+            <Shortcut Id="ReadMe_Shortcut"
+                      Directory="ProgramMenuDir"
+                      Name="Read Me"
+                      WorkingDirectory="INSTALLLOCATION"
+                      Target="[INSTALLLOCATION]Read Me.pdf"
                       Advertise="no" />
             <Shortcut Id="WebLink_Shortcut"
                       Directory="ProgramMenuDir"

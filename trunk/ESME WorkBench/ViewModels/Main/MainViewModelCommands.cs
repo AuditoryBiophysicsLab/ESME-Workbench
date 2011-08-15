@@ -158,6 +158,28 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region HelpCommand
+        public SimpleCommand<object, object> HelpCommand
+        {
+            get { return _help ?? (_help = new SimpleCommand<object, object>(delegate { HelpHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _help;
+
+        void HelpHandler()
+        {
+            var userManual = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ESME Workbench*Manual*.pdf");
+            if (userManual.Length == 0)
+            {
+                _messageBoxService.ShowError("The user manual was not found!");
+                return;
+            }
+            var info = new ProcessStartInfo(userManual[0]) {UseShellExecute = true, Verb = "open"};
+
+            Process.Start(info);   
+        }
+        #endregion
+
         #region ViewScenarioSimulatorLogDirCommand
 
 #if EXPERIMENTS_SUPPORTED
