@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Windows.Data;
+using System.Windows.Threading;
 using System.Xml.Serialization;
+using Cinch;
 
 namespace HRC.Utility
 {
@@ -110,7 +112,15 @@ namespace HRC.Utility
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
-            if (CollectionChanged != null) CollectionChanged(this, e);
+            var handlers = CollectionChanged;
+            if (handlers == null) return;
+            foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, e));
+                else
+                    handler(this, e);
+            }
         }
 
         protected virtual void OnCollectionChangedMultiItem(NotifyCollectionChangedEventArgs e)

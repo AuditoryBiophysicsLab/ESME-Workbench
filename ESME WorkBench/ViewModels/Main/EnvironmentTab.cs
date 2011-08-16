@@ -174,7 +174,14 @@ namespace ESMEWorkBench.ViewModels.Main
                     if (MapLayerCollections.ActiveLayer.Name == "Environment") ZoomToWorldMap();
                 }
                 NotifyPropertyChanged(SelectedRangeComplexDescriptorChangedEventArgs);
-                _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
+                try
+                {
+                    _dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
+                }
+                catch (Exception e)
+                {
+                    if (_selectedRangeComplexDescriptor != null) _messageBoxService.ShowError("Error loading range complex \"" + _selectedRangeComplexDescriptor.Data.Name + "\": " + e.Message);
+                }
             }
         }
 

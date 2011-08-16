@@ -6,15 +6,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using ESME.NEMO.Overlay;
+using HRC;
 using HRC.Navigation;
+using Cinch;
 
 namespace ESME.Environment.Descriptors
 {
     public class RangeComplexDescriptors : NAEMODescriptors<RangeComplexDescriptor>
     {
-        private RangeComplexDescriptors()
-        {
-        }
+        private RangeComplexDescriptors() { }
 
         public static RangeComplexDescriptors ReadCSV(string fileName, Dispatcher dispatcher)
         {
@@ -25,7 +25,7 @@ namespace ESME.Environment.Descriptors
                          };
 
             result.Add(new KeyValuePair<string, RangeComplexDescriptor>("[None]", null));
-
+            var badSimAreas = new List<string>();
             var lines = File.ReadAllLines(fileName);
             Parallel.ForEach(lines, line =>
             {
@@ -33,13 +33,13 @@ namespace ESME.Environment.Descriptors
                 var curLine = line.Trim();
                 if ((curLine.Trim() == "") || curLine.StartsWith("!") || curLine.StartsWith("#")) return;
                 var fields = curLine.Split(',');
-                var simAreaName = fields[0];
-                var latString = fields[1];
-                var lonString = fields[2];
-                var heightString = fields[3];
-                var geoidString = fields[4];
-                var opsLimitFile = fields[5];
-                var simLimitFile = fields[6];
+                var simAreaName = fields[0].Trim();
+                var latString = fields[1].Trim();
+                var lonString = fields[2].Trim();
+                var heightString = fields[3].Trim();
+                var geoidString = fields[4].Trim();
+                var opsLimitFile = fields[5].Trim();
+                var simLimitFile = fields[6].Trim();
                 double latitude;
                 double longitude;
                 double height;
@@ -51,9 +51,12 @@ namespace ESME.Environment.Descriptors
                 if (!double.TryParse(lonString, out longitude)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid longitude", fileName));
                 if (!double.TryParse(heightString, out height)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid height", fileName));
                 if (!double.TryParse(geoidString, out geoid)) throw new FormatException(string.Format("RangeComplexDescriptors: Error reading sim area file \"{0}\"\nError: Invalid geoid separation value", fileName));
-                result.AddRangeComplex(simAreaName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile, dispatcher);
+                if (result.AddRangeComplex(simAreaName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile, dispatcher) == null)
+                    badSimAreas.Add(simAreaName);
             });
             result.Sort();
+            foreach (var badSimArea in badSimAreas)
+                result.DeleteRangeComplexFromCSV(badSimArea);
             return result;
         }
 
@@ -61,6 +64,9 @@ namespace ESME.Environment.Descriptors
 
         public RangeComplexDescriptor AddRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, string simLimitFile, Dispatcher dispatcher)
         {
+            var rangeComplexPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName);
+            if (!Directory.Exists(rangeComplexPath)) return null;
+
             NAEMOOverlayDescriptors overlayDescriptors = null;
             NAEMOBathymetryDescriptors bathymetryDescriptors = null;
             NAEMOEnvironmentDescriptors environmentDescriptors = null;
@@ -129,9 +135,9 @@ namespace ESME.Environment.Descriptors
                     using (var writer = new StreamWriter(FileName, true))
                     {
                         if (needsExtraNewline) writer.WriteLine();
-                        writer.WriteLine("{0},{1:0.0###},{2:0.0###},{3:0.0###},{4:0.0###},{5},{6}", rangeComplexName,
+                        writer.WriteLine("{0},{1:0.0###},{2:0.0###},{3:0.0###},{4:0.0###},{5},{6}", rangeComplexName.Trim(),
                                          latitude, longitude, height, geoid,
-                                         Path.GetFileName(opsOverlayFilename), Path.GetFileName(simOverlayFilename));
+                                         Path.GetFileName(opsOverlayFilename).Trim(), Path.GetFileName(simOverlayFilename).Trim());
                     }
                 }
             }
@@ -141,13 +147,7 @@ namespace ESME.Environment.Descriptors
         public void DeleteRangeComplex(RangeComplexDescriptor rangeComplexToDelete)
         {
             var rangeComplexName = rangeComplexToDelete.Data.Name;
-            var simAreaCSVFileContents = File.ReadAllLines(FileName);
-            var oldCSVFileName = FileName;
-            var newCSVFileName = FileName + ".new";
-            using (var streamWriter = new StreamWriter(newCSVFileName)) foreach (var curLine in simAreaCSVFileContents.Where(curLine => !curLine.StartsWith(rangeComplexName))) streamWriter.WriteLine(curLine);
-            File.Delete(oldCSVFileName);
-            File.Move(newCSVFileName, oldCSVFileName);
-
+            DeleteRangeComplexFromCSV(rangeComplexName);
             Task.Factory.StartNew(() =>
             {
                 Directory.Delete(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName), true);
@@ -155,5 +155,16 @@ namespace ESME.Environment.Descriptors
             });
         }
 
+        void DeleteRangeComplexFromCSV(string simAreaName)
+        {
+            var simAreaCSVFileContents = File.ReadAllLines(FileName);
+            var oldCSVFileName = FileName;
+            var newCSVFileName = FileName + ".new";
+            using (var streamWriter = new StreamWriter(newCSVFileName)) 
+                foreach (var curLine in simAreaCSVFileContents.Where(curLine => !curLine.StartsWith(simAreaName))) 
+                    streamWriter.WriteLine(curLine);
+            File.Delete(oldCSVFileName);
+            File.Move(newCSVFileName, oldCSVFileName);
+        }
     }
 }

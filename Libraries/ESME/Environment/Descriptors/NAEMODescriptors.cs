@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Threading;
+using HRC;
 using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
-    public abstract class NAEMODescriptors<T> : ObservableList<KeyValuePair<string, T>> where T : NAEMODescriptor, new()
+    public abstract class NAEMODescriptors<T> : ObservableList<KeyValuePair<string, T>>, IRequireInvoke where T : NAEMODescriptor, new()
     {
         public delegate KeyValuePair<string, T> NewDescriptor(string sourceFilename);
 
         public delegate IEnumerable<string> FilenameFilter(IEnumerable<string> fileName);
 
         public Dispatcher Dispatcher { get; set; }
-        protected NAEMODescriptors() { }
+        protected NAEMODescriptors() { Dispatcher = Dispatcher.CurrentDispatcher; }
 
         protected string RangeComplexName;
         protected string SubDirectoryName;
@@ -35,7 +36,11 @@ namespace ESME.Environment.Descriptors
         {
             Clear();
             //Console.WriteLine("{0} Entered NAEMODescriptors constructor", DateTime.Now);
-            var files = Directory.GetFiles(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, RangeComplexName, SubDirectoryName), SearchPattern);
+            var rangeComplexPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, RangeComplexName);
+            if (!Directory.Exists(rangeComplexPath)) return;
+            var subDirectoryPath = Path.Combine(rangeComplexPath, SubDirectoryName);
+            if (!Directory.Exists(subDirectoryPath)) return;
+            var files = Directory.GetFiles(subDirectoryPath, SearchPattern);
             //Console.WriteLine("{0} Got directory listing containing {1} files", DateTime.Now, files.Length);
             IEnumerable<string> filteredFiles = files;
             if (FilenameFilterDelegate != null)
