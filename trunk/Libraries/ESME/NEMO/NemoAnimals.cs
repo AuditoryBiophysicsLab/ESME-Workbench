@@ -7,7 +7,7 @@ namespace ESME.NEMO
     public class NemoAnimals : NemoBase
     {
         public List<NemoSpecies> Species { get; private set; }
-        
+
         public NemoAnimals(XmlNode animals, string scenarioDirectory)
         {
             Species = new List<NemoSpecies>();
@@ -16,5 +16,7 @@ namespace ESME.NEMO
                 Species.Add(new NemoSpecies(cur, scenarioDirectory));
             }
         }
+
+        public override IEnumerable<KeyValuePair<string, string>> Properties { get { yield break; } }
     }
 }

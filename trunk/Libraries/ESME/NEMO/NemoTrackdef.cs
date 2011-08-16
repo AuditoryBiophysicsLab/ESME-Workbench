@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using ESME.NEMO.Overlay;
@@ -26,6 +27,25 @@ namespace ESME.NEMO
             InitialLocation = new EarthCoordinate3D(InitialLatitude, InitialLongitude, InitialHeight);
             EndTime = StartTime + Duration;
             if (!string.IsNullOrEmpty(LimitFileName)) OverlayFile = new OverlayFile(Path.Combine(Path.Combine(scenarioDirectory, "Areas"), LimitFileName));
+        }
+
+        public override IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get
+            {
+                yield return new KeyValuePair<string, string>("Track type", TrackType);
+                yield return new KeyValuePair<string, string>("Start time", StartTime.ToString());
+                yield return new KeyValuePair<string, string>("Duration", Duration.ToString());
+                yield return new KeyValuePair<string, string>("Random", Random.ToString());
+                yield return new KeyValuePair<string, string>("Ops bounds", OpsBounds.ToString());
+                yield return new KeyValuePair<string, string>("Ops times", OpsTimes.ToString());
+                yield return new KeyValuePair<string, string>("Initial latitude", InitialLatitude.ToString());
+                yield return new KeyValuePair<string, string>("Initial longitude", InitialLongitude.ToString());
+                yield return new KeyValuePair<string, string>("Initial height", InitialHeight.ToString());
+                yield return new KeyValuePair<string, string>("Initial course", InitialCourse.ToString());
+                yield return new KeyValuePair<string, string>("Initial speed", InitialSpeed.ToString());
+                yield return new KeyValuePair<string, string>("Limit file", LimitFileName);
+            }
         }
 
         public string TrackType { get; private set; }

@@ -5,36 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
              xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views" 
-             xmlns:Collections="clr-namespace:HRC.Collections;assembly=HRC" 
-             xmlns:Mapping="clr-namespace:ESME.Mapping;assembly=ESME" xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" mef:ViewModelLocator.ViewModel="LayerListViewModel"
+             xmlns:emse="clr-namespace:ESME.Mapping;assembly=ESME" 
+             xmlns:hrc="clr-namespace:HRC.WPF;assembly=HRC" 
+             mef:ViewModelLocator.ViewModel="LayerListViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300">
 	<UserControl.Resources>
-        <Style x:Key="HeaderedToolTip" TargetType="ToolTip">
-            <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="HasDropShadow" Value="True" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="HeaderedContentControl">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Border HorizontalAlignment="Stretch" 
-                                    BorderThickness="0 0 0 1"
-                                    BorderBrush="Black"
-                                    Margin="5"
-                                    Grid.Row="0">
-                                <ContentPresenter ContentSource="{TemplateBinding Header}" />
-                            </Border>
-                            <ContentPresenter Grid.Row="1" ContentSource="{TemplateBinding Content}" />
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
 		<Style x:Key="ContextMenuItemStyle">
 			<Setter Property="MenuItem.Header"
 			        Value="{Binding Header}" />
@@ -71,344 +48,76 @@
 				</Trigger>
 			</Style.Triggers>
 		</Style>
-        <Style x:Key="ToolTipStyle" TargetType="ToolTip">
+        <Style x:Key="ToolTipStyle" TargetType="Control">
             <Setter Property="Background" Value="Gainsboro" />
+            <Setter Property="Foreground" Value="Black" />
         </Style>
-        <Style x:Key="ToolTipLefthandListViewStyle" TargetType="ListView">
-            <Setter Property="Background" Value="Gainsboro" />
+        <Style x:Key="ToolTipLefthandListViewStyle" 
+               TargetType="TextBlock">
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="HorizontalContentAlignment" Value="Right" />
-            <Setter Property="Margin" Value="5" />
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="Margin" Value="5 2 5 0" />
             <Setter Property="Grid.Column" Value="0" />
-            <Setter Property="BorderThickness" Value="0" />
         </Style>
-        <Style x:Key="ToolTipRighthandListViewStyle" TargetType="ListView">
-            <Setter Property="Background" Value="Gainsboro" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="Margin" Value="0 5 5 0" />
+        <Style x:Key="ToolTipRighthandListViewStyle" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Left" />
+            <Setter Property="Margin" Value="0 2 5 0" />
             <Setter Property="Grid.Column" Value="1" />
+        </Style>
+        <Style x:Key="ToolTipListViewStyle" TargetType="Control">
+            <Setter Property="Background" Value="Gainsboro" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Margin" Value="5" />
             <Setter Property="BorderThickness" Value="0" />
         </Style>
-        <DataTemplate x:Key="ScenarioNodeTooltipTemplate" DataType="{x:Type Mapping:ScenarioNode}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-            </Grid>
-        </DataTemplate>
-
+        <Style x:Key="ToolTipHeaderStyle" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Margin" Value="-5 -1 -5 0" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Background" Value="Gray" />
+        </Style>
     </UserControl.Resources>
     <TreeView DockPanel.Dock="Top"
               Grid.IsSharedSizeScope="True"
  	          ItemsSource="{Binding TreeViewRootNodes}">
         <TreeView.Resources>
-            <HierarchicalDataTemplate DataType="{x:Type Mapping:TreeNode}"
-                                  ItemsSource="{Binding Children}">
-                <TextBlock Text="{Binding Name}" />
-            </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Mapping:ScenarioNode}"
-                                  ItemsSource="{Binding Children}">
+            <HierarchicalDataTemplate DataType="{x:Type emse:TreeNode}"
+                                      ItemsSource="{Binding Children}">
                 <TextBlock Text="{Binding Name}">
                     <TextBlock.ToolTip>
-                        <ToolTip DataContext="{Binding Path=DataContext.WrappedObject, RelativeSource={RelativeSource TemplatedParent}}"
+                        <ToolTip DataContext="{Binding Path=DataContext, RelativeSource={RelativeSource TemplatedParent}}"
                                  Style="{StaticResource ToolTipStyle}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <ListView Style="{StaticResource ToolTipLefthandListViewStyle}">
-                                    <ListViewItem Content="Range complex" />
-                                    <ListViewItem Content="Description" />
-                                    <ListViewItem Content="Time frame" />
-                                    <ListViewItem Content="Start time" />
-                                    <ListViewItem Content="Duration" />
-                                    <ListViewItem Content="Created on" />
-                                    <ListViewItem Content="Created by" />
-                                    <ListViewItem Content="Builder version" />
+                            <StackPanel HorizontalAlignment="Stretch" 
+                                        Orientation="Vertical">
+                                <TextBlock Style="{StaticResource ToolTipHeaderStyle}"
+                                           Text="{Binding Name}" />
+                                <Border BorderThickness="1" />
+                                <ListView ItemsSource="{Binding WrappedObject.Properties}" Style="{StaticResource ToolTipListViewStyle}"
+                                          HorizontalContentAlignment="Stretch" Grid.IsSharedSizeScope="True">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition SharedSizeGroup="Left"/>
+                                                    <ColumnDefinition SharedSizeGroup="Right"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" 
+                                                           Style="{StaticResource ToolTipLefthandListViewStyle}"
+                                                           Text="{Binding Key}" />
+                                                <TextBlock Grid.Column="1" 
+                                                           Style="{StaticResource ToolTipRighthandListViewStyle}"
+                                                           Text="{Binding Value}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
                                 </ListView>
-                                <ListView Style="{StaticResource ToolTipRighthandListViewStyle}">
-                                    <ListViewItem Content="{Binding SimAreaName}" />
-                                    <ListViewItem Content="{Binding Description}" />
-                                    <ListViewItem Content="{Binding TimeFrame}" />
-                                    <ListViewItem Content="{Binding StartTime}" />
-                                    <ListViewItem Content="{Binding Duration}" />
-                                    <ListViewItem Content="{Binding CreationTime}" />
-                                    <ListViewItem Content="{Binding AnalystName}" />
-                                    <ListViewItem Content="{Binding BuilderVersion}" />
-                                </ListView>
-                            </Grid>
+                            </StackPanel>
                         </ToolTip>
                     </TextBlock.ToolTip>
                 </TextBlock>
             </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Mapping:PlatformNode}"
-                                  ItemsSource="{Binding Children}">
-                <TextBlock Text="{Binding Name}">
-                    <TextBlock.ToolTip>
-                        <ToolTip DataContext="{Binding Path=DataContext.WrappedObject, RelativeSource={RelativeSource TemplatedParent}}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <ListView Grid.Column="0" HorizontalContentAlignment="Right" Margin="5">
-                                    <ListViewItem Content="PSM Name" />
-                                    <ListViewItem Content="PSM ID" />
-                                    <ListViewItem Content="Name" />
-                                    <ListViewItem Content="ID" />
-                                    <ListViewItem Content="Start Time" />
-                                    <ListViewItem Content="Duration" />
-                                    <ListViewItem Content="Priority" />
-                                    <ListViewItem Content="Type" />
-                                    <ListViewItem Content="Description" />
-                                    <ListViewItem Content="Launcher" />
-                                    <ListViewItem Content="Towwer" />
-                                    <ListViewItem Content="Repeat count" />
-                                    <ListViewItem Content="" />
-                                    <ListViewItem>
-                                        <ListViewItem.Content>
-                                            <TextBlock Text="Track information" FontWeight="Bold" TextDecorations="Underline"/>
-                                        </ListViewItem.Content>
-                                    </ListViewItem>
-                                    <ListViewItem Content="Track type" />
-                                    <ListViewItem Content="Start time" />
-                                    <ListViewItem Content="Duration" />
-                                    <ListViewItem Content="Random" />
-                                    <ListViewItem Content="Ops bounds" />
-                                    <ListViewItem Content="Ops times" />
-                                    <ListViewItem Content="Initial latitude" />
-                                    <ListViewItem Content="Initial longitude" />
-                                    <ListViewItem Content="Initial height" />
-                                    <ListViewItem Content="Initial course" />
-                                    <ListViewItem Content="Initial speed" />
-                                    <ListViewItem Content="Limit file" />
-                                </ListView>
-                                <ListView Grid.Column="1" HorizontalContentAlignment="Left" Margin="0 5 5 5">
-                                    <ListViewItem Content="{Binding PSMName}" />
-                                    <ListViewItem Content="{Binding PSMId}" />
-                                    <ListViewItem Content="{Binding Name}" />
-                                    <ListViewItem Content="{Binding Id}" />
-                                    <ListViewItem Content="{Binding StartTime}" />
-                                    <ListViewItem Content="{Binding Duration}" />
-                                    <ListViewItem Content="{Binding Priority}" />
-                                    <ListViewItem Content="{Binding Type}" />
-                                    <ListViewItem Content="{Binding Description}" />
-                                    <ListViewItem Content="{Binding Launcher}" />
-                                    <ListViewItem Content="{Binding Towwer}" />
-                                    <ListViewItem Content="{Binding RepeatCount}" />
-                                    <ListViewItem Content="" />
-                                    <ListViewItem Content="" />
-                                    <ListViewItem Content="{Binding TrackType}" />
-                                    <ListViewItem Content="{Binding StartTime}" />
-                                    <ListViewItem Content="{Binding Duration}" />
-                                    <ListViewItem Content="{Binding Random}" />
-                                    <ListViewItem Content="{Binding StartTime}" />
-                                    <ListViewItem Content="{Binding OpsBounds}" />
-                                    <ListViewItem Content="{Binding OpsTimes}" />
-                                    <ListViewItem Content="{Binding InitialLatitude}" />
-                                    <ListViewItem Content="{Binding InitialLongitude}" />
-                                    <ListViewItem Content="{Binding InitialHeight}" />
-                                    <ListViewItem Content="{Binding InitialCourse}" />
-                                    <ListViewItem Content="{Binding InitialSpeed}"  />
-                                    <ListViewItem Content="{Binding LimitFileName}" />
-                                </ListView>
-                            </Grid>
-                        </ToolTip>
-                    </TextBlock.ToolTip>
-                </TextBlock>
-            </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Mapping:SourceNode}"
-                                  ItemsSource="{Binding Children}">
-                <TextBlock Text="{Binding Name}">
-                    <TextBlock.ToolTip>
-                        <ToolTip DataContext="{Binding Path=DataContext.WrappedObject, RelativeSource={RelativeSource TemplatedParent}}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <ListView Grid.Column="0" HorizontalContentAlignment="Right" Margin="5">
-                                    <ListViewItem Content="PSM Name" />
-                                    <ListViewItem Content="PSM ID" />
-                                    <ListViewItem Content="Name" />
-                                    <ListViewItem Content="ID" />
-                                    <ListViewItem Content="Start Time" />
-                                    <ListViewItem Content="Duration" />
-                                    <ListViewItem Content="Priority" />
-                                    <ListViewItem Content="Type" />
-                                    <ListViewItem Content="Description" />
-                                </ListView>
-                                <ListView Grid.Column="1" HorizontalContentAlignment="Left" Margin="0 5 5 5">
-                                    <ListViewItem Content="{Binding PSMName}" />
-                                    <ListViewItem Content="{Binding PSMId}" />
-                                    <ListViewItem Content="{Binding Name}" />
-                                    <ListViewItem Content="{Binding Id}" />
-                                    <ListViewItem Content="{Binding StartTime}" />
-                                    <ListViewItem Content="{Binding Duration}" />
-                                    <ListViewItem Content="{Binding Priority}" />
-                                    <ListViewItem Content="{Binding Type}" />
-                                    <ListViewItem Content="{Binding Description}" />
-                                </ListView>
-                            </Grid>
-                        </ToolTip>
-                    </TextBlock.ToolTip>
-                </TextBlock>
-            </HierarchicalDataTemplate>
-            <HierarchicalDataTemplate DataType="{x:Type Mapping:ModeNode}"
-                                  ItemsSource="{Binding Children}">
-                <TextBlock Text="{Binding Name}">
-                    <TextBlock.ToolTip>
-                        <ToolTip DataContext="{Binding Path=DataContext.WrappedObject, RelativeSource={RelativeSource TemplatedParent}}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <ListView Grid.Column="0" HorizontalContentAlignment="Right" Margin="5">
-                                    <ListViewItem Content="PSM Name" />
-                                    <ListViewItem Content="PSM ID" />
-                                    <ListViewItem Content="Name" />
-                                    <ListViewItem Content="ID" />
-                                    <ListViewItem Content="Start Time" />
-                                    <ListViewItem Content="Duration" />
-                                    <ListViewItem Content="Priority" />
-                                    <ListViewItem Content="Type" />
-                                    <ListViewItem Content="State" />
-                                    <ListViewItem Content="Linked" />
-                                    <ListViewItem Content="Active time" />
-                                    <ListViewItem Content="Depth offset" />
-                                    <ListViewItem Content="Source level" />
-                                    <ListViewItem Content="Source depth" />
-                                    <ListViewItem Content="Low frequency" />
-                                    <ListViewItem Content="High frequency" />
-                                    <ListViewItem Content="Pulse interval" />
-                                    <ListViewItem Content="Pulse length" />
-                                    <ListViewItem Content="Horizontal beam width" />
-                                    <ListViewItem Content="Vertical beam width" />
-                                    <ListViewItem Content="Depression/elevation angle" />
-                                    <ListViewItem Content="Relative beam angle" />
-                                    <ListViewItem Content="Radius" />
-                                </ListView>
-                                <ListView Grid.Column="1" HorizontalContentAlignment="Left" Margin="0 5 5 5">
-                                    <ListViewItem Content="{Binding PSMName}" />
-                                    <ListViewItem Content="{Binding PSMId}" />
-                                    <ListViewItem Content="{Binding Name}" />
-                                    <ListViewItem Content="{Binding Id}" />
-                                    <ListViewItem Content="{Binding StartTime}" />
-                                    <ListViewItem Content="{Binding Duration}" />
-                                    <ListViewItem Content="{Binding Priority}" />
-                                    <ListViewItem Content="{Binding Type}" />
-                                    <ListViewItem Content="{Binding State}" />
-                                    <ListViewItem Content="{Binding Linked}" />
-                                    <ListViewItem Content="{Binding ActiveTime}" />
-                                    <ListViewItem Content="{Binding DepthOffset}" />
-                                    <ListViewItem Content="{Binding SourceLevel}" />
-                                    <ListViewItem Content="{Binding SourceDepth}" />
-                                    <ListViewItem Content="{Binding LowFrequency}" />
-                                    <ListViewItem Content="{Binding HighFrequency}" />
-                                    <ListViewItem Content="{Binding PulseInterval}" />
-                                    <ListViewItem Content="{Binding PulseLength}" />
-                                    <ListViewItem Content="{Binding HorizontalBeamWidth}" />
-                                    <ListViewItem Content="{Binding VerticalBeamWidth}" />
-                                    <ListViewItem Content="{Binding DepressionElevationAngle}" />
-                                    <ListViewItem Content="{Binding RelativeBeamAngle}" />
-                                    <ListViewItem Content="{Binding Radius}" />
-                                </ListView>
-                            </Grid>
-                        </ToolTip>
-                    </TextBlock.ToolTip>
-                </TextBlock>
-            </HierarchicalDataTemplate>
-            <!--
-            <HierarchicalDataTemplate DataType="{x:Type Mapping:TrackdefNode}"
-                                  ItemsSource="{Binding Children}">
-                <TextBlock Text="{Binding Name}">
-                    <TextBlock.ToolTip>
-                        <ToolTip DataContext="{Binding Path=DataContext.WrappedObject, RelativeSource={RelativeSource TemplatedParent}}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <ListView Grid.Column="0" HorizontalContentAlignment="Right" Margin="5">
-                                    <ListViewItem Content="Track type" />
-                                    <ListViewItem Content="Start time" />
-                                    <ListViewItem Content="Duration" />
-                                    <ListViewItem Content="Random" />
-                                    <ListViewItem Content="Ops bounds" />
-                                    <ListViewItem Content="Ops times" />
-                                    <ListViewItem Content="Initial latitude" />
-                                    <ListViewItem Content="Initial longitude" />
-                                    <ListViewItem Content="Initial height" />
-                                    <ListViewItem Content="Initial course" />
-                                    <ListViewItem Content="Initial speed" />
-                                    <ListViewItem Content="Limit file" />
-                                </ListView>
-                                <ListView Grid.Column="1" HorizontalContentAlignment="Left" Margin="0 5 5 5">
-                                    <ListViewItem Content="{Binding TrackType}" />
-                                    <ListViewItem Content="{Binding StartTime}" />
-                                    <ListViewItem Content="{Binding Duration}" />
-                                    <ListViewItem Content="{Binding Random}" />
-                                    <ListViewItem Content="{Binding StartTime}" />
-                                    <ListViewItem Content="{Binding OpsBounds}" />
-                                    <ListViewItem Content="{Binding OpsTimes}" />
-                                    <ListViewItem Content="{Binding InitialLatitude}" />
-                                    <ListViewItem Content="{Binding InitialLongitude}" />
-                                    <ListViewItem Content="{Binding InitialHeight}" />
-                                    <ListViewItem Content="{Binding InitialCourse}" />
-                                    <ListViewItem Content="{Binding InitialSpeed}"  />
-                                    <ListViewItem Content="{Binding LimitFileName}" />
-                                </ListView>
-                            </Grid>
-                        </ToolTip>
-                    </TextBlock.ToolTip>
-                </TextBlock>
-            </HierarchicalDataTemplate>
-            -->
-            <!--
-            <HierarchicalDataTemplate DataType="{x:Type Mapping:SpeciesNode}"
-                                  ItemsSource="{Binding Children}">
-                <TextBlock Text="{Binding Name}">
-                    <TextBlock.ToolTip>
-                        <ToolTip DataContext="{Binding Path=DataContext.WrappedObject, RelativeSource={RelativeSource TemplatedParent}}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <ListView Grid.Column="0" HorizontalContentAlignment="Right" Margin="5">
-                                    <ListViewItem Content="Record version" />
-                                    <ListViewItem Content="Species file" />
-                                    <ListViewItem Content="Species name" />
-                                    <ListViewItem Content="Species code" />
-                                    <ListViewItem Content="Total animats" />
-                                    <ListViewItem Content="Population" />
-                                    <ListViewItem Content="Track area population" />
-                                    <ListViewItem Content="Track area total" />
-                                    <ListViewItem Content="Sim area population" />
-                                    <ListViewItem Content="Sim area total" />
-                                </ListView>
-                                <ListView Grid.Column="1" HorizontalContentAlignment="Left" Margin="0 5 5 5">
-                                    <ListViewItem Content="{Binding RecordVersion}" />
-                                    <ListViewItem Content="{Binding SpeciesFile}" />
-                                    <ListViewItem Content="{Binding SpeciesName}" />
-                                    <ListViewItem Content="{Binding SpeciesCode}" />
-                                    <ListViewItem Content="{Binding TotalAnimats}" />
-                                    <ListViewItem Content="{Binding Population}" />
-                                    <ListViewItem Content="{Binding TrackAreaPopulation}" />
-                                    <ListViewItem Content="{Binding TrackAreaTotal}" />
-                                    <ListViewItem Content="{Binding SimAreaPopulation}" />
-                                    <ListViewItem Content="{Binding SimAreaTotal}" />
-                                </ListView>
-                            </Grid>
-                        </ToolTip>
-                    </TextBlock.ToolTip>
-                </TextBlock>
-            </HierarchicalDataTemplate>
-            -->
-            <DataTemplate DataType="{x:Type Mapping:MapLayerViewModel}">
+            <DataTemplate DataType="{x:Type emse:MapLayerViewModel}">
                 <DockPanel LastChildFill="True">
                     <Grid DockPanel.Dock="Top">
                         <Grid.ColumnDefinitions>
@@ -440,7 +149,6 @@
 						             ItemsSource="{Binding AreaColorPickerMenu}" />
                             </Rectangle.ContextMenu>
                         </Rectangle>
-
                         <Rectangle Width="12"
 				               RadiusX="3"
 				               RadiusY="3"
@@ -455,7 +163,6 @@
 						             ItemsSource="{Binding LineOrPointPickerMenu}" />
                             </Rectangle.ContextMenu>
                         </Rectangle>
-
                         <Grid.ContextMenu>
                             <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 					             ItemsSource="{Binding ContextMenu}" />
@@ -472,11 +179,11 @@
                 </DataTemplate.Triggers>
             </DataTemplate>
         </TreeView.Resources>
-        <WPF:ViewPropertyBinding.ViewPropertyBindings>
-            <WPF:ViewPropertyCollection>
-                <WPF:ViewProperty Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type TreeView}}, Path=ActualWidth}"
-                              Target="{Binding Path=TreeViewWidth, Mode=OneWayToSource}" />
-            </WPF:ViewPropertyCollection>
-        </WPF:ViewPropertyBinding.ViewPropertyBindings>
+        <hrc:ViewPropertyBinding.ViewPropertyBindings>
+            <hrc:ViewPropertyCollection>
+                <hrc:ViewProperty Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type TreeView}}, Path=ActualWidth}"
+                                  Target="{Binding Path=TreeViewWidth, Mode=OneWayToSource}" />
+            </hrc:ViewPropertyCollection>
+        </hrc:ViewPropertyBinding.ViewPropertyBindings>
     </TreeView>
 </UserControl>

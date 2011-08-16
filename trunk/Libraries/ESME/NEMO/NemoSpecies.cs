@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Xml;
 using ESME.Animats;
 
@@ -19,6 +20,23 @@ namespace ESME.NEMO
             SimAreaPopulation = GetFloat("simAreaPopulation");
             SimAreaTotal = GetInt("simAreaTotal");
             AnimatData = DDB.Load(Path.Combine(scenarioDirectory, "Species", SpeciesFile));
+        }
+
+        public override IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get
+            {
+                yield return new KeyValuePair<string, string>("Record version", RecordVersion);
+                yield return new KeyValuePair<string, string>("Species file", SpeciesFile);
+                yield return new KeyValuePair<string, string>("Species name", SpeciesName);
+                yield return new KeyValuePair<string, string>("Species code", SpeciesCode.ToString());
+                yield return new KeyValuePair<string, string>("Total animats", TotalAnimats.ToString());
+                yield return new KeyValuePair<string, string>("Population", Population.ToString());
+                yield return new KeyValuePair<string, string>("Track area population", TrackAreaPopulation.ToString());
+                yield return new KeyValuePair<string, string>("Track area total", TrackAreaTotal.ToString());
+                yield return new KeyValuePair<string, string>("Sim area population", SimAreaPopulation.ToString());
+                yield return new KeyValuePair<string, string>("Sim area total", SimAreaTotal.ToString());
+            }
         }
 
         public string RecordVersion         { get; private set; }
