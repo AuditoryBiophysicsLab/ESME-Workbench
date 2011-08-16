@@ -18,6 +18,7 @@ namespace ESME.NEMO
 
                 Launcher = GetString("launcher");
                 Towwer = GetString("towwer");
+                RepeatCount = GetInt("repeatCount");
 
                 foreach (XmlNode cur in platform.ChildNodes) if (cur.Name == "trackDef") Trackdefs.Add(new NemoTrackdef(cur, scenarioDirectory));
 
@@ -41,6 +42,7 @@ namespace ESME.NEMO
         public string Description { get; private set; }
         public string Launcher { get; private set; }
         public string Towwer { get; private set; }
+        public int RepeatCount { get; private set; }
         public List<NemoTrackdef> Trackdefs { get; private set; }
         public List<NemoSource> Sources { get; private set; }
         public BehaviorModel BehaviorModel { get; private set; }
