@@ -167,8 +167,7 @@ namespace TransmissionLossCalculator
                             if (QueueViewModel.FieldCalculatorViewModels.Any(curJob => curJob.TransmissionLossRunFile.Filename == runFileName))
                                 doCalculation = false;
                             if (!doCalculation) continue;
-                            if (_dispatcher != null) _dispatcher.InvokeIfRequired(() => QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName, _dispatcher)));
-                            else QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName, _dispatcher));
+                            QueueViewModel.FieldCalculatorViewModels.Add(new TransmissionLossFieldCalculatorViewModel(runFileName));
                         }
                     break;
                 case NotifyCollectionChangedAction.Move:

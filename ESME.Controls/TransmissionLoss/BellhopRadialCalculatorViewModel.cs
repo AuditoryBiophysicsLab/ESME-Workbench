@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using System.Windows.Threading;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 
@@ -13,7 +12,7 @@ namespace ESME.Views.TransmissionLoss
     {
         readonly BellhopRunFileRadial _bellhopRunFileRadial;
 
-        public BellhopRadialCalculatorViewModel(BellhopRunFileRadial bellhopRunFileRadial, int radialNumber, Dispatcher dispatcher) : base(radialNumber, dispatcher)
+        public BellhopRadialCalculatorViewModel(BellhopRunFileRadial bellhopRunFileRadial, int radialNumber) : base(radialNumber)
         {
             _bellhopRunFileRadial = bellhopRunFileRadial;
             BearingFromSource = bellhopRunFileRadial.BearingFromSourceDegrees;

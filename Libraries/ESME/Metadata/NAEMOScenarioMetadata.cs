@@ -35,7 +35,7 @@ namespace ESME.Metadata
 
         public NAEMOScenarioMetadata()
         {
-            TreeViewRootNodes = new TreeNodeList();
+            TreeViewRootNodes = new ObservableList<TreeNode>();
         }
 
         public static NAEMOScenarioMetadata Load(string metaDataFilename)
@@ -538,9 +538,9 @@ namespace ESME.Metadata
 
         #endregion
 
-        #region public TreeNodeList TreeViewRootNodes { get; set; }
+        #region public ObservableList<TreeNode> TreeViewRootNodes { get; set; }
         [XmlIgnore]
-        public TreeNodeList TreeViewRootNodes
+        public ObservableList<TreeNode> TreeViewRootNodes
         {
             get { return _treeViewRootNodes; }
             set
@@ -553,7 +553,7 @@ namespace ESME.Metadata
         }
 
         static readonly PropertyChangedEventArgs TreeViewRootNodesChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.TreeViewRootNodes);
-        TreeNodeList _treeViewRootNodes;
+        ObservableList<TreeNode> _treeViewRootNodes;
 
         void PlaceMapLayerInTree(MapLayerViewModel mapLayer)
         {
@@ -563,7 +563,8 @@ namespace ESME.Metadata
 
         void UpdateEnvironmentTreeRoot()
         {
-            TreeViewRootNodes.RemoveAll(new Regex(@"Environment: [\s\S]+$"));
+            var regex = new Regex(@"Environment: [\s\S]+$");
+            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
             var environmentRoot = new TreeNode("Environment: {0}", Path.GetFileNameWithoutExtension(_selectedEnvironment.DataFilename));
             TreeViewRootNodes.Add(environmentRoot);
             environmentRoot.MapLayers.Add(MapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault());
@@ -585,7 +586,8 @@ namespace ESME.Metadata
 
         void UpdateAnimalsTreeRoot()
         {
-            TreeViewRootNodes.RemoveAll(new Regex(@"Animals: [\s\S]+$"));
+            var regex = new Regex(@"Animals: [\s\S]+$");
+            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
         }
 
         #endregion
