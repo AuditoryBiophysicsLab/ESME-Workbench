@@ -29,10 +29,16 @@ namespace grahams_little_sandbox
 
 
             // var tlf = TransmissionLossField.FromCASS(CASSOutput.Load(cassFile));  
-#endif
+
             var ddbFile = @"C:\Users\Graham Voysey\Desktop\test2.ddb";
             var output = DDB.Load(ddbFile);
             var foo = output.AnimatStartPoints;
+#endif
+            var mmmbFile =
+                    @"C:\Users\Graham Voysey\Desktop\test.3mb";
+            var output = MMMB.Load(mmmbFile);
+            var foo = output.AnimatStartPoints;
+
         }
     }
 }

@@ -340,7 +340,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AnimatLocationFile\" />
     <Folder Include="Simulation\" />
   </ItemGroup>
   <ItemGroup>
