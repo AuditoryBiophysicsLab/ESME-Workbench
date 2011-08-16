@@ -210,17 +210,33 @@ namespace ESME.Mapping
         public override string Name { get { return string.Format("Mode: {0}", WrappedObject.Name); } }
     }
 
-    public class TransmissionLossContainerNode : TreeNode
+    public class TransmissionLossContainerNode : TreeNodeWrapper<TransmissionLossContainerNodeProperties>
     {
         public TransmissionLossContainerNode(string layerName, string psmName)
         {
             _layerName = layerName;
-            _psmName = psmName; 
+            _psmName = psmName;
+            WrappedObject = new TransmissionLossContainerNodeProperties {ParentNode = this};
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get
+            {
+                yield return new KeyValuePair<string, string>(string.Format("{0} file count", Name), MapLayers.Count.ToString());
+            }
         }
 
         readonly string _psmName;
         readonly string _layerName;
         public override string Name { get { return _layerName; } }
         protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer) { return mapLayer.Name.Contains(_psmName); }
+    }
+
+    public class TransmissionLossContainerNodeProperties
+    {
+        public TransmissionLossContainerNode ParentNode { get; set; }
+
+        public IEnumerable<KeyValuePair<string, string>> Properties { get { return ParentNode.Properties; } }
     }
 }

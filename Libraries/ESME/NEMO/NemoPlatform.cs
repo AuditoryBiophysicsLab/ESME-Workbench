@@ -39,6 +39,18 @@ namespace ESME.NEMO
             BehaviorModel = new BehaviorModel(this);
         }
 
+        public override IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get
+            {
+                foreach (var property in base.Properties) yield return property;
+                yield return new KeyValuePair<string, string>("Description", Description);
+                yield return new KeyValuePair<string, string>("Launcher", Launcher);
+                yield return new KeyValuePair<string, string>("Towwer", Towwer);
+                yield return new KeyValuePair<string, string>("Repeat Count", RepeatCount.ToString());
+            }
+        }
+
         public string Description { get; private set; }
         public string Launcher { get; private set; }
         public string Towwer { get; private set; }

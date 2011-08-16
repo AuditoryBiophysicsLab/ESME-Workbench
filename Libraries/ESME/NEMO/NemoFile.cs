@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
@@ -20,6 +21,14 @@ namespace ESME.NEMO
             catch (Exception e)
             {
                 throw new FileFormatException(string.Format("Error opening NEMO file \"{0}\"", FileName), e);
+            }
+        }
+
+        public override IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get
+            {
+                yield return new KeyValuePair<string, string>("File name", FileName);
             }
         }
 

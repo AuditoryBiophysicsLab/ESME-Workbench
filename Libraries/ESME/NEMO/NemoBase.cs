@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using HRC.Navigation;
@@ -32,6 +33,8 @@ namespace ESME.NEMO
         static TimeSpan _simulationStepTime;
 
         #endregion
+
+        public abstract IEnumerable<KeyValuePair<string, string>> Properties { get; }
 
         protected bool GetBool(string childElementName)
         {

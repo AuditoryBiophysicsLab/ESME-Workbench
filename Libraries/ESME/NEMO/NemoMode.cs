@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
 using ESME.Model;
@@ -56,6 +57,29 @@ namespace ESME.NEMO
                                         });
                     realPulseCount += actualPulses;
                 }
+            }
+        }
+
+        public override IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get
+            {
+                foreach (var property in base.Properties) yield return property;
+                yield return new KeyValuePair<string, string>("State", State);
+                yield return new KeyValuePair<string, string>("Linked", Linked);
+                yield return new KeyValuePair<string, string>("Active time", ActiveTime.ToString());
+                yield return new KeyValuePair<string, string>("Depth offset", DepthOffset.ToString());
+                yield return new KeyValuePair<string, string>("Source level", SourceLevel.ToString());
+                yield return new KeyValuePair<string, string>("Source depth", SourceDepth.ToString());
+                yield return new KeyValuePair<string, string>("Low frequency", LowFrequency.ToString());
+                yield return new KeyValuePair<string, string>("High frequency", HighFrequency.ToString());
+                yield return new KeyValuePair<string, string>("Pulse interval", PulseInterval.ToString());
+                yield return new KeyValuePair<string, string>("Pulse length",PulseLength.ToString());
+                yield return new KeyValuePair<string, string>("Horizontal beam width", HorizontalBeamWidth.ToString());
+                yield return new KeyValuePair<string, string>("Vertical beam width", VerticalBeamWidth.ToString());
+                yield return new KeyValuePair<string, string>("Depression/elevation angle",DepressionElevationAngle.ToString());
+                yield return new KeyValuePair<string, string>("Relative beam angle", RelativeBeamAngle.ToString());
+                yield return new KeyValuePair<string, string>("Radius", Radius.ToString());
             }
         }
 

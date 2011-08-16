@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace ESME.NEMO
@@ -15,6 +16,21 @@ namespace ESME.NEMO
             Duration = GetTimeSpan("duration");
             Priority = GetInt("priority");
             Type = GetString("type");
+        }
+
+        public override IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get
+            {
+                yield return new KeyValuePair<string, string>("PSM Name", PSMName);
+                yield return new KeyValuePair<string, string>("PSM ID", PSMId);
+                yield return new KeyValuePair<string, string>("Name", Name);
+                yield return new KeyValuePair<string, string>("ID", Id);
+                yield return new KeyValuePair<string, string>("Start Time", StartTime.ToString());
+                yield return new KeyValuePair<string, string>("Duration", Duration.ToString());
+                yield return new KeyValuePair<string, string>("Priority", Priority.ToString());
+                yield return new KeyValuePair<string, string>("Type", Type);
+            }
         }
 
         public NemoPSM() {  }

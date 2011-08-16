@@ -42,6 +42,21 @@ namespace ESME.NEMO
             }
         }
 
+        public override IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get
+            {
+                yield return new KeyValuePair<string, string>("Range complex", SimAreaName);
+                yield return new KeyValuePair<string, string>("Description", Description);
+                yield return new KeyValuePair<string, string>("Time frame", TimeFrame);
+                yield return new KeyValuePair<string, string>("Start time", StartTime.ToString());
+                yield return new KeyValuePair<string, string>("Duration", Duration.ToString());
+                yield return new KeyValuePair<string, string>("Created on", CreationTime.ToString());
+                yield return new KeyValuePair<string, string>("Created by", AnalystName);
+                yield return new KeyValuePair<string, string>("Builder version", BuilderVersion);
+            }
+        }
+
         public string BuilderVersion { get; private set; }
         public string EventName { get; private set; }
         public DateTime CreationTime { get; private set; }
