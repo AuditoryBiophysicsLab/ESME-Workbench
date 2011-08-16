@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Cinch;
 using ESME.NEMO;
@@ -9,12 +8,12 @@ using HRC.ViewModels;
 
 namespace ESME.Mapping
 {
-    public class TreeNode : INotifyPropertyChanged
+    public class TreeNode : PropertyChangedBase
     {
         public TreeNode()
         {
             MapLayers = new ObservableList<MapLayerViewModel>();
-            Nodes = new TreeNodeList();
+            Nodes = new ObservableList<TreeNode>();
         }
 
         public TreeNode(string format, params object[] args) : this() { Name = string.Format(format, args); }
@@ -51,7 +50,7 @@ namespace ESME.Mapping
             }
         }
 
-        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.Name);
+        protected static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.Name);
         string _name;
 
         #endregion
@@ -69,9 +68,9 @@ namespace ESME.Mapping
 
         #endregion
 
-        #region public List<MapLayerViewModel> MapLayers { get; set; }
+        #region public ObservableList<MapLayerViewModel> MapLayers { get; set; }
 
-        public List<MapLayerViewModel> MapLayers
+        public ObservableList<MapLayerViewModel> MapLayers
         {
             get { return _mapLayers; }
             set
@@ -79,17 +78,18 @@ namespace ESME.Mapping
                 if (_mapLayers == value) return;
                 _mapLayers = value;
                 NotifyPropertyChanged(MapLayersChangedEventArgs);
+                if (_mapLayers != null) _mapLayers.CollectionChanged += (s, e) => NotifyPropertyChanged(NameChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.MapLayers);
-        List<MapLayerViewModel> _mapLayers;
+        ObservableList<MapLayerViewModel> _mapLayers;
 
         #endregion
 
-        #region public TreeNodeList Nodes { get; set; }
+        #region public ObservableList<TreeNode> Nodes { get; set; }
 
-        public TreeNodeList Nodes
+        public ObservableList<TreeNode> Nodes
         {
             get { return _nodes; }
             set
@@ -101,7 +101,7 @@ namespace ESME.Mapping
         }
 
         static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.Nodes);
-        TreeNodeList _nodes;
+        ObservableList<TreeNode> _nodes;
 
         #endregion
 
@@ -120,13 +120,6 @@ namespace ESME.Mapping
 
         static readonly PropertyChangedEventArgs ContextMenuChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.ContextMenu);
         List<MenuItemViewModelBase> _contextMenu;
-
-        #endregion
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void NotifyPropertyChanged(PropertyChangedEventArgs args) { if (PropertyChanged != null) PropertyChanged(this, args); }
 
         #endregion
     }
@@ -160,15 +153,8 @@ namespace ESME.Mapping
     {
         public PlatformNode(NemoPlatform nemoPlatform) : base(nemoPlatform)
         {
-            TreeNode nodesRoot;
-            if (nemoPlatform.Sources.Count < 3) nodesRoot = this;
-            else
-            {
-                nodesRoot = new TreeNode("Sources");
-                Nodes.Add(nodesRoot);
-            }
             foreach (var source in nemoPlatform.Sources)
-                nodesRoot.Nodes.Add(new SourceNode(source));
+                Nodes.Add(new SourceNode(source));
         }
 
         protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer) { return new Regex(string.Format(@"{0} [\s\S]+$", Name)).IsMatch(mapLayer.Name); }
@@ -180,15 +166,8 @@ namespace ESME.Mapping
     {
         public SourceNode(NemoSource nemoSource) : base(nemoSource)
         {
-            TreeNode nodesRoot;
-            if (nemoSource.Modes.Count < 3) nodesRoot = this;
-            else
-            {
-                nodesRoot = new TreeNode("Modes");
-                Nodes.Add(nodesRoot);
-            }
             foreach (var mode in nemoSource.Modes)
-                nodesRoot.Nodes.Add(new ModeNode(mode));
+                Nodes.Add(new ModeNode(mode));
         }
 
         public override string Name { get { return string.Format("Source: {0}", WrappedObject.Name); } }
@@ -200,43 +179,8 @@ namespace ESME.Mapping
         {
         }
 
-        protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer)
-        {
-            if ((mapLayer.LayerType == LayerType.Propagation) && (!Nodes.Any(node => node.Name == "Propagation"))) Nodes.Add(new TransmissionLossContainerNode("Propagation", WrappedObject.PSMName));
-            if ((mapLayer.LayerType == LayerType.Pressure) && (!Nodes.Any(node => node.Name == "Pressure"))) Nodes.Add(new TransmissionLossContainerNode("Pressure", WrappedObject.PSMName));
-            return false;
-        }
+        protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer) { return mapLayer.Name.Contains(WrappedObject.PSMName); }
 
-        public override string Name { get { return string.Format("Mode: {0}", WrappedObject.Name); } }
-    }
-
-    public class TransmissionLossContainerNode : TreeNodeWrapper<TransmissionLossContainerNodeProperties>
-    {
-        public TransmissionLossContainerNode(string layerName, string psmName)
-        {
-            _layerName = layerName;
-            _psmName = psmName;
-            WrappedObject = new TransmissionLossContainerNodeProperties {ParentNode = this};
-        }
-
-        public IEnumerable<KeyValuePair<string, string>> Properties
-        {
-            get
-            {
-                yield return new KeyValuePair<string, string>(string.Format("{0} file count", Name), MapLayers.Count.ToString());
-            }
-        }
-
-        readonly string _psmName;
-        readonly string _layerName;
-        public override string Name { get { return _layerName; } }
-        protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer) { return mapLayer.Name.Contains(_psmName); }
-    }
-
-    public class TransmissionLossContainerNodeProperties
-    {
-        public TransmissionLossContainerNode ParentNode { get; set; }
-
-        public IEnumerable<KeyValuePair<string, string>> Properties { get { return ParentNode.Properties; } }
+        public override string Name { get { return string.Format("Mode: {0} [{1}]", WrappedObject.Name, MapLayers.Count); } }
     }
 }

@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Windows.Controls;
 using Cinch;
+using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Mapping
@@ -55,9 +56,9 @@ namespace ESME.Mapping
 
         #endregion
 
-        #region public TreeNodeList TreeViewRootNodes { get; set; }
+        #region public ObservableList<TreeNode> TreeViewRootNodes { get; set; }
 
-        public TreeNodeList TreeViewRootNodes
+        public ObservableList<TreeNode> TreeViewRootNodes
         {
             get { return _treeViewRootNodes; }
             set
@@ -69,12 +70,12 @@ namespace ESME.Mapping
         }
 
         static readonly PropertyChangedEventArgs TreeViewRootNodesChangedEventArgs = ObservableHelper.CreateArgs<LayerListViewModel>(x => x.TreeViewRootNodes);
-        TreeNodeList _treeViewRootNodes;
+        ObservableList<TreeNode> _treeViewRootNodes;
 
         #endregion
 
         [MediatorMessageSink(MediatorMessage.SetTreeRoots)]
-        void SetTreeRoots(TreeNodeList rootNodes) { TreeViewRootNodes = rootNodes; }
+        void SetTreeRoots(ObservableList<TreeNode> rootNodes) { TreeViewRootNodes = rootNodes; }
 
         [MediatorMessageSink(MediatorMessage.SetMapLayers)]
         void SetMapLayers(MapLayerCollection mapLayers) { MapLayers = mapLayers; }

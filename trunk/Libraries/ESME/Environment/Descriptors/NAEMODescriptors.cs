@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Threading;
-using HRC;
 using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
-    public abstract class NAEMODescriptors<T> : ObservableList<KeyValuePair<string, T>>, IRequireInvoke where T : NAEMODescriptor, new()
+    public abstract class NAEMODescriptors<T> : ObservableList<KeyValuePair<string, T>> where T : NAEMODescriptor, new()
     {
         public delegate KeyValuePair<string, T> NewDescriptor(string sourceFilename);
 

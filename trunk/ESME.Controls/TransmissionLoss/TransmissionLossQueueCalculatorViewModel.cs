@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 using Cinch;
 using ESME.TransmissionLoss.CASS;
+using HRC.Utility;
 
 namespace ESME.Views.TransmissionLoss
 {
@@ -18,30 +15,12 @@ namespace ESME.Views.TransmissionLoss
 
         public TransmissionLossQueueCalculatorViewModel()
         {
-            FieldCalculatorViewModels = new ObservableCollection<TransmissionLossFieldCalculatorViewModel>();
-            Dispatcher = Dispatcher.CurrentDispatcher;
+            FieldCalculatorViewModels = new ObservableList<TransmissionLossFieldCalculatorViewModel>();
         }
 
         public uint PhysicalCores { get; set; }
         public uint LogicalCores { get; set; }
         public string CpuDescription { get; set; }
-        #endregion
-
-        #region public Dispatcher Dispatcher { get; set; }
-
-        public Dispatcher Dispatcher
-        {
-            get { return _dispatcher; }
-            set
-            {
-                if (_dispatcher == value) return;
-                _dispatcher = value;
-                foreach (var field in FieldCalculatorViewModels) field.Dispatcher = _dispatcher;
-            }
-        }
-
-        Dispatcher _dispatcher;
-
         #endregion
 
         #region public string WindowTitle { get; set; }
@@ -52,14 +31,14 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (!string.IsNullOrEmpty(_windowTitle)) return _windowTitle;
                 _windowTitle = GetCurrentWindowTitleString();
-                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(WindowTitleChangedEventArgs));
+                NotifyPropertyChanged(WindowTitleChangedEventArgs);
                 return _windowTitle;
             }
             set
             {
                 if (_windowTitle == value) return;
                 _windowTitle = value;
-                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(WindowTitleChangedEventArgs));
+                NotifyPropertyChanged(WindowTitleChangedEventArgs);
             }
         }
 
@@ -107,46 +86,21 @@ namespace ESME.Views.TransmissionLoss
             if ((FieldCalculatorViewModels != null) && (FieldCalculatorViewModels.Count > 0)) FieldCalculatorViewModels[0].CancelRequested = true;
         }
 
-        #region public ObservableCollection<TransmissionLossFieldCalculatorViewModel> FieldCalculatorViewModels { get; set; }
+        #region public ObservableList<TransmissionLossFieldCalculatorViewModel> FieldCalculatorViewModels { get; set; }
 
-        public ObservableCollection<TransmissionLossFieldCalculatorViewModel> FieldCalculatorViewModels
+        public ObservableList<TransmissionLossFieldCalculatorViewModel> FieldCalculatorViewModels
         {
             get { return _fieldCalculatorViewModels; }
             set
             {
                 if (_fieldCalculatorViewModels == value) return;
-                if (_fieldCalculatorViewModels != null) _fieldCalculatorViewModels.CollectionChanged -= FieldCalculatorViewModelsCollectionChanged;
                 _fieldCalculatorViewModels = value;
-                if (_fieldCalculatorViewModels != null) _fieldCalculatorViewModels.CollectionChanged += FieldCalculatorViewModelsCollectionChanged;
-                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs));
+                NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs FieldCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.FieldCalculatorViewModels);
-        ObservableCollection<TransmissionLossFieldCalculatorViewModel> _fieldCalculatorViewModels;
-
-        void FieldCalculatorViewModelsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    //if (e.NewItems != null)
-                    //    foreach (var newItem in e.NewItems.Cast<TransmissionLossFieldCalculatorViewModel>()) {}
-                    break;
-                case NotifyCollectionChangedAction.Move:
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    //if (e.OldItems != null) foreach (var oldItem in e.OldItems.Cast<TransmissionLossFieldCalculatorViewModel>()) {}
-                    break;
-                case NotifyCollectionChangedAction.Replace:
-                    break;
-                case NotifyCollectionChangedAction.Reset:
-                    break;
-            }
-            if (!IsPaused) StartWorkIfNeeded();
-            WindowTitle = GetCurrentWindowTitleString();
-            if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs));
-        }
+        ObservableList<TransmissionLossFieldCalculatorViewModel> _fieldCalculatorViewModels;
 
         void StartWorkIfNeeded()
         {
@@ -163,8 +117,7 @@ namespace ESME.Views.TransmissionLoss
             {
                 if (FieldCalculatorViewModels[0].CancelRequested)
                 {
-                    if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]));
-                    else FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
+                    FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
                     continue;
                 }
                 var runfileName = FieldCalculatorViewModels[0].RunfileName;
@@ -229,8 +182,7 @@ namespace ESME.Views.TransmissionLoss
                     output.Pressures.Add(buffer);
                 }
                 output.ToBinaryFile();
-                if (Dispatcher != null) Dispatcher.InvokeIfRequired(() => FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]));
-                else FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
+                FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
             }
             if (!IsPaused) StartWorkIfNeeded();
         }

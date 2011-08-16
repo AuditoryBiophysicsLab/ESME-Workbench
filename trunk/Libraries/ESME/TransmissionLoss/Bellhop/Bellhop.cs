@@ -57,6 +57,34 @@ namespace ESME.TransmissionLoss.Bellhop
             }
         }
 
+#if false
+        /// <summary>
+        /// Generate sea surface reflection coefficients for a given wind speed
+        /// </summary>
+        /// <param name="windSpeed">Wind speed, in meters per second.  Sample height must be 10 meters.</param>
+        /// <param name="frequency">Frequency of the sound source, in Hertz.</param>
+        /// <param name="startAngle">Lowest desired grazing angle, in degrees</param>
+        /// <param name="endAngle">Highest desired grazing angle, in degrees</param>
+        /// <param name="angleStep">Increment between calculated coefficients, in degrees</param>
+        /// <returns></returns>
+        public static double[,] GenerateReflectionCoefficients(float windSpeed, float frequency, double startAngle = 0, double endAngle = 90.0, double angleStep = 1.0)
+        {
+            if (double.IsNaN(windSpeed) || (windSpeed < 0) || (windSpeed > 13)) throw new ArgumentException("Valid values are 0 - 13", "windSpeed");
+            if (double.IsNaN(frequency) || (frequency < 0) || (frequency > 4000)) throw new ArgumentException("Valid values are 0 - 4000", "frequency");
+            if ((windSpeed > 5) && (frequency > 1000)) throw new ArgumentException("Frequency values under 1000 require windSpeed values under 5");
+            var sampleCount = (int)((endAngle - startAngle) / angleStep) + 1;
+
+            var result = new double[sampleCount,3];
+
+            if ((frequency < 1000) && (windSpeed < 5))
+            { }
+
+            var wind4 = Math.Pow(windSpeed / 10, 4.0);
+
+            return result;
+        }
+#endif
+
         public static void DrawWind(float windSpeed, float frequency)
         {
             // reference for surface loss code: US Navy

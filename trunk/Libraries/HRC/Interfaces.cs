@@ -2,8 +2,4 @@
 
 namespace HRC
 {
-    public interface IRequireInvoke
-    {
-        Dispatcher Dispatcher { get; set; }
-    }
 }
