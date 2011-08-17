@@ -851,7 +851,6 @@ namespace ESME.Animats
             //uint datasize = GetSize(OutputConfiguration);   
             for (var i = 0; i < TotalAnimats; i++) AnimatStartPoints.Add(ReadAnimat(reader));
         }
-
         private EarthCoordinate ReadAnimat(BinaryReader reader)
         {
             float lat = float.MinValue;
