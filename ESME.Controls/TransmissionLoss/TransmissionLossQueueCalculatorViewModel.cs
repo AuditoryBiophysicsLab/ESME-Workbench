@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Cinch;
 using ESME.TransmissionLoss.CASS;
@@ -16,6 +18,7 @@ namespace ESME.Views.TransmissionLoss
         public TransmissionLossQueueCalculatorViewModel()
         {
             FieldCalculatorViewModels = new ObservableList<TransmissionLossFieldCalculatorViewModel>();
+            Task.Factory.StartNew(ProcessWorkQueue);
         }
 
         public uint PhysicalCores { get; set; }
@@ -72,7 +75,7 @@ namespace ESME.Views.TransmissionLoss
                 _isPaused = value;
                 NotifyPropertyChanged(IsPausedChangedEventArgs);
                 WindowTitle = GetCurrentWindowTitleString();
-                if (!_isPaused) StartWorkIfNeeded();
+                //if (!_isPaused) StartWorkIfNeeded();
             }
         }
 
@@ -96,6 +99,7 @@ namespace ESME.Views.TransmissionLoss
                 if (_fieldCalculatorViewModels == value) return;
                 _fieldCalculatorViewModels = value;
                 NotifyPropertyChanged(FieldCalculatorViewModelsChangedEventArgs);
+                //if (_fieldCalculatorViewModels != null) _fieldCalculatorViewModels.CollectionChanged += (s, e) => StartWorkIfNeeded();
             }
         }
 
@@ -110,6 +114,62 @@ namespace ESME.Views.TransmissionLoss
             if (FieldCalculatorViewModels.Count > 1) Task.Factory.StartNew(() => FieldCalculatorViewModels[1].PrepareRadials());
             //if (FieldCalculatorViewModels.Count > 2) Task.Factory.StartNew(() => FieldCalculatorViewModels[2].PrepareRadials());
         }
+
+        void ProcessWorkQueue()
+        {
+            Task calculationTask = null;
+            Task preparationTask = null;
+            while (true)
+            {
+                while (IsPaused) Thread.Sleep(200);
+                if (FieldCalculatorViewModels.Count > 0) calculationTask = Task.Factory.StartNew(Calculate, FieldCalculatorViewModels[0]);
+                if (FieldCalculatorViewModels.Count > 1) preparationTask = Task.Factory.StartNew(Prepare, FieldCalculatorViewModels[1]);
+                try
+                {
+                    if (calculationTask != null) calculationTask.Wait();
+                }
+                catch (AggregateException ae)
+                {
+                    foreach (var e in ae.InnerExceptions) Debug.WriteLine("{0}: Calculation task threw exception: {1}", DateTime.Now, e.Message);
+                    if (calculationTask != null)
+                    {
+                        Debug.WriteLine("{0}: Removing calculation item {1}", DateTime.Now, Path.GetFileNameWithoutExtension(((TransmissionLossFieldCalculatorViewModel)calculationTask.AsyncState).RunfileName));
+                        FieldCalculatorViewModels.Remove((TransmissionLossFieldCalculatorViewModel)calculationTask.AsyncState);
+                    }
+                }
+                try
+                {
+                    if (preparationTask != null) preparationTask.Wait();
+                }
+                catch (AggregateException ae)
+                {
+                    foreach (var e in ae.InnerExceptions) Debug.WriteLine("{0}: Preparation task threw exception: {1}", DateTime.Now, e.Message);
+                    if (preparationTask != null)
+                    {
+                        Debug.WriteLine("{0}: Removing preparation item {1}", DateTime.Now, Path.GetFileNameWithoutExtension(((TransmissionLossFieldCalculatorViewModel)preparationTask.AsyncState).RunfileName));
+                        FieldCalculatorViewModels.Remove((TransmissionLossFieldCalculatorViewModel)preparationTask.AsyncState);
+                    }
+                }
+                if (calculationTask == null && preparationTask == null) Thread.Sleep(500);
+                calculationTask = null;
+                preparationTask = null;
+            }
+        }
+
+        void Calculate(object state)
+        {
+            var field = (TransmissionLossFieldCalculatorViewModel)state;
+            Debug.WriteLine("{0}: Starting {1}", DateTime.Now, Path.GetFileNameWithoutExtension(field.RunfileName));
+            field.Start(delegate { HandleCompletedQueueItem(); });
+        }
+
+        static void Prepare(object state)
+        {
+            var field = (TransmissionLossFieldCalculatorViewModel)state;
+            Debug.WriteLine("{0}: Preparing {1}", DateTime.Now, Path.GetFileNameWithoutExtension(field.RunfileName));
+            field.PrepareRadials();
+        }
+
 
         void HandleCompletedQueueItem()
         {
@@ -184,7 +244,7 @@ namespace ESME.Views.TransmissionLoss
                 output.ToBinaryFile();
                 FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
             }
-            if (!IsPaused) StartWorkIfNeeded();
+            //if (!IsPaused) StartWorkIfNeeded();
         }
 
         #endregion
