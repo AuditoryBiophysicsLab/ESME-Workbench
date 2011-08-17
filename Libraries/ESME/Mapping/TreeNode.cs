@@ -18,24 +18,63 @@ namespace ESME.Mapping
 
         public TreeNode(string format, params object[] args) : this() { Name = string.Format(format, args); }
 
-        public TreeNode FindNodeForMapLayer(MapLayerViewModel mapLayer)
+        public void RemoveMapLayer(MapLayerViewModel mapLayer)
+        {
+            if (MapLayerMatchesMe(mapLayer))
+                MapLayers.Remove(mapLayer);
+            foreach (var node in Nodes)
+                node.RemoveMapLayer(mapLayer);
+        }
+
+        public void AddMapLayer(MapLayerViewModel mapLayer)
         {
             if (MapLayerMatchesMe(mapLayer))
             {
                 var existingLayer = MapLayers.Find(layer => layer.Name == mapLayer.Name);
                 if (existingLayer != null) MapLayers[MapLayers.IndexOf(existingLayer)] = mapLayer;
                 else MapLayers.Add(mapLayer);
-                return this;
             }
             foreach (var node in Nodes)
-            {
-                var result = node.FindNodeForMapLayer(mapLayer);
-                if (result != null) return result;
-            }
-            return null;
+                node.AddMapLayer(mapLayer);
         }
 
         protected virtual bool MapLayerMatchesMe(MapLayerViewModel mapLayer) { return false; }
+
+        #region public virtual string ToolTipTitle { get; set; }
+
+        public virtual string ToolTipTitle
+        {
+            get { return _toolTipTitle ?? Name; }
+            set
+            {
+                if (_toolTipTitle == value) return;
+                _toolTipTitle = value;
+                NotifyPropertyChanged(ToolTipTitleChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ToolTipTitleChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.ToolTipTitle);
+        string _toolTipTitle;
+
+        #endregion
+
+        #region public virtual IEnumerable<KeyValuePair<string, string>> ToolTipProperties { get; set; }
+
+        public virtual IEnumerable<KeyValuePair<string, string>> ToolTipProperties
+        {
+            get { return _toolTipProperties; }
+            set
+            {
+                if (_toolTipProperties == value) return;
+                _toolTipProperties = value;
+                NotifyPropertyChanged(ToolTipPropertiesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ToolTipPropertiesChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.ToolTipProperties);
+        IEnumerable<KeyValuePair<string, string>> _toolTipProperties;
+
+        #endregion
 
         #region public virtual string Name { get; set; }
 
@@ -65,6 +104,7 @@ namespace ESME.Mapping
                 foreach (var node in Nodes) yield return node;
             }
         }
+        static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.Children);
 
         #endregion
 
@@ -78,7 +118,11 @@ namespace ESME.Mapping
                 if (_mapLayers == value) return;
                 _mapLayers = value;
                 NotifyPropertyChanged(MapLayersChangedEventArgs);
-                if (_mapLayers != null) _mapLayers.CollectionChanged += (s, e) => NotifyPropertyChanged(NameChangedEventArgs);
+                if (_mapLayers != null) _mapLayers.CollectionChanged += (s, e) =>
+                {
+                    NotifyPropertyChanged(NameChangedEventArgs);
+                    NotifyPropertyChanged(ChildrenChangedEventArgs);
+                };
             }
         }
 
@@ -96,11 +140,12 @@ namespace ESME.Mapping
             {
                 if (_nodes == value) return;
                 _nodes = value;
+                NotifyPropertyChanged(NodesChangedEventArgs);
                 NotifyPropertyChanged(ChildrenChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.Nodes);
+        static readonly PropertyChangedEventArgs NodesChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.Nodes);
         ObservableList<TreeNode> _nodes;
 
         #endregion
@@ -131,22 +176,35 @@ namespace ESME.Mapping
         public T WrappedObject { get; protected set; }
     }
 
+    public class EnvironmentNode : TreeNode
+    {
+        public EnvironmentNode(string format, params object[] args) : base(format, args) { }
+
+        protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer)
+        {
+            return mapLayer.LayerType == LayerType.BaseMap || mapLayer.LayerType == LayerType.Bathymetry ||
+                   mapLayer.LayerType == LayerType.BathymetryRaster || mapLayer.LayerType == LayerType.BottomType ||
+                   mapLayer.LayerType == LayerType.SoundSpeed || mapLayer.LayerType == LayerType.WindSpeed;
+        }
+    }
+
+    public class AnalysisPointNode : TreeNode
+    {
+        public AnalysisPointNode(string format, params object[] args) : base(format, args) { }
+
+        protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer) { return mapLayer.LayerType == LayerType.AnalysisPoint; }
+    }
+
     public class ScenarioNode : TreeNodeWrapper<NemoScenario>
     {
         public ScenarioNode(NemoScenario nemoScenario) : base(nemoScenario)
         {
-            TreeNode nodesRoot;
-            if (nemoScenario.Platforms.Count < 3) nodesRoot = this;
-            else
-            {
-                nodesRoot = new TreeNode("Platforms");
-                Nodes.Add(nodesRoot);
-            }
             foreach (var platform in nemoScenario.Platforms)
-                nodesRoot.Nodes.Add(new PlatformNode(platform));
+                Nodes.Add(new PlatformNode(platform));
         }
 
         public override string Name { get { return string.Format("Scenario: {0}", WrappedObject.EventName); } }
+        protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer) { return mapLayer.LayerType == LayerType.Animal; }
     }
 
     public class PlatformNode : TreeNodeWrapper<NemoPlatform>

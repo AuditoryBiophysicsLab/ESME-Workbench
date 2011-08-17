@@ -6,9 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using ESME.NEMO.Overlay;
-using HRC;
 using HRC.Navigation;
-using Cinch;
 
 namespace ESME.Environment.Descriptors
 {

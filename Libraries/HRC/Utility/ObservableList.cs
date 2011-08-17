@@ -104,15 +104,20 @@ namespace HRC.Utility
             {
                 var item = base[index];
                 base[index] = value;
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, item));
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, item, index));
             }
         }
 
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
+        public event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            add { CollectionChangedEvent += value; }
+            remove { CollectionChangedEvent -= value; }
+        }
+        event NotifyCollectionChangedEventHandler CollectionChangedEvent;
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
-            var handlers = CollectionChanged;
+            var handlers = CollectionChangedEvent;
             if (handlers == null) return;
             foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList())
             {
@@ -125,7 +130,7 @@ namespace HRC.Utility
 
         protected virtual void OnCollectionChangedMultiItem(NotifyCollectionChangedEventArgs e)
         {
-            var handlers = CollectionChanged;
+            var handlers = CollectionChangedEvent;
             if (handlers == null) return;
             foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList())
             {

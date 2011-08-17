@@ -81,6 +81,7 @@ namespace ESME.Metadata
                 case NotifyCollectionChangedAction.Remove:
                     foreach (MapLayerViewModel item in e.OldItems)
                     {
+                        foreach (var tree in TreeViewRootNodes) tree.RemoveMapLayer(item);
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
@@ -95,6 +96,7 @@ namespace ESME.Metadata
                     Debug.WriteLine("NotifyCollectionChangedAction.Reset");
                     break;
             }
+            NotifyPropertyChanged(MapLayersChangedEventArgs);
         }
         static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.MapLayers);
         [XmlIgnore]
@@ -185,6 +187,15 @@ namespace ESME.Metadata
                         foreach (var mode in _nemoFile.Scenario.DistinctModes)
                             _distinctModeProperties.Add(mode.AcousticProperties);
                     }
+
+                    UpdateScenarioTreeRoot();
+
+                    if ((_nemoFile.Scenario != null) && (_nemoFile.Scenario.Animals != null))
+                    {
+                        foreach (var species in _nemoFile.Scenario.Animals.SelectMany(animal => animal.Species))
+                            MapLayers.DisplaySpecies(species);
+                    }
+
                     DisplayScenario();
                     _rangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[_nemoFile.Scenario.SimAreaName];
                     var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
@@ -249,7 +260,6 @@ namespace ESME.Metadata
                         if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
                         else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
                     }
-                UpdateScenarioTreeRoot();
             }
         }
 
@@ -351,6 +361,13 @@ namespace ESME.Metadata
         void DisplaySelectedEnvironment()
         {
             if (_selectedEnvironment == null) return;
+
+            var regex = new Regex(@"Environment: [\s\S]+$");
+            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
+            var environmentRoot = new EnvironmentNode("Environment: {0}", Path.GetFileNameWithoutExtension(_selectedEnvironment.DataFilename));
+            TreeViewRootNodes.Add(environmentRoot);
+            foreach (var layer in _mapLayers) PlaceMapLayerInTree(layer);
+
             var samplePoints = _selectedEnvironment.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
             SelectedBathymetry = ((NAEMOBathymetryDescriptor)(_rangeComplexDescriptor.NAEMOBathymetryDescriptors[_selectedEnvironment.Metadata.BathymetryName]));
             var bathymetryBounds = SelectedBathymetry.Metadata.Bounds;
@@ -369,7 +386,7 @@ namespace ESME.Metadata
             // Get a list of transmission loss files that match the modes in the current scenario
             if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
             else CASSOutputs.RefreshInBackground();
-            UpdateEnvironmentTreeRoot();
+            //UpdateEnvironmentTreeRoot();
         }
 
         #endregion
@@ -482,9 +499,17 @@ namespace ESME.Metadata
             set
             {
                 if (_analysisPoints == value) return;
-                if (_analysisPoints != null) _analysisPoints.CollectionChanged -= AnalysisPointsCollectionChanged;
+                if (_analysisPoints != null)
+                {
+                    _analysisPoints.CollectionChanged -= AnalysisPointsCollectionChanged;
+
+                    TreeViewRootNodes.RemoveAll(item => item.Name == "Analysis points");
+                }
                 _analysisPoints = value;
-                if (_analysisPoints != null) _analysisPoints.CollectionChanged += AnalysisPointsCollectionChanged;
+                if (_analysisPoints != null)
+                {
+                    _analysisPoints.CollectionChanged += AnalysisPointsCollectionChanged;
+                }
                 NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
                 SetBathymetryForAnalysisPoints();
             }
@@ -500,6 +525,9 @@ namespace ESME.Metadata
         void DisplayExistingAnalysisPoints()
         {
             if (AnalysisPoints == null || MapLayers == null) return;
+            TreeViewRootNodes.RemoveAll(item => item.Name == "Analysis points");
+            var analysisPointNode = new AnalysisPointNode("Analysis points");
+            TreeViewRootNodes.Add(analysisPointNode);
             foreach (var analysisPoint in AnalysisPoints) MapLayers.DisplayAnalysisPoint(analysisPoint);
         }
 
@@ -555,11 +583,7 @@ namespace ESME.Metadata
         static readonly PropertyChangedEventArgs TreeViewRootNodesChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.TreeViewRootNodes);
         ObservableList<TreeNode> _treeViewRootNodes;
 
-        void PlaceMapLayerInTree(MapLayerViewModel mapLayer)
-        {
-            foreach (var tree in TreeViewRootNodes)
-                if (tree.FindNodeForMapLayer(mapLayer) != null) return;
-        }
+        void PlaceMapLayerInTree(MapLayerViewModel mapLayer) { foreach (var tree in TreeViewRootNodes) tree.AddMapLayer(mapLayer); }
 
         void UpdateEnvironmentTreeRoot()
         {
@@ -577,11 +601,9 @@ namespace ESME.Metadata
         void UpdateScenarioTreeRoot()
         {
             var scenarioRoot = TreeViewRootNodes.Find(node => node is ScenarioNode);
-            if (scenarioRoot == null)
-            {
-                scenarioRoot = new ScenarioNode(NemoFile.Scenario);
-                TreeViewRootNodes.Add(scenarioRoot);
-            }
+            if (scenarioRoot != null) return;
+            scenarioRoot = new ScenarioNode(NemoFile.Scenario);
+            TreeViewRootNodes.Add(scenarioRoot);
         }
 
         void UpdateAnimalsTreeRoot()
@@ -591,8 +613,6 @@ namespace ESME.Metadata
         }
 
         #endregion
-
-
 
         public void ExportAnalysisPoints()
         {

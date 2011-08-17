@@ -305,7 +305,8 @@ namespace ESME.Animats
                     var result1 = DDB.Load(fileName);
                     speciesName = result1.LatinName;
                     return result1.AnimatStartPoints;
-                default: throw new FileFormatException("Cannot load animat data: improper file extension.");
+                default: 
+                    throw new FileFormatException(string.Format("Unable to load animat locations.  Unrecognized file type: \"{0}\"", Path.GetExtension(fileName)));
             }
         }
     }
