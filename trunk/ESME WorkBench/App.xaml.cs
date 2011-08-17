@@ -117,7 +117,7 @@ namespace ESMEWorkBench
         {
             Trace.TraceError("{0} encountered an unhandled exception and is exiting.  A dump file will be created in {1}", Name, DumpFile);
 
-            MiniDump.Write(DumpFile, MiniDump.Option.Normal, MiniDump.ExceptionInfo.Present);
+            MiniDump.Write(DumpFile, MiniDump.Option.WithoutAuxiliaryState | MiniDump.Option.WithoutOptionalData, MiniDump.ExceptionInfo.Present);
         }
 
 #if DEBUG

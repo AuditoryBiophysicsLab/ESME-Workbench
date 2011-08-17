@@ -5,6 +5,7 @@ using System.Data.Linq;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
+using ESME.NEMO;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
@@ -322,6 +323,33 @@ namespace ESME.Mapping
             propagationPointLayer.Done();
         }
 
+        public void DisplaySpecies(NemoSpecies species)
+        {
+            var speciesLayerName = string.Format("Species: {0}", species.SpeciesName);
+            var speciesLayer = Find<OverlayShapeMapLayer>(LayerType.Propagation, speciesLayerName);
+            if (speciesLayer == null)
+            {
+                speciesLayer = new OverlayShapeMapLayer
+                {
+                    Name = speciesLayerName,
+                    LayerType = LayerType.Animal,
+                    LineWidth = 1,
+                    CanBeRemoved = false,
+                    CanBeReordered = true,
+                    HasSettings = true,
+                    CanChangeLineColor = true,
+                    CanChangeLineWidth = true,
+                    CanChangeAreaColor = false,
+                    IsChecked = false,
+                };
+                Add(speciesLayer);
+            }
+            var startPoints = species.AnimatData.AnimatStartPoints.Select(startPoint => new OverlayPoint(startPoint));
+            speciesLayer.ToolTip = String.Format("Layer contains {0} animats", species.AnimatData.ActualMammalPopulation);
+            speciesLayer.Clear();
+            speciesLayer.Add(startPoints);
+            speciesLayer.Done();
+        }
 
         public RectangleShape CurrentExtent { get; set; }
 

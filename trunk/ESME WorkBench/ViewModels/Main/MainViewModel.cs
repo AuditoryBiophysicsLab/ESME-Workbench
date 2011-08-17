@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -19,6 +20,7 @@ using HRC.Utility;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
 using ESME.Views.AcousticBuilder;
+using ESME.Environment.Descriptors;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -83,6 +85,8 @@ namespace ESMEWorkBench.ViewModels.Main
             IsLatLonGridVisible = Settings.Default.ShowGrid;
             IsScaleBarVisible = Settings.Default.ShowScaleBar;
             IsPanZoomVisible = Settings.Default.ShowPanZoom;
+
+            Task.Factory.StartNew(() => RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"), _dispatcher));
 
 #if EXPERIMENTS_SUPPORTED
             var args = Environment.GetCommandLineArgs();

@@ -37,7 +37,6 @@ namespace ESMEWorkBench.ViewModels.Main
             AreAllViewModelsReady = true;
             UpdateMapLayerVisibility();
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
-            Task.Factory.StartNew(() => RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"), _dispatcher));
             
             //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
