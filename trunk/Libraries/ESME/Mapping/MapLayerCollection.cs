@@ -345,7 +345,7 @@ namespace ESME.Mapping
                 Add(speciesLayer);
             }
             var startPoints = species.AnimatData.AnimatStartPoints.Select(startPoint => new OverlayPoint(startPoint));
-            speciesLayer.ToolTip = String.Format("Layer contains {0} animats", species.AnimatData.ActualMammalPopulation);
+            speciesLayer.ToolTip = String.Format("Layer contains {0} animats", species.AnimatData.TotalAnimats);
             speciesLayer.Clear();
             speciesLayer.Add(startPoints);
             speciesLayer.Done();

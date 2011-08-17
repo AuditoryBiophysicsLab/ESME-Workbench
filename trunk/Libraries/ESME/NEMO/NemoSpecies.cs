@@ -19,7 +19,8 @@ namespace ESME.NEMO
             TrackAreaTotal = GetInt("trackAreaTotal");
             SimAreaPopulation = GetFloat("simAreaPopulation");
             SimAreaTotal = GetInt("simAreaTotal");
-            AnimatData = DDB.Load(Path.Combine(scenarioDirectory, "Species", SpeciesFile));
+            string fileSpeciesName;
+            AnimatData = AnimatFile.Load(Path.Combine(scenarioDirectory, "Species", SpeciesFile),out fileSpeciesName);
         }
 
         public override IEnumerable<KeyValuePair<string, string>> Properties
@@ -49,6 +50,6 @@ namespace ESME.NEMO
         public int    TrackAreaTotal        { get; private set; }
         public float  SimAreaPopulation     { get; private set; }
         public int    SimAreaTotal          { get; private set; }
-        public DDB AnimatData { get; private set; }
+        public AnimatFile AnimatData { get; private set; }
     }
 }
