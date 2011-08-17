@@ -291,31 +291,35 @@ namespace ESME.Animats
         }
     }
 
-    public static class AnimatFile
+    public class AnimatFile
     {
-        public static List<EarthCoordinate> Load(string fileName, out string speciesName)
+        public string Filename { get; internal set; }
+        public string LatinName { get; internal set; }
+        public List<EarthCoordinate> AnimatStartPoints { get; internal set; }
+        public int TotalAnimats { get; internal set; }
+        public static AnimatFile Load(string fileName, out string speciesName)
         {
             switch (Path.GetExtension(fileName).ToLower())
             {
                 case ".3mb":
                     var result = MMMB.Load(fileName);
                     speciesName = result.LatinName;
-                    return result.AnimatStartPoints;
+                    return result;
                 case ".ddb":
                     var result1 = DDB.Load(fileName);
                     speciesName = result1.LatinName;
-                    return result1.AnimatStartPoints;
+                    return result1;
                 default: 
                     throw new FileFormatException(string.Format("Unable to load animat locations.  Unrecognized file type: \"{0}\"", Path.GetExtension(fileName)));
             }
         }
     }
 
-    public class DDB
+    public class DDB:AnimatFile
     {
         #region public properties {get; internal set;}
         //not all of these are ever set; the header load procedure terminates once we have determined the species name, output configuration, and total number of animats -- it's all we need.
-        public string Filename { get; internal set; }
+        
         public string SpeciesFilePath { get; internal set; }
         public int MbLibSuperVersion { get; internal set; }
         public int MbLibSubVersion { get; internal set; }
@@ -324,7 +328,6 @@ namespace ESME.Animats
         public int MbOutSuperVersion { get; internal set; }
         public int MbOutSubVersion { get; internal set; }
         public int MbNumSpecies { get; internal set; }
-        public int MbTotalAnimats { get; internal set; }
         public int MbIterationCount { get; internal set; }
         public int MbSavedStateCount { get; internal set; }
         public int MbStartClockTime { get; internal set; }
@@ -359,8 +362,7 @@ namespace ESME.Animats
         public int TrackAreaTotal { get; internal set; }
         public float TrackAreaPopulation { get; internal set; }
         public int ActualMammalPopulation { get; internal set; }
-        public string LatinName { get; internal set; }
-        public List<EarthCoordinate> AnimatStartPoints { get; internal set; }
+       
 
         #endregion
         /// <summary>
@@ -395,7 +397,7 @@ namespace ESME.Animats
                 }
 
                 result.MbNumSpecies = reader.ReadInt32();
-                result.MbTotalAnimats = reader.ReadInt32();
+                result.TotalAnimats = reader.ReadInt32();
                 result.MbIterationCount = reader.ReadInt32();
                 result.MbSavedStateCount = reader.ReadInt32();
                 result.MbStartClockTime = reader.ReadInt32();
@@ -612,7 +614,7 @@ namespace ESME.Animats
             reader.BaseStream.Seek(1040, SeekOrigin.Begin); // skip the .ddb header
             AnimatStartPoints = new List<EarthCoordinate>();
             int datasize = GetSize(MbOutputConfiguration);
-            for (int i = 0; i < MbTotalAnimats; i++)
+            for (int i = 0; i < TotalAnimats; i++)
             {
                 //var id = reader.ReadSingle();
                 //var time = reader.ReadSingle();
@@ -659,7 +661,7 @@ namespace ESME.Animats
         }
     }
 
-    public class MMMB
+    public class MMMB:AnimatFile
     {
         #region public properties {get; internal set;}
         public string MbFileIdentifier { get; internal set; }
@@ -670,11 +672,10 @@ namespace ESME.Animats
         public uint MbOutputSuperVersion { get; internal set; }
         public uint MbOutputSubVersion { get; internal set; }
         public uint NumberOfSpecies { get; internal set; }
-        public uint TotalAnimats { get; internal set; }
         public uint Duration { get; internal set; }
         public uint SavedStateCount { get; internal set; }
         public uint StartClockTime { get; internal set; }
-        
+        #region public uint OutputConfiguration { get; internal set; }
         uint _outputConfiguration;
         public uint OutputConfiguration
         {
@@ -689,7 +690,7 @@ namespace ESME.Animats
             }
         }
         readonly bool[] _bits = new bool[32];
-        
+        #endregion
         public int SizeOfSizeT { get; internal set; }
         public uint MiscParams { get; internal set; }
         public uint SeedValue { get; internal set; }
@@ -699,7 +700,6 @@ namespace ESME.Animats
         public bool IntervalLimitedFileOutputEnabled { get; internal set; }
         public uint IntervalLimitedFileOutputStart { get; internal set; }
         public uint IntervalLimitedFileOutputValue { get; internal set; }
-        public string LatinName { get; internal set; }
         public uint ActualPopulation { get; internal set; }
         public float InnerBoxDensity { get; internal set; }
         public float OuterBoxDensity { get; internal set; }
@@ -729,8 +729,7 @@ namespace ESME.Animats
         public ulong TotalAnimatBinaryFileOutputSize { get; internal set; }
         public ulong TotalAcousticExposureBinaryOutputSize { get; internal set; }
 
-        public string Filename { get; internal set; }
-        public List<EarthCoordinate> AnimatStartPoints { get; internal set; }
+
 
         #endregion
         /// <summary>
@@ -741,8 +740,7 @@ namespace ESME.Animats
         public static MMMB Load(string fileName)
         {
             if (Path.GetExtension(fileName) != ".3mb") throw new FileFormatException("only 3MB files are supported.");
-            var result = new MMMB();
-            result.Filename = fileName;
+            var result = new MMMB {Filename = fileName};
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
                 result.MbFileIdentifier = Encoding.Default.GetString(reader.ReadBytes(16)).TrimEnd('\0');
@@ -754,7 +752,7 @@ namespace ESME.Animats
                 result.MbOutputSuperVersion = reader.ReadUInt32();
                 result.MbOutputSubVersion = reader.ReadUInt32();
                 result.NumberOfSpecies = reader.ReadUInt32();
-                result.TotalAnimats = reader.ReadUInt32();
+                result.TotalAnimats = reader.ReadInt32();
                 result.Duration = reader.ReadUInt32();
                 result.SavedStateCount = reader.ReadUInt32();
                 result.StartClockTime = reader.ReadUInt32();
@@ -769,6 +767,7 @@ namespace ESME.Animats
                 result.IntervalLimitedFileOutputStart = reader.ReadUInt32();
                 result.IntervalLimitedFileOutputValue = reader.ReadUInt32();
                 reader.BaseStream.Seek(28, SeekOrigin.Current);
+                #region result.LatinName
                 var buf = reader.ReadBytes(32);
                 var end = false;
                 for (int i = 0; i < buf.Length; i++)
@@ -776,7 +775,8 @@ namespace ESME.Animats
                     if (buf[i] == 0) end = true;
                     if (end) buf[i] = 0;
                 }
-                result.LatinName = Encoding.Default.GetString(buf).TrimEnd('\0');//reader.ReadString().TrimEnd('\0').Trim();
+                result.LatinName = Encoding.Default.GetString(buf).TrimEnd('\0');
+                #endregion
                 result.ActualPopulation = reader.ReadUInt32();
                 result.InnerBoxDensity = reader.ReadSingle();
                 result.OuterBoxDensity = reader.ReadSingle();
