@@ -687,7 +687,7 @@ namespace ESME.Animats
                 {
                     _bits[i] = (_outputConfiguration & (1 << i)) != 0;
                 }
-                if (_bits[31])
+                if (!_bits[31])
                     throw new FileFormatException(
                             "The animat states in this 3MB file are ordered by animat not by time. Mysterious, and forbidden.");
                 

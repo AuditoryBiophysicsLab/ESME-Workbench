@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Cinch;
+using ESME.Views.LogFileViewer;
 using ESME;
 using ESME.Data;
 using ESME.Mapping;
@@ -152,8 +153,8 @@ namespace ESMEWorkBench.ViewModels.Main
         
         private void ViewSimulatorLogsHandler()
         {
-            var scenarioSimulatorLogViewModel = new ScenarioSimulatorLogViewModel(Settings.Default.LogLastDir, "*.log.*", _dispatcher);
-            _visualizerService.Show("ScenarioSimulatorLogView", scenarioSimulatorLogViewModel, true,null);
+            var scenarioSimulatorLogViewModel = new LogFileViewModel(Settings.Default.LogLastDir, "*.log.*", _dispatcher);
+            _visualizerService.Show("LogFileView", scenarioSimulatorLogViewModel, true,null);
         }
 
         #endregion

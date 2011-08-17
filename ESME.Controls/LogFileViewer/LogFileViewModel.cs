@@ -1,5 +1,4 @@
-﻿#if false
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -11,16 +10,17 @@ using System.Windows.Threading;
 using Cinch;
 using HRC.Validation;
 
-namespace ESMEWorkBench.ViewModels.NAVO
+namespace ESME.Views.LogFileViewer
 {
-    sealed class ScenarioSimulatorLogViewModel : ValidatingViewModel
+    public sealed class LogFileViewModel:ValidatingViewModel
     {
         readonly Dispatcher _dispatcher;
-        public ScenarioSimulatorLogViewModel(string logDirectory, string filePattern, Dispatcher dispatcher)
+        public LogFileViewModel(string logDirectory, string filePattern, Dispatcher dispatcher)
         {
             _dispatcher = dispatcher;
-            FilePattern = filePattern;
+            
             LogDirectory = logDirectory;
+            FilePattern = filePattern;
 
             ValidationRules.AddRange(new List<ValidationRule>
                                          {
@@ -30,7 +30,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                                                      Description = "Directory contains no files that match file pattern",
                                                      RuleDelegate = (o, r) =>
                                                                         {
-                                                                            var ruleTarget = ((ScenarioSimulatorLogViewModel) o).LogDirectory;
+                                                                            var ruleTarget = ((LogFileViewModel) o).LogDirectory;
                                                                             return Directory.GetFiles(ruleTarget,FilePattern,SearchOption.TopDirectoryOnly).Length>0;
                                                                         },
                                                  },                               
@@ -41,10 +41,10 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         public string LogDirectory
         {
-            get { return Properties.Settings.Default.LogLastDir; }
+            get { return _logDirectory; }
             set
             {
-                Properties.Settings.Default.LogLastDir = value;
+                _logDirectory = value;
                 NotifyPropertyChanged(LogDirectoryChangedEventArgs);
                 RefreshDirectory();
 
@@ -53,7 +53,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     _dirWatcher.EnableRaisingEvents = false;
                     _dirWatcher.Dispose();
                 }
-                _dirWatcher = new FileSystemWatcher(Properties.Settings.Default.LogLastDir)
+                _dirWatcher = new FileSystemWatcher(_logDirectory)
                 {
                     EnableRaisingEvents = true,
                     NotifyFilter = (NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.DirectoryName),
@@ -65,16 +65,17 @@ namespace ESMEWorkBench.ViewModels.NAVO
             }
         }
 
+        string _logDirectory;
         void DirectoryChanged(object sender, FileSystemEventArgs e)
         {
             Debug.WriteLine("[Raw] Directory: " + e.Name + " " + e.ChangeType);
             if (_dirTimer != null) return;
-            _dirTimer = new Timer(1000) { AutoReset = false, Enabled = true };
+            _dirTimer = new Timer(1000) {AutoReset = false, Enabled = true};
             _dirTimer.Elapsed += (s1, e1) =>
                                      {
                                          _dirTimer = null;
                                          Debug.WriteLine("Directory: " + e.Name + " " + e.ChangeType);
-                                         _dispatcher.Invoke(DispatcherPriority.Background, (Action)(RefreshDirectory));
+                                         _dispatcher.Invoke(DispatcherPriority.Background, (Action) (RefreshDirectory));
                                      };
 
         }
@@ -92,7 +93,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             _isRefreshingDirectory = false;
             SelectedLogFile = null;
         }
-        private static readonly PropertyChangedEventArgs LogDirectoryChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.LogDirectory);
+        private static readonly PropertyChangedEventArgs LogDirectoryChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.LogDirectory);
         private FileSystemWatcher _dirWatcher;
         private Timer _dirTimer;
         bool _isRefreshingDirectory;
@@ -113,7 +114,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             }
         }
 
-        static readonly PropertyChangedEventArgs FilePatternChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.FilePattern);
+        static readonly PropertyChangedEventArgs FilePatternChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.FilePattern);
         string _filePattern;
 
         #endregion
@@ -124,7 +125,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
         {
             get { return _filePatterns; }
         }
-        private readonly string[] _filePatterns = new[]
+        private readonly string[] _filePatterns= new[]
                                            {
                                                "*.log.*",
                                                "*.txt",
@@ -135,9 +136,9 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         #region public ObservableCollection<KeyValuePair<string,string>> LogFilePairs { get; set; }
 
-        public ObservableCollection<KeyValuePair<string, string>> LogFilePairs
+        public ObservableCollection<KeyValuePair<string,string>> LogFilePairs
         {
-            get { return _logFilePairs ?? (_logFilePairs = new ObservableCollection<KeyValuePair<string, string>>()); }
+            get { return _logFilePairs ?? (_logFilePairs = new ObservableCollection<KeyValuePair<string,string>>()); }
             set
             {
                 if (_logFilePairs == value) return;
@@ -153,8 +154,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
             NotifyPropertyChanged(LogFilePairsChangedEventArgs);
         }
 
-        private static readonly PropertyChangedEventArgs LogFilePairsChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.LogFilePairs);
-        private ObservableCollection<KeyValuePair<string, string>> _logFilePairs;
+        private static readonly PropertyChangedEventArgs LogFilePairsChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.LogFilePairs);
+        private ObservableCollection<KeyValuePair<string,string>> _logFilePairs;
 
         #endregion
 
@@ -182,7 +183,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     _watcher.EnableRaisingEvents = false;
                     _watcher.Dispose();
                 }
-                _watcher = new FileSystemWatcher(Path.GetDirectoryName(_selectedLogFile), Path.GetFileName(_selectedLogFile))
+                _watcher = new FileSystemWatcher(Path.GetDirectoryName(_selectedLogFile),Path.GetFileName(_selectedLogFile))
                                {
                                    EnableRaisingEvents = true,
                                    NotifyFilter = NotifyFilters.LastWrite,
@@ -203,8 +204,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
 
         private FileSystemWatcher _watcher;
         Timer _fileReloadTimer;
-
-        private static readonly PropertyChangedEventArgs SelectedLogFileChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.SelectedLogFile);
+        
+        private static readonly PropertyChangedEventArgs SelectedLogFileChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.SelectedLogFile);
         private string _selectedLogFile;
 
         #endregion
@@ -220,8 +221,8 @@ namespace ESMEWorkBench.ViewModels.NAVO
             }
         }
 
-        private static readonly PropertyChangedEventArgs SelectedLogFileHeaderTextChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.SelectedLogFileHeaderText);
-
+        private static readonly PropertyChangedEventArgs SelectedLogFileHeaderTextChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.SelectedLogFileHeaderText);
+       
 
         #endregion
 
@@ -238,7 +239,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             }
         }
 
-        private static readonly PropertyChangedEventArgs SelectedLogFileTextChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.SelectedLogFileText);
+        private static readonly PropertyChangedEventArgs SelectedLogFileTextChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.SelectedLogFileText);
         private string _selectedLogFileText;
 
         #endregion
@@ -256,7 +257,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
             }
         }
 
-        static readonly PropertyChangedEventArgs AutoScrollChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.AutoScroll);
+        static readonly PropertyChangedEventArgs AutoScrollChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.AutoScroll);
         bool _autoScroll = true;
 
         #endregion
@@ -274,11 +275,11 @@ namespace ESMEWorkBench.ViewModels.NAVO
             }
         }
 
-        static readonly PropertyChangedEventArgs FileIsSelectedChangedEventArgs = ObservableHelper.CreateArgs<ScenarioSimulatorLogViewModel>(x => x.FileIsSelected);
+        static readonly PropertyChangedEventArgs FileIsSelectedChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.FileIsSelected);
         bool _fileIsSelected;
 
         #endregion
-
+        
         #region CloseCommand
 
         public SimpleCommand<object, object> CloseCommand
@@ -292,7 +293,7 @@ namespace ESMEWorkBench.ViewModels.NAVO
         }
 
         private SimpleCommand<object, object> _close;
-
+        
         private void CloseHandler()
         {
             CloseActivePopUpCommand.Execute(true);
@@ -301,5 +302,3 @@ namespace ESMEWorkBench.ViewModels.NAVO
         #endregion
     }
 }
-
-#endif
