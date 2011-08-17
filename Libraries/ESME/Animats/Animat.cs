@@ -687,6 +687,10 @@ namespace ESME.Animats
                 {
                     _bits[i] = (_outputConfiguration & (1 << i)) != 0;
                 }
+                if (_bits[31])
+                    throw new FileFormatException(
+                            "The animat states in this 3MB file are ordered by animat not by time. Mysterious, and forbidden.");
+                
             }
         }
         readonly bool[] _bits = new bool[32];
@@ -728,10 +732,8 @@ namespace ESME.Animats
         public ulong TotalBinaryFileOutputSize { get; internal set; }
         public ulong TotalAnimatBinaryFileOutputSize { get; internal set; }
         public ulong TotalAcousticExposureBinaryOutputSize { get; internal set; }
-
-
-
         #endregion
+
         /// <summary>
         /// the header load procedure terminates once we have determined the species name, output configuration, and total number of animats -- it's all we need to display points on a map.
         /// </summary>
@@ -743,15 +745,20 @@ namespace ESME.Animats
             var result = new MMMB {Filename = fileName};
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
+                #region MbFileIdentifier
                 result.MbFileIdentifier = Encoding.Default.GetString(reader.ReadBytes(16)).TrimEnd('\0');
-                if(result.MbFileIdentifier!="3MBBinaryOutput") throw new FileFormatException("Invalid 3MB file.");
+                if (result.MbFileIdentifier != "3MBBinaryOutput") throw new FileFormatException("Invalid 3MB file."); 
+                #endregion
                 result.MbLibSuperVersion = reader.ReadUInt32();
                 result.MbLibSubVersion = reader.ReadUInt32();
                 result.MbSpeciesSuperVersion = reader.ReadUInt32();
                 result.MbSpeciesSubVersion = reader.ReadUInt32();
                 result.MbOutputSuperVersion = reader.ReadUInt32();
                 result.MbOutputSubVersion = reader.ReadUInt32();
+                #region NumberOfSpecies
                 result.NumberOfSpecies = reader.ReadUInt32();
+                if (result.NumberOfSpecies > 1) throw new FileFormatException(string.Format("The 3MB file {0} associated with this species contains more than one species!", Path.GetFileName(result.Filename))); 
+                #endregion
                 result.TotalAnimats = reader.ReadInt32();
                 result.Duration = reader.ReadUInt32();
                 result.SavedStateCount = reader.ReadUInt32();
@@ -828,56 +835,24 @@ namespace ESME.Animats
                 result.TotalAcousticExposureBinaryOutputSize = reader.ReadUInt64();
                 reader.BaseStream.Seek(8, SeekOrigin.Current);
 
-                
-
                 result.ReadStartPositions(reader); //
             }
             return result;
         }
         /// <summary>
-        /// jumps the .3mb header, and then populates AnimatStartPoints with the starting locations of every animat in the file.
+        /// Populates AnimatStartPoints with the starting locations of every animat in the file.
         /// </summary>
         /// <param name="reader"></param>
         private void ReadStartPositions(BinaryReader reader)
         {
-            //if (SizeOfSizeT != 4 && SizeOfSizeT != 8) throw new FileFormatException("unknown architecture");
-
-            //if(SizeOfSizeT == 8) reader.BaseStream.Seek(1296, SeekOrigin.Begin); // skip the header
-            //if(SizeOfSizeT == 4) reader.BaseStream.Seek(1264, SeekOrigin.Begin);
-
             //skip to where animat state data is
             reader.BaseStream.Seek((long)AnimatsState, SeekOrigin.Begin);
-            
-
-
             AnimatStartPoints = new List<EarthCoordinate>();
-            uint datasize = GetSize(OutputConfiguration);   
-            for (int i = 0; i < TotalAnimats; i++)
-            {
-#if false
-                var id = reader.ReadSingle();
-                var time = reader.ReadSingle();
-                //reader.BaseStream.Seek(8, SeekOrigin.Current); //skip id and time
-                float lat = reader.ReadSingle();
-                float lon = reader.ReadSingle();
-                AnimatStartPoints.Add(new EarthCoordinate(lat, lon));
-                //AnimatStartPoints.Add(new EarthCoordinate(reader.ReadSingle(), reader.ReadSingle()));
-                //adds lat and lon.
-                reader.BaseStream.Seek(8 + datasize, SeekOrigin.Current);
-                // skip depth, packedData, and the data itself.
-
-                //var depth = reader.ReadSingle();
-                //var packedData = reader.ReadSingle();
-                //reader.BaseStream.Seek(datasize, SeekOrigin.Current);
-
-                // reader.BaseStream.Seek(GetSize(MbOutputConfiguration), SeekOrigin.Current);
-                //skip its data because we don't care.  
-#endif
-                AnimatStartPoints.Add(ReadAnimat(reader));
-            }
+            //uint datasize = GetSize(OutputConfiguration);   
+            for (var i = 0; i < TotalAnimats; i++) AnimatStartPoints.Add(ReadAnimat(reader));
         }
 
-        EarthCoordinate ReadAnimat(BinaryReader reader)
+        private EarthCoordinate ReadAnimat(BinaryReader reader)
         {
             float lat = float.MinValue;
             float lon = float.MinValue;
@@ -908,7 +883,7 @@ namespace ESME.Animats
             }
             if (_bits[10])
             {
-                Debug.WriteLine("dive rate: {0}", reader.ReadSingle());
+              Debug.WriteLine("dive rate: {0}", reader.ReadSingle());
             }
             if (_bits[11])
             {
@@ -954,14 +929,11 @@ namespace ESME.Animats
             {
                 Debug.WriteLine("calculated depth: {0}", reader.ReadSingle());
             }
-            var result = new EarthCoordinate(lat, lon);
-            //AnimatStartPoints.Add(new EarthCoordinate(reader.ReadSingle(), reader.ReadSingle()));
-            //adds lat and lon.
-            //reader.BaseStream.Seek(8 + datasize, SeekOrigin.Current);
-            return result;
+            return new EarthCoordinate(lat, lon);
         }
+#if false
         /// <summary>
-        /// takes MbOutputConfiguration and determines the size of each animat's packed data.
+        /// takes OutputConfiguration and determines the size of each animat's packed data.
         /// </summary>
         /// <param name="bitmap"></param>
         /// <returns></returns>
@@ -983,10 +955,7 @@ namespace ESME.Animats
             }
 
             return size;
-        }
-        private void ParseOutputConfiguration()
-        {
-
-        }
+        } 
+#endif
     }
 }
