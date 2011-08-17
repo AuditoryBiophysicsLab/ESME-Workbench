@@ -234,7 +234,6 @@
     <Compile Include="Views\AnalysisPointVisualizerView.xaml.cs">
       <DependentUpon>AnalysisPointVisualizerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ValueConverters.cs" />
     <Compile Include="ViewModels\Layers\GraphicLogoAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\GraticuleAdornmentLayer.cs" />
     <Compile Include="ViewModels\Layers\OverlayShapesLayerViewModel.cs" />

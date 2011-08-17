@@ -10,8 +10,7 @@
                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                 xmlns:ia="http://schemas.microsoft.com/expression/2010/interactions"
                 xmlns:LocalControls="clr-namespace:ESMEWorkBench.Controls"
-                xmlns:app="clr-namespace:ESMEWorkBench" 
-                mef:ViewModelLocator.ViewModel="MainViewModel"
+                xmlns:app="clr-namespace:ESMEWorkBench" xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" mef:ViewModelLocator.ViewModel="MainViewModel"
                 SnapsToDevicePixels="True"
                 Title="ESME WorkBench 2011"
                 Icon="..\Wave.ico"
@@ -23,7 +22,7 @@
                 d:DesignHeight="800"
                 mc:Ignorable="d">
 	<r:RibbonWindow.Resources>
-		<app:GridLengthConverter x:Key="gridLengthConverter" />
+		<WPF:GridLengthConverter x:Key="gridLengthConverter" />
     </r:RibbonWindow.Resources>
 	<r:RibbonWindow.InputBindings>
 		<KeyBinding Command="{Binding CancelCurrentCommand}"

@@ -4,8 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:converters="clr-namespace:ESMEWorkBench"
-             xmlns:con="http://schemas.kent.boogaart.com/converters"
-             mc:Ignorable="d" 
+             xmlns:con="http://schemas.kent.boogaart.com/converters" xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="500">
     <UserControl.Resources>
         <Style x:Key="{x:Type ProgressBar}" TargetType="{x:Type ProgressBar}">
@@ -26,7 +25,7 @@
                                                         <Rectangle.Fill>
                                                             <MultiBinding>
                                                                 <MultiBinding.Converter>
-                                                                    <converters:ProgressBarBrushConverter />
+                                                                    <WPF:ProgressBarBrushConverter />
                                                                 </MultiBinding.Converter>
                                                                 <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
                                                                 <Binding Path="IsIndeterminate" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -60,7 +59,7 @@
                                             <Rectangle.Fill>
                                                 <MultiBinding>
                                                     <MultiBinding.Converter>
-                                                        <converters:ProgressBarBrushConverter />
+                                                        <WPF:ProgressBarBrushConverter />
                                                     </MultiBinding.Converter>
                                                     <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
                                                     <Binding Path="IsIndeterminate" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -88,7 +87,7 @@
                     <Path.Fill>
                         <MultiBinding>
                             <MultiBinding.Converter>
-                                <converters:ProgressBarBrushConverter />
+                                <WPF:ProgressBarBrushConverter />
                             </MultiBinding.Converter>
                             <Binding Path="Foreground" RelativeSource="{RelativeSource TemplatedParent}" />
                             <Binding Path="IsIndeterminate" RelativeSource="{RelativeSource TemplatedParent}" />

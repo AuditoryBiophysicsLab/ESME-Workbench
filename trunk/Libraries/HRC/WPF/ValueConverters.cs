@@ -5,7 +5,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
-namespace ESMEWorkBench
+namespace HRC.WPF
 {
     [ValueConversion(typeof(double), typeof(GridLength))]
     public class GridLengthConverter : IValueConverter

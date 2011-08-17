@@ -151,6 +151,10 @@
       <DependentUpon>OverlayExpandView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Locations\OverlayExpandViewModel.cs" />
+    <Compile Include="LogFileViewer\LogFileView.xaml.cs">
+      <DependentUpon>LogFileView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LogFileViewer\LogFileViewModel.cs" />
     <Compile Include="Misc\BackgroundTaskStatusViewModel.cs" />
     <Compile Include="Misc\BackgroundTaskStatusView.xaml.cs">
       <DependentUpon>BackgroundTaskStatusView.xaml</DependentUpon>
@@ -265,6 +269,10 @@
     <Page Include="Locations\OverlayExpandView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LogFileViewer\LogFileView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Misc\BackgroundTaskStatusView.xaml">
       <SubType>Designer</SubType>

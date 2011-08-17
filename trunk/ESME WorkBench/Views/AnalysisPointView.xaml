@@ -8,14 +8,13 @@
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
              xmlns:p="clr-namespace:ESMEWorkBench.Properties"
-             xmlns:app="clr-namespace:ESMEWorkBench"
-             mef:ViewModelLocator.ViewModel="AnalysisPointViewModel"
+             xmlns:app="clr-namespace:ESMEWorkBench" xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" mef:ViewModelLocator.ViewModel="AnalysisPointViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="650">
     
 	<UserControl.Resources>
-        <app:GridLengthConverter x:Key="gridLengthConverter" />
+        <WPF:GridLengthConverter x:Key="gridLengthConverter" />
 		<HierarchicalDataTemplate x:Key="PlatformSourceModeTreeTemplate"
 		                          ItemsSource="{Binding AcousticProperties}">
 			<TextBlock Text="{Binding FieldName}" />
