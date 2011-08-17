@@ -1,29 +1,28 @@
-!     Last change:  MBP  23 Jun 2002    2:44 pm
- SUBROUTINE ERROUT( PRTFIL, SEVRTY, WHERE, ErrMsg )
+ SUBROUTINE ERROUT( PRTFIL, Severity, WHERE, ErrMsg )
 
 !     Outputs an error message
 
 !     PRTFIL unit number for print-out
-!     SEVRTY:
+!     Severity:
 !        'W' Warning
 !        'F' Fatal
 !     WHERE  in which program or subroutine
 !     ErrMsg error message
 
  IMPLICIT NONE
- INTEGER PRTFIL, Last
- CHARACTER SEVRTY *1, WHERE *(*), ErrMsg *(*)
+ INTEGER   PRTFIL, Last
+ CHARACTER Severity *1, WHERE *(*), ErrMsg *(*)
 
  WRITE( PRTFIL, * )
 
- SELECT CASE ( SEVRTY )  !     *** Severity ***
+ SELECT CASE ( Severity )  !     *** Severity ***
   CASE ( 'W' )
      WRITE( PRTFIL, * ) '*** WARNING ***'
   CASE ( 'F' )
      WRITE( PRTFIL, * ) '*** FATAL ERROR ***'
   CASE DEFAULT
      WRITE( PRTFIL, * ) '*** FATAL ERROR ***'
-     WRITE( PRTFIL, * ) 'Error handler (ERROUT) called with unknown severity level: ', SEVRTY
+     WRITE( PRTFIL, * ) 'Error handler (ERROUT) called with unknown severity level: ', Severity
  END SELECT
 
  Last = LEN( WHERE )
@@ -35,7 +34,7 @@
 
 ! return or stop depending on severity
 
-IF ( SEVRTY == 'W' ) THEN
+IF ( Severity == 'W' ) THEN
  RETURN
 ELSE
  STOP 'Fatal Error: See print file for details'
