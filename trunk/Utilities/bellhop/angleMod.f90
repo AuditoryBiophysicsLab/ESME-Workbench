@@ -3,6 +3,6 @@ MODULE anglemod
    SAVE
 
    INTEGER NBeams
-   REAL, ALLOCATABLE:: Alpha(:)
+   REAL (KIND=8), ALLOCATABLE:: Alpha(:)
 
 END MODULE anglemod

@@ -5,6 +5,8 @@ MODULE sspmod
    IMPLICIT NONE
    SAVE
    INTEGER, PARAMETER :: MaxSSP = 2001
-   INTEGER NSSP, LAYER
-   REAL ( KIND = 4 ) :: ZSSPV( MaxSSP ), CSSPV( MaxSSP ), CZV( MaxSSP ), N2V( MaxSSP ), N2ZV( MaxSSP ), CVS( 4, MaxSSP )
+   INTEGER            :: NSSP, Layer
+   REAL  ( KIND = 8 ) :: zSSPV( MaxSSP ), cSSPV( MaxSSP ), cZV( MaxSSP ), n2V( MaxSSP ), n2ZV( MaxSSP ), &
+                         cVS( 4, MaxSSP )
+
 END MODULE sspmod

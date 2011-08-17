@@ -4,130 +4,263 @@ MODULE bdrymod
   ! altimetry (top bdry) and bathymetry (bottom bdry) data
   !
   ! x = coordinate of boundary
-  ! t = tangent
-  ! n = normal
-  ! Rlen = length of tangent (temporary variable to normalize tangent)
+  ! t = tangent for a segment
+  ! n = normal  for a segment
+  ! Len = length of tangent (temporary variable to normalize tangent)
+  ! tangents are also calculated for the nodes, if the curvilinear option is used for the boundaries.
 
+  IMPLICIT NONE
   SAVE
-  INTEGER, PARAMETER :: ATIFIL = 40, BTYFIL = 41
-  INTEGER NATIPTS, NBTYPTS
-  REAL (KIND=8), ALLOCATABLE :: xBot( :, : ), tBot( :, : ), nBot( :, : ), RLenBot( : ), &
-       xTop( :, : ), tTop( :, : ), nTop( :, : ), RLenTop( : )
+  INTEGER, PARAMETER :: ATIFile = 40, BTYFile = 41, Number_to_Echo = 21
+  INTEGER            :: NATIPTS, NBTYPTS, ii, I, IOStat, IAllocStat
+  CHARACTER  (LEN=1) :: atiType, btyType
+
+  TYPE BdryPt
+     REAL (KIND=8) :: x( 2 ), t( 2 ), n( 2 ), Nodet( 2 ), Noden( 2 ), Len, Kappa
+  END TYPE
+
+  TYPE(BdryPt), ALLOCATABLE :: Bot( : ), Top( : )
 
 CONTAINS
 
-  SUBROUTINE READATI( TopATI, DepthT, rBox, PRTFil )
+  SUBROUTINE ReadATI( FileRoot, TopATI, DepthT, rBox, PRTFile )
 
-    INTEGER     PRTFil
-    CHARACTER*1 TopATI
+    IMPLICIT NONE
+    INTEGER                       PRTFile
+    CHARACTER          (LEN=1) :: TopATI
+    REAL (KIND=8)              :: DepthT, rBox, sss
+    REAL (KIND=8), ALLOCATABLE :: phi( : )
+    CHARACTER (LEN=80)         :: FileRoot
 
     IF ( TopATI == '*' ) THEN
-       WRITE( PRTFIL, * ) '*********************************'
-       WRITE( PRTFIL, * ) 'Using top-altimetry file'
+       WRITE( PRTFile, * ) '*********************************'
+       WRITE( PRTFile, * ) 'Using top-altimetry file'
 
-       OPEN ( FILE = 'ATIFIL', UNIT = ATIFIL, STATUS = 'OLD' )
+       OPEN( UNIT = ATIFile,   FILE = TRIM( FileRoot ) // '.ati', STATUS = 'OLD', IOSTAT = IOStat )
+       IF ( IOsTAT /= 0 ) CALL ERROUT( PRTFile, 'F', 'ReadATI', 'Unable to open altimetry file' )
 
-       READ(  ATIFIL, * ) NatiPts
-       WRITE( PRTFIL, * ) 'Number of altimetry points', NatiPts
+       READ(  ATIFile, * ) atiType
+       SELECT CASE ( atiType )
+       CASE ( 'C' )
+          WRITE( PRTFile, * ) 'Curvilinear Interpolation'
+       CASE ( 'L' )
+          WRITE( PRTFile, * ) 'Piecewise linear interpolation'
+       CASE DEFAULT
+          CALL ERROUT( PRTFile, 'F', 'ReadATI', 'Unknown option for selecting altimetry interpolation' )
+       END SELECT
 
-       ALLOCATE( xTop( 2, NatiPts ), tTop( 2, NatiPts - 1 ), nTop( 2, NatiPts - 1 ), &
-            RLenTop( NatiPts - 1 ), Stat = IAllocStat )
+       READ(  ATIFile, * ) NatiPts
+       WRITE( PRTFile, * ) 'Number of altimetry points', NatiPts
+       NatiPts = NatiPts + 2   ! we'll be extending the altimetry to infinity to the left and right
+
+       ALLOCATE( Top(  NatiPts ), phi( NatiPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( PRTFIL, 'F', 'BELLHOP', 'Insufficient memory for altimetry data: reduce # ati points' )
+            CALL ERROUT( PRTFile, 'F', 'BELLHOP:ReadATI', 'Insufficient memory for altimetry data: reduce # ati points' )
 
-       WRITE( PRTFIL, * )
-       WRITE( PRTFIL, * ) ' Range (km)  Depth (m)'
+       WRITE( PRTFile, * )
+       WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
 
-       DO I = 1, NatiPts
-          READ(  ATIFIL, * ) xTop( :, I )
-          WRITE( PRTFIL, FMT = "(2G11.3)" ) xTop( :, I )
+       DO I = 2, NatiPts - 1
+          READ(  ATIFile, * ) Top( I )%x
+          IF ( I < Number_to_Echo .OR. I == NatiPts ) THEN   ! echo some values
+             WRITE( PRTFile, FMT = "(2G11.3)" ) Top( I )%x
+          END IF
+          IF ( Top( I )%x( 2 ) < DepthT ) THEN
+             CALL ERROUT( PRTFile, 'F', 'BELLHOP:ReadATI', 'Altimetry rises above highest point in the sound speed profile' )
+          END IF
        END DO
 
-       xTop( 1, : ) = 1000.0 * xTop( 1, : )   ! Convert ranges in km to m
+       CLOSE( ATIFile )
+
+       Top( : )%x( 1 ) = 1000.0 * Top( : )%x( 1 )   ! Convert ranges in km to m
+
+       ! extend the altimetry to +/- infinity in a piecewise constant fashion
+
+       Top( 1 )%x( 1 )       = -sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5
+       Top( 1 )%x( 2 )       = Top( 2 )%x( 2 )
+       Top( NatiPts )%x( 1 ) = +sqrt( huge( Top( 1 )%x( 1 ) ) ) / 1.0d5
+       Top( NatiPts )%x( 2 ) = Top( NatiPts - 1 )%x( 2 )
 
        ! compute tangent and outward-pointing normal to top
-       tToP( 1, : ) = xTop( 1, 2:NatiPts ) - xTop( 1, 1:NatiPts - 1 )
-       tTop( 2, : ) = xTop( 2, 2:NatiPts ) - xTop( 2, 1:NatiPts - 1 )
-       RLenTop = SQRT( tTop( 1, : ) ** 2 + tTop( 2, : ) ** 2 )
+       ! tToP( 1, : ) = xTop( 1, 2 : NatiPts ) - xTop( 1, 1 : NatiPts - 1 )
+       ! tTop( 2, : ) = xTop( 2, 2 : NatiPts ) - xTop( 2, 1 : NatiPts - 1 )
 
-       tTop( 1, : ) = tTop( 1, : ) / RLenTop
-       tTop( 2, : ) = tTop( 2, : ) / RLenTop
-       DEALLOCATE( RLenTop )
+       DO ii = 1, NatiPts - 1
+          Top( ii )%t = Top( ii+1 )%x - Top( ii )%x
+          Top( ii )%Len = SQRT( Top( ii )%t( 1 ) ** 2 + Top( ii )%t( 2 ) ** 2 )
+          Top( ii )%t = Top( ii )%t / Top( ii )%Len
 
-       nTop( 1, : ) =  tTop( 2, : )
-       nTop( 2, : ) = -tTop( 1, : )
+          Top( ii )%n( 1 ) =  Top( ii )%t( 2 )
+          Top( ii )%n( 2 ) = -Top( ii )%t( 1 )
+       END DO
+
+       IF ( atiType == 'C' ) THEN ! curvilinear option: compute tangent and normal at node by averaging normals on adjacent segments
+
+          DO ii = 2, NatiPts - 1
+ 
+             sss = Top( ii - 1 )%Len / ( Top( ii - 1 )%Len + Top( ii )%Len )
+             sss = 0.5
+             Top( ii )%Nodet = ( 1.0 - sss ) * Top( ii - 1 )%t + sss * Top( ii )%t
+
+             !tTopNode( :, ii ) = ( LenTop( ii ) * tTop( :, ii - 1 ) + LenTop( ii - 1 ) * tTop( :, ii ) ) / &
+             !                    ( LenTop( ii )                     + LenTop( ii - 1 ) )
+          END DO
+
+          Top( 1       )%Nodet = [ 1.0, 0.0 ]   ! tangent left-end  node
+          Top( NatiPts )%Nodet = [ 1.0, 0.0 ]   ! tangent right-end node
+          Top( : )%Noden( 1 )  = +Top( : )%Nodet( 2 )
+          Top( : )%Noden( 2 )  = -Top( : )%Nodet( 1 )
+
+          ! compute curvature in each segment
+          phi = atan2( Top( : )%Nodet( 2 ), Top( : )%Nodet( 1 ) )
+          DO ii = 1, NatiPts - 2
+             Top( ii )%kappa = ( phi( ii + 1 ) - phi( ii ) ) / Top( ii )%Len ! this is curvature = dphi/ds
+          END DO 
+
+       ELSE
+          Top%kappa = 0
+       END IF
 
     ELSE   ! no bathymetry given, use SSP depth for flat top
        NatiPts = 2
-       ALLOCATE( xTop( 2, 2 ), tTop( 2, 1 ), nTop( 2, 1 ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( PRTFIL, 'F', 'BELLHOP', 'Insufficient memory'  )
-       xTop( :, 1 ) = (/ -rBox, DepthT /)
-       xTop( :, 2 ) = (/  rBox, DepthT /)
+       atiType = 'L'
+       ALLOCATE( Top( 2 ), Stat = IAllocStat )
+       IF ( IAllocStat /= 0 ) CALL ERROUT( PRTFile, 'F', 'BELLHOP', 'Insufficient memory'  )
+       Top( 1 )%x = [ -rBox, DepthT ]
+       Top( 2 )%x = [  rBox, DepthT ]
 
-       tTop( :, 1 ) = (/ 1.0,  0.0 /)   ! tangent to top
-       nTop( :, 1 ) = (/ 0.0, -1.0 /)   ! outward-pointing normal
+       Top( 1 )%t = [ 1.0,  0.0 ]   ! tangent to top
+       Top( 1 )%n = [ 0.0, -1.0 ]   ! outward-pointing normal
+       Top( 2 )%t = [ 1.0,  0.0 ]   ! tangent to top
+       Top( 2 )%n = [ 0.0, -1.0 ]   ! outward-pointing normal
+
+       Top%Len = sqrt( Top( 1 )%t( 1 )** 2 + Top( 1 )%t( 2 )** 2 )
+
+       Top( 1 )%kappa = 0
+
     ENDIF
 
-  END SUBROUTINE READATI
+  END SUBROUTINE ReadATI
 
   ! **********************************************************************!
 
-  SUBROUTINE READBTY( BotBTY, DepthB, rBox, PRTFil )
+  SUBROUTINE ReadBTY( FileRoot, BotBTY, DepthB, rBox, PRTFile )
 
     ! Reads in the bottom bathymetry
 
-    INTEGER     PRTFil
-    CHARACTER*1 BotBTY
+    IMPLICIT NONE
+    INTEGER                       PRTFile
+    CHARACTER          (LEN=1) :: BotBTY
+    REAL              (KIND=8) :: DepthB, rBox, sss
+    REAL (KIND=8), ALLOCATABLE :: phi( : )
+    CHARACTER         (LEN=80) :: FileRoot
 
     IF ( BotBTY == '*' ) THEN
-       WRITE( PRTFIL, * ) '*********************************'
-       WRITE( PRTFIL, * ) 'Using bottom-bathymetry file'
+       WRITE( PRTFile, * ) '*********************************'
+       WRITE( PRTFile, * ) 'Using bottom-bathymetry file'
 
-       OPEN ( FILE = 'BTYFIL', UNIT = BTYFIL, STATUS = 'OLD' )
+       OPEN( UNIT = BTYFile,   FILE = TRIM( FileRoot ) // '.bty', STATUS = 'OLD', IOSTAT = IOStat )
+       IF ( IOsTAT /= 0 ) CALL ERROUT( PRTFile, 'F', 'ReadBTY', 'Unable to open bathymetry file' )
+ 
+       READ( BTYFile, * ) btyType
+ 
+       SELECT CASE ( btyType )
+       CASE ( 'C' )
+          WRITE( PRTFile, * ) 'Curvilinear Interpolation'
+       CASE ( 'L' )
+          WRITE( PRTFile, * ) 'Piecewise linear interpolation'
+       CASE DEFAULT
+          CALL ERROUT( PRTFile, 'F', 'ReadBTY', 'Unknown option for selecting bathymetry interpolation' )
+       END SELECT
 
-       READ(  BTYFIL, * ) NbtyPts
-       WRITE( PRTFIL, * ) 'Number of bathymetry points', NbtyPts
+       READ(  BTYFile, * ) NbtyPts
+       WRITE( PRTFile, * ) 'Number of bathymetry points', NbtyPts
 
-       ALLOCATE( xBot( 2, NbtyPts ), tBot( 2, NbtyPts - 1 ), nBot( 2, NbtyPts - 1 ), &
-            RlenBot( NbtyPts - 1 ), Stat = IAllocStat )
+       NbtyPts = NbtyPts + 2   ! we'll be extending the bathymetry to infinity on both sides
+       ALLOCATE( Bot( NbtyPts ), phi( NbtyPts ), Stat = IAllocStat )
        IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( PRTFIL, 'F', 'BELLHOP', 'Insufficient memory for bathymetry data: reduce # bty points' )
+            CALL ERROUT( PRTFile, 'F', 'BELLHOP:ReadBTY', 'Insufficient memory for bathymetry data: reduce # bty points' )
 
-       WRITE( PRTFIL, * )
-       WRITE( PRTFIL, * ) ' Range (km)  Depth (m)'
+       WRITE( PRTFile, * )
+       WRITE( PRTFile, * ) ' Range (km)  Depth (m)'
 
-       DO I = 1, NbtyPts
-          READ(  BTYFIL, * ) xBot( :, I )
-          WRITE( PRTFIL, FMT = "(2G11.3)" ) xBot( :, I )
+       DO I = 2, NbtyPts - 1
+          READ(  BTYFile, * ) Bot( I )%x
+          IF ( I < Number_to_Echo .OR. I == NbtyPts ) THEN   ! echo some values
+             WRITE( PRTFile, FMT = "(2G11.3)" ) Bot( I )%x
+          END IF
+          IF ( Bot( I )%x( 2 ) > DepthB ) THEN
+             CALL ERROUT( PRTFile, 'F', 'BELLHOP:ReadBTY', 'Bathymetry drops below lowest point in the sound speed profile' )
+          END IF
+ 
        END DO
 
-       xBot( 1, : ) = 1000.0 * xBot( 1, : )   ! Convert ranges in km to m
+       CLOSE( BTYFile )
 
-       ! compute tangent and outward-pointing normal to bottom
-       tBot( 1, : ) = xBot( 1, 2:NbtyPts ) - xBot( 1, 1:NbtyPts - 1 )
-       tBot( 2, : ) = xBot( 2, 2:NbtyPts ) - xBot( 2, 1:NbtyPts - 1 )
-       RLenBot = SQRT( tBot( 1, : ) ** 2 + tBot( 2, : ) ** 2 )
+       Bot( : )%x( 1 ) = 1000.0 * Bot( : )%x( 1 )   ! Convert ranges in km to m
 
-       tBot( 1, : ) = tBot( 1, : ) / RLenBot
-       tBot( 2, : ) = tBot( 2, : ) / RLenBot
+       ! extend the bathymetry to +/- infinity in a piecewise constant fashion
 
-       nBot( 1, : ) = -tBot( 2, : )
-       nBot( 2, : ) =  tBot( 1, : )
-       DEALLOCATE( RLenBot )
+       Bot( 1 )%x( 1 )       = -sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5
+       Bot( 1 )%x( 2 )       = Bot( 2 )%x( 2 )
+       Bot( NbtyPts )%x( 1 ) = +sqrt( huge( Bot( 1 )%x( 1 ) ) ) / 1.0d5
+       Bot( NbtyPts )%x( 2 ) = Bot( NbtyPts - 1 )%x( 2 )
+
+       ! compute tangent and outward-pointing normal to each bottom segment
+       !tBot( 1, : ) = xBot( 1, 2:NbtyPts ) - xBot( 1, 1:NbtyPts - 1 )
+       !tBot( 2, : ) = xBot( 2, 2:NbtyPts ) - xBot( 2, 1:NbtyPts - 1 )
+       ! above caused compiler problems
+
+       DO ii = 1, NbtyPts - 1
+          Bot( ii )%t   = Bot( ii+1 )%x - Bot( ii )%x
+          Bot( ii )%Len = SQRT( Bot( ii )%t( 1 ) ** 2 + Bot( ii )%t( 2 ) ** 2 )
+          Bot( ii )%t   =  Bot( ii )%t / Bot( ii )%Len
+
+          Bot( ii )%n( 1 ) = -Bot( ii )%t( 2 )
+          Bot( ii )%n( 2 ) = +Bot( ii )%t( 1 )
+       END DO
+
+       IF ( btyType == 'C' ) THEN ! curvilinear option: compute tangent and normal at node by averaging normals on adjacent segments
+
+          DO ii = 2, NbtyPts - 1
+             sss = Bot( ii - 1 )%Len / ( Bot( ii - 1 )%Len + Bot( ii )%Len )
+             sss = 0.5
+             Bot( ii )%Nodet = ( 1.0 - sss ) * Bot( ii - 1 )%t + sss * Bot( ii )%t
+          END DO
+
+          Bot( 1       )%Nodet = [ 1.0, 0.0 ]   ! tangent left-end  node
+          Bot( NbtyPts )%Nodet = [ 1.0, 0.0 ]   ! tangent right-end node
+          Bot( :       )%Noden( 1 ) = -Bot( : )%Nodet( 2 )
+          Bot( :       )%Noden( 2 ) = +Bot( : )%Nodet( 1 )
+
+          ! compute curvature in each segment
+          phi = atan2( Bot( : )%Nodet( 2 ), Bot( : )%Nodet( 1 ) )   ! this is the angle at each node
+          DO ii = 1, NbtyPts - 2
+             Bot( ii )%kappa = ( phi( ii + 1 ) - phi( ii ) ) / Bot( ii )%Len ! this is curvature = dphi/ds
+          END DO
+
+       ELSE
+          Bot%kappa = 0
+       END IF
 
     ELSE   ! no bathymetry given, use SSP depth for flat bottom
+       btyType = 'L'
        NbtyPts = 2
-       ALLOCATE( xBot( 2, 2 ), tBot( 2, 1 ), nBot( 2, 1 ), Stat = IAllocStat )
-       IF ( IAllocStat /= 0 ) &
-            CALL ERROUT( PRTFIL, 'F', 'BELLHOP', 'Insufficient memory'  )
-       xBot( :, 1 ) = (/ -rBox, DEPTHB /)
-       xBot( :, 2 ) = (/  rBox, DEPTHB /)
+       ALLOCATE( Bot( 2 ), Stat = IAllocStat )
+       IF ( IAllocStat /= 0 ) CALL ERROUT( PRTFile, 'F', 'BELLHOP', 'Insufficient memory'  )
+       Bot( 1 )%x = [ -rBox, DepthB ]
+       Bot( 2 )%x = [  rBox, DepthB ]
 
-       tBot( :, 1 ) = (/ 1.0, 0.0 /)   ! tangent to bottom
-       nBot( :, 1 ) = (/ 0.0, 1.0 /)   ! outward-pointing normal
+       Bot( 1 )%t = [ 1.0, 0.0 ]   ! tangent to bottom
+       Bot( 1 )%n = [ 0.0, 1.0 ]   ! outward-pointing normal
+       Bot( 2 )%t = [ 1.0, 0.0 ]   ! tangent to bottom
+       Bot( 2 )%n = [ 0.0, 1.0 ]   ! outward-pointing normal
+
+       Bot%Len = sqrt( Bot( 1 )%t( 1 )** 2 + Bot( 1 )%t( 2 )** 2 )
+       Bot( 1 )%kappa = 0
+
     ENDIF
 
-  END SUBROUTINE READBTY
+  END SUBROUTINE ReadBTY
 
 END MODULE bdrymod

@@ -2,23 +2,31 @@ MODULE ArrMod
 
   ! Variables for arrival information
 
-  INTEGER, PARAMETER :: ARRFIL = 36
+  INTEGER, PARAMETER    :: ARRFile = 36
+  INTEGER               :: MaxNArr
+  INTEGER,  ALLOCATABLE :: NArr( :, : )
 
-  INTEGER   MaxNArr
-  INTEGER ( KIND = 2 ),  ALLOCATABLE :: NArr( :, : ), NTopBncArr( :, :, : ), NBotBncArr( :, :, : )
-  REAL,     ALLOCATABLE :: DelArr( :, :, : ), SrcAngArr( :, :, : ), RcvrAngArr( :, :, : ), &
-       AArr( :, :, : ), PhaseArr( :, :, : )
+  TYPE Arrival
+     INTEGER :: NTopBnc, NBotBnc
+     REAL    :: delay, SrcAngle, RcvrAngle, A, Phase
+  END TYPE
+
+  TYPE(Arrival), ALLOCATABLE :: Arr( :, :, : )
+
 CONTAINS
 
   SUBROUTINE AddArr( omega, id, ir, Amp, Phase, delay, SrcAngle, RcvrAngle, NumTopBnc, NumBotBnc )
 
-    ! ADDs the amplitude and delay for an ARRival into a matrix of same
-    ! extra logic to keep only the strongest arrivals
+    ! ADDs the amplitude and delay for an ARRival into a matrix of same.
+    ! Extra logic included to keep only the strongest arrivals.
 
-    REAL, PARAMETER :: PhaseTol = 0.5  ! arrivals with essentially the same phase are grouped into one
-    LOGICAL   NewRay
-    INTEGER   IArr( 1 )
-    INTEGER ( KIND = 2 ) :: NumTopBnc, NumBotBnc
+    IMPLICIT NONE
+    REAL,      PARAMETER :: PhaseTol = 0.5  ! arrivals with essentially the same phase are grouped into one
+    LOGICAL                 NewRay
+    INTEGER                 IArr( 1 ), id, ir, Nt
+    INTEGER              :: NumTopBnc, NumBotBnc
+    REAL                 :: AmpTot
+    REAL    ( KIND = 8 ) :: omega, Amp, Phase, delay, SrcAngle, RcvrAngle
 
     Nt     = NArr( id, ir )    ! # of arrivals
     NewRay = .TRUE.
@@ -29,39 +37,39 @@ CONTAINS
     ! (also need that the phase is about the same to make sure surface and direct paths are not joined)
 
     IF ( Nt >= 1 ) THEN
-       IF( omega * ABS( delay - DelArr( id, ir, Nt ) ) < PhaseTol .AND. &
-           ABS( PhaseArr( id, ir, Nt ) - Phase )       < PhaseTol ) NewRay = .FALSE.
+       IF( omega * ABS( delay - Arr( id, ir, Nt )%delay ) < PhaseTol .AND. &
+           ABS( Arr( id, ir, Nt )%phase - Phase )       < PhaseTol ) NewRay = .FALSE.
     END IF
 
     IF ( NewRay ) THEN
        IF ( Nt >= MaxNArr ) THEN       ! space available to add an arrival?
-          IARR = MINLOC( AArr( id, ir, : ) )   ! no: replace weakest arrival
-          IF ( Amp > AArr( id, ir, IArr( 1 ) ) ) THEN
-             AArr(       id, ir, IArr( 1 ) ) = Amp		! amplitude
-             PhaseArr(   id, ir, IArr( 1 ) ) = Phase  	! phase
-             DelArr(     id, ir, IArr( 1 ) ) = delay		! delay time
-             SrcAngArr(  id, ir, IArr( 1 ) ) = SrcAngle	! angle
-             RcvrAngArr( id, ir, IArr( 1 ) ) = RcvrAngle	! angle
-             NTopBncArr( id, ir, IArr( 1 ) ) = NumTopBnc	! Number of top     bounces
-             NBotBncArr( id, ir, IArr( 1 ) ) = NumBotBnc 	!   "       bottom
+          IARR = MINLOC( Arr( id, ir, : )%A )                       ! no: replace weakest arrival
+          IF ( Amp > Arr( id, ir, IArr( 1 ) )%A ) THEN
+             Arr( id, ir, IArr( 1 ) )%A         = SNGL( Amp )       ! amplitude
+             Arr( id, ir, IArr( 1 ) )%Phase     = SNGL( Phase )     ! phase
+             Arr( id, ir, IArr( 1 ) )%delay     = SNGL( delay )     ! delay time
+             Arr( id, ir, IArr( 1 ) )%SrcAngle  = SNGL( SrcAngle )  ! angle
+             Arr( id, ir, IArr( 1 ) )%RcvrAngle = SNGL( RcvrAngle ) ! angle
+             Arr( id, ir, IArr( 1 ) )%NTopBnc   = NumTopBnc         ! Number of top     bounces
+             Arr( id, ir, IArr( 1 ) )%NBotBnc   = NumBotBnc         !   "       bottom
           ENDIF
        ELSE
-          NArr(       id, ir         ) = Nt + 1       	! # of arrivals
-          AArr(       id, ir, Nt + 1 ) = Amp			! amplitude
-          PhaseArr(   id, ir, Nt + 1 ) = Phase                ! phase
-          DelArr(     id, ir, Nt + 1 ) = delay	   	! delay time
-          SrcAngArr(  id, ir, Nt + 1 ) = SrcAngle		! angle
-          RcvrAngArr( id, ir, Nt + 1 ) = RcvrAngle		! angle
-          NTopBncArr( id, ir, Nt + 1 ) = NumTopBnc 		! Number of top     bounces
-          NBotBncArr( id, ir, Nt + 1 ) = NumBotBnc 		!   "       bottom
+          NArr( id, ir         )           = Nt + 1              ! # of arrivals
+          Arr(  id, ir, Nt + 1 )%A         = SNGL( Amp )         ! amplitude
+          Arr(  id, ir, Nt + 1 )%Phase     = SNGL( Phase )       ! phase
+          Arr(  id, ir, Nt + 1 )%delay     = SNGL( delay )       ! delay time
+          Arr(  id, ir, Nt + 1 )%SrcAngle  = SNGL( SrcAngle )    ! angle
+          Arr(  id, ir, Nt + 1 )%RcvrAngle = SNGL( RcvrAngle )   ! angle
+          Arr(  id, ir, Nt + 1 )%NTopBnc   = NumTopBnc           ! Number of top     bounces
+          Arr(  id, ir, Nt + 1 )%NBotBnc   = NumBotBnc           !   "       bottom
        ENDIF
     ELSE      ! not a new ray
        !PhaseArr(   id, ir, Nt ) = PhaseArr( id, ir, Nt )
-       AmpTot = AArr( id, ir, Nt ) + Amp
-       DelArr(     id, ir, Nt ) = ( AArr( id, ir, Nt ) * DelArr( id, ir, Nt ) + Amp * delay ) / AmpTot ! weighted sum
-       AArr(       id, ir, Nt ) = AmpTot
-       SrcAngArr(  id, ir, Nt ) = SrcAngle
-       RcvrAngArr( id, ir, Nt ) = RcvrAngle
+       AmpTot = Arr( id, ir, Nt )%A + SNGL( Amp )
+       Arr( id, ir, Nt )%delay     = ( Arr( id, ir, Nt )%A * Arr( id, ir, Nt )%delay + SNGL( Amp * delay ) ) / AmpTot ! weighted sum
+       Arr( id, ir, Nt )%A         = AmpTot
+       Arr( id, ir, Nt )%SrcAngle  = SNGL( SrcAngle )
+       Arr( id, ir, Nt )%RcvrAngle = SNGL( RcvrAngle )
     ENDIF
 
     RETURN
@@ -69,28 +77,32 @@ CONTAINS
 
   ! **********************************************************************!
 
-  SUBROUTINE WRTARRASC( R, Nrd, Nr, TopOpt, freq, SourceType )
+  SUBROUTINE WriteArrivalsASCII( R, Nrd, Nr, TopOpt, freq, SourceType )
 
     ! Writes the arrival data (Amplitude, delay for each eigenray)
     ! ASCII output file
 
-    REAL,    PARAMETER :: PI = 3.14159265, RadDeg = 180 / PI
-    REAL    r( Nr )
-    CHARACTER TopOpt*4, SourceType*1
+    IMPLICIT NONE
+    INTEGER           :: Nrd, Nr, ir, id, IArr
+    REAL,   PARAMETER :: PI = 3.14159265, RadDeg = 180 / PI
+    REAL                 r( Nr ), AArrT
+    REAL     (KIND=8) :: freq, f2, alpha, factor
+    CHARACTER (LEN=6) :: TopOpt
+    CHARACTER (LEN=1) :: SourceType
 
     ! *** Thorpe attenuation? ***
 
-    IF ( TopOpt(4:4) == 'T' ) THEN
-       f2 = ( freq / 1000.0 ) ** 2
-       alpha = 40.0 * f2 / ( 4100.0 + f2 ) + 0.1 * f2 / ( 1.0 + f2 )
-       alpha = alpha / 914.4     ! dB / m
-       alpha = alpha / 8.6858896 ! Nepers / m
+    IF ( TopOpt( 4 : 4 ) == 'T' ) THEN
+       f2 = ( freq / 1000.0d0 ) ** 2
+       ! Updated formula from JKPS Eq. 1.34
+       alpha = 3.3d-3 + 0.11d0 * f2 / ( 1.0d0 + f2 ) + 44.0d0 * f2 / ( 4100.0d0 + f2 ) + 3d-4* f2   ! dB/km
+       alpha = alpha / 8685.8896 ! Nepers / m
     ELSE
        alpha = 0.0
     ENDIF
 
 
-    WRITE( ARRFIL, * ) MAXVAL( NArr( 1:Nrd, 1:Nr ) )
+    WRITE( ARRFile, * ) MAXVAL( NArr( 1 : Nrd, 1 : Nr ) )
 
     DO id = 1, Nrd
        DO ir = 1, Nr
@@ -104,44 +116,53 @@ CONTAINS
              END IF
           END IF
 
-          WRITE( ARRFIL, * ) NArr( id, ir )
+          WRITE( ARRFile, * ) NArr( id, ir )
           DO IARR = 1, NArr( id, ir )
-             AArrT = factor * AArr( id, ir, IARR )
+             AArrT = SNGL( factor * Arr( id, ir, IARR )%A )
              ! you can compress the output file a lot by putting in an explicit format statement here ...
              ! However, you'll need to make sure you keep adequate precision
-             WRITE( ARRFIL, * ) AArrT, RadDeg * PhaseArr( id, ir, IARR ), DelArr( id, ir, IARR ), &
-                  SrcAngArr( id, ir, IARR), RcvrAngArr( id, ir, IARR ), &
-                  NTopBncArr( id, ir, IARR ), NBotBncArr( id, ir, IARR )
+             WRITE( ARRFile, * ) AArrT, RadDeg * Arr( id, ir, IARR )%Phase, Arr( id, ir, IARR )%delay, &
+                  Arr(  id, ir, IARR)%SrcAngle,  Arr( id, ir, IARR )%RcvrAngle, &
+                  Arr( id, ir, IARR )%NTopBnc, Arr( id, ir, IARR )%NBotBnc
           END DO  ! next arrival
        END DO  ! next receiver depth
     END DO  ! next range
 
     RETURN
-  END SUBROUTINE WRTARRASC
+  END SUBROUTINE WriteArrivalsASCII
 
   ! **********************************************************************!
 
-  SUBROUTINE WRTARRBIN( R, Nrd, Nr, TopOpt, freq, SourceType )
+  SUBROUTINE WriteArrivalsBinary( R, Nrd, Nr, TopOpt, freq, SourceType )
 
     ! Writes the arrival data (amplitude, delay for each eigenray)
     ! Binary output file
 
-    REAL,    PARAMETER :: PI = 3.14159265, RadDeg = 180 / PI
-    REAL    r( Nr )
-    CHARACTER TopOpt*4, SourceType*1
+    IMPLICIT NONE
+    INTEGER           :: Nrd, Nr, ir, id, IArr
+    REAL,   PARAMETER :: PI = 3.14159265, RadDeg = 180 / PI
+    REAL                 r( Nr ), AArrT
+    REAL     (KIND=8) :: freq, f2, alpha, factor
+    CHARACTER (LEN=6) :: TopOpt
+    CHARACTER (LEN=1) :: SourceType
 
     ! *** Thorpe attenuation? ***
 
     IF ( TopOpt(4:4) == 'T' ) THEN
-       f2 = ( freq / 1000.0 ) ** 2
-       alpha = 40.0 * f2 / ( 4100.0 + f2 ) + 0.1 * f2 / ( 1.0 + f2 )
-       alpha = alpha / 914.4     ! dB / m
-       alpha = alpha / 8.6858896 ! Nepers / m
+       f2 = ( freq / 1000.0d0 ) ** 2
+       ! Original formula from Thorp 1967
+       ! alpha = 40.0 * f2 / ( 4100.0 + f2 ) + 0.1 * f2 / ( 1.0 + f2 )   ! dB/kyard
+       ! alpha = alpha / 914.4     ! dB / m
+       ! alpha = alpha / 8.6858896 ! Nepers / m
+
+       ! Updated formula from JKPS Eq. 1.34
+       alpha = 3.3d-3 + 0.11d0 * f2 / ( 1.0d0 + f2 ) + 44.0d0 * f2 / ( 4100.0d0 + f2 ) + 3d-4* f2   ! dB/km
+       alpha = alpha / 8685.8896 ! Nepers / m
     ELSE
        alpha = 0.0
     ENDIF
 
-    WRITE( ARRFIL ) MAXVAL( NArr( 1:Nrd, 1:Nr ) )
+    WRITE( ARRFile ) MAXVAL( NArr( 1 : Nrd, 1 : Nr ) )
 
     DO id = 1, Nrd
        DO ir = 1, Nr
@@ -155,19 +176,19 @@ CONTAINS
              END IF
           END IF
 
-          WRITE( ARRFIL ) NArr( id, ir )
+          WRITE( ARRFile ) NArr( id, ir )
 
           DO IARR = 1, NArr( id, ir )
-             AArrT = factor * AArr( id, ir, IARR )
+             AArrT = SNGL( factor * Arr( id, ir, IARR )%A )
              ! integers written out as reals below for fast reading in Matlab
-             WRITE( ARRFIL ) AArrT, RadDeg * PhaseArr( id, ir, IARR ), DelArr( id, ir, IARR ), &
-                  SrcAngArr( id, ir, IARR), RcvrAngArr( id, ir, IARR ),  &
-                  REAL( NTopBncArr( id, ir, IARR ) ), REAL( NBotBncArr( id, ir, IARR ) )
+             WRITE( ARRFile ) AArrT, RadDeg * Arr( id, ir, IARR )%Phase, Arr( id, ir, IARR )%delay, &
+                  Arr( id, ir, IARR)%SrcAngle, Arr( id, ir, IARR )%RcvrAngle,  &
+                  REAL( Arr( id, ir, IARR )%NTopBnc ), REAL( Arr( id, ir, IARR )%NBotBnc )
           END DO   ! next arrival
        END DO   ! next receiver depth
     END DO   ! next range
 
     RETURN
-  END SUBROUTINE WRTARRBIN
+  END SUBROUTINE WriteArrivalsBinary
 
 END MODULE ArrMod
