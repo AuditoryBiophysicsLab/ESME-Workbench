@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.ComponentModel;
 using System.IO;
@@ -9,14 +10,17 @@ using System.Windows;
 using System.Windows.Input;
 using Cinch;
 using ESME;
+using ESME.Data;
 using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
+using ESME.NEMO;
 using ESME.NewNEMO;
 using ESME.TransmissionLoss;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
 using ESMEWorkBench.Properties;
+using ESMEWorkBench.ViewModels.NAVO;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -176,6 +180,96 @@ namespace ESMEWorkBench.ViewModels.Main
         SimpleCommand<object, object> _exportAnalysisPoints;
 
         void ExportAnalysisPointsHandler() { ScenarioMetadata.ExportAnalysisPoints(); }
+        #endregion
+
+        #region RunScenarioCommand
+        public SimpleCommand<object, object> RunScenarioCommand
+        {
+            get
+            {
+                return _runScenario ??
+                       (_runScenario =
+                        new SimpleCommand<object, object>(delegate { return IsRunScenarioCommandEnabled; },
+                                                          delegate { RunScenarioHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _runScenario;
+
+        bool IsRunScenarioCommandEnabled
+        {
+            get
+            {
+                return IsScenarioLoaded;
+                //do all defined analysis points have fully calculated modes?
+               
+                //does the nemo file validate?
+                
+
+                //does 
+                return true;
+            }
+        }
+
+        void RunScenarioHandler()
+        {
+            var vm = new ScenarioSimulatorOptionsViewModel
+            {
+                    ScenarioSimulatorSettings = Globals.AppSettings.ScenarioSimulatorSettings,
+                    NemoFile = ScenarioMetadata.NemoFile,
+            };
+
+            var result = _visualizerService.ShowDialog("ScenarioSimulatorOptionsView", vm);
+
+        }
+        #endregion
+
+        #region RunScenarioGUICommand
+        public SimpleCommand<object, object> RunScenarioGUICommand
+        {
+            get
+            {
+                return _runScenarioGUI ??
+                       (_runScenarioGUI =
+                        new SimpleCommand<object, object>(delegate { return IsRunScenarioGUICommandEnabled; },
+                                                          delegate { RunScenarioGUIHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _runScenarioGUI;
+
+        bool IsRunScenarioGUICommandEnabled
+        {
+            get { return ((Globals.AppSettings.NAEMOTools.ScenarioExecutablePath != null)
+                        && File.Exists(Globals.AppSettings.NAEMOTools.ScenarioExecutablePath)
+                        && (Globals.AppSettings.NAEMOTools.JavaExecutablePath != null)
+                        && File.Exists(Globals.AppSettings.NAEMOTools.JavaExecutablePath) && IsScenarioLoaded); }
+        }
+
+        void RunScenarioGUIHandler()
+        {
+            var commandArgs = CommandArgs;
+            new Process
+            {
+                StartInfo =
+                {
+                    WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioExecutablePath),
+                    FileName = Globals.AppSettings.NAEMOTools.JavaExecutablePath,
+                    Arguments = commandArgs,
+                    
+                },
+            }.Start();
+        }
+        string CommandArgs
+        {
+            get
+            {
+                var sb = new StringBuilder();
+                sb.Append(string.Format("-jar \"{0}\" ", Globals.AppSettings.NAEMOTools.ScenarioExecutablePath));
+                sb.Append(string.Format("-s \"{0}\" ", ScenarioMetadata.NemoFile));
+                return sb.ToString();
+            }
+        }
         #endregion
 
         [MediatorMessageSink(MediatorMessage.PlaceAnalysisPoint)]
