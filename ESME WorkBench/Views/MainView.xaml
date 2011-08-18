@@ -375,12 +375,18 @@
 					                ToolTipDescription="Launch the scenario editor"
                                     IsEnabled="{Binding IsScenarioLoaded}"
 					                Command="{Binding ScenarioMetadata.EditScenarioCommand}" />
-					<r:RibbonButton Label="Run"
+					<r:RibbonButton Label="Batch"
 					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Run the scenario"
                                     IsEnabled="{Binding IsScenarioLoaded}"
-					                Command="{Binding ScenarioMetadata.RunExperimentCommand}" />
+					                Command="{Binding RunScenarioCommand}" />
+                    <r:RibbonButton Label="Interactive"
+					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Run the scenario"
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+					                Command="{Binding RunScenarioGUICommand}" />
                     <r:RibbonButton Label="Zoom"
 					                SmallImageSource="..\Images\SmallIcons\Magnifying-Glass-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
