@@ -11,7 +11,7 @@
   <?define ESMEPath="$(var.ESMERoot)\ESME WorkBench\bin\Release"?>
   <?define HDFPath="$(var.ESMERoot)\Libraries\ESME\External References"?>
   <?define ESMEViewsPath="$(var.ESMERoot)\ESME.Controls\bin\Release"?>
-  <?define BellhopPath="$(var.ESMERoot)\Utilities"?>
+  <?define BellhopPath="$(var.ESMERoot)\Utilities\bellhop"?>
   <?define MMMBSPath="$(var.ESMERoot)\Utilities\MMMBS\demoProjects"?>
   <?define MergeModulesPath="C:\Program Files (x86)\Common Files\Merge Modules"?>
   <?define ReleaseNotesPath="$(var.ESMERoot)\Release Notes"?>
@@ -127,6 +127,15 @@
             <!-- End OAML extraction programs -->
 
             <!-- Bellhop acoustic simulator -->
+            <File Id="cyggcc_s-1.dll"
+                  Name="cyggcc_s-1.dll"
+                  Source="$(var.BellhopPath)\cyggcc_s-1.dll" />
+            <File Id="cyggfortran-3.dll"
+                  Name="cyggfortran-3.dll"
+                  Source="$(var.BellhopPath)\cyggfortran-3.dll" />
+            <File Id="cygwin1.dll"
+                  Name="cygwin1.dll"
+                  Source="$(var.BellhopPath)\cygwin1.dll" />
             <File Id="bellhop.exe"
                   Name="bellhop.exe"
                   Source="$(var.BellhopPath)\bellhop.exe" />

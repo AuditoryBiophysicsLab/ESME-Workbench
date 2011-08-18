@@ -106,15 +106,6 @@ namespace ESME.Views.TransmissionLoss
         static readonly PropertyChangedEventArgs FieldCalculatorViewModelsChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossQueueCalculatorViewModel>(x => x.FieldCalculatorViewModels);
         ObservableList<TransmissionLossFieldCalculatorViewModel> _fieldCalculatorViewModels;
 
-        void StartWorkIfNeeded()
-        {
-            WindowTitle = GetCurrentWindowTitleString();
-            if (FieldCalculatorViewModels.Count > 0)
-                Task.Factory.StartNew(() => FieldCalculatorViewModels[0].Start(delegate { HandleCompletedQueueItem(); }));
-            if (FieldCalculatorViewModels.Count > 1) Task.Factory.StartNew(() => FieldCalculatorViewModels[1].PrepareRadials());
-            //if (FieldCalculatorViewModels.Count > 2) Task.Factory.StartNew(() => FieldCalculatorViewModels[2].PrepareRadials());
-        }
-
         void ProcessWorkQueue()
         {
             Task calculationTask = null;
@@ -122,11 +113,15 @@ namespace ESME.Views.TransmissionLoss
             while (true)
             {
                 while (IsPaused) Thread.Sleep(200);
-                if (FieldCalculatorViewModels.Count > 0) calculationTask = Task.Factory.StartNew(Calculate, FieldCalculatorViewModels[0]);
-                if (FieldCalculatorViewModels.Count > 1) preparationTask = Task.Factory.StartNew(Prepare, FieldCalculatorViewModels[1]);
+                if ((FieldCalculatorViewModels.Count > 0) && (calculationTask == null)) calculationTask = Task.Factory.StartNew(Calculate, FieldCalculatorViewModels[0]);
+                if ((FieldCalculatorViewModels.Count > 1) && (preparationTask == null) && (FieldCalculatorViewModels[1].Status != "Ready")) preparationTask = Task.Factory.StartNew(Prepare, FieldCalculatorViewModels[1]);
                 try
                 {
-                    if (calculationTask != null) calculationTask.Wait();
+                    if (calculationTask != null)
+                    {
+                        calculationTask.Wait(2000);
+                        if (calculationTask.IsCompleted) calculationTask = null;
+                    }
                 }
                 catch (AggregateException ae)
                 {
@@ -135,11 +130,16 @@ namespace ESME.Views.TransmissionLoss
                     {
                         Debug.WriteLine("{0}: Removing calculation item {1}", DateTime.Now, Path.GetFileNameWithoutExtension(((TransmissionLossFieldCalculatorViewModel)calculationTask.AsyncState).RunfileName));
                         FieldCalculatorViewModels.Remove((TransmissionLossFieldCalculatorViewModel)calculationTask.AsyncState);
+                        calculationTask = null;
                     }
                 }
                 try
                 {
-                    if (preparationTask != null) preparationTask.Wait();
+                    if (preparationTask != null)
+                    {
+                        preparationTask.Wait(2000);
+                        if (preparationTask.IsCompleted) preparationTask = null;
+                    }
                 }
                 catch (AggregateException ae)
                 {
@@ -148,11 +148,10 @@ namespace ESME.Views.TransmissionLoss
                     {
                         Debug.WriteLine("{0}: Removing preparation item {1}", DateTime.Now, Path.GetFileNameWithoutExtension(((TransmissionLossFieldCalculatorViewModel)preparationTask.AsyncState).RunfileName));
                         FieldCalculatorViewModels.Remove((TransmissionLossFieldCalculatorViewModel)preparationTask.AsyncState);
+                        preparationTask = null;
                     }
                 }
                 if (calculationTask == null && preparationTask == null) Thread.Sleep(500);
-                calculationTask = null;
-                preparationTask = null;
             }
         }
 
@@ -160,7 +159,8 @@ namespace ESME.Views.TransmissionLoss
         {
             var field = (TransmissionLossFieldCalculatorViewModel)state;
             Debug.WriteLine("{0}: Starting {1}", DateTime.Now, Path.GetFileNameWithoutExtension(field.RunfileName));
-            field.Start(delegate { HandleCompletedQueueItem(); });
+            if (field.Calculate()) CalculationCompleteHandler(field);
+            else FieldCalculatorViewModels.Remove(field);
         }
 
         static void Prepare(object state)
@@ -170,81 +170,69 @@ namespace ESME.Views.TransmissionLoss
             field.PrepareRadials();
         }
 
-
-        void HandleCompletedQueueItem()
+        void CalculationCompleteHandler(TransmissionLossFieldCalculatorViewModel completedCalculation)
         {
-            while ((FieldCalculatorViewModels.Count > 0) && (FieldCalculatorViewModels[0].IsCompleted))
+            var runfileName = completedCalculation.RunfileName;
+            var runfilePath = Path.GetDirectoryName(runfileName);
+            var runFile = completedCalculation.TransmissionLossRunFile;
+            var outputFileName = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runFile.Filename) + ".bin");
+            var output = new CASSOutput
             {
-                if (FieldCalculatorViewModels[0].CancelRequested)
-                {
-                    FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
-                    continue;
-                }
-                var runfileName = FieldCalculatorViewModels[0].RunfileName;
-                var runfilePath = Path.GetDirectoryName(runfileName);
-                //var outputFileName = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runfileName) + ".bin");
-                var runFile = FieldCalculatorViewModels[0].TransmissionLossRunFile;
-                var outputFileName = Path.Combine(runfilePath, Path.GetFileNameWithoutExtension(runFile.Filename) + ".bin");
-                var output = new CASSOutput
-                {
-                    RunDateTime = DateTime.Now.ToString(),
-                    OperatingSystemName = System.Environment.OSVersion.VersionString ?? "",
-                    SystemNodeName = System.Environment.MachineName,
-                    OperatingSystemRelease = System.Environment.OSVersion.ServicePack,
-                    OperatingSystemVersion = System.Environment.OSVersion.Platform.ToString(),
-                    MachineType = string.Format("{0}/{1} phys/logical core(s)", PhysicalCores, LogicalCores),
-                    ProcessorType = CpuDescription ?? "",
-                    Title = Path.GetFileNameWithoutExtension(runfileName) ?? "",
-                    SiteName = FieldCalculatorViewModels[0].TransmissionLossRunFile.RangeComplexName ?? "",
-                    SiteRefLatLocation = (float)runFile.ReferenceLocation.Latitude,
-                    SiteRefLonLocation = (float)runFile.ReferenceLocation.Longitude,
-                    SourceRefLatLocation = (float)runFile.TransmissionLossJob.SoundSource.Latitude,
-                    SourceRefLonLocation = (float)runFile.TransmissionLossJob.SoundSource.Longitude,
-                    PlatformName = runFile.TransmissionLossJob.PlatformName ?? "",
-                    SourceName = runFile.TransmissionLossJob.SourceName ?? "",
-                    ModeName = runFile.TransmissionLossJob.ModeName ?? "",
-                    Frequency = runFile.TransmissionLossJob.SoundSource.AcousticProperties.Frequency,
-                    DepressionElevationAngle = runFile.TransmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle,
-                    VerticalBeamPattern = runFile.TransmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth,
-                    SourceDepth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.SourceDepth,
-                    SourceLevel = runFile.TransmissionLossJob.SoundSource.SourceLevel,
-                    MinWaterDepth = 0,  // Seems to be always zero
-                    MaxWaterDepth = runFile.TransmissionLossJob.MaxDepth,
-                    WaterDepthIncrement = runFile.WaterDepthIncrement,
-                    MinRangeDistance = 0,
-                    MaxRangeDistance = runFile.TransmissionLossJob.SoundSource.Radius,
-                    RangeDistanceIncrement = runFile.RangeDistanceIncrement,
-                    BottomType = runFile.TransmissionLossJob.BottomTypeName ?? "",
-                    Season = runFile.TransmissionLossJob.TimePeriodName ?? "",
-                    WindSpeed = runFile.TransmissionLossJob.WindSpeed,
-                    CASSLevel = 1,
-                    RadialCount = FieldCalculatorViewModels[0].RadialCalculatorViewModels.Count,
-                    RadialBearings = runFile.TransmissionLossJob.SoundSource.RadialBearings.ToArray(),
-                    RangeCellCount = FieldCalculatorViewModels[0].RadialCalculatorViewModels[0].TransmissionLossRadial.Ranges.Count,
-                    RangeCells = FieldCalculatorViewModels[0].RadialCalculatorViewModels[0].TransmissionLossRadial.Ranges.ToArray(),
-                    DepthCellCount = FieldCalculatorViewModels[0].RadialCalculatorViewModels[0].TransmissionLossRadial.Depths.Count,
-                    DepthCells = FieldCalculatorViewModels[0].RadialCalculatorViewModels[0].TransmissionLossRadial.Depths.ToArray(),
-                    Pressures = new List<float[,]>(),
-                    Filename = outputFileName,
-                };
-                foreach (var radialViewModel in FieldCalculatorViewModels[0].RadialCalculatorViewModels)
-                {
-                    var radial = radialViewModel.TransmissionLossRadial;
-                    var buffer = new float[radial.Depths.Count, radial.Ranges.Count];
-                    for (var rangeIndex = 0; rangeIndex < radial.Ranges.Count; rangeIndex++)
-                        for (var depthIndex = 0; depthIndex < radial.Depths.Count; depthIndex++)
-                        {
-                            var spl = runFile.TransmissionLossJob.SoundSource.SourceLevel -
-                                                             radial[depthIndex, rangeIndex];
-                            //if (spl > runFile.TransmissionLossJob.SoundSource.SourceLevel) Debugger.Break();
-                            buffer[depthIndex, rangeIndex] = spl;
-                        }
-                    output.Pressures.Add(buffer);
-                }
-                output.ToBinaryFile();
-                FieldCalculatorViewModels.Remove(FieldCalculatorViewModels[0]);
+                RunDateTime = DateTime.Now.ToString(),
+                OperatingSystemName = System.Environment.OSVersion.VersionString ?? "",
+                SystemNodeName = System.Environment.MachineName,
+                OperatingSystemRelease = System.Environment.OSVersion.ServicePack,
+                OperatingSystemVersion = System.Environment.OSVersion.Platform.ToString(),
+                MachineType = string.Format("{0}/{1} phys/logical core(s)", PhysicalCores, LogicalCores),
+                ProcessorType = CpuDescription ?? "",
+                Title = Path.GetFileNameWithoutExtension(runfileName) ?? "",
+                SiteName = completedCalculation.TransmissionLossRunFile.RangeComplexName ?? "",
+                SiteRefLatLocation = (float)runFile.ReferenceLocation.Latitude,
+                SiteRefLonLocation = (float)runFile.ReferenceLocation.Longitude,
+                SourceRefLatLocation = (float)runFile.TransmissionLossJob.SoundSource.Latitude,
+                SourceRefLonLocation = (float)runFile.TransmissionLossJob.SoundSource.Longitude,
+                PlatformName = runFile.TransmissionLossJob.PlatformName ?? "",
+                SourceName = runFile.TransmissionLossJob.SourceName ?? "",
+                ModeName = runFile.TransmissionLossJob.ModeName ?? "",
+                Frequency = runFile.TransmissionLossJob.SoundSource.AcousticProperties.Frequency,
+                DepressionElevationAngle = runFile.TransmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle,
+                VerticalBeamPattern = runFile.TransmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth,
+                SourceDepth = runFile.TransmissionLossJob.SoundSource.AcousticProperties.SourceDepth,
+                SourceLevel = runFile.TransmissionLossJob.SoundSource.SourceLevel,
+                MinWaterDepth = 0, // Seems to be always zero
+                MaxWaterDepth = runFile.TransmissionLossJob.MaxDepth,
+                WaterDepthIncrement = runFile.WaterDepthIncrement,
+                MinRangeDistance = 0,
+                MaxRangeDistance = runFile.TransmissionLossJob.SoundSource.Radius,
+                RangeDistanceIncrement = runFile.RangeDistanceIncrement,
+                BottomType = runFile.TransmissionLossJob.BottomTypeName ?? "",
+                Season = runFile.TransmissionLossJob.TimePeriodName ?? "",
+                WindSpeed = runFile.TransmissionLossJob.WindSpeed,
+                CASSLevel = 1,
+                RadialCount = completedCalculation.RadialCalculatorViewModels.Count,
+                RadialBearings = runFile.TransmissionLossJob.SoundSource.RadialBearings.ToArray(),
+                RangeCellCount = completedCalculation.RadialCalculatorViewModels[0].TransmissionLossRadial.Ranges.Count,
+                RangeCells = completedCalculation.RadialCalculatorViewModels[0].TransmissionLossRadial.Ranges.ToArray(),
+                DepthCellCount = completedCalculation.RadialCalculatorViewModels[0].TransmissionLossRadial.Depths.Count,
+                DepthCells = completedCalculation.RadialCalculatorViewModels[0].TransmissionLossRadial.Depths.ToArray(),
+                Pressures = new List<float[,]>(),
+                Filename = outputFileName,
+            };
+            foreach (var radialViewModel in completedCalculation.RadialCalculatorViewModels)
+            {
+                var radial = radialViewModel.TransmissionLossRadial;
+                var buffer = new float[radial.Depths.Count,radial.Ranges.Count];
+                for (var rangeIndex = 0; rangeIndex < radial.Ranges.Count; rangeIndex++)
+                    for (var depthIndex = 0; depthIndex < radial.Depths.Count; depthIndex++)
+                    {
+                        var spl = runFile.TransmissionLossJob.SoundSource.SourceLevel -
+                                  radial[depthIndex, rangeIndex];
+                        buffer[depthIndex, rangeIndex] = spl;
+                    }
+                output.Pressures.Add(buffer);
             }
-            //if (!IsPaused) StartWorkIfNeeded();
+            output.ToBinaryFile();
+            FieldCalculatorViewModels.Remove(completedCalculation);
         }
 
         #endregion

@@ -28,33 +28,77 @@ namespace ESME.Views.TransmissionLoss
 
         #region Code that computes the radial by running bellhop and reading the output files it creates
 
-        TransmissionLossRadial ComputeRadial(string bellhopConfiguration, string bottomProfile, string topReflectionCoefficients, float bearing)
+        TransmissionLossRadial ComputeRadial(string bellhopConfiguration, string bottomProfile, double[,] topReflectionCoefficients, float bearing)
         {
             var workingDirectory = CreateTemporaryDirectory();
             TransmissionLossRadial result = null;
 
             // Write the bottom profile file that will be read by BELLHOP);
+            // File.WriteAllText(Path.Combine(workingDirectory, "bellhop.env"), bellhopConfiguration);
             File.WriteAllText(Path.Combine(workingDirectory, "BTYFIL"), bottomProfile);
-            if (!string.IsNullOrEmpty(topReflectionCoefficients)) File.WriteAllText(Path.Combine(workingDirectory, "TRCFIL"), topReflectionCoefficients);
 
+            var trcfil = Path.Combine(workingDirectory, "TRCFIL");
+            if (topReflectionCoefficients != null)
+            {
+                using (var writer = new StreamWriter(trcfil, false))
+                {
+                    writer.WriteLine(topReflectionCoefficients.GetLength(0));
+                    for (var rowIndex = 0; rowIndex < topReflectionCoefficients.GetLength(0); rowIndex++)
+                        writer.WriteLine("{0} {1} {2} ", topReflectionCoefficients[rowIndex, 0], topReflectionCoefficients[rowIndex, 1], topReflectionCoefficients[rowIndex, 2]);
+                }
+            }
+            if (!string.IsNullOrEmpty(LogPath))
+            {
+                foreach (var file in Directory.EnumerateFiles(Path.GetDirectoryName(LogPath), Path.GetFileName(LogPath) + "*"))
+                    File.Delete(file);
+                File.WriteAllText(LogPath + "ENVFIL.txt", bellhopConfiguration);
+                File.WriteAllText(LogPath + "BTYFIL.txt", bottomProfile);
+                if (topReflectionCoefficients != null) File.Copy(LogPath + "TRCFIL.txt", trcfil);
+            }
+            var bellhopExecutable = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "bellhop.exe");
+            var info = new ProcessStartInfo(bellhopExecutable, "bellhop")
+            {
+                WorkingDirectory = workingDirectory,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            //var process = Process.Start(bellhopExecutable, "bellhop");
             TransmissionLossProcess = new TransmissionLossProcess
             {
-                StartInfo = new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "Bellhop.exe"))
-                {
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    WorkingDirectory = workingDirectory
-                },
+                StartInfo = info
             };
-            TransmissionLossProcess.PropertyChanged += (sender, e) => { if (e.PropertyName == "ProgressPercent") 
-                ProgressPercent = Math.Max(ProgressPercent, ((TransmissionLossProcess) sender).ProgressPercent); };
+            TransmissionLossProcess.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == "ProgressPercent") 
+                    ProgressPercent = Math.Max(ProgressPercent, ((TransmissionLossProcess)sender).ProgressPercent);
+            };
 #if DEBUG
             //File.WriteAllText(Path.Combine(workingDirectory, "BellhopEnvironmentFile.txt"), bellhopConfiguration);
 #endif
-            TransmissionLossProcess.OutputDataReceived += OutputDataRecieved;
+            TransmissionLossProcess.OutputDataReceived += (s, e) =>
+            {
+                var theProcess = (TransmissionLossProcess)s;
+                string[] fields;
+                char[] separators = { ' ', '=' };
+
+                // Collect the command output.
+                if (String.IsNullOrEmpty(e.Data)) return;
+                // Add the text to the collected output.
+                OutputData.Append(e.Data);
+                var curLine = e.Data.Trim();
+                if (curLine.StartsWith("Tracing beam"))
+                {
+                    fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+                    theProcess.CurBeam = int.Parse(fields[2]);
+                }
+                if (!curLine.StartsWith("Number of beams")) return;
+                fields = curLine.Split(separators);
+                theProcess.BeamCount = int.Parse(fields[fields.Length - 1]);
+            };
             TransmissionLossProcess.Start();
             TransmissionLossProcess.PriorityClass = ProcessPriorityClass.Idle;
             TransmissionLossProcess.StandardInput.WriteLine(bellhopConfiguration);
@@ -70,7 +114,7 @@ namespace ESME.Views.TransmissionLoss
             if (!CancelRequested)
             {
                 ErrorText = TransmissionLossProcess.StandardError.ReadToEnd();
-                //Debug.WriteLine("Bellhop error output for radial bearing " + bearing + " deg: \n" + ErrorText);
+                Debug.WriteLine("{0}: Bellhop error output for radial bearing {1} deg:\n{2}", DateTime.Now, bearing, ErrorText);
 
                 // Convert the Bellhop output file into a Radial binary file
                 var shdfile = Path.Combine(workingDirectory, "SHDFIL");
@@ -81,17 +125,27 @@ namespace ESME.Views.TransmissionLoss
                     count++;
                 }
 
+#if DEBUG
+                //File.WriteAllText(Path.Combine(workingDirectory, "BellhopStandardOutput.txt"), OutputData.ToString());
+#endif
+                if (!string.IsNullOrEmpty(LogPath))
+                {
+                    if (File.Exists(shdfile)) File.Copy(shdfile, LogPath + "SHDFIL.shd");
+                    File.WriteAllText(LogPath + "STDOUT.txt", OutputData.ToString());
+                    File.WriteAllText(LogPath + "STDERR.txt", ErrorText);
+                }
+
                 if (ErrorText.Contains("forrtl") || (ErrorText.Contains("Error")))
                 {
                     Console.WriteLine("{0}: Bellhop failure: {1}", DateTime.Now, ErrorText);
                     Console.WriteLine("{0}: Bellhop input: {1}", DateTime.Now, bellhopConfiguration);
+                    Console.WriteLine("{0}: Bellhop output: {1}", DateTime.Now, OutputData);
                     Status = "Error";
                     return null;
                 }
-#if DEBUG
-                //File.WriteAllText(Path.Combine(workingDirectory, "BellhopStandardOutput.txt"), OutputData.ToString());
-#endif
-                result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
+                
+                //if (!string.IsNullOrEmpty(LogPath)) File.Copy(shdfile, LogPath + "SHDFIL");
+                if (File.Exists(shdfile)) result = new TransmissionLossRadial(bearing, new BellhopOutput(shdfile));
             }
             var tries = 10;
             while (tries > 0)
@@ -108,33 +162,10 @@ namespace ESME.Views.TransmissionLoss
                     Thread.Sleep(100);
                 }
             }
+            //if (!string.IsNullOrEmpty(LogPath)) File.WriteAllText(LogPath + "STDOUT.txt", OutputData.ToString());
             TransmissionLossProcess.ProgressPercent = 100;
             return result;
         }
-
-        void OutputDataRecieved(object sendingProcess, DataReceivedEventArgs outLine)
-        {
-            var theProcess = (TransmissionLossProcess) sendingProcess;
-            string[] fields;
-            char[] separators = {
-                                    ' ', '='
-                                };
-
-            // Collect the command output.
-            if (String.IsNullOrEmpty(outLine.Data)) return;
-            // Add the text to the collected output.
-            OutputData.Append(outLine.Data);
-            var curLine = outLine.Data.Trim();
-            if (curLine.StartsWith("Tracing beam"))
-            {
-                fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-                theProcess.CurBeam = int.Parse(fields[2]);
-            }
-            if (!curLine.StartsWith("Number of beams")) return;
-            fields = curLine.Split(separators);
-            theProcess.BeamCount = int.Parse(fields[fields.Length - 1]);
-        }
-
         #endregion
     }
 }
