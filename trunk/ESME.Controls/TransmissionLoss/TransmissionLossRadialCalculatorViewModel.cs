@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Cinch;
@@ -27,8 +28,28 @@ namespace ESME.Views.TransmissionLoss
         public event EventHandler CalculationCompleted;
         protected virtual void OnCalculationCompleted()
         {
+            IsCompleted = true;
             if (CalculationCompleted != null) CalculationCompleted(this, new EventArgs());
         }
+
+        #region public bool IsCompleted { get; set; }
+
+        public bool IsCompleted
+        {
+            get { return _isCompleted; }
+            private set
+            {
+                if (_isCompleted == value) return;
+                _isCompleted = value;
+                NotifyPropertyChanged(IsCompletedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsCompletedChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialCalculatorViewModel>(x => x.IsCompleted);
+        bool _isCompleted;
+
+        #endregion
+
 
         #region public double BearingFromSource { get; set; }
 
@@ -156,6 +177,24 @@ namespace ESME.Views.TransmissionLoss
 
         static readonly PropertyChangedEventArgs CancelRequestedChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialCalculatorViewModel>(x => x.CancelRequested);
         bool _cancelRequested;
+
+        #endregion
+
+        #region public string LogPath { get; set; }
+
+        public string LogPath
+        {
+            get { return _logPath; }
+            set
+            {
+                if (_logPath == value) return;
+                _logPath = value;
+                NotifyPropertyChanged(LogPathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LogPathChangedEventArgs = ObservableHelper.CreateArgs<TransmissionLossRadialCalculatorViewModel>(x => x.LogPath);
+        string _logPath;
 
         #endregion
 

@@ -121,10 +121,15 @@ namespace HRC.Utility
             if (handlers == null) return;
             foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList())
             {
-                if (handler.Target is DispatcherObject)
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, e));
-                else
-                    handler(this, e);
+                try
+                {
+                    if (handler.Target is DispatcherObject)
+                        ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, e));
+                    else
+                        handler(this, e);
+                }
+                catch (Exception)
+                {}
             }
         }
 

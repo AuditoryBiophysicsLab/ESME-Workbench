@@ -15,49 +15,49 @@ namespace ESME.TransmissionLoss.Bellhop
             using (var sw = new StringWriter())
             {
                 sw.WriteLine("'TL'");
-                sw.WriteLine("{0:F},", transmissionLossJob.SoundSource.AcousticProperties.Frequency);
-                sw.WriteLine("1,"); // was NMEDIA in gui_genbellhopenv.m
-                sw.WriteLine(useSurfaceReflection ? "'CFMT'," : "'CVMT',");
+                sw.WriteLine("{0},", transmissionLossJob.SoundSource.AcousticProperties.Frequency);
+                sw.WriteLine("1"); // was NMEDIA in gui_genbellhopenv.m
+                sw.WriteLine(useSurfaceReflection ? "'CFLT'," : "'CVLT',");
 
                 if (depthCellCount < 5) throw new BathymetryTooShallowException("Error: Maximum depth of transect (" + maxCalculationDepthMeters + " meters) less than minimum required for transmission loss calculations.\nPlease choose a different location for this transect.");
 
-                sw.WriteLine("0.0, 0.0, {0:F}, !NMESH SIGMA Z(NSSP)", ssp.Data[ssp.Data.Count - 1].Depth);
+                sw.WriteLine("0, 0.0, {0}", ssp.Data[ssp.Data.Count - 1].Depth);
 
                 // If SSP is shallower than the bathymetry then extrapolate an SSP entry for the deepest part of the water
                 //if (SSP.DepthVector[SSP.DepthVector.Length - 1] < RealBottomDepth_Meters)
                 //    SoundSpeedProfile = ExtrapolateSSP(SoundSpeedProfile, RealBottomDepth_Meters);
 
                 foreach (var depthValuePair in ssp.Data)
-                    sw.WriteLine("{0:F} {1:F} /", depthValuePair.Depth, depthValuePair.Value);
+                    sw.WriteLine("{0} {1} 0.0 1.0 0.0 0.0", depthValuePair.Depth, depthValuePair.Value);
 
                 //sw.WriteLine("'V*', 0.0"); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)
-                sw.WriteLine("'A*', 0.0"); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)
-                sw.WriteLine("{0:F} {1:F} {2:F} {3:F} {4:F} {5:F} /", maxCalculationDepthMeters, sediment.CompressionWaveSpeed, sediment.ShearWaveSpeed, sediment.Density, sediment.LossParameter, 0);
+                sw.WriteLine("'A*' 0.0"); // A = Acoustic halfspace, * = read bathymetry file 'BTYFIL', 0.0 = bottom roughness (currently ignored)
+                sw.WriteLine("{0} {1} {2} {3} {4} {5} /", maxCalculationDepthMeters, sediment.CompressionWaveSpeed, sediment.ShearWaveSpeed, sediment.Density, sediment.LossParameter, 0);
                 // Source and Receiver Depths and Ranges
-                sw.WriteLine("1    !NSD"); // Number of Source Depths
-                sw.WriteLine("  {0:F} / ! source_depth", Math.Max(1, transmissionLossJob.SoundSource.AcousticProperties.SourceDepth)); // source depth
-                sw.WriteLine("{0}   ! NRD", depthCellCount); // Number of Receiver Depths
-                sw.WriteLine("  0.0 {0:F} /  ! surface_depth (0.0) to max_depth (in meters)", maxCalculationDepthMeters);
-                sw.WriteLine("{0}  ! NRR", rangeCellCount); // Number of receiver ranges
-                sw.WriteLine("  0.0 {0:F} /  ! start_range (0.0) to max_range (in km)", transmissionLossJob.SoundSource.Radius/1000.0);
+                sw.WriteLine("1"); // Number of Source Depths
+                sw.WriteLine("{0} /", transmissionLossJob.SoundSource.AcousticProperties.SourceDepth); // source depth
+                sw.WriteLine("{0}", depthCellCount); // Number of Receiver Depths
+                sw.WriteLine("0.0 {0} /", maxCalculationDepthMeters);
+                sw.WriteLine("{0}", rangeCellCount); // Number of receiver ranges
+                sw.WriteLine("0.0 {0} /", transmissionLossJob.SoundSource.Radius/1000.0);
 
                 if (generateArrivalsFile) sw.WriteLine("'AB'");  // aB
-                else sw.WriteLine(useVerticalBeamforming ? "'CG*'" : "'C'");
+                else sw.WriteLine(useVerticalBeamforming ? "'IG*'" : "'I'");
                 // if useVerticalBeamforming is true, then SBPFIL must be present (Source Beam Pattern file)
                 sw.WriteLine("{0}", beamCount); // Number of beams
                 //sw.WriteLine("0"); // Number of beams
                 var verticalHalfAngle = transmissionLossJob.SoundSource.AcousticProperties.VerticalBeamWidth / 2;
                 var angle1 = transmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle - verticalHalfAngle;
                 var angle2 = transmissionLossJob.SoundSource.AcousticProperties.DepressionElevationAngle + verticalHalfAngle;
-                sw.WriteLine("{0:F} {1:F} /", angle1, angle2); // Beam fan half-angles (negative angles are toward the surface
+                sw.WriteLine("{0} {1} /", angle1, angle2); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("-60.00 60.00 /"); // Beam fan half-angles (negative angles are toward the surface
                 //sw.WriteLine("{0:F} {1:F} {2:F} ! step zbox(meters) rbox(km)", experiment.TransmissionLossSettings.DepthCellSize, RealBottomDepth_Meters + 100, (bottomProfile.Length / 1000.0) * 1.01);
-                sw.WriteLine("2.0 {0:F} {1:F} ! step zbox(meters) rbox(km)", maxCalculationDepthMeters * 1.01, (transmissionLossJob.SoundSource.Radius / 1000.0) * 1.01);
+                sw.WriteLine("0.0 {0} {1}", ssp.Data[ssp.Data.Count - 1].Depth * 2, (transmissionLossJob.SoundSource.Radius / 1000.0) * 1.01);
                 return sw.ToString();
             }
         }
 
-#if false
+#if true
         /// <summary>
         /// Generate sea surface reflection coefficients for a given wind speed
         /// </summary>
@@ -69,18 +69,28 @@ namespace ESME.TransmissionLoss.Bellhop
         /// <returns></returns>
         public static double[,] GenerateReflectionCoefficients(float windSpeed, float frequency, double startAngle = 0, double endAngle = 90.0, double angleStep = 1.0)
         {
-            if (double.IsNaN(windSpeed) || (windSpeed < 0) || (windSpeed > 13)) throw new ArgumentException("Valid values are 0 - 13", "windSpeed");
-            if (double.IsNaN(frequency) || (frequency < 0) || (frequency > 4000)) throw new ArgumentException("Valid values are 0 - 4000", "frequency");
-            if ((windSpeed > 5) && (frequency > 1000)) throw new ArgumentException("Frequency values under 1000 require windSpeed values under 5");
+            //if (double.IsNaN(windSpeed) || (windSpeed < 0) || (windSpeed > 13)) throw new ArgumentException("Valid values are 0 - 13", "windSpeed");
+            //if (double.IsNaN(frequency) || (frequency < 0) || (frequency > 4000)) throw new ArgumentException("Valid values are 0 - 4000", "frequency");
+            //if ((windSpeed > 5) && (frequency > 1000)) throw new ArgumentException("Frequency values under 1000 require windSpeed values under 5");
+            //if ((frequency < 1000) && (windSpeed < 5)) { }
+
+            frequency /= 1000;  // Frequency is expressed in kHz in the formula
+
             var sampleCount = (int)((endAngle - startAngle) / angleStep) + 1;
 
-            var result = new double[sampleCount,3];
+            var result = new double[sampleCount, 3];
 
-            if ((frequency < 1000) && (windSpeed < 5))
-            { }
-
+            var f32 = Math.Pow(frequency, 3.0 / 2.0);
             var wind4 = Math.Pow(windSpeed / 10, 4.0);
-
+            var eta = 3.4 * f32 * wind4;
+            var angle = startAngle;
+            for (var angleIndex = 0; angleIndex < sampleCount; angleIndex++)
+            {
+                result[angleIndex, 0] = angle;
+                result[angleIndex, 1] = Math.Exp(-1.0 * Math.Sin(angle * (Math.PI / 180.0)));
+                result[angleIndex, 2] = 180;
+                angle += angleStep;
+            }
             return result;
         }
 #endif
