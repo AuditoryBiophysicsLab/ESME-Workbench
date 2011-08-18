@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Input;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Environment;
@@ -75,8 +76,10 @@ namespace ESME.TransmissionLoss
             {
                 if (_radialBearings == value) return;
                 _radialBearings = value;
+                _bearingsString = null;
                 NotifyPropertyChanged(RadialBearingsChangedEventArgs);
                 Validate();
+                NotifyPropertyChanged(BearingsStringChangedEventArgs);
             }
         }
 
@@ -84,6 +87,85 @@ namespace ESME.TransmissionLoss
         List<float> _radialBearings;
 
         #endregion
+
+        #region public string BearingsString { get; set; }
+        [XmlIgnore]
+        public string BearingsString
+        {
+            get
+            {
+                if (_bearingsString != null) return _bearingsString;
+                var sb = new StringBuilder();
+                foreach (var bearing in RadialBearings)
+                    sb.AppendFormat("{0:0.##}, ", bearing);
+                sb.Remove(sb.Length - 2, 2);
+                _bearingsString = sb.ToString();
+                return _bearingsString;
+            }
+            set
+            {
+                if (_bearingsString == value) return;
+                _bearingsString = value;
+                if (string.IsNullOrEmpty(_bearingsString) || string.IsNullOrEmpty(_bearingsString.Trim()))
+                {
+                    NotifyPropertyChanged(BearingsStringChangedEventArgs);
+                    NotifyPropertyChanged(BearingsStringIsValidChangedEventArgs);
+                    return;
+                }
+                var items = _bearingsString.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries);
+                if (items.Count() == 0)
+                {
+                    NotifyPropertyChanged(BearingsStringIsValidChangedEventArgs);
+                    return;
+                }
+                var tmp = new List<float>();
+                foreach (var item in items)
+                {
+                    float curBearing;
+                    if (!float.TryParse(item, out curBearing))
+                    {
+                        NotifyPropertyChanged(BearingsStringIsValidChangedEventArgs);
+                        return;
+                    }
+                    tmp.Add(curBearing);
+                }
+                if (tmp.Count == 0)
+                {
+                    NotifyPropertyChanged(BearingsStringIsValidChangedEventArgs);
+                    return;
+                }
+                NotifyPropertyChanged(BearingsStringChangedEventArgs);
+                NotifyPropertyChanged(BearingsStringIsValidChangedEventArgs);
+                tmp.Sort();
+                _radialBearings = tmp.Distinct().ToList();
+                Validate();
+            }
+        }
+
+        [XmlIgnore]
+        public bool BearingsStringIsValid
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(BearingsString)) return false;
+                if (string.IsNullOrEmpty(BearingsString.Trim())) return false;
+                var items = BearingsString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (items.Count() == 0) return false;
+                foreach (var item in items)
+                {
+                    float curBearing;
+                    if (!float.TryParse(item, out curBearing)) return false;
+                }
+                return true;
+            }
+        }
+        static readonly PropertyChangedEventArgs BearingsStringIsValidChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.BearingsStringIsValid);
+
+        static readonly PropertyChangedEventArgs BearingsStringChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.BearingsString);
+        string _bearingsString;
+
+        #endregion
+
 
         #region public int Radius { get; set; }
 
@@ -106,7 +188,6 @@ namespace ESME.TransmissionLoss
         int _radius;
 
         #endregion
-
 
         /// <summary>
         ///   The presumptively-unique sound source ID.  Use this as the basis of the filename for transmission loss jobs and TLF files

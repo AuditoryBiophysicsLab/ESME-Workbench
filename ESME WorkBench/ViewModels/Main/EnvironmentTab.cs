@@ -152,9 +152,8 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_selectedRangeComplexDescriptor == value) return;
                 _selectedRangeComplexDescriptor = value;
                 IsRangeComplexSelected = _selectedRangeComplexDescriptor != null;
-                if ((_selectedRangeComplexDescriptor != null) && (_selectedRangeComplexDescriptor != _lastNonNullRangeComplex))
+                if (_selectedRangeComplexDescriptor != null)
                 {
-                    _lastNonNullRangeComplex = _selectedRangeComplexDescriptor;
                     SelectedRangeComplexInfo = string.Format("Name: {0}\nReference Point: ({1}, {2})\nHeight: {3}\nGeoid Separation: {4}\nOps Limit: {5}\nSim Limit: {6}",
                                                              _selectedRangeComplexDescriptor.Data.Name, Math.Round(_selectedRangeComplexDescriptor.Data.Latitude, 5), Math.Round(_selectedRangeComplexDescriptor.Data.Longitude, 5),
                                                              _selectedRangeComplexDescriptor.Data.Height, _selectedRangeComplexDescriptor.Data.GeoidSeparation, SelectedRangeComplexDescriptor.Data.OpsLimitFile,
@@ -186,7 +185,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         static readonly PropertyChangedEventArgs SelectedRangeComplexDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplexDescriptor);
         RangeComplexDescriptor _selectedRangeComplexDescriptor;
-        RangeComplexDescriptor _lastNonNullRangeComplex;
 
         void DisplayWorldMap()
         {
