@@ -169,10 +169,8 @@ namespace ESME.Views.TransmissionLoss
             {
                 case TransmissionLossAlgorithm.Bellhop:
                     bellhopSettings = ((BellhopRunFile)TransmissionLossRunFile).BellhopSettings;
-                    depthCellSize = Math.Max(bellhopSettings.DepthCellSize, 25);
-                    rangeCellCount =
-                            (int)
-                            Math.Round((transmissionLossJob.SoundSource.Radius / Math.Max(bellhopSettings.RangeCellSize, 50))) + 1;
+                    depthCellSize = bellhopSettings.DepthCellSize;
+                    rangeCellCount = (int)Math.Round((transmissionLossJob.SoundSource.Radius / bellhopSettings.RangeCellSize)) + 1;
                     break;
                 case TransmissionLossAlgorithm.RAMGEO:
                     ramSettings = ((RamRunFile)TransmissionLossRunFile).RAMSettings;
