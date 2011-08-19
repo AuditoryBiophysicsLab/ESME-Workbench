@@ -190,84 +190,6 @@ namespace ESME.Mapping
 
         #endregion
 
-        #region public string AnalysisPointCompletionTooltip { get; set; }
-
-        [XmlIgnore]
-        public string AnalysisPointCompletionTooltip
-        {
-            get { return _analysisPointCompletionTooltip; }
-            set
-            {
-                if (_analysisPointCompletionTooltip == value) return;
-                _analysisPointCompletionTooltip = value;
-                NotifyPropertyChanged(AnalysisPointCompletionTooltipChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs AnalysisPointCompletionTooltipChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AnalysisPointCompletionTooltip);
-        string _analysisPointCompletionTooltip = "Not yet calculated";
-
-        #endregion
-
-        #region public int PercentComplete { get; set; }
-
-        [XmlIgnore]
-        public int PercentComplete
-        {
-            get { return _percentComplete; }
-            set
-            {
-                string toolTip;
-                if (_percentComplete == value) return;
-                _percentComplete = value;
-                NotifyPropertyChanged(PercentCompleteChangedEventArgs);
-                if (_percentComplete <= 0)
-                {
-                    toolTip = "Not yet calculated";
-                    System.Diagnostics.Debug.WriteLine("12px-red-circle.png");
-                }
-                else
-                {
-                    toolTip = String.Format("{0}% complete", _percentComplete);
-                    if ((_percentComplete > 0) && (_percentComplete <= 25))
-                        System.Diagnostics.Debug.WriteLine("12px-yellow-circle-25pct.png");
-                    else if ((_percentComplete > 25) && (_percentComplete <= 50))
-                        System.Diagnostics.Debug.WriteLine("12px-yellow-circle-50pct.png");
-                    else if ((_percentComplete > 50) && (_percentComplete <= 75))
-                        System.Diagnostics.Debug.WriteLine("12px-yellow-circle-75pct.png");
-                    else if (_percentComplete >= 100)
-                    {
-                        toolTip = "Calculation complete";
-                        System.Diagnostics.Debug.WriteLine("12px-green-circle.png");
-                    }
-                }
-                AnalysisPointCompletionTooltip = toolTip;
-            }
-        }
-
-        static readonly PropertyChangedEventArgs PercentCompleteChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.PercentComplete);
-        int _percentComplete;
-
-        #endregion
-
-        #endregion
-
-        #region public TreeNode TreeViewParent { get; set; }
-
-        public TreeNode TreeViewParent
-        {
-            get { return _treeViewParent; }
-            set
-            {
-                if (_treeViewParent == value) return;
-                _treeViewParent = value;
-                NotifyPropertyChanged(TreeViewParentChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs TreeViewParentChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.TreeViewParent);
-        TreeNode _treeViewParent;
-
         #endregion
 
         #region public bool IsValid { get; set; }
@@ -539,7 +461,7 @@ namespace ESME.Mapping
         #endregion
 
         #region public CASSOutput CASSOutput { get; set; }
-
+        [XmlIgnore]
         public CASSOutput CASSOutput
         {
             get { return _cassOutput; }

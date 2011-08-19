@@ -15,70 +15,105 @@ namespace ESME.Environment.NAVO
         public NAVOConfiguration()
         {
             ValidationRules.AddRange(new List<ValidationRule>
-                                         {
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "GDEMDirectory",
-                                                     Description = "Directory must exist and contain many uncompressed .nc files",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((NAVOConfiguration) o).GDEMDirectory;
-                                                                            if(!Directory.Exists(ruleTarget))
-                                                                                return false;
-                                                                            return Directory.GetFiles(ruleTarget,"*.nc").Length>1;
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "SMGCDirectory",
-                                                     Description = "Directory must exist and contain many .stt files",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((NAVOConfiguration) o).SMGCDirectory;
-                                                                            if (!Directory.Exists(ruleTarget))
-                                                                                return false;
-                                                                            return
-                                                                                (File.Exists(Path.Combine(ruleTarget, "n00e009.stt")) && File.Exists(Path.Combine(ruleTarget, "n52e117.stt")) && File.Exists(Path.Combine(ruleTarget, "n88e091.stt")));
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "BSTDirectory",
-                                                     Description = "File must exist.",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((NAVOConfiguration) o).BSTDirectory;
-                                                                            return File.Exists(ruleTarget);
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "DBDBDirectory",
-                                                     Description = "File must exist.",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((NAVOConfiguration) o).DBDBDirectory;
-                                                                            return File.Exists(ruleTarget);
-                                                                        },
-                                                 },
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "DBDBEXEPath",
-                                                     Description = "File must exist.",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((NAVOConfiguration) o).DBDBEXEPath;
-                                                                            return File.Exists(ruleTarget);
-                                                                        },
-                                                 },                               
-                               
-                                         });
-      
+            {
+                    new ValidationRule
+                    {
+                            PropertyName = "GDEMDirectory",
+                            Description = "Directory must exist and contain many uncompressed .nc files",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((NAVOConfiguration)o).GDEMDirectory;
+                                if (!Directory.Exists(ruleTarget)) return false;
+                                return Directory.GetFiles(ruleTarget, "*.nc").Length > 1;
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "SMGCDirectory",
+                            Description = "Directory must exist and contain many .stt files",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((NAVOConfiguration)o).SMGCDirectory;
+                                if (!Directory.Exists(ruleTarget)) return false;
+                                return
+                                        (File.Exists(Path.Combine(ruleTarget, "n00e009.stt")) &&
+                                         File.Exists(Path.Combine(ruleTarget, "n52e117.stt")) &&
+                                         File.Exists(Path.Combine(ruleTarget, "n88e091.stt")));
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "BSTDirectory",
+                            Description = "File must exist.",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((NAVOConfiguration)o).BSTDirectory;
+                                return File.Exists(ruleTarget);
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "DBDBDirectory",
+                            Description = "File must exist.",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((NAVOConfiguration)o).DBDBDirectory;
+                                return File.Exists(ruleTarget);
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "DBDBEXEPath",
+                            Description = "File must exist.",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((NAVOConfiguration)o).DBDBEXEPath;
+                                return File.Exists(ruleTarget);
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "HFBLDirectory",
+                            Description = "Directory must exist",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((NAVOConfiguration)o).HFBLDirectory;
+                                return Directory.Exists(ruleTarget);
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "LFBLDirectory",
+                            Description = "Directory must exist",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((NAVOConfiguration)o).LFBLDirectory;
+                                return Directory.Exists(ruleTarget);
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "HFBLEXEPath",
+                            Description = "File must exist.",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((NAVOConfiguration)o).HFBLEXEPath;
+                                return File.Exists(ruleTarget);
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "LFBLEXEPath",
+                            Description = "File must exist.",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((NAVOConfiguration)o).LFBLEXEPath;
+                                return File.Exists(ruleTarget);
+                            },
+                    },
+            });
+
         }
-             private bool ValidateBST(string filePath)
-             {
-                 return false;
-             }
 
         public void SetDefaults()
         {
@@ -265,6 +300,42 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
+        #region public string HFBLDirectory { get; set; }
+
+        public string HFBLDirectory
+        {
+            get { return _hfblDirectory; }
+            set
+            {
+                if (_hfblDirectory == value) return;
+                _hfblDirectory = value;
+                NotifyPropertyChanged(HFBLDirectoryChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs HFBLDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.HFBLDirectory);
+        string _hfblDirectory;
+
+        #endregion
+
+        #region public string LFBLDirectory { get; set; }
+
+        public string LFBLDirectory
+        {
+            get { return _lfblDirectory; }
+            set
+            {
+                if (_lfblDirectory == value) return;
+                _lfblDirectory = value;
+                NotifyPropertyChanged(LFBLDirectoryChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LFBLDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.LFBLDirectory);
+        string _lfblDirectory;
+
+        #endregion
+
         #region public string DBDBEXEPath { get; set; }
 
         public string DBDBEXEPath
@@ -280,6 +351,42 @@ namespace ESME.Environment.NAVO
 
         static readonly PropertyChangedEventArgs DBDBEXEPathChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.DBDBEXEPath);
         string _dBDBEXEPath;
+
+        #endregion
+
+        #region public string HFBLEXEPath { get; set; }
+
+        public string HFBLEXEPath
+        {
+            get { return _hfblEXEPath; }
+            set
+            {
+                if (_hfblEXEPath == value) return;
+                _hfblEXEPath = value;
+                NotifyPropertyChanged(HFBLEXEPathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs HFBLEXEPathChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.HFBLEXEPath);
+        string _hfblEXEPath;
+
+        #endregion
+
+        #region public string LFBLEXEPath { get; set; }
+
+        public string LFBLEXEPath
+        {
+            get { return _lfblEXEPath; }
+            set
+            {
+                if (_lfblEXEPath == value) return;
+                _lfblEXEPath = value;
+                NotifyPropertyChanged(LFBLEXEPathChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LFBLEXEPathChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.LFBLEXEPath);
+        string _lfblEXEPath;
 
         #endregion
 

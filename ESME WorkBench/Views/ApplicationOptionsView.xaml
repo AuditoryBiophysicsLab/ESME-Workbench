@@ -6,7 +6,12 @@
         Title="User Options"
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
-        WindowStyle="ToolWindow">
+        WindowStyle="ToolWindow" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:Main="clr-namespace:ESMEWorkBench.ViewModels.Main" 
+        mc:Ignorable="d" 
+        d:DataContext="{d:DesignInstance Type=Main:ApplicationOptionsViewModel}">
     <DockPanel LastChildFill="True">
         <DockPanel LastChildFill="False"
 		           Margin="10"
@@ -52,25 +57,10 @@
 					          Margin="5"
 					          Padding="5">
                         <Views:ScenarioSimulatorUserControlView DataContext="{Binding AppSettings.ScenarioSimulatorSettings}"/>
-                        <!--	<StackPanel Orientation="Vertical">
-							<TextBlock Text="Number of Iterations"
-							           Margin="5 0" />
-							<TextBox Text="{Binding AppSettings.ScenarioSimulatorSettings.Iterations}"
-							         Margin="5 0">
-								<i:Interaction.Behaviors>
-									<cinch:NumericTextBoxBehaviour />
-								</i:Interaction.Behaviors>
-							</TextBox>
-                            <CheckBox IsChecked="{Binding AppSettings.ScenarioSimulatorSettings.IsRandomized}"
-							          Margin="5 10">
-								Randomize Ship Tracks
-							</CheckBox>
-						</StackPanel> -->
                     </GroupBox>
                 </StackPanel>
             </TabItem>
             <TabItem Header="Environment"
-			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}"
 			         HorizontalContentAlignment="Stretch"
 			         VerticalContentAlignment="Stretch">
                 <StackPanel Orientation="Vertical">
@@ -100,6 +90,14 @@
 							                                 DialogTitle="Choose the Digital Bathymetric Database file"
 							                                 FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
+                            <Controls:FileOrDirectorySetting Caption="HFBL"
+							                                 IsDirectoryBrowser="True"
+                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.HFBLDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
+                            <Controls:FileOrDirectorySetting Caption="LFBL"
+							                                 IsDirectoryBrowser="True"
+                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.LFBLDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Header="Required Extraction Tools"
@@ -107,14 +105,29 @@
 					          Padding="5">
                         <StackPanel Orientation="Vertical">
                             <Controls:FileOrDirectorySetting Caption="DBDB Extractor"
+							                                 DialogTitle="Choose the extraction program for DBDB"
 							                                 IsDirectoryBrowser="False"
+							                                 FileNameFilter="Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*"
                                                              Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBEXEPath, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
+                            <Controls:FileOrDirectorySetting Caption="HFBL Extractor"
+							                                 DialogTitle="Choose the extraction program for HFBL"
+							                                 IsDirectoryBrowser="False"
+							                                 FileNameFilter="Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*"
+                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.HFBLEXEPath, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
+                            <Controls:FileOrDirectorySetting Caption="LFBL Extractor"
+							                                 DialogTitle="Choose the extraction program for LFBL"
+							                                 IsDirectoryBrowser="False"
+							                                 FileNameFilter="Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*"
+                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
+							                                 FileName="{Binding AppSettings.NAVOConfiguration.LFBLEXEPath, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
 
                     </GroupBox>
                 </StackPanel>
             </TabItem>
+            <!--
             <TabItem Header="[Collapsed]"
 			         Visibility="Collapsed"
 			         HorizontalContentAlignment="Stretch"
@@ -132,11 +145,11 @@
 					                                 FileName="{Binding AppSettings.EnvironmentDatabaseDirectory}" />
                 </StackPanel>
             </TabItem>
+            -->
             <TabItem Header="Acoustic Simulators">
                 <Views:AcousticSimulatorOptionsControl DataContext="{Binding AppSettings}" />
             </TabItem>
-            <TabItem Header="Seasons"
-			         IsEnabled="{Binding AppSettings.UseOAMLDataSources}">
+            <TabItem Header="Seasons">
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Vertical"
 					            Margin="5">
