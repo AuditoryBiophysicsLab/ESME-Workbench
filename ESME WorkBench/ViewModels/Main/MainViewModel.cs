@@ -463,7 +463,6 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        public bool CanPlaceAnalysisPoint { get { return (_experiment != null) && (_experiment.NemoFile != null) && (_experiment.Bathymetry != null) && (_experiment.SoundSpeedField != null) && (_experiment.FileName != null); } }
         
         void ShowEnvironmentSettingsView()
         {
@@ -612,6 +611,12 @@ namespace ESMEWorkBench.ViewModels.Main
         static readonly PropertyChangedEventArgs IsInAnalysisPointModeChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsInAnalysisPointMode);
         bool _isInAnalysisPointMode;
 
+        [MediatorMessageSink(MediatorMessage.SetAnalysisPointMode)]
+        void SetAnalysisPointMode(bool mode)
+        {
+            IsInAnalysisPointMode = mode;
+        }
+
         #endregion
 
         #region PreviewKeyDownCommand
@@ -710,7 +715,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void UpdateMapLayerVisibility()
         {
-#if true
             if ((!IsLayerListViewVisible) && MapLayerCollections["Environment"] != null)
             {
                 MapLayerCollections.ActiveLayer = MapLayerCollections["Environment"];
@@ -728,13 +732,6 @@ namespace ESMEWorkBench.ViewModels.Main
                     MapLayerCollections.ActiveLayer = MapLayerCollections["Home"];
                 }
             }
-#else
-            var currentMapLayers = HomeTabMapLayers;
-            //var currentMapLayers = EnvironmentTabMapLayers;
-            if (!IsLayerListViewVisible) currentMapLayers = EnvironmentTabMapLayers;
-            MapLayerViewModel.Layers = currentMapLayers;
-            MediatorMessage.Send(MediatorMessage.SetMapLayers, currentMapLayers);
-#endif
         }
 
         #region public double LayersListWidth { get; set; }

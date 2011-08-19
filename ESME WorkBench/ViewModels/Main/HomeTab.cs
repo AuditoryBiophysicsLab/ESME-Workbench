@@ -10,12 +10,9 @@ using System.Windows;
 using System.Windows.Input;
 using Cinch;
 using ESME;
-using ESME.Data;
 using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
-using ESME.NEMO;
-using ESME.NewNEMO;
 using ESME.TransmissionLoss;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
@@ -38,9 +35,17 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_scenarioMetadata == value) return;
                 if (_scenarioMetadata != null) _scenarioMetadata.Save();
                 _scenarioMetadata = value;
-                _dispatcher.InvokeIfRequired(() => NotifyPropertyChanged(ScenarioMetadataChangedEventArgs));
+                _dispatcher.InvokeIfRequired(() =>
+                {
+                    NotifyPropertyChanged(ScenarioMetadataChangedEventArgs);
+                    NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
+                });
                 if (_scenarioMetadata != null)
                 {
+                    _scenarioMetadata.PropertyChanged += (s, e) =>
+                    {
+                        if (e.PropertyName == "CanPlaceAnalysisPoint") _dispatcher.InvokeIfRequired(() =>  NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs));
+                    };
                     _scenarioMetadata.Dispatcher = _dispatcher;
                     _scenarioMetadata.VisualizerService = _visualizerService;
                     _scenarioMetadata.RangeComplexDescriptors = RangeComplexDescriptors;
@@ -270,6 +275,14 @@ namespace ESMEWorkBench.ViewModels.Main
                 return sb.ToString();
             }
         }
+        #endregion
+
+        #region public bool CanPlaceAnalysisPoint { get; set; }
+
+        public bool CanPlaceAnalysisPoint { get { return ScenarioMetadata != null && ScenarioMetadata.CanPlaceAnalysisPoint; } }
+
+        static readonly PropertyChangedEventArgs CanPlaceAnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.CanPlaceAnalysisPoint);
+
         #endregion
 
         [MediatorMessageSink(MediatorMessage.PlaceAnalysisPoint)]
