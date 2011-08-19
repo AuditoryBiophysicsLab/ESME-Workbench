@@ -168,8 +168,8 @@
                             Content="Apply to all" 
                             Command="{Binding ApplyToAllModesCommand}"
                             ToolTip="Apply this radial configuration to all modes in this analysis point" />
-                    <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}" IsEnabled="{Binding IssItemSelected}"
-                                            BoundField="BearingsString">
+                    <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}" IsEnabled="{Binding IsItemSelected}"
+                                            BoundField="SelectedMode.BearingsString">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="LostFocus">
                                 <cinch:EventToCommandTrigger Command="{Binding RadialsLostFocusCommand}" />
