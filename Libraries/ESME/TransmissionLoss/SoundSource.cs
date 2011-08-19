@@ -144,19 +144,22 @@ namespace ESME.TransmissionLoss
         [XmlIgnore]
         public bool BearingsStringIsValid
         {
-            get
+            get { return IsBearingStringValid(BearingsString); }
+        }
+
+        public static bool IsBearingStringValid(string bearingString)
+        {
+            if (string.IsNullOrEmpty(bearingString)) return false;
+            if (string.IsNullOrEmpty(bearingString.Trim())) return false;
+            var items = bearingString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (items.Count() == 0) return false;
+            foreach (var item in items)
             {
-                if (string.IsNullOrEmpty(BearingsString)) return false;
-                if (string.IsNullOrEmpty(BearingsString.Trim())) return false;
-                var items = BearingsString.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                if (items.Count() == 0) return false;
-                foreach (var item in items)
-                {
-                    float curBearing;
-                    if (!float.TryParse(item, out curBearing)) return false;
-                }
-                return true;
+                float curBearing;
+                if (!float.TryParse(item, out curBearing)) return false;
+                if (curBearing < 0.0 || curBearing > 360) return false;
             }
+            return true;
         }
         static readonly PropertyChangedEventArgs BearingsStringIsValidChangedEventArgs = ObservableHelper.CreateArgs<SoundSource>(x => x.BearingsStringIsValid);
 

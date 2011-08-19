@@ -6,28 +6,103 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
+using System.Xml.Serialization;
 using Cinch;
 using ESME.TransmissionLoss;
+using HRC.Validation;
 using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.AcousticBuilder
 {
     [ExportViewModel("AnalysisPointSettingsViewModel")]
-    public class AnalysisPointSettingsViewModel : ViewModelBase
+    public sealed class AnalysisPointSettingsViewModel : ValidatingViewModel
     {
-        public AnalysisPointSettingsViewModel(AnalysisPoint analysisPoint) : this()
-        {
-            AnalysisPoint = analysisPoint;
-        }
-        [ImportingConstructor]
-        public AnalysisPointSettingsViewModel()
+        public AnalysisPointSettingsViewModel(AnalysisPoint analysisPoint)
         {
             RegisterMediator();
-
             AvailableModes = new ObservableCollection<SoundSource>();
+            AnalysisPoint = analysisPoint;
+            IsItemSelected = false;
+            Latitude = AnalysisPoint.Latitude;
+            Longitude = AnalysisPoint.Longitude;
+            BearingsString = SelectedMode != null ? SelectedMode.BearingsString : "";
+
+            ValidationRules.AddRange(new List<ValidationRule>
+            {
+                    new ValidationRule
+                    {
+                            PropertyName = "Latitude",
+                            Description = "Latitude is out of range",
+                            RuleDelegate = (o, r) =>RangeCheck(((AnalysisPointSettingsViewModel)o).Latitude, -90, 90),
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "Longitude",
+                            Description = "Longitude is out of range",
+                            RuleDelegate = (o, r) =>RangeCheck(((AnalysisPointSettingsViewModel)o).Longitude, -180, 180),
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "BearingsString",
+                            Description = "Must contain one or more comma-separated bearings.  All bearings must vary between 0 and 360 degrees",
+                            RuleDelegate = (o, r) => ((AnalysisPointSettingsViewModel)o).SelectedMode == null || SoundSource.IsBearingStringValid(((AnalysisPointSettingsViewModel)o).BearingsString),
+                    },                                                                                 
+            });
         }
 
         public static IMessageBoxService MessageBoxService { get; set; }
+
+        #region public double Latitude { get; set; }
+
+        public double Latitude
+        {
+            get { return _latitude; }
+            set
+            {
+                _latitude = value;
+                NotifyPropertyChanged(LatitudeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LatitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.Latitude);
+        double _latitude;
+
+        #endregion
+
+        #region public double Longitude { get; set; }
+
+        public double Longitude
+        {
+            get { return _longitude; }
+            set
+            {
+                _longitude = value;
+                NotifyPropertyChanged(LongitudeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.Longitude);
+        double _longitude;
+
+        #endregion
+
+        #region public string BearingsString { get; set; }
+
+        public string BearingsString
+        {
+            get { return _bearingsString; }
+            set
+            {
+                if (_bearingsString == value) return;
+                _bearingsString = value;
+                NotifyPropertyChanged(BearingsStringChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BearingsStringChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.BearingsString);
+        string _bearingsString;
+
+        #endregion
 
         #region public AnalysisPoint AnalysisPoint { get; set; }
 
@@ -91,7 +166,7 @@ namespace ESME.Views.AcousticBuilder
         #endregion
 
         #region public bool IsItemSelected { get; set; }
-
+        [XmlIgnore]
         public bool IsItemSelected
         {
             get { return _isItemSelected; }
@@ -100,6 +175,7 @@ namespace ESME.Views.AcousticBuilder
                 if (_isItemSelected == value) return;
                 _isItemSelected = value;
                 NotifyPropertyChanged(IsItemSelectedChangedEventArgs);
+                NotifyPropertyChanged(IssItemSelectedChangedEventArgs);
             }
         }
 
@@ -107,6 +183,25 @@ namespace ESME.Views.AcousticBuilder
         bool _isItemSelected;
 
         #endregion
+
+        #region public bool IssItemSelected { get; set; }
+
+        public bool IssItemSelected
+        {
+            get { return _issItemSelected; }
+            set
+            {
+                if (_issItemSelected == value) return;
+                _issItemSelected = value;
+                NotifyPropertyChanged(IssItemSelectedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IssItemSelectedChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.IssItemSelected);
+        bool _issItemSelected;
+
+        #endregion
+
 
         #region public bool AnalysisPointIsChanged { get; set; }
 
@@ -130,11 +225,20 @@ namespace ESME.Views.AcousticBuilder
 
         public SimpleCommand<object, object> OkCommand
         {
-            get { return _okCommand ?? (_okCommand = new SimpleCommand<object, object>(delegate
-                                                                                       {
-                                                                                           if (AnalysisPoint != null) AnalysisPoint.Validate();
-                                                                                           CloseActivePopUpCommand.Execute(true);
-                                                                                       })); }
+            get
+            {
+                return _okCommand ??
+                       (_okCommand = new SimpleCommand<object, object>(
+                                             delegate { return IsValid; },
+                                             delegate
+                                             {
+                                                 AnalysisPoint.Latitude = Latitude;
+                                                 AnalysisPoint.Longitude = Longitude;
+                                                 if(SelectedMode != null) SelectedMode.BearingsString = BearingsString;
+                                                 if (AnalysisPoint != null) AnalysisPoint.Validate();
+                                                 CloseActivePopUpCommand.Execute(true);
+                                             }));
+            }
         }
 
         SimpleCommand<object, object> _okCommand;
