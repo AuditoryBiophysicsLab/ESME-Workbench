@@ -12,7 +12,6 @@ using ESME.Mapping;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.NAVO;
 using ESMEWorkBench.ViewModels.TransmissionLoss;
-using ExportOptionsViewModel = ESMEWorkBench.ViewModels.NAVO.ExportOptionsViewModel;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
@@ -593,27 +592,6 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _navoEnvironmentBuilder;
-#endif
-        #endregion
-
-        #region ExportAnalysisPointsToCASSCommand
-#if EXPERIMENTS_SUPPORTED
-
-        public SimpleCommand<object, object> ExportAnalysisPointsToCASSCommand
-        {
-            get
-            {
-                return _exportAnalysisPointsToCASS ?? (_exportAnalysisPointsToCASS = new SimpleCommand<object, object>(delegate { return ((_experiment != null) && (_experiment.NemoFile != null) && (!string.IsNullOrEmpty(_experiment.BathymetryFileName) || (!string.IsNullOrEmpty(_experiment.SoundSpeedFileName) || !string.IsNullOrEmpty(_experiment.SedimentFileName) || !string.IsNullOrEmpty(_experiment.WindSpeedFileName) || ((_experiment.AnalysisPoints != null) && (_experiment.AnalysisPoints.Count > 0))))); },
-                                                                                                                       delegate
-                                                                                                                       {
-                                                                                                                           var exportOptionsViewModel = new ExportOptionsViewModel(_experiment, _dispatcher);
-                                                                                                                           var result = _visualizerService.ShowDialog("ExportOptionsView", exportOptionsViewModel);
-                                                                                                                           if (result.HasValue && result.Value) { }
-                                                                                                                       }));
-            }
-        }
-
-        SimpleCommand<object, object> _exportAnalysisPointsToCASS;
 #endif
         #endregion
 

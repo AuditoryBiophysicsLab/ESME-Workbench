@@ -90,14 +90,6 @@
 							                                 DialogTitle="Choose the Digital Bathymetric Database file"
 							                                 FileNameFilter="HDF5 files (*.h5)|*.h5|All files (*.*)|*.*"
 							                                 FileName="{Binding AppSettings.NAVOConfiguration.DBDBDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
-                            <Controls:FileOrDirectorySetting Caption="HFBL"
-							                                 IsDirectoryBrowser="True"
-                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
-							                                 FileName="{Binding AppSettings.NAVOConfiguration.HFBLDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
-                            <Controls:FileOrDirectorySetting Caption="LFBL"
-							                                 IsDirectoryBrowser="True"
-                                                             Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"
-							                                 FileName="{Binding AppSettings.NAVOConfiguration.LFBLDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Header="Required Extraction Tools"

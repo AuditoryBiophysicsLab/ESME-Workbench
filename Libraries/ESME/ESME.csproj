@@ -156,6 +156,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Environment\NAVO\ChenMilleroLi.cs" />
+    <Compile Include="Environment\NAVO\BottomLossBackgroundExtractor.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Environment\NAVO\DBDBBackgroundExtractor.cs">
       <SubType>Component</SubType>
     </Compile>

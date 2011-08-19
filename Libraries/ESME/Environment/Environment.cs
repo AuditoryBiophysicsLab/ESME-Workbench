@@ -135,7 +135,7 @@ namespace ESME.Environment
         {
             ExportBathymetry(simAreaPath, areaToExport, backgroundTask);
             if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
-            ExportEnvironment(simAreaPath, timePeriods, areaToExport, backgroundTask);
+            //ExportEnvironment(simAreaPath, timePeriods, areaToExport, backgroundTask);
         }
 
         public static int EnvironmentExportStepCount(IEnumerable<NAVOTimePeriod> selectedTimePeriods)
@@ -155,7 +155,7 @@ namespace ESME.Environment
             result += selectedTimePeriods.Count();
             return result;
         }
-
+#if false
         public void ExportEnvironment(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, BackgroundTask backgroundTask = null)
         {
             if ((Bathymetry == null) || (Sediment == null) || (SoundSpeed == null) || (Salinity == null) || (Temperature == null) || (Wind == null)) throw new DataException("Unable to export environmental data: One or more required data types are not present");
@@ -210,6 +210,7 @@ namespace ESME.Environment
                 if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
             }
         }
+#endif
 
         public void ExportBathymetry(string simAreaPath, GeoRect areaToExport = null, BackgroundTask backgroundTask = null)
         {

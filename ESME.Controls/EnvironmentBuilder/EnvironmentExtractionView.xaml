@@ -11,7 +11,7 @@
         mc:Ignorable="d" 
         d:DataContext="{d:DesignInstance Type=EnvironmentBuilder:EnvironmentExtractionViewModel}">
     <StackPanel Orientation="Vertical">
-        <GroupBox Header="Bottom Type (select one or more)"
+        <GroupBox Header="Bottom type database"
                   Padding="5">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -93,10 +93,14 @@
                 </DockPanel>
             </GroupBox>
         </Grid>
-        <TextBlock Width="350"
-                   Margin="5"
-                   TextWrapping="WrapWithOverflow" 
-                   Text="{Binding Note}" />
+        <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                      MaxHeight="200"
+                      HorizontalScrollBarVisibility="Auto">
+            <TextBlock Width="350"
+                       Margin="5"
+                       TextWrapping="WrapWithOverflow" 
+                       Text="{Binding Note}" />
+        </ScrollViewer>
         <DockPanel LastChildFill="False"
 		           Margin="5 10">
             <Button Width="90"

@@ -164,6 +164,7 @@ namespace ESME.TransmissionLoss.CASS
 
         [XmlIgnore]
         public int CellCount { get { return RadialCount * DepthCellCount * RangeCellCount; } }
+
         #endregion
 
         #region Validation
@@ -259,6 +260,7 @@ namespace ESME.TransmissionLoss.CASS
         #endregion
 
         #region public bool IsRadiusSufficient { get; set; }
+        [XmlIgnore]
         public bool IsRadiusSufficient
         {
             get { return _isRadiusSufficient; }
@@ -279,12 +281,12 @@ namespace ESME.TransmissionLoss.CASS
 
         #region public float ThresholdRadius { get; set; }
 
+        [XmlIgnore]
         public float ThresholdRadius
         {
             get { return _thresholdRadius; }
             set
             {
-                if (_thresholdRadius == value) return;
                 _thresholdRadius = value;
                 NotifyPropertyChanged(ThresholdRadiusChangedEventArgs);
                 Debug.WriteLine("{0}: [{1:0.####}, {2:0.####}] {3}|{4}|{5} threshold radius {6:0.##}m", DateTime.Now, Latitude, Longitude, PlatformName, SourceName, ModeName, _thresholdRadius);
@@ -301,6 +303,25 @@ namespace ESME.TransmissionLoss.CASS
         }
 
         #endregion
+
+        #region public float[] ThresholdRadii { get; set; }
+
+        public float[] ThresholdRadii
+        {
+            get { return _thresholdRadii; }
+            set
+            {
+                if (_thresholdRadii == value) return;
+                _thresholdRadii = value;
+                NotifyPropertyChanged(ThresholdRadiiChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ThresholdRadiiChangedEventArgs = ObservableHelper.CreateArgs<CASSOutput>(x => x.ThresholdRadii);
+        float[] _thresholdRadii;
+
+        #endregion
+
 
         public void CheckThreshold(float threshold, Dispatcher dispatcher)
         {
@@ -319,21 +340,23 @@ namespace ESME.TransmissionLoss.CASS
                     unloadAfterCheck = true;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                if (!string.IsNullOrEmpty(ValidationErrorText)) ValidationErrorText += "\n";
+                ValidationErrorText += "Error loading radial data: " + e.Message + "\nPropagation file is corrupted.";
                 return;    
             }
             if (Pressures == null) throw new ApplicationException("No radial data found");
             var allRadialsBelowThreshold = true;
-            var thresholdRadii = new List<float>();
-            Parallel.ForEach(Pressures, currentRadial =>
+            ThresholdRadii = new float[Pressures.Count];
+            Parallel.For(0, Pressures.Count, radialIndex =>
             {
                 float rangeBelowThreshold;
-                var isBelowThreshold = IsRadialBelowThreshold(currentRadial, threshold, out rangeBelowThreshold);
+                var isBelowThreshold = IsRadialBelowThreshold(Pressures[radialIndex], threshold, out rangeBelowThreshold);
                 if (!isBelowThreshold) allRadialsBelowThreshold = false;
-                lock (thresholdRadii) thresholdRadii.Add(rangeBelowThreshold);
+                ThresholdRadii[radialIndex] = rangeBelowThreshold;
             });
-            ThresholdRadius = thresholdRadii.Max();
+            ThresholdRadius = ThresholdRadii.Max();
             dispatcher.InvokeIfRequired(() => IsRadiusSufficient = allRadialsBelowThreshold);
             if (unloadAfterCheck) Pressures = null;
         }

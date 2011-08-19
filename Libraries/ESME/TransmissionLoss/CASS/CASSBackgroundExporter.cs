@@ -9,26 +9,6 @@ namespace ESME.TransmissionLoss.CASS
 {
     public class CASSBackgroundExporter : NAVOBackgroundExtractor
     {
-        #region public Bathymetry Bathymetry { get; set; }
-
-        public Bathymetry Bathymetry
-        {
-            get { return _bathymetry; }
-            set
-            {
-                if (_bathymetry == value) return;
-                _bathymetry = value;
-                NotifyPropertyChanged(BathymetryChangedEventArgs);
-                //Console.WriteLine("CASS Exporter got bathymetry...");
-                CheckForSemaphoreRelease();
-            }
-        }
-
-        static readonly PropertyChangedEventArgs BathymetryChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.Bathymetry);
-        Bathymetry _bathymetry;
-
-        #endregion
-
         #region public string BathymetryFileName { get; set; }
 
         public string BathymetryFileName
@@ -119,55 +99,147 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
+        #region public EnvironmentData<BottomLossData> BottomLossData { get; set; }
+
+        public EnvironmentData<BottomLossData> BottomLossData
+        {
+            get { return _bottomLossData; }
+            set
+            {
+                if (_bottomLossData == value) return;
+                _bottomLossData = value;
+                NotifyPropertyChanged(BottomLossDataChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs BottomLossDataChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.BottomLossData);
+        EnvironmentData<BottomLossData> _bottomLossData;
+
+        #endregion
+
+        #region public bool ExportHFEVA { get; set; }
+
+        public bool ExportHFEVA
+        {
+            get { return _exportHFEVA; }
+            set
+            {
+                if (_exportHFEVA == value) return;
+                _exportHFEVA = value;
+                NotifyPropertyChanged(ExportHFEVAChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExportHFEVAChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.ExportHFEVA);
+        bool _exportHFEVA;
+
+        #endregion
+
+        #region public bool ExportHFBL { get; set; }
+
+        public bool ExportHFBL
+        {
+            get { return _exportHFBL; }
+            set
+            {
+                if (_exportHFBL == value) return;
+                _exportHFBL = value;
+                NotifyPropertyChanged(ExportHFBLChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExportHFBLChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.ExportHFBL);
+        bool _exportHFBL;
+
+        #endregion
+
+        #region public bool ExportLFBLHFB { get; set; }
+
+        public bool ExportLFBLHFB
+        {
+            get { return _exportLFBLHFB; }
+            set
+            {
+                if (_exportLFBLHFB == value) return;
+                _exportLFBLHFB = value;
+                NotifyPropertyChanged(ExportLFBLHFBChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExportLFBLHFBChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.ExportLFBLHFB);
+        bool _exportLFBLHFB;
+
+        #endregion
+
+        #region public bool ExportLFBLPE { get; set; }
+
+        public bool ExportLFBLPE
+        {
+            get { return _exportLFBLPE; }
+            set
+            {
+                if (_exportLFBLPE == value) return;
+                _exportLFBLPE = value;
+                NotifyPropertyChanged(ExportLFBLPEChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ExportLFBLPEChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.ExportLFBLPE);
+        bool _exportLFBLPE;
+
+        #endregion
+
         readonly Mutex _mutex = new Mutex();
 
         void CheckForSemaphoreRelease()
         {
-            _mutex.WaitOne();
-            var sb = new StringBuilder();
-            sb.Append("Waiting for ");
-            if (Sediment == null) sb.Append("sediment, ");
-            if (Wind == null) sb.Append("wind, ");
-            if (ExtendedAndAveragedSoundSpeeds == null) sb.Append("soundspeed, ");
-            sb.Remove(sb.Length - 2, 2);
-            sb.Append(" data");
-            RunState = sb.ToString();
-            if ((Bathymetry != null) || ((Sediment != null) && (ExtendedAndAveragedSoundSpeeds != null) && (Wind != null)))
+            try
+            {
+                _mutex.WaitOne();
+                var sb = new StringBuilder();
+                sb.Append("Waiting for ");
+                if (ExportHFEVA && (Sediment == null)) sb.Append("sediment, ");
+                if ((ExportHFBL || ExportLFBLHFB || ExportLFBLPE) && (BottomLossData == null)) sb.Append("bottom loss, ");
+                if (Wind == null) sb.Append("wind, ");
+                if (ExtendedAndAveragedSoundSpeeds == null) sb.Append("soundspeed, ");
+                sb.Remove(sb.Length - 2, 2);
+                sb.Append(" data");
+                RunState = sb.ToString();
+                if (ExportHFEVA && Sediment == null) return;
+                if ((ExportHFBL || ExportLFBLHFB || ExportLFBLPE) && (BottomLossData == null)) return;
+                if (Wind == null) return;
+                if (ExtendedAndAveragedSoundSpeeds == null) return;
                 WaitSemaphore.Release();
-            _mutex.ReleaseMutex();
+            }
+            finally
+            {
+                _mutex.ReleaseMutex();
+            }
         }
 
         protected override void Run(object sender, DoWorkEventArgs e)
         {
             var backgroundExtractor = (CASSBackgroundExporter)e.Argument;
 
-            RunState = "Waiting for extended sediment, wind, soundspeed data";
+            RunState = "Waiting for environment data";
             TaskName = "Exporting NAEMO data";
             WaitSemaphore.WaitOne();
             RunState = "Running";
-
-            if (Bathymetry != null)
+            while ((ExtendedAndAveragedSoundSpeeds[TimePeriod] == null) || (Wind[TimePeriod] == null) || (ExtractionArea == null))
             {
-                TaskName = "Exporting NAEMO bathymetry";
-                Bathymetry.ToYXZ(backgroundExtractor.DestinationPath, -1);
+                var sb = new StringBuilder();
+                sb.Append("Still waiting on ");
+                if (ExtendedAndAveragedSoundSpeeds[TimePeriod] == null) sb.Append("sound speed, ");
+                if (Wind[TimePeriod] == null) sb.Append("wind, ");
+                if (ExtractionArea == null) sb.Append("extraction area, ");
+                if ((ExportHFBL || ExportLFBLHFB || ExportLFBLPE) && (BottomLossData == null)) sb.Append("bottom loss, ");
+                sb.Remove(sb.Length - 2, 2);
+                TaskName = sb.ToString();
+                Thread.Sleep(100);
             }
-            else
-            {
-                while ((ExtendedAndAveragedSoundSpeeds[TimePeriod] == null) || (Wind[TimePeriod] == null) || (ExtractionArea == null))
-                {
-                    var sb = new StringBuilder();
-                    sb.Append("Still waiting on ");
-                    if (ExtendedAndAveragedSoundSpeeds[TimePeriod] == null) sb.Append("sound speed, ");
-                    if (Wind[TimePeriod] == null) sb.Append("wind, ");
-                    if (ExtractionArea == null) sb.Append("extraction area, ");
-                    sb.Remove(sb.Length - 2, 2);
-                    TaskName = sb.ToString();
-                    Thread.Sleep(100);
-                }
-                TaskName = "Exporting NAEMO environment for " + TimePeriod;
-                var environmentFileName = backgroundExtractor.DestinationPath;
-                CASSFiles.WriteEnvironmentFile(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], backgroundExtractor, BathymetryFileName, OverlayFileName);
-            }
+            TaskName = "Exporting NAEMO environment for " + TimePeriod;
+            var environmentFileName = backgroundExtractor.DestinationPath;
+            CASSFiles.WriteEnvironmentFiles(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], BathymetryFileName, OverlayFileName, ExportHFEVA, ExportHFBL, ExportLFBLHFB, ExportLFBLPE, BottomLossData, backgroundExtractor);
 
             backgroundExtractor.Value++;
         }
