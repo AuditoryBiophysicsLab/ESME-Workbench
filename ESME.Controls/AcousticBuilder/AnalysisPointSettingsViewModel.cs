@@ -25,8 +25,7 @@ namespace ESME.Views.AcousticBuilder
             IsItemSelected = false;
             Latitude = AnalysisPoint.Latitude;
             Longitude = AnalysisPoint.Longitude;
-            BearingsString = SelectedMode != null ? SelectedMode.BearingsString : "";
-
+            
             ValidationRules.AddRange(new List<ValidationRule>
             {
                     new ValidationRule
@@ -41,12 +40,6 @@ namespace ESME.Views.AcousticBuilder
                             Description = "Longitude is out of range",
                             RuleDelegate = (o, r) =>RangeCheck(((AnalysisPointSettingsViewModel)o).Longitude, -180, 180),
                     },
-                    new ValidationRule
-                    {
-                            PropertyName = "BearingsString",
-                            Description = "Must contain one or more comma-separated bearings.  All bearings must vary between 0 and 360 degrees",
-                            RuleDelegate = (o, r) => ((AnalysisPointSettingsViewModel)o).SelectedMode == null || SoundSource.IsBearingStringValid(((AnalysisPointSettingsViewModel)o).BearingsString),
-                    },                                                                                 
             });
         }
 
@@ -83,24 +76,6 @@ namespace ESME.Views.AcousticBuilder
 
         static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.Longitude);
         double _longitude;
-
-        #endregion
-
-        #region public string BearingsString { get; set; }
-
-        public string BearingsString
-        {
-            get { return _bearingsString; }
-            set
-            {
-                if (_bearingsString == value) return;
-                _bearingsString = value;
-                NotifyPropertyChanged(BearingsStringChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs BearingsStringChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.BearingsString);
-        string _bearingsString;
 
         #endregion
 
@@ -175,7 +150,6 @@ namespace ESME.Views.AcousticBuilder
                 if (_isItemSelected == value) return;
                 _isItemSelected = value;
                 NotifyPropertyChanged(IsItemSelectedChangedEventArgs);
-                NotifyPropertyChanged(IssItemSelectedChangedEventArgs);
             }
         }
 
@@ -183,25 +157,6 @@ namespace ESME.Views.AcousticBuilder
         bool _isItemSelected;
 
         #endregion
-
-        #region public bool IssItemSelected { get; set; }
-
-        public bool IssItemSelected
-        {
-            get { return _issItemSelected; }
-            set
-            {
-                if (_issItemSelected == value) return;
-                _issItemSelected = value;
-                NotifyPropertyChanged(IssItemSelectedChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IssItemSelectedChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.IssItemSelected);
-        bool _issItemSelected;
-
-        #endregion
-
 
         #region public bool AnalysisPointIsChanged { get; set; }
 
@@ -234,7 +189,6 @@ namespace ESME.Views.AcousticBuilder
                                              {
                                                  AnalysisPoint.Latitude = Latitude;
                                                  AnalysisPoint.Longitude = Longitude;
-                                                 if(SelectedMode != null) SelectedMode.BearingsString = BearingsString;
                                                  if (AnalysisPoint != null) AnalysisPoint.Validate();
                                                  CloseActivePopUpCommand.Execute(true);
                                              }));
@@ -298,7 +252,10 @@ namespace ESME.Views.AcousticBuilder
             {
                 return _radialsLostFocus ??
                        (_radialsLostFocus =
-                        new SimpleCommand<object, object>(delegate { foreach (var mode in AvailableModes) mode.BearingsString = null; }));
+                        new SimpleCommand<object, object>(delegate
+                        {
+                            foreach (var mode in AvailableModes) mode.BearingsString = null;
+                        }));
             }
         }
 
