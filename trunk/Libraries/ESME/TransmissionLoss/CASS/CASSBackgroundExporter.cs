@@ -109,6 +109,7 @@ namespace ESME.TransmissionLoss.CASS
                 if (_bottomLossData == value) return;
                 _bottomLossData = value;
                 NotifyPropertyChanged(BottomLossDataChangedEventArgs);
+                CheckForSemaphoreRelease();
             }
         }
 

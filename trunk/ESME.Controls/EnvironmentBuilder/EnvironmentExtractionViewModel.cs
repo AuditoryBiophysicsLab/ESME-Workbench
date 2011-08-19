@@ -344,18 +344,18 @@ namespace ESME.Views.EnvironmentBuilder
                 foreach (var timePeriod in MonthCheckboxes.SelectedTimePeriods)
                     EnvironmentDescriptors.Add(new EnvironmentDescriptor
                     {
-                        EnvironmentName = string.Format("{0}_{1}{2}.dat", _selectedBathymetry, timePeriod, database),
+                        EnvironmentName = string.Format("{0}_env_{1}{2}.dat", _selectedBathymetry, timePeriod, database),
                         TimePeriod = timePeriod,
                     });
                 foreach (var timePeriod in SeasonCheckboxes.SelectedTimePeriods)
                     EnvironmentDescriptors.Add(new EnvironmentDescriptor
                     {
-                        EnvironmentName = string.Format("{0}_{1}{2}.dat", _selectedBathymetry, timePeriod, database),
+                        EnvironmentName = string.Format("{0}_env_{1}{2}.dat", _selectedBathymetry, timePeriod, database),
                         TimePeriod = timePeriod,
                     });
             }
             foreach (var environmentDescriptor in EnvironmentDescriptors)
-                sb.Append(string.Format("{0}, ", environmentDescriptor.EnvironmentName));
+                sb.Append(string.Format("{0}\n", environmentDescriptor.EnvironmentName));
             sb.Remove(sb.Length - 2, 2);
             Note = string.Format("Environment file count: {0}\nBoundary overlay: {1}.\nFiles to be created:\n{2}", EnvironmentDescriptors.Count, _selectedOverlay, sb);
         }

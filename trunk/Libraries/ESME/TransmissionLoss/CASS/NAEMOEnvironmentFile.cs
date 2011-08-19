@@ -128,7 +128,8 @@ namespace ESME.TransmissionLoss.CASS
             var resarray = File.ReadAllLines(environmentFileName).ToList();
             var rawvalues = new List<List<string>>();
             var curLineIndex = 0;
-            var space = new[] {' '};
+            var space = new[] { ' ' };
+            var equals = new[] { '=' };
             //make packets
             while (curLineIndex < resarray.Count)
             {
@@ -163,9 +164,9 @@ namespace ESME.TransmissionLoss.CASS
                 if (!double.TryParse(packet[1].Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out lon)) throw new DataMisalignedException("");
                 var retpacket = new NAEMOEnvironmentLocation(new EarthCoordinate(lat, lon))
                 {
-                    Latitude = lat,
-                    Longitude = lon,
-                    Filename = environmentFileName
+                        Latitude = lat,
+                        Longitude = lon,
+                        Filename = environmentFileName
                 };
                 var curGroupLineIndex = 0;
                 while (curGroupLineIndex < packet.Count)
@@ -181,7 +182,8 @@ namespace ESME.TransmissionLoss.CASS
                             double depth;
                             double speed;
                             if (!double.TryParse(packet[index].Split(space, StringSplitOptions.RemoveEmptyEntries)[0], out depth) ||
-                                !double.TryParse(packet[index].Split(space, StringSplitOptions.RemoveEmptyEntries)[1], out speed)) throw new DataException("");
+                                !double.TryParse(packet[index].Split(space, StringSplitOptions.RemoveEmptyEntries)[1], out speed)) 
+                                throw new DataException("");
                             depths.Add(depth);
                             speeds.Add(speed);
                             index++;
@@ -189,23 +191,28 @@ namespace ESME.TransmissionLoss.CASS
                         retpacket.Depths = depths;
                         retpacket.Soundspeeds = speeds;
                     }
-                    if (!curLine.StartsWith("BOTTOM REFLECTION")) continue;
-                    var bottom = packet[curGroupLineIndex++];
-                    if (bottom.Contains("WIND SPEED"))
-                    {
-                        double wind;
-                        if (!double.TryParse(bottom.Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
-                        retpacket.WindSpeed = wind;
-                    }
-                    else
-                    {
-                        retpacket.BottomType = bottom;
-                        var speed = packet[curGroupLineIndex];
-                        double wind;
-                        if (!double.TryParse(speed.Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
-                        retpacket.WindSpeed = wind;
-                    }
+                    if (packet[curGroupLineIndex].StartsWith("BOTTOM REFLECTION")) break;
                 }
+                var model = packet[curGroupLineIndex++].Split(equals, StringSplitOptions.RemoveEmptyEntries);
+                retpacket.BottomTypeModel = model[1].Trim().ToUpper();
+                switch (model[1].Trim().ToUpper())
+                {
+                    case "HFEVA":
+                        retpacket.BottomType = packet[curGroupLineIndex++];
+                        break;
+                    case "HFBL":
+                        curGroupLineIndex++;    // Skip one line
+                        break;
+                    case "LFBL_HFB":
+                        curGroupLineIndex += 12;
+                        break;
+                    case "LFBL_PE":
+                        curGroupLineIndex += 11;
+                        break;
+                }
+                double wind;
+                if (!double.TryParse(packet[curGroupLineIndex++].Split(space, StringSplitOptions.RemoveEmptyEntries)[3], out wind)) throw new DataException("");
+                retpacket.WindSpeed = wind;
                 result.Locations.Add(retpacket);
             }
             result.EnvironmentInformation = new EnvironmentInformation
@@ -218,12 +225,15 @@ namespace ESME.TransmissionLoss.CASS
             foreach (var location in result.Locations)
             {
                 windData.EnvironmentData.Add(new WindSample(location, (float)location.WindSpeed));
-                var bottomType = location.BottomType == "SAND" ? "Medium Sand or Sand" : location.BottomType;
-                result.EnvironmentInformation.Sediment.Samples.Add(new SedimentSample(location,
-                                                               new SedimentSampleBase
-                                                               {
-                                                                    SampleValue = (short)Model.SedimentTypes.Find(bottomType).HFEVACategory
-                                                               }));
+                if (location.BottomTypeModel == "HFEVA")
+                {
+                    var bottomType = location.BottomType == "SAND" ? "Medium Sand or Sand" : location.BottomType;
+                    result.EnvironmentInformation.Sediment.Samples.Add(new SedimentSample(location,
+                                                                   new SedimentSampleBase
+                                                                   {
+                                                                       SampleValue = (short)Model.SedimentTypes.Find(bottomType).HFEVACategory
+                                                                   }));
+                }
                 var profileData = new DepthValuePairs<float>();
                 for (var depthIndex = 0; depthIndex < location.Depths.Count; depthIndex++)
                     profileData.Add(new DepthValuePair<float>((float)location.Depths[depthIndex], (float)location.Soundspeeds[depthIndex]));

@@ -1105,7 +1105,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
             var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
 
-            var selectedTimePeriods = vm.EnvironmentDescriptors.Select(t => t.TimePeriod).ToList();
+            var selectedTimePeriods = vm.EnvironmentDescriptors.Select(t => t.TimePeriod).Distinct().ToList();
             var requiredMonths = selectedTimePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
             var allMonths = new List<NAVOTimePeriod>();
             foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
@@ -1122,7 +1122,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 TimePeriod = t,
                 ExtractionArea = extractionArea,
                 NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                DestinationPath = Path.Combine(environmentPath, vm.EnvironmentDescriptors.Find(descriptor => descriptor.TimePeriod == t).EnvironmentName),
+                DestinationPath = Path.Combine(environmentPath, string.Format("{0}_env_{1}", bathymetryName, t.ToString().ToLower())),
                 UseExpandedExtractionArea = false,
                 ExportHFEVA = vm.GenerateHFEVA,
                 ExportHFBL = vm.GenerateHFBL,
@@ -1135,23 +1135,85 @@ namespace ESMEWorkBench.ViewModels.Main
                 exporter.RunWorkerCompleted += (s, e) =>
                 {
                     var curExporter = (CASSBackgroundExporter)s;
-                    var metadataFilename = NAEMOMetadataBase.MetadataFilename(curExporter.DestinationPath);
-                    var metadata = new NAEMOEnvironmentMetadata
-                    {
-                        BathymetryName = Path.GetFileNameWithoutExtension(curExporter.BathymetryFileName),
-                        OverlayFilename = Path.GetFileNameWithoutExtension(curExporter.OverlayFileName),
-                        TimePeriod = curExporter.TimePeriod,
-                        Bounds = extractionArea,
-                        Filename = metadataFilename,
-                    };
-                    metadata.Save();
-                    var environmentDescriptor = new NAEMOEnvironmentDescriptor { DataFilename = curExporter.DestinationPath, Metadata = metadata };
+                    
                     lock (NAEMOEnvironmentDescriptors)
                     {
-                        NAEMOEnvironmentDescriptors.Add(new KeyValuePair<string, NAEMOEnvironmentDescriptor>(Path.GetFileNameWithoutExtension(curExporter.DestinationPath),
-                                                                                                                                        environmentDescriptor));
+                        string environmentFilename;
+                        NAEMOEnvironmentDescriptor environmentDescriptor;
+                        if (curExporter.ExportHFEVA)
+                        {
+                            environmentFilename = string.Format("{0}.dat", curExporter.DestinationPath);
+                            environmentDescriptor = new NAEMOEnvironmentDescriptor
+                            {
+                                DataFilename = environmentFilename,
+                                Metadata = new NAEMOEnvironmentMetadata
+                                {
+                                    BathymetryName = Path.GetFileNameWithoutExtension(curExporter.BathymetryFileName),
+                                    OverlayFilename = Path.GetFileNameWithoutExtension(curExporter.OverlayFileName),
+                                    TimePeriod = curExporter.TimePeriod,
+                                    Bounds = extractionArea,
+                                    Filename = NAEMOMetadataBase.MetadataFilename(environmentFilename),
+                                }
+                            };
+                            environmentDescriptor.Metadata.Save();
+                            NAEMOEnvironmentDescriptors.Add(new KeyValuePair<string, NAEMOEnvironmentDescriptor>(Path.GetFileNameWithoutExtension(environmentFilename), environmentDescriptor));
+                        }
+                        if (curExporter.ExportHFBL)
+                        {
+                            environmentFilename = string.Format("{0}-hfbl.dat", curExporter.DestinationPath);
+                            environmentDescriptor = new NAEMOEnvironmentDescriptor
+                            {
+                                DataFilename = environmentFilename,
+                                Metadata = new NAEMOEnvironmentMetadata
+                                {
+                                    BathymetryName = Path.GetFileNameWithoutExtension(curExporter.BathymetryFileName),
+                                    OverlayFilename = Path.GetFileNameWithoutExtension(curExporter.OverlayFileName),
+                                    TimePeriod = curExporter.TimePeriod,
+                                    Bounds = extractionArea,
+                                    Filename = NAEMOMetadataBase.MetadataFilename(environmentFilename),
+                                }
+                            };
+                            environmentDescriptor.Metadata.Save();
+                            NAEMOEnvironmentDescriptors.Add(new KeyValuePair<string, NAEMOEnvironmentDescriptor>(Path.GetFileNameWithoutExtension(environmentFilename), environmentDescriptor));
+                        }
+                        if (curExporter.ExportLFBLHFB)
+                        {
+                            environmentFilename = string.Format("{0}-lfbl-hfb.dat", curExporter.DestinationPath);
+                            environmentDescriptor = new NAEMOEnvironmentDescriptor
+                            {
+                                DataFilename = environmentFilename,
+                                Metadata = new NAEMOEnvironmentMetadata
+                                {
+                                    BathymetryName = Path.GetFileNameWithoutExtension(curExporter.BathymetryFileName),
+                                    OverlayFilename = Path.GetFileNameWithoutExtension(curExporter.OverlayFileName),
+                                    TimePeriod = curExporter.TimePeriod,
+                                    Bounds = extractionArea,
+                                    Filename = NAEMOMetadataBase.MetadataFilename(environmentFilename),
+                                }
+                            };
+                            environmentDescriptor.Metadata.Save();
+                            NAEMOEnvironmentDescriptors.Add(new KeyValuePair<string, NAEMOEnvironmentDescriptor>(Path.GetFileNameWithoutExtension(environmentFilename), environmentDescriptor));
+                        }
+                        if (curExporter.ExportLFBLPE)
+                        {
+                            environmentFilename = string.Format("{0}-lfbl-pe.dat", curExporter.DestinationPath);
+                            environmentDescriptor = new NAEMOEnvironmentDescriptor
+                            {
+                                DataFilename = environmentFilename,
+                                Metadata = new NAEMOEnvironmentMetadata
+                                {
+                                    BathymetryName = Path.GetFileNameWithoutExtension(curExporter.BathymetryFileName),
+                                    OverlayFilename = Path.GetFileNameWithoutExtension(curExporter.OverlayFileName),
+                                    TimePeriod = curExporter.TimePeriod,
+                                    Bounds = extractionArea,
+                                    Filename = NAEMOMetadataBase.MetadataFilename(environmentFilename),
+                                }
+                            };
+                            environmentDescriptor.Metadata.Save();
+                            NAEMOEnvironmentDescriptors.Add(new KeyValuePair<string, NAEMOEnvironmentDescriptor>(Path.GetFileNameWithoutExtension(environmentFilename), environmentDescriptor));
+                        }
                         NAEMOBathymetryDescriptors.Sort();
-                        SelectedEnvironmentDescriptor = environmentDescriptor;
+                        SelectedEnvironmentDescriptor = null;
                     }
                 };
             }
