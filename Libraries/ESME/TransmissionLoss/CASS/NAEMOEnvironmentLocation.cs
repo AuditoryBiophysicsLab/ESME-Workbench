@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ESME.Environment;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.CASS
@@ -11,6 +10,7 @@ namespace ESME.TransmissionLoss.CASS
         public NAEMOEnvironmentLocation(Geo location) : base(location) {  }
         public List<double> Depths;
         public List<double> Soundspeeds;
+        public string BottomTypeModel;
         public string BottomType;
         public double WindSpeed;
         public string Filename;
