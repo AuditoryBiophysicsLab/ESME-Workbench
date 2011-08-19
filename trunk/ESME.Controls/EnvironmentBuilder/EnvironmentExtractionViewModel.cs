@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Windows.Input;
 using Cinch;
 using ESME.Environment.NAVO;
 
@@ -23,6 +24,118 @@ namespace ESME.Views.EnvironmentBuilder
             foreach (var item in SeasonCheckboxes) item.PropertyChanged += (o, args) => UpdateNote();
             UpdateNote();
         }
+
+        #region public bool GenerateHFEVA { get; set; }
+
+        public bool GenerateHFEVA
+        {
+            get { return _generateHFEVA; }
+            set
+            {
+                if (_generateHFEVA == value) return;
+                _generateHFEVA = value;
+                NotifyPropertyChanged(GenerateHFEVAChangedEventArgs);
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GenerateHFEVAChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentExtractionViewModel>(x => x.GenerateHFEVA);
+        bool _generateHFEVA;
+
+        #endregion
+
+        #region public bool HFEVAEnabled { get; set; }
+
+        public bool HFEVAEnabled
+        {
+            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.BSTDirectory); }
+        }
+
+        #endregion
+
+        #region public bool GenerateHFBL { get; set; }
+
+        public bool GenerateHFBL
+        {
+            get { return _generateHFBL; }
+            set
+            {
+                if (_generateHFBL == value) return;
+                _generateHFBL = value;
+                NotifyPropertyChanged(GenerateHFBLChangedEventArgs);
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GenerateHFBLChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentExtractionViewModel>(x => x.GenerateHFBL);
+        bool _generateHFBL;
+
+        #endregion
+
+        #region public bool HFBLEnabled { get; set; }
+
+        public bool HFBLEnabled
+        {
+            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath); }
+        }
+
+        #endregion
+
+        #region public bool GenerateLFBLHFB { get; set; }
+
+        public bool GenerateLFBLHFB
+        {
+            get { return _generateLFBLHFB; }
+            set
+            {
+                if (_generateLFBLHFB == value) return;
+                _generateLFBLHFB = value;
+                NotifyPropertyChanged(GenerateLFBLHFBChangedEventArgs);
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GenerateLFBLHFBChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentExtractionViewModel>(x => x.GenerateLFBLHFB);
+        bool _generateLFBLHFB;
+
+        #endregion
+
+        #region public bool LFBLHFBEnabled { get; set; }
+
+        public bool LFBLHFBEnabled
+        {
+            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath) || !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath); }
+        }
+
+        #endregion
+
+        #region public bool GenerateLFBLPE { get; set; }
+
+        public bool GenerateLFBLPE
+        {
+            get { return _generateLFBLPE; }
+            set
+            {
+                if (_generateLFBLPE == value) return;
+                _generateLFBLPE = value;
+                NotifyPropertyChanged(GenerateLFBLPEChangedEventArgs);
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GenerateLFBLPEChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentExtractionViewModel>(x => x.GenerateLFBLPE);
+        bool _generateLFBLPE;
+
+        #endregion
+
+        #region public bool LFBLPEEnabled { get; set; }
+
+        public bool LFBLPEEnabled
+        {
+            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath); }
+        }
+
+        #endregion
 
         #region SelectAllMonthsCommand
 
@@ -253,7 +366,9 @@ namespace ESME.Views.EnvironmentBuilder
         #region OkCommand
         public SimpleCommand<object, object> OkCommand
         {
-            get { return _ok ?? (_ok = new SimpleCommand<object, object>(delegate { return true; }, delegate { OkHandler(); })); }
+            get { return _ok ?? (_ok = new SimpleCommand<object, object>(
+                delegate { return (GenerateHFEVA || GenerateHFBL || GenerateLFBLHFB || GenerateLFBLPE) && (MonthCheckboxes.IsAtLeastOneChecked || SeasonCheckboxes.IsAtLeastOneChecked); }, 
+                delegate { OkHandler(); })); }
         }
 
         SimpleCommand<object, object> _ok;
@@ -316,6 +431,7 @@ namespace ESME.Views.EnvironmentBuilder
                 if (_isChecked == value) return;
                 _isChecked = value;
                 NotifyPropertyChanged(IsCheckedChangedEventArgs);
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 

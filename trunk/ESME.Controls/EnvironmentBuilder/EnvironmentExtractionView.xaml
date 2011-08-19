@@ -4,9 +4,14 @@
         Title="Environment Data Extraction"
         SizeToContent="WidthAndHeight" 
         ResizeMode="NoResize" 
-        WindowStyle="ToolWindow">
+        WindowStyle="ToolWindow" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder" 
+        mc:Ignorable="d" 
+        d:DataContext="{d:DesignInstance Type=EnvironmentBuilder:EnvironmentExtractionViewModel}">
     <StackPanel Orientation="Vertical">
-        <GroupBox Header="Bottom Type"
+        <GroupBox Header="Bottom Type (select one or more)"
                   Padding="5">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -15,13 +20,13 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <CheckBox Grid.Column="0" Content="HFEVA" IsChecked="{Binding GenerateHFEVA}" />
-                <CheckBox Grid.Column="1" Content="HFBL" IsChecked="{Binding GenerateHFEVA}" />
-                <CheckBox Grid.Column="2" Content="LFBL__HFB" IsChecked="{Binding GenerateHFEVA}" />
-                <CheckBox Grid.Column="3" Content="LFBL__PE" IsChecked="{Binding GenerateHFEVA}" />
+                <CheckBox Grid.Column="0" Content="HFEVA" IsChecked="{Binding GenerateHFEVA}" IsEnabled="{Binding HFEVAEnabled}"/>
+                <CheckBox Grid.Column="1" Content="HFBL" IsChecked="{Binding GenerateHFBL}" IsEnabled="{Binding HFBLEnabled}" />
+                <CheckBox Grid.Column="2" Content="LFBL__HFB" IsChecked="{Binding GenerateLFBLHFB}" IsEnabled="{Binding LFBLHFBEnabled}" />
+                <CheckBox Grid.Column="3" Content="LFBL__PE" IsChecked="{Binding GenerateLFBLPE}" IsEnabled="{Binding LFBLPEEnabled}" />
             </Grid>
         </GroupBox>
-        <Grid IsEnabled="{Binding NotExtractingData}">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -43,19 +48,19 @@
                                 Select None
                             </Button>
                         </StackPanel>
-                        <StackPanel DockPanel.Dock="Top">
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[January].IsChecked}">January</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[February].IsChecked}">February</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[March].IsChecked}">March</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[April].IsChecked}">April</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[May].IsChecked}">May</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[June].IsChecked}">June</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[July].IsChecked}">July</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[August].IsChecked}">August</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[September].IsChecked}">September</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[October].IsChecked}">October</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[November].IsChecked}">November</CheckBox>
-                            <CheckBox IsChecked="{Binding MonthCheckboxes[December].IsChecked}">December</CheckBox>
+                        <StackPanel DockPanel.Dock="Top" DataContext="{Binding MonthCheckboxes}">
+                            <CheckBox DataContext="{Binding .[January]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[February]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[March]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[April]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[May]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[June]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[July]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[August]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[September]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[October]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[November]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                            <CheckBox DataContext="{Binding .[December]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
                         </StackPanel>
                     </StackPanel>
                 </DockPanel>
@@ -77,13 +82,13 @@
                             Select None
                         </Button>
                     </StackPanel>
-                    <StackPanel DockPanel.Dock="Top">
-                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Spring].IsChecked}">Spring</CheckBox>
-                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Summer].IsChecked}">Summer</CheckBox>
-                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Fall].IsChecked}">Fall</CheckBox>
-                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Winter].IsChecked}">Winter</CheckBox>
-                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Warm].IsChecked}">Warm</CheckBox>
-                        <CheckBox IsChecked="{Binding SeasonCheckboxes[Cold].IsChecked}">Cold</CheckBox>
+                    <StackPanel DockPanel.Dock="Top" DataContext="{Binding SeasonCheckboxes}">
+                        <CheckBox DataContext="{Binding .[Spring]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                        <CheckBox DataContext="{Binding .[Summer]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                        <CheckBox DataContext="{Binding .[Fall]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                        <CheckBox DataContext="{Binding .[Winter]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                        <CheckBox DataContext="{Binding .[Warm]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
+                        <CheckBox DataContext="{Binding .[Cold]}" IsChecked="{Binding IsChecked}" Content="{Binding TimePeriod}"/>
                     </StackPanel>
                 </DockPanel>
             </GroupBox>
