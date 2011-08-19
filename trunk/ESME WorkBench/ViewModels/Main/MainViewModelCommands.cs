@@ -201,9 +201,9 @@ namespace ESMEWorkBench.ViewModels.Main
 #endif
         #endregion
 
-        #region LaunchNUWCReportGeneratorCommand
+        #region LaunchScenarioPostProcessorCommand
 
-        public SimpleCommand<object, object> LaunchNUWCReportGeneratorCommand
+        public SimpleCommand<object, object> LaunchScenarioPostProcessorCommand
         {
             get
             {
@@ -472,29 +472,37 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region LaunchMMMBSCommand
-
         public SimpleCommand<object, object> LaunchMMMBSCommand
         {
             get
             {
-                return _launchMMMBS ?? (_launchMMMBS = new SimpleCommand<object, object>(obj =>
-                                                                                         {
-                                                                                             var mbsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "3MB.exe");
-
-                                                                                             new Process
-                                                                                             {
-                                                                                                 StartInfo =
-                                                                                                     {
-                                                                                                         FileName = mbsPath,
-                                                                                                         WorkingDirectory = Path.GetDirectoryName(mbsPath),
-                                                                                                     }
-                                                                                             }.Start();
-                                                                                         }));
+                return _launchMMMBS ??
+                       (_launchMMMBS =
+                        new SimpleCommand<object, object>(delegate { return IsLaunchMMMBSCommandEnabled; },
+                                                          delegate { LaunchMMMBSHandler(); }));
             }
         }
 
         SimpleCommand<object, object> _launchMMMBS;
 
+        static bool IsLaunchMMMBSCommandEnabled
+        {
+            get { return File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "3MB.exe")); }
+        }
+
+        static void LaunchMMMBSHandler()
+        {
+            var mbsPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "3MB.exe");
+
+            new Process
+            {
+                StartInfo =
+                {
+                    FileName = mbsPath,
+                    WorkingDirectory = Path.GetDirectoryName(mbsPath),
+                }
+            }.Start();
+        }
         #endregion
 
         #region LaunchMMMBSpeciesBuilderCommand

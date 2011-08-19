@@ -339,6 +339,28 @@ namespace ESME.Metadata
 
         #endregion
 
+        #region EditEnvironmentCommand
+        public SimpleCommand<object, object> EditEnvironmentCommand
+        {
+            get
+            {
+                return _editEnvironment ??
+                       (_editEnvironment =
+                        new SimpleCommand<object, object>(delegate { return IsEditEnvironmentCommandEnabled; },
+                                                          delegate { EditEnvironmentHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _editEnvironment;
+
+        bool IsEditEnvironmentCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void EditEnvironmentHandler() { }
+        #endregion
+
         #region public NAEMOEnvironmentDescriptor SelectedEnvironment { get; set; }
         [XmlIgnore]
         public NAEMOEnvironmentDescriptor SelectedEnvironment
