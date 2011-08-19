@@ -5,7 +5,11 @@
 	    Title="New Range Complex"
 	    SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
-        WindowStyle="ToolWindow">
+        WindowStyle="ToolWindow" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:Locations="clr-namespace:ESME.Views.Locations" 
+        mc:Ignorable="d" 
+        d:DataContext="{d:DesignInstance Type=Locations:NewRangeComplexViewModel}">
 
     <StackPanel Margin="5">
         <DockPanel LastChildFill="True">
