@@ -218,7 +218,7 @@ namespace ESME.Environment.NAVO
             if (ExportCASSData)
             {
                 Status = "Exporting bathymetry data";
-
+#if false
                 var environment = new Environment
                 {
                         Bathymetry = Bathymetry.FromYXZ(BathymetryFilename, -1),
@@ -231,6 +231,7 @@ namespace ESME.Environment.NAVO
 
                 environment.Export(_simAreaPath, SelectedTimePeriods, environment.Bathymetry.Samples.GeoRect);
                 if (backgroundTask.CancellationPending) return;
+#endif
             }
 
             // At this point, the user can no longer cancel the operation.

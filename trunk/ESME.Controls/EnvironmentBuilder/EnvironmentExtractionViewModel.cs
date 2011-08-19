@@ -19,7 +19,7 @@ namespace ESME.Views.EnvironmentBuilder
         {
             _selectedOverlay = selectedOverlay;
             _selectedBathymetry = selectedBathymetry;
-
+            if (HFEVAEnabled) GenerateHFEVA = true;
             foreach (var item in MonthCheckboxes) item.PropertyChanged += (o, args) => UpdateNote();
             foreach (var item in SeasonCheckboxes) item.PropertyChanged += (o, args) => UpdateNote();
             UpdateNote();
@@ -35,7 +35,7 @@ namespace ESME.Views.EnvironmentBuilder
                 if (_generateHFEVA == value) return;
                 _generateHFEVA = value;
                 NotifyPropertyChanged(GenerateHFEVAChangedEventArgs);
-                CommandManager.InvalidateRequerySuggested();
+                UpdateNote();
             }
         }
 
@@ -63,7 +63,7 @@ namespace ESME.Views.EnvironmentBuilder
                 if (_generateHFBL == value) return;
                 _generateHFBL = value;
                 NotifyPropertyChanged(GenerateHFBLChangedEventArgs);
-                CommandManager.InvalidateRequerySuggested();
+                UpdateNote();
             }
         }
 
@@ -76,7 +76,7 @@ namespace ESME.Views.EnvironmentBuilder
 
         public bool HFBLEnabled
         {
-            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath); }
+            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath); }
         }
 
         #endregion
@@ -91,7 +91,7 @@ namespace ESME.Views.EnvironmentBuilder
                 if (_generateLFBLHFB == value) return;
                 _generateLFBLHFB = value;
                 NotifyPropertyChanged(GenerateLFBLHFBChangedEventArgs);
-                CommandManager.InvalidateRequerySuggested();
+                UpdateNote();
             }
         }
 
@@ -104,7 +104,7 @@ namespace ESME.Views.EnvironmentBuilder
 
         public bool LFBLHFBEnabled
         {
-            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath) || !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath); }
+            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath) || !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath); }
         }
 
         #endregion
@@ -119,7 +119,7 @@ namespace ESME.Views.EnvironmentBuilder
                 if (_generateLFBLPE == value) return;
                 _generateLFBLPE = value;
                 NotifyPropertyChanged(GenerateLFBLPEChangedEventArgs);
-                CommandManager.InvalidateRequerySuggested();
+                UpdateNote();
             }
         }
 
@@ -132,7 +132,7 @@ namespace ESME.Views.EnvironmentBuilder
 
         public bool LFBLPEEnabled
         {
-            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLDirectory) && !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath); }
+            get { return !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath); }
         }
 
         #endregion
@@ -198,57 +198,58 @@ namespace ESME.Views.EnvironmentBuilder
 
         void MonthCheckboxesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(MonthCheckboxesChangedEventArgs); }
         static readonly PropertyChangedEventArgs MonthCheckboxesChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentExtractionViewModel>(x => x.MonthCheckboxes);
+
         static CheckboxSettings _monthCheckboxes = new CheckboxSettings
-                                                   {
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.January
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.February
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.March
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.April
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.May
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.June
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.July
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.August
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.September
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.October
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.November
-                                                       },
-                                                       new CheckboxSetting
-                                                       {
-                                                           TimePeriod = NAVOTimePeriod.December
-                                                       },
-                                                   };
+        {
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.January
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.February
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.March
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.April
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.May
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.June
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.July
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.August
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.September
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.October
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.November
+                },
+                new CheckboxSetting
+                {
+                        TimePeriod = NAVOTimePeriod.December
+                },
+        };
 
         #endregion
 
@@ -317,49 +318,58 @@ namespace ESME.Views.EnvironmentBuilder
 
         void UpdateNote()
         {
-            if ((MonthCheckboxes.SelectedTimePeriods.Count() == 0) && (SeasonCheckboxes.SelectedTimePeriods.Count() == 0))
+            CommandManager.InvalidateRequerySuggested();
+            if (!(GenerateHFEVA || GenerateHFBL || GenerateLFBLHFB || GenerateLFBLPE))
             {
-                Note = "Note: You must select at least one time period to extract environment data.";
+                if ((MonthCheckboxes.SelectedTimePeriods.Count() == 0) && (SeasonCheckboxes.SelectedTimePeriods.Count() == 0))
+                    Note = "You must select at least one bottom type database\nYou must select at least one time period";
+                else Note = "You must select at least one bottom type database";
                 return;
             }
+            if ((MonthCheckboxes.SelectedTimePeriods.Count() == 0) && (SeasonCheckboxes.SelectedTimePeriods.Count() == 0))
+            {
+                Note = "You must select at least one time period";
+                return;
+            }
+            var selectedDatabases = new List<string>();
+            if (GenerateHFEVA) selectedDatabases.Add("");
+            if (GenerateHFBL) selectedDatabases.Add("-hfbl");
+            if (GenerateLFBLHFB) selectedDatabases.Add("-lfbl-hfb");
+            if (GenerateLFBLPE) selectedDatabases.Add("-lfbl-pe");
 
             EnvironmentDescriptors.Clear();
             var sb = new StringBuilder();
-            foreach (var timePeriod in MonthCheckboxes.SelectedTimePeriods)
-                EnvironmentDescriptors.Add(new EnvironmentDescriptor
-                {
-                        EnvironmentName = string.Format("{0}_{1}", _selectedBathymetry, timePeriod),
+            foreach (var database in selectedDatabases)
+            {
+                foreach (var timePeriod in MonthCheckboxes.SelectedTimePeriods)
+                    EnvironmentDescriptors.Add(new EnvironmentDescriptor
+                    {
+                        EnvironmentName = string.Format("{0}_{1}{2}.dat", _selectedBathymetry, timePeriod, database),
                         TimePeriod = timePeriod,
-                });
-            foreach (var timePeriod in SeasonCheckboxes.SelectedTimePeriods)
-                EnvironmentDescriptors.Add(new EnvironmentDescriptor
-                {
-                        EnvironmentName = string.Format("{0}_{1}", _selectedBathymetry, timePeriod),
+                    });
+                foreach (var timePeriod in SeasonCheckboxes.SelectedTimePeriods)
+                    EnvironmentDescriptors.Add(new EnvironmentDescriptor
+                    {
+                        EnvironmentName = string.Format("{0}_{1}{2}.dat", _selectedBathymetry, timePeriod, database),
                         TimePeriod = timePeriod,
-                });
+                    });
+            }
             foreach (var environmentDescriptor in EnvironmentDescriptors)
                 sb.Append(string.Format("{0}, ", environmentDescriptor.EnvironmentName));
             sb.Remove(sb.Length - 2, 2);
-            Note = string.Format("Note: Environment data will be extracted within the bounds of the overlay {0}.  The following environment files will be created:\n{1}", _selectedOverlay, sb);
+            Note = string.Format("Environment file count: {0}\nBoundary overlay: {1}.\nFiles to be created:\n{2}", EnvironmentDescriptors.Count, _selectedOverlay, sb);
         }
 
         #endregion
 
-        #region public List<EnvironmentDescriptors> EnvironmentDescriptor { get; set; }
+        #region List<EnvironmentDescriptors> EnvironmentDescriptor { get; set; }
 
         public List<EnvironmentDescriptor> EnvironmentDescriptors
         {
-            get { return _environmentDescriptor ?? (_environmentDescriptor = new List<EnvironmentDescriptor>()); }
-            set
-            {
-                if (_environmentDescriptor == value) return;
-                _environmentDescriptor = value;
-                NotifyPropertyChanged(EnvironmentDescriptorChangedEventArgs);
-            }
+            get { return _environmentDescriptor; }
         }
 
-        static readonly PropertyChangedEventArgs EnvironmentDescriptorChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentExtractionViewModel>(x => x.EnvironmentDescriptors);
-        List<EnvironmentDescriptor> _environmentDescriptor;
+        readonly List<EnvironmentDescriptor> _environmentDescriptor = new List<EnvironmentDescriptor>();
 
         #endregion
 
@@ -383,6 +393,7 @@ namespace ESME.Views.EnvironmentBuilder
     public class EnvironmentDescriptor
     {
         public string EnvironmentName { get; set; }
+        public string SedimentDatabaseName { get; set; }
         public NAVOTimePeriod TimePeriod { get; set; }
     }
 

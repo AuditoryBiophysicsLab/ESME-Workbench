@@ -255,7 +255,7 @@ namespace ESME.Mapping
                 {
                     Name = layerName,
                     LayerType = LayerType.Propagation,
-                    LineWidth = 4,
+                    LineWidth = 1,
                     CanBeRemoved = false,
                     CanBeReordered = true,
                     HasSettings = true,
@@ -315,8 +315,21 @@ namespace ESME.Mapping
                 displayPoints.Clear();
             }
 
+            if (curPoint.ThresholdRadii != null)
+            {
+                for (var radialIndex = 0; radialIndex <= radialCount; radialIndex++)
+                {
+                    var curRadialBearing = curPoint.RadialBearings[radialIndex % radialCount];
+                    displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing,
+                                                           curPoint.ThresholdRadii[radialIndex % radialCount]));
+                }
+                propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
+                displayPoints.Clear();
+            }
+
             if (!float.IsNaN(curPoint.ThresholdRadius))
             {
+                // Display circle at maximum threshold radius
                 for (var angle = 0; angle <= 360; angle++) circlePoints.Add(EarthCoordinate.Move(curPoint, angle, curPoint.ThresholdRadius));
                 propagationPointLayer.Add(new OverlayLineSegments(circlePoints.ToArray(), Colors.Red, 5));
             }

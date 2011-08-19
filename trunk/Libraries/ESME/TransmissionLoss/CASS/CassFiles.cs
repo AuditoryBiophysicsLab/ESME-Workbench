@@ -267,10 +267,23 @@ namespace ESME.TransmissionLoss.CASS
             }
         }
 
-        public static void WriteEnvironmentFile(string environmentFileName, GeoRect geoRect, Sediment sedimentType, SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, BackgroundTask backgroundTask = null, string bathymetryFileName = null, string overlayFileName = null)
+        public static void WriteEnvironmentFiles(string environmentFileName, GeoRect geoRect, Sediment sedimentType, 
+                                                 SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, string bathymetryFileName, 
+                                                 string overlayFileName, bool exportHFEVA, bool exportHFBL, bool exportLFBLHFB, bool exportLFBLPE, 
+                                                 EnvironmentData<BottomLossData> bottomLossData, BackgroundTask backgroundTask = null)
+        {
+            if (exportHFEVA) WriteEnvironmentFile(environmentFileName, geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFEVA", bottomLossData, backgroundTask);
+            if (exportHFBL) WriteEnvironmentFile(environmentFileName + "-hfbl", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFBL", bottomLossData, backgroundTask);
+            if (exportLFBLHFB) WriteEnvironmentFile(environmentFileName + "-lfbl-hfb", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "LFBL_HFB", bottomLossData, backgroundTask);
+            if (exportLFBLPE) WriteEnvironmentFile(environmentFileName + "-lfbl-pe", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "LFBL_PE", bottomLossData, backgroundTask);
+        }
+
+        static void WriteEnvironmentFile(string environmentFileName, GeoRect geoRect, Sediment sedimentType, 
+                                         TimePeriodEnvironmentData<SoundSpeedProfile> soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, string bathymetryFileName, 
+                                         string overlayFileName, string model, EnvironmentData<BottomLossData> bottomLossData, BackgroundTask backgroundTask = null)
         {
             var isFirstPoint = true;
-            using (var envFile = new StreamWriter(environmentFileName, false))
+            using (var envFile = new StreamWriter(environmentFileName + ".dat", false))
             {
                 envFile.WriteLine("SOUND SPEED MODEL = TABLE");
                 envFile.WriteLine("COMMENT TABLE");
@@ -288,14 +301,14 @@ namespace ESME.TransmissionLoss.CASS
                     for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                     {
                         WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(lat, lon),
-                                             ref isFirstPoint);
+                                             ref isFirstPoint, model, bottomLossData);
                         if (backgroundTask != null) backgroundTask.Value++;
                     }
                     if ((lat - geoRect.North) < 0.125)
                     {
                         if (backgroundTask != null) backgroundTask.Maximum++;
                         WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind,
-                                             new EarthCoordinate(geoRect.North, lon), ref isFirstPoint);
+                                             new EarthCoordinate(geoRect.North, lon), ref isFirstPoint, model, bottomLossData);
                         if (backgroundTask != null) backgroundTask.Value++;
                     }
                 }
@@ -305,14 +318,16 @@ namespace ESME.TransmissionLoss.CASS
                     for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                     {
                         WriteEnvironmentFile(envFile, sedimentType, soundSpeedField, wind,
-                                             new EarthCoordinate(lat, geoRect.East), ref isFirstPoint);
+                                             new EarthCoordinate(lat, geoRect.East), ref isFirstPoint, model, bottomLossData);
                         if (backgroundTask != null) backgroundTask.Value++;
                     }
                 }
             }
         }
 
-        static void WriteEnvironmentFile(TextWriter envFile, Sediment sediment, TimePeriodEnvironmentData<SoundSpeedProfile> soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, EarthCoordinate requestedLocation, ref bool isFirstPoint)
+        static void WriteEnvironmentFile(TextWriter envFile, Sediment sediment, TimePeriodEnvironmentData<SoundSpeedProfile> soundSpeedField, 
+                                         TimePeriodEnvironmentData<WindSample> wind, EarthCoordinate requestedLocation, ref bool isFirstPoint, 
+                                         string model, EnvironmentData<BottomLossData> bottomLossData)
         {
             // ssp is the nearest actual soundspeed profile to the point that's been requested.  The actual profiles are not laid out
             // in a grid, rather they are placed at quarter-degree grid points where there is water.  So grid points on land typically won't
@@ -322,10 +337,13 @@ namespace ESME.TransmissionLoss.CASS
             var ssp = soundSpeedField.EnvironmentData[requestedLocation];
             var roundedLat = Math.Round(requestedLocation.Latitude * 4) / 4;
             var roundedLon = Math.Round(requestedLocation.Longitude * 4) / 4;
+            BottomLossData bottomLoss = null;
+            if (bottomLossData != null) bottomLoss = bottomLossData[requestedLocation];
             if (ssp.Data.Count == 0) return;
             envFile.WriteLine(isFirstPoint ? "RESET ENVIRONMENT NUMBER" : "INCREMENT ENVIRONMENT NUMBER");
             envFile.WriteLine("COMMENT TABLE");
-            envFile.WriteLine("Requested Latitude: {0:0.0000} Longitude: {1:0.0000}", requestedLocation.Latitude, requestedLocation.Longitude);
+            envFile.WriteLine("Requested Latitude: {0:0.0000} Longitude: {1:0.0000}", requestedLocation.Latitude,
+                              requestedLocation.Longitude);
             envFile.WriteLine("Actual Profile Latitude: {0:0.0000} Longitude: {1:0.0000}", ssp.Latitude, ssp.Longitude);
             envFile.WriteLine("Synthesized Latitude: {0:0.0000} Longitude: {1:0.0000}", roundedLat, roundedLon);
             envFile.WriteLine("EOT");
@@ -334,17 +352,34 @@ namespace ESME.TransmissionLoss.CASS
             envFile.WriteLine("OCEAN SOUND SPEED TABLE");
             envFile.WriteLine("M         M/S       ");
             foreach (var datum in ssp.Data)
-                if (!float.IsNaN(datum.Value))
-                    envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", datum.Depth, datum.Value);
+                if (!float.IsNaN(datum.Value)) envFile.WriteLine("{0,-10:0.000}{1,-10:0.000}", datum.Depth, datum.Value);
                 else break;
             envFile.WriteLine("EOT");
-            envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = HFEVA");
+            model = model.ToUpper();
+            envFile.WriteLine("BOTTOM REFLECTION COEFFICIENT MODEL   = {0}", model);
+            if (model == "HFEVA")
+            {
+                var findResult = BottomSedimentTypeTable.CASSMap.Find(mapEntry => (int)mapEntry.Value == (int)sediment.Samples[requestedLocation].Data.SampleValue);
+                var sedimentTypeName = findResult == null ? "SAND" : findResult.Name;
+                envFile.WriteLine(sedimentTypeName);
+            }
+            if (model == "HFBL" || model == "LFBL_HFB") envFile.WriteLine("BOTTOM PROVINCE                       = {0}", bottomLoss.CurveNumber);
+            if (model == "LFBL_HFB" || model == "LFBL_PE")
+            {
+                envFile.WriteLine("BOTTOM-TO-WATER SOUND SPEED RATIO        = {0}", bottomLoss.RATIOD);
+                envFile.WriteLine("THIN LAYER THICKNESS                     = {0}", bottomLoss.DLD);
+                envFile.WriteLine("THIN LAYER SEDIMENT DENSITY              = {0}", bottomLoss.RHOLD);
+                envFile.WriteLine("SEDIMENT-SURFACE DENSITY                 = {0}", bottomLoss.RHOSD);
+                envFile.WriteLine("SOUND-SPEED GRADIENT AT TOP OF SEDIMENT  = {0}", bottomLoss.GD);
+                envFile.WriteLine("BETA SOUND-SPEED CURVATURE PARAMETER     = {0}", bottomLoss.BETAD);
+                envFile.WriteLine("ATTENUATION--LOSS AT TOP OF SEDIMENT     = {0}", bottomLoss.FKZD);
+                envFile.WriteLine("ATTENUATION GRADIENT                     = {0}", bottomLoss.FKZP);
+                envFile.WriteLine("FREQUENCY EXPONENT                       = {0}", bottomLoss.FEXP);
+                envFile.WriteLine("BASEMENT REFLECTION LOSS                 = {0}", -20.0 * Math.Log10(bottomLoss.BRFLD));
+                envFile.WriteLine("TWO WAY TRAVEL TIME TO GEOLOGIC BASEMENT = {0}", bottomLoss.SEDTHK_S);
+            }
             //var sedimentSample = sedimentType.Samples[location];
             //var sedimentTypeName = BottomSedimentTypeTable.Lookup(sedimentSample.Data.SampleValue).ToUpper();
-            var findResult =
-                BottomSedimentTypeTable.CASSMap.Find(mapEntry => mapEntry.Value == sediment.Samples[requestedLocation].Data.SampleValue);
-            var sedimentTypeName = findResult == null ? "SAND" : findResult.Name;
-            envFile.WriteLine(sedimentTypeName);
             envFile.WriteLine("WIND SPEED                            = {0:0.###} KNOTS", wind.EnvironmentData[requestedLocation].Data * 1.94384449);
             envFile.WriteLine();
             isFirstPoint = false;

@@ -73,26 +73,6 @@ namespace ESME.Environment.NAVO
                     },
                     new ValidationRule
                     {
-                            PropertyName = "HFBLDirectory",
-                            Description = "Directory must exist",
-                            RuleDelegate = (o, r) =>
-                            {
-                                var ruleTarget = ((NAVOConfiguration)o).HFBLDirectory;
-                                return Directory.Exists(ruleTarget);
-                            },
-                    },
-                    new ValidationRule
-                    {
-                            PropertyName = "LFBLDirectory",
-                            Description = "Directory must exist",
-                            RuleDelegate = (o, r) =>
-                            {
-                                var ruleTarget = ((NAVOConfiguration)o).LFBLDirectory;
-                                return Directory.Exists(ruleTarget);
-                            },
-                    },
-                    new ValidationRule
-                    {
                             PropertyName = "HFBLEXEPath",
                             Description = "File must exist.",
                             RuleDelegate = (o, r) =>
@@ -297,42 +277,6 @@ namespace ESME.Environment.NAVO
 
         static readonly PropertyChangedEventArgs BSTDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.BSTDirectory);
         string _bSTDirectory;
-
-        #endregion
-
-        #region public string HFBLDirectory { get; set; }
-
-        public string HFBLDirectory
-        {
-            get { return _hfblDirectory; }
-            set
-            {
-                if (_hfblDirectory == value) return;
-                _hfblDirectory = value;
-                NotifyPropertyChanged(HFBLDirectoryChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs HFBLDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.HFBLDirectory);
-        string _hfblDirectory;
-
-        #endregion
-
-        #region public string LFBLDirectory { get; set; }
-
-        public string LFBLDirectory
-        {
-            get { return _lfblDirectory; }
-            set
-            {
-                if (_lfblDirectory == value) return;
-                _lfblDirectory = value;
-                NotifyPropertyChanged(LFBLDirectoryChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs LFBLDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.LFBLDirectory);
-        string _lfblDirectory;
 
         #endregion
 

@@ -85,7 +85,7 @@
     </Reference>
     <Reference Include="Kent.Boogaart.Converters, Version=1.1.0.0, Culture=neutral, PublicKeyToken=cc96fa93a217f7a1, processorArchitecture=MSIL" />
     <Reference Include="Kent.Boogaart.HelperTrinity, Version=1.2.0.0, Culture=neutral, PublicKeyToken=cc96fa93a217f7a1, processorArchitecture=MSIL" />
-    <Reference Include="MapSuiteCore, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="MapSuiteCore, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Windows.Shell, Version=3.5.41019.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -109,7 +109,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="WpfDesktopEdition, Version=4.5.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="WpfDesktopEdition, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -144,7 +144,6 @@
     <Compile Include="ViewModels\Main\OverrideCursor.cs" />
     <Compile Include="ViewModels\Main\SimulationViewModel.cs" />
     <Compile Include="ViewModels\NAVO\EnvironmentBuilderViewModel.cs" />
-    <Compile Include="ViewModels\NAVO\ExportOptionsViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ScenarioSimulatorLogViewModel.cs" />
     <Compile Include="ViewModels\NAVO\ScenarioSimulatorOptionsViewModel.cs" />
     <Compile Include="ViewModels\TransmissionLoss\AcousticEngineParameterViewModel.cs" />
