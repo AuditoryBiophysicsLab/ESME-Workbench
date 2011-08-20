@@ -4,7 +4,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Cinch;
+using ESME.Environment.Descriptors;
 using ESME.Views.LogFileViewer;
 using ESME;
 using ESME.Data;
@@ -26,16 +28,25 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(obj =>
-                                                                                         {
-                                                                                             var extraTypes = new List<Type>
-                                                                                                              {
-                                                                                                                  typeof (MapLayerViewModel), typeof (ShapefileMapLayer), typeof (OverlayShapeMapLayer), typeof (OverlayFileMapLayer)
-                                                                                                              };
-                                                                                             var programOptionsViewModel = new ApplicationOptionsViewModel();
-                                                                                             var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
-                                                                                             if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
-                                                                                             else Globals.AppSettings = AppSettings.Load(extraTypes);
-                                                                                         }));
+                {
+                    var extraTypes = new List<Type>
+                    {
+                            typeof (MapLayerViewModel),
+                            typeof (ShapefileMapLayer),
+                            typeof (OverlayShapeMapLayer),
+                            typeof (OverlayFileMapLayer)
+                    };
+                    var programOptionsViewModel = new ApplicationOptionsViewModel();
+                    var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
+                    if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
+                    Globals.AppSettings = AppSettings.Load(extraTypes);
+                    ESME.Globals.AppSettings = Globals.AppSettings;
+                    if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null &&
+                        File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
+                        Task.Factory.StartNew(
+                                              () =>
+                                              RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory,"SimAreas.csv"), _dispatcher));
+                }));
             }
         }
 
