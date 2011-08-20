@@ -177,7 +177,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _exportAnalysisPoints ??
                        (_exportAnalysisPoints =
-                        new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; },
+                        new SimpleCommand<object, object>(delegate { return IsScenarioLoaded && IsEnvironmentFileSelected; },
                                                           delegate { ExportAnalysisPointsHandler(); }));
             }
         }
