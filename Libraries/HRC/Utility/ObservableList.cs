@@ -98,10 +98,10 @@ namespace HRC.Utility
 
         public void Move(int oldIndex, int newIndex)
         {
-            var item = this[oldIndex];
-            RemoveAt(oldIndex);
+            var item = base[oldIndex];
+            base.RemoveAt(oldIndex);
             if (newIndex > oldIndex) newIndex--;
-            Insert(newIndex, item);
+            base.Insert(newIndex, item);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
         }
 

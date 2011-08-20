@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
@@ -220,6 +219,7 @@ namespace ESMEWorkBench.ViewModels.Map
                     for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
                     {
                         _wpfMap.Overlays.Add(((MapLayerViewModel)e.NewItems[itemIndex]).Overlay);
+                        _wpfMap.Refresh(((MapLayerViewModel)e.NewItems[itemIndex]).Overlay);
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -229,6 +229,7 @@ namespace ESMEWorkBench.ViewModels.Map
                         _wpfMap.Overlays.RemoveAt(e.OldStartingIndex);
                         _wpfMap.Overlays.Insert(e.NewStartingIndex + itemIndex, ((MapLayerViewModel)e.NewItems[itemIndex]).Overlay);
                     }
+                    _wpfMap.Refresh();
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     Debug.WriteLine("MapView: LayerCollection.Remove");
@@ -242,14 +243,15 @@ namespace ESMEWorkBench.ViewModels.Map
                     for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
                     {
                         _wpfMap.Overlays[e.OldStartingIndex + itemIndex] = ((MapLayerViewModel)e.NewItems[itemIndex]).Overlay;
+                        _wpfMap.Refresh(((MapLayerViewModel)e.NewItems[itemIndex]).Overlay);
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     Debug.WriteLine("MapView: LayerCollection.Reset");
                     _wpfMap.Overlays.Clear();
+                    foreach (var layer in MapLayers) _wpfMap.Overlays.Add(layer.Overlay);
                     break;
             }
-            _wpfMap.Refresh();
         }
 
         #endregion
@@ -359,45 +361,33 @@ namespace ESMEWorkBench.ViewModels.Map
             //_wpfMap.Overlays.MoveToTop(mapLayer.Overlay);
             //RefreshMap(true);
             //MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
+            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToTop: {0}", mapLayer.Name));
             var curIndex = MapLayers.IndexOf(mapLayer);
-            MapLayers.Move(curIndex, MapLayers.Count - 1);
+            MapLayers.Move(curIndex, MapLayers.Count);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerUp)]
         void MoveLayerUp(MapLayerViewModel mapLayer)
         {
+            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerUp: {0}", mapLayer.Name));
             var curIndex = MapLayers.IndexOf(mapLayer);
             MapLayers.Move(curIndex, curIndex + 1);
-            return;
-            //_wpfMap.Overlays.MoveUp(mapLayer.Overlay);
-            RefreshMap(true);
-            MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerDown)]
         void MoveLayerDown(MapLayerViewModel mapLayer)
         {
+            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerDown: {0}", mapLayer.Name));
             var curIndex = MapLayers.IndexOf(mapLayer);
             MapLayers.Move(curIndex, curIndex - 1);
-            return;
-            //_wpfMap.Overlays.MoveDown(mapLayer.Overlay);
-            RefreshMap(true);
-            MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerToBottom)]
         void MoveLayerToBottom(MapLayerViewModel mapLayer)
         {
+            Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToBottom: {0}", mapLayer.Name));
             var curIndex = MapLayers.IndexOf(mapLayer);
             MapLayers.Move(curIndex, 0);
-            return;
-            if (_wpfMap.Overlays.Count > 0)
-            {
-                //if (_wpfMap.Overlays.IndexOf(mapLayer.Overlay) == -1) _wpfMap.Overlays.Add(mapLayer.Overlay);
-                //_wpfMap.Overlays.MoveToBottom(mapLayer.Overlay);
-                RefreshMap(true);
-                MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
-            }
         }
 
         [MediatorMessageSink(MediatorMessage.EnableGUI)]
