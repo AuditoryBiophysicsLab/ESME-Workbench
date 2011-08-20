@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data.Linq;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,6 +9,7 @@ using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using HRC.Navigation;
+using HRC.Utility;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Mapping
@@ -60,7 +60,7 @@ namespace ESME.Mapping
         }
     }
 
-    public class MapLayerCollection : ObservableCollection<MapLayerViewModel>
+    public class MapLayerCollection : ObservableList<MapLayerViewModel>
     {
         internal MapLayerCollection(string collectionName)
         {
@@ -194,6 +194,15 @@ namespace ESME.Mapping
 
         public void DisplayAnalysisPoint(AnalysisPoint curPoint)
         {
+            var oldIndex = -1;
+            if (curPoint.OldLocation != null)
+            {
+                var oldName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.OldLocation.Latitude, curPoint.OldLocation.Longitude);
+                var oldLayer = Find<OverlayShapeMapLayer>(LayerType.AnalysisPoint, oldName);
+                oldIndex = IndexOf(oldLayer);
+                if (oldLayer != null) Remove(oldLayer);
+                curPoint.OldLocation = null;
+            }
             var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
             var analysisPointLayer = Find<OverlayShapeMapLayer>(LayerType.AnalysisPoint, analysisPointName);
             if (analysisPointLayer == null)
@@ -210,7 +219,8 @@ namespace ESME.Mapping
                     CanChangeLineWidth = true,
                     CanChangeAreaColor = false,
                 };
-                Add(analysisPointLayer);
+                if (oldIndex == -1) Add(analysisPointLayer);
+                else this[oldIndex] = analysisPointLayer;
             }
 
             analysisPointLayer.AnalysisPoint = curPoint;

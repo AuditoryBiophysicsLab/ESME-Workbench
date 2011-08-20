@@ -982,8 +982,8 @@ namespace ESMEWorkBench.Data
             }
             foreach (var currentLayer in currentLayers) previousSedimentLayers.Remove(currentLayer);
             // Remove any old sediment layers that might be left over
-            foreach (var previousLayer in previousSedimentLayers)
-                MediatorMessage.Send(MediatorMessage.RemoveLayer, previousLayer);
+            //foreach (var previousLayer in previousSedimentLayers)
+            //    MediatorMessage.Send(MediatorMessage.RemoveLayer, previousLayer);
         }
 
         void DisplaySpecies(NemoSpecies species)

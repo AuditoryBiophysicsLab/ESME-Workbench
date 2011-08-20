@@ -63,6 +63,7 @@ namespace ESME.Mapping
             MediatorMessage.Send(MediatorMessage.LayerListViewModelInitialized);
         }
 
+#if false
         [MediatorMessageSink(MediatorMessage.RemoveLayer)]
         void RemoveLayer(MapLayerViewModel layer)
         {
@@ -77,6 +78,7 @@ namespace ESME.Mapping
             if (layerIndex == -1) return;
             MapLayers.Move(layerIndex, layer.Index);
         }
+#endif
 
         [MediatorMessageSink(MediatorMessage.EnableGUI)]
         void EnableGUI(bool enable)

@@ -216,28 +216,40 @@ namespace ESMEWorkBench.ViewModels.Map
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    if (e.NewItems != null)
-                        foreach (var layer in e.NewItems.Cast<MapLayerViewModel>().Where(layer => !_wpfMap.Overlays.Contains(layer.Name)).Where(layer => layer.Overlay != null))
-                        {
-                            _wpfMap.Overlays.Add(layer.Name, layer.Overlay);
-                            _wpfMap.Refresh(layer.Overlay);
-                        }
+                    Debug.WriteLine("MapView: LayerCollection.Add");
+                    for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
+                    {
+                        _wpfMap.Overlays.Add(((MapLayerViewModel)e.NewItems[itemIndex]).Overlay);
+                    }
                     break;
                 case NotifyCollectionChangedAction.Move:
                     Debug.WriteLine("MapView: LayerCollection.Move");
+                    for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
+                    {
+                        _wpfMap.Overlays.RemoveAt(e.OldStartingIndex);
+                        _wpfMap.Overlays.Insert(e.NewStartingIndex + itemIndex, ((MapLayerViewModel)e.NewItems[itemIndex]).Overlay);
+                    }
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    if (e.OldItems != null) foreach (var layer in e.OldItems) _wpfMap.Overlays.Remove(((MapLayerViewModel) layer).LayerOverlay);
+                    Debug.WriteLine("MapView: LayerCollection.Remove");
+                    for (var itemIndex = 0; itemIndex < e.OldItems.Count; itemIndex++)
+                    {
+                        _wpfMap.Overlays.Remove(((MapLayerViewModel)e.OldItems[itemIndex]).Overlay);
+                    }
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     Debug.WriteLine("MapView: LayerCollection.Replace");
+                    for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
+                    {
+                        _wpfMap.Overlays[e.OldStartingIndex + itemIndex] = ((MapLayerViewModel)e.NewItems[itemIndex]).Overlay;
+                    }
                     break;
                 case NotifyCollectionChangedAction.Reset:
+                    Debug.WriteLine("MapView: LayerCollection.Reset");
                     _wpfMap.Overlays.Clear();
-                    var mapLayers = (ObservableCollection<MapLayerViewModel>)sender;
-                    foreach (var layer in mapLayers) _wpfMap.Overlays.Add(layer.Name, layer.LayerOverlay);
                     break;
             }
+            _wpfMap.Refresh();
         }
 
         #endregion
@@ -309,7 +321,7 @@ namespace ESMEWorkBench.ViewModels.Map
         #endregion
 
         [MediatorMessageSink(MediatorMessage.RemoveLayer)]
-        void RemoveLayer(MapLayerViewModel mapLayer) { _wpfMap.Overlays.Remove(mapLayer.LayerOverlay); }
+        void RemoveLayer(MapLayerViewModel mapLayer) { MapLayers.Remove(mapLayer); }
 
         [MediatorMessageSink(MediatorMessage.RefreshMap)]
         void RefreshMap(bool dummy) { _wpfMap.Refresh(); }
@@ -344,15 +356,20 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.MoveLayerToTop)]
         void MoveLayerToTop(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveToTop(mapLayer.Overlay);
-            RefreshMap(true);
-            MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
+            //_wpfMap.Overlays.MoveToTop(mapLayer.Overlay);
+            //RefreshMap(true);
+            //MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
+            var curIndex = MapLayers.IndexOf(mapLayer);
+            MapLayers.Move(curIndex, MapLayers.Count - 1);
         }
 
         [MediatorMessageSink(MediatorMessage.MoveLayerUp)]
         void MoveLayerUp(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveUp(mapLayer.Overlay);
+            var curIndex = MapLayers.IndexOf(mapLayer);
+            MapLayers.Move(curIndex, curIndex + 1);
+            return;
+            //_wpfMap.Overlays.MoveUp(mapLayer.Overlay);
             RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
@@ -360,7 +377,10 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.MoveLayerDown)]
         void MoveLayerDown(MapLayerViewModel mapLayer)
         {
-            _wpfMap.Overlays.MoveDown(mapLayer.Overlay);
+            var curIndex = MapLayers.IndexOf(mapLayer);
+            MapLayers.Move(curIndex, curIndex - 1);
+            return;
+            //_wpfMap.Overlays.MoveDown(mapLayer.Overlay);
             RefreshMap(true);
             MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
         }
@@ -368,10 +388,13 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.MoveLayerToBottom)]
         void MoveLayerToBottom(MapLayerViewModel mapLayer)
         {
+            var curIndex = MapLayers.IndexOf(mapLayer);
+            MapLayers.Move(curIndex, 0);
+            return;
             if (_wpfMap.Overlays.Count > 0)
             {
                 //if (_wpfMap.Overlays.IndexOf(mapLayer.Overlay) == -1) _wpfMap.Overlays.Add(mapLayer.Overlay);
-                _wpfMap.Overlays.MoveToBottom(mapLayer.Overlay);
+                //_wpfMap.Overlays.MoveToBottom(mapLayer.Overlay);
                 RefreshMap(true);
                 MediatorMessage.Send(MediatorMessage.LayersReordered, mapLayer);
             }

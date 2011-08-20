@@ -22,6 +22,7 @@ namespace ESME.TransmissionLoss
             TransmissionLossFields = new ObservableCollection<TransmissionLossField>();
             SoundSources = new List<SoundSource>();
             AnalysisPointID = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+            OldLocation = null;
         }
 
         public AnalysisPoint(Geo location) : this()
@@ -36,6 +37,43 @@ namespace ESME.TransmissionLoss
         public string AnalysisPointID { get; set; }
 
         public List<SoundSource> SoundSources { get; set; }
+
+        [XmlIgnore]
+        public EarthCoordinate OldLocation { get; set; }
+
+        #region public new double Latitude { get; set; }
+        [XmlIgnore]
+        public new double Latitude
+        {
+            get { return base.Latitude; }
+            set
+            {
+                if (OldLocation == null) OldLocation = new EarthCoordinate(base.Latitude, base.Longitude);
+                base.Latitude = value;
+                NotifyPropertyChanged(LatitudeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LatitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPoint>(x => x.Latitude);
+
+        #endregion
+
+        #region public new double Longitude { get; set; }
+        [XmlIgnore]
+        public new double Longitude
+        {
+            get { return base.Longitude; }
+            set
+            {
+                if (OldLocation == null) OldLocation = new EarthCoordinate(base.Latitude, base.Longitude);
+                base.Longitude = value;
+                NotifyPropertyChanged(LongitudeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPoint>(x => x.Longitude);
+        
+        #endregion
 
         #region public WeakReference<Bathymetry> Bathymetry { get; set; }
 

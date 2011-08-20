@@ -61,7 +61,7 @@ namespace HRC.Utility
         public new void RemoveRange(int index, int count)
         {
             var items = GetRange(index, count);
-            RemoveRange(index, count);
+            base.RemoveRange(index, count);
             if (items.Count > 0) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, items));
         }
 
@@ -94,6 +94,15 @@ namespace HRC.Utility
         {
             base.Sort(index, count, comparer);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+
+        public void Move(int oldIndex, int newIndex)
+        {
+            var item = this[oldIndex];
+            RemoveAt(oldIndex);
+            if (newIndex > oldIndex) newIndex--;
+            Insert(newIndex, item);
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
         }
 
         [XmlIgnore] 
