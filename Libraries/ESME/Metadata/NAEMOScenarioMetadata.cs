@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Serialization;
@@ -374,6 +375,7 @@ namespace ESME.Metadata
                 NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
                 if (_selectedEnvironment != null) EnvironmentName = Path.GetFileNameWithoutExtension(_selectedEnvironment.Metadata.Filename);
                 Task.Factory.StartNew(() => Dispatcher.InvokeIfRequired(DisplaySelectedEnvironment, DispatcherPriority.Normal));
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 

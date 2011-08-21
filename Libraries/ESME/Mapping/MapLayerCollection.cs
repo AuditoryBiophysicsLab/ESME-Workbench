@@ -201,6 +201,7 @@ namespace ESME.Mapping
                 var oldLayer = Find<OverlayShapeMapLayer>(LayerType.AnalysisPoint, oldName);
                 oldIndex = IndexOf(oldLayer);
                 if (oldLayer != null) Remove(oldLayer);
+                oldIndex--;
                 curPoint.OldLocation = null;
             }
             var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
@@ -219,7 +220,7 @@ namespace ESME.Mapping
                     CanChangeLineWidth = true,
                     CanChangeAreaColor = false,
                 };
-                if (oldIndex == -1) Add(analysisPointLayer);
+                if (oldIndex < 0) Add(analysisPointLayer);
                 else this[oldIndex] = analysisPointLayer;
             }
 

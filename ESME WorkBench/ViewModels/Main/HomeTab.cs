@@ -84,6 +84,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_isScenarioLoaded == value) return;
                 _isScenarioLoaded = value;
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -177,7 +178,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _exportAnalysisPoints ??
                        (_exportAnalysisPoints =
-                        new SimpleCommand<object, object>(delegate { return IsScenarioLoaded && IsEnvironmentFileSelected; },
+                        new SimpleCommand<object, object>(delegate { return ScenarioMetadata != null && ScenarioMetadata.SelectedEnvironment != null; },
                                                           delegate { ExportAnalysisPointsHandler(); }));
             }
         }
