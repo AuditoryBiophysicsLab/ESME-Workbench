@@ -18,6 +18,10 @@ namespace ESME.NEMO
                 _xmlDocument.Load(FileName);
                 Scenario = new NemoScenario(_xmlDocument["Scenario"], nemoDataDirectory);
             }
+            catch (FileNotFoundException e)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new FileFormatException(string.Format("Error opening NEMO file \"{0}\"", FileName), e);

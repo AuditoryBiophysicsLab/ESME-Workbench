@@ -17,8 +17,6 @@ namespace ESME.NEMO.Overlay
             set
             {
                 _fileName = value;
-                if ((string.IsNullOrEmpty(_fileName)) || (!File.Exists(_fileName)))
-                    throw new FileNotFoundException("LineReader.NextLine: Could not open requested file '" + _fileName + "'");
                 Lines = File.ReadAllLines(_fileName);
             }
         }

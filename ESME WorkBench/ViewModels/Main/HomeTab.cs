@@ -119,11 +119,8 @@ namespace ESMEWorkBench.ViewModels.Main
             //NemoScenario.Test(fileName);
             try
             {
-                Task.Factory.StartNew(() =>
-                {
-                    ScenarioMetadata = NAEMOScenarioMetadata.Load(NAEMOMetadataBase.MetadataFilename(fileName)) ?? new NAEMOScenarioMetadata { Filename = NAEMOMetadataBase.MetadataFilename(fileName) };
-                    _dispatcher.InvokeIfRequired(() => ScenarioMetadata.ScenarioFilename = fileName);
-                });
+                ScenarioMetadata = NAEMOScenarioMetadata.Load(NAEMOMetadataBase.MetadataFilename(fileName)) ?? new NAEMOScenarioMetadata { Filename = NAEMOMetadataBase.MetadataFilename(fileName) };
+                _dispatcher.InvokeIfRequired(() => ScenarioMetadata.ScenarioFilename = fileName);
             }
             catch (Exception ex)
             {
@@ -135,7 +132,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     sb.AppendLine(inner.Message);
                     inner = inner.InnerException;
                 }
-                _messageBoxService.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\": " + sb);
+                _messageBoxService.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\":\n" + sb);
                 ScenarioMetadata = null;
             }
         }
