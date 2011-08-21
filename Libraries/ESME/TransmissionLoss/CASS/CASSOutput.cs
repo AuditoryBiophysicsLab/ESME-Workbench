@@ -884,6 +884,7 @@ namespace ESME.TransmissionLoss.CASS
 
         void SetWatch()
         {
+            Directory.CreateDirectory(_directory);
             _dirWatcher = new FileSystemWatcher(_directory, _pattern)
             {
                 EnableRaisingEvents = true,

@@ -356,8 +356,7 @@ namespace ESME.Views.EnvironmentBuilder
             }
             foreach (var environmentDescriptor in EnvironmentDescriptors)
                 sb.Append(string.Format("{0}\n", environmentDescriptor.EnvironmentName));
-            sb.Remove(sb.Length - 2, 2);
-            Note = string.Format("Environment file count: {0}\nBoundary overlay: {1}.\nFiles to be created:\n{2}", EnvironmentDescriptors.Count, _selectedOverlay, sb);
+            Note = string.Format("Environment file count: {0}\nBoundary overlay: {1}.\nFiles to be created:\n{2}", EnvironmentDescriptors.Count, _selectedOverlay, sb.ToString().Trim());
         }
 
         #endregion
