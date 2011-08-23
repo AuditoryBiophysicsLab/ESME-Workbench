@@ -126,7 +126,13 @@ namespace ESME.Mapping
 
         readonly MenuItemViewModelBase _removeMenu = new MenuItemViewModelBase
         {
-                Header = "Remove Layer",
+            Header = "Remove Layer",
+        };
+
+        readonly MenuItemViewModelBase _propertiesMenu = new MenuItemViewModelBase
+        {
+            Header = "Properties...",
+            Visibility = Visibility.Collapsed,
         };
 
         readonly MenuItemViewModelBase _settingsMenu = new MenuItemViewModelBase
@@ -545,6 +551,8 @@ namespace ESME.Mapping
 
             _settingsMenu.Command = new SimpleCommand<object, object>(obj => HasSettings, obj => MediatorMessage.Send(MediatorMessage.EditAnalysisPoint, AnalysisPoint));
 
+            _propertiesMenu.Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ShowLayerProperties, this));
+
             _lineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
                                                                                                   {
                                                                                                       var result = ColorPickerService.ShowDialog();
@@ -589,6 +597,7 @@ namespace ESME.Mapping
                               _orderMenu,
                               _removeMenu,
                               _settingsMenu,
+                              _propertiesMenu,
                           };
 
             LineColorPickerMenu = new List<MenuItemViewModelBase>
@@ -856,6 +865,25 @@ namespace ESME.Mapping
                 NotifyPropertyChanged(CanBeReorderedChangedEventArgs);
             }
         }
+
+        #endregion
+
+        #region public IHaveProperties Properties { get; set; }
+
+        public IHaveProperties Properties
+        {
+            get { return _properties; }
+            set
+            {
+                if (_properties == value) return;
+                _properties = value;
+                NotifyPropertyChanged(PropertiesSourceChangedEventArgs);
+                _propertiesMenu.Visibility = (_properties != null) ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PropertiesSourceChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.Properties);
+        IHaveProperties _properties;
 
         #endregion
 

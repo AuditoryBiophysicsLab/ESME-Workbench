@@ -166,6 +166,9 @@
     <Compile Include="Misc\ProjectCredits.xaml.cs">
       <DependentUpon>ProjectCredits.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Misc\PropertiesView.xaml.cs">
+      <DependentUpon>PropertiesView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\ViewParameterService.cs" />
     <Compile Include="TestView.xaml.cs">
       <DependentUpon>TestView.xaml</DependentUpon>
@@ -283,6 +286,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Misc\ProjectCredits.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Misc\PropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

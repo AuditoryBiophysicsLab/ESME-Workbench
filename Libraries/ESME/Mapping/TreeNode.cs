@@ -2,18 +2,20 @@
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 using Cinch;
+using ESME.Metadata;
 using ESME.NEMO;
 using HRC.Utility;
 using HRC.ViewModels;
 
 namespace ESME.Mapping
 {
-    public class TreeNode : PropertyChangedBase
+    public class TreeNode : PropertyChangedBase, IHaveProperties
     {
         public TreeNode()
         {
             MapLayers = new ObservableList<MapLayerViewModel>();
             Nodes = new ObservableList<TreeNode>();
+            ContextMenu = new ObservableList<MenuItemViewModelBase>();
         }
 
         public TreeNode(string format, params object[] args) : this() { Name = string.Format(format, args); }
@@ -150,9 +152,9 @@ namespace ESME.Mapping
 
         #endregion
 
-        #region public List<MenuItemViewModelBase> ContextMenu { get; set; }
+        #region public ObservableList<MenuItemViewModelBase> ContextMenu { get; set; }
 
-        public List<MenuItemViewModelBase> ContextMenu
+        public ObservableList<MenuItemViewModelBase> ContextMenu
         {
             get { return _contextMenu; }
             set
@@ -164,16 +166,30 @@ namespace ESME.Mapping
         }
 
         static readonly PropertyChangedEventArgs ContextMenuChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.ContextMenu);
-        List<MenuItemViewModelBase> _contextMenu;
+        ObservableList<MenuItemViewModelBase> _contextMenu;
 
         #endregion
+
+        public virtual IEnumerable<KeyValuePair<string, string>> Properties
+        {
+            get { return null; }
+        }
     }
 
-    public class TreeNodeWrapper<T> : TreeNode
+    public class TreeNodeWrapper<T> : TreeNode where T : IHaveProperties
     {
-        public TreeNodeWrapper() {  }
-        public TreeNodeWrapper(T wrappedObject) { WrappedObject = wrappedObject; }
+        public TreeNodeWrapper()
+        {
+            ContextMenu.Add(new MenuItemViewModelBase
+            {
+                Header = "Properties...",
+                Command = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.ShowTreeNodeProperties, this); }),
+            });
+            PropertiesViewModel = new PropertiesViewModel();
+        }
+        public TreeNodeWrapper(T wrappedObject) : this() { WrappedObject = wrappedObject; }
         public T WrappedObject { get; protected set; }
+        public PropertiesViewModel PropertiesViewModel { get; set; }
     }
 
     public class EnvironmentNode : TreeNode
@@ -201,6 +217,7 @@ namespace ESME.Mapping
         {
             foreach (var platform in nemoScenario.Platforms)
                 Nodes.Add(new PlatformNode(platform));
+            PropertiesViewModel.WindowTitle = "Scenario Properties";
         }
 
         public override string Name { get { return string.Format("Scenario: {0}", WrappedObject.EventName); } }

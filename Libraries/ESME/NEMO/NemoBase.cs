@@ -6,7 +6,7 @@ using HRC.Navigation;
 
 namespace ESME.NEMO
 {
-    public abstract class NemoBase
+    public abstract class NemoBase: IHaveProperties
     {
         protected XmlNode ParentNode;
 

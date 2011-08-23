@@ -6,11 +6,14 @@
              xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
              xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views" 
              xmlns:emse="clr-namespace:ESME.Mapping;assembly=ESME" 
-             xmlns:hrc="clr-namespace:HRC.WPF;assembly=HRC" 
+             xmlns:hrc="clr-namespace:HRC.WPF;assembly=HRC"
+             xmlns:Main="clr-namespace:ESMEWorkBench.ViewModels.Main"
+             xmlns:Metadata="clr-namespace:ESME.Metadata;assembly=ESME"
              mef:ViewModelLocator.ViewModel="LayerListViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
-             d:DesignWidth="300">
+             d:DesignWidth="300"
+             d:DataContext="{d:DesignInstance Metadata:NAEMOScenarioMetadata}">
 	<UserControl.Resources>
 		<Style x:Key="ContextMenuItemStyle">
 			<Setter Property="MenuItem.Header"
@@ -85,6 +88,11 @@
             <HierarchicalDataTemplate DataType="{x:Type emse:TreeNode}"
                                       ItemsSource="{Binding Children}">
                 <TextBlock Text="{Binding Name}">
+                    <TextBlock.ContextMenu>
+                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+					                 ItemsSource="{Binding ContextMenu}" />
+                    </TextBlock.ContextMenu>
+
                     <TextBlock.ToolTip>
                         <ToolTip DataContext="{Binding Path=DataContext, RelativeSource={RelativeSource TemplatedParent}}"
                                  Style="{StaticResource ToolTipStyle}">
@@ -122,18 +130,29 @@
                     <Grid DockPanel.Dock="Top">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="16" />
+                            <!--<ColumnDefinition Width="16" />-->
                             <ColumnDefinition Width="*" SharedSizeGroup="LayerName" />
-                            <ColumnDefinition Width="16" />
-                            <ColumnDefinition Width="16" />
-                            <ColumnDefinition Width="10" />
                         </Grid.ColumnDefinitions>
                         <CheckBox Focusable="False"
 				              Grid.Column="0"
 				              IsChecked="{Binding IsChecked}"
 				              VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding Name, Mode=OneTime}"
-                               x:Name="LayerName"
-				               Grid.Column="1"/>
+                        <Rectangle Width="12"
+				               RadiusX="3"
+				               RadiusY="3"
+				               Grid.Column="1"
+				               Height="12"
+				               Fill="{Binding LineColorBrush}"
+				               Visibility="{Binding IsLineColorVisible}"
+				               VerticalAlignment="Center"
+				               ToolTip="{Binding PointLineTooltip}">
+                            <Rectangle.ContextMenu>
+                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+						             ItemsSource="{Binding LineOrPointPickerMenu}" />
+                            </Rectangle.ContextMenu>
+                        </Rectangle>
+                        <!--
                         <Rectangle Width="12"
 				               RadiusX="3"
 				               RadiusY="3"
@@ -149,20 +168,10 @@
 						             ItemsSource="{Binding AreaColorPickerMenu}" />
                             </Rectangle.ContextMenu>
                         </Rectangle>
-                        <Rectangle Width="12"
-				               RadiusX="3"
-				               RadiusY="3"
-				               Grid.Column="3"
-				               Height="12"
-				               Fill="{Binding LineColorBrush}"
-				               Visibility="{Binding IsLineColorVisible}"
-				               VerticalAlignment="Center"
-				               ToolTip="{Binding PointLineTooltip}">
-                            <Rectangle.ContextMenu>
-                                <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding LineOrPointPickerMenu}" />
-                            </Rectangle.ContextMenu>
-                        </Rectangle>
+                        -->
+                        <TextBlock Text="{Binding Name, Mode=OneTime}"
+                               x:Name="LayerName"
+				               Grid.Column="2"/>
                         <Grid.ContextMenu>
                             <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 					             ItemsSource="{Binding ContextMenu}" />

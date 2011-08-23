@@ -197,6 +197,7 @@
     <Compile Include="Mapping\ScenarioTreeViewModel.cs" />
     <Compile Include="Mapping\ShapefileMapLayer.cs" />
     <Compile Include="Mapping\TreeNode.cs" />
+    <Compile Include="Metadata\PropertiesViewModel.cs" />
     <Compile Include="Metadata\RangeComplexMetadata.cs" />
     <Compile Include="Environment\Sediment.cs" />
     <Compile Include="Environment\NAVO\SurfaceMarineGriddedClimatologyDatabase.cs" />

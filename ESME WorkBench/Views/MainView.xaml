@@ -14,7 +14,7 @@
                 xmlns:Main="clr-namespace:ESMEWorkBench.ViewModels.Main" 
                 mef:ViewModelLocator.ViewModel="MainViewModel"
                 SnapsToDevicePixels="True"
-                Title="ESME WorkBench 2011"
+                Title="{Binding MainWindowTitle}"
                 Icon="..\Wave.ico"
                 Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
                 Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"

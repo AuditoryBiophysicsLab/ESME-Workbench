@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Threading;
 
 namespace ESME
@@ -33,5 +34,13 @@ namespace ESME
     public interface IHaveBasePath
     {
         string BasePath { get; set; }
+    }
+
+    public interface IHaveProperties
+    {
+        /// <summary>
+        /// Property name is Key, property value is Value
+        /// </summary>
+        IEnumerable<KeyValuePair<string, string>> Properties { get; }
     }
 }

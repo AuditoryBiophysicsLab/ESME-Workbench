@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Cinch;
@@ -85,6 +83,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 _isScenarioLoaded = value;
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
                 CommandManager.InvalidateRequerySuggested();
+                if (!_isScenarioLoaded) MainWindowTitle = "ESME WorkBench 2011: <No scenario loaded>";
             }
         }
 
@@ -120,7 +119,11 @@ namespace ESMEWorkBench.ViewModels.Main
             try
             {
                 ScenarioMetadata = NAEMOScenarioMetadata.Load(NAEMOMetadataBase.MetadataFilename(fileName)) ?? new NAEMOScenarioMetadata { Filename = NAEMOMetadataBase.MetadataFilename(fileName) };
-                _dispatcher.InvokeIfRequired(() => ScenarioMetadata.ScenarioFilename = fileName);
+                _dispatcher.InvokeIfRequired(() =>
+                {
+                    ScenarioMetadata.ScenarioFilename = fileName;
+                    MainWindowTitle = string.Format("ESME WorkBench 2011: {0} [{1}]", ScenarioMetadata.NemoFile.Scenario.EventName, ScenarioMetadata.NemoFile.Scenario.TimeFrame);
+                });
             }
             catch (Exception ex)
             {
@@ -204,13 +207,6 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 return IsScenarioLoaded;
-                //do all defined analysis points have fully calculated modes?
-               
-                //does the nemo file validate?
-                
-
-                //does 
-                return true;
             }
         }
 
@@ -222,7 +218,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     NemoFile = ScenarioMetadata.NemoFile,
             };
 
-            var result = _visualizerService.ShowDialog("ScenarioSimulatorOptionsView", vm);
+            _visualizerService.Show("ScenarioSimulatorOptionsView", vm, true, null);
 
         }
         #endregion
@@ -283,122 +279,48 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public string MainWindowTitle { get; set; }
+
+        public string MainWindowTitle
+        {
+            get { return _mainWindowTitle; }
+            set
+            {
+                if (_mainWindowTitle == value) return;
+                _mainWindowTitle = value;
+                NotifyPropertyChanged(MainWindowTitleChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MainWindowTitleChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MainWindowTitle);
+        string _mainWindowTitle = "ESME WorkBench 2011: <No scenario loaded>";
+
+        #endregion
+
+        [MediatorMessageSink(MediatorMessage.ShowLayerProperties)]
+        public void ShowProperties(MapLayerViewModel viewModel)
+        {
+            if (viewModel.Properties == null) return;
+            _visualizerService.Show("PropertiesView", viewModel, true, null);
+        }
+
+        [MediatorMessageSink(MediatorMessage.ShowTreeNodeProperties)]
+        public void ShowProperties(TreeNode treeNode)
+        {
+            if (treeNode.Properties == null) return;
+            _visualizerService.Show("PropertiesView", treeNode, true, null);
+        }
+
         [MediatorMessageSink(MediatorMessage.PlaceAnalysisPoint)]
-        void PlaceAnalysisPoint(bool dummy)
+        public void PlaceAnalysisPoint(bool dummy)
         {
             if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
             if (ScenarioMetadata == null) return;
             ScenarioMetadata.PlaceAnalysisPoint(MouseEarthCoordinate);
-            return;
-            try
-            {
-#if false
-            var environmentInformation = new EnvironmentInformation
-                                         {
-                                             Bathymetry = _experiment.Bathymetry,
-                                             SoundSpeedField = _experiment.SoundSpeedField,
-                                             Sediment = SedimentTypes.SedimentArray[0],
-                                         };
-
-            var transmissionLossSettings = new TransmissionLossSettings
-                                           {
-                                               DepthCellSize = (float)_experiment.BellhopDepthCellSize,
-                                               RangeCellSize = (float)_experiment.BellhopRangeCellSize,
-                                           };
-
-#endif
-                //if(!_experiment.Bathymetry.BoundingBox.Contains(MouseEarthCoordinate)) throw new AnalysisPointLocationException("Analysis Points cannot be placed outside the bathymetry bounds.");
-                var analysisPoint = new AnalysisPoint(MouseEarthCoordinate);
-#if false
-            var analysisPointViewModel = new AnalysisPointCalculationPreviewViewModel
-            {
-                AnalysisPoint = analysisPoint,
-            };
-#endif
-
-                var distinctModes = (from platform in _experiment.NemoFile.Scenario.Platforms
-                                     from source in platform.Sources
-                                     from mode in source.Modes
-                                     select mode).Distinct();
-                foreach (var mode in distinctModes)
-                {
-                    analysisPoint.SoundSources.Add(new SoundSource(analysisPoint, mode, 16));
-#if false
-                var transmissionLossJobViewModel = new TransmissionLossJobViewModel(MouseEarthCoordinate, mode, 16, 3000)
-                                                   {
-                                                       Name = string.Format("{0}", mode.PSMName),
-                                                       IDField = _experiment.NextObjectID,
-                                                   };
-                try
-                {
-                    analysisPointViewModel.AnalysisPoint.SoundSources.Add(transmissionLossJobViewModel.TransmissionLossJob.SoundSource);
-                    //var cassRunFile = CassRunFile.Create(transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings, _experiment.NemoFile.Scenario.TimeFrame);
-                    //cassRunFile.Save(Path.GetDirectoryName(_experiment.FileName));
-                    var ramRunFile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.RAM, transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
-                    ramRunFile.Save(_experiment.LocalStorageRoot);
-                    var bellhopRunFile = TransmissionLossRunFile.Create(TransmissionLossAlgorithm.Bellhop, transmissionLossJobViewModel.TransmissionLossJob, environmentInformation, transmissionLossSettings);
-                    bellhopRunFile.Save(_experiment.LocalStorageRoot);
-                    analysisPointViewModel.TransmissionLossJobViewModels.Add(transmissionLossJobViewModel);
-                    analysisPointViewModel.TransmissionLossRunFiles.Add(bellhopRunFile);
-                }
-                catch (BathymetryOutOfBoundsException ex)
-                {
-                    _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("Unable to add analysis point.\nDid you click outside the bounds of the simulation area?\n\n" + ex.Message));
-                    _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
-                    return;
-                }
-                catch (BathymetryTooShallowException ex)
-                {
-                    _dispatcher.InvokeIfRequired(() => _messageBoxService.ShowError("This area is too shallow to place an analysis point.  Pick a different area.\n\n" + ex.Message));
-                    _dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow));
-                    return;
-                }
-#endif
-                }
-                var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
-                var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
-                IsInAnalysisPointMode = false;
-                if ((!settingsResult.HasValue) || (!settingsResult.Value))
-                    return;
-                var maxRadial = analysisPoint.SoundSources.Where(s => s.ShouldBeCalculated).Aggregate(0, (current, soundSource) => Math.Max(current, soundSource.Radius));
-                //for (var i = 0; i < 360; i += 90) if (!_experiment.Bathymetry.BoundingBox.Contains(new EarthCoordinate(MouseEarthCoordinate, i, maxRadial))) throw new AnalysisPointLocationException("One or more radial endpoints extends beyond the bounds of the bathymetry.");
-
-                MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPoint);
-#if false
-            var result = _visualizerService.ShowDialog("AnalysisPointCalculationPreviewView", analysisPointViewModel);
-            if ((!result.HasValue) || (!result.Value))
-            {
-                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-                return;
-            }
-            MediatorMessage.Send(MediatorMessage.AddAnalysisPoint, analysisPointViewModel.AnalysisPoint);
-            if (_bellhopQueueCalculatorViewModel == null)
-            {
-                _bellhopQueueCalculatorViewModel = new BellhopQueueCalculatorViewModel(_experiment.LocalStorageRoot, _messageBoxService);
-                _visualizerService.Show("BellhopQueueCalculatorView", _bellhopQueueCalculatorViewModel, false, null);
-            }
-
-            var backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += delegate
-                                        {
-                                            foreach (var bellhopRunFile in analysisPointViewModel.TransmissionLossRunFiles) 
-                                                _dispatcher.BeginInvoke(new MediatorSendDelegate(MediatorMessage.Send), DispatcherPriority.Background, MediatorMessage.QueueTransmissionLossJob, bellhopRunFile);
-                                        };
-            backgroundWorker.RunWorkerAsync();
-#endif
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError("Error placing Analysis Point: " + e.Message);
-            }
-            finally
-            {
-                MediatorMessage.Send(MediatorMessage.SetMapCursor, Cursors.Arrow);
-            }
         }
 
         [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
-        void EditAnalysisPoint(AnalysisPoint analysisPoint)
+        public void EditAnalysisPoint(AnalysisPoint analysisPoint)
         {
             var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
             var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
@@ -411,7 +333,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         [MediatorMessageSink(MediatorMessage.RemoveAnalysisPoint)]
-        void RemoveAnalysisPoint(AnalysisPoint analysisPoint)
+        public void RemoveAnalysisPoint(AnalysisPoint analysisPoint)
         {
             ScenarioMetadata.AnalysisPoints.Remove(analysisPoint);
         }
