@@ -300,15 +300,15 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ShowLayerProperties)]
         public void ShowProperties(MapLayerViewModel viewModel)
         {
-            if (viewModel.Properties == null) return;
-            _visualizerService.Show("PropertiesView", viewModel, true, null);
+            //if (viewModel.Properties == null) return;
+            //_visualizerService.Show("PropertiesView", viewModel.Properties, true, null);
         }
 
         [MediatorMessageSink(MediatorMessage.ShowTreeNodeProperties)]
         public void ShowProperties(TreeNode treeNode)
         {
-            if (treeNode.Properties == null) return;
-            _visualizerService.Show("PropertiesView", treeNode, true, null);
+            if (treeNode.PropertiesViewModel == null) return;
+            _visualizerService.Show("PropertiesView", treeNode.PropertiesViewModel, true, null);
         }
 
         [MediatorMessageSink(MediatorMessage.PlaceAnalysisPoint)]

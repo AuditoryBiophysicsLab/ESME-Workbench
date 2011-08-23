@@ -868,25 +868,6 @@ namespace ESME.Mapping
 
         #endregion
 
-        #region public IHaveProperties Properties { get; set; }
-
-        public IHaveProperties Properties
-        {
-            get { return _properties; }
-            set
-            {
-                if (_properties == value) return;
-                _properties = value;
-                NotifyPropertyChanged(PropertiesSourceChangedEventArgs);
-                _propertiesMenu.Visibility = (_properties != null) ? Visibility.Visible : Visibility.Collapsed;
-            }
-        }
-
-        static readonly PropertyChangedEventArgs PropertiesSourceChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.Properties);
-        IHaveProperties _properties;
-
-        #endregion
-
         #region public bool HasSettings { get; set; }
 
         public bool HasSettings

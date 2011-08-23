@@ -170,6 +170,8 @@ namespace ESME.Mapping
 
         #endregion
 
+        public PropertiesViewModel PropertiesViewModel { get; set; }
+
         public virtual IEnumerable<KeyValuePair<string, string>> Properties
         {
             get { return null; }
@@ -189,7 +191,6 @@ namespace ESME.Mapping
         }
         public TreeNodeWrapper(T wrappedObject) : this() { WrappedObject = wrappedObject; }
         public T WrappedObject { get; protected set; }
-        public PropertiesViewModel PropertiesViewModel { get; set; }
     }
 
     public class EnvironmentNode : TreeNode
