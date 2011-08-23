@@ -134,6 +134,10 @@
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="InstallationWizard\WizardView.xaml.cs">
+      <DependentUpon>WizardView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="InstallationWizard\WizardViewModel.cs" />
     <Compile Include="LabelValuePair.cs" />
     <Compile Include="Locations\MetadataPropertiesView.xaml.cs">
       <DependentUpon>MetadataPropertiesView.xaml</DependentUpon>
@@ -254,6 +258,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvironmentBuilder\EnvironmentExtractionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="InstallationWizard\WizardView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Timers;
 using System.Windows.Threading;
 using Cinch;
@@ -12,33 +13,35 @@ using HRC.Validation;
 
 namespace ESME.Views.LogFileViewer
 {
-    public sealed class LogFileViewModel:ValidatingViewModel
+    public sealed class LogFileViewModel : ValidatingViewModel
     {
         readonly Dispatcher _dispatcher;
+
         public LogFileViewModel(string logDirectory, string filePattern, Dispatcher dispatcher)
         {
             _dispatcher = dispatcher;
-            
+
             LogDirectory = logDirectory;
             FilePattern = filePattern;
 
             ValidationRules.AddRange(new List<ValidationRule>
-                                         {
-                                             new ValidationRule
-                                                 {
-                                                     PropertyName = "LogDirectory",
-                                                     Description = "Directory contains no files that match file pattern",
-                                                     RuleDelegate = (o, r) =>
-                                                                        {
-                                                                            var ruleTarget = ((LogFileViewModel) o).LogDirectory;
-                                                                            return Directory.GetFiles(ruleTarget,FilePattern,SearchOption.TopDirectoryOnly).Length>0;
-                                                                        },
-                                                 },                               
-                                         });
+            {
+                    new ValidationRule
+                    {
+                            PropertyName = "LogDirectory",
+                            Description = "Directory contains no files that match file pattern",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((LogFileViewModel)o).LogDirectory;
+                                return
+                                        Directory.GetFiles(ruleTarget, FilePattern, SearchOption.TopDirectoryOnly).
+                                                Length > 0;
+                            },
+                    },
+            });
         }
 
         #region public string LogDirectory { get; set; }
-
         public string LogDirectory
         {
             get { return _logDirectory; }
@@ -55,29 +58,30 @@ namespace ESME.Views.LogFileViewer
                 }
                 _dirWatcher = new FileSystemWatcher(_logDirectory)
                 {
-                    EnableRaisingEvents = true,
-                    NotifyFilter = (NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.DirectoryName),
+                        EnableRaisingEvents = true,
+                        NotifyFilter =
+                                (NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.LastAccess |
+                                 NotifyFilters.DirectoryName),
                 };
                 _dirWatcher.Created += DirectoryChanged;
                 //_dirWatcher.Changed += DirectoryChanged;
                 _dirWatcher.Deleted += DirectoryChanged;
-
             }
         }
 
         string _logDirectory;
+
         void DirectoryChanged(object sender, FileSystemEventArgs e)
         {
             Debug.WriteLine("[Raw] Directory: " + e.Name + " " + e.ChangeType);
             if (_dirTimer != null) return;
             _dirTimer = new Timer(1000) {AutoReset = false, Enabled = true};
             _dirTimer.Elapsed += (s1, e1) =>
-                                     {
-                                         _dirTimer = null;
-                                         Debug.WriteLine("Directory: " + e.Name + " " + e.ChangeType);
-                                         _dispatcher.Invoke(DispatcherPriority.Background, (Action) (RefreshDirectory));
-                                     };
-
+            {
+                _dirTimer = null;
+                Debug.WriteLine("Directory: " + e.Name + " " + e.ChangeType);
+                _dispatcher.Invoke(DispatcherPriority.Background, (Action)(RefreshDirectory));
+            };
         }
 
         void RefreshDirectory()
@@ -86,21 +90,20 @@ namespace ESME.Views.LogFileViewer
             if (FilePattern == null) return;
             var logFiles = Directory.EnumerateFiles(LogDirectory, FilePattern, SearchOption.TopDirectoryOnly);
             LogFilePairs.Clear();
-            foreach (var logFile in logFiles)
-            {
-                LogFilePairs.Add(new KeyValuePair<string, string>(Path.GetFileName(logFile), logFile));
-            }
+            foreach (var logFile in logFiles) LogFilePairs.Add(new KeyValuePair<string, string>(Path.GetFileName(logFile), logFile));
             _isRefreshingDirectory = false;
             SelectedLogFile = null;
         }
-        private static readonly PropertyChangedEventArgs LogDirectoryChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.LogDirectory);
-        private FileSystemWatcher _dirWatcher;
-        private Timer _dirTimer;
+
+        static readonly PropertyChangedEventArgs LogDirectoryChangedEventArgs =
+                ObservableHelper.CreateArgs<LogFileViewModel>(x => x.LogDirectory);
+
+        FileSystemWatcher _dirWatcher;
+        Timer _dirTimer;
         bool _isRefreshingDirectory;
         #endregion
 
         #region public string FilePattern { get; set; }
-
         public string FilePattern
         {
             get { return _filePattern; }
@@ -114,31 +117,30 @@ namespace ESME.Views.LogFileViewer
             }
         }
 
-        static readonly PropertyChangedEventArgs FilePatternChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.FilePattern);
-        string _filePattern;
+        static readonly PropertyChangedEventArgs FilePatternChangedEventArgs =
+                ObservableHelper.CreateArgs<LogFileViewModel>(x => x.FilePattern);
 
+        string _filePattern;
         #endregion
 
         #region public string[] FilePatterns { get; set; }
-
         public string[] FilePatterns
         {
             get { return _filePatterns; }
         }
-        private readonly string[] _filePatterns= new[]
-                                           {
-                                               "*.log.*",
-                                               "*.txt",
-                                               "*.*",
-                                           };
 
+        readonly string[] _filePatterns = new[]
+        {
+                "*.log.*",
+                "*.txt",
+                "*.*",
+        };
         #endregion
 
         #region public ObservableCollection<KeyValuePair<string,string>> LogFilePairs { get; set; }
-
-        public ObservableCollection<KeyValuePair<string,string>> LogFilePairs
+        public ObservableCollection<KeyValuePair<string, string>> LogFilePairs
         {
-            get { return _logFilePairs ?? (_logFilePairs = new ObservableCollection<KeyValuePair<string,string>>()); }
+            get { return _logFilePairs ?? (_logFilePairs = new ObservableCollection<KeyValuePair<string, string>>()); }
             set
             {
                 if (_logFilePairs == value) return;
@@ -149,17 +151,29 @@ namespace ESME.Views.LogFileViewer
             }
         }
 
-        private void LogFilePairsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            NotifyPropertyChanged(LogFilePairsChangedEventArgs);
-        }
+        void LogFilePairsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(LogFilePairsChangedEventArgs); }
 
-        private static readonly PropertyChangedEventArgs LogFilePairsChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.LogFilePairs);
-        private ObservableCollection<KeyValuePair<string,string>> _logFilePairs;
+        static readonly PropertyChangedEventArgs LogFilePairsChangedEventArgs =
+                ObservableHelper.CreateArgs<LogFileViewModel>(x => x.LogFilePairs);
 
+        ObservableCollection<KeyValuePair<string, string>> _logFilePairs;
         #endregion
 
         #region public string SelectedLogFile { get; set; }
+        FileTailer _tailer;
+        FileTailer Tailer
+        {
+            get { return _tailer; }
+            set
+            {
+                if (_tailer == value) return;
+                if (_tailer != null)
+                {
+                    _tailer.Close();
+                }
+                _tailer = value;
+            }
+        }
 
         public string SelectedLogFile
         {
@@ -168,6 +182,12 @@ namespace ESME.Views.LogFileViewer
             {
                 if (_isRefreshingDirectory) return;
                 if (_selectedLogFile == value) return;
+                if (_selectedLogFile != null)
+                {
+                    _watcher.EnableRaisingEvents = false;
+                    _watcher = null;
+                    _tailer = null;
+                }
                 _selectedLogFile = value;
                 FileIsSelected = !string.IsNullOrEmpty(_selectedLogFile);
                 NotifyPropertyChanged(SelectedLogFileChangedEventArgs);
@@ -177,41 +197,44 @@ namespace ESME.Views.LogFileViewer
                     SelectedLogFileText = null;
                     return;
                 }
-                SelectedLogFileText = File.ReadAllText(_selectedLogFile);
+                Tailer = new FileTailer(_selectedLogFile);
+                SelectedLogFileText = Tailer.Read();
                 if (_watcher != null)
                 {
                     _watcher.EnableRaisingEvents = false;
                     _watcher.Dispose();
                 }
-                _watcher = new FileSystemWatcher(Path.GetDirectoryName(_selectedLogFile),Path.GetFileName(_selectedLogFile))
-                               {
-                                   EnableRaisingEvents = true,
-                                   NotifyFilter = NotifyFilters.LastWrite,
-                               };
+                _watcher = new FileSystemWatcher(Path.GetDirectoryName(_selectedLogFile),
+                                                 Path.GetFileName(_selectedLogFile))
+                {
+                        EnableRaisingEvents = true,
+                        NotifyFilter = NotifyFilters.LastWrite,
+                };
                 _watcher.Changed += (s, e) =>
                 {
                     if (_fileReloadTimer != null) return;
-                    _fileReloadTimer = new Timer(1000) { AutoReset = false, Enabled = true };
+                    _fileReloadTimer = new Timer(1000) {AutoReset = false, Enabled = true};
                     _fileReloadTimer.Elapsed += (s1, e1) =>
                     {
                         _fileReloadTimer = null;
                         Debug.WriteLine("File: " + e.Name + " " + e.ChangeType);
-                        _dispatcher.Invoke(DispatcherPriority.Background, (Action)(() => SelectedLogFileText = File.ReadAllText(_selectedLogFile)));
+                        _dispatcher.Invoke(DispatcherPriority.Background,
+                                           (Action)(() => Tailer.Read())); //SelectedLogFileText = File.ReadAllText(_selectedLogFile)));
                     };
                 };
             }
         }
 
-        private FileSystemWatcher _watcher;
+        FileSystemWatcher _watcher;
         Timer _fileReloadTimer;
-        
-        private static readonly PropertyChangedEventArgs SelectedLogFileChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.SelectedLogFile);
-        private string _selectedLogFile;
 
+        static readonly PropertyChangedEventArgs SelectedLogFileChangedEventArgs =
+                ObservableHelper.CreateArgs<LogFileViewModel>(x => x.SelectedLogFile);
+
+        string _selectedLogFile;
         #endregion
 
         #region public string SelectedLogFileHeaderText { get; set; }
-
         public string SelectedLogFileHeaderText
         {
             get
@@ -221,13 +244,11 @@ namespace ESME.Views.LogFileViewer
             }
         }
 
-        private static readonly PropertyChangedEventArgs SelectedLogFileHeaderTextChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.SelectedLogFileHeaderText);
-       
-
+        static readonly PropertyChangedEventArgs SelectedLogFileHeaderTextChangedEventArgs =
+                ObservableHelper.CreateArgs<LogFileViewModel>(x => x.SelectedLogFileHeaderText);
         #endregion
 
         #region public string SelectedLogFileText { get; set; }
-
         public string SelectedLogFileText
         {
             get { return _selectedLogFileText; }
@@ -239,13 +260,13 @@ namespace ESME.Views.LogFileViewer
             }
         }
 
-        private static readonly PropertyChangedEventArgs SelectedLogFileTextChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.SelectedLogFileText);
-        private string _selectedLogFileText;
+        static readonly PropertyChangedEventArgs SelectedLogFileTextChangedEventArgs =
+                ObservableHelper.CreateArgs<LogFileViewModel>(x => x.SelectedLogFileText);
 
+        string _selectedLogFileText;
         #endregion
 
         #region public bool AutoScroll { get; set; }
-
         public bool AutoScroll
         {
             get { return _autoScroll; }
@@ -257,13 +278,13 @@ namespace ESME.Views.LogFileViewer
             }
         }
 
-        static readonly PropertyChangedEventArgs AutoScrollChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.AutoScroll);
-        bool _autoScroll = true;
+        static readonly PropertyChangedEventArgs AutoScrollChangedEventArgs =
+                ObservableHelper.CreateArgs<LogFileViewModel>(x => x.AutoScroll);
 
+        bool _autoScroll = true;
         #endregion
 
         #region public bool FileIsSelected { get; set; }
-
         public bool FileIsSelected
         {
             get { return _fileIsSelected; }
@@ -275,13 +296,13 @@ namespace ESME.Views.LogFileViewer
             }
         }
 
-        static readonly PropertyChangedEventArgs FileIsSelectedChangedEventArgs = ObservableHelper.CreateArgs<LogFileViewModel>(x => x.FileIsSelected);
+        static readonly PropertyChangedEventArgs FileIsSelectedChangedEventArgs =
+                ObservableHelper.CreateArgs<LogFileViewModel>(x => x.FileIsSelected);
+
         bool _fileIsSelected;
-
         #endregion
-        
-        #region CloseCommand
 
+        #region CloseCommand
         public SimpleCommand<object, object> CloseCommand
         {
             get
@@ -292,13 +313,36 @@ namespace ESME.Views.LogFileViewer
             }
         }
 
-        private SimpleCommand<object, object> _close;
-        
-        private void CloseHandler()
-        {
-            CloseActivePopUpCommand.Execute(true);
-        }
+        SimpleCommand<object, object> _close;
 
+        void CloseHandler() { CloseActivePopUpCommand.Execute(true); }
         #endregion
+    }
+}
+
+class FileTailer
+{
+    StreamReader _logFileStream;
+    int _bufferLinesRead;
+
+    public FileTailer(string fileName)
+    {
+        _logFileStream = new StreamReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+    }
+
+    public string Read(int readToLine = 0)
+    {
+        var sb = new StringBuilder();
+        while (!_logFileStream.EndOfStream)
+        {
+            sb.Append(_logFileStream.ReadLine() + Environment.NewLine);
+            _bufferLinesRead++;
+        }
+        return sb.ToString();
+    }
+
+    public void Close()
+    {
+        _logFileStream.Close();
     }
 }
