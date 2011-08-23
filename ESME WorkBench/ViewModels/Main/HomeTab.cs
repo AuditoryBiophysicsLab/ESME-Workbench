@@ -297,18 +297,10 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        [MediatorMessageSink(MediatorMessage.ShowLayerProperties)]
-        public void ShowProperties(MapLayerViewModel viewModel)
+        [MediatorMessageSink(MediatorMessage.ShowProperties)]
+        public void ShowProperties(IHaveProperties propertyViewModel)
         {
-            //if (viewModel.Properties == null) return;
-            //_visualizerService.Show("PropertiesView", viewModel.Properties, true, null);
-        }
-
-        [MediatorMessageSink(MediatorMessage.ShowTreeNodeProperties)]
-        public void ShowProperties(TreeNode treeNode)
-        {
-            if (treeNode.PropertiesViewModel == null) return;
-            _visualizerService.Show("PropertiesView", treeNode.PropertiesViewModel, true, null);
+            _visualizerService.Show(propertyViewModel.PropertyViewName, propertyViewModel, true, null);
         }
 
         [MediatorMessageSink(MediatorMessage.PlaceAnalysisPoint)]
@@ -336,6 +328,7 @@ namespace ESMEWorkBench.ViewModels.Main
         public void RemoveAnalysisPoint(AnalysisPoint analysisPoint)
         {
             ScenarioMetadata.AnalysisPoints.Remove(analysisPoint);
+            ScenarioMetadata.Save();
         }
     }
 }

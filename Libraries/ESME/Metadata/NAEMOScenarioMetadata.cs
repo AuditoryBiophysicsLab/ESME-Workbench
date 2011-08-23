@@ -88,9 +88,11 @@ namespace ESME.Metadata
                 case NotifyCollectionChangedAction.Replace:
                     foreach (MapLayerViewModel item in e.OldItems)
                     {
+                        foreach (var tree in TreeViewRootNodes) tree.RemoveMapLayer(item);
                     }
                     foreach (MapLayerViewModel item in e.NewItems)
                     {
+                        PlaceMapLayerInTree(item);
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:

@@ -239,12 +239,16 @@ namespace ESMEWorkBench.ViewModels.Map
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    Debug.WriteLine("MapView: LayerCollection.Replace");
+                    Debug.WriteLine("MapView: LayerCollection.Replace (OldItemCount = {0}, OldStartIndex = {1}, NewItemCount = {2}, NewStartIndex = {3}", e.OldItems.Count, e.OldStartingIndex, e.NewItems.Count, e.NewStartingIndex);
+                    for (var itemIndex = 0; itemIndex < e.OldItems.Count; itemIndex++)
+                    {
+                        _wpfMap.Overlays.Remove(((MapLayerViewModel)e.OldItems[itemIndex]).Overlay);
+                    }
                     for (var itemIndex = 0; itemIndex < e.NewItems.Count; itemIndex++)
                     {
-                        _wpfMap.Overlays[e.OldStartingIndex + itemIndex] = ((MapLayerViewModel)e.NewItems[itemIndex]).Overlay;
-                        _wpfMap.Refresh(((MapLayerViewModel)e.NewItems[itemIndex]).Overlay);
+                        _wpfMap.Overlays.Insert(e.NewStartingIndex + itemIndex - 1, ((MapLayerViewModel)e.NewItems[itemIndex]).Overlay);
                     }
+                    //_wpfMap.Refresh();
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     Debug.WriteLine("MapView: LayerCollection.Reset");

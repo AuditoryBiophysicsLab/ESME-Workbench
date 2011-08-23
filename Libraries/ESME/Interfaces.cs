@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Threading;
+﻿using System.Drawing;
 
 namespace ESME
 {
@@ -38,9 +36,6 @@ namespace ESME
 
     public interface IHaveProperties
     {
-        /// <summary>
-        /// Property name is Key, property value is Value
-        /// </summary>
-        IEnumerable<KeyValuePair<string, string>> Properties { get; }
+        string PropertyViewName { get; }
     }
 }

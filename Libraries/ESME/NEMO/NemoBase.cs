@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Xml;
+using Cinch;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.NEMO
 {
-    public abstract class NemoBase: IHaveProperties
+    public abstract class NemoBase: PropertyChangedBase, IHaveProperties
     {
         protected XmlNode ParentNode;
 
@@ -76,6 +79,25 @@ namespace ESME.NEMO
         protected EarthCoordinate3D GetEarthCoordinate3D(string latitudeElementName, string longitudeElementName, string elevationElementName) { return new EarthCoordinate3D(GetFloat(latitudeElementName), GetFloat(longitudeElementName), GetFloat(elevationElementName)); }
 
         protected string GetString(string childElementName) { return GetInnerText(childElementName); }
+
+        #region public string PropertyViewName { get; set; }
+
+        public string PropertyViewName
+        {
+            get { return _propertyViewName; }
+            protected set
+            {
+                if (_propertyViewName == value) return;
+                _propertyViewName = value;
+                NotifyPropertyChanged(PropertyViewNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PropertyViewNameChangedEventArgs = ObservableHelper.CreateArgs<NemoBase>(x => x.PropertyViewName);
+        string _propertyViewName;
+
+        #endregion
+
 
         string GetInnerText(string childElementName)
         {

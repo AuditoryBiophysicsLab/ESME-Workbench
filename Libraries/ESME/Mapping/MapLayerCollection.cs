@@ -200,8 +200,8 @@ namespace ESME.Mapping
                 var oldName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.OldLocation.Latitude, curPoint.OldLocation.Longitude);
                 var oldLayer = Find<OverlayShapeMapLayer>(LayerType.AnalysisPoint, oldName);
                 oldIndex = IndexOf(oldLayer);
-                if (oldLayer != null) Remove(oldLayer);
-                oldIndex--;
+                //if (oldLayer != null) Remove(oldLayer);
+                //oldIndex--;
                 curPoint.OldLocation = null;
             }
             var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);

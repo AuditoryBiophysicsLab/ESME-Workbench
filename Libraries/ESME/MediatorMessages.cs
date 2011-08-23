@@ -22,8 +22,7 @@ namespace ESME
         public const string ViewAnalysisPoint = "ViewAnalysisPointMessage";
         public const string CalculateAnalysisPoint = "CalculateAnalysisPointMessage";
 
-        public const string ShowLayerProperties = "ShowLayerPropertiesMessage";
-        public const string ShowTreeNodeProperties = "ShowTreeNodePropertiesMessage";
+        public const string ShowProperties = "ShowPropertiesMessage";
 
         public const string SetExperiment = "SetExperimentMessage";
         public const string SetMapLayers = "SetMapLayersMessage";

@@ -176,6 +176,24 @@ namespace ESME.Mapping
         {
             get { return null; }
         }
+
+        #region public string PropertyViewName { get; set; }
+
+        public string PropertyViewName
+        {
+            get { return _propertyViewName; }
+            set
+            {
+                if (_propertyViewName == value) return;
+                _propertyViewName = value;
+                NotifyPropertyChanged(PropertyViewNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PropertyViewNameChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.PropertyViewName);
+        string _propertyViewName;
+
+        #endregion
     }
 
     public class TreeNodeWrapper<T> : TreeNode where T : IHaveProperties
@@ -185,7 +203,7 @@ namespace ESME.Mapping
             ContextMenu.Add(new MenuItemViewModelBase
             {
                 Header = "Properties...",
-                Command = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.ShowTreeNodeProperties, this); }),
+                Command = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.ShowProperties, this); }),
             });
             PropertiesViewModel = new PropertiesViewModel();
         }

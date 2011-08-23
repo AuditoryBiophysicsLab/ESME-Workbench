@@ -547,11 +547,16 @@ namespace ESME.Mapping
             CanBeRemoved = false;
             CanBeReordered = true;
 
-            _removeMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj => MediatorMessage.Send(MediatorMessage.RemoveLayer, this));
+            _removeMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj =>
+            {
+                MediatorMessage.Send(MediatorMessage.RemoveLayer, this);
+                if (AnalysisPoint != null)
+                    MediatorMessage.Send(MediatorMessage.RemoveAnalysisPoint, AnalysisPoint);
+            });
 
             _settingsMenu.Command = new SimpleCommand<object, object>(obj => HasSettings, obj => MediatorMessage.Send(MediatorMessage.EditAnalysisPoint, AnalysisPoint));
 
-            _propertiesMenu.Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ShowLayerProperties, this));
+            _propertiesMenu.Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ShowProperties, this));
 
             _lineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
                                                                                                   {
