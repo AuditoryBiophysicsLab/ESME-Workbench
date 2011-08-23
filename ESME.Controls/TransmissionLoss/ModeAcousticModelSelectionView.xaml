@@ -1,7 +1,10 @@
 ﻿<Window x:Class="ESME.Views.TransmissionLoss.ModeAcousticModelSelectionView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Acoustic model configuration" SizeToContent="WidthAndHeight">
+        Title="Acoustic model configuration" 
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize" 
+        WindowStyle="ToolWindow">
     <StackPanel Orientation="Vertical" Grid.IsSharedSizeScope="True">
         <Grid Background="#EEEEEE">
             <Grid.ColumnDefinitions>
