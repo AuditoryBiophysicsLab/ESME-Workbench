@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.IO;
@@ -297,10 +298,20 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
         [MediatorMessageSink(MediatorMessage.ShowProperties)]
         public void ShowProperties(IHaveProperties propertyViewModel)
         {
-            _visualizerService.Show(propertyViewModel.PropertyViewName, propertyViewModel, true, null);
+            var target = _openPropertyWindows.Find(property => property.Item1 == propertyViewModel);
+            if (target == null)
+            {
+                var window = _visualizerService.ShowWindow(propertyViewModel.PropertyViewName, propertyViewModel, true, (s, e) => _openPropertyWindows.Remove(_openPropertyWindows.Find(property => property.Item1 == (IHaveProperties)e.State)));
+                _openPropertyWindows.Add(new Tuple<IHaveProperties, Window>(propertyViewModel, window));
+            }
+            else
+            {
+                target.Item2.Activate();
+            }
         }
 
         [MediatorMessageSink(MediatorMessage.PlaceAnalysisPoint)]

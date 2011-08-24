@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows;
 using Cinch;
 using ESME.Metadata;
 using ESME.NEMO;
@@ -15,7 +17,6 @@ namespace ESME.Mapping
         {
             MapLayers = new ObservableList<MapLayerViewModel>();
             Nodes = new ObservableList<TreeNode>();
-            ContextMenu = new ObservableList<MenuItemViewModelBase>();
         }
 
         public TreeNode(string format, params object[] args) : this() { Name = string.Format(format, args); }
@@ -170,12 +171,23 @@ namespace ESME.Mapping
 
         #endregion
 
-        public PropertiesViewModel PropertiesViewModel { get; set; }
+        #region public bool HasContextMenu { get; set; }
 
-        public virtual IEnumerable<KeyValuePair<string, string>> Properties
+        public bool HasContextMenu
         {
-            get { return null; }
+            get { return _hasContextMenu; }
+            set
+            {
+                if (_hasContextMenu == value) return;
+                _hasContextMenu = value;
+                NotifyPropertyChanged(HasContextMenuChangedEventArgs);
+            }
         }
+
+        static readonly PropertyChangedEventArgs HasContextMenuChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.HasContextMenu);
+        bool _hasContextMenu;
+
+        #endregion
 
         #region public string PropertyViewName { get; set; }
 
@@ -194,26 +206,73 @@ namespace ESME.Mapping
         string _propertyViewName;
 
         #endregion
+
+        #region public string WindowTitle { get; set; }
+
+        public string WindowTitle
+        {
+            get { return _windowTitle; }
+            set
+            {
+                if (_windowTitle == value) return;
+                _windowTitle = value;
+                NotifyPropertyChanged(WindowTitleChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs WindowTitleChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.WindowTitle);
+        string _windowTitle;
+
+        #endregion
+
+        #region public List<KeyValuePair<string, string>> KeyValuePairs { get; protected set; }
+
+        public List<KeyValuePair<string, string>> KeyValuePairs
+        {
+            get { return _keyValuePairs; }
+            protected set
+            {
+                if (_keyValuePairs == value) return;
+                _keyValuePairs = value;
+                NotifyPropertyChanged(KeyValuePairsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs KeyValuePairsChangedEventArgs = ObservableHelper.CreateArgs<TreeNode>(x => x.KeyValuePairs);
+        List<KeyValuePair<string, string>> _keyValuePairs;
+
+        #endregion
+
     }
 
-    public class TreeNodeWrapper<T> : TreeNode where T : IHaveProperties
+    public class TreeNodeWrapper<T> : TreeNode
     {
+        protected MenuItemViewModelBase PropertiesMenu { get; set; }
         public TreeNodeWrapper()
         {
-            ContextMenu.Add(new MenuItemViewModelBase
+            PropertiesMenu = new MenuItemViewModelBase
             {
                 Header = "Properties...",
                 Command = new SimpleCommand<object, object>(delegate { MediatorMessage.Send(MediatorMessage.ShowProperties, this); }),
-            });
-            PropertiesViewModel = new PropertiesViewModel();
+            };
+            ContextMenu = new ObservableList<MenuItemViewModelBase> {PropertiesMenu};
+
+            PropertyViewName = "BasicPropertiesView";
         }
-        public TreeNodeWrapper(T wrappedObject) : this() { WrappedObject = wrappedObject; }
+        public TreeNodeWrapper(T wrappedObject) : this()
+        {
+            WrappedObject = wrappedObject;
+            if (wrappedObject is IHaveProperties) PropertiesMenu.Visibility = Visibility.Visible;
+        }
         public T WrappedObject { get; protected set; }
     }
 
     public class EnvironmentNode : TreeNode
     {
-        public EnvironmentNode(string format, params object[] args) : base(format, args) { }
+        public EnvironmentNode(string format, params object[] args) : base(format, args)
+        {
+            WindowTitle = "Environment properties";
+        }
 
         protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer)
         {
@@ -234,9 +293,11 @@ namespace ESME.Mapping
     {
         public ScenarioNode(NemoScenario nemoScenario) : base(nemoScenario)
         {
+            WindowTitle = "Scenario Properties: " + nemoScenario.EventName;
+            KeyValuePairs = nemoScenario.Properties.ToList();
+            HasContextMenu = true;
             foreach (var platform in nemoScenario.Platforms)
                 Nodes.Add(new PlatformNode(platform));
-            PropertiesViewModel.WindowTitle = "Scenario Properties";
         }
 
         public override string Name { get { return string.Format("Scenario: {0}", WrappedObject.EventName); } }
@@ -247,6 +308,9 @@ namespace ESME.Mapping
     {
         public PlatformNode(NemoPlatform nemoPlatform) : base(nemoPlatform)
         {
+            WindowTitle = "Platform Properties: " + nemoPlatform.Name;
+            KeyValuePairs = nemoPlatform.Properties.ToList();
+            HasContextMenu = true;
             foreach (var source in nemoPlatform.Sources)
                 Nodes.Add(new SourceNode(source));
         }
@@ -260,6 +324,9 @@ namespace ESME.Mapping
     {
         public SourceNode(NemoSource nemoSource) : base(nemoSource)
         {
+            WindowTitle = "Source Properties: " + nemoSource.Name;
+            KeyValuePairs = nemoSource.Properties.ToList();
+            HasContextMenu = true;
             foreach (var mode in nemoSource.Modes)
                 Nodes.Add(new ModeNode(mode));
         }
@@ -271,6 +338,9 @@ namespace ESME.Mapping
     {
         public ModeNode(NemoMode nemoMode) : base(nemoMode)
         {
+            WindowTitle = "Mode Properties: " + nemoMode.Name;
+            KeyValuePairs = nemoMode.Properties.ToList();
+            HasContextMenu = true;
         }
 
         protected override bool MapLayerMatchesMe(MapLayerViewModel mapLayer) { return mapLayer.Name.Contains(WrappedObject.PSMName); }

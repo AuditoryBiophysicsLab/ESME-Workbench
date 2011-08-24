@@ -5,15 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
              xmlns:views="clr-namespace:ESME.Views;assembly=ESME.Views" 
-             xmlns:emse="clr-namespace:ESME.Mapping;assembly=ESME" 
+             xmlns:esme="clr-namespace:ESME.Mapping;assembly=ESME" 
              xmlns:hrc="clr-namespace:HRC.WPF;assembly=HRC"
-             xmlns:Main="clr-namespace:ESMEWorkBench.ViewModels.Main"
-             xmlns:Metadata="clr-namespace:ESME.Metadata;assembly=ESME"
              mef:ViewModelLocator.ViewModel="LayerListViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300"
-             d:DesignWidth="300"
-             d:DataContext="{d:DesignInstance Metadata:NAEMOScenarioMetadata}">
+             d:DesignWidth="300">
 	<UserControl.Resources>
 		<Style x:Key="ContextMenuItemStyle">
 			<Setter Property="MenuItem.Header"
@@ -85,14 +82,14 @@
               Grid.IsSharedSizeScope="True"
  	          ItemsSource="{Binding TreeViewRootNodes}">
         <TreeView.Resources>
-            <HierarchicalDataTemplate DataType="{x:Type emse:TreeNode}"
+            <HierarchicalDataTemplate DataType="{x:Type esme:TreeNode}"
                                       ItemsSource="{Binding Children}">
-                <TextBlock Text="{Binding Name}">
+                <TextBlock x:Name="TextBlock" Text="{Binding Name}" ContextMenuService.IsEnabled="{Binding HasContextMenu}">
                     <TextBlock.ContextMenu>
                         <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
 					                 ItemsSource="{Binding ContextMenu}" />
                     </TextBlock.ContextMenu>
-
+                    <!--
                     <TextBlock.ToolTip>
                         <ToolTip DataContext="{Binding Path=DataContext, RelativeSource={RelativeSource TemplatedParent}}"
                                  Style="{StaticResource ToolTipStyle}">
@@ -123,9 +120,10 @@
                             </StackPanel>
                         </ToolTip>
                     </TextBlock.ToolTip>
+                    -->
                 </TextBlock>
             </HierarchicalDataTemplate>
-            <DataTemplate DataType="{x:Type emse:MapLayerViewModel}">
+            <DataTemplate DataType="{x:Type esme:MapLayerViewModel}">
                 <DockPanel LastChildFill="True">
                     <Grid DockPanel.Dock="Top">
                         <Grid.ColumnDefinitions>

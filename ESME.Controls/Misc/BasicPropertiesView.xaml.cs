@@ -5,10 +5,10 @@ namespace ESME.Views.Misc
     /// <summary>
     /// Interaction logic for PropertiesView.xaml
     /// </summary>
-    [PopupNameToViewLookupKeyMetadata("PropertiesView", typeof(PropertiesView))]
-    public partial class PropertiesView
+    [PopupNameToViewLookupKeyMetadata("BasicPropertiesView", typeof(BasicPropertiesView))]
+    public partial class BasicPropertiesView
     {
-        public PropertiesView()
+        public BasicPropertiesView()
         {
             InitializeComponent();
         }
