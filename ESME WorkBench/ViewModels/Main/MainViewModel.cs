@@ -726,6 +726,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (MapLayerCollections["Scenario"] != null)
                 {
                     MapLayerCollections.ActiveLayer = MapLayerCollections["Scenario"];
+                    if (ScenarioMetadata != null) ScenarioMetadata.ZoomToScenarioHandler();
                 }
                 else if (MapLayerCollections["Home"] != null)
                 {

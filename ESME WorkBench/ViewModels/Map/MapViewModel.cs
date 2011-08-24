@@ -176,7 +176,6 @@ namespace ESMEWorkBench.ViewModels.Map
         [MediatorMessageSink(MediatorMessage.SetMapLayers)]
         void SetMapLayers(MapLayerCollection mapLayers)
         {
-            if (MapLayers != null) MapLayers.CurrentExtent = _wpfMap.CurrentExtent;
             MapLayers = mapLayers;
         }
 
@@ -186,11 +185,16 @@ namespace ESMEWorkBench.ViewModels.Map
             set
             {
                 if (_mapLayers == value) return;
-                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
+                if (_mapLayers != null)
+                {
+                    _mapLayers.CurrentExtent = _wpfMap.CurrentExtent;
+                    _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
+                }
                 _wpfMap.Overlays.Clear();
                 _mapLayers = value;
                 if (_mapLayers != null)
                 {
+                    _wpfMap.CurrentExtent = _mapLayers.CurrentExtent;
                     foreach (var layer in _mapLayers.Where(layer => layer.Overlay != null))
                     {
                         //if (layer.LayerType == LayerType.BathymetryRaster) continue;

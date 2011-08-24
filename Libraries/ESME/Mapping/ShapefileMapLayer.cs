@@ -1,12 +1,43 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Xml.Serialization;
+using Cinch;
+using HRC.ViewModels;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Mapping
 {
     public class ShapefileMapLayer : MapLayerViewModel
     {
-        public ShapefileMapLayer() { LayerType = LayerType.Shapefile; LayerOverlay.Layers.Clear(); }
+        #region Menu Initializers
+
+        readonly MenuItemViewModelBase _areaColorMenu = new MenuItemViewModelBase
+        {
+            Header = "Area Color",
+        };
+
+        #endregion
+
+        public ShapefileMapLayer()
+        {
+            LayerType = LayerType.Shapefile; 
+            LayerOverlay.Layers.Clear();
+            _areaColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeAreaColor, obj =>
+            {
+                var result = ColorPickerService.ShowDialog();
+                if (!result.HasValue || !result.Value) return;
+                AreaColor = ColorPickerService.Color;
+                MediatorMessage.Send(MediatorMessage.SetExperimentAsModified, true);
+                MediatorMessage.Send(MediatorMessage.RefreshLayer, this);
+            });
+            AreaColorPickerMenu = new List<MenuItemViewModelBase>
+            {
+                                      _areaColorMenu,
+                                  };
+
+            ColorMenu.Children.Add(_areaColorMenu);
+        }
 
         #region public string ShapefileName { get; set; }
         [XmlElement]
@@ -59,6 +90,23 @@ namespace ESME.Mapping
         }
 
         string _shapefileName;
+
+        #endregion
+
+        #region public List<MenuItemViewModelBase> AreaColorPickerMenu { get; set; }
+        [XmlIgnore]
+        public List<MenuItemViewModelBase> AreaColorPickerMenu
+        {
+            get { return _areaColorPickerMenu; }
+            set
+            {
+                if (_areaColorPickerMenu == value) return;
+                _areaColorPickerMenu = value;
+                NotifyPropertyChanged(AreaColorPickerMenuChangedEventArgs);
+            }
+        }
+        static readonly PropertyChangedEventArgs AreaColorPickerMenuChangedEventArgs = ObservableHelper.CreateArgs<ShapefileMapLayer>(x => x.AreaColorPickerMenu);
+        List<MenuItemViewModelBase> _areaColorPickerMenu;
 
         #endregion
     }

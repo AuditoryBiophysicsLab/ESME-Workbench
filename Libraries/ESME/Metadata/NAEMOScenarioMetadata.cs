@@ -447,7 +447,7 @@ namespace ESME.Metadata
 
         SimpleCommand<object, object> _zoomToScenario;
 
-        void ZoomToScenarioHandler()
+        public void ZoomToScenarioHandler()
         {
             var mapExtent = new RectangleShape(_scenarioBounds.West, _scenarioBounds.North, _scenarioBounds.East, _scenarioBounds.South);
             MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
