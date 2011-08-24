@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.NEMO.Overlay;
+using ESME.TransmissionLoss;
 using HRC.ViewModels;
 using ThinkGeo.MapSuite.Core;
 
@@ -111,16 +113,67 @@ namespace ESME.Mapping
 
     public class AnalysisPointLayer : OverlayShapeMapLayer
     {
+        public AnalysisPointLayer() 
+        {
+            PropertiesMenu.Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.EditAnalysisPoint, AnalysisPoint));
+            LayerType = LayerType.AnalysisPoint;
+            RemoveMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj =>
+            {
+                MediatorMessage.Send(MediatorMessage.RemoveLayer, this);
+                if (AnalysisPoint != null) MediatorMessage.Send(MediatorMessage.RemoveAnalysisPoint, AnalysisPoint);
+            });
+
+        }
         #region Properties for analysis point layers only
 
         #region public Visibility VisibleIfAnalysisPointLayer { get; set; }
         [XmlIgnore]
-        public Visibility VisibleIfAnalysisPointLayer
+        public override Visibility VisibleIfAnalysisPointLayer
         {
-            get { return LayerType == LayerType.AnalysisPoint ? Visibility.Visible : Visibility.Hidden; }
+            get { return Visibility.Visible; }
         }
         #endregion
 
+        #endregion
+        #region public AnalysisPoint AnalysisPoint { get; set; }
+        static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs =
+            ObservableHelper.CreateArgs<AnalysisPointLayer>(x => x.AnalysisPoint);
+
+        AnalysisPoint _analysisPoint;
+
+        [XmlIgnore]
+        public AnalysisPoint AnalysisPoint
+        {
+            get { return _analysisPoint; }
+            set
+            {
+                if (_analysisPoint == value) return;
+                if ((value != null) && (_analysisPoint != null)) _analysisPoint.PropertyChanged -= AnalysisPointChanged;
+                _analysisPoint = value;
+                NotifyPropertyChanged(AnalysisPointChangedEventArgs);
+                if (_analysisPoint != null) _analysisPoint.PropertyChanged += AnalysisPointChanged;
+            }
+        }
+
+        void AnalysisPointChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var ap = (AnalysisPoint)sender;
+            ap.Validate();
+            ValidationErrorText = ap.ValidationErrorText;
+        }
+        #endregion
+
+        #region ISupportValidation Members
+        public override void Validate()
+        {
+            if (AnalysisPoint == null)
+            {
+                ValidationErrorText = "Unable to validate - AnalysisPoint is null";
+                return;
+            }
+            AnalysisPoint.Validate();
+            ValidationErrorText = AnalysisPoint.ValidationErrorText;
+        }
         #endregion
 
 

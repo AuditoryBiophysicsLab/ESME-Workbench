@@ -134,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildInformation.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="Data\AppSettings.cs" />
     <Compile Include="Data\CASSTemplate.cs" />
     <Compile Include="Data\WorkDirectories.cs" />

@@ -6,7 +6,6 @@ using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Model;
-using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using HRC.Services;
 using HRC.Utility;
@@ -134,10 +133,6 @@ namespace ESME.Mapping
             Header = "Remove Layer",
         };
 
-        protected readonly MenuItemViewModelBase SettingsMenu = new MenuItemViewModelBase
-        {
-            Header = "Settings...",
-        };
         #endregion
 
         Brush _areaColorBrush;
@@ -218,7 +213,7 @@ namespace ESME.Mapping
                 Validate();
                 return _validationErrorText;
             }
-            private set
+            protected set
             {
                 if (_validationErrorText == value) return;
                 _validationErrorText = value;
@@ -246,25 +241,10 @@ namespace ESME.Mapping
             LineStyle = CreateLineStyle(LineColor, LineWidth);
 
             // These settings are defaults, which are overriden as appropriate by specific layers
-            HasSettings = false;
             CanBeRemoved = false;
             CanBeReordered = true;
 
-            RemoveMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj =>
-            {
-                MediatorMessage.Send(MediatorMessage.RemoveLayer, this);
-                if (AnalysisPoint != null) MediatorMessage.Send(MediatorMessage.RemoveAnalysisPoint, AnalysisPoint);
-            });
-
-            SettingsMenu.Command = new SimpleCommand<object, object>(obj => HasSettings,
-                                                                      obj =>
-                                                                      MediatorMessage.Send(
-                                                                                           MediatorMessage.
-                                                                                               EditAnalysisPoint,
-                                                                                           AnalysisPoint));
-
-            PropertiesMenu.Command =
-                new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ShowProperties, this));
+            PropertiesMenu.Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ShowProperties, this));
 
             LineColorMenu.Command = new SimpleCommand<object, object>(obj => CanChangeLineColor, obj =>
             {
@@ -299,7 +279,6 @@ namespace ESME.Mapping
             {
                 OrderMenu,
                 RemoveMenu,
-                SettingsMenu,
                 PropertiesMenu,
             };
 
@@ -510,25 +489,6 @@ namespace ESME.Mapping
         }
         #endregion
 
-        #region public bool HasSettings { get; set; }
-        static readonly PropertyChangedEventArgs HasSettingsChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.HasSettings);
-
-        bool _hasSettings;
-
-        public bool HasSettings
-        {
-            get { return _hasSettings; }
-            set
-            {
-                SettingsMenu.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-                if (_hasSettings == value) return;
-                _hasSettings = value;
-                NotifyPropertyChanged(HasSettingsChangedEventArgs);
-            }
-        }
-        #endregion
-
         #region public bool CanBeRemoved { get; set; }
         static readonly PropertyChangedEventArgs CanBeRemovedChangedEventArgs =
             ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CanBeRemoved);
@@ -733,19 +693,10 @@ namespace ESME.Mapping
         #endregion
 
         #region ISupportValidation Members
-        public void Validate()
+        public virtual void Validate()
         {
             switch (LayerType)
             {
-                case LayerType.AnalysisPoint:
-                    if (AnalysisPoint == null)
-                    {
-                        ValidationErrorText = "Unable to validate - AnalysisPoint is null";
-                        return;
-                    }
-                    AnalysisPoint.Validate();
-                    ValidationErrorText = AnalysisPoint.ValidationErrorText;
-                    break;
                 case LayerType.Propagation:
                     if (CASSOutput == null)
                     {
@@ -981,31 +932,11 @@ namespace ESME.Mapping
         }
         #endregion
 
-        #region public AnalysisPoint AnalysisPoint { get; set; }
-        static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.AnalysisPoint);
-
-        AnalysisPoint _analysisPoint;
-
+        #region public Visibility VisibleIfAnalysisPointLayer { get; set; }
         [XmlIgnore]
-        public AnalysisPoint AnalysisPoint
+        public virtual Visibility VisibleIfAnalysisPointLayer
         {
-            get { return _analysisPoint; }
-            set
-            {
-                if (_analysisPoint == value) return;
-                if ((value != null) && (_analysisPoint != null)) _analysisPoint.PropertyChanged -= AnalysisPointChanged;
-                _analysisPoint = value;
-                NotifyPropertyChanged(AnalysisPointChangedEventArgs);
-                if (_analysisPoint != null) _analysisPoint.PropertyChanged += AnalysisPointChanged;
-            }
-        }
-
-        void AnalysisPointChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var ap = (AnalysisPoint)sender;
-            ap.Validate();
-            ValidationErrorText = ap.ValidationErrorText;
+            get { return Visibility.Collapsed; }
         }
         #endregion
     }

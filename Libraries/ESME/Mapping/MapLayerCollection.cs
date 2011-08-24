@@ -205,17 +205,15 @@ namespace ESME.Mapping
                 curPoint.OldLocation = null;
             }
             var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
-            var analysisPointLayer = Find<OverlayShapeMapLayer>(LayerType.AnalysisPoint, analysisPointName);
+            var analysisPointLayer = Find<AnalysisPointLayer>(LayerType.AnalysisPoint, analysisPointName);
             if (analysisPointLayer == null)
             {
-                analysisPointLayer = new OverlayShapeMapLayer
+                analysisPointLayer = new AnalysisPointLayer
                 {
                     Name = analysisPointName,
-                    LayerType = LayerType.AnalysisPoint,
                     LineWidth = 1,
                     CanBeRemoved = true,
                     CanBeReordered = true,
-                    HasSettings = true,
                     CanChangeLineColor = true,
                     CanChangeLineWidth = true,
                     CanChangeAreaColor = false,

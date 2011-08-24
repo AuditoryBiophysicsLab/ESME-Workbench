@@ -965,7 +965,6 @@ namespace ESMEWorkBench.Data
                         PointSymbolType = PointSymbolType.Circle,
                         CanBeRemoved = false,
                         CanBeReordered = true,
-                        HasSettings = true,
                         CanChangeLineColor = true,
                         CanChangeLineWidth = true,
                         CanChangeAreaColor = false,
@@ -999,7 +998,6 @@ namespace ESMEWorkBench.Data
                     LineWidth = 1,
                     CanBeRemoved = false,
                     CanBeReordered = true,
-                    HasSettings = true,
                     CanChangeLineColor = true,
                     CanChangeLineWidth = true,
                     CanChangeAreaColor = false,
@@ -1026,7 +1024,6 @@ namespace ESMEWorkBench.Data
                     LineWidth = defaultLineWidth,
                     CanBeRemoved = false,
                     CanBeReordered = true,
-                    HasSettings = true,
                     CanChangeLineColor = true,
                     CanChangeLineWidth = true,
                     CanChangeAreaColor = false,
@@ -1044,17 +1041,16 @@ namespace ESMEWorkBench.Data
         void DisplayAnalysisPoint(AnalysisPoint curPoint)
         {
             var analysisPointName = string.Format("Analysis Point: [{0:0.###}, {1:0.###}]", curPoint.Latitude, curPoint.Longitude);
-            var analysisPointLayer = (OverlayShapeMapLayer) MapLayers.FirstOrDefault(curLayer => curLayer.Name == analysisPointName);
+            var analysisPointLayer = (AnalysisPointLayer)MapLayers.FirstOrDefault(curLayer => curLayer.Name == analysisPointName);
             if (analysisPointLayer == null)
             {
-                analysisPointLayer = new OverlayShapeMapLayer
+                analysisPointLayer = new AnalysisPointLayer
                                      {
                                          Name = analysisPointName,
                                          LayerType = LayerType.AnalysisPoint,
                                          LineWidth = 1,
                                          CanBeRemoved = true,
                                          CanBeReordered = true,
-                                         HasSettings = true,
                                          CanChangeLineColor = true,
                                          CanChangeLineWidth = true,
                                          CanChangeAreaColor = false,

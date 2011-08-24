@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using Cinch;
+using ESME;
 using ESME.Data;
 
 namespace ESMEWorkBench
@@ -19,11 +19,14 @@ namespace ESMEWorkBench
             AppSettings.SetDefaults();
             ESME.Globals.WorkDirectories = WorkDirectories;
             ESME.Globals.AppSettings = AppSettings;
+            Configuration = new Configuration();
         }
 
         public static AppSettings AppSettings { get; set; }
 
         public static WorkDirectories WorkDirectories { get; set; }
+
+        public static Configuration Configuration { get; private set; }
 
         public static void DisplayException(IMessageBoxService messageBoxService, Exception ex, string format, params object[] args)
         {
@@ -56,19 +59,6 @@ namespace ESMEWorkBench
                 Trace.WriteLine("Inner exception stack trace:");
                 Trace.WriteLine(originalException.InnerException.StackTrace);
             }
-        }
-
-        public static string Filter(this string s, Func<char, bool> trueIfKeep)
-        {
-            if (!string.IsNullOrEmpty(s))
-            {
-                var sb = new StringBuilder(s.Length);
-                foreach (var c in s.Where(c => trueIfKeep(c)))
-                    sb.Append(c);
-
-                return sb.ToString();
-            }
-            return s;
         }
     }
 }
