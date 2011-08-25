@@ -128,6 +128,8 @@
       <Abbreviation Text="GUI" />
       <Abbreviation Text="RAM" />
       <Abbreviation Text="RMS" />
+      <Abbreviation Text="DDB" />
+      <Abbreviation Text="MMMB" />
     </Naming2>
   </CodeStyleSettings>
 </Configuration>

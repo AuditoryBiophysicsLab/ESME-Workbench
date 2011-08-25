@@ -20,6 +20,7 @@ using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.EnvironmentBuilder;
 using ESME.Views.Locations;
+using ESME.Views.InstallationWizard;
 using HRC.Navigation;
 using HRC.Utility;
 using Microsoft.Windows.Controls.Ribbon;
@@ -33,6 +34,7 @@ namespace ESMEWorkBench.ViewModels.Main
         void AllViewModelsAreReady(bool allViewModelsAreReady)
         {
             Console.WriteLine("All view models are ready!");
+            WizardViewModel.LaunchWizardIfNeeded(_visualizerService);
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             AreAllViewModelsReady = true;
             UpdateMapLayerVisibility();

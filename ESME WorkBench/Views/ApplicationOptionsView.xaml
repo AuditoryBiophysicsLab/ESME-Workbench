@@ -139,7 +139,7 @@
             </TabItem>
             -->
             <TabItem Header="Acoustic Simulators">
-                <Views:AcousticSimulatorOptionsControl DataContext="{Binding AppSettings}" />
+                <Views:AcousticSimulatorOptionsControl DataContext="{Binding AppSettings}"/>
             </TabItem>
             <TabItem Header="Seasons">
                 <StackPanel Orientation="Vertical">
