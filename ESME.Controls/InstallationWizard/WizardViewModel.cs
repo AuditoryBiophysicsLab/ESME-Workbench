@@ -27,7 +27,8 @@ namespace ESME.Views.InstallationWizard
             {
                     new WizardPanelInfo
                     {
-                            DescriptiveText ="Welcome to the ESME Workbench Installation Wizard.\n\nThe next several panes of this wizard will guide you in the configuration of required data directories and program locations for proper operation of ESME Workbench.\n\n Please press Next to continue, or Cancel to exit.",
+                            DescriptiveText =
+                                    "Welcome to the ESME Workbench Installation Wizard.\n\nThe next several panes of this wizard will guide you in the configuration of required data directories and program locations for proper operation of ESME Workbench.\n\n Please press Next to continue, or Cancel to exit.",
                             IsFileBrowerEnabled = false,
                             UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                             PropertyName = "welcomeScreen"
@@ -95,26 +96,29 @@ namespace ESME.Views.InstallationWizard
                     },
             };
             if (Configuration.IsClassifiedModel)
-            {
-                Panels.Add(new WizardPanelInfo
+                Panels.AddRange(new List<WizardPanelInfo>
                 {
-                        DescriptiveText =
-                                   "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.",
-                        FieldName = "HFBL Extractor",
-                        IsDirectoryBrowser = false,
-                        FileNameFilter = "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
-                        PropertyName = "HFBLExtractor",
+                        new WizardPanelInfo
+                        {
+                                DescriptiveText =
+                                        "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.",
+                                FieldName = "HFBL Extractor",
+                                IsDirectoryBrowser = false,
+                                FileNameFilter =
+                                        "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
+                                PropertyName = "HFBLExtractor",
+                        },
+                        new WizardPanelInfo
+                        {
+                                DescriptiveText =
+                                        "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.",
+                                FieldName = "LFBL Extractor",
+                                IsDirectoryBrowser = false,
+                                FileNameFilter =
+                                        "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
+                                PropertyName = "LFBLExtractor",
+                        }
                 });
-                Panels.Add(new WizardPanelInfo
-                {
-                        DescriptiveText =
-                                   "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.",
-                        FieldName = "LFBL Extractor",
-                        IsDirectoryBrowser = false,
-                        FileNameFilter = "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
-                        PropertyName = "LFBLExtractor",
-                });
-            }
         }
 
         public static void LaunchWizardIfNeeded(IUIVisualizerService visualizerService)
