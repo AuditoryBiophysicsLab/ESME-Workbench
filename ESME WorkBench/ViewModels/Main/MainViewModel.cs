@@ -59,7 +59,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 throw;
             }
 
-            AnalysisPointSettingsViewModel.MessageBoxService = messageBoxService;
+            AnalysisPointPropertiesViewModel.MessageBoxService = messageBoxService;
             Experiment.MessageBoxService = messageBoxService;
             Experiment.VisualizerService = visualizerService;
 

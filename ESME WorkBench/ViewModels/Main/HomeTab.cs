@@ -13,6 +13,7 @@ using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.CASS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
 using ESMEWorkBench.Properties;
@@ -325,8 +326,8 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
         public void EditAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
-            var settingsResult = _visualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
+            var analysisPointPropertiesViewModel = new AnalysisPointPropertiesViewModel(analysisPoint);
+            var settingsResult = _visualizerService.ShowDialog("AnalysisPointPropertiesView", analysisPointPropertiesViewModel);
             if (settingsResult.HasValue && settingsResult.Value)
             {
                 ScenarioMetadata.MapLayers.DisplayAnalysisPoint(analysisPoint);
@@ -340,6 +341,11 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             ScenarioMetadata.AnalysisPoints.Remove(analysisPoint);
             ScenarioMetadata.Save();
+        }
+
+        [MediatorMessageSink(MediatorMessage.ViewPropagation)]
+        public void ViewPropagation(CASSOutput cassOutput)
+        {
         }
     }
 }

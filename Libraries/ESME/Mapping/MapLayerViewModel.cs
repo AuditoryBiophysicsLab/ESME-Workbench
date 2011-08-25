@@ -6,7 +6,6 @@ using System.Windows.Media;
 using System.Xml.Serialization;
 using Cinch;
 using ESME.Model;
-using ESME.TransmissionLoss.CASS;
 using HRC.Services;
 using HRC.Utility;
 using HRC.ViewModels;
@@ -355,7 +354,7 @@ namespace ESME.Mapping
         public Overlay Overlay { get; set; }
 
         [XmlIgnore]
-        public Visibility IsLineColorVisible
+        public virtual Visibility IsLineColorVisible
         {
             get
             {
@@ -365,7 +364,6 @@ namespace ESME.Mapping
                         return Visibility.Hidden;
                     case LayerType.BaseMap:
                     case LayerType.Shapefile:
-                    case LayerType.OverlayFile:
                     case LayerType.SimArea:
                     case LayerType.OpArea:
                     case LayerType.Bathymetry:
@@ -373,8 +371,6 @@ namespace ESME.Mapping
                     case LayerType.SoundSpeed:
                     case LayerType.BottomType:
                     case LayerType.WindSpeed:
-                    case LayerType.AnalysisPoint:
-                    case LayerType.Propagation:
                     case LayerType.Pressure:
                         return Visibility.Visible;
                 }
@@ -695,21 +691,7 @@ namespace ESME.Mapping
         #region ISupportValidation Members
         public virtual void Validate()
         {
-            switch (LayerType)
-            {
-                case LayerType.Propagation:
-                    if (CASSOutput == null)
-                    {
-                        ValidationErrorText = "Unable to validate - CASSOutput is null";
-                        return;
-                    }
-                    CASSOutput.Validate();
-                    ValidationErrorText = CASSOutput.ValidationErrorText;
-                    break;
-                default:
-                    ValidationErrorText = null;
-                    break;
-            }
+            ValidationErrorText = null;
         }
         #endregion
 
@@ -723,10 +705,10 @@ namespace ESME.Mapping
             set
             {
                 if (_areaStyle == value) return;
-                LineColor = Color.FromArgb(value.OutlinePen.Color.AlphaComponent, value.OutlinePen.Color.RedComponent,
+                _lineColor = Color.FromArgb(value.OutlinePen.Color.AlphaComponent, value.OutlinePen.Color.RedComponent,
                                            value.OutlinePen.Color.GreenComponent, value.OutlinePen.Color.BlueComponent);
-                LineWidth = value.OutlinePen.Width;
-                AreaColor = Color.FromArgb(value.FillSolidBrush.Color.AlphaComponent,
+                _lineWidth = value.OutlinePen.Width;
+                _areaColor = Color.FromArgb(value.FillSolidBrush.Color.AlphaComponent,
                                            value.FillSolidBrush.Color.RedComponent,
                                            value.FillSolidBrush.Color.GreenComponent,
                                            value.FillSolidBrush.Color.BlueComponent);
@@ -806,11 +788,10 @@ namespace ESME.Mapping
             get { return _lineWidth; }
             set
             {
-                if (_lineWidth == value) return;
                 _lineWidth = value;
-                AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-                LineStyle = CreateLineStyle(LineColor, LineWidth);
-                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
+                _areaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
+                _lineStyle = CreateLineStyle(LineColor, LineWidth);
+                _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
                 CheckProperLineWidthMenu();
             }
         }
@@ -836,8 +817,8 @@ namespace ESME.Mapping
             {
                 if (_areaColor == value) return;
                 _areaColor = value;
-                AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-                AreaColorBrush = new SolidColorBrush(_areaColor);
+                _areaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
+                _areaColorBrush = new SolidColorBrush(_areaColor);
             }
         }
         #endregion
@@ -869,10 +850,10 @@ namespace ESME.Mapping
             {
                 if (_lineColor == value) return;
                 _lineColor = value;
-                AreaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
-                LineStyle = CreateLineStyle(LineColor, LineWidth);
-                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)Math.Max(1, LineWidth));
-                LineColorBrush = new SolidColorBrush(_lineColor);
+                _areaStyle = CreateAreaStyle(LineColor, LineWidth, AreaColor);
+                _lineStyle = CreateLineStyle(LineColor, LineWidth);
+                _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)Math.Max(1, LineWidth));
+                _lineColorBrush = new SolidColorBrush(_lineColor);
             }
         }
         #endregion
@@ -888,7 +869,7 @@ namespace ESME.Mapping
             {
                 if (_pointSymbolType == value) return;
                 _pointSymbolType = value;
-                PointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
+                _pointStyle = CreatePointStyle(PointSymbolType, LineColor, (int)LineWidth);
                 CheckProperPointSymbolTypeMenu();
             }
         }
@@ -902,42 +883,6 @@ namespace ESME.Mapping
             }
         }
 
-        #endregion
-
-        #region public CASSOutput CASSOutput { get; set; }
-        static readonly PropertyChangedEventArgs CASSOutputChangedEventArgs =
-            ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.CASSOutput);
-
-        CASSOutput _cassOutput;
-
-        [XmlIgnore]
-        public CASSOutput CASSOutput
-        {
-            get { return _cassOutput; }
-            set
-            {
-                if (_cassOutput == value) return;
-                if ((value != null) && (_cassOutput != null)) _cassOutput.PropertyChanged -= CASSOutputChanged;
-                _cassOutput = value;
-                NotifyPropertyChanged(CASSOutputChangedEventArgs);
-                if (_cassOutput != null) _cassOutput.PropertyChanged += CASSOutputChanged;
-            }
-        }
-
-        void CASSOutputChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var point = (CASSOutput)sender;
-            point.Validate();
-            ValidationErrorText = point.ValidationErrorText;
-        }
-        #endregion
-
-        #region public Visibility VisibleIfAnalysisPointLayer { get; set; }
-        [XmlIgnore]
-        public virtual Visibility VisibleIfAnalysisPointLayer
-        {
-            get { return Visibility.Collapsed; }
-        }
         #endregion
     }
 }

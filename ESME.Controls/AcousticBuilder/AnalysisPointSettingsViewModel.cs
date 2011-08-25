@@ -13,10 +13,10 @@ using MEFedMVVM.ViewModelLocator;
 
 namespace ESME.Views.AcousticBuilder
 {
-    [ExportViewModel("AnalysisPointSettingsViewModel")]
-    public sealed class AnalysisPointSettingsViewModel : ValidatingViewModel
+    [ExportViewModel("AnalysisPointPropertiesViewModel")]
+    public sealed class AnalysisPointPropertiesViewModel : ValidatingViewModel
     {
-        public AnalysisPointSettingsViewModel(AnalysisPoint analysisPoint)
+        public AnalysisPointPropertiesViewModel(AnalysisPoint analysisPoint)
         {
             RegisterMediator();
             AvailableModes = new ObservableCollection<SoundSource>();
@@ -31,13 +31,13 @@ namespace ESME.Views.AcousticBuilder
                     {
                             PropertyName = "Latitude",
                             Description = "Latitude is out of range",
-                            RuleDelegate = (o, r) =>RangeCheck(((AnalysisPointSettingsViewModel)o).Latitude, -90, 90),
+                            RuleDelegate = (o, r) =>RangeCheck(((AnalysisPointPropertiesViewModel)o).Latitude, -90, 90),
                     },
                     new ValidationRule
                     {
                             PropertyName = "Longitude",
                             Description = "Longitude is out of range",
-                            RuleDelegate = (o, r) =>RangeCheck(((AnalysisPointSettingsViewModel)o).Longitude, -180, 180),
+                            RuleDelegate = (o, r) =>RangeCheck(((AnalysisPointPropertiesViewModel)o).Longitude, -180, 180),
                     },
             });
         }
@@ -56,7 +56,7 @@ namespace ESME.Views.AcousticBuilder
             }
         }
 
-        static readonly PropertyChangedEventArgs LatitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.Latitude);
+        static readonly PropertyChangedEventArgs LatitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.Latitude);
         double _latitude;
 
         #endregion
@@ -73,7 +73,7 @@ namespace ESME.Views.AcousticBuilder
             }
         }
 
-        static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.Longitude);
+        static readonly PropertyChangedEventArgs LongitudeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.Longitude);
         double _longitude;
 
         #endregion
@@ -94,7 +94,7 @@ namespace ESME.Views.AcousticBuilder
             }
         }
 
-        static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.AnalysisPoint);
+        static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.AnalysisPoint);
         AnalysisPoint _analysisPoint;
 
         #endregion
@@ -115,7 +115,7 @@ namespace ESME.Views.AcousticBuilder
         }
 
         void AvailableModesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) { NotifyPropertyChanged(AvailableModesChangedEventArgs); }
-        static readonly PropertyChangedEventArgs AvailableModesChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.AvailableModes);
+        static readonly PropertyChangedEventArgs AvailableModesChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.AvailableModes);
         ObservableCollection<SoundSource> _availableModes;
 
         #endregion
@@ -134,7 +134,7 @@ namespace ESME.Views.AcousticBuilder
             }
         }
 
-        static readonly PropertyChangedEventArgs SelectedModeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.SelectedMode);
+        static readonly PropertyChangedEventArgs SelectedModeChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.SelectedMode);
         SoundSource _selectedMode;
 
         #endregion
@@ -152,7 +152,7 @@ namespace ESME.Views.AcousticBuilder
             }
         }
 
-        static readonly PropertyChangedEventArgs IsItemSelectedChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.IsItemSelected);
+        static readonly PropertyChangedEventArgs IsItemSelectedChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.IsItemSelected);
         bool _isItemSelected;
 
         #endregion
@@ -170,7 +170,7 @@ namespace ESME.Views.AcousticBuilder
             }
         }
 
-        static readonly PropertyChangedEventArgs AnalysisPointIsChangedChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointSettingsViewModel>(x => x.AnalysisPointIsChanged);
+        static readonly PropertyChangedEventArgs AnalysisPointIsChangedChangedEventArgs = ObservableHelper.CreateArgs<AnalysisPointPropertiesViewModel>(x => x.AnalysisPointIsChanged);
         bool _analysisPointIsChanged;
 
         #endregion

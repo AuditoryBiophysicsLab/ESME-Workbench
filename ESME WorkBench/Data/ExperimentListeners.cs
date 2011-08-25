@@ -87,13 +87,13 @@ namespace ESMEWorkBench.Data
         [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
         void EditAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            var analysisPointSettingsViewModel = new AnalysisPointSettingsViewModel(analysisPoint);
-            var settingsResult = VisualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointSettingsViewModel);
+            var analysisPointPropertiesViewModel = new AnalysisPointPropertiesViewModel(analysisPoint);
+            var settingsResult = VisualizerService.ShowDialog("AnalysisPointSettingsView", analysisPointPropertiesViewModel);
             if (settingsResult.HasValue && settingsResult.Value)
             {
             }
             DisplayAnalysisPoint(analysisPoint);
-            if (analysisPointSettingsViewModel.AnalysisPointIsChanged) IsChanged = true;
+            if (analysisPointPropertiesViewModel.AnalysisPointIsChanged) IsChanged = true;
             analysisPoint.Validate();
         }
 

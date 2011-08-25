@@ -250,17 +250,17 @@ namespace ESME.Mapping
         public void RemovePropagationPoint(CASSOutput curPoint)
         {
             var layerName = string.Format("Prop {0}|{1}|{2}: [{3:0.###}, {4:0.###}]", curPoint.PlatformName, curPoint.SourceName, curPoint.ModeName, curPoint.Latitude, curPoint.Longitude);
-            var propagationPointLayer = Find<OverlayShapeMapLayer>(LayerType.Propagation, layerName);
+            var propagationPointLayer = Find<PropagationLayer>(LayerType.Propagation, layerName);
             if (propagationPointLayer != null) Remove(propagationPointLayer);
         }
 
         public void DisplayPropagationPoint(CASSOutput curPoint)
         {
             var layerName = string.Format("Prop {0}|{1}|{2}: [{3:0.###}, {4:0.###}]", curPoint.PlatformName, curPoint.SourceName, curPoint.ModeName, curPoint.Latitude, curPoint.Longitude);
-            var propagationPointLayer = Find<OverlayShapeMapLayer>(LayerType.Propagation, layerName);
+            var propagationPointLayer = Find<PropagationLayer>(LayerType.Propagation, layerName);
             if (propagationPointLayer == null)
             {
-                propagationPointLayer = new OverlayShapeMapLayer
+                propagationPointLayer = new PropagationLayer
                 {
                     Name = layerName,
                     LayerType = LayerType.Propagation,
@@ -285,36 +285,14 @@ namespace ESME.Mapping
             for (var radialIndex = 0; radialIndex < radialCount; radialIndex++)
             {
                 displayPoints.Clear();
-#if false
-                displayPoints.Add(curPoint);
-                const float wiggleSize = 5;
-                var wiggleOffset = -wiggleSize;
-                var wiggleDirection = 1;
-                const int wiggleSteps = 8;
-                for (var wiggleIndex = 0; wiggleIndex < wiggleSteps; wiggleIndex++)
-                {
-                    displayPoints.Add(EarthCoordinate.Move(curPoint, curPoint.RadialBearings[radialIndex] + wiggleOffset, (curPoint.MaxRangeDistance / wiggleSteps) * (wiggleIndex + 1)));
-                    wiggleOffset += wiggleSize * wiggleDirection;
-                    if (Math.Abs(wiggleOffset) == wiggleSize) wiggleDirection *= -1;
-                }
-#endif
+
                 var curRadialBearing = curPoint.RadialBearings[radialIndex];
                 // Line from center to radius
                 displayPoints.Add(curPoint);
                 displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
                 propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
                 displayPoints.Clear();
-#if false
-                // arrow halfway along radial
-                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance * .5));
-                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing + 10, curPoint.MaxRangeDistance * .4));
-                propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
-                displayPoints.Clear();
-                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance * .5));
-                displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing - 10, curPoint.MaxRangeDistance * .4));
-                propagationPointLayer.Add(new OverlayLineSegments(displayPoints.ToArray(), Colors.Red, 5));
-                displayPoints.Clear();
-#endif
+
                 // arrow at end of radial
                 displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing + 5, curPoint.MaxRangeDistance * .9));
                 displayPoints.Add(EarthCoordinate.Move(curPoint, curRadialBearing, curPoint.MaxRangeDistance));
@@ -347,7 +325,7 @@ namespace ESME.Mapping
         public void DisplaySpecies(NemoSpecies species)
         {
             var speciesLayerName = string.Format("Species: {0}", species.SpeciesName);
-            var speciesLayer = Find<OverlayShapeMapLayer>(LayerType.Propagation, speciesLayerName);
+            var speciesLayer = Find<OverlayShapeMapLayer>(LayerType.Animal, speciesLayerName);
             if (speciesLayer == null)
             {
                 speciesLayer = new OverlayShapeMapLayer

@@ -52,30 +52,41 @@
 			<Grid Width="{Binding ElementName=ListBox, Path=ActualWidth}">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="16" />
-					<ColumnDefinition Width="*" />
-					<ColumnDefinition Width="16" />
                     <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="*" />
+                    <!--<ColumnDefinition Width="16" />-->
 				</Grid.ColumnDefinitions>
 				<CheckBox Focusable="False"
 				          Grid.Column="0"
 				          IsChecked="{Binding IsChecked}"
 				          VerticalAlignment="Center" />
-				<TextBlock Text="{Binding Name, Mode=OneTime}"
-                           x:Name="LayerName"
-				           Grid.Column="1"
-    				       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
-
-                <Image Source="..\Images\SmallIcons\12px-red-circle.png" 
-                       Grid.Column="2"
-                       ToolTip="{Binding AnalysisPointCompletionTooltip}"
-                       Visibility="{Binding VisibleIfAnalysisPointLayer}" />
 
                 <Rectangle Width="12"
 				           RadiusX="3"
 				           RadiusY="3"
-				           Grid.Column="3"
+				           Grid.Column="1"
+				           Height="12"
+				           Fill="{Binding LineColorBrush}"
+				           Visibility="{Binding IsLineColorVisible}"
+				           VerticalAlignment="Center"
+				           ToolTip="{Binding PointLineTooltip}">
+                    <Rectangle.ContextMenu>
+                        <ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
+						             ItemsSource="{Binding LineOrPointPickerMenu}" />
+
+                    </Rectangle.ContextMenu>
+                </Rectangle>
+                
+                <TextBlock Text="{Binding Name, Mode=OneTime}"
+                           x:Name="LayerName"
+				           Grid.Column="2"
+    				       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=Width}" />
+
+                <!--
+                <Rectangle Width="12"
+				           RadiusX="3"
+				           RadiusY="3"
+				           Grid.Column="2"
 				           Height="12"
 				           Fill="{Binding AreaColorBrush}"
 				           Visibility="{Binding IsAreaColorVisible}"
@@ -88,22 +99,7 @@
 
                     </Rectangle.ContextMenu>
                 </Rectangle>
-                
-                <Rectangle Width="12"
-				           RadiusX="3"
-				           RadiusY="3"
-				           Grid.Column="4"
-				           Height="12"
-				           Fill="{Binding LineColorBrush}"
-				           Visibility="{Binding IsLineColorVisible}"
-				           VerticalAlignment="Center"
-				           ToolTip="{Binding PointLineTooltip}">
-					<Rectangle.ContextMenu>
-						<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"
-						             ItemsSource="{Binding LineOrPointPickerMenu}" />
-
-					</Rectangle.ContextMenu>
-				</Rectangle>
+                -->
 
                 <Grid.ContextMenu>
 					<ContextMenu ItemContainerStyle="{StaticResource ContextMenuItemStyle}"

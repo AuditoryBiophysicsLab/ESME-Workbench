@@ -5,6 +5,7 @@ using System.Xml.Serialization;
 using Cinch;
 using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
+using ESME.TransmissionLoss.CASS;
 using HRC.ViewModels;
 using ThinkGeo.MapSuite.Core;
 
@@ -109,13 +110,24 @@ namespace ESME.Mapping
             _layer.ZoomLevelSet.ZoomLevel01.ApplyUntilZoomLevel = ApplyUntilZoomLevel.Level20;
             LayerOverlay.Layers.Add(_layer);
         }
+
+        [XmlIgnore]
+        public override Visibility IsLineColorVisible
+        {
+            get { return Visibility.Visible; }
+        }
+
     }
 
     public class AnalysisPointLayer : OverlayShapeMapLayer
     {
         public AnalysisPointLayer() 
         {
-            PropertiesMenu.Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.EditAnalysisPoint, AnalysisPoint));
+            ContextMenu.Add(new MenuItemViewModelBase
+            {
+                Header = "Properties...",
+                Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.EditAnalysisPoint, AnalysisPoint)),
+            });
             LayerType = LayerType.AnalysisPoint;
             RemoveMenu.Command = new SimpleCommand<object, object>(obj => CanBeRemoved, obj =>
             {
@@ -124,18 +136,7 @@ namespace ESME.Mapping
             });
 
         }
-        #region Properties for analysis point layers only
 
-        #region public Visibility VisibleIfAnalysisPointLayer { get; set; }
-        [XmlIgnore]
-        public override Visibility VisibleIfAnalysisPointLayer
-        {
-            get { return Visibility.Visible; }
-        }
-        #endregion
-
-        #endregion
-        #region public AnalysisPoint AnalysisPoint { get; set; }
         static readonly PropertyChangedEventArgs AnalysisPointChangedEventArgs =
             ObservableHelper.CreateArgs<AnalysisPointLayer>(x => x.AnalysisPoint);
 
@@ -161,9 +162,7 @@ namespace ESME.Mapping
             ap.Validate();
             ValidationErrorText = ap.ValidationErrorText;
         }
-        #endregion
 
-        #region ISupportValidation Members
         public override void Validate()
         {
             if (AnalysisPoint == null)
@@ -174,8 +173,52 @@ namespace ESME.Mapping
             AnalysisPoint.Validate();
             ValidationErrorText = AnalysisPoint.ValidationErrorText;
         }
-        #endregion
+    }
 
+    public class PropagationLayer : OverlayShapeMapLayer
+    {
+        public PropagationLayer() 
+        {
+            LayerType = LayerType.Propagation;
+            ContextMenu.Add(new MenuItemViewModelBase
+            {
+                Header = "View...",
+                Command = new SimpleCommand<object, object>(obj => MediatorMessage.Send(MediatorMessage.ViewPropagation, _cassOutput)),
+            });
+        }
 
+        [XmlIgnore]
+        public CASSOutput CASSOutput
+        {
+            get { return _cassOutput; }
+            set
+            {
+                if (_cassOutput == value) return;
+                if ((value != null) && (_cassOutput != null)) _cassOutput.PropertyChanged -= CASSOutputChanged;
+                _cassOutput = value;
+                NotifyPropertyChanged(CASSOutputChangedEventArgs);
+                if (_cassOutput != null) _cassOutput.PropertyChanged += CASSOutputChanged;
+            }
+        }
+        CASSOutput _cassOutput;
+        static readonly PropertyChangedEventArgs CASSOutputChangedEventArgs = ObservableHelper.CreateArgs<PropagationLayer>(x => x.CASSOutput);
+
+        void CASSOutputChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var point = (CASSOutput)sender;
+            point.Validate();
+            ValidationErrorText = point.ValidationErrorText;
+        }
+
+        public override void Validate()
+        {
+            if (CASSOutput == null)
+            {
+                ValidationErrorText = "Unable to validate - CASSOutput is null";
+                return;
+            }
+            CASSOutput.Validate();
+            ValidationErrorText = CASSOutput.ValidationErrorText;
+        }
     }
 }

@@ -89,8 +89,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AcousticBuilder\AnalysisPointSettingsView.xaml.cs">
-      <DependentUpon>AnalysisPointSettingsView.xaml</DependentUpon>
+    <Compile Include="AcousticBuilder\AnalysisPointPropertiesView.xaml.cs">
+      <DependentUpon>AnalysisPointPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="AcousticBuilder\AnalysisPointSettingsViewModel.cs" />
     <Compile Include="BuildInformation.cs" />
@@ -179,6 +179,9 @@
     </Compile>
     <Compile Include="TestViewModel.cs" />
     <Compile Include="Controls\ColorMapViewModel.cs" />
+    <Compile Include="TransmissionLossViewer\PropagationView.xaml.cs">
+      <DependentUpon>PropagationView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TransmissionLossViewer\TransmissionLossFieldListItemViewModel.cs" />
     <Compile Include="TransmissionLossViewer\TransmissionLossFieldView.xaml.cs">
       <DependentUpon>TransmissionLossFieldView.xaml</DependentUpon>
@@ -209,7 +212,7 @@
     <Compile Include="TransmissionLoss\TransmissionLossRadialCalculatorViewModel.cs" />
     <Compile Include="ValueConverters.cs" />
     <Compile Include="VirtualToggleButton.cs" />
-    <Page Include="AcousticBuilder\AnalysisPointSettingsView.xaml">
+    <Page Include="AcousticBuilder\AnalysisPointPropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -304,6 +307,10 @@
     <Page Include="TestView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransmissionLossViewer\PropagationView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="TransmissionLossViewer\TransmissionLossFieldView.xaml">
       <Generator>MSBuild:Compile</Generator>

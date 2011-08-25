@@ -22,6 +22,8 @@ namespace ESME
         public const string ViewAnalysisPoint = "ViewAnalysisPointMessage";
         public const string CalculateAnalysisPoint = "CalculateAnalysisPointMessage";
 
+        public const string ViewPropagation = "ViewPropagationMessage";
+
         public const string ShowProperties = "ShowPropertiesMessage";
 
         public const string SetExperiment = "SetExperimentMessage";
