@@ -299,6 +299,22 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region NewScenarioCommand
+        public SimpleCommand<object, object> NewScenarioCommand
+        {
+            get { return _newScenario ?? (_newScenario = new SimpleCommand<object, object>(delegate { return IsNewScenarioCommandEnabled; }, delegate { NewScenarioHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _newScenario;
+
+        bool IsNewScenarioCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void NewScenarioHandler() { }
+        #endregion
+
         readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
         [MediatorMessageSink(MediatorMessage.ShowProperties)]
         public void ShowProperties(IHaveProperties propertyViewModel)

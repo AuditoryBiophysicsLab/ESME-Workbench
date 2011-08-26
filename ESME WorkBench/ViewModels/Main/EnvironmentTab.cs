@@ -1116,6 +1116,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var environmentPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Environment");
             BackgroundTaskAggregator = new BackgroundTaskAggregator();
 
+            var bathyName = bathymetryName.EndsWith("_bathy") ? bathymetryName.Remove(bathymetryName.Length - 6, 6) : bathymetryName;
             var naemoEnvironmentExporters = selectedTimePeriods.Select(t => new CASSBackgroundExporter
             {
                 WorkerSupportsCancellation = false,
@@ -1124,7 +1125,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 TimePeriod = t,
                 ExtractionArea = extractionArea,
                 NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
-                DestinationPath = Path.Combine(environmentPath, string.Format("{0}_env_{1}", bathymetryName, t.ToString().ToLower())),
+                DestinationPath = Path.Combine(environmentPath, string.Format("{0}_env_{1}", bathyName, t.ToString().ToLower())),
                 UseExpandedExtractionArea = false,
                 ExportHFEVA = vm.GenerateHFEVA,
                 ExportHFBL = vm.GenerateHFBL,

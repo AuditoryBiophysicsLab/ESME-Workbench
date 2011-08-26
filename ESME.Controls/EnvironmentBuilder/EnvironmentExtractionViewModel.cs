@@ -18,7 +18,7 @@ namespace ESME.Views.EnvironmentBuilder
         public EnvironmentExtractionViewModel(string selectedOverlay, string selectedBathymetry)
         {
             _selectedOverlay = selectedOverlay;
-            _selectedBathymetry = selectedBathymetry;
+            _selectedBathymetry = selectedBathymetry.EndsWith("_bathy") ? selectedBathymetry.Remove(selectedBathymetry.Length - 6, 6) : selectedBathymetry;
             if (HFEVAEnabled) GenerateHFEVA = true;
             foreach (var item in MonthCheckboxes) item.PropertyChanged += (o, args) => UpdateNote();
             foreach (var item in SeasonCheckboxes) item.PropertyChanged += (o, args) => UpdateNote();

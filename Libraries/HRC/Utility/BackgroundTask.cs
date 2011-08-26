@@ -164,8 +164,8 @@ namespace HRC.Utility
             set
             {
                 if (_value == value) return;
-                if ((value < Minimum) || (value > Maximum)) throw new ArgumentOutOfRangeException("Value", string.Format("Value {0} must be between {1} and {2}", value, Minimum, Maximum));
-                _value = value;
+                if (value < Minimum) throw new ArgumentOutOfRangeException("Value", string.Format("Value {0} must be between {1} and {2}", value, Minimum, Maximum));
+                if (value < Maximum) _value = value;
                 if ((WorkerReportsProgress) && (_range > 0f) && IsBusy)
                     try
                     {

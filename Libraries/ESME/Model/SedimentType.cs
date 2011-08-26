@@ -54,6 +54,7 @@ namespace ESME.Model
 
         static SedimentTypes()
         {
+            //                                    name                         category density  compSpd cmpCoef shearSpd shrCoef sspRatio grainSize     lossParam
             SedimentTypeList.Add(new SedimentType("Rough Rock",                       1, 2.500f, 3750.0f, 1.595f, 699.6f, 46.20f, 2.5000f, float.NaN,    0.01374f));
             SedimentTypeList.Add(new SedimentType("Rock",                             2, 2.500f, 3750.0f, 1.595f, 699.6f, 46.20f, 2.5000f, float.NaN,    0.01374f));
             SedimentTypeList.Add(new SedimentType("Cobble or Gravel or Pebble",       3, 2.500f, 2700.0f, 1.595f, 699.6f, 46.20f, 1.8000f, float.NaN,    0.01374f));

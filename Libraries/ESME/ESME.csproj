@@ -253,6 +253,7 @@
     <Compile Include="TransmissionLoss\NemoModeToAcousticModelNameMap.cs" />
     <Compile Include="TransmissionLoss\RAM\RamOutput.cs" />
     <Compile Include="TransmissionLoss\REFMS\REFMS.cs" />
+    <Compile Include="TransmissionLoss\REFMS\REFMSInputFile.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFileManager.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />

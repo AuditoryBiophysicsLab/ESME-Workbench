@@ -84,6 +84,12 @@
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Open a scenario file"
 					                             Command="{Binding OpenScenarioCommand}" />
+                    <r:RibbonApplicationMenuItem Header="New Scenario"
+					                             InputGestureText="Ctrl+N"
+					                             ImageSource="..\Images\LargeIcons\new-icon.png"
+					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
+					                             ToolTipDescription="Create a new scenario"
+					                             Command="{Binding NewScenarioCommand}" />
                     <r:RibbonApplicationMenuItem Header="Close Scenario"
 					                             ImageSource="..\Images\LargeIcons\close-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
@@ -112,12 +118,6 @@
 					                             ImageSource="..\Images\LargeIcons\close-icon.png"
 					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
 					                             ToolTipDescription="Close the current experiment"
-					                             Command="{Binding NewExperimentCommand}" />
-					<r:RibbonApplicationMenuItem Header="New Experiment"
-					                             InputGestureText="Ctrl+N"
-					                             ImageSource="..\Images\LargeIcons\new-icon.png"
-					                             ToolTipTitle="{Binding Header, RelativeSource={RelativeSource Self}}"
-					                             ToolTipDescription="Create a new experiment"
 					                             Command="{Binding NewExperimentCommand}" />
                     -->
 					<r:RibbonApplicationMenuItem Header="About"
@@ -214,7 +214,13 @@
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Associate a scenario file with the current experiment"
 					                Command="{Binding OpenScenarioCommand}" />
-					<r:RibbonButton Label="Edit"
+                    <r:RibbonButton Label="New"
+					                SmallImageSource="..\Images\SmallIcons\new-icon.png"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Create a new scenario"
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+					                Command="{Binding NewScenarioCommand}" />
+                    <r:RibbonButton Label="Edit"
 					                SmallImageSource="..\Images\SmallIcons\application-icon.png"
 					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
 					                ToolTipDescription="Launch the scenario editor"
