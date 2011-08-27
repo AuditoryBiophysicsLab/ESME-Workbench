@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.REFMS
 {
@@ -11,6 +12,7 @@ namespace ESME.TransmissionLoss.REFMS
         public double Yield { get; set; }
         public double Cluster { get; set; }
         public double ExplosionDepth { get; set; }
+        public double Duration { get; set; }
         public double WaterDepth { get; set; }
         public double BottomSoundSpeedRatio { get; set; }
         public double BottomShearWaveSpeed { get; set; }
@@ -106,5 +108,91 @@ LOOPL
  25000.00 100000.00 15  
 STOP
 #endif
+
+        public void WriteBatchFile(string filenameBase, string svpFilename, string modeName, string timeFrame, REFMSInputFile inputFile, EarthCoordinate explosiveLocation, EarthCoordinate svpLocation)
+        {
+            using (var writer = new StreamWriter(string.Format("{0}-refms.bat", filenameBase), false))
+            {
+                writer.WriteLine("");
+                writer.WriteLine("mkdir \"{0}\"", filenameBase);
+                writer.WriteLine("COPY /Y \"{0}refms.in\" \"{0}\\refms.in\" ", filenameBase);
+                writer.WriteLine("COPY /Y \"{0}\" \"{1}\\loc.svp\" ", svpFilename, filenameBase);
+                writer.WriteLine("rem effects header - ");
+                writer.WriteLine("cd \"{0}\"", filenameBase);
+                writer.WriteLine("echo #head=> ref_effect.head");
+                writer.WriteLine("echo #tstamp=%DATE% %TIME%>> ref_effect.head");
+                writer.WriteLine("echo #sysver=%COMPUTERNAME%^|{0}^|{1}^|{2}^|{3}^|null>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString, System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
+                writer.WriteLine("echo #title=Explosives Test, EC_SimArea>> ref_effect.head");
+                writer.WriteLine("echo #mode={0}>> ref_effect.head", modeName);
+                writer.WriteLine("echo #bin=E12>> ref_effect.head");    // Where does this come from?
+                writer.WriteLine("echo #season={0}>> ref_effect.head", timeFrame);
+                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> ref_effect.head", inputFile.ExplosionDepth, inputFile.Yield, inputFile.Duration, inputFile.BottomSoundSpeedRatio, -20, -15); // where do -20 and -15 come from?
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>> ref_effect.head", explosiveLocation.Latitude, explosiveLocation.Longitude);
+                writer.WriteLine("echo #splineloc={0:0.000000} {1:0.000000}>> ref_effect.head", svpLocation.Latitude, svpLocation.Longitude);
+                writer.WriteLine("echo #units=meters>> ref_effect.head");
+                writer.WriteLine("start \"REFMS\" /wait  \"{0}\"", Globals.AppSettings.REFMSSettings.REFMSExecutablePath);
+                writer.WriteLine("COPY /Y ref_effect.head + refms.out refms.effects");
+                writer.WriteLine("echo # SPEC:{0}refms.spec >> refms.effects");
+                writer.WriteLine("COPY /Y refms.effects + refms.spec refms.effects");
+                var specFilename = string.Format("\"..\\{0}refms.spec\"", filenameBase);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", explosiveLocation.Latitude, explosiveLocation.Longitude, specFilename);
+                writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
+                writer.WriteLine("cd ..");
+            }
+            using (var writer = new StreamWriter(string.Format("{0}-refms.sh", filenameBase), false))
+            {
+                writer.WriteLine("#!/bin/sh");
+                writer.WriteLine("mkdir \"{0}\"", filenameBase);
+                writer.WriteLine("cp \"{0}refms.in\" \"{0}\\refms.in\" ", filenameBase);
+                writer.WriteLine("cp \"{0}\" \"{1}\\loc.svp\" ", svpFilename, filenameBase);
+                writer.WriteLine("# effects header - ");
+                writer.WriteLine("cd \"{0}\"", filenameBase);
+                writer.WriteLine("echo -n #head\\n> ref_effect.head");
+                writer.WriteLine("echo -n #tstamp=$(date +\"%F %T\")\\n>> ref_effect.head");
+                writer.WriteLine("echo -n #sysver=$(hostname)\\|{0}\\|{1}\\|{2}\\|{3}\\|null\\n>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString, System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
+                writer.WriteLine("echo -n #title=Explosives Test, EC_SimArea\\n>> ref_effect.head");
+                writer.WriteLine("echo -n #mode={0}\\n>> ref_effect.head", modeName);
+                writer.WriteLine("echo -n #bin=E12\\n>> ref_effect.head");    // Where does this come from?
+                writer.WriteLine("echo -n #season={0}\\n>> ref_effect.head", timeFrame);
+                writer.WriteLine("echo -n #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}\\n>> ref_effect.head", inputFile.ExplosionDepth, inputFile.Yield, inputFile.Duration, inputFile.BottomSoundSpeedRatio, -20, -15); // where do -20 and -15 come from?
+                writer.WriteLine("echo -n #location={0:0.000000} {1:0.000000}\\n>> ref_effect.head", explosiveLocation.Latitude, explosiveLocation.Longitude);
+                writer.WriteLine("echo -n #splineloc={0:0.000000} {1:0.000000}\\n>> ref_effect.head", svpLocation.Latitude, svpLocation.Longitude);
+                writer.WriteLine("echo -n #units=meters\\n>> ref_effect.head");
+                writer.WriteLine("refms");
+                writer.WriteLine("echo -en ref_effect.head + refms.out refms.effects");
+                writer.WriteLine("echo # SPEC:{0}refms.spec >> refms.effects");
+                writer.WriteLine("COPY /Y refms.effects + refms.spec refms.effects");
+                var specFilename = string.Format("\"..\\{0}refms.spec\"", filenameBase);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", explosiveLocation.Latitude, explosiveLocation.Longitude, specFilename);
+                writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
+                writer.WriteLine("cd ..");
+            }
+        }
+
+        static readonly Random Random = new Random();
+
+        string FilenameFromPSMIdEarthCoordinateTimeFrame(string psmId, string svpFilename)
+        {
+            //2000 lb Bomb:1|2000 lb Bomb:1|Explosive:1
+            //2000_lb_Bomb+1~2000_lb_Bomb+1~Explosive+1_LOC_3715N_7515W_27-Fall0
+            var step1 = psmId.Replace(' ', '_').Replace(':', '+').Replace('|', '~');
+            return string.Format("{0}_{1}0", step1, svpFilename);
+        }
+
+        string SVPFilenameFromEarthCoordinateAndTimeFrame(Geo svpLocation, string timeFrame)
+        {
+            var northSouth = svpLocation.Latitude >= 0 ? "N" : "S";
+            var eastWest = svpLocation.Longitude >= 0 ? "E" : "W";
+            var randomInt = Random.Next(99);
+            return string.Format("LOC_{0}{1}_{2}{3}_{4}-{5}", DegreesMinutes(svpLocation.Latitude), northSouth, DegreesMinutes(svpLocation.Longitude), eastWest, randomInt, timeFrame);
+        }
+
+        static string DegreesMinutes(double itude)
+        {
+            var degrees = (int)(Math.Abs(itude));
+            var fraction = ((int)((Math.Abs(itude) - degrees) * 100)) / 100.0;
+            var minutes = (int)(fraction * 60.0);
+            return string.Format("{0}{1}", degrees, minutes);
+        }
     }
 }
