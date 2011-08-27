@@ -173,7 +173,27 @@ namespace ESME.TransmissionLoss.REFMS
                 Depth = double.Parse(fields[5]),
             };
         }
+
+        /// <summary>
+        /// Calculate the density of seawater, at a given depth, temperature and salinity
+        /// </summary>
+        /// <param name="depth">Depth, in meters</param>
+        /// <param name="temp">Temperature, in degrees Celsius</param>
+        /// <param name="salinity">Salinity, in parts per thousand</param>
+        /// <returns></returns>
+        public static double SaltWaterDensity(double depth, double temp, double salinity)
+        {
+            var depthKm = depth / 1000.0;
+            var c = 999.83 + (5.053 * depthKm) - (0.048 * (depthKm * depthKm));
+            var beta = 0.808 - (0.0085 * depthKm);
+            var alpha = 0.0708 * (1.0 + (0.351 * depthKm) + 0.068 * (1.0 - (0.0683 * depthKm)) * temp);
+            var gamma = 0.0030 * (1.0 - (0.059 * depthKm) - 0.012 * (1.0 - (0.0640 * depthKm)) * temp);
+
+            return (c + (beta * salinity) - (alpha * temp) - (gamma * (35.0 - salinity)) * temp) / 1000.0;
+        }
     }
+
+
 
     public class SVPFile : EarthCoordinate
     {
