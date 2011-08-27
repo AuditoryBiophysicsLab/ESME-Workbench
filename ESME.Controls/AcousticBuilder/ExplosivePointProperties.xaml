@@ -1,0 +1,82 @@
+﻿<Window x:Class="ESME.Views.AcousticBuilder.ExplosivePointProperties"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:Controls="clr-namespace:ESME.Views.Controls"
+        Title="Explosive Point Properties"
+        WindowStyle="ToolWindow"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <Style x:Key="DetailLabelStyle">
+            <Setter Property="TextBlock.TextAlignment"
+			        Value="Left" />
+            <Setter Property="Control.Margin"
+			        Value="0 5 0 0" />
+        </Style>
+        <Style x:Key="DetailValueStyleReadonly" TargetType="Label">
+            <Setter Property="TextBlock.TextAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Control.Background" Value="#EEEEEE" />
+            <Setter Property="Control.BorderThickness" Value="1" />
+            <Setter Property="Control.BorderBrush" Value="LightGray" />
+            <Setter Property="Height" Value="27" />
+        </Style>
+        <Style x:Key="DetailValueStyleEditable" TargetType="TextBox" BasedOn="{StaticResource ValidatingTextBoxStyle}">
+            <Setter Property="TextBlock.TextAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Control.BorderThickness" Value="1" />
+            <Setter Property="Control.BorderBrush" Value="LightGray" />
+            <Setter Property="Height" Value="27" />
+        </Style>
+    </Window.Resources>
+    <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <GroupBox Header="Location" Padding="5" Width="150">
+                    <StackPanel Orientation="Vertical" Margin="0,0,3,0">
+                        <TextBlock Text="Latitude" Style="{StaticResource DetailLabelStyle}" />
+                        <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
+						                            BoundField="Latitude" />
+                        <TextBlock Text="Longitude" Style="{StaticResource DetailLabelStyle}" />
+                        <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
+						                            BoundField="Longitude" />
+                    </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Simulation" Padding="5">
+                <StackPanel Orientation="Vertical">
+                    <CheckBox Content="Limit depth to" IsChecked="{Binding DepthLimitEnabled}" Style="{StaticResource DetailLabelStyle}" />
+                    <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
+						                            BoundField="DepthLimit" />
+                    <TextBlock Text="Source count" Style="{StaticResource DetailLabelStyle}"/>
+                    <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
+						                            BoundField="SourceCount" />
+                    <CheckBox Content="Enable bottom reflections" IsChecked="{Binding BottomReflectionsEnabled}" Style="{StaticResource DetailLabelStyle}" />
+                    <CheckBox Content="Include exponential at bottom" IsChecked="{Binding BottomExponentialEnabled}" Style="{StaticResource DetailLabelStyle}" />
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+        <GroupBox Header="Sound velocity profile" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <CheckBox Content="Enabled" IsChecked="{Binding IsEnabled}" Style="{StaticResource DetailLabelStyle}" />
+                <TextBlock Text="Delta" Style="{StaticResource DetailLabelStyle}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="75" />
+                    </Grid.ColumnDefinitions>
+                    <Controls:ValidatingTextBox Style="{StaticResource DetailValueStyleEditable}"
+						                            BoundField="Delta" />
+                    <Button Grid.Column="1" Content="Regenerate" Style="{StaticResource DetailLabelStyle}" Margin="5 0 0 0"/>
+                </Grid>
+                <TextBlock Text="Profile name" Style="{StaticResource DetailLabelStyle}"/>
+                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding SplineName}" />
+                <TextBlock Text="Layer count" Style="{StaticResource DetailLabelStyle}"/>
+                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding LayerCount}" />
+                <TextBlock Text="Profile depth (m)" Style="{StaticResource DetailLabelStyle}"/>
+                <Label Style="{StaticResource DetailValueStyleReadonly}" Content="{Binding SVPDepth}" />
+            </StackPanel>
+        </GroupBox>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="OK" Style="{StaticResource DetailLabelStyle}" Width="75" Margin="0 0 5 0" IsDefault="True" Command="{Binding OkCommand}"/>
+            <Button Content="Cancel" Style="{StaticResource DetailLabelStyle}" Width="75" Margin="5 0 10 0" IsCancel="True" Command="{Binding CancelCommand}"/>
+        </StackPanel>
+    </StackPanel>
+</Window>
