@@ -5,6 +5,7 @@ using System.Text;
 using Cinch;
 using ESME;
 using ESME.Data;
+using HRC.Services;
 
 namespace ESMEWorkBench
 {
@@ -22,7 +23,18 @@ namespace ESMEWorkBench
             Configuration = new Configuration();
         }
 
-        public static AppSettings AppSettings { get; set; }
+        static AppSettings _appSettings;
+        public static AppSettings AppSettings
+        {
+            get { return _appSettings; }
+            set
+            {
+                if (_appSettings == value) return;
+                _appSettings = value;
+                ESME.Globals.AppSettings = value;
+                HRCOpenFileService.InitialDirectories = _appSettings.OpenFileServiceDirectories;
+            }
+        }
 
         public static WorkDirectories WorkDirectories { get; set; }
 

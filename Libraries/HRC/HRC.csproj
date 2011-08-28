@@ -141,6 +141,7 @@
     <Compile Include="Collections\RedBlackEnumerator.cs" />
     <Compile Include="Collections\RedBlackException.cs" />
     <Compile Include="Collections\RedBlackNode.cs" />
+    <Compile Include="Collections\SerializableDictionary.cs" />
     <Compile Include="Collections\TraversalMethods.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="Database\MySqlWrapper.cs" />

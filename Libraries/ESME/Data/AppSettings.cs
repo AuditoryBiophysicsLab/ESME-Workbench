@@ -8,8 +8,10 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Xml.Serialization;
+using C5;
 using Cinch;
 using ESME.Environment.NAVO;
+using HRC.Collections;
 using HRC.Utility;
 using HRC.Validation;
 
@@ -20,7 +22,7 @@ namespace ESME.Data
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
         {
-                typeof (NAVOConfiguration),
+            typeof (NAVOConfiguration),
         };
 
         static string _appSettingsDirectory;
@@ -87,6 +89,25 @@ namespace ESME.Data
             else referencedTypes.AddRange(ReferencedTypes);
             return XmlSerializer<AppSettings>.Load(fileName, referencedTypes);
         }
+
+        #region public SerializableDictionary<string, string> OpenFileServiceDirectories { get; set; }
+
+        public SerializableDictionary<string, string> OpenFileServiceDirectories
+        {
+            get { return _openFileServiceDirectories ?? (_openFileServiceDirectories = new SerializableDictionary<string, string>()); }
+            set
+            {
+                if (_openFileServiceDirectories == value) return;
+                _openFileServiceDirectories = value;
+                NotifyPropertyChanged(OpenFileServiceDirectoriesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs OpenFileServiceDirectoriesChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.OpenFileServiceDirectories);
+        SerializableDictionary<string, string> _openFileServiceDirectories;
+
+        #endregion
+
 
         #region public string ScenarioDataDirectory { get; set; }
 

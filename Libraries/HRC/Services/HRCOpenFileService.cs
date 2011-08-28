@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Windows;
-using Cinch;
+using HRC.Collections;
 using MEFedMVVM.ViewModelLocator;
 using Microsoft.Win32;
 
@@ -21,6 +23,12 @@ namespace HRC.Services
         ///   values to ViewModel
         /// </summary>
         readonly OpenFileDialog _ofd = new OpenFileDialog();
+
+        /// <summary>
+        /// Used if set, to associate filter strings with last-used directories
+        /// Must be externally managed
+        /// </summary>
+        public static SerializableDictionary<string, string> InitialDirectories { get; set; }
 
         #endregion
 
@@ -50,7 +58,15 @@ namespace HRC.Services
         /// </summary>
         public string FileName
         {
-            get { return _ofd.FileName; }
+            get
+            {
+                if (InitialDirectories != null)
+                {
+                    if (InitialDirectories.ContainsKey(Filter)) InitialDirectories[Filter] = Path.GetDirectoryName(_ofd.FileName);
+                    else InitialDirectories.Add(Filter, Path.GetDirectoryName(_ofd.FileName));
+                }
+                return _ofd.FileName;
+            }
             set { _ofd.FileName = value; }
         }
 
@@ -60,7 +76,11 @@ namespace HRC.Services
         public string Filter
         {
             get { return _ofd.Filter; }
-            set { _ofd.Filter = value; }
+            set
+            {
+                _ofd.Filter = value;
+                if (InitialDirectories != null && InitialDirectories.ContainsKey(value)) InitialDirectory = InitialDirectories[value];
+            }
         }
 
         /// <summary>
@@ -79,6 +99,7 @@ namespace HRC.Services
         }
         #endregion
     }
+
     public interface IHRCOpenFileService
     {
         string FileName { get; set; }

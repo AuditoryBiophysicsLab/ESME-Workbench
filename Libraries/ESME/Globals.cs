@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using ESME.Data;
 using ESME.TransmissionLoss;
+using HRC.Services;
 
 namespace ESME
 {
@@ -32,7 +33,17 @@ namespace ESME
             return s;
         }
 
-        public static AppSettings AppSettings { get; set; }
+        static AppSettings _appSettings;
+        public static AppSettings AppSettings
+        {
+            get { return _appSettings; }
+            set
+            {
+                if (_appSettings == value) return;
+                _appSettings = value;
+                HRCOpenFileService.InitialDirectories = _appSettings.OpenFileServiceDirectories;
+            }
+        }
 
         public static WorkDirectories WorkDirectories { get; set; }
 
