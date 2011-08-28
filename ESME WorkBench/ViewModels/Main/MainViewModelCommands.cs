@@ -35,7 +35,7 @@ namespace ESMEWorkBench.ViewModels.Main
                             typeof (OverlayShapeMapLayer),
                             typeof (OverlayFileMapLayer)
                     };
-                    var programOptionsViewModel = new ApplicationOptionsViewModel();
+                    var programOptionsViewModel = new ApplicationOptionsViewModel(_messageBoxService);
                     var result = _visualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
                     if ((result.HasValue) && (result.Value)) Globals.AppSettings.Save(extraTypes);
                     Globals.AppSettings = AppSettings.Load(extraTypes);

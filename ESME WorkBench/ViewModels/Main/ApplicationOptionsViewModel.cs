@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using Cinch;
 using ESME.Data;
 using ESME.Environment.NAVO;
@@ -7,8 +8,10 @@ namespace ESMEWorkBench.ViewModels.Main
 {
     public class ApplicationOptionsViewModel : ViewModelBase
     {
-        public ApplicationOptionsViewModel()
+        readonly IMessageBoxService _messageBoxService;
+        public ApplicationOptionsViewModel(IMessageBoxService messageBoxService)
         {
+            _messageBoxService = messageBoxService;
             Globals.AppSettings = AppSettings.Load();
             AppSettings = Globals.AppSettings;
         }
@@ -102,6 +105,38 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         List<NAVOTimePeriod> _months;
+
+        #endregion
+
+        #region public string GDEMDirectory { get; set; }
+
+        public string GDEMDirectory
+        {
+            get { return Globals.AppSettings.NAVOConfiguration.GDEMDirectory; }
+            set
+            {
+                Globals.AppSettings.NAVOConfiguration.ValidateGDEMDirectory(value, _messageBoxService);
+                NotifyPropertyChanged(GDEMDirectoryChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GDEMDirectoryChangedEventArgs = ObservableHelper.CreateArgs<ApplicationOptionsViewModel>(x => x.GDEMDirectory);
+
+        #endregion
+
+        #region public string SMGCDirectory { get; set; }
+
+        public string SMGCDirectory
+        {
+            get { return Globals.AppSettings.NAVOConfiguration.SMGCDirectory; }
+            set
+            {
+                Globals.AppSettings.NAVOConfiguration.ValidateSMGCDirectory(value, _messageBoxService);
+                NotifyPropertyChanged(SMGCDirectoryChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SMGCDirectoryChangedEventArgs = ObservableHelper.CreateArgs<ApplicationOptionsViewModel>(x => x.SMGCDirectory);
 
         #endregion
 

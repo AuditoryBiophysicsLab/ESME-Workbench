@@ -212,17 +212,65 @@ namespace ESME.Environment.NAVO
 
         public string GDEMDirectory
         {
-            get { return _gDEMDirectory; }
+            get { return _gdemDirectory; }
             set
             {
-                if (_gDEMDirectory == value) return;
-                _gDEMDirectory = value;
+                if (_gdemDirectory == value) return;
+                _gdemDirectory = value;
                 NotifyPropertyChanged(GDEMDirectoryChangedEventArgs);
             }
         }
 
         static readonly PropertyChangedEventArgs GDEMDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.GDEMDirectory);
-        string _gDEMDirectory;
+        string _gdemDirectory;
+
+        public bool ValidateGDEMDirectory(string gdemFile, IMessageBoxService messageBoxService)
+        {
+            var standardFilenames = new[]
+            {
+                "sgdemv3s01.nc", "sgdemv3s02.nc", "sgdemv3s03.nc", "sgdemv3s04.nc", "sgdemv3s05.nc", "sgdemv3s06.nc",
+                "sgdemv3s07.nc", "sgdemv3s08.nc", "sgdemv3s09.nc", "sgdemv3s10.nc", "sgdemv3s11.nc", "sgdemv3s12.nc",
+                "tgdemv3s01.nc", "tgdemv3s02.nc", "tgdemv3s03.nc", "tgdemv3s04.nc", "tgdemv3s05.nc", "tgdemv3s06.nc",
+                "tgdemv3s07.nc", "tgdemv3s08.nc", "tgdemv3s09.nc", "tgdemv3s10.nc", "tgdemv3s11.nc", "tgdemv3s12.nc",
+            };
+            var nuwcFilenames = new[]
+            {
+                "jan_s.nc", "feb_s.nc", "mar_s.nc", "apr_s.nc", "may_s.nc", "jun_s.nc",
+                "jul_s.nc", "aug_s.nc", "sep_s.nc", "oct_s.nc", "nov_s.nc", "dec_s.nc",
+                "jan_t.nc", "feb_t.nc", "mar_t.nc", "apr_t.nc", "may_t.nc", "jun_t.nc",
+                "jul_t.nc", "aug_t.nc", "sep_t.nc", "oct_t.nc", "nov_t.nc", "dec_t.nc",
+            };
+            var gdemDirectory = Path.GetDirectoryName(gdemFile);
+            var files = Directory.GetFiles(gdemDirectory, "*.nc");
+            if (files.Length < 12)
+            {
+                messageBoxService.ShowError(string.Format("Error validating GDEM directory \"{0}\": Expected file(s) not found in this directory", gdemDirectory));
+                return false;
+            }
+            foreach (var file in files)
+            {
+                var curFile = Path.GetFileName(file).ToLower();
+                var foundMatch = false;
+                foreach (var standardFile in standardFilenames)
+                    if (curFile == standardFile)
+                    {
+                        foundMatch = true;
+                        break;
+                    }
+                if (foundMatch) continue;
+                foreach (var nuwcFile in nuwcFilenames)
+                    if (curFile == nuwcFile)
+                    {
+                        foundMatch = true;
+                        break;
+                    }
+                if (foundMatch) continue;
+                messageBoxService.ShowError(string.Format("Error validating GDEM directory \"{0}\": Expected file(s) not found in this directory", gdemDirectory));
+                return false;
+            }
+            GDEMDirectory = gdemDirectory;
+            return true;
+        }
 
         #endregion
 
@@ -241,6 +289,30 @@ namespace ESME.Environment.NAVO
 
         static readonly PropertyChangedEventArgs SMGCDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SMGCDirectory);
         string _smgcDirectory;
+        public bool ValidateSMGCDirectory(string smgcFile, IMessageBoxService messageBoxService)
+        {
+            var smgcDirectory = Path.GetDirectoryName(smgcFile);
+            if (smgcDirectory.ToLower().EndsWith("north") || smgcDirectory.ToLower().EndsWith("south")) smgcDirectory = Path.GetDirectoryName(smgcDirectory);
+            var files = Directory.GetFiles(smgcDirectory, "*.stt");
+            if (files.Length == 50686)
+            {
+                SMGCDirectory = smgcDirectory;
+                return true;
+            }
+            var count = 0;
+            if (Directory.Exists(Path.Combine(smgcDirectory, "north")))
+                count = Directory.GetFiles(Path.Combine(smgcDirectory, "north"), "*.stt").Length;
+            if (Directory.Exists(Path.Combine(smgcDirectory, "south")))
+                count += Directory.GetFiles(Path.Combine(smgcDirectory, "south"), "*.stt").Length;
+            if (count == 50686)
+            {
+                SMGCDirectory = smgcDirectory;
+                return true;
+            }
+
+            messageBoxService.ShowError(string.Format("Error validating SMGC directory \"{0}\": Expected file(s) not found in this directory", smgcDirectory));
+            return false;
+        }
 
         #endregion
 
