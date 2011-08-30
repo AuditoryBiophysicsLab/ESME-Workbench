@@ -125,6 +125,12 @@ namespace ESME.Data
         }
         public bool ValidateScenarioDataDirectory(string simAreaFile, IMessageBoxService messageBoxService = null)
         {
+            if (string.IsNullOrEmpty(simAreaFile) || !File.Exists(simAreaFile))
+            {
+                if (messageBoxService != null) messageBoxService.ShowError(string.Format("Scenario data directory must point to a valid file or directory"));
+                return false;
+            }
+
             var standardFilenames = new[]
             {
                 "SimAreas.csv", "Species.csv", "PSM.csv"

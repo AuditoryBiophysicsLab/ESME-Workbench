@@ -226,6 +226,11 @@ namespace ESME.Environment.NAVO
 
         public bool ValidateGDEMDirectory(string gdemFile, IMessageBoxService messageBoxService = null)
         {
+            if (string.IsNullOrEmpty(gdemFile) || !File.Exists(gdemFile))
+            {
+                if (messageBoxService != null) messageBoxService.ShowError(string.Format("GDEM directory must point to a valid file or directory"));
+                return false;
+            }
             var standardFilenames = new[]
             {
                 "sgdemv3s01.nc", "sgdemv3s02.nc", "sgdemv3s03.nc", "sgdemv3s04.nc", "sgdemv3s05.nc", "sgdemv3s06.nc",
@@ -291,6 +296,11 @@ namespace ESME.Environment.NAVO
         string _smgcDirectory;
         public bool ValidateSMGCDirectory(string smgcFile, IMessageBoxService messageBoxService = null)
         {
+            if (string.IsNullOrEmpty(smgcFile) || !File.Exists(smgcFile))
+            {
+                if (messageBoxService != null) messageBoxService.ShowError(string.Format("SMGC directory must point to a valid file or directory"));
+                return false;
+            }
             var smgcDirectory = Path.GetDirectoryName(smgcFile);
             if (smgcDirectory.ToLower().EndsWith("north") || smgcDirectory.ToLower().EndsWith("south")) smgcDirectory = Path.GetDirectoryName(smgcDirectory);
             var files = Directory.GetFiles(smgcDirectory, "*.stt");
