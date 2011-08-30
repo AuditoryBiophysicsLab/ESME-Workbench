@@ -140,6 +140,21 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public string ScenarioDataDirectory { get; set; }
+
+        public string ScenarioDataDirectory
+        {
+            get { return Globals.AppSettings.ScenarioDataDirectory; }
+            set
+            {
+                Globals.AppSettings.ValidateScenarioDataDirectory(value, _messageBoxService);
+                NotifyPropertyChanged(ScenarioDataDirectoryChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<ApplicationOptionsViewModel>(x => x.ScenarioDataDirectory);
+
+        #endregion
 
     }
 }

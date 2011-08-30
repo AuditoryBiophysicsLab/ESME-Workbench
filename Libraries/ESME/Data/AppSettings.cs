@@ -108,7 +108,6 @@ namespace ESME.Data
 
         #endregion
 
-
         #region public string ScenarioDataDirectory { get; set; }
 
         static readonly PropertyChangedEventArgs ScenarioDataDirectoryChangedEventArgs = ObservableHelper.CreateArgs<AppSettings>(x => x.ScenarioDataDirectory);
@@ -123,6 +122,36 @@ namespace ESME.Data
                 _scenarioDataDirectory = value;
                 NotifyPropertyChanged(ScenarioDataDirectoryChangedEventArgs);
             }
+        }
+        public bool ValidateScenarioDataDirectory(string simAreaFile, IMessageBoxService messageBoxService = null)
+        {
+            var standardFilenames = new[]
+            {
+                "SimAreas.csv", "Species.csv", "PSM.csv"
+            };
+            var simAreaDirectory = Path.GetDirectoryName(simAreaFile);
+            var files = Directory.GetFiles(simAreaDirectory, "*.csv");
+            if (files.Length < 3)
+            {
+                if (messageBoxService != null) messageBoxService.ShowError(string.Format("Error validating scenario data directory \"{0}\": Expected file(s) not found in this directory", simAreaDirectory));
+                return false;
+            }
+            foreach (var file in files)
+            {
+                var curFile = Path.GetFileName(file).ToLower();
+                var foundMatch = false;
+                foreach (var standardFile in standardFilenames)
+                    if (curFile == standardFile.ToLower())
+                    {
+                        foundMatch = true;
+                        break;
+                    }
+                if (foundMatch) continue;
+                if (messageBoxService != null) messageBoxService.ShowError(string.Format("Error validating scenario data directory \"{0}\": Expected file(s) not found in this directory", simAreaDirectory));
+                return false;
+            }
+            ScenarioDataDirectory = simAreaDirectory;
+            return true;
         }
 
         #endregion

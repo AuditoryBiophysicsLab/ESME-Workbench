@@ -49,8 +49,10 @@
 
                     <Controls:FileOrDirectorySetting Caption="Scenario data directory"
 					                                 Margin="5 0"
-					                                 IsDirectoryBrowser="True"
-					                                 FileName="{Binding AppSettings.ScenarioDataDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}"
+					                                 DialogTitle="Locate the range complex definitions file (SimAreas.csv)"
+					                                 FileNameFilter="Range complex definitions (SimAreas.csv)|SimAreas.csv|All files (*.*)|*.*"
+					                                 IsDirectoryBrowser="False"
+					                                 FileName="{Binding ScenarioDataDirectory, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}"
                                                      Style="{StaticResource ValidatingFileOrDirectorySettingStyle}"  />
 
                     <GroupBox Header="Scenario Simulator Options"
