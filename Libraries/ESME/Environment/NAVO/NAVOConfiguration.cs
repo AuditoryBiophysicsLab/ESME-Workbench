@@ -304,7 +304,7 @@ namespace ESME.Environment.NAVO
             var smgcDirectory = Path.GetDirectoryName(smgcFile);
             if (smgcDirectory.ToLower().EndsWith("north") || smgcDirectory.ToLower().EndsWith("south")) smgcDirectory = Path.GetDirectoryName(smgcDirectory);
             var files = Directory.GetFiles(smgcDirectory, "*.stt");
-            if (files.Length == 50686)
+            if (files.Length == 64800)
             {
                 SMGCDirectory = smgcDirectory;
                 return true;
@@ -314,7 +314,7 @@ namespace ESME.Environment.NAVO
                 count = Directory.GetFiles(Path.Combine(smgcDirectory, "north"), "*.stt").Length;
             if (Directory.Exists(Path.Combine(smgcDirectory, "south")))
                 count += Directory.GetFiles(Path.Combine(smgcDirectory, "south"), "*.stt").Length;
-            if (count == 50686)
+            if (count == 64800)
             {
                 SMGCDirectory = smgcDirectory;
                 return true;

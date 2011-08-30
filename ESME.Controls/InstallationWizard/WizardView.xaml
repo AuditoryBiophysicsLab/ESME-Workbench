@@ -15,9 +15,9 @@
       <Controls:FileOrDirectorySetting
           Visibility="{Binding SelectedPanel.IsFileBrowerEnabled, Converter={StaticResource TrueVisibleFalseCollapsed}}"
         Caption="{Binding SelectedPanel.FieldName}" 
-        DialogTitle="{Binding SelectedPanel.FieldName}"
+        DialogTitle="{Binding SelectedPanel.DialogTitle}"
         FileNameFilter="{Binding SelectedPanel.FileNameFilter}" Margin="10"
-        IsDirectoryBrowser="{Binding SelectedPanel.IsDirectoryBrowser}"
+        IsDirectoryBrowser="False"
         FileName="{Binding SelectedPanel.UserResponse, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}"
         Style="{StaticResource ValidatingFileOrDirectorySettingStyle}" />
     </StackPanel>

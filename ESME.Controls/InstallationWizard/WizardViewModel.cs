@@ -48,7 +48,6 @@ namespace ESME.Views.InstallationWizard
                                    "Java Runtime Environment (JRE) from http://www.oracle.com/technetwork/java/javase/downloads/index.html . ",
                                    FieldName = "Java Executable (javaw.exe)",
                                    FileNameFilter = "Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*",
-                                   IsDirectoryBrowser = false,
                                    PropertyName = "javaw",
                            });
 
@@ -60,7 +59,8 @@ namespace ESME.Views.InstallationWizard
                                    "The Scenario Data Directory is the default location for all experimental data.  It is typically named Sim Areas, and contains " +
                                    "the files SimAreas.csv, PSM.csv, and Species.csv.",
                                    FieldName = "Scenario Data Directory",
-                                   IsDirectoryBrowser = true,
+                                   DialogTitle = "Locate the SimAreas.csv file",
+                                   FileNameFilter = "Simulation Areas File (SimAreas.csv)|SimAreas.csv|All files (*.*)|*.*",
                                    PropertyName = "ScenarioDataDirectory",
                            });
 
@@ -73,7 +73,8 @@ namespace ESME.Views.InstallationWizard
                                    "The Generalized Digital Environmental Model (GDEM) is a required OAML database. " +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
                                    FieldName = "GDEM-V",
-                                   IsDirectoryBrowser = true,
+                                   DialogTitle="Choose one GDEM database file",
+							       FileNameFilter="NetCDF files (*.nc)|*.nc|All files (*.*)|*.*",
                                    PropertyName = "GDEM-V",
                            });
             if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.SMGCDirectory) || !Directory.Exists(Globals.AppSettings.NAVOConfiguration.SMGCDirectory))
@@ -85,7 +86,8 @@ namespace ESME.Views.InstallationWizard
                                    "The Surface Marine Gridded Climatological (SMGC) database is a required OAML database. " +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
                                    FieldName = "SMGC",
-                                   IsDirectoryBrowser = true,
+                                   DialogTitle="Choose one SMGC database file (*.stt)",
+                                   FileNameFilter="SMGC files (*.stt)|*.stt|All files (*.*)|*.*",
                                    PropertyName = "SMGC",
                            });
             if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.BSTDirectory) || !File.Exists(Globals.AppSettings.NAVOConfiguration.BSTDirectory))
@@ -97,7 +99,6 @@ namespace ESME.Views.InstallationWizard
                                    "The Bottom Sediment Type (BST) database is a required OAML database. " +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
                                    FieldName = "BST",
-                                   IsDirectoryBrowser = false,
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "BST",
                            });
@@ -110,7 +111,6 @@ namespace ESME.Views.InstallationWizard
                                    "The Digital Bathymetric DataBase (DBDB) is a required OAML database. " +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
                                    FieldName = "DBDB",
-                                   IsDirectoryBrowser = false,
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "DBDB",
                            });
@@ -122,7 +122,6 @@ namespace ESME.Views.InstallationWizard
                                    "The Digital Bathymetric DataBase (DBDB) requires a seperate extraction tool for use. " +
                                    "If you do not have this tool, a copy can be downloaded from http://esme.bu.edu/  ",
                                    FieldName = "DBDB Extractor (dbv5_command.exe)",
-                                   IsDirectoryBrowser = false,
                                    FileNameFilter =
                                    "DBDB Extractor (dbv5_command.exe)|dbv5_command.exe|Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
                                    PropertyName = "DBDBExtractor",
@@ -135,7 +134,6 @@ namespace ESME.Views.InstallationWizard
                                    DescriptiveText =
                                    "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.",
                                    FieldName = "HFBL Extractor",
-                                   IsDirectoryBrowser = false,
                                    FileNameFilter =
                                    "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
                                    PropertyName = "HFBLExtractor",
@@ -147,7 +145,6 @@ namespace ESME.Views.InstallationWizard
                                    DescriptiveText =
                                    "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.",
                                    FieldName = "LFBL Extractor",
-                                   IsDirectoryBrowser = false,
                                    FileNameFilter =
                                    "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
                                    PropertyName = "LFBLExtractor",
@@ -359,7 +356,7 @@ namespace ESME.Views.InstallationWizard
                     new ValidationRule
                     {
                             PropertyName = "UserResponse",
-                            Description = "File must Exist",
+                            Description = "File must exist.",
                             RuleDelegate = (o, r) =>
                             {
                                 var ruleTarget = ((WizardPanelInfo)o).UserResponse;
@@ -367,6 +364,39 @@ namespace ESME.Views.InstallationWizard
                                         (File.Exists(ruleTarget) || Directory.Exists(ruleTarget)));
                             },
                     },
+                    new ValidationRule
+                    {
+                            PropertyName = "UserResponse",
+                            Description = "The GDEM directory must contain many uncompressed .nc files.",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((WizardPanelInfo)o).UserResponse;
+                                if (PropertyName != "GDEM-V") return true;
+                                return Globals.AppSettings.NAVOConfiguration.ValidateGDEMDirectory(ruleTarget);
+                            },  
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "UserResponse",
+                            Description = "The SMGC directory must contain many .stt files.",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((WizardPanelInfo)o).UserResponse;
+                                if (PropertyName != "SMGC") return true;
+                                return Globals.AppSettings.NAVOConfiguration.ValidateSMGCDirectory(ruleTarget);
+                            },
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "UserResponse",
+                            Description = "The Scenario Data Directory must contain the files SimAreas.csv, Species.csv, and PSM.csv.",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((WizardPanelInfo)o).UserResponse;
+                                if (PropertyName != "ScenarioDataDirectory") return true;
+                                return Globals.AppSettings.ValidateScenarioDataDirectory(ruleTarget);
+                            },
+                    },                                                     
             });
         }
 
@@ -426,6 +456,24 @@ namespace ESME.Views.InstallationWizard
         string _fieldName;
         #endregion
 
+        #region public string DialogTitle { get; set; }
+
+        public string DialogTitle
+        {
+            get { return _dialogTitle; }
+            set
+            {
+                if (_dialogTitle == value) return;
+                _dialogTitle = value;
+                NotifyPropertyChanged(DialogTitleChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DialogTitleChangedEventArgs = ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.DialogTitle);
+        string _dialogTitle;
+
+        #endregion
+
         #region public string FileNameFilter { get; set; }
         public string FileNameFilter
         {
@@ -442,24 +490,6 @@ namespace ESME.Views.InstallationWizard
                 ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.FileNameFilter);
 
         string _fileNameFilter;
-        #endregion
-
-        #region public bool IsDirectoryBrowser { get; set; }
-        public bool IsDirectoryBrowser
-        {
-            get { return _isDirectoryBrowser; }
-            set
-            {
-                if (_isDirectoryBrowser == value) return;
-                _isDirectoryBrowser = value;
-                NotifyPropertyChanged(IsDirectoryBrowserChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsDirectoryBrowserChangedEventArgs =
-                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.IsDirectoryBrowser);
-
-        bool _isDirectoryBrowser;
         #endregion
 
         #region public bool IsFileBrowerEnabled { get; set; }
@@ -479,8 +509,5 @@ namespace ESME.Views.InstallationWizard
         bool _isFileBrowerEnabled;
 
         #endregion
-
-
-        public bool Skip { get; set; }
     }
 }
