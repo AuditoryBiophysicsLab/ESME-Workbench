@@ -1,158 +1,152 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace NetCDF
 {
     public abstract class NcVar : NcComponent
     {
-        protected NcType type;
-        protected int[] dim_ids, dims, strides;
+        protected int[] DimIds, Dims, Strides;
         protected long size;
-        protected long elements;
-        protected int varid;
-        NcDimList nc_dims;
-        NcAttList nc_atts;
+        protected long Elements;
+        protected int Varid;
+        readonly NcDimList _ncDims;
+        readonly NcAttList _ncAtts;
 
-        public NcVar(int NcID, int VariableID, NcDimList Dims)
-            : base(NcID, VariableID)
+        protected NcVar(int ncID, int variableID, IList<NcDim> dims)
+            : base(ncID, variableID)
         {
-            StringBuilder VariableName;
-            int AttributeCount, DimCount;
-            int[] DimIDs = new int[100];
-            int[] dimlist = new int[100];
-            NcType VariableType;
+            StringBuilder variableName;
+            int attributeCount, dimCount;
+            var dimIDs = new int[100];
+            NcType variableType;
 
-            NC_inq_var(NcID, VariableID, out VariableName, out VariableType, out DimCount, ref DimIDs, out AttributeCount);
+            NcInqVar(ncID, variableID, out variableName, out variableType, out dimCount, ref dimIDs, out attributeCount);
 
-            varid = VariableID;
-            dim_ids = new int[DimCount];
-            dims = new int[DimCount];
-            strides = new int[DimCount];
-            component_name = VariableName.ToString();
-            nc_dims = new NcDimList(DimCount);
-            nc_atts = new NcAttList(AttributeCount);
-            for (int i = 0; i < DimCount; i++)
-                dim_ids[i] = DimIDs[i];
-            for (int i = 0; i < DimCount; i++)
+            Varid = variableID;
+            DimIds = new int[dimCount];
+            Dims = new int[dimCount];
+            Strides = new int[dimCount];
+            ComponentName = variableName.ToString();
+            _ncDims = new NcDimList(dimCount);
+            _ncAtts = new NcAttList(attributeCount);
+            for (var i = 0; i < dimCount; i++)
+                DimIds[i] = dimIDs[i];
+            for (var i = 0; i < dimCount; i++)
             {
-                nc_dims.Add(Dims[dim_ids[i]]);
-                dims[i] = (int)nc_dims[i].Size;
+                _ncDims.Add(dims[DimIds[i]]);
+                Dims[i] = (int)_ncDims[i].Size;
             }
-            elements = 1;
-            for (int i = 0; i < DimCount; i++)
-                elements *= dims[i];
+            Elements = 1;
+            for (var i = 0; i < dimCount; i++)
+                Elements *= Dims[i];
 
-            switch (DimCount)
+            switch (dimCount)
             {
                 case 1:
-                    strides[0] = 1;
+                    Strides[0] = 1;
                     break;
                 case 2:
-                    strides[1] = 1;
-                    strides[0] = dims[1];
+                    Strides[1] = 1;
+                    Strides[0] = Dims[1];
                     break;
                 default:
-                    strides[DimCount - 1] = 1;
-                    for (int i = DimCount - 2; i >= 0; i--)
-                        strides[i] = (int)dims[i + 1] * strides[i + 1];
+                    Strides[dimCount - 1] = 1;
+                    for (var i = dimCount - 2; i >= 0; i--)
+                        Strides[i] = Dims[i + 1] * Strides[i + 1];
                     break;
             }
 
-            for (int i = 0; i < AttributeCount; i++)
-                nc_atts.Add(NcComponent.GetAttribute(NcID, VariableID, i));
+            for (var i = 0; i < attributeCount; i++)
+                _ncAtts.Add(GetAttribute(ncID, variableID, i));
         }
 
-        public int[] DimensionIDs { get { return dim_ids; } }
-        public NcDimList Dimensions { get { return nc_dims; } }
-        public NcAttList Attributes { get { return nc_atts; } }
+        public int[] DimensionIDs { get { return DimIds; } }
+        public NcDimList Dimensions { get { return _ncDims; } }
+        public NcAttList Attributes { get { return _ncAtts; } }
         public abstract void ReadData();
 
         /// <summary>
         /// Size of the variable, in bytes
         /// </summary>
-        public long Size { get { return size * elements; } }
+        public long Size { get { return size * Elements; } }
 
         /// <summary>
         /// Total number of elements in the variable (all dimensions multiplied together)
         /// </summary>
-        public long ElementCount { get { return elements; } }
+        public long ElementCount { get { return Elements; } }
 
-        public NcType Type { get { return type; } }
+        public NcType NcType { get; protected set; }
         public virtual short GetShort(params int[] dimensions) { return 0; }
         public virtual float GetFloat(params int[] dimensions) { return 0.0f; }
-        public virtual double Min { get { return 0.0; } }
-        public virtual double Max { get { return 0.0; } }
+        public virtual double Min { get; protected set; }
+        public virtual double Max { get; protected set; }
     }
 
     public abstract class NcVarTyped<T> : NcVar
     {
-        protected T[] data;
-        protected double min, max;
-
-        public NcVarTyped(int NCID, int VarID, NcDimList Dims)
-            : base(NCID, VarID, Dims)
+        protected NcVarTyped(int ncid, int varID, IList<NcDim> dims)
+            : base(ncid, varID, dims)
         {
         }
 
         public void ReleaseData()
         {
-            data = null;
+            Data = null;
         }
 
         public override void ReadData()
         {
-            if (data == null)
-                data = new T[elements];
+            if (Data == null)
+                Data = new T[Elements];
         }
 
-        public T[] Data { get { return data; } }
+        public T[] Data { get; protected set; }
         protected abstract void FindMinMax();
 
         public int GetIndex(params int[] dimensions)
         {
-            int offset = 0;
-            for (int i = 0; i < dims.Length; i++)
-                offset += dimensions[i] * strides[i];
-            return offset;
+            return Dims.Select((t, i) => dimensions[i] * Strides[i]).Sum();
         }
 
         public T Element(params int[] dimensions)
         {
-            if (data == null)
-                throw new ArgumentNullException("NcVarTyped<T>.Element(...) failed because data has not been loaded.  Call ReadData() method for this object first.");
-            if (dimensions.Length != dims.Length)
-                throw new IndexOutOfRangeException(String.Format("NcVarTyped<T>.Element(...) exception.  Request was for {0} dimensions but variable has {1} dimensions", dimensions.Length, dims.Length));
-            for (int i = 0; i < dims.Length; i++)
+            if (Data == null)
+                throw new ArgumentNullException("Data", "NcVarTyped<T>.Element(...) failed because data has not been loaded.  Call ReadData() method for this object first.");
+            if (dimensions.Length != Dims.Length)
+                throw new IndexOutOfRangeException(String.Format("NcVarTyped<T>.Element(...) exception.  Request was for {0} dimensions but variable has {1} dimensions", dimensions.Length, Dims.Length));
+            for (var i = 0; i < Dims.Length; i++)
             {
-                if (dimensions[i] >= dims[i])
-                    throw new IndexOutOfRangeException(String.Format("NcVarTyped<T>.Element(...) exception.  Dimension {0} requested index {1} but size of dimension {0} for variable is {2}", i, dimensions[i], dims[i]));
+                if (dimensions[i] >= Dims[i])
+                    throw new IndexOutOfRangeException(String.Format("NcVarTyped<T>.Element(...) exception.  Dimension {0} requested index {1} but size of dimension {0} for variable is {2}", i, dimensions[i], Dims[i]));
                 if (dimensions[i] < 0)
-                    throw new IndexOutOfRangeException(String.Format("NcVarTyped<T>.Element(...) exception.  Dimension {0} requested index {1}.  Negative indices are not supported.", i, dimensions[i], dims[i]));
+                    throw new IndexOutOfRangeException(String.Format("NcVarTyped<T>.Element(...) exception.  Dimension {0} requested index {1}.  Negative indices are not supported.", i, dimensions[i]));
             }
-            return data[GetIndex(dimensions)];
+            return Data[GetIndex(dimensions)];
         }
-        public override double Min { get { return min; } }
-        public override double Max { get { return max; } }
+
+        public override double Min { get; protected set; }
+        public override double Max { get; protected set; }
     }
 
     public class NcVarDouble : NcVarTyped<double>
     {
-        public NcVarDouble(int NCID, int VarID, NcDimList Dims)
-            : base(NCID, VarID, Dims)
+        public NcVarDouble(int ncid, int varID, IList<NcDim> dims)
+            : base(ncid, varID, dims)
         {
             size = 8;
-            type = NcType.ncDouble;
+            NcType = NcType.ncDouble;
         }
 
         protected override void FindMinMax()
         {
-            max = double.MinValue;
-            min = double.MaxValue;
-            foreach (double cur in data)
+            Max = double.MinValue;
+            Min = double.MaxValue;
+            foreach (var cur in Data)
             {
-                min = Math.Min(cur, min);
-                max = Math.Max(cur, max);
+                Min = Math.Min(cur, Min);
+                Max = Math.Max(cur, Max);
             }
         }
 
@@ -162,162 +156,162 @@ namespace NetCDF
         public override void ReadData()
         {
             base.ReadData();
-            NcResult result = nc_get_var_double(ncid, varid, data);
+            nc_get_var_double(Ncid, Varid, Data);
             FindMinMax();
         }
     }
 
     public class NcVarFloat : NcVarTyped<float>
     {
-        public NcVarFloat(int NCID, int VarID, NcDimList Dims)
-            : base(NCID, VarID, Dims)
+        public NcVarFloat(int ncid, int varID, IList<NcDim> dims)
+            : base(ncid, varID, dims)
         {
             size = 4;
-            type = NcType.ncFloat;
+            NcType = NcType.ncFloat;
         }
 
         protected override void FindMinMax()
         {
-            max = float.MinValue;
-            min = float.MaxValue;
-            foreach (float cur in data)
+            Max = float.MinValue;
+            Min = float.MaxValue;
+            foreach (var cur in Data)
             {
-                min = Math.Min(cur, min);
-                max = Math.Max(cur, max);
+                Min = Math.Min(cur, Min);
+                Max = Math.Max(cur, Max);
             }
         }
 
         public override short GetShort(params int[] dimensions) { return (short)Element(dimensions); }
-        public override float GetFloat(params int[] dimensions) { return (float)Element(dimensions); }
+        public override float GetFloat(params int[] dimensions) { return Element(dimensions); }
 
         public override void ReadData()
         {
             base.ReadData();
-            nc_get_var_float(ncid, varid, data);
+            nc_get_var_float(Ncid, Varid, Data);
             FindMinMax();
         }
     }
 
     public class NcVarInt : NcVarTyped<int>
     {
-        public NcVarInt(int NCID, int VarID, NcDimList Dims)
-            : base(NCID, VarID, Dims)
+        public NcVarInt(int ncid, int varID, IList<NcDim> dims)
+            : base(ncid, varID, dims)
         {
             size = 4;
-            type = NcType.ncInt;
+            NcType = NcType.ncInt;
         }
 
         protected override void FindMinMax()
         {
-            max = int.MinValue;
-            min = int.MaxValue;
-            foreach (int cur in data)
+            Max = int.MinValue;
+            Min = int.MaxValue;
+            foreach (var cur in Data)
             {
-                min = Math.Min(cur, min);
-                max = Math.Max(cur, max);
+                Min = Math.Min(cur, Min);
+                Max = Math.Max(cur, Max);
             }
         }
 
         public override short GetShort(params int[] dimensions) { return (short)Element(dimensions); }
-        public override float GetFloat(params int[] dimensions) { return (float)Element(dimensions); }
+        public override float GetFloat(params int[] dimensions) { return Element(dimensions); }
 
         public override void ReadData()
         {
             base.ReadData();
-            nc_get_var_int(ncid, varid, data);
+            nc_get_var_int(Ncid, Varid, Data);
             FindMinMax();
         }
     }
 
     public class NcVarShort : NcVarTyped<short>
     {
-        public NcVarShort(int NCID, int VarID, NcDimList Dims)
-            : base(NCID, VarID, Dims)
+        public NcVarShort(int ncid, int varID, IList<NcDim> dims)
+            : base(ncid, varID, dims)
         {
             size = 2;
-            type = NcType.ncShort;
+            NcType = NcType.ncShort;
         }
 
         protected override void FindMinMax()
         {
-            max = short.MinValue;
-            min = short.MaxValue;
-            foreach (short cur in data)
+            Max = short.MinValue;
+            Min = short.MaxValue;
+            foreach (var cur in Data)
             {
-                min = Math.Min(cur, min);
-                max = Math.Max(cur, max);
+                Min = Math.Min(cur, Min);
+                Max = Math.Max(cur, Max);
             }
         }
 
-        public override short GetShort(params int[] dimensions) { return (short)Element(dimensions); }
-        public override float GetFloat(params int[] dimensions) { return (float)Element(dimensions); }
+        public override short GetShort(params int[] dimensions) { return Element(dimensions); }
+        public override float GetFloat(params int[] dimensions) { return Element(dimensions); }
 
         public override void ReadData()
         {
             base.ReadData();
-            nc_get_var_short(ncid, varid, data);
+            nc_get_var_short(Ncid, Varid, Data);
             FindMinMax();
         }
     }
 
     public class NcVarByte : NcVarTyped<byte>
     {
-        public NcVarByte(int NCID, int VarID, NcDimList Dims)
-            : base(NCID, VarID, Dims)
+        public NcVarByte(int ncid, int varID, IList<NcDim> dims)
+            : base(ncid, varID, dims)
         {
             size = 1;
-            type = NcType.ncByte;
+            NcType = NcType.ncByte;
         }
 
         protected override void FindMinMax()
         {
-            max = byte.MinValue;
-            min = byte.MaxValue;
-            foreach (byte cur in data)
+            Max = byte.MinValue;
+            Min = byte.MaxValue;
+            foreach (var cur in Data)
             {
-                min = Math.Min(cur, min);
-                max = Math.Max(cur, max);
+                Min = Math.Min(cur, Min);
+                Max = Math.Max(cur, Max);
             }
         }
 
         public override void ReadData()
         {
             base.ReadData();
-            nc_get_var_byte(ncid, varid, data);
+            nc_get_var_byte(Ncid, Varid, Data);
             FindMinMax();
         }
     }
 
     public class NcVarChar : NcVarTyped<char>
     {
-        public NcVarChar(int NCID, int VarID, NcDimList Dims)
-            : base(NCID, VarID, Dims)
+        public NcVarChar(int ncid, int varID, IList<NcDim> dims)
+            : base(ncid, varID, dims)
         {
             size = 1;
-            type = NcType.ncChar;
+            NcType = NcType.ncChar;
         }
 
         protected override void FindMinMax()
         {
-            max = char.MinValue;
-            min = char.MaxValue;
-            foreach (char cur in data)
+            Max = char.MinValue;
+            Min = char.MaxValue;
+            foreach (var cur in Data)
             {
-                min = (char)Math.Min(cur, min);
-                max = (char)Math.Max(cur, max);
+                Min = Math.Min(cur, Min);
+                Max = Math.Max(cur, Max);
             }
         }
 
         public override void ReadData()
         {
             base.ReadData();
-            nc_get_var_char(ncid, varid, data);
+            nc_get_var_char(Ncid, Varid, Data);
             FindMinMax();
         }
 
         public override string ToString()
         {
-            return new string(data);
+            return new string(Data);
         }
     }
 }

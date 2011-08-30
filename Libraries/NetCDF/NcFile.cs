@@ -1,75 +1,76 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NetCDF
 {
-    public class NcFile : NetCDF
+    public class NcFile : NetCdf
     {
-        private int ndims, nvars, natts, unlimdimid;
-        private NcDimList dims;
-        private NcVarList vars;
-        private NcAttList atts;
+        readonly int _ndims;
+        readonly int _nvars;
+        readonly int _natts;
+        readonly int _unlimdimid;
+        readonly NcDimList _dims;
+        readonly NcVarList _vars;
+        readonly NcAttList _atts;
 
 #region Constructors
-        public NcFile(string Filename)
+        public NcFile(string filename)
         {
-            NcResult status;
+            if (filename == null) throw new ArgumentNullException("filename");
             int i, j;
 
-            filename = Filename;
-            status = NC_open(filename, 0, out ncid);
+            base.filename = filename;
+            var status = NcOpen(base.filename, 0, out Ncid);
             if (status != NcResult.NC_NOERR)
-                throw new ApplicationException(String.Format("Error constructing NcFile object for file \"{0}\".  NC_open returned {1}", Filename, status.ToString()));
+                throw new ApplicationException(String.Format("Error constructing NcFile object for file \"{0}\".  NC_open returned {1}", filename, status.ToString()));
 
-            status = NC_inq(ncid, out ndims, out nvars, out natts, out unlimdimid);
+            status = NcInq(Ncid, out _ndims, out _nvars, out _natts, out _unlimdimid);
             if (status != NcResult.NC_NOERR)
-                throw new ApplicationException(String.Format("Error constructing NcFile object for file \"{0}\".  NC_inq returned {1}", Filename, status.ToString()));
+                throw new ApplicationException(String.Format("Error constructing NcFile object for file \"{0}\".  NC_inq returned {1}", filename, status.ToString()));
 
-            atts = new NcAttList(natts);
-            for (j = 0; j < natts; j++)
-                atts.Add(NcComponent.GetAttribute(ncid, j));
+            _atts = new NcAttList(_natts);
+            for (j = 0; j < _natts; j++)
+                _atts.Add(NcComponent.GetAttribute(Ncid, j));
 
-            dims = new NcDimList(ndims);
+            _dims = new NcDimList(_ndims);
             // Get the list of dimensions
-            for (i = 0; i < ndims; i++)
-                dims.Add(NcComponent.GetDimension(ncid, i, (unlimdimid == i)));
+            for (i = 0; i < _ndims; i++)
+                _dims.Add(NcComponent.GetDimension(Ncid, i, (_unlimdimid == i)));
 
-            vars = new NcVarList(nvars);
+            _vars = new NcVarList(_nvars);
             // Get the list of variables
-            for (i = 0; i < nvars; i++)
-                vars.Add(NcComponent.GetVariable(ncid, i, dims));
+            for (i = 0; i < _nvars; i++)
+                _vars.Add(NcComponent.GetVariable(Ncid, i, _dims));
         }
         #endregion
 
         public void LoadAllData()
         {
-            foreach (NcVar cur in vars)
+            foreach (var cur in _vars)
                 cur.ReadData();
         }
 
-        public NcResult CheckYerself(int VarID, int X, int Y, out short[] results)
+        public NcResult CheckYerself(int varID, int x, int y, out short[] results)
         {
-            uint[] start = new uint[3];
-            uint[] count = new uint[3];
+            var start = new uint[3];
+            var count = new uint[3];
 
             start[0] = 0;
-            start[2] = (uint)X;
-            start[1] = (uint)Y;
-            count[0] = (uint)Variables[VarID].Dimensions["depth"].Size;
+            start[2] = (uint)x;
+            start[1] = (uint)y;
+            count[0] = (uint)Variables[varID].Dimensions["depth"].Size;
             count[1] = count[2] = 1;
 
-            results = new short[Variables[VarID].Dimensions["depth"].Size];
+            results = new short[Variables[varID].Dimensions["depth"].Size];
 
-            return nc_get_vara_short(NcID, VarID, start, count, results);
+            return nc_get_vara_short(NcID, varID, start, count, results);
         }
 
-        public int DimensionCount { get { return ndims; } }
-        public int VariableCount { get { return nvars; } }
-        public int AttributeCount { get { return natts; } }
-        public NcDimList Dimensions { get { return dims; } }
-        public NcVarList Variables { get { return vars; } }
-        public NcAttList Attributes { get { return atts; } }
+        public int DimensionCount { get { return _ndims; } }
+        public int VariableCount { get { return _nvars; } }
+        public int AttributeCount { get { return _natts; } }
+        public NcDimList Dimensions { get { return _dims; } }
+        public NcVarList Variables { get { return _vars; } }
+        public NcAttList Attributes { get { return _atts; } }
         public string Filename { get { return filename; } }
     }
 }

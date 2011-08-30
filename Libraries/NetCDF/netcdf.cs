@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 
 namespace NetCDF
 {
-    public class NetCDF
+    public class NetCdf
     {
         private const int MaxStringLength = 100;
         #region Protected member variables
-        protected int ncid;
+        protected int Ncid;
         protected string filename;
         #endregion
         #region Enumerated types
@@ -18,12 +16,12 @@ namespace NetCDF
 
         #region DLL entry point declarations and safe wrappers where needed
         // http://www.unidata.ucar.edu/downloads/netcdf/netcdf-3_6_1/index.jsp v3.6.1 precompiled for windows
-        const string dllnetcdf = @"netcdf.dll";
+        const string NetCdfDll = @"netcdf.dll";
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         // omode = 0: open with read-only access
         private static unsafe extern NcResult nc_open(string path, int omode, int* ncidp);
-        protected static NcResult NC_open(string path, int omode, out int ncid)
+        protected static NcResult NcOpen(string path, int omode, out int ncid)
         {
             unsafe
             {
@@ -33,9 +31,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq(int ncid, int* ndimsp, int* nvarsp, int* nattsp, int* unlimdimidp);
-        protected static NcResult NC_inq(int ncid, out int ndims, out int nvars, out int natts, out int unlimdimid)
+        protected static NcResult NcInq(int ncid, out int ndims, out int nvars, out int natts, out int unlimdimid)
         {
             unsafe
             {
@@ -44,9 +42,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_ndims(int ncid, int* ndimsp);
-        protected static NcResult NC_inq_ndims(int ncid, out int ndims)
+        protected static NcResult NcInqNdims(int ncid, out int ndims)
         {
             unsafe
             {
@@ -55,9 +53,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_nvars(int ncid, int* nvarsp);
-        protected static NcResult NC_inq_nvars(int ncid, out int nvars)
+        protected static NcResult NcInqNvars(int ncid, out int nvars)
         {
             unsafe
             {
@@ -66,9 +64,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_natts(int ncid, int* nattsp);
-        protected static NcResult NC_inq_natts(int ncid, out int natts)
+        protected static NcResult NcInqNatts(int ncid, out int natts)
         {
             unsafe
             {
@@ -77,15 +75,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_inq_unlimdim(int ncid, int* unlimdimidp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_inq_format(int ncid, int* formatp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_inq_dimid(int ncid, [MarshalAs(UnmanagedType.LPStr)] StringBuilder name, int* idp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_dim(int ncid, int dimid, [MarshalAs(UnmanagedType.LPStr)] StringBuilder dimname, int* lenp);
-        protected static NcResult NC_inq_dim(int ncid, int dimid, out StringBuilder dimname, out int len)
+        protected static NcResult NcInqDim(int ncid, int dimid, out StringBuilder dimname, out int len)
         {
             dimname = new StringBuilder(MaxStringLength);
             unsafe
@@ -95,12 +87,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult NC_inq_dimname(int ncid, int dimid, [MarshalAs(UnmanagedType.LPStr)] out StringBuilder dimname);
-
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_dimlen(int ncid, int dimid, int* dimlenp);
-        protected static NcResult NC_inq_dimlen(int ncid, int dimid, ref int dimlen)
+        protected static NcResult NcInqDimlen(int ncid, int dimid, ref int dimlen)
         {
             unsafe
             {
@@ -109,17 +98,17 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_inq_attname(int ncid, int varid, int attnum, [MarshalAs(UnmanagedType.LPStr)] StringBuilder attname);
-        protected static NcResult NC_inq_attname(int ncid, int varid, int attnum, out StringBuilder attname)
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern NcResult nc_inq_attname(int ncid, int varid, int attnum, [MarshalAs(UnmanagedType.LPStr)] StringBuilder attname);
+        protected static NcResult NcInqAttname(int ncid, int varid, int attnum, out StringBuilder attname)
         {
             attname = new StringBuilder(MaxStringLength);
             return nc_inq_attname(ncid, varid, attnum, attname);
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_att(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string attname, NcType* xtypep, int* lenp);
-        protected static NcResult NC_inq_att(int ncid, int varid, string attname, out NcType xtype, out int len)
+        protected static NcResult NcInqAtt(int ncid, int varid, string attname, out NcType xtype, out int len)
         {
             unsafe
             {
@@ -130,14 +119,14 @@ namespace NetCDF
                 }
             }
         }
-        protected static NcResult NC_inq_global_att(int ncid, string attname, out NcType xtype, out int len)
+        protected static NcResult NcInqGlobalAtt(int ncid, string attname, out NcType xtype, out int len)
         {
-            return NC_inq_att(ncid, -1, attname, out xtype, out len);
+            return NcInqAtt(ncid, -1, attname, out xtype, out len);
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_atttype(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] StringBuilder attname, NcType* xtypep);
-        protected static NcResult NC_inq_atttype(int ncid, int varid, out StringBuilder attname, out NcType xtype)
+        protected static NcResult NcInqAtttype(int ncid, int varid, out StringBuilder attname, out NcType xtype)
         {
             attname = new StringBuilder(MaxStringLength);
             unsafe
@@ -146,14 +135,14 @@ namespace NetCDF
                     return nc_inq_atttype(ncid, varid, attname, xtypep);
             }
         }
-        protected static NcResult NC_inq_global_atttype(int ncid, out StringBuilder attname, out NcType xtype)
+        protected static NcResult NcInqGlobalAtttype(int ncid, out StringBuilder attname, out NcType xtype)
         {
-            return NC_inq_atttype(ncid, -1, out attname, out xtype);
+            return NcInqAtttype(ncid, -1, out attname, out xtype);
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_attlen(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] StringBuilder name, int* lenp);
-        protected static NcResult NC_inq_attlen(int ncid, int varid, out StringBuilder attname, out int len)
+        protected static NcResult NcInqAttlen(int ncid, int varid, out StringBuilder attname, out int len)
         {
             attname = new StringBuilder(MaxStringLength);
             unsafe
@@ -162,17 +151,14 @@ namespace NetCDF
                     return nc_inq_attlen(ncid, varid, attname, lenp);
             }
         }
-        protected static NcResult NC_inq_global_attlen(int ncid, out StringBuilder attname, out int len)
+        protected static NcResult NcInqGlobalAttlen(int ncid, out StringBuilder attname, out int len)
         {
-            return NC_inq_attlen(ncid, -1, out attname, out len);
+            return NcInqAttlen(ncid, -1, out attname, out len);
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_inq_attid(int ncid, int attid, [MarshalAs(UnmanagedType.LPStr)] StringBuilder name, int* attnump);
-
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_dimid(int ncid, [MarshalAs(UnmanagedType.LPStr)] string dimname, int* dimidp);
-        protected static NcResult NC_inq_dimid(int ncid, string dimname, out int dimid)
+        protected static NcResult NcInqDimid(int ncid, string dimname, out int dimid)
         {
             unsafe
             {
@@ -181,9 +167,9 @@ namespace NetCDF
             }
         }
         
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_var(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] StringBuilder varname, NcType* xtypep, int* ndimsp, int* dimidsp, int* nattsp);
-        protected static NcResult NC_inq_var(int ncid, int varid, out StringBuilder varname, out NcType xtype, out int ndims, ref int[] dimids, out int natts)
+        protected static NcResult NcInqVar(int ncid, int varid, out StringBuilder varname, out NcType xtype, out int ndims, ref int[] dimids, out int natts)
         {
             varname = new StringBuilder(MaxStringLength);
             unsafe
@@ -194,9 +180,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_vartype(int ncid, int varid, NcType* xtypep);
-        protected static NcResult NC_inq_vartype(int ncid, int varid, out NcType xtype)
+        protected static NcResult NcInqVartype(int ncid, int varid, out NcType xtype)
         {
             unsafe
             {
@@ -205,9 +191,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_varid(int ncid, char *name, int *varidp);
-        protected static NcResult NC_inq_varid(int ncid, string varname, out int varid)
+        protected static NcResult NcInqVarid(int ncid, string varname, out int varid)
         {
             unsafe
             {
@@ -217,9 +203,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_inq_varname(int ncid, int varid, char *name);
-        protected static NcResult NC_inq_varname(int ncid, int varid, ref string varname)
+        protected static NcResult NcInqVarname(int ncid, int varid, ref string varname)
         {
             unsafe
             {
@@ -228,42 +214,32 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_inq_varndims(int ncid, int varid, int *ndimsp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_inq_vardimid(int ncid, int varid, int *dimidsp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_inq_varnatts(int ncid, int varid, int *nattsp);
-
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         protected static extern NcResult nc_get_vara_short(int ncid, int varid, uint[] start, uint[] count, short[] sp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         protected static extern NcResult nc_get_var_double(int ncid, int varid, double[] dp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         protected static extern NcResult nc_get_var_float(int ncid, int varid, float[] dp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         protected static extern NcResult nc_get_var_int(int ncid, int varid, int[] dp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         protected static extern NcResult nc_get_var_short(int ncid, int varid, short[] dp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         protected static extern NcResult nc_get_var_char(int ncid, int varid, int[] dp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         protected static extern NcResult nc_get_var_byte(int ncid, int varid, byte[] dp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         protected static extern NcResult nc_get_var_char(int ncid, int varid, char[] dp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_text(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string attname, [MarshalAs(UnmanagedType.LPStr)] StringBuilder tp);
-        protected static NcResult NC_get_att_text(int ncid, int varid, string attname, ref StringBuilder value)
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern NcResult nc_get_att_text(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string attname, [MarshalAs(UnmanagedType.LPStr)] StringBuilder tp);
+        protected static NcResult NcGetAttText(int ncid, int varid, string attname, ref StringBuilder value)
         {
             return nc_get_att_text(ncid, varid, attname, value);
         }
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_uchar(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, byte* up);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_schar(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, [MarshalAs(UnmanagedType.LPStr)] StringBuilder cp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_get_att_short(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, short* sp);
-        protected static NcResult NC_get_att_short(int ncid, int varid, string attname, ref short[] ip)
+        protected static NcResult NcGetAttShort(int ncid, int varid, string attname, ref short[] ip)
         {
             unsafe
             {
@@ -272,9 +248,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_get_att_int(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, int* ip);
-        protected static NcResult NC_get_att_int(int ncid, int varid, string attname, ref int[] ip)
+        protected static NcResult NcGetAttInt(int ncid, int varid, string attname, ref int[] ip)
         {
             unsafe
             {
@@ -282,11 +258,10 @@ namespace NetCDF
                     return nc_get_att_int(ncid, varid, attname, valp);
             }
         }
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_long(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, long* lp);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_get_att_float(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, float* fp);
-        protected static NcResult NC_get_att_float(int ncid, int varid, string attname, ref float[] ip)
+        protected static NcResult NcGetAttFloat(int ncid, int varid, string attname, ref float[] ip)
         {
             unsafe
             {
@@ -295,9 +270,9 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern NcResult nc_get_att_double(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, double* dp);
-        protected static NcResult NC_get_att_double(int ncid, int varid, string attname, ref double[] ip)
+        protected static NcResult NcGetAttDouble(int ncid, int varid, string attname, ref double[] ip)
         {
             unsafe
             {
@@ -306,37 +281,23 @@ namespace NetCDF
             }
         }
 
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_ubyte(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, byte* ip);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_ushort(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, ushort* ip);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_uint(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, uint* ip);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_longlong(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, long* ip);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_ulonglong(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, ulong* ip);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att_string(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, [MarshalAs(UnmanagedType.LPStr)] StringBuilder ip);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
-        private static unsafe extern NcResult nc_get_att(int ncid, int varid, [MarshalAs(UnmanagedType.LPStr)] string name, void* ip);
-        [DllImport(dllnetcdf, CharSet = CharSet.Ansi)]
+        [DllImport(NetCdfDll, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         protected static extern NcResult NC_close(int ncid);
         #endregion
 
         #region Public Constructors
-        public NetCDF(int NcID)
+        public NetCdf(int ncID)
         {
-            ncid = NcID;
+            Ncid = ncID;
         }
 
-        public NetCDF()
+        public NetCdf()
         {
         }
         #endregion
 
         #region Public Properties
-        public int NcID { get { return ncid; } }
+        public int NcID { get { return Ncid; } }
         #endregion
 
     }

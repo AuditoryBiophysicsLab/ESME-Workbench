@@ -1,28 +1,26 @@
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace NetCDF
 {
     public class NcDim : NcComponent
     {
-        private bool is_unlimited;
-        private long size;
+        private readonly bool _isUnlimited;
+        private readonly long _size;
 
-        public NcDim(int NcID, int DimID, bool IsUnlimited)
-            : base(NcID, DimID)
+        public NcDim(int ncID, int dimID, bool isUnlimited)
+            : base(ncID, dimID)
         {
             StringBuilder curdim;
             int curlen;
 
-            NC_inq_dim(NcID, DimID, out curdim, out curlen);
+            NcInqDim(ncID, dimID, out curdim, out curlen);
 
-            component_name = curdim.ToString();
-            is_unlimited = IsUnlimited;
-            size = curlen;
+            ComponentName = curdim.ToString();
+            _isUnlimited = isUnlimited;
+            _size = curlen;
         }
 
-        public bool IsUnlimited { get { return is_unlimited; } }
-        public long Size { get { return size; } }
+        public bool IsUnlimited { get { return _isUnlimited; } }
+        public long Size { get { return _size; } }
     }
 }

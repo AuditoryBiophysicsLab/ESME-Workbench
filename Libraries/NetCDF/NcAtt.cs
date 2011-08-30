@@ -1,133 +1,120 @@
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace NetCDF
 {
     public abstract class NcAtt : NcComponent
     {
-        protected int varid;
-
-        protected NcAtt(int NcID, int VariableID, string AttributeName)
-            : base(NcID, AttributeName)
+        protected NcAtt(int ncID, int variableID, string attributeName)
+            : base(ncID, attributeName)
         {
-            varid = VariableID;
+            VarID = variableID;
         }
 
-        protected NcAtt(int NcID, int VariableID, string AttributeName, int Length)
-            : base(NcID, AttributeName)
-        {
-            varid = VariableID;
-        }
+        public virtual short GetShort(int index) { return 0; }
+        public virtual float GetFloat(int index) { return 0.0f; }
 
-        public virtual short GetShort(int Index) { return 0; }
-        public virtual float GetFloat(int Index) { return 0.0f; }
-
-        public int VarID { get { return varid; } }
+        public int VarID { get; protected set; }
     }
 
     public abstract class NcAttGeneric<T> : NcAtt
     {
-        protected T[] values;
-        NcType type;
+        protected T[] Values;
 
-        public NcAttGeneric(int NcId, int VariableID, string AttributeName, NcType Type)
-            : base(NcId, VariableID, AttributeName)
-        {
-            type = Type;
-        }
+        protected NcAttGeneric(int ncId, int variableID, string attributeName, NcType type)
+            : base(ncId, variableID, attributeName) { NcType = type; }
 
-        public T[] Value { get { return values; } }
+        public T[] Value { get { return Values; } }
+        protected NcType NcType { get; set; }
         protected int Length
         {
-            get { return values.Length; }
-            set { values = new T[value]; }
+            get { return Values.Length; }
+            set { Values = new T[value]; }
         }
     }
 
     public class NcAttString : NcAttGeneric<string>
     {
-        private string strval;
-        public NcAttString(int NcId, int VariableID, string AttributeName, string Value)
-            : base(NcId, VariableID, AttributeName, NcType.ncChar)
+        private readonly string _strval;
+        public NcAttString(int ncId, int variableID, string attributeName, string value)
+            : base(ncId, variableID, attributeName, NcType.ncChar)
         {
-            strval = Value;
+            _strval = value;
         }
 
-        public NcAttString(int NcId, int VariableID, string AttributeName, int Length)
-            : base(NcId, VariableID, AttributeName, NcType.ncChar)
+        public NcAttString(int ncId, int variableID, string attributeName, int length)
+            : base(ncId, variableID, attributeName, NcType.ncChar)
         {
-            StringBuilder outval = new StringBuilder(Length);
-            NcResult status = NC_get_att_text(ncid, VariableID, AttributeName, ref outval);
-            strval = outval.ToString(0, Length);
+            var outval = new StringBuilder(length);
+            NcGetAttText(Ncid, variableID, attributeName, ref outval);
+            _strval = outval.ToString(0, length);
             //strval = outval.ToString(0, outval.Length);
         }
 
-        public override short GetShort(int Index) { return short.Parse(strval.Substring(Index)); }
-        public override float GetFloat(int Index) { return float.Parse(strval.Substring(Index)); }
+        public override short GetShort(int index) { return short.Parse(_strval.Substring(index)); }
+        public override float GetFloat(int index) { return float.Parse(_strval.Substring(index)); }
 
-        public new string Value { get { return strval; } }
-        public override string ToString() { return string.Format("{0}: '{1}'", ComponentName, strval); }
+        public new string Value { get { return _strval; } }
+        public override string ToString() { return string.Format("{0}: '{1}'", ComponentName, _strval); }
     }
 
     public class NcAttInt : NcAttGeneric<int>
     {
-        public NcAttInt(int NcId, int VariableID, string AttributeName, int Length)
-            : base(NcId, VariableID, AttributeName, NcType.ncInt)
+        public NcAttInt(int ncId, int variableID, string attributeName, int length)
+            : base(ncId, variableID, attributeName, NcType.ncInt)
         {
-            this.Length = Length;
-            NcResult status = NC_get_att_int(ncid, VariableID, AttributeName, ref values);
+            Length = length;
+            NcGetAttInt(Ncid, variableID, attributeName, ref Values);
         }
 
-        public override short GetShort(int Index) { return (short)values[Index]; }
-        public override float GetFloat(int Index) { return (float)values[Index]; }
+        public override short GetShort(int index) { return (short)Values[index]; }
+        public override float GetFloat(int index) { return Values[index]; }
 
-        public override string ToString() { return string.Format("{0}: int[{1}]", ComponentName, values[0]); }
+        public override string ToString() { return string.Format("{0}: int[{1}]", ComponentName, Values[0]); }
     }
 
     public class NcAttShort : NcAttGeneric<short>
     {
-        public NcAttShort(int NcId, int VariableID, string AttributeName, int Length)
-            : base(NcId, VariableID, AttributeName, NcType.ncShort)
+        public NcAttShort(int ncId, int variableID, string attributeName, int length)
+            : base(ncId, variableID, attributeName, NcType.ncShort)
         {
-            this.Length = Length;
-            NcResult status = NC_get_att_short(ncid, VariableID, AttributeName, ref values);
+            Length = length;
+            NcGetAttShort(Ncid, variableID, attributeName, ref Values);
         }
 
-        public override short GetShort(int Index) { return (short)values[Index]; }
-        public override float GetFloat(int Index) { return (float)values[Index]; }
+        public override short GetShort(int index) { return Values[index]; }
+        public override float GetFloat(int index) { return Values[index]; }
 
-        public override string ToString() { return string.Format("{0}: short[{1}]", ComponentName, values[0]); }
+        public override string ToString() { return string.Format("{0}: short[{1}]", ComponentName, Values[0]); }
     }
 
     public class NcAttFloat : NcAttGeneric<float>
     {
-        public NcAttFloat(int NcId, int VariableID, string AttributeName, int Length)
-            : base(NcId, VariableID, AttributeName, NcType.ncFloat)
+        public NcAttFloat(int ncId, int variableID, string attributeName, int length)
+            : base(ncId, variableID, attributeName, NcType.ncFloat)
         {
-            this.Length = Length;
-            NcResult status = NC_get_att_float(ncid, VariableID, AttributeName, ref values);
+            Length = length;
+            NcGetAttFloat(Ncid, variableID, attributeName, ref Values);
         }
 
-        public override short GetShort(int Index) { return (short)values[Index]; }
-        public override float GetFloat(int Index) { return (float)values[Index]; }
+        public override short GetShort(int index) { return (short)Values[index]; }
+        public override float GetFloat(int index) { return Values[index]; }
 
-        public override string ToString() { return string.Format("{0}: float[{1}]", ComponentName, values[0]); }
+        public override string ToString() { return string.Format("{0}: float[{1}]", ComponentName, Values[0]); }
     }
 
     public class NcAttDouble : NcAttGeneric<double>
     {
-        public NcAttDouble(int NcId, int VariableID, string AttributeName, int Length)
-            : base(NcId, VariableID, AttributeName, NcType.ncDouble)
+        public NcAttDouble(int ncId, int variableID, string attributeName, int length)
+            : base(ncId, variableID, attributeName, NcType.ncDouble)
         {
-            this.Length = Length;
-            NcResult status = NC_get_att_double(ncid, VariableID, AttributeName, ref values);
+            Length = length;
+            NcGetAttDouble(Ncid, variableID, attributeName, ref Values);
         }
 
-        public override short GetShort(int Index) { return (short)values[Index]; }
-        public override float GetFloat(int Index) { return (float)values[Index]; }
+        public override short GetShort(int index) { return (short)Values[index]; }
+        public override float GetFloat(int index) { return (float)Values[index]; }
 
-        public override string ToString() { return string.Format("{0}: double[{1}]", ComponentName, values[0]); }
+        public override string ToString() { return string.Format("{0}: double[{1}]", ComponentName, Values[0]); }
     }
 }
 

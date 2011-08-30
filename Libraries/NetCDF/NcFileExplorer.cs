@@ -51,7 +51,7 @@ namespace NetCDF
             rootNode.Nodes.Add(variablesNode);
             foreach (NcVar curVar in ncFile.Variables)
             {
-                string varEntry = String.Format("{0} {1}", curVar.Type.ToString(), curVar.ComponentName);
+                string varEntry = String.Format("{0} {1}", curVar.NcType.ToString(), curVar.ComponentName);
                 for (int i = 0; i < curVar.Dimensions.Count; i++)
                     varEntry += String.Format("[{0}]", curVar.Dimensions[i].ComponentName);
                 TreeNode curVarNode = new TreeNode(varEntry);

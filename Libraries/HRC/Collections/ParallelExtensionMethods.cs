@@ -88,12 +88,15 @@ namespace HRC.Collections
                     listIsSorted &= x;
                 }
             });
-            for (var i = 0; i < cpuCount - 1; i++)
+            if (array.Count > cpuCount)
             {
-                var baseIndex = arraySliceLength * (i + 1);
-                listIsSorted &= comparer.Compare(array[baseIndex - 1], array[baseIndex]) <= 0;
+                for (var i = 0; i < cpuCount - 1; i++)
+                {
+                    var baseIndex = arraySliceLength * (i + 1);
+                    listIsSorted &= comparer.Compare(array[baseIndex - 1], array[baseIndex]) <= 0;
+                }
+                System.Diagnostics.Debug.WriteLine("{0}: GetIsSorted: Finished parallel sort order check.  List appears to be {1}", DateTime.Now, listIsSorted ? "sorted" : "unsorted");
             }
-            System.Diagnostics.Debug.WriteLine("{0}: GetIsSorted: Finished parallel sort order check.  List appears to be {1}", DateTime.Now, listIsSorted ? "sorted" : "unsorted");
             return listIsSorted;
         }
 

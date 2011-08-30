@@ -70,8 +70,8 @@ namespace ImportGDEM
                 return;
             }
 
-            if ((north < -90) || (north > 90) || (south < -90) || (south > 90) || (north <= south) ||
-                (west < -180) || (west > 180) || (east < -180) || (east > 180) || (east <= west))
+            if ((north < -90) || (north > 90) || (south < -90) || (south > 90) || (north < south) ||
+                (west < -180) || (west > 180) || (east < -180) || (east > 180) || (east < west))
             {
                 Usage();
                 return;

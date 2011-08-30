@@ -1,152 +1,139 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace NetCDF
 {
-    public abstract class NcComponent: NetCDF
+    public abstract class NcComponent: NetCdf
     {
-        protected int component_id;
-        protected string component_name;
-
-        public NcComponent(int NcId, int ComponentID, string ComponentName)
-            : base(NcId)
+        protected NcComponent(int ncId, int componentID, string componentName)
+            : base(ncId)
         {
-            component_id = ComponentID;
-            component_name = ComponentName;
+            ComponentID = componentID;
+            ComponentName = componentName;
         }
 
-        public NcComponent(int NcId, string ComponentName)
-            : base(NcId)
+        protected NcComponent(int ncId, string componentName)
+            : base(ncId)
         {
-            component_name = ComponentName;
+            ComponentName = componentName;
         }
 
-        public NcComponent(int NcId, int ComponentID)
-            : base(NcId)
+        protected NcComponent(int ncId, int componentID)
+            : base(ncId)
         {
-            component_id = ComponentID;
+            ComponentID = componentID;
         }
 
-        public int ComponentID { get { return component_id; } }
-        public string ComponentName { get { return component_name; } }
+        public int ComponentID { get; protected set; }
+        public string ComponentName { get; protected set; }
 
         /// <summary>
         /// Get the global attribute with the specified AttributeID
         /// </summary>
-        /// <param name="NcID">ID returned by NC_open()</param>
-        /// <param name="AttributeID">Zero-based global attribute ID</param>
+        /// <param name="ncID">ID returned by NC_open()</param>
+        /// <param name="attributeID">Zero-based global attribute ID</param>
         /// <returns>NcAtt with the specified attribute properties</returns>
-        public static NcAtt GetAttribute(int NcID, int AttributeID)
+        public static NcAtt GetAttribute(int ncID, int attributeID)
         {
-            return NcComponent.GetAttribute(NcID, -1, AttributeID);
+            return GetAttribute(ncID, -1, attributeID);
         }
 
         /// <summary>
         /// Retrieve the specified attribute ID for a given variable ID
         /// </summary>
-        /// <param name="NcID">ID returned by NC_open()</param>
-        /// <param name="VariableID">Zero-based global variable ID</param>
-        /// <param name="AttributeID">Zero-based attribute ID specific to the given VariableID</param>
+        /// <param name="ncID">ID returned by NC_open()</param>
+        /// <param name="variableID">Zero-based global variable ID</param>
+        /// <param name="attributeID">Zero-based attribute ID specific to the given VariableID</param>
         /// <returns>NcAtt with the specified attribute properties</returns>
-        public static NcAtt GetAttribute(int NcID, int VariableID, int AttributeID)
+        public static NcAtt GetAttribute(int ncID, int variableID, int attributeID)
         {
-            NcResult status;
             StringBuilder curatt;
             NcType atttype;
             int curlen;
 
-            status = NC_inq_attname(NcID, VariableID, AttributeID, out curatt);
+            var status = NcInqAttname(ncID, variableID, attributeID, out curatt);
             if (status != NcResult.NC_NOERR)
-                throw new ApplicationException(String.Format("Error constructing NcAtt for VariableID {0} and AttributeID {1}. NC_inq_attname returned {2}", VariableID, AttributeID, status.ToString()));
-            status = NC_inq_att(NcID, VariableID, curatt.ToString(), out atttype, out curlen);
+                throw new ApplicationException(String.Format("Error constructing NcAtt for VariableID {0} and AttributeID {1}. NC_inq_attname returned {2}", variableID, attributeID, status.ToString()));
+            status = NcInqAtt(ncID, variableID, curatt.ToString(), out atttype, out curlen);
             if (status != NcResult.NC_NOERR)
-                throw new ApplicationException(String.Format("Error constructing NcAtt for VariableID {0} and Attribute {1}. NC_inq_att returned {2}", VariableID, curatt.ToString(), status.ToString()));
+                throw new ApplicationException(String.Format("Error constructing NcAtt for VariableID {0} and Attribute {1}. NC_inq_att returned {2}", variableID, curatt, status.ToString()));
 
             switch (atttype)
             {
                 case NcType.ncByte:
                     throw new Exception("ncByte attributes not implemented yet");
                 case NcType.ncChar:
-                    return new NcAttString(NcID, VariableID, curatt.ToString(), curlen);
+                    return new NcAttString(ncID, variableID, curatt.ToString(), curlen);
                 case NcType.ncDouble:
-                    return new NcAttDouble(NcID, VariableID, curatt.ToString(), curlen);
+                    return new NcAttDouble(ncID, variableID, curatt.ToString(), curlen);
                 case NcType.ncFloat:
-                    return new NcAttFloat(NcID, VariableID, curatt.ToString(), curlen);
+                    return new NcAttFloat(ncID, variableID, curatt.ToString(), curlen);
                 case NcType.ncInt:
-                    return new NcAttInt(NcID, VariableID, curatt.ToString(), curlen);
+                    return new NcAttInt(ncID, variableID, curatt.ToString(), curlen);
                 case NcType.ncNat:
-                    return new NcAttString(NcID, VariableID, curatt.ToString(), "");
+                    return new NcAttString(ncID, variableID, curatt.ToString(), "");
                 case NcType.ncShort:
-                    return new NcAttShort(NcID, VariableID, curatt.ToString(), curlen);
+                    return new NcAttShort(ncID, variableID, curatt.ToString(), curlen);
                 default:
                     throw new ApplicationException("Unknown type " + atttype.ToString() + " passed to NcAttFactory.Create()");
             }
         }
 
-        public static NcDim GetDimension(int NcID, int DimensionID, bool IsUnlimited)
+        public static NcDim GetDimension(int ncID, int dimensionID, bool isUnlimited)
         {
-            return new NcDim(NcID, DimensionID, IsUnlimited);
+            return new NcDim(ncID, dimensionID, isUnlimited);
         }
 
-        public static NcVar GetVariable(int NcID, int VariableID, NcDimList Dims)
+        public static NcVar GetVariable(int ncID, int variableID, NcDimList dims)
         {
-            NcType VariableType;
+            NcType variableType;
 
-            NC_inq_vartype(NcID, VariableID, out VariableType);
-            switch (VariableType)
+            NcInqVartype(ncID, variableID, out variableType);
+            switch (variableType)
             {
                 case NcType.ncDouble:
-                    return new NcVarDouble(NcID, VariableID, Dims);
+                    return new NcVarDouble(ncID, variableID, dims);
                 case NcType.ncShort:
-                    return new NcVarShort(NcID, VariableID, Dims);
+                    return new NcVarShort(ncID, variableID, dims);
                 case NcType.ncFloat:
-                    return new NcVarFloat(NcID, VariableID, Dims);
+                    return new NcVarFloat(ncID, variableID, dims);
                 case NcType.ncInt:
-                    return new NcVarInt(NcID, VariableID, Dims);
+                    return new NcVarInt(ncID, variableID, dims);
                 case NcType.ncByte:
-                    return new NcVarByte(NcID, VariableID, Dims);
+                    return new NcVarByte(ncID, variableID, dims);
                 case NcType.ncChar:
-                    return new NcVarChar(NcID, VariableID, Dims);
-                case NcType.ncNat:
+                    return new NcVarChar(ncID, variableID, dims);
                 default:
-                    throw new Exception(VariableType.ToString() + " factory not yet implemented!");
+                    throw new Exception(variableType.ToString() + " factory not yet implemented!");
             }
         }
     }
 
     public class NcList<T> : List<T> where T: NcComponent
     {
-        public NcList() : base() { }
+        public NcList() { }
         public NcList(int capacity) : base(capacity) { }
 
-        public T this[string index]
-        {
-            get
-            {
-                foreach (T cur in this)
-                    if (cur.ComponentName == index)
-                        return cur;
-                return null;
-            }
-        }
+        public T this[string index] { get { return this.FirstOrDefault(cur => cur.ComponentName == index); } }
     }
 
     public class NcDimList : NcList<NcDim>
     {
-        public NcDimList() : base() { }
+        public NcDimList() { }
         public NcDimList(int capacity) : base(capacity) { }
     }
 
     public class NcAttList : NcList<NcAtt>
     {
-        public NcAttList() : base() { }
+        public NcAttList() { }
         public NcAttList(int capacity) : base(capacity) { }
     }
 
     public class NcVarList : NcList<NcVar>
     {
-        public NcVarList() : base() { }
+        public NcVarList() { }
         public NcVarList(int capacity) : base(capacity) { }
     }
 }
