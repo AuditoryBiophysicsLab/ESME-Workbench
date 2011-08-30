@@ -15,8 +15,8 @@ namespace ESME.Views.InstallationWizard
     {
         public WizardViewModel()
         {
-            CreatePanels();
             AppSettings = Globals.AppSettings;
+            CreatePanels();
             SelectedPanelIndex = 0;
             SelectedPanel = Panels[SelectedPanelIndex];
         }
@@ -28,158 +28,146 @@ namespace ESME.Views.InstallationWizard
                     new WizardPanelInfo
                     {
                             DescriptiveText =
-                                    "Welcome to the ESME Workbench Installation Wizard.\n\nThe next several panes of this wizard will guide you in the configuration of required data directories and program locations for proper operation of ESME Workbench.\n\n Please press Next to continue, or Cancel to exit.",
+                                    "Welcome to the ESME Workbench Installation Wizard.\n\n" +
+                                    "The next several panes of this wizard will guide you in the configuration of required data directories " +
+                                    "and program locations for proper operation of ESME Workbench.\n\n Please press Next to continue, or Cancel to exit without saving changes.",
                             IsFileBrowerEnabled = false,
                             UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                            PropertyName = "welcomeScreen"
-                    },
-                    new WizardPanelInfo
-                    {
-                            DescriptiveText =
-                                    @"Some components of the One Navy Model require Java to run.  Please select the javaw.exe executable installed on your system.  Typically it is installed into Program Files under 'Java'.  If you do not have Java installed, please install the latest Java Runtime Environment (JRE) from http://www.oracle.com/technetwork/java/javase/downloads/index.html . ",
-                            FieldName = "Java Executable (javaw.exe)",
-                            FileNameFilter = "Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*",
-                            IsDirectoryBrowser = false,
-                            PropertyName = "javaw"
-                    },
-                    new WizardPanelInfo
-                    {
-                            DescriptiveText =
-                                    "The Scenario Data Directory is the default location for all experimental data.  It is typically named Sim Areas, and contains the files SimAreas.csv, PSM.csv, and Species.csv.",
-                            FieldName = "Scenario Data Directory",
-                            IsDirectoryBrowser = true,
-                            PropertyName = "ScenarioDataDirectory",
-                    },
-                    new WizardPanelInfo
-                    {
-                            DescriptiveText =
-                                    "The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  The Generalized Digital Environmental Model (GDEM) is a required OAML database. If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
-                            FieldName = "GDEM-V",
-                            IsDirectoryBrowser = true,
-                            PropertyName = "GDEM-V",
-                    },
-                    new WizardPanelInfo
-                    {
-                            DescriptiveText =
-                                    "The The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  The Surface Marine Gridded Climatological (SMGC) database is a required OAML database. If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
-                            FieldName = "SMGC",
-                            IsDirectoryBrowser = true,
-                            PropertyName = "SMGC",
-                    },
-                    new WizardPanelInfo
-                    {
-                            DescriptiveText =
-                                    "The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  The Bottom Sediment Type (BST) database is a required OAML database. If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
-                            FieldName = "BST",
-                            IsDirectoryBrowser = false,
-                            FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
-                            PropertyName = "BST",
-                    },
-                    new WizardPanelInfo
-                    {
-                            DescriptiveText =
-                                    "The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  The Digital Bathymetric DataBase (DBDB) is a required OAML database. If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
-                            FieldName = "DBDB",
-                            IsDirectoryBrowser = false,
-                            FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
-                            PropertyName = "DBDB",
-                    },
-                    new WizardPanelInfo
-                    {
-                            DescriptiveText =
-                                    "The Digital Bathymetric DataBase (DBDB) requires a seperate extraction tool for use. If you do not have this tool, a copy can be downloaded from http://esme.bu.edu/  ",
-                            FieldName = "DBDB Extractor (dbv5_command.exe)",
-                            IsDirectoryBrowser = false,
-                            FileNameFilter =
-                                    "DBDB Extractor (dbv5_command.exe)|dbv5_command.exe|Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
-                            PropertyName = "DBDBExtractor",
+                            //will always be a valid location; "next" button always lit.
+                            PropertyName = "welcomeScreen",
                     },
             };
-            if (Configuration.IsClassifiedModel)
-                Panels.AddRange(new List<WizardPanelInfo>
-                {
-                        new WizardPanelInfo
-                        {
-                                DescriptiveText =
-                                        "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.",
-                                FieldName = "HFBL Extractor",
-                                IsDirectoryBrowser = false,
-                                FileNameFilter =
-                                        "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
-                                PropertyName = "HFBLExtractor",
-                        },
-                        new WizardPanelInfo
-                        {
-                                DescriptiveText =
-                                        "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.",
-                                FieldName = "LFBL Extractor",
-                                IsDirectoryBrowser = false,
-                                FileNameFilter =
-                                        "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
-                                PropertyName = "LFBLExtractor",
-                        }
-                });
+
+            if (string.IsNullOrEmpty(AppSettings.NAEMOTools.JavaExecutablePath) || !File.Exists(AppSettings.NAEMOTools.JavaExecutablePath))
+                Panels.Add(
+                           new WizardPanelInfo
+                           {
+                                   DescriptiveText =
+                                   "Some components of the One Navy Model require Java to run.  Please select the javaw.exe executable installed on your system.  " +
+                                   "Typically it is installed into Program Files under 'Java'.  If you do not have Java installed, please install the latest " +
+                                   "Java Runtime Environment (JRE) from http://www.oracle.com/technetwork/java/javase/downloads/index.html . ",
+                                   FieldName = "Java Executable (javaw.exe)",
+                                   FileNameFilter = "Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*",
+                                   IsDirectoryBrowser = false,
+                                   PropertyName = "javaw",
+                           });
+
+            if (string.IsNullOrEmpty(Globals.AppSettings.ScenarioDataDirectory) || !Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))
+                Panels.Add(
+                           new WizardPanelInfo
+                           {
+                                   DescriptiveText =
+                                   "The Scenario Data Directory is the default location for all experimental data.  It is typically named Sim Areas, and contains " +
+                                   "the files SimAreas.csv, PSM.csv, and Species.csv.",
+                                   FieldName = "Scenario Data Directory",
+                                   IsDirectoryBrowser = true,
+                                   PropertyName = "ScenarioDataDirectory",
+                           });
+
+            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.GDEMDirectory) || !Directory.Exists(Globals.AppSettings.NAVOConfiguration.GDEMDirectory))
+                Panels.Add(
+                           new WizardPanelInfo
+                           {
+                                   DescriptiveText =
+                                   "The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  " +
+                                   "The Generalized Digital Environmental Model (GDEM) is a required OAML database. " +
+                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
+                                   FieldName = "GDEM-V",
+                                   IsDirectoryBrowser = true,
+                                   PropertyName = "GDEM-V",
+                           });
+            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.SMGCDirectory) || !Directory.Exists(Globals.AppSettings.NAVOConfiguration.SMGCDirectory))
+                Panels.Add(
+                           new WizardPanelInfo
+                           {
+                                   DescriptiveText =
+                                   "The The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  " +
+                                   "The Surface Marine Gridded Climatological (SMGC) database is a required OAML database. " +
+                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
+                                   FieldName = "SMGC",
+                                   IsDirectoryBrowser = true,
+                                   PropertyName = "SMGC",
+                           });
+            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.BSTDirectory) || !File.Exists(Globals.AppSettings.NAVOConfiguration.BSTDirectory))
+                Panels.Add(
+                           new WizardPanelInfo
+                           {
+                                   DescriptiveText =
+                                   "The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  " +
+                                   "The Bottom Sediment Type (BST) database is a required OAML database. " +
+                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
+                                   FieldName = "BST",
+                                   IsDirectoryBrowser = false,
+                                   FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
+                                   PropertyName = "BST",
+                           });
+            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBDirectory) || !File.Exists(Globals.AppSettings.NAVOConfiguration.DBDBDirectory))
+                Panels.Add(
+                           new WizardPanelInfo
+                           {
+                                   DescriptiveText =
+                                   "The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  " +
+                                   "The Digital Bathymetric DataBase (DBDB) is a required OAML database. " +
+                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
+                                   FieldName = "DBDB",
+                                   IsDirectoryBrowser = false,
+                                   FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
+                                   PropertyName = "DBDB",
+                           });
+            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath) || !File.Exists(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath))
+                Panels.Add(
+                           new WizardPanelInfo
+                           {
+                                   DescriptiveText =
+                                   "The Digital Bathymetric DataBase (DBDB) requires a seperate extraction tool for use. " +
+                                   "If you do not have this tool, a copy can be downloaded from http://esme.bu.edu/  ",
+                                   FieldName = "DBDB Extractor (dbv5_command.exe)",
+                                   IsDirectoryBrowser = false,
+                                   FileNameFilter =
+                                   "DBDB Extractor (dbv5_command.exe)|dbv5_command.exe|Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
+                                   PropertyName = "DBDBExtractor",
+                           });
+
+            if (Configuration.IsClassifiedModel && (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath) || !File.Exists(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath)))
+                Panels.Add(
+                           new WizardPanelInfo
+                           {
+                                   DescriptiveText =
+                                   "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.",
+                                   FieldName = "HFBL Extractor",
+                                   IsDirectoryBrowser = false,
+                                   FileNameFilter =
+                                   "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
+                                   PropertyName = "HFBLExtractor",
+                           });
+            if (Configuration.IsClassifiedModel && (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath) || !File.Exists(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath)))
+                Panels.Add(
+                           new WizardPanelInfo
+                           {
+                                   DescriptiveText =
+                                   "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.",
+                                   FieldName = "LFBL Extractor",
+                                   IsDirectoryBrowser = false,
+                                   FileNameFilter =
+                                   "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
+                                   PropertyName = "LFBLExtractor",
+                           });
         }
 
         public static void LaunchWizardIfNeeded(IUIVisualizerService visualizerService)
         {
             var wizardView = new WizardViewModel();
-            foreach (var panel in wizardView.Panels)
-                switch (panel.PropertyName)
-                {
-                    case "javaw":
-                        panel.Skip = (!string.IsNullOrEmpty(Globals.AppSettings.NAEMOTools.JavaExecutablePath)) &&
-                                     File.Exists(Globals.AppSettings.NAEMOTools.JavaExecutablePath);
-                        break;
-                    case "ScenarioDataDirectory":
-                        panel.Skip = (!string.IsNullOrEmpty(Globals.AppSettings.ScenarioDataDirectory) &&
-                                      Directory.Exists(Globals.AppSettings.ScenarioDataDirectory));
-                        break;
-                    case "GDEM-V":
-                        panel.Skip = (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.GDEMDirectory) &&
-                                      Directory.Exists(Globals.AppSettings.NAVOConfiguration.GDEMDirectory));
-                        break;
-                    case "SMGC":
-                        panel.Skip = (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.SMGCDirectory) &&
-                                      Directory.Exists(Globals.AppSettings.NAVOConfiguration.SMGCDirectory));
-                        break;
-                    case "BST":
-                        panel.Skip = (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.BSTDirectory) &&
-                                      File.Exists(Globals.AppSettings.NAVOConfiguration.BSTDirectory));
-                        break;
-                    case "DBDB":
-                        panel.Skip = (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBDirectory) &&
-                                      File.Exists(Globals.AppSettings.NAVOConfiguration.DBDBDirectory));
-                        break;
-                    case "DBDBExtractor":
-                        panel.Skip = (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath) &&
-                                      File.Exists(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath));
-                        break;
-                    case "HFBLExtractor":
-                        panel.Skip = (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath) &&
-                                      File.Exists(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath));
-                        break;
-                    case "LFBLExtractor":
-                        panel.Skip = (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath) &&
-                                      File.Exists(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath));
-                        break;
-                    case "welcomeScreen":
-                        panel.Skip = false;
-                        break;
-                    default:
-                        throw new ApplicationException("typo.");
-                }
-            wizardView.Panels.RemoveAll(panel => panel.Skip);
-            if (wizardView.Panels.Count == 1 && wizardView.Panels[0].PropertyName == "welcomeScreen") wizardView.Panels.RemoveAt(0);
-            if (wizardView.Panels.Count > 0)
+            if (wizardView.Panels.Count == 1 && wizardView.Panels[0].PropertyName == "welcomeScreen") wizardView.Panels.RemoveAt(0); // if there aren't any configurable panels, delete the welcome screen
+            if (wizardView.Panels.Count > 0) //and if any panels remain, show them. 
             {
                 var result = visualizerService.ShowDialog("WizardView", wizardView);
-                if (result.HasValue && !result.Value)
+                if (result.HasValue && !result.Value)//todo
                 {
                     //user pressed cancel.
                     //shut. down. everything.
                 }
             }
+            //otherwise launch esme.
         }
 
         #region public AppSettings AppSettings { get; set; }
@@ -285,6 +273,9 @@ namespace ESME.Views.InstallationWizard
                 return;
             }
             NextButtonString = "Finish";
+            SelectedPanel.IsFileBrowerEnabled = false;
+            SelectedPanel.DescriptiveText =
+                    "Wizard has completed successfully.  Please press the Finish button to complete configuration and launch ESME Workbench, or Cancel to exit without saving changes.";
             SelectedPanel = Panels.Last();
         }
 
@@ -471,7 +462,24 @@ namespace ESME.Views.InstallationWizard
         bool _isDirectoryBrowser;
         #endregion
 
-        public bool IsFileBrowerEnabled { get; set; }
+        #region public bool IsFileBrowerEnabled { get; set; }
+
+        public bool IsFileBrowerEnabled
+        {
+            get { return _isFileBrowerEnabled; }
+            set
+            {
+                if (_isFileBrowerEnabled == value) return;
+                _isFileBrowerEnabled = value;
+                NotifyPropertyChanged(IsFileBrowerEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsFileBrowerEnabledChangedEventArgs = ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.IsFileBrowerEnabled);
+        bool _isFileBrowerEnabled;
+
+        #endregion
+
 
         public bool Skip { get; set; }
     }
