@@ -224,7 +224,7 @@ namespace ESME.Environment.NAVO
         static readonly PropertyChangedEventArgs GDEMDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.GDEMDirectory);
         string _gdemDirectory;
 
-        public bool ValidateGDEMDirectory(string gdemFile, IMessageBoxService messageBoxService)
+        public bool ValidateGDEMDirectory(string gdemFile, IMessageBoxService messageBoxService = null)
         {
             var standardFilenames = new[]
             {
@@ -244,7 +244,7 @@ namespace ESME.Environment.NAVO
             var files = Directory.GetFiles(gdemDirectory, "*.nc");
             if (files.Length < 12)
             {
-                messageBoxService.ShowError(string.Format("Error validating GDEM directory \"{0}\": Expected file(s) not found in this directory", gdemDirectory));
+                if (messageBoxService != null) messageBoxService.ShowError(string.Format("Error validating GDEM directory \"{0}\": Expected file(s) not found in this directory", gdemDirectory));
                 return false;
             }
             foreach (var file in files)
@@ -265,7 +265,7 @@ namespace ESME.Environment.NAVO
                         break;
                     }
                 if (foundMatch) continue;
-                messageBoxService.ShowError(string.Format("Error validating GDEM directory \"{0}\": Expected file(s) not found in this directory", gdemDirectory));
+                if (messageBoxService != null) messageBoxService.ShowError(string.Format("Error validating GDEM directory \"{0}\": Expected file(s) not found in this directory", gdemDirectory));
                 return false;
             }
             GDEMDirectory = gdemDirectory;
@@ -289,7 +289,7 @@ namespace ESME.Environment.NAVO
 
         static readonly PropertyChangedEventArgs SMGCDirectoryChangedEventArgs = ObservableHelper.CreateArgs<NAVOConfiguration>(x => x.SMGCDirectory);
         string _smgcDirectory;
-        public bool ValidateSMGCDirectory(string smgcFile, IMessageBoxService messageBoxService)
+        public bool ValidateSMGCDirectory(string smgcFile, IMessageBoxService messageBoxService = null)
         {
             var smgcDirectory = Path.GetDirectoryName(smgcFile);
             if (smgcDirectory.ToLower().EndsWith("north") || smgcDirectory.ToLower().EndsWith("south")) smgcDirectory = Path.GetDirectoryName(smgcDirectory);
@@ -310,7 +310,7 @@ namespace ESME.Environment.NAVO
                 return true;
             }
 
-            messageBoxService.ShowError(string.Format("Error validating SMGC directory \"{0}\": Expected file(s) not found in this directory", smgcDirectory));
+            if (messageBoxService != null) messageBoxService.ShowError(string.Format("Error validating SMGC directory \"{0}\": Expected file(s) not found in this directory", smgcDirectory));
             return false;
         }
 

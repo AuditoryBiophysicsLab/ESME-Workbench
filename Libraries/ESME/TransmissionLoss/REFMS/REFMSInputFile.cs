@@ -2,8 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using ESME.Data;
+using ESME.Environment;
+using ESME.Environment.NAVO;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.TransmissionLoss.REFMS
 {
@@ -108,6 +113,72 @@ LOOPL
  25000.00 100000.00 15  
 STOP
 #endif
+
+        public static void CreateSVP(EarthCoordinate location, NAVOTimePeriod timePeriod, float depth, BackgroundTaskAggregator backgroundTaskAggregator)
+        {
+            var appSettings = Globals.AppSettings;
+            var assemblyLocation = Assembly.GetCallingAssembly().Location;
+            var extractionPath = Path.GetDirectoryName(assemblyLocation);
+            if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
+            var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
+            var gdemRequiredSupportFiles = new List<string>
+            {
+                    Path.Combine(extractionPath, "netcdf.dll"),
+                    Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
+            };
+
+            var requiredMonths = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
+            var uniqueMonths = requiredMonths.Distinct().ToList();
+            uniqueMonths.Sort();
+
+            var lat = Math.Round(location.Latitude * 4) / 4;
+            var lon = Math.Round(location.Longitude * 4) / 4;
+            var extractionArea = new GeoRect(lat, lat, lon, lon);
+            var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
+            if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
+            var maxDepth = new EarthCoordinate<float>(location.Latitude, location.Longitude, depth);
+            var monthlyTemperature = new SoundSpeed();
+            var monthlySalinity = new SoundSpeed();
+            var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
+            foreach (var month in uniqueMonths)
+            {
+                var soundSpeedExtractor = new GDEMBackgroundExtractor
+                {
+                    WorkerSupportsCancellation = false,
+                    TimePeriod = month,
+                    ExtractionArea = extractionArea,
+                    NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                    DestinationPath = tempPath,
+                    UseExpandedExtractionArea = false,
+                    ExtractionProgramPath = gdemExtractionProgramPath,
+                    RequiredSupportFiles = gdemRequiredSupportFiles,
+                    MaxDepth = maxDepth,
+                    PointExtractionMode = true,
+                };
+                soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
+                {
+                    var extractor = (GDEMBackgroundExtractor)sender;
+                    monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
+                    monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
+                    if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
+                    SoundSpeed averageTemperature;
+                    SoundSpeed averageSalinity;
+                    if (uniqueMonths.Count <= 1)
+                    {
+                        averageTemperature = monthlyTemperature;
+                        averageSalinity = monthlySalinity;
+                    }
+                    else
+                    {
+                        averageTemperature = SoundSpeed.Average(monthlyTemperature, uniqueMonths);
+                        averageSalinity = SoundSpeed.Average(monthlySalinity, uniqueMonths);
+                    }
+                    // todo: here is where we create the SVP using the PCHIP algorithm, etc. from the average temp/salinity
+                };
+                soundSpeedExtractors.Add(soundSpeedExtractor);
+                backgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
+            }
+        }
 
         public void WriteBatchFile(string filenameBase, string svpFilename, string modeName, string timeFrame, REFMSInputFile inputFile, EarthCoordinate explosiveLocation, EarthCoordinate svpLocation)
         {

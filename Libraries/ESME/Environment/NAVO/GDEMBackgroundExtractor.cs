@@ -118,17 +118,38 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
+        #region public bool PointExtractionMode { get; set; }
+
+        public bool PointExtractionMode
+        {
+            get { return _pointExtractionMode; }
+            set
+            {
+                if (_pointExtractionMode == value) return;
+                _pointExtractionMode = value;
+                NotifyPropertyChanged(PointExtractionModeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PointExtractionModeChangedEventArgs = ObservableHelper.CreateArgs<GDEMBackgroundExtractor>(x => x.PointExtractionMode);
+        bool _pointExtractionMode;
+
+        #endregion
+
         protected override void Run(object sender, DoWorkEventArgs e)
         {
             RunState = "Running";
             var backgroundExtractor = (GDEMBackgroundExtractor)e.Argument;
             TaskName = "Temperature and salinity data extraction for " + backgroundExtractor.TimePeriod;
             backgroundExtractor.Maximum = 6;
-            var north = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
-            var south = (int)Math.Floor(backgroundExtractor.ExtractionArea.South);
-            var east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
-            var west = (int)Math.Floor(backgroundExtractor.ExtractionArea.West);
-
+            float north = 0, south = 0, east = 0, west = 0;
+            if (!PointExtractionMode)
+            {
+                north = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
+                south = (int)Math.Floor(backgroundExtractor.ExtractionArea.South);
+                east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
+                west = (int)Math.Floor(backgroundExtractor.ExtractionArea.West);
+            }
             var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6} -new", backgroundExtractor.DestinationPath, backgroundExtractor.NAVOConfiguration.GDEMDirectory, backgroundExtractor.TimePeriod, north, south, east, west);
 
             NAVOExtractionProgram.Execute(backgroundExtractor.ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath, backgroundExtractor.RequiredSupportFiles);

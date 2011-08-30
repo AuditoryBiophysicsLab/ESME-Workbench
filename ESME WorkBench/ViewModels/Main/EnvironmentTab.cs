@@ -1290,6 +1290,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     ExtractionProgramPath = gdemExtractionProgramPath,
                     RequiredSupportFiles = gdemRequiredSupportFiles,
                     MaxDepth = maxDepth,
+                    PointExtractionMode = false,
                 };
                 soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
                 {
