@@ -28,9 +28,9 @@ namespace ESME.Views.InstallationWizard
                     new WizardPanelInfo
                     {
                             DescriptiveText =
-                                    "Welcome to the ESME Workbench Installation Wizard.\n\n" +
+                                    "Welcome to the ESME Workbench Configuration Wizard.\n\n" +
                                     "The next several panes of this wizard will guide you in the configuration of required data directories " +
-                                    "and program locations for proper operation of ESME Workbench.\n\n Please press Next to continue, or Cancel to exit without saving changes.",
+                                    "and program locations for proper operation of ESME Workbench.\n\nPlease press Next to continue, or Cancel to exit without saving changes.",
                             IsFileBrowerEnabled = false,
                             UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                             //will always be a valid location; "next" button always lit.
@@ -51,7 +51,7 @@ namespace ESME.Views.InstallationWizard
                                    PropertyName = "javaw",
                            });
 
-            if (string.IsNullOrEmpty(Globals.AppSettings.ScenarioDataDirectory) || !Directory.Exists(Globals.AppSettings.ScenarioDataDirectory))
+            if (string.IsNullOrEmpty(AppSettings.ScenarioDataDirectory) || !Directory.Exists(AppSettings.ScenarioDataDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -64,7 +64,7 @@ namespace ESME.Views.InstallationWizard
                                    PropertyName = "ScenarioDataDirectory",
                            });
 
-            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.GDEMDirectory) || !Directory.Exists(Globals.AppSettings.NAVOConfiguration.GDEMDirectory))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.GDEMDirectory) || !Directory.Exists(AppSettings.NAVOConfiguration.GDEMDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -77,7 +77,7 @@ namespace ESME.Views.InstallationWizard
 							       FileNameFilter="NetCDF files (*.nc)|*.nc|All files (*.*)|*.*",
                                    PropertyName = "GDEM-V",
                            });
-            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.SMGCDirectory) || !Directory.Exists(Globals.AppSettings.NAVOConfiguration.SMGCDirectory))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.SMGCDirectory) || !Directory.Exists(AppSettings.NAVOConfiguration.SMGCDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -90,7 +90,7 @@ namespace ESME.Views.InstallationWizard
                                    FileNameFilter="SMGC files (*.stt)|*.stt|All files (*.*)|*.*",
                                    PropertyName = "SMGC",
                            });
-            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.BSTDirectory) || !File.Exists(Globals.AppSettings.NAVOConfiguration.BSTDirectory))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.BSTDirectory) || !File.Exists(AppSettings.NAVOConfiguration.BSTDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -102,7 +102,7 @@ namespace ESME.Views.InstallationWizard
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "BST",
                            });
-            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBDirectory) || !File.Exists(Globals.AppSettings.NAVOConfiguration.DBDBDirectory))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.DBDBDirectory) || !File.Exists(AppSettings.NAVOConfiguration.DBDBDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -114,7 +114,7 @@ namespace ESME.Views.InstallationWizard
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "DBDB",
                            });
-            if (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath) || !File.Exists(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.DBDBEXEPath) || !File.Exists(AppSettings.NAVOConfiguration.DBDBEXEPath))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -127,7 +127,7 @@ namespace ESME.Views.InstallationWizard
                                    PropertyName = "DBDBExtractor",
                            });
 
-            if (Configuration.IsClassifiedModel && (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath) || !File.Exists(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath)))
+            if (Configuration.IsClassifiedModel && (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.HFBLEXEPath) || !File.Exists(AppSettings.NAVOConfiguration.HFBLEXEPath)))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -138,7 +138,7 @@ namespace ESME.Views.InstallationWizard
                                    "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
                                    PropertyName = "HFBLExtractor",
                            });
-            if (Configuration.IsClassifiedModel && (string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath) || !File.Exists(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath)))
+            if (Configuration.IsClassifiedModel && (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.LFBLEXEPath) || !File.Exists(AppSettings.NAVOConfiguration.LFBLEXEPath)))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -149,12 +149,22 @@ namespace ESME.Views.InstallationWizard
                                    "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
                                    PropertyName = "LFBLExtractor",
                            });
+
+            Panels.Add(new WizardPanelInfo
+            {
+                    DescriptiveText = "Wizard has completed successfully.  Please press the Finish button to complete configuration and launch ESME Workbench, or Cancel to exit without saving changes.",
+                    IsFileBrowerEnabled = false,
+                    UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                    //will always be a valid location; "next" button always lit.
+                    PropertyName = "finishScreen",
+
+            });
         }
 
         public static void LaunchWizardIfNeeded(IUIVisualizerService visualizerService)
         {
             var wizardView = new WizardViewModel();
-            if (wizardView.Panels.Count == 1 && wizardView.Panels[0].PropertyName == "welcomeScreen") wizardView.Panels.RemoveAt(0); // if there aren't any configurable panels, delete the welcome screen
+            if (wizardView.Panels.Count == 2 && wizardView.Panels[0].PropertyName == "welcomeScreen" && wizardView.Panels[1].PropertyName=="finishScreen") wizardView.Panels.Clear(); // if there aren't any configurable panels, delete the welcome screen
             if (wizardView.Panels.Count > 0) //and if any panels remain, show them. 
             {
                 var result = visualizerService.ShowDialog("WizardView", wizardView);
@@ -259,21 +269,18 @@ namespace ESME.Views.InstallationWizard
         void NextHandler()
         {
             SelectedPanelIndex++;
-            if (SelectedPanelIndex < Panels.Count)
+            if (SelectedPanelIndex < Panels.Count-1)
             {
                 SelectedPanel = Panels[SelectedPanelIndex];
                 return;
             }
-            if (NextButtonString == "Finish")
-            {
-                FinishWizard();
-                return;
-            }
+            
+            if (NextButtonString == "Finish") FinishWizard();
+            
             NextButtonString = "Finish";
-            SelectedPanel.IsFileBrowerEnabled = false;
-            SelectedPanel.DescriptiveText =
-                    "Wizard has completed successfully.  Please press the Finish button to complete configuration and launch ESME Workbench, or Cancel to exit without saving changes.";
             SelectedPanel = Panels.Last();
+           
+            
         }
 
         void FinishWizard()
@@ -285,13 +292,13 @@ namespace ESME.Views.InstallationWizard
                         AppSettings.NAEMOTools.JavaExecutablePath = panel.UserResponse;
                         break;
                     case "ScenarioDataDirectory":
-                        AppSettings.ScenarioDataDirectory = panel.UserResponse;
+                        AppSettings.ValidateScenarioDataDirectory(panel.UserResponse);
                         break;
                     case "GDEM-V":
-                        AppSettings.NAVOConfiguration.GDEMDirectory = panel.UserResponse;
+                        AppSettings.NAVOConfiguration.ValidateGDEMDirectory(panel.UserResponse);
                         break;
                     case "SMGC":
-                        AppSettings.NAVOConfiguration.SMGCDirectory = panel.UserResponse;
+                        AppSettings.NAVOConfiguration.ValidateSMGCDirectory(panel.UserResponse);
                         break;
                     case "BST":
                         AppSettings.NAVOConfiguration.BSTDirectory = panel.UserResponse;
@@ -309,6 +316,7 @@ namespace ESME.Views.InstallationWizard
                         AppSettings.NAVOConfiguration.LFBLEXEPath = panel.UserResponse;
                         break;
                     case "welcomeScreen":
+                    case "finishScreen":
                         break;
                     default:
                         throw new ApplicationException("typo.");
@@ -342,6 +350,8 @@ namespace ESME.Views.InstallationWizard
         {
             SelectedPanelIndex--;
             SelectedPanel = Panels[SelectedPanelIndex];
+            if (SelectedPanelIndex < Panels.Count - 1) NextButtonString = "Next";
+
         }
         #endregion
     }
