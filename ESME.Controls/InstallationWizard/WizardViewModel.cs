@@ -514,7 +514,7 @@ namespace ESME.Views.InstallationWizard
         string _userResponse;
         #endregion
 
-        public string PropertyName { get; set; }
+        public string PropertyName { get; internal set; }
 
         #region public string FieldName { get; set; }
         public string FieldName
