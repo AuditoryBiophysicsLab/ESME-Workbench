@@ -142,13 +142,20 @@ namespace ESME.Environment.NAVO
             var backgroundExtractor = (GDEMBackgroundExtractor)e.Argument;
             TaskName = "Temperature and salinity data extraction for " + backgroundExtractor.TimePeriod;
             backgroundExtractor.Maximum = 6;
-            float north = 0, south = 0, east = 0, west = 0;
+            float north, south, east, west;
             if (!PointExtractionMode)
             {
-                north = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
-                south = (int)Math.Floor(backgroundExtractor.ExtractionArea.South);
-                east = (int)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
-                west = (int)Math.Floor(backgroundExtractor.ExtractionArea.West);
+                north = (float)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
+                south = (float)Math.Floor(backgroundExtractor.ExtractionArea.South);
+                east = (float)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
+                west = (float)Math.Floor(backgroundExtractor.ExtractionArea.West);
+            }
+            else
+            {
+                north = (float)backgroundExtractor.ExtractionArea.North;
+                south = (float)backgroundExtractor.ExtractionArea.South;
+                east = (float)backgroundExtractor.ExtractionArea.East;
+                west = (float)backgroundExtractor.ExtractionArea.West;
             }
             var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6} -new", backgroundExtractor.DestinationPath, backgroundExtractor.NAVOConfiguration.GDEMDirectory, backgroundExtractor.TimePeriod, north, south, east, west);
 

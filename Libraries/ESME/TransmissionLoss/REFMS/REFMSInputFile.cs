@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using ESME.Environment;
 using ESME.Environment.NAVO;
+using ESME.NEMO;
 using HRC.Navigation;
 using HRC.Utility;
 
@@ -12,131 +13,126 @@ namespace ESME.TransmissionLoss.REFMS
 {
     public class REFMSInputFile
     {
-        public double Yield { get; set; }
-        public double Cluster { get; set; }
-        public double ExplosionDepth { get; set; }
-        public double Duration { get; set; }
-        public double WaterDepth { get; set; }
-        public double BottomSoundSpeedRatio { get; set; }
+        public double ExplosionDepth { get; private set; }
+        public bool UseBottomReflections { get; private set; }
+        public double WaterDepth { get; private set; }
         public double BottomShearWaveSpeed { get; set; }
-        public double SPLCutoff { get; set; }
-        public double SourceCount { get; set; }
+        public int SourceCount { get; private set; }
+        public EarthCoordinate ExplosiveLocation { get; private set; }
+        public EarthCoordinate SVPLocation { get; private set; }
+        public NAVOTimePeriod TimePeriod { get; private set; }
+        public NemoMode NemoMode { get; private set; }
+        public BottomLossData BottomLossData { get; private set; }
+        public float BottomSoundSpeed { get; private set; }
+        public string OutputPath { get; private set; }
+        public double Delta { get; private set; }
 
-        public void Write(string fileName)
+        public REFMSInputFile(string outputPath, Geo explosiveLocation, NemoScenario scenario, NemoPlatform platform, NemoMode mode, float waterDepth, bool useBottomReflections, Geo svpLocation, double svpDelta, BackgroundTaskAggregator backgroundTaskAggregator)
         {
+            OutputPath = outputPath;
+            Delta = svpDelta;
+            NemoMode = mode;
+            ExplosionDepth = Math.Abs(platform.Trackdefs[0].InitialHeight) + mode.DepthOffset;
+            WaterDepth = waterDepth;
+            UseBottomReflections = useBottomReflections;
+            ExplosiveLocation = new EarthCoordinate(explosiveLocation);
+            SVPLocation = new EarthCoordinate(svpLocation);
+            NAVOTimePeriod timePeriod;
+            if (Enum.TryParse(scenario.TimeFrame, true, out timePeriod)) TimePeriod = timePeriod;
+            else throw new ApplicationException("Error converting " + scenario.TimeFrame + " to a known time period");
+            SourceCount = 0;
+            foreach (var curPlatform in scenario.Platforms) 
+                foreach (var curSource in curPlatform.Sources) 
+                    if (curSource.Type.ToLower() == "explosive") SourceCount++;
+            CreateSVP(backgroundTaskAggregator);
+        }
+
+        void WriteInputFile()
+        {
+            var fileName = Path.Combine(OutputPath, BaseFilename + "refms.in");
             using (var writer = new StreamWriter(fileName, false))
             {
                 writer.WriteLine("");
                 writer.WriteLine("COMMENT");
-                writer.WriteLine("For: [tbd]");
+                writer.WriteLine("For: {0}[{1}] Build {2} ({3})", SVPFilename, NemoMode.PSMName, BuildInformation.SVNVersion, BuildInformation.BuildDateTime);
                 writer.WriteLine("");
                 writer.WriteLine("UNITS       1 - Metric Units");
                 writer.WriteLine("EXPLOSIVE   1    	Explosive composition (1=TNT)");
-                writer.WriteLine("YIELD       {0:0.000} 	kg", Yield);
-                writer.WriteLine("CLUSTER     {0}   	Charges", Cluster);
-                writer.WriteLine("DEXPLOSION  {0:0.00} 	Depth of explosion in meters", ExplosionDepth);
+                writer.WriteLine("NemoMode.SourceLevel       {0:0.000} 	kg", NemoMode.SourceLevel); // From Mode/sourceLevel
+                writer.WriteLine("CLUSTER     {0}   	Charges", NemoMode.ClusterCount); // From Mode/clusterCount
+                writer.WriteLine("DEXPLOSION  {0:0.00} 	Depth of explosion in meters", ExplosionDepth); // Platform/trackDef/initialHeight plus Mode/depthOffset
                 writer.WriteLine("");
-                writer.WriteLine("RADIUS      0.   	Skip ship response");
-                writer.WriteLine("DURATION    5.0 	Duration in secs after bottom reflection");
-                writer.WriteLine("IMULT       0    	Second Order Reflection");
-                writer.WriteLine("IRB1        1.   	Compute bottom reflections");
-                writer.WriteLine("IRB2        1.   	Compute rays surf to gage");
-                writer.WriteLine("IRSC        0    	Compute rays in sound channel");
-                writer.WriteLine("IC          1.   	Disables cavitation.");
+                //writer.WriteLine("RADIUS      0.   	Skip ship response");   
+                writer.WriteLine("DURATION    {0:0.0} 	Duration in secs after bottom reflection", NemoMode.Duration.Seconds); // Mode/duration
+                //writer.WriteLine("IMULT       0    	Second Order Reflection");
+                writer.WriteLine("IRB1        {0}   	Compute bottom reflections", UseBottomReflections ? "1." : "0.");
+                // if water depth > 2000m, uncheck the "Include exponential at bottom" checkbox.  Otherwise check it, but allow the user to override if they wish.
+                writer.WriteLine("IRB2        1.   	Compute rays surf to gage"); // Always 1
+                writer.WriteLine("IRSC        0    	Compute rays in sound channel"); // Always 0
+                writer.WriteLine("IC          1.   	Disables cavitation."); // Always 1
                 writer.WriteLine("");
-                writer.WriteLine("FILTER     -2    	 ");
+                writer.WriteLine("FILTER     -2    	 "); // Always -2
                 writer.WriteLine("");
-                writer.WriteLine("DWATER      26.9 	Depth of water in meters");
+                writer.WriteLine("DWATER      {0:0.0} 	Depth of water in meters", WaterDepth - 0.1);               // Bathymetry at analysis point - 0.1
                 writer.WriteLine("");
-                writer.WriteLine("BSSRATIO    2.000 	Soil Type: Sound Speed Ratio");
-                writer.WriteLine("BRHO        8.000 	Soil Type: Density");
-                writer.WriteLine("BSWSPEED    1357.767 	Soil Type: Shear Wave Velocity");
-                writer.WriteLine("BMAT        1.0 ");
-                writer.WriteLine("SCALEI      no   ");
-                writer.WriteLine("SVPFILE     loc.svp   ");
+                writer.WriteLine("BSSRATIO    {0:0.000} 	Soil Type: Sound Speed Ratio", BottomLossData.RATIOD);  // From LFBL
+                writer.WriteLine("BRHO        {0:0.000} 	Soil Type: Density", BottomLossData.RHOSD);             // From LFBL
+                writer.WriteLine("BSWSPEED    {0:0.000} 	Soil Type: Shear Wave Velocity", ShearWaveVelocity);    // Computed by property getter
+                writer.WriteLine("BMAT        1.0 "); // Always 1.0
+                writer.WriteLine("SCALEI      no   "); // Always no
+                writer.WriteLine("SVPFILE     loc.svp   "); // Always loc.svp
                 writer.WriteLine("");
-                writer.WriteLine("SE          1   make 3rd-octave energy spectra");
-                writer.WriteLine("SPLCUTOFF   200.000  	 from 1 sources");
-                writer.WriteLine("SELCUTOFF   164  800  171  1100  183   ");
-                writer.WriteLine("SOURCES     1   ");
+                writer.WriteLine("SE          1   make 3rd-octave energy spectra"); // Always 1
+                var splCutoff = SourceCount == 1 ? Globals.AppSettings.REFMSSettings.SPLCutoffSingleSource : Globals.AppSettings.REFMSSettings.SPLCutoffMultiSource;
+                writer.WriteLine("SPLCUTOFF   {0:0.000}  	 from {1} sources", splCutoff, SourceCount); // From scenario - single or multi based on num sources (used below)
+                writer.WriteLine("SELCUTOFF   {0}   ", Globals.AppSettings.REFMSSettings.SELCutoffLine); // From REFMS Settings, just copy the string
+                writer.WriteLine("SOURCES     {0}   ", SourceCount); // Num sources in scenario
                 writer.WriteLine("");
                 writer.WriteLine("DEPTHE");
-                writer.WriteLine(" 0.30 27.00 20  ");
+                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", Globals.AppSettings.REFMSSettings.MinimumDepth, WaterDepth, 20); // REFMS min depth config, depth at analysis point, 20
                 writer.WriteLine("LOOPE");
-                writer.WriteLine(" 50.00 549.30 20 ");
+                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", NemoMode.LowFrequency, NemoMode.HighFrequency * 0.2, 20); // Mode/Low Freq, Mode/Hi Freq * 0.2, 20
                 writer.WriteLine("LOOPL");
-                writer.WriteLine(" 686.63 2746.51 15  ");
+                writer.WriteLine(" {0:0.00} {1:0.00} {2} ", NemoMode.HighFrequency * 0.25, NemoMode.HighFrequency, 15); // Mode/High Freq * 0.25, Mode/Hi freq, 15
                 writer.WriteLine("STOP");
             }
         }
-#if false
-COMMENT
-For: LOC_259-Summer[2000 lb Bomb:1|2000 lb Bomb:1|Explosive:1] Vers: 1.20.0 working
 
-UNITS       1 - Metric Units   
-EXPLOSIVE   1    	Explosive composition (1=TNT)
-YIELD       453.590 	kg
-CLUSTER     1   	Charges
-DEXPLOSION  1.00 	Depth of explosion in meters
-
-RADIUS      0.   	Skip ship response
-DURATION    5.0 	Duration in secs after bottom reflection
-IMULT       0    	Second Order Reflection
-IRB1        1.   	Compute bottom reflections
-IRB2        1.   	Compute rays surf to gage
-IRSC        0    	Compute rays in sound channel
-IC          1.   	Disables cavitation.
-
-FILTER     -2    	 
-
-DWATER      24.9 	Depth of water in meters
-
-BSSRATIO    2.000 	Soil Type: Sound Speed Ratio
-BRHO        8.000 	Soil Type: Density
-BSWSPEED    1394.923 	Soil Type: Shear Wave Velocity
-BMAT        1.0 
-SCALEI      no   
-SVPFILE     LOC_259-Summer.svp   
-
-SE          1   make 3rd-octave energy spectra
-SPLCUTOFF   200.000  	 from 1 sources
-SELCUTOFF   163  800  171  1100  183   
-SOURCES     1   
-
-DEPTHE
- 0.30 25.00 16  
-LOOPE
- 50.00 20000.00 20 
-LOOPL
- 25000.00 100000.00 15  
-STOP
-#endif
-
-        public static void CreateSVP(EarthCoordinate location, NAVOTimePeriod timePeriod, float depth, BackgroundTaskAggregator backgroundTaskAggregator)
+        void CreateSVP(BackgroundTaskAggregator backgroundTaskAggregator)
         {
-            var appSettings = Globals.AppSettings;
             var assemblyLocation = Assembly.GetCallingAssembly().Location;
             var extractionPath = Path.GetDirectoryName(assemblyLocation);
             if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
             var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
             var gdemRequiredSupportFiles = new List<string>
             {
-                    Path.Combine(extractionPath, "netcdf.dll"),
-                    Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
+                Path.Combine(extractionPath, "netcdf.dll"),
+                Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
             };
 
-            var requiredMonths = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
+            var requiredMonths = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(TimePeriod);
             var uniqueMonths = requiredMonths.Distinct().ToList();
             uniqueMonths.Sort();
 
-            var lat = Math.Round(location.Latitude * 4) / 4;
-            var lon = Math.Round(location.Longitude * 4) / 4;
+            var lat = Math.Round(SVPLocation.Latitude * 4) / 4;
+            var lon = Math.Round(SVPLocation.Longitude * 4) / 4;
             var extractionArea = new GeoRect(lat, lat, lon, lon);
             var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
             if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
-            var maxDepth = new EarthCoordinate<float>(location.Latitude, location.Longitude, depth);
+            var maxDepth = new EarthCoordinate<float>(SVPLocation.Latitude, SVPLocation.Longitude, (float)WaterDepth);
             var monthlyTemperature = new SoundSpeed();
             var monthlySalinity = new SoundSpeed();
+            var monthlyExtendedSoundSpeed = new SoundSpeed();
+            var bottomLossExtractor = new BottomLossBackgroundExtractor
+            {
+                WorkerSupportsCancellation = false,
+                ExtractionArea = extractionArea,
+                NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,
+                UseExpandedExtractionArea = false,
+                TaskName = "Bottom loss extraction",
+                PointExtractionMode = true,
+            };
+            backgroundTaskAggregator.BackgroundTasks.Add(bottomLossExtractor);
             var soundSpeedExtractors = new List<GDEMBackgroundExtractor>();
             foreach (var month in uniqueMonths)
             {
@@ -158,81 +154,99 @@ STOP
                     var extractor = (GDEMBackgroundExtractor)sender;
                     monthlyTemperature.SoundSpeedFields.Add(extractor.TemperatureField);
                     monthlySalinity.SoundSpeedFields.Add(extractor.SalinityField);
+                    monthlyExtendedSoundSpeed.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
                     if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
-                    SoundSpeed averageTemperature;
-                    SoundSpeed averageSalinity;
+                    if (bottomLossExtractor.IsBusy) return;
+                    BottomLossData = bottomLossExtractor.BottomLossData[0];
+                    SoundSpeedField averageTemperature;
+                    SoundSpeedField averageSalinity;
+                    SoundSpeedField averageSoundspeed;
                     if (uniqueMonths.Count <= 1)
                     {
-                        averageTemperature = monthlyTemperature;
-                        averageSalinity = monthlySalinity;
+                        averageTemperature = monthlyTemperature[TimePeriod];
+                        averageSalinity = monthlySalinity[TimePeriod];
+                        averageSoundspeed = monthlyExtendedSoundSpeed[TimePeriod];
                     }
                     else
                     {
-                        averageTemperature = SoundSpeed.Average(monthlyTemperature, uniqueMonths);
-                        averageSalinity = SoundSpeed.Average(monthlySalinity, uniqueMonths);
+                        averageTemperature = SoundSpeed.Average(monthlyTemperature, TimePeriod);
+                        averageSalinity = SoundSpeed.Average(monthlySalinity, TimePeriod);
+                        averageSoundspeed = SoundSpeed.Average(monthlyExtendedSoundSpeed, TimePeriod);
                     }
-                    // todo: here is where we create the SVP using the PCHIP algorithm, etc. from the average temp/salinity
+                    BottomSoundSpeed = averageSoundspeed.EnvironmentData[0].Data.Last().Value;
+                    // Here is where we create the SVP using the PCHIP algorithm, etc. from the average temp/salinity
+                    var svp = new SVPFile(SVPLocation, Delta, averageTemperature, averageSalinity, averageSoundspeed);
+                    var svpFilename = Path.Combine(OutputPath, SVPFilename + ".svp");
+                    // Write out the SVP file
+                    svp.Write(svpFilename);
+                    WriteInputFile();
+                    WriteBatchFile();
                 };
                 soundSpeedExtractors.Add(soundSpeedExtractor);
                 backgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
             }
         }
 
-        public void WriteBatchFile(string filenameBase, string svpFilename, string modeName, string timeFrame, REFMSInputFile inputFile, EarthCoordinate explosiveLocation, EarthCoordinate svpLocation)
+        public void WriteBatchFile()
         {
-            using (var writer = new StreamWriter(string.Format("{0}-refms.bat", filenameBase), false))
+            var scriptBase = Path.Combine(OutputPath, string.Format("{0}", BaseFilename));
+            using (var writer = new StreamWriter(scriptBase + "-refms.bat", false))
             {
                 writer.WriteLine("");
-                writer.WriteLine("mkdir \"{0}\"", filenameBase);
-                writer.WriteLine("COPY /Y \"{0}refms.in\" \"{0}\\refms.in\" ", filenameBase);
-                writer.WriteLine("COPY /Y \"{0}\" \"{1}\\loc.svp\" ", svpFilename, filenameBase);
+                writer.WriteLine("mkdir \"{0}\"", BaseFilename);
+                writer.WriteLine("COPY /Y \"{0}refms.in\" \"{0}\\refms.in\" ", BaseFilename);
+                writer.WriteLine("COPY /Y \"{0}.svp\" \"{1}\\loc.svp\" ", SVPFilename, BaseFilename);
                 writer.WriteLine("rem effects header - ");
-                writer.WriteLine("cd \"{0}\"", filenameBase);
+                writer.WriteLine("cd \"{0}\"", BaseFilename);
                 writer.WriteLine("echo #head=> ref_effect.head");
                 writer.WriteLine("echo #tstamp=%DATE% %TIME%>> ref_effect.head");
-                writer.WriteLine("echo #sysver=%COMPUTERNAME%^|{0}^|{1}^|{2}^|{3}^|null>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString, System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
+                writer.WriteLine("echo #sysver=%COMPUTERNAME%^|{0}^|{1}^|{2}^|{3}^|null>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString,
+                                 System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
                 writer.WriteLine("echo #title=Explosives Test, EC_SimArea>> ref_effect.head");
-                writer.WriteLine("echo #mode={0}>> ref_effect.head", modeName);
-                writer.WriteLine("echo #bin=E12>> ref_effect.head");    // Where does this come from?
-                writer.WriteLine("echo #season={0}>> ref_effect.head", timeFrame);
-                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> ref_effect.head", inputFile.ExplosionDepth, inputFile.Yield, inputFile.Duration, inputFile.BottomSoundSpeedRatio, -20, -15); // where do -20 and -15 come from?
-                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>> ref_effect.head", explosiveLocation.Latitude, explosiveLocation.Longitude);
-                writer.WriteLine("echo #splineloc={0:0.000000} {1:0.000000}>> ref_effect.head", svpLocation.Latitude, svpLocation.Longitude);
+                writer.WriteLine("echo #mode={0}>> ref_effect.head", NemoMode.Name);
+                writer.WriteLine("echo #bin=E12>> ref_effect.head"); // Where does this come from?
+                writer.WriteLine("echo #season={0}>> ref_effect.head", TimePeriod);
+                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> ref_effect.head", ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
+                                 BottomLossData.RATIOD, -20, -15); // where do -20 and -15 come from?
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>> ref_effect.head", ExplosiveLocation.Latitude, ExplosiveLocation.Longitude);
+                writer.WriteLine("echo #splineloc={0:0.000000} {1:0.000000}>> ref_effect.head", SVPLocation.Latitude, SVPLocation.Longitude);
                 writer.WriteLine("echo #units=meters>> ref_effect.head");
                 writer.WriteLine("start \"REFMS\" /wait  \"{0}\"", Globals.AppSettings.REFMSSettings.REFMSExecutablePath);
                 writer.WriteLine("COPY /Y ref_effect.head + refms.out refms.effects");
                 writer.WriteLine("echo # SPEC:{0}refms.spec >> refms.effects");
                 writer.WriteLine("COPY /Y refms.effects + refms.spec refms.effects");
-                var specFilename = string.Format("\"..\\{0}refms.spec\"", filenameBase);
-                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", explosiveLocation.Latitude, explosiveLocation.Longitude, specFilename);
+                var specFilename = string.Format("\"..\\{0}refms.spec\"", BaseFilename);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", ExplosiveLocation.Latitude, ExplosiveLocation.Longitude, specFilename);
                 writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
                 writer.WriteLine("cd ..");
             }
-            using (var writer = new StreamWriter(string.Format("{0}-refms.sh", filenameBase), false))
+            using (var writer = new StreamWriter(scriptBase + "-refms.sh", false))
             {
                 writer.WriteLine("#!/bin/sh");
-                writer.WriteLine("mkdir \"{0}\"", filenameBase);
-                writer.WriteLine("cp \"{0}refms.in\" \"{0}\\refms.in\" ", filenameBase);
-                writer.WriteLine("cp \"{0}\" \"{1}\\loc.svp\" ", svpFilename, filenameBase);
+                writer.WriteLine("mkdir \"{0}\"", BaseFilename);
+                writer.WriteLine("cp \"{0}refms.in\" \"{0}\\refms.in\" ", BaseFilename);
+                writer.WriteLine("cp \"{0}\" \"{1}\\loc.svp\" ", SVPFilename, BaseFilename);
                 writer.WriteLine("# effects header - ");
-                writer.WriteLine("cd \"{0}\"", filenameBase);
+                writer.WriteLine("cd \"{0}\"", BaseFilename);
                 writer.WriteLine("echo -n #head\\n> ref_effect.head");
                 writer.WriteLine("echo -n #tstamp=$(date +\"%F %T\")\\n>> ref_effect.head");
-                writer.WriteLine("echo -n #sysver=$(hostname)\\|{0}\\|{1}\\|{2}\\|{3}\\|null\\n>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString, System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
+                writer.WriteLine("echo -n #sysver=$(hostname)\\|{0}\\|{1}\\|{2}\\|{3}\\|null\\n>> ref_effect.head", System.Environment.UserName, System.Environment.OSVersion.VersionString,
+                                 System.Environment.OSVersion.ServicePack, System.Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE"));
                 writer.WriteLine("echo -n #title=Explosives Test, EC_SimArea\\n>> ref_effect.head");
-                writer.WriteLine("echo -n #mode={0}\\n>> ref_effect.head", modeName);
-                writer.WriteLine("echo -n #bin=E12\\n>> ref_effect.head");    // Where does this come from?
-                writer.WriteLine("echo -n #season={0}\\n>> ref_effect.head", timeFrame);
-                writer.WriteLine("echo -n #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}\\n>> ref_effect.head", inputFile.ExplosionDepth, inputFile.Yield, inputFile.Duration, inputFile.BottomSoundSpeedRatio, -20, -15); // where do -20 and -15 come from?
-                writer.WriteLine("echo -n #location={0:0.000000} {1:0.000000}\\n>> ref_effect.head", explosiveLocation.Latitude, explosiveLocation.Longitude);
-                writer.WriteLine("echo -n #splineloc={0:0.000000} {1:0.000000}\\n>> ref_effect.head", svpLocation.Latitude, svpLocation.Longitude);
+                writer.WriteLine("echo -n #mode={0}\\n>> ref_effect.head", NemoMode.Name);
+                writer.WriteLine("echo -n #bin=E12\\n>> ref_effect.head"); // Where does this come from?
+                writer.WriteLine("echo -n #season={0}\\n>> ref_effect.head", TimePeriod);
+                writer.WriteLine("echo -n #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}\\n>> ref_effect.head", ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
+                                 BottomLossData.RATIOD, -20, -15); // where do -20 and -15 come from?
+                writer.WriteLine("echo -n #location={0:0.000000} {1:0.000000}\\n>> ref_effect.head", ExplosiveLocation.Latitude, ExplosiveLocation.Longitude);
+                writer.WriteLine("echo -n #splineloc={0:0.000000} {1:0.000000}\\n>> ref_effect.head", SVPLocation.Latitude, SVPLocation.Longitude);
                 writer.WriteLine("echo -n #units=meters\\n>> ref_effect.head");
                 writer.WriteLine("refms");
                 writer.WriteLine("echo -en ref_effect.head + refms.out refms.effects");
                 writer.WriteLine("echo # SPEC:{0}refms.spec >> refms.effects");
                 writer.WriteLine("COPY /Y refms.effects + refms.spec refms.effects");
-                var specFilename = string.Format("\"..\\{0}refms.spec\"", filenameBase);
-                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", explosiveLocation.Latitude, explosiveLocation.Longitude, specFilename);
+                var specFilename = string.Format("\"..\\{0}refms.spec\"", BaseFilename);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", ExplosiveLocation.Latitude, ExplosiveLocation.Longitude, specFilename);
                 writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
                 writer.WriteLine("cd ..");
             }
@@ -240,20 +254,24 @@ STOP
 
         static readonly Random Random = new Random();
 
-        string FilenameFromPSMIdEarthCoordinateTimeFrame(string psmId, string svpFilename)
+        string BaseFilename
         {
-            //2000 lb Bomb:1|2000 lb Bomb:1|Explosive:1
-            //2000_lb_Bomb+1~2000_lb_Bomb+1~Explosive+1_LOC_3715N_7515W_27-Fall0
-            var step1 = psmId.Replace(' ', '_').Replace(':', '+').Replace('|', '~');
-            return string.Format("{0}_{1}0", step1, svpFilename);
+            get
+            {
+                var step1 = NemoMode.PSMId.Replace(' ', '_').Replace(':', '+').Replace('|', '~');
+                return string.Format("{0}_{1}{2:0.#}", step1, SVPFilename, ExplosionDepth);
+            }
         }
 
-        string SVPFilenameFromEarthCoordinateAndTimeFrame(Geo svpLocation, string timeFrame)
+        string SVPFilename
         {
-            var northSouth = svpLocation.Latitude >= 0 ? "N" : "S";
-            var eastWest = svpLocation.Longitude >= 0 ? "E" : "W";
-            var randomInt = Random.Next(99);
-            return string.Format("LOC_{0}{1}_{2}{3}_{4}-{5}", DegreesMinutes(svpLocation.Latitude), northSouth, DegreesMinutes(svpLocation.Longitude), eastWest, randomInt, timeFrame);
+            get
+            {
+                var northSouth = SVPLocation.Latitude >= 0 ? "N" : "S";
+                var eastWest = SVPLocation.Longitude >= 0 ? "E" : "W";
+                var randomInt = Random.Next(99);
+                return string.Format("LOC_{0}{1}_{2}{3}_{4}-{5}", DegreesMinutes(SVPLocation.Latitude), northSouth, DegreesMinutes(SVPLocation.Longitude), eastWest, randomInt, TimePeriod);
+            }
         }
 
         static string DegreesMinutes(double itude)
@@ -262,6 +280,29 @@ STOP
             var fraction = ((int)((Math.Abs(itude) - degrees) * 100)) / 100.0;
             var minutes = (int)(fraction * 60.0);
             return string.Format("{0}{1}", degrees, minutes);
+        }
+
+        double ShearWaveVelocity
+        {
+            get
+            {
+                double bSwSpeed;
+                var vSedKM = (BottomLossData.RATIOD * BottomSoundSpeed) / 1000.0;
+
+                if (vSedKM < 1.555)
+                {
+                    //if (vSedKM < 1.512)
+                    //    warn("Sediment Compression Velocity outside of algorithm range.");
+                    bSwSpeed = (3.884 * vSedKM - 5.757) * 1000.0;
+                }
+                else if (vSedKM < 1.650)
+                    bSwSpeed = (1.137 * vSedKM - 1.485) * 1000.0;
+                else if (vSedKM < 2.150)
+                    bSwSpeed = (0.991 - 1.136 * vSedKM + 0.47 * vSedKM * vSedKM) * 1000.0;
+                else
+                    bSwSpeed = (0.78 * vSedKM - 0.962) * 1000.0;
+                return bSwSpeed;
+            }
         }
     }
 }

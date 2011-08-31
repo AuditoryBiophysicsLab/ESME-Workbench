@@ -13,39 +13,39 @@ namespace ESME.Environment.NAVO
 {
     public class BottomLossBackgroundExtractor : NAVOBackgroundExtractor
     {
-        #region public string LowFrequencyExtractor { get; set; }
+        #region public bool UseHFBL { get; set; }
 
-        public string LowFrequencyExtractor
+        public bool UseHFBL
         {
-            get { return _lowFrequencyExtractor; }
+            get { return _useHFBL; }
             set
             {
-                if (_lowFrequencyExtractor == value) return;
-                _lowFrequencyExtractor = value;
-                NotifyPropertyChanged(LowFrequencyExtractorChangedEventArgs);
+                if (_useHFBL == value) return;
+                _useHFBL = value;
+                NotifyPropertyChanged(UseHFBLChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs LowFrequencyExtractorChangedEventArgs = ObservableHelper.CreateArgs<BottomLossBackgroundExtractor>(x => x.LowFrequencyExtractor);
-        string _lowFrequencyExtractor;
+        static readonly PropertyChangedEventArgs UseHFBLChangedEventArgs = ObservableHelper.CreateArgs<BottomLossBackgroundExtractor>(x => x.UseHFBL);
+        bool _useHFBL;
 
         #endregion
 
-        #region public string HighFrequencyExtractor { get; set; }
+        #region public bool UseLFBL { get; set; }
 
-        public string HighFrequencyExtractor
+        public bool UseLFBL
         {
-            get { return _highFrequencyExtractor; }
+            get { return _useLFBL; }
             set
             {
-                if (_highFrequencyExtractor == value) return;
-                _highFrequencyExtractor = value;
-                NotifyPropertyChanged(HighFrequencyExtractorChangedEventArgs);
+                if (_useLFBL == value) return;
+                _useLFBL = value;
+                NotifyPropertyChanged(UseLFBLChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs HighFrequencyExtractorChangedEventArgs = ObservableHelper.CreateArgs<BottomLossBackgroundExtractor>(x => x.HighFrequencyExtractor);
-        string _highFrequencyExtractor;
+        static readonly PropertyChangedEventArgs UseLFBLChangedEventArgs = ObservableHelper.CreateArgs<BottomLossBackgroundExtractor>(x => x.UseLFBL);
+        bool _useLFBL;
 
         #endregion
 
@@ -78,6 +78,24 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
+        #region public bool PointExtractionMode { get; set; }
+
+        public bool PointExtractionMode
+        {
+            get { return _pointExtractionMode; }
+            set
+            {
+                if (_pointExtractionMode == value) return;
+                _pointExtractionMode = value;
+                NotifyPropertyChanged(PointExtractionModeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs PointExtractionModeChangedEventArgs = ObservableHelper.CreateArgs<BottomLossBackgroundExtractor>(x => x.PointExtractionMode);
+        bool _pointExtractionMode;
+
+        #endregion
+
         protected override void Run(object sender, DoWorkEventArgs e)
         {
             RunState = "Running";
@@ -85,30 +103,38 @@ namespace ESME.Environment.NAVO
             var backgroundExtractor = (NAVOBackgroundExtractor)e.Argument;
             backgroundExtractor.Status = "Extracting bottom loss data";
 
-            var north = Math.Ceiling(backgroundExtractor.ExtractionArea.North);
-            var south = Math.Floor(backgroundExtractor.ExtractionArea.South);
-            var east = Math.Ceiling(backgroundExtractor.ExtractionArea.East);
-            var west = Math.Floor(backgroundExtractor.ExtractionArea.West);
-
-
+            float north, south, east, west;
             var locations = new List<EarthCoordinate>();
-            for (var lat = south; lat < north; lat += 0.25)
-                for (var lon = west; lon < east; lon += 0.25)
-                    locations.Add(new EarthCoordinate(lat, lon));
+            if (!PointExtractionMode)
+            {
+                north = (float)Math.Ceiling(backgroundExtractor.ExtractionArea.North);
+                south = (float)Math.Floor(backgroundExtractor.ExtractionArea.South);
+                east = (float)Math.Ceiling(backgroundExtractor.ExtractionArea.East);
+                west = (float)Math.Floor(backgroundExtractor.ExtractionArea.West);
+                locations = new List<EarthCoordinate>();
+                for (var lat = south; lat < north; lat += 0.25f)
+                    for (var lon = west; lon < east; lon += 0.25f)
+                        locations.Add(new EarthCoordinate(lat, lon));
+            }
+            else
+            {
+                north = (float)backgroundExtractor.ExtractionArea.North;
+                south = (float)backgroundExtractor.ExtractionArea.South;
+                east = (float)backgroundExtractor.ExtractionArea.East;
+                west = (float)backgroundExtractor.ExtractionArea.West;
+                locations.Add(new EarthCoordinate(north, west));
+            }
 
-            
-            var useLowFrequency = !string.IsNullOrEmpty(LowFrequencyExtractor);
-            var useHighFrequency = !string.IsNullOrEmpty(HighFrequencyExtractor);
             backgroundExtractor.Maximum = locations.Count;
             foreach (var location in locations) 
             {
                 BottomLossData curPoint = null;
-                if (useLowFrequency)
+                if (UseLFBL)
                 {
                     var process = Process.Start(new ProcessStartInfo
                     {
                         Arguments = ExtractorArgument(true, location),
-                        FileName = LowFrequencyExtractor,
+                        FileName = NAVOConfiguration.LFBLEXEPath,
                         RedirectStandardInput = false,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
@@ -120,12 +146,12 @@ namespace ESME.Environment.NAVO
                     var stderr = process.StandardError.ReadToEnd();
                     curPoint = ParseLowFrequencyOutput(process.StandardOutput);
                 }
-                if (useHighFrequency)
+                if (UseHFBL)
                 {
                     var process = Process.Start(new ProcessStartInfo
                     {
                         Arguments = ExtractorArgument(false, location),
-                        FileName = HighFrequencyExtractor,
+                        FileName = NAVOConfiguration.HFBLEXEPath,
                         RedirectStandardInput = false,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
@@ -144,21 +170,21 @@ namespace ESME.Environment.NAVO
 
         void GenerateBatchFile(string batchFileName, IEnumerable<EarthCoordinate> locations)
         {
-            var lowFreqencyDatabase = string.IsNullOrEmpty(LowFrequencyExtractor) ? string.Empty : Path.Combine(Path.GetDirectoryName(LowFrequencyExtractor), "dbases/");
-            var highFreqencyDatabase = string.IsNullOrEmpty(HighFrequencyExtractor) ? string.Empty : Path.Combine(Path.GetDirectoryName(HighFrequencyExtractor), "dbases/");
+            var lowFreqencyDatabase = string.IsNullOrEmpty(NAVOConfiguration.LFBLEXEPath) ? string.Empty : Path.Combine(Path.GetDirectoryName(NAVOConfiguration.LFBLEXEPath), "dbases/");
+            var highFreqencyDatabase = string.IsNullOrEmpty(NAVOConfiguration.HFBLEXEPath) ? string.Empty : Path.Combine(Path.GetDirectoryName(NAVOConfiguration.HFBLEXEPath), "dbases/");
             using (var batchFile = new StreamWriter(batchFileName, false))
             {
                 foreach (var location in locations)
                 {
-                    if (!string.IsNullOrEmpty(LowFrequencyExtractor))
+                    if (!string.IsNullOrEmpty(NAVOConfiguration.LFBLEXEPath))
                     {
                         batchFile.WriteLine("@echo -----LFBL DATA-----");
-                        batchFile.WriteLine("@call \"{0}\" \"/\" \"{1}\" {2:0.00} {3:0.00} 1 0", LowFrequencyExtractor, lowFreqencyDatabase, location.Latitude, location.Longitude);
+                        batchFile.WriteLine("@call \"{0}\" \"/\" \"{1}\" {2:0.00} {3:0.00} 1 0", NAVOConfiguration.LFBLEXEPath, lowFreqencyDatabase, location.Latitude, location.Longitude);
                     }
-                    if (!string.IsNullOrEmpty(HighFrequencyExtractor))
+                    if (!string.IsNullOrEmpty(NAVOConfiguration.HFBLEXEPath))
                     {
                         batchFile.WriteLine("@echo -----HFBL DATA-----");
-                        batchFile.WriteLine("@call \"{0}\" \"/\" \"{1}\" {2:0.00} {3:0.00}", HighFrequencyExtractor, highFreqencyDatabase, location.Latitude, location.Longitude);
+                        batchFile.WriteLine("@call \"{0}\" \"/\" \"{1}\" {2:0.00} {3:0.00}", NAVOConfiguration.HFBLEXEPath, highFreqencyDatabase, location.Latitude, location.Longitude);
                     }
                 }
             }
@@ -171,7 +197,7 @@ namespace ESME.Environment.NAVO
 
         string ExtractorArgument(bool isLowFrequency, Geo location)
         {
-            var database = Path.Combine(isLowFrequency ? Path.GetDirectoryName(LowFrequencyExtractor) : Path.GetDirectoryName(HighFrequencyExtractor), "dbases/");
+            var database = Path.Combine(isLowFrequency ? Path.GetDirectoryName(NAVOConfiguration.LFBLEXEPath) : Path.GetDirectoryName(NAVOConfiguration.HFBLEXEPath), "dbases/");
             return string.Format(isLowFrequency ? " \"/\" \"{0}\" {1:0.00} {2:0.00} 1 0" : " \"/\" \"{0}\" {1:0.00} {2:0.00}", database, location.Latitude, location.Longitude);
         }
 

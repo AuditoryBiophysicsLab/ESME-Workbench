@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows.Threading;
 using Cinch;
+using ESME.Environment;
 using HRC.Navigation;
 
 namespace ESME.TransmissionLoss.REFMS
@@ -159,8 +161,9 @@ namespace ESME.TransmissionLoss.REFMS
     {
         public double Thickness { get; set; }
         public double SoundVelocity { get; set; }
-        public double Density { get; set; }
         public double Depth { get; set; }
+        public double Salinity { get; set; }
+        public double Temperature { get; set; }
         public override string ToString() { return string.Format("{0,13:0.0000} {1,13:0.0000} {2,9:0.00000}    0            D= {3,13:0.0000}", Thickness, SoundVelocity, Density, Depth); }
         public static SVPLayer Parse(string layerLine)
         {
@@ -169,7 +172,7 @@ namespace ESME.TransmissionLoss.REFMS
             {
                 Thickness = double.Parse(fields[0]),
                 SoundVelocity = double.Parse(fields[1]),
-                Density = double.Parse(fields[2]),
+                //Density = double.Parse(fields[2]),
                 Depth = double.Parse(fields[5]),
             };
         }
@@ -177,19 +180,18 @@ namespace ESME.TransmissionLoss.REFMS
         /// <summary>
         /// Calculate the density of seawater, at a given depth, temperature and salinity
         /// </summary>
-        /// <param name="depth">Depth, in meters</param>
-        /// <param name="temp">Temperature, in degrees Celsius</param>
-        /// <param name="salinity">Salinity, in parts per thousand</param>
-        /// <returns></returns>
-        public static double SaltWaterDensity(double depth, double temp, double salinity)
+        public double Density
         {
-            var depthKm = depth / 1000.0;
-            var c = 999.83 + (5.053 * depthKm) - (0.048 * (depthKm * depthKm));
-            var beta = 0.808 - (0.0085 * depthKm);
-            var alpha = 0.0708 * (1.0 + (0.351 * depthKm) + 0.068 * (1.0 - (0.0683 * depthKm)) * temp);
-            var gamma = 0.0030 * (1.0 - (0.059 * depthKm) - 0.012 * (1.0 - (0.0640 * depthKm)) * temp);
+            get
+            {
+                var depthKm = Depth / 1000.0;
+                var c = 999.83 + (5.053 * depthKm) - (0.048 * (depthKm * depthKm));
+                var beta = 0.808 - (0.0085 * depthKm);
+                var alpha = 0.0708 * (1.0 + (0.351 * depthKm) + 0.068 * (1.0 - (0.0683 * depthKm)) * Temperature);
+                var gamma = 0.0030 * (1.0 - (0.059 * depthKm) - 0.012 * (1.0 - (0.0640 * depthKm)) * Temperature);
 
-            return (c + (beta * salinity) - (alpha * temp) - (gamma * (35.0 - salinity)) * temp) / 1000.0;
+                return (c + (beta * Salinity) - (alpha * Temperature) - (gamma * (35.0 - Salinity)) * Temperature) / 1000.0;
+            }
         }
     }
 
@@ -199,6 +201,77 @@ namespace ESME.TransmissionLoss.REFMS
     {
         public List<SVPLayer> Layers { get; set; }
         public double Delta;
+
+        public SVPFile() {}
+
+        public SVPFile(Geo location, double delta, TimePeriodEnvironmentData<SoundSpeedProfile> temperatureProfile, TimePeriodEnvironmentData<SoundSpeedProfile> salinityProfile, TimePeriodEnvironmentData<SoundSpeedProfile> soundSpeedProfile)
+            : base(location)
+        {
+            Delta = delta;
+            var depths = (from temp in temperatureProfile.EnvironmentData[0].Data
+                          select temp.Depth).Cast<double>().ToArray();
+            var temps = (from temp in temperatureProfile.EnvironmentData[0].Data
+                         select temp.Value).Cast<double>().ToArray();
+            var salinities = (from temp in salinityProfile.EnvironmentData[0].Data
+                              select temp.Value).Cast<double>().ToArray();
+            var soundspeeds = (from temp in soundSpeedProfile.EnvironmentData[0].Data
+                               select temp.Value).Cast<double>().ToArray();
+            var maxDepth = depths.Last();
+            // this creates the depth increments
+            var nodes = (int)Math.Floor(maxDepth);
+            var dinc = Math.Floor(maxDepth) / (nodes - 1);
+            var depthIncs = new double[nodes];
+
+            for (var m = 0; m < nodes; m++)
+            {
+                var tmp = Math.Round(((double)m * dinc) * 1000000.0) / 1000000.0;
+                depthIncs[m] = tmp;
+            }
+            // this implements the spline function
+            var interp = new PiecewiseCubicHermitePolynomialInterpolator();
+            var temperatureFunction = interp.Interpolate(depths, temps);
+            var salinityFunction = interp.Interpolate(depths, salinities);
+            var soundspeedFunction = interp.Interpolate(depths, soundspeeds);
+
+            var td = new double[depthIncs.Length];
+            var sd = new double[depthIncs.Length];
+            var svpd = new double[depthIncs.Length];
+            for (var inc = 0; inc < depthIncs.Length; inc++)
+            {
+                try
+                {
+                    td[inc] = temperatureFunction.Value(depthIncs[inc]);
+                    sd[inc] = salinityFunction.Value(depthIncs[inc]);
+                    svpd[inc] = soundspeedFunction.Value(depthIncs[inc]);
+                }
+                catch { }
+            }
+            // this is the implementation of the layers function
+
+            nodes = depthIncs.Length;
+            Layers = new List<SVPLayer>();
+            int start = 0, prev = 0;
+            for (var inc = 0; inc < nodes; inc++)
+            {
+                var depthmid = inc == 0 ? depthIncs[0] * 0.5 : (depthIncs[inc] + depthIncs[inc - 1]) * 0.5;
+
+                var deltaSVP = Math.Abs(svpd[inc] - svpd[start]);
+
+                if (deltaSVP >= Delta || (inc == (nodes - 1)))
+                {
+                    start = inc;
+                    Layers.Add(new SVPLayer
+                    {
+                        Depth = depthIncs[inc],
+                        Thickness = Math.Abs(depthIncs[prev] - depthIncs[start]),
+                        SoundVelocity = soundspeedFunction.Value(depthmid),
+                        Salinity = sd[inc],
+                        Temperature = td[inc],
+                    });
+                    prev = inc;
+                }
+            }
+        }
 
         public void Write(string fileName)
         {

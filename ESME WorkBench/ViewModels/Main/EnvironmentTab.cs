@@ -31,7 +31,7 @@ namespace ESMEWorkBench.ViewModels.Main
     public partial class MainViewModel
     {
         [MediatorMessageSink(MediatorMessage.AllViewModelsAreReady)]
-        void AllViewModelsAreReady(bool allViewModelsAreReady)
+        public void AllViewModelsAreReady(bool allViewModelsAreReady)
         {
             Console.WriteLine("All view models are ready!");
             WizardViewModel.LaunchWizardIfNeeded(_visualizerService);
@@ -244,13 +244,11 @@ namespace ESMEWorkBench.ViewModels.Main
         void DisplayRangeComplex()
         {
             if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
-            OverlayShapeMapLayer opAreaLayer;
-            OverlayShapeMapLayer simAreaLayer;
             if (_selectedRangeComplexDescriptor == null)
             {
-                opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
+                var opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
                 if (opAreaLayer != null) opAreaLayer.IsChecked = false;
-                simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
+                var simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
                 if (simAreaLayer != null) simAreaLayer.IsChecked = false;
                 return;
             }
@@ -494,10 +492,9 @@ namespace ESMEWorkBench.ViewModels.Main
         void DisplayOverlay()
         {
             if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
-            OverlayShapeMapLayer overlayLayer;
             if (_selectedOverlayDescriptor == null)
             {
-                overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
+                var overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
                 if (overlayLayer != null) overlayLayer.IsChecked = false;
                 return;
             }
@@ -993,10 +990,9 @@ namespace ESMEWorkBench.ViewModels.Main
         void DisplayEnvironment()
         {
             if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
-            OverlayShapeMapLayer overlayLayer;
             if (_selectedEnvironmentDescriptor == null)
             {
-                overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment");
+                var overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.SoundSpeed, "Environment");
                 if (overlayLayer != null) overlayLayer.IsChecked = false;
                 return;
             }
@@ -1096,8 +1092,8 @@ namespace ESMEWorkBench.ViewModels.Main
             var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
             var gdemRequiredSupportFiles = new List<string>
             {
-                    Path.Combine(extractionPath, "netcdf.dll"),
-                    Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
+                Path.Combine(extractionPath, "netcdf.dll"),
+                Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
             };
 
             var extendedMonthlySoundSpeeds = new SoundSpeed();
@@ -1116,6 +1112,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var environmentPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Environment");
             BackgroundTaskAggregator = new BackgroundTaskAggregator();
 
+            Debug.Assert(bathymetryName != null, "bathymetryName != null");
             var bathyName = bathymetryName.EndsWith("_bathy") ? bathymetryName.Remove(bathymetryName.Length - 6, 6) : bathymetryName;
             var naemoEnvironmentExporters = selectedTimePeriods.Select(t => new CASSBackgroundExporter
             {
@@ -1249,8 +1246,8 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 var bottomLossExtractor = new BottomLossBackgroundExtractor
                 {
-                    HighFrequencyExtractor = vm.GenerateHFBL || vm.GenerateLFBLHFB ? Globals.AppSettings.NAVOConfiguration.HFBLEXEPath : null,
-                    LowFrequencyExtractor = vm.GenerateLFBLHFB || vm.GenerateLFBLPE ? Globals.AppSettings.NAVOConfiguration.LFBLEXEPath : null,
+                    UseHFBL = vm.GenerateHFBL || vm.GenerateLFBLHFB,
+                    UseLFBL = vm.GenerateLFBLHFB || vm.GenerateLFBLPE,
                     WorkerSupportsCancellation = false,
                     ExtractionArea = extractionArea,
                     NAVOConfiguration = Globals.AppSettings.NAVOConfiguration,

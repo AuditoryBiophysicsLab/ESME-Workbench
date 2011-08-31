@@ -41,7 +41,7 @@ namespace ESME.TransmissionLoss.REFMS
 
         public double Value(double v)
         {
-            if (v < _knots[0] || v > _knots[_n]) throw new ApplicationException("");
+            if (v < _knots[0] || v > _knots[_n]) throw new ApplicationException("Domain error");
             var i = Array.BinarySearch(_knots, v);
             if (i < 0) i = -i - 2;
             //This will handle the case where v is the last knot value

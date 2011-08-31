@@ -27,6 +27,7 @@ namespace ESME.NEMO
             DepressionElevationAngle = GetFloat("depthElAngle");
             RelativeBeamAngle = GetFloat("relativeBeamAngle");
             Radius = GetFloat("radius");
+            ClusterCount = GetInt("clusterCount");
             //UsePlatformTimes = GetBool("usePlatformTimes");
             //PropagationPath = GetString("propagationPath");
 
@@ -80,6 +81,7 @@ namespace ESME.NEMO
                 yield return new KeyValuePair<string, string>("Depression/elevation angle",DepressionElevationAngle.ToString());
                 yield return new KeyValuePair<string, string>("Relative beam angle", RelativeBeamAngle.ToString());
                 yield return new KeyValuePair<string, string>("Radius", Radius.ToString());
+                yield return new KeyValuePair<string, string>("ClusterCount", ClusterCount.ToString());
             }
         }
 
@@ -99,6 +101,7 @@ namespace ESME.NEMO
         public float DepressionElevationAngle { get; set; }
         public float RelativeBeamAngle { get; set; }
         public float Radius { get; set; }
+        public int ClusterCount { get; set; }
         public ActiveTimeSteps ActiveTimeSteps { get; set; }
         //public bool UsePlatformTimes { get; set; }
         //public string PropagationPath { get; set; }
