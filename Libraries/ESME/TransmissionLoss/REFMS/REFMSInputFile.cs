@@ -13,29 +13,28 @@ namespace ESME.TransmissionLoss.REFMS
 {
     public class REFMSInputFile
     {
-        public double ExplosionDepth { get; private set; }
-        public bool UseBottomReflections { get; private set; }
         public double WaterDepth { get; private set; }
         public double BottomShearWaveSpeed { get; set; }
         public int SourceCount { get; private set; }
-        public EarthCoordinate ExplosiveLocation { get; private set; }
         public EarthCoordinate SVPLocation { get; private set; }
         public NAVOTimePeriod TimePeriod { get; private set; }
         public NemoMode NemoMode { get; private set; }
         public BottomLossData BottomLossData { get; private set; }
-        public float BottomSoundSpeed { get; private set; }
         public string OutputPath { get; private set; }
         public double Delta { get; private set; }
+        public bool IsComplete { get; private set; }
 
-        public REFMSInputFile(string outputPath, Geo explosiveLocation, NemoScenario scenario, NemoPlatform platform, NemoMode mode, float waterDepth, bool useBottomReflections, Geo svpLocation, double svpDelta, BackgroundTaskAggregator backgroundTaskAggregator)
+        SVPFile _svpFile;
+
+        readonly ExplosivePoint _explosivePoint;
+        
+        public REFMSInputFile(string outputPath, ExplosivePoint explosivePoint, NemoScenario scenario, NemoMode mode, float waterDepth, Geo svpLocation, double svpDelta, BackgroundTaskAggregator backgroundTaskAggregator)
         {
+            _explosivePoint = explosivePoint;
             OutputPath = outputPath;
             Delta = svpDelta;
             NemoMode = mode;
-            ExplosionDepth = Math.Abs(platform.Trackdefs[0].InitialHeight) + mode.DepthOffset;
             WaterDepth = waterDepth;
-            UseBottomReflections = useBottomReflections;
-            ExplosiveLocation = new EarthCoordinate(explosiveLocation);
             SVPLocation = new EarthCoordinate(svpLocation);
             NAVOTimePeriod timePeriod;
             if (Enum.TryParse(scenario.TimeFrame, true, out timePeriod)) TimePeriod = timePeriod;
@@ -60,12 +59,12 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("EXPLOSIVE   1    	Explosive composition (1=TNT)");
                 writer.WriteLine("NemoMode.SourceLevel       {0:0.000} 	kg", NemoMode.SourceLevel); // From Mode/sourceLevel
                 writer.WriteLine("CLUSTER     {0}   	Charges", NemoMode.ClusterCount); // From Mode/clusterCount
-                writer.WriteLine("DEXPLOSION  {0:0.00} 	Depth of explosion in meters", ExplosionDepth); // Platform/trackDef/initialHeight plus Mode/depthOffset
+                writer.WriteLine("DEXPLOSION  {0:0.00} 	Depth of explosion in meters", _explosivePoint.ExplosionDepth); // Platform/trackDef/initialHeight plus Mode/depthOffset
                 writer.WriteLine("");
                 //writer.WriteLine("RADIUS      0.   	Skip ship response");   
                 writer.WriteLine("DURATION    {0:0.0} 	Duration in secs after bottom reflection", NemoMode.Duration.Seconds); // Mode/duration
                 //writer.WriteLine("IMULT       0    	Second Order Reflection");
-                writer.WriteLine("IRB1        {0}   	Compute bottom reflections", UseBottomReflections ? "1." : "0.");
+                writer.WriteLine("IRB1        {0}   	Compute bottom reflections", _explosivePoint.BottomReflectionsEnabled ? "1." : "0.");
                 // if water depth > 2000m, uncheck the "Include exponential at bottom" checkbox.  Otherwise check it, but allow the user to override if they wish.
                 writer.WriteLine("IRB2        1.   	Compute rays surf to gage"); // Always 1
                 writer.WriteLine("IRSC        0    	Compute rays in sound channel"); // Always 0
@@ -173,14 +172,14 @@ namespace ESME.TransmissionLoss.REFMS
                         averageSalinity = SoundSpeed.Average(monthlySalinity, TimePeriod);
                         averageSoundspeed = SoundSpeed.Average(monthlyExtendedSoundSpeed, TimePeriod);
                     }
-                    BottomSoundSpeed = averageSoundspeed.EnvironmentData[0].Data.Last().Value;
                     // Here is where we create the SVP using the PCHIP algorithm, etc. from the average temp/salinity
-                    var svp = new SVPFile(SVPLocation, Delta, averageTemperature, averageSalinity, averageSoundspeed);
+                    //_svpFile = new SVPFile(SVPLocation, Delta, averageTemperature, averageSalinity, averageSoundspeed);
                     var svpFilename = Path.Combine(OutputPath, SVPFilename + ".svp");
                     // Write out the SVP file
-                    svp.Write(svpFilename);
+                    _svpFile.Write(svpFilename);
                     WriteInputFile();
                     WriteBatchFile();
+                    IsComplete = true;
                 };
                 soundSpeedExtractors.Add(soundSpeedExtractor);
                 backgroundTaskAggregator.BackgroundTasks.Add(soundSpeedExtractor);
@@ -206,9 +205,9 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("echo #mode={0}>> ref_effect.head", NemoMode.Name);
                 writer.WriteLine("echo #bin=E12>> ref_effect.head"); // Where does this come from?
                 writer.WriteLine("echo #season={0}>> ref_effect.head", TimePeriod);
-                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> ref_effect.head", ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
+                writer.WriteLine("echo #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}>> ref_effect.head", _explosivePoint.ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
                                  BottomLossData.RATIOD, -20, -15); // where do -20 and -15 come from?
-                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>> ref_effect.head", ExplosiveLocation.Latitude, ExplosiveLocation.Longitude);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}>> ref_effect.head", _explosivePoint.Latitude, _explosivePoint.Longitude);
                 writer.WriteLine("echo #splineloc={0:0.000000} {1:0.000000}>> ref_effect.head", SVPLocation.Latitude, SVPLocation.Longitude);
                 writer.WriteLine("echo #units=meters>> ref_effect.head");
                 writer.WriteLine("start \"REFMS\" /wait  \"{0}\"", Globals.AppSettings.REFMSSettings.REFMSExecutablePath);
@@ -216,7 +215,7 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("echo # SPEC:{0}refms.spec >> refms.effects");
                 writer.WriteLine("COPY /Y refms.effects + refms.spec refms.effects");
                 var specFilename = string.Format("\"..\\{0}refms.spec\"", BaseFilename);
-                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", ExplosiveLocation.Latitude, ExplosiveLocation.Longitude, specFilename);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", _explosivePoint.Latitude, _explosivePoint.Longitude, specFilename);
                 writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
                 writer.WriteLine("cd ..");
             }
@@ -236,9 +235,9 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("echo -n #mode={0}\\n>> ref_effect.head", NemoMode.Name);
                 writer.WriteLine("echo -n #bin=E12\\n>> ref_effect.head"); // Where does this come from?
                 writer.WriteLine("echo -n #season={0}\\n>> ref_effect.head", TimePeriod);
-                writer.WriteLine("echo -n #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}\\n>> ref_effect.head", ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
+                writer.WriteLine("echo -n #info={0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0}, {4:0.0}, {5:0.0}\\n>> ref_effect.head", _explosivePoint.ExplosionDepth, NemoMode.SourceLevel, NemoMode.Duration.Seconds,
                                  BottomLossData.RATIOD, -20, -15); // where do -20 and -15 come from?
-                writer.WriteLine("echo -n #location={0:0.000000} {1:0.000000}\\n>> ref_effect.head", ExplosiveLocation.Latitude, ExplosiveLocation.Longitude);
+                writer.WriteLine("echo -n #location={0:0.000000} {1:0.000000}\\n>> ref_effect.head", _explosivePoint.Latitude, _explosivePoint.Longitude);
                 writer.WriteLine("echo -n #splineloc={0:0.000000} {1:0.000000}\\n>> ref_effect.head", SVPLocation.Latitude, SVPLocation.Longitude);
                 writer.WriteLine("echo -n #units=meters\\n>> ref_effect.head");
                 writer.WriteLine("refms");
@@ -246,7 +245,7 @@ namespace ESME.TransmissionLoss.REFMS
                 writer.WriteLine("echo # SPEC:{0}refms.spec >> refms.effects");
                 writer.WriteLine("COPY /Y refms.effects + refms.spec refms.effects");
                 var specFilename = string.Format("\"..\\{0}refms.spec\"", BaseFilename);
-                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", ExplosiveLocation.Latitude, ExplosiveLocation.Longitude, specFilename);
+                writer.WriteLine("echo #location={0:0.000000} {1:0.000000}> {2}", _explosivePoint.Latitude, _explosivePoint.Longitude, specFilename);
                 writer.WriteLine("COPY /Y {0} + refms.spec {0}", specFilename);
                 writer.WriteLine("cd ..");
             }
@@ -259,7 +258,7 @@ namespace ESME.TransmissionLoss.REFMS
             get
             {
                 var step1 = NemoMode.PSMId.Replace(' ', '_').Replace(':', '+').Replace('|', '~');
-                return string.Format("{0}_{1}{2:0.#}", step1, SVPFilename, ExplosionDepth);
+                return string.Format("{0}_{1}{2:0.#}", step1, SVPFilename, _explosivePoint.ExplosionDepth);
             }
         }
 
@@ -287,7 +286,7 @@ namespace ESME.TransmissionLoss.REFMS
             get
             {
                 double bSwSpeed;
-                var vSedKM = (BottomLossData.RATIOD * BottomSoundSpeed) / 1000.0;
+                var vSedKM = (BottomLossData.RATIOD * _svpFile.Layers.Last().SoundVelocity) / 1000.0;
 
                 if (vSedKM < 1.555)
                 {
