@@ -13,7 +13,7 @@ namespace ESME.Views.InstallationWizard
 {
     public sealed class WizardViewModel : ViewModelBase
     {
-        public WizardViewModel()
+        WizardViewModel()
         {
             AppSettings = Globals.AppSettings;
             CreatePanels();
@@ -49,7 +49,7 @@ namespace ESME.Views.InstallationWizard
                                    Hyperlink = new Uri("http://www.oracle.com/technetwork/java/javase/downloads/index.html"),
                                    HyperlinkText = "the Oracle Java download page.",
                                    FieldName = "Java Executable (javaw.exe)",
-                                   UserResponse = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86)+@"\",
+                                   UserResponse = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86)+@"\Java\",
                                    FileNameFilter = "Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*",
                                    PropertyName = "javaw",
                            });
