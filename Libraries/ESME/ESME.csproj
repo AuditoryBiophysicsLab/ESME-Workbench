@@ -259,6 +259,7 @@
     <Compile Include="TransmissionLoss\REFMS\PolynomialSplineFunction.cs" />
     <Compile Include="TransmissionLoss\REFMS\Interfaces.cs" />
     <Compile Include="TransmissionLoss\REFMS\REFMSInputFile.cs" />
+    <Compile Include="TransmissionLoss\REFMS\SplineInterpolator.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossFileManager.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
