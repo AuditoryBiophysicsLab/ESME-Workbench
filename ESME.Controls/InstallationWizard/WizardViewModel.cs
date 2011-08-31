@@ -29,8 +29,8 @@ namespace ESME.Views.InstallationWizard
                     {
                             DescriptiveText =
                                     "Welcome to the ESME Workbench Configuration Wizard.\n\n" +
-                                    "The next several panes of this wizard will guide you in the configuration of required data directories " +
-                                    "and program locations for proper operation of ESME Workbench.\n\nPlease press Next to continue, or Cancel to exit without saving changes.",
+                                    "The next several panes of this wizard will help complete the configuration of ESME Workbench.\n\n" +
+                                    "Please press Next to continue, or Cancel to exit without saving changes.",
                             IsFileBrowerEnabled = false,
                             UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                             //will always be a valid location; "next" button always lit.
@@ -43,10 +43,13 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "Some components of the One Navy Model require Java to run.  Please select the javaw.exe executable installed on your system.  " +
-                                   "Typically it is installed into Program Files under 'Java'.  If you do not have Java installed, please install the latest " +
-                                   "Java Runtime Environment (JRE) from http://www.oracle.com/technetwork/java/javase/downloads/index.html . ",
+                                   "Some components of the One Navy Model bundled with ESME Workbench require Java to run.\n\n"+
+                                   "Please select the installed javaw.exe executable.\n\n" +
+                                   "If Java is not installed, the latest Java Runtime Environment (JRE) can be downloaded from http://www.oracle.com/technetwork/java/javase/downloads/index.html",
+                                   Hyperlink = new Uri("http://www.oracle.com/technetwork/java/javase/downloads/index.html"),
+                                   HyperlinkText = "the Oracle Java download page.",
                                    FieldName = "Java Executable (javaw.exe)",
+                                   UserResponse = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86)+@"\",
                                    FileNameFilter = "Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*",
                                    PropertyName = "javaw",
                            });
@@ -56,7 +59,7 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The Scenario Data Directory is the default location for all experimental data.  It is typically named Sim Areas, and contains " +
+                                   "The Scenario Data Directory is the default location for all experimental data.  It is typically named Sim Areas, and must contain " +
                                    "the files SimAreas.csv, PSM.csv, and Species.csv.",
                                    FieldName = "Scenario Data Directory",
                                    DialogTitle = "Locate the SimAreas.csv file",
@@ -69,9 +72,12 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  " +
-                                   "The Generalized Digital Environmental Model (GDEM) is a required OAML database. " +
-                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
+                                   "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
+                                   "The Generalized Digital Environmental Model (GDEM) is a required OAML database organized as a collection of NetCDF files.\n\n" +
+                                   "Please select any .nc file in the directory containing all of the GDEM data.\n\n" +
+                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
+                                   Hyperlink = new Uri("http://esme.bu.edu"),
+                                   HyperlinkText = "the ESME Workbench webpage.",
                                    FieldName = "GDEM-V",
                                    DialogTitle="Choose one GDEM database file",
 							       FileNameFilter="NetCDF files (*.nc)|*.nc|All files (*.*)|*.*",
@@ -82,9 +88,12 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  " +
-                                   "The Surface Marine Gridded Climatological (SMGC) database is a required OAML database. " +
-                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
+                                   "The The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
+                                   "The Surface Marine Gridded Climatological (SMGC) database is a required OAML database organized as a collection of 64,800 .stt files\n\n " +
+                                   "Please select any .stt file a directory tree containing all of the SMGC data.\n\n"+
+                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
+                                   Hyperlink = new Uri("http://esme.bu.edu"),
+                                   HyperlinkText = "the ESME Workbench webpage.",
                                    FieldName = "SMGC",
                                    DialogTitle="Choose one SMGC database file (*.stt)",
                                    FileNameFilter="SMGC files (*.stt)|*.stt|All files (*.*)|*.*",
@@ -95,9 +104,12 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  " +
-                                   "The Bottom Sediment Type (BST) database is a required OAML database. " +
-                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
+                                   "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
+                                   "The High-Frequency Environment Acoustic (HFEVA) Bottom Sediment Type (BST) database is a required OAML database packaged as a standalone HDF5 file.\n\n" +
+                                   "Please select the .h5 file that contains the HFEVA BST database.\n\n"+
+                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
+                                   Hyperlink = new Uri("http://esme.bu.edu"),
+                                   HyperlinkText = "the ESME Workbench webpage.",
                                    FieldName = "BST",
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "BST",
@@ -107,9 +119,12 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The Oceanographic and Atmospheric Master Library(OAML) provides key environmental information necessary for operation.  " +
-                                   "The Digital Bathymetric DataBase (DBDB) is a required OAML database. " +
-                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu/ ",
+                                   "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
+                                   "The Digital Bathymetric DataBase (DBDB) is a required OAML database packaged as a standalone HDF5 file.\n\n" +
+                                   "Please select the .h5 file that contains the DBDB.\n\n"+
+                                   "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
+                                   Hyperlink = new Uri("http://esme.bu.edu"),
+                                   HyperlinkText = "the ESME Workbench webpage.",
                                    FieldName = "DBDB",
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "DBDB",
@@ -119,8 +134,11 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The Digital Bathymetric DataBase (DBDB) requires a seperate extraction tool for use. " +
-                                   "If you do not have this tool, a copy can be downloaded from http://esme.bu.edu/  ",
+                                   "The Digital Bathymetric DataBase (DBDB) requires a seperate extraction tool for use.\n\n" +
+                                   "Please select the DBDB extractor.\n\n"+
+                                   "If you do not have this tool, a copy can be downloaded from http://esme.bu.edu",
+                                   Hyperlink = new Uri("http://esme.bu.edu"),
+                                   HyperlinkText = "the ESME Workbench webpage.",
                                    FieldName = "DBDB Extractor (dbv5_command.exe)",
                                    FileNameFilter =
                                    "DBDB Extractor (dbv5_command.exe)|dbv5_command.exe|Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
@@ -132,7 +150,8 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.",
+                                   "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.\n\n"+
+                                   "Please select the HFBL database extractor.\n\n",
                                    FieldName = "HFBL Extractor",
                                    FileNameFilter =
                                    "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
@@ -143,7 +162,8 @@ namespace ESME.Views.InstallationWizard
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.",
+                                   "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.\n\n"+
+                                   "Please select the LFBL database extractor.\n\n",
                                    FieldName = "LFBL Extractor",
                                    FileNameFilter =
                                    "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
@@ -152,7 +172,7 @@ namespace ESME.Views.InstallationWizard
 
             Panels.Add(new WizardPanelInfo
             {
-                    DescriptiveText = "Wizard has completed successfully.  Please press the Finish button to complete configuration and launch ESME Workbench, or Cancel to exit without saving changes.",
+                    DescriptiveText = "The wizard has successfully configured all necessary parameters.\n\nPlease press the Finish button to complete configuration and launch ESME Workbench, or Cancel to exit without saving changes.",
                     IsFileBrowerEnabled = false,
                     UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                     //will always be a valid location; "next" button always lit.
@@ -406,7 +426,18 @@ namespace ESME.Views.InstallationWizard
                                 if (PropertyName != "ScenarioDataDirectory") return true;
                                 return Globals.AppSettings.ValidateScenarioDataDirectory(ruleTarget);
                             },
-                    },                                                     
+                    },
+                    new ValidationRule
+                    {
+                            PropertyName = "UserResponse",
+                            Description = "Must be javaw.exe",
+                            RuleDelegate = (o, r) =>
+                            {
+                                var ruleTarget = ((WizardPanelInfo)o).UserResponse;
+                                if (PropertyName != "javaw") return true;
+                                return (!string.IsNullOrEmpty(ruleTarget) && (Path.GetFileName(ruleTarget).ToLowerInvariant()=="javaw.exe"));
+                            },
+                    },                                                               
             });
         }
 
@@ -426,6 +457,43 @@ namespace ESME.Views.InstallationWizard
                 ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.DescriptiveText);
 
         string _descriptiveText;
+
+        #region public Uri Hyperlink { get; set; }
+
+        public Uri Hyperlink
+        {
+            get { return _hyperlink; }
+            set
+            {
+                if (_hyperlink == value) return;
+                _hyperlink = value;
+                NotifyPropertyChanged(HyperlinkChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs HyperlinkChangedEventArgs = ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.Hyperlink);
+        Uri _hyperlink;
+
+        #endregion
+
+        #region public string HyperlinkText { get; set; }
+
+        public string HyperlinkText
+        {
+            get { return _hyperlinkText; }
+            set
+            {
+                if (_hyperlinkText == value) return;
+                _hyperlinkText = value;
+                NotifyPropertyChanged(HyperlinkTextChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs HyperlinkTextChangedEventArgs = ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.HyperlinkText);
+        string _hyperlinkText;
+
+        #endregion
+
         #endregion
 
         #region public string UserResponse { get; set; }

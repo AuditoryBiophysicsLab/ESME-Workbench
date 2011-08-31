@@ -35,9 +35,14 @@
             <StackPanel.Background>
                 <ImageBrush ImageSource="dlgbmp.bmp"/>
             </StackPanel.Background>
-                <TextBlock Text="{Binding SelectedPanel.DescriptiveText}"
-                 Margin="175 15 15 15"
-                 TextWrapping="Wrap" />
+            <TextBlock Margin="175 15 15 15">
+                <TextBlock Text="{Binding SelectedPanel.DescriptiveText}" TextWrapping="Wrap"/>
+                
+                    <Hyperlink NavigateUri="{Binding SelectedPanel.Hyperlink}">
+                        <TextBlock Text="{Binding SelectedPanel.HyperlinkText}"  TextWrapping="Wrap"/>
+                    </Hyperlink>
+                
+            </TextBlock>
       <Controls:FileOrDirectorySetting
 Visibility="{Binding SelectedPanel.IsFileBrowerEnabled, Converter={StaticResource TrueVisibleFalseCollapsed}}"
 Caption="{Binding SelectedPanel.FieldName}"
