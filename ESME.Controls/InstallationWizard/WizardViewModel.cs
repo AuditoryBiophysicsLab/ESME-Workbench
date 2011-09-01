@@ -4,15 +4,15 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using ESME.Data;
 using Cinch;
+using ESME.Data;
 using HRC.Validation;
 
 namespace ESME.Views.InstallationWizard
 {
     public sealed class WizardViewModel : ViewModelBase
     {
+        #region private constructor and associated methods
         WizardViewModel()
         {
             AppSettings = Globals.AppSettings;
@@ -38,23 +38,28 @@ namespace ESME.Views.InstallationWizard
                     },
             };
 
-            if (string.IsNullOrEmpty(AppSettings.NAEMOTools.JavaExecutablePath) || !File.Exists(AppSettings.NAEMOTools.JavaExecutablePath))
+            if (string.IsNullOrEmpty(AppSettings.NAEMOTools.JavaExecutablePath) ||
+                !File.Exists(AppSettings.NAEMOTools.JavaExecutablePath))
                 Panels.Add(
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "Some components of the One Navy Model bundled with ESME Workbench require Java to run.\n\n"+
+                                   "Some components of the One Navy Model bundled with ESME Workbench require Java to run.\n\n" +
                                    "Please select the installed javaw.exe executable.\n\n" +
                                    "If Java is not installed, the latest Java Runtime Environment (JRE) can be downloaded from http://www.oracle.com/technetwork/java/javase/downloads/index.html",
-                                   Hyperlink = new Uri("http://www.oracle.com/technetwork/java/javase/downloads/index.html"),
+                                   Hyperlink =
+                                   new Uri("http://www.oracle.com/technetwork/java/javase/downloads/index.html"),
                                    HyperlinkText = "the Oracle Java download page.",
                                    FieldName = "Java Executable (javaw.exe)",
-                                   UserResponse = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86)+@"\Java\",
+                                   UserResponse =
+                                   System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86) +
+                                   @"\Java\",
                                    FileNameFilter = "Java executable (javaw.exe)|javaw.exe|All files (*.*)|*.*",
                                    PropertyName = "javaw",
                            });
 
-            if (string.IsNullOrEmpty(AppSettings.ScenarioDataDirectory) || !Directory.Exists(AppSettings.ScenarioDataDirectory))
+            if (string.IsNullOrEmpty(AppSettings.ScenarioDataDirectory) ||
+                !Directory.Exists(AppSettings.ScenarioDataDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -63,11 +68,13 @@ namespace ESME.Views.InstallationWizard
                                    "the files SimAreas.csv, PSM.csv, and Species.csv.",
                                    FieldName = "Scenario Data Directory",
                                    DialogTitle = "Locate the SimAreas.csv file",
-                                   FileNameFilter = "Simulation Areas File (SimAreas.csv)|SimAreas.csv|All files (*.*)|*.*",
+                                   FileNameFilter =
+                                   "Simulation Areas File (SimAreas.csv)|SimAreas.csv|All files (*.*)|*.*",
                                    PropertyName = "ScenarioDataDirectory",
                            });
 
-            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.GDEMDirectory) || !Directory.Exists(AppSettings.NAVOConfiguration.GDEMDirectory))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.GDEMDirectory) ||
+                !Directory.Exists(AppSettings.NAVOConfiguration.GDEMDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
@@ -79,34 +86,36 @@ namespace ESME.Views.InstallationWizard
                                    Hyperlink = new Uri("http://esme.bu.edu"),
                                    HyperlinkText = "the ESME Workbench webpage.",
                                    FieldName = "GDEM-V",
-                                   DialogTitle="Choose one GDEM database file",
-							       FileNameFilter="NetCDF files (*.nc)|*.nc|All files (*.*)|*.*",
+                                   DialogTitle = "Choose one GDEM database file",
+                                   FileNameFilter = "NetCDF files (*.nc)|*.nc|All files (*.*)|*.*",
                                    PropertyName = "GDEM-V",
                            });
-            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.SMGCDirectory) || !Directory.Exists(AppSettings.NAVOConfiguration.SMGCDirectory))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.SMGCDirectory) ||
+                !Directory.Exists(AppSettings.NAVOConfiguration.SMGCDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
                                    "The The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
                                    "The Surface Marine Gridded Climatological (SMGC) database is a required OAML database organized as a collection of 64,800 .stt files\n\n " +
-                                   "Please select any .stt file a directory tree containing all of the SMGC data.\n\n"+
+                                   "Please select any .stt file a directory tree containing all of the SMGC data.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
                                    HyperlinkText = "the ESME Workbench webpage.",
                                    FieldName = "SMGC",
-                                   DialogTitle="Choose one SMGC database file (*.stt)",
-                                   FileNameFilter="SMGC files (*.stt)|*.stt|All files (*.*)|*.*",
+                                   DialogTitle = "Choose one SMGC database file (*.stt)",
+                                   FileNameFilter = "SMGC files (*.stt)|*.stt|All files (*.*)|*.*",
                                    PropertyName = "SMGC",
                            });
-            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.BSTDirectory) || !File.Exists(AppSettings.NAVOConfiguration.BSTDirectory))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.BSTDirectory) ||
+                !File.Exists(AppSettings.NAVOConfiguration.BSTDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
                                    "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
                                    "The High-Frequency Environment Acoustic (HFEVA) Bottom Sediment Type (BST) database is a required OAML database packaged as a standalone HDF5 file.\n\n" +
-                                   "Please select the .h5 file that contains the HFEVA BST database.\n\n"+
+                                   "Please select the .h5 file that contains the HFEVA BST database.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
                                    HyperlinkText = "the ESME Workbench webpage.",
@@ -114,14 +123,15 @@ namespace ESME.Views.InstallationWizard
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "BST",
                            });
-            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.DBDBDirectory) || !File.Exists(AppSettings.NAVOConfiguration.DBDBDirectory))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.DBDBDirectory) ||
+                !File.Exists(AppSettings.NAVOConfiguration.DBDBDirectory))
                 Panels.Add(
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
                                    "The Oceanographic and Atmospheric Master Library (OAML) provides key environmental information necessary for operation.  " +
                                    "The Digital Bathymetric DataBase (DBDB) is a required OAML database packaged as a standalone HDF5 file.\n\n" +
-                                   "Please select the .h5 file that contains the DBDB.\n\n"+
+                                   "Please select the .h5 file that contains the DBDB.\n\n" +
                                    "If you do not have this database, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
                                    HyperlinkText = "the ESME Workbench webpage.",
@@ -129,13 +139,14 @@ namespace ESME.Views.InstallationWizard
                                    FileNameFilter = "HDF5 files (*.h5)|*.h5|All files (*.*)|*.*",
                                    PropertyName = "DBDB",
                            });
-            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.DBDBEXEPath) || !File.Exists(AppSettings.NAVOConfiguration.DBDBEXEPath))
+            if (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.DBDBEXEPath) ||
+                !File.Exists(AppSettings.NAVOConfiguration.DBDBEXEPath))
                 Panels.Add(
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
                                    "The Digital Bathymetric DataBase (DBDB) requires a seperate extraction tool for use.\n\n" +
-                                   "Please select the DBDB extractor.\n\n"+
+                                   "Please select the DBDB extractor.\n\n" +
                                    "If you do not have this tool, a copy can be downloaded from http://esme.bu.edu",
                                    Hyperlink = new Uri("http://esme.bu.edu"),
                                    HyperlinkText = "the ESME Workbench webpage.",
@@ -145,24 +156,28 @@ namespace ESME.Views.InstallationWizard
                                    PropertyName = "DBDBExtractor",
                            });
 
-            if (Configuration.IsClassifiedModel && (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.HFBLEXEPath) || !File.Exists(AppSettings.NAVOConfiguration.HFBLEXEPath)))
+            if (Configuration.IsClassifiedModel &&
+                (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.HFBLEXEPath) ||
+                 !File.Exists(AppSettings.NAVOConfiguration.HFBLEXEPath)))
                 Panels.Add(
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.\n\n"+
+                                   "The High Frequency Bottom Loss (HFBL) database requires a seperate extraction tool for use.\n\n" +
                                    "Please select the HFBL database extractor.\n\n",
                                    FieldName = "HFBL Extractor",
                                    FileNameFilter =
                                    "Executable files (*.exe)|*.exe|Batch files (*.bat)|*.bat|All files (*.*)|*.*",
                                    PropertyName = "HFBLExtractor",
                            });
-            if (Configuration.IsClassifiedModel && (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.LFBLEXEPath) || !File.Exists(AppSettings.NAVOConfiguration.LFBLEXEPath)))
+            if (Configuration.IsClassifiedModel &&
+                (string.IsNullOrEmpty(AppSettings.NAVOConfiguration.LFBLEXEPath) ||
+                 !File.Exists(AppSettings.NAVOConfiguration.LFBLEXEPath)))
                 Panels.Add(
                            new WizardPanelInfo
                            {
                                    DescriptiveText =
-                                   "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.\n\n"+
+                                   "The Low Frequency Bottom Loss (LFBL) databases require a seperate extraction tool for use.\n\n" +
                                    "Please select the LFBL database extractor.\n\n",
                                    FieldName = "LFBL Extractor",
                                    FileNameFilter =
@@ -172,23 +187,25 @@ namespace ESME.Views.InstallationWizard
 
             Panels.Add(new WizardPanelInfo
             {
-                    DescriptiveText = "The wizard has successfully configured all necessary parameters.\n\nPlease press the Finish button to complete configuration and launch ESME Workbench, or Cancel to exit without saving changes.",
+                    DescriptiveText =
+                               "The wizard has successfully configured all necessary parameters.\n\nPlease press the Finish button to complete configuration and launch ESME Workbench, or Cancel to exit without saving changes.",
                     IsFileBrowerEnabled = false,
                     UserResponse = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                     //will always be a valid location; "next" button always lit.
                     PropertyName = "finishScreen",
-
             });
         }
+        #endregion
 
         public static void LaunchWizardIfNeeded(IUIVisualizerService visualizerService)
         {
             var wizardView = new WizardViewModel();
-            if (wizardView.Panels.Count == 2 && wizardView.Panels[0].PropertyName == "welcomeScreen" && wizardView.Panels[1].PropertyName=="finishScreen") wizardView.Panels.Clear(); // if there aren't any configurable panels, delete the welcome screen
+            if (wizardView.Panels.Count == 2 && wizardView.Panels[0].PropertyName == "welcomeScreen" &&
+                wizardView.Panels[1].PropertyName == "finishScreen") wizardView.Panels.Clear(); // if there aren't any configurable panels, delete the welcome screen
             if (wizardView.Panels.Count > 0) //and if any panels remain, show them. 
             {
                 var result = visualizerService.ShowDialog("WizardView", wizardView);
-                if (result.HasValue && !result.Value)//todo
+                if (result.HasValue && !result.Value) //todo
                 {
                     //user pressed cancel.
                     //shut. down. everything.
@@ -197,7 +214,14 @@ namespace ESME.Views.InstallationWizard
             //otherwise launch esme.
         }
 
+        #region properties
+
         #region public AppSettings AppSettings { get; set; }
+        static readonly PropertyChangedEventArgs AppSettingsChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardViewModel>(x => x.AppSettings);
+
+        AppSettings _appSettings;
+
         public AppSettings AppSettings
         {
             get { return _appSettings; }
@@ -208,14 +232,14 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(AppSettingsChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs AppSettingsChangedEventArgs =
-                ObservableHelper.CreateArgs<WizardViewModel>(x => x.AppSettings);
-
-        AppSettings _appSettings;
         #endregion
 
         #region public List<WizardPanelInfo> Panels { get; set; }
+        static readonly PropertyChangedEventArgs PanelsChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardViewModel>(x => x.Panels);
+
+        List<WizardPanelInfo> _panels;
+
         public List<WizardPanelInfo> Panels
         {
             get { return _panels; }
@@ -226,15 +250,15 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(PanelsChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs PanelsChangedEventArgs =
-                ObservableHelper.CreateArgs<WizardViewModel>(x => x.Panels);
-
-        List<WizardPanelInfo> _panels;
         #endregion
 
         #region public WizardPanelInfo SelectedPanel { get; set; }
+        static readonly PropertyChangedEventArgs SelectedPanelChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardViewModel>(x => x.SelectedPanel);
+
         public int SelectedPanelIndex;
+
+        WizardPanelInfo _selectedPanel;
 
         public WizardPanelInfo SelectedPanel
         {
@@ -246,16 +270,20 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(SelectedPanelChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs SelectedPanelChangedEventArgs =
-                ObservableHelper.CreateArgs<WizardViewModel>(x => x.SelectedPanel);
-
-        WizardPanelInfo _selectedPanel;
         #endregion
+
+        #endregion
+
+        #region commands
 
         #region NextCommand
 
         #region public string NextButtonString { get; set; }
+        static readonly PropertyChangedEventArgs NextButtonStringChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardViewModel>(x => x.NextButtonString);
+
+        string _nextButtonString = "Next";
+
         public string NextButtonString
         {
             get { return _nextButtonString; }
@@ -266,12 +294,9 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(NextButtonStringChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs NextButtonStringChangedEventArgs =
-                ObservableHelper.CreateArgs<WizardViewModel>(x => x.NextButtonString);
-
-        string _nextButtonString = "Next";
         #endregion
+
+        SimpleCommand<object, object> _next;
 
         public SimpleCommand<object, object> NextCommand
         {
@@ -284,23 +309,19 @@ namespace ESME.Views.InstallationWizard
             }
         }
 
-        SimpleCommand<object, object> _next;
-
         void NextHandler()
         {
             SelectedPanelIndex++;
-            if (SelectedPanelIndex < Panels.Count-1)
+            if (SelectedPanelIndex < Panels.Count - 1)
             {
                 SelectedPanel = Panels[SelectedPanelIndex];
                 return;
             }
-            
+
             if (NextButtonString == "Finish") FinishWizard();
-            
+
             NextButtonString = "Finish";
             SelectedPanel = Panels.Last();
-           
-            
         }
 
         void FinishWizard()
@@ -348,6 +369,8 @@ namespace ESME.Views.InstallationWizard
         #endregion
 
         #region BackCommand
+        SimpleCommand<object, object> _back;
+
         public SimpleCommand<object, object> BackCommand
         {
             get
@@ -359,8 +382,6 @@ namespace ESME.Views.InstallationWizard
             }
         }
 
-        SimpleCommand<object, object> _back;
-
         bool IsBackCommandEnabled
         {
             get { return SelectedPanelIndex > 0; }
@@ -371,8 +392,9 @@ namespace ESME.Views.InstallationWizard
             SelectedPanelIndex--;
             SelectedPanel = Panels[SelectedPanelIndex];
             if (SelectedPanelIndex < Panels.Count - 1) NextButtonString = "Next";
-
         }
+        #endregion
+
         #endregion
     }
 
@@ -401,9 +423,8 @@ namespace ESME.Views.InstallationWizard
                             RuleDelegate = (o, r) =>
                             {
                                 var ruleTarget = ((WizardPanelInfo)o).UserResponse;
-                                if (PropertyName != "GDEM-V") return true;
-                                return Globals.AppSettings.NAVOConfiguration.ValidateGDEMDirectory(ruleTarget);
-                            },  
+                                return PropertyName != "GDEM-V" || Globals.AppSettings.NAVOConfiguration.ValidateGDEMDirectory(ruleTarget);
+                            },
                     },
                     new ValidationRule
                     {
@@ -412,19 +433,18 @@ namespace ESME.Views.InstallationWizard
                             RuleDelegate = (o, r) =>
                             {
                                 var ruleTarget = ((WizardPanelInfo)o).UserResponse;
-                                if (PropertyName != "SMGC") return true;
-                                return Globals.AppSettings.NAVOConfiguration.ValidateSMGCDirectory(ruleTarget);
+                                return PropertyName != "SMGC" || Globals.AppSettings.NAVOConfiguration.ValidateSMGCDirectory(ruleTarget);
                             },
                     },
                     new ValidationRule
                     {
                             PropertyName = "UserResponse",
-                            Description = "The Scenario Data Directory must contain the files SimAreas.csv, Species.csv, and PSM.csv.",
+                            Description =
+                                             "The Scenario Data Directory must contain the files SimAreas.csv, Species.csv, and PSM.csv.",
                             RuleDelegate = (o, r) =>
                             {
                                 var ruleTarget = ((WizardPanelInfo)o).UserResponse;
-                                if (PropertyName != "ScenarioDataDirectory") return true;
-                                return Globals.AppSettings.ValidateScenarioDataDirectory(ruleTarget);
+                                return PropertyName != "ScenarioDataDirectory" || Globals.AppSettings.ValidateScenarioDataDirectory(ruleTarget);
                             },
                     },
                     new ValidationRule
@@ -435,30 +455,26 @@ namespace ESME.Views.InstallationWizard
                             {
                                 var ruleTarget = ((WizardPanelInfo)o).UserResponse;
                                 if (PropertyName != "javaw") return true;
-                                return (!string.IsNullOrEmpty(ruleTarget) && (Path.GetFileName(ruleTarget).ToLowerInvariant()=="javaw.exe"));
+                                var fileName = Path.GetFileName(ruleTarget);
+                                return fileName != null && (!string.IsNullOrEmpty(ruleTarget) && (fileName.ToLowerInvariant() == "javaw.exe"));
                             },
-                    },                                                               
+                    },
             });
         }
 
-        #region public string DescriptiveText { get; set; }
-        public string DescriptiveText
-        {
-            get { return _descriptiveText; }
-            set
-            {
-                if (_descriptiveText == value) return;
-                _descriptiveText = value;
-                NotifyPropertyChanged(DescriptiveTextChangedEventArgs);
-            }
-        }
+        #region properties
 
+        #region public string DescriptiveText { get; set; }
         static readonly PropertyChangedEventArgs DescriptiveTextChangedEventArgs =
                 ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.DescriptiveText);
 
         string _descriptiveText;
 
         #region public Uri Hyperlink { get; set; }
+        static readonly PropertyChangedEventArgs HyperlinkChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.Hyperlink);
+
+        Uri _hyperlink;
 
         public Uri Hyperlink
         {
@@ -470,13 +486,13 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(HyperlinkChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs HyperlinkChangedEventArgs = ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.Hyperlink);
-        Uri _hyperlink;
-
         #endregion
 
         #region public string HyperlinkText { get; set; }
+        static readonly PropertyChangedEventArgs HyperlinkTextChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.HyperlinkText);
+
+        string _hyperlinkText;
 
         public string HyperlinkText
         {
@@ -488,15 +504,26 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(HyperlinkTextChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs HyperlinkTextChangedEventArgs = ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.HyperlinkText);
-        string _hyperlinkText;
-
         #endregion
 
+        public string DescriptiveText
+        {
+            get { return _descriptiveText; }
+            set
+            {
+                if (_descriptiveText == value) return;
+                _descriptiveText = value;
+                NotifyPropertyChanged(DescriptiveTextChangedEventArgs);
+            }
+        }
         #endregion
 
         #region public string UserResponse { get; set; }
+        static readonly PropertyChangedEventArgs UserResponseChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.UserResponse);
+
+        string _userResponse;
+
         public string UserResponse
         {
             get { return _userResponse; }
@@ -507,16 +534,16 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(UserResponseChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs UserResponseChangedEventArgs =
-                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.UserResponse);
-
-        string _userResponse;
         #endregion
 
         public string PropertyName { get; internal set; }
 
         #region public string FieldName { get; set; }
+        static readonly PropertyChangedEventArgs FieldNameChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.FieldName);
+
+        string _fieldName;
+
         public string FieldName
         {
             get { return _fieldName; }
@@ -527,14 +554,13 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(FieldNameChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs FieldNameChangedEventArgs =
-                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.FieldName);
-
-        string _fieldName;
         #endregion
 
         #region public string DialogTitle { get; set; }
+        static readonly PropertyChangedEventArgs DialogTitleChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.DialogTitle);
+
+        string _dialogTitle;
 
         public string DialogTitle
         {
@@ -546,13 +572,14 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(DialogTitleChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs DialogTitleChangedEventArgs = ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.DialogTitle);
-        string _dialogTitle;
-
         #endregion
 
         #region public string FileNameFilter { get; set; }
+        static readonly PropertyChangedEventArgs FileNameFilterChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.FileNameFilter);
+
+        string _fileNameFilter;
+
         public string FileNameFilter
         {
             get { return _fileNameFilter; }
@@ -563,14 +590,13 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(FileNameFilterChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs FileNameFilterChangedEventArgs =
-                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.FileNameFilter);
-
-        string _fileNameFilter;
         #endregion
 
         #region public bool IsFileBrowerEnabled { get; set; }
+        static readonly PropertyChangedEventArgs IsFileBrowerEnabledChangedEventArgs =
+                ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.IsFileBrowerEnabled);
+
+        bool _isFileBrowerEnabled;
 
         public bool IsFileBrowerEnabled
         {
@@ -582,9 +608,7 @@ namespace ESME.Views.InstallationWizard
                 NotifyPropertyChanged(IsFileBrowerEnabledChangedEventArgs);
             }
         }
-
-        static readonly PropertyChangedEventArgs IsFileBrowerEnabledChangedEventArgs = ObservableHelper.CreateArgs<WizardPanelInfo>(x => x.IsFileBrowerEnabled);
-        bool _isFileBrowerEnabled;
+        #endregion
 
         #endregion
     }
