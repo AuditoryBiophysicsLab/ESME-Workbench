@@ -141,7 +141,7 @@ namespace ESME.Environment.NAVO
                         UseShellExecute = false,
                         CreateNoWindow = true,
                     });
-                    process.PriorityClass = ProcessPriorityClass.Normal;
+                    //process.PriorityClass = ProcessPriorityClass.Normal;
                     process.WaitForExit();
                     var stderr = process.StandardError.ReadToEnd();
                     curPoint = ParseLowFrequencyOutput(process.StandardOutput);
@@ -158,7 +158,7 @@ namespace ESME.Environment.NAVO
                         UseShellExecute = false,
                         CreateNoWindow = true,
                     });
-                    process.PriorityClass = ProcessPriorityClass.Normal;
+                    //process.PriorityClass = ProcessPriorityClass.Normal;
                     process.WaitForExit();
                     var stderr = process.StandardError.ReadToEnd();
                     curPoint = ParseHighFrequencyOutput(process.StandardOutput, curPoint);

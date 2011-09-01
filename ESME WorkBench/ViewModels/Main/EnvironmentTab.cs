@@ -48,14 +48,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public MapLayerCollection EnvironmentTabMapLayers { get; set; }
 
-#if false
-        T FindEnvironmentTabMapLayer<T>(LayerType layerType, string layerName) where T : class
-        {
-            if (EnvironmentTabMapLayers == null) return null;
-            return EnvironmentTabMapLayers.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
-        }
-#endif
-
         #region public bool AreAllViewModelsReady { get; set; }
 
         public bool AreAllViewModelsReady
@@ -1110,6 +1102,8 @@ namespace ESMEWorkBench.ViewModels.Main
             var uniqueMonths = allMonths.Distinct().ToList();
             uniqueMonths.Sort();
             var environmentPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Environment");
+            var dataPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Data");
+            Directory.CreateDirectory(dataPath);
             BackgroundTaskAggregator = new BackgroundTaskAggregator();
 
             Debug.Assert(bathymetryName != null, "bathymetryName != null");
@@ -1312,6 +1306,19 @@ namespace ESMEWorkBench.ViewModels.Main
                 {
                     var avg = (SoundSpeedBackgroundAverager)sender;
                     extendedAndAveragedSoundSpeeds.SoundSpeedFields.Add(avg.ExtendedAverageSoundSpeedField);
+
+                    var averageTemperatures = new SoundSpeed();
+                    averageTemperatures.SoundSpeedFields.Add(SoundSpeed.Average(monthlyTemperature, avg.TimePeriod));
+                    averageTemperatures.Save(Path.Combine(dataPath, string.Format("{0}_env_{1}_temperature.xml", bathyName, avg.TimePeriod.ToString().ToLower())));
+                    
+                    var averageSalinities = new SoundSpeed();
+                    averageSalinities.SoundSpeedFields.Add(SoundSpeed.Average(monthlySalinity, avg.TimePeriod));
+                    averageSalinities.Save(Path.Combine(dataPath, string.Format("{0}_env_{1}_salinity.xml", bathyName, avg.TimePeriod.ToString().ToLower())));
+                    
+                    var averageSoundSpeed = new SoundSpeed();
+                    averageSoundSpeed.SoundSpeedFields.Add(avg.ExtendedAverageSoundSpeedField);
+                    averageSoundSpeed.Save(Path.Combine(dataPath, string.Format("{0}_env_{1}_soundspeed.xml", bathyName, avg.TimePeriod.ToString().ToLower())));
+
                     if (averagers.Any(a => a.IsBusy)) return;
                     foreach (var naemo in naemoEnvironmentExporters) naemo.ExtendedAndAveragedSoundSpeeds = extendedAndAveragedSoundSpeeds;
                 };

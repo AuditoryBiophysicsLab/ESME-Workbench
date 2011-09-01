@@ -9,8 +9,16 @@ namespace ESME.Environment
 {
     public class SoundSpeedProfileAverager : EarthCoordinate<DepthValuePairs<AverageDatum>>
     {
-        public SoundSpeedProfileAverager() { Data = new DepthValuePairs<AverageDatum>(); }
-        public SoundSpeedProfileAverager(Geo location) : base(location) { Data = new DepthValuePairs<AverageDatum>(); }
+        public SoundSpeedProfileAverager()
+        {
+            Data = new DepthValuePairs<AverageDatum>();
+        }
+
+        public SoundSpeedProfileAverager(SoundSpeedProfile profile) : base(profile)
+        {
+            Data = new DepthValuePairs<AverageDatum>();
+            Add(profile);
+        }
 
         public void Add(SoundSpeedProfile profile)
         {
