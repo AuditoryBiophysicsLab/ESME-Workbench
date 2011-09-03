@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Reflection;
 using Cinch;
 using HRC.Navigation;
+using System.Threading.Tasks;
 
 namespace ESME.Environment.NAVO
 {
@@ -198,5 +200,59 @@ namespace ESME.Environment.NAVO
             }
             backgroundExtractor.Value++;
         }
+
+        public static Task<EnvironmentData<BottomLossData>> ExtractAsync(bool isPointExtraction, float north, float south, float east, float west, NAVOTimePeriod timePeriod, IProgress<int> progress = null)
+        {
+            if (!isPointExtraction)
+            {
+                north = (float)Math.Ceiling(north);
+                south = (float)Math.Floor(south);
+                east = (float)Math.Ceiling(east);
+                west = (float)Math.Floor(west);
+            }
+
+            var assemblyLocation = Assembly.GetCallingAssembly().Location;
+            var extractionPath = Path.GetDirectoryName(assemblyLocation);
+            if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
+            var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
+            var gdemRequiredSupportFiles = new List<string>
+            {
+                Path.Combine(extractionPath, "netcdf.dll"),
+                Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
+            };
+            var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
+            if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
+
+            var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6} -new", tempPath, Globals.AppSettings.NAVOConfiguration.GDEMDirectory, timePeriod, north, south, east, west);
+
+            NAVOExtractionProgram.Execute(gdemExtractionProgramPath, commandArgs, tempPath, gdemRequiredSupportFiles);
+
+#if false
+            var temperatureFileName = Path.Combine(tempPath, string.Format("{0}-temperature.xml", timePeriod));
+            var salinityFileName = Path.Combine(tempPath, string.Format("{0}-salinity.xml", timePeriod));
+            var field = SoundSpeed.Load(temperatureFileName);
+            File.Delete(temperatureFileName);
+            TemperatureField = field.SoundSpeedFields[0];
+
+            field = SoundSpeed.Load(salinityFileName);
+            File.Delete(salinityFileName);
+            SalinityField = field.SoundSpeedFields[0];
+
+            var soundSpeedField = SoundSpeedField.Create(TemperatureField, SalinityField);
+            soundSpeedField.Extend(TemperatureField, SalinityField, MaxDepth);
+            backgroundExtractor.Value++;
+            ExtendedSoundSpeedField = soundSpeedField;
+            if (!backgroundExtractor.UseExpandedExtractionArea)
+            {
+                backgroundExtractor.Status = "Trimming soundspeed data for " + TimePeriod;
+                TemperatureField.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
+                SalinityField.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
+                ExtendedSoundSpeedField.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
+            }
+            backgroundExtractor.Value++;
+#endif
+            return null;
+        }
+
     }
 }

@@ -79,6 +79,7 @@
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AsyncCtpLibrary, Version=1.0.4107.18181, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="GeoAPI, Version=1.1.0.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -97,8 +98,13 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.74.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=AMD64" />
+    <Reference Include="System.Data.SQLite.Linq, Version=1.0.74.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xaml" />
@@ -556,8 +562,12 @@
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="External References\AsyncCtpLibrary.dll" />
     <Content Include="External References\Kent.Boogaart.Converters.dll" />
     <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
+    <Content Include="External References\System.Data.SQLite.dll" />
+    <Content Include="External References\System.Data.SQLite.Linq.dll" />
+    <Content Include="External References\System.Threading.Tasks.Dataflow.dll" />
     <Resource Include="Images\SmallIcons\orbz_water.png" />
     <Resource Include="Images\LargeIcons\orbz_water.png" />
     <Resource Include="Images\SmallIcons\log-icon.png" />

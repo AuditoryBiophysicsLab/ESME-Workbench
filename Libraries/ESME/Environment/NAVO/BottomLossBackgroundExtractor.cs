@@ -8,6 +8,7 @@ using Cinch;
 using ESME.NEMO;
 using GisSharpBlog.NetTopologySuite.IO;
 using HRC.Navigation;
+using System.Threading.Tasks;
 
 namespace ESME.Environment.NAVO
 {
@@ -168,6 +169,68 @@ namespace ESME.Environment.NAVO
             }
         }
 
+        public static async Task<EnvironmentData<BottomLossData>> ExtractAsync(bool useHFBL, bool useLFBL, bool isPointExtraction, float north, float south, float east, float west, IProgress<int> progress = null)
+        {
+            var locations = new List<EarthCoordinate>();
+            if (!isPointExtraction)
+            {
+                north = (float)Math.Ceiling(north);
+                south = (float)Math.Floor(south);
+                east = (float)Math.Ceiling(east);
+                west = (float)Math.Floor(west);
+                locations = new List<EarthCoordinate>();
+                for (var lat = south; lat < north; lat += 0.25f)
+                    for (var lon = west; lon < east; lon += 0.25f)
+                        locations.Add(new EarthCoordinate(lat, lon));
+            }
+            else
+            {
+                locations.Add(new EarthCoordinate(north, west));
+            }
+
+            var bottomLossData = new EnvironmentData<BottomLossData>();
+            foreach (var location in locations)
+            {
+                BottomLossData curPoint = null;
+                if (useLFBL)
+                {
+                    var process = Process.Start(new ProcessStartInfo
+                    {
+                        Arguments = ExtractorArgument(true, location),
+                        FileName = Globals.AppSettings.NAVOConfiguration.LFBLEXEPath,
+                        RedirectStandardInput = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    });
+                    //process.PriorityClass = ProcessPriorityClass.Normal;
+                    process.WaitForExit();
+                    var stderr = process.StandardError.ReadToEnd();
+                    curPoint = ParseLowFrequencyOutput(process.StandardOutput);
+                }
+                if (useHFBL)
+                {
+                    var process = Process.Start(new ProcessStartInfo
+                    {
+                        Arguments = ExtractorArgument(false, location),
+                        FileName = Globals.AppSettings.NAVOConfiguration.HFBLEXEPath,
+                        RedirectStandardInput = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    });
+                    //process.PriorityClass = ProcessPriorityClass.Normal;
+                    process.WaitForExit();
+                    var stderr = process.StandardError.ReadToEnd();
+                    curPoint = ParseHighFrequencyOutput(process.StandardOutput, curPoint);
+                }
+                if (curPoint != null) bottomLossData.Add(curPoint);
+            }
+            return bottomLossData;
+        }
+
         void GenerateBatchFile(string batchFileName, IEnumerable<EarthCoordinate> locations)
         {
             var lowFreqencyDatabase = string.IsNullOrEmpty(NAVOConfiguration.LFBLEXEPath) ? string.Empty : Path.Combine(Path.GetDirectoryName(NAVOConfiguration.LFBLEXEPath), "dbases/");
@@ -195,9 +258,9 @@ namespace ESME.Environment.NAVO
             return locations.Select(location => ExtractorArgument(isLowFrequency, location));
         }
 
-        string ExtractorArgument(bool isLowFrequency, Geo location)
+        static string ExtractorArgument(bool isLowFrequency, Geo location)
         {
-            var database = Path.Combine(isLowFrequency ? Path.GetDirectoryName(NAVOConfiguration.LFBLEXEPath) : Path.GetDirectoryName(NAVOConfiguration.HFBLEXEPath), "dbases/");
+            var database = Path.Combine(isLowFrequency ? Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath) : Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath), "dbases/");
             return string.Format(isLowFrequency ? " \"/\" \"{0}\" {1:0.00} {2:0.00} 1 0" : " \"/\" \"{0}\" {1:0.00} {2:0.00}", database, location.Latitude, location.Longitude);
         }
 

@@ -192,6 +192,18 @@
             <File Id="Kent.Boogaart.HelperTrinity.dll"
                   Name="Kent.Boogaart.HelperTrinity.dll"
                   Source="$(var.ESMEPath)\Kent.Boogaart.HelperTrinity.dll" />
+            <File Id="AsyncCtpLibrary.dll"
+                  Name="AsyncCtpLibrary.dll"
+                  Source="$(var.ESMEPath)\AsyncCtpLibrary.dll" />
+            <File Id="System.Threading.Tasks.Dataflow.dll"
+                  Name="System.Threading.Tasks.Dataflow.dll"
+                  Source="$(var.ESMEPath)\System.Threading.Tasks.Dataflow.dll" />
+            <File Id="System.Data.SQLite.dll"
+                  Name="System.Data.SQLite.dll"
+                  Source="$(var.ESMEPath)\System.Data.SQLite.dll" />
+            <File Id="System.Data.SQLite.Linq.dll"
+                  Name="System.Data.SQLite.dllSystem.Data.SQLite.Linq.dll"
+                  Source="$(var.ESMEPath)\System.Data.SQLite.Linq.dll" />
 
             <!-- 3MB assemblies -->
             <File Id="MMMBSLib.dll"

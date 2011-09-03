@@ -11,6 +11,7 @@ using ESME.Environment.NAVO;
 using ESME.NEMO;
 using HRC.Navigation;
 using HRC.Utility;
+using System.Threading.Tasks;
 
 namespace ESME.TransmissionLoss.REFMS
 {
@@ -293,7 +294,7 @@ namespace ESME.TransmissionLoss.REFMS
             }
         }
 
-        public static SVPFile Create(Geo location, float waterDepth, NAVOTimePeriod timePeriod, BackgroundTaskAggregator backgroundTaskAggregator)
+        public static async Task<SVPFile> Create(Geo location, float waterDepth, NAVOTimePeriod timePeriod, BackgroundTaskAggregator backgroundTaskAggregator)
         {
             var assemblyLocation = Assembly.GetCallingAssembly().Location;
             var extractionPath = Path.GetDirectoryName(assemblyLocation);
@@ -318,6 +319,7 @@ namespace ESME.TransmissionLoss.REFMS
             var monthlyTemperature = new SoundSpeed();
             var monthlySalinity = new SoundSpeed();
             var monthlyExtendedSoundSpeed = new SoundSpeed();
+            var bottomLossData = await BottomLossBackgroundExtractor.ExtractAsync(false, true, true, (float)lat, (float)lat, (float)lon, (float)lon);
             var bottomLossExtractor = new BottomLossBackgroundExtractor
             {
                 WorkerSupportsCancellation = false,
