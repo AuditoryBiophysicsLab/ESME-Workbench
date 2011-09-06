@@ -7,6 +7,7 @@ using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
+using HRC.NetCDF;
 using HRC.Utility;
 using ShoNS.Hosting;
 using Environment = System.Environment;
@@ -16,6 +17,11 @@ namespace DavesConsoleTester
     class Program
     {
         static void Main(string[] args)
+        {
+            var test = new NetCDF(@"H:\OAML\GDEM\sgdemv3s01.nc");
+        }
+
+        static void AsyncTest(string[] args)
         {
             var settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME WorkBench"), "settings.xml");
             ESME.Globals.AppSettings = AppSettings.Load(settings);

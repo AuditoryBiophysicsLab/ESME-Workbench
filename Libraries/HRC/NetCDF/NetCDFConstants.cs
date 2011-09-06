@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace HRC.NetCDF
+﻿namespace HRC.NetCDF
 {
     public enum NcType : uint
     {
@@ -22,7 +17,7 @@ namespace HRC.NetCDF
         Variable  = 11,
         Attribute = 12
     }
-#if false
+
     internal static class NetCDFConstants
     {
         static readonly byte FillChar = 0;
@@ -33,5 +28,4 @@ namespace HRC.NetCDF
         static readonly double FillDouble = 9.9692099683868690e+36;
         static readonly uint StreamingRecords = 0xFFFFFFFF;
     }
-#endif
 }

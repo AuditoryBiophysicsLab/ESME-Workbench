@@ -192,13 +192,12 @@
     <Compile Include="Navigation\Planet.cs" />
     <Compile Include="Navigation\Rotation.cs" />
     <Compile Include="Navigation\TrackPoint.cs" />
-    <Compile Include="NetCDF\InterfaceDefinitions.cs" />
     <Compile Include="NetCDF\NetCDF.cs" />
-    <Compile Include="NetCDF\NetCDFAttribute.cs" />
+    <Compile Include="NetCDF\NcAtt.cs" />
     <Compile Include="NetCDF\NetCDFConstants.cs" />
-    <Compile Include="NetCDF\NetCDFDimension.cs" />
-    <Compile Include="NetCDF\NetCDFString.cs" />
-    <Compile Include="NetCDF\NetCDFHeader.cs" />
+    <Compile Include="NetCDF\NcDim.cs" />
+    <Compile Include="NetCDF\NcString.cs" />
+    <Compile Include="NetCDF\NcVar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Navigation\EarthCoordinateTypeConverter.cs" />
     <Compile Include="Services\HRCColorPickerService.cs" />
