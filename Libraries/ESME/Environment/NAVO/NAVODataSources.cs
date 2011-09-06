@@ -40,7 +40,6 @@ namespace ESME.Environment.NAVO
             SurfaceMarineGriddedClimatologyDatabase.DatabasePath = configurations.SMGCDirectory;
 
             DigitalBathymetricDatabase.DatabasePath = configurations.DBDBDirectory;
-            DigitalBathymetricDatabase.ExtractionProgramPath = configurations.DBDBEXEPath;
             while (DigitalBathymetricDatabase.Resolutions.Count == 0) Thread.Sleep(100);
             DigitalBathymetricDatabase = new DigitalBathymetricDatabase
             {
@@ -151,7 +150,7 @@ namespace ESME.Environment.NAVO
 
         int _currentExtractionStep;
         float _totalExtractionStepCount;
-        void ExtractAreas(object sender, DoWorkEventArgs args)
+        async void ExtractAreas(object sender, DoWorkEventArgs args)
         {
 
             var backgroundTask = (BackgroundWorker)sender;
@@ -183,11 +182,10 @@ namespace ESME.Environment.NAVO
             //    totalExtractionStepCount++;
 
             Status = "Extracting bathymetry data for selected area";
-            DigitalBathymetricDatabase.ExtractArea(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea);
+            var bathymetry = await DigitalBathymetricDatabase.ExtractAsync(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea);
             if (backgroundTask.CancellationPending) return;
             ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
             //var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryCHBFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
-            var bathymetry = Bathymetry.FromYXZ(DigitalBathymetricDatabase.BathymetryYXZFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
             var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
 
             // BST and DBDB should not need the period to be provided, as these datasets are time-invariant

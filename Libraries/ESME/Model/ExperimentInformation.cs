@@ -14,6 +14,7 @@ using System.Diagnostics;
  
 namespace ESME.Model
 {
+    [Serializable]
     public class ExperimentInformation : IDataErrorInfo
     {
         #region State Properties

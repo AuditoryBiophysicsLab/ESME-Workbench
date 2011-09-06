@@ -4,6 +4,7 @@ using System.Xml.Serialization;
 
 namespace HRC.Navigation
 {
+    [Serializable]
     public class Geo : EqualityComparer<Geo>, IEquatable<Geo>
     {
         const double Flattening = 1.0 / 298.257223563;

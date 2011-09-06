@@ -156,7 +156,7 @@ namespace ESME.TransmissionLoss.REFMS
                     monthlyExtendedSoundSpeed.SoundSpeedFields.Add(extractor.ExtendedSoundSpeedField);
                     if (soundSpeedExtractors.Any(ssfExtractor => ssfExtractor.IsBusy)) return;
                     if (bottomLossExtractor.IsBusy) return;
-                    BottomLossData = bottomLossExtractor.BottomLossData[0];
+                    //BottomLossData = bottomLossExtractor.BottomLossData[0];
                     SoundSpeedField averageTemperature;
                     SoundSpeedField averageSalinity;
                     SoundSpeedField averageSoundspeed;

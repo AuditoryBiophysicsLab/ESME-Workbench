@@ -1,10 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Mapping
 {
+    [Serializable]
     public class MyGdiPlusRasterLayer : GdiPlusRasterLayer
     {
         public MyGdiPlusRasterLayer(string fileName) : base(fileName) { }
@@ -15,6 +17,7 @@ namespace ESME.Mapping
         }
     }
 
+    [Serializable]
     public class RasterMapLayer : MapLayerViewModel
     {
         public RasterMapLayer() {LayerOverlay.Layers.Clear();}

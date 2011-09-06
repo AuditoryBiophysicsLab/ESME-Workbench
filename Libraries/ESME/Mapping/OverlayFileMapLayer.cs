@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Xml.Serialization;
@@ -11,6 +12,7 @@ using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Mapping
 {
+    [Serializable]
     public class OverlayFileMapLayer : OverlayShapeMapLayer
     {
         public OverlayFileMapLayer()
@@ -41,6 +43,7 @@ namespace ESME.Mapping
         #endregion
     }
 
+    [Serializable]
     public class OverlayShapeMapLayer : MapLayerViewModel
     {
         InMemoryFeatureLayer _layer;
@@ -119,6 +122,7 @@ namespace ESME.Mapping
 
     }
 
+    [Serializable]
     public class AnalysisPointLayer : OverlayShapeMapLayer
     {
         public AnalysisPointLayer() 
@@ -175,6 +179,7 @@ namespace ESME.Mapping
         }
     }
 
+    [Serializable]
     public class PropagationLayer : OverlayShapeMapLayer
     {
         public PropagationLayer() 

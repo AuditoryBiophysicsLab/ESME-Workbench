@@ -14,6 +14,7 @@ using HRC.Utility;
 
 namespace ESME.TransmissionLoss
 {
+    [Serializable]
     public class AnalysisPoint : EarthCoordinate, IEquatable<AnalysisPoint>, ISupportValidation
     {
         private AnalysisPoint()

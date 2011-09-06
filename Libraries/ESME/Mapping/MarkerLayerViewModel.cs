@@ -7,6 +7,7 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESME.Mapping
 {
+    [Serializable]
     public class MarkerLayerViewModel : MapLayerViewModel
     {
         readonly SimpleMarkerOverlay _markerOverlay;

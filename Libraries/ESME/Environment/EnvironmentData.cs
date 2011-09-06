@@ -13,6 +13,7 @@ using System.Windows;
 
 namespace ESME.Environment
 {
+    [Serializable]
     public class EnvironmentData<T> : System.Collections.Generic.IList<T> where T : EarthCoordinate, new()
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>
@@ -428,7 +429,8 @@ namespace ESME.Environment
         public override string ToString() { return _key.ToString(); }
         public override int GetHashCode() { return ToString().GetHashCode(); }
     }
-    
+
+    [Serializable]
     public class TimePeriodEnvironmentData<T> where T : EarthCoordinate, new()
     {
         public static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<EarthCoordinate<T>>.ReferencedTypes);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Xml.Serialization;
@@ -8,6 +9,7 @@ using ThinkGeo.MapSuite.Core;
 
 namespace ESME.Mapping
 {
+    [Serializable]
     public class ShapefileMapLayer : MapLayerViewModel
     {
         #region Menu Initializers

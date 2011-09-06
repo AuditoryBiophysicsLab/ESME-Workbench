@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
@@ -77,7 +78,7 @@ namespace ImportGDEM
                 return;
             }
 
-            var months = monthNames.Select(curMonth => (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), curMonth)).ToList();
+            var months = monthNames.Select(curMonth => (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), curMonth, true)).ToList();
             months.Sort();
             foreach (var month in months)
             {
@@ -124,46 +125,67 @@ namespace ImportGDEM
         { 
             var temperatureFile = new SoundSpeed();
             var salinityFile = new SoundSpeed();
+            
+            var temperatureFileName = string.Format("{0}.temperature", outputDirectory);
+            var salinityFileName = string.Format("{0}.salinity", outputDirectory);
+            if (isNewMode && (months.Count == 1))
+            {
+                temperatureFileName = string.Format("{0}_{1}.temperature", outputDirectory, months[0]);
+                salinityFileName = string.Format("{0}_{1}.salinity", outputDirectory, months[0]);
+            }
+            else
+            {
+                if (File.Exists(temperatureFileName)) temperatureFile = SoundSpeed.Load(temperatureFileName);
+                if (File.Exists(salinityFileName)) salinityFile = SoundSpeed.Load(salinityFileName);
+            }
+
             const string temperatureVariableName = "water_temp";
             const string salinityVariableName = "salinity";
             var dataCrossesGreenwich = false;
+            var tasks = new List<Task>();
 
             if ((west < 0) && (east >= 0)) dataCrossesGreenwich = true;
             for (var monthIndex = 0; monthIndex < months.Count; monthIndex++)
             {
-                SoundSpeedField temperatureField, salinityField;
-                Console.WriteLine("Importing temperature data for {0}...", months[monthIndex]);
-                if (dataCrossesGreenwich)
+                var index = monthIndex;
+                tasks.Add(Task.Factory.StartNew(() =>
                 {
-                    temperatureField = ImportGDEM(temperatureFiles[monthIndex], temperatureVariableName, months[monthIndex], north, south, -0.25f, west);
-                    temperatureField.EnvironmentData.AddRange(ImportGDEM(temperatureFiles[monthIndex], temperatureVariableName, months[monthIndex], north, south, east, 0).EnvironmentData);
-                    temperatureField.EnvironmentData.Sort();
-                }
-                else temperatureField = ImportGDEM(temperatureFiles[monthIndex], temperatureVariableName, months[monthIndex], north, south, east, west);
-                temperatureFile.SoundSpeedFields.Add(temperatureField);
+                    SoundSpeedField temperatureField;
+                    Console.WriteLine("Importing temperature data for {0}...", months[index]);
+                    if (dataCrossesGreenwich)
+                    {
+                        temperatureField = ImportGDEM(temperatureFiles[index], temperatureVariableName, months[index], north, south, -0.25f, west);
+                        temperatureField.EnvironmentData.AddRange(ImportGDEM(temperatureFiles[index], temperatureVariableName, months[index], north, south, east, 0).EnvironmentData);
+                        temperatureField.EnvironmentData.Sort();
+                    }
+                    else temperatureField = ImportGDEM(temperatureFiles[index], temperatureVariableName, months[index], north, south, east, west);
+                    if (temperatureFile[months[index]] != null) temperatureFile.SoundSpeedFields.Remove(temperatureFile[months[index]]);
+                    temperatureFile.SoundSpeedFields.Add(temperatureField);
+                }));
 
-                Console.WriteLine("Importing salinity data for {0}...", months[monthIndex]);
-                if (dataCrossesGreenwich)
+                tasks.Add(Task.Factory.StartNew(() =>
                 {
-                    salinityField = ImportGDEM(salinityFiles[monthIndex], salinityVariableName, months[monthIndex], north, south, -0.25f, west);
-                    salinityField.EnvironmentData.AddRange(ImportGDEM(salinityFiles[monthIndex], salinityVariableName, months[monthIndex], north, south, east, 0).EnvironmentData);
-                    salinityField.EnvironmentData.Sort();
-                }
-                else salinityField = ImportGDEM(salinityFiles[monthIndex], salinityVariableName, months[monthIndex], north, south, east, west);
-                salinityFile.SoundSpeedFields.Add(salinityField);
+                    SoundSpeedField salinityField;
+                    Console.WriteLine("Importing salinity data for {0}...", months[index]);
+                    if (dataCrossesGreenwich)
+                    {
+                        salinityField = ImportGDEM(salinityFiles[index], salinityVariableName, months[index], north, south, -0.25f, west);
+                        salinityField.EnvironmentData.AddRange(ImportGDEM(salinityFiles[index], salinityVariableName, months[index], north, south, east, 0).EnvironmentData);
+                        salinityField.EnvironmentData.Sort();
+                    }
+                    else salinityField = ImportGDEM(salinityFiles[index], salinityVariableName, months[index], north, south, east, west);
+                    if (salinityFile[months[index]] != null) salinityFile.SoundSpeedFields.Remove(salinityFile[months[index]]);
+                    salinityFile.SoundSpeedFields.Add(salinityField);
+                }));
+                if (tasks.Count < 6) continue;
+                Task.WaitAll(tasks.ToArray());
+                tasks.Clear();
             }
-
+            if (tasks.Count > 0) Task.WaitAll(tasks.ToArray());
             Console.WriteLine("Saving imported temperature data...");
-            var temperatureFileName = "temperature.xml";
-            var salinityFileName = "salinity.xml";
-            if (isNewMode && (months.Count == 1))
-            {
-                temperatureFileName = string.Format("{0}-temperature.xml", months[0]);
-                salinityFileName = string.Format("{0}-salinity.xml", months[0]);
-            }
-            temperatureFile.Save(Path.Combine(outputDirectory, temperatureFileName));
+            temperatureFile.Save(temperatureFileName);
             Console.WriteLine("Saving imported salinity data...");
-            salinityFile.Save(Path.Combine(outputDirectory, salinityFileName));
+            salinityFile.Save(salinityFileName);
         }
 
         static SoundSpeedField ImportGDEM(string fileName, string dataVarName, NAVOTimePeriod month, float north, float south, float east, float west)

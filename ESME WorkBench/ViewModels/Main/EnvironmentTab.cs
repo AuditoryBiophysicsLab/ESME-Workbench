@@ -1248,7 +1248,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     UseExpandedExtractionArea = false,
                     TaskName = "Bottom loss extraction",
                 };
-                bottomLossExtractor.RunWorkerCompleted += (s, e) => { foreach (var naemo in naemoEnvironmentExporters) naemo.BottomLossData = ((BottomLossBackgroundExtractor)s).BottomLossData; };
+                //bottomLossExtractor.RunWorkerCompleted += (s, e) => { foreach (var naemo in naemoEnvironmentExporters) naemo.BottomLossSample = ((BottomLossBackgroundExtractor)s).BottomLossData; };
                 BackgroundTaskAggregator.BackgroundTasks.Add(bottomLossExtractor);
             }
 
@@ -1309,15 +1309,15 @@ namespace ESMEWorkBench.ViewModels.Main
 
                     var averageTemperatures = new SoundSpeed();
                     averageTemperatures.SoundSpeedFields.Add(SoundSpeed.Average(monthlyTemperature, avg.TimePeriod));
-                    averageTemperatures.Save(Path.Combine(dataPath, string.Format("{0}_env_{1}_temperature.xml", bathyName, avg.TimePeriod.ToString().ToLower())));
+                    averageTemperatures.Save(Path.Combine(dataPath, string.Format("{0}_env_{1}.temperature", bathyName, avg.TimePeriod.ToString().ToLower())));
                     
                     var averageSalinities = new SoundSpeed();
                     averageSalinities.SoundSpeedFields.Add(SoundSpeed.Average(monthlySalinity, avg.TimePeriod));
-                    averageSalinities.Save(Path.Combine(dataPath, string.Format("{0}_env_{1}_salinity.xml", bathyName, avg.TimePeriod.ToString().ToLower())));
+                    averageSalinities.Save(Path.Combine(dataPath, string.Format("{0}_env_{1}.salinity", bathyName, avg.TimePeriod.ToString().ToLower())));
                     
                     var averageSoundSpeed = new SoundSpeed();
                     averageSoundSpeed.SoundSpeedFields.Add(avg.ExtendedAverageSoundSpeedField);
-                    averageSoundSpeed.Save(Path.Combine(dataPath, string.Format("{0}_env_{1}_soundspeed.xml", bathyName, avg.TimePeriod.ToString().ToLower())));
+                    averageSoundSpeed.Save(Path.Combine(dataPath, string.Format("{0}_env_{1}.soundspeed", bathyName, avg.TimePeriod.ToString().ToLower())));
 
                     if (averagers.Any(a => a.IsBusy)) return;
                     foreach (var naemo in naemoEnvironmentExporters) naemo.ExtendedAndAveragedSoundSpeeds = extendedAndAveragedSoundSpeeds;

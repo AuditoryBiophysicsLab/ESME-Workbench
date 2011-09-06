@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Threading;
 using Cinch;
 using HRC.Navigation;
 using System.Threading.Tasks;
+using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
@@ -201,8 +205,42 @@ namespace ESME.Environment.NAVO
             backgroundExtractor.Value++;
         }
 
-        public static Task<EnvironmentData<BottomLossData>> ExtractAsync(bool isPointExtraction, float north, float south, float east, float west, NAVOTimePeriod timePeriod, IProgress<int> progress = null)
+        public static void ComputeSoundSpeeds(string filePath, SoundSpeed temperature, SoundSpeed salinity, EarthCoordinate<float> maxDepth, IEnumerable<NAVOTimePeriod> timePeriods, IProgress<TaskProgressInfo> progress = null)
         {
+            var taskProgress = new TaskProgressInfo
+            {
+                TaskName = "SoundSpeed Creation",
+                CurrentActivity = "Initializing",
+                ProgressPercent = 0,
+            };
+            if (progress != null) progress.Report(taskProgress);
+            var soundSpeed = new SoundSpeed();
+            for (var i = 0; i < temperature.SoundSpeedFields.Count; i++)
+            {
+                var temperatureField = temperature.SoundSpeedFields[i];
+                var salinityField = salinity[temperatureField.TimePeriod];
+                var soundSpeedField = SoundSpeedField.Create(temperatureField, salinityField);
+                soundSpeedField.Extend(temperatureField, salinityField, maxDepth);
+                soundSpeed.SoundSpeedFields.Add(soundSpeedField);
+            }
+            foreach (var timePeriod in timePeriods)
+            {
+                var timePeriodCount = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList().Count();
+                if (timePeriodCount > 1) soundSpeed.SoundSpeedFields.Add(SoundSpeed.Average(soundSpeed, timePeriod));
+            }
+            soundSpeed.Save(filePath + ".soundspeed");
+        }
+
+        public async static void ExtractAsync(bool isPointExtraction, float north, float south, float east, float west, IEnumerable<NAVOTimePeriod> timePeriods, string outputFilename, IProgress<TaskProgressInfo> progress = null)
+        {
+            var taskProgress = new TaskProgressInfo
+            {
+                TaskName = "GDEM Extraction",
+                CurrentActivity = "Initializing",
+                ProgressPercent = 0,
+            };
+            if (progress != null) progress.Report(taskProgress);
+            
             if (!isPointExtraction)
             {
                 north = (float)Math.Ceiling(north);
@@ -220,39 +258,21 @@ namespace ESME.Environment.NAVO
                 Path.Combine(extractionPath, "netcdf.dll"),
                 Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
             };
-            var tempPath = Path.GetTempPath().Remove(Path.GetTempPath().Length - 1);
+            var tempPath = Path.GetDirectoryName(outputFilename);
             if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
+            var sb = new StringBuilder();
+            foreach (var timePeriod in timePeriods) sb.Append(string.Format("{0},", timePeriod.ToString().ToLower()));
+            sb.Remove(sb.Length - 1, 1);
 
-            var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6} -new", tempPath, Globals.AppSettings.NAVOConfiguration.GDEMDirectory, timePeriod, north, south, east, west);
+            var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6}", outputFilename, Globals.AppSettings.NAVOConfiguration.GDEMDirectory, sb, north, south, east, west);
 
-            NAVOExtractionProgram.Execute(gdemExtractionProgramPath, commandArgs, tempPath, gdemRequiredSupportFiles);
-
-#if false
-            var temperatureFileName = Path.Combine(tempPath, string.Format("{0}-temperature.xml", timePeriod));
-            var salinityFileName = Path.Combine(tempPath, string.Format("{0}-salinity.xml", timePeriod));
-            var field = SoundSpeed.Load(temperatureFileName);
-            File.Delete(temperatureFileName);
-            TemperatureField = field.SoundSpeedFields[0];
-
-            field = SoundSpeed.Load(salinityFileName);
-            File.Delete(salinityFileName);
-            SalinityField = field.SoundSpeedFields[0];
-
-            var soundSpeedField = SoundSpeedField.Create(TemperatureField, SalinityField);
-            soundSpeedField.Extend(TemperatureField, SalinityField, MaxDepth);
-            backgroundExtractor.Value++;
-            ExtendedSoundSpeedField = soundSpeedField;
-            if (!backgroundExtractor.UseExpandedExtractionArea)
-            {
-                backgroundExtractor.Status = "Trimming soundspeed data for " + TimePeriod;
-                TemperatureField.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
-                SalinityField.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
-                ExtendedSoundSpeedField.EnvironmentData.TrimToNearestPoints(backgroundExtractor.ExtractionArea);
-            }
-            backgroundExtractor.Value++;
-#endif
-            return null;
+            taskProgress.CurrentActivity = "Waiting for extraction program to complete";
+            taskProgress.ProgressPercent = 5;
+            if (progress != null) progress.Report(taskProgress);
+            var result = await NAVOExtractionProgram.Execute(gdemExtractionProgramPath, commandArgs, tempPath, gdemRequiredSupportFiles);
+            taskProgress.CurrentActivity = "Done";
+            taskProgress.ProgressPercent = 100;
+            if (progress != null) progress.Report(taskProgress);
         }
-
     }
 }

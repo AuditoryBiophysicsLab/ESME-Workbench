@@ -5,6 +5,7 @@ using ESME.TransmissionLoss;
 
 namespace ESME.Model
 {
+    [Serializable]
     public class AcousticProperties : IEquatable<AcousticProperties>, IEquatable<TransmissionLossField>, IEquatable<NemoMode>
     {
         public AcousticProperties() { }

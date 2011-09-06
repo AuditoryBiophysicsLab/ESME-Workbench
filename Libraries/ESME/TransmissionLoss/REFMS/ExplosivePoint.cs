@@ -319,7 +319,7 @@ namespace ESME.TransmissionLoss.REFMS
             var monthlyTemperature = new SoundSpeed();
             var monthlySalinity = new SoundSpeed();
             var monthlyExtendedSoundSpeed = new SoundSpeed();
-            var bottomLossData = await BottomLossBackgroundExtractor.ExtractAsync(false, true, true, (float)lat, (float)lat, (float)lon, (float)lon);
+            //var bottomLossData = await BottomLossBackgroundExtractor.ExtractAsync(false, true, true, (float)lat, (float)lat, (float)lon, (float)lon);
             var bottomLossExtractor = new BottomLossBackgroundExtractor
             {
                 WorkerSupportsCancellation = false,
@@ -372,7 +372,7 @@ namespace ESME.TransmissionLoss.REFMS
                     // Here is where we create the SVP using the PCHIP algorithm, etc. from the average temp/salinity
                     var result = new SVPFile
                     {
-                        BottomLossData = bottomLossExtractor.BottomLossData[0],
+                        //BottomLossData = bottomLossExtractor.BottomLossData[0],
                         _depths = (from temp in averageTemperature.EnvironmentData[0].Data select temp.Depth).Cast<double>().ToArray(),
                         _temps = (from temp in averageTemperature.EnvironmentData[0].Data select temp.Depth).Cast<double>().ToArray(),
                         _salinities = (from temp in averageSalinity.EnvironmentData[0].Data select temp.Depth).Cast<double>().ToArray(),

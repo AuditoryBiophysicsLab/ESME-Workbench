@@ -99,22 +99,22 @@ namespace ESME.TransmissionLoss.CASS
 
         #endregion
 
-        #region public EnvironmentData<BottomLossData> BottomLossData { get; set; }
+        #region public EnvironmentData<BottomLossSample> BottomLossSample { get; set; }
 
-        public EnvironmentData<BottomLossData> BottomLossData
+        public EnvironmentData<BottomLossSample> BottomLossSample
         {
-            get { return _bottomLossData; }
+            get { return _bottomLossSample; }
             set
             {
-                if (_bottomLossData == value) return;
-                _bottomLossData = value;
+                if (_bottomLossSample == value) return;
+                _bottomLossSample = value;
                 NotifyPropertyChanged(BottomLossDataChangedEventArgs);
                 CheckForSemaphoreRelease();
             }
         }
 
-        static readonly PropertyChangedEventArgs BottomLossDataChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.BottomLossData);
-        EnvironmentData<BottomLossData> _bottomLossData;
+        static readonly PropertyChangedEventArgs BottomLossDataChangedEventArgs = ObservableHelper.CreateArgs<CASSBackgroundExporter>(x => x.BottomLossSample);
+        EnvironmentData<BottomLossSample> _bottomLossSample;
 
         #endregion
 
@@ -200,14 +200,14 @@ namespace ESME.TransmissionLoss.CASS
                 var sb = new StringBuilder();
                 sb.Append("Waiting for ");
                 if (ExportHFEVA && (Sediment == null)) sb.Append("sediment, ");
-                if ((ExportHFBL || ExportLFBLHFB || ExportLFBLPE) && (BottomLossData == null)) sb.Append("bottom loss, ");
+                if ((ExportHFBL || ExportLFBLHFB || ExportLFBLPE) && (BottomLossSample == null)) sb.Append("bottom loss, ");
                 if (Wind == null) sb.Append("wind, ");
                 if (ExtendedAndAveragedSoundSpeeds == null) sb.Append("soundspeed, ");
                 sb.Remove(sb.Length - 2, 2);
                 sb.Append(" data");
                 RunState = sb.ToString();
                 if (ExportHFEVA && Sediment == null) return;
-                if ((ExportHFBL || ExportLFBLHFB || ExportLFBLPE) && (BottomLossData == null)) return;
+                if ((ExportHFBL || ExportLFBLHFB || ExportLFBLPE) && (BottomLossSample == null)) return;
                 if (Wind == null) return;
                 if (ExtendedAndAveragedSoundSpeeds == null) return;
                 WaitSemaphore.Release();
@@ -233,14 +233,14 @@ namespace ESME.TransmissionLoss.CASS
                 if (ExtendedAndAveragedSoundSpeeds[TimePeriod] == null) sb.Append("sound speed, ");
                 if (Wind[TimePeriod] == null) sb.Append("wind, ");
                 if (ExtractionArea == null) sb.Append("extraction area, ");
-                if ((ExportHFBL || ExportLFBLHFB || ExportLFBLPE) && (BottomLossData == null)) sb.Append("bottom loss, ");
+                if ((ExportHFBL || ExportLFBLHFB || ExportLFBLPE) && (BottomLossSample == null)) sb.Append("bottom loss, ");
                 sb.Remove(sb.Length - 2, 2);
                 TaskName = sb.ToString();
                 Thread.Sleep(100);
             }
             TaskName = "Exporting NAEMO environment for " + TimePeriod;
             var environmentFileName = backgroundExtractor.DestinationPath;
-            CASSFiles.WriteEnvironmentFiles(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], BathymetryFileName, OverlayFileName, ExportHFEVA, ExportHFBL, ExportLFBLHFB, ExportLFBLPE, BottomLossData, backgroundExtractor);
+            CASSFiles.WriteEnvironmentFiles(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], BathymetryFileName, OverlayFileName, ExportHFEVA, ExportHFBL, ExportLFBLHFB, ExportLFBLPE, BottomLossSample, backgroundExtractor);
 
             backgroundExtractor.Value++;
         }

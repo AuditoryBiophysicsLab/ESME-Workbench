@@ -75,6 +75,7 @@ namespace ESME.Environment
         public float Average { get { return Value / Count; } }
     }
 
+    [Serializable]
     public class SoundSpeedProfile : EarthCoordinate<DepthValuePairs<float>>
     {
         public SoundSpeedProfile() { Data = new DepthValuePairs<float>(); }
@@ -147,6 +148,7 @@ namespace ESME.Environment
         }
     }
 
+    [Serializable]
     public class DepthValuePairs<T> : List<DepthValuePair<T>>
     {
         public DepthValuePairs() { }
@@ -174,6 +176,7 @@ namespace ESME.Environment
         }
     }
 
+    [Serializable]
     public class DepthValuePair<TValue> : IComparable<DepthValuePair<TValue>>, IComparer<DepthValuePair<TValue>>
     {
         public DepthValuePair() { }

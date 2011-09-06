@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using ESME.Model;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.Environment
 {
@@ -19,16 +20,27 @@ namespace ESME.Environment
 
         public static Sediment Load(string filename)
         {
-            return new Sediment { Samples = XmlSerializer<EnvironmentData<SedimentSample>>.Load(filename, ReferencedTypes) };
+            //return new Sediment { Samples = XmlSerializer<EnvironmentData<SedimentSample>>.Load(filename, ReferencedTypes) };
+            var formatter = new BinaryFormatter();
+            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return new Sediment { Samples = (EnvironmentData<SedimentSample>)formatter.Deserialize(stream) };
+            }
         }
 
         public void Save(string filename)
         {
-            var serializer = new XmlSerializer<EnvironmentData<SedimentSample>> { Data = Samples };
-            serializer.Save(filename, ReferencedTypes);
+            //var serializer = new XmlSerializer<EnvironmentData<SedimentSample>> { Data = Samples };
+            //serializer.Save(filename, ReferencedTypes);
+            var formatter = new BinaryFormatter();
+            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                formatter.Serialize(stream, Samples);
+            }
         }
     }
 
+    [Serializable]
     public class SedimentSample : EarthCoordinate<SedimentSampleBase>, IComparable<SedimentSample>
     {
         public SedimentSample() { }
@@ -47,6 +59,7 @@ namespace ESME.Environment
         }
     }
 
+    [Serializable]
     public class SedimentSampleBase : IComparable<SedimentSampleBase>
     {
         public short SampleValue { get; set; }

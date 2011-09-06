@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.Environment
 {
+    [Serializable]
     public class Wind
     {
         static readonly List<Type> ReferencedTypes = new List<Type>(TimePeriodEnvironmentData<WindSample>.ReferencedTypes);
@@ -19,13 +21,23 @@ namespace ESME.Environment
 
         public static Wind Load(string filename)
         {
-            return new Wind { TimePeriods = XmlSerializer<List<TimePeriodEnvironmentData<WindSample>>>.Load(filename, ReferencedTypes) };
+            //return new Wind { TimePeriods = XmlSerializer<List<TimePeriodEnvironmentData<WindSample>>>.Load(filename, ReferencedTypes) };
+            var formatter = new BinaryFormatter();
+            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return new Wind { TimePeriods = (List<TimePeriodEnvironmentData<WindSample>>)formatter.Deserialize(stream) };
+            }
         }
 
         public void Save(string filename)
         {
-            var serializer = new XmlSerializer<List<TimePeriodEnvironmentData<WindSample>>> { Data = TimePeriods };
-            serializer.Save(filename, ReferencedTypes);
+            //var serializer = new XmlSerializer<List<TimePeriodEnvironmentData<WindSample>>> { Data = TimePeriods };
+            //serializer.Save(filename, ReferencedTypes);
+            var formatter = new BinaryFormatter();
+            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                formatter.Serialize(stream, TimePeriods);
+            }
         }
 
         /// <summary>
@@ -39,6 +51,7 @@ namespace ESME.Environment
         }
     }
 
+    [Serializable]
     public class WindSample : EarthCoordinate<float>
     {
         public WindSample() {  }

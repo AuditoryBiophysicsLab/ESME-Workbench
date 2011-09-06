@@ -14,6 +14,7 @@ using FileFormatException = ESME.Model.FileFormatException;
 
 namespace ESME.Animats
 {
+    [Serializable]
     public class Animat
     {
         [XmlIgnore] public SourceRecieverLevelBins[] LevelBins;
@@ -152,6 +153,7 @@ namespace ESME.Animats
         #endregion
     }
 
+    [Serializable]
     public class AnimatList : List<Animat>
     {
         private readonly C3mbs _mmmbs = new C3mbs();
@@ -291,6 +293,7 @@ namespace ESME.Animats
         }
     }
 
+    [Serializable]
     public class AnimatFile
     {
         public string Filename { get; internal set; }
@@ -315,7 +318,8 @@ namespace ESME.Animats
         }
     }
 
-    public class DDB:AnimatFile
+    [Serializable]
+    public class DDB : AnimatFile
     {
         #region public properties {get; internal set;}
         //not all of these are ever set; the header load procedure terminates once we have determined the species name, output configuration, and total number of animats -- it's all we need.
@@ -661,7 +665,8 @@ namespace ESME.Animats
         }
     }
 
-    public class MMMB:AnimatFile
+    [Serializable]
+    public class MMMB : AnimatFile
     {
         #region public properties {get; internal set;}
         public string MbFileIdentifier { get; internal set; }

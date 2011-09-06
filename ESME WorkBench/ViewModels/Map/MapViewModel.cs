@@ -26,6 +26,7 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 namespace ESMEWorkBench.ViewModels.Map
 {
     [ExportViewModel("MapViewModel")]
+    [Serializable]
     public class MapViewModel : ViewModelBase
     {
         #region Private fields

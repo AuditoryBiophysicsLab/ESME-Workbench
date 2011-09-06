@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using Cinch;
-using HRC.Utility;
 using HRC.Validation;
 
 namespace ESME.Environment.NAVO

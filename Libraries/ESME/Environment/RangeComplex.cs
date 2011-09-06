@@ -1,7 +1,9 @@
-﻿using HRC.Navigation;
+﻿using System;
+using HRC.Navigation;
 
 namespace ESME.Environment
 {
+    [Serializable]
     public class RangeComplex : EarthCoordinate
     {
         public RangeComplex() { }

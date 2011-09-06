@@ -7,6 +7,7 @@ using HRC.Utility;
 
 namespace ESME.NEMO
 {
+    [Serializable]
     public class NemoMode : NemoPSM, IEquatable<NemoMode>, IEquatable<AcousticProperties>
     {
         public NemoMode(XmlNode mode, float platformHeight, int modeID) : base(mode)

@@ -14,6 +14,7 @@ using ThinkGeo.MapSuite.WpfDesktopEdition;
 
 namespace ESME.Mapping
 {
+    [Serializable]
     public class MapLayerViewModel : PropertyChangedBase, ISupportValidation, IHaveAName
     {
         protected static readonly Random Random;

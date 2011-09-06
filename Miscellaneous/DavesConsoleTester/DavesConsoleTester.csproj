@@ -37,6 +37,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Cinch.WPF, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\Cinch.WPF.dll</HintPath>
+    </Reference>
     <Reference Include="EmbeddedSho, Version=2.0.5.27, Culture=neutral, PublicKeyToken=314a316d4cfb815d, processorArchitecture=MSIL" />
     <Reference Include="HDF5DotNet">
       <HintPath>..\..\Libraries\ESME\External References\HDF5DotNet.dll</HintPath>
@@ -45,11 +51,18 @@
     <Reference Include="IronPython.Modules, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" />
     <Reference Include="MathFunc, Version=2.0.5.0, Culture=neutral, PublicKeyToken=af39242306d6159d, processorArchitecture=MSIL" />
     <Reference Include="MatrixInterf, Version=2.0.5.0, Culture=neutral, PublicKeyToken=1fa71b5ffec10e32, processorArchitecture=MSIL" />
+    <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
+    </Reference>
     <Reference Include="ShoArray, Version=2.0.5.0, Culture=neutral, PublicKeyToken=1635376d5e62ab5f, processorArchitecture=MSIL" />
     <Reference Include="ShoDB, Version=2.0.5.0, Culture=neutral, PublicKeyToken=44bfc57d893eaf85, processorArchitecture=MSIL" />
     <Reference Include="ShoViz, Version=2.0.5.0, Culture=neutral, PublicKeyToken=14eb30934789ddca, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\ESME WorkBench\External References\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />

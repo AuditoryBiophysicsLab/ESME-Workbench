@@ -30,6 +30,7 @@ using TreeNode = ESME.Mapping.TreeNode;
 
 namespace ESME.Metadata
 {
+    [Serializable]
     public class NAEMOScenarioMetadata : NAEMOMetadataBase
     {
         new internal static readonly List<Type> ReferencedTypes = new List<Type>(NAEMOMetadataBase.ReferencedTypes) {typeof(NemoModeToAcousticModelNameMap)};

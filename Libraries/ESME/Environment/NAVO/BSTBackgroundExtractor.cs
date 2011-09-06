@@ -4,6 +4,8 @@ using System.ComponentModel;
 using Cinch;
 using HDF5DotNet;
 using C5;
+using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
@@ -75,6 +77,56 @@ namespace ESME.Environment.NAVO
                 RunState = "Saved";
             }
             backgroundExtractor.Value++;
+        }
+
+        public static void Extract(float north, float south, float east, float west, System.Collections.Generic.IList<NAVOTimePeriod> timePeriods, string outputFilename, IProgress<TaskProgressInfo> progress = null)
+        {
+            var taskProgress = new TaskProgressInfo
+            {
+                TaskName = "BST Extraction",
+                CurrentActivity = "Initializing",
+                ProgressPercent = 0,
+            };
+            if (progress != null) progress.Report(taskProgress);
+
+            var trimRect = new GeoRect(north, south, east, west);
+            north = (float)Math.Ceiling(north);
+            south = (float)Math.Floor(south);
+            east = (float)Math.Ceiling(east);
+            west = (float)Math.Floor(west);
+
+            var maxProgress = (north - south) * (east - west) + 3;
+            var curProgress = 0f;
+
+            var fileId = H5F.open(Globals.AppSettings.NAVOConfiguration.BSTDirectory, H5F.OpenMode.ACC_RDONLY);
+            var highResGroup = H5G.open(fileId, "0.10000/G/UNCLASSIFIED/");
+            var lowResGroup = H5G.open(fileId, "5.00000/G/UNCLASSIFIED/");
+            var dedupeList = new HashedArrayList<SedimentSample>();
+            for (var lat = south; lat < north; lat++)
+                for (var lon = west; lon < east; lon++)
+                {
+                    var data = ReadDataset(null, lowResGroup, (int)lat, (int)lon);
+                    //if (data != null) results.Samples.AddRange(data.Where(extractionArea.Contains));
+                    if (data != null) dedupeList.AddAll(data);
+                    curProgress++;
+                }
+            var sediment = new Sediment();
+            sediment.Samples.AddRange(dedupeList);
+            sediment.Samples.Sort();
+            //TaskName = "Sediment: Removing duplicate data";
+            //Sediment.Samples.RemoveDuplicates(backgroundExtractor);
+            curProgress++;
+            taskProgress.CurrentActivity = "Trimming data to selected region";
+            sediment.Samples.TrimToNearestPoints(trimRect);
+            curProgress++;
+
+            H5G.close(lowResGroup);
+            H5G.close(highResGroup);
+            H5F.close(fileId);
+            sediment.Save(outputFilename + ".sediment");
+            taskProgress.CurrentActivity = "Done";
+            taskProgress.ProgressPercent = 100;
+            if (progress != null) progress.Report(taskProgress);
         }
 
         static IEnumerable<SedimentSample> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)

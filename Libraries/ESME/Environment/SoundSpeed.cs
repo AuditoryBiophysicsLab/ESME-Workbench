@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 using HRC.Utility;
 
 namespace ESME.Environment
 {
-    public class SoundSpeed
+    [Serializable]
+    public class SoundSpeed : IExtensibleDataObject
     {
         static readonly List<Type> ReferencedTypes = new List<Type>(SoundSpeedField.ReferencedTypes);
 
@@ -21,8 +25,14 @@ namespace ESME.Environment
 
         public void Save(string filename)
         {
-            var serializer = new XmlSerializer<List<SoundSpeedField>> { Data = SoundSpeedFields };
-            serializer.Save(filename, ReferencedTypes);
+            //var serializer = new XmlSerializer<List<SoundSpeedField>> { Data = SoundSpeedFields };
+            //serializer.Save(filename, ReferencedTypes);
+
+            var formatter = new BinaryFormatter();
+            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                formatter.Serialize(stream, SoundSpeedFields);
+            }
         }
 
         /// <summary>
@@ -43,7 +53,11 @@ namespace ESME.Environment
 
         public static SoundSpeed Load(string filename)
         {
-            return new SoundSpeed { SoundSpeedFields = XmlSerializer<List<SoundSpeedField>>.Load(filename, ReferencedTypes) };
+            var formatter = new BinaryFormatter();
+            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return new SoundSpeed {SoundSpeedFields = (List<SoundSpeedField>)formatter.Deserialize(stream)};
+            }
         }
 
         public static SoundSpeed Load(string temperatureFilename, string salinityFilename, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null, BackgroundTask backgroundTask = null)
@@ -114,5 +128,9 @@ namespace ESME.Environment
             foreach (var field1 in data1.SoundSpeedFields.Where(field1 => data2[field1.TimePeriod] == null)) throw new DataException(string.Format("SoundSpeeds do not contain the same time periods. Data 1 has time period {0}, data 2 does not", field1.TimePeriod));
             foreach (var field2 in data2.SoundSpeedFields.Where(field2 => data1[field2.TimePeriod] == null)) throw new DataException(string.Format("SoundSpeeds do not contain the same time periods. Data 2 has time period {0}, data 1 does not", field2.TimePeriod));
         }
+
+        #region IExtensibleDataObject
+        public virtual ExtensionDataObject ExtensionData { get; set; }
+        #endregion
     }
 }

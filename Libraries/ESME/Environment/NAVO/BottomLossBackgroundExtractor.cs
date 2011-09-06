@@ -4,11 +4,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using Cinch;
 using ESME.NEMO;
 using GisSharpBlog.NetTopologySuite.IO;
 using HRC.Navigation;
 using System.Threading.Tasks;
+using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
@@ -52,12 +54,12 @@ namespace ESME.Environment.NAVO
 
         #region public EnvironmentData<BottomLossData> BottomLossData { get; set; }
 
-        public EnvironmentData<BottomLossData> BottomLossData
+        public EnvironmentData<BottomLossSample> BottomLossData
         {
             get { return _bottomLossData; }
         }
 
-        readonly EnvironmentData<BottomLossData> _bottomLossData = new EnvironmentData<BottomLossData>();
+        readonly EnvironmentData<BottomLossSample> _bottomLossData = new EnvironmentData<BottomLossSample>();
 
         #endregion
 
@@ -129,7 +131,7 @@ namespace ESME.Environment.NAVO
             backgroundExtractor.Maximum = locations.Count;
             foreach (var location in locations) 
             {
-                BottomLossData curPoint = null;
+                BottomLossSample curPoint = null;
                 if (UseLFBL)
                 {
                     var process = Process.Start(new ProcessStartInfo
@@ -169,8 +171,16 @@ namespace ESME.Environment.NAVO
             }
         }
 
-        public static async Task<EnvironmentData<BottomLossData>> ExtractAsync(bool useHFBL, bool useLFBL, bool isPointExtraction, float north, float south, float east, float west, IProgress<int> progress = null)
+        public static void Extract(bool useHFBL, bool useLFBL, bool isPointExtraction, float north, float south, float east, float west, string outputFilename, IProgress<TaskProgressInfo> progress = null)
         {
+            var taskProgress = new TaskProgressInfo
+            {
+                TaskName = "Bottom Loss Extraction",
+                CurrentActivity = "Initializing",
+                ProgressPercent = 0,
+            };
+            if (progress != null) progress.Report(taskProgress);
+
             var locations = new List<EarthCoordinate>();
             if (!isPointExtraction)
             {
@@ -188,10 +198,10 @@ namespace ESME.Environment.NAVO
                 locations.Add(new EarthCoordinate(north, west));
             }
 
-            var bottomLossData = new EnvironmentData<BottomLossData>();
+            var bottomLoss = new BottomLoss();
             foreach (var location in locations)
             {
-                BottomLossData curPoint = null;
+                BottomLossSample curPoint = null;
                 if (useLFBL)
                 {
                     var process = Process.Start(new ProcessStartInfo
@@ -203,11 +213,13 @@ namespace ESME.Environment.NAVO
                         RedirectStandardError = true,
                         UseShellExecute = false,
                         CreateNoWindow = true,
+                        WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath),
                     });
                     //process.PriorityClass = ProcessPriorityClass.Normal;
                     process.WaitForExit();
-                    var stderr = process.StandardError.ReadToEnd();
+                    //var stderr = process.StandardError.ReadToEnd();
                     curPoint = ParseLowFrequencyOutput(process.StandardOutput);
+                    //Debug.WriteLine(string.Format("Low frequency output: {0}", process.StandardOutput.ReadToEnd()));
                 }
                 if (useHFBL)
                 {
@@ -220,15 +232,24 @@ namespace ESME.Environment.NAVO
                         RedirectStandardError = true,
                         UseShellExecute = false,
                         CreateNoWindow = true,
+                        WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath),
                     });
                     //process.PriorityClass = ProcessPriorityClass.Normal;
                     process.WaitForExit();
-                    var stderr = process.StandardError.ReadToEnd();
+                    //var stderr = process.StandardError.ReadToEnd();
                     curPoint = ParseHighFrequencyOutput(process.StandardOutput, curPoint);
+                    //Debug.WriteLine(string.Format("High frequency output: {0}", process.StandardOutput.ReadToEnd()));
                 }
-                if (curPoint != null) bottomLossData.Add(curPoint);
+                if (curPoint != null) bottomLoss.Samples.Add(curPoint);
             }
-            return bottomLossData;
+            taskProgress.CurrentActivity = "Saving";
+            taskProgress.ProgressPercent = 95;
+            if (progress != null) progress.Report(taskProgress);
+            bottomLoss.Save(outputFilename + ".bottomloss");
+            taskProgress.CurrentActivity = "Done";
+            taskProgress.ProgressPercent = 100;
+            if (progress != null) progress.Report(taskProgress);
+
         }
 
         void GenerateBatchFile(string batchFileName, IEnumerable<EarthCoordinate> locations)
@@ -261,13 +282,13 @@ namespace ESME.Environment.NAVO
         static string ExtractorArgument(bool isLowFrequency, Geo location)
         {
             var database = Path.Combine(isLowFrequency ? Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath) : Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath), "dbases/");
-            return string.Format(isLowFrequency ? " \"/\" \"{0}\" {1:0.00} {2:0.00} 1 0" : " \"/\" \"{0}\" {1:0.00} {2:0.00}", database, location.Latitude, location.Longitude);
+            return string.Format(isLowFrequency ? "\"/\" \"{0}\" {1:0.00} {2:0.00} 1 0" : "\"/\" \"{0}\" {1:0.00} {2:0.00}", database, location.Latitude, location.Longitude);
         }
 
-        static BottomLossData ParseLowFrequencyOutput(TextReader stream)
+        static BottomLossSample ParseLowFrequencyOutput(TextReader stream)
         {
             var splitCharsSpaceEquals = new[] { ' ', '=' };
-
+            //NextLine(stream);
             var fields = NextLine(stream).Split(splitCharsSpaceEquals, StringSplitOptions.RemoveEmptyEntries);
             if (fields[0].ToLower() != "latitude")
                 throw new ParseException(
@@ -278,7 +299,7 @@ namespace ESME.Environment.NAVO
                 throw new ParseException(
                         "Error parsing bottom loss results.  LFBL output not in expected format (longitude)");
             var lfLongitude = Math.Round(double.Parse(fields[1]), 4);
-            var curPoint = new BottomLossData(lfLatitude, lfLongitude);
+            var curPoint = new BottomLossSample(lfLatitude, lfLongitude, new BottomLossData());
             NextLine(stream, "---- World 15 Parameter set ----");
             var curLine = NextLine(stream);
             while (!curLine.Contains("Tabular Listing of Parameters"))
@@ -287,55 +308,55 @@ namespace ESME.Environment.NAVO
                 switch (fields[0].ToUpper())
                 {
                     case "RATIOD":
-                        curPoint.RATIOD = double.Parse(fields[1]);
+                        curPoint.Data.RATIOD = double.Parse(fields[1]);
                         break;
                     case "DLD":
-                        curPoint.DLD = double.Parse(fields[1]);
+                        curPoint.Data.DLD = double.Parse(fields[1]);
                         break;
                     case "RHOLD":
-                        curPoint.RHOLD = double.Parse(fields[1]);
+                        curPoint.Data.RHOLD = double.Parse(fields[1]);
                         break;
                     case "RHOSD":
-                        curPoint.RHOSD = double.Parse(fields[1]);
+                        curPoint.Data.RHOSD = double.Parse(fields[1]);
                         break;
                     case "GD":
-                        curPoint.GD = double.Parse(fields[1]);
+                        curPoint.Data.GD = double.Parse(fields[1]);
                         break;
                     case "BETAD":
-                        curPoint.BETAD = double.Parse(fields[1]);
+                        curPoint.Data.BETAD = double.Parse(fields[1]);
                         break;
                     case "FKZD":
-                        curPoint.FKZD = double.Parse(fields[1]);
+                        curPoint.Data.FKZD = double.Parse(fields[1]);
                         break;
                     case "FKZP":
-                        curPoint.FKZP = double.Parse(fields[1]);
+                        curPoint.Data.FKZP = double.Parse(fields[1]);
                         break;
                     case "BRFLD":
-                        curPoint.BRFLD = double.Parse(fields[1]);
+                        curPoint.Data.BRFLD = double.Parse(fields[1]);
                         break;
                     case "FEXP":
-                        curPoint.FEXP = double.Parse(fields[1]);
+                        curPoint.Data.FEXP = double.Parse(fields[1]);
                         break;
                     case "D2A":
-                        curPoint.D2A = double.Parse(fields[1]);
+                        curPoint.Data.D2A = double.Parse(fields[1]);
                         break;
                     case "ALF2A":
-                        curPoint.ALF2A = double.Parse(fields[1]);
+                        curPoint.Data.ALF2A = double.Parse(fields[1]);
                         break;
                     case "RHO2A":
-                        curPoint.RHO2A = double.Parse(fields[1]);
+                        curPoint.Data.RHO2A = double.Parse(fields[1]);
                         break;
                     case "SUBCRIT":
-                        curPoint.SUBCRIT = double.Parse(fields[1]);
+                        curPoint.Data.SUBCRIT = double.Parse(fields[1]);
                         break;
                     case "T2RH":
-                        curPoint.T2RH = double.Parse(fields[1]);
+                        curPoint.Data.T2RH = double.Parse(fields[1]);
                         break;
                     case "SEDTHK_M":
-                        curPoint.SEDTHK_M = double.Parse(fields[1]);
+                        curPoint.Data.SEDTHK_M = double.Parse(fields[1]);
                         break;
                     case "SEDTHK_S":
-                        curPoint.SEDTHK_S = double.Parse(fields[1]);
+                        curPoint.Data.SEDTHK_S = double.Parse(fields[1]);
                         break;
                 }
                 curLine = NextLine(stream);
@@ -343,7 +364,7 @@ namespace ESME.Environment.NAVO
             return curPoint;
         }
 
-        static BottomLossData ParseHighFrequencyOutput(TextReader stream, BottomLossData curPoint)
+        static BottomLossSample ParseHighFrequencyOutput(TextReader stream, BottomLossSample curPoint)
         {
             var splitCharsSpaceEquals = new[] { ' ', '=' };
             var splitCharsCommaEquals = new[] { ',', '=' };
@@ -353,17 +374,17 @@ namespace ESME.Environment.NAVO
             var hfLatitude = Math.Round(double.Parse(fields[1]), 4);
             if (fields[2].ToLower() != "lon") throw new ParseException("Error parsing bottom loss results.  HFBL output not in expected format (lon)");
             var hfLongitude = Math.Round(double.Parse(fields[3]), 4);
-            if (curPoint == null) curPoint = new BottomLossData(hfLatitude, hfLongitude);
+            if (curPoint == null) curPoint = new BottomLossSample(hfLatitude, hfLongitude, new BottomLossData());
             else if (((int)(hfLatitude * 10000.0) != (int)(curPoint.Latitude * 10000)) && ((int)(hfLongitude * 10000.0) != (int)(curPoint.Longitude * 10000))) throw new ParseException("Error parsing bottom loss results.  Adjacent LFBL and HFBL extractions do not refer to the same point");
             fields = NextLine(stream).Split(splitCharsCommaEquals, StringSplitOptions.RemoveEmptyEntries);
             if (fields[0].Trim().ToUpper() != "HFBL CURVE NUMBER") throw new ParseException("Error parsing bottom loss results.  HFBL output not in expected format (HFBL curve number)");
-            curPoint.CurveNumber = double.Parse(fields[1]);
+            curPoint.Data.CurveNumber = double.Parse(fields[1]);
             return curPoint;
         }
 
-        static EnvironmentData<BottomLossData> ParseOutput(TextReader stream, bool hasLowFreq, bool hasHighFreq)
+        static EnvironmentData<BottomLossSample> ParseOutput(TextReader stream, bool hasLowFreq, bool hasHighFreq)
         {
-            var result = new EnvironmentData<BottomLossData>();
+            var result = new EnvironmentData<BottomLossSample>();
             var splitCharsSpaceEquals = new[] { ' ', '=' };
             var splitCharsCommaEquals = new[] { ',', '=' };
             var curLine = NextLine(stream);
@@ -371,7 +392,7 @@ namespace ESME.Environment.NAVO
             {
                 var lfLongitude = 0.0;
                 var lfLatitude =  0.0;
-                BottomLossData curPoint = null;
+                BottomLossSample curPoint = null;
                 string[] fields;
                 if (hasLowFreq)
                 {
@@ -382,7 +403,7 @@ namespace ESME.Environment.NAVO
                     fields = NextLine(stream).Split(splitCharsSpaceEquals, StringSplitOptions.RemoveEmptyEntries);
                     if (fields[0].ToLower() != "longitude") throw new ParseException("Error parsing bottom loss results.  LFBL output not in expected format (longitude)");
                     lfLongitude = Math.Round(double.Parse(fields[1]), 4);
-                    curPoint = new BottomLossData(lfLatitude, lfLongitude);
+                    curPoint = new BottomLossSample(lfLatitude, lfLongitude, new BottomLossData());
                     curLine = NextLine(stream, "---- World 15 Parameter set ----");
                     while (!curLine.Contains("Tabular Listing of Parameters"))
                     {
@@ -390,55 +411,55 @@ namespace ESME.Environment.NAVO
                         switch (fields[0].ToUpper())
                         {
                             case "RATIOD":
-                                curPoint.RATIOD = double.Parse(fields[1]);
+                                curPoint.Data.RATIOD = double.Parse(fields[1]);
                                 break;
                             case "DLD":
-                                curPoint.DLD = double.Parse(fields[1]);
+                                curPoint.Data.DLD = double.Parse(fields[1]);
                                 break;
                             case "RHOLD":
-                                curPoint.RHOLD = double.Parse(fields[1]);
+                                curPoint.Data.RHOLD = double.Parse(fields[1]);
                                 break;
                             case "RHOSD":
-                                curPoint.RHOSD = double.Parse(fields[1]);
+                                curPoint.Data.RHOSD = double.Parse(fields[1]);
                                 break;
                             case "GD":
-                                curPoint.GD = double.Parse(fields[1]);
+                                curPoint.Data.GD = double.Parse(fields[1]);
                                 break;
                             case "BETAD":
-                                curPoint.BETAD = double.Parse(fields[1]);
+                                curPoint.Data.BETAD = double.Parse(fields[1]);
                                 break;
                             case "FKZD":
-                                curPoint.FKZD = double.Parse(fields[1]);
+                                curPoint.Data.FKZD = double.Parse(fields[1]);
                                 break;
                             case "FKZP":
-                                curPoint.FKZP = double.Parse(fields[1]);
+                                curPoint.Data.FKZP = double.Parse(fields[1]);
                                 break;
                             case "BRFLD":
-                                curPoint.BRFLD = double.Parse(fields[1]);
+                                curPoint.Data.BRFLD = double.Parse(fields[1]);
                                 break;
                             case "FEXP":
-                                curPoint.FEXP = double.Parse(fields[1]);
+                                curPoint.Data.FEXP = double.Parse(fields[1]);
                                 break;
                             case "D2A":
-                                curPoint.D2A = double.Parse(fields[1]);
+                                curPoint.Data.D2A = double.Parse(fields[1]);
                                 break;
                             case "ALF2A":
-                                curPoint.ALF2A = double.Parse(fields[1]);
+                                curPoint.Data.ALF2A = double.Parse(fields[1]);
                                 break;
                             case "RHO2A":
-                                curPoint.RHO2A = double.Parse(fields[1]);
+                                curPoint.Data.RHO2A = double.Parse(fields[1]);
                                 break;
                             case "SUBCRIT":
-                                curPoint.SUBCRIT = double.Parse(fields[1]);
+                                curPoint.Data.SUBCRIT = double.Parse(fields[1]);
                                 break;
                             case "T2RH":
-                                curPoint.T2RH = double.Parse(fields[1]);
+                                curPoint.Data.T2RH = double.Parse(fields[1]);
                                 break;
                             case "SEDTHK_M":
-                                curPoint.SEDTHK_M = double.Parse(fields[1]);
+                                curPoint.Data.SEDTHK_M = double.Parse(fields[1]);
                                 break;
                             case "SEDTHK_S":
-                                curPoint.SEDTHK_S = double.Parse(fields[1]);
+                                curPoint.Data.SEDTHK_S = double.Parse(fields[1]);
                                 break;
                         }
                     }
@@ -452,11 +473,11 @@ namespace ESME.Environment.NAVO
                     var hfLatitude = Math.Round(double.Parse(fields[1]), 4);
                     if (fields[2].ToLower() != "longitude") throw new ParseException("Error parsing bottom loss results.  HFBL output not in expected format (lon)");
                     var hfLongitude = Math.Round(double.Parse(fields[3]), 4);
-                    if (curPoint == null) curPoint = new BottomLossData(hfLatitude, hfLongitude);
+                    if (curPoint == null) curPoint = new BottomLossSample(hfLatitude, hfLongitude, new BottomLossData());
                     else if ((hfLatitude != lfLatitude) && (hfLongitude != lfLongitude)) throw new ParseException("Error parsing bottom loss results.  Adjacent LFBL and HFBL extractions do not refer to the same point");
                     fields = NextLine(stream).Split(splitCharsCommaEquals, StringSplitOptions.RemoveEmptyEntries);
                     if (fields[0].Trim().ToUpper() != "HFBL CURVE NUMBER") throw new ParseException("Error parsing bottom loss results.  HFBL output not in expected format (HFBL curve number)");
-                    curPoint.CurveNumber = double.Parse(fields[1]);
+                    curPoint.Data.CurveNumber = double.Parse(fields[1]);
                 }
                 
                 if (curPoint != null) result.Add(curPoint);
@@ -490,12 +511,52 @@ namespace ESME.Environment.NAVO
         }
     }
 
-    // ReSharper disable InconsistentNaming
-    public class BottomLossData : EarthCoordinate<BottomLossData>
+    public class BottomLoss
     {
-        public BottomLossData() { }
-        public BottomLossData(double latitude, double longitude) : base(latitude, longitude) { }
+        static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<BottomLossSample>.ReferencedTypes) { typeof(BottomLossSample) };
 
+        public EnvironmentData<BottomLossSample> Samples { get; private set; }
+
+        public BottomLoss()
+        {
+            Samples = new EnvironmentData<BottomLossSample>();
+        }
+
+        public static BottomLoss Load(string filename)
+        {
+            //return new BottomLoss { Samples = XmlSerializer<EnvironmentData<BottomLossSample>>.Load(filename, ReferencedTypes) };
+            var formatter = new BinaryFormatter();
+            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return new BottomLoss { Samples = (EnvironmentData<BottomLossSample>)formatter.Deserialize(stream) };
+            }
+        }
+
+        public void Save(string filename)
+        {
+            //var serializer = new XmlSerializer<EnvironmentData<BottomLossSample>> { Data = Samples };
+            //serializer.Save(filename, ReferencedTypes);
+            var formatter = new BinaryFormatter();
+            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                formatter.Serialize(stream, Samples);
+            }
+        }
+    }
+
+    [Serializable]
+    public class BottomLossSample : EarthCoordinate<BottomLossData>
+    {
+        public BottomLossSample() { }
+
+        public BottomLossSample(Geo location, BottomLossData sample) : base(location.Latitude, location.Longitude, sample) { }
+        public BottomLossSample(double latitude, double longitude, BottomLossData sample) : base(latitude, longitude, sample) { }
+    }
+
+    // ReSharper disable InconsistentNaming
+    [Serializable]
+    public class BottomLossData 
+    {
         public double CurveNumber { get; set; }
         public double RATIOD { get; set; }
         public double DLD { get; set; }

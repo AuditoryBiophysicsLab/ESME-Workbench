@@ -1,15 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using System.Threading.Tasks;
+using ESME.Data;
 using ESME.Environment;
+using ESME.Environment.NAVO;
+using HRC.Navigation;
+using HRC.Utility;
 using ShoNS.Hosting;
+using Environment = System.Environment;
 
 namespace DavesConsoleTester
 {
     class Program
     {
         static void Main(string[] args)
+        {
+            var settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME WorkBench"), "settings.xml");
+            ESME.Globals.AppSettings = AppSettings.Load(settings);
+
+            const double north = 32.964529899922404;
+            const double south = 27.555799630786112;
+            const double east = -77.1238998087263;
+            const double west = -83.37449801842213;
+            const string where = @"C:\Users\Dave Anderson\Desktop\NAEMO demos\BU Test Sample\Sim Areas\Jacksonville\Data";
+            const string overlayName = "Jax_Ops_Area_200km";
+            var outputPath = Path.Combine(where, overlayName);
+            var months = new List<NAVOTimePeriod> { NAVOTimePeriod.January, NAVOTimePeriod.February, NAVOTimePeriod.March, NAVOTimePeriod.April, NAVOTimePeriod.May, NAVOTimePeriod.June, NAVOTimePeriod.July, NAVOTimePeriod.August, NAVOTimePeriod.September, NAVOTimePeriod.October, NAVOTimePeriod.November, NAVOTimePeriod.December};
+            var seasons = new List<NAVOTimePeriod> { NAVOTimePeriod.Spring, NAVOTimePeriod.Summer, NAVOTimePeriod.Fall, NAVOTimePeriod.Winter, NAVOTimePeriod.Warm, NAVOTimePeriod.Cold};
+            IProgress<TaskProgressInfo> gdemProgress = new Progress<TaskProgressInfo>(p => Debug.WriteLine("{0} : {1} : {2}%", p.TaskName, p.CurrentActivity, p.ProgressPercent));
+            var gdem = TaskEx.Run(() => GDEMBackgroundExtractor.ExtractAsync(false, (float)north, (float)south, (float)east, (float)west, months, outputPath, gdemProgress));
+            IProgress<TaskProgressInfo> dbdbProgress = new Progress<TaskProgressInfo>(p => Debug.WriteLine("{0} : {1} : {2}%", p.TaskName, p.CurrentActivity, p.ProgressPercent));
+            var dbdb = TaskEx.Run(() => DBDBBackgroundExtractor.ExtractAsync(outputPath + "_0.50min", "0.50", new GeoRect(north, south, east, west), dbdbProgress));
+            IProgress<TaskProgressInfo> smgcProgress = new Progress<TaskProgressInfo>(p => Debug.WriteLine("{0} : {1} : {2}%", p.TaskName, p.CurrentActivity, p.ProgressPercent));
+            var smgc = TaskEx.Run(() => SMGCBackgroundExtractor.Extract((float)north, (float)south, (float)east, (float)west, months, outputPath, smgcProgress));
+            IProgress<TaskProgressInfo> bstProgress = new Progress<TaskProgressInfo>(p => Debug.WriteLine("{0} : {1} : {2}%", p.TaskName, p.CurrentActivity, p.ProgressPercent));
+            var bst = TaskEx.Run(() => BSTBackgroundExtractor.Extract((float)north, (float)south, (float)east, (float)west, months, outputPath, bstProgress));
+            IProgress<TaskProgressInfo> blProgress = new Progress<TaskProgressInfo>(p => Debug.WriteLine("{0} : {1} : {2}%", p.TaskName, p.CurrentActivity, p.ProgressPercent));
+            var bottomLoss = TaskEx.Run(() => BottomLossBackgroundExtractor.Extract(true, true, false, (float)north, (float)south, (float)east, (float)west, outputPath, blProgress));
+            Task.WaitAll(gdem, dbdb);
+            SoundSpeed temperature = null, salinity = null;
+            Bathymetry bathymetry = null;
+            Task.WaitAll(TaskEx.Run(() => temperature = SoundSpeed.Load(outputPath + ".temperature")),
+                         TaskEx.Run(() => salinity = SoundSpeed.Load(outputPath + ".salinity")),
+                         TaskEx.Run(() => bathymetry = Bathymetry.Load(outputPath + "_0.50min.bathymetry")));
+            var maxDepth = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
+            IProgress<TaskProgressInfo> ssProgress = new Progress<TaskProgressInfo>(p => Debug.WriteLine("{0} : {1} : {2}%", p.TaskName, p.CurrentActivity, p.ProgressPercent));
+            var soundSpeed = TaskEx.Run(() => GDEMBackgroundExtractor.ComputeSoundSpeeds(outputPath, temperature, salinity, maxDepth, seasons, ssProgress));
+            Task.WaitAll(soundSpeed, smgc, bst, bottomLoss);
+        }
+
+        static void Sho(string[] args)
         {
             // create the Embedded Sho
             Console.Write("Starting Embedded Sho...");

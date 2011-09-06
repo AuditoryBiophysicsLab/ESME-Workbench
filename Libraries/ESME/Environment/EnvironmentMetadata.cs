@@ -593,16 +593,19 @@ namespace ESME.Environment
         bool _isDirty;
     }
 
+    [Serializable]
     public class BathymetryMetadataFile : MetadataFile<BathymetryMetadata>
     {
         public BathymetryMetadataFile() { FileExtension = "txt"; }
     }
 
+    [Serializable]
     public class EnvironmentMetadataFile : MetadataFile<EnvironmentMetadata>
     {
         public EnvironmentMetadataFile() { FileExtension = ".dat"; }
     }
 
+    [Serializable]
     public class SimAreaMetadata : ViewModelBase
     {
         public SimAreaMetadata(string simAreaBasePath)

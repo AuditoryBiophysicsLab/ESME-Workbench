@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using Cinch;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
@@ -106,6 +107,96 @@ namespace ESME.Environment.NAVO
             }
             if (backgroundExtractor.SaveAsFilename != null) Wind.Save(backgroundExtractor.SaveAsFilename);
         }
+
+        public static void Extract(float north, float south, float east, float west, IList<NAVOTimePeriod> timePeriods, string outputFilename, IProgress<TaskProgressInfo> progress = null)
+        {
+            var taskProgress = new TaskProgressInfo
+            {
+                TaskName = "SMGC Extraction",
+                CurrentActivity = "Initializing",
+                ProgressPercent = 0,
+            };
+            if (progress != null) progress.Report(taskProgress);
+
+            var trimRect = new GeoRect(north, south, east, west);
+            north = (float)Math.Ceiling(north);
+            south = (float)Math.Floor(south);
+            east = (float)Math.Ceiling(east);
+            west = (float)Math.Floor(west);
+
+            var requiredMonths = timePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
+            var allMonths = new List<NAVOTimePeriod>();
+            foreach (var curPeriod in requiredMonths) allMonths.AddRange(curPeriod);
+            var uniqueMonths = allMonths.Distinct().ToList();
+            uniqueMonths.Sort();
+
+            var maxProgress = ((north - south + 1) * (east - west + 1) * uniqueMonths.Count) + timePeriods.Count;
+            var curProgress = 0f;
+
+            taskProgress.CurrentActivity = "Extracting monthly data";
+            // Construct a list of files we will need to read out of the SMGC database
+            var selectedFiles = new List<SMGCFile>();
+            var selectedLocations = new List<EarthCoordinate>();
+            for (var lat = south; lat <= north; lat++)
+                for (var lon = west; lon <= east; lon++)
+                {
+                    var northSouth = (lat >= 0) ? "n" : "s";
+                    var eastWest = (lon >= 0) ? "e" : "w";
+                    var curFileName = string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon));
+                    var matchingFiles = Directory.GetFiles(Globals.AppSettings.NAVOConfiguration.SMGCDirectory, curFileName, SearchOption.AllDirectories);
+                    if (matchingFiles.Length == 0) continue;
+                    var selectedFile = new SMGCFile(matchingFiles.First());
+                    selectedFiles.Add(selectedFile);
+                    selectedLocations.Add(new EarthCoordinate(lat, lon));
+                    curProgress++;
+                    taskProgress.ProgressPercent = (int)(curProgress / maxProgress) * 100;
+                    if (progress != null) progress.Report(taskProgress);
+                }
+            var wind = new Wind();
+            taskProgress.CurrentActivity = "Aggregating monthly data";
+            foreach (var curMonth in uniqueMonths)
+            {
+                var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
+                curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
+                                                      where (selectedFile.Months != null) && (selectedFile[curMonth] != null)
+                                                      select new WindSample(selectedFile.EarthCoordinate, selectedFile[curMonth].MeanWindSpeed));
+                wind.TimePeriods.Add(curMonthData);
+                curProgress++;
+                taskProgress.ProgressPercent = (int)(curProgress / maxProgress);
+                if (progress != null) progress.Report(taskProgress);
+            }
+            taskProgress.CurrentActivity = "Averaging monthly wind data";
+            for (var timePeriodIndex = 0; timePeriodIndex < timePeriods.Count(); timePeriodIndex++)
+            {
+                var curTimePeriodData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = timePeriods[timePeriodIndex] };
+                var monthsInCurTimePeriod = requiredMonths[timePeriodIndex].ToList();
+                if (monthsInCurTimePeriod.Count == 1) continue;
+                var curTimePeriodEnvironmentData = new List<WindSample>();
+                foreach (var curLocation in selectedLocations)
+                {
+                    var sum = 0f;
+                    var count = 0;
+                    foreach (var curMonth in monthsInCurTimePeriod)
+                    {
+                        if ((wind.TimePeriods == null) || (wind[curMonth] == null)) continue;
+                        if (!wind[curMonth].EnvironmentData[curLocation].Equals(curLocation)) continue;
+                        sum += wind[curMonth].EnvironmentData[curLocation].Data;
+                        count++;
+                    }
+                    if (count > 0) curTimePeriodEnvironmentData.Add(new WindSample(curLocation, sum / count));
+                }
+                curTimePeriodData.EnvironmentData.AddRange(curTimePeriodEnvironmentData);
+                curTimePeriodData.EnvironmentData.TrimToNearestPoints(trimRect);
+                curProgress++;
+                taskProgress.ProgressPercent = (int)(curProgress / maxProgress) * 100;
+                if (progress != null) progress.Report(taskProgress);
+            }
+            wind.Save(outputFilename + ".wind");
+            taskProgress.CurrentActivity = "Done";
+            taskProgress.ProgressPercent = 100;
+            if (progress != null) progress.Report(taskProgress);
+        }
+
 
         internal class SMGCFile
         {

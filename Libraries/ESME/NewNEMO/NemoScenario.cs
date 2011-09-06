@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Xml.Serialization;
@@ -7,6 +8,7 @@ using HRC.Utility;
 
 namespace ESME.NewNEMO
 {
+    [Serializable]
     [XmlRoot("Scenario")]
     public class NemoScenario : PropertyChangedBase
     {
