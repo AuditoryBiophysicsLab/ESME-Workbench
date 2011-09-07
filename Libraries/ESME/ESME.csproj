@@ -153,6 +153,7 @@
     <Compile Include="Data\WorkDirectories.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="Environment\Bathymetry.cs" />
+    <Compile Include="Environment\BottomLoss.cs" />
     <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptor.cs" />
     <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptors.cs" />
     <Compile Include="Environment\Descriptors\NAEMODescriptor.cs" />
