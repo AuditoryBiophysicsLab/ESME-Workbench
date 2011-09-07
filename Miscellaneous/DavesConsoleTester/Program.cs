@@ -268,11 +268,10 @@ namespace DavesConsoleTester
             Task<Wind> wind = null;
             Task<Sediment> sediment = null;
             Task<BottomLoss> bottomLoss = null;
-            bottomLoss = BottomLossBackgroundExtractor.Extract(true, true, false, north, south, east, west, bottomLossProgress)
             Task.WaitAll(TaskEx.Run(() => temperature = GDEM.ReadTemperatureAsync(months, north, south, east, west, temperatureProgress)),
                          TaskEx.Run(() => salinity = GDEM.ReadSalinityAsync(months, north, south, east, west, salinityProgress)),
                          TaskEx.Run(() => sediment = BST.ExtractAsync(north, south, east, west, sedimentProgress)),
-                         TaskEx.Run(() => bottomLoss = BottomLossBackgroundExtractor.Extract(true, true, false, north, south, east, west, bottomLossProgress)),
+                         TaskEx.Run(() => bottomLoss = BottomLossDatabase.ExtractAsync(true, true, false, north, south, east, west, bottomLossProgress)),
                          TaskEx.Run(() => wind = SMGC.ExtractAsync(months, north, south, east, west, windProgress)));
             Console.WriteLine("Waiting for temperature and salinity extraction...");
             Task.WaitAll(temperature, salinity);

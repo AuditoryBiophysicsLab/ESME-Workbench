@@ -176,7 +176,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Environment\NAVO\BST.cs" />
-    <Compile Include="Environment\NAVO\BottomLoss.cs" />
     <Compile Include="Environment\NAVO\SMGC.cs" />
     <Compile Include="Environment\NAVO\DBDBBackgroundExtractor.cs">
       <SubType>Component</SubType>
