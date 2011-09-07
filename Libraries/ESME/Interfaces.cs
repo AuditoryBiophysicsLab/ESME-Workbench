@@ -38,4 +38,9 @@ namespace ESME
     {
         string PropertyViewName { get; }
     }
+
+    public interface ICanSave
+    {
+        void Save(string fileName);
+    }
 }

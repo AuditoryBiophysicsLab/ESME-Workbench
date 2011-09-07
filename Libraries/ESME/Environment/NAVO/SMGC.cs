@@ -38,7 +38,7 @@ namespace ESME.Environment.NAVO
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = TaskScheduler.Default,
-                MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded
+                MaxDegreeOfParallelism = 4,
             });
 
             // Construct a list of files we will need to read out of the SMGC database

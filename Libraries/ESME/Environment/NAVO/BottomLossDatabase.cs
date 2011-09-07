@@ -1,10 +1,11 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using ESME.NEMO;
-using GisSharpBlog.NetTopologySuite.IO;
 using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
@@ -33,55 +34,70 @@ namespace ESME.Environment.NAVO
             }
             var progressStep = 100f / ((locations.Count * 2) + 1);
             var totalProgress = 0f;
+            var useLFBL = !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath);
+            var useHFBL = !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath);
+
+            var transformBlock = new TransformBlock<EarthCoordinate, BottomLossSample>(async location =>
+                {
+                    BottomLossSample curPoint = null;
+                    if (useLFBL)
+                    {
+                        var process = Process.Start(new ProcessStartInfo
+                        {
+                            Arguments = ExtractorArgument(true, location),
+                            FileName = Globals.AppSettings.NAVOConfiguration.LFBLEXEPath,
+                            RedirectStandardInput = false,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath),
+                        });
+                        //process.PriorityClass = ProcessPriorityClass.Normal;
+                        while (!process.HasExited) await TaskEx.Delay(10);
+                        if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+                        //var stderr = process.StandardError.ReadToEnd();
+                        curPoint = ParseLowFrequencyOutput(process.StandardOutput);
+                        //Debug.WriteLine(string.Format("Low frequency output: {0}", process.StandardOutput.ReadToEnd()));
+                    }
+                    if (useHFBL)
+                    {
+                        var process = Process.Start(new ProcessStartInfo
+                        {
+                            Arguments = ExtractorArgument(false, location),
+                            FileName = Globals.AppSettings.NAVOConfiguration.HFBLEXEPath,
+                            RedirectStandardInput = false,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath),
+                        });
+                        //process.PriorityClass = ProcessPriorityClass.Normal;
+                        while (!process.HasExited) await TaskEx.Delay(10);
+                        if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+                        //var stderr = process.StandardError.ReadToEnd();
+                        curPoint = ParseHighFrequencyOutput(process.StandardOutput, curPoint);
+                        //Debug.WriteLine(string.Format("High frequency output: {0}", process.StandardOutput.ReadToEnd()));
+                    }
+                    return curPoint;
+                },
+                new ExecutionDataflowBlockOptions
+                {
+                    TaskScheduler = TaskScheduler.Default,
+                    MaxDegreeOfParallelism = 4,
+                });
 
             var bottomLoss = new BottomLoss();
             foreach (var location in locations)
-            {
-                BottomLossSample curPoint = null;
-                if (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath))
-                {
-                    var process = Process.Start(new ProcessStartInfo
-                    {
-                        Arguments = ExtractorArgument(true, location),
-                        FileName = Globals.AppSettings.NAVOConfiguration.LFBLEXEPath,
-                        RedirectStandardInput = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath),
-                    });
-                    //process.PriorityClass = ProcessPriorityClass.Normal;
-                    if (!process.HasExited)
-                        await TaskEx.Delay(10);
-                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-                    //var stderr = process.StandardError.ReadToEnd();
-                    curPoint = ParseLowFrequencyOutput(process.StandardOutput);
-                    //Debug.WriteLine(string.Format("Low frequency output: {0}", process.StandardOutput.ReadToEnd()));
-                }
-                if (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath))
-                {
-                    var process = Process.Start(new ProcessStartInfo
-                    {
-                        Arguments = ExtractorArgument(false, location),
-                        FileName = Globals.AppSettings.NAVOConfiguration.HFBLEXEPath,
-                        RedirectStandardInput = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath),
-                    });
-                    //process.PriorityClass = ProcessPriorityClass.Normal;
-                    if (!process.HasExited)
-                        await TaskEx.Delay(10);
-                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-                    //var stderr = process.StandardError.ReadToEnd();
-                    curPoint = ParseHighFrequencyOutput(process.StandardOutput, curPoint);
-                    //Debug.WriteLine(string.Format("High frequency output: {0}", process.StandardOutput.ReadToEnd()));
-                }
-                if (curPoint != null) bottomLoss.Samples.Add(curPoint);
-            }
+                transformBlock.Post(location);
+
+            var batchBlock = new BatchBlock<BottomLossSample>(locations.Count);
+            transformBlock.LinkTo(batchBlock);
+
+            transformBlock.Complete();
+            await transformBlock.Completion;
+            bottomLoss.Samples.AddRange(batchBlock.Receive().Where(data => data != null).ToList());
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             return bottomLoss;
         }
@@ -98,13 +114,11 @@ namespace ESME.Environment.NAVO
             //NextLine(stream);
             var fields = NextLine(stream).Split(splitCharsSpaceEquals, StringSplitOptions.RemoveEmptyEntries);
             if (fields[0].ToLower() != "latitude")
-                throw new ParseException(
-                    "Error parsing bottom loss results.  LFBL output not in expected format (latitude)");
+                throw new FormatException("Error parsing bottom loss results.  LFBL output not in expected format (latitude)");
             var lfLatitude = Math.Round(double.Parse(fields[1]), 4);
             fields = NextLine(stream).Split(splitCharsSpaceEquals, StringSplitOptions.RemoveEmptyEntries);
             if (fields[0].ToLower() != "longitude")
-                throw new ParseException(
-                    "Error parsing bottom loss results.  LFBL output not in expected format (longitude)");
+                throw new FormatException("Error parsing bottom loss results.  LFBL output not in expected format (longitude)");
             var lfLongitude = Math.Round(double.Parse(fields[1]), 4);
             var curPoint = new BottomLossSample(lfLatitude, lfLongitude, new BottomLossData());
             NextLine(stream, "---- World 15 Parameter set ----");
@@ -177,14 +191,14 @@ namespace ESME.Environment.NAVO
             var splitCharsCommaEquals = new[] { ',', '=' };
 
             var fields = NextLine(stream).Split(splitCharsSpaceEquals, StringSplitOptions.RemoveEmptyEntries);
-            if (fields[0].ToLower() != "lat") throw new ParseException("Error parsing bottom loss results.  HFBL output not in expected format (lat)");
+            if (fields[0].ToLower() != "lat") throw new FormatException("Error parsing bottom loss results.  HFBL output not in expected format (lat)");
             var hfLatitude = Math.Round(double.Parse(fields[1]), 4);
-            if (fields[2].ToLower() != "lon") throw new ParseException("Error parsing bottom loss results.  HFBL output not in expected format (lon)");
+            if (fields[2].ToLower() != "lon") throw new FormatException("Error parsing bottom loss results.  HFBL output not in expected format (lon)");
             var hfLongitude = Math.Round(double.Parse(fields[3]), 4);
             if (curPoint == null) curPoint = new BottomLossSample(hfLatitude, hfLongitude, new BottomLossData());
-            else if (((int)(hfLatitude * 10000.0) != (int)(curPoint.Latitude * 10000)) && ((int)(hfLongitude * 10000.0) != (int)(curPoint.Longitude * 10000))) throw new ParseException("Error parsing bottom loss results.  Adjacent LFBL and HFBL extractions do not refer to the same point");
+            else if (((int)(hfLatitude * 10000.0) != (int)(curPoint.Latitude * 10000)) && ((int)(hfLongitude * 10000.0) != (int)(curPoint.Longitude * 10000))) throw new FormatException("Error parsing bottom loss results.  Adjacent LFBL and HFBL extractions do not refer to the same point");
             fields = NextLine(stream).Split(splitCharsCommaEquals, StringSplitOptions.RemoveEmptyEntries);
-            if (fields[0].Trim().ToUpper() != "HFBL CURVE NUMBER") throw new ParseException("Error parsing bottom loss results.  HFBL output not in expected format (HFBL curve number)");
+            if (fields[0].Trim().ToUpper() != "HFBL CURVE NUMBER") throw new FormatException("Error parsing bottom loss results.  HFBL output not in expected format (HFBL curve number)");
             curPoint.Data.CurveNumber = double.Parse(fields[1]);
             return curPoint;
         }

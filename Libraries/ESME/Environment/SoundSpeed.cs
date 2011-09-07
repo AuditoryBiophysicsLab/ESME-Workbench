@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 using HRC.Utility;
@@ -12,7 +13,7 @@ using HRC.Utility;
 namespace ESME.Environment
 {
     [Serializable]
-    public class SoundSpeed : IExtensibleDataObject
+    public class SoundSpeed : IExtensibleDataObject, ICanSave
     {
         static readonly List<Type> ReferencedTypes = new List<Type>(SoundSpeedField.ReferencedTypes);
 
@@ -56,8 +57,13 @@ namespace ESME.Environment
             var formatter = new BinaryFormatter();
             using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return new SoundSpeed {SoundSpeedFields = (List<SoundSpeedField>)formatter.Deserialize(stream)};
+                return new SoundSpeed { SoundSpeedFields = (List<SoundSpeedField>)formatter.Deserialize(stream) };
             }
+        }
+
+        public static Task<SoundSpeed> LoadAsync(string filename)
+        {
+            return TaskEx.Run(() => Load(filename));
         }
 
         public static SoundSpeed Load(string temperatureFilename, string salinityFilename, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null, BackgroundTask backgroundTask = null)

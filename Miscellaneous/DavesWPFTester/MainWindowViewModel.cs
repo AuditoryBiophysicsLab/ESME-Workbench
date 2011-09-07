@@ -91,13 +91,13 @@ namespace DavesWPFTester
             await TaskEx.WhenAll(sediment, wind, soundSpeed, bottomLoss, bathymetry);
             LogText += string.Format("{0} Data extraction complete!\r\n", DateTime.Now);
             IsStartCommandEnabled = true;
-            Task.WaitAll(temperature.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.temperature"))),
-                         salinity.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.salinity"))),
-                         soundSpeed.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.soundspeed"))),
-                         sediment.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.sediment"))),
-                         bottomLoss.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.bottomloss"))),
-                         bathymetry.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.0.50min.bathymetry"))),
-                         wind.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.wind"))));
+            await TaskEx.WhenAll(temperature.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.temperature"))),
+                                 salinity.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.salinity"))),
+                                 soundSpeed.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.soundspeed"))),
+                                 sediment.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.sediment"))),
+                                 bottomLoss.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.bottomloss"))),
+                                 bathymetry.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.0.50min.bathymetry"))),
+                                 wind.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.wind"))));
 
         }
         #endregion

@@ -25,7 +25,7 @@ namespace ESME.Environment.NAVO
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded
+                    MaxDegreeOfParallelism = 4,
                 });
             var batchBlock = new BatchBlock<SoundSpeedField>(months.Count);
             transformBlock.LinkTo(batchBlock);
@@ -62,7 +62,7 @@ namespace ESME.Environment.NAVO
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded
+                    MaxDegreeOfParallelism = 4,
                 });
             var batchBlock = new BatchBlock<SoundSpeedField>(months.Count);
             transformBlock.LinkTo(batchBlock);
@@ -99,7 +99,7 @@ namespace ESME.Environment.NAVO
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded
+                    MaxDegreeOfParallelism = 4,
                 });
             var batchBlock = new BatchBlock<SoundSpeedField>(months.Count);
             transformBlock.LinkTo(batchBlock);
@@ -140,7 +140,7 @@ namespace ESME.Environment.NAVO
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded
+                    MaxDegreeOfParallelism = 4,
                 });
             var batchBlock = new BatchBlock<SoundSpeedField>(temperature.SoundSpeedFields.Count);
             transformBlock.LinkTo(batchBlock);

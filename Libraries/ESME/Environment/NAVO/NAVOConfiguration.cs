@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
@@ -455,6 +456,17 @@ namespace ESME.Environment.NAVO
                 NAVOTimePeriod.May,
                 NAVOTimePeriod.June,
         };
+
+        /// <summary>
+        /// Returns a ReadOnlyCollection&gt;NAVOTimePeriod&lt; of all individual months (January through December)
+        /// </summary>
+        public static ReadOnlyCollection<NAVOTimePeriod> AllMonths { get { return AllMonthList.AsReadOnly(); } }
+        static readonly List<NAVOTimePeriod> AllMonthList = new List<NAVOTimePeriod> { NAVOTimePeriod.January, NAVOTimePeriod.February, NAVOTimePeriod.March, NAVOTimePeriod.April, NAVOTimePeriod.May, NAVOTimePeriod.June, NAVOTimePeriod.July, NAVOTimePeriod.August, NAVOTimePeriod.September, NAVOTimePeriod.October, NAVOTimePeriod.November, NAVOTimePeriod.December };
+        /// <summary>
+        /// Returns a ReadOnlyCollection&gt;NAVOTimePeriod&lt; of all seasons (Spring, Summer, Fall, Winter, Warm, Cold)
+        /// </summary>
+        public static ReadOnlyCollection<NAVOTimePeriod> AllSeasons { get { return AllSeasonsList.AsReadOnly(); } }
+        static readonly List<NAVOTimePeriod> AllSeasonsList = new List<NAVOTimePeriod> { NAVOTimePeriod.Spring, NAVOTimePeriod.Summer, NAVOTimePeriod.Fall, NAVOTimePeriod.Winter, NAVOTimePeriod.Warm, NAVOTimePeriod.Cold };
 
         public IEnumerable<NAVOTimePeriod> MonthsInTimePeriod(NAVOTimePeriod timePeriod)
         {
