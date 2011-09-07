@@ -11,17 +11,17 @@ namespace ESME.Environment.NAVO
 {
     public static class BottomLossDatabase
     {
-        public async static Task<BottomLoss> ExtractAsync(bool useHFBL, bool useLFBL, bool isPointExtraction, float north, float south, float east, float west, IProgress<float> progress = null)
+        public async static Task<BottomLoss> ExtractAsync(bool isPointExtraction, GeoRect region, IProgress<float> progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0f);
 
             var locations = new List<EarthCoordinate>();
             if (!isPointExtraction)
             {
-                north = (float)Math.Ceiling(north);
-                south = (float)Math.Floor(south);
-                east = (float)Math.Ceiling(east);
-                west = (float)Math.Floor(west);
+                var north = (float)Math.Ceiling(region.North);
+                var south = (float)Math.Floor(region.South);
+                var east = (float)Math.Ceiling(region.East);
+                var west = (float)Math.Floor(region.West);
                 locations = new List<EarthCoordinate>();
                 for (var lat = south; lat < north; lat += 0.25f)
                     for (var lon = west; lon < east; lon += 0.25f)
@@ -29,14 +29,16 @@ namespace ESME.Environment.NAVO
             }
             else
             {
-                locations.Add(new EarthCoordinate(north, west));
+                locations.Add(new EarthCoordinate(region.North, region.West));
             }
+            var progressStep = 100f / ((locations.Count * 2) + 1);
+            var totalProgress = 0f;
 
             var bottomLoss = new BottomLoss();
             foreach (var location in locations)
             {
                 BottomLossSample curPoint = null;
-                if (useLFBL)
+                if (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath))
                 {
                     var process = Process.Start(new ProcessStartInfo
                     {
@@ -50,12 +52,14 @@ namespace ESME.Environment.NAVO
                         WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath),
                     });
                     //process.PriorityClass = ProcessPriorityClass.Normal;
-                    process.WaitForExit();
+                    if (!process.HasExited)
+                        await TaskEx.Delay(10);
+                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
                     //var stderr = process.StandardError.ReadToEnd();
                     curPoint = ParseLowFrequencyOutput(process.StandardOutput);
                     //Debug.WriteLine(string.Format("Low frequency output: {0}", process.StandardOutput.ReadToEnd()));
                 }
-                if (useHFBL)
+                if (!string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath))
                 {
                     var process = Process.Start(new ProcessStartInfo
                     {
@@ -69,14 +73,16 @@ namespace ESME.Environment.NAVO
                         WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath),
                     });
                     //process.PriorityClass = ProcessPriorityClass.Normal;
-                    process.WaitForExit();
+                    if (!process.HasExited)
+                        await TaskEx.Delay(10);
+                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
                     //var stderr = process.StandardError.ReadToEnd();
                     curPoint = ParseHighFrequencyOutput(process.StandardOutput, curPoint);
                     //Debug.WriteLine(string.Format("High frequency output: {0}", process.StandardOutput.ReadToEnd()));
                 }
                 if (curPoint != null) bottomLoss.Samples.Add(curPoint);
             }
-            if (progress != null) progress.Report(0f);
+            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             return bottomLoss;
         }
 

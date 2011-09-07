@@ -1,0 +1,35 @@
+﻿<Window x:Class="DavesWPFTester.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+        mef:ViewModelLocator.ViewModel="MainWindowViewModel"
+        SnapsToDevicePixels="True"
+        Title="Dave's WPF Test Application"
+        Height="350"
+        Width="525"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:app="clr-namespace:DavesWPFTester"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance app:MainWindowViewModel}">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition />
+      <ColumnDefinition />
+    </Grid.ColumnDefinitions>
+    <DockPanel Grid.Column="0">
+      <Button DockPanel.Dock="Top"
+              Content="Start"
+              Height="25"
+              Command="{Binding StartCommand}" />
+      <Button DockPanel.Dock="Top"
+              Content="Stop"
+              Height="25"
+              Command="{Binding StopCommand}" />
+    </DockPanel>
+    <Controls:AutoScrollingTextBlock Grid.Column="1"
+                                     Text="{Binding LogText}" />
+  </Grid>
+</Window>

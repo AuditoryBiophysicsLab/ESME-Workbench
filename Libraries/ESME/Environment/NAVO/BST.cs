@@ -14,17 +14,16 @@ namespace ESME.Environment.NAVO
 {
     public static class BST
     {
-        public async static Task<Sediment> ExtractAsync(float north, float south, float east, float west, IProgress<float> progress = null)
+        public async static Task<Sediment> ExtractAsync(GeoRect region, IProgress<float> progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0f);
 
-            var trimRect = new GeoRect(north, south, east, west);
-            north = (float)Math.Ceiling(north);
-            south = (float)Math.Floor(south);
-            east = (float)Math.Ceiling(east);
-            west = (float)Math.Floor(west);
+            var north = (float)Math.Ceiling(region.North);
+            var south = (float)Math.Floor(region.South);
+            var east = (float)Math.Ceiling(region.East);
+            var west = (float)Math.Floor(region.West);
 
-            var progressStep = 100f / ((north - south) * (east - west) * 2) + 3;
+            var progressStep = 100f / (((north - south) * (east - west) * 2) + 3);
             var totalProgress = 0f;
 
             var fileId = H5F.open(Globals.AppSettings.NAVOConfiguration.BSTDirectory, H5F.OpenMode.ACC_RDONLY);
@@ -34,7 +33,7 @@ namespace ESME.Environment.NAVO
             for (var lat = south; lat < north; lat++)
                 for (var lon = west; lon < east; lon++)
                 {
-                    var data = ReadDataset(highResGroup, lowResGroup, (int)lat, (int)lon);
+                    var data = await ReadDataset(highResGroup, lowResGroup, (int)lat, (int)lon);
                     if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
                     if (data != null) dedupeList.AddAll(data);
                     if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
@@ -44,7 +43,7 @@ namespace ESME.Environment.NAVO
             sediment.Samples.AddRange(dedupeList);
             sediment.Samples.Sort();
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-            sediment.Samples.TrimToNearestPoints(trimRect);
+            sediment.Samples.TrimToNearestPoints(region);
             H5G.close(lowResGroup);
             H5G.close(highResGroup);
             H5F.close(fileId);
@@ -52,9 +51,9 @@ namespace ESME.Environment.NAVO
             return sediment;
         }
 
-        static IEnumerable<SedimentSample> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
+        static async Task<IEnumerable<SedimentSample>> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
         {
-            var result = ReadDataset(highResGroup, latitude, longitude);
+            var result = await ReadDataset(highResGroup, latitude, longitude);
             double resolutionStep;
             if (result != null)
             {
@@ -62,7 +61,7 @@ namespace ESME.Environment.NAVO
             }
             else
             {
-                result = ReadDataset(lowResGroup, latitude, longitude);
+                result = await ReadDataset(lowResGroup, latitude, longitude);
                 //if (result == null) throw new KeyNotFoundException(string.Format("Unable to locate sediment data for lat: {0}, lon: {1}", latitude, longitude));
                 if (result == null) return null;
                 resolutionStep = 5.0 / 60.0;
@@ -74,7 +73,7 @@ namespace ESME.Environment.NAVO
             return sedimentList;
         }
 
-        static short[,] ReadDataset(H5FileOrGroupId groupId, int latitude, int longitude)
+        static async Task<short[,]> ReadDataset(H5FileOrGroupId groupId, int latitude, int longitude)
         {
             if (groupId == null) return null;
             try

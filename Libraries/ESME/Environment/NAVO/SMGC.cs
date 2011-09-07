@@ -12,15 +12,14 @@ namespace ESME.Environment.NAVO
 {
     public static class SMGC
     {
-        public async static Task<Wind> ExtractAsync(IList<NAVOTimePeriod> timePeriods, float north, float south, float east, float west, IProgress<float> progress = null)
+        public async static Task<Wind> ExtractAsync(IList<NAVOTimePeriod> timePeriods, GeoRect region, IProgress<float> progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0f);
 
-            var trimRect = new GeoRect(north, south, east, west);
-            north = (float)Math.Ceiling(north);
-            south = (float)Math.Floor(south);
-            east = (float)Math.Ceiling(east);
-            west = (float)Math.Floor(west);
+            var north = (float)Math.Ceiling(region.North);
+            var south = (float)Math.Floor(region.South);
+            var east = (float)Math.Ceiling(region.East);
+            var west = (float)Math.Floor(region.West);
 
             var requiredMonths = timePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
             var allMonths = new List<NAVOTimePeriod>();
@@ -28,7 +27,7 @@ namespace ESME.Environment.NAVO
             var uniqueMonths = allMonths.Distinct().ToList();
             uniqueMonths.Sort();
 
-            var progressStep = 100f / ((north - south + 1) * (east - west + 1) + uniqueMonths.Count + timePeriods.Count + 1);
+            var progressStep = 100f / (((north - south + 1) * (east - west)) + uniqueMonths.Count + timePeriods.Count + 1);
             var totalProgress = 0f;
             var parallelReader = new TransformBlock<string, SMGCFile>(data =>
             {
@@ -58,6 +57,7 @@ namespace ESME.Environment.NAVO
             var batchBlock = new BatchBlock<SMGCFile>(selectedLocations.Count);
             parallelReader.LinkTo(batchBlock);
             parallelReader.Complete();
+            await parallelReader.Completion;
             IList<SMGCFile> selectedFiles = batchBlock.Receive().ToList();
             var wind = new Wind();
             foreach (var curMonth in uniqueMonths)
@@ -89,7 +89,7 @@ namespace ESME.Environment.NAVO
                     if (count > 0) curTimePeriodEnvironmentData.Add(new WindSample(curLocation, sum / count));
                 }
                 curTimePeriodData.EnvironmentData.AddRange(curTimePeriodEnvironmentData);
-                curTimePeriodData.EnvironmentData.TrimToNearestPoints(trimRect);
+                //curTimePeriodData.EnvironmentData.TrimToNearestPoints(region);
                 if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             }
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
