@@ -5,23 +5,27 @@ using System.Text;
 
 namespace HRC.NetCDF
 {
-    public class NetCDF
+    public class NetCDF : IDisposable
     {
-        public NetCDF(string fileName) 
+        readonly BinaryReader _reader;
+
+        public NetCDF(string fileName)
         {
-            using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var reader = new BinaryReader(stream))
-            {
-                var magic = reader.ReadBytes(3);
-                if (magic[0] != 'C' || magic[1] != 'D' || magic[2] != 'F') throw new FormatException("This is not a NetCDF file");
-                Version = reader.ReadByte();
-                if (Version != 1) throw new FormatException("This NetCDF file specifies 64 bit offsets, which are not supported by this reader");
-                RecordCount = reader.ReadNetCDFUint();
-                if (reader.ReadNetCDFUint() == (uint)NcField.Dimension) Dimensions = NcDim.ReadAll(reader);
-                if (reader.ReadNetCDFUint() == (uint)NcField.Attribute) Attributes = NcAtt.ReadAll(reader);
-                if (reader.ReadNetCDFUint() == (uint)NcField.Variable) Variables = NcVar.ReadAll(reader, Dimensions);
-            }
+            var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            _reader = new BinaryReader(stream);
+            var magic = _reader.ReadBytes(3);
+            if (magic[0] != 'C' || magic[1] != 'D' || magic[2] != 'F') throw new FormatException("This is not a NetCDF file");
+            Version = _reader.ReadByte();
+            if (Version != 1) throw new FormatException("This NetCDF file specifies 64 bit offsets, which are not supported by this reader");
+            RecordCount = _reader.ReadNetCDFUint();
+            if (_reader.ReadNetCDFUint() == (uint)NcField.Dimension) Dimensions = NcDim.ReadAll(_reader);
+            if (_reader.ReadNetCDFUint() == (uint)NcField.Attribute) Attributes = NcAtt.ReadAll(_reader);
+            if (_reader.ReadNetCDFUint() == (uint)NcField.Variable) Variables = NcVar.ReadAll(_reader, Dimensions);
         }
+
+        public void Close() {_reader.Close();}
+        public void Dispose() {Close();}
+        ~NetCDF(){Close();}
 
         public byte Version { get; private set; }
         public uint RecordCount { get; private set; }
@@ -56,6 +60,7 @@ namespace HRC.NetCDF
             }
             return sb.ToString();
         }
+
     }
 
     public static class NetCDFReaders

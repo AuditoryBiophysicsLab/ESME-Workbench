@@ -164,6 +164,7 @@
     <Compile Include="Environment\EnvironmentData.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />
     <Compile Include="Environment\Location.cs" />
+    <Compile Include="Environment\NAVO\BottomLossDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeDatabase.cs" />
     <Compile Include="Environment\NAVO\BottomSedimentTypeTable.cs" />
     <Compile Include="Environment\NAVO\BSTBackgroundExtractor.cs">
@@ -173,6 +174,9 @@
     <Compile Include="Environment\NAVO\BottomLossBackgroundExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Environment\NAVO\BST.cs" />
+    <Compile Include="Environment\NAVO\BottomLoss.cs" />
+    <Compile Include="Environment\NAVO\SMGC.cs" />
     <Compile Include="Environment\NAVO\DBDBBackgroundExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -180,6 +184,7 @@
     <Compile Include="Environment\NAVO\GDEMBackgroundExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Environment\NAVO\GDEM.cs" />
     <Compile Include="Environment\NAVO\GeneralizedDigitalEnvironmentModelDatabase.cs" />
     <Compile Include="Environment\NAVO\NAVOBackgroundExtractor.cs">
       <SubType>Component</SubType>

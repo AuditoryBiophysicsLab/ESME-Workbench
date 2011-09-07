@@ -11,7 +11,7 @@ namespace ESME.Environment
     {
         static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<SedimentSample>.ReferencedTypes) { typeof (SedimentSampleBase) };
 
-        public EnvironmentData<SedimentSample> Samples { get; private set; }
+        public EnvironmentData<SedimentSample> Samples { get; set; }
 
         public Sediment()
         {

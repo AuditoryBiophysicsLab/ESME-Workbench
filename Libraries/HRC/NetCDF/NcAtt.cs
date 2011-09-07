@@ -7,7 +7,7 @@ namespace HRC.NetCDF
 {
     public abstract class NcAtt
     {
-        public NcString Name { get; private set; }
+        public string Name { get; private set; }
         public NcType NcType { get; private set; }
 
         public uint Length { get; protected set; }
@@ -48,14 +48,13 @@ namespace HRC.NetCDF
                 default:
                     throw new NotImplementedException("Unknown base type");
             }
-            result.Name = name;
+            result.Name = name.Value;
             result.NcType = ncType;
             return result;
         }
     }
 
-    public class NcAttGeneric<T>: NcAtt
-        where T : struct
+    public abstract class NcAtt<T>: NcAtt
     {
         public T[] Value { get; protected set; }
         public T this[uint index] { get { return Value[index]; } set { Value[index] = value; } }
@@ -78,7 +77,7 @@ namespace HRC.NetCDF
         }
     }
 
-    public class NcAttByte : NcAttGeneric<byte>
+    public class NcAttByte : NcAtt<byte>
     {
         public NcAttByte(BinaryReader reader)
         {
@@ -87,7 +86,7 @@ namespace HRC.NetCDF
         }
     }
 
-    public class NcAttChar : NcAttGeneric<char>
+    public class NcAttChar : NcAtt<char>
     {
         public NcAttChar(BinaryReader reader)
         {
@@ -99,7 +98,7 @@ namespace HRC.NetCDF
         public override string ToString() { return string.Format("{0} {1} [{2}]", NcType, Name, Value); }
     }
 
-    public class NcAttShort : NcAttGeneric<short>
+    public class NcAttShort : NcAtt<short>
     {
         public NcAttShort(BinaryReader reader)
         {
@@ -110,7 +109,7 @@ namespace HRC.NetCDF
         }
     }
 
-    public class NcAttInt : NcAttGeneric<int>
+    public class NcAttInt : NcAtt<int>
     {
         public NcAttInt(BinaryReader reader)
         {
@@ -120,7 +119,7 @@ namespace HRC.NetCDF
         }
     }
 
-    public class NcAttFloat : NcAttGeneric<float>
+    public class NcAttFloat : NcAtt<float>
     {
         public NcAttFloat(BinaryReader reader)
         {
@@ -130,7 +129,7 @@ namespace HRC.NetCDF
         }
     }
 
-    public class NcAttDouble : NcAttGeneric<double>
+    public class NcAttDouble : NcAtt<double>
     {
         public NcAttDouble(BinaryReader reader)
         {

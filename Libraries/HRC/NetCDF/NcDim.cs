@@ -5,7 +5,7 @@ namespace HRC.NetCDF
 {
     public class NcDim
     {
-        public NcString Name { get; set; }
+        public string Name { get; set; }
         public uint Length { get; set; }
 
         public static List<NcDim> ReadAll(BinaryReader reader)
@@ -19,7 +19,7 @@ namespace HRC.NetCDF
 
         public NcDim(BinaryReader reader)
         {
-            Name = new NcString(reader);
+            Name = new NcString(reader).Value;
             Length = reader.ReadNetCDFUint();
         }
         public override string ToString() { return string.Format("{0} ({1})", Name, Length); }
