@@ -28,7 +28,12 @@ namespace ESME.NEMO
             DepressionElevationAngle = GetFloat("depthElAngle");
             RelativeBeamAngle = GetFloat("relativeBeamAngle");
             Radius = GetFloat("radius");
-            ClusterCount = GetInt("clusterCount");
+            try
+            {
+                ClusterCount = GetInt("clusterCount");
+            }
+            catch { }
+            
             //UsePlatformTimes = GetBool("usePlatformTimes");
             //PropagationPath = GetString("propagationPath");
 
