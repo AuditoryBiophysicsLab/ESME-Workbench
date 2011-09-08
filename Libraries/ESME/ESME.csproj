@@ -161,6 +161,7 @@
     <Compile Include="Environment\Descriptors\NAEMOEnvironmentDescriptors.cs" />
     <Compile Include="Environment\Descriptors\NAEMOOverlayDescriptor.cs" />
     <Compile Include="Environment\Descriptors\NAEMOOverlayDescriptors.cs" />
+    <Compile Include="Environment\Descriptors\RangeComplexes.cs" />
     <Compile Include="Environment\Environment.cs" />
     <Compile Include="Environment\Environment2DData.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />

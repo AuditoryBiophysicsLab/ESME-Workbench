@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Cinch;
 using ESME.Data;
+using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
 using HRC.Services;
@@ -33,6 +34,8 @@ namespace DavesWPFTester
             _visualizerService = visualizerService;
             var settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME WorkBench"), "settings.xml");
             ESME.Globals.AppSettings = AppSettings.Load(settings);
+            RangeComplexes = RangeComplexes.Singleton;
+            RangeComplexes.SimAreaCSVFile = Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv");
         }
 
         #region StartCommand
@@ -132,6 +135,24 @@ namespace DavesWPFTester
 
         static readonly PropertyChangedEventArgs LogTextChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.LogText);
         string _logText;
+
+        #endregion
+
+        #region public RangeComplexes RangeComplexes { get; set; }
+
+        public RangeComplexes RangeComplexes
+        {
+            get { return _rangeComplexes; }
+            set
+            {
+                if (_rangeComplexes == value) return;
+                _rangeComplexes = value;
+                NotifyPropertyChanged(RangeComplexesChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs RangeComplexesChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.RangeComplexes);
+        RangeComplexes _rangeComplexes;
 
         #endregion
 

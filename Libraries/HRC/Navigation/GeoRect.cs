@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
@@ -159,12 +160,16 @@ namespace HRC.Navigation
         }
 
         /// <summary>
-        ///   Creates a GeoRect that is exactly large enough to contain the two specified GeoRects.
+        /// Returns a GeoRect that encompasses all the GeoRects passed in as parameters
         /// </summary>
-        /// <param name = "geoRect1"></param>
-        /// <param name = "geoRect2"></param>
-        /// <returns></returns>
-        public static GeoRect Union(GeoRect geoRect1, GeoRect geoRect2) { return new GeoRect(Rect.Union(geoRect1, geoRect2)); }
+        /// <param name = "geoRects"></param>
+        public static GeoRect Union(params GeoRect[] geoRects)
+        {
+            if (geoRects.Length == 0) return null;
+            var result = new GeoRect(geoRects[0]);
+            if (geoRects.Length > 1) for (var i = 1; i < geoRects.Length; i++) result.Union(geoRects[i]);
+            return result;
+        }
 
         /// <summary>
         ///   Creates a GeoRect that is exactly large enough to include the specified GeoRect and the specified EarthCoordinate.

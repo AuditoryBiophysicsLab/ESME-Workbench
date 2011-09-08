@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Data;
 using System.Windows.Threading;
@@ -10,13 +12,16 @@ using Cinch;
 namespace HRC.Utility
 {
     [Serializable]
-    public class ObservableList<T> : List<T>, INotifyCollectionChanged
+    public class ObservableList<T> : List<T>, ICollection<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
         public new void Add(T item)
         {
             base.Add(item);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
         }
+// ReSharper disable StaticFieldInGenericType
+        static readonly PropertyChangedEventArgs ObservableListCountChangedEventArgs = ObservableHelper.CreateArgs<ObservableList<T>>(x => x.Count);
+// ReSharper restore StaticFieldInGenericType
 
         public new void AddRange(IEnumerable<T> items)
         {
@@ -140,6 +145,7 @@ namespace HRC.Utility
                 catch (Exception)
                 {}
             }
+            NotifyPropertyChanged(ObservableListCountChangedEventArgs);
         }
 
         protected virtual void OnCollectionChangedMultiItem(NotifyCollectionChangedEventArgs e)
@@ -153,6 +159,7 @@ namespace HRC.Utility
                 else
                     handler(this, e);
             }
+            NotifyPropertyChanged(ObservableListCountChangedEventArgs);
         }
 
         void CollectionChangedHandler(object sender, NotifyCollectionChangedEventArgs e)
@@ -186,6 +193,22 @@ namespace HRC.Utility
                     break;
             }
         }
- 
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs e)
+        {
+            var handlers = PropertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, e));
+                else
+                    handler(this, e);
+            }
+        }
+        #endregion
     }
 }

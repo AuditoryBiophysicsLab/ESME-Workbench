@@ -115,7 +115,7 @@ namespace ESME.NEMO.Overlay
             return null;
         }
 
-        public static void Create(string newOverlayFileName, IEnumerable<EarthCoordinate> coords, string sourceOverlayFileName = null, double? expandedRangeInKm = null)
+        public static void Create(string newOverlayFileName, IEnumerable<Geo> coords, string sourceOverlayFileName = null, double? expandedRangeInKm = null)
         {
             using (var writer = new StreamWriter(newOverlayFileName))
             {
