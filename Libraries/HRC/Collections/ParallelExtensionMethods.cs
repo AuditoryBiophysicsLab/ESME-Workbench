@@ -59,9 +59,10 @@ namespace HRC.Collections
             System.Diagnostics.Debug.WriteLine("{0}: ParallelSort: Final sort pass complete.  Total time: {1} seconds", DateTime.Now, elapsed.TotalSeconds);
         }
 
-        public async static Task<bool> GetIsSorted<T>(this System.Collections.Generic.IList<T> array, IComparer<T> comparer = null) where T : IComparer<T>
+        public static bool GetIsSorted<T>(this System.Collections.Generic.IList<T> array, IComparer<T> comparer = null) where T : IComparer<T>
         {
             if (comparer == null) comparer = Comparer<T>.Default;
+            if (array.Count < 10000) return IsSubListSorted(array, 0, array.Count - 1, comparer);
 
             var listIsSorted = true;
             //System.Diagnostics.Debug.WriteLine("{0}: GetIsSorted: Starting check on {1} threads", DateTime.Now, cpuCount);
@@ -79,7 +80,6 @@ namespace HRC.Collections
             transformBlock.LinkTo(actionBlock);
             transformBlock.Completion.ContinueWith(task => actionBlock.Complete());
             for (var i = 0; i < 4; i++) transformBlock.Post(i);
-            await actionBlock.Completion;
             return listIsSorted;
 #if false
             Parallel.For(0, cpuCount, () => false, (i, loop, j) =>

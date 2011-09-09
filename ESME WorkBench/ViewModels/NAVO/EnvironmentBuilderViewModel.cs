@@ -434,11 +434,6 @@ namespace ESMEWorkBench.ViewModels.NAVO
             if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
 
             var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
-            var gdemRequiredSupportFiles = new List<string>
-                                               {
-                                                   Path.Combine(extractionPath, "netcdf.dll"),
-                                                   Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
-                                               };
 
             var requiredMonths = selectedTimePeriods.Select(Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod).ToList();
             var allMonths = new List<NAVOTimePeriod>();
@@ -556,7 +551,6 @@ namespace ESMEWorkBench.ViewModels.NAVO
                     DestinationPath = tempPath,
                     UseExpandedExtractionArea = useExpandedExtractionArea,
                     ExtractionProgramPath = gdemExtractionProgramPath,
-                    RequiredSupportFiles = gdemRequiredSupportFiles,
                 };
                 soundSpeedExtractor.RunWorkerCompleted += (sender, e) =>
                 {

@@ -448,11 +448,6 @@ namespace ESME.Environment.Descriptors
 
         Task ReadDataAsync<T>(string dataFilename, AsyncArgs<T> args, out Task<T> mainTask) where T : ICanSave
         {
-            // args.Item1 = mainTask
-            // args.Item2 = continuationTask
-            // args.Item3 = loadFunc
-            // args.Item4 = readFunc
-            // args.Item5 = completionAction
             var dataFile = Path.Combine(DataPath, dataFilename);
             Task<T> main;
             var result = File.Exists(dataFile)

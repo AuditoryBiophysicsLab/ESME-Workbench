@@ -342,7 +342,6 @@ namespace ESME.TransmissionLoss.REFMS
                     DestinationPath = tempPath,
                     UseExpandedExtractionArea = false,
                     ExtractionProgramPath = gdemExtractionProgramPath,
-                    RequiredSupportFiles = gdemRequiredSupportFiles,
                     MaxDepth = maxDepth,
                     PointExtractionMode = true,
                 };

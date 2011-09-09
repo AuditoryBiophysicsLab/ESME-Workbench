@@ -60,6 +60,7 @@ namespace DavesWPFTester
 
         async void StartHandler()
         {
+#if false
             LogText = string.Format("{0} Started\r\n", DateTime.Now);
             IsStartCommandEnabled = false;
             const double north = 32.964529899922404f;
@@ -102,6 +103,7 @@ namespace DavesWPFTester
                                  bathymetry.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.0.50min.bathymetry"))),
                                  wind.ContinueWith(task => task.Result.Save(Path.Combine(outputPath, "data.wind"))));
 
+#endif
         }
         #endregion
 

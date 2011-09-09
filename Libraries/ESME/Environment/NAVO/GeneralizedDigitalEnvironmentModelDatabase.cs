@@ -11,8 +11,6 @@ namespace ESME.Environment.NAVO
         public const float GridSpacing = 0.25f;
         public static string DatabasePath { get; set; }
 
-        static List<string> RequiredSupportFiles { get; set; }
-
         static string _extractionProgramPath;
         public static string ExtractionProgramPath
         {
@@ -21,10 +19,6 @@ namespace ESME.Environment.NAVO
             {
                 if (_extractionProgramPath == value) return;
                 _extractionProgramPath = value;
-                RequiredSupportFiles = new List<string>();
-                var directory = Path.GetDirectoryName(_extractionProgramPath) ?? "";
-                RequiredSupportFiles.Add(Path.Combine(directory, "netcdf.dll"));
-                RequiredSupportFiles.Add(Path.Combine(directory, "NetCDF_Wrapper.dll"));
             }
         }
 
@@ -36,7 +30,7 @@ namespace ESME.Environment.NAVO
             monthNames.Remove(monthNames.Length - 1, 1);    // drop trailing comma
             var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6}", outputPath, DatabasePath, monthNames, expandedArea.North, expandedArea.South, expandedArea.East, expandedArea.West);
 
-            NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputPath, RequiredSupportFiles);
+            NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, outputPath);
         }
 
         public static void ExtractArea(NAVOBackgroundExtractor backgroundExtractor, out SoundSpeedField temperatureProfile, out SoundSpeedField salinityProfile)
@@ -49,7 +43,7 @@ namespace ESME.Environment.NAVO
             var expandedArea = new GeoRect(north, south, east, west);
             var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6}", backgroundExtractor.DestinationPath, DatabasePath, backgroundExtractor.TimePeriod, expandedArea.North, expandedArea.South, expandedArea.East, expandedArea.West);
 
-            var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath, RequiredSupportFiles);
+            var result = NAVOExtractionProgram.Execute(ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath);
             backgroundExtractor.Value++;
 
             var temperatureFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}-temperature.xml", backgroundExtractor.TimePeriod));

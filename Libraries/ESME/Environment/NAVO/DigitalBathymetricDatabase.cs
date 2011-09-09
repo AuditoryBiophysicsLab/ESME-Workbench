@@ -43,11 +43,11 @@ namespace ESME.Environment.NAVO
 
         public static string BathymetryYXZFilename(string outputPath, string selectedResolution) { return Path.Combine(outputPath, string.Format("bathymetry-{0}.yxz", selectedResolution)); }
         
-        public async static void Initialize()
+        public static void Initialize()
         {
             Resolutions.Clear();
             var commandArgs = string.Format("resolutions \"{0}\"", DatabasePath);
-            var result = await NAVOExtractionProgram.ExecuteAsync(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, null);
+            var result = NAVOExtractionProgram.Execute(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, null);
             var resarray = result.Trim().Split('\n');
             for (var index = 0; index < resarray.Length; index++)
             {
@@ -66,7 +66,7 @@ namespace ESME.Environment.NAVO
         }
 
         //public override void ExtractArea(NAVOExtractionPacket extractionPacket)
-        public async static Task<Bathymetry> ExtractAsync(string outputPath, string selectedResolution, GeoRect extractionArea)
+        public static Bathymetry ExtractAsync(string outputPath, string selectedResolution, GeoRect extractionArea)
         {
             var resTemp = selectedResolution.EndsWith("min") ? selectedResolution.Remove(selectedResolution.Length - 3) : selectedResolution;
             double desiredResolution;
@@ -76,7 +76,7 @@ namespace ESME.Environment.NAVO
             var commandArgs = string.Format(" area \"{0}\" 0.05min 2.00min nearest 0 meters G {1} {2} {3} {4} {5:0.0##} YXZ=\"{6}\"", Globals.AppSettings.NAVOConfiguration.DBDBDirectory, extractionArea.South, extractionArea.West, extractionArea.North, extractionArea.East, desiredResolution, string.Format("{0}.yxz", Path.GetFileName(outputPath)));
             //extract the area and look for success or failure in the output string.
 
-            var result = await NAVOExtractionProgram.ExecuteAsync(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, outputDirectory);
+            var result = NAVOExtractionProgram.Execute(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, outputDirectory);
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
             var bathymetry = Bathymetry.FromYXZ(Path.Combine(outputPath + ".yxz"), -1);
@@ -85,7 +85,7 @@ namespace ESME.Environment.NAVO
             return bathymetry;
         }
 
-        public async static Task<Bathymetry> ExtractArea(NAVOBackgroundExtractor backgroundExtractor)
+        public static Bathymetry ExtractArea(NAVOBackgroundExtractor backgroundExtractor)
         {
             backgroundExtractor.Maximum = 1;
             //from documentation, area extractions for DBDB are of the form <dbv5_command path> area <database path> <finest_resolution> <coarsest resolution> nearest 0 meters G <south west north east> 
@@ -95,7 +95,7 @@ namespace ESME.Environment.NAVO
             var commandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3} {4} {5} {6} {7:0.0##} YXZ=\"{8}\"", Globals.AppSettings.NAVOConfiguration.DBDBDirectory, Resolutions.First(), Resolutions.Last(), backgroundExtractor.ExtractionArea.South, backgroundExtractor.ExtractionArea.West, backgroundExtractor.ExtractionArea.North, backgroundExtractor.ExtractionArea.East, backgroundExtractor.SelectedResolution, yxzFilename);
             //extract the area and look for success or failure in the output string.
 
-            var result = await NAVOExtractionProgram.ExecuteAsync(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, backgroundExtractor.DestinationPath);
+            var result = NAVOExtractionProgram.Execute(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, backgroundExtractor.DestinationPath);
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
             backgroundExtractor.Value = 1;

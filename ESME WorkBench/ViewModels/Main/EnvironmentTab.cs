@@ -1279,7 +1279,6 @@ namespace ESMEWorkBench.ViewModels.Main
                     DestinationPath = tempPath,
                     UseExpandedExtractionArea = false,
                     ExtractionProgramPath = gdemExtractionProgramPath,
-                    RequiredSupportFiles = gdemRequiredSupportFiles,
                     MaxDepth = maxDepth,
                     PointExtractionMode = false,
                 };

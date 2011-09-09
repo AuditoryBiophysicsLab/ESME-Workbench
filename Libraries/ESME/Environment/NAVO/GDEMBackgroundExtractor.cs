@@ -106,24 +106,6 @@ namespace ESME.Environment.NAVO
 
         #endregion
 
-        #region public List<string> RequiredSupportFiles { get; set; }
-
-        public List<string> RequiredSupportFiles
-        {
-            get { return _requiredSupportFiles; }
-            set
-            {
-                if (_requiredSupportFiles == value) return;
-                _requiredSupportFiles = value;
-                NotifyPropertyChanged(RequiredSupportFilesChangedEventArgs);
-            }
-        }
-
-        private static readonly PropertyChangedEventArgs RequiredSupportFilesChangedEventArgs = ObservableHelper.CreateArgs<GDEMBackgroundExtractor>(x => x.RequiredSupportFiles);
-        private List<string> _requiredSupportFiles;
-
-        #endregion
-
         #region public bool PointExtractionMode { get; set; }
 
         public bool PointExtractionMode
@@ -165,11 +147,11 @@ namespace ESME.Environment.NAVO
             }
             var commandArgs = string.Format("-out \"{0}\" -gdem \"{1}\" -months {2} -north {3} -south {4} -east {5} -west {6} -new", backgroundExtractor.DestinationPath, backgroundExtractor.NAVOConfiguration.GDEMDirectory, backgroundExtractor.TimePeriod, north, south, east, west);
 
-            NAVOExtractionProgram.Execute(backgroundExtractor.ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath, backgroundExtractor.RequiredSupportFiles);
+            NAVOExtractionProgram.Execute(backgroundExtractor.ExtractionProgramPath, commandArgs, backgroundExtractor.DestinationPath);
             backgroundExtractor.Value++;
 
-            var temperatureFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}-temperature.xml", backgroundExtractor.TimePeriod));
-            var salinityFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}-salinity.xml", backgroundExtractor.TimePeriod));
+            var temperatureFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}.temperature", backgroundExtractor.TimePeriod));
+            var salinityFileName = Path.Combine(backgroundExtractor.DestinationPath, string.Format("{0}.salinity", backgroundExtractor.TimePeriod));
 
             var field = SoundSpeed.Load(temperatureFileName);
             File.Delete(temperatureFileName);
@@ -231,7 +213,7 @@ namespace ESME.Environment.NAVO
             soundSpeed.Save(filePath + ".soundspeed");
         }
 
-        public async static void ExtractAsync(bool isPointExtraction, float north, float south, float east, float west, IEnumerable<NAVOTimePeriod> timePeriods, string outputFilename, IProgress<TaskProgressInfo> progress = null)
+        public static void ExtractAsync(bool isPointExtraction, float north, float south, float east, float west, IEnumerable<NAVOTimePeriod> timePeriods, string outputFilename, IProgress<TaskProgressInfo> progress = null)
         {
             var taskProgress = new TaskProgressInfo
             {
@@ -253,11 +235,6 @@ namespace ESME.Environment.NAVO
             var extractionPath = Path.GetDirectoryName(assemblyLocation);
             if (extractionPath == null) throw new ApplicationException("Extraction path can't be null!");
             var gdemExtractionProgramPath = Path.Combine(extractionPath, "ImportGDEM.exe");
-            var gdemRequiredSupportFiles = new List<string>
-            {
-                Path.Combine(extractionPath, "netcdf.dll"),
-                Path.Combine(extractionPath, "NetCDF_Wrapper.dll")
-            };
             var tempPath = Path.GetDirectoryName(outputFilename);
             if (!Directory.Exists(tempPath)) Directory.CreateDirectory(tempPath);
             var sb = new StringBuilder();
@@ -269,7 +246,7 @@ namespace ESME.Environment.NAVO
             taskProgress.CurrentActivity = "Waiting for extraction program to complete";
             taskProgress.ProgressPercent = 5;
             if (progress != null) progress.Report(taskProgress);
-            var result = await NAVOExtractionProgram.Execute(gdemExtractionProgramPath, commandArgs, tempPath, gdemRequiredSupportFiles);
+            var result = NAVOExtractionProgram.Execute(gdemExtractionProgramPath, commandArgs, tempPath);
             taskProgress.CurrentActivity = "Done";
             taskProgress.ProgressPercent = 100;
             if (progress != null) progress.Report(taskProgress);

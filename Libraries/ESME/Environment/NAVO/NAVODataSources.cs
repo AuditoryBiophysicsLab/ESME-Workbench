@@ -150,7 +150,7 @@ namespace ESME.Environment.NAVO
 
         int _currentExtractionStep;
         float _totalExtractionStepCount;
-        async void ExtractAreas(object sender, DoWorkEventArgs args)
+        void ExtractAreas(object sender, DoWorkEventArgs args)
         {
 
             var backgroundTask = (BackgroundWorker)sender;
@@ -182,7 +182,7 @@ namespace ESME.Environment.NAVO
             //    totalExtractionStepCount++;
 
             Status = "Extracting bathymetry data for selected area";
-            var bathymetry = await DigitalBathymetricDatabase.ExtractAsync(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea);
+            var bathymetry = DigitalBathymetricDatabase.ExtractAsync(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea);
             if (backgroundTask.CancellationPending) return;
             ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
             //var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryCHBFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);

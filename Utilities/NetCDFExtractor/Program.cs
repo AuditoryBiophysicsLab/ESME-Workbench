@@ -125,13 +125,13 @@ namespace ImportGDEM
         { 
             var temperatureFile = new SoundSpeed();
             var salinityFile = new SoundSpeed();
-            
-            var temperatureFileName = string.Format("{0}.temperature", outputDirectory);
-            var salinityFileName = string.Format("{0}.salinity", outputDirectory);
+
+            var temperatureFileName = Path.Combine(outputDirectory, "data.temperature");
+            var salinityFileName = Path.Combine(outputDirectory, "data.salinity");
             if (isNewMode && (months.Count == 1))
             {
-                temperatureFileName = string.Format("{0}_{1}.temperature", outputDirectory, months[0]);
-                salinityFileName = string.Format("{0}_{1}.salinity", outputDirectory, months[0]);
+                temperatureFileName = Path.Combine(outputDirectory, string.Format("{0}.temperature", months[0]));
+                salinityFileName = Path.Combine(outputDirectory, string.Format("{0}.salinity", months[0]));
             }
             else
             {

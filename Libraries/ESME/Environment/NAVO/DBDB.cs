@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.IO;
-using System.Threading.Tasks;
 using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
     public static class DBDB
     {
-        public async static Task<Bathymetry> ExtractAsync(float selectedResolution, GeoRect region, IProgress<float> progress = null)
+        public static Bathymetry ExtractAsync(float selectedResolution, GeoRect region, IProgress<float> progress = null)
         {
             if (progress != null) lock(progress) progress.Report(0f);
 
@@ -24,7 +23,7 @@ namespace ESME.Environment.NAVO
 
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
 
-            var result = await NAVOExtractionProgram.ExecuteAsync(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, outputDirectory);
+            var result = NAVOExtractionProgram.Execute(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, outputDirectory);
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
 

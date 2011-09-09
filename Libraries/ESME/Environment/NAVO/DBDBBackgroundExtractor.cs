@@ -10,7 +10,7 @@ namespace ESME.Environment.NAVO
 {
     public class DBDBBackgroundExtractor : NAVOBackgroundExtractor
     {
-        protected async override void Run(object sender, DoWorkEventArgs e)
+        protected override void Run(object sender, DoWorkEventArgs e)
         {
             RunState = "Running";
             TaskName = "Bathymetry data extraction";
@@ -22,7 +22,7 @@ namespace ESME.Environment.NAVO
             var commandArgs = string.Format(" area \"{0}\" {1} {2} nearest 0 meters G {3} {4} {5} {6} {7:0.0##} YXZ=\"{8}\"", backgroundExtractor.NAVOConfiguration.DBDBDirectory, "0.05min", "2.00min", backgroundExtractor.ExtractionArea.South, backgroundExtractor.ExtractionArea.West, backgroundExtractor.ExtractionArea.North, backgroundExtractor.ExtractionArea.East, backgroundExtractor.SelectedResolution, backgroundExtractor.SaveAsFilename);
             //extract the area and look for success or failure in the output string.
 
-            var result = await NAVOExtractionProgram.ExecuteAsync(backgroundExtractor.NAVOConfiguration.DBDBEXEPath, commandArgs, backgroundExtractor.DestinationPath);
+            var result = NAVOExtractionProgram.Execute(backgroundExtractor.NAVOConfiguration.DBDBEXEPath, commandArgs, backgroundExtractor.DestinationPath);
             backgroundExtractor.Value++;
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
@@ -30,7 +30,7 @@ namespace ESME.Environment.NAVO
         }
 
         //public override void ExtractArea(NAVOExtractionPacket extractionPacket)
-        public async static void ExtractAsync(string outputPath, string selectedResolution, GeoRect extractionArea, IProgress<TaskProgressInfo> progress = null)
+        public static void Extract(string outputPath, string selectedResolution, GeoRect extractionArea, IProgress<TaskProgressInfo> progress = null)
         {
             var taskProgress = new TaskProgressInfo
             {
@@ -52,7 +52,7 @@ namespace ESME.Environment.NAVO
             taskProgress.ProgressPercent = 5;
             if (progress != null) progress.Report(taskProgress);
 
-            var result = await NAVOExtractionProgram.ExecuteAsync(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, outputDirectory);
+            var result = NAVOExtractionProgram.Execute(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, outputDirectory);
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
 
