@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment-project>
-  <configuration target="target.net.component" target-name=".NET Assembly" name="BellhopNL" location="C:\Users\Graham Voysey\Documents\Bellhop-NL" file="C:\Users\Graham Voysey\Documents\Bellhop-NL\BellhopNL.prj" build-checksum="499945280">
-    <param.project.name>C:\Users\Graham Voysey\Documents\Bellhop-NL\BellhopNL.prj</param.project.name>
+  <configuration target="target.net.component" target-name=".NET Assembly" name="BellhopNL" location="C:\Projects\ESME Deliverables\Utilities\bellhopNL" file="C:\Projects\ESME Deliverables\Utilities\bellhopNL\BellhopNL.prj" build-checksum="3823078900">
+    <param.project.name>C:\Projects\ESME Deliverables\Utilities\bellhopNL\BellhopNL.prj</param.project.name>
     <param.target.type>.NET Assembly</param.target.type>
     <param.appname>BellhopNL</param.appname>
     <param.intermediate>${PROJECT_ROOT}\BellhopNL\src</param.intermediate>
@@ -57,10 +57,10 @@
     <fileset.resources />
     <fileset.package />
     <build-deliverables>
-      <file name="BellhopNLNative.dll" location="${PROJECT_ROOT}\BellhopNL\distrib" optional="false">C:\Users\Graham Voysey\Documents\Bellhop-NL\BellhopNL\distrib\BellhopNLNative.dll</file>
-      <file name="readme.txt" location="${PROJECT_ROOT}\BellhopNL\distrib" optional="false">C:\Users\Graham Voysey\Documents\Bellhop-NL\BellhopNL\distrib\readme.txt</file>
-      <file name="BellhopNL_overview.html" location="${PROJECT_ROOT}\BellhopNL\distrib" optional="false">C:\Users\Graham Voysey\Documents\Bellhop-NL\BellhopNL\distrib\BellhopNL_overview.html</file>
-      <file name="BellhopNL.dll" location="${PROJECT_ROOT}\BellhopNL\distrib" optional="false">C:\Users\Graham Voysey\Documents\Bellhop-NL\BellhopNL\distrib\BellhopNL.dll</file>
+      <file name="BellhopNL.dll" location="${PROJECT_ROOT}\BellhopNL\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\bellhopNL\BellhopNL\distrib\BellhopNL.dll</file>
+      <file name="BellhopNL_overview.html" location="${PROJECT_ROOT}\BellhopNL\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\bellhopNL\BellhopNL\distrib\BellhopNL_overview.html</file>
+      <file name="BellhopNLNative.dll" location="${PROJECT_ROOT}\BellhopNL\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\bellhopNL\BellhopNL\distrib\BellhopNLNative.dll</file>
+      <file name="readme.txt" location="${PROJECT_ROOT}\BellhopNL\distrib" optional="false">C:\Projects\ESME Deliverables\Utilities\bellhopNL\BellhopNL\distrib\readme.txt</file>
     </build-deliverables>
     <matlab>
       <root>C:\Program Files\MATLAB\R2011a</root>
