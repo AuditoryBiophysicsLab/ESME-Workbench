@@ -1,9 +1,11 @@
 ﻿<Application x:Class="DavesWPFTester.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
              Exit="ApplicationExit"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" TrueValue="Visible" FalseValue="Collapsed"/>
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" TrueValue="Collapsed" FalseValue="Visible"/>
     </Application.Resources>
 </Application>

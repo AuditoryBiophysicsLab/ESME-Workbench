@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using C5;
 using HRC.Utility;
 
@@ -58,21 +59,29 @@ namespace HRC.Collections
             System.Diagnostics.Debug.WriteLine("{0}: ParallelSort: Final sort pass complete.  Total time: {1} seconds", DateTime.Now, elapsed.TotalSeconds);
         }
 
-        public static bool GetIsSorted<T>(this System.Collections.Generic.IList<T> array, IComparer<T> comparer = null, BackgroundTask backgroundTask = null) where T : IComparer<T>
+        public async static Task<bool> GetIsSorted<T>(this System.Collections.Generic.IList<T> array, IComparer<T> comparer = null) where T : IComparer<T>
         {
             if (comparer == null) comparer = Comparer<T>.Default;
 
-            var cpuCount = Environment.ProcessorCount;
-            if (backgroundTask != null) backgroundTask.Maximum += cpuCount;
-
-            cpuCount = Environment.ProcessorCount;
-            var started = DateTime.Now;
             var listIsSorted = true;
-            if (backgroundTask != null) backgroundTask.Status += string.Format("Checking if list is sorted [{0} threads]", cpuCount);
-            System.Diagnostics.Debug.WriteLine("{0}: GetIsSorted: Starting check on {1} threads", DateTime.Now, cpuCount);
+            //System.Diagnostics.Debug.WriteLine("{0}: GetIsSorted: Starting check on {1} threads", DateTime.Now, cpuCount);
                 
-            var arraySliceLength = array.Count / cpuCount;
+            var arraySliceLength = array.Count / 5;
 
+            var transformBlock = new TransformBlock<int, bool>(
+                index => IsSubListSorted(array, arraySliceLength * index, arraySliceLength * (index + 1), comparer),
+                new ExecutionDataflowBlockOptions
+                {
+                    TaskScheduler = TaskScheduler.Default,
+                    MaxDegreeOfParallelism = 4,
+                });
+            var actionBlock = new ActionBlock<bool>(isSorted => listIsSorted &= isSorted );
+            transformBlock.LinkTo(actionBlock);
+            transformBlock.Completion.ContinueWith(task => actionBlock.Complete());
+            for (var i = 0; i < 4; i++) transformBlock.Post(i);
+            await actionBlock.Completion;
+            return listIsSorted;
+#if false
             Parallel.For(0, cpuCount, () => false, (i, loop, j) =>
             {
                 System.Diagnostics.Debug.WriteLine("{0}: GetIsSorted: Starting thread to check sort order from index {1} to {2}", DateTime.Now, arraySliceLength * i, arraySliceLength * (i + 1));
@@ -80,14 +89,7 @@ namespace HRC.Collections
                 System.Diagnostics.Debug.WriteLine("{0}: GetIsSorted: Finished checking sort order from index {1} to {2}.  Sublist appears to be {3}", DateTime.Now, arraySliceLength * i, arraySliceLength * (i + 1), result ? "sorted" : "unsorted");
                 return result;
             },
-            x =>
-            {
-                if (backgroundTask != null) backgroundTask.Value++;
-                lock (array)
-                {
-                    listIsSorted &= x;
-                }
-            });
+            x => { lock (array) listIsSorted &= x; });
             if (array.Count > cpuCount)
             {
                 for (var i = 0; i < cpuCount - 1; i++)
@@ -98,6 +100,7 @@ namespace HRC.Collections
                 System.Diagnostics.Debug.WriteLine("{0}: GetIsSorted: Finished parallel sort order check.  List appears to be {1}", DateTime.Now, listIsSorted ? "sorted" : "unsorted");
             }
             return listIsSorted;
+#endif
         }
 
         static bool IsSubListSorted<T>(System.Collections.Generic.IList<T> array, int startIndex, int endIndex, IComparer<T> comparer)

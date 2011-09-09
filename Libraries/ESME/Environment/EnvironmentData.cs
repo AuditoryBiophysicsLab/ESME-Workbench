@@ -70,9 +70,9 @@ namespace ESME.Environment
 
         public bool IsSorted { get; private set; }
 
-        public void Sort()
+        public async void Sort()
         {
-            if (IsSorted || _arrayList.GetIsSorted())
+            if (IsSorted || await _arrayList.GetIsSorted())
             {
                 System.Diagnostics.Debug.WriteLine("{0}: Call to Sort() avoided.  List already sorted.", DateTime.Now);
                 IsSorted = true;

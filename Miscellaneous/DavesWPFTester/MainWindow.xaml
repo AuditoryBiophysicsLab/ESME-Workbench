@@ -1,33 +1,98 @@
-﻿<Window x:Class="DavesWPFTester.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
-        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF" mef:ViewModelLocator.ViewModel="MainWindowViewModel"
-        SnapsToDevicePixels="True" Title="Dave's WPF Test Application" Height="350" Width="525"
+﻿<Window x:Class="DavesWPFTester.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mef="http:\\www.codeplex.com\MEFedMVVM"
+        xmlns:cinch="clr-namespace:Cinch;assembly=Cinch.WPF"
+        mef:ViewModelLocator.ViewModel="MainWindowViewModel"
+        SnapsToDevicePixels="True"
+        Title="Dave's WPF Test Application"
+        Height="350"
+        Width="525"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:app="clr-namespace:DavesWPFTester"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:app="clr-namespace:DavesWPFTester"
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:Descriptors="clr-namespace:ESME.Environment.Descriptors;assembly=ESME"
-        xmlns:Navigation="clr-namespace:HRC.Navigation;assembly=HRC" mc:Ignorable="d"
+        xmlns:Navigation="clr-namespace:HRC.Navigation;assembly=HRC"
+        mc:Ignorable="d"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}">
   <Grid>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition />
-      <ColumnDefinition />
-    </Grid.ColumnDefinitions>
-    <GroupBox Header="Range Complex Tree" Margin="5" Grid.Column="0">
-      <TreeView ItemsSource="{Binding RangeComplexes.RangeComplexCollection}">
+    <GroupBox Header="Range Complex Tree"
+              Margin="5">
+      <TreeView ItemsSource="{Binding RangeComplexes.RangeComplexCollection}"
+                Grid.IsSharedSizeScope="True">
         <TreeView.Resources>
-          <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}"
-                                    ItemsSource="{Binding AreaCollection}">
-            <TextBlock Text="{Binding Name}" />
+          <DataTemplate DataType="{x:Type Navigation:GeoRect}"
+                        x:Key="GeoRectTemplate">
+            <StackPanel Orientation="Vertical">
+              <TextBlock>
+                <Run Text="North: " />
+                <Run Text="{Binding North, StringFormat={}{0:0.0000}}" />
+                <Run Text="deg" />
+              </TextBlock>
+              <TextBlock>
+                <Run Text="South: " />
+                <Run Text="{Binding South, StringFormat={}{0:0.0000}}" />
+                <Run Text="deg" />
+              </TextBlock>
+              <TextBlock>
+                <Run Text="East: " />
+                <Run Text="{Binding East, StringFormat={}{0:0.0000}}" />
+                <Run Text="deg" />
+              </TextBlock>
+              <TextBlock>
+                <Run Text="West: " />
+                <Run Text="{Binding West, StringFormat={}{0:0.0000}}" />
+                <Run Text="deg" />
+              </TextBlock>
+            </StackPanel>
+          </DataTemplate>
+          <HierarchicalDataTemplate x:Key="TupleTemplate"
+                                    ItemsSource="{Binding Item1}">
+            <TextBlock Text="{Binding Item2}" />
+          </HierarchicalDataTemplate>
+          <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}">
+            <TreeViewItem>
+              <TreeViewItem.Header>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="RangeComplexName" />
+                    <ColumnDefinition SharedSizeGroup="RangeComplexState" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0"
+                             HorizontalAlignment="Left"
+                             TextAlignment="Left"
+                             Text="{Binding Name}" />
+                  <ProgressBar Grid.Column="1"
+                               Margin="10 0 0 2"
+                               Width="200"
+                               Visibility="{Binding IsInitializing, Converter={StaticResource TrueVisibleFalseCollapsed}}"
+                               Value="{Binding InitializationProgress}" />
+                  <TextBlock Grid.Column="1"
+                             Margin="10 0 0 2"
+                             HorizontalAlignment="Center"
+                             Text="{Binding InitializationState, Mode=OneWay}"
+                             FontStyle="Italic"
+                             Visibility="{Binding IsInitializing, Converter={StaticResource TrueVisibleFalseCollapsed}}" />
+                </Grid>
+              </TreeViewItem.Header>
+              <TreeViewItem Header="Foo"
+                            ItemsSource="{Binding GeoRect}" />
+              <TreeViewItem Header="Environment"
+                            ItemsSource="{Binding Environment}"
+                            ItemTemplate="{StaticResource TupleTemplate}" />
+              <TreeViewItem Header="Areas"
+                            ItemsSource="{Binding AreaCollection}" />
+            </TreeViewItem>
           </HierarchicalDataTemplate>
           <HierarchicalDataTemplate DataType="{x:Type Descriptors:RangeComplexArea}">
             <TreeViewItem Header="{Binding Name}">
-              <TreeViewItem Header="Bounding Box">
+              <TreeViewItem Header="Limits">
                 <TreeViewItem>
                   <TreeViewItem.Header>
                     <TextBlock>
                       <Run Text="North: " />
-                      <Run Text="{Binding GeoRect.North, StringFormat={}{0:0.####}}" />
+                      <Run Text="{Binding GeoRect.North, StringFormat={}{0:0.0000}}" />
                       <Run Text="deg" />
                     </TextBlock>
                   </TreeViewItem.Header>
@@ -36,7 +101,7 @@
                   <TreeViewItem.Header>
                     <TextBlock>
                       <Run Text="South: " />
-                      <Run Text="{Binding GeoRect.South, StringFormat={}{0:0.####}}" />
+                      <Run Text="{Binding GeoRect.South, StringFormat={}{0:0.0000}}" />
                       <Run Text="deg" />
                     </TextBlock>
                   </TreeViewItem.Header>
@@ -45,7 +110,7 @@
                   <TreeViewItem.Header>
                     <TextBlock>
                       <Run Text="East: " />
-                      <Run Text="{Binding GeoRect.East, StringFormat={}{0:0.####}}" />
+                      <Run Text="{Binding GeoRect.East, StringFormat={}{0:0.0000}}" />
                       <Run Text="deg" />
                     </TextBlock>
                   </TreeViewItem.Header>
@@ -54,37 +119,27 @@
                   <TreeViewItem.Header>
                     <TextBlock>
                       <Run Text="West: " />
-                      <Run Text="{Binding GeoRect.West, StringFormat={}{0:0.####}}" />
+                      <Run Text="{Binding GeoRect.West, StringFormat={}{0:0.0000}}" />
                       <Run Text="deg" />
                     </TextBlock>
                   </TreeViewItem.Header>
                 </TreeViewItem>
               </TreeViewItem>
-              <TreeViewItem Header="Shape" ItemsSource="{Binding OverlayShape.EarthCoordinates}" />
+              <TreeViewItem Header="Points (lat, lon)"
+                            ItemsSource="{Binding OverlayShape.EarthCoordinates}" />
             </TreeViewItem>
           </HierarchicalDataTemplate>
-                    <HierarchicalDataTemplate DataType="{x:Type Navigation:EarthCoordinate}">
-                        <TextBlock>
-                            <Run Text="(" />
-                            <Run Text="{Binding Latitude, StringFormat={}{0:0.####}}" />
-                            <Run Text=", " />
-                            <Run Text="{Binding Longitude, StringFormat={}{0:0.####}}" />
-                            <Run Text=")" />
-                        </TextBlock>
-                    </HierarchicalDataTemplate>
-                </TreeView.Resources>
+          <HierarchicalDataTemplate DataType="{x:Type Navigation:EarthCoordinate}">
+            <TextBlock>
+              <Run Text="(" />
+              <Run Text="{Binding Latitude, StringFormat={}{0:0.0000}}" />
+              <Run Text=", " />
+              <Run Text="{Binding Longitude, StringFormat={}{0:0.0000}}" />
+              <Run Text=")" />
+            </TextBlock>
+          </HierarchicalDataTemplate>
+        </TreeView.Resources>
       </TreeView>
-    </GroupBox>
-    <GroupBox Header="Environment Extraction Test" Grid.Column="1" Margin="5">
-      <DockPanel LastChildFill="True">
-        <DockPanel LastChildFill="False" DockPanel.Dock="Top">
-          <Button DockPanel.Dock="Right" Margin="5" Content="Stop" Width="75" Command="{Binding StopCommand}" />
-          <Button DockPanel.Dock="Right" Margin="5" Content="Start" Width="75" Command="{Binding StartCommand}" />
-        </DockPanel>
-        <GroupBox Header="Log">
-          <Controls:AutoScrollingTextBlock Text="{Binding LogText}" />
-        </GroupBox>
-      </DockPanel>
     </GroupBox>
   </Grid>
 </Window>

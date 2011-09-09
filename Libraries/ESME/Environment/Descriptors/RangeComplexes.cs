@@ -76,7 +76,7 @@ namespace ESME.Environment.Descriptors
             if (!File.Exists(simAreaFile)) throw new FileNotFoundException("Error reading sim area file", simAreaFile);
             SimAreaPath = Path.GetDirectoryName(simAreaFile);
 		    var transformBlock = new TransformBlock<Tuple<string, double, double, double, double, string, string>, NewRangeComplex>(
-		        info => NewRangeComplex.Read(SimAreaPath, info),
+		        async info => await NewRangeComplex.ReadAsync(SimAreaPath, info),
 		        new ExecutionDataflowBlockOptions
 		        {
 		            TaskScheduler = TaskScheduler.Default,
@@ -214,18 +214,87 @@ namespace ESME.Environment.Descriptors
 
 	    #endregion
 
-        internal static Task<NewRangeComplex> CreateAsync(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits) { return TaskEx.Run(() => Create(simAreaPath, rangeComplexName, opAreaLimits, simAreaLimits)); }
+	    #region public bool IsInitializing { get; private set; }
 
-        static NewRangeComplex Create(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits)
+	    public bool IsInitializing
+	    {
+	        get { return _isInitializing; }
+	        private set
+	        {
+	            if (_isInitializing == value) return;
+	            _isInitializing = value;
+	            NotifyPropertyChanged(IsInitializingChangedEventArgs);
+	        }
+	    }
+
+	    static readonly PropertyChangedEventArgs IsInitializingChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.IsInitializing);
+	    bool _isInitializing = true;
+
+	    #endregion
+
+	    #region public string InitializationState { get; private set; }
+
+	    public string InitializationState
+	    {
+	        get { return _initializationState; }
+	        private set
+	        {
+	            if (_initializationState == value) return;
+	            _initializationState = value;
+	            NotifyPropertyChanged(InitializationStateChangedEventArgs);
+	        }
+	    }
+
+	    static readonly PropertyChangedEventArgs InitializationStateChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.InitializationState);
+	    string _initializationState;
+
+	    #endregion
+
+        #region public IEnumerable<Tuple<object, string>> Environment { get; }
+
+        public IEnumerable<Tuple<object, string>> Environment
+	    {
+	        get
+	        {
+                yield return new Tuple<object, string>(Temperature, "Temperature");
+                yield return new Tuple<object, string>(Salinity, "Salinity");
+                yield return new Tuple<object, string>(SoundSpeed, "Soundspeed");
+            }
+	    }
+
+	    #endregion
+
+
+	    #region public int InitializationProgress { get; set; }
+
+	    public int InitializationProgress
+	    {
+	        get { return _initializationProgress; }
+	        set
+	        {
+	            if (_initializationProgress == value) return;
+	            _initializationProgress = value;
+	            NotifyPropertyChanged(InitializationProgressChangedEventArgs);
+	        }
+	    }
+
+	    static readonly PropertyChangedEventArgs InitializationProgressChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.InitializationProgress);
+	    int _initializationProgress;
+
+	    #endregion
+
+
+        internal async static Task<NewRangeComplex> CreateAsync(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits)
         {
             var result = new NewRangeComplex(simAreaPath, rangeComplexName);
             result.OpArea = RangeComplexArea.Create(result.AreasPath, Path.Combine(result.AreasPath, String.Format("{0}_OpArea", rangeComplexName)), opAreaLimits);
             result.SimArea = RangeComplexArea.Create(result.AreasPath, Path.Combine(result.AreasPath, String.Format("{0}_SimArea", rangeComplexName)), simAreaLimits);
             result.UpdateAreas();
+            result.InitializeAsync();
             return result;
         }
 
-        internal static NewRangeComplex Read(string simAreaPath, Tuple<string, double, double, double, double, string, string> rangeComplexInfo)
+        internal async static Task<NewRangeComplex> ReadAsync(string simAreaPath, Tuple<string, double, double, double, double, string, string> rangeComplexInfo)
         {
             var result = new NewRangeComplex(simAreaPath, rangeComplexInfo.Item1);
             result.OpArea = result._areas.Where(area => area.Name == Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)).First();
@@ -234,16 +303,22 @@ namespace ESME.Environment.Descriptors
             return result;
         }
 
-        async void InitializeAsync()
+        async Task InitializeAsync()
         {
+            Debug.WriteLine("{0}: Range complex {1} initializing", DateTime.Now, Name);
+            IsInitializing = true;
+            InitializationState = "initializing";
             var months = NAVOConfiguration.AllMonths.ToList();
-            var temperaturePath = Path.Combine(DataPath, "data.temperature");
-            Task<SoundSpeed> temperatureTask = null, salinityTask = null;
+            //var temperaturePath = Path.Combine(DataPath, "data.temperature");
+            //Task<SoundSpeed> temperatureTask = null, salinityTask = null;
+            var currentState = new Progress<string>(p => InitializationState = p);
+            var progress = new Progress<float>(p => InitializationProgress = (int)p);
 #if true
             var continuations = new List<Task>
             {
-                ReadDataAsync(Path.Combine(DataPath, "data.temperature"), _temperatureArgs, out temperatureTask), 
-                ReadDataAsync(Path.Combine(DataPath, "data.salinity"), _salinityArgs, out salinityTask)
+                GDEM.ImportByMonthAsync(DataPath, true, true, months, GeoRect, currentState, progress),
+                //ReadDataAsync(Path.Combine(DataPath, "data.temperature"), SoundSpeed.LoadAsync, () => GDEM.ReadTemperatureAsync(NAVOConfiguration.AllMonths.ToList(), GeoRect), task => Temperature = task.Result, out temperatureTask), 
+                //ReadDataAsync(Path.Combine(DataPath, "data.salinity"), SoundSpeed.LoadAsync, () => GDEM.ReadSalinityAsync(NAVOConfiguration.AllMonths.ToList(), GeoRect), task => Salinity = task.Result, out salinityTask)
             };
 #else
             if (File.Exists(temperaturePath)) continuations.Add((temperatureTask = SoundSpeed.LoadAsync(temperaturePath)).ContinueWith(task => Temperature = task.Result));
@@ -262,11 +337,13 @@ namespace ESME.Environment.Descriptors
             }
 #endif
 
-            await TaskEx.WhenAll(temperatureTask, salinityTask);
-            var soundSpeedTask = GDEM.CalculateSoundSpeedAsync(temperatureTask.Result, salinityTask.Result, null);
-            continuations.Add(soundSpeedTask.ContinueWith(task => SoundSpeed = task.Result));
+            //await TaskEx.WhenAll(temperatureTask, salinityTask);
+            //var soundSpeedTask = GDEM.CalculateSoundSpeedAsync(temperatureTask.Result, salinityTask.Result, null);
+            //continuations.Add(soundSpeedTask.ContinueWith(task => SoundSpeed = task.Result));
 
             await TaskEx.WhenAll(continuations);
+            Temperature = Salinity = SoundSpeed = null;
+            IsInitializing = false;
             Debug.WriteLine("{0}: Range complex {1} initialization complete", DateTime.Now, Name);
         }
 
@@ -352,6 +429,21 @@ namespace ESME.Environment.Descriptors
             public Func<string, Task<T>> LoadFunction { get; private set; }
             public Func<Task<T>> ReadFunction { get; private set; }
             public Action<Task<T>> CompletionAction { get; private set; }
+        }
+
+        Task ReadDataAsync<T>(string dataFilename, Func<string, Task<T>> loadFunc, Func<Task<T>> readFunc, Action<Task<T>> completionAction, out Task<T> mainTask) where T : ICanSave
+        {
+            // args.Item1 = mainTask
+            // args.Item2 = continuationTask
+            // args.Item3 = loadFunc
+            // args.Item4 = readFunc
+            // args.Item5 = completionAction
+            var dataFile = Path.Combine(DataPath, dataFilename);
+            Task<T> main;
+            var result = File.Exists(dataFile) ? (main = loadFunc(dataFile)) : (main = readFunc()).ContinueWith(task => task.Result.Save(dataFile));
+            result.ContinueWith(task => completionAction(main));
+            mainTask = main;
+            return result;
         }
 
         Task ReadDataAsync<T>(string dataFilename, AsyncArgs<T> args, out Task<T> mainTask) where T : ICanSave

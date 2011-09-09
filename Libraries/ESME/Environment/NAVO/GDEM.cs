@@ -12,6 +12,51 @@ namespace ESME.Environment.NAVO
 {
     public static class GDEM
     {
+        [Flags]
+        public enum GDEMFlags
+        {
+            None = 0x0,
+            Temperature = 0x01,
+            Salinity = 0x02,
+        }
+        public static Task ImportByMonthAsync(string outputPath, bool temperature, bool salinity, ICollection<NAVOTimePeriod> months, GeoRect geoRect, IProgress<string> currentState = null, IProgress<float> progress = null)
+        {
+            var multiplier = 0;
+            if (temperature) multiplier++;
+            if (salinity) multiplier++;
+            if (multiplier == 0) throw new ApplicationException("one or both of temperature and salinity must be true");
+            var progressStep = 100f / (months.Count * multiplier);
+            var totalProgress = 0f;
+            var actionBlock = new ActionBlock<NAVOTimePeriod>(month =>
+                {
+                    var monthName = month.ToString().ToLower();
+                    var speed = new SoundSpeed();
+                    if (temperature)
+                    {
+                        if (currentState != null) lock (currentState) currentState.Report(string.Format("Importing {0} temperature", monthName));
+                        if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+                        speed.SoundSpeedFields.Add(ReadFile(FindTemperatureFile(month), "water_temp", month, geoRect));
+                        speed.Save(Path.Combine(outputPath, string.Format("{0}.{1}", monthName, "temperature")));
+                    }
+                    if (salinity)
+                    {
+                        speed = new SoundSpeed();
+                        if (currentState != null) lock (currentState) currentState.Report(string.Format("Importing {0} salinity", monthName));
+                        if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+                        speed.SoundSpeedFields.Add(ReadFile(FindSalinityFile(month), "salinity", month, geoRect));
+                        speed.Save(Path.Combine(outputPath, string.Format("{0}.{1}", monthName, "salinity")));
+                    }
+                },
+                new ExecutionDataflowBlockOptions
+                {
+                    TaskScheduler = TaskScheduler.Default,
+                    MaxDegreeOfParallelism = 1,
+                });
+            foreach (var month in months) actionBlock.Post(month);
+            actionBlock.Complete();
+            return actionBlock.Completion;
+        }
+
         public static async Task<SoundSpeed> ReadTemperatureAsync(ICollection<NAVOTimePeriod> months, GeoRect region, IProgress<float> progress = null)
         {
             var progressStep = 100f / (months.Count + 1);
@@ -29,6 +74,7 @@ namespace ESME.Environment.NAVO
                 });
             var batchBlock = new BatchBlock<SoundSpeedField>(months.Count);
             transformBlock.LinkTo(batchBlock);
+            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
             foreach (var month in months) transformBlock.Post(new Tuple<NAVOTimePeriod, GeoRect>(month, region));
             transformBlock.Complete();
             await transformBlock.Completion;
@@ -66,6 +112,7 @@ namespace ESME.Environment.NAVO
                 });
             var batchBlock = new BatchBlock<SoundSpeedField>(months.Count);
             transformBlock.LinkTo(batchBlock);
+            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
             foreach (var month in months) transformBlock.Post(new Tuple<NAVOTimePeriod, GeoRect>(month, region));
             transformBlock.Complete();
             await transformBlock.Completion;
@@ -103,6 +150,7 @@ namespace ESME.Environment.NAVO
                 });
             var batchBlock = new BatchBlock<SoundSpeedField>(months.Count);
             transformBlock.LinkTo(batchBlock);
+            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
             foreach (var month in months) transformBlock.Post(new Tuple<NAVOTimePeriod, GeoRect, EarthCoordinate<float>>(month, region, deepestPoint));
             transformBlock.Complete();
             await transformBlock.Completion;
@@ -144,6 +192,7 @@ namespace ESME.Environment.NAVO
                 });
             var batchBlock = new BatchBlock<SoundSpeedField>(temperature.SoundSpeedFields.Count);
             transformBlock.LinkTo(batchBlock);
+            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
             foreach (var field in temperature.SoundSpeedFields) transformBlock.Post(new Tuple<SoundSpeedField, SoundSpeedField, EarthCoordinate<float>>(field, salinity[field.TimePeriod], deepestPoint));
             transformBlock.Complete();
             await transformBlock.Completion;
