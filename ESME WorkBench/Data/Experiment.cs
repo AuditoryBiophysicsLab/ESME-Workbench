@@ -93,7 +93,7 @@ namespace ESMEWorkBench.Data
 
         #endregion
 
-        #region public DateTime LastModified { get; set; }
+        #region public DateTime LastWriteTime { get; set; }
 
         [XmlIgnore] static readonly PropertyChangedEventArgs LastModifiedChangedEventArgs = ObservableHelper.CreateArgs<Experiment>(x => x.LastModified);
         [XmlIgnore] DateTime _lastModified;

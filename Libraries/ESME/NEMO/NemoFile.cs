@@ -18,7 +18,7 @@ namespace ESME.NEMO
                 _xmlDocument.Load(FileName);
                 Scenario = new NemoScenario(_xmlDocument["Scenario"], nemoDataDirectory);
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 throw;
             }

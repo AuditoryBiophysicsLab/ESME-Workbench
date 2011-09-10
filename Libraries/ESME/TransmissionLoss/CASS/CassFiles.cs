@@ -270,17 +270,17 @@ namespace ESME.TransmissionLoss.CASS
         public static void WriteEnvironmentFiles(string environmentFileName, GeoRect geoRect, Sediment sedimentType, 
                                                  SoundSpeedField soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, string bathymetryFileName, 
                                                  string overlayFileName, bool exportHFEVA, bool exportHFBL, bool exportLFBLHFB, bool exportLFBLPE,
-                                                 EnvironmentData<BottomLossSample> bottomLossSamples, BackgroundTask backgroundTask = null)
+                                                 EnvironmentData<BottomLossSample> bottomLossSamples)
         {
-            if (exportHFEVA) WriteEnvironmentFileHeader(environmentFileName, geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFEVA", bottomLossSamples, backgroundTask);
-            if (exportHFBL) WriteEnvironmentFileHeader(environmentFileName + "-hfbl", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFBL", bottomLossSamples, backgroundTask);
-            if (exportLFBLHFB) WriteEnvironmentFileHeader(environmentFileName + "-lfbl-hfb", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "LFBL_HFB", bottomLossSamples, backgroundTask);
-            if (exportLFBLPE) WriteEnvironmentFileHeader(environmentFileName + "-lfbl-pe", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "LFBL_PE", bottomLossSamples, backgroundTask);
+            if (exportHFEVA) WriteEnvironmentFileHeader(environmentFileName, geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFEVA", bottomLossSamples);
+            if (exportHFBL) WriteEnvironmentFileHeader(environmentFileName + "-hfbl", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "HFBL", bottomLossSamples);
+            if (exportLFBLHFB) WriteEnvironmentFileHeader(environmentFileName + "-lfbl-hfb", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "LFBL_HFB", bottomLossSamples);
+            if (exportLFBLPE) WriteEnvironmentFileHeader(environmentFileName + "-lfbl-pe", geoRect, sedimentType, soundSpeedField, wind, bathymetryFileName, overlayFileName, "LFBL_PE", bottomLossSamples);
         }
 
         static void WriteEnvironmentFileHeader(string environmentFileName, GeoRect geoRect, Sediment sedimentType, 
                                          TimePeriodEnvironmentData<SoundSpeedProfile> soundSpeedField, TimePeriodEnvironmentData<WindSample> wind, string bathymetryFileName,
-                                         string overlayFileName, string model, EnvironmentData<BottomLossSample> bottomLossSamples, BackgroundTask backgroundTask = null)
+                                         string overlayFileName, string model, EnvironmentData<BottomLossSample> bottomLossSamples)
         {
             var isFirstPoint = true;
             using (var envFile = new StreamWriter(environmentFileName + ".dat", false))
@@ -295,31 +295,25 @@ namespace ESME.TransmissionLoss.CASS
                 envFile.WriteLine();
 
                 double lat, lon;
-                if (backgroundTask != null) backgroundTask.Maximum += (int)(((geoRect.East - geoRect.West) * 4) * ((geoRect.North - geoRect.South) * 4));
                 for (lon = geoRect.West; lon < geoRect.East; lon += 0.25)
                 {
                     for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                     {
                         WriteEnvironmentFileRecord(envFile, sedimentType, soundSpeedField, wind, new EarthCoordinate(lat, lon),
                                              ref isFirstPoint, model, bottomLossSamples);
-                        if (backgroundTask != null) backgroundTask.Value++;
                     }
                     if ((lat - geoRect.North) < 0.125)
                     {
-                        if (backgroundTask != null) backgroundTask.Maximum++;
                         WriteEnvironmentFileRecord(envFile, sedimentType, soundSpeedField, wind,
                                              new EarthCoordinate(geoRect.North, lon), ref isFirstPoint, model, bottomLossSamples);
-                        if (backgroundTask != null) backgroundTask.Value++;
                     }
                 }
                 if ((lon - geoRect.East) < 0.125)
                 {
-                    if (backgroundTask != null) backgroundTask.Maximum += (int) ((geoRect.North - geoRect.South)*4);
                     for (lat = geoRect.South; lat < geoRect.North; lat += 0.25)
                     {
                         WriteEnvironmentFileRecord(envFile, sedimentType, soundSpeedField, wind,
                                              new EarthCoordinate(lat, geoRect.East), ref isFirstPoint, model, bottomLossSamples);
-                        if (backgroundTask != null) backgroundTask.Value++;
                     }
                 }
             }

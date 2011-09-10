@@ -154,7 +154,6 @@
     <Compile Include="Delegates.cs" />
     <Compile Include="Environment\Bathymetry.cs" />
     <Compile Include="Environment\BottomLoss.cs" />
-    <Compile Include="Environment\Descriptors\EnvironmentDescriptor.cs" />
     <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptor.cs" />
     <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptors.cs" />
     <Compile Include="Environment\Descriptors\NAEMODescriptor.cs" />
@@ -281,7 +280,6 @@
     <Compile Include="TransmissionLoss\REFMS\Interfaces.cs" />
     <Compile Include="TransmissionLoss\REFMS\REFMSInputFile.cs" />
     <Compile Include="TransmissionLoss\REFMS\SplineInterpolator.cs" />
-    <Compile Include="TransmissionLoss\TransmissionLossFileManager.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BellhopRunFileRadial.cs" />
     <Compile Include="TransmissionLoss\Bellhop\FieldCalculator.cs" />
     <Compile Include="TransmissionLoss\Bellhop\RadialCalculator.cs" />

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows.Threading;
@@ -13,7 +14,6 @@ using ESME.Environment.NAVO;
 using ESME.NEMO.Overlay;
 using HRC;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
@@ -80,9 +80,9 @@ namespace ESME.Environment.Descriptors
 		        new ExecutionDataflowBlockOptions
 		        {
 		            TaskScheduler = TaskScheduler.Default,
-		            MaxDegreeOfParallelism = 4,
+		            MaxDegreeOfParallelism = 1,
 		        });
-            var actionBlock = new ActionBlock<NewRangeComplex>(item => { if (item != null) ranges.Add(item); });
+            var actionBlock = new ActionBlock<NewRangeComplex>(item => { if (item != null) _dispatcher.InvokeInBackgroundIfRequired(() => _rangeComplexes.Add(item)); });
             transformBlock.LinkTo(actionBlock);
             var lines = File.ReadAllLines(simAreaFile);
             foreach (var line in lines)
@@ -113,11 +113,7 @@ namespace ESME.Environment.Descriptors
             }
 		    transformBlock.Complete();
             transformBlock.Completion.ContinueWith(t => actionBlock.Complete());
-            actionBlock.Completion.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
-            {
-                _rangeComplexes.Clear();
-                foreach (var range in ranges) _rangeComplexes.Add(range);
-            }));
+            await actionBlock.Completion;
         }
 
         public string SimAreaPath { get; private set; }
@@ -136,7 +132,7 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        public async Task<NewRangeComplex> CreateAsync(string rangeComplexName, double height, double latitude, double longitude, double geoid, IList<Geo> opAreaLimits, IList<Geo> simAreaLimits)
+        public async Task<NewRangeComplex> CreateAsync(string rangeComplexName, double height, double latitude, double longitude, double geoid, ICollection<Geo> opAreaLimits, List<Geo> simAreaLimits)
         {
             if (opAreaLimits == null) throw new ArgumentNullException("opAreaLimits");
             if (simAreaLimits == null) throw new ArgumentNullException("simAreaLimits");
@@ -166,8 +162,144 @@ namespace ESME.Environment.Descriptors
 
 		//public async Task<RangeComplex> AddAsync(string rangeComplexName, List<Geo> opAreaLimits, List<Geo> simAreaLimits){}
     }
-	
-	public class NewRangeComplex : ViewModelBase
+
+    public abstract class TreeItem : ViewModelBase
+    {
+        #region public string Name { get; set; }
+
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name == value) return;
+                _name = value;
+                NotifyPropertyChanged(NameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NameChangedEventArgs = ObservableHelper.CreateArgs<TreeItem>(x => x.Name);
+        string _name;
+
+        #endregion
+
+        #region public bool IsEnabled { get; set; }
+
+        public bool IsEnabled
+        {
+            get { return _isEnabled; }
+            set
+            {
+                if (_isEnabled == value) return;
+                _isEnabled = value;
+                NotifyPropertyChanged(IsEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<TreeItem>(x => x.IsEnabled);
+        bool _isEnabled;
+
+        #endregion
+
+        #region public string ToolTip { get; set; }
+
+        public string ToolTip
+        {
+            get { return _toolTip; }
+            set
+            {
+                if (_toolTip == value) return;
+                _toolTip = value;
+                NotifyPropertyChanged(ToolTipChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ToolTipChangedEventArgs = ObservableHelper.CreateArgs<TreeItem>(x => x.ToolTip);
+        string _toolTip;
+
+        #endregion
+
+        #region public Progress<string> Status { get; set; }
+
+        public Progress<string> Status
+        {
+            get { return _status; }
+            set
+            {
+                if (_status == value) return;
+                _status = value;
+                NotifyPropertyChanged(StatusChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs StatusChangedEventArgs = ObservableHelper.CreateArgs<TreeItem>(x => x.Status);
+        Progress<string> _status;
+
+        #endregion
+
+        #region public Progress<float> Progress { get; set; }
+
+        public Progress<float> Progress
+        {
+            get { return _progress; }
+            set
+            {
+                if (_progress == value) return;
+                _progress = value;
+                NotifyPropertyChanged(ProgressChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ProgressChangedEventArgs = ObservableHelper.CreateArgs<TreeItem>(x => x.Progress);
+        Progress<float> _progress;
+
+        #endregion
+    }
+
+    public abstract class TreeItem<T> : TreeItem
+    {
+        #region public T Data { get; set; }
+
+        public T Data
+        {
+            get { return _data; }
+            set
+            {
+                _data = value;
+                NotifyPropertyChanged(DataChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DataChangedEventArgs = ObservableHelper.CreateArgs<TreeItem<T>>(x => x.Data);
+        T _data;
+
+        #endregion
+    }
+
+    public class PlainTreeItem : TreeItem<bool>
+    {
+        #region public List<PlainTreeItem> Children { get; set; }
+
+        public List<PlainTreeItem> Children
+        {
+            get { return _children; }
+            set
+            {
+                if (_children == value) return;
+                _children = value;
+                NotifyPropertyChanged(ChildrenChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ChildrenChangedEventArgs = ObservableHelper.CreateArgs<PlainTreeItem>(x => x.Children);
+        List<PlainTreeItem> _children;
+
+        #endregion
+
+        public PlainTreeItem this[string childName] { get { return Children.Where(item => item.Name == childName).First(); } }
+    }
+
+    public class NewRangeComplex : ViewModelBase
 	{
         NewRangeComplex(string simAreaPath, string rangeComplexName)
         {
@@ -190,10 +322,32 @@ namespace ESME.Environment.Descriptors
             Directory.CreateDirectory(Path.Combine(RangeComplexPath, "GeographicAreas"));
             _areas = new ObservableCollection<RangeComplexArea>();
             UpdateAreas();
-            _temperatureArgs = new AsyncArgs<SoundSpeed>(SoundSpeed.LoadAsync, () => GDEM.ReadTemperatureAsync(NAVOConfiguration.AllMonths.ToList(), GeoRect), task => Temperature = task.Result);
-            _salinityArgs = new AsyncArgs<SoundSpeed>(SoundSpeed.LoadAsync, () => GDEM.ReadSalinityAsync(NAVOConfiguration.AllMonths.ToList(), GeoRect), task => Salinity = task.Result);
+            _token = RangeComplexToken.Load(Path.Combine(DataPath, "token"));
+            if ((_token.GeoRect == null ) || (!_token.GeoRect.Contains(GeoRect))) _token.ReextractionRequired = true;
+            var fields = new List<PlainTreeItem>
+            {
+                new PlainTreeItem{Name = "January", IsEnabled = false},
+                new PlainTreeItem{Name = "February", IsEnabled = false},
+                new PlainTreeItem{Name = "March", IsEnabled = false},
+                new PlainTreeItem{Name = "April", IsEnabled = false},
+                new PlainTreeItem{Name = "May", IsEnabled = false},
+                new PlainTreeItem{Name = "June", IsEnabled = false},
+            };
+            Environment = new PlainTreeItem
+            {
+                Name = "Environment",
+                IsEnabled = true,
+                Children = new List<PlainTreeItem>
+                {
+                    new PlainTreeItem {Name = "Sediment", IsEnabled = false},
+                    new PlainTreeItem {Name = "Bottom Loss", IsEnabled = false},
+                    new PlainTreeItem {Name = "Temperature", IsEnabled = true, Children = fields},
+                    new PlainTreeItem {Name = "Salinity", IsEnabled = true, Children = fields},
+                    new PlainTreeItem {Name = "Sound Speed", IsEnabled = true, Children = fields},
+                    new PlainTreeItem {Name = "Wind", IsEnabled = true, Children = fields},
+                }
+            };
         }
-        readonly AsyncArgs<SoundSpeed> _temperatureArgs, _salinityArgs, _soundspeedArgs;
         readonly ObservableCollection<RangeComplexArea> _areas;
 
 	    #region public ReadOnlyObservableCollection<RangeComplexArea> AreaCollection { get; private set; }
@@ -208,6 +362,8 @@ namespace ESME.Environment.Descriptors
 	            NotifyPropertyChanged(AreaCollectionChangedEventArgs);
 	        }
 	    }
+
+	    public RangeComplexArea this[string areaName] { get { return _areaCollection.Where(item => item.Name == areaName).First(); } }
 
 	    static readonly PropertyChangedEventArgs AreaCollectionChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.AreaCollection);
 	    ReadOnlyObservableCollection<RangeComplexArea> _areaCollection;
@@ -250,22 +406,9 @@ namespace ESME.Environment.Descriptors
 
 	    #endregion
 
-        #region public IEnumerable<Tuple<object, string>> Environment { get; }
+        public PlainTreeItem Environment { get; private set; }
 
-        public IEnumerable<Tuple<object, string>> Environment
-	    {
-	        get
-	        {
-                yield return new Tuple<object, string>(Temperature, "Temperature");
-                yield return new Tuple<object, string>(Salinity, "Salinity");
-                yield return new Tuple<object, string>(SoundSpeed, "Soundspeed");
-            }
-	    }
-
-	    #endregion
-
-
-	    #region public int InitializationProgress { get; set; }
+        #region public int InitializationProgress { get; set; }
 
 	    public int InitializationProgress
 	    {
@@ -283,14 +426,145 @@ namespace ESME.Environment.Descriptors
 
 	    #endregion
 
+        #region public GeoRect GeoRect { get; private set; }
 
-        internal async static Task<NewRangeComplex> CreateAsync(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits)
+        /// <summary>
+        /// A GeoRect that encompasses all RangeComplexAreas in this range complex
+        /// </summary>
+        [NotNull]
+        public GeoRect GeoRect
+        {
+            get { return _geoRect; }
+            private set
+            {
+                if (_geoRect == null)
+                {
+                    _geoRect = value;
+                    NotifyPropertyChanged(GeoRectChangedEventArgs);
+                }
+                else
+                {
+                    if (_geoRect.Contains(value)) return;
+                    _geoRect = value;
+                    NotifyPropertyChanged(GeoRectChangedEventArgs);
+                    OnGeoRectChanged();
+                }
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GeoRectChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.GeoRect);
+        GeoRect _geoRect;
+        #endregion
+
+        #region public event EventHandler<EventArgs> GeoRectChanged;
+        public event EventHandler<EventArgs> GeoRectChanged;
+        readonly EventArgs _eventArgs = new EventArgs();
+        protected virtual void OnGeoRectChanged()
+        {
+            var handlers = GeoRectChanged;
+            if (handlers == null) return;
+            foreach (EventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, _eventArgs));
+                else
+                    handler(this, _eventArgs);
+            }
+        }
+        #endregion
+
+        #region Validation
+	    readonly RangeComplexToken _token;
+
+        Task ValidateAsync() { return TaskEx.Run(Validate); }
+
+        void Validate()
+        {
+            _token.ExtractionsRequired.AddRange(ValidateMonthlyData("temperature").Select(month => new Tuple<NAVOTimePeriod, string>(month, "temperature")));
+            _token.ExtractionsRequired.AddRange(ValidateMonthlyData("salinity").Select(month => new Tuple<NAVOTimePeriod, string>(month, "salinity")));
+            
+            var windFilename = Path.Combine(DataPath, "wind.sediment");
+            if (_token.ReextractionRequired || (!File.Exists(windFilename)) || (new FileInfo(windFilename).LastWriteTime > _token.LastWriteTime))
+                _token.ExtractionsRequired.Add(new Tuple<NAVOTimePeriod, string>(0, "wind"));
+
+            var sedimentFilename = Path.Combine(DataPath, "data.sediment");
+            if (_token.ReextractionRequired || (!File.Exists(sedimentFilename)) || (new FileInfo(sedimentFilename).LastWriteTime > _token.LastWriteTime))
+                _token.ExtractionsRequired.Add(new Tuple<NAVOTimePeriod, string>(0, "sediment"));
+            
+            if (Globals.AppSettings.IsNavyVersion)
+            {
+                var bottomLossFilename = Path.Combine(DataPath, "data.bottomloss");
+                if (_token.ReextractionRequired || (!File.Exists(bottomLossFilename)) || (new FileInfo(bottomLossFilename).LastWriteTime > _token.LastWriteTime)) 
+                    _token.ExtractionsRequired.Add(new Tuple<NAVOTimePeriod, string>(0, "bottomloss"));
+            }
+        }
+
+        IEnumerable<NAVOTimePeriod> ValidateMonthlyData(string dataFileExtension)
+        {
+            var availableMonths = Directory.EnumerateFiles(DataPath, "*." + dataFileExtension).Select(item => (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), Path.GetFileNameWithoutExtension(item), true)).ToList();
+            var missingMonths = new List<NAVOTimePeriod>();
+            if (_token.ReextractionRequired) return NAVOConfiguration.AllMonths;
+            foreach (var month in NAVOConfiguration.AllMonths)
+            {
+                var fileName = Path.Combine(DataPath, month.ToString().ToLower() + dataFileExtension);
+                if (!availableMonths.Contains(month)) missingMonths.Add(month);
+                else if ((!File.Exists(fileName)) || (new FileInfo(fileName).LastWriteTime > _token.LastWriteTime))
+                    missingMonths.Add(month);
+            }
+            return missingMonths.Distinct();
+        }
+
+        [Serializable]
+        class RangeComplexToken
+        {
+            RangeComplexToken()
+            {
+                GeoRect = null;
+                _lastWriteTime = new DateTime(1, 1, 1, 0, 0, 0, 0);  // This should ensure that no files are older than the token's last write time
+            }
+
+            public void Save(string filename, GeoRect geoRect)
+            {
+                var formatter = new BinaryFormatter();
+                GeoRect = geoRect;
+                _lastWriteTime = DateTime.Now;
+                ExtractionsRequired.Clear();
+                using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None)) formatter.Serialize(stream, this);
+            }
+
+            public static RangeComplexToken Load(string filename)
+            {
+                if (!File.Exists(filename)) return new RangeComplexToken();
+                RangeComplexToken result;
+                var formatter = new BinaryFormatter();
+                using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    result = (RangeComplexToken)formatter.Deserialize(stream);
+                result._lastWriteTime = new FileInfo(filename).LastWriteTime;
+                return result;
+            }
+
+            public static Task<RangeComplexToken> LoadAsync(string filename) { return TaskEx.Run(() => Load(filename)); }
+
+            [NonSerialized] DateTime _lastWriteTime;
+            [NonSerialized] public readonly List<Tuple<NAVOTimePeriod, string>> ExtractionsRequired = new List<Tuple<NAVOTimePeriod,string>>();
+            [NonSerialized] public bool ReextractionRequired = false;
+            public GeoRect GeoRect { get; private set; }
+
+            public DateTime LastWriteTime { get { return _lastWriteTime; } }
+        }
+
+#endregion
+
+        internal async static Task<NewRangeComplex> CreateAsync(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, List<Geo> simAreaLimits)
         {
             var result = new NewRangeComplex(simAreaPath, rangeComplexName);
             result.OpArea = RangeComplexArea.Create(result.AreasPath, Path.Combine(result.AreasPath, String.Format("{0}_OpArea", rangeComplexName)), opAreaLimits);
             result.SimArea = RangeComplexArea.Create(result.AreasPath, Path.Combine(result.AreasPath, String.Format("{0}_SimArea", rangeComplexName)), simAreaLimits);
             result.UpdateAreas();
-            result.InitializeAsync();
+            await result.ValidateAsync();
+            // expand simArea by 200km for the initial environment extraction
+            var extractionArea = new GeoRect(new Limits(ConvexHull.Create(simAreaLimits, true)).CreateExpandedLimit(200f).Geos);
+            //result.InitializeAsync();
             return result;
         }
 
@@ -299,7 +573,11 @@ namespace ESME.Environment.Descriptors
             var result = new NewRangeComplex(simAreaPath, rangeComplexInfo.Item1);
             result.OpArea = result._areas.Where(area => area.Name == Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)).First();
             result.SimArea = result._areas.Where(area => area.Name == Path.GetFileNameWithoutExtension(rangeComplexInfo.Item7)).First();
-            result.InitializeAsync();
+            var simAreaLimits = result.SimArea.OverlayShape.Geos;
+            await result.ValidateAsync();
+            // expand simArea by 100km if we need to re-extract all data
+            var extractionArea = new GeoRect(new Limits(ConvexHull.Create(simAreaLimits, true)).CreateExpandedLimit(200f).Geos);
+            //result.InitializeAsync();
             return result;
         }
 
@@ -342,14 +620,9 @@ namespace ESME.Environment.Descriptors
             //continuations.Add(soundSpeedTask.ContinueWith(task => SoundSpeed = task.Result));
 
             await TaskEx.WhenAll(continuations);
-            Temperature = Salinity = SoundSpeed = null;
             IsInitializing = false;
             Debug.WriteLine("{0}: Range complex {1} initialization complete", DateTime.Now, Name);
         }
-
-        public SoundSpeed Temperature { get; private set; }
-        public SoundSpeed Salinity { get; private set; }
-        public SoundSpeed SoundSpeed { get; private set; }
 
         void UpdateAreas()
         {
@@ -370,53 +643,7 @@ namespace ESME.Environment.Descriptors
         [NotNull] public RangeComplexArea OpArea { get; private set; }
         [NotNull] public RangeComplexArea SimArea { get; private set; }
 
-	    #region public GeoRect GeoRect { get; private set; }
-
-        /// <summary>
-        /// A GeoRect that encompasses all RangeComplexAreas in this range complex
-        /// </summary>
-	    [NotNull]
-        public GeoRect GeoRect
-	    {
-	        get { return _geoRect; }
-	        private set
-	        {
-                if (_geoRect == null)
-                {
-                    _geoRect = value;
-                    NotifyPropertyChanged(GeoRectChangedEventArgs);
-                }
-                else
-                {
-                    if (_geoRect.Contains(value)) return;
-                    _geoRect = value;
-                    NotifyPropertyChanged(GeoRectChangedEventArgs);
-                    OnGeoRectChanged();
-                }
-            }
-	    }
-
-	    static readonly PropertyChangedEventArgs GeoRectChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.GeoRect);
-	    GeoRect _geoRect;
-	    #endregion
-
-        #region public event EventHandler<EventArgs> GeoRectChanged;
-        public event EventHandler<EventArgs> GeoRectChanged;
-        readonly EventArgs _eventArgs = new EventArgs();
-        protected virtual void OnGeoRectChanged()
-        {
-            var handlers = GeoRectChanged;
-            if (handlers == null) return;
-            foreach (EventHandler handler in handlers.GetInvocationList())
-            {
-                if (handler.Target is DispatcherObject)
-                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, _eventArgs));
-                else
-                    handler(this, _eventArgs);
-            }
-        }
-        #endregion
-
+#if false
         class AsyncArgs<T> where T : ICanSave
         {
             public AsyncArgs(Func<string, Task<T>> loadFunc, Func<Task<T>> readFunc, Action<Task<T>> completionAction)
@@ -433,11 +660,6 @@ namespace ESME.Environment.Descriptors
 
         Task ReadDataAsync<T>(string dataFilename, Func<string, Task<T>> loadFunc, Func<Task<T>> readFunc, Action<Task<T>> completionAction, out Task<T> mainTask) where T : ICanSave
         {
-            // args.Item1 = mainTask
-            // args.Item2 = continuationTask
-            // args.Item3 = loadFunc
-            // args.Item4 = readFunc
-            // args.Item5 = completionAction
             var dataFile = Path.Combine(DataPath, dataFilename);
             Task<T> main;
             var result = File.Exists(dataFile) ? (main = loadFunc(dataFile)) : (main = readFunc()).ContinueWith(task => task.Result.Save(dataFile));
@@ -456,36 +678,71 @@ namespace ESME.Environment.Descriptors
             mainTask = main;
             return result;
         }
+
+	    public void OnDeserialization(object sender) { throw new NotImplementedException(); }
+#endif
     }
+
+    public class ResolutionTreeItem : TreeItem<uint> {}
 
     public class RangeComplexArea : ViewModelBase
     {
-        internal static RangeComplexArea Create(string areasPath, string areaName, IEnumerable<Geo> limits)
+        private RangeComplexArea(string rangeComplexPath, string areaName, OverlayShape overlayShape)
         {
-            var areaPath = Path.Combine(areasPath, areaName + ".ovr");
+            _rangeComplexPath = rangeComplexPath;
+            Name = areaName;
+            OverlayShape = overlayShape;
+            GeoRect = new GeoRect(overlayShape.BoundingBox);
+            BathymetryPath = Path.Combine(_rangeComplexPath, "Data", Name);
+            _availableResolutions = new ObservableCollection<ResolutionTreeItem>();
+            AvailableResolutions = new ReadOnlyObservableCollection<ResolutionTreeItem>(_availableResolutions);
+            UpdateAvailableBathymetry();
+        }
+
+        public void UpdateAvailableBathymetry()
+        {
+            _availableResolutions.Clear();
+            foreach (var samplesPerDegree in AvailableSampleCountsPerDegree)
+            {
+                var resolutionString = string.Format("{0:0.00}min", 60.0 / samplesPerDegree);
+                var north = Math.Round(GeoRect.North * samplesPerDegree) / samplesPerDegree;
+                var south = Math.Round(GeoRect.South * samplesPerDegree) / samplesPerDegree;
+                var east = Math.Round(GeoRect.East * samplesPerDegree) / samplesPerDegree;
+                var west = Math.Round(GeoRect.West * samplesPerDegree) / samplesPerDegree;
+                var width = (uint)(east - west);
+                var height = (uint)(north - south);
+                _availableResolutions.Add(new ResolutionTreeItem
+                {
+                    Name = resolutionString,
+                    IsEnabled = File.Exists(Path.Combine(BathymetryPath, resolutionString + ".bathymetry")),
+                    Data = width * samplesPerDegree * height * samplesPerDegree,
+                });
+            }
+        }
+
+        internal static RangeComplexArea Create(string rangeComplexPath, string areaName, IEnumerable<Geo> limits)
+        {
+            var areaPath = Path.Combine(rangeComplexPath, "Areas", areaName + ".ovr");
             OverlayFile.Create(areaPath, limits);
             var overlay = new OverlayFile(areaPath);
-            return new RangeComplexArea
-            {
-                Name = areaName,
-                OverlayShape = overlay.Shapes[0],
-                GeoRect = new GeoRect(overlay.Shapes[0].BoundingBox),
-            };
+            return new RangeComplexArea(rangeComplexPath, areaName, overlay.Shapes[0]);
         }
 
         internal static RangeComplexArea Read(string areaPath)
         {
             var overlay = new OverlayFile(areaPath);
-            return new RangeComplexArea
-            {
-                Name = Path.GetFileNameWithoutExtension(areaPath),
-                OverlayShape = overlay.Shapes[0],
-                GeoRect = new GeoRect(overlay.Shapes[0].BoundingBox),
-            };
+            return new RangeComplexArea(Path.GetDirectoryName(Path.GetDirectoryName(areaPath)), Path.GetFileNameWithoutExtension(areaPath), overlay.Shapes[0]);
         }
 
+        [NotNull] public ReadOnlyObservableCollection<ResolutionTreeItem> AvailableResolutions { get; private set; }
         [NotNull] public string Name { get; private set; }
+        [NotNull] public string BathymetryPath { get; private set; }
         [NotNull] public GeoRect GeoRect { get; private set; }
         [NotNull] public OverlayShape OverlayShape { get; private set; }
+
+        [NotNull] readonly ObservableCollection<ResolutionTreeItem> _availableResolutions;
+        [NotNull] readonly string _rangeComplexPath;
+
+        static readonly List<uint> AvailableSampleCountsPerDegree = new List<uint> { 30, 60, 120, 600, 1200 };
     }
 }

@@ -288,25 +288,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region Experiment Load/Save and associated utility functions
 
-        /// <summary>
-        ///   If the current experiment is unsaved, ask the user to save the experiment.
-        /// </summary>
-        /// <returns>true if the user wants to cancel the current operation, false otherwise.</returns>
-        bool UserCanceledBecauseExperimentUnsaved()
-        {
-            return false;
-
-            if ((_experiment == null) || (!_experiment.IsChanged)) return false;
-            var results = _messageBoxService.ShowYesNoCancel("The current experiment has changed.\nWould you like to save it first?", CustomDialogIcons.Exclamation);
-            if (results == CustomDialogResults.Cancel) return true;
-            if (results == CustomDialogResults.No) return false;
-
-            return !SaveExperiment();
-        }
-
         void OpenExperiment(string fileName)
         {
-            if (UserCanceledBecauseExperimentUnsaved()) return;
             if (fileName == null)
             {
                 _openFileService.Filter = "ESME files (*.esme)|*.esme|All files (*.*)|*.*";
@@ -364,7 +347,6 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void NewExperiment()
         {
-            if (UserCanceledBecauseExperimentUnsaved()) return;
             if (_experiment != null) _experiment.Close();
             _experiment = new Experiment();
             _experiment.InitializeIfViewModelsReady();

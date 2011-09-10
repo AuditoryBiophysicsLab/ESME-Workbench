@@ -377,7 +377,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 Task.Factory.StartNew(() =>
                 {
                     SelectedRangeComplexDescriptor = RangeComplexDescriptors.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
-                                                               vm.NewOpAreaOverlayEarthCoordinates, vm.ExistingSimAreaOverlayFilename, vm.NewSimAreaOverlayEarthCoordinates, _dispatcher);
+                                                               vm.NewOpAreaOverlayGeos, vm.ExistingSimAreaOverlayFilename, vm.NewSimAreaOverlayGeos, _dispatcher);
                     RangeComplexDescriptors.Sort();
                 });
             }
@@ -570,7 +570,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplexDescriptor.Data.Name);
             var result = _visualizerService.ShowDialog("NewOverlayView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
-            NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, Path.GetFileNameWithoutExtension(vm.OverlayName), vm.OverlayEarthCoordinates, vm.BoundingBox, 0, null);
+            NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, Path.GetFileNameWithoutExtension(vm.OverlayName), vm.OverlayGeos, vm.BoundingBox, 0, null);
             SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(vm.OverlayName)];
         }
 
@@ -604,11 +604,11 @@ namespace ESMEWorkBench.ViewModels.Main
             
             var curOverlay = SelectedOverlayDescriptor.Data;
             //var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].EarthCoordinates));
-            var limits = new Limits(ConvexHull.Create(curOverlay.Shapes[0].EarthCoordinates, true));
+            var limits = new Limits(ConvexHull.Create(curOverlay.Shapes[0].EarthCoordinates.Cast<Geo>().ToList(), true));
             var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
-            var boundingBox = new GeoRect(expandedLimits.GeoPointList);
-            var coordinateList = expandedLimits.GeoPointList.Select(geo => new EarthCoordinate(geo)).ToList();
-            var testShape = new OverlayLineSegments(coordinateList.ToArray(), Colors.Black);
+            var boundingBox = new GeoRect(expandedLimits.Geos);
+            var coordinateList = expandedLimits.Geos;
+            var testShape = new OverlayLineSegments((ICollection<Geo>)coordinateList, Colors.Black);
 
             if (!testShape.IsUsableAsPerimeter) coordinateList = ConvexHull.Create(coordinateList, true);
 

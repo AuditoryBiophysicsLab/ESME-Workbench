@@ -60,7 +60,7 @@ namespace ESME.Environment.Descriptors
             });
         }
 
-        public void CreateNewOverlay(string rangeComplexName, string overlayName, List<EarthCoordinate> coordinates, GeoRect boundingBox, float bufferZoneSize, string sourceOverlayName)
+        public void CreateNewOverlay(string rangeComplexName, string overlayName, ICollection<Geo> coordinates, GeoRect boundingBox, float bufferZoneSize, string sourceOverlayName)
         {
             if (coordinates == null) throw new ApplicationException("Cannot create a new overlay without coordinates");
             var rangeComplexAreasFolder = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName, "Areas");

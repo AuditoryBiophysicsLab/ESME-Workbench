@@ -36,6 +36,7 @@ namespace ESME.NEMO.Overlay
         }
 
         public virtual List<EarthCoordinate> EarthCoordinates { get { return new List<EarthCoordinate>(_earthCoordinates); } }
+        public virtual List<Geo> Geos { get { return new List<Geo>(_earthCoordinates); } }
 
         public virtual bool IsClosed
         {
@@ -108,6 +109,18 @@ namespace ESME.NEMO.Overlay
         protected void Add(EarthCoordinate[] newPoints)
         {
             _earthCoordinates.AddRange(newPoints);
+            CalculateBoundingBox();
+        }
+
+        protected void Add(IEnumerable<EarthCoordinate> newPoints)
+        {
+            _earthCoordinates.AddRange(newPoints);
+            CalculateBoundingBox();
+        }
+
+        protected void Add(IEnumerable<Geo> newPoints)
+        {
+            _earthCoordinates.AddRange(newPoints.Cast<EarthCoordinate>());
             CalculateBoundingBox();
         }
 

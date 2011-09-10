@@ -131,10 +131,9 @@ namespace ESME.Environment
             }
         }
 
-        public void Export(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, BackgroundTask backgroundTask = null)
+        public void Export(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null)
         {
-            ExportBathymetry(simAreaPath, areaToExport, backgroundTask);
-            if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
+            ExportBathymetry(simAreaPath, areaToExport);
             //ExportEnvironment(simAreaPath, timePeriods, areaToExport, backgroundTask);
         }
 
@@ -156,7 +155,7 @@ namespace ESME.Environment
             return result;
         }
 #if false
-        public void ExportEnvironment(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null, BackgroundTask backgroundTask = null)
+        public void ExportEnvironment(string simAreaPath, IEnumerable<NAVOTimePeriod> timePeriods, GeoRect areaToExport = null)
         {
             if ((Bathymetry == null) || (Sediment == null) || (SoundSpeed == null) || (Salinity == null) || (Temperature == null) || (Wind == null)) throw new DataException("Unable to export environmental data: One or more required data types are not present");
             
@@ -212,7 +211,7 @@ namespace ESME.Environment
         }
 #endif
 
-        public void ExportBathymetry(string simAreaPath, GeoRect areaToExport = null, BackgroundTask backgroundTask = null)
+        public void ExportBathymetry(string simAreaPath, GeoRect areaToExport = null)
         {
             if (Bathymetry == null) throw new DataException("Unable to export bathymetry data: No bathymetry data is present");
 
@@ -226,11 +225,9 @@ namespace ESME.Environment
                     selectedBathymetry = new Bathymetry();
                     selectedBathymetry.Samples.AddRange(Bathymetry.Samples);
                     selectedBathymetry.Samples.TrimToNearestPoints(areaToExport);
-                    if ((backgroundTask != null) && backgroundTask.CancellationPending) return;
                 }
             }
 
-            if (backgroundTask != null) backgroundTask.Status = string.Format("Exporting bathymetry data");
             selectedBathymetry.ToYXZ(Path.Combine(simAreaPath, "Bathymetry", "bathymetry.txt"), -1);
         }
     }

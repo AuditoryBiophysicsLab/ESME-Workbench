@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using Cinch;
 using HDF5DotNet;
 using C5;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
     public static class BST
     {
-        public async static Task<Sediment> ExtractAsync(GeoRect region, IProgress<float> progress = null)
+        public static Sediment Extract(GeoRect region, IProgress<float> progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0f);
 
@@ -33,7 +27,7 @@ namespace ESME.Environment.NAVO
             for (var lat = south; lat < north; lat++)
                 for (var lon = west; lon < east; lon++)
                 {
-                    var data = await ReadDataset(highResGroup, lowResGroup, (int)lat, (int)lon);
+                    var data = ReadDataset(highResGroup, lowResGroup, (int)lat, (int)lon);
                     if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
                     if (data != null) dedupeList.AddAll(data);
                     if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
@@ -51,9 +45,9 @@ namespace ESME.Environment.NAVO
             return sediment;
         }
 
-        static async Task<IEnumerable<SedimentSample>> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
+        static IEnumerable<SedimentSample> ReadDataset(H5FileOrGroupId highResGroup, H5FileOrGroupId lowResGroup, int latitude, int longitude)
         {
-            var result = await ReadDataset(highResGroup, latitude, longitude);
+            var result = ReadDataset(highResGroup, latitude, longitude);
             double resolutionStep;
             if (result != null)
             {
@@ -61,7 +55,7 @@ namespace ESME.Environment.NAVO
             }
             else
             {
-                result = await ReadDataset(lowResGroup, latitude, longitude);
+                result = ReadDataset(lowResGroup, latitude, longitude);
                 //if (result == null) throw new KeyNotFoundException(string.Format("Unable to locate sediment data for lat: {0}, lon: {1}", latitude, longitude));
                 if (result == null) return null;
                 resolutionStep = 5.0 / 60.0;
@@ -73,7 +67,7 @@ namespace ESME.Environment.NAVO
             return sedimentList;
         }
 
-        static async Task<short[,]> ReadDataset(H5FileOrGroupId groupId, int latitude, int longitude)
+        static short[,] ReadDataset(H5FileOrGroupId groupId, int latitude, int longitude)
         {
             if (groupId == null) return null;
             try
@@ -91,6 +85,5 @@ namespace ESME.Environment.NAVO
                 return null;
             }
         }
-
     }
 }

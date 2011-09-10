@@ -22,13 +22,13 @@ namespace HRC.Navigation
     //    leaving out L from lower and R from upper.
     public static class ConvexHull
     {
-        public static List<EarthCoordinate> Create(List<EarthCoordinate> sourcePoints, bool makeClosed = false)
+        public static List<Geo> Create(List<Geo> sourcePoints, bool makeClosed = false)
         {
             var points = new ConvexHullPoint[sourcePoints.Count];
             for (var i = 0; i < points.Length; i++)
                 points[i] = new ConvexHullPoint(sourcePoints[i].Longitude, sourcePoints[i].Latitude);
             var resultPoints = Create(points);
-            var result = resultPoints.Select(t => new EarthCoordinate(t.Y, t.X)).ToList();
+            var result = resultPoints.Select(t => new Geo(t.Y, t.X)).ToList();
             if (makeClosed) result.Add(result.First());
             return result;
         }

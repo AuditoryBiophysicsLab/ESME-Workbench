@@ -57,6 +57,48 @@ namespace ESME.Environment.NAVO
             return actionBlock.Completion;
         }
 
+        public async static Task<List<SoundSpeedField>> CalculateSoundSpeedFieldsAsync(List<SoundSpeedField> temperatureFields, List<SoundSpeedField> salinityFields, Bathymetry bathymetry = null, IProgress<string> currentState = null, IProgress<float> progress = null)
+        {
+            var temperaturePeriods = temperatureFields.Select(field => field.TimePeriod).ToList();
+            var salinityPeriods = salinityFields.Select(field => field.TimePeriod).ToList();
+            temperaturePeriods.Sort();
+            salinityPeriods.Sort();
+            if ((temperaturePeriods.Count != salinityPeriods.Count) || (temperaturePeriods.Where((t, i) => t != salinityPeriods[i]).Any()))
+                throw new ArgumentException("temperature and salinity contain data for different time periods");
+            var progressStep = 100f / temperaturePeriods.Count;
+            var totalProgress = 0f;
+            var transformBlock = new TransformBlock<NAVOTimePeriod, SoundSpeedField>(month =>
+                {
+                    var monthName = month.ToString().ToLower();
+                    if (currentState != null) lock (currentState) currentState.Report(string.Format("Calculating {0} soundspeed", monthName));
+                    if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+                    return CalculateSoundSpeedField(temperatureFields.Find(field => field.TimePeriod == month), salinityFields.Find(field => field.TimePeriod == month), bathymetry);
+                },
+                new ExecutionDataflowBlockOptions
+                {
+                    TaskScheduler = TaskScheduler.Default,
+                    MaxDegreeOfParallelism = 1,
+                });
+            var batchBlock = new BatchBlock<SoundSpeedField>(temperaturePeriods.Count);
+            transformBlock.LinkTo(batchBlock);
+            transformBlock.Completion.ContinueWith(task => batchBlock.Complete());
+            foreach (var month in temperaturePeriods) transformBlock.Post(month);
+            transformBlock.Complete();
+            await batchBlock.Completion;
+            return batchBlock.Receive().ToList();
+        }
+
+        public static SoundSpeedField CalculateSoundSpeedField(SoundSpeedField temperatureField, SoundSpeedField salinityField, Bathymetry bathymetry = null)
+        {
+            var soundspeed = SoundSpeedField.Create(temperatureField, salinityField);
+            if (bathymetry != null)
+            {
+                var deepestPoint = new EarthCoordinate<float>(bathymetry.Minimum, Math.Abs(bathymetry.Minimum.Data));
+                soundspeed = soundspeed.Extend(temperatureField, salinityField, deepestPoint);
+            }
+            return soundspeed;
+        }
+#if false
         public static async Task<SoundSpeed> ReadTemperatureAsync(ICollection<NAVOTimePeriod> months, GeoRect region, IProgress<float> progress = null)
         {
             var progressStep = 100f / (months.Count + 1);
@@ -231,6 +273,7 @@ namespace ESME.Environment.NAVO
             }
             return soundSpeedField;
         }
+#endif
 
         static void VerifyThatProfilePointsMatch(TimePeriodEnvironmentData<SoundSpeedProfile> profile1, TimePeriodEnvironmentData<SoundSpeedProfile> profile2)
         {

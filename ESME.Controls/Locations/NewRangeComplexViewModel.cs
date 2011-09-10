@@ -131,9 +131,9 @@ namespace ESME.Views.Locations
         {
             if (string.IsNullOrEmpty(fieldData)) return true;
 
-            List<EarthCoordinate> earthCoordinates;
+            List<Geo> geos;
             string validationErrors;
-            var result = OverlayFile.ValidateCoordinates(fieldData, null, out earthCoordinates, out validationErrors);
+            var result = OverlayFile.ValidateCoordinates(fieldData, null, out geos, out validationErrors);
             if (result != null) return true;
             rule.ValidationErrorMessage = validationErrors;
             return false;
@@ -354,8 +354,8 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        public List<EarthCoordinate> NewOpAreaOverlayEarthCoordinates { get; private set; }
-        public List<EarthCoordinate> NewSimAreaOverlayEarthCoordinates { get; private set; }
+        public List<Geo> NewOpAreaOverlayGeos { get; private set; }
+        public List<Geo> NewSimAreaOverlayGeos { get; private set; }
         public GeoRect OpAreaBoundingBox { get; private set; }
         public GeoRect SimAreaBoundingBox { get; private set; }
 
@@ -376,8 +376,8 @@ namespace ESME.Views.Locations
 
         private void OkCommandHandler()
         {
-            List<EarthCoordinate> opCoords = null;
-            List<EarthCoordinate> simCoords = null;
+            List<Geo> opCoords = null;
+            List<Geo> simCoords = null;
             string opErrors;
             OpAreaBoundingBox = !string.IsNullOrEmpty(NewOpAreaOverlayCoordinates)
                            ? OverlayFile.ValidateCoordinates(NewOpAreaOverlayCoordinates, "Op Limits", out opCoords, out opErrors)
@@ -388,8 +388,8 @@ namespace ESME.Views.Locations
                             ? OverlayFile.ValidateCoordinates(NewSimAreaOverlayCoordinates, "Sim Limits", out simCoords, out simErrors)
                             : OverlayFile.ValidateFile(ExistingSimAreaOverlayFilename, "Sim Limits", out simErrors);
 
-            NewOpAreaOverlayEarthCoordinates = opCoords;
-            NewSimAreaOverlayEarthCoordinates = simCoords;
+            NewOpAreaOverlayGeos = opCoords;
+            NewSimAreaOverlayGeos = simCoords;
 
             CloseActivePopUpCommand.Execute(true);
         }

@@ -106,25 +106,25 @@ namespace ESME.Environment.Descriptors
             Directory.CreateDirectory(Path.Combine(rangeComplexPath, "Species"));
         }
 
-        public RangeComplexDescriptor CreateRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, List<EarthCoordinate> opAreaBoundsCoordinates, string simLimitFile, List<EarthCoordinate> simAreaBoundsCoordinates, Dispatcher dispatcher)
+        public RangeComplexDescriptor CreateRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, string opsLimitFile, List<Geo> opAreaBoundsGeos, string simLimitFile, List<Geo> simAreaBoundsGeos, Dispatcher dispatcher)
         {
             var rangeComplexPath = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, rangeComplexName);
             if (!Directory.Exists(rangeComplexPath))
             {
                 CreateRangeComplexDirectories(rangeComplexPath);
                 var areasPath = Path.Combine(rangeComplexPath, "Areas");
-                if (string.IsNullOrEmpty(opsLimitFile) && opAreaBoundsCoordinates == null) throw new ApplicationException("Operational area limit file OR operational area bounds MUST be provided, but neither were");
-                if (!string.IsNullOrEmpty(opsLimitFile) && opAreaBoundsCoordinates != null) throw new ApplicationException("Operational area limit file OR operational area bounds MUST be provided, but not both");
+                if (string.IsNullOrEmpty(opsLimitFile) && opAreaBoundsGeos == null) throw new ApplicationException("Operational area limit file OR operational area bounds MUST be provided, but neither were");
+                if (!string.IsNullOrEmpty(opsLimitFile) && opAreaBoundsGeos != null) throw new ApplicationException("Operational area limit file OR operational area bounds MUST be provided, but not both");
                 var opsOverlayFilename = Path.Combine(areasPath, String.Format("{0}_OpArea.ovr", rangeComplexName));
                 if (!string.IsNullOrEmpty(opsLimitFile)) File.Copy(opsLimitFile, opsOverlayFilename);
-                if (opAreaBoundsCoordinates != null) OverlayFile.Create(opsOverlayFilename, opAreaBoundsCoordinates);
+                if (opAreaBoundsGeos != null) OverlayFile.Create(opsOverlayFilename, opAreaBoundsGeos);
                 opsLimitFile = opsOverlayFilename;
 
-                if (string.IsNullOrEmpty(simLimitFile) && simAreaBoundsCoordinates == null) throw new ApplicationException("Simulation area limit file OR simulation area bounds MUST be provided, but neither were");
-                if (!string.IsNullOrEmpty(simLimitFile) && simAreaBoundsCoordinates != null) throw new ApplicationException("Simulation area limit file OR simulation area bounds MUST be provided, but not both");
+                if (string.IsNullOrEmpty(simLimitFile) && simAreaBoundsGeos == null) throw new ApplicationException("Simulation area limit file OR simulation area bounds MUST be provided, but neither were");
+                if (!string.IsNullOrEmpty(simLimitFile) && simAreaBoundsGeos != null) throw new ApplicationException("Simulation area limit file OR simulation area bounds MUST be provided, but not both");
                 var simOverlayFilename = Path.Combine(areasPath, String.Format("{0}_SimArea.ovr", rangeComplexName));
                 if (!string.IsNullOrEmpty(simLimitFile)) File.Copy(simLimitFile, simOverlayFilename);
-                if (simAreaBoundsCoordinates != null) OverlayFile.Create(simOverlayFilename, simAreaBoundsCoordinates);
+                if (simAreaBoundsGeos != null) OverlayFile.Create(simOverlayFilename, simAreaBoundsGeos);
                 simLimitFile = simOverlayFilename;
 
                 lock (this)

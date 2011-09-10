@@ -78,7 +78,7 @@ namespace ESME.Environment
                 profile.Extend(DeepestSSP);
         }
 
-        public static SoundSpeedField Create(SoundSpeedField temperatureField, SoundSpeedField salinityField, BackgroundTask backgroundTask = null)
+        public static SoundSpeedField Create(SoundSpeedField temperatureField, SoundSpeedField salinityField)
         {
             if (temperatureField.TimePeriod != salinityField.TimePeriod) throw new DataException("");
             VerifyThatProfilePointsMatch(temperatureField, salinityField);
@@ -88,7 +88,7 @@ namespace ESME.Environment
             return result;
         }
 
-        public SoundSpeedField Extend(SoundSpeedField sourceTemperatureField, SoundSpeedField sourceSalinityField, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest = null, BackgroundTask backgroundTask = null)
+        public SoundSpeedField Extend(SoundSpeedField sourceTemperatureField, SoundSpeedField sourceSalinityField, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest = null)
         {
             if ((TimePeriod != sourceTemperatureField.TimePeriod) || (TimePeriod != sourceSalinityField.TimePeriod))
                 throw new DataException("");

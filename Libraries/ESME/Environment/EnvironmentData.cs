@@ -79,12 +79,12 @@ namespace ESME.Environment
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine("{0}: About to call ParallelSort", DateTime.Now);
+            // System.Diagnostics.Debug.WriteLine("{0}: About to call ParallelSort", DateTime.Now);
             var array = _arrayList.ToArray();
             array.ParallelSort();
             _arrayList.Clear();
             _arrayList.AddRange(array);
-            System.Diagnostics.Debug.WriteLine("{0}: Returned from ParallelSort", DateTime.Now);
+            // System.Diagnostics.Debug.WriteLine("{0}: Returned from ParallelSort", DateTime.Now);
             IsSorted = true;
         }
 

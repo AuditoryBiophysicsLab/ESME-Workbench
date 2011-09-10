@@ -75,19 +75,14 @@ namespace ESME.Environment.NAVO
             short[,] result = null;
             result = ReadDataset(highResGroup, latitude, longitude);
             double resolutionStep;
-            bool isHighResolution;
             if (result != null)
-            {
                 resolutionStep = 6.0 / 3600.0;
-                isHighResolution = true;
-            }
             else
             {
                 result = ReadDataset(lowResGroup, latitude, longitude);
                 //if (result == null) throw new KeyNotFoundException(string.Format("Unable to locate sediment data for lat: {0}, lon: {1}", latitude, longitude));
                 if (result == null) return null;
                 resolutionStep = 5.0 / 60.0;
-                isHighResolution = false;
             }
             var sedimentList = new List<SedimentSample>();
             for (var i = 0; i < result.GetLength(0); i++)

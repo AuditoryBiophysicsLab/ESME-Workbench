@@ -18,6 +18,7 @@
         Attribute = 12
     }
 
+#if false
     internal static class NetCDFConstants
     {
         static readonly byte FillChar = 0;
@@ -28,4 +29,5 @@
         static readonly double FillDouble = 9.9692099683868690e+36;
         static readonly uint StreamingRecords = 0xFFFFFFFF;
     }
+#endif
 }

@@ -15,8 +15,6 @@ namespace ESME.Environment
     [Serializable]
     public class SoundSpeed : IExtensibleDataObject, ICanSave
     {
-        static readonly List<Type> ReferencedTypes = new List<Type>(SoundSpeedField.ReferencedTypes);
-
         public List<SoundSpeedField> SoundSpeedFields { get; set; }
 
         public SoundSpeed()
@@ -66,12 +64,12 @@ namespace ESME.Environment
             return TaskEx.Run(() => Load(filename));
         }
 
-        public static SoundSpeed Load(string temperatureFilename, string salinityFilename, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null, BackgroundTask backgroundTask = null)
+        public static SoundSpeed Load(string temperatureFilename, string salinityFilename, EarthCoordinate<float> deepestPoint = null, GeoRect areaOfInterest = null)
         {
             var temperatureData = Load(temperatureFilename);
             var salinityData = Load(salinityFilename);
             VerifyThatTimePeriodsMatch(temperatureData, salinityData);
-            var soundSpeed = Create(temperatureData, salinityData, backgroundTask);
+            var soundSpeed = Create(temperatureData, salinityData);
             if (deepestPoint == null) return soundSpeed;
             soundSpeed.Extend(temperatureData, salinityData, deepestPoint, areaOfInterest);
             foreach (var soundSpeedField in soundSpeed.SoundSpeedFields)
@@ -79,53 +77,44 @@ namespace ESME.Environment
             return soundSpeed;
         }
 
-        public void Extend(SoundSpeed temperatureData, SoundSpeed salinityData, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest, BackgroundTask backgroundTask = null)
+        public void Extend(SoundSpeed temperatureData, SoundSpeed salinityData, EarthCoordinate<float> deepestPoint, GeoRect areaOfInterest)
         {
             VerifyThatTimePeriodsMatch(this, temperatureData);
             VerifyThatTimePeriodsMatch(temperatureData, salinityData);
 
             foreach (var soundSpeedField in SoundSpeedFields)
-                soundSpeedField.Extend(temperatureData[soundSpeedField.TimePeriod], salinityData[soundSpeedField.TimePeriod], deepestPoint, areaOfInterest, backgroundTask);
+                soundSpeedField.Extend(temperatureData[soundSpeedField.TimePeriod], salinityData[soundSpeedField.TimePeriod], deepestPoint, areaOfInterest);
         }
 
-        public static SoundSpeed Create(SoundSpeed temperatureData, SoundSpeed salinityData, BackgroundTask backgroundTask = null)
+        public static SoundSpeed Create(SoundSpeed temperatureData, SoundSpeed salinityData)
         {
             VerifyThatTimePeriodsMatch(temperatureData, salinityData);
 
             var soundSpeedFile = new SoundSpeed();
             foreach (var temperatureField in temperatureData.SoundSpeedFields)
-                soundSpeedFile.SoundSpeedFields.Add(SoundSpeedField.Create(temperatureField, salinityData[temperatureField.TimePeriod], backgroundTask));
+                soundSpeedFile.SoundSpeedFields.Add(SoundSpeedField.Create(temperatureField, salinityData[temperatureField.TimePeriod]));
             return soundSpeedFile;
         }
 
-        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods, BackgroundTask backgroundTask = null)
+        public static SoundSpeed Average(SoundSpeed monthlySoundSpeeds, List<NAVOTimePeriod> timePeriods)
         {
             var result = new SoundSpeed();
-            if (backgroundTask != null) backgroundTask.Maximum += timePeriods.Count;
             foreach (var timePeriod in timePeriods)
             {
-                if (backgroundTask != null) backgroundTask.Status = string.Format("Averaging soundspeeds for {0}", timePeriod);
                 var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
                 var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
                 foreach (var month in months)
                     accumulator.Add(monthlySoundSpeeds[month]);
                 result.SoundSpeedFields.Add(accumulator.Average);
-                if ((backgroundTask != null) && backgroundTask.CancellationPending) return result;
             }
             return result;
         }
 
-        public static SoundSpeedField Average(SoundSpeed monthlySoundSpeeds, NAVOTimePeriod timePeriod, BackgroundTask backgroundTask = null)
+        public static SoundSpeedField Average(SoundSpeed monthlySoundSpeeds, NAVOTimePeriod timePeriod)
         {
-            if (backgroundTask != null) backgroundTask.Status = string.Format("Averaging soundspeeds for {0}", timePeriod);
             var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList();
-            if (backgroundTask != null) backgroundTask.Maximum += months.Count;
             var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
-            foreach (var month in months)
-            {
-                accumulator.Add(monthlySoundSpeeds[month]);
-                if (backgroundTask != null) backgroundTask.Value++;
-            }
+            foreach (var month in months) accumulator.Add(monthlySoundSpeeds[month]);
             return accumulator.Average;
         }
 

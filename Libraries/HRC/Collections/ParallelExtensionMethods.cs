@@ -4,13 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using C5;
-using HRC.Utility;
 
 namespace HRC.Collections
 {
     public static class ParallelExtensionMethods
     {
-        public static void ParallelSort<T>(this T[] array, IComparer<T> comparer = null, BackgroundTask backgroundTask = null) where T : IComparer<T>
+        public static void ParallelSort<T>(this T[] array, IComparer<T> comparer = null) where T : IComparer<T>
         {
             if (comparer == null) comparer = Comparer<T>.Default;
             if (array.Length < 10000)
@@ -20,20 +19,11 @@ namespace HRC.Collections
             }
 
             var cpuCount = Environment.ProcessorCount;
-            while (cpuCount > 1)
-            {
-                if (backgroundTask != null) backgroundTask.Maximum += cpuCount;
-                cpuCount /= 2;
-            }
-            if (backgroundTask != null) backgroundTask.Maximum++;
-
-            cpuCount = Environment.ProcessorCount;
             var pass = 0;
             var started = DateTime.Now;
             while (cpuCount > 1)
             {
                 pass++;
-                if (backgroundTask != null) backgroundTask.Status += string.Format("Sorting (parallel pass {0}) [{1} threads]", pass, cpuCount);
                 System.Diagnostics.Debug.WriteLine("{0}: ParallelSort: Starting sort pass {1} on {2} threads", DateTime.Now, pass, cpuCount);
                 var totalItemsSorted = 0;
                 var arraySliceLength = array.Length / cpuCount;
@@ -45,11 +35,7 @@ namespace HRC.Collections
                     System.Diagnostics.Debug.WriteLine("{0}: ParallelSort: Finished sorting from index {1} to {2}", DateTime.Now, arraySliceLength * i, arraySliceLength * (i + 1));
                     return arraySliceLength;
                 },
-                x => 
-                { 
-                    if (backgroundTask != null) backgroundTask.Value++;
-                    Interlocked.Add(ref totalItemsSorted, x);
-                });
+                x => Interlocked.Add(ref totalItemsSorted, x));
                 System.Diagnostics.Debug.WriteLine("{0}: ParallelSort: Finished sort pass {1}", DateTime.Now, pass);
                 cpuCount /= 2;
             }

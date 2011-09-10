@@ -185,7 +185,6 @@ namespace ESME.Views.TransmissionLoss
             var bottomProfiles = new BottomProfile[radialCount];
             var soundSpeedProfiles = new SoundSpeedProfile[radialCount];
             var windSpeeds = new float[radialCount];
-            var useWindSpeed = false;
             for (var bearingIndex = 0; bearingIndex < radialCount; bearingIndex++)
             {
                 var radialBearing = transmissionLossJob.SoundSource.RadialBearings[bearingIndex];

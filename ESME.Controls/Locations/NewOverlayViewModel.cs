@@ -156,9 +156,9 @@ namespace ESME.Views.Locations
         public static bool ValidateOverlayCoordinates(string fieldData, ValidationRuleBase rule)
         {
             if (string.IsNullOrEmpty(fieldData)) return true;
-            List<EarthCoordinate> earthCoordinates;
+            List<Geo> geos;
             string validationErrors;
-            var result = OverlayFile.ValidateCoordinates(fieldData, null, out earthCoordinates, out validationErrors);
+            var result = OverlayFile.ValidateCoordinates(fieldData, null, out geos, out validationErrors);
             if (result != null) return true;
             rule.ValidationErrorMessage = validationErrors;
             return false;
@@ -177,16 +177,16 @@ namespace ESME.Views.Locations
             }
         }
 
-        public List<EarthCoordinate> OverlayEarthCoordinates { get; private set; }
+        public List<Geo> OverlayGeos { get; private set; }
 
         public GeoRect BoundingBox { get; private set; }
 
         void OkCommandHandler()
         {
-            List<EarthCoordinate> coords;
+            List<Geo> coords;
             string overlayError;
             BoundingBox = OverlayFile.ValidateCoordinates(OverlayCoordinates, "Op Limits", out coords, out overlayError);
-            OverlayEarthCoordinates = coords;
+            OverlayGeos = coords;
 
             CloseActivePopUpCommand.Execute(true);
         }

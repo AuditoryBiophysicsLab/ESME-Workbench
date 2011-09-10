@@ -240,7 +240,7 @@ namespace ESME.TransmissionLoss.CASS
             }
             TaskName = "Exporting NAEMO environment for " + TimePeriod;
             var environmentFileName = backgroundExtractor.DestinationPath;
-            CASSFiles.WriteEnvironmentFiles(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], BathymetryFileName, OverlayFileName, ExportHFEVA, ExportHFBL, ExportLFBLHFB, ExportLFBLPE, BottomLossSample, backgroundExtractor);
+            CASSFiles.WriteEnvironmentFiles(environmentFileName, ExtractionArea, Sediment, ExtendedAndAveragedSoundSpeeds[TimePeriod], Wind[TimePeriod], BathymetryFileName, OverlayFileName, ExportHFEVA, ExportHFBL, ExportLFBLHFB, ExportLFBLPE, BottomLossSample);
 
             backgroundExtractor.Value++;
         }

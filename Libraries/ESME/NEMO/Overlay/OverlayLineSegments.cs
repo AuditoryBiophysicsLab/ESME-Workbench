@@ -46,6 +46,30 @@ namespace ESME.NEMO.Overlay
             CheckCrossingSegments();
         }
 
+        public OverlayLineSegments(ICollection<EarthCoordinate> points, Color color, float size = 1f, LineStyle lineStyle = LineStyle.Solid)
+            : base(color, size, lineStyle)
+        {
+            Segments = new List<OverlayLineSegment>();
+            Add(points);
+            if (points.Count < 2) return;
+            CreateSegments();
+            ComputeBoundingBox();
+            CheckForClosure();
+            CheckCrossingSegments();
+        }
+
+        public OverlayLineSegments(ICollection<Geo> points, Color color, float size = 1f, LineStyle lineStyle = LineStyle.Solid)
+            : base(color, size, lineStyle)
+        {
+            Segments = new List<OverlayLineSegment>();
+            Add(points);
+            if (points.Count < 2) return;
+            CreateSegments();
+            ComputeBoundingBox();
+            CheckForClosure();
+            CheckCrossingSegments();
+        }
+
         private void CreateSegments()
         {
             for (var i = 0; i < Length - 1; i++)

@@ -64,7 +64,7 @@ namespace ESME.Environment.NAVO
                 return;
             }
 
-            ExtendedAverageSoundSpeedField = SoundSpeed.Average(ExtendedMonthlySoundSpeeds, backgroundExtractor.TimePeriod, this);
+            ExtendedAverageSoundSpeedField = SoundSpeed.Average(ExtendedMonthlySoundSpeeds, backgroundExtractor.TimePeriod);
         }
     }
 }
