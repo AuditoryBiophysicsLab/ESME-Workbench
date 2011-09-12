@@ -236,12 +236,10 @@ namespace HRC.Navigation
             return new GeoRect(newNorthWest.Latitude, newSouthEast.Latitude, newSouthEast.Longitude, newNorthWest.Longitude);
         }
 
-        public static GeoRect InflateWithGeo(GeoRect geoRect, double rangeOutKm)
+        public static GeoRect Inflate(GeoRect geoRect, double rangeOutKm)
         {
             var northWest = Geo.FromDegrees(geoRect.North, geoRect.West).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(315));
-            var northEast = Geo.FromDegrees(geoRect.North, geoRect.East).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(45));
             var southEast = Geo.FromDegrees(geoRect.South, geoRect.East).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(135));
-            var southWest = Geo.FromDegrees(geoRect.South, geoRect.West).Offset(Geo.KilometersToRadians(Math.Sqrt(2) * rangeOutKm), Geo.DegreesToRadians(225));
             return new GeoRect(northWest.Latitude, southEast.Latitude, southEast.Longitude, northWest.Longitude);
         }
 

@@ -160,7 +160,12 @@
     <Compile Include="Environment\Descriptors\NAEMOEnvironmentDescriptors.cs" />
     <Compile Include="Environment\Descriptors\NAEMOOverlayDescriptor.cs" />
     <Compile Include="Environment\Descriptors\NAEMOOverlayDescriptors.cs" />
+    <Compile Include="Environment\Descriptors\NewRangeComplex.cs" />
+    <Compile Include="Environment\Descriptors\RangeComplexArea.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexes.cs" />
+    <Compile Include="Environment\Descriptors\EnvironmentTreeItem.cs" />
+    <Compile Include="Environment\Descriptors\SampleCountTreeItem.cs" />
+    <Compile Include="Environment\Descriptors\TemplateSelectors.cs" />
     <Compile Include="Environment\Environment.cs" />
     <Compile Include="Environment\Environment2DData.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />

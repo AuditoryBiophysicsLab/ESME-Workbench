@@ -145,11 +145,9 @@ namespace ESME.Environment
             return result;
         }
 
-        public void TrimToNearestPoints(GeoRect geoRect)
+        public void TrimToNearestPoints(GeoRect geoRect, double? rangeOutKm = null)
         {
-            var southWest = this[geoRect.SouthWest];
-            var northEast = this[geoRect.NorthEast];
-            var trimRect = GeoRect.InflateWithGeo(new GeoRect(northEast.Latitude, southWest.Latitude, northEast.Longitude, southWest.Longitude), 0.01);
+            var trimRect = GeoRect.Inflate(geoRect, rangeOutKm.HasValue ? rangeOutKm.Value : 0.01);
             var matchingPoints = _arrayList.Where(trimRect.Contains).ToList();
             var pointsToKeep = from point in matchingPoints
                                select point;
@@ -284,7 +282,7 @@ namespace ESME.Environment
             {
                 var lonRes = CalculateResolution(Longitudes);
                 var latRes = CalculateResolution(Latitudes);
-                return lonRes == latRes ? lonRes : double.NaN;
+                return Math.Abs(lonRes - latRes) < 0.0001 ? lonRes : double.NaN;
             }
         }
 

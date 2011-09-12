@@ -6,53 +6,39 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:app="clr-namespace:DavesWPFTester"
         xmlns:Controls="clr-namespace:ESME.Views.Controls;assembly=ESME.Views"
         xmlns:Descriptors="clr-namespace:ESME.Environment.Descriptors;assembly=ESME"
-        xmlns:Navigation="clr-namespace:HRC.Navigation;assembly=HRC" mc:Ignorable="d"
+        xmlns:Navigation="clr-namespace:HRC.Navigation;assembly=HRC"
+        xmlns:Overlay="clr-namespace:ESME.NEMO.Overlay;assembly=ESME" mc:Ignorable="d"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}">
   <Grid>
     <GroupBox Header="Range Complex Tree" Margin="5">
       <TreeView ItemsSource="{Binding RangeComplexes.RangeComplexCollection}" Grid.IsSharedSizeScope="True">
         <TreeView.Resources>
-          <DataTemplate DataType="{x:Type Navigation:GeoRect}" x:Key="GeoRectTemplate">
-            <StackPanel Orientation="Vertical">
-              <TextBlock>
-                <Run Text="North: " />
-                <Run Text="{Binding North, StringFormat={}{0:0.0000}}" />
-                <Run Text="deg" />
-              </TextBlock>
-              <TextBlock>
-                <Run Text="South: " />
-                <Run Text="{Binding South, StringFormat={}{0:0.0000}}" />
-                <Run Text="deg" />
-              </TextBlock>
-              <TextBlock>
-                <Run Text="East: " />
-                <Run Text="{Binding East, StringFormat={}{0:0.0000}}" />
-                <Run Text="deg" />
-              </TextBlock>
-              <TextBlock>
-                <Run Text="West: " />
-                <Run Text="{Binding West, StringFormat={}{0:0.0000}}" />
-                <Run Text="deg" />
-              </TextBlock>
-            </StackPanel>
-          </DataTemplate>
-          <HierarchicalDataTemplate DataType="{x:Type Descriptors:PlainTreeItem}">
-            <TreeViewItem Header="{Binding Name}" IsEnabled="{Binding IsEnabled}" ItemsSource="{Binding Children}" />
-          </HierarchicalDataTemplate>
-          <HierarchicalDataTemplate DataType="{x:Type Descriptors:ResolutionTreeItem}">
-            <TextBlock Text="{Binding Name}" IsEnabled="{Binding IsEnabled}">
-              <TextBlock.ToolTip>
-                <TextBlock>
-                  <Run Text="Estimated point count: " />
-                  <Run Text="{Binding Data}" />
-                </TextBlock>
-              </TextBlock.ToolTip>
-            </TextBlock>
-          </HierarchicalDataTemplate>
+          <!-- =============================================================================== -->
+          <!-- This template displays a single Range Complex                                   -->
+          <!-- =============================================================================== -->
           <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}">
-            <TreeViewItem>
+            <TreeViewItem Header="{Binding Name}">
+              <!--<TreeViewItem DataContext="{Binding GeoRect}" />-->
+              <TreeViewItem Header="Environment" ItemsSource="{Binding EnvironmentTree.Children}" />
+              <TreeViewItem Header="Areas" ItemsSource="{Binding AreaCollection}" />
+            </TreeViewItem>
+          </HierarchicalDataTemplate>
+
+          <!-- =============================================================================== -->
+          <!-- This template displays the root of the environment tree in a range complex      -->
+          <!-- =============================================================================== -->
+          <HierarchicalDataTemplate DataType="{x:Type Descriptors:EnvironmentDataTree}">
+            <TreeViewItem Header="{Binding Name}" ItemsSource="{Binding Children}" />
+          </HierarchicalDataTemplate>
+
+          <!-- =============================================================================== -->
+          <!-- This template displays a single entry in a range complex environment tree       -->
+          <!-- Progress is displayed while the environment is being imported from the database -->
+          <!-- =============================================================================== -->
+          <HierarchicalDataTemplate DataType="{x:Type Descriptors:EnvironmentTreeItem}">
+            <TreeViewItem ItemsSource="{Binding Children}">
               <TreeViewItem.Header>
-                <Grid>
+                <Grid IsEnabled="{Binding IsEnabled}">
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition SharedSizeGroup="RangeComplexName" />
                     <ColumnDefinition SharedSizeGroup="RangeComplexState" />
@@ -60,62 +46,30 @@
                   <TextBlock Grid.Column="0" HorizontalAlignment="Left" TextAlignment="Left" Text="{Binding Name}" />
                   <ProgressBar Grid.Column="1" Margin="10 0 0 2" Width="200"
                                Visibility="{Binding IsInitializing, Converter={StaticResource TrueVisibleFalseCollapsed}}"
-                               Value="{Binding InitializationProgress}" />
+                               Value="{Binding ProgressPercent}" />
                   <TextBlock Grid.Column="1" Margin="10 0 0 2" HorizontalAlignment="Center"
-                             Text="{Binding InitializationState, Mode=OneWay}" FontStyle="Italic"
+                             Text="{Binding StatusText, Mode=OneWay}" FontStyle="Italic"
                              Visibility="{Binding IsInitializing, Converter={StaticResource TrueVisibleFalseCollapsed}}" />
                 </Grid>
               </TreeViewItem.Header>
-              <TreeViewItem Header="Foo" ItemsSource="{Binding GeoRect}" />
-              <TreeViewItem Header="Environment" ItemsSource="{Binding Environment.Children}" />
-              <TreeViewItem Header="Areas" ItemsSource="{Binding AreaCollection}" />
             </TreeViewItem>
           </HierarchicalDataTemplate>
+
+          <!-- =============================================================================== -->
+          <!-- This template displays a single area in the areas tree in a range complex       -->
+          <!-- =============================================================================== -->
           <HierarchicalDataTemplate DataType="{x:Type Descriptors:RangeComplexArea}">
             <TreeViewItem Header="{Binding Name}">
-              <TreeViewItem Header="Limits">
-                <TreeViewItem>
-                  <TreeViewItem.Header>
-                    <TextBlock>
-                      <Run Text="North: " />
-                      <Run Text="{Binding GeoRect.North, StringFormat={}{0:0.0000}}" />
-                      <Run Text="deg" />
-                    </TextBlock>
-                  </TreeViewItem.Header>
-                </TreeViewItem>
-                <TreeViewItem>
-                  <TreeViewItem.Header>
-                    <TextBlock>
-                      <Run Text="South: " />
-                      <Run Text="{Binding GeoRect.South, StringFormat={}{0:0.0000}}" />
-                      <Run Text="deg" />
-                    </TextBlock>
-                  </TreeViewItem.Header>
-                </TreeViewItem>
-                <TreeViewItem>
-                  <TreeViewItem.Header>
-                    <TextBlock>
-                      <Run Text="East: " />
-                      <Run Text="{Binding GeoRect.East, StringFormat={}{0:0.0000}}" />
-                      <Run Text="deg" />
-                    </TextBlock>
-                  </TreeViewItem.Header>
-                </TreeViewItem>
-                <TreeViewItem>
-                  <TreeViewItem.Header>
-                    <TextBlock>
-                      <Run Text="West: " />
-                      <Run Text="{Binding GeoRect.West, StringFormat={}{0:0.0000}}" />
-                      <Run Text="deg" />
-                    </TextBlock>
-                  </TreeViewItem.Header>
-                </TreeViewItem>
-              </TreeViewItem>
+              <!--<TreeViewItem DataContext="{Binding GeoRect}" />-->
               <TreeViewItem Header="Points (lat, lon)" ItemsSource="{Binding OverlayShape.EarthCoordinates}" />
               <TreeViewItem Header="Resolutions" ItemsSource="{Binding AvailableResolutions}" />
             </TreeViewItem>
           </HierarchicalDataTemplate>
-          <HierarchicalDataTemplate DataType="{x:Type Navigation:EarthCoordinate}">
+
+          <!-- =============================================================================== -->
+          <!-- This template displays a latitude and longitude in a collection of them         -->
+          <!-- =============================================================================== -->
+          <HierarchicalDataTemplate DataType="{x:Type Navigation:Geo}">
             <TextBlock>
               <Run Text="(" />
               <Run Text="{Binding Latitude, StringFormat={}{0:0.0000}}" />
@@ -124,6 +78,19 @@
               <Run Text=")" />
             </TextBlock>
           </HierarchicalDataTemplate>
+
+          <!-- =============================================================================== -->
+          <!-- This template displays a temperature, salinity, sound speed or wind speed item  -->
+          <!-- in the environment tree of a range complex                                      -->
+          <!-- =============================================================================== -->
+          <DataTemplate DataType="{x:Type Descriptors:SampleCountTreeItem}">
+            <TextBlock>
+              <Run Text="{Binding Name}" />
+              <Run Text=" [" />
+              <Run Text="{Binding SampleCount, StringFormat={}{0}}" />
+              <Run Text=" samples]" />
+            </TextBlock>
+          </DataTemplate>
         </TreeView.Resources>
       </TreeView>
     </GroupBox>

@@ -1,13 +1,47 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using HRC.Navigation;
 
 namespace ESME.Environment.NAVO
 {
     public static class DBDB
     {
-        public static Bathymetry ExtractAsync(float selectedResolution, GeoRect region, IProgress<float> progress = null)
+        readonly static object LockObject = new object();
+        static ActionBlock<Tuple<string, float, GeoRect, IProgress<string>, IProgress<float>>> _dbdbWorkQueue;
+        public static void ImportAsync(string outputPath, float selectedResolution, GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        {
+            lock (LockObject)
+            {
+                if (_dbdbWorkQueue == null)
+                {
+                    _dbdbWorkQueue = new ActionBlock<Tuple<string, float, GeoRect, IProgress<string>, IProgress<float>>>(item => TaskEx.Run(() =>
+                    {
+                        Debug.WriteLine("{0}: About to import bathymetry data for {1}\\{2:0.00}min", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(item.Item1)), item.Item2);
+                        var result = Extract(item.Item2, item.Item3, item.Item5);
+                        if (item.Item4 != null) lock (item.Item4) item.Item4.Report("Saving");
+                        result.Save(Path.Combine(item.Item1, string.Format("{0:0.00}min.bathymetry", item.Item2)));
+                        Debug.WriteLine("{0}: Sediment import completed for {1}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(item.Item1)));
+                    }), new ExecutionDataflowBlockOptions
+                    {
+                        TaskScheduler = TaskScheduler.Default,
+                        MaxDegreeOfParallelism = 4,
+                    });
+                }
+            }
+            if (currentState != null) lock (currentState) currentState.Report("Queued");
+            _dbdbWorkQueue.Post(new Tuple<string, float, GeoRect, IProgress<string>, IProgress<float>>(outputPath, selectedResolution, region, currentState, progress));
+        }
+
+        public static Task<Bathymetry> ExtractAsync(float selectedResolution, GeoRect region, IProgress<float> progress = null)
+        {
+            return TaskEx.Run(() => Extract(selectedResolution, region, progress));
+        }
+
+        public static Bathymetry Extract(float selectedResolution, GeoRect region, IProgress<float> progress = null)
         {
             if (progress != null) lock(progress) progress.Report(0f);
 

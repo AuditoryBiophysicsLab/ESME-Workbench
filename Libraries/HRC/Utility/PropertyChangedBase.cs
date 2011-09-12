@@ -1,9 +1,11 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Windows.Threading;
 using Cinch;
 
 namespace HRC.Utility
 {
+    [Serializable]
     public abstract class PropertyChangedBase : INotifyPropertyChanged
     {
         #region INotifyPropertyChanged Members

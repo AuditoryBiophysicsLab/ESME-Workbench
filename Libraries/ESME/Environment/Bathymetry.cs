@@ -3,19 +3,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.Environment
 {
     public class Bathymetry
     {
-        static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<EarthCoordinate<float>>.ReferencedTypes) { typeof(SedimentSampleBase) };
-
         public EnvironmentData<EarthCoordinate<float>> Samples { get; private set; }
 
         public Bathymetry() { Samples = new EnvironmentData<EarthCoordinate<float>>(); }
+
+        public static Task<Bathymetry> LoadAsync(string filename)
+        {
+            return TaskEx.Run(() => Load(filename));
+        }
 
         public static Bathymetry Load(string filename)
         {

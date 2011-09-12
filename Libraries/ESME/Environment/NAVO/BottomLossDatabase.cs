@@ -12,9 +12,17 @@ namespace ESME.Environment.NAVO
 {
     public static class BottomLossDatabase
     {
-        public async static Task<BottomLoss> ExtractAsync(bool isPointExtraction, GeoRect region, IProgress<float> progress = null)
+        public async static Task ImportAsync(string outputPath, GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        {
+            var result = await ExtractAsync(false, region, currentState, progress);
+            if (currentState != null) lock (currentState) currentState.Report("Saving");
+            result.Save(Path.Combine(outputPath, "data.bottomloss"));
+        }
+
+        public async static Task<BottomLoss> ExtractAsync(bool isPointExtraction, GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0f);
+            if (currentState != null) lock (currentState) currentState.Report("Importing bottom loss data");
 
             var locations = new List<EarthCoordinate>();
             if (!isPointExtraction)
@@ -54,7 +62,7 @@ namespace ESME.Environment.NAVO
                             WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath),
                         });
                         //process.PriorityClass = ProcessPriorityClass.Normal;
-                        while (!process.HasExited) await TaskEx.Delay(10);
+                        while (!process.HasExited) await TaskEx.Delay(50);
                         if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
                         //var stderr = process.StandardError.ReadToEnd();
                         curPoint = ParseLowFrequencyOutput(process.StandardOutput);
@@ -74,7 +82,7 @@ namespace ESME.Environment.NAVO
                             WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAVOConfiguration.HFBLEXEPath),
                         });
                         //process.PriorityClass = ProcessPriorityClass.Normal;
-                        while (!process.HasExited) await TaskEx.Delay(10);
+                        while (!process.HasExited) await TaskEx.Delay(50);
                         if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
                         //var stderr = process.StandardError.ReadToEnd();
                         curPoint = ParseHighFrequencyOutput(process.StandardOutput, curPoint);
@@ -196,7 +204,7 @@ namespace ESME.Environment.NAVO
             if (fields[2].ToLower() != "lon") throw new FormatException("Error parsing bottom loss results.  HFBL output not in expected format (lon)");
             var hfLongitude = Math.Round(double.Parse(fields[3]), 4);
             if (curPoint == null) curPoint = new BottomLossSample(hfLatitude, hfLongitude, new BottomLossData());
-            else if (((int)(hfLatitude * 10000.0) != (int)(curPoint.Latitude * 10000)) && ((int)(hfLongitude * 10000.0) != (int)(curPoint.Longitude * 10000))) throw new FormatException("Error parsing bottom loss results.  Adjacent LFBL and HFBL extractions do not refer to the same point");
+            else if (((int)Math.Round(hfLatitude * 10000.0) != (int)Math.Round(curPoint.Latitude * 10000)) && ((int)Math.Round(hfLongitude * 10000.0) != (int)Math.Round(curPoint.Longitude * 10000))) throw new FormatException("Error parsing bottom loss results.  Adjacent LFBL and HFBL extractions do not refer to the same point");
             fields = NextLine(stream).Split(splitCharsCommaEquals, StringSplitOptions.RemoveEmptyEntries);
             if (fields[0].Trim().ToUpper() != "HFBL CURVE NUMBER") throw new FormatException("Error parsing bottom loss results.  HFBL output not in expected format (HFBL curve number)");
             curPoint.Data.CurveNumber = double.Parse(fields[1]);

@@ -48,12 +48,13 @@ namespace HRC.Collections
         public static bool GetIsSorted<T>(this System.Collections.Generic.IList<T> array, IComparer<T> comparer = null) where T : IComparer<T>
         {
             if (comparer == null) comparer = Comparer<T>.Default;
+            return IsSubListSorted(array, 0, array.Count - 1, comparer);
             if (array.Count < 10000) return IsSubListSorted(array, 0, array.Count - 1, comparer);
 
             var listIsSorted = true;
             //System.Diagnostics.Debug.WriteLine("{0}: GetIsSorted: Starting check on {1} threads", DateTime.Now, cpuCount);
                 
-            var arraySliceLength = array.Count / 5;
+            var arraySliceLength = (int)Math.Round(array.Count / 5f);
 
             var transformBlock = new TransformBlock<int, bool>(
                 index => IsSubListSorted(array, arraySliceLength * index, arraySliceLength * (index + 1), comparer),

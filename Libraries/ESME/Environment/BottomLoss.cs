@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using HRC.Navigation;
 
 namespace ESME.Environment
@@ -12,6 +13,11 @@ namespace ESME.Environment
         public BottomLoss()
         {
             Samples = new EnvironmentData<BottomLossSample>();
+        }
+
+        public static Task<BottomLoss> LoadAsync(string filename)
+        {
+            return TaskEx.Run(() => Load(filename));
         }
 
         public static BottomLoss Load(string filename)

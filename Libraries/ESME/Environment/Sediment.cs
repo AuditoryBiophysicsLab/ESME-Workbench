@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using ESME.Model;
 using HRC.Navigation;
 
@@ -16,6 +17,11 @@ namespace ESME.Environment
         public Sediment()
         {
             Samples = new EnvironmentData<SedimentSample>();
+        }
+
+        public static Task<Sediment> LoadAsync(string filename)
+        {
+            return TaskEx.Run(() => Load(filename));
         }
 
         public static Sediment Load(string filename)
