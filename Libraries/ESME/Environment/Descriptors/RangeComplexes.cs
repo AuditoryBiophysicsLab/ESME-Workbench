@@ -73,8 +73,7 @@ namespace ESME.Environment.Descriptors
             var actionBlock = new ActionBlock<Tuple<string, double, double, double, double, string, string>>(
 		        async info =>
 		        {
-                    var rangeComplex = await NewRangeComplex.ReadAsync(SimAreaPath, info);
-                    if (rangeComplex != null) _dispatcher.InvokeInBackgroundIfRequired(() => _rangeComplexes.Add(rangeComplex)); 
+                    var rangeComplex = await NewRangeComplex.ReadAsync(SimAreaPath, info, simArea => _dispatcher.InvokeInBackgroundIfRequired(() => _rangeComplexes.Add(simArea)));     
 		        },
 		        new ExecutionDataflowBlockOptions
 		        {

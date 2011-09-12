@@ -270,9 +270,10 @@ namespace ESME.Environment.Descriptors
             return result;
         }
 
-        internal async static Task<NewRangeComplex> ReadAsync(string simAreaPath, Tuple<string, double, double, double, double, string, string> rangeComplexInfo)
+        internal async static Task<NewRangeComplex> ReadAsync(string simAreaPath, Tuple<string, double, double, double, double, string, string> rangeComplexInfo, Action<NewRangeComplex> action)
         {
             var result = new NewRangeComplex(simAreaPath, rangeComplexInfo.Item1);
+            action(result);
             result.OpArea = result._areas.Where(area => area.Name == Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)).First();
             result.SimArea = result._areas.Where(area => area.Name == Path.GetFileNameWithoutExtension(rangeComplexInfo.Item7)).First();
             var simAreaLimits = result.SimArea.OverlayShape.Geos;
