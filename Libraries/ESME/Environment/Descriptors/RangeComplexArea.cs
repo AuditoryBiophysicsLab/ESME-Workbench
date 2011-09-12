@@ -29,6 +29,7 @@ namespace ESME.Environment.Descriptors
 
         void UpdateAvailableBathymetry()
         {
+            _availableResolutions.Clear();
             foreach (var samplesPerDegree in AvailableSampleCountsPerDegree)
             {
                 var resolution = 60.0f / samplesPerDegree;
@@ -45,8 +46,15 @@ namespace ESME.Environment.Descriptors
                     IsDataAvailable = File.Exists(Path.Combine(BathymetryPath, resolutionString + ".bathymetry")),
                     SampleCount = width * samplesPerDegree * height * samplesPerDegree,
                 };
-                if (curItem.SampleCount < 512000)
-                    DBDB.ImportAsync(BathymetryPath, resolution, GeoRect);
+                if (curItem.IsDataAvailable) 
+                    Bathymetry.LoadAsync(Path.Combine(BathymetryPath, string.Format("{0:0.00}min.bathymetry", resolution))).
+                        ContinueWith(task =>
+                        {
+                            curItem.IsDataAvailable = true;
+                            curItem.SampleCount = (uint)task.Result.Samples.Count;
+                            curItem.GeoRect = task.Result.Samples.GeoRect;
+                        });
+                else if (curItem.SampleCount < 512000) DBDB.ImportAsync(BathymetryPath, resolution, GeoRect, curItem);
                 _availableResolutions.Add(curItem);
             }
         }

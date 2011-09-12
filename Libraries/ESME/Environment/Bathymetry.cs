@@ -43,7 +43,7 @@ namespace ESME.Environment
         {
             char[] separators = { ' ' };
             var samples = new List<EarthCoordinate<float>>();
-            System.Diagnostics.Debug.WriteLine("{0}: FromYXZ: About to read bathymetry file {1}", DateTime.Now, Path.GetFileName(fileName));
+            //System.Diagnostics.Debug.WriteLine("{0}: FromYXZ: About to read bathymetry file {1}", DateTime.Now, Path.GetFileName(fileName));
             var lineCount = 0;
             using (var stream = new StreamReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
@@ -59,7 +59,7 @@ namespace ESME.Environment
                     curLine = stream.ReadLine();
                 }
             }
-            System.Diagnostics.Debug.WriteLine("{0}: FromYXZ: Finished readying bathymetry file {1}.  Line count: {2}", DateTime.Now, Path.GetFileName(fileName), lineCount);
+            //System.Diagnostics.Debug.WriteLine("{0}: FromYXZ: Finished readying bathymetry file {1}.  Line count: {2}", DateTime.Now, Path.GetFileName(fileName), lineCount);
             var result = new Bathymetry();
             result.Samples.AddRange(samples);
             return result;
