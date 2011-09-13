@@ -6,7 +6,7 @@ namespace BellhopNL
     {
         public MWCharArray ArrivalsFile { get; set; }
         // ReSharper disable InconsistentNaming
-        public enum ModelType{ arons, chapman,}
+        public enum ModelType{ arons, chapman, error}
         // ReSharper restore InconsistentNaming
         public MWCharArray ModelName { get; set; }
         public double ChargeDepth { get; set; }
