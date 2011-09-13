@@ -84,12 +84,28 @@
           <!-- in the environment tree of a range complex                                      -->
           <!-- =============================================================================== -->
           <DataTemplate DataType="{x:Type Descriptors:SampleCountTreeItem}">
-            <TextBlock>
-              <Run Text="{Binding Name}" />
-              <Run Text=" [" />
-              <Run Text="{Binding SampleCount, StringFormat={}{0}}" />
-              <Run Text=" samples]" />
-            </TextBlock>
+            <TreeViewItem ItemsSource="{Binding Children}">
+              <TreeViewItem.Header>
+                <Grid IsEnabled="{Binding IsEnabled}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition SharedSizeGroup="RangeComplexName" />
+                    <ColumnDefinition SharedSizeGroup="RangeComplexState" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0">
+                    <Run Text="{Binding Name}" />
+                    <Run Text=" [" />
+                    <Run Text="{Binding SampleCount, StringFormat={}{0}}" />
+                    <Run Text=" samples]" />
+                  </TextBlock>
+                  <ProgressBar Grid.Column="1" Margin="10 0 0 2" Width="200"
+                               Visibility="{Binding IsInitializing, Converter={StaticResource TrueVisibleFalseCollapsed}}"
+                               Value="{Binding ProgressPercent}" />
+                  <TextBlock Grid.Column="1" Margin="10 0 0 2" HorizontalAlignment="Center"
+                             Text="{Binding StatusText, Mode=OneWay}" FontStyle="Italic"
+                             Visibility="{Binding IsInitializing, Converter={StaticResource TrueVisibleFalseCollapsed}}" />
+                </Grid>
+              </TreeViewItem.Header>
+            </TreeViewItem>
           </DataTemplate>
         </TreeView.Resources>
       </TreeView>

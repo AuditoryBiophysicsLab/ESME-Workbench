@@ -56,8 +56,68 @@ namespace ESME.Environment.NAVO
             parallelReader.Complete();
             await parallelReader.Completion;
             IList<SMGCFile> selectedFiles = batchBlock.Receive().ToList();
-            var wind = new Wind();
             if (currentState != null) lock (currentState) currentState.Report("Creating monthly data collection");
+            foreach (var curMonth in NAVOConfiguration.AllMonths)
+            {
+                var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
+                curMonthData.EnvironmentData.AddRange(from selectedFile in selectedFiles
+                                                      where (selectedFile.Months != null) && (selectedFile[curMonth] != null)
+                                                      select new WindSample(selectedFile.EarthCoordinate, selectedFile[curMonth].MeanWindSpeed));
+                var wind = new Wind();
+                wind.TimePeriods.Add(curMonthData);
+                wind.Save(Path.Combine(outputPath, string.Format("{0}.wind", curMonth.ToString().ToLower())));
+                if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+            }
+            if (currentState != null) lock (currentState) currentState.Report("Saving");
+            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+        }
+
+        public async static Task<Wind> NewImportAsync(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        {
+            if (progress != null) lock (progress) progress.Report(0f);
+            if (currentState != null) lock (currentState) currentState.Report("Importing wind data");
+
+            var north = (float)Math.Ceiling(region.North);
+            var south = (float)Math.Floor(region.South);
+            var east = (float)Math.Ceiling(region.East);
+            var west = (float)Math.Floor(region.West);
+
+            var progressStep = 100f / (((north - south) * (east - west)) + 13);
+            var totalProgress = 0f;
+
+            var parallelReader = new TransformBlock<string, SMGCFile>(data =>
+            {
+                var file = new SMGCFile(data);
+                if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+                return file;
+            },
+            new ExecutionDataflowBlockOptions
+            {
+                TaskScheduler = TaskScheduler.Default,
+                MaxDegreeOfParallelism = 4,
+            });
+
+            if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
+            // Construct a list of files we will need to read out of the SMGC database
+            var selectedLocations = new List<EarthCoordinate>();
+            for (var lat = south; lat <= north; lat++)
+                for (var lon = west; lon <= east; lon++)
+                {
+                    var northSouth = (lat >= 0) ? "n" : "s";
+                    var eastWest = (lon >= 0) ? "e" : "w";
+                    var curFileName = string.Format("{0}{1:00}{2}{3:000}.stt", northSouth, Math.Abs(lat), eastWest, Math.Abs(lon));
+                    var matchingFiles = Directory.GetFiles(Globals.AppSettings.NAVOConfiguration.SMGCDirectory, curFileName, SearchOption.AllDirectories);
+                    if (matchingFiles.Length == 0) continue;
+                    parallelReader.Post(matchingFiles.First());
+                    selectedLocations.Add(new EarthCoordinate(lat, lon));
+                }
+            var batchBlock = new BatchBlock<SMGCFile>(selectedLocations.Count);
+            parallelReader.LinkTo(batchBlock);
+            parallelReader.Complete();
+            await parallelReader.Completion;
+            IList<SMGCFile> selectedFiles = batchBlock.Receive().ToList();
+            if (currentState != null) lock (currentState) currentState.Report("Creating monthly data collection");
+            var wind = new Wind();
             foreach (var curMonth in NAVOConfiguration.AllMonths)
             {
                 var curMonthData = new TimePeriodEnvironmentData<WindSample> { TimePeriod = curMonth };
@@ -69,7 +129,7 @@ namespace ESME.Environment.NAVO
             }
             if (currentState != null) lock (currentState) currentState.Report("Saving");
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
-            wind.Save(Path.Combine(outputPath, "data.wind"));
+            return wind;
         }
 
         internal class SMGCFile

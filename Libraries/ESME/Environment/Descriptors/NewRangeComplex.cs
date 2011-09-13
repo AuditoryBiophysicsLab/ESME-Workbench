@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows.Threading;
@@ -37,10 +37,16 @@ namespace ESME.Environment.Descriptors
             Directory.CreateDirectory(ImagesPath);
             Directory.CreateDirectory(SpeciesPath);
             Directory.CreateDirectory(Path.Combine(RangeComplexPath, "GeographicAreas"));
+            TemperatureFiles = new TimePeriodEnvironmentFileList<SoundSpeed>();
+            TemperatureFiles.CollectionChanged += (s, e) => UpdateTree(s, e, EnvironmentTree["Temperature"]);
+            SalinityFiles = new TimePeriodEnvironmentFileList<SoundSpeed>();
+            TemperatureFiles.CollectionChanged += (s, e) => UpdateTree(s, e, EnvironmentTree["Salinity"]);
+            WindFiles = new TimePeriodEnvironmentFileList<Wind>();
+            TemperatureFiles.CollectionChanged += (s, e) => UpdateTree(s, e, EnvironmentTree["Wind"]);
             _areas = new ObservableCollection<RangeComplexArea>();
-            UpdateAreas();
             _token = RangeComplexToken.Load(Path.Combine(DataPath, "data.token"));
-            if ((_token.GeoRect == null ) || (!_token.GeoRect.Contains(GeoRect))) _token.ReextractionRequired = true;
+            UpdateAreas();
+            if ((_token.GeoRect == null) || (!_token.GeoRect.Contains(GeoRect))) _token.ReextractionRequired = true;
             EnvironmentTree = new EnvironmentDataTree
             {
                 Name = "Environment",
@@ -56,6 +62,26 @@ namespace ESME.Environment.Descriptors
             };
         }
         readonly ObservableCollection<RangeComplexArea> _areas;
+
+        void UpdateTree(object sender, NotifyCollectionChangedEventArgs args, EnvironmentTreeItem tree)
+        {
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (TimePeriodEnvironmentFile<SoundSpeed> newItem in args.NewItems)
+                        tree.Children.Add(new SampleCountTreeItem
+                        {
+                            Name = newItem.TimePeriod.ToString(),
+                            SampleCount = newItem.SampleCount,
+                            GeoRect = newItem.GeoRect,
+                        });
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (TimePeriodEnvironmentFile<SoundSpeed> oldItem in args.OldItems)
+                        tree.Children.RemoveAll(child => child.Name == oldItem.TimePeriod.ToString());
+                    break;
+            }
+        }
 
         #region public ReadOnlyObservableCollection<RangeComplexArea> AreaCollection { get; private set; }
 
@@ -133,15 +159,12 @@ namespace ESME.Environment.Descriptors
         {
             _token.ExtractionsRequired.Add(new Tuple<object, string>(ValidateMonthlyData("temperature").ToList(), "temperature"));
             _token.ExtractionsRequired.Add(new Tuple<object, string>(ValidateMonthlyData("salinity").ToList(), "salinity"));
-            
-            var windFilename = Path.Combine(DataPath, "data.wind");
-            if (_token.ReextractionRequired || (!File.Exists(windFilename)) || (new FileInfo(windFilename).LastWriteTime > _token.LastWriteTime))
-                _token.ExtractionsRequired.Add(new Tuple<object, string>(null, "wind"));
+            _token.ExtractionsRequired.Add(new Tuple<object, string>(ValidateMonthlyData("wind").ToList(), "wind"));
 
             var sedimentFilename = Path.Combine(DataPath, "data.sediment");
             if (_token.ReextractionRequired || (!File.Exists(sedimentFilename)) || (new FileInfo(sedimentFilename).LastWriteTime > _token.LastWriteTime))
                 _token.ExtractionsRequired.Add(new Tuple<object, string>(null, "sediment"));
-            
+
             if (Globals.AppSettings.IsNavyVersion)
             {
                 var bottomLossFilename = Path.Combine(DataPath, "data.bottomloss");
@@ -153,6 +176,111 @@ namespace ESME.Environment.Descriptors
             _token.Save(Path.Combine(DataPath, "data.token"), GeoRect);
         }
 
+        IEnumerable<ImportJobDescriptor> CreateImportJobs()
+        {
+            var jobs = ValidateMonthlyData("temperature").Select(missingItem => new ImportJobDescriptor
+            {
+                DataType = EnvironmentDataType.Temperature,
+                GeoRect = GeoRect,
+                TimePeriod = missingItem,
+                DestinationFilename = Path.Combine(DataPath, string.Format("{0}.temperature", missingItem.ToString().ToLower())),
+                CompletionAction = tempJob =>
+                {
+                    var key = Path.GetFileName(tempJob.DestinationFilename);
+                    var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect);
+                    _token.EnvironmentDictionary[key] = envFile;
+                    EnvironmentTree["Temperature"].Children.Add(new SampleCountTreeItem
+                    {
+                        Name = tempJob.TimePeriod.ToString(),
+                        SampleCount = tempJob.SampleCount,
+                        GeoRect = tempJob.GeoRect,
+                        IsDataAvailable = true
+                    });
+                }
+            }).ToList();
+            jobs.AddRange(ValidateMonthlyData("salinity").Select(missingItem => new ImportJobDescriptor
+            {
+                DataType = EnvironmentDataType.Salinity,
+                GeoRect = GeoRect,
+                TimePeriod = missingItem,
+                DestinationFilename = Path.Combine(DataPath, string.Format("{0}.salinity", missingItem.ToString().ToLower())),
+                CompletionAction = tempJob =>
+                {
+                    var key = Path.GetFileName(tempJob.DestinationFilename);
+                    var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect);
+                    _token.EnvironmentDictionary[key] = envFile;
+                    EnvironmentTree["Salinity"].Children.Add(new SampleCountTreeItem
+                    {
+                        Name = tempJob.TimePeriod.ToString(),
+                        SampleCount = tempJob.SampleCount,
+                        GeoRect = tempJob.GeoRect,
+                        IsDataAvailable = true,
+                    });
+                }
+            }));
+
+            var windFilename = Path.Combine(DataPath, "data.wind");
+            if (_token.ReextractionRequired || (!File.Exists(windFilename)) || (new FileInfo(windFilename).LastWriteTime > _token.LastWriteTime))
+                jobs.Add(new ImportJobDescriptor
+                {
+                    DataType = EnvironmentDataType.Wind,
+                    GeoRect = GeoRect,
+                    DestinationFilename = windFilename,
+                    CompletionAction = tempJob =>
+                    {
+                        var key = Path.GetFileName(tempJob.DestinationFilename);
+                        var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect);
+                        _token.EnvironmentDictionary[key] = envFile;
+                        var treeItem = EnvironmentTree["Wind"];
+                        //treeItem.SampleCount = tempJob.SampleCount;
+                        //treeItem.GeoRect = tempJob.GeoRect;
+                        //treeItem.IsDataAvailable = true;
+                    },
+                });
+
+            var sedimentFilename = Path.Combine(DataPath, "data.sediment");
+            if (_token.ReextractionRequired || (!File.Exists(sedimentFilename)) || (new FileInfo(sedimentFilename).LastWriteTime > _token.LastWriteTime))
+                jobs.Add(new ImportJobDescriptor
+                {
+                    DataType = EnvironmentDataType.Sediment,
+                    GeoRect = GeoRect,
+                    DestinationFilename = sedimentFilename,
+                    CompletionAction = tempJob =>
+                    {
+                        var key = Path.GetFileName(tempJob.DestinationFilename);
+                        var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect);
+                        _token.EnvironmentDictionary[key] = envFile;
+                        var treeItem = (SampleCountTreeItem)EnvironmentTree["Sediment"];
+                        treeItem.SampleCount = tempJob.SampleCount;
+                        treeItem.GeoRect = tempJob.GeoRect;
+                        treeItem.IsDataAvailable = true;
+                    },
+                });
+
+            if (Globals.AppSettings.IsNavyVersion)
+            {
+                var bottomLossFilename = Path.Combine(DataPath, "data.bottomloss");
+                if (_token.ReextractionRequired || (!File.Exists(bottomLossFilename)) || (new FileInfo(bottomLossFilename).LastWriteTime > _token.LastWriteTime))
+                    jobs.Add(new ImportJobDescriptor
+                    {
+                        DataType = EnvironmentDataType.BottomLoss,
+                        GeoRect = GeoRect,
+                        DestinationFilename = bottomLossFilename,
+                        CompletionAction = tempJob =>
+                        {
+                            var key = Path.GetFileName(tempJob.DestinationFilename);
+                            var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect);
+                            _token.EnvironmentDictionary[key] = envFile;
+                            var treeItem = (SampleCountTreeItem)EnvironmentTree["Bottom Loss"];
+                            treeItem.SampleCount = tempJob.SampleCount;
+                            treeItem.GeoRect = tempJob.GeoRect;
+                            treeItem.IsDataAvailable = true;
+                        },
+                    });
+            }
+            return jobs;
+        }
+
         IEnumerable<NAVOTimePeriod> ValidateMonthlyData(string dataFileExtension)
         {
             var availableMonths = Directory.EnumerateFiles(DataPath, "*." + dataFileExtension).Select(item => (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), Path.GetFileNameWithoutExtension(item), true)).ToList();
@@ -160,7 +288,7 @@ namespace ESME.Environment.Descriptors
             if (_token.ReextractionRequired) return NAVOConfiguration.AllMonths;
             foreach (var month in NAVOConfiguration.AllMonths)
             {
-                var fileName = Path.Combine(DataPath, month.ToString().ToLower() + dataFileExtension);
+                var fileName = Path.Combine(DataPath, string.Format("{0}.{1}", month.ToString().ToLower(), dataFileExtension));
                 if (!availableMonths.Contains(month)) missingMonths.Add(month);
                 else if ((!File.Exists(fileName)) || (new FileInfo(fileName).LastWriteTime > _token.LastWriteTime))
                     missingMonths.Add(month);
@@ -215,53 +343,13 @@ namespace ESME.Environment.Descriptors
             return result;
         }
 
-        [Serializable]
-        class RangeComplexToken
-        {
-            RangeComplexToken()
-            {
-                GeoRect = null;
-                _lastWriteTime = new DateTime(1, 1, 1, 0, 0, 0, 0);  // This should ensure that no files are older than the token's last write time
-            }
-
-            public void Save(string filename, GeoRect geoRect)
-            {
-                var formatter = new BinaryFormatter();
-                GeoRect = geoRect;
-                _lastWriteTime = DateTime.Now;
-                ExtractionsRequired.Clear();
-                using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None)) formatter.Serialize(stream, this);
-            }
-
-            public static RangeComplexToken Load(string filename)
-            {
-                if (!File.Exists(filename)) return new RangeComplexToken();
-                RangeComplexToken result;
-                var formatter = new BinaryFormatter();
-                using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    result = (RangeComplexToken)formatter.Deserialize(stream);
-                result._lastWriteTime = new FileInfo(filename).LastWriteTime;
-                result.ExtractionsRequired = new List<Tuple<object, string>>();
-                return result;
-            }
-
-            public static Task<RangeComplexToken> LoadAsync(string filename) { return TaskEx.Run(() => Load(filename)); }
-
-            [NonSerialized] DateTime _lastWriteTime;
-            [NonSerialized] public List<Tuple<object, string>> ExtractionsRequired = new List<Tuple<object, string>>();
-            [NonSerialized] public bool ReextractionRequired;
-            public GeoRect GeoRect { get; private set; }
-
-            public DateTime LastWriteTime { get { return _lastWriteTime; } }
-        }
-
         #endregion
 
         internal async static Task<NewRangeComplex> CreateAsync(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, List<Geo> simAreaLimits)
         {
             var result = new NewRangeComplex(simAreaPath, rangeComplexName);
-            result.OpArea = RangeComplexArea.Create(result.AreasPath, Path.Combine(result.AreasPath, String.Format("{0}_OpArea", rangeComplexName)), opAreaLimits);
-            result.SimArea = RangeComplexArea.Create(result.AreasPath, Path.Combine(result.AreasPath, String.Format("{0}_SimArea", rangeComplexName)), simAreaLimits);
+            result.OpArea = RangeComplexArea.Create(result.AreasPath, Path.Combine(result.AreasPath, String.Format("{0}_OpArea", rangeComplexName)), opAreaLimits, result._token);
+            result.SimArea = RangeComplexArea.Create(result.AreasPath, Path.Combine(result.AreasPath, String.Format("{0}_SimArea", rangeComplexName)), simAreaLimits, result._token);
             result.UpdateAreas();
             await result.ValidateAsync();
             // expand simArea by 200km for the initial environment extraction
@@ -277,8 +365,11 @@ namespace ESME.Environment.Descriptors
             result.OpArea = result._areas.Where(area => area.Name == Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)).First();
             result.SimArea = result._areas.Where(area => area.Name == Path.GetFileNameWithoutExtension(rangeComplexInfo.Item7)).First();
             var simAreaLimits = result.SimArea.OverlayShape.Geos;
-            await result.ValidateAsync();
-            await result.GetEnvironmentMetadataAsync();
+            var importJobs = result.CreateImportJobs().ToList();
+            foreach (var area in result.AreaCollection) importJobs.AddRange(area.ImportJobs);
+            NAVOImporter.Import(importJobs);
+            //await result.ValidateAsync();
+            //await result.GetEnvironmentMetadataAsync();
             // expand simArea by 100km if we need to re-extract all data
             var extractionArea = new GeoRect(new Limits(ConvexHull.Create(simAreaLimits, true)).CreateExpandedLimit(200f).Geos);
             //result.InitializeAsync();
@@ -287,48 +378,65 @@ namespace ESME.Environment.Descriptors
 
         Task GetEnvironmentMetadataAsync()
         {
-            var soundSpeedAction = new ActionBlock<Tuple<NAVOTimePeriod, string, SampleCountTreeItem>>(
-                async item =>
-                {
-                    SoundSpeed data = await SoundSpeed.LoadAsync(Path.Combine(DataPath, string.Format("{0}.{1}", item.Item1.ToString().ToLower(), item.Item2)));
-                    var curField = data[item.Item1];
-                    item.Item3.SampleCount = (uint)curField.EnvironmentData.Count;
-                    item.Item3.GeoRect = curField.EnvironmentData.GeoRect;
-                    item.Item3.Name = curField.TimePeriod.ToString();
-                    item.Item3.IsInitializing = false;
-                }, new ExecutionDataflowBlockOptions
-                {
-                    TaskScheduler = TaskScheduler.Default,
-                    MaxDegreeOfParallelism = 2,
-                });
+#if false
+		    var soundSpeedAction = new ActionBlock<Tuple<NAVOTimePeriod, string, SampleCountTreeItem, 
+                                                Func<NAVOTimePeriod, string, string, uint, GeoRect, TimePeriodEnvironmentFile<SoundSpeed>>, 
+                                                Action<TimePeriodEnvironmentFile<SoundSpeed>>>>(
+            async item =>
+            {
+                var itemName = string.Format("{0}.{1}", item.Item1.ToString().ToLower(), item.Item2);
+                SoundSpeed data = await SoundSpeed.LoadAsync(Path.Combine(DataPath, itemName));
+                var curField = data[item.Item1];
+                item.Item3.SampleCount = (uint)curField.EnvironmentData.Count;
+                item.Item3.GeoRect = curField.EnvironmentData.GeoRect;
+                item.Item3.Name = curField.TimePeriod.ToString();
+                item.Item3.IsInitializing = false;
+                item.Item4(item.Item1, DataPath, itemName, (uint)curField.EnvironmentData.Count, curField.EnvironmentData.GeoRect);
+            }, new ExecutionDataflowBlockOptions
+            {
+                TaskScheduler = TaskScheduler.Default,
+                MaxDegreeOfParallelism = 2,
+            });
+#endif
+            var temperatureAction = new ActionBlock<NAVOTimePeriod>(async timePeriod =>
+            {
+                var fileName = string.Format("{0}.temperature", timePeriod.ToString().ToLower());
+                SoundSpeed data = await SoundSpeed.LoadAsync(Path.Combine(DataPath, fileName));
+                var curField = data[timePeriod];
+                var item = new TimePeriodEnvironmentFile<SoundSpeed>(timePeriod, DataPath, fileName, (uint)curField.EnvironmentData.Count, curField.EnvironmentData.GeoRect);
+                TemperatureFiles.Add(timePeriod, item);
+            });
+            var salinityAction = new ActionBlock<NAVOTimePeriod>(async timePeriod =>
+            {
+                var fileName = string.Format("{0}.salinity", timePeriod.ToString().ToLower());
+                SoundSpeed data = await SoundSpeed.LoadAsync(Path.Combine(DataPath, fileName));
+                var curField = data[timePeriod];
+                var item = new TimePeriodEnvironmentFile<SoundSpeed>(timePeriod, DataPath, fileName, (uint)curField.EnvironmentData.Count, curField.EnvironmentData.GeoRect);
+                SalinityFiles.Add(timePeriod, item);
+            });
+            var windAction = new ActionBlock<NAVOTimePeriod>(async timePeriod =>
+            {
+                var fileName = string.Format("{0}.wind", timePeriod.ToString().ToLower());
+                Wind data = await Wind.LoadAsync(Path.Combine(DataPath, fileName));
+                var curField = data[timePeriod];
+                var item = new TimePeriodEnvironmentFile<Wind>(timePeriod, DataPath, fileName, (uint)curField.EnvironmentData.Count, curField.EnvironmentData.GeoRect);
+                WindFiles.Add(timePeriod, item);
+            });
             foreach (var month in NAVOConfiguration.AllMonths)
             {
-                var monthName = month.ToString();
-                EnvironmentTree["Temperature"].Children.Add(new SoundSpeedTreeItem { Name = monthName, IsInitializing = true });
-                soundSpeedAction.Post(new Tuple<NAVOTimePeriod, string, SampleCountTreeItem>(month, "temperature", (SampleCountTreeItem)EnvironmentTree["Temperature"][monthName]));
-                EnvironmentTree["Salinity"].Children.Add(new SoundSpeedTreeItem { Name = monthName });
-                soundSpeedAction.Post(new Tuple<NAVOTimePeriod, string, SampleCountTreeItem>(month, "salinity", (SampleCountTreeItem)EnvironmentTree["Salinity"][monthName]));
+                temperatureAction.Post(month);
+                salinityAction.Post(month);
+                windAction.Post(month);
             }
-            soundSpeedAction.Complete();
-            var windTask = Wind.LoadAsync(Path.Combine(DataPath, "data.wind")).ContinueWith(wind =>
-            {
-                var windData = wind.Result;
-                foreach (var timePeriod in windData.TimePeriods)
-                {
-                    var periodName = timePeriod.TimePeriod.ToString();
-                    EnvironmentTree["Wind"].Children.Add(new TimePeriodEnvironmentTreeItem
-                    {
-                        Name = periodName, 
-                        SampleCount = (uint)timePeriod.EnvironmentData.Count, 
-                        GeoRect = timePeriod.EnvironmentData.GeoRect, 
-                        IsInitializing = false
-                    });
-                }
-            });
+            temperatureAction.Complete();
+            salinityAction.Complete();
+            windAction.Complete();
 
             var sedimentTask = Sediment.LoadAsync(Path.Combine(DataPath, "data.sediment")).ContinueWith(sediment =>
             {
                 var sedimentData = sediment.Result;
+                SedimentFile = new EnvironmentFile<Sediment>(DataPath, "data.sediment", (uint)sedimentData.Samples.Count, sedimentData.Samples.GeoRect);
+                _token.EnvironmentDictionary[SedimentFile.FileName] = SedimentFile;
                 var sedimentRoot = (SampleCountTreeItem)EnvironmentTree["Sediment"];
                 sedimentRoot.SampleCount = (uint)sedimentData.Samples.Count;
                 sedimentRoot.GeoRect = sedimentData.Samples.GeoRect;
@@ -338,13 +446,15 @@ namespace ESME.Environment.Descriptors
             var bottomLossTask = BottomLoss.LoadAsync(Path.Combine(DataPath, "data.bottomLoss")).ContinueWith(bottomLoss =>
             {
                 var bottomLossData = bottomLoss.Result;
+                BottomLossFile = new EnvironmentFile<BottomLoss>(DataPath, "data.bottomLoss", (uint)bottomLossData.Samples.Count, bottomLossData.Samples.GeoRect);
+                _token.EnvironmentDictionary[BottomLossFile.FileName] = BottomLossFile;
                 var bottomLossRoot = (SampleCountTreeItem)EnvironmentTree["Bottom Loss"];
                 bottomLossRoot.SampleCount = (uint)bottomLossData.Samples.Count;
                 bottomLossRoot.GeoRect = bottomLossData.Samples.GeoRect;
                 bottomLossRoot.IsInitializing = false;
             });
 
-            return TaskEx.WhenAll(soundSpeedAction.Completion, windTask, sedimentTask, bottomLossTask);
+            return TaskEx.WhenAll(temperatureAction.Completion, salinityAction.Completion, windAction.Completion, sedimentTask, bottomLossTask);
         }
 
         async Task InitializeAsync()
@@ -388,8 +498,16 @@ namespace ESME.Environment.Descriptors
         void UpdateAreas()
         {
             _areas.Clear();
-            foreach (var areaFile in Directory.EnumerateFiles(AreasPath, "*.ovr")) _areas.Add(RangeComplexArea.Read(areaFile));
+            foreach (var areaFile in Directory.EnumerateFiles(AreasPath, "*.ovr"))
+            {
+                var keyStartsWith = Path.GetFileNameWithoutExtension(areaFile) + "\\";
+                var fileList = new EnvironmentFileList<Bathymetry>();
+                var items = _token.EnvironmentDictionary.Where(entry => entry.Key.StartsWith(keyStartsWith));
+                foreach (var item in items) fileList.Add(item.Key, (EnvironmentFile<Bathymetry>)item.Value);
+                _areas.Add(RangeComplexArea.Read(areaFile, fileList, _token));
+            }
             GeoRect = GeoRect.Union(_areas.Select(area => area.GeoRect).ToArray());
+            _token.GeoRect = GeoRect;
             AreaCollection = new ReadOnlyObservableCollection<RangeComplexArea>(_areas);
         }
 
@@ -404,7 +522,12 @@ namespace ESME.Environment.Descriptors
         [NotNull] public RangeComplexArea OpArea { get; private set; }
         [NotNull] public RangeComplexArea SimArea { get; private set; }
 
-#if true
+        public EnvironmentFile<BottomLoss> BottomLossFile { get; private set; }
+        public EnvironmentFile<Sediment> SedimentFile { get; private set; }
+        [NotNull] public TimePeriodEnvironmentFileList<SoundSpeed> TemperatureFiles { get; private set; }
+        [NotNull] public TimePeriodEnvironmentFileList<SoundSpeed> SalinityFiles { get; private set; }
+        [NotNull] public TimePeriodEnvironmentFileList<Wind> WindFiles { get; private set; }
+#if false
         class AsyncArgs<T> where T : ICanSave
         {
             public AsyncArgs(Func<string, Task<T>> loadFunc, Func<Task<T>> readFunc, Action<Task<T>> completionAction)

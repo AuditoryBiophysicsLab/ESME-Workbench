@@ -281,7 +281,7 @@ namespace ESME.Environment.NAVO
             foreach (var point2 in profile2.EnvironmentData.Where(point2 => !profile1.EnvironmentData.Any(point2.Equals))) throw new DataException(string.Format("Profiles do not contain the same data points.  One has data at {0}, the other does not", point2));
         }
 
-        static string FindSalinityFile(NAVOTimePeriod monthIndex)
+        public static string FindSalinityFile(NAVOTimePeriod monthIndex)
         {
             var gdemRootDirectory = Globals.AppSettings.NAVOConfiguration.GDEMDirectory;
             var files = Directory.GetFiles(gdemRootDirectory, GDEMSalinityFileName(monthIndex), SearchOption.AllDirectories);
@@ -291,7 +291,7 @@ namespace ESME.Environment.NAVO
             throw new FileNotFoundException(string.Format("Could not find requested salinity file, tried {0} and {1}", GDEMSalinityFileName(monthIndex), NUWCSalinityFileName(monthIndex)));
         }
 
-        static string FindTemperatureFile(NAVOTimePeriod monthIndex)
+        public static string FindTemperatureFile(NAVOTimePeriod monthIndex)
         {
             var gdemRootDirectory = Globals.AppSettings.NAVOConfiguration.GDEMDirectory;
             var files = Directory.GetFiles(gdemRootDirectory, GDEMTemperatureFileName(monthIndex), SearchOption.AllDirectories);
@@ -308,7 +308,7 @@ namespace ESME.Environment.NAVO
         static string NUWCSalinityFileName(NAVOTimePeriod monthIndex) { return ShortMonthNames[(int)monthIndex] + "_s.nc"; }
         static readonly string[] ShortMonthNames = new[] { "noneuary", "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
 
-        static SoundSpeedField ReadFile(string fileName, string dataVarName, NAVOTimePeriod month, GeoRect region)
+        public static SoundSpeedField ReadFile(string fileName, string dataVarName, NAVOTimePeriod month, GeoRect region)
         {
             var myFile = new NetCDF(fileName);
             var lats = ((NcVarDouble)myFile.Variables.Find(var => var.Name == "lat")).ToArray();

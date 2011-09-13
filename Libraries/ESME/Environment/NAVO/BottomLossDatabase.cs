@@ -14,32 +14,25 @@ namespace ESME.Environment.NAVO
     {
         public async static Task ImportAsync(string outputPath, GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
         {
-            var result = await ExtractAsync(false, region, currentState, progress);
+            var result = await ExtractAsync(region, currentState, progress);
             if (currentState != null) lock (currentState) currentState.Report("Saving");
             result.Save(Path.Combine(outputPath, "data.bottomloss"));
         }
 
-        public async static Task<BottomLoss> ExtractAsync(bool isPointExtraction, GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
+        public async static Task<BottomLoss> ExtractAsync(GeoRect region, IProgress<string> currentState = null, IProgress<float> progress = null)
         {
             if (progress != null) lock (progress) progress.Report(0f);
             if (currentState != null) lock (currentState) currentState.Report("Importing bottom loss data");
 
             var locations = new List<EarthCoordinate>();
-            if (!isPointExtraction)
-            {
-                var north = (float)Math.Ceiling(region.North);
-                var south = (float)Math.Floor(region.South);
-                var east = (float)Math.Ceiling(region.East);
-                var west = (float)Math.Floor(region.West);
-                locations = new List<EarthCoordinate>();
-                for (var lat = south; lat < north; lat += 0.25f)
-                    for (var lon = west; lon < east; lon += 0.25f)
-                        locations.Add(new EarthCoordinate(lat, lon));
-            }
-            else
-            {
-                locations.Add(new EarthCoordinate(region.North, region.West));
-            }
+            var north = (float)Math.Ceiling(region.North);
+            var south = (float)Math.Floor(region.South);
+            var east = (float)Math.Ceiling(region.East);
+            var west = (float)Math.Floor(region.West);
+
+            for (var lat = south; lat < north; lat += 0.25f)
+                for (var lon = west; lon < east; lon += 0.25f)
+                    locations.Add(new EarthCoordinate(lat, lon));
             var progressStep = 100f / ((locations.Count * 2) + 1);
             var totalProgress = 0f;
             var useLFBL = !string.IsNullOrEmpty(Globals.AppSettings.NAVOConfiguration.LFBLEXEPath);

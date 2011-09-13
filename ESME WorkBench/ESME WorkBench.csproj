@@ -566,6 +566,7 @@
     <Content Include="External References\AsyncCtpLibrary.dll" />
     <Content Include="External References\Kent.Boogaart.Converters.dll" />
     <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
+    <Content Include="External References\log4net.dll" />
     <Content Include="External References\System.Data.SQLite.dll" />
     <Content Include="External References\System.Data.SQLite.Linq.dll" />
     <Content Include="External References\System.Threading.Tasks.Dataflow.dll" />

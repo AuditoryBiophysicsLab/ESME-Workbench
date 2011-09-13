@@ -105,7 +105,7 @@ namespace ESME.Environment.Descriptors
                 if (!double.TryParse(lonString, out longitude)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid longitude", simAreaFile));
                 if (!double.TryParse(heightString, out height)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid height", simAreaFile));
                 if (!double.TryParse(geoidString, out geoid)) throw new FormatException(string.Format("RangeComplexes: Error reading sim area file \"{0}\"\nError: Invalid geoid separation value", simAreaFile));
-                actionBlock.Post(new Tuple<string, double, double, double, double, string, string>(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile));
+                actionBlock.Post(Tuple.Create(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile));
             }
             actionBlock.Complete();
             return actionBlock.Completion;
@@ -114,17 +114,10 @@ namespace ESME.Environment.Descriptors
         public string SimAreaPath { get; private set; }
         static RangeComplexes _instance;
         public static RangeComplexes Singleton { get { return _instance ?? (_instance = new RangeComplexes()); } }
-		public ReadOnlyCollection<string> RangeComplexNames { get; private set; }
 
         public NewRangeComplex this[string rangeComplexName]
         {
-            get
-            {
-                var matches = _rangeComplexes.Where(complex => complex.Name == rangeComplexName).ToList();
-                if (matches.Count == 0) throw new IndexOutOfRangeException(string.Format("Range complex {0} not found", rangeComplexName));
-                if (matches.Count > 1) throw new ApplicationException(string.Format("Multiple matches found for range complex {0}", rangeComplexName));
-                return matches.First();
-            }
+            get { return _rangeComplexes.Where(complex => complex.Name == rangeComplexName).Single(); }
         }
 
         public async Task<NewRangeComplex> CreateAsync(string rangeComplexName, double height, double latitude, double longitude, double geoid, ICollection<Geo> opAreaLimits, List<Geo> simAreaLimits)

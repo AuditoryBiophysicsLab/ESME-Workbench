@@ -154,6 +154,7 @@
     <Compile Include="Delegates.cs" />
     <Compile Include="Environment\Bathymetry.cs" />
     <Compile Include="Environment\BottomLoss.cs" />
+    <Compile Include="Environment\Descriptors\EnvironmentFile.cs" />
     <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptor.cs" />
     <Compile Include="Environment\Descriptors\NAEMOBathymetryDescriptors.cs" />
     <Compile Include="Environment\Descriptors\NAEMODescriptor.cs" />
@@ -164,11 +165,13 @@
     <Compile Include="Environment\Descriptors\RangeComplexArea.cs" />
     <Compile Include="Environment\Descriptors\RangeComplexes.cs" />
     <Compile Include="Environment\Descriptors\EnvironmentTreeItem.cs" />
+    <Compile Include="Environment\Descriptors\RangeComplexToken.cs" />
     <Compile Include="Environment\Descriptors\SampleCountTreeItem.cs" />
     <Compile Include="Environment\Descriptors\TemplateSelectors.cs" />
     <Compile Include="Environment\Environment.cs" />
     <Compile Include="Environment\Environment2DData.cs" />
     <Compile Include="Environment\EnvironmentData.cs" />
+    <Compile Include="Environment\EnvironmentImporter.cs" />
     <Compile Include="Environment\EnvironmentMetadata.cs" />
     <Compile Include="Environment\Location.cs" />
     <Compile Include="Environment\NAVO\BottomLossDatabase.cs" />
