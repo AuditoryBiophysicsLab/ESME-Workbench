@@ -146,9 +146,16 @@
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\EnvironmentSelectionViewModel.cs" />
+    <Compile Include="EnvironmentBuilder\ImportProgressListView.xaml.cs">
+      <DependentUpon>ImportProgressListView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EnvironmentBuilder\ImportProgressViewModel.cs" />
+    <Compile Include="EnvironmentBuilder\RangeComplexesViewModel.cs" />
     <Compile Include="EnvironmentBuilder\RangeComplexTreeItem.cs" />
-    <Compile Include="EnvironmentBuilder\RangeComplexViewModel.cs" />
+    <Compile Include="EnvironmentBuilder\RangeComplexTreeView.xaml.cs">
+      <DependentUpon>RangeComplexTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EnvironmentBuilder\RangeComplexTreeViewModel.cs" />
     <Compile Include="InstallationWizard\WizardView.xaml.cs">
       <DependentUpon>WizardView.xaml</DependentUpon>
     </Compile>
@@ -280,6 +287,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EnvironmentBuilder\EnvironmentExtractionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\ImportProgressListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\RangeComplexTreeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

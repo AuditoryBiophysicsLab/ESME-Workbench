@@ -110,7 +110,33 @@ namespace ESME.Environment.Descriptors
                         }
                         break;
                     case NotifyCollectionChangedAction.Replace:
-                        throw new NotImplementedException();
+                        for (var i = 0; i < e.OldItems.Count; i++)
+                        {
+                            var oldItem = (EnvironmentFile)e.OldItems[i];
+                            switch (oldItem.DataType)
+                            {
+                                case EnvironmentDataType.Bathymetry:
+                                    var areaName = Path.GetDirectoryName(oldItem.FileName);
+                                    var area = AreaCollection[areaName];
+                                    area.BathymetryFiles[oldItem.FileName] = (EnvironmentFile<Bathymetry>)e.NewItems[i];
+                                    break;
+                                case EnvironmentDataType.BottomLoss:
+                                    BottomLossFile = (EnvironmentFile<BottomLoss>)e.NewItems[i];
+                                    break;
+                                case EnvironmentDataType.Salinity:
+                                    SalinityFiles[oldItem.FileName] = (EnvironmentFile<SoundSpeed>)e.NewItems[i];
+                                    break;
+                                case EnvironmentDataType.Sediment:
+                                    SedimentFile = (EnvironmentFile<Sediment>)e.NewItems[i];
+                                    break;
+                                case EnvironmentDataType.Temperature:
+                                    TemperatureFiles[oldItem.FileName] = (EnvironmentFile<SoundSpeed>)e.NewItems[i];
+                                    break;
+                                case EnvironmentDataType.Wind:
+                                    WindFile = (EnvironmentFile<Wind>)e.NewItems[i];
+                                    break;
+                            }
+                        }
                         break;
                 }
             };

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Cinch;
 using ESME.Environment.Descriptors;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
+using HRC.Utility;
 
 namespace ESME.Environment
 {
@@ -190,54 +193,104 @@ namespace ESME.Environment
         public Action<ImportJobDescriptor> CompletionAction { get; set; }
     }
 
+    public class ImportProgressCollection : ReadOnlyObservableCollection<ImportProgressViewModel>
+    {
+        static readonly ImportProgressViewModel MainProgress = new ImportProgressViewModel("Overall");
+        static readonly ObservableCollection<ImportProgressViewModel> Importers = new ObservableCollection<ImportProgressViewModel>(
+            new List<ImportProgressViewModel>
+            {
+                MainProgress,
+                NAVOImporter.TemperatureProgress,
+                NAVOImporter.SalinityProgress,
+                NAVOImporter.BathymetryProgress,
+                NAVOImporter.BottomLossProgress,
+                NAVOImporter.SedimentProgress,
+                NAVOImporter.WindProgress,
+            });
+
+        static readonly ImportProgressCollection Instance = new ImportProgressCollection();
+        public static ImportProgressCollection Singleton { get { return Instance; } }
+        readonly static object LockObject = new object();
+        ImportProgressCollection() : base(Importers)
+        {
+            MainProgress.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == "IsWorkInProgress")
+                    lock (LockObject) IsWorkInProgress = MainProgress.IsWorkInProgress;
+            };
+        }
+
+        public void Post(ImportJobDescriptor job) { MainProgress.Post(job); }
+        public void JobStarting(ImportJobDescriptor job) { MainProgress.JobStarting(job); }
+        public void JobCompleted(ImportJobDescriptor job) { MainProgress.JobCompleted(job); }
+
+        #region public bool IsWorkInProgress { get; private set; }
+
+        public bool IsWorkInProgress
+        {
+            get { return _isWorkInProgress; }
+            private set
+            {
+                if (_isWorkInProgress == value) return;
+                _isWorkInProgress = value;
+                OnPropertyChanged(IsWorkInProgressChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsWorkInProgressChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressCollection>(x => x.IsWorkInProgress);
+        bool _isWorkInProgress;
+
+        #endregion
+    }
+
     public class ImportProgressViewModel : ViewModelBase
     {
-        public ImportProgressViewModel(string name, ActionBlock<ImportJobDescriptor> importer) 
+        public ImportProgressViewModel(string name, ActionBlock<ImportJobDescriptor> importer = null) 
         {
             Name = name;
             _importer = importer;
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void Post(ImportJobDescriptor job)
         {
-            lock (_lockObject)
+            JobsSubmitted++;
+            CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
+            if (_importer != null)
             {
-                JobsSubmitted++;
-                CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
                 _importer.Post(job);
-                IsWorkInProgress = true;
+                ImportProgressCollection.Singleton.Post(job);
             }
+            IsWorkInProgress = true;
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void JobStarting(ImportJobDescriptor job)
         {
-            lock (_lockObject)
-            {
-                JobsInFlight++;
-                CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
-            }
+            JobsInFlight++;
+            CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
+            if (_importer != null) ImportProgressCollection.Singleton.JobStarting(job);
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void JobCompleted(ImportJobDescriptor job)
         {
-            lock (_lockObject)
-            {
-                JobsInFlight--;
-                JobsCompleted++;
-                CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
-                if (JobsCompleted != JobsSubmitted) return;
-                IsWorkInProgress = false;
-                JobsSubmitted = 0;
-                JobsCompleted = 0;
-            }
+            JobsInFlight--;
+            JobsCompleted++;
+            CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
+            if (_importer != null) ImportProgressCollection.Singleton.JobCompleted(job);
+            if (JobsCompleted != JobsSubmitted) return;
+            IsWorkInProgress = false;
+            JobsSubmitted = 0;
+            JobsCompleted = 0;
         }
 
-        #region public string Name { get; set; }
+        #region public string Name { get; private set; }
 
         public string Name
         {
             get { return _name; }
-            set
+            private set
             {
                 if (_name == value) return;
                 _name = value;
@@ -250,12 +303,12 @@ namespace ESME.Environment
 
         #endregion
 
-        #region public bool IsWorkInProgress { get; set; }
+        #region public bool IsWorkInProgress { get; private set; }
 
         public bool IsWorkInProgress
         {
             get { return _isWorkInProgress; }
-            set
+            private set
             {
                 if (_isWorkInProgress == value) return;
                 _isWorkInProgress = value;
@@ -268,12 +321,12 @@ namespace ESME.Environment
 
         #endregion
 
-        #region public int JobsSubmitted { get; set; }
+        #region public int JobsSubmitted { get; private set; }
 
         public int JobsSubmitted
         {
             get { return _jobsSubmitted; }
-            set
+            private set
             {
                 if (_jobsSubmitted == value) return;
                 _jobsSubmitted = value;
@@ -286,12 +339,12 @@ namespace ESME.Environment
 
         #endregion
 
-        #region public int JobsCompleted { get; set; }
+        #region public int JobsCompleted { get; private set; }
 
         public int JobsCompleted
         {
             get { return _jobsCompleted; }
-            set
+            private set
             {
                 if (_jobsCompleted == value) return;
                 _jobsCompleted = value;
@@ -304,12 +357,12 @@ namespace ESME.Environment
 
         #endregion
 
-        #region public int JobsInFlight { get; set; }
+        #region public int JobsInFlight { get; private set; }
 
         public int JobsInFlight
         {
             get { return _jobsInFlight; }
-            set
+            private set
             {
                 if (_jobsInFlight == value) return;
                 _jobsInFlight = value;
@@ -322,12 +375,12 @@ namespace ESME.Environment
 
         #endregion
 
-        #region public string CurrentJob { get; set; }
+        #region public string CurrentJob { get; private set; }
 
         public string CurrentJob
         {
             get { return _currentJob; }
-            set
+            private set
             {
                 if (_currentJob == value) return;
                 _currentJob = value;
@@ -341,6 +394,5 @@ namespace ESME.Environment
         #endregion
 
         readonly ActionBlock<ImportJobDescriptor> _importer;
-        readonly object _lockObject = new object();
     }
 }
