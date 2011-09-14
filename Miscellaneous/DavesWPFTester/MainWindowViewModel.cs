@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Cinch;
 using ESME.Data;
+using ESME.Environment;
 using ESME.Environment.Descriptors;
-using ESME.Environment.NAVO;
-using HRC.Navigation;
+using ESME.Views.EnvironmentBuilder;
 using HRC.Services;
+using HRC.Utility;
 using MEFedMVVM.ViewModelLocator;
+using Environment = System.Environment;
 
 namespace DavesWPFTester
 {
@@ -34,9 +35,27 @@ namespace DavesWPFTester
             _visualizerService = visualizerService;
             var settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME WorkBench"), "settings.xml");
             ESME.Globals.AppSettings = AppSettings.Load(settings);
-            RangeComplexes = RangeComplexes.Singleton;
-            RangeComplexes.SimAreaCSVFile = Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv");
+            _rangeComplexes = RangeComplexes.Singleton;
+            RangeComplexCollection = new ObservableList<RangeComplexViewModel>();
+            ImportProgressCollection = new ObservableList<ImportProgressViewModel>
+            {
+                NAVOImporter.TemperatureProgress, 
+                NAVOImporter.SalinityProgress,
+                NAVOImporter.BathymetryProgress,
+                NAVOImporter.BottomLossProgress,
+                NAVOImporter.SedimentProgress,
+                NAVOImporter.WindProgress,
+            };
+            _rangeComplexes.RangeComplexCollection.CollectionChanged += (s, e) =>
+            {
+                if (e.Action == NotifyCollectionChangedAction.Add)
+                    foreach (NewRangeComplex item in e.NewItems)
+                        RangeComplexCollection.Add(new RangeComplexViewModel(item) { Name = item.Name });
+            };
+            _rangeComplexes.SimAreaCSVFile = Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv");
         }
+
+        readonly RangeComplexes _rangeComplexes;
 
         #region StartCommand
         public SimpleCommand<object, object> StartCommand
@@ -140,21 +159,39 @@ namespace DavesWPFTester
 
         #endregion
 
-        #region public RangeComplexes RangeComplexes { get; set; }
+        #region public ObservableList<RangeComplexViewModel> RangeComplexCollection { get; set; }
 
-        public RangeComplexes RangeComplexes
+        public ObservableList<RangeComplexViewModel> RangeComplexCollection
         {
-            get { return _rangeComplexes; }
+            get { return _rangeComplexCollection; }
             set
             {
-                if (_rangeComplexes == value) return;
-                _rangeComplexes = value;
-                NotifyPropertyChanged(RangeComplexesChangedEventArgs);
+                if (_rangeComplexCollection == value) return;
+                _rangeComplexCollection = value;
+                NotifyPropertyChanged(RangeComplexCollectionChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs RangeComplexesChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.RangeComplexes);
-        RangeComplexes _rangeComplexes;
+        static readonly PropertyChangedEventArgs RangeComplexCollectionChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.RangeComplexCollection);
+        ObservableList<RangeComplexViewModel> _rangeComplexCollection;
+
+        #endregion
+
+        #region public ObservableList<ImportProgressViewModel> ImportProgressCollection { get; set; }
+
+        public ObservableList<ImportProgressViewModel> ImportProgressCollection
+        {
+            get { return _importProgressCollection; }
+            set
+            {
+                if (_importProgressCollection == value) return;
+                _importProgressCollection = value;
+                NotifyPropertyChanged(ImportProgressCollectionChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ImportProgressCollectionChangedEventArgs = ObservableHelper.CreateArgs<MainWindowViewModel>(x => x.ImportProgressCollection);
+        ObservableList<ImportProgressViewModel> _importProgressCollection;
 
         #endregion
 

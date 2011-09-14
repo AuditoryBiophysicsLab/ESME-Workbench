@@ -144,6 +144,9 @@
     <Compile Include="EnvironmentBuilder\EnvironmentBuilderView.xaml.cs">
       <DependentUpon>EnvironmentBuilderView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EnvironmentBuilder\ImportProgressViewModel.cs" />
+    <Compile Include="EnvironmentBuilder\RangeComplexTreeItem.cs" />
+    <Compile Include="EnvironmentBuilder\RangeComplexViewModel.cs" />
     <Compile Include="InstallationWizard\WizardView.xaml.cs">
       <DependentUpon>WizardView.xaml</DependentUpon>
     </Compile>

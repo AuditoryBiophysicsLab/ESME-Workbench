@@ -1,7 +1,8 @@
 ﻿<Application x:Class="DavesWPFTester.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
-             xmlns:Descriptors="clr-namespace:ESME.Environment.Descriptors;assembly=ESME"
-             xmlns:Navigation="clr-namespace:HRC.Navigation;assembly=HRC" Exit="ApplicationExit" StartupUri="MainWindow.xaml">
+             xmlns:Navigation="clr-namespace:HRC.Navigation;assembly=HRC"
+             xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder;assembly=ESME.Views" Exit="ApplicationExit"
+             StartupUri="MainWindow.xaml">
   <Application.Resources>
     <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" TrueValue="Visible" FalseValue="Collapsed" />
     <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed" TrueValue="Collapsed" FalseValue="Visible" />
@@ -31,42 +32,5 @@
         </StackPanel>
       </TreeViewItem>
     </DataTemplate>
-
-    <HierarchicalDataTemplate x:Key="DataAvailableTemplate" DataType="{x:Type Descriptors:SampleCountTreeItem}">
-      <TreeViewItem Header="{Binding Name}">
-        <TreeViewItem>
-          <TreeViewItem.Header>
-            <TextBlock>
-              <Run Text="Sample Count: " />
-              <Run Text="{Binding SampleCount, StringFormat={}{0}}" />
-            </TextBlock>
-          </TreeViewItem.Header>
-        </TreeViewItem>
-        <!--<TreeViewItem DataContext="{Binding GeoRect}" ItemTemplateSelector="{StaticResource GeoRectSelector}" />-->
-      </TreeViewItem>
-    </HierarchicalDataTemplate>
-
-    <HierarchicalDataTemplate x:Key="DataNotAvailableTemplate" DataType="{x:Type Descriptors:SampleCountTreeItem}">
-      <TreeViewItem FontStyle="Italic">
-        <TreeViewItem.Header>
-          <TextBlock>
-            <Run Text="{Binding Name}" />
-            <Run Text=" [unavailable]" />
-          </TextBlock>
-        </TreeViewItem.Header>
-        <TreeViewItem>
-          <TreeViewItem.Header>
-            <TextBlock>
-              <Run Text="Estimated sample count (if created): " />
-              <Run Text="{Binding SampleCount, StringFormat={}{0}}" />
-            </TextBlock>
-          </TreeViewItem.Header>
-        </TreeViewItem>
-        <!--<TreeViewItem DataContext="{Binding GeoRect}" ItemTemplateSelector="{StaticResource GeoRectSelector}" />-->
-      </TreeViewItem>
-    </HierarchicalDataTemplate>
-    <Descriptors:EnvironmentTreeTemplateSelector x:Key="EnvironmentTreeSelector"
-                                                 DataAvailableTemplate="{StaticResource DataAvailableTemplate}"
-                                                 DataNotAvailableTemplate="{StaticResource DataNotAvailableTemplate}" />
   </Application.Resources>
 </Application>

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,41 +7,24 @@ using System.Threading.Tasks.Dataflow;
 using System.Windows.Threading;
 using Cinch;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
-    public class RangeComplexes : ViewModelBase
+    public class RangeComplexes
     {
         RangeComplexes()
         {
-            _rangeComplexes = new ObservableCollection<NewRangeComplex>();
             _dispatcher = Dispatcher.CurrentDispatcher;
-            RangeComplexCollection = new ReadOnlyObservableCollection<NewRangeComplex>(_rangeComplexes);
+            RangeComplexCollection = new ObservableList<NewRangeComplex>();
         }
 
         #region Private fields
         readonly object _lockObject = new object();
-        readonly ObservableCollection<NewRangeComplex> _rangeComplexes;
         readonly Dispatcher _dispatcher;
         #endregion
 
-        #region public ReadOnlyObservableCollection<NewRangeComplex> RangeComplexCollection { get; private set; }
-
-        public ReadOnlyObservableCollection<NewRangeComplex> RangeComplexCollection
-        {
-            get { return _rangeComplexCollection; }
-            private set
-            {
-                if (_rangeComplexCollection == value) return;
-                _rangeComplexCollection = value;
-                NotifyPropertyChanged(RangeComplexListChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs RangeComplexListChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.RangeComplexCollection);
-        ReadOnlyObservableCollection<NewRangeComplex> _rangeComplexCollection;
-
-        #endregion
+        public ObservableList<NewRangeComplex> RangeComplexCollection { get; private set; }
 
         #region public string SimAreaCSVFile { get; set; }
 
@@ -54,13 +35,11 @@ namespace ESME.Environment.Descriptors
             {
                 if (_simAreaCSVFile == value) return;
                 _simAreaCSVFile = value;
-                _rangeComplexes.Clear();
+                RangeComplexCollection.Clear();
                 if (_simAreaCSVFile != null) InitializeAsync(_simAreaCSVFile);
-                NotifyPropertyChanged(SimAreaCSVFileChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs SimAreaCSVFileChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SimAreaCSVFile);
         string _simAreaCSVFile;
 
         #endregion
@@ -73,7 +52,7 @@ namespace ESME.Environment.Descriptors
             var actionBlock = new ActionBlock<Tuple<string, double, double, double, double, string, string>>(
 		        async info =>
 		        {
-                    var rangeComplex = await NewRangeComplex.ReadAsync(SimAreaPath, info, simArea => _dispatcher.InvokeInBackgroundIfRequired(() => _rangeComplexes.Add(simArea)));     
+                    var rangeComplex = await NewRangeComplex.ReadAsync(SimAreaPath, info, simArea => _dispatcher.InvokeInBackgroundIfRequired(() => RangeComplexCollection.Add(simArea)), _dispatcher);     
 		        },
 		        new ExecutionDataflowBlockOptions
 		        {
@@ -117,7 +96,7 @@ namespace ESME.Environment.Descriptors
 
         public NewRangeComplex this[string rangeComplexName]
         {
-            get { return _rangeComplexes.Where(complex => complex.Name == rangeComplexName).Single(); }
+            get { return RangeComplexCollection.Where(complex => complex.Name == rangeComplexName).Single(); }
         }
 
         public async Task<NewRangeComplex> CreateAsync(string rangeComplexName, double height, double latitude, double longitude, double geoid, ICollection<Geo> opAreaLimits, List<Geo> simAreaLimits)
@@ -129,9 +108,9 @@ namespace ESME.Environment.Descriptors
 
             var rangeComplexPath = Path.Combine(SimAreaPath, rangeComplexName);
 
-            if (Directory.Exists(rangeComplexPath) || (_rangeComplexes.Where(complex => complex.Name == rangeComplexName).Count() != 0)) throw new ApplicationException(string.Format("Range complex {0} already exists", rangeComplexName));
+            if (Directory.Exists(rangeComplexPath) || (RangeComplexCollection.Where(complex => complex.Name == rangeComplexName).Count() != 0)) throw new ApplicationException(string.Format("Range complex {0} already exists", rangeComplexName));
 
-            var result = await NewRangeComplex.CreateAsync(SimAreaPath, rangeComplexName, opAreaLimits, simAreaLimits);
+            var result = await NewRangeComplex.CreateAsync(SimAreaPath, rangeComplexName, opAreaLimits, simAreaLimits, _dispatcher);
 
             lock (_lockObject)
             {
@@ -144,7 +123,7 @@ namespace ESME.Environment.Descriptors
                                      Path.GetFileName(result.OpArea.Name).Trim(), Path.GetFileName(result.SimArea.Name).Trim());
                 }
             }
-		    _rangeComplexes.Add(result);
+            RangeComplexCollection.Add(result);
             return result;
         }
 

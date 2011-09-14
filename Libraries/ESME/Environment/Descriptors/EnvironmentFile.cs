@@ -12,7 +12,7 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public class EnvironmentFile
     {
-        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect)
+        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
         {
             DataPath = dataPath;
             FileName = fileName;
@@ -21,6 +21,8 @@ namespace ESME.Environment.Descriptors
             LastWriteTime = info.LastWriteTime;
             SampleCount = sampleCount;
             GeoRect = geoRect;
+            DataType = dataType;
+            TimePeriod = timePeriod;
         }
 
         public string DataPath
@@ -45,15 +47,26 @@ namespace ESME.Environment.Descriptors
         public DateTime LastWriteTime { get; private set; }
         public uint SampleCount { get; private set; }
         public GeoRect GeoRect { get; private set; }
+        public EnvironmentDataType DataType { get; private set; }
+        public NAVOTimePeriod TimePeriod { get; private set; }
     }
 
-    public class EnvironmentFileList<T> : Dictionary<string, EnvironmentFile<T>> where T : class {}
+
+    public enum EnvironmentDataType
+    {
+        Temperature,
+        Salinity,
+        Sediment,
+        Wind,
+        Bathymetry,
+        BottomLoss,
+    }
 
     [Serializable]
     public class EnvironmentFile<T> : EnvironmentFile, IDeserializationCallback where T : class
     {
-        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect) 
-            : base(dataPath, fileName, sampleCount, geoRect) 
+        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod) 
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) 
         { }
 
         public Func<Task<T>> GetAsyncFunc { get { return _getAsyncFunc; } set { _getAsyncFunc = value; } }
@@ -87,15 +100,5 @@ namespace ESME.Environment.Descriptors
         public void OnDeserialization(object sender) { _lockObject = new object(); }
     }
 
-    public class TimePeriodEnvironmentFile<T> : EnvironmentFile<T> where T : class
-    {
-        public TimePeriodEnvironmentFile(NAVOTimePeriod timePeriod, string dataPath, string fileName, uint sampleCount, GeoRect geoRect)
-            : base(dataPath, fileName, sampleCount, geoRect) { TimePeriod = timePeriod; }
-
-        public NAVOTimePeriod TimePeriod { get; private set; }
-    }
-
-    public class TimePeriodEnvironmentFileList<T> : ObservableConcurrentDictionary<NAVOTimePeriod, TimePeriodEnvironmentFile<T>> where T : class
-    {
-    }
+    public class EnvironmentFileList<T> : ObservableConcurrentDictionary<string, EnvironmentFile<T>> where T : class { }
 }

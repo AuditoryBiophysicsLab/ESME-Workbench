@@ -11,7 +11,7 @@ using HRC.Navigation;
 namespace ESME.Environment.Descriptors
 {
     [Serializable]
-    class RangeComplexToken : IDeserializationCallback
+    internal class RangeComplexToken : IDeserializationCallback
     {
         RangeComplexToken()
         {
@@ -42,22 +42,25 @@ namespace ESME.Environment.Descriptors
 
         public static RangeComplexToken Load(string filename)
         {
-            RangeComplexToken result;
-            if (!File.Exists(filename))
+            try
             {
-                result = new RangeComplexToken();
+                RangeComplexToken result;
+                var formatter = new BinaryFormatter();
+                using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read)) result = (RangeComplexToken)formatter.Deserialize(stream);
+                result._lastWriteTime = new FileInfo(filename).LastWriteTime;
                 result._fileName = filename;
                 result._dataPath = Path.GetDirectoryName(result._fileName);
+                foreach (var file in result.EnvironmentDictionary.Values) file.DataPath = result._dataPath;
                 return result;
             }
-            var formatter = new BinaryFormatter();
-            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                result = (RangeComplexToken)formatter.Deserialize(stream);
-            result._lastWriteTime = new FileInfo(filename).LastWriteTime;
-            result._fileName = filename;
-            result._dataPath = Path.GetDirectoryName(result._fileName);
-            foreach (var file in result.EnvironmentDictionary.Values) file.DataPath = result._dataPath;
-            return result;
+            catch(Exception)
+            {
+                return new RangeComplexToken
+                {
+                    _fileName = filename,
+                    _dataPath = Path.GetDirectoryName(filename),
+                };                
+            }
         }
 
         void IDeserializationCallback.OnDeserialization(Object sender)
