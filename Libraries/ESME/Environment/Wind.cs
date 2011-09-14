@@ -12,8 +12,6 @@ namespace ESME.Environment
     [Serializable]
     public class Wind
     {
-        static readonly List<Type> ReferencedTypes = new List<Type>(TimePeriodEnvironmentData<WindSample>.ReferencedTypes);
-
         public List<TimePeriodEnvironmentData<WindSample>> TimePeriods { get; set; }
 
         public Wind()

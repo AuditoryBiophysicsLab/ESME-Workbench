@@ -93,6 +93,15 @@ namespace ESME.Environment
                 return maxPoint;
             }
         }
+
+        public EarthCoordinate<float> DeepestPoint
+        {
+            get
+            {
+                var minimum = Minimum;
+                return new EarthCoordinate<float>(minimum, Math.Abs(minimum.Data));
+            }
+        }
     }
 
     public class AvailableResolution

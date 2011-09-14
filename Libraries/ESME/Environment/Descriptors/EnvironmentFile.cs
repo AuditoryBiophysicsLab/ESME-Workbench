@@ -91,8 +91,7 @@ namespace ESME.Environment.Descriptors
         {
             get
             {
-                if ((_data == null) && (!AsyncData.IsCompleted)) 
-                    AsyncData.ContinueWith(task => _data = task.Result).Wait();
+                if (_data == null) _data = AsyncData.Result;
                 return _data;
             }
         }

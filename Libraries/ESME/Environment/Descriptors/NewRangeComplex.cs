@@ -10,6 +10,7 @@ using ESME.Environment.NAVO;
 using HRC;
 using HRC.Navigation;
 using HRC.Utility;
+using HRC.Collections;
 
 namespace ESME.Environment.Descriptors
 {
@@ -39,7 +40,7 @@ namespace ESME.Environment.Descriptors
             SalinityFiles = new EnvironmentFileDictionary<SoundSpeed>();
             _dispatcher.InvokeIfRequired(() =>
             {
-                AreaCollection = new ObservableList<RangeComplexArea>();
+                AreaCollection = new ObservableConcurrentDictionary<string, RangeComplexArea>();
                 EnvironmentFileCollection = new ObservableList<EnvironmentFile>();
             });
             Token = RangeComplexToken.Load(Path.Combine(DataPath, "data.token"));
@@ -58,7 +59,7 @@ namespace ESME.Environment.Descriptors
                             {
                                 case EnvironmentDataType.Bathymetry:
                                     var areaName = Path.GetDirectoryName(envFile.FileName);
-                                    var area = AreaCollection.Where(item => item.Name == areaName).Single();
+                                    var area = AreaCollection[areaName];
                                     area.BathymetryFiles.Add(envFile.FileName, (EnvironmentFile<Bathymetry>)envFile);
                                     break;
                                 case EnvironmentDataType.BottomLoss:
@@ -87,7 +88,7 @@ namespace ESME.Environment.Descriptors
                             {
                                 case EnvironmentDataType.Bathymetry:
                                     var areaName = Path.GetDirectoryName(envFile.FileName);
-                                    var area = AreaCollection.Where(item => item.Name == areaName).Single();
+                                    var area = AreaCollection[areaName];
                                     area.BathymetryFiles.Remove(envFile.FileName);
                                     break;
                                 case EnvironmentDataType.BottomLoss:
@@ -118,7 +119,7 @@ namespace ESME.Environment.Descriptors
 
         [NotNull] internal RangeComplexToken Token { get; private set; }
 
-        [NotNull] public ObservableList<RangeComplexArea> AreaCollection { get; private set; }
+        [NotNull] public ObservableConcurrentDictionary<string, RangeComplexArea> AreaCollection { get; private set; }
         [NotNull] public ObservableList<EnvironmentFile> EnvironmentFileCollection { get; private set; }
 
         [NotNull] public string Name { get; private set; }
@@ -139,7 +140,7 @@ namespace ESME.Environment.Descriptors
         public EnvironmentFile<BottomLoss> BottomLossFile { get; private set; }
         public EnvironmentFile<Sediment> SedimentFile { get; private set; }
 
-        public RangeComplexArea this[string areaName] { get { return AreaCollection.Where(item => item.Name == areaName).Single(); } }
+        public RangeComplexArea this[string areaName] { get { return AreaCollection[areaName]; } }
 
         #region public GeoRect GeoRect { get; private set; }
 
@@ -194,9 +195,10 @@ namespace ESME.Environment.Descriptors
                 var fileList = new EnvironmentFileDictionary<Bathymetry>();
                 var items = Token.EnvironmentDictionary.Where(entry => entry.Key.StartsWith(keyStartsWith));
                 foreach (var item in items) fileList.Add(item.Key, (EnvironmentFile<Bathymetry>)item.Value);
-                _dispatcher.InvokeInBackgroundIfRequired(() => AreaCollection.Add(RangeComplexArea.Read(this, Path.GetFileNameWithoutExtension(areaFile), fileList, Token)));
+                var areaName = Path.GetFileNameWithoutExtension(areaFile);
+                _dispatcher.InvokeInBackgroundIfRequired(() => AreaCollection.Add(areaName, RangeComplexArea.Read(this, areaName, fileList, Token)));
             }
-            GeoRect = GeoRect.Union(AreaCollection.Select(area => area.GeoRect).ToArray());
+            GeoRect = GeoRect.Union(AreaCollection.Values.Select(area => area.GeoRect).ToArray());
             Token.GeoRect = GeoRect;
         }
 
@@ -304,7 +306,7 @@ namespace ESME.Environment.Descriptors
             result.SimArea = RangeComplexArea.Create(result, Path.Combine(result.AreasPath, String.Format("{0}_SimArea", rangeComplexName)), simAreaLimits, result.Token);
             result.UpdateAreas();
             var importJobs = result.CheckForMissingEnviromentFiles().ToList();
-            foreach (var area in result.AreaCollection) importJobs.AddRange(area.ImportJobs);
+            foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
             NAVOImporter.Import(importJobs);
             return result;
         }
@@ -313,11 +315,11 @@ namespace ESME.Environment.Descriptors
         {
             var result = new NewRangeComplex(simAreaPath, rangeComplexInfo.Item1, dispatcher);
             action(result);
-            result.OpArea = result.AreaCollection.Where(area => area.Name == Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)).First();
-            result.SimArea = result.AreaCollection.Where(area => area.Name == Path.GetFileNameWithoutExtension(rangeComplexInfo.Item7)).First();
+            result.OpArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)];
+            result.SimArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item7)];
             result.UpdateAreas();
             var importJobs = result.CheckForMissingEnviromentFiles().ToList();
-            foreach (var area in result.AreaCollection) importJobs.AddRange(area.ImportJobs);
+            foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
             NAVOImporter.Import(importJobs);
             return result;
         }

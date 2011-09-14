@@ -8,7 +8,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.Environment
 {

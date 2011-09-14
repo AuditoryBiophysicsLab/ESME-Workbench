@@ -157,34 +157,35 @@ namespace HRC.Collections
             var isReplace = _dictionary.ContainsKey(key);
             if (isReplace) oldItem = _dictionary[key];
             _dictionary[key] = value;
-            if (isReplace) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, oldItem));
-            else OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value));
+            OnCollectionChanged(isReplace
+                                    ? new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, oldItem)
+                                    : new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value));
         }
 
         #region ICollection<KeyValuePair<TKey,TValue>> Members
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) { TryAddWithNotification(item); }
 
-        void ICollection<KeyValuePair<TKey, TValue>>.Clear()
+        public void Clear()
         {
             ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Clear();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item) { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Contains(item); }
+        public bool Contains(KeyValuePair<TKey, TValue> item) { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Contains(item); }
 
-        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) { ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo(array, arrayIndex); }
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) { ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo(array, arrayIndex); }
 
-        int ICollection<KeyValuePair<TKey, TValue>>.Count
+        public int Count
         {
             get { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Count; }
         }
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
+        public bool IsReadOnly
         {
             get { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).IsReadOnly; }
         }
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
+        public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             TValue temp;
             return TryRemoveWithNotification(item.Key, out temp);
