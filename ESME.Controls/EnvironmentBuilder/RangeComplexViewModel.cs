@@ -74,8 +74,13 @@ namespace ESME.Views.EnvironmentBuilder
                     };
                     var areaName = Path.GetDirectoryName(envFile.FileName);
                     var areas = this["Areas"];
-                    if (!areas.Children.Any(area => area.Name == areaName)) areas.Children.Add(new RangeComplexTreeItem {Name = areaName});
+                    if (!areas.Children.Any(area => area.Name == areaName))
+                    {
+                        areas.Children.Add(new RangeComplexTreeItem { Name = areaName });
+                        Debug.WriteLine("{0} Added area {1}, count is now {2}", Name, areaName, areas.Children.Count);
+                    }
                     areas[areaName].Children.Add(newItem);
+                    //Debug.WriteLine("{0} Added resolution {1}, count is now {2}", areaName, newItem.Name, areas[areaName].Children.Count);
                     break;
                 case EnvironmentDataType.BottomLoss:
                     newItem = new EnvironmentFileTreeItem
@@ -85,7 +90,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    Debug.WriteLine("Bottom Loss");
+                    //Debug.WriteLine("Bottom Loss");
                     this["Environment"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Salinity:
@@ -97,7 +102,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    Debug.WriteLine("Salinity " + envFile.TimePeriod);
+                    //Debug.WriteLine("Salinity " + envFile.TimePeriod);
                     this["Environment"]["Salinity"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Sediment:
@@ -108,7 +113,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    Debug.WriteLine("Sediment");
+                    //Debug.WriteLine("Sediment");
                     this["Environment"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Temperature:
@@ -120,7 +125,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    Debug.WriteLine("Temperature " + envFile.TimePeriod);
+                    //Debug.WriteLine("Temperature " + envFile.TimePeriod);
                     this["Environment"]["Temperature"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Wind:
@@ -131,7 +136,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    Debug.WriteLine("Wind");
+                    //Debug.WriteLine("Wind");
                     this["Environment"].Children.Add(newItem);
                     break;
                 default:

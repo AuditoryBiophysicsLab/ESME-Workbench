@@ -13,8 +13,11 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading;
+using System.Windows.Threading;
+using Cinch;
 
 namespace HRC.Collections
 {
@@ -45,29 +48,64 @@ namespace HRC.Collections
         /// <summary>
         ///   Event raised when the collection changes.
         /// </summary>
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
-
+        [NonSerialized]
+        private NotifyCollectionChangedEventHandler _collectionChanged;
+        public event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            add
+            {
+                _collectionChanged = (NotifyCollectionChangedEventHandler)Delegate.Combine(_collectionChanged, value);
+            }
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            remove
+            {
+                _collectionChanged = (NotifyCollectionChangedEventHandler)Delegate.Remove(_collectionChanged, value);
+            }
+        }
         /// <summary>
         ///   Event raised when a property on the collection changes.
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
-        ///   Notifies observers of CollectionChanged or PropertyChanged of an update to the dictionary.
-        /// </summary>
-        void NotifyObserversOfChange()
+        [NonSerialized]
+        private PropertyChangedEventHandler _propertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged
         {
-            var collectionHandler = CollectionChanged;
-            var propertyHandler = PropertyChanged;
-            if (collectionHandler != null || propertyHandler != null)
-                _context.Post(s =>
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            add
+            {
+                _propertyChanged = (PropertyChangedEventHandler)Delegate.Combine(_propertyChanged, value);
+            }
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            remove
+            {
+                _propertyChanged = (PropertyChangedEventHandler)Delegate.Remove(_propertyChanged, value);
+            }
+        }
+
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            //if (Name != null) Debug.WriteLine("{0} {1} [{2}]", DateTime.Now, Name, e.Action);
+            var handlers = _collectionChanged;
+            _context.Post(s =>
+            {
+                if (handlers != null)
                 {
-                    if (collectionHandler != null) collectionHandler(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-                    if (propertyHandler == null) return;
-                    propertyHandler(this, new PropertyChangedEventArgs("Count"));
-                    propertyHandler(this, new PropertyChangedEventArgs("Keys"));
-                    propertyHandler(this, new PropertyChangedEventArgs("Values"));
-                }, null);
+                    foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList())
+                    {
+                        var localHandler = handler;
+                        try
+                        {
+                            if (handler.Target is DispatcherObject) ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, e));
+                            else handler(this, e);
+                        }
+                        catch (Exception) {}
+                    }
+                }
+                if (_propertyChanged == null) return;
+                _propertyChanged(this, new PropertyChangedEventArgs("Count"));
+                _propertyChanged(this, new PropertyChangedEventArgs("Keys"));
+                _propertyChanged(this, new PropertyChangedEventArgs("Values"));
+            }, null);
         }
 
         /// <summary>
@@ -90,7 +128,7 @@ namespace HRC.Collections
         void TryAddWithNotification(TKey key, TValue value)
         {
             var result = _dictionary.TryAdd(key, value);
-            if (result) NotifyObserversOfChange();
+            if (result) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value));
             return;
         }
 
@@ -103,7 +141,7 @@ namespace HRC.Collections
         bool TryRemoveWithNotification(TKey key, out TValue value)
         {
             var result = _dictionary.TryRemove(key, out value);
-            if (result) NotifyObserversOfChange();
+            if (result) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, value));
             return result;
         }
 
@@ -115,8 +153,12 @@ namespace HRC.Collections
         /// <returns>Whether the update was successful.</returns>
         void UpdateWithNotification(TKey key, TValue value)
         {
+            var oldItem = default(TValue);
+            var isReplace = _dictionary.ContainsKey(key);
+            if (isReplace) oldItem = _dictionary[key];
             _dictionary[key] = value;
-            NotifyObserversOfChange();
+            if (isReplace) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, oldItem));
+            else OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value));
         }
 
         #region ICollection<KeyValuePair<TKey,TValue>> Members
@@ -125,7 +167,7 @@ namespace HRC.Collections
         void ICollection<KeyValuePair<TKey, TValue>>.Clear()
         {
             ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Clear();
-            NotifyObserversOfChange();
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item) { return ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Contains(item); }

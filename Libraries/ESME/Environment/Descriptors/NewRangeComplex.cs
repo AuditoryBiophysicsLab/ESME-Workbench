@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,7 +48,23 @@ namespace ESME.Environment.Descriptors
             UpdateAreas();
             if ((Token.GeoRect == null) || (!Token.GeoRect.Contains(GeoRect))) Token.ReextractionRequired = true;
             else EnvironmentFileCollection.AddRange(Token.EnvironmentDictionary.Values);
-
+            Token.EnvironmentDictionary.CollectionChanged += (s, e) =>
+            {
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        foreach (EnvironmentFile envFile in e.NewItems)
+                            EnvironmentFileCollection.Add(envFile);
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        foreach (EnvironmentFile envFile in e.OldItems)
+                            EnvironmentFileCollection.Remove(envFile);
+                        break;
+                    case NotifyCollectionChangedAction.Replace:
+                        throw new NotImplementedException();
+                        break;
+                }
+            };
         }
         [NotNull] readonly Dispatcher _dispatcher;
 
@@ -149,7 +166,6 @@ namespace ESME.Environment.Descriptors
                     var key = Path.GetFileName(tempJob.DestinationFilename);
                     var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Temperature, tempJob.TimePeriod);
                     Token.EnvironmentDictionary[key] = envFile;
-                    EnvironmentFileCollection.Add(envFile);
                 }
             }).ToList();
             jobs.AddRange(ValidateMonthlyData("salinity").Select(missingItem => new ImportJobDescriptor
@@ -163,7 +179,6 @@ namespace ESME.Environment.Descriptors
                     var key = Path.GetFileName(tempJob.DestinationFilename);
                     var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Salinity, tempJob.TimePeriod);
                     Token.EnvironmentDictionary[key] = envFile;
-                    EnvironmentFileCollection.Add(envFile);
                 }
             }));
 
@@ -179,7 +194,6 @@ namespace ESME.Environment.Descriptors
                         var key = Path.GetFileName(tempJob.DestinationFilename);
                         var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Wind, NAVOTimePeriod.Invalid);
                         Token.EnvironmentDictionary[key] = envFile;
-                        EnvironmentFileCollection.Add(envFile);
                     },
                 });
 
@@ -195,7 +209,6 @@ namespace ESME.Environment.Descriptors
                         var key = Path.GetFileName(tempJob.DestinationFilename);
                         var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Sediment, NAVOTimePeriod.Invalid);
                         Token.EnvironmentDictionary[key] = envFile;
-                        EnvironmentFileCollection.Add(envFile);
                     },
                 });
 
@@ -213,7 +226,6 @@ namespace ESME.Environment.Descriptors
                             var key = Path.GetFileName(tempJob.DestinationFilename);
                             var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.BottomLoss, NAVOTimePeriod.Invalid);
                             Token.EnvironmentDictionary[key] = envFile;
-                            EnvironmentFileCollection.Add(envFile);
                         },
                     });
             }

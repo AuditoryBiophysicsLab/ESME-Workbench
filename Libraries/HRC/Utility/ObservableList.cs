@@ -45,6 +45,7 @@ namespace HRC.Utility
                 base.Clear();
             }
             OnCollectionChangedMultiItem(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, items));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public new void Insert(int index, T item)
