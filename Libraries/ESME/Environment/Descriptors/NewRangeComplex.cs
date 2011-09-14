@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
@@ -36,9 +35,8 @@ namespace ESME.Environment.Descriptors
             Directory.CreateDirectory(ImagesPath);
             Directory.CreateDirectory(SpeciesPath);
             Directory.CreateDirectory(Path.Combine(RangeComplexPath, "GeographicAreas"));
-            TemperatureFiles = new EnvironmentFileList<SoundSpeed>();
-            SalinityFiles = new EnvironmentFileList<SoundSpeed>();
-            WindFiles = new EnvironmentFileList<Wind>();
+            TemperatureFiles = new EnvironmentFileDictionary<SoundSpeed>();
+            SalinityFiles = new EnvironmentFileDictionary<SoundSpeed>();
             _dispatcher.InvokeIfRequired(() =>
             {
                 AreaCollection = new ObservableList<RangeComplexArea>();
@@ -54,11 +52,61 @@ namespace ESME.Environment.Descriptors
                 {
                     case NotifyCollectionChangedAction.Add:
                         foreach (EnvironmentFile envFile in e.NewItems)
+                        {
                             EnvironmentFileCollection.Add(envFile);
+                            switch (envFile.DataType)
+                            {
+                                case EnvironmentDataType.Bathymetry:
+                                    var areaName = Path.GetDirectoryName(envFile.FileName);
+                                    var area = AreaCollection.Where(item => item.Name == areaName).Single();
+                                    area.BathymetryFiles.Add(envFile.FileName, (EnvironmentFile<Bathymetry>)envFile);
+                                    break;
+                                case EnvironmentDataType.BottomLoss:
+                                    BottomLossFile = (EnvironmentFile<BottomLoss>)envFile;
+                                    break;
+                                case EnvironmentDataType.Salinity:
+                                    SalinityFiles.Add(envFile.FileName, (EnvironmentFile<SoundSpeed>)envFile);
+                                    break;
+                                case EnvironmentDataType.Sediment:
+                                    SedimentFile = (EnvironmentFile<Sediment>)envFile;
+                                    break;
+                                case EnvironmentDataType.Temperature:
+                                    TemperatureFiles.Add(envFile.FileName, (EnvironmentFile<SoundSpeed>)envFile);
+                                    break;
+                                case EnvironmentDataType.Wind:
+                                    WindFile = (EnvironmentFile<Wind>)envFile;
+                                    break;
+                            }
+                        }
                         break;
                     case NotifyCollectionChangedAction.Remove:
                         foreach (EnvironmentFile envFile in e.OldItems)
+                        {
                             EnvironmentFileCollection.Remove(envFile);
+                            switch (envFile.DataType)
+                            {
+                                case EnvironmentDataType.Bathymetry:
+                                    var areaName = Path.GetDirectoryName(envFile.FileName);
+                                    var area = AreaCollection.Where(item => item.Name == areaName).Single();
+                                    area.BathymetryFiles.Remove(envFile.FileName);
+                                    break;
+                                case EnvironmentDataType.BottomLoss:
+                                    BottomLossFile = null;
+                                    break;
+                                case EnvironmentDataType.Salinity:
+                                    SalinityFiles.Remove(envFile.FileName);
+                                    break;
+                                case EnvironmentDataType.Sediment:
+                                    SedimentFile = null;
+                                    break;
+                                case EnvironmentDataType.Temperature:
+                                    TemperatureFiles.Remove(envFile.FileName);
+                                    break;
+                                case EnvironmentDataType.Wind:
+                                    WindFile = null;
+                                    break;
+                            }
+                        }
                         break;
                     case NotifyCollectionChangedAction.Replace:
                         throw new NotImplementedException();
@@ -83,10 +131,11 @@ namespace ESME.Environment.Descriptors
         [NotNull] public string SpeciesPath { get; private set; }
         [NotNull] public RangeComplexArea OpArea { get; private set; }
         [NotNull] public RangeComplexArea SimArea { get; private set; }
-        [NotNull] public EnvironmentFileList<SoundSpeed> TemperatureFiles { get; private set; }
-        [NotNull] public EnvironmentFileList<SoundSpeed> SalinityFiles { get; private set; }
-        [NotNull] public EnvironmentFileList<Wind> WindFiles { get; private set; }
 
+        [NotNull] public EnvironmentFileDictionary<SoundSpeed> TemperatureFiles { get; private set; }
+        [NotNull] public EnvironmentFileDictionary<SoundSpeed> SalinityFiles { get; private set; }
+
+        public EnvironmentFile<Wind> WindFile { get; private set; }
         public EnvironmentFile<BottomLoss> BottomLossFile { get; private set; }
         public EnvironmentFile<Sediment> SedimentFile { get; private set; }
 
@@ -142,7 +191,7 @@ namespace ESME.Environment.Descriptors
             foreach (var areaFile in Directory.EnumerateFiles(AreasPath, "*.ovr"))
             {
                 var keyStartsWith = Path.GetFileNameWithoutExtension(areaFile) + "\\";
-                var fileList = new EnvironmentFileList<Bathymetry>();
+                var fileList = new EnvironmentFileDictionary<Bathymetry>();
                 var items = Token.EnvironmentDictionary.Where(entry => entry.Key.StartsWith(keyStartsWith));
                 foreach (var item in items) fileList.Add(item.Key, (EnvironmentFile<Bathymetry>)item.Value);
                 _dispatcher.InvokeInBackgroundIfRequired(() => AreaCollection.Add(RangeComplexArea.Read(this, Path.GetFileNameWithoutExtension(areaFile), fileList, Token)));
@@ -192,7 +241,7 @@ namespace ESME.Environment.Descriptors
                     CompletionAction = tempJob =>
                     {
                         var key = Path.GetFileName(tempJob.DestinationFilename);
-                        var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Wind, NAVOTimePeriod.Invalid);
+                        var envFile = new EnvironmentFile<Wind>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Wind, NAVOTimePeriod.Invalid);
                         Token.EnvironmentDictionary[key] = envFile;
                     },
                 });
@@ -207,7 +256,7 @@ namespace ESME.Environment.Descriptors
                     CompletionAction = tempJob =>
                     {
                         var key = Path.GetFileName(tempJob.DestinationFilename);
-                        var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Sediment, NAVOTimePeriod.Invalid);
+                        var envFile = new EnvironmentFile<Sediment>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Sediment, NAVOTimePeriod.Invalid);
                         Token.EnvironmentDictionary[key] = envFile;
                     },
                 });
@@ -224,7 +273,7 @@ namespace ESME.Environment.Descriptors
                         CompletionAction = tempJob =>
                         {
                             var key = Path.GetFileName(tempJob.DestinationFilename);
-                            var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.BottomLoss, NAVOTimePeriod.Invalid);
+                            var envFile = new EnvironmentFile<BottomLoss>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.BottomLoss, NAVOTimePeriod.Invalid);
                             Token.EnvironmentDictionary[key] = envFile;
                         },
                     });

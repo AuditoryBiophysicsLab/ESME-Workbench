@@ -46,7 +46,7 @@
           <!-- This template displays a single Range Complex                                   -->
           <!-- =============================================================================== -->
           <HierarchicalDataTemplate DataType="{x:Type EnvironmentBuilder:RangeComplexTreeItem}">
-                        <TreeViewItem Header="{Binding Name}" 
+                        <TreeViewItem Header="{Binding Name}" ToolTip="{Binding ToolTip}"
                                       ItemsSource="{Binding Children, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" Margin="-20 0 0 0" />
           </HierarchicalDataTemplate>
 

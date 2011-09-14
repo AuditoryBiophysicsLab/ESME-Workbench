@@ -100,5 +100,5 @@ namespace ESME.Environment.Descriptors
         public void OnDeserialization(object sender) { _lockObject = new object(); }
     }
 
-    public class EnvironmentFileList<T> : ObservableConcurrentDictionary<string, EnvironmentFile<T>> where T : class { }
+    public class EnvironmentFileDictionary<T> : ObservableConcurrentDictionary<string, EnvironmentFile<T>> where T : class { }
 }

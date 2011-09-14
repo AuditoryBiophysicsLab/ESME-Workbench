@@ -268,6 +268,24 @@ namespace HRC.Navigation
         }
 
         [XmlIgnore]
+        public EarthCoordinate Center
+        {
+            get { return new EarthCoordinate((North + South) / 2, (East + West) / 2); }
+        }
+
+        [XmlIgnore]
+        public double AverageWidthKm
+        {
+            get { return (NorthWest.DistanceKilometers(NorthEast) + SouthWest.DistanceKilometers(SouthEast)) / 2; }
+        }
+
+        [XmlIgnore]
+        public double HeightKm
+        {
+            get { return (NorthWest.DistanceKilometers(SouthWest) + NorthEast.DistanceKilometers(SouthEast)) / 2; }
+        }
+
+        [XmlIgnore]
         public double Width
         {
             get { return East - West; }

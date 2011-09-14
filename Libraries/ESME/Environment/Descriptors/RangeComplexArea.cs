@@ -11,12 +11,12 @@ namespace ESME.Environment.Descriptors
 {
     public class RangeComplexArea
     {
-        private RangeComplexArea(NewRangeComplex rangeComplex, string areaName, OverlayShape overlayShape, EnvironmentFileList<Bathymetry> bathymetryFiles,  RangeComplexToken token)
+        private RangeComplexArea(NewRangeComplex rangeComplex, string areaName, OverlayShape overlayShape, EnvironmentFileDictionary<Bathymetry> bathymetryFiles,  RangeComplexToken token)
         {
             _rangeComplex = rangeComplex;
             Name = areaName;
             OverlayShape = overlayShape;
-            BathymetryFiles = bathymetryFiles ?? new EnvironmentFileList<Bathymetry>();
+            BathymetryFiles = bathymetryFiles ?? new EnvironmentFileDictionary<Bathymetry>();
             _token = token;
             GeoRect = new GeoRect(overlayShape.BoundingBox);
             BathymetryPath = Path.Combine(_rangeComplex.DataPath, Name);
@@ -67,7 +67,7 @@ namespace ESME.Environment.Descriptors
             return new RangeComplexArea(rangeComplex, areaName, overlay.Shapes[0], null, token);
         }
 
-        internal static RangeComplexArea Read(NewRangeComplex rangeComplex, string areaName, EnvironmentFileList<Bathymetry> files, RangeComplexToken token)
+        internal static RangeComplexArea Read(NewRangeComplex rangeComplex, string areaName, EnvironmentFileDictionary<Bathymetry> files, RangeComplexToken token)
         {
             var areaPath = Path.Combine(rangeComplex.AreasPath, areaName + ".ovr");
             var overlay = new OverlayFile(areaPath);
@@ -86,7 +86,7 @@ namespace ESME.Environment.Descriptors
 
         public List<ImportJobDescriptor> ImportJobs { get; private set; }
 
-        [NotNull] public EnvironmentFileList<Bathymetry> BathymetryFiles { get; private set; }
+        [NotNull] public EnvironmentFileDictionary<Bathymetry> BathymetryFiles { get; private set; }
         [NotNull] public string Name { get; private set; }
         [NotNull] public string BathymetryPath { get; private set; }
         [NotNull] public GeoRect GeoRect { get; private set; }

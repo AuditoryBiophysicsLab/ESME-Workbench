@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Collections.Generic;
@@ -77,10 +76,10 @@ namespace ESME.Views.EnvironmentBuilder
                     if (!areas.Children.Any(area => area.Name == areaName))
                     {
                         areas.Children.Add(new RangeComplexTreeItem { Name = areaName });
-                        Debug.WriteLine("{0} Added area {1}, count is now {2}", Name, areaName, areas.Children.Count);
+                        areas.ToolTip = "{0} areas defined";
                     }
+                    areas[areaName].ToolTip = "{0} resolutions available";
                     areas[areaName].Children.Add(newItem);
-                    //Debug.WriteLine("{0} Added resolution {1}, count is now {2}", areaName, newItem.Name, areas[areaName].Children.Count);
                     break;
                 case EnvironmentDataType.BottomLoss:
                     newItem = new EnvironmentFileTreeItem
@@ -90,7 +89,6 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    //Debug.WriteLine("Bottom Loss");
                     this["Environment"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Salinity:
@@ -102,8 +100,9 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    //Debug.WriteLine("Salinity " + envFile.TimePeriod);
-                    this["Environment"]["Salinity"].Children.Add(newItem);
+                    var salinityRoot = this["Environment"]["Salinity"];
+                    salinityRoot.Children.Add(newItem);
+                    salinityRoot.ToolTip = "{0} time periods available";
                     break;
                 case EnvironmentDataType.Sediment:
                     newItem = new EnvironmentFileTreeItem
@@ -113,7 +112,6 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    //Debug.WriteLine("Sediment");
                     this["Environment"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Temperature:
@@ -125,8 +123,9 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    //Debug.WriteLine("Temperature " + envFile.TimePeriod);
-                    this["Environment"]["Temperature"].Children.Add(newItem);
+                    var temperatureRoot = this["Environment"]["Temperature"];
+                    temperatureRoot.Children.Add(newItem);
+                    temperatureRoot.ToolTip = "{0} time periods available";
                     break;
                 case EnvironmentDataType.Wind:
                     newItem = new EnvironmentFileTreeItem
@@ -136,7 +135,6 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
-                    //Debug.WriteLine("Wind");
                     this["Environment"].Children.Add(newItem);
                     break;
                 default:
@@ -146,6 +144,11 @@ namespace ESME.Views.EnvironmentBuilder
             newItem.IsAvailable = true;
             newItem.IsInitializing = false;
             newItem.IsEnabled = true;
+            if (newItem.ToolTip == null)
+                newItem.ToolTip = string.Format("Sample points: {0:#,#}\r\nCenter: ({1:0.####}, {2:0.####})\r\nAverage width: {3:0.##} km\r\nHeight: {4:0.##} km\r\nFile size: {5:#,#} bytes",
+                                                envFile.SampleCount, envFile.GeoRect.Center.Latitude, envFile.GeoRect.Center.Longitude, envFile.GeoRect.AverageWidthKm, envFile.GeoRect.HeightKm,
+                                                envFile.FileSize);
+
             _treeItems.Add(newItem);
         }
     }

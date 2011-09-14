@@ -18,6 +18,7 @@ namespace ESME.Views.EnvironmentBuilder
             {
                 if (e.Action == NotifyCollectionChangedAction.Add)
                     foreach (RangeComplexTreeItem item in e.NewItems) item.Parent = this;
+                NotifyPropertyChanged(ToolTipChangedEventArgs);
             };
         }
 
@@ -43,7 +44,11 @@ namespace ESME.Views.EnvironmentBuilder
 
         public string ToolTip
         {
-            get { return _toolTip; }
+            get
+            {
+                if (_toolTip == null) return null;
+                return _toolTip.Contains("{0}") ? string.Format(_toolTip, Children.Count) : _toolTip;
+            }
             set
             {
                 if (_toolTip == value) return;
