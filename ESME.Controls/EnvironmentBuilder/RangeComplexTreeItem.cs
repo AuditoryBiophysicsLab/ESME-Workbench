@@ -18,8 +18,6 @@ namespace ESME.Views.EnvironmentBuilder
             {
                 if (e.Action == NotifyCollectionChangedAction.Add)
                     foreach (RangeComplexTreeItem item in e.NewItems) item.Parent = this;
-                if (e.Action != NotifyCollectionChangedAction.Reset)
-                    Children.Sort((x, y) => x.Name.CompareTo(y.Name));
             };
         }
 

@@ -10,15 +10,18 @@
         xmlns:Overlay="clr-namespace:ESME.NEMO.Overlay;assembly=ESME"
         xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder;assembly=ESME.Views" mc:Ignorable="d"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}">
+    <Window.Resources>
+        <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter"/>
+    </Window.Resources>
   <DockPanel LastChildFill="True">
     <GroupBox Header="Import status" Margin="5" DockPanel.Dock="Bottom">
-      <ListView ItemsSource="{Binding ImportProgressCollection}" Grid.IsSharedSizeScope="True">
+      <ListView ItemsSource="{Binding ImportProgressCollection}" Grid.IsSharedSizeScope="True" HorizontalContentAlignment="Stretch">
         <ListView.ItemTemplate>
           <DataTemplate>
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition SharedSizeGroup="Name" />
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition />
               </Grid.ColumnDefinitions>
               <TextBlock Grid.Column="0" TextAlignment="Right" Margin="0 0 5 0" FontWeight="Bold">
                 <Run Text="{Binding Name}" />
@@ -43,7 +46,8 @@
           <!-- This template displays a single Range Complex                                   -->
           <!-- =============================================================================== -->
           <HierarchicalDataTemplate DataType="{x:Type EnvironmentBuilder:RangeComplexTreeItem}">
-            <TreeViewItem Header="{Binding Name}" ItemsSource="{Binding Children}" Margin="-20 0 0 0" />
+                        <TreeViewItem Header="{Binding Name}" 
+                                      ItemsSource="{Binding Children, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" Margin="-20 0 0 0" />
           </HierarchicalDataTemplate>
 
           <!-- =============================================================================== -->

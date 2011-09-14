@@ -242,7 +242,10 @@
     <Compile Include="Validation\ValidatingViewModel.cs" />
     <Compile Include="Triggers\ValidationErrorEventTrigger.cs" />
     <Compile Include="ViewModels\MenuItemViewModelBase.cs" />
+    <Compile Include="WPF\BindingExtensions.cs" />
     <Compile Include="WPF\ComparisonBinding.cs" />
+    <Compile Include="WPF\Dynamic.cs" />
+    <Compile Include="WPF\LambdaExtension.cs" />
     <Compile Include="WPF\ValueConverters.cs" />
     <Compile Include="WPF\ViewPropertyBinding.cs" />
   </ItemGroup>

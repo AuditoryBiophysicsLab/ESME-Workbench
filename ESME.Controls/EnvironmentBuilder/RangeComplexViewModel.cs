@@ -1,8 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Windows.Data;
 using ESME.Environment.Descriptors;
 
 namespace ESME.Views.EnvironmentBuilder
@@ -81,6 +85,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
+                    Debug.WriteLine("Bottom Loss");
                     this["Environment"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Salinity:
@@ -92,6 +97,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
+                    Debug.WriteLine("Salinity " + envFile.TimePeriod);
                     this["Environment"]["Salinity"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Sediment:
@@ -102,6 +108,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
+                    Debug.WriteLine("Sediment");
                     this["Environment"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Temperature:
@@ -113,6 +120,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
+                    Debug.WriteLine("Temperature " + envFile.TimePeriod);
                     this["Environment"]["Temperature"].Children.Add(newItem);
                     break;
                 case EnvironmentDataType.Wind:
@@ -123,6 +131,7 @@ namespace ESME.Views.EnvironmentBuilder
                         GeoRect = envFile.GeoRect,
                         FileSize = envFile.FileSize,
                     };
+                    Debug.WriteLine("Wind");
                     this["Environment"].Children.Add(newItem);
                     break;
                 default:
@@ -134,5 +143,20 @@ namespace ESME.Views.EnvironmentBuilder
             newItem.IsEnabled = true;
             _treeItems.Add(newItem);
         }
+    }
+
+    [ValueConversion(typeof (System.Collections.IList), typeof (System.Collections.IEnumerable))]
+    public class CollectionViewSortConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var collection = value as System.Collections.IList;
+            var view = new ListCollectionView(collection);
+            var sort = new SortDescription(parameter.ToString(), ListSortDirection.Ascending);
+            view.SortDescriptions.Add(sort);
+            return view;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { throw new NotImplementedException(); }
     }
 }
