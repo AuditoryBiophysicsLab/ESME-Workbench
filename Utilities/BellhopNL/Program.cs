@@ -3,6 +3,13 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Reflection;
+using System.Text;
+using System.Threading;
+using ESME.Model;
+using ESME.TransmissionLoss.Bellhop;
+using ESME.TransmissionLoss.BellhopNL;
+using HRC;
+using ESME.TransmissionLoss;
 
 namespace BellhopNL
 {
@@ -10,55 +17,54 @@ namespace BellhopNL
     {
         static void Main(string[] args)
         {
-            var arrivalsFile = "";
-            var envFile = "";
-            var chargeDepth = double.MinValue;
-            var chargeMass = double.MinValue;
-            var outputRate = double.MinValue;
-            var outputDuration = double.MinValue;
-            var modelType = BellhopNLWrapper.ModelType.error;
-            try
+            var data = new DataBlob();
+            
+            for (var i = 0; i < args.Length; i++)
             {
-                if (args.Length < 12) throw new FormatException("a required parameter is missing.");
-                for (var i = 0; i < args.Length; i++)
+                switch (args[i])
                 {
-                    switch (args[i])
-                    {
-                        case "-envFile":
-                            envFile = args[++i];
-                            if (string.IsNullOrEmpty(envFile) || !File.Exists(envFile) || Path.GetExtension(envFile) != ".env") throw new FormatException("the specified environment file does not exist.");
-                            break;
-                        case "-chargeDepth":
-                            if (!double.TryParse(args[++i], out chargeDepth) || chargeDepth < 0) throw new FormatException("The specified charge depth is invalid");
-                            break;
-                        case "-chargeMass":
-                            if (!double.TryParse(args[++i], out chargeMass) || chargeMass <= 0) throw new FormatException("The specified charge mass is invalid");
-                            break;
-                        case "-outputRate":
-                            if (!double.TryParse(args[++i], out outputRate) || outputRate <= 0) throw new FormatException("The specified output rate is invalid");
-                            break;
-                        case "-outputDuration":
-                            if (!double.TryParse(args[++i], out outputDuration) || outputDuration <= 0) throw new FormatException("The specified output duration is invalid");
-                            break;
-                        case "-modelType":
-                            if (!Enum.TryParse(args[++i], true, out modelType) || modelType == BellhopNLWrapper.ModelType.error) throw new FormatException("The specified model type is invalid");
-                            break;
-                        default:
-                            Useage();
-                            return;
-                    }
+                    case "-data":
+                        data = DataBlob.Load(args[++i]);
+                        break;
+                    default:
+                        Useage();
+                        return;
                 }
             }
-            catch (FormatException exception)
-            {
-                Console.WriteLine("Input parameter was incorrect: " + exception.Message);
-            }
-#if  false
+            string arrivalsFile;
+            ComputeRadial(data, out arrivalsFile);
+            //give NLWrapper the arrivals file. 
+            BellhopNLWrapper.ModelType modelType;
+            var modelOK = Enum.TryParse(data.ModelType, true, out modelType);
+            if (!modelOK) throw new ApplicationException("modelType invalid.  'arons' or 'chapman'.");
+            var result =BellhopNLWrapper.Run(arrivalsFile, data.ChargeDepth, data.ChargeMass, data.OutputFreq, data.OutputTime, modelType).Waveforms;
 
-            //todo: given a .env file, can we parse out chargeDepth,chargeMass,outputRate, &. ?  might only need envFile and modelType. 
-            // run bellhop with env file. 
-            var workingDirectory = "";
-            var bellhopExecutable = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "bellhop.exe"); //incorrect, almost certainly.
+            //todo: make a refms-like file from this data.
+        }
+
+        static void ComputeRadial(DataBlob data, out string shdfile)
+        {
+            var envFile = File.ReadAllText(data.EnvFilename);
+            shdfile = null;
+            var outputData = new StringBuilder();
+            var workingDirectory = CreateTemporaryDirectory();
+            TransmissionLossRadial result = null;
+
+            // Write the bottom profile file that will be read by BELLHOP);
+            // File.WriteAllText(Path.Combine(workingDirectory, "bellhop.env"), bellhopConfiguration);
+            File.WriteAllText(Path.Combine(workingDirectory, "BTYFIL"), string.Format(@"'L' \n2 \n0 {0} \n{1} {0}\n",data.WaterDepth,data.CalculationRange));
+
+            var trcfil = Path.Combine(workingDirectory, "TRCFIL");
+            if (data.TopReflectionCoefficients != null)
+            {
+                using (var writer = new StreamWriter(trcfil, false))
+                {
+                    writer.WriteLine(data.TopReflectionCoefficients.GetLength(0));
+                    for (var rowIndex = 0; rowIndex < data.TopReflectionCoefficients.GetLength(0); rowIndex++)
+                        writer.WriteLine("{0} {1} {2} ", data.TopReflectionCoefficients[rowIndex, 0], data.TopReflectionCoefficients[rowIndex, 1], data.TopReflectionCoefficients[rowIndex, 2]);
+                }
+            }
+            var bellhopExecutable = Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), "bellhop.exe");
             var info = new ProcessStartInfo(bellhopExecutable, "bellhop")
             {
                 WorkingDirectory = workingDirectory,
@@ -69,17 +75,99 @@ namespace BellhopNL
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
-            var process = Process.Start(bellhopExecutable, "bellhop"); 
-
-            while (process != null && !process.HasExited)
+           
+            var transmissionLossProcess = new TransmissionLossProcess
             {
-                arrivalsFile += process.StandardOutput; //?
-            }
+                StartInfo = info
+            };
+#if false
+            transmissionLossProcess.PropertyChanged += (sender, e) =>
+               {
+                   if (e.PropertyName == "ProgressPercent")
+                       ProgressPercent = Math.Max(ProgressPercent, ((TransmissionLossProcess)sender).ProgressPercent);
+               }; 
 #endif
-            //give NLWrapper the arrivals file. 
-            var result =BellhopNLWrapper.Run(arrivalsFile, chargeDepth, chargeMass, outputRate, outputDuration, modelType).Waveforms;
+            transmissionLossProcess.OutputDataReceived += (s, e) =>
+            {
+                var theProcess = (TransmissionLossProcess)s;
+                string[] fields;
+                char[] separators = { ' ', '=' };
 
-            //todo: make a refms-like file from this data.
+                // Collect the command output.
+                if (String.IsNullOrEmpty(e.Data)) return;
+                // Add the text to the collected output.
+                outputData.Append(e.Data);
+                var curLine = e.Data.Trim();
+                if (curLine.StartsWith("Tracing beam"))
+                {
+                    fields = curLine.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+                    theProcess.CurBeam = int.Parse(fields[2]);
+                }
+                if (!curLine.StartsWith("Number of beams")) return;
+                fields = curLine.Split(separators);
+                theProcess.BeamCount = int.Parse(fields[fields.Length - 1]);
+            };
+            transmissionLossProcess.Start();
+            transmissionLossProcess.PriorityClass = ProcessPriorityClass.Idle;
+            transmissionLossProcess.StandardInput.WriteLine(data.BellhopConfiguration);
+            transmissionLossProcess.BeginOutputReadLine();
+            while (!transmissionLossProcess.HasExited)
+            {
+                Thread.Sleep(100);
+                if ((transmissionLossProcess.HasExited)) continue;
+                transmissionLossProcess.Kill();
+                break;
+            }
+            
+            var errorText = transmissionLossProcess.StandardError.ReadToEnd();
+            Debug.WriteLine("{0}: Bellhop error output for radial bearing {1} deg:\n{2}", DateTime.Now, data.Bearing, errorText);
+
+            // Convert the Bellhop output file into a Radial binary file
+            
+                
+            var count = 0;
+            while (!File.Exists(shdfile) && (count < 10))
+            {
+                Thread.Sleep(200);
+                count++;
+            }
+
+            if (errorText.Contains("forrtl") || (errorText.Contains("Error")))
+            {
+                Console.WriteLine(@"{0}: Bellhop failure: {1}", DateTime.Now, errorText);
+                Console.WriteLine(@"{0}: Bellhop input: {1}", DateTime.Now, data.BellhopConfiguration);
+                Console.WriteLine(@"{0}: Bellhop output: {1}", DateTime.Now, outputData);
+                return;
+            }
+            
+           // if (File.Exists(shdfile)) result = new TransmissionLossRadial(data.Bearing, new BellhopOutput(shdfile));
+            
+            var tries = 10;
+            while (tries > 0)
+            {
+                try
+                {
+                    foreach (var file in Directory.EnumerateFiles(workingDirectory)) File.Delete(file);
+                    Directory.Delete(workingDirectory, true);
+                    break;
+                }
+                catch (Exception)
+                {
+                    tries--;
+                    Thread.Sleep(100);
+                }
+            }
+            shdfile = Path.Combine(workingDirectory, "SHDFIL");
+            if(shdfile == null) throw new FileIsEmptyException("arrivals file not generated!");
+            transmissionLossProcess.ProgressPercent = 100;
+            return;
+        }
+
+        protected static string CreateTemporaryDirectory()
+        {
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(Path.GetRandomFileName()));
+            Directory.CreateDirectory(workingDirectory);
+            return workingDirectory;
         }
 
         static void Useage() { throw new NotImplementedException(); }

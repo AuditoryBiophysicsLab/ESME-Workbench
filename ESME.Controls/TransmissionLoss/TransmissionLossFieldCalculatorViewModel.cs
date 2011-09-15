@@ -207,6 +207,32 @@ namespace ESME.Views.TransmissionLoss
                 if (!float.IsNaN(windSpeeds[bearingIndex])) topReflectionCoefficient = Bellhop.GenerateReflectionCoefficients(windSpeeds[bearingIndex], transmissionLossJob.SoundSource.AcousticProperties.Frequency);
                 switch (TransmissionLossRunFile.TransmissionLossAlgorithm)
                 {
+                    case TransmissionLossAlgorithm.BellhopNL:
+                         var bellhopNLConfig = Bellhop.GetRadialConfiguration(transmissionLossJob,
+                                                                           soundSpeedProfiles[bearingIndex],
+                                                                           sedimentType, maxCalculationDepthMeters,
+                                                                           rangeCellCount, depthCellCount, false,
+                                                                           false, true, 1500);
+                        TransmissionLossRunFile.TransmissionLossRunFileRadials.Add(new BellhopRunFileRadial
+                        {
+                                BearingFromSourceDegrees = radialBearing,
+                                Configuration = bellhopNLConfig,
+                                BottomProfile = bottomProfiles[bearingIndex].ToBellhopString(),
+                                TopReflectionCoefficient = topReflectionCoefficient,
+                        });
+                        radialViewModel = new BellhopRadialCalculatorViewModel((BellhopRunFileRadial)_runFile.TransmissionLossRunFileRadials[bearingIndex], bearingIndex);
+                        var NLLogDirectory = Path.Combine(Path.GetDirectoryName(_runFile.Filename), "Transmission Loss Calculator logs");
+                        Directory.CreateDirectory(NLLogDirectory);
+                        //radialViewModel.LogPath = Path.Combine(logDirectory, Path.GetFileNameWithoutExtension(_runFile.Filename) + string.Format("-bearing-{0:0.##}-", radialBearing));
+                        radialViewModel.PropertyChanged += (s, e) =>
+                        {
+                            if (e.PropertyName != "ProgressPercent") return;
+                            //float radialCount = RadialCalculatorViewModels.Count;
+                            TotalProgress = RadialCalculatorViewModels.Sum(radial => radial.ProgressPercent);
+                        };
+                        radialViewModel.CalculationCompleted += (s, e) => RadialCount = RadialCalculatorViewModels.Count(radial => !radial.IsCompleted);
+                        RadialCalculatorViewModels.Add(radialViewModel);
+                        break;
                     case TransmissionLossAlgorithm.Bellhop:
                         var bellhopConfig = Bellhop.GetRadialConfiguration(transmissionLossJob,
                                                                            soundSpeedProfiles[bearingIndex],
@@ -220,8 +246,6 @@ namespace ESME.Views.TransmissionLoss
                                 BottomProfile = bottomProfiles[bearingIndex].ToBellhopString(),
                                 TopReflectionCoefficient = topReflectionCoefficient,
                         });
-                        // todo: Once we know how to calculate the Top Reflection Coefficients for Bellhop, put them in here
-                        // 
                         radialViewModel = new BellhopRadialCalculatorViewModel((BellhopRunFileRadial)_runFile.TransmissionLossRunFileRadials[bearingIndex], bearingIndex);
                         var logDirectory = Path.Combine(Path.GetDirectoryName(_runFile.Filename), "Transmission Loss Calculator logs");
                         Directory.CreateDirectory(logDirectory);

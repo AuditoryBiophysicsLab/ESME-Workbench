@@ -269,6 +269,7 @@
     <Compile Include="Platform\Exceptions.cs" />
     <Compile Include="Platform\PlatformState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TransmissionLoss\BellhopNL\DataBlob.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSBackgroundExporter.cs">
       <SubType>Component</SubType>
     </Compile>
