@@ -90,15 +90,6 @@ namespace ESME.Environment.Descriptors
 
         [NotNull] readonly Dispatcher _dispatcher;
 
-        [NotNull] public RangeComplexToken EnvironmentFiles { get; private set; }
-
-        [NotNull]
-        public ObservableConcurrentDictionary<string, RangeComplexArea> AreaCollection { get; private set; }
-        [NotNull]
-        public ObservableList<RangeComplexArea> AreaList { get; private set; }
-        [NotNull]
-        public ObservableList<EnvironmentFile> EnvironmentList { get; private set; }
-
         [NotNull] public string Name { get; private set; }
         [NotNull] public string RangeComplexPath { get; private set; }
         [NotNull] public string AreasPath { get; private set; }
@@ -107,11 +98,16 @@ namespace ESME.Environment.Descriptors
         [NotNull] public string EnvironmentPath { get; private set; }
         [NotNull] public string ImagesPath { get; private set; }
         [NotNull] public string SpeciesPath { get; private set; }
+
+        [NotNull] public RangeComplexToken EnvironmentFiles { get; private set; }
         [NotNull] public RangeComplexArea OpArea { get; private set; }
         [NotNull] public RangeComplexArea SimArea { get; private set; }
 
         [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> TemperatureFiles { get; private set; }
         [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> SalinityFiles { get; private set; }
+        [NotNull] public ObservableConcurrentDictionary<string, RangeComplexArea> AreaCollection { get; private set; }
+        [NotNull] public ObservableList<RangeComplexArea> AreaList { get; private set; }
+        [NotNull] public ObservableList<EnvironmentFile> EnvironmentList { get; private set; }
 
         public EnvironmentFile<Wind> WindFile { get; private set; }
         public EnvironmentFile<BottomLoss> BottomLossFile { get; private set; }
@@ -295,6 +291,23 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
+        #region public string ToolTip { get; set; }
+
+        public string ToolTip
+        {
+            get { return _toolTip; }
+            set
+            {
+                if (_toolTip == value) return;
+                _toolTip = value;
+                NotifyPropertyChanged(ToolTipChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ToolTipChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.ToolTip);
+        string _toolTip;
+
+        #endregion
 
         internal static NewRangeComplex Create(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits, Dispatcher dispatcher)
         {
@@ -306,6 +319,7 @@ namespace ESME.Environment.Descriptors
             foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
             NAVOImporter.Import(importJobs);
             result.IsEnabled = true;
+            //Tuple.Create(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile)
             return result;
         }
 

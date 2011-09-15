@@ -25,7 +25,7 @@
     </HierarchicalDataTemplate>
 
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}">
-      <TreeViewItem Header="{Binding Name}" IsEnabled="{Binding IsEnabled}" Margin="-20 0 0 0">
+      <TreeViewItem Header="{Binding Name}" IsEnabled="{Binding IsEnabled}" ToolTip ="{Binding ToolTip}" Margin="-20 0 0 0">
         <TreeViewItem Header="Areas"
                       ItemsSource="{Binding AreaList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
         <TreeViewItem Header="Environment"

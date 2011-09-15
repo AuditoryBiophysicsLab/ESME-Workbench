@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Threading.Tasks;
 using Cinch;
+using ESME;
 using ESME.Data;
 using ESME.Environment;
 using ESME.Environment.Descriptors;
@@ -11,6 +12,7 @@ using ESME.Views.EnvironmentBuilder;
 using HRC.Navigation;
 using HRC.Services;
 using MEFedMVVM.ViewModelLocator;
+using Environment = System.Environment;
 
 namespace DavesWPFTester
 {
@@ -24,31 +26,17 @@ namespace DavesWPFTester
         readonly IUIVisualizerService _visualizerService;
 
         [ImportingConstructor]
-        public MainWindowViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService, IUIVisualizerService visualizerService)
+        public MainWindowViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService,
+                                   IUIVisualizerService visualizerService)
         {
             _viewAwareStatus = viewAwareStatus;
             _messageBoxService = messageBoxService;
             _openFileService = openFileService;
             _saveFileService = saveFileService;
             _visualizerService = visualizerService;
-            var settings = Path.Combine(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME WorkBench"), "settings.xml");
-            ESME.Globals.AppSettings = AppSettings.Load(settings);
+            string settings = Path.Combine(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME WorkBench"), "settings.xml");
+            Globals.AppSettings = AppSettings.Load(settings);
             Initialize();
-        }
-
-        async void Initialize()
-        {
-            RangeComplexes = RangeComplexes.Singleton;
-            RangeComplexesViewModel = new RangeComplexesViewModel(RangeComplexes.Singleton);
-            ImportProgressCollection = ImportProgressCollection.Singleton;
-            try
-            {
-                await RangeComplexes.Singleton.ReadRangeComplexFileAsync(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
-            }
         }
 
         public RangeComplexesViewModel RangeComplexesViewModel { get; private set; }
@@ -56,6 +44,8 @@ namespace DavesWPFTester
         public RangeComplexes RangeComplexes { get; set; }
 
         #region ThrashTestRangeComplexesCommand
+        SimpleCommand<object, object> _thrashTestRangeComplexes;
+
         public SimpleCommand<object, object> ThrashTestRangeComplexesCommand
         {
             get
@@ -67,20 +57,18 @@ namespace DavesWPFTester
             }
         }
 
-        SimpleCommand<object, object> _thrashTestRangeComplexes;
-        
         async void ThrashTestRangeComplexesHandler()
         {
-            for (var i = 0; i < 50; i++)
+            for (int i = 0; i < 50; i++)
             {
                 var coordinates = new List<Geo>
                 {
-                        new Geo(29.3590, -79.2195),
-                        new Geo(31.1627, -79.2195),
-                        new Geo(31.1627, -81.2789),
-                        new Geo(30.1627, -81.2789),
-                        new Geo(29.3590, -80.8789),
-                        new Geo(29.3590, -79.2195),
+                    new Geo(29.3590, -79.2195),
+                    new Geo(31.1627, -79.2195),
+                    new Geo(31.1627, -81.2789),
+                    new Geo(30.1627, -81.2789),
+                    new Geo(29.3590, -80.8789),
+                    new Geo(29.3590, -79.2195),
                 };
                 try
                 {
@@ -92,12 +80,13 @@ namespace DavesWPFTester
                     _messageBoxService.ShowError(e.Message);
                 }
                 await TaskEx.Delay(500);
-
             }
         }
         #endregion
 
         #region ThrashTestAreasCommand
+        SimpleCommand<object, object> _thrashTestAreas;
+
         public SimpleCommand<object, object> ThrashTestAreasCommand
         {
             get
@@ -109,45 +98,48 @@ namespace DavesWPFTester
             }
         }
 
-        SimpleCommand<object, object> _thrashTestAreas;
-
         bool IsThrashTestAreasCommandEnabled
         {
             get { return true; }
         }
 
-        async void ThrashTestAreasHandler()
+        async 
+
+        void ThrashTestAreasHandler()
         {
             for (int i = 0; i < 50; i++)
             {
                 var coordinates = new List<Geo>
                 {
-                        new Geo(29.3590, -79.2195),
-                        new Geo(31.1627, -79.2195),
-                        new Geo(31.1627, -81.2789),
-                        new Geo(30.1627, -81.2789),
-                        new Geo(29.3590, -80.8789),
-                        new Geo(29.3590, -79.2195),
+                    new Geo(29.3590, -79.2195),
+                    new Geo(31.1627, -79.2195),
+                    new Geo(31.1627, -81.2789),
+                    new Geo(30.1627, -81.2789),
+                    new Geo(29.3590, -80.8789),
+                    new Geo(29.3590, -79.2195),
                 };
                 try
                 {
                     RangeComplexes.Singleton.RangeComplexCollection[string.Format("Test{0}", i)].CreateArea(
                                                                                                             string.
-                                                                                                                    Format
-                                                                                                                    ("Test{0}",
-                                                                                                                     i),
+                                                                                                                Format
+                                                                                                                ("Test{0}",
+                                                                                                                 i),
                                                                                                             coordinates);
                 }
                 catch (Exception e)
                 {
                     _messageBoxService.ShowError(e.Message);
                 }
-                await TaskEx.Delay(500);
+                await
+                TaskEx.Delay(500);
             }
         }
         #endregion
 
         #region DeleteTestRangeComplexesCommand
+        SimpleCommand<object, object> _deleteTestRangeComplexes;
+
         public SimpleCommand<object, object> DeleteTestRangeComplexesCommand
         {
             get
@@ -159,14 +151,14 @@ namespace DavesWPFTester
             }
         }
 
-        SimpleCommand<object, object> _deleteTestRangeComplexes;
-
         bool IsDeleteTestRangeComplexesCommandEnabled
         {
             get { return true; }
         }
 
-        async void DeleteTestRangeComplexesHandler()
+        async 
+
+        void DeleteTestRangeComplexesHandler()
         {
             for (int i = 0; i < 50; i++)
             {
@@ -174,25 +166,25 @@ namespace DavesWPFTester
                 {
                     RangeComplexes.Singleton.RemoveRangeComplex(string.Format("Test{0}", i));
                 }
-                catch (ArgumentException) { }
+                catch (ArgumentException) {}
                 catch (Exception e)
                 {
                     _messageBoxService.ShowError(e.Message);
                 }
-                
-                await TaskEx.Delay(100);
+
+                await
+                TaskEx.Delay(100);
             }
-            
         }
         #endregion
 
         #region CreateTestRangeComplexCommand
+        SimpleCommand<object, object> _addDave;
+
         public SimpleCommand<object, object> CreateTestRangeComplexCommand
         {
             get { return _addDave ?? (_addDave = new SimpleCommand<object, object>(delegate { CreateTestRangeComplexHandler(); })); }
         }
-
-        SimpleCommand<object, object> _addDave;
 
         void CreateTestRangeComplexHandler()
         {
@@ -217,12 +209,12 @@ namespace DavesWPFTester
         #endregion
 
         #region RemoveTestRangeComplexCommand
+        SimpleCommand<object, object> _removeTestRangeComplex;
+
         public SimpleCommand<object, object> RemoveTestRangeComplexCommand
         {
             get { return _removeTestRangeComplex ?? (_removeTestRangeComplex = new SimpleCommand<object, object>(delegate { RemoveTestRangeComplexHandler(); })); }
         }
-
-        SimpleCommand<object, object> _removeTestRangeComplex;
 
         void RemoveTestRangeComplexHandler()
         {
@@ -238,12 +230,12 @@ namespace DavesWPFTester
         #endregion
 
         #region CreateTestAreaCommand
+        SimpleCommand<object, object> _addTestArea;
+
         public SimpleCommand<object, object> CreateTestAreaCommand
         {
             get { return _addTestArea ?? (_addTestArea = new SimpleCommand<object, object>(delegate { AddTestAreaHandler(); })); }
         }
-
-        SimpleCommand<object, object> _addTestArea;
 
         void AddTestAreaHandler()
         {
@@ -268,12 +260,12 @@ namespace DavesWPFTester
         #endregion
 
         #region RemoveTestAreaCommand
+        SimpleCommand<object, object> _removeTestArea;
+
         public SimpleCommand<object, object> RemoveTestAreaCommand
         {
             get { return _removeTestArea ?? (_removeTestArea = new SimpleCommand<object, object>(delegate { RemoveTestAreaHandler(); })); }
         }
-
-        SimpleCommand<object, object> _removeTestArea;
 
         void RemoveTestAreaHandler()
         {
@@ -289,12 +281,12 @@ namespace DavesWPFTester
         #endregion
 
         #region DumpTestAreaCommand
+        SimpleCommand<object, object> _dumpTestArea;
+
         public SimpleCommand<object, object> DumpTestAreaCommand
         {
             get { return _dumpTestArea ?? (_dumpTestArea = new SimpleCommand<object, object>(delegate { DumpTestAreaHandler(); })); }
         }
-
-        SimpleCommand<object, object> _dumpTestArea;
 
         void DumpTestAreaHandler()
         {
@@ -308,5 +300,23 @@ namespace DavesWPFTester
             }
         }
         #endregion
+
+        async 
+
+        void Initialize()
+        {
+            RangeComplexes = RangeComplexes.Singleton;
+            RangeComplexesViewModel = new RangeComplexesViewModel(RangeComplexes.Singleton);
+            ImportProgressCollection = ImportProgressCollection.Singleton;
+            try
+            {
+                await
+                RangeComplexes.Singleton.ReadRangeComplexFileAsync(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError(e.Message);
+            }
+        }
     }
 }
