@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Threading.Tasks;
 using Cinch;
 using ESME.Data;
 using ESME.Environment;
@@ -53,6 +54,99 @@ namespace DavesWPFTester
         public RangeComplexesViewModel RangeComplexesViewModel { get; private set; }
         public ImportProgressCollection ImportProgressCollection { get; private set; }
         public RangeComplexes RangeComplexes { get; set; }
+
+        #region ThrashTestRangeComplexesCommand
+        public SimpleCommand<object, object> ThrashTestRangeComplexesCommand
+        {
+            get
+            {
+                return _thrashTestRangeComplexes ??
+                       (_thrashTestRangeComplexes =
+                        new SimpleCommand<object, object>(delegate { return true; },
+                                                          delegate { ThrashTestRangeComplexesHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _thrashTestRangeComplexes;
+        
+        async void ThrashTestRangeComplexesHandler()
+        {
+            for (var i = 0; i < 50; i++)
+            {
+                var coordinates = new List<Geo>
+                {
+                        new Geo(29.3590, -79.2195),
+                        new Geo(31.1627, -79.2195),
+                        new Geo(31.1627, -81.2789),
+                        new Geo(30.1627, -81.2789),
+                        new Geo(29.3590, -80.8789),
+                        new Geo(29.3590, -79.2195),
+                };
+                try
+                {
+                    RangeComplexes.Singleton.CreateRangeComplex(string.Format("Test{0}", i), 0, 29.3590, -79.2195, 0,
+                                                                coordinates, coordinates);
+                }
+                catch (Exception e)
+                {
+                    _messageBoxService.ShowError(e.Message);
+                }
+                await TaskEx.Delay(500);
+
+            }
+        }
+        #endregion
+
+        #region ThrashTestAreasCommand
+        public SimpleCommand<object, object> ThrashTestAreasCommand
+        {
+            get
+            {
+                return _thrashTestAreas ??
+                       (_thrashTestAreas =
+                        new SimpleCommand<object, object>(delegate { return IsThrashTestAreasCommandEnabled; },
+                                                          delegate { ThrashTestAreasHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _thrashTestAreas;
+
+        bool IsThrashTestAreasCommandEnabled
+        {
+            get { return true; }
+        }
+
+        async void ThrashTestAreasHandler()
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                var coordinates = new List<Geo>
+                {
+                        new Geo(29.3590, -79.2195),
+                        new Geo(31.1627, -79.2195),
+                        new Geo(31.1627, -81.2789),
+                        new Geo(30.1627, -81.2789),
+                        new Geo(29.3590, -80.8789),
+                        new Geo(29.3590, -79.2195),
+                };
+                try
+                {
+                    RangeComplexes.Singleton.RangeComplexCollection[string.Format("Test{0}", i)].CreateArea(
+                                                                                                            string.
+                                                                                                                    Format
+                                                                                                                    ("Test{0}",
+                                                                                                                     i),
+                                                                                                            coordinates);
+                }
+                catch (Exception e)
+                {
+                    _messageBoxService.ShowError(e.Message);
+                }
+                await TaskEx.Delay(500);
+            }
+        }
+        #endregion
+
 
         #region CreateTestRangeComplexCommand
         public SimpleCommand<object, object> CreateTestRangeComplexCommand

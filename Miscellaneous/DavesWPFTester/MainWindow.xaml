@@ -12,6 +12,8 @@
             <Button Content="Add test area" Command="{Binding CreateTestAreaCommand}" />
             <Button Content="Remove test area" Command="{Binding RemoveTestAreaCommand}" />
             <Button Content="Dump test area" Command="{Binding DumpTestAreaCommand}" />
+            <Button Content="Make many test complexes" Command="{Binding ThrashTestRangeComplexesCommand}" />
+            <Button Content="Make many test areas" Command="{Binding ThrashTestAreasCommand}" />
         </StackPanel>
             <GroupBox Header="Import status" Margin="5" DockPanel.Dock="Bottom"
               IsEnabled="{Binding ImportProgressCollection.IsWorkInProgress, Mode=OneWay}">
