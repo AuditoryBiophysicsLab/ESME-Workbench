@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -142,7 +143,14 @@ namespace ESME.Environment
             if (BathymetryWorker == null) BathymetryWorker = new ActionBlock<ImportJobDescriptor>(async
             job =>
             {
-                BathymetryProgress.JobStarting(job);
+                try
+                {
+                    BathymetryProgress.JobStarting(job);
+                }
+                catch (Exception e)
+                {
+                    job.Exception = e;
+                }
                 if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                 {
                     //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
@@ -230,6 +238,7 @@ namespace ESME.Environment
         public string DestinationFilename { get; set; }
         public uint SampleCount { get; set; }
         public Action<ImportJobDescriptor> CompletionAction { get; set; }
+        public Exception Exception { get; set; }
     }
 
     public class ImportProgressCollection : ReadOnlyObservableCollection<ImportProgressViewModel>
@@ -322,7 +331,19 @@ namespace ESME.Environment
 #endif
                 JobsInFlight--;
                 JobsCompleted++;
-                CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
+                if (job.Exception != null)
+                {
+                    CurrentJob = job.Exception.Message;
+                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
+                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
+                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
+                    Debug.WriteLine(job.Exception.Message);
+                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
+                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
+                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
+                    _exceptionCaught = true;
+                }
+                else if (!_exceptionCaught) CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
             });
             if (JobsCompleted != JobsSubmitted) return;
             IsWorkInProgress = false;
@@ -438,6 +459,7 @@ namespace ESME.Environment
 
         #endregion
 
+        bool _exceptionCaught = false;
         readonly ActionBlock<ImportJobDescriptor> _importer;
     }
 

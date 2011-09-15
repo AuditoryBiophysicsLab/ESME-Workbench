@@ -4,14 +4,17 @@
           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
           xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder"
-          xmlns:Descriptors="clr-namespace:ESME.Environment.Descriptors;assembly=ESME" mc:Ignorable="d" d:DesignHeight="300"
+          xmlns:Descriptors="clr-namespace:ESME.Environment.Descriptors;assembly=ESME" 
+          xmlns:wpf="clr-namespace:HRC.WPF;assembly=HRC" 
+          mc:Ignorable="d" d:DesignHeight="300"
           d:DesignWidth="300">
   <TreeView.Resources>
     <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter" />
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:EnvironmentFile}">
       <TreeViewItem Header="{Binding FileName}" Margin="-20 0 0 0">
-        <TreeViewItem Header="{Binding FileSize, StringFormat='{}File size: {0} bytes'}" />
-      </TreeViewItem>
+                <!-- <TreeViewItem Header="{Binding FileSize, Converter={wpf:Lambda 't=>string.Format(&quot;File size: {0:#,#} bytes&quot;,t)'}}" /> -->
+                <TreeViewItem Header="{Binding FileSize}" />
+            </TreeViewItem>
     </HierarchicalDataTemplate>
 
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:RangeComplexArea}">
@@ -22,7 +25,7 @@
     </HierarchicalDataTemplate>
 
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}">
-      <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0">
+      <TreeViewItem Header="{Binding Name}" IsEnabled="{Binding IsEnabled}" Margin="-20 0 0 0">
         <TreeViewItem Header="Areas"
                       ItemsSource="{Binding AreaList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
         <TreeViewItem Header="Environment"

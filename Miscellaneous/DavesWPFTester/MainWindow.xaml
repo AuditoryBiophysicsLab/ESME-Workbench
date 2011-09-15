@@ -21,8 +21,8 @@
     </GroupBox>
     <GroupBox Header="Range Complexes" Margin="5" DockPanel.Dock="Top" HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
-      <EnvironmentBuilder:RangeComplexTreeView DockPanel.Dock="Top"
-                                               ItemsSource="{Binding RangeComplexes.RangeComplexList}" SelectedValuePath="Value" />
+      <EnvironmentBuilder:RangeComplexTreeView DockPanel.Dock="Top" DataContext="{Binding RangeComplexes}" IsEnabled="{Binding IsEnabled}"
+                                               ItemsSource="{Binding RangeComplexList}" SelectedValuePath="Value" />
     </GroupBox>
   </DockPanel>
 </Window>
