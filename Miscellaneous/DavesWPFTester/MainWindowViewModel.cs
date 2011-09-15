@@ -147,6 +147,44 @@ namespace DavesWPFTester
         }
         #endregion
 
+        #region DeleteTestRangeComplexesCommand
+        public SimpleCommand<object, object> DeleteTestRangeComplexesCommand
+        {
+            get
+            {
+                return _deleteTestRangeComplexes ??
+                       (_deleteTestRangeComplexes =
+                        new SimpleCommand<object, object>(delegate { return IsDeleteTestRangeComplexesCommandEnabled; },
+                                                          delegate { DeleteTestRangeComplexesHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _deleteTestRangeComplexes;
+
+        bool IsDeleteTestRangeComplexesCommandEnabled
+        {
+            get { return true; }
+        }
+
+        async void DeleteTestRangeComplexesHandler()
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                try
+                {
+                    RangeComplexes.Singleton.RemoveRangeComplex(string.Format("Test{0}", i));
+                }
+                catch (ArgumentException) { }
+                catch (Exception e)
+                {
+                    _messageBoxService.ShowError(e.Message);
+                }
+                
+                await TaskEx.Delay(100);
+            }
+            
+        }
+        #endregion
 
         #region CreateTestRangeComplexCommand
         public SimpleCommand<object, object> CreateTestRangeComplexCommand
