@@ -8,17 +8,26 @@
           d:DesignWidth="300">
   <TreeView.Resources>
     <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter" />
+    <HierarchicalDataTemplate DataType="{x:Type Descriptors:EnvironmentFile}">
+      <TreeViewItem Header="{Binding FileName}" Margin="-20 0 0 0">
+        <TreeViewItem Header="{Binding FileSize, StringFormat='{}File size: {0} bytes'}" />
+      </TreeViewItem>
+    </HierarchicalDataTemplate>
+
+    <HierarchicalDataTemplate DataType="{x:Type Descriptors:RangeComplexArea}">
+      <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0">
+        <TreeViewItem Header="Resolutions"
+                      ItemsSource="{Binding BathymetryList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
+      </TreeViewItem>
+    </HierarchicalDataTemplate>
+
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}">
       <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0">
         <TreeViewItem Header="Areas"
                       ItemsSource="{Binding AreaList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
         <TreeViewItem Header="Environment"
-                      ItemsSource="{Binding EnvironmentList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
+                      ItemsSource="{Binding EnvironmentList, Converter={StaticResource SortConverter}, ConverterParameter='FileName'}" />
       </TreeViewItem>
-    </HierarchicalDataTemplate>
-
-    <HierarchicalDataTemplate DataType="{x:Type Descriptors:RangeComplexArea}">
-      <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0" ></TreeViewItem>
     </HierarchicalDataTemplate>
 
     <HierarchicalDataTemplate DataType="{x:Type EnvironmentBuilder:RangeComplexTreeItem}">

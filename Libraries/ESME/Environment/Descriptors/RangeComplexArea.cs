@@ -9,6 +9,7 @@ using ESME.Environment.NAVO;
 using ESME.NEMO.Overlay;
 using HRC;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
@@ -23,6 +24,7 @@ namespace ESME.Environment.Descriptors
             GeoRect = new GeoRect(overlayShape.BoundingBox);
             BathymetryPath = Path.Combine(_rangeComplex.DataPath, Name);
             BathymetryFiles = RangeComplexToken.Load(Path.Combine(BathymetryPath, Name + ".token"));
+            BathymetryList = BathymetryFiles.GetObservableWrapper<EnvironmentFile<Bathymetry>>();
             Directory.CreateDirectory(BathymetryPath);
             ImportJobs = new List<ImportJobDescriptor>();
             UpdateAvailableBathymetry();
@@ -122,6 +124,8 @@ namespace ESME.Environment.Descriptors
         }
 
         public List<ImportJobDescriptor> ImportJobs { get; private set; }
+
+        [NotNull] public ObservableList<EnvironmentFile<Bathymetry>> BathymetryList { get; private set; }
 
         [NotNull] public string Name { get; private set; }
         [NotNull] public string BathymetryPath { get; private set; }

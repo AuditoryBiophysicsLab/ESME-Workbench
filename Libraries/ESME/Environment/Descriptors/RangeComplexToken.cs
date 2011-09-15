@@ -12,13 +12,14 @@ using System.Windows.Threading;
 using Cinch;
 using HRC.Collections;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
     [Serializable]
     public class RangeComplexToken : IDeserializationCallback, IEnumerable<KeyValuePair<string, EnvironmentFile>>, INotifyCollectionChanged
     {
-        RangeComplexToken()
+        protected RangeComplexToken()
         {
             GeoRect = null;
             _lastWriteTime = new DateTime(1, 1, 1, 0, 0, 0, 0);  // This should ensure that no files are older than the token's last write time
@@ -44,7 +45,7 @@ namespace ESME.Environment.Descriptors
             OnCollectionChanged(e);
         }
 
-        public void Save(string filename, GeoRect geoRect)
+        public virtual void Save(string filename, GeoRect geoRect)
         {
             var formatter = new BinaryFormatter();
             GeoRect = geoRect;
@@ -98,7 +99,25 @@ namespace ESME.Environment.Descriptors
         [NonSerialized] public List<Tuple<object, string>> ExtractionsRequired = new List<Tuple<object, string>>();
         [NonSerialized] public bool ReextractionRequired;
 
-        ObservableConcurrentDictionary<string, EnvironmentFile> EnvironmentDictionary { get; set; }
+        protected ObservableConcurrentDictionary<string, EnvironmentFile> EnvironmentDictionary { get; set; }
+
+        [NonSerialized] object _observableWrapperT;
+        public ObservableList<T> GetObservableWrapper<T>(string listName = null) where T : EnvironmentFile
+        {
+            if (_observableWrapperT != null) return (ObservableList<T>)_observableWrapperT;
+            _observableWrapperT = ObservableList<T>.FromObservableConcurrentDictionary(EnvironmentDictionary, kvp => (T)kvp.Value, (kvp, ef) => kvp.Key == ef.FileName, kvp => kvp.Key, listName);
+            return (ObservableList<T>) _observableWrapperT;
+        }
+
+        [NonSerialized]
+        object _observableWrapper;
+        public ObservableList<EnvironmentFile> GetObservableWrapper(string listName = null)
+        {
+            if (_observableWrapper != null) return (ObservableList<EnvironmentFile>)_observableWrapperT;
+            _observableWrapper = ObservableList<EnvironmentFile>.FromObservableConcurrentDictionary(EnvironmentDictionary, kvp => kvp.Value, (kvp, ef) => kvp.Key == ef.FileName, kvp => kvp.Key, listName);
+            return (ObservableList<EnvironmentFile>)_observableWrapper;
+        }
+
         public GeoRect GeoRect { get; set; }
         public DateTime LastWriteTime { get { return _lastWriteTime; } }
         IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }

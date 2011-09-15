@@ -18,9 +18,10 @@ namespace HRC.Utility
     {
         object _lockObject = new object();
 
-        public static ObservableList<T> FromObservableConcurrentDictionary<TKey, TValue>(ObservableConcurrentDictionary<TKey, TValue> dict, Func<KeyValuePair<TKey, TValue>, T> convert, Func<KeyValuePair<TKey, TValue>, T, bool> equate, Func<KeyValuePair<TKey, TValue>, string> log = null)
+        public static ObservableList<T> FromObservableConcurrentDictionary<TKey, TValue>(ObservableConcurrentDictionary<TKey, TValue> dict, Func<KeyValuePair<TKey, TValue>, T> convert, Func<KeyValuePair<TKey, TValue>, T, bool> equate, Func<KeyValuePair<TKey, TValue>, string> log = null, string listName = null)
         {
             var list = new ObservableList<T>();
+            if (listName != null) list.Name = listName;
             foreach (var item in dict) list.Add(convert(item));
             ((INotifyCollectionChanged)dict).CollectionChanged += (s, e) =>
             {
@@ -72,7 +73,6 @@ namespace HRC.Utility
                     }
                 }
             };
-            foreach (var item in dict) list.Add(convert(item));
             return list;
         }
 

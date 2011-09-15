@@ -56,8 +56,8 @@ namespace ESME.Environment.Descriptors
             {
                 AreaCollection = new ObservableConcurrentDictionary<string, RangeComplexArea>();
                 AreaList = ObservableList<RangeComplexArea>.FromObservableConcurrentDictionary(AreaCollection, kvp => kvp.Value, (kvp, ac) => kvp.Key == ac.Name, kvp => kvp.Value.Name);
-                //if (Name == "Dave") AreaList.Name = "list";
-                //EnvironmentList = ObservableList<EnvironmentFile>.FromObservableConcurrentDictionary(EnvironmentFiles.EnvironmentDictionary, kvp => kvp.Value, (kvp, ac) => kvp.Key == ac.Name);
+
+                EnvironmentList = EnvironmentFiles.GetObservableWrapper();
             });
             UpdateAreas();
             if ((EnvironmentFiles.GeoRect == null) || (!EnvironmentFiles.GeoRect.Contains(GeoRect))) EnvironmentFiles.ReextractionRequired = true;
