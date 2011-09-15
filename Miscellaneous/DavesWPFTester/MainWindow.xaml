@@ -20,7 +20,7 @@
     <GroupBox Header="Range Complexes" Margin="5" DockPanel.Dock="Top" HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
       <EnvironmentBuilder:RangeComplexTreeView DockPanel.Dock="Top"
-                                               ItemsSource="{Binding RangeComplexesViewModel.RangeComplexCollection}" SelectedValuePath="Value" />
+                                               ItemsSource="{Binding RangeComplexes.RangeComplexList}" SelectedValuePath="Value" />
     </GroupBox>
   </DockPanel>
 </Window>

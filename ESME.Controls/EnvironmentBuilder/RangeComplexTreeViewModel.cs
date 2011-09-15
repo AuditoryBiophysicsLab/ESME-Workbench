@@ -208,6 +208,7 @@ namespace ESME.Views.EnvironmentBuilder
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var collection = value as System.Collections.IList;
+            if (collection == null) return null;
             var view = new ListCollectionView(collection);
             var sort = new SortDescription(parameter.ToString(), ListSortDirection.Ascending);
             view.SortDescriptions.Add(sort);

@@ -10,6 +10,7 @@ using ESME.Environment.NAVO;
 using HRC;
 using HRC.Navigation;
 using HRC.Collections;
+using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
@@ -50,11 +51,14 @@ namespace ESME.Environment.Descriptors
 
             TemperatureFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>>();
             SalinityFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>>();
+            EnvironmentFiles = RangeComplexToken.Load(Path.Combine(DataPath, Name + ".token"));
             _dispatcher.InvokeIfRequired(() =>
             {
                 AreaCollection = new ObservableConcurrentDictionary<string, RangeComplexArea>();
+                AreaList = ObservableList<RangeComplexArea>.FromObservableConcurrentDictionary(AreaCollection, kvp => kvp.Value, (kvp, ac) => kvp.Key == ac.Name, kvp => kvp.Value.Name);
+                //if (Name == "Dave") AreaList.Name = "list";
+                //EnvironmentList = ObservableList<EnvironmentFile>.FromObservableConcurrentDictionary(EnvironmentFiles.EnvironmentDictionary, kvp => kvp.Value, (kvp, ac) => kvp.Key == ac.Name);
             });
-            EnvironmentFiles = RangeComplexToken.Load(Path.Combine(DataPath, Name + ".token"));
             UpdateAreas();
             if ((EnvironmentFiles.GeoRect == null) || (!EnvironmentFiles.GeoRect.Contains(GeoRect))) EnvironmentFiles.ReextractionRequired = true;
             foreach (var envFile in EnvironmentFiles)
@@ -88,7 +92,12 @@ namespace ESME.Environment.Descriptors
 
         [NotNull] public RangeComplexToken EnvironmentFiles { get; private set; }
 
-        [NotNull] public ObservableConcurrentDictionary<string, RangeComplexArea> AreaCollection { get; private set; }
+        [NotNull]
+        public ObservableConcurrentDictionary<string, RangeComplexArea> AreaCollection { get; private set; }
+        [NotNull]
+        public ObservableList<RangeComplexArea> AreaList { get; private set; }
+        [NotNull]
+        public ObservableList<EnvironmentFile> EnvironmentList { get; private set; }
 
         [NotNull] public string Name { get; private set; }
         [NotNull] public string RangeComplexPath { get; private set; }

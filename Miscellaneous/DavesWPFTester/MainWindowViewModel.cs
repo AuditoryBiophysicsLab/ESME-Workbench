@@ -37,6 +37,7 @@ namespace DavesWPFTester
 
         async void Initialize()
         {
+            RangeComplexes = RangeComplexes.Singleton;
             RangeComplexesViewModel = new RangeComplexesViewModel(RangeComplexes.Singleton);
             ImportProgressCollection = ImportProgressCollection.Singleton;
             try
@@ -51,6 +52,7 @@ namespace DavesWPFTester
 
         public RangeComplexesViewModel RangeComplexesViewModel { get; private set; }
         public ImportProgressCollection ImportProgressCollection { get; private set; }
+        public RangeComplexes RangeComplexes { get; set; }
 
         #region CreateTestRangeComplexCommand
         public SimpleCommand<object, object> CreateTestRangeComplexCommand

@@ -13,6 +13,7 @@ using Cinch;
 using HRC;
 using HRC.Navigation;
 using HRC.Collections;
+using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
@@ -22,6 +23,7 @@ namespace ESME.Environment.Descriptors
         {
             _dispatcher = Dispatcher.CurrentDispatcher;
             RangeComplexCollection = new ObservableConcurrentDictionary<string, NewRangeComplex>();
+            RangeComplexList = ObservableList<NewRangeComplex>.FromObservableConcurrentDictionary(RangeComplexCollection, kvp => kvp.Value, (kvp, rc) => kvp.Value == rc);
         }
 
         #region Private fields
@@ -31,6 +33,8 @@ namespace ESME.Environment.Descriptors
 
         [NotNull]
         public ObservableConcurrentDictionary<string, NewRangeComplex> RangeComplexCollection { get; private set; }
+
+        public ObservableList<NewRangeComplex> RangeComplexList { get; private set; }
 
         public Task ReadRangeComplexFileAsync(string fileName)
         {

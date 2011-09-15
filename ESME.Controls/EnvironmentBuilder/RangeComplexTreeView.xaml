@@ -3,13 +3,24 @@
           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-          xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder" mc:Ignorable="d" d:DesignHeight="300"
+          xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder"
+          xmlns:Descriptors="clr-namespace:ESME.Environment.Descriptors;assembly=ESME" mc:Ignorable="d" d:DesignHeight="300"
           d:DesignWidth="300">
   <TreeView.Resources>
     <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter" />
-    <!-- =============================================================================== -->
-    <!-- This template displays a single Range Complex                                   -->
-    <!-- =============================================================================== -->
+    <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}">
+      <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0">
+        <TreeViewItem Header="Areas"
+                      ItemsSource="{Binding AreaList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
+        <TreeViewItem Header="Environment"
+                      ItemsSource="{Binding EnvironmentList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
+      </TreeViewItem>
+    </HierarchicalDataTemplate>
+
+    <HierarchicalDataTemplate DataType="{x:Type Descriptors:RangeComplexArea}">
+      <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0" ></TreeViewItem>
+    </HierarchicalDataTemplate>
+
     <HierarchicalDataTemplate DataType="{x:Type EnvironmentBuilder:RangeComplexTreeItem}">
       <TreeViewItem Header="{Binding Name}" ToolTip="{Binding ToolTip}"
                     ItemsSource="{Binding Children, Converter={StaticResource SortConverter}, ConverterParameter='Name'}"

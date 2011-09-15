@@ -18,33 +18,61 @@ namespace HRC.Utility
     {
         object _lockObject = new object();
 
-        public static ObservableList<T> FromObservableConcurrentDictionary<TKey, TValue>(ObservableConcurrentDictionary<TKey, TValue> dict, Func<KeyValuePair<TKey, TValue>, T> convert, Func<KeyValuePair<TKey, TValue>, T, bool> compare)
+        public static ObservableList<T> FromObservableConcurrentDictionary<TKey, TValue>(ObservableConcurrentDictionary<TKey, TValue> dict, Func<KeyValuePair<TKey, TValue>, T> convert, Func<KeyValuePair<TKey, TValue>, T, bool> equate, Func<KeyValuePair<TKey, TValue>, string> log = null)
         {
             var list = new ObservableList<T>();
+            foreach (var item in dict) list.Add(convert(item));
             ((INotifyCollectionChanged)dict).CollectionChanged += (s, e) =>
             {
-                switch (e.Action)
+                lock (list)
                 {
-                    case NotifyCollectionChangedAction.Add:
-                        foreach (KeyValuePair<TKey, TValue> newItem in e.NewItems) list.Add(convert(newItem));
-                        break;
-                    case NotifyCollectionChangedAction.Remove:
-                        foreach (KeyValuePair<TKey, TValue> oldItem in e.OldItems) list.RemoveAll(listItem => compare(oldItem, listItem));
-                        break;
-                    case NotifyCollectionChangedAction.Replace:
-                        for (var i = 0; i < e.OldItems.Count; i++)
-                        {
-                            var oldItem = (KeyValuePair<TKey, TValue>)e.OldItems[i];
-                            var newItem = (KeyValuePair<TKey, TValue>)e.NewItems[i];
-                            list[list.IndexOf(list.Where(listItem => compare(oldItem, listItem)).Single())] = convert(newItem);
-                        }
-                        break;
-                    case NotifyCollectionChangedAction.Reset:
-                        foreach (KeyValuePair<TKey, TValue> item in dict) list.Add(convert(item));
-                        break;
+                    switch (e.Action)
+                    {
+                        case NotifyCollectionChangedAction.Add:
+                            foreach (KeyValuePair<TKey, TValue> newItem in e.NewItems)
+                            {
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to add \"{1}\", Count={2}", list.Name, log(newItem), list.Count);
+                                list.Add(convert(newItem));
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After adding \"{1}\", Count={2}", list.Name, log(newItem), list.Count);
+                            }
+                            break;
+                        case NotifyCollectionChangedAction.Remove:
+                            foreach (KeyValuePair<TKey, TValue> oldItem in e.OldItems)
+                            {
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to remove \"{1}\", Count={2}", list.Name, log(oldItem), list.Count);
+                                list.RemoveAll(listItem => equate(oldItem, listItem));
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After removing \"{1}\", Count={2}", list.Name, log(oldItem), list.Count);
+                            }
+                            break;
+                        case NotifyCollectionChangedAction.Replace:
+                            for (var i = 0; i < e.OldItems.Count; i++)
+                            {
+                                var oldItem = (KeyValuePair<TKey, TValue>)e.OldItems[i];
+                                var newItem = (KeyValuePair<TKey, TValue>)e.NewItems[i];
+                                var listIndex = list.IndexOf(list.Where(listItem => equate(oldItem, listItem)).Single());
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to replace \"{1}\" with \"{2}\" at index {3}, Count={4}", list.Name, log(oldItem), log(newItem), listIndex, list.Count);
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: Before replace, list[{0}] is currently \"{1}\"", list.Name, listIndex, list[listIndex]);
+                                list[listIndex] = convert(newItem);
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After replacing \"{1}\" with \"{2}\", Count={3}", list.Name, log(oldItem), log(newItem), list.Count);
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After replace, list[{1}] is currently \"{2}\"", list.Name, listIndex, list[listIndex]);
+                            }
+                            break;
+                        case NotifyCollectionChangedAction.Reset:
+                            if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to reset, Count={1}", list.Name, list.Count);
+                            list.Clear();
+#if false
+                            foreach (var item in dict)
+                            {
+                                list.Add(convert(item));
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: Added \"{1}\", Count={2}", list.Name, log(item), list.Count);
+                            }
+#endif
+                            if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After reset, Count={1}", list.Name, list.Count);
+                            break;
+                    }
                 }
             };
-            foreach (KeyValuePair<TKey, TValue> item in dict) list.Add(convert(item));
+            foreach (var item in dict) list.Add(convert(item));
             return list;
         }
 
