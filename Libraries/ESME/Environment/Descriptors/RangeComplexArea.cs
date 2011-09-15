@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Cinch;
 using ESME.Environment.NAVO;
 using ESME.NEMO.Overlay;
 using HRC;
@@ -9,20 +12,21 @@ using HRC.Navigation;
 
 namespace ESME.Environment.Descriptors
 {
-    public class RangeComplexArea
+    public class RangeComplexArea : ViewModelBase
     {
-        private RangeComplexArea(NewRangeComplex rangeComplex, string areaName, OverlayShape overlayShape, EnvironmentFileDictionary<Bathymetry> bathymetryFiles,  RangeComplexToken token)
+        private RangeComplexArea(NewRangeComplex rangeComplex, string areaName, OverlayShape overlayShape)
         {
+            IsEnabled = false;
             _rangeComplex = rangeComplex;
             Name = areaName;
             OverlayShape = overlayShape;
-            BathymetryFiles = bathymetryFiles ?? new EnvironmentFileDictionary<Bathymetry>();
-            _token = token;
             GeoRect = new GeoRect(overlayShape.BoundingBox);
             BathymetryPath = Path.Combine(_rangeComplex.DataPath, Name);
+            BathymetryFiles = RangeComplexToken.Load(Path.Combine(BathymetryPath, Name + ".token"));
             Directory.CreateDirectory(BathymetryPath);
             ImportJobs = new List<ImportJobDescriptor>();
             UpdateAvailableBathymetry();
+            IsEnabled = true;
         }
 
         void UpdateAvailableBathymetry()
@@ -50,49 +54,81 @@ namespace ESME.Environment.Descriptors
                     CompletionAction = bathyJob =>
                     {
                         var jobResolution = string.Format("{0:0.00}min", bathyJob.Resolution);
-                        var bathymetryName = Path.Combine(Name, jobResolution + ".bathymetry");
-                        var envFile = new EnvironmentFile<Bathymetry>(_rangeComplex.DataPath, bathymetryName, bathyJob.SampleCount, bathyJob.GeoRect, EnvironmentDataType.Bathymetry, NAVOTimePeriod.Invalid);
-                        BathymetryFiles.Add(jobResolution, envFile);
-                        _token.EnvironmentDictionary[bathymetryName] = envFile;
+                        var bathymetryKey = Path.Combine(Name, jobResolution);
+                        var bathymetryFile = bathymetryKey + ".bathymetry";
+                        BathymetryFiles[bathymetryKey] = new EnvironmentFile<Bathymetry>(_rangeComplex.DataPath, bathymetryFile, bathyJob.SampleCount, bathyJob.GeoRect, EnvironmentDataType.Bathymetry, NAVOTimePeriod.Invalid);
                     },
                 });
             }
         }
 
-        internal static RangeComplexArea Create(NewRangeComplex rangeComplex, string areaName, IEnumerable<Geo> limits, RangeComplexToken token)
+        #region public bool IsEnabled { get; private set; }
+
+        public bool IsEnabled
         {
-            var areaPath = Path.Combine(rangeComplex.AreasPath, areaName + ".ovr");
-            OverlayFile.Create(areaPath, limits);
-            var overlay = new OverlayFile(areaPath);
-            return new RangeComplexArea(rangeComplex, areaName, overlay.Shapes[0], null, token);
+            get { return _isEnabled; }
+            private set
+            {
+                if (_isEnabled == value) return;
+                _isEnabled = value;
+                NotifyPropertyChanged(IsEnabledChangedEventArgs);
+            }
         }
 
-        internal static RangeComplexArea Read(NewRangeComplex rangeComplex, string areaName, EnvironmentFileDictionary<Bathymetry> files, RangeComplexToken token)
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexArea>(x => x.IsEnabled);
+        bool _isEnabled;
+
+        #endregion
+
+
+        internal static RangeComplexArea Create(NewRangeComplex rangeComplex, string areaName, IEnumerable<Geo> limits)
+        {
+            var areaPath = Path.Combine(rangeComplex.AreasPath, areaName + ".ovr");
+            if (File.Exists(areaPath)) throw new InvalidOperationException(string.Format("Area {0} overlay already exists", areaName));
+            if (Directory.Exists(Path.Combine(rangeComplex.DataPath, areaName))) Directory.Delete(Path.Combine(rangeComplex.DataPath, areaName), true);
+            OverlayFile.Create(areaPath, limits);
+            var overlay = new OverlayFile(areaPath);
+            return new RangeComplexArea(rangeComplex, areaName, overlay.Shapes[0]);
+        }
+
+        internal static RangeComplexArea Read(NewRangeComplex rangeComplex, string areaName)
         {
             var areaPath = Path.Combine(rangeComplex.AreasPath, areaName + ".ovr");
             var overlay = new OverlayFile(areaPath);
-            return new RangeComplexArea(rangeComplex, areaName, overlay.Shapes[0], files, token);
+            return new RangeComplexArea(rangeComplex, areaName, overlay.Shapes[0]);
+        }
+
+        internal void Remove()
+        {
+            File.Delete(Path.Combine(_rangeComplex.AreasPath, Name + ".ovr"));
+            if (Directory.Exists(BathymetryPath)) Directory.Delete(BathymetryPath, true);
+        }
+
+        public void Dump()
+        {
+            Debug.WriteLine("{0} Dump of area {1}\\{2}", DateTime.Now, _rangeComplex.Name, Name);
+            Debug.WriteLine("{0}   Dictionary", DateTime.Now);
+            foreach (var item in BathymetryFiles) Debug.WriteLine("{0}     [{1}]  size: {2}", DateTime.Now, item.Key, item.Value.FileSize);
         }
 
         public Bathymetry this[string resolutionString]
         {
-            get { return BathymetryFiles[resolutionString].Data; }
+            get { return ((EnvironmentFile<Bathymetry>)BathymetryFiles[resolutionString]).Data; }
         }
 
         public Task<Bathymetry> GetDataAsync(string resolutionString)
         {
-            return BathymetryFiles[resolutionString].AsyncData;
+            return ((EnvironmentFile<Bathymetry>)BathymetryFiles[resolutionString]).AsyncData;
         }
 
         public List<ImportJobDescriptor> ImportJobs { get; private set; }
 
-        [NotNull] public EnvironmentFileDictionary<Bathymetry> BathymetryFiles { get; private set; }
         [NotNull] public string Name { get; private set; }
         [NotNull] public string BathymetryPath { get; private set; }
         [NotNull] public GeoRect GeoRect { get; private set; }
         [NotNull] public OverlayShape OverlayShape { get; private set; }
 
-        [NotNull] readonly RangeComplexToken _token;
+        [NotNull] public RangeComplexToken BathymetryFiles { get; private set; }
         [NotNull] readonly NewRangeComplex _rangeComplex;
 
         static readonly List<uint> AvailableSampleCountsPerDegree = new List<uint> { 30, 60, 120, 600, 1200 };

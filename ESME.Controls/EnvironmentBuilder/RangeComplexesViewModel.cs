@@ -10,13 +10,9 @@ namespace ESME.Views.EnvironmentBuilder
     {
         public RangeComplexesViewModel(RangeComplexes rangeComplexes)
         {
-            RangeComplexCollection = new ObservableList<RangeComplexTreeViewModel>();
-            rangeComplexes.RangeComplexCollection.CollectionChanged += (s, e) =>
-            {
-                if (e.Action == NotifyCollectionChangedAction.Add)
-                    foreach (NewRangeComplex item in e.NewItems)
-                        RangeComplexCollection.Add(new RangeComplexTreeViewModel(item) { Name = item.Name });
-            };
+            RangeComplexCollection = ObservableList<RangeComplexTreeViewModel>.FromObservableConcurrentDictionary(rangeComplexes.RangeComplexCollection,
+                                                                                                        x => new RangeComplexTreeViewModel(x.Value) {Name = x.Value.Name},
+                                                                                                        (x, y) => x.Value.Name == y.Name);
         }
 
         #region public ObservableList<RangeComplexTreeViewModel> RangeComplexCollection { get; set; }

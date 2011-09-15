@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.Descriptors;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
-using HRC.Utility;
 
 namespace ESME.Environment
 {
@@ -33,14 +34,20 @@ namespace ESME.Environment
             job =>
             {
                 TemperatureProgress.JobStarting(job);
-                //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
-                var temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(job.TimePeriod), "water_temp", job.TimePeriod, job.GeoRect);
-                var temperature = new SoundSpeed();
-                temperature.SoundSpeedFields.Add(temperatureField);
-                temperature.Save(job.DestinationFilename);
-                job.Resolution = 15;
-                job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
-                job.CompletionAction(job);
+                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                {
+                    //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
+                    var temperatureField = GDEM.ReadFile(GDEM.FindTemperatureFile(job.TimePeriod), "water_temp", job.TimePeriod, job.GeoRect);
+                    var temperature = new SoundSpeed();
+                    temperature.SoundSpeedFields.Add(temperatureField);
+                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                    {
+                        temperature.Save(job.DestinationFilename);
+                        job.Resolution = 15;
+                        job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
+                        job.CompletionAction(job);
+                    }
+                }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
                 TemperatureProgress.JobCompleted(job);
             },
@@ -55,14 +62,20 @@ namespace ESME.Environment
             job =>
             {
                 SalinityProgress.JobStarting(job);
-                //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
-                var salinityField = GDEM.ReadFile(GDEM.FindSalinityFile(job.TimePeriod), "salinity", job.TimePeriod, job.GeoRect);
-                var salinity = new SoundSpeed();
-                salinity.SoundSpeedFields.Add(salinityField);
-                salinity.Save(job.DestinationFilename);
-                job.Resolution = 15;
-                job.SampleCount = (uint)salinityField.EnvironmentData.Count;
-                job.CompletionAction(job);
+                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                {
+                    //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
+                    var salinityField = GDEM.ReadFile(GDEM.FindSalinityFile(job.TimePeriod), "salinity", job.TimePeriod, job.GeoRect);
+                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                    {
+                        var salinity = new SoundSpeed();
+                        salinity.SoundSpeedFields.Add(salinityField);
+                        salinity.Save(job.DestinationFilename);
+                        job.Resolution = 15;
+                        job.SampleCount = (uint)salinityField.EnvironmentData.Count;
+                        job.CompletionAction(job);
+                    }
+                }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
                 SalinityProgress.JobCompleted(job);
             },
@@ -77,12 +90,18 @@ namespace ESME.Environment
             job =>
             {
                 SedimentProgress.JobStarting(job);
-                //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                var sediment = BST.Extract(job.GeoRect);
-                sediment.Save(job.DestinationFilename);
-                job.SampleCount = (uint)sediment.Samples.Count;
-                job.Resolution = 5;
-                job.CompletionAction(job);
+                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                {
+                    //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
+                    var sediment = BST.Extract(job.GeoRect);
+                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                    {
+                        sediment.Save(job.DestinationFilename);
+                        job.SampleCount = (uint)sediment.Samples.Count;
+                        job.Resolution = 5;
+                        job.CompletionAction(job);
+                    }
+                }
                 //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
                 SedimentProgress.JobCompleted(job);
             },
@@ -97,12 +116,19 @@ namespace ESME.Environment
             job =>
             {
                 WindProgress.JobStarting(job);
-                //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                var wind = await SMGC.NewImportAsync(job.GeoRect);
-                wind.Save(job.DestinationFilename);
-                job.SampleCount = (uint)wind.TimePeriods[0].EnvironmentData.Count;
-                job.Resolution = 60;
-                job.CompletionAction(job);
+                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                {
+                    //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
+                    var wind = await
+                    SMGC.NewImportAsync(job.GeoRect);
+                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                    {
+                        wind.Save(job.DestinationFilename);
+                        job.SampleCount = (uint)wind.TimePeriods[0].EnvironmentData.Count;
+                        job.Resolution = 60;
+                        job.CompletionAction(job);
+                    }
+                }
                 //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
                 WindProgress.JobCompleted(job);
             },
@@ -117,11 +143,17 @@ namespace ESME.Environment
             job =>
             {
                 BathymetryProgress.JobStarting(job);
-                //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
-                var bathymetry = DBDB.Extract(job.Resolution, job.GeoRect);
-                bathymetry.Save(job.DestinationFilename);
-                job.SampleCount = (uint)bathymetry.Samples.Count;
-                job.CompletionAction(job);
+                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                {
+                    //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
+                    var bathymetry = DBDB.Extract(job.Resolution, job.GeoRect);
+                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                    {
+                        bathymetry.Save(job.DestinationFilename);
+                        job.SampleCount = (uint)bathymetry.Samples.Count;
+                        job.CompletionAction(job);
+                    }
+                }
                 //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
                 BathymetryProgress.JobCompleted(job);
             },
@@ -136,12 +168,19 @@ namespace ESME.Environment
             job =>
             {
                 BottomLossProgress.JobStarting(job);
-                //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
-                var bottomLoss = await BottomLossDatabase.ExtractAsync(job.GeoRect);
-                bottomLoss.Save(job.DestinationFilename);
-                job.SampleCount = (uint)bottomLoss.Samples.Count;
-                job.Resolution = 15;
-                job.CompletionAction(job);
+                if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                {
+                    //Debug.WriteLine("{0} About to import {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
+                    var bottomLoss = await
+                    BottomLossDatabase.ExtractAsync(job.GeoRect);
+                    if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
+                    {
+                        bottomLoss.Save(job.DestinationFilename);
+                        job.SampleCount = (uint)bottomLoss.Samples.Count;
+                        job.Resolution = 15;
+                        job.CompletionAction(job);
+                    }
+                }
                 //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
                 BottomLossProgress.JobCompleted(job);
             },
@@ -195,11 +234,9 @@ namespace ESME.Environment
 
     public class ImportProgressCollection : ReadOnlyObservableCollection<ImportProgressViewModel>
     {
-        static readonly ImportProgressViewModel MainProgress = new ImportProgressViewModel("Overall");
         static readonly ObservableCollection<ImportProgressViewModel> Importers = new ObservableCollection<ImportProgressViewModel>(
             new List<ImportProgressViewModel>
             {
-                MainProgress,
                 NAVOImporter.TemperatureProgress,
                 NAVOImporter.SalinityProgress,
                 NAVOImporter.BathymetryProgress,
@@ -210,75 +247,83 @@ namespace ESME.Environment
 
         static readonly ImportProgressCollection Instance = new ImportProgressCollection();
         public static ImportProgressCollection Singleton { get { return Instance; } }
-        readonly static object LockObject = new object();
-        ImportProgressCollection() : base(Importers)
-        {
-            MainProgress.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == "IsWorkInProgress")
-                    lock (LockObject) IsWorkInProgress = MainProgress.IsWorkInProgress;
-            };
-        }
-
-        public void Post(ImportJobDescriptor job) { MainProgress.Post(job); }
-        public void JobStarting(ImportJobDescriptor job) { MainProgress.JobStarting(job); }
-        public void JobCompleted(ImportJobDescriptor job) { MainProgress.JobCompleted(job); }
-
-        #region public bool IsWorkInProgress { get; private set; }
-
-        public bool IsWorkInProgress
-        {
-            get { return _isWorkInProgress; }
-            private set
-            {
-                if (_isWorkInProgress == value) return;
-                _isWorkInProgress = value;
-                OnPropertyChanged(IsWorkInProgressChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsWorkInProgressChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressCollection>(x => x.IsWorkInProgress);
-        bool _isWorkInProgress;
-
-        #endregion
+        ImportProgressCollection() : base(Importers) { }
     }
 
     public class ImportProgressViewModel : ViewModelBase
     {
+        readonly object _lockObject = new object();
+        const int DeadlockTimeout = 2000;
+        //readonly SynchronizationContext _context = new DispatcherSynchronizationContext();
+        readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
+
         public ImportProgressViewModel(string name, ActionBlock<ImportJobDescriptor> importer = null) 
         {
             Name = name;
             _importer = importer;
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void Post(ImportJobDescriptor job)
         {
-            JobsSubmitted++;
-            CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
-            if (_importer != null)
+#if true
+            _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
-                _importer.Post(job);
-                ImportProgressCollection.Singleton.Post(job);
+#else
+            var gotLock = false;
+            Monitor.TryEnter(_lockObject, DeadlockTimeout, ref gotLock);
+            if (!gotLock)
+            {
+                var error = string.Format("Deadlock in Post({0})", job.DataType);
+                CurrentJob = error;
+                throw new SynchronizationLockException(error);
             }
-            IsWorkInProgress = true;
+#endif
+                JobsSubmitted++;
+                CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
+                _importer.Post(job);
+                IsWorkInProgress = true;
+            });
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void JobStarting(ImportJobDescriptor job)
         {
-            JobsInFlight++;
-            CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
-            if (_importer != null) ImportProgressCollection.Singleton.JobStarting(job);
+#if true
+            _dispatcher.InvokeInBackgroundIfRequired(() =>
+            {
+#else
+            var gotLock = false;
+            Monitor.TryEnter(_lockObject, DeadlockTimeout, ref gotLock);
+            if (!gotLock)
+            {
+                var error = string.Format("Deadlock in JobStarting({0})", job.DataType);
+                CurrentJob = error;
+                throw new SynchronizationLockException(error);
+            }
+#endif
+                JobsInFlight++;
+                CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
+            });
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void JobCompleted(ImportJobDescriptor job)
         {
-            JobsInFlight--;
-            JobsCompleted++;
-            CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
-            if (_importer != null) ImportProgressCollection.Singleton.JobCompleted(job);
+#if true
+            _dispatcher.InvokeInBackgroundIfRequired(() =>
+            {
+#else
+            var gotLock = false;
+            Monitor.TryEnter(_lockObject, DeadlockTimeout, ref gotLock);
+            if (!gotLock)
+            {
+                var error = string.Format("Deadlock in JobCompleted({0})", job.DataType);
+                CurrentJob = error;
+                throw new SynchronizationLockException(error);
+            }
+#endif
+                JobsInFlight--;
+                JobsCompleted++;
+                CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
+            });
             if (JobsCompleted != JobsSubmitted) return;
             IsWorkInProgress = false;
             JobsSubmitted = 0;
@@ -394,5 +439,38 @@ namespace ESME.Environment
         #endregion
 
         readonly ActionBlock<ImportJobDescriptor> _importer;
+    }
+
+    public static class SynchronizationContextExtensions
+    {
+        /// <summary>
+        /// Synchronously invokes a delegate by passing it to a <see cref="SynchronizationContext">, waiting for it to complete.
+        /// </see></summary>
+        /// <param name="synchronizationContext"/>The <see cref="SynchronizationContext"> to pass the delegate to. May not be null.
+        /// <param name="action"/>The delegate to invoke. May not be null.
+        /// <remarks>
+        /// <para>This method is guaranteed to not be reentrant.</para>
+        /// </remarks>
+        public static void SafeSend(this SynchronizationContext synchronizationContext, Action action)
+        {
+            // The semantics of SynchronizationContext.Send allow it to invoke the delegate directly, but we can't allow that.
+            Action forwardDelegate = () => synchronizationContext.Send((state) => action(), null);
+            var result = forwardDelegate.BeginInvoke(null, null);
+            result.AsyncWaitHandle.WaitOne();
+        }
+
+        /// <summary>
+        /// Asynchronously invokes a delegate by passing it to a <see cref="SynchronizationContext">, returning immediately.
+        /// </see></summary>
+        /// <param name="synchronizationContext"/>The <see cref="SynchronizationContext"> to pass the delegate to. May not be null.
+        /// <param name="action"/>The delegate to invoke. May not be null.
+        /// <remarks>
+        /// <para>This method is guaranteed to not be reentrant.</para>
+        /// </remarks>
+        public static void SafePost(this SynchronizationContext synchronizationContext, Action action)
+        {
+            // The semantics of SynchronizationContext.Post allow it to invoke the delegate directly, but we can't allow that.
+            ThreadPool.QueueUserWorkItem((state) => synchronizationContext.Post((state2) => action(), null));
+        }
     }
 }

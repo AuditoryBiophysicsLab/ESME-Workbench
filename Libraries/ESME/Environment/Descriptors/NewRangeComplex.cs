@@ -1,23 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.NAVO;
 using HRC;
 using HRC.Navigation;
-using HRC.Utility;
 using HRC.Collections;
 
 namespace ESME.Environment.Descriptors
 {
-    public class NewRangeComplex
+    public class NewRangeComplex : ViewModelBase
     {
-        NewRangeComplex(string simAreaPath, string rangeComplexName, Dispatcher dispatcher)
+        NewRangeComplex(string simAreaPath, string rangeComplexName, bool isCreate, Dispatcher dispatcher)
         {
+            IsEnabled = false;
             _dispatcher = dispatcher;
             var rangeComplexPath = Path.Combine(simAreaPath, rangeComplexName);
             Name = rangeComplexName;
@@ -28,125 +28,67 @@ namespace ESME.Environment.Descriptors
             EnvironmentPath = Path.Combine(rangeComplexPath, "Environment");
             ImagesPath = Path.Combine(rangeComplexPath, "Images");
             SpeciesPath = Path.Combine(rangeComplexPath, "Species");
-            Directory.CreateDirectory(RangeComplexPath);
-            Directory.CreateDirectory(AreasPath);
+            if (isCreate)
+            {
+                Directory.CreateDirectory(RangeComplexPath);
+                Directory.CreateDirectory(AreasPath);
+            }
+            else
+            {
+                if (!Directory.Exists(RangeComplexPath) || !Directory.Exists(AreasPath))
+                {
+                    RangeComplexes.Singleton.DeleteRangeComplexFromDisk(rangeComplexName);
+                    throw new InvalidOperationException(string.Format("The range complex \"{0}\" is missing critical files or directories.\r\nThe range complex has been deleted", Name));
+                }
+            }
             Directory.CreateDirectory(BathymetryPath);
             Directory.CreateDirectory(DataPath);
             Directory.CreateDirectory(EnvironmentPath);
             Directory.CreateDirectory(ImagesPath);
             Directory.CreateDirectory(SpeciesPath);
             Directory.CreateDirectory(Path.Combine(RangeComplexPath, "GeographicAreas"));
-            TemperatureFiles = new EnvironmentFileDictionary<SoundSpeed>();
-            SalinityFiles = new EnvironmentFileDictionary<SoundSpeed>();
+
+            TemperatureFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>>();
+            SalinityFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>>();
             _dispatcher.InvokeIfRequired(() =>
             {
                 AreaCollection = new ObservableConcurrentDictionary<string, RangeComplexArea>();
-                EnvironmentFileCollection = new ObservableList<EnvironmentFile>();
             });
-            Token = RangeComplexToken.Load(Path.Combine(DataPath, "data.token"));
+            EnvironmentFiles = RangeComplexToken.Load(Path.Combine(DataPath, Name + ".token"));
             UpdateAreas();
-            if ((Token.GeoRect == null) || (!Token.GeoRect.Contains(GeoRect))) Token.ReextractionRequired = true;
-            else EnvironmentFileCollection.AddRange(Token.EnvironmentDictionary.Values);
-            Token.EnvironmentDictionary.CollectionChanged += (s, e) =>
+            if ((EnvironmentFiles.GeoRect == null) || (!EnvironmentFiles.GeoRect.Contains(GeoRect))) EnvironmentFiles.ReextractionRequired = true;
+            foreach (var envFile in EnvironmentFiles)
             {
-                switch (e.Action)
+                switch (envFile.Value.DataType)
                 {
-                    case NotifyCollectionChangedAction.Add:
-                        foreach (EnvironmentFile envFile in e.NewItems)
-                        {
-                            EnvironmentFileCollection.Add(envFile);
-                            switch (envFile.DataType)
-                            {
-                                case EnvironmentDataType.Bathymetry:
-                                    var areaName = Path.GetDirectoryName(envFile.FileName);
-                                    var area = AreaCollection[areaName];
-                                    area.BathymetryFiles.Add(envFile.FileName, (EnvironmentFile<Bathymetry>)envFile);
-                                    break;
-                                case EnvironmentDataType.BottomLoss:
-                                    BottomLossFile = (EnvironmentFile<BottomLoss>)envFile;
-                                    break;
-                                case EnvironmentDataType.Salinity:
-                                    SalinityFiles.Add(envFile.FileName, (EnvironmentFile<SoundSpeed>)envFile);
-                                    break;
-                                case EnvironmentDataType.Sediment:
-                                    SedimentFile = (EnvironmentFile<Sediment>)envFile;
-                                    break;
-                                case EnvironmentDataType.Temperature:
-                                    TemperatureFiles.Add(envFile.FileName, (EnvironmentFile<SoundSpeed>)envFile);
-                                    break;
-                                case EnvironmentDataType.Wind:
-                                    WindFile = (EnvironmentFile<Wind>)envFile;
-                                    break;
-                            }
-                        }
+                    case EnvironmentDataType.Bathymetry:
+                        throw new NotImplementedException();
+                    case EnvironmentDataType.BottomLoss:
+                        BottomLossFile = (EnvironmentFile<BottomLoss>)envFile.Value;
                         break;
-                    case NotifyCollectionChangedAction.Remove:
-                        foreach (EnvironmentFile envFile in e.OldItems)
-                        {
-                            EnvironmentFileCollection.Remove(envFile);
-                            switch (envFile.DataType)
-                            {
-                                case EnvironmentDataType.Bathymetry:
-                                    var areaName = Path.GetDirectoryName(envFile.FileName);
-                                    var area = AreaCollection[areaName];
-                                    area.BathymetryFiles.Remove(envFile.FileName);
-                                    break;
-                                case EnvironmentDataType.BottomLoss:
-                                    BottomLossFile = null;
-                                    break;
-                                case EnvironmentDataType.Salinity:
-                                    SalinityFiles.Remove(envFile.FileName);
-                                    break;
-                                case EnvironmentDataType.Sediment:
-                                    SedimentFile = null;
-                                    break;
-                                case EnvironmentDataType.Temperature:
-                                    TemperatureFiles.Remove(envFile.FileName);
-                                    break;
-                                case EnvironmentDataType.Wind:
-                                    WindFile = null;
-                                    break;
-                            }
-                        }
+                    case EnvironmentDataType.Salinity:
+                        var salinityFile = (EnvironmentFile<SoundSpeed>)envFile.Value;
+                        SalinityFiles.Add(salinityFile.TimePeriod, salinityFile);
                         break;
-                    case NotifyCollectionChangedAction.Replace:
-                        for (var i = 0; i < e.OldItems.Count; i++)
-                        {
-                            var oldItem = (EnvironmentFile)e.OldItems[i];
-                            switch (oldItem.DataType)
-                            {
-                                case EnvironmentDataType.Bathymetry:
-                                    var areaName = Path.GetDirectoryName(oldItem.FileName);
-                                    var area = AreaCollection[areaName];
-                                    area.BathymetryFiles[oldItem.FileName] = (EnvironmentFile<Bathymetry>)e.NewItems[i];
-                                    break;
-                                case EnvironmentDataType.BottomLoss:
-                                    BottomLossFile = (EnvironmentFile<BottomLoss>)e.NewItems[i];
-                                    break;
-                                case EnvironmentDataType.Salinity:
-                                    SalinityFiles[oldItem.FileName] = (EnvironmentFile<SoundSpeed>)e.NewItems[i];
-                                    break;
-                                case EnvironmentDataType.Sediment:
-                                    SedimentFile = (EnvironmentFile<Sediment>)e.NewItems[i];
-                                    break;
-                                case EnvironmentDataType.Temperature:
-                                    TemperatureFiles[oldItem.FileName] = (EnvironmentFile<SoundSpeed>)e.NewItems[i];
-                                    break;
-                                case EnvironmentDataType.Wind:
-                                    WindFile = (EnvironmentFile<Wind>)e.NewItems[i];
-                                    break;
-                            }
-                        }
+                    case EnvironmentDataType.Sediment:
+                        SedimentFile = (EnvironmentFile<Sediment>)envFile.Value;
                         break;
-                }
-            };
+                    case EnvironmentDataType.Temperature:
+                        var temperatureFile = (EnvironmentFile<SoundSpeed>)envFile.Value;
+                        SalinityFiles.Add(temperatureFile.TimePeriod, temperatureFile);
+                        break;
+                    case EnvironmentDataType.Wind:
+                        WindFile = (EnvironmentFile<Wind>)envFile.Value;
+                        break;
+                }                
+            }
         }
+
         [NotNull] readonly Dispatcher _dispatcher;
 
-        [NotNull] internal RangeComplexToken Token { get; private set; }
+        [NotNull] public RangeComplexToken EnvironmentFiles { get; private set; }
 
         [NotNull] public ObservableConcurrentDictionary<string, RangeComplexArea> AreaCollection { get; private set; }
-        [NotNull] public ObservableList<EnvironmentFile> EnvironmentFileCollection { get; private set; }
 
         [NotNull] public string Name { get; private set; }
         [NotNull] public string RangeComplexPath { get; private set; }
@@ -159,8 +101,8 @@ namespace ESME.Environment.Descriptors
         [NotNull] public RangeComplexArea OpArea { get; private set; }
         [NotNull] public RangeComplexArea SimArea { get; private set; }
 
-        [NotNull] public EnvironmentFileDictionary<SoundSpeed> TemperatureFiles { get; private set; }
-        [NotNull] public EnvironmentFileDictionary<SoundSpeed> SalinityFiles { get; private set; }
+        [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> TemperatureFiles { get; private set; }
+        [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> SalinityFiles { get; private set; }
 
         public EnvironmentFile<Wind> WindFile { get; private set; }
         public EnvironmentFile<BottomLoss> BottomLossFile { get; private set; }
@@ -217,15 +159,11 @@ namespace ESME.Environment.Descriptors
             AreaCollection.Clear();
             foreach (var areaFile in Directory.EnumerateFiles(AreasPath, "*.ovr"))
             {
-                var keyStartsWith = Path.GetFileNameWithoutExtension(areaFile) + "\\";
-                var fileList = new EnvironmentFileDictionary<Bathymetry>();
-                var items = Token.EnvironmentDictionary.Where(entry => entry.Key.StartsWith(keyStartsWith));
-                foreach (var item in items) fileList.Add(item.Key, (EnvironmentFile<Bathymetry>)item.Value);
                 var areaName = Path.GetFileNameWithoutExtension(areaFile);
-                _dispatcher.InvokeInBackgroundIfRequired(() => AreaCollection.Add(areaName, RangeComplexArea.Read(this, areaName, fileList, Token)));
+                _dispatcher.InvokeInBackgroundIfRequired(() => AreaCollection.Add(areaName, RangeComplexArea.Read(this, areaName)));
             }
             GeoRect = GeoRect.Union(AreaCollection.Values.Select(area => area.GeoRect).ToArray());
-            Token.GeoRect = GeoRect;
+            EnvironmentFiles.GeoRect = GeoRect;
         }
 
         #region Validation
@@ -242,7 +180,8 @@ namespace ESME.Environment.Descriptors
                 {
                     var key = Path.GetFileName(tempJob.DestinationFilename);
                     var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Temperature, tempJob.TimePeriod);
-                    Token.EnvironmentDictionary[key] = envFile;
+                    EnvironmentFiles[key] = envFile;
+                    TemperatureFiles[tempJob.TimePeriod] = envFile;
                 }
             }).ToList();
             jobs.AddRange(ValidateMonthlyData("salinity").Select(missingItem => new ImportJobDescriptor
@@ -255,12 +194,13 @@ namespace ESME.Environment.Descriptors
                 {
                     var key = Path.GetFileName(tempJob.DestinationFilename);
                     var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Salinity, tempJob.TimePeriod);
-                    Token.EnvironmentDictionary[key] = envFile;
+                    EnvironmentFiles[key] = envFile;
+                    SalinityFiles[tempJob.TimePeriod] = envFile;
                 }
             }));
 
             var windFilename = Path.Combine(DataPath, "data.wind");
-            if (Token.ReextractionRequired || (!File.Exists(windFilename)) || (new FileInfo(windFilename).LastWriteTime > Token.LastWriteTime))
+            if (EnvironmentFiles.ReextractionRequired || (!File.Exists(windFilename)) || (new FileInfo(windFilename).LastWriteTime > EnvironmentFiles.LastWriteTime))
                 jobs.Add(new ImportJobDescriptor
                 {
                     DataType = EnvironmentDataType.Wind,
@@ -270,12 +210,13 @@ namespace ESME.Environment.Descriptors
                     {
                         var key = Path.GetFileName(tempJob.DestinationFilename);
                         var envFile = new EnvironmentFile<Wind>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Wind, NAVOTimePeriod.Invalid);
-                        Token.EnvironmentDictionary[key] = envFile;
+                        EnvironmentFiles[key] = envFile;
+                        WindFile = envFile;
                     },
                 });
 
             var sedimentFilename = Path.Combine(DataPath, "data.sediment");
-            if (Token.ReextractionRequired || (!File.Exists(sedimentFilename)) || (new FileInfo(sedimentFilename).LastWriteTime > Token.LastWriteTime))
+            if (EnvironmentFiles.ReextractionRequired || (!File.Exists(sedimentFilename)) || (new FileInfo(sedimentFilename).LastWriteTime > EnvironmentFiles.LastWriteTime))
                 jobs.Add(new ImportJobDescriptor
                 {
                     DataType = EnvironmentDataType.Sediment,
@@ -285,14 +226,15 @@ namespace ESME.Environment.Descriptors
                     {
                         var key = Path.GetFileName(tempJob.DestinationFilename);
                         var envFile = new EnvironmentFile<Sediment>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Sediment, NAVOTimePeriod.Invalid);
-                        Token.EnvironmentDictionary[key] = envFile;
+                        EnvironmentFiles[key] = envFile;
+                        SedimentFile = envFile;
                     },
                 });
 
             if (Globals.AppSettings.IsNavyVersion)
             {
                 var bottomLossFilename = Path.Combine(DataPath, "data.bottomloss");
-                if (Token.ReextractionRequired || (!File.Exists(bottomLossFilename)) || (new FileInfo(bottomLossFilename).LastWriteTime > Token.LastWriteTime))
+                if (EnvironmentFiles.ReextractionRequired || (!File.Exists(bottomLossFilename)) || (new FileInfo(bottomLossFilename).LastWriteTime > EnvironmentFiles.LastWriteTime))
                     jobs.Add(new ImportJobDescriptor
                     {
                         DataType = EnvironmentDataType.BottomLoss,
@@ -302,7 +244,8 @@ namespace ESME.Environment.Descriptors
                         {
                             var key = Path.GetFileName(tempJob.DestinationFilename);
                             var envFile = new EnvironmentFile<BottomLoss>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.BottomLoss, NAVOTimePeriod.Invalid);
-                            Token.EnvironmentDictionary[key] = envFile;
+                            EnvironmentFiles[key] = envFile;
+                            BottomLossFile = envFile;
                         },
                     });
             }
@@ -313,41 +256,113 @@ namespace ESME.Environment.Descriptors
         {
             var availableMonths = Directory.EnumerateFiles(DataPath, "*." + dataFileExtension).Select(item => (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), Path.GetFileNameWithoutExtension(item), true)).ToList();
             var missingMonths = new List<NAVOTimePeriod>();
-            if (Token.ReextractionRequired) return NAVOConfiguration.AllMonths;
+            if (EnvironmentFiles.ReextractionRequired) return NAVOConfiguration.AllMonths;
             foreach (var month in NAVOConfiguration.AllMonths)
             {
                 var fileName = Path.Combine(DataPath, string.Format("{0}.{1}", month.ToString().ToLower(), dataFileExtension));
                 if (!availableMonths.Contains(month)) missingMonths.Add(month);
-                else if ((!File.Exists(fileName)) || (new FileInfo(fileName).LastWriteTime > Token.LastWriteTime))
+                else if ((!File.Exists(fileName)) || (new FileInfo(fileName).LastWriteTime > EnvironmentFiles.LastWriteTime))
                     missingMonths.Add(month);
             }
             return missingMonths.Distinct();
         }
         #endregion
 
-        internal async static Task<NewRangeComplex> CreateAsync(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, List<Geo> simAreaLimits, Dispatcher dispatcher)
+        #region public bool IsEnabled { get; private set; }
+
+        public bool IsEnabled
         {
-            var result = new NewRangeComplex(simAreaPath, rangeComplexName, dispatcher);
-            result.OpArea = RangeComplexArea.Create(result, Path.Combine(result.AreasPath, String.Format("{0}_OpArea", rangeComplexName)), opAreaLimits, result.Token);
-            result.SimArea = RangeComplexArea.Create(result, Path.Combine(result.AreasPath, String.Format("{0}_SimArea", rangeComplexName)), simAreaLimits, result.Token);
+            get { return _isEnabled; }
+            private set
+            {
+                if (_isEnabled == value) return;
+                _isEnabled = value;
+                NotifyPropertyChanged(IsEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.IsEnabled);
+        bool _isEnabled;
+
+        #endregion
+
+
+        internal static NewRangeComplex Create(string simAreaPath, string rangeComplexName, IEnumerable<Geo> opAreaLimits, IEnumerable<Geo> simAreaLimits, Dispatcher dispatcher)
+        {
+            var result = new NewRangeComplex(simAreaPath, rangeComplexName, true, dispatcher);
+            result.OpArea = result.CreateAreaPrivate(String.Format("{0}_OpArea", rangeComplexName), opAreaLimits);
+            result.SimArea = result.CreateAreaPrivate(String.Format("{0}_SimArea", rangeComplexName), simAreaLimits);
             result.UpdateAreas();
             var importJobs = result.CheckForMissingEnviromentFiles().ToList();
             foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
             NAVOImporter.Import(importJobs);
+            result.IsEnabled = true;
             return result;
         }
 
-        internal async static Task<NewRangeComplex> ReadAsync(string simAreaPath, Tuple<string, double, double, double, double, string, string> rangeComplexInfo, Action<NewRangeComplex> action, Dispatcher dispatcher)
+        internal static NewRangeComplex Load(string simAreaPath, Tuple<string, double, double, double, double, string, string> rangeComplexInfo, Dispatcher dispatcher)
         {
-            var result = new NewRangeComplex(simAreaPath, rangeComplexInfo.Item1, dispatcher);
-            action(result);
-            result.OpArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)];
-            result.SimArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item7)];
+            var result = new NewRangeComplex(simAreaPath, rangeComplexInfo.Item1, false, dispatcher);
+            try
+            {
+                result.OpArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)];
+                result.SimArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item7)];
+            }
+            catch (Exception e)
+            {
+                RangeComplexes.Singleton.DeleteRangeComplexFromDisk(result.Name);
+                throw new InvalidOperationException(string.Format("The range complex \"{0}\" is missing critical files or directories.\r\nThe range complex has been deleted", result.Name));
+            }
             result.UpdateAreas();
-            var importJobs = result.CheckForMissingEnviromentFiles().ToList();
-            foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
-            NAVOImporter.Import(importJobs);
+            NAVOImporter.Import(result.CheckForMissingEnviromentFiles());
+            foreach (var area in result.AreaCollection.Values) NAVOImporter.Import(area.ImportJobs);
+            result.IsEnabled = true;
             return result;
+        }
+
+        public RangeComplexArea CreateArea(string areaName, IEnumerable<Geo> areaLimits)
+        {
+            if (!IsEnabled) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
+            return CreateAreaPrivate(areaName, areaLimits);
+        }
+
+        RangeComplexArea CreateAreaPrivate(string areaName, IEnumerable<Geo> areaLimits)
+        {
+            if (areaName == null) throw new ArgumentNullException("areaName");
+            if (AreaCollection.ContainsKey(areaName)) throw new ArgumentException(string.Format("Area {0} already exists", areaName), "areaName");
+            var newArea = RangeComplexArea.Create(this, areaName, areaLimits);
+            AreaCollection.Add(newArea.Name, newArea); 
+            NAVOImporter.Import(newArea.ImportJobs);
+            return newArea;
+        }
+
+        public void RemoveArea(string areaName)
+        {
+            if (!IsEnabled) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
+            RemoveAreaPrivate(areaName);
+        }
+
+        public void RemoveAreaPrivate(string areaName)
+        {
+            if (areaName == null) throw new ArgumentNullException("areaName");
+            if (!AreaCollection.ContainsKey(areaName)) throw new ArgumentException(string.Format("Area {0} does not exist", areaName), "areaName");
+            AreaCollection[areaName].Remove();
+            AreaCollection.Remove(areaName);
+        }
+
+        public void Dump()
+        {
+            Debug.WriteLine("{0} Dump of range complex {1}", DateTime.Now, Name);
+            Debug.WriteLine("{0}   Environment Files", DateTime.Now);
+            foreach (var item in EnvironmentFiles) Debug.WriteLine("{0}     [{1}]  size: {2}", DateTime.Now, item.Key, item.Value.FileSize);
+            Debug.WriteLine("{0}   Areas", DateTime.Now);
+            foreach (var item in AreaCollection)
+            {
+                Debug.WriteLine("{0}     [{1}]  size: {2:0.##}km x {3:0.##}km", DateTime.Now, item.Key, item.Value.GeoRect.AverageWidthKm, item.Value.GeoRect.HeightKm);
+                Debug.WriteLine("{0}       Bathymetry", DateTime.Now);
+                foreach (var area in item.Value.BathymetryFiles) 
+                    Debug.WriteLine("{0}         [{1}]  size: {2}", DateTime.Now, area.Key, area.Value.FileSize);
+            }
         }
     }
 }

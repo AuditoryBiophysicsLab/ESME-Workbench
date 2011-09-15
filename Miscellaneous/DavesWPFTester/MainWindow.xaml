@@ -6,7 +6,14 @@
         xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder;assembly=ESME.Views" mc:Ignorable="d"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}">
   <DockPanel LastChildFill="True">
-    <GroupBox Header="Import status" Margin="5" DockPanel.Dock="Bottom"
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
+            <Button Content="Add test range complex" Command="{Binding CreateTestRangeComplexCommand}" />
+            <Button Content="Remove test range complex" Command="{Binding RemoveTestRangeComplexCommand}" />
+            <Button Content="Add test area" Command="{Binding CreateTestAreaCommand}" />
+            <Button Content="Remove test area" Command="{Binding RemoveTestAreaCommand}" />
+            <Button Content="Dump test area" Command="{Binding DumpTestAreaCommand}" />
+        </StackPanel>
+            <GroupBox Header="Import status" Margin="5" DockPanel.Dock="Bottom"
               IsEnabled="{Binding ImportProgressCollection.IsWorkInProgress, Mode=OneWay}">
       <EnvironmentBuilder:ImportProgressListView ItemsSource="{Binding ImportProgressCollection}" />
     </GroupBox>

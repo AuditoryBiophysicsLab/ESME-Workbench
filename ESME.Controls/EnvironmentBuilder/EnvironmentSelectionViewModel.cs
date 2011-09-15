@@ -17,7 +17,7 @@ namespace ESME.Views.EnvironmentBuilder
         {
             _rangeComplexes = rangeComplexes;
             RangeComplexes = _rangeComplexes.RangeComplexCollection;
-            _availableTimePeriods = new ObservableDictionary<string, NAVOTimePeriod>
+            _availableTimePeriods = new ObservableConcurrentDictionary<string, NAVOTimePeriod>
             {
                 {null, NAVOTimePeriod.Invalid},
             };
@@ -28,14 +28,14 @@ namespace ESME.Views.EnvironmentBuilder
         public ObservableConcurrentDictionary<string, NewRangeComplex> RangeComplexes { get; private set; }
 
         // A dictionary of all legal time periods, plus a null value
-        #region public ObservableDictionary<string, NAVOTimePeriod> AvailableTimePeriods { get; set; }
+        #region public ObservableConcurrentDictionary<string, NAVOTimePeriod> AvailableTimePeriods { get; set; }
 
-        public ObservableDictionary<string, NAVOTimePeriod> AvailableTimePeriods
+        public ObservableConcurrentDictionary<string, NAVOTimePeriod> AvailableTimePeriods
         {
             get { return _availableTimePeriods; }
         }
 
-        readonly ObservableDictionary<string, NAVOTimePeriod> _availableTimePeriods;
+        readonly ObservableConcurrentDictionary<string, NAVOTimePeriod> _availableTimePeriods;
 
         #endregion
 
@@ -90,7 +90,7 @@ namespace ESME.Views.EnvironmentBuilder
                 if (_selectedResolution == value) return;
                 _selectedResolution = value;
                 NotifyPropertyChanged(SelectedResolutionChangedEventArgs);
-                _bathymetryFile = _selectedResolution == null ? null : SelectedArea.BathymetryFiles[_selectedResolution];
+                _bathymetryFile = _selectedResolution == null ? null : (EnvironmentFile<Bathymetry>)SelectedArea.BathymetryFiles[_selectedResolution];
             }
         }
 

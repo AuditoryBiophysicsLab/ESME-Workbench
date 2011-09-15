@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows.Threading;
 using Cinch;
 using HRC;
 using HRC.Navigation;
-using HRC.Utility;
 using HRC.Collections;
 
 namespace ESME.Environment.Descriptors
 {
-    public class RangeComplexes
+    public class RangeComplexes : ViewModelBase, IEnumerable<KeyValuePair<string, NewRangeComplex>>, INotifyCollectionChanged
     {
         RangeComplexes()
         {
@@ -26,36 +29,48 @@ namespace ESME.Environment.Descriptors
         readonly Dispatcher _dispatcher;
         #endregion
 
-        [NotNull] public ObservableConcurrentDictionary<string, NewRangeComplex> RangeComplexCollection { get; private set; }
+        [NotNull]
+        public ObservableConcurrentDictionary<string, NewRangeComplex> RangeComplexCollection { get; private set; }
 
-        #region public string SimAreaCSVFile { get; set; }
-
-        public string SimAreaCSVFile
+        public Task ReadRangeComplexFileAsync(string fileName)
         {
-            get { return _simAreaCSVFile; }
+            IsEnabled = false;
+            _rangeComplexFile = fileName;
+            var result = InitializeAsync(_rangeComplexFile);
+            result.ContinueWith(_=> IsEnabled = true);
+            return result;
+        }
+
+        #region public bool IsEnabled { get; set; }
+
+        public bool IsEnabled
+        {
+            get { return _isEnabled; }
             set
             {
-                if (_simAreaCSVFile == value) return;
-                _simAreaCSVFile = value;
-                RangeComplexCollection.Clear();
-                if (_simAreaCSVFile != null) InitializeAsync(_simAreaCSVFile);
+                if (_isEnabled == value) return;
+                _isEnabled = value;
+                NotifyPropertyChanged(IsEnabledChangedEventArgs);
             }
         }
 
-        string _simAreaCSVFile;
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsEnabled);
+        bool _isEnabled;
 
         #endregion
 
+        string _rangeComplexFile;
+
         Task InitializeAsync(string simAreaFile)
         {
-            var ranges = new List<NewRangeComplex>();
             if (!File.Exists(simAreaFile)) throw new FileNotFoundException("Error reading sim area file", simAreaFile);
             SimAreaPath = Path.GetDirectoryName(simAreaFile);
             var actionBlock = new ActionBlock<Tuple<string, double, double, double, double, string, string>>(
-		        async info =>
+		        info => _dispatcher.InvokeInBackgroundIfRequired(() =>
 		        {
-                    var rangeComplex = await NewRangeComplex.ReadAsync(SimAreaPath, info, simArea => _dispatcher.InvokeInBackgroundIfRequired(() => RangeComplexCollection.Add(simArea.Name, simArea)), _dispatcher);     
-		        },
+		            var rangeComplex = NewRangeComplex.Load(SimAreaPath, info, _dispatcher);
+		            RangeComplexCollection.Add(rangeComplex.Name, rangeComplex);
+		        }),
 		        new ExecutionDataflowBlockOptions
 		        {
 		            TaskScheduler = TaskScheduler.Default,
@@ -101,23 +116,24 @@ namespace ESME.Environment.Descriptors
             get { return RangeComplexCollection[rangeComplexName]; }
         }
 
-        public async Task<NewRangeComplex> CreateAsync(string rangeComplexName, double height, double latitude, double longitude, double geoid, ICollection<Geo> opAreaLimits, List<Geo> simAreaLimits)
+        public NewRangeComplex CreateRangeComplex(string rangeComplexName, double height, double latitude, double longitude, double geoid, ICollection<Geo> opAreaLimits, List<Geo> simAreaLimits)
         {
             if (opAreaLimits == null) throw new ArgumentNullException("opAreaLimits");
             if (simAreaLimits == null) throw new ArgumentNullException("simAreaLimits");
             if (opAreaLimits.Count < 4) throw new ArgumentException("Must have at least four coordinates", "opAreaLimits");
             if (simAreaLimits.Count < 4) throw new ArgumentException("Must have at least four coordinates", "simAreaLimits");
 
+            if (RangeComplexCollection.ContainsKey(rangeComplexName)) throw new ApplicationException(string.Format("Range complex {0} already exists", rangeComplexName));
             var rangeComplexPath = Path.Combine(SimAreaPath, rangeComplexName);
 
-            if (Directory.Exists(rangeComplexPath) || (RangeComplexCollection.Where(complex => complex.Value.Name == rangeComplexName).Count() != 0)) throw new ApplicationException(string.Format("Range complex {0} already exists", rangeComplexName));
+            if (Directory.Exists(rangeComplexPath)) Directory.Delete(rangeComplexPath, true);
 
-            var result = await NewRangeComplex.CreateAsync(SimAreaPath, rangeComplexName, opAreaLimits, simAreaLimits, _dispatcher);
+            var result = NewRangeComplex.Create(SimAreaPath, rangeComplexName, opAreaLimits, simAreaLimits, _dispatcher);
 
             lock (_lockObject)
             {
-                var needsExtraNewline = !File.ReadAllText(SimAreaCSVFile).EndsWith("\n");
-                using (var writer = new StreamWriter(SimAreaCSVFile, true))
+                var needsExtraNewline = !File.ReadAllText(_rangeComplexFile).EndsWith("\n");
+                using (var writer = new StreamWriter(_rangeComplexFile, true))
                 {
                     if (needsExtraNewline) writer.WriteLine();
                     writer.WriteLine("{0},{1:0.0###},{2:0.0###},{3:0.0###},{4:0.0###},{5},{6}", rangeComplexName.Trim(),
@@ -129,6 +145,77 @@ namespace ESME.Environment.Descriptors
             return result;
         }
 
+        public void RemoveRangeComplex(string rangeComplexName)
+        {
+            if (rangeComplexName == null) throw new ArgumentNullException("rangeComplexName");
+            if (!RangeComplexCollection.ContainsKey(rangeComplexName)) throw new ArgumentException(string.Format("Range complex {0} does not exist", rangeComplexName), "rangeComplexName");
+            DeleteRangeComplexFromDisk(rangeComplexName);
+        }
+
+        internal void DeleteRangeComplexFromDisk(string rangeComplexName)
+        {
+            if (rangeComplexName == null) throw new ArgumentNullException("rangeComplexName");
+            lock (_lockObject)
+            {
+                var directoryPath = Path.Combine(Path.GetDirectoryName(_rangeComplexFile), rangeComplexName);
+                if (Directory.Exists(directoryPath)) Directory.Delete(directoryPath, true);
+                var simAreaCSVFileContents = File.ReadAllLines(_rangeComplexFile);
+                var oldCSVFileName = _rangeComplexFile;
+                var newCSVFileName = _rangeComplexFile + ".new";
+                using (var streamWriter = new StreamWriter(newCSVFileName))
+                    foreach (var curLine in simAreaCSVFileContents.Where(curLine => !curLine.StartsWith(rangeComplexName + ",")))
+                        streamWriter.WriteLine(curLine);
+                File.Delete(oldCSVFileName);
+                File.Move(newCSVFileName, oldCSVFileName);
+                if (RangeComplexCollection.ContainsKey(rangeComplexName)) RangeComplexCollection.Remove(rangeComplexName);
+            }
+        }
+
+        public void Dump()
+        {
+            foreach (var rangeComplex in RangeComplexCollection) rangeComplex.Value.Dump();
+        }
+
 		//public async Task<RangeComplex> AddAsync(string rangeComplexName, List<Geo> opAreaLimits, List<Geo> simAreaLimits){}
+        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+        public IEnumerator<KeyValuePair<string, NewRangeComplex>> GetEnumerator()
+        {
+            return RangeComplexCollection.GetEnumerator();
+        }
+        /// <summary>
+        ///   Event raised when the collection changes.
+        /// </summary>
+        [NonSerialized]
+        private NotifyCollectionChangedEventHandler _collectionChanged;
+        public event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            add
+            {
+                _collectionChanged = (NotifyCollectionChangedEventHandler)Delegate.Combine(_collectionChanged, value);
+            }
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            remove
+            {
+                _collectionChanged = (NotifyCollectionChangedEventHandler)Delegate.Remove(_collectionChanged, value);
+            }
+        }
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            //if (Name != null) Debug.WriteLine("{0} {1} [{2}]", DateTime.Now, Name, e.Action);
+            var handlers = _collectionChanged;
+            if (handlers == null) return;
+            foreach (NotifyCollectionChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                var localHandler = handler;
+                try
+                {
+                    if (handler.Target is DispatcherObject) ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => localHandler(this, e));
+                    else handler(this, e);
+                }
+                catch (Exception) { }
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Collections.Generic;
@@ -14,15 +15,56 @@ namespace ESME.Views.EnvironmentBuilder
     {
         readonly NewRangeComplex _rangeComplex;
         readonly List<RangeComplexTreeItem> _treeItems = new List<RangeComplexTreeItem>();
+        bool _once = true;
         public RangeComplexTreeViewModel(NewRangeComplex rangeComplex) 
         {
             _rangeComplex = rangeComplex;
-            Children.Add(new RangeComplexTreeItem { Name = "Areas" });
-            Children.Add(new RangeComplexTreeItem { Name = "Environment" });
-            this["Environment"].Children.Add(new RangeComplexTreeItem { Name = "Salinity" });
-            this["Environment"].Children.Add(new RangeComplexTreeItem { Name = "Temperature" });
-            _rangeComplex.EnvironmentFileCollection.CollectionChanged += EnvironmentFileCollectionChanged;
-            AddEnvironmentFiles(_rangeComplex.EnvironmentFileCollection);
+            ResetTree();
+            _rangeComplex.EnvironmentFiles.CollectionChanged += EnvironmentFileCollectionChanged;
+            _rangeComplex.AreaCollection.CollectionChanged += (s, e) =>
+            {
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        foreach (KeyValuePair<string, RangeComplexArea> newItem in e.NewItems)
+                        {
+                            newItem.Value.BathymetryFiles.CollectionChanged += EnvironmentFileCollectionChanged;
+                            AddEnvironmentFiles(newItem.Value.BathymetryFiles);
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        foreach (KeyValuePair<string, RangeComplexArea> oldItem in e.OldItems)
+                        {
+                            oldItem.Value.BathymetryFiles.CollectionChanged -= EnvironmentFileCollectionChanged;
+                            this["Areas"].Children.RemoveAll(area => area.Name == oldItem.Key);
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Replace:
+                        foreach (KeyValuePair<string, RangeComplexArea> oldItem in e.OldItems)
+                        {
+                            oldItem.Value.BathymetryFiles.CollectionChanged -= EnvironmentFileCollectionChanged;
+                            this["Areas"].Children.RemoveAll(area => area.Name == oldItem.Key);
+                        }
+                        foreach (KeyValuePair<string, RangeComplexArea> newItem in e.NewItems)
+                        {
+                            newItem.Value.BathymetryFiles.CollectionChanged += EnvironmentFileCollectionChanged;
+                            AddEnvironmentFiles(newItem.Value.BathymetryFiles);
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Reset:
+                        ResetTree();
+                        break;
+                }
+            };
+        }
+
+        void ResetTree()
+        {
+            if (!_once) Debugger.Break();
+            _once = true;
+            Children.Clear();
+            AddEnvironmentFiles(_rangeComplex.EnvironmentFiles);
+            foreach (var area in _rangeComplex.AreaCollection) AddEnvironmentFiles(area.Value.BathymetryFiles);
         }
 
         void EnvironmentFileCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -30,36 +72,43 @@ namespace ESME.Views.EnvironmentBuilder
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (EnvironmentFile item in e.NewItems) AddEnvironmentFile(item);
+                    foreach (KeyValuePair<string, EnvironmentFile> newItem in e.NewItems) AddEnvironmentFile(newItem.Value);
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    foreach (EnvironmentFile oldItem in e.OldItems)
+                    foreach (KeyValuePair<string, EnvironmentFile> oldItem in e.OldItems)
                     {
-                        var oldTreeItem = _treeItems.Where(item => item.EnvironmentFile == oldItem).Single();
+                        var oldTreeItem = _treeItems.Where(item => item.EnvironmentFile == oldItem.Value).Single();
                         if (oldTreeItem.Parent != null) oldTreeItem.Parent.Children.Remove(oldTreeItem);
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
-                    foreach (EnvironmentFile oldItem in e.OldItems)
+                    foreach (KeyValuePair<string, EnvironmentFile> oldItem in e.OldItems)
                     {
-                        var oldTreeItem = _treeItems.Where(item => item.EnvironmentFile == oldItem).Single();
-                        if (oldTreeItem.Parent != null)
-                        {
-                            var parent = oldTreeItem.Parent;
-                            var siblings = parent.Children;
-                            throw new NotImplementedException();
-                        }
+                        var oldTreeItem = _treeItems.Where(item => item.EnvironmentFile == oldItem.Value).Single();
+                        if (oldTreeItem.Parent != null) oldTreeItem.Parent.Children.Remove(oldTreeItem);
                     }
+                    foreach (KeyValuePair<string, EnvironmentFile> newItem in e.NewItems) AddEnvironmentFile(newItem.Value);
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     throw new NotImplementedException();
-                    break;
             }
         }
 
-        void AddEnvironmentFiles(IEnumerable<EnvironmentFile> fileCollection) { foreach (var envFile in fileCollection) AddEnvironmentFile(envFile); }
+        void AddEnvironmentFiles(IEnumerable<KeyValuePair<string, EnvironmentFile>> envFiles)
+        {
+            foreach (var envFile in envFiles) AddEnvironmentFile(envFile.Value);
+        }
+
         void AddEnvironmentFile(EnvironmentFile envFile)
         {
+            if (Children.Where(item => item.Name == "Areas").Count() == 0) Children.Add(new RangeComplexTreeItem { Name = "Areas" });
+            if (Children.Where(item => item.Name == "Environment").Count() == 0)
+            {
+                Children.Add(new RangeComplexTreeItem { Name = "Environment" });
+                this["Environment"].Children.Add(new RangeComplexTreeItem { Name = "Salinity" });
+                this["Environment"].Children.Add(new RangeComplexTreeItem { Name = "Temperature" });
+            }
+
             RangeComplexTreeItem newItem;
             switch (envFile.DataType)
             {

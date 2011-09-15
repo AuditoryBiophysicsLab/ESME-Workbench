@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -8,6 +9,7 @@ using System.Windows.Data;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
+using HRC.Collections;
 
 namespace HRC.Utility
 {
@@ -15,6 +17,36 @@ namespace HRC.Utility
     public class ObservableList<T> : List<T>, ICollection<T>, INotifyCollectionChanged, INotifyPropertyChanged, IDeserializationCallback
     {
         object _lockObject = new object();
+
+        public static ObservableList<T> FromObservableConcurrentDictionary<TKey, TValue>(ObservableConcurrentDictionary<TKey, TValue> dict, Func<KeyValuePair<TKey, TValue>, T> convert, Func<KeyValuePair<TKey, TValue>, T, bool> compare)
+        {
+            var list = new ObservableList<T>();
+            ((INotifyCollectionChanged)dict).CollectionChanged += (s, e) =>
+            {
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        foreach (KeyValuePair<TKey, TValue> newItem in e.NewItems) list.Add(convert(newItem));
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+                        foreach (KeyValuePair<TKey, TValue> oldItem in e.OldItems) list.RemoveAll(listItem => compare(oldItem, listItem));
+                        break;
+                    case NotifyCollectionChangedAction.Replace:
+                        for (var i = 0; i < e.OldItems.Count; i++)
+                        {
+                            var oldItem = (KeyValuePair<TKey, TValue>)e.OldItems[i];
+                            var newItem = (KeyValuePair<TKey, TValue>)e.NewItems[i];
+                            list[list.IndexOf(list.Where(listItem => compare(oldItem, listItem)).Single())] = convert(newItem);
+                        }
+                        break;
+                    case NotifyCollectionChangedAction.Reset:
+                        foreach (KeyValuePair<TKey, TValue> item in dict) list.Add(convert(item));
+                        break;
+                }
+            };
+            foreach (KeyValuePair<TKey, TValue> item in dict) list.Add(convert(item));
+            return list;
+        }
 
         public string Name { get; set; }
 
