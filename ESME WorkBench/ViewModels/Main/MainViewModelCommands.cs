@@ -524,7 +524,6 @@ namespace ESMEWorkBench.ViewModels.Main
         #endregion
 
         #region CreateMMMBSBathymetryFileCommand
-#if EXPERIMENTS_SUPPORTED
 
         public SimpleCommand<object, object> CreateMMMBSBathymetryFileCommand
         {
@@ -532,13 +531,13 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 return _createMMMBSBathymetryFileCommand ??
                        (_createMMMBSBathymetryFileCommand =
-                        new SimpleCommand<object, object>(obj => ((_experiment != null) && (_experiment.Bathymetry != null)),
+                        new SimpleCommand<object, object>(obj => false&&(IsScenarioLoaded),
                                                           obj => MediatorMessage.Send(MediatorMessage.CreateMMMBSBathymetryFileCommand)));
             }
         }
 
         SimpleCommand<object, object> _createMMMBSBathymetryFileCommand;
-#endif
+
         #endregion
 
         #region RunExperimentCommand

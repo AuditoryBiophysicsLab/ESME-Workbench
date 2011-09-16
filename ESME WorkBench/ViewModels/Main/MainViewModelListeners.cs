@@ -30,7 +30,8 @@ namespace ESMEWorkBench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.CreateMMMBSBathymetryFileCommand)]
         void CreateMMMBSBathymetryFile(bool dummy)
         {
-            if ((_experiment == null) || (_experiment.Bathymetry == null)) return;
+            
+//            if ((_experiment == null) || (_experiment.Bathymetry == null)) return;
             _saveFileService.Filter = "MMMBS bathymetry files (*.bth)|*.bth|All files (*.*)|*.*";
             _saveFileService.OverwritePrompt = true;
             _saveFileService.InitialDirectory = Settings.Default.LastBathymetryFileDirectory;
@@ -38,7 +39,9 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _saveFileService.ShowDialog((Window)_viewAwareStatus.View);
             if ((!result.HasValue) || (!result.Value)) return;
             Settings.Default.LastBathymetryFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
-            _experiment.Bathymetry.ToYXZ(_saveFileService.FileName, 1);
+            //_experiment.Bathymetry.ToYXZ(_saveFileService.FileName, 1);
+            //_selectedBathymetryDescriptor.Data.ToYXZ(_saveFileService.FileName,1);
+            
         }
 
         [MediatorMessageSink(MediatorMessage.AddAnimatPopulationFileCommand)]
