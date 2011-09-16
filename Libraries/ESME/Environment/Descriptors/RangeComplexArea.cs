@@ -24,7 +24,7 @@ namespace ESME.Environment.Descriptors
             GeoRect = new GeoRect(overlayShape.BoundingBox);
             BathymetryPath = Path.Combine(_rangeComplex.DataPath, Name);
             BathymetryFiles = RangeComplexToken.Load(Path.Combine(BathymetryPath, Name + ".token"));
-            BathymetryList = BathymetryFiles.GetObservableWrapper<EnvironmentFile<Bathymetry>>();
+            BathymetryList = BathymetryFiles.GetObservableWrapper<BathymetryFile>();
             Directory.CreateDirectory(BathymetryPath);
             ImportJobs = new List<ImportJobDescriptor>();
             UpdateAvailableBathymetry();
@@ -43,7 +43,12 @@ namespace ESME.Environment.Descriptors
                 var west = Math.Round(GeoRect.West * samplesPerDegree) / samplesPerDegree;
                 var width = east - west;
                 var height = north - south;
-                var isDataAvailable = File.Exists(Path.Combine(BathymetryPath, resolutionString + ".bathymetry"));
+                var fileName = Path.Combine(BathymetryPath, resolutionString + ".bathymetry");
+                if (File.Exists(fileName))
+                {
+                    var info = new FileInfo(fileName);
+                }
+                var isDataAvailable = File.Exists(fileName);
                 var sampleCount = (uint)Math.Round(width * samplesPerDegree * height * samplesPerDegree);
                 if ((isDataAvailable) || (sampleCount >= 512000)) continue;
                 var bathymetryFilename = Path.Combine(BathymetryPath, string.Format("{0:0.00}min.bathymetry", resolution));
@@ -58,7 +63,7 @@ namespace ESME.Environment.Descriptors
                         var jobResolution = string.Format("{0:0.00}min", bathyJob.Resolution);
                         var bathymetryKey = Path.Combine(Name, jobResolution);
                         var bathymetryFile = bathymetryKey + ".bathymetry";
-                        BathymetryFiles[bathymetryKey] = new EnvironmentFile<Bathymetry>(_rangeComplex.DataPath, bathymetryFile, bathyJob.SampleCount, bathyJob.GeoRect, EnvironmentDataType.Bathymetry, NAVOTimePeriod.Invalid);
+                        BathymetryFiles[bathymetryKey] = new BathymetryFile(_rangeComplex.DataPath, bathymetryFile, bathyJob.SampleCount, bathyJob.GeoRect, EnvironmentDataType.Bathymetry, NAVOTimePeriod.Invalid, true);
                     },
                 });
             }
@@ -115,17 +120,17 @@ namespace ESME.Environment.Descriptors
 
         public Bathymetry this[string resolutionString]
         {
-            get { return ((EnvironmentFile<Bathymetry>)BathymetryFiles[resolutionString]).Data; }
+            get { return ((BathymetryFile)BathymetryFiles[resolutionString]).Data; }
         }
 
         public Task<Bathymetry> GetDataAsync(string resolutionString)
         {
-            return ((EnvironmentFile<Bathymetry>)BathymetryFiles[resolutionString]).AsyncData;
+            return ((BathymetryFile)BathymetryFiles[resolutionString]).AsyncData;
         }
 
         public List<ImportJobDescriptor> ImportJobs { get; private set; }
 
-        [NotNull] public ObservableList<EnvironmentFile<Bathymetry>> BathymetryList { get; private set; }
+        [NotNull] public ObservableList<BathymetryFile> BathymetryList { get; private set; }
 
         [NotNull] public string Name { get; private set; }
         [NotNull] public string BathymetryPath { get; private set; }

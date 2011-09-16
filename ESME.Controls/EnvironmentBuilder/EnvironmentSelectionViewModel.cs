@@ -90,7 +90,7 @@ namespace ESME.Views.EnvironmentBuilder
                 if (_selectedResolution == value) return;
                 _selectedResolution = value;
                 NotifyPropertyChanged(SelectedResolutionChangedEventArgs);
-                _bathymetryFile = _selectedResolution == null ? null : (EnvironmentFile<Bathymetry>)SelectedArea.BathymetryFiles[_selectedResolution];
+                _bathymetryFile = _selectedResolution == null ? null : (BathymetryFile)SelectedArea.BathymetryFiles[_selectedResolution];
             }
         }
 
@@ -179,9 +179,9 @@ namespace ESME.Views.EnvironmentBuilder
                 _temperatureFiles = (from temperatureFile in SelectedRangeComplex.TemperatureFiles.Values
                                      where _selectedMonths.Contains(temperatureFile.TimePeriod)
                                      select temperatureFile).ToDictionary(item => item.TimePeriod);
-                _salinityFiles = (from temperatureFile in SelectedRangeComplex.TemperatureFiles.Values
-                                  where _selectedMonths.Contains(temperatureFile.TimePeriod)
-                                  select temperatureFile).ToDictionary(item => item.TimePeriod);
+                _salinityFiles = (from salinityFile in SelectedRangeComplex.SalinityFiles.Values
+                                  where _selectedMonths.Contains(salinityFile.TimePeriod)
+                                  select salinityFile).ToDictionary(item => item.TimePeriod);
             }
         }
 
@@ -190,9 +190,9 @@ namespace ESME.Views.EnvironmentBuilder
 
         #endregion
 
-        EnvironmentFile<Bathymetry> _bathymetryFile;
-        Dictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> _temperatureFiles;
-        Dictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> _salinityFiles;
+        BathymetryFile _bathymetryFile;
+        Dictionary<NAVOTimePeriod, TemperatureFile> _temperatureFiles;
+        Dictionary<NAVOTimePeriod, SalinityFile> _salinityFiles;
 
         public Bathymetry Bathymetry { get { return _bathymetryFile.Data; } }
         public Wind Wind { get { return SelectedRangeComplex.WindFile.Data; } }

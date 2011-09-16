@@ -50,8 +50,8 @@ namespace ESME.Environment.Descriptors
             Directory.CreateDirectory(SpeciesPath);
             Directory.CreateDirectory(Path.Combine(RangeComplexPath, "GeographicAreas"));
 
-            TemperatureFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>>();
-            SalinityFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>>();
+            TemperatureFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, TemperatureFile>();
+            SalinityFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, SalinityFile>();
             EnvironmentFiles = RangeComplexToken.Load(Path.Combine(DataPath, Name + ".token"));
             _dispatcher.InvokeIfRequired(() =>
             {
@@ -69,21 +69,21 @@ namespace ESME.Environment.Descriptors
                     case EnvironmentDataType.Bathymetry:
                         throw new NotImplementedException();
                     case EnvironmentDataType.BottomLoss:
-                        BottomLossFile = (EnvironmentFile<BottomLoss>)envFile.Value;
+                        BottomLossFile = (BottomLossFile)envFile.Value;
                         break;
                     case EnvironmentDataType.Salinity:
-                        var salinityFile = (EnvironmentFile<SoundSpeed>)envFile.Value;
+                        var salinityFile = (SalinityFile)envFile.Value;
                         SalinityFiles.Add(salinityFile.TimePeriod, salinityFile);
                         break;
                     case EnvironmentDataType.Sediment:
-                        SedimentFile = (EnvironmentFile<Sediment>)envFile.Value;
+                        SedimentFile = (SedimentFile)envFile.Value;
                         break;
                     case EnvironmentDataType.Temperature:
-                        var temperatureFile = (EnvironmentFile<SoundSpeed>)envFile.Value;
-                        SalinityFiles.Add(temperatureFile.TimePeriod, temperatureFile);
+                        var temperatureFile = (TemperatureFile)envFile.Value;
+                        TemperatureFiles.Add(temperatureFile.TimePeriod, temperatureFile);
                         break;
                     case EnvironmentDataType.Wind:
-                        WindFile = (EnvironmentFile<Wind>)envFile.Value;
+                        WindFile = (WindFile)envFile.Value;
                         break;
                 }                
             }
@@ -104,15 +104,15 @@ namespace ESME.Environment.Descriptors
         [NotNull] public RangeComplexArea OpArea { get; private set; }
         [NotNull] public RangeComplexArea SimArea { get; private set; }
 
-        [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> TemperatureFiles { get; private set; }
-        [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> SalinityFiles { get; private set; }
+        [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, TemperatureFile> TemperatureFiles { get; private set; }
+        [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, SalinityFile> SalinityFiles { get; private set; }
         [NotNull] public ObservableConcurrentDictionary<string, RangeComplexArea> AreaCollection { get; private set; }
         [NotNull] public ObservableList<RangeComplexArea> AreaList { get; private set; }
         [NotNull] public ObservableList<EnvironmentFile> EnvironmentList { get; private set; }
 
-        public EnvironmentFile<Wind> WindFile { get; private set; }
-        public EnvironmentFile<BottomLoss> BottomLossFile { get; private set; }
-        public EnvironmentFile<Sediment> SedimentFile { get; private set; }
+        public WindFile WindFile { get; private set; }
+        public BottomLossFile BottomLossFile { get; private set; }
+        public SedimentFile SedimentFile { get; private set; }
 
         public RangeComplexArea this[string areaName] { get { return AreaCollection[areaName]; } }
 
@@ -187,7 +187,7 @@ namespace ESME.Environment.Descriptors
                 CompletionAction = tempJob =>
                 {
                     var key = Path.GetFileName(tempJob.DestinationFilename);
-                    var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Temperature, tempJob.TimePeriod);
+                    var envFile = new TemperatureFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Temperature, tempJob.TimePeriod);
                     EnvironmentFiles[key] = envFile;
                     TemperatureFiles[tempJob.TimePeriod] = envFile;
                 }
@@ -201,7 +201,7 @@ namespace ESME.Environment.Descriptors
                 CompletionAction = tempJob =>
                 {
                     var key = Path.GetFileName(tempJob.DestinationFilename);
-                    var envFile = new EnvironmentFile<SoundSpeed>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Salinity, tempJob.TimePeriod);
+                    var envFile = new SalinityFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Salinity, tempJob.TimePeriod);
                     EnvironmentFiles[key] = envFile;
                     SalinityFiles[tempJob.TimePeriod] = envFile;
                 }
@@ -217,7 +217,7 @@ namespace ESME.Environment.Descriptors
                     CompletionAction = tempJob =>
                     {
                         var key = Path.GetFileName(tempJob.DestinationFilename);
-                        var envFile = new EnvironmentFile<Wind>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Wind, NAVOTimePeriod.Invalid);
+                        var envFile = new WindFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Wind, NAVOTimePeriod.Invalid);
                         EnvironmentFiles[key] = envFile;
                         WindFile = envFile;
                     },
@@ -233,7 +233,7 @@ namespace ESME.Environment.Descriptors
                     CompletionAction = tempJob =>
                     {
                         var key = Path.GetFileName(tempJob.DestinationFilename);
-                        var envFile = new EnvironmentFile<Sediment>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Sediment, NAVOTimePeriod.Invalid);
+                        var envFile = new SedimentFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Sediment, NAVOTimePeriod.Invalid);
                         EnvironmentFiles[key] = envFile;
                         SedimentFile = envFile;
                     },
@@ -251,7 +251,7 @@ namespace ESME.Environment.Descriptors
                         CompletionAction = tempJob =>
                         {
                             var key = Path.GetFileName(tempJob.DestinationFilename);
-                            var envFile = new EnvironmentFile<BottomLoss>(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.BottomLoss, NAVOTimePeriod.Invalid);
+                            var envFile = new BottomLossFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.BottomLoss, NAVOTimePeriod.Invalid);
                             EnvironmentFiles[key] = envFile;
                             BottomLossFile = envFile;
                         },

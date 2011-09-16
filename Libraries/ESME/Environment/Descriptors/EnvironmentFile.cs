@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
@@ -6,13 +7,12 @@ using System.Threading.Tasks;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.NAVO;
-using HRC.Collections;
 using HRC.Navigation;
 
 namespace ESME.Environment.Descriptors
 {
     [Serializable]
-    public class EnvironmentFile
+    public class EnvironmentFile : INotifyPropertyChanged
     {
         public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
         {
@@ -101,17 +101,38 @@ namespace ESME.Environment.Descriptors
             }
         }
         #endregion
-    }
 
+        #region INotifyPropertyChanged Members
 
-    public enum EnvironmentDataType
-    {
-        Temperature,
-        Salinity,
-        Sediment,
-        Wind,
-        Bathymetry,
-        BottomLoss,
+        [NonSerialized]
+        private PropertyChangedEventHandler _propertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged
+        {
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            add
+            {
+                _propertyChanged = (PropertyChangedEventHandler)Delegate.Combine(_propertyChanged, value);
+            }
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            remove
+            {
+                _propertyChanged = (PropertyChangedEventHandler)Delegate.Remove(_propertyChanged, value);
+            }
+        }
+        protected void NotifyPropertyChanged(PropertyChangedEventArgs e)
+        {
+            var handlers = _propertyChanged;
+            if (handlers == null) return;
+            foreach (PropertyChangedEventHandler handler in handlers.GetInvocationList())
+            {
+                if (handler.Target is DispatcherObject)
+                    ((DispatcherObject)handler.Target).Dispatcher.InvokeIfRequired(() => handler(this, e));
+                else
+                    handler(this, e);
+            }
+        }
+
+        #endregion
     }
 
     [Serializable]
@@ -152,6 +173,60 @@ namespace ESME.Environment.Descriptors
 
     }
 
+    [Serializable]
+    public class TemperatureFile : EnvironmentFile<SoundSpeed>
+    {
+        public TemperatureFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+    }
+
+    [Serializable]
+    public class SalinityFile : EnvironmentFile<SoundSpeed>
+    {
+        public SalinityFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+    }
+
+    [Serializable]
+    public class SedimentFile : EnvironmentFile<Sediment>
+    {
+        public SedimentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+    }
+
+    [Serializable]
+    public class WindFile : EnvironmentFile<Wind>
+    {
+        public WindFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+    }
+
+    [Serializable]
+    public class BathymetryFile : EnvironmentFile<Bathymetry>
+    {
+        public BathymetryFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, bool isCached)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { IsCached = isCached; }
+
+        public bool IsCached { get; private set; }
+    }
+
+    [Serializable]
+    public class BottomLossFile : EnvironmentFile<BottomLoss>
+    {
+        public BottomLossFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+    }
+
+    public enum EnvironmentDataType
+    {
+        Temperature,
+        Salinity,
+        Sediment,
+        Wind,
+        Bathymetry,
+        BottomLoss,
+    }
+
     public class DataAvailabilityChangedEventArgs : EventArgs
     {
         public DataAvailabilityChangedEventArgs(DataAvailability dataAvailability) { DataAvailability = dataAvailability; }
@@ -164,6 +239,4 @@ namespace ESME.Environment.Descriptors
         Loading,
         Available
     }
-
-    public class EnvironmentFileDictionary<T> : ObservableConcurrentDictionary<string, EnvironmentFile<T>> where T : class { }
 }
