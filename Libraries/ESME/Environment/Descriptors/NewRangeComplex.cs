@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.NAVO;
@@ -175,6 +176,8 @@ namespace ESME.Environment.Descriptors
 
         IEnumerable<ImportJobDescriptor> CheckForMissingEnviromentFiles()
         {
+            //var test = new Task<EnvironmentFile<SoundSpeed>>()
+
             var jobs = ValidateMonthlyData("temperature").Select(missingItem => new ImportJobDescriptor
             {
                 DataType = EnvironmentDataType.Temperature,

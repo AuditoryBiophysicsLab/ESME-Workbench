@@ -11,28 +11,27 @@
       <Style.Triggers>
         <DataTrigger Binding="{Binding Path=IsFaulted}" Value="True">
           <Setter Property="Foreground" Value="Red" />
+          <Setter Property="Background" Value="Red" />
         </DataTrigger>
       </Style.Triggers>
     </Style>
   </ListView.Resources>
   <ListView.ItemTemplate>
     <DataTemplate>
-      <Grid VerticalAlignment="Center" Height="22" ToolTipService.ShowDuration="60000"
-            ToolTip="{Binding ToolTip}">
+      <Grid VerticalAlignment="Center" Height="16" ToolTipService.ShowDuration="60000" ToolTip="{Binding ToolTip}">
         <Grid.ColumnDefinitions>
           <ColumnDefinition SharedSizeGroup="Name" />
-          <ColumnDefinition Width="*" MinWidth="200" />
+          <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0" TextAlignment="Right" Margin="0 0 5 0" FontWeight="Bold">
+        <TextBlock Grid.Column="0" TextAlignment="Right" FontWeight="Bold">
           <Run Text="{Binding Name, Mode=OneWay}" />
           <Run Text=": " />
         </TextBlock>
-        <TextBlock Grid.Column="1" TextAlignment="Left" Text="Idle" Margin="5 0 0 0"
+        <TextBlock Grid.Column="1" TextAlignment="Left" Text="Idle" 
                    Visibility="{Binding IsWorkInProgress, Converter={StaticResource FalseVisibleTrueCollapsed}, Mode=OneWay}" />
-        <Grid Grid.Column="1" Margin="5 0 0 0"
-              Visibility="{Binding IsWorkInProgress, Converter={StaticResource TrueVisibleFalseCollapsed}, Mode=OneWay}">
+        <Grid Grid.Column="1" Visibility="{Binding IsWorkInProgress, Converter={StaticResource TrueVisibleFalseCollapsed}, Mode=OneWay}" Margin="0 0 5 0">
           <ProgressBar Maximum="{Binding Submitted, Mode=OneWay}" Value="{Binding Completed, Mode=OneWay}" />
-          <TextBlock TextAlignment="Center" Text="{Binding Status, Mode=OneWay}" Margin="10 1 0 1"
+          <TextBlock TextAlignment="Center" Text="{Binding Status, Mode=OneWay}"
                      Visibility="{Binding IsWorkInProgress, Converter={StaticResource TrueVisibleFalseCollapsed}, Mode=OneWay}" />
         </Grid>
       </Grid>

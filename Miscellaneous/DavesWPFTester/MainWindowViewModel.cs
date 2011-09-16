@@ -123,26 +123,20 @@ namespace DavesWPFTester
         }
         #endregion
 
-        #region ThrashTestAreasCommand
-        SimpleCommand<object, object> _thrashTestAreas;
+        #region CreateManyAreasCommand
+        SimpleCommand<object, object> _createManyAreas;
 
-        public SimpleCommand<object, object> ThrashTestAreasCommand
+        public SimpleCommand<object, object> CreateManyAreasCommand
         {
             get
             {
-                return _thrashTestAreas ??
-                       (_thrashTestAreas =
-                        new SimpleCommand<object, object>(delegate { return IsThrashTestAreasCommandEnabled; },
-                                                          delegate { ThrashTestAreasHandler(); }));
+                return _createManyAreas ??
+                       (_createManyAreas =
+                        new SimpleCommand<object, object>(delegate { CreateManyAreasHandler(); }));
             }
         }
 
-        bool IsThrashTestAreasCommandEnabled
-        {
-            get { return true; }
-        }
-
-        async void ThrashTestAreasHandler()
+        async void CreateManyAreasHandler()
         {
             var coordinates = new List<Geo>
                 {
@@ -160,11 +154,7 @@ namespace DavesWPFTester
                 {
                     while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
                     RangeComplexes.RangeComplexCollection[string.Format("Test{0}", i)].CreateArea(string.Format("Test{0}", i), coordinates);
-                }
-                catch (Exception e)
-                {
-                    _messageBoxService.ShowError(e.Message);
-                }
+                } catch {}
             }
         }
         #endregion

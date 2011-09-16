@@ -352,6 +352,7 @@ namespace ESME.Environment
                     ToolTip = "";
                     foreach (var ex in _importer.Completion.Exception.InnerExceptions)
                         ToolTip += FormatExceptionMessage(ex, 0) + "\r\n";
+                    ToolTip.Remove(ToolTip.Length - 2, 2);
                     ToolTip.Trim();
                 }
             });
@@ -400,11 +401,9 @@ namespace ESME.Environment
 
         void UpdateStatus()
         {
-            if (!IsFaulted)
-            {
-                Status = string.Format("{0}/{1} complete, {2} running", Completed, Submitted, Running);
-                ToolTip = Status;
-            }
+            if (IsFaulted) return;
+            Status = IsWorkInProgress ? string.Format("{0:0}%", ((float)Completed / Submitted) * 100) : "";
+            ToolTip = string.Format("{0} jobs completed\r\n{1} jobs in queue\r\n{2} jobs running", Completed, Submitted - Completed, Running);
         }
 
         #region public string ToolTip { get; set; }
