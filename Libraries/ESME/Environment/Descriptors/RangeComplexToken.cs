@@ -80,7 +80,7 @@ namespace ESME.Environment.Descriptors
 
         public EnvironmentFile this[string key]
         {
-            get { return EnvironmentDictionary[key]; }
+            get { return !EnvironmentDictionary.ContainsKey(key) ? null : EnvironmentDictionary[key]; }
             set { EnvironmentDictionary[key] = value; }
         }
 

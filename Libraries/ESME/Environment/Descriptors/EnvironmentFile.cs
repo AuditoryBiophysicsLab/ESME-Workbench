@@ -18,21 +18,24 @@ namespace ESME.Environment.Descriptors
         {
             DataPath = dataPath;
             FileName = fileName;
-            var info = new FileInfo(Path.Combine(dataPath, fileName));
-            FileSize = info.Length;
-            LastWriteTime = info.LastWriteTime;
+            var filePath = Path.Combine(dataPath, fileName);
+            if (File.Exists(filePath))
+            {
+                var info = new FileInfo(filePath);
+                FileSize = info.Length;
+                LastWriteTime = info.LastWriteTime;
+            }
             SampleCount = sampleCount;
             GeoRect = geoRect;
             DataType = dataType;
             TimePeriod = timePeriod;
         }
 
-        public string DataPath
-        {
-            get { return _dataPath; }
-            set { _dataPath = value; }
-        }
+        public string DataPath { get { return _dataPath; } set { _dataPath = value; } }
         [NonSerialized] string _dataPath;
+
+        public string Name { get { return _name ?? (_name = Path.GetFileNameWithoutExtension(FileName)); } }
+        [NonSerialized] string _name;
 
         public bool IsValid
         {

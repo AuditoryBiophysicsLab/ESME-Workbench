@@ -10,16 +10,6 @@
     <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter" />
 
     <!-- ================================================================================================================================================== -->
-    <!-- Basic EnvironmentFile                                                                                                                              -->
-    <!-- ================================================================================================================================================== -->
-    <HierarchicalDataTemplate DataType="{x:Type Descriptors:EnvironmentFile}">
-      <TreeViewItem Header="{Binding FileName}" Margin="-20 0 0 0">
-        <!-- <TreeViewItem Header="{Binding FileSize, Converter={wpf:Lambda 't=>string.Format(&quot;File size: {0:#,#} bytes&quot;,t)'}}" /> -->
-        <TreeViewItem Header="{Binding FileSize}" />
-      </TreeViewItem>
-    </HierarchicalDataTemplate>
-
-    <!-- ================================================================================================================================================== -->
     <!-- RangeComplexArea                                                                                                                                   -->
     <!-- ================================================================================================================================================== -->
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:RangeComplexArea}">
@@ -27,6 +17,14 @@
         <TreeViewItem Header="Resolutions"
                       ItemsSource="{Binding BathymetryList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
       </TreeViewItem>
+    </HierarchicalDataTemplate>
+    <HierarchicalDataTemplate DataType="{x:Type Descriptors:BathymetryFile}">
+      <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0">
+        <!-- <TreeViewItem Header="{Binding FileSize, Converter={wpf:Lambda 't=>string.Format(&quot;File size: {0:#,#} bytes&quot;,t)'}}" /> -->
+                <TreeViewItem Header="{Binding IsCached}" />
+                <TreeViewItem Header="{Binding SampleCount}" />
+                <TreeViewItem Header="{Binding FileSize}" />
+            </TreeViewItem>
     </HierarchicalDataTemplate>
 
     <!-- ================================================================================================================================================== -->
@@ -41,5 +39,16 @@
                       ItemsSource="{Binding EnvironmentList, Converter={StaticResource SortConverter}, ConverterParameter='FileName'}" />
       </TreeViewItem>
     </HierarchicalDataTemplate>
+    
+    <!-- ================================================================================================================================================== -->
+    <!-- Basic EnvironmentFile                                                                                                                              -->
+    <!-- ================================================================================================================================================== -->
+    <HierarchicalDataTemplate DataType="{x:Type Descriptors:EnvironmentFile}">
+      <TreeViewItem Header="{Binding FileName}" Margin="-20 0 0 0">
+        <!-- <TreeViewItem Header="{Binding FileSize, Converter={wpf:Lambda 't=>string.Format(&quot;File size: {0:#,#} bytes&quot;,t)'}}" /> -->
+        <TreeViewItem Header="{Binding FileSize}" />
+      </TreeViewItem>
+    </HierarchicalDataTemplate>
+
   </TreeView.Resources>
 </TreeView>

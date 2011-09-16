@@ -44,28 +44,33 @@ namespace ESME.Environment.Descriptors
                 var width = east - west;
                 var height = north - south;
                 var fileName = Path.Combine(BathymetryPath, resolutionString + ".bathymetry");
-                if (File.Exists(fileName))
-                {
-                    var info = new FileInfo(fileName);
-                }
-                var isDataAvailable = File.Exists(fileName);
+                var fileKey = Path.GetFileNameWithoutExtension(fileName);
+                var fileInfo = File.Exists(fileName) ? new FileInfo(fileName) : null;
                 var sampleCount = (uint)Math.Round(width * samplesPerDegree * height * samplesPerDegree);
-                if ((isDataAvailable) || (sampleCount >= 512000)) continue;
-                var bathymetryFilename = Path.Combine(BathymetryPath, string.Format("{0:0.00}min.bathymetry", resolution));
-                ImportJobs.Add(new ImportJobDescriptor
-                {
-                    DataType = EnvironmentDataType.Bathymetry,
-                    GeoRect = GeoRect,
-                    DestinationFilename = bathymetryFilename,
-                    Resolution = resolution,
-                    CompletionAction = bathyJob =>
+
+                // If the file does not exist, or it's newer than the token, or it's not in the token's list of files, 
+                // or it's length is different from the one stored in the token, or it's last write time is different from the one sorted in the token.
+                // If any of these things are true, we want to re-extract the file from the database
+                if (((fileInfo == null) || (fileInfo.LastWriteTime > BathymetryFiles.LastWriteTime) ||
+                    (BathymetryFiles[fileKey] == null) || (fileInfo.Length != BathymetryFiles[fileKey].FileSize) ||
+                    (fileInfo.LastWriteTime != BathymetryFiles[fileKey].LastWriteTime)) && (sampleCount <= 512000))
+                    ImportJobs.Add(new ImportJobDescriptor
                     {
-                        var jobResolution = string.Format("{0:0.00}min", bathyJob.Resolution);
-                        var bathymetryKey = Path.Combine(Name, jobResolution);
-                        var bathymetryFile = bathymetryKey + ".bathymetry";
-                        BathymetryFiles[bathymetryKey] = new BathymetryFile(_rangeComplex.DataPath, bathymetryFile, bathyJob.SampleCount, bathyJob.GeoRect, EnvironmentDataType.Bathymetry, NAVOTimePeriod.Invalid, true);
-                    },
-                });
+                        DataType = EnvironmentDataType.Bathymetry,
+                        GeoRect = GeoRect,
+                        DestinationFilename = fileName,
+                        Resolution = resolution,
+                        CompletionAction = bathyJob =>
+                        {
+                            BathymetryFiles[resolutionString] = new BathymetryFile(BathymetryPath, resolutionString + ".bathymetry",
+                                                                                   bathyJob.SampleCount, bathyJob.GeoRect, EnvironmentDataType.Bathymetry,
+                                                                                   NAVOTimePeriod.Invalid, true);
+                        }
+                    });
+                else if (fileInfo == null)
+                    BathymetryFiles[resolutionString] = new BathymetryFile(BathymetryPath, resolutionString + ".bathymetry",
+                                                                           sampleCount, GeoRect, EnvironmentDataType.Bathymetry, 
+                                                                           NAVOTimePeriod.Invalid, false);
             }
         }
 
