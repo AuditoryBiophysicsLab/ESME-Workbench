@@ -5,6 +5,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:app="clr-namespace:DavesWPFTester"
         xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder;assembly=ESME.Views" mc:Ignorable="d"
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}">
+    <Window.Resources>
+        <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter" />
+    </Window.Resources>
   <DockPanel LastChildFill="True">
     <GroupBox Header="Areas" DockPanel.Dock="Bottom" Margin="5">
       <WrapPanel Orientation="Horizontal" Margin="5">
@@ -28,7 +31,7 @@
     <GroupBox Header="Range Complexes" Margin="5" DockPanel.Dock="Top" HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
       <EnvironmentBuilder:RangeComplexTreeView DockPanel.Dock="Top" DataContext="{Binding RangeComplexes}"
-                                               IsEnabled="{Binding IsEnabled}" ItemsSource="{Binding RangeComplexList}" SelectedValuePath="Value" />
+                                               IsEnabled="{Binding IsEnabled}" ItemsSource="{Binding RangeComplexList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
     </GroupBox>
   </DockPanel>
 </Window>

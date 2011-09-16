@@ -7,13 +7,17 @@ using System.Threading.Tasks;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.NAVO;
+using HRC.Collections;
 using HRC.Navigation;
+using HRC.Utility;
 
 namespace ESME.Environment.Descriptors
 {
     [Serializable]
     public class EnvironmentFile : INotifyPropertyChanged
     {
+        protected EnvironmentFile() { }
+
         public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
         {
             DataPath = dataPath;
@@ -56,7 +60,7 @@ namespace ESME.Environment.Descriptors
         public DateTime LastWriteTime { get; private set; }
         public uint SampleCount { get; private set; }
         public GeoRect GeoRect { get; private set; }
-        public EnvironmentDataType DataType { get; private set; }
+        public EnvironmentDataType DataType { get; protected set; }
         public NAVOTimePeriod TimePeriod { get; private set; }
 
         #region public DataAvailability DataAvailability { get; protected set; }
@@ -145,8 +149,17 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public class EnvironmentFile<T> : EnvironmentFile, IDeserializationCallback where T : class
     {
+        protected EnvironmentFile() { Initialize(); }
+
         public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { DataAvailability = DataAvailability.NotLoaded; }
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { Initialize(); }
+
+        public void Initialize()
+        {
+            DataAvailability = DataAvailability.NotLoaded;
+            Months = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>>();
+            MonthsList = ObservableList<EnvironmentFile<T>>.FromObservableConcurrentDictionary(Months, kvp => kvp.Value, (kvp, ef) => kvp.Key == ef.TimePeriod);
+        }
 
         public Func<Task<T>> GetAsyncFunc { get { return _getAsyncFunc; } set { _getAsyncFunc = value; } }
         [NonSerialized] Func<Task<T>> _getAsyncFunc;
@@ -171,11 +184,50 @@ namespace ESME.Environment.Descriptors
         [NonSerialized] Task<T> _inFlightFunc;
         [NonSerialized] object _lockObject = new object();
         [NonSerialized] T _data;
+
+        #region public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>> Months { get; set; }
+
+        public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>> Months
+        {
+            get { return _months; }
+            set
+            {
+                if (_months == value) return;
+                _months = value;
+                NotifyPropertyChanged(MonthsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MonthsChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile<T>>(x => x.Months);
+        [NonSerialized] ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>> _months;
+
+        #endregion
+
+        #region public ObservableList<EnvironmentFile<T>> MonthsList { get; set; }
+
+        public ObservableList<EnvironmentFile<T>> MonthsList
+        {
+            get { return _monthsList; }
+            private set
+            {
+                if (_monthsList == value) return;
+                _monthsList = value;
+                NotifyPropertyChanged(MonthsListChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs MonthsListChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile<T>>(x => x.MonthsList);
+        [NonSerialized] ObservableList<EnvironmentFile<T>> _monthsList;
+
+        #endregion
+
         
         public void OnDeserialization(object sender)
         {
             _lockObject = new object();
             DataAvailability = DataAvailability.NotLoaded;
+            Months = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>>();
+            MonthsList = ObservableList<EnvironmentFile<T>>.FromObservableConcurrentDictionary(Months, kvp => kvp.Value, (kvp, ef) => kvp.Key == ef.TimePeriod);
         }
 
     }
@@ -185,6 +237,8 @@ namespace ESME.Environment.Descriptors
     {
         public TemperatureFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+
+        public TemperatureFile() { DataType = EnvironmentDataType.Temperature; }
     }
 
     [Serializable]
@@ -192,6 +246,8 @@ namespace ESME.Environment.Descriptors
     {
         public SalinityFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+
+        public SalinityFile() { DataType = EnvironmentDataType.Salinity; }
     }
 
     [Serializable]

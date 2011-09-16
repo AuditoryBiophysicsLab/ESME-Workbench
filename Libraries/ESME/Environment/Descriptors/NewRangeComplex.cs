@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.NAVO;
@@ -50,18 +49,18 @@ namespace ESME.Environment.Descriptors
             Directory.CreateDirectory(SpeciesPath);
             Directory.CreateDirectory(Path.Combine(RangeComplexPath, "GeographicAreas"));
 
-            TemperatureFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, TemperatureFile>();
-            SalinityFiles = new ObservableConcurrentDictionary<NAVOTimePeriod, SalinityFile>();
+            TemperatureFile = new TemperatureFile();
+            SalinityFile = new SalinityFile();
+
             EnvironmentFiles = RangeComplexToken.Load(Path.Combine(DataPath, Name + ".token"));
             _dispatcher.InvokeIfRequired(() =>
             {
                 AreaCollection = new ObservableConcurrentDictionary<string, RangeComplexArea>();
                 AreaList = ObservableList<RangeComplexArea>.FromObservableConcurrentDictionary(AreaCollection, kvp => kvp.Value, (kvp, ac) => kvp.Key == ac.Name, kvp => kvp.Value.Name);
-
-                EnvironmentList = EnvironmentFiles.GetObservableWrapper();
             });
             UpdateAreas();
             if ((EnvironmentFiles.GeoRect == null) || (!EnvironmentFiles.GeoRect.Contains(GeoRect))) EnvironmentFiles.ReextractionRequired = true;
+
             foreach (var envFile in EnvironmentFiles)
             {
                 switch (envFile.Value.DataType)
@@ -73,20 +72,28 @@ namespace ESME.Environment.Descriptors
                         break;
                     case EnvironmentDataType.Salinity:
                         var salinityFile = (SalinityFile)envFile.Value;
-                        SalinityFiles.Add(salinityFile.TimePeriod, salinityFile);
+                        SalinityFile.Months.Add(salinityFile.TimePeriod, salinityFile);
                         break;
                     case EnvironmentDataType.Sediment:
                         SedimentFile = (SedimentFile)envFile.Value;
                         break;
                     case EnvironmentDataType.Temperature:
                         var temperatureFile = (TemperatureFile)envFile.Value;
-                        TemperatureFiles.Add(temperatureFile.TimePeriod, temperatureFile);
+                        TemperatureFile.Months.Add(temperatureFile.TimePeriod, temperatureFile);
                         break;
                     case EnvironmentDataType.Wind:
                         WindFile = (WindFile)envFile.Value;
                         break;
-                }                
+                }
             }
+            EnvironmentList = new ObservableList<EnvironmentFile>
+            {
+                WindFile,
+                SedimentFile,
+                BottomLossFile,
+                TemperatureFile,
+                SalinityFile
+            };
         }
 
         [NotNull] readonly Dispatcher _dispatcher;
@@ -104,8 +111,6 @@ namespace ESME.Environment.Descriptors
         [NotNull] public RangeComplexArea OpArea { get; private set; }
         [NotNull] public RangeComplexArea SimArea { get; private set; }
 
-        [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, TemperatureFile> TemperatureFiles { get; private set; }
-        [NotNull] public ObservableConcurrentDictionary<NAVOTimePeriod, SalinityFile> SalinityFiles { get; private set; }
         [NotNull] public ObservableConcurrentDictionary<string, RangeComplexArea> AreaCollection { get; private set; }
         [NotNull] public ObservableList<RangeComplexArea> AreaList { get; private set; }
         [NotNull] public ObservableList<EnvironmentFile> EnvironmentList { get; private set; }
@@ -113,6 +118,8 @@ namespace ESME.Environment.Descriptors
         public WindFile WindFile { get; private set; }
         public BottomLossFile BottomLossFile { get; private set; }
         public SedimentFile SedimentFile { get; private set; }
+        public TemperatureFile TemperatureFile { get; private set; }
+        public SalinityFile SalinityFile { get; private set; }
 
         public RangeComplexArea this[string areaName] { get { return AreaCollection[areaName]; } }
 
@@ -189,7 +196,7 @@ namespace ESME.Environment.Descriptors
                     var key = Path.GetFileName(tempJob.DestinationFilename);
                     var envFile = new TemperatureFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Temperature, tempJob.TimePeriod);
                     EnvironmentFiles[key] = envFile;
-                    TemperatureFiles[tempJob.TimePeriod] = envFile;
+                    TemperatureFile.Months[tempJob.TimePeriod] = envFile;
                 }
             }).ToList();
             jobs.AddRange(ValidateMonthlyData("salinity").Select(missingItem => new ImportJobDescriptor
@@ -203,7 +210,7 @@ namespace ESME.Environment.Descriptors
                     var key = Path.GetFileName(tempJob.DestinationFilename);
                     var envFile = new SalinityFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Salinity, tempJob.TimePeriod);
                     EnvironmentFiles[key] = envFile;
-                    SalinityFiles[tempJob.TimePeriod] = envFile;
+                    SalinityFile.Months[tempJob.TimePeriod] = envFile;
                 }
             }));
 

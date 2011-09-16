@@ -176,10 +176,10 @@ namespace ESME.Views.EnvironmentBuilder
                     _salinityFiles.Clear();
                     return;
                 }
-                _temperatureFiles = (from temperatureFile in SelectedRangeComplex.TemperatureFiles.Values
+                _temperatureFiles = (from temperatureFile in SelectedRangeComplex.TemperatureFile.Months.Values
                                      where _selectedMonths.Contains(temperatureFile.TimePeriod)
                                      select temperatureFile).ToDictionary(item => item.TimePeriod);
-                _salinityFiles = (from salinityFile in SelectedRangeComplex.SalinityFiles.Values
+                _salinityFiles = (from salinityFile in SelectedRangeComplex.SalinityFile.Months.Values
                                   where _selectedMonths.Contains(salinityFile.TimePeriod)
                                   select salinityFile).ToDictionary(item => item.TimePeriod);
             }
@@ -191,8 +191,8 @@ namespace ESME.Views.EnvironmentBuilder
         #endregion
 
         BathymetryFile _bathymetryFile;
-        Dictionary<NAVOTimePeriod, TemperatureFile> _temperatureFiles;
-        Dictionary<NAVOTimePeriod, SalinityFile> _salinityFiles;
+        Dictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> _temperatureFiles;
+        Dictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> _salinityFiles;
 
         public Bathymetry Bathymetry { get { return _bathymetryFile.Data; } }
         public Wind Wind { get { return SelectedRangeComplex.WindFile.Data; } }

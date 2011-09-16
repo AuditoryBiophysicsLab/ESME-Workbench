@@ -32,7 +32,7 @@ namespace HRC.Utility
                         case NotifyCollectionChangedAction.Add:
                             foreach (KeyValuePair<TKey, TValue> newItem in e.NewItems)
                             {
-                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to add \"{1}\", Count={2}", list.Name, log(newItem), list.Count);
+                                if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: About to add \"{1}\", Count={2}", list.Name, log(newItem), list.Count); 
                                 list.Add(convert(newItem));
                                 if (!string.IsNullOrEmpty(list.Name) && (log != null)) Debug.WriteLine("{0}: After adding \"{1}\", Count={2}", list.Name, log(newItem), list.Count);
                             }
