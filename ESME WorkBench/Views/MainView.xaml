@@ -309,6 +309,30 @@
                                     IsEnabled="{Binding IsScenarioLoaded}"
 					                Command="{Binding ConfigureAcousticModelsCommand}" />
                 </r:RibbonGroup>
+                <r:RibbonGroup Header="Animals">
+                    <r:RibbonButton Label="MMMBS"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Launch the Marine Mammal Movement and Behavior Simulator to define animat populations."
+					                SmallImageSource="..\Images\3mbNewIcon.ico"
+					                LargeImageSource="..\Images\3mbNewIcon.ico"
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+					                Command="{Binding LaunchMMMBSCommand}" />
+                    <!--
+                    <r:RibbonButton Label="Launch SpeciesBuilder"
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator's Species File Editor"
+					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
+					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
+					                Command="{Binding LaunchMMMBSpeciesBuilderCommand}" />
+                    -->
+                   
+                    <r:RibbonButton Label="Export Bathymetry File"
+					                SmallImageSource="..\Images\SmallIcons\export-icon.png"					                
+					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+					                ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS"
+                                    IsEnabled="{Binding IsScenarioLoaded}"
+					                Command="{Binding CreateMMMBSBathymetryFileCommand}" />
+                </r:RibbonGroup>
             </r:RibbonTab>
             <r:RibbonTab KeyTip="S"
 			             Header="Simulation">

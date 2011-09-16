@@ -570,6 +570,7 @@
     <Content Include="External References\System.Data.SQLite.dll" />
     <Content Include="External References\System.Data.SQLite.Linq.dll" />
     <Content Include="External References\System.Threading.Tasks.Dataflow.dll" />
+    <Resource Include="Images\3mbNewIcon.ico" />
     <Resource Include="Images\SmallIcons\orbz_water.png" />
     <Resource Include="Images\LargeIcons\orbz_water.png" />
     <Resource Include="Images\SmallIcons\log-icon.png" />
