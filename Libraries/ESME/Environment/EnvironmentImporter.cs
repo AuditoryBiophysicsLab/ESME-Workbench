@@ -347,18 +347,21 @@ namespace ESME.Environment
                 IsFaulted = _importer.Completion.IsFaulted;
                 if (IsFaulted)
                 {
+                    System.Media.SystemSounds.Beep.Play();
                     Status = "Error";
                     ToolTip = "";
-                    var faultCount = 0;
                     foreach (var ex in _importer.Completion.Exception.InnerExceptions)
-                    {
-                        if (faultCount > 0) ToolTip += new string(' ', 2 * faultCount);
-                        ToolTip += ex.Message + "\r\n";
-                        faultCount++;
-                    }
-                    ToolTip = _importer.Completion.Exception.InnerExceptions[0].Message;
+                        ToolTip += FormatExceptionMessage(ex, 0) + "\r\n";
+                    ToolTip.Trim();
                 }
             });
+        }
+
+        public string FormatExceptionMessage(Exception exception, int indentLevel)
+        {
+            return new string(' ', 2 * indentLevel) + ((exception.InnerException == null)
+                                                           ? exception.Message
+                                                           : exception.Message + "\r\n" + FormatExceptionMessage(exception.InnerException, indentLevel + 1));
         }
 
         public void Post(ImportJobDescriptor job)
