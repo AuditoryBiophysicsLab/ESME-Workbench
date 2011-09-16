@@ -18,9 +18,11 @@ namespace ESME.Environment.Descriptors
         {
             DataPath = dataPath;
             FileName = fileName;
+            IsCached = false;
             var filePath = Path.Combine(dataPath, fileName);
             if (File.Exists(filePath))
             {
+                IsCached = true;
                 var info = new FileInfo(filePath);
                 FileSize = info.Length;
                 LastWriteTime = info.LastWriteTime;
@@ -36,6 +38,8 @@ namespace ESME.Environment.Descriptors
 
         public string Name { get { return _name ?? (_name = Path.GetFileNameWithoutExtension(FileName)); } }
         [NonSerialized] string _name;
+
+        public bool IsCached { get; set; }
 
         public bool IsValid
         {
@@ -209,8 +213,6 @@ namespace ESME.Environment.Descriptors
     {
         public BathymetryFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, bool isCached)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { IsCached = isCached; }
-
-        public bool IsCached { get; private set; }
     }
 
     [Serializable]

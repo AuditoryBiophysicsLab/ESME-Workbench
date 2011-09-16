@@ -403,7 +403,7 @@ namespace ESME.Environment
         {
             if (IsFaulted) return;
             Status = IsWorkInProgress ? string.Format("{0:0}%", ((float)Completed / Submitted) * 100) : "";
-            ToolTip = string.Format("{0} jobs completed\r\n{1} jobs in queue\r\n{2} jobs running", Completed, Submitted - Completed, Running);
+            ToolTip = IsWorkInProgress ? string.Format("{0} jobs completed\r\n{1} jobs in queue\r\n{2} jobs running", Completed, Submitted - Completed, Running) : null;
         }
 
         #region public string ToolTip { get; set; }
@@ -588,38 +588,5 @@ namespace ESME.Environment
 
         readonly ActionBlock<ImportJobDescriptor> _importer;
         readonly BufferBlock<ImportJobDescriptor> _buffer;
-    }
-
-    public static class SynchronizationContextExtensions
-    {
-        /// <summary>
-        /// Synchronously invokes a delegate by passing it to a <see cref="SynchronizationContext">, waiting for it to complete.
-        /// </see></summary>
-        /// <param name="synchronizationContext"/>The <see cref="SynchronizationContext"> to pass the delegate to. May not be null.
-        /// <param name="action"/>The delegate to invoke. May not be null.
-        /// <remarks>
-        /// <para>This method is guaranteed to not be reentrant.</para>
-        /// </remarks>
-        public static void SafeSend(this SynchronizationContext synchronizationContext, Action action)
-        {
-            // The semantics of SynchronizationContext.Send allow it to invoke the delegate directly, but we can't allow that.
-            Action forwardDelegate = () => synchronizationContext.Send((state) => action(), null);
-            var result = forwardDelegate.BeginInvoke(null, null);
-            result.AsyncWaitHandle.WaitOne();
-        }
-
-        /// <summary>
-        /// Asynchronously invokes a delegate by passing it to a <see cref="SynchronizationContext">, returning immediately.
-        /// </see></summary>
-        /// <param name="synchronizationContext"/>The <see cref="SynchronizationContext"> to pass the delegate to. May not be null.
-        /// <param name="action"/>The delegate to invoke. May not be null.
-        /// <remarks>
-        /// <para>This method is guaranteed to not be reentrant.</para>
-        /// </remarks>
-        public static void SafePost(this SynchronizationContext synchronizationContext, Action action)
-        {
-            // The semantics of SynchronizationContext.Post allow it to invoke the delegate directly, but we can't allow that.
-            ThreadPool.QueueUserWorkItem((state) => synchronizationContext.Post((state2) => action(), null));
-        }
     }
 }
