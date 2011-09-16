@@ -12,14 +12,14 @@
         <Button Content="Remove test area" Command="{Binding RemoveTestAreaCommand}" />
         <Button Content="Dump test area" Command="{Binding DumpTestAreaCommand}" />
         <Button Content="Make many test areas" Command="{Binding ThrashTestAreasCommand}" />
-        <Button Content="Delete many test areas" Command="{Binding DeleteTestRangeComplexesCommand}" />
+        <Button Content="Delete many test areas" Command="{Binding DeleteManyRangeComplexesCommand}" />
       </WrapPanel>
     </GroupBox>
     <GroupBox Header="Range Complexes" DockPanel.Dock="Bottom" Margin="5">
       <WrapPanel Orientation="Horizontal">
         <Button Content="Add test range complex" Command="{Binding CreateTestRangeComplexCommand}" />
         <Button Content="Remove test range complex" Command="{Binding RemoveTestRangeComplexCommand}" />
-        <Button Content="Make many test complexes" Command="{Binding ThrashTestRangeComplexesCommand}" />
+        <Button Content="Make many test complexes" Command="{Binding CreateManyRangeComplexesCommand}" />
       </WrapPanel>
     </GroupBox>
     <GroupBox Header="Import status" Margin="5" DockPanel.Dock="Bottom"

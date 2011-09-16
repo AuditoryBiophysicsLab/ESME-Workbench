@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace ESME.Environment.NAVO
 {
     public static class NAVOExtractionProgram
     {
-        public static string Execute(string extractionProgramPath, string commandArgs, string workingDirectory)
+        public async static Task<string> Execute(string extractionProgramPath, string commandArgs, string workingDirectory)
         {
             if (!File.Exists(extractionProgramPath)) throw new FileNotFoundException(string.Format("Could not locate specifed extraction program {0}", extractionProgramPath));
 
@@ -26,9 +25,8 @@ namespace ESME.Environment.NAVO
             };
             process.Start();
             if (process.HasExited) return process.StandardOutput.ReadToEnd();
-
-            process.PriorityClass = ProcessPriorityClass.BelowNormal;
-            process.WaitForExit();
+            try { process.PriorityClass = ProcessPriorityClass.Idle; } catch {}
+            while (!process.HasExited) await TaskEx.Delay(50);
             return process.StandardOutput.ReadToEnd();
         }
     }

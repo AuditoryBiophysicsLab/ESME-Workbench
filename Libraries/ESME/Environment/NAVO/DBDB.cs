@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
-using System.Windows;
-using ESME.Environment.Descriptors;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
@@ -35,7 +29,7 @@ namespace ESME.Environment.NAVO
 
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
 
-            var result = NAVOExtractionProgram.Execute(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, outputDirectory);
+            var result = NAVOExtractionProgram.Execute(Globals.AppSettings.NAVOConfiguration.DBDBEXEPath, commandArgs, outputDirectory).Result;
             var resarray = result.Split('\n');
             foreach (var line in resarray.Where(line => line.Contains("ERROR"))) throw new ApplicationException("DigitalBathymetricDatabase: Error extracting requested area: " + line);
 

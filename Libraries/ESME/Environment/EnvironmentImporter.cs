@@ -4,13 +4,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.Descriptors;
-using HRC;
 using HRC.Navigation;
 using ESME.Environment.NAVO;
 
@@ -58,6 +58,7 @@ namespace ESME.Environment
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
+                    BoundedCapacity = 4,
                     MaxDegreeOfParallelism = 4,
                 })
                 ;
@@ -87,6 +88,7 @@ namespace ESME.Environment
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
+                    BoundedCapacity = 4,
                     MaxDegreeOfParallelism = 4,
                 })
                 ;
@@ -114,6 +116,7 @@ namespace ESME.Environment
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
+                    BoundedCapacity = 1,
                     MaxDegreeOfParallelism = 1,
                 })
                 ;
@@ -142,6 +145,7 @@ namespace ESME.Environment
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
+                    BoundedCapacity = 4,
                     MaxDegreeOfParallelism = 4,
                 })
                 ;
@@ -175,6 +179,7 @@ namespace ESME.Environment
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
+                    BoundedCapacity = 4,
                     MaxDegreeOfParallelism = 4,
                 })
                 ;
@@ -203,6 +208,7 @@ namespace ESME.Environment
                 new ExecutionDataflowBlockOptions
                 {
                     TaskScheduler = TaskScheduler.Default,
+                    BoundedCapacity = 4,
                     MaxDegreeOfParallelism = 4,
                 })
                 ;
@@ -221,9 +227,31 @@ namespace ESME.Environment
         {
             try
             {
-                var failure = TaskEx.WhenAny(TemperatureWorker.Completion, SalinityWorker.Completion, SedimentWorker.Completion,
-                                             WindWorker.Completion, BathymetryWorker.Completion, BottomLossWorker.Completion);
-                await failure;
+                var workers = new Dictionary<string, IDataflowBlock>
+                {
+                    {"Temperature", TemperatureWorker},
+                    {"Salinity", SalinityWorker},
+                    {"Sediment", SedimentWorker},
+                    {"Wind", WindWorker},
+                    {"Bathymetry", BathymetryWorker},
+                    {"Bottom Loss", BottomLossWorker},
+                };
+                while (workers.Count > 0)
+                {
+                    var runningTasks = (from worker in workers.Values
+                                        where worker.Completion.IsCanceled == false &&
+                                              worker.Completion.IsCompleted == false &&
+                                              worker.Completion.IsFaulted == false
+                                        select worker.Completion).ToList();
+                    if (runningTasks.Count == 0)
+                    {
+                        Debug.WriteLine("{0} All workers have completed");
+                        break;
+                    }
+                    await TaskEx.WhenAny(runningTasks);
+                    Debug.WriteLine("{0} Worker completed", DateTime.Now);
+                    workers.ToList().ForEach(worker => Debug.WriteLine("{0} {1,15}: completed: {2,-5}  canceled: {3,-5}  faulted: {4,-5}", DateTime.Now, worker.Key, worker.Value.Completion.IsCompleted, worker.Value.Completion.IsCanceled, worker.Value.Completion.IsFaulted));
+                }
             }
             catch (Exception e)
             {
@@ -294,95 +322,105 @@ namespace ESME.Environment
 
     public class ImportProgressViewModel : ViewModelBase
     {
-        readonly object _lockObject = new object();
-        const int DeadlockTimeout = 2000;
-        //readonly SynchronizationContext _context = new DispatcherSynchronizationContext();
         readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
 
         public ImportProgressViewModel(string name, ActionBlock<ImportJobDescriptor> importer = null) 
         {
             Name = name;
             _importer = importer;
+            _buffer = new BufferBlock<ImportJobDescriptor>();
+            _buffer.LinkTo(_importer);
+            AwaitCompletion();
+        }
+
+        async void AwaitCompletion()
+        {
+            try
+            {
+                await _importer.Completion;
+            }
+            catch {}
+            _dispatcher.InvokeInBackgroundIfRequired(() =>
+            {
+                IsCompleted = _importer.Completion.IsCompleted;
+                IsCanceled = _importer.Completion.IsCanceled;
+                IsFaulted = _importer.Completion.IsFaulted;
+                if (IsFaulted)
+                {
+                    Status = "Error";
+                    ToolTip = "";
+                    var faultCount = 0;
+                    foreach (var ex in _importer.Completion.Exception.InnerExceptions)
+                    {
+                        if (faultCount > 0) ToolTip += new string(' ', 2 * faultCount);
+                        ToolTip += ex.Message + "\r\n";
+                        faultCount++;
+                    }
+                    ToolTip = _importer.Completion.Exception.InnerExceptions[0].Message;
+                }
+            });
         }
 
         public void Post(ImportJobDescriptor job)
         {
-#if true
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
-#else
-            var gotLock = false;
-            Monitor.TryEnter(_lockObject, DeadlockTimeout, ref gotLock);
-            if (!gotLock)
-            {
-                var error = string.Format("Deadlock in Post({0})", job.DataType);
-                CurrentJob = error;
-                throw new SynchronizationLockException(error);
-            }
-#endif
-                JobsSubmitted++;
-                CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
-                _importer.Post(job);
+                Submitted++;
+                UpdateStatus();
+                _buffer.Post(job);
                 IsWorkInProgress = true;
             });
         }
 
         public void JobStarting(ImportJobDescriptor job)
         {
-#if true
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
-#else
-            var gotLock = false;
-            Monitor.TryEnter(_lockObject, DeadlockTimeout, ref gotLock);
-            if (!gotLock)
-            {
-                var error = string.Format("Deadlock in JobStarting({0})", job.DataType);
-                CurrentJob = error;
-                throw new SynchronizationLockException(error);
-            }
-#endif
-                JobsInFlight++;
-                CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
+                Running++;
+                UpdateStatus();
             });
         }
 
         public void JobCompleted(ImportJobDescriptor job)
         {
-#if true
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
-#else
-            var gotLock = false;
-            Monitor.TryEnter(_lockObject, DeadlockTimeout, ref gotLock);
-            if (!gotLock)
-            {
-                var error = string.Format("Deadlock in JobCompleted({0})", job.DataType);
-                CurrentJob = error;
-                throw new SynchronizationLockException(error);
-            }
-#endif
-                JobsInFlight--;
-                JobsCompleted++;
-                if (job.Exception != null)
-                {
-                    CurrentJob = job.Exception.Message;
-                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
-                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
-                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
-                    Debug.WriteLine(job.Exception.Message);
-                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
-                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
-                    Debug.WriteLine("******************************EXCEPTION CAUGHT******************************");
-                    _exceptionCaught = true;
-                }
-                else if (!_exceptionCaught) CurrentJob = string.Format("{0}/{1} complete, {2} running", JobsCompleted, JobsSubmitted, JobsInFlight);
+                Running--;
+                Completed++;
+                UpdateStatus();
             });
-            if (JobsCompleted != JobsSubmitted) return;
+            if (Completed != Submitted) return;
             IsWorkInProgress = false;
-            JobsSubmitted = 0;
-            JobsCompleted = 0;
+            Submitted = 0;
+            Completed = 0;
         }
+
+        void UpdateStatus()
+        {
+            if (!IsFaulted)
+            {
+                Status = string.Format("{0}/{1} complete, {2} running", Completed, Submitted, Running);
+                ToolTip = Status;
+            }
+        }
+
+        #region public string ToolTip { get; set; }
+
+        public string ToolTip
+        {
+            get { return _toolTip; }
+            set
+            {
+                if (_toolTip == value) return;
+                _toolTip = value;
+                NotifyPropertyChanged(ToolTipChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ToolTipChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.ToolTip);
+        string _toolTip;
+
+        #endregion
 
         #region public string Name { get; private set; }
 
@@ -420,80 +458,134 @@ namespace ESME.Environment
 
         #endregion
 
-        #region public int JobsSubmitted { get; private set; }
+        #region public int Submitted { get; private set; }
 
-        public int JobsSubmitted
+        public int Submitted
         {
-            get { return _jobsSubmitted; }
+            get { return _submitted; }
             private set
             {
-                if (_jobsSubmitted == value) return;
-                _jobsSubmitted = value;
+                if (_submitted == value) return;
+                _submitted = value;
                 NotifyPropertyChanged(JobsSubmittedChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs JobsSubmittedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.JobsSubmitted);
-        int _jobsSubmitted;
+        static readonly PropertyChangedEventArgs JobsSubmittedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.Submitted);
+        int _submitted;
 
         #endregion
 
-        #region public int JobsCompleted { get; private set; }
+        #region public int Completed { get; private set; }
 
-        public int JobsCompleted
+        public int Completed
         {
-            get { return _jobsCompleted; }
+            get { return _completed; }
             private set
             {
-                if (_jobsCompleted == value) return;
-                _jobsCompleted = value;
+                if (_completed == value) return;
+                _completed = value;
                 NotifyPropertyChanged(JobsCompletedChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs JobsCompletedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.JobsCompleted);
-        int _jobsCompleted;
+        static readonly PropertyChangedEventArgs JobsCompletedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.Completed);
+        int _completed;
 
         #endregion
 
-        #region public int JobsInFlight { get; private set; }
+        #region public int Running { get; private set; }
 
-        public int JobsInFlight
+        public int Running
         {
-            get { return _jobsInFlight; }
+            get { return _running; }
             private set
             {
-                if (_jobsInFlight == value) return;
-                _jobsInFlight = value;
+                if (_running == value) return;
+                _running = value;
                 NotifyPropertyChanged(JobsInFlightChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs JobsInFlightChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.JobsInFlight);
-        int _jobsInFlight;
+        static readonly PropertyChangedEventArgs JobsInFlightChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.Running);
+        int _running;
 
         #endregion
 
-        #region public string CurrentJob { get; private set; }
+        #region public string Status { get; private set; }
 
-        public string CurrentJob
+        public string Status
         {
-            get { return _currentJob; }
+            get { return _status; }
             private set
             {
-                if (_currentJob == value) return;
-                _currentJob = value;
+                if (_status == value) return;
+                _status = value;
                 NotifyPropertyChanged(CurrentJobChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs CurrentJobChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.CurrentJob);
-        string _currentJob;
+        static readonly PropertyChangedEventArgs CurrentJobChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.Status);
+        string _status;
 
         #endregion
 
-        bool _exceptionCaught = false;
+        #region public bool IsCompleted { get; set; }
+
+        public bool IsCompleted
+        {
+            get { return _isCompleted; }
+            set
+            {
+                if (_isCompleted == value) return;
+                _isCompleted = value;
+                NotifyPropertyChanged(IsCompletedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsCompletedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.IsCompleted);
+        bool _isCompleted;
+
+        #endregion
+
+        #region public bool IsCanceled { get; set; }
+
+        public bool IsCanceled
+        {
+            get { return _isCanceled; }
+            set
+            {
+                if (_isCanceled == value) return;
+                _isCanceled = value;
+                NotifyPropertyChanged(IsCanceledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsCanceledChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.IsCanceled);
+        bool _isCanceled;
+
+        #endregion
+
+        #region public bool IsFaulted { get; set; }
+
+        public bool IsFaulted
+        {
+            get { return _isFaulted; }
+            set
+            {
+                if (_isFaulted == value) return;
+                _isFaulted = value;
+                NotifyPropertyChanged(IsFaultedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsFaultedChangedEventArgs = ObservableHelper.CreateArgs<ImportProgressViewModel>(x => x.IsFaulted);
+        bool _isFaulted;
+
+        #endregion
+
         readonly ActionBlock<ImportJobDescriptor> _importer;
+        readonly BufferBlock<ImportJobDescriptor> _buffer;
     }
 
     public static class SynchronizationContextExtensions

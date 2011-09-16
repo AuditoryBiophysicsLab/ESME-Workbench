@@ -25,7 +25,7 @@ namespace HRC.Utility
             RunWorkerAsync(this);
         }
 
-        protected abstract void Run(object sender, DoWorkEventArgs e);
+        protected virtual async void Run(object sender, DoWorkEventArgs e) { throw new NotImplementedException(); }
 
         protected override void OnRunWorkerCompleted(RunWorkerCompletedEventArgs e)
         {

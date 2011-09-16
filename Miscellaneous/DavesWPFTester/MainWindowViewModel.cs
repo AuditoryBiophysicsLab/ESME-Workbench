@@ -43,25 +43,22 @@ namespace DavesWPFTester
         public ImportProgressCollection ImportProgressCollection { get; private set; }
         public RangeComplexes RangeComplexes { get; set; }
 
-        #region ThrashTestRangeComplexesCommand
-        SimpleCommand<object, object> _thrashTestRangeComplexes;
+        #region CreateManyRangeComplexesCommand
+        SimpleCommand<object, object> _createManyTestRangeComplexes;
 
-        public SimpleCommand<object, object> ThrashTestRangeComplexesCommand
+        public SimpleCommand<object, object> CreateManyRangeComplexesCommand
         {
             get
             {
-                return _thrashTestRangeComplexes ??
-                       (_thrashTestRangeComplexes =
-                        new SimpleCommand<object, object>(delegate { return true; },
-                                                          delegate { ThrashTestRangeComplexesHandler(); }));
+                return _createManyTestRangeComplexes ??
+                       (_createManyTestRangeComplexes =
+                        new SimpleCommand<object, object>(delegate { CreateManyRangeComplexesHandler(); }));
             }
         }
 
-        async void ThrashTestRangeComplexesHandler()
+        async void CreateManyRangeComplexesHandler()
         {
-            for (int i = 0; i < 50; i++)
-            {
-                var coordinates = new List<Geo>
+            var coordinates = new List<Geo>
                 {
                     new Geo(29.3590, -79.2195),
                     new Geo(31.1627, -79.2195),
@@ -70,17 +67,59 @@ namespace DavesWPFTester
                     new Geo(29.3590, -80.8789),
                     new Geo(29.3590, -79.2195),
                 };
-                try
+
+            await TaskEx.Run(async () =>
+            {
+                for (var i = 0; i < 50; i++)
                 {
-                    RangeComplexes.Singleton.CreateRangeComplex(string.Format("Test{0}", i), 0, 29.3590, -79.2195, 0,
-                                                                coordinates, coordinates);
+                    try
+                    {
+                        while (!RangeComplexes.IsEnabled) await
+                        TaskEx.Delay(10);
+                        RangeComplexes.CreateRangeComplex(string.Format("Test{0}", i), 0, 29.3590, -79.2195, 0, coordinates, coordinates);
+                    }
+                    catch (Exception e)
+                    {
+                        _messageBoxService.ShowError(e.Message);
+                    }
                 }
-                catch (Exception e)
-                {
-                    _messageBoxService.ShowError(e.Message);
-                }
-                await TaskEx.Delay(500);
+            });
+        }
+        #endregion
+
+        #region DeleteManyRangeComplexesCommand
+        SimpleCommand<object, object> _deleteManyRangeComplexes;
+
+        public SimpleCommand<object, object> DeleteManyRangeComplexesCommand
+        {
+            get
+            {
+                return _deleteManyRangeComplexes ??
+                       (_deleteManyRangeComplexes =
+                        new SimpleCommand<object, object>(delegate { DeleteManyRangeComplexesHandler(); }));
             }
+        }
+
+        async void DeleteManyRangeComplexesHandler()
+        {
+            await TaskEx.Run(async () =>
+            {
+                for (var i = 0; i < 50; i++)
+                {
+                    try
+                    {
+                        while (!RangeComplexes.IsEnabled) await
+                        TaskEx.Delay(10);
+                        RangeComplexes.RemoveRangeComplex(string.Format("Test{0}", i));
+                    }
+                    catch (ArgumentException) { }
+                    catch (KeyNotFoundException) { }
+                    catch (Exception e)
+                    {
+                        _messageBoxService.ShowError(e.Message);
+                    }
+                }
+            });
         }
         #endregion
 
@@ -103,13 +142,9 @@ namespace DavesWPFTester
             get { return true; }
         }
 
-        async 
-
-        void ThrashTestAreasHandler()
+        async void ThrashTestAreasHandler()
         {
-            for (int i = 0; i < 50; i++)
-            {
-                var coordinates = new List<Geo>
+            var coordinates = new List<Geo>
                 {
                     new Geo(29.3590, -79.2195),
                     new Geo(31.1627, -79.2195),
@@ -118,62 +153,18 @@ namespace DavesWPFTester
                     new Geo(29.3590, -80.8789),
                     new Geo(29.3590, -79.2195),
                 };
+
+            for (var i = 0; i < 50; i++)
+            {
                 try
                 {
-                    RangeComplexes.Singleton.RangeComplexCollection[string.Format("Test{0}", i)].CreateArea(
-                                                                                                            string.
-                                                                                                                Format
-                                                                                                                ("Test{0}",
-                                                                                                                 i),
-                                                                                                            coordinates);
+                    while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
+                    RangeComplexes.RangeComplexCollection[string.Format("Test{0}", i)].CreateArea(string.Format("Test{0}", i), coordinates);
                 }
                 catch (Exception e)
                 {
                     _messageBoxService.ShowError(e.Message);
                 }
-                await
-                TaskEx.Delay(500);
-            }
-        }
-        #endregion
-
-        #region DeleteTestRangeComplexesCommand
-        SimpleCommand<object, object> _deleteTestRangeComplexes;
-
-        public SimpleCommand<object, object> DeleteTestRangeComplexesCommand
-        {
-            get
-            {
-                return _deleteTestRangeComplexes ??
-                       (_deleteTestRangeComplexes =
-                        new SimpleCommand<object, object>(delegate { return IsDeleteTestRangeComplexesCommandEnabled; },
-                                                          delegate { DeleteTestRangeComplexesHandler(); }));
-            }
-        }
-
-        bool IsDeleteTestRangeComplexesCommandEnabled
-        {
-            get { return true; }
-        }
-
-        async 
-
-        void DeleteTestRangeComplexesHandler()
-        {
-            for (int i = 0; i < 50; i++)
-            {
-                try
-                {
-                    RangeComplexes.Singleton.RemoveRangeComplex(string.Format("Test{0}", i));
-                }
-                catch (ArgumentException) {}
-                catch (Exception e)
-                {
-                    _messageBoxService.ShowError(e.Message);
-                }
-
-                await
-                TaskEx.Delay(100);
             }
         }
         #endregion
@@ -186,7 +177,7 @@ namespace DavesWPFTester
             get { return _addDave ?? (_addDave = new SimpleCommand<object, object>(delegate { CreateTestRangeComplexHandler(); })); }
         }
 
-        void CreateTestRangeComplexHandler()
+        async void CreateTestRangeComplexHandler()
         {
             var coordinates = new List<Geo>
             {
@@ -199,7 +190,8 @@ namespace DavesWPFTester
             };
             try
             {
-                RangeComplexes.Singleton.CreateRangeComplex("Test", 0, 29.3590, -79.2195, 0, coordinates, coordinates);
+                while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
+                RangeComplexes.CreateRangeComplex("Test", 0, 29.3590, -79.2195, 0, coordinates, coordinates);
             }
             catch (Exception e)
             {
@@ -216,12 +208,14 @@ namespace DavesWPFTester
             get { return _removeTestRangeComplex ?? (_removeTestRangeComplex = new SimpleCommand<object, object>(delegate { RemoveTestRangeComplexHandler(); })); }
         }
 
-        void RemoveTestRangeComplexHandler()
+        async void RemoveTestRangeComplexHandler()
         {
             try
             {
-                RangeComplexes.Singleton.RemoveRangeComplex("Test");
+                while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
+                RangeComplexes.RemoveRangeComplex("Test");
             }
+            catch (KeyNotFoundException) { }
             catch (Exception e)
             {
                 _messageBoxService.ShowError(e.Message);
@@ -237,7 +231,7 @@ namespace DavesWPFTester
             get { return _addTestArea ?? (_addTestArea = new SimpleCommand<object, object>(delegate { AddTestAreaHandler(); })); }
         }
 
-        void AddTestAreaHandler()
+        async void AddTestAreaHandler()
         {
             var coordinates = new List<Geo>
             {
@@ -250,7 +244,8 @@ namespace DavesWPFTester
             };
             try
             {
-                RangeComplexes.Singleton.RangeComplexCollection["Test"].CreateArea("Test", coordinates);
+                while (!RangeComplexes.RangeComplexCollection["Test"].IsEnabled) await TaskEx.Delay(10);
+                RangeComplexes.RangeComplexCollection["Test"].CreateArea("Test", coordinates);
             }
             catch (Exception e)
             {
@@ -267,11 +262,12 @@ namespace DavesWPFTester
             get { return _removeTestArea ?? (_removeTestArea = new SimpleCommand<object, object>(delegate { RemoveTestAreaHandler(); })); }
         }
 
-        void RemoveTestAreaHandler()
+        async void RemoveTestAreaHandler()
         {
             try
             {
-                RangeComplexes.Singleton.RangeComplexCollection["Test"].RemoveArea("Test");
+                while (!RangeComplexes.RangeComplexCollection["Test"].IsEnabled) await TaskEx.Delay(10);
+                RangeComplexes.RangeComplexCollection["Test"].RemoveArea("Test");
             }
             catch (Exception e)
             {
@@ -292,7 +288,7 @@ namespace DavesWPFTester
         {
             try
             {
-                RangeComplexes.Singleton.Dump();
+                RangeComplexes.Dump();
             }
             catch (Exception e)
             {
@@ -301,17 +297,14 @@ namespace DavesWPFTester
         }
         #endregion
 
-        async 
-
-        void Initialize()
+        async void Initialize()
         {
             RangeComplexes = RangeComplexes.Singleton;
             RangeComplexesViewModel = new RangeComplexesViewModel(RangeComplexes.Singleton);
             ImportProgressCollection = ImportProgressCollection.Singleton;
             try
             {
-                await
-                RangeComplexes.Singleton.ReadRangeComplexFileAsync(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+                await RangeComplexes.ReadRangeComplexFileAsync(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
             }
             catch (Exception e)
             {

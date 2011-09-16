@@ -4,19 +4,24 @@
           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
           xmlns:EnvironmentBuilder="clr-namespace:ESME.Views.EnvironmentBuilder"
-          xmlns:Descriptors="clr-namespace:ESME.Environment.Descriptors;assembly=ESME" 
-          xmlns:wpf="clr-namespace:HRC.WPF;assembly=HRC" 
-          mc:Ignorable="d" d:DesignHeight="300"
-          d:DesignWidth="300">
+          xmlns:Descriptors="clr-namespace:ESME.Environment.Descriptors;assembly=ESME"
+          xmlns:wpf="clr-namespace:HRC.WPF;assembly=HRC" mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
   <TreeView.Resources>
     <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter" />
+
+    <!-- ================================================================================================================================================== -->
+    <!-- Basic EnvironmentFile                                                                                                                              -->
+    <!-- ================================================================================================================================================== -->
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:EnvironmentFile}">
       <TreeViewItem Header="{Binding FileName}" Margin="-20 0 0 0">
-                <!-- <TreeViewItem Header="{Binding FileSize, Converter={wpf:Lambda 't=>string.Format(&quot;File size: {0:#,#} bytes&quot;,t)'}}" /> -->
-                <TreeViewItem Header="{Binding FileSize}" />
-            </TreeViewItem>
+        <!-- <TreeViewItem Header="{Binding FileSize, Converter={wpf:Lambda 't=>string.Format(&quot;File size: {0:#,#} bytes&quot;,t)'}}" /> -->
+        <TreeViewItem Header="{Binding FileSize}" />
+      </TreeViewItem>
     </HierarchicalDataTemplate>
 
+    <!-- ================================================================================================================================================== -->
+    <!-- RangeComplexArea                                                                                                                                   -->
+    <!-- ================================================================================================================================================== -->
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:RangeComplexArea}">
       <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0">
         <TreeViewItem Header="Resolutions"
@@ -24,19 +29,17 @@
       </TreeViewItem>
     </HierarchicalDataTemplate>
 
+    <!-- ================================================================================================================================================== -->
+    <!-- NewRangeComplex                                                                                                                                    -->  
+    <!-- ================================================================================================================================================== -->
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}">
-      <TreeViewItem Header="{Binding Name}" IsEnabled="{Binding IsEnabled}" ToolTip ="{Binding ToolTip}" Margin="-20 0 0 0">
+      <TreeViewItem Header="{Binding Name}" IsEnabled="{Binding IsEnabled}" ToolTip="{Binding ToolTip}"
+                    Margin="-20 0 0 0">
         <TreeViewItem Header="Areas"
                       ItemsSource="{Binding AreaList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
         <TreeViewItem Header="Environment"
                       ItemsSource="{Binding EnvironmentList, Converter={StaticResource SortConverter}, ConverterParameter='FileName'}" />
       </TreeViewItem>
-    </HierarchicalDataTemplate>
-
-    <HierarchicalDataTemplate DataType="{x:Type EnvironmentBuilder:RangeComplexTreeItem}">
-      <TreeViewItem Header="{Binding Name}" ToolTip="{Binding ToolTip}"
-                    ItemsSource="{Binding Children, Converter={StaticResource SortConverter}, ConverterParameter='Name'}"
-                    Margin="-20 0 0 0" />
     </HierarchicalDataTemplate>
   </TreeView.Resources>
 </TreeView>

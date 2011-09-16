@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
 using System.Threading.Tasks;
 using ESME.Environment.NAVO;
 using HRC.Navigation;
@@ -22,21 +23,14 @@ namespace ESME.Environment
 
         public static Bathymetry Load(string filename)
         {
-            //return new Bathymetry { Samples = XmlSerializer<EnvironmentData<EarthCoordinate<float>>>.Load(filename, ReferencedTypes) };
-            var formatter = new BinaryFormatter();
             using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return new Bathymetry { Samples = (EnvironmentData<EarthCoordinate<float>>)formatter.Deserialize(stream) };
-            }
+                return new Bathymetry { Samples = (EnvironmentData<EarthCoordinate<float>>)new BinaryFormatter().Deserialize(stream) };
         }
 
         public void Save(string filename)
         {
-            var formatter = new BinaryFormatter();
             using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                formatter.Serialize(stream, Samples);
-            }
+                new BinaryFormatter().Serialize(stream, Samples);
         }
 
         public static Bathymetry FromYXZ(string fileName, float scaleFactor)

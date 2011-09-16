@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Threading;
 using Cinch;
 using HRC.Navigation;
-using HRC.Utility;
 
 namespace ESME.Environment.NAVO
 {
@@ -182,7 +181,7 @@ namespace ESME.Environment.NAVO
             //    totalExtractionStepCount++;
 
             Status = "Extracting bathymetry data for selected area";
-            var bathymetry = DigitalBathymetricDatabase.ExtractAsync(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea);
+            var bathymetry = DigitalBathymetricDatabase.ExtractAsync(tempDirectory, DigitalBathymetricDatabase.SelectedResolution, ExtractionArea).Result;
             if (backgroundTask.CancellationPending) return;
             ProgressPercent = (int)((++_currentExtractionStep / _totalExtractionStepCount) * 100);
             //var bathymetry = Environment2DData.FromCHB(DigitalBathymetricDatabase.BathymetryCHBFilename(tempDirectory, DigitalBathymetricDatabase.SelectedResolution), -1);
