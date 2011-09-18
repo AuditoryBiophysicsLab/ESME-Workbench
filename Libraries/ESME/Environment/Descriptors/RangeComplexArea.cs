@@ -36,39 +36,38 @@ namespace ESME.Environment.Descriptors
             foreach (var samplesPerDegree in AvailableSampleCountsPerDegree)
             {
                 var resolution = 60.0f / samplesPerDegree;
-                var resolutionString = string.Format("{0:0.00}min", resolution);
+                var fileName = string.Format("{0:0.00}min.bathymetry", resolution);
                 var north = Math.Round(GeoRect.North * samplesPerDegree) / samplesPerDegree;
                 var south = Math.Round(GeoRect.South * samplesPerDegree) / samplesPerDegree;
                 var east = Math.Round(GeoRect.East * samplesPerDegree) / samplesPerDegree;
                 var west = Math.Round(GeoRect.West * samplesPerDegree) / samplesPerDegree;
                 var width = east - west;
                 var height = north - south;
-                var fileName = Path.Combine(BathymetryPath, resolutionString + ".bathymetry");
-                var fileKey = Path.GetFileNameWithoutExtension(fileName);
-                var fileInfo = File.Exists(fileName) ? new FileInfo(fileName) : null;
+                var localPath = Path.Combine(BathymetryPath, fileName);
+                var fileInfo = File.Exists(localPath) ? new FileInfo(localPath) : null;
                 var sampleCount = (uint)Math.Round(width * samplesPerDegree * height * samplesPerDegree);
 
                 // If the file does not exist, or it's newer than the token, or it's not in the token's list of files, 
                 // or it's length is different from the one stored in the token, or it's last write time is different from the one sorted in the token.
                 // If any of these things are true, we want to re-extract the file from the database
                 if (((fileInfo == null) || (fileInfo.LastWriteTime > BathymetryFiles.LastWriteTime) ||
-                    (BathymetryFiles[fileKey] == null) || (fileInfo.Length != BathymetryFiles[fileKey].FileSize) ||
-                    (fileInfo.LastWriteTime != BathymetryFiles[fileKey].LastWriteTime)) && (sampleCount <= 512000))
+                    (BathymetryFiles[fileName] == null) || (fileInfo.Length != BathymetryFiles[fileName].FileSize) ||
+                    (fileInfo.LastWriteTime != BathymetryFiles[fileName].LastWriteTime)) && (sampleCount <= 512000))
                     ImportJobs.Add(new ImportJobDescriptor
                     {
                         DataType = EnvironmentDataType.Bathymetry,
                         GeoRect = GeoRect,
-                        DestinationFilename = fileName,
+                        DestinationFilename = localPath,
                         Resolution = resolution,
                         CompletionAction = bathyJob =>
                         {
-                            BathymetryFiles[resolutionString] = new BathymetryFile(BathymetryPath, resolutionString + ".bathymetry",
+                            BathymetryFiles[fileName] = new BathymetryFile(BathymetryPath, fileName,
                                                                                    bathyJob.SampleCount, bathyJob.GeoRect, EnvironmentDataType.Bathymetry,
                                                                                    NAVOTimePeriod.Invalid, true);
                         }
                     });
                 else if (fileInfo == null)
-                    BathymetryFiles[resolutionString] = new BathymetryFile(BathymetryPath, resolutionString + ".bathymetry",
+                    BathymetryFiles[fileName] = new BathymetryFile(BathymetryPath, fileName,
                                                                            sampleCount, GeoRect, EnvironmentDataType.Bathymetry, 
                                                                            NAVOTimePeriod.Invalid, false);
             }
@@ -91,7 +90,6 @@ namespace ESME.Environment.Descriptors
         bool _isEnabled;
 
         #endregion
-
 
         internal static RangeComplexArea Create(NewRangeComplex rangeComplex, string areaName, IEnumerable<Geo> limits)
         {

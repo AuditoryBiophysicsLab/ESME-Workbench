@@ -30,7 +30,7 @@
     </GroupBox>
     <GroupBox Header="Range Complexes" Margin="5" DockPanel.Dock="Top" HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
-      <EnvironmentBuilder:RangeComplexTreeView DockPanel.Dock="Top" DataContext="{Binding RangeComplexes}"
+      <EnvironmentBuilder:RangeComplexTreeView2 DockPanel.Dock="Top" DataContext="{Binding RangeComplexes}"
                                                IsEnabled="{Binding IsEnabled}" ItemsSource="{Binding RangeComplexList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
     </GroupBox>
   </DockPanel>

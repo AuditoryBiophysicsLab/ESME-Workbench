@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -14,36 +15,52 @@ using HRC.Utility;
 namespace ESME.Environment.Descriptors
 {
     [Serializable]
-    public class EnvironmentFile : INotifyPropertyChanged
+    public class EnvironmentFile : INotifyPropertyChanged, IDeserializationCallback
     {
         protected EnvironmentFile() { }
 
         public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
         {
-            DataPath = dataPath;
             FileName = fileName;
+            DataPath = dataPath;
             IsCached = false;
-            var filePath = Path.Combine(dataPath, fileName);
-            if (File.Exists(filePath))
-            {
-                IsCached = true;
-                var info = new FileInfo(filePath);
-                FileSize = info.Length;
-                LastWriteTime = info.LastWriteTime;
-            }
             SampleCount = sampleCount;
             GeoRect = geoRect;
             DataType = dataType;
             TimePeriod = timePeriod;
+            RequiredFiles = new List<EnvironmentFile>();
         }
 
-        public string DataPath { get { return _dataPath; } set { _dataPath = value; } }
+        public void OnDeserialization(object sender)
+        {
+            RequiredFiles = new List<EnvironmentFile>();
+        }
+
+        public void UpdateFileInfo()
+        {
+            if (string.IsNullOrEmpty(DataPath)) return;
+            var filePath = Path.Combine(DataPath, FileName);
+            IsCached = false;
+            if (!File.Exists(filePath)) return;
+            IsCached = true;
+            var info = new FileInfo(filePath);
+            FileSize = info.Length;
+            LastWriteTime = info.LastWriteTime;
+        }
+
+        public string DataPath
+        {
+            get { return _dataPath; }
+            set
+            {
+                _dataPath = value;
+                UpdateFileInfo();
+            }
+        }
         [NonSerialized] string _dataPath;
 
         public string Name { get { return _name ?? (_name = Path.GetFileNameWithoutExtension(FileName)); } }
         [NonSerialized] string _name;
-
-        public bool IsCached { get; set; }
 
         public bool IsValid
         {
@@ -55,13 +72,111 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        public string FileName { get; private set; }
-        public long FileSize { get; private set; }
-        public DateTime LastWriteTime { get; private set; }
-        public uint SampleCount { get; private set; }
-        public GeoRect GeoRect { get; private set; }
+        #region public bool IsCached { get; set; }
+
+        public bool IsCached
+        {
+            get { return _isCached; }
+            set
+            {
+                if (_isCached == value) return;
+                _isCached = value;
+                NotifyPropertyChanged(IsCachedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsCachedChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.IsCached);
+        bool _isCached;
+
+        #endregion
+        #region public string FileName { get; private set; }
+
+        public string FileName
+        {
+            get { return _fileName; }
+            private set
+            {
+                if (_fileName == value) return;
+                _fileName = value;
+                NotifyPropertyChanged(FileNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs FileNameChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.FileName);
+        string _fileName;
+
+        #endregion
+        #region public long FileSize { get; private set; }
+
+        public long FileSize
+        {
+            get { return _fileSize; }
+            private set
+            {
+                if (_fileSize == value) return;
+                _fileSize = value;
+                NotifyPropertyChanged(FileSizeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs FileSizeChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.FileSize);
+        long _fileSize;
+
+        #endregion
+        #region public DateTime LastWriteTime { get; private set; }
+
+        public DateTime LastWriteTime
+        {
+            get { return _lastWriteTime; }
+            private set
+            {
+                if (_lastWriteTime == value) return;
+                _lastWriteTime = value;
+                NotifyPropertyChanged(LastWriteTimeChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LastWriteTimeChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.LastWriteTime);
+        DateTime _lastWriteTime;
+
+        #endregion
+        #region public uint SampleCount { get; internal set; }
+
+        public uint SampleCount
+        {
+            get { return _sampleCount; }
+            internal set
+            {
+                if (_sampleCount == value) return;
+                _sampleCount = value;
+                NotifyPropertyChanged(SampleCountChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SampleCountChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.SampleCount);
+        uint _sampleCount;
+
+        #endregion
+        #region public GeoRect GeoRect { get; set; }
+
+        public GeoRect GeoRect
+        {
+            get { return _geoRect; }
+            internal set
+            {
+                if (_geoRect == value) return;
+                _geoRect = value;
+                NotifyPropertyChanged(GeoRectChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs GeoRectChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.GeoRect);
+        GeoRect _geoRect;
+
+        #endregion
         public EnvironmentDataType DataType { get; protected set; }
         public NAVOTimePeriod TimePeriod { get; private set; }
+        public List<EnvironmentFile> RequiredFiles { get; internal set; }
 
         #region public DataAvailability DataAvailability { get; protected set; }
         public DataAvailability DataAvailability
@@ -251,6 +366,19 @@ namespace ESME.Environment.Descriptors
     }
 
     [Serializable]
+    public class SoundSpeedFile : EnvironmentFile<SoundSpeed>
+    {
+        public SoundSpeedFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+
+        public SoundSpeedFile()
+        {
+            DataType = EnvironmentDataType.SoundSpeed;
+            IsCached = false;
+        }
+    }
+
+    [Serializable]
     public class SedimentFile : EnvironmentFile<Sediment>
     {
         public SedimentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
@@ -286,6 +414,7 @@ namespace ESME.Environment.Descriptors
         Wind,
         Bathymetry,
         BottomLoss,
+        SoundSpeed,
     }
 
     public class DataAvailabilityChangedEventArgs : EventArgs

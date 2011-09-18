@@ -138,6 +138,9 @@
       <DependentUpon>BathymetryExtractionView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnvironmentBuilder\BathymetryExtractionViewModel.cs" />
+    <Compile Include="EnvironmentBuilder\RangeComplexTreeView2.xaml.cs">
+      <DependentUpon>RangeComplexTreeView2.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EnvironmentBuilder\EnvironmentExtractionView.xaml.cs">
       <DependentUpon>EnvironmentExtractionView.xaml</DependentUpon>
     </Compile>
@@ -281,6 +284,10 @@
     <Page Include="EnvironmentBuilder\BathymetryExtractionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EnvironmentBuilder\RangeComplexTreeView2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="EnvironmentBuilder\EnvironmentBuilderView.xaml">
       <SubType>Designer</SubType>

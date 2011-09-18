@@ -154,14 +154,7 @@ namespace ESME.Environment
                 if (BathymetryWorker == null) BathymetryWorker = new ActionBlock<ImportJobDescriptor>(async
                 job =>
                 {
-                    try
-                    {
-                        BathymetryProgress.JobStarting(job);
-                    }
-                    catch (Exception e)
-                    {
-                        job.Exception = e;
-                    }
+                    BathymetryProgress.JobStarting(job);
                     if (Directory.Exists(Path.GetDirectoryName(job.DestinationFilename)))
                     {
                         //Debug.WriteLine("{0} About to import {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
@@ -299,7 +292,6 @@ namespace ESME.Environment
         public string DestinationFilename { get; set; }
         public uint SampleCount { get; set; }
         public Action<ImportJobDescriptor> CompletionAction { get; set; }
-        public Exception Exception { get; set; }
     }
 
     public class ImportProgressCollection : ReadOnlyObservableCollection<ImportProgressViewModel>

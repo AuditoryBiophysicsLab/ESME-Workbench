@@ -39,7 +39,7 @@ namespace DavesWPFTester
             Initialize();
         }
 
-        public RangeComplexesViewModel RangeComplexesViewModel { get; private set; }
+        //public RangeComplexesViewModel RangeComplexesViewModel { get; private set; }
         public ImportProgressCollection ImportProgressCollection { get; private set; }
         public RangeComplexes RangeComplexes { get; set; }
 
@@ -290,7 +290,7 @@ namespace DavesWPFTester
         async void Initialize()
         {
             RangeComplexes = RangeComplexes.Singleton;
-            RangeComplexesViewModel = new RangeComplexesViewModel(RangeComplexes.Singleton);
+            //RangeComplexesViewModel = new RangeComplexesViewModel(RangeComplexes.Singleton);
             ImportProgressCollection = ImportProgressCollection.Singleton;
             try
             {
