@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -24,9 +25,14 @@ namespace ESME.Environment.NAVO
                 },
             };
             process.Start();
-            if (process.HasExited) return process.StandardOutput.ReadToEnd();
+            if (process.HasExited)
+            {
+                Debug.WriteLine("{0} {1} has completed early", DateTime.Now, Path.GetFileNameWithoutExtension(extractionProgramPath));
+                return process.StandardOutput.ReadToEnd();
+            }
             try { process.PriorityClass = ProcessPriorityClass.Idle; } catch {}
             while (!process.HasExited) await TaskEx.Delay(50);
+            Debug.WriteLine("{0} {1} has completed", DateTime.Now, Path.GetFileNameWithoutExtension(extractionProgramPath));
             return process.StandardOutput.ReadToEnd();
         }
     }

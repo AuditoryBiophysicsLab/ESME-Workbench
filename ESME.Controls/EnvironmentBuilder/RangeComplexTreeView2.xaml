@@ -77,8 +77,8 @@
       <TreeViewItem ToolTip="{Binding ToolTip}" Margin="-20 0 0 0">
         <TreeViewItem.Header>
           <Grid>
-            <ProgressBar Width="200" Value="{Binding LoadProgress}"
-                         Visibility="{Binding IsLoading, Converter={StaticResource FalseVisibleTrueCollapsed}}" />
+            <ProgressBar Width="200" Value="{Binding ImportProgressPercent}"
+                         Visibility="{Binding IsLoading, Converter={StaticResource TrueVisibleFalseCollapsed}}" />
             <TextBlock Text="{Binding Name}" />
           </Grid>
         </TreeViewItem.Header>

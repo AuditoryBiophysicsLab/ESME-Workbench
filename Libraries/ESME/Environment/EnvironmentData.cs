@@ -3,27 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using C5;
 using ESME.Environment.NAVO;
 using HRC.Collections;
 using HRC.LinqStatistics;
 using HRC.Navigation;
-using System.Windows;
 
 namespace ESME.Environment
 {
     [Serializable]
     public class EnvironmentData<T> : System.Collections.Generic.IList<T> where T : EarthCoordinate, new()
     {
-        public static readonly List<Type> ReferencedTypes = new List<Type>
-        {
-                typeof (EarthCoordinate),
-                typeof (Geo),
-                typeof (Point),
-                typeof (T),
-        };
-
         readonly List<T> _arrayList = new List<T>();
 
         public T this[int index] { get { return _arrayList[index]; } }
@@ -121,7 +111,7 @@ namespace ESME.Environment
                 return _twoDIndex[lonIndex, latIndex];
             }
         }
-        T[,] _twoDIndex;
+        [NonSerialized] T[,] _twoDIndex;
 
         public static EnvironmentData<T> Decimate(EnvironmentData<T> source, int outputWidth, int outputHeight)
         {
@@ -250,24 +240,6 @@ namespace ESME.Environment
         }
         #endregion
 
-        private static double[] SortedList(IEnumerable<double> rawEnumerable)
-        {
-            var dedupeList = new HashedArrayList<double>();
-            dedupeList.AddAll(rawEnumerable);
-            dedupeList.Sort();
-            return dedupeList.ToArray();
-            //var result = new List<double>();
-            //for (var index = 0; index < rawList.Count - 1; index++)
-            //{
-            //    result.Add(Math.Round(rawList[index], 4));
-            //    int duplicateCount;
-            //    for (duplicateCount = 0; duplicateCount < (rawList.Count - 1 - index); duplicateCount++)
-            //        if (Math.Round(rawList[index + duplicateCount], 4) != Math.Round(rawList[index + duplicateCount + 1], 4)) break;
-            //    index += duplicateCount;
-            //}
-            //return result;
-        }
-
         static double CalculateResolution(System.Collections.Generic.IList<double> axis)
         {
             var differences = new List<double>();
@@ -286,7 +258,6 @@ namespace ESME.Environment
             }
         }
 
-        [XmlIgnore]
         public double[] Longitudes
         {
             get
@@ -296,10 +267,9 @@ namespace ESME.Environment
             }
         }
 
-        [XmlIgnore]
+        [NonSerialized]
         double[] _longitudes;
 
-        [XmlIgnore]
         public double[] Latitudes
         {
             get
@@ -309,7 +279,7 @@ namespace ESME.Environment
             }
         }
 
-        [XmlIgnore]
+        [NonSerialized]
         double[] _latitudes;
 
         void CreateLatLonIndices()
@@ -360,7 +330,7 @@ namespace ESME.Environment
         IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
         #endregion
     }
-
+#if false
     internal class LatLonKey : IComparer<LatLonKey>, IComparable<LatLonKey>
     {
         public LatLonKey(Geo geo)
@@ -427,11 +397,11 @@ namespace ESME.Environment
         public override string ToString() { return _key.ToString(); }
         public override int GetHashCode() { return ToString().GetHashCode(); }
     }
+#endif
 
     [Serializable]
     public class TimePeriodEnvironmentData<T> where T : EarthCoordinate, new()
     {
-        public static readonly List<Type> ReferencedTypes = new List<Type>(EnvironmentData<EarthCoordinate<T>>.ReferencedTypes);
         public TimePeriodEnvironmentData() { EnvironmentData = new EnvironmentData<T>(); }
 
         public NAVOTimePeriod TimePeriod { get; set; }

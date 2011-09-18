@@ -38,8 +38,6 @@ namespace ESME.Environment
     [Serializable]
     public class SoundSpeedField : TimePeriodEnvironmentData<SoundSpeedProfile>
     {
-        new public static readonly List<Type> ReferencedTypes = new List<Type>(TimePeriodEnvironmentData<SoundSpeedProfile>.ReferencedTypes);
-
         public SoundSpeedField() { DeepestPoint = null; }
 
         [XmlIgnore]

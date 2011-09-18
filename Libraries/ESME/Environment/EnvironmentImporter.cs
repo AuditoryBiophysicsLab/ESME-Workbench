@@ -270,6 +270,12 @@ namespace ESME.Environment
         {
             foreach (var jobDescriptor in jobDescriptors)
             {
+                Import(jobDescriptor);
+            }
+        }
+
+        public static void Import(ImportJobDescriptor jobDescriptor)
+        {
                 switch (jobDescriptor.DataType)
                 {
                     case EnvironmentDataType.Bathymetry:
@@ -291,7 +297,6 @@ namespace ESME.Environment
                         WindProgress.Post(jobDescriptor);
                         break;
                 }
-            }
         }
     }
 
@@ -353,6 +358,7 @@ namespace ESME.Environment
                 IsFaulted = _importer.Completion.IsFaulted;
                 if (IsFaulted)
                 {
+                    Debug.WriteLine("{0} Importer has caught an exception.  Message follows.", DateTime.Now);
                     System.Media.SystemSounds.Beep.Play();
                     Status = "Error";
                     ToolTip = "";
@@ -360,6 +366,7 @@ namespace ESME.Environment
                         ToolTip += FormatExceptionMessage(ex, 0) + "\r\n";
                     ToolTip.Remove(ToolTip.Length - 2, 2);
                     ToolTip.Trim();
+                    Debug.WriteLine("{0} {1}", DateTime.Now, ToolTip);
                 }
             });
         }

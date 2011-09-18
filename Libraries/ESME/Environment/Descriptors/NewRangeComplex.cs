@@ -20,7 +20,7 @@ namespace ESME.Environment.Descriptors
     {
         NewRangeComplex(string simAreaPath, string rangeComplexName, bool isCreate, Dispatcher dispatcher)
         {
-            IsLoading = false;
+            IsLoading = true;
             _dispatcher = dispatcher;
             var rangeComplexPath = Path.Combine(simAreaPath, rangeComplexName);
             Name = rangeComplexName;
@@ -62,6 +62,7 @@ namespace ESME.Environment.Descriptors
                 AreaCollection = new ObservableConcurrentDictionary<string, RangeComplexArea>();
                 AreaList = ObservableList<RangeComplexArea>.FromObservableConcurrentDictionary(AreaCollection, kvp => kvp.Value, (kvp, ac) => kvp.Key == ac.Name, kvp => kvp.Value.Name);
             });
+            IsLoading = false;
             UpdateAreas();
             if ((EnvironmentFiles.GeoRect == null) || (!EnvironmentFiles.GeoRect.Contains(GeoRect))) EnvironmentFiles.ReextractionRequired = true;
 
@@ -177,31 +178,29 @@ namespace ESME.Environment.Descriptors
         }
 
         #region Validation
-        List<ImportJobDescriptor> ValidateEnvironment()
+        void ValidateEnvironment()
         {
-            var jobs = new List<ImportJobDescriptor>();
             var result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Sediment, 5, true);
-            if (result != null) jobs.Add(result.Item2);
+            if (result != null) QueueImportJob(result.Item2);
             result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.BottomLoss, 15, true);
-            if (result != null) jobs.Add(result.Item2);
+            if (result != null) QueueImportJob(result.Item2);
             result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Wind, 60, true);
-            if (result != null) jobs.Add(result.Item2);
+            if (result != null) QueueImportJob(result.Item2);
             foreach (var month in NAVOConfiguration.AllMonths)
             {
                 result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Temperature, 15, true, month);
-                if (result != null) jobs.Add(result.Item2);
+                if (result != null) QueueImportJob(result.Item2);
                 result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Salinity, 15, true, month);
-                if (result != null) jobs.Add(result.Item2);
-                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, 15, false, month);
+                if (result != null) QueueImportJob(result.Item2);
+                CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, 15, false, month);
                 //LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Temperature);
                 //LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Salinity);
             }
             foreach (var season in NAVOConfiguration.AllSeasons)
             {
-                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, 15, false, season);
+                CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, 15, false, season);
                 //LinkToSourceMonths(result.Item1, season, EnvironmentDataType.SoundSpeed);
             }
-            return jobs;
         }
         
         void LinkToSourceMonths<TEnvironment, TData>(TEnvironment envFile, NAVOTimePeriod timePeriod, EnvironmentDataType sourceType) where TEnvironment: EnvironmentFile<TData> where TData : class
@@ -231,22 +230,22 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        EnvironmentFile NewEnvironmentFile(string fileName, uint sampleCount, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
+        EnvironmentFile NewEnvironmentFile(string fileName, uint sampleCount, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
         {
             switch (dataType)
             {
                 case EnvironmentDataType.BottomLoss:
-                    return new BottomLossFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod);
+                    return new BottomLossFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
                 case EnvironmentDataType.Salinity:
-                    return new SalinityFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod);
+                    return new SalinityFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
                 case EnvironmentDataType.Sediment:
-                    return new SedimentFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod);
+                    return new SedimentFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
                 case EnvironmentDataType.SoundSpeed:
-                    return new SoundSpeedFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod);
+                    return new SoundSpeedFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
                 case EnvironmentDataType.Temperature:
-                    return new TemperatureFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod);
+                    return new TemperatureFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
                 case EnvironmentDataType.Wind:
-                    return new WindFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod);
+                    return new WindFile(DataPath, fileName, sampleCount, GeoRect, dataType, timePeriod, resolution);
                 default:
                     throw new ApplicationException(string.Format("Unknown environment data type: {0}", dataType));
             }
@@ -279,22 +278,22 @@ namespace ESME.Environment.Descriptors
                 switch (dataType)
                 {
                     case EnvironmentDataType.BottomLoss:
-                        envFile = BottomLossFile = (BottomLossFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod);
+                        envFile = BottomLossFile = (BottomLossFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.Salinity:
-                        envFile = SalinityFile.Months[timePeriod] = (SalinityFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod);
+                        envFile = SalinityFile.Months[timePeriod] = (SalinityFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.Sediment:
-                        envFile = SedimentFile = (SedimentFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod);
+                        envFile = SedimentFile = (SedimentFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.Temperature:
-                        envFile = TemperatureFile.Months[timePeriod] = (TemperatureFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod);
+                        envFile = TemperatureFile.Months[timePeriod] = (TemperatureFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.SoundSpeed:
-                        envFile = SoundSpeedFile.Months[timePeriod] = (SoundSpeedFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod);
+                        envFile = SoundSpeedFile.Months[timePeriod] = (SoundSpeedFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     case EnvironmentDataType.Wind:
-                        envFile = WindFile = (WindFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod);
+                        envFile = WindFile = (WindFile)NewEnvironmentFile(fileName, sampleCount, dataType, timePeriod, resolution);
                         break;
                     default:
                         throw new ApplicationException(string.Format("Unknown environment data type: {0}", dataType));
@@ -335,24 +334,6 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        #region public bool IsEnabled { get; private set; }
-
-        public bool IsLoading
-        {
-            get { return _isLoading; }
-            private set
-            {
-                if (_isLoading == value) return;
-                _isLoading = value;
-                NotifyPropertyChanged(IsEnabledChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.IsLoading);
-        bool _isLoading;
-
-        #endregion
-
         #region public string ToolTip { get; set; }
 
         public string ToolTip
@@ -377,14 +358,7 @@ namespace ESME.Environment.Descriptors
             result.OpArea = result.CreateAreaPrivate(String.Format("{0}_OpArea", rangeComplexName), opAreaLimits);
             result.SimArea = result.CreateAreaPrivate(String.Format("{0}_SimArea", rangeComplexName), simAreaLimits);
             result.UpdateAreas();
-            var importJobs = result.ValidateEnvironment();
-            foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
-            NAVOImporter.Import(importJobs);
-            var completionTasks = (from job in importJobs
-                                   select job.CompletionTask).ToList();
-            result.LoadTaskTotal = completionTasks.Count();
-            foreach (var task in completionTasks) task.ContinueWith(t => result.IncrementCompletedTasks());
-            TaskEx.WhenAll(completionTasks).ContinueWith(task => result.IsLoading = true);
+            result.ValidateEnvironment();
             return result;
         }
 
@@ -396,76 +370,118 @@ namespace ESME.Environment.Descriptors
                 result.OpArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item6)];
                 result.SimArea = result.AreaCollection[Path.GetFileNameWithoutExtension(rangeComplexInfo.Item7)];
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 RangeComplexes.Singleton.DeleteRangeComplexFromDisk(result.Name);
                 throw new InvalidOperationException(string.Format("The range complex \"{0}\" is missing critical files or directories.\r\nThe range complex has been deleted", result.Name));
             }
             result.UpdateAreas();
-            var importJobs = result.ValidateEnvironment();
-            foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
-            NAVOImporter.Import(importJobs);
-            var completionTasks = (from job in importJobs
-                                   select job.CompletionTask).ToList();
-            result.LoadTaskTotal = completionTasks.Count();
-            foreach (var task in completionTasks) task.ContinueWith(t => result.IncrementCompletedTasks());
-            TaskEx.WhenAll(completionTasks).ContinueWith(task => result.IsLoading = true);
+            result.ValidateEnvironment();
             return result;
         }
 
-        #region public int LoadTaskTotal { get; set; }
+        #region Import job queueing
+        readonly object _queueLock = new object();
 
-        public int LoadTaskTotal
+        public void QueueImportJob(ImportJobDescriptor job)
         {
-            get { return _loadTaskTotal; }
+            lock (_queueLock)
+            {
+                job.CompletionTask.ContinueWith(task =>
+                {
+                    JobCompleted();
+                    task.Dispose();
+                });
+                NAVOImporter.Import(job);
+                QueuedJobCount++;
+                IsLoading = true;
+            }
+        }
+
+        #region public int QueuedJobCount { get; set; }
+
+        public int QueuedJobCount
+        {
+            get { return _queuedJobCount; }
             set
             {
-                if (_loadTaskTotal == value) return;
-                _loadTaskTotal = value;
+                if (_queuedJobCount == value) return;
+                _queuedJobCount = value;
                 NotifyPropertyChanged(LoadTaskTotalChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs LoadTaskTotalChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.LoadTaskTotal);
-        int _loadTaskTotal;
+        static readonly PropertyChangedEventArgs LoadTaskTotalChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.QueuedJobCount);
+        int _queuedJobCount;
 
         #endregion
 
-        #region public int LoadTasksCompleted { get; set; }
-        public int LoadTasksCompleted { get; private set; }
+        #region public int CompletedJobCount { get; set; }
+        public int CompletedJobCount { get; private set; }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        void IncrementCompletedTasks()
+        void JobCompleted()
         {
-            LoadTasksCompleted++;
+            var isLoading = _isLoading;
+            lock (_queueLock)
+            {
+                CompletedJobCount++;
+                ImportProgressPercent = (int)(((float)CompletedJobCount / QueuedJobCount) * 100);
+                if (CompletedJobCount == QueuedJobCount)
+                {
+                    CompletedJobCount = 0;
+                    QueuedJobCount = 0;
+                    isLoading = false;
+                }
+            }
             NotifyPropertyChanged(LoadTasksCompletedChangedEventArgs);
-            LoadProgress = (int)(((float)LoadTasksCompleted / LoadTaskTotal) * 100);
+            IsLoading = isLoading;
         }
 
-        static readonly PropertyChangedEventArgs LoadTasksCompletedChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.LoadTasksCompleted);
+        static readonly PropertyChangedEventArgs LoadTasksCompletedChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.CompletedJobCount);
         #endregion
 
-        #region public int LoadProgress { get; set; }
+        #region public int ImportProgressPercent { get; set; }
 
-        public int LoadProgress
+        public int ImportProgressPercent
         {
-            get { return _loadProgress; }
+            get { return _importProgressPercent; }
             set
             {
-                if (_loadProgress == value) return;
-                _loadProgress = value;
+                if (_importProgressPercent == value) return;
+                _importProgressPercent = value;
                 NotifyPropertyChanged(LoadProgressChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs LoadProgressChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.LoadProgress);
-        int _loadProgress;
+        static readonly PropertyChangedEventArgs LoadProgressChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.ImportProgressPercent);
+        int _importProgressPercent;
+
+        #endregion
+
+        #region public bool IsLoading { get; private set; }
+
+        public bool IsLoading
+        {
+            get { return _isLoading; }
+            private set
+            {
+                if (_isLoading == value) return;
+                _isLoading = value;
+                NotifyPropertyChanged(IsEnabledChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.IsLoading);
+        bool _isLoading;
+
+        #endregion
 
         #endregion
 
         public RangeComplexArea CreateArea(string areaName, IEnumerable<Geo> areaLimits)
         {
-            if (!IsLoading) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
+            if (IsLoading) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
             return CreateAreaPrivate(areaName, areaLimits);
         }
 
@@ -475,13 +491,12 @@ namespace ESME.Environment.Descriptors
             if (AreaCollection.ContainsKey(areaName)) throw new ArgumentException(string.Format("Area {0} already exists", areaName), "areaName");
             var newArea = RangeComplexArea.Create(this, areaName, areaLimits);
             AreaCollection.Add(newArea.Name, newArea); 
-            NAVOImporter.Import(newArea.ImportJobs);
             return newArea;
         }
 
         public void RemoveArea(string areaName)
         {
-            if (!IsLoading) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
+            if (IsLoading) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
             RemoveAreaPrivate(areaName);
         }
 

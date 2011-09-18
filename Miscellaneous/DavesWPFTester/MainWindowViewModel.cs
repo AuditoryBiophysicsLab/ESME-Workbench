@@ -29,6 +29,7 @@ namespace DavesWPFTester
         public MainWindowViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBoxService, IHRCOpenFileService openFileService, IHRCSaveFileService saveFileService,
                                    IUIVisualizerService visualizerService)
         {
+            System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.BelowNormal;
             _viewAwareStatus = viewAwareStatus;
             _messageBoxService = messageBoxService;
             _openFileService = openFileService;
@@ -76,7 +77,7 @@ namespace DavesWPFTester
                     {
                         while (!RangeComplexes.IsEnabled) await
                         TaskEx.Delay(10);
-                        RangeComplexes.CreateRangeComplex(string.Format("Test{0}", i), 0, 29.3590, -79.2195, 0, coordinates, coordinates);
+                        RangeComplexes.CreateRangeComplex(string.Format("Test {00}", i), 0, 29.3590, -79.2195, 0, coordinates, coordinates);
                     }
                     catch (Exception e)
                     {
@@ -110,7 +111,7 @@ namespace DavesWPFTester
                     {
                         while (!RangeComplexes.IsEnabled) await
                         TaskEx.Delay(10);
-                        RangeComplexes.RemoveRangeComplex(string.Format("Test{0}", i));
+                        RangeComplexes.RemoveRangeComplex(string.Format("Test {0:00}", i));
                     }
                     catch (ArgumentException) { }
                     catch (KeyNotFoundException) { }
@@ -152,10 +153,40 @@ namespace DavesWPFTester
             {
                 try
                 {
+                    var newAreaName = string.Format("Test {0:00}", i);
                     while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
-                    RangeComplexes.RangeComplexCollection[string.Format("Test{0}", i)].CreateArea(string.Format("Test{0}", i), coordinates);
+                    RangeComplexes[newAreaName].CreateArea(newAreaName, coordinates);
                 } catch {}
             }
+        }
+        #endregion
+
+        #region RemoveManyAreasCommand
+        public SimpleCommand<object, object> RemoveManyAreasCommand
+        {
+            get { return _removeManyAreas ?? (_removeManyAreas = new SimpleCommand<object, object>(delegate { return IsRemoveManyAreasCommandEnabled; }, delegate { RemoveManyAreasHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _removeManyAreas;
+
+        bool IsRemoveManyAreasCommandEnabled
+        {
+            get { return true; }
+        }
+
+        async void RemoveManyAreasHandler()
+        {
+            for (var i = 0; i < 50; i++)
+            {
+                try
+                {
+                    var oldAreaName = string.Format("Test {0:00}", i);
+                    while (!RangeComplexes.IsEnabled) await TaskEx.Delay(10);
+                    RangeComplexes[oldAreaName].RemoveArea(oldAreaName);
+                }
+                catch { }
+            }
+
         }
         #endregion
 
@@ -234,7 +265,7 @@ namespace DavesWPFTester
             };
             try
             {
-                while (!RangeComplexes.RangeComplexCollection["Test"].IsLoading) await TaskEx.Delay(10);
+                while (RangeComplexes.RangeComplexCollection["Test"].IsLoading) await TaskEx.Delay(10);
                 RangeComplexes.RangeComplexCollection["Test"].CreateArea("Test", coordinates);
             }
             catch (Exception e)
@@ -256,7 +287,7 @@ namespace DavesWPFTester
         {
             try
             {
-                while (!RangeComplexes.RangeComplexCollection["Test"].IsLoading) await TaskEx.Delay(10);
+                while (RangeComplexes.RangeComplexCollection["Test"].IsLoading) await TaskEx.Delay(10);
                 RangeComplexes.RangeComplexCollection["Test"].RemoveArea("Test");
             }
             catch (Exception e)
@@ -287,6 +318,58 @@ namespace DavesWPFTester
         }
         #endregion
 
+        #region ImportTestBathymetryCommand
+        public SimpleCommand<object, object> ImportTestBathymetryCommand
+        {
+            get { return _importTestBathymetry ?? (_importTestBathymetry = new SimpleCommand<object, object>(delegate { return IsImportTestBathymetryCommandEnabled; }, delegate { ImportTestBathymetryHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _importTestBathymetry;
+
+        bool IsImportTestBathymetryCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void ImportTestBathymetryHandler()
+        {
+            try
+            {
+                RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"].ImportBathymetry(RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"]["0.50min.bathymetry"]);
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError(e.Message);
+            }
+        }
+        #endregion
+
+        #region RemoveTestBathymetryCommand
+        public SimpleCommand<object, object> RemoveTestBathymetryCommand
+        {
+            get { return _removeTestBathymetry ?? (_removeTestBathymetry = new SimpleCommand<object, object>(delegate { return IsRemoveTestBathymetryCommandEnabled; }, delegate { RemoveTestBathymetryHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _removeTestBathymetry;
+
+        bool IsRemoveTestBathymetryCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void RemoveTestBathymetryHandler()
+        {
+            try
+            {
+                RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"].RemoveBathymetry(RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"]["0.50min.bathymetry"]);
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError(e.Message);
+            }
+        }
+        #endregion
+
         #region LoadTestBathymetryCommand
         public SimpleCommand<object, object> LoadTestBathymetryCommand
         {
@@ -300,7 +383,36 @@ namespace DavesWPFTester
             get { return true; }
         }
 
-        void LoadTestBathymetryHandler() { RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area_200km"]["0.50min.bathymetry"].GetMyDataAsync(); }
+        void LoadTestBathymetryHandler()
+        {
+            try
+            {
+                RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"]["0.50min.bathymetry"].GetMyDataAsync();
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError(e.Message);
+            }
+        }
+        #endregion
+
+        #region ClearTestBathymetryCommand
+        public SimpleCommand<object, object> ClearTestBathymetryCommand
+        {
+            get { return _clearTestBathymetry ?? (_clearTestBathymetry = new SimpleCommand<object, object>(delegate { return IsClearTestBathymetryCommandEnabled; }, delegate { ClearTestBathymetryHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _clearTestBathymetry;
+
+        bool IsClearTestBathymetryCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void ClearTestBathymetryHandler()
+        {
+            RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area"]["0.50min.bathymetry"].Reset();
+        }
         #endregion
 
         async void Initialize()

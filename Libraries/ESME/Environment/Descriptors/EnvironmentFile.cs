@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using Cinch;
@@ -21,8 +22,9 @@ namespace ESME.Environment.Descriptors
     {
         protected EnvironmentFile() { }
 
-        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
+        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
         {
+            Resolution = resolution;
             FileName = fileName;
             DataPath = dataPath;
             IsCached = false;
@@ -178,6 +180,23 @@ namespace ESME.Environment.Descriptors
         GeoRect _geoRect;
 
         #endregion
+        #region public float Resolution { get; private set; }
+
+        public float Resolution
+        {
+            get { return _resolution; }
+            private set
+            {
+                if (Math.Abs(_resolution - value) < 0.00001f) return;
+                _resolution = value;
+                NotifyPropertyChanged(ResolutionChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs ResolutionChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.Resolution);
+        float _resolution;
+
+        #endregion
         #region public DataAvailability DataAvailability { get; protected set; }
         public DataAvailability DataAvailability
         {
@@ -229,6 +248,7 @@ namespace ESME.Environment.Descriptors
             }
         }
         #endregion
+
         public EnvironmentDataType DataType { get; protected set; }
         public NAVOTimePeriod TimePeriod { get; private set; }
         public List<EnvironmentFile> RequiredFiles { get; internal set; }
@@ -271,8 +291,8 @@ namespace ESME.Environment.Descriptors
     {
         protected EnvironmentFile() { Initialize(); }
 
-        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { Initialize(); }
+        public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Initialize(); }
 
         void IDeserializationCallback.OnDeserialization(object sender)
         {
@@ -290,12 +310,17 @@ namespace ESME.Environment.Descriptors
         public override Task GetDataAsync() { return GetMyDataAsync(); }
         public Task<T> GetMyDataAsync()
         {
-            if (DataTask == null) throw new ApplicationException("DataTask is null");
+            if (DataTask == null) throw new InvalidOperationException("Requested data has not been imported");
             if (DataTask.Status != TaskStatus.Created) return DataTask;
             DataTask.Start();
             DataAvailability = DataAvailability.Loading;
             DataTask.ContinueWith(task => DataAvailability = DataAvailability.Available);
             return DataTask;
+        }
+
+        public virtual void Reset()
+        {
+            DataAvailability = DataAvailability.NotLoaded;
         }
 
         async Task GetRequiredFilesAsync()
@@ -324,8 +349,15 @@ namespace ESME.Environment.Descriptors
             [MethodImpl(MethodImplOptions.Synchronized)]
             set
             {
-                if (_dataTask != null) throw new ApplicationException("DataTask is already set");
+                if (_dataTask != null)
+                {
+                    if (_dataTask.IsCompleted)
+                        _dataTask.Dispose();
+                    else if (_dataTask.Status != TaskStatus.Created) 
+                        throw new InvalidOperationException("Data is being imported and cannot be cleared at this time");
+                }
                 _dataTask = value;
+
             }
         }
         [NonSerialized] Task<T> _dataTask;
@@ -373,28 +405,41 @@ namespace ESME.Environment.Descriptors
     }
 
     [Serializable]
-    public class TemperatureFile : EnvironmentFile<SoundSpeed>
+    public sealed class TemperatureFile : EnvironmentFile<SoundSpeed>
     {
-        public TemperatureFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+        public TemperatureFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
 
         public TemperatureFile() { DataType = EnvironmentDataType.Temperature; }
+
+        public override void Reset() 
+        {
+            base.Reset();
+            DataTask = IsCached ? new Task<SoundSpeed>(() => SoundSpeed.Load(Path.Combine(DataPath, FileName))) : null;
+        }
     }
 
     [Serializable]
-    public class SalinityFile : EnvironmentFile<SoundSpeed>
+    public sealed class SalinityFile : EnvironmentFile<SoundSpeed>
     {
-        public SalinityFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+        public SalinityFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
 
         public SalinityFile() { DataType = EnvironmentDataType.Salinity; }
+
+        public override void Reset() 
+        {
+            base.Reset();
+            DataTask = IsCached ? new Task<SoundSpeed>(() => SoundSpeed.Load(Path.Combine(DataPath, FileName))) : null;
+            base.Reset();
+        }
     }
 
     [Serializable]
-    public class SoundSpeedFile : EnvironmentFile<SoundSpeed>
+    public sealed class SoundSpeedFile : EnvironmentFile<SoundSpeed>
     {
-        public SoundSpeedFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+        public SoundSpeedFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { }
 
         public SoundSpeedFile()
         {
@@ -402,7 +447,7 @@ namespace ESME.Environment.Descriptors
             IsCached = false;
         }
 
-        public async Task<SoundSpeed> FooAsync(IDictionary<string, EnvironmentFile> environmentFiles, EnvironmentFile<Bathymetry> bathymetryFile)
+        public async Task<SoundSpeed> FooAsync(IDictionary<string, EnvironmentFile> environmentFiles, EnvironmentFile<Bathymetry> bathymetryFile, float resolution)
         {
             var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(TimePeriod).ToList();
 
@@ -439,34 +484,55 @@ namespace ESME.Environment.Descriptors
     }
 
     [Serializable]
-    public class SedimentFile : EnvironmentFile<Sediment>
+    public sealed class SedimentFile : EnvironmentFile<Sediment>
     {
-        public SedimentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
-    }
+        public SedimentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
 
-    [Serializable]
-    public class WindFile : EnvironmentFile<Wind>
-    {
-        public WindFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
-    }
-
-    [Serializable]
-    public class BathymetryFile : EnvironmentFile<Bathymetry>
-    {
-        public BathymetryFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, bool isCached)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod)
+        public override void Reset() 
         {
-            DataTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(dataPath, fileName)));
+            base.Reset();
+            DataTask = IsCached ? new Task<Sediment>(() => Sediment.Load(Path.Combine(DataPath, FileName))) : null;
         }
     }
 
     [Serializable]
-    public class BottomLossFile : EnvironmentFile<BottomLoss>
+    public sealed class WindFile : EnvironmentFile<Wind>
     {
-        public BottomLossFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { }
+        public WindFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
+
+        public override void Reset() 
+        {
+            base.Reset();
+            DataTask = IsCached ? new Task<Wind>(() => Wind.Load(Path.Combine(DataPath, FileName))) : null;
+        }
+    }
+
+    [Serializable]
+    public sealed class BathymetryFile : EnvironmentFile<Bathymetry>
+    {
+        public BathymetryFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
+
+        public override void Reset() 
+        {
+            base.Reset();
+            DataTask = IsCached ? new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(DataPath, FileName))) : null;
+        }
+    }
+
+    [Serializable]
+    public sealed class BottomLossFile : EnvironmentFile<BottomLoss>
+    {
+        public BottomLossFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
+
+        public override void Reset()
+        {
+            base.Reset();
+            DataTask = IsCached ? new Task<BottomLoss>(() => BottomLoss.Load(Path.Combine(DataPath, FileName))) : null;
+        }
     }
 
     public enum EnvironmentDataType

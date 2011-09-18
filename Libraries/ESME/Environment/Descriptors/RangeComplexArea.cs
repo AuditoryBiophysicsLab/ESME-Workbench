@@ -26,7 +26,6 @@ namespace ESME.Environment.Descriptors
             BathymetryFiles = RangeComplexToken.Load(Path.Combine(BathymetryPath, Name + ".token"));
             BathymetryList = BathymetryFiles.GetObservableWrapper<BathymetryFile>();
             Directory.CreateDirectory(BathymetryPath);
-            ImportJobs = new List<ImportJobDescriptor>();
             UpdateAvailableBathymetry();
             IsEnabled = true;
         }
@@ -50,36 +49,17 @@ namespace ESME.Environment.Descriptors
                 // If the file does not exist, or it's newer than the token, or it's not in the token's list of files, 
                 // or it's length is different from the one stored in the token, or it's last write time is different from the one sorted in the token.
                 // If any of these things are true, we want to re-extract the file from the database
-                if (((fileInfo == null) || (fileInfo.LastWriteTime > BathymetryFiles.LastWriteTime) ||
+                if ((fileInfo == null) || (fileInfo.LastWriteTime > BathymetryFiles.LastWriteTime) ||
                     (BathymetryFiles[fileName] == null) || (fileInfo.Length != BathymetryFiles[fileName].FileSize) ||
-                    (fileInfo.LastWriteTime != BathymetryFiles[fileName].LastWriteTime)) && (sampleCount <= 512000))
+                    (fileInfo.LastWriteTime != BathymetryFiles[fileName].LastWriteTime))
                 {
-                    var jobDescriptor = new ImportJobDescriptor
-                    {
-                        DataType = EnvironmentDataType.Bathymetry,
-                        GeoRect = GeoRect,
-                        DestinationFilename = localPath,
-                        Resolution = resolution,
-                        CompletionFunction = arg =>
-                        {
-                            var job = (ImportJobDescriptor)arg;
-                            BathymetryFiles[fileName] = new BathymetryFile(BathymetryPath, fileName,
-                                                                           job.SampleCount, job.GeoRect, EnvironmentDataType.Bathymetry,
-                                                                           NAVOTimePeriod.Invalid, true);
-                            return job;
-                        }
-                    };
-                    jobDescriptor.CompletionTask = new Task<ImportJobDescriptor>(jobDescriptor.CompletionFunction, jobDescriptor);
-                    ImportJobs.Add(jobDescriptor);
+                    var bathymetryFile = new BathymetryFile(BathymetryPath, fileName, sampleCount, GeoRect,
+                                                                   EnvironmentDataType.Bathymetry, NAVOTimePeriod.Invalid, resolution);
+                    BathymetryFiles[fileName] = bathymetryFile;
+                    if (sampleCount <= 512000)
+                        ImportBathymetry(bathymetryFile);
                 }
-                else
-                {
-                    if (fileInfo == null)
-                        BathymetryFiles[fileName] = new BathymetryFile(BathymetryPath, fileName,
-                                                                       sampleCount, GeoRect, EnvironmentDataType.Bathymetry,
-                                                                       NAVOTimePeriod.Invalid, false);
-                    else ((BathymetryFile)BathymetryFiles[fileName]).DataTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(BathymetryPath, fileName)));
-                }
+                else ((BathymetryFile)BathymetryFiles[fileName]).Reset();
             }
         }
 
@@ -118,6 +98,40 @@ namespace ESME.Environment.Descriptors
             return new RangeComplexArea(rangeComplex, areaName, overlay.Shapes[0]);
         }
 
+        public void ImportBathymetry(BathymetryFile bathymetryFile)
+        {
+            var jobDescriptor = new ImportJobDescriptor
+            {
+                DataType = EnvironmentDataType.Bathymetry,
+                GeoRect = GeoRect,
+                DestinationFilename = Path.Combine(BathymetryPath, bathymetryFile.FileName),
+                Resolution = bathymetryFile.Resolution,
+                CompletionFunction = arg =>
+                {
+                    var job = (ImportJobDescriptor)arg;
+                    var thisFile = (BathymetryFile)BathymetryFiles[bathymetryFile.FileName];
+                    thisFile.GeoRect = job.GeoRect;
+                    thisFile.SampleCount = job.SampleCount;
+                    thisFile.IsCached = true;
+                    thisFile.Reset();
+                    BathymetryFiles[bathymetryFile.FileName] = thisFile;
+                    return job;
+                }
+            };
+            jobDescriptor.CompletionTask = new Task<ImportJobDescriptor>(jobDescriptor.CompletionFunction, jobDescriptor);
+            _rangeComplex.QueueImportJob(jobDescriptor);
+        }
+
+        public void RemoveBathymetry(BathymetryFile bathymetryFile)
+        {
+            if (bathymetryFile.SampleCount < 512000) throw new InvalidOperationException("This bathymetry file may not be removed.  You may, however, choose to re-import it");
+            var thisFile = (BathymetryFile)BathymetryFiles[bathymetryFile.FileName];
+            File.Delete(Path.Combine(BathymetryPath, bathymetryFile.FileName));
+            thisFile.IsCached = false;
+            thisFile.Reset();
+            BathymetryFiles[bathymetryFile.FileName] = thisFile;
+        }
+
         internal void Remove()
         {
             File.Delete(Path.Combine(_rangeComplex.AreasPath, Name + ".ovr"));
@@ -135,8 +149,6 @@ namespace ESME.Environment.Descriptors
         {
             get { return (BathymetryFile)BathymetryFiles[resolutionString]; }
         }
-
-        public List<ImportJobDescriptor> ImportJobs { get; private set; }
 
         [NotNull] public ObservableList<BathymetryFile> BathymetryList { get; private set; }
 

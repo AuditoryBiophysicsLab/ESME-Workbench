@@ -18,7 +18,7 @@
         <StackPanel Orientation="Vertical" Margin="5">
           <Button Content="Add test range complex" Command="{Binding CreateTestRangeComplexCommand}" />
           <Button Content="Remove test range complex" Command="{Binding RemoveTestRangeComplexCommand}" />
-          <Button Content="Add 50 test complexes" Command="{Binding CreateManyRangeComplexesCommand}" />
+          <Button Content="Add 50 range complexes" Command="{Binding CreateManyRangeComplexesCommand}" />
           <Button Content="Delete 50 range complexes" Command="{Binding DeleteManyRangeComplexesCommand}" />
         </StackPanel>
       </GroupBox>
@@ -26,13 +26,17 @@
         <StackPanel Orientation="Vertical" Margin="5">
           <Button Content="Add test area" Command="{Binding CreateTestAreaCommand}" />
           <Button Content="Remove test area" Command="{Binding RemoveTestAreaCommand}" />
-          <Button Content="Dump test area" Command="{Binding DumpTestAreaCommand}" />
           <Button Content="Add 50 test areas" Command="{Binding CreateManyAreasCommand}" />
+          <Button Content="Remove 50 test areas" Command="{Binding RemoveManyAreasCommand}" />
+          <Button Content="Dump test area" Command="{Binding DumpTestAreaCommand}" />
         </StackPanel>
       </GroupBox>
       <GroupBox Header="Data" DockPanel.Dock="Bottom" Margin="5">
         <StackPanel Orientation="Vertical" Margin="5">
+          <Button Content="Import test bathymetry" Command="{Binding ImportTestBathymetryCommand}" />
+          <Button Content="Remove test bathymetry" Command="{Binding RemoveTestBathymetryCommand}" />
           <Button Content="Load test bathymetry" Command="{Binding LoadTestBathymetryCommand}" />
+          <Button Content="Clear test bathymetry" Command="{Binding ClearTestBathymetryCommand}" />
           <Button Content="Load test temperature" Command="{Binding LoadTestTemperatureCommand}" />
           <Button Content="Load test salinity" Command="{Binding LoadTestSalinityCommand}" />
           <Button Content="Load test soundspeed" Command="{Binding LoadTestSoundspeedCommand}" />

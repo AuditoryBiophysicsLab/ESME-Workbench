@@ -43,4 +43,12 @@ namespace ESME
     {
         void Save(string fileName);
     }
+
+    public interface ICanLoad<out T>
+    {
+        T Load(string fileName);
+    }
+
+    public interface IEnvironmentFile<out T> : ICanSave, ICanLoad<T>
+    { }
 }
