@@ -77,6 +77,7 @@ namespace ESME.Environment.Descriptors
         }
 
         public virtual Task GetDataAsync() { throw new NotImplementedException(); }
+        public virtual void Reset() { throw new NotImplementedException(); }
 
         #region public bool IsCached { get; set; }
 
@@ -318,7 +319,7 @@ namespace ESME.Environment.Descriptors
             return DataTask;
         }
 
-        public virtual void Reset()
+        public override void Reset()
         {
             DataAvailability = DataAvailability.NotLoaded;
         }
@@ -407,10 +408,15 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public sealed class TemperatureFile : EnvironmentFile<SoundSpeed>
     {
+        public static TemperatureFile None = new TemperatureFile { DataAvailability = DataAvailability.NotLoaded };
+        public TemperatureFile()
+        {
+            DataType = EnvironmentDataType.Temperature;
+            IsCached = false;
+        }
+
         public TemperatureFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
-
-        public TemperatureFile() { DataType = EnvironmentDataType.Temperature; }
 
         public override void Reset() 
         {
@@ -422,10 +428,15 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public sealed class SalinityFile : EnvironmentFile<SoundSpeed>
     {
+        public static SalinityFile None = new SalinityFile { DataAvailability = DataAvailability.NotLoaded };
+        public SalinityFile()
+        {
+            DataType = EnvironmentDataType.Salinity;
+            IsCached = false;
+        }
+
         public SalinityFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
-
-        public SalinityFile() { DataType = EnvironmentDataType.Salinity; }
 
         public override void Reset() 
         {
@@ -438,14 +449,17 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public sealed class SoundSpeedFile : EnvironmentFile<SoundSpeed>
     {
-        public SoundSpeedFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { }
-
+        public static SoundSpeedFile None = new SoundSpeedFile { DataAvailability = DataAvailability.NotLoaded };
         public SoundSpeedFile()
         {
             DataType = EnvironmentDataType.SoundSpeed;
             IsCached = false;
         }
+
+        public SoundSpeedFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { }
+
+        public BathymetryFile SelectedBathymetry { get; set; }
 
         public async Task<SoundSpeed> FooAsync(IDictionary<string, EnvironmentFile> environmentFiles, EnvironmentFile<Bathymetry> bathymetryFile, float resolution)
         {
@@ -486,8 +500,16 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public sealed class SedimentFile : EnvironmentFile<Sediment>
     {
+        public static SedimentFile None = new SedimentFile { DataAvailability = DataAvailability.NotLoaded };
+        SedimentFile()
+        {
+            DataType = EnvironmentDataType.SoundSpeed;
+            IsCached = false;
+        }
+
         public SedimentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
+
 
         public override void Reset() 
         {
@@ -499,6 +521,13 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public sealed class WindFile : EnvironmentFile<Wind>
     {
+        public static WindFile None = new WindFile { DataAvailability = DataAvailability.NotLoaded };
+        WindFile()
+        {
+            DataType = EnvironmentDataType.Wind;
+            IsCached = false;
+        }
+
         public WindFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
 
@@ -512,6 +541,13 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public sealed class BathymetryFile : EnvironmentFile<Bathymetry>
     {
+        public static BathymetryFile None = new BathymetryFile { DataAvailability = DataAvailability.NotLoaded };
+        BathymetryFile()
+        {
+            DataType = EnvironmentDataType.Bathymetry;
+            IsCached = false;
+        }
+
         public BathymetryFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
 
@@ -525,6 +561,13 @@ namespace ESME.Environment.Descriptors
     [Serializable]
     public sealed class BottomLossFile : EnvironmentFile<BottomLoss>
     {
+        public static BottomLossFile None = new BottomLossFile { DataAvailability = DataAvailability.NotLoaded };
+        BottomLossFile()
+        {
+            DataType = EnvironmentDataType.BottomLoss;
+            IsCached = false;
+        }
+
         public BottomLossFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
 

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Windows.Threading;
 using Cinch;
+using ESME.Environment.NAVO;
 using HRC;
 using HRC.Navigation;
 using HRC.Collections;
@@ -22,7 +23,7 @@ namespace ESME.Environment.Descriptors
         RangeComplexes()
         {
             _dispatcher = Dispatcher.CurrentDispatcher;
-            RangeComplexCollection = new ObservableConcurrentDictionary<string, NewRangeComplex>();
+            RangeComplexCollection = new ObservableConcurrentDictionary<string, NewRangeComplex> {{"None", NewRangeComplex.None}};
             RangeComplexList = ObservableList<NewRangeComplex>.FromObservableConcurrentDictionary(RangeComplexCollection, kvp => kvp.Value, (kvp, rc) => kvp.Value == rc);
         }
 
@@ -220,6 +221,232 @@ namespace ESME.Environment.Descriptors
                 }
                 catch (Exception) { }
             }
+        }
+
+        #region public NewRangeComplex SelectedRangeComplex { get; set; }
+
+        public NewRangeComplex SelectedRangeComplex
+        {
+            get { return _selectedRangeComplex; }
+            set
+            {
+                if (_selectedRangeComplex == value) return;
+                if (_selectedRangeComplex != NewRangeComplex.None)
+                    ClearEnvironment();
+                _selectedRangeComplex = value ?? NewRangeComplex.None;
+                if (_selectedRangeComplex != NewRangeComplex.None)
+                {
+                    SelectedWind = (WindFile)_selectedRangeComplex.EnvironmentFiles["data.wind"];
+                    SelectedBottomLoss = (BottomLossFile)_selectedRangeComplex.EnvironmentFiles["data.bottomloss"];
+                    SelectedSediment = (SedimentFile)_selectedRangeComplex.EnvironmentFiles["data.sediment"];
+                    if ((SelectedTimePeriod != NAVOTimePeriod.Invalid) && (SelectedBathymetry != null))
+                    {
+                        SelectedSoundSpeed = (SoundSpeedFile)_selectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
+                        SelectedSoundSpeed.SelectedBathymetry = SelectedBathymetry;
+                    }
+                }
+                NotifyPropertyChanged(SelectedRangeComplexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedRangeComplexChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedRangeComplex);
+        NewRangeComplex _selectedRangeComplex = NewRangeComplex.None;
+
+        #endregion
+
+        #region public NAVOTimePeriod SelectedTimePeriod { get; set; }
+
+        public NAVOTimePeriod SelectedTimePeriod
+        {
+            get { return _selectedTimePeriod; }
+            set
+            {
+                if (_selectedTimePeriod == value) return;
+                if (_selectedTimePeriod != NAVOTimePeriod.Invalid) ClearSoundSpeed();
+                _selectedTimePeriod = value;
+                if (_selectedTimePeriod != NAVOTimePeriod.Invalid)
+                {
+                    if ((SelectedRangeComplex != null) && (SelectedBathymetry != null))
+                    {
+                        SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", _selectedTimePeriod)];
+                        SelectedSoundSpeed.SelectedBathymetry = SelectedBathymetry;
+                    }
+                }
+                NotifyPropertyChanged(SelectedTimePeriodChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedTimePeriodChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedTimePeriod);
+        NAVOTimePeriod _selectedTimePeriod = NAVOTimePeriod.Invalid;
+
+        #endregion
+
+        #region public RangeComplexArea SelectedArea { get; set; }
+
+        public RangeComplexArea SelectedArea
+        {
+            get { return _selectedArea; }
+            set
+            {
+                if (_selectedArea == value) return;
+                if (_selectedArea != RangeComplexArea.None) SelectedBathymetry = BathymetryFile.None;
+                _selectedArea = value ?? RangeComplexArea.None;
+                if (_selectedArea != RangeComplexArea.None)
+                {
+                    uint maxSamplesSeen = 0;
+                    BathymetryFile selectedBathymetry = null;
+                    foreach (var entry in _selectedArea.BathymetryFiles)
+                    {
+                        var bathymetryFile = (BathymetryFile)entry.Value;
+                        var isCached = bathymetryFile.IsCached;
+                        var samples = bathymetryFile.SampleCount;
+                        if (!isCached) continue;
+                        if (samples <= maxSamplesSeen) continue;
+                        maxSamplesSeen = samples;
+                        selectedBathymetry = bathymetryFile;
+                    }
+                    SelectedBathymetry = selectedBathymetry;
+                }
+                NotifyPropertyChanged(SelectedAreaChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedAreaChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedArea);
+        RangeComplexArea _selectedArea = RangeComplexArea.None;
+
+        #endregion
+
+        #region public BathymetryFile SelectedBathymetry { get; set; }
+
+        public BathymetryFile SelectedBathymetry
+        {
+            get { return _selectedBathymetry; }
+            set
+            {
+                if (_selectedBathymetry == value) return;
+                if (_selectedBathymetry != BathymetryFile.None)
+                {
+                    ClearSoundSpeed();
+                    _selectedBathymetry.Reset();
+                }
+                _selectedBathymetry = value ?? BathymetryFile.None;
+                if ((SelectedTimePeriod != NAVOTimePeriod.Invalid) && (SelectedRangeComplex != NewRangeComplex.None))
+                {
+                    SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
+                    SelectedSoundSpeed.SelectedBathymetry = _selectedBathymetry;
+                }
+                NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedBathymetryChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedBathymetry);
+        BathymetryFile _selectedBathymetry = BathymetryFile.None;
+
+        #endregion
+
+        #region public WindFile SelectedWind { get; set; }
+
+        public WindFile SelectedWind
+        {
+            get { return _selectedWind; }
+            set
+            {
+                if (_selectedWind == value) return;
+                if (_selectedWind != WindFile.None) _selectedWind.Reset();
+                _selectedWind = value ?? WindFile.None;
+                if (_selectedWind != WindFile.None) _selectedWind.Reset();
+                NotifyPropertyChanged(SelectedWindChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedWindChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedWind);
+        WindFile _selectedWind = WindFile.None;
+
+        #endregion
+
+        #region public BottomLossFile SelectedBottomLoss { get; set; }
+
+        public BottomLossFile SelectedBottomLoss
+        {
+            get { return _selectedBottomLoss; }
+            set
+            {
+                if (_selectedBottomLoss == value) return;
+                if (_selectedBottomLoss != BottomLossFile.None) _selectedBottomLoss.Reset();
+                _selectedBottomLoss = value ?? BottomLossFile.None;
+                if (_selectedBottomLoss != BottomLossFile.None) _selectedBottomLoss.Reset();
+                NotifyPropertyChanged(SelectedBottomLossChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedBottomLossChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedBottomLoss);
+        BottomLossFile _selectedBottomLoss = BottomLossFile.None;
+
+        #endregion
+
+        #region public SedimentFile SelectedSediment { get; set; }
+
+        public SedimentFile SelectedSediment
+        {
+            get { return _selectedSediment; }
+            set
+            {
+                if (_selectedSediment == value) return;
+                if (_selectedSediment != SedimentFile.None) _selectedSediment.Reset();
+                _selectedSediment = value ?? SedimentFile.None;
+                if (_selectedSediment != SedimentFile.None) _selectedSediment.Reset();
+                NotifyPropertyChanged(SelectedSedimentChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedSedimentChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedSediment);
+        SedimentFile _selectedSediment = SedimentFile.None;
+
+        #endregion
+
+        #region public SoundSpeedFile SelectedSoundSpeed { get; set; }
+
+        public SoundSpeedFile SelectedSoundSpeed
+        {
+            get { return _selectedSoundSpeed; }
+            set
+            {
+                if (_selectedSoundSpeed == value) return;
+                if (_selectedSoundSpeed != SoundSpeedFile.None) _selectedSoundSpeed.Reset();
+                _selectedSoundSpeed = value ?? SoundSpeedFile.None;
+                if (_selectedSoundSpeed != SoundSpeedFile.None) _selectedSoundSpeed.Reset();
+                NotifyPropertyChanged(SelectedSoundSpeedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedSoundSpeedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.SelectedSoundSpeed);
+        SoundSpeedFile _selectedSoundSpeed = SoundSpeedFile.None;
+
+        #endregion
+
+        public void ResetEnvironment()
+        {
+            if (SelectedBathymetry != null) SelectedBathymetry.Reset();
+            if (SelectedWind != null) SelectedWind.Reset();
+            if (SelectedBottomLoss != null) SelectedBottomLoss.Reset();
+            if (SelectedSediment != null) SelectedSediment.Reset();
+            if (SelectedSoundSpeed != null) SelectedSoundSpeed.Reset();
+        }
+
+        public void ClearEnvironment()
+        {
+            ResetEnvironment();
+            SelectedBathymetry = BathymetryFile.None;
+            SelectedWind = WindFile.None;
+            SelectedBottomLoss = BottomLossFile.None;
+            SelectedSediment = SedimentFile.None;
+            SelectedTimePeriod = NAVOTimePeriod.Invalid;
+        }
+
+        public void ClearSoundSpeed()
+        {
+            if (SelectedSoundSpeed != null) SelectedSoundSpeed.SelectedBathymetry = null;
+            SelectedSoundSpeed = null;
         }
     }
 }

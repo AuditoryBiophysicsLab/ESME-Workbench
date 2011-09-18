@@ -15,7 +15,10 @@ namespace ESME.Environment.Descriptors
 {
     public class RangeComplexArea : ViewModelBase
     {
-        private RangeComplexArea(NewRangeComplex rangeComplex, string areaName, OverlayShape overlayShape)
+        public static readonly RangeComplexArea None = new RangeComplexArea {Name = "None"};
+        RangeComplexArea() { }
+
+        RangeComplexArea(NewRangeComplex rangeComplex, string areaName, OverlayShape overlayShape)
         {
             IsEnabled = false;
             _rangeComplex = rangeComplex;

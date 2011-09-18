@@ -18,6 +18,9 @@ namespace ESME.Environment.Descriptors
 {
     public class NewRangeComplex : ViewModelBase
     {
+        public static NewRangeComplex None = new NewRangeComplex {Name = "None"};
+        NewRangeComplex() { }
+
         NewRangeComplex(string simAreaPath, string rangeComplexName, bool isCreate, Dispatcher dispatcher)
         {
             IsLoading = true;

@@ -50,7 +50,15 @@
       <GroupBox Header="Import status" Margin="5" DockPanel.Dock="Bottom">
         <EnvironmentBuilder:ImportProgressListView ItemsSource="{Binding ImportProgressCollection}" />
       </GroupBox>
-      <GroupBox Header="Range Complexes" Margin="5" DockPanel.Dock="Top" HorizontalAlignment="Stretch"
+            <GroupBox Margin="5" DockPanel.Dock="Bottom">
+                <GroupBox.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Selected Range Complex: " />
+                        <ComboBox ItemsSource="{Binding RangeComplexes.RangeComplexList}" SelectedItem="{Binding RangeComplexes.SelectedRangeComplex}" DisplayMemberPath="Name"/>
+                    </StackPanel>
+                </GroupBox.Header>
+            </GroupBox>
+                <GroupBox Header="Range Complexes" Margin="5" DockPanel.Dock="Top" HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
         <EnvironmentBuilder:RangeComplexTreeView2 DockPanel.Dock="Top" DataContext="{Binding RangeComplexes}"
                                                   IsEnabled="{Binding IsEnabled}"
