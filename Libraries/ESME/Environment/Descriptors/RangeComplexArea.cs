@@ -72,10 +72,14 @@ namespace ESME.Environment.Descriptors
                     jobDescriptor.CompletionTask = new Task<ImportJobDescriptor>(jobDescriptor.CompletionFunction, jobDescriptor);
                     ImportJobs.Add(jobDescriptor);
                 }
-                else if (fileInfo == null)
-                    BathymetryFiles[fileName] = new BathymetryFile(BathymetryPath, fileName,
-                                                                           sampleCount, GeoRect, EnvironmentDataType.Bathymetry,
-                                                                           NAVOTimePeriod.Invalid, false);
+                else
+                {
+                    if (fileInfo == null)
+                        BathymetryFiles[fileName] = new BathymetryFile(BathymetryPath, fileName,
+                                                                       sampleCount, GeoRect, EnvironmentDataType.Bathymetry,
+                                                                       NAVOTimePeriod.Invalid, false);
+                    else ((BathymetryFile)BathymetryFiles[fileName]).DataTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(BathymetryPath, fileName)));
+                }
             }
         }
 
@@ -127,9 +131,9 @@ namespace ESME.Environment.Descriptors
             foreach (var item in BathymetryFiles) Debug.WriteLine("{0}     [{1}]  size: {2}", DateTime.Now, item.Key, item.Value.FileSize);
         }
 
-        public Bathymetry this[string resolutionString]
+        public BathymetryFile this[string resolutionString]
         {
-            get { return ((BathymetryFile)BathymetryFiles[resolutionString]).Data; }
+            get { return (BathymetryFile)BathymetryFiles[resolutionString]; }
         }
 
         public List<ImportJobDescriptor> ImportJobs { get; private set; }

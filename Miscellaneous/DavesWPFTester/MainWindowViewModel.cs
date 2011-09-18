@@ -287,6 +287,22 @@ namespace DavesWPFTester
         }
         #endregion
 
+        #region LoadTestBathymetryCommand
+        public SimpleCommand<object, object> LoadTestBathymetryCommand
+        {
+            get { return _loadTestBathymetry ?? (_loadTestBathymetry = new SimpleCommand<object, object>(delegate { return IsLoadTestBathymetryCommandEnabled; }, delegate { LoadTestBathymetryHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _loadTestBathymetry;
+
+        bool IsLoadTestBathymetryCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void LoadTestBathymetryHandler() { RangeComplexes["Jacksonville"].AreaCollection["Jax_Ops_Area_200km"]["0.50min.bathymetry"].GetMyDataAsync(); }
+        #endregion
+
         async void Initialize()
         {
             RangeComplexes = RangeComplexes.Singleton;

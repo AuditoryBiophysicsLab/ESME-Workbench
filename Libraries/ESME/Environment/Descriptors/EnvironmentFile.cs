@@ -291,7 +291,7 @@ namespace ESME.Environment.Descriptors
         public Task<T> GetMyDataAsync()
         {
             if (DataTask == null) throw new ApplicationException("DataTask is null");
-            if (DataTask.Status != TaskStatus.WaitingForActivation) return DataTask;
+            if (DataTask.Status != TaskStatus.Created) return DataTask;
             DataTask.Start();
             DataAvailability = DataAvailability.Loading;
             DataTask.ContinueWith(task => DataAvailability = DataAvailability.Available);
@@ -456,7 +456,10 @@ namespace ESME.Environment.Descriptors
     public class BathymetryFile : EnvironmentFile<Bathymetry>
     {
         public BathymetryFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, bool isCached)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { IsCached = isCached; }
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod)
+        {
+            DataTask = new Task<Bathymetry>(() => Bathymetry.Load(Path.Combine(dataPath, fileName)));
+        }
     }
 
     [Serializable]
