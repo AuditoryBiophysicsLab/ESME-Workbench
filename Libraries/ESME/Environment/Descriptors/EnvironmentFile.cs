@@ -474,14 +474,19 @@ namespace ESME.Environment.Descriptors
             {
                 var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(TimePeriod).ToList();
                 Debug.WriteLine("{0} Computing soundspeed for {1}", DateTime.Now, TimePeriod);
+                foreach (var month in months)
+                {
+                    RangeComplexToken[string.Format("{0}.temperature", month)].Reset();
+                    RangeComplexToken[string.Format("{0}.salinity", month)].Reset();
+                }
                 var sources = (from month in months
                                select new
                                {
                                    Month = month,
-                                   TemperatureFile = (TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", TimePeriod)],
-                                   TemperatureDataTask = ((TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", TimePeriod)]).GetMyDataAsync(),
-                                   SalinityFile = (TemperatureFile)RangeComplexToken[string.Format("{0}.salinity", TimePeriod)],
-                                   SalinityDataTask = ((TemperatureFile)RangeComplexToken[string.Format("{0}.salinity", TimePeriod)]).GetMyDataAsync(),
+                                   TemperatureFile = (TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)],
+                                   TemperatureDataTask = ((TemperatureFile)RangeComplexToken[string.Format("{0}.temperature", month)]).GetMyDataAsync(),
+                                   SalinityFile = (SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)],
+                                   SalinityDataTask = ((SalinityFile)RangeComplexToken[string.Format("{0}.salinity", month)]).GetMyDataAsync(),
                                }).ToDictionary(item => item.Month);
                 var sourceTasks = new List<Task>();
                 foreach (var month in months)
@@ -510,7 +515,7 @@ namespace ESME.Environment.Descriptors
                         Debug.WriteLine("{0} Releasing temperature and salinity data for {1}", DateTime.Now, month);
                         sources[month].TemperatureFile.Reset();
                         sources[month].SalinityFile.Reset();
-                        monthlySoundSpeeds.SoundSpeedFields.Add(soundSpeedFields[month].SoundSpeedField);
+                        monthlySoundSpeeds.Add(soundSpeedFields[month].SoundSpeedField);
                     }
                     Debug.WriteLine("{0} Computing average sound speed for {1}", DateTime.Now, TimePeriod);
                     return SoundSpeed.Average(monthlySoundSpeeds, new List<NAVOTimePeriod> {TimePeriod});

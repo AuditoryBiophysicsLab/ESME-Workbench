@@ -111,11 +111,11 @@ namespace ESME.Environment
                 DeepestPoint = deepestPoint,
                 TimePeriod = soundSpeedData.TimePeriod
             };
-
             VerifyThatProfilePointsMatch(temperatureField, salinityField);
             VerifyThatProfilePointsMatch(temperatureField, soundSpeedField);
 
             soundSpeedField.ExtendProfiles(temperatureField, salinityField);
+            soundSpeedField.TimePeriod = sourceTemperatureField.TimePeriod;
             return soundSpeedField;
         }
 
@@ -144,6 +144,7 @@ namespace ESME.Environment
             VerifyThatProfilePointsMatch(temperatureField, soundSpeedField);
 
             soundSpeedField.ExtendProfiles(temperatureField, salinityField);
+            soundSpeedField.TimePeriod = sourceTemperatureField.TimePeriod;
             return soundSpeedField;
         }
 

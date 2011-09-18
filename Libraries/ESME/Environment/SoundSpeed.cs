@@ -49,6 +49,12 @@ namespace ESME.Environment
             }
         }
 
+        public void Add(SoundSpeedField newField)
+        {
+            if (this[newField.TimePeriod] != null) throw new DataException(string.Format("Unable to add SoundSpeedField for {0}. Data already present.", newField.TimePeriod));
+            SoundSpeedFields.Add(newField);
+        }
+
         public static SoundSpeed Load(string filename)
         {
             var formatter = new BinaryFormatter();

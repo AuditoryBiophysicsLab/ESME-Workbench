@@ -300,7 +300,7 @@ namespace ESME.Environment.Descriptors
                 if (_selectedArea != RangeComplexArea.None)
                 {
                     uint maxSamplesSeen = 0;
-                    BathymetryFile selectedBathymetry = BathymetryFile.None;
+                    var selectedBathymetry = BathymetryFile.None;
                     foreach (var entry in _selectedArea.BathymetryFiles)
                     {
                         var bathymetryFile = (BathymetryFile)entry.Value;
@@ -422,9 +422,7 @@ namespace ESME.Environment.Descriptors
             set
             {
                 if (_selectedSoundSpeed == value) return;
-                if (_selectedSoundSpeed != SoundSpeedFile.None) _selectedSoundSpeed.Reset();
                 _selectedSoundSpeed = value ?? SoundSpeedFile.None;
-                if (_selectedSoundSpeed != SoundSpeedFile.None) _selectedSoundSpeed.Reset();
                 NotifyPropertyChanged(SelectedSoundSpeedChangedEventArgs);
             }
         }
