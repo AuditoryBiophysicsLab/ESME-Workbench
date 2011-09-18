@@ -159,6 +159,8 @@
       <Abbreviation Text="GDEM" />
       <Abbreviation Text="KM" />
       <Abbreviation Text="API" />
+      <Abbreviation Text="SMGC" />
+      <Abbreviation Text="DBDB" />
     </Naming2>
   </CodeStyleSettings>
   <CodeAnnotations>
