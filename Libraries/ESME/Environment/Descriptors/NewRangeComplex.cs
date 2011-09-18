@@ -180,25 +180,25 @@ namespace ESME.Environment.Descriptors
         List<ImportJobDescriptor> ValidateEnvironment()
         {
             var jobs = new List<ImportJobDescriptor>();
-            var result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Sediment, true);
+            var result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Sediment, 5, true);
             if (result != null) jobs.Add(result.Item2);
-            result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.BottomLoss, true);
+            result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.BottomLoss, 15, true);
             if (result != null) jobs.Add(result.Item2);
-            result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Wind, true);
+            result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Wind, 60, true);
             if (result != null) jobs.Add(result.Item2);
             foreach (var month in NAVOConfiguration.AllMonths)
             {
-                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Temperature, true, month);
+                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Temperature, 15, true, month);
                 if (result != null) jobs.Add(result.Item2);
-                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Salinity, true, month);
+                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Salinity, 15, true, month);
                 if (result != null) jobs.Add(result.Item2);
-                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, false, month);
+                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, 15, false, month);
                 //LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Temperature);
                 //LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Salinity);
             }
             foreach (var season in NAVOConfiguration.AllSeasons)
             {
-                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, false, season);
+                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, 15, false, season);
                 //LinkToSourceMonths(result.Item1, season, EnvironmentDataType.SoundSpeed);
             }
             return jobs;
@@ -252,10 +252,9 @@ namespace ESME.Environment.Descriptors
             }
         }
 
-        Tuple<EnvironmentFile, ImportJobDescriptor> CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType dataType, bool createJobIfRequired, NAVOTimePeriod timePeriod = NAVOTimePeriod.Invalid)
+        Tuple<EnvironmentFile, ImportJobDescriptor> CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType dataType, float resolution, bool createJobIfRequired, NAVOTimePeriod timePeriod = NAVOTimePeriod.Invalid)
         {
-            const float samplesPerDegree = 15.0f;
-            const float resolution = 60.0f / samplesPerDegree;
+            var samplesPerDegree = 60.0f / resolution;
             var fileName = string.Format("{0}.{1}", timePeriod == NAVOTimePeriod.Invalid ? "data" : timePeriod.ToString(), dataType.ToString().ToLower());
             var north = Math.Round(GeoRect.North * samplesPerDegree) / samplesPerDegree;
             var south = Math.Round(GeoRect.South * samplesPerDegree) / samplesPerDegree;

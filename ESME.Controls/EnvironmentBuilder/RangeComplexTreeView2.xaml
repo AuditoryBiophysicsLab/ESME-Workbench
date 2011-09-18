@@ -9,10 +9,19 @@
           d:DesignWidth="300">
   <TreeView.Resources>
     <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter" />
-    <Style x:Key="BathymetryResolutionStyle" TargetType="TreeViewItem">
+    <Style x:Key="DataCachedDisplayStyle" TargetType="TreeViewItem">
       <Style.Triggers>
         <DataTrigger Binding="{Binding IsCached}" Value="False">
           <Setter Property="FontStyle" Value="Italic" />
+        </DataTrigger>
+        <DataTrigger Binding="{Binding DataAvailability}" Value="NotLoaded">
+          <Setter Property="Foreground" Value="Black" />
+        </DataTrigger>
+        <DataTrigger Binding="{Binding DataAvailability}" Value="Loading">
+          <Setter Property="Foreground" Value="Orange" />
+        </DataTrigger>
+        <DataTrigger Binding="{Binding DataAvailability}" Value="Available">
+          <Setter Property="Foreground" Value="Green" />
         </DataTrigger>
       </Style.Triggers>
     </Style>
@@ -55,7 +64,7 @@
     <!-- Basic BathymetryFile                                                                                                                              -->
     <!-- ================================================================================================================================================== -->
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:BathymetryFile}">
-      <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0" Style="{StaticResource BathymetryResolutionStyle}">
+      <TreeViewItem Header="{Binding Name}" Margin="-20 0 0 0" Style="{StaticResource DataCachedDisplayStyle}">
         <ContentPresenter ContentTemplate="{StaticResource EnvironmentFileTemplate}" />
       </TreeViewItem>
     </HierarchicalDataTemplate>
@@ -65,15 +74,15 @@
     <!-- ================================================================================================================================================== -->
 
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}">
-      <TreeViewItem ToolTip="{Binding ToolTip}"
-                    Margin="-20 0 0 0">
-                <TreeViewItem.Header>
-                    <Grid>
-                        <ProgressBar Width="200" Value="{Binding LoadProgress}" Visibility="{Binding IsLoading, Converter={StaticResource FalseVisibleTrueCollapsed}}" />
-                        <TextBlock Text="{Binding Name}"/>
-                    </Grid>
-                </TreeViewItem.Header>
-                    <TreeViewItem.Resources>
+      <TreeViewItem ToolTip="{Binding ToolTip}" Margin="-20 0 0 0">
+        <TreeViewItem.Header>
+          <Grid>
+            <ProgressBar Width="200" Value="{Binding LoadProgress}"
+                         Visibility="{Binding IsLoading, Converter={StaticResource FalseVisibleTrueCollapsed}}" />
+            <TextBlock Text="{Binding Name}" />
+          </Grid>
+        </TreeViewItem.Header>
+        <TreeViewItem.Resources>
           <CollectionViewSource x:Key="cvs" Source="{Binding EnvironmentList}">
             <CollectionViewSource.SortDescriptions>
               <ComponentModel:SortDescription PropertyName="TimePeriod" />
@@ -82,15 +91,19 @@
               <PropertyGroupDescription PropertyName="DataType" />
             </CollectionViewSource.GroupDescriptions>
           </CollectionViewSource>
+
           <HierarchicalDataTemplate x:Key="SingleTemplate" ItemsSource="{Binding Items}"
-                                    ItemTemplate="{StaticResource EnvironmentFileTemplate}">
+                                    ItemContainerStyle="{StaticResource DataCachedDisplayStyle}" ItemTemplate="{StaticResource EnvironmentFileTemplate}">
             <TextBlock Text="{Binding Name}" />
           </HierarchicalDataTemplate>
+
           <HierarchicalDataTemplate x:Key="MonthTemplate" ItemTemplate="{StaticResource EnvironmentFileTemplate}">
-            <TreeViewItem Header="{Binding Path=Name}" Margin="-20 0 0 0">
+            <TreeViewItem Header="{Binding Path=Name}" Margin="-20 0 0 0"
+                          Style="{StaticResource DataCachedDisplayStyle}">
               <ContentPresenter ContentTemplate="{StaticResource EnvironmentFileTemplate}" />
             </TreeViewItem>
           </HierarchicalDataTemplate>
+
           <HierarchicalDataTemplate x:Key="MultiTemplate" ItemTemplate="{StaticResource MonthTemplate}"
                                     ItemsSource="{Binding Items}">
             <TextBlock Text="{Binding Name}" />
@@ -101,10 +114,9 @@
         </TreeViewItem.Resources>
         <TreeViewItem Header="Areas"
                       ItemsSource="{Binding AreaList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
-                <TreeViewItem Header="Environment" ItemsSource="{Binding Source={StaticResource cvs}, Path=Groups}"
-                      ItemTemplateSelector="{StaticResource DavesGroupSelector}" >
-                </TreeViewItem>
-                </TreeViewItem>
+        <TreeViewItem Header="Environment" ItemsSource="{Binding Source={StaticResource cvs}, Path=Groups}"
+                      ItemTemplateSelector="{StaticResource DavesGroupSelector}"></TreeViewItem>
+      </TreeViewItem>
     </HierarchicalDataTemplate>
 
   </TreeView.Resources>
