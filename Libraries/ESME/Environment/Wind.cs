@@ -65,7 +65,7 @@ namespace ESME.Environment
             }
         }
 
-        TimePeriodEnvironmentData<WindSample> SeasonalAverage(NAVOTimePeriod season)
+        public TimePeriodEnvironmentData<WindSample> SeasonalAverage(NAVOTimePeriod season)
         {
             // Make sure the requested time period is, in fact, a season.
             if (!NAVOConfiguration.AllSeasons.Contains(season)) throw new ArgumentException(season + " is not a season", "season");

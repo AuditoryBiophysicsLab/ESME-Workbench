@@ -127,6 +127,8 @@ namespace ESME.Environment.NAVO
                 wind.TimePeriods.Add(curMonthData);
                 if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             }
+            foreach (var curSeason in NAVOConfiguration.AllSeasons)
+                wind.TimePeriods.Add(wind.SeasonalAverage(curSeason));
             if (currentState != null) lock (currentState) currentState.Report("Saving");
             if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
             return wind;

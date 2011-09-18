@@ -23,7 +23,7 @@ namespace ESME.Environment.Descriptors
         RangeComplexes()
         {
             _dispatcher = Dispatcher.CurrentDispatcher;
-            RangeComplexCollection = new ObservableConcurrentDictionary<string, NewRangeComplex> {{"None", NewRangeComplex.None}};
+            RangeComplexCollection = new ObservableConcurrentDictionary<string, NewRangeComplex>();
             RangeComplexList = ObservableList<NewRangeComplex>.FromObservableConcurrentDictionary(RangeComplexCollection, kvp => kvp.Value, (kvp, rc) => kvp.Value == rc);
         }
 
