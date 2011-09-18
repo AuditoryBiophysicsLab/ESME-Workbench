@@ -65,9 +65,15 @@
     <!-- ================================================================================================================================================== -->
 
     <HierarchicalDataTemplate DataType="{x:Type Descriptors:NewRangeComplex}">
-      <TreeViewItem Header="{Binding Name}" IsEnabled="{Binding IsEnabled}" ToolTip="{Binding ToolTip}"
+      <TreeViewItem ToolTip="{Binding ToolTip}"
                     Margin="-20 0 0 0">
-        <TreeViewItem.Resources>
+                <TreeViewItem.Header>
+                    <Grid>
+                        <ProgressBar Width="200" Value="{Binding LoadProgress}" Visibility="{Binding IsLoading, Converter={StaticResource FalseVisibleTrueCollapsed}}" />
+                        <TextBlock Text="{Binding Name}"/>
+                    </Grid>
+                </TreeViewItem.Header>
+                    <TreeViewItem.Resources>
           <CollectionViewSource x:Key="cvs" Source="{Binding EnvironmentList}">
             <CollectionViewSource.SortDescriptions>
               <ComponentModel:SortDescription PropertyName="TimePeriod" />

@@ -53,22 +53,28 @@ namespace ESME.Environment.Descriptors
                 if (((fileInfo == null) || (fileInfo.LastWriteTime > BathymetryFiles.LastWriteTime) ||
                     (BathymetryFiles[fileName] == null) || (fileInfo.Length != BathymetryFiles[fileName].FileSize) ||
                     (fileInfo.LastWriteTime != BathymetryFiles[fileName].LastWriteTime)) && (sampleCount <= 512000))
-                    ImportJobs.Add(new ImportJobDescriptor
+                {
+                    var jobDescriptor = new ImportJobDescriptor
                     {
                         DataType = EnvironmentDataType.Bathymetry,
                         GeoRect = GeoRect,
                         DestinationFilename = localPath,
                         Resolution = resolution,
-                        CompletionAction = bathyJob =>
+                        CompletionFunction = arg =>
                         {
+                            var job = (ImportJobDescriptor)arg;
                             BathymetryFiles[fileName] = new BathymetryFile(BathymetryPath, fileName,
-                                                                                   bathyJob.SampleCount, bathyJob.GeoRect, EnvironmentDataType.Bathymetry,
-                                                                                   NAVOTimePeriod.Invalid, true);
+                                                                           job.SampleCount, job.GeoRect, EnvironmentDataType.Bathymetry,
+                                                                           NAVOTimePeriod.Invalid, true);
+                            return job;
                         }
-                    });
+                    };
+                    jobDescriptor.CompletionTask = new Task<ImportJobDescriptor>(jobDescriptor.CompletionFunction, jobDescriptor);
+                    ImportJobs.Add(jobDescriptor);
+                }
                 else if (fileInfo == null)
                     BathymetryFiles[fileName] = new BathymetryFile(BathymetryPath, fileName,
-                                                                           sampleCount, GeoRect, EnvironmentDataType.Bathymetry, 
+                                                                           sampleCount, GeoRect, EnvironmentDataType.Bathymetry,
                                                                            NAVOTimePeriod.Invalid, false);
             }
         }

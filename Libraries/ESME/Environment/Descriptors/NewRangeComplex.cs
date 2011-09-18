@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.NAVO;
@@ -18,7 +20,7 @@ namespace ESME.Environment.Descriptors
     {
         NewRangeComplex(string simAreaPath, string rangeComplexName, bool isCreate, Dispatcher dispatcher)
         {
-            IsEnabled = false;
+            IsLoading = false;
             _dispatcher = dispatcher;
             var rangeComplexPath = Path.Combine(simAreaPath, rangeComplexName);
             Name = rangeComplexName;
@@ -88,16 +90,6 @@ namespace ESME.Environment.Descriptors
                         break;
                 }
             }
-#if false
-            EnvironmentList = new ObservableList<EnvironmentFile>
-            {
-                WindFile,
-                SedimentFile,
-                BottomLossFile,
-                TemperatureFile,
-                SalinityFile
-            };
-#endif
         }
 
         [NotNull] readonly Dispatcher _dispatcher;
@@ -185,7 +177,7 @@ namespace ESME.Environment.Descriptors
         }
 
         #region Validation
-
+#if false
         IEnumerable<ImportJobDescriptor> CheckForMissingEnviromentFiles()
         {
             //var test = new Task<EnvironmentFile<SoundSpeed>>()
@@ -291,15 +283,16 @@ namespace ESME.Environment.Descriptors
             }
             return missingMonths.Distinct();
         }
+#endif
 
-        IEnumerable<ImportJobDescriptor> ValidateEnvironment()
+        List<ImportJobDescriptor> ValidateEnvironment()
         {
             var jobs = new List<ImportJobDescriptor>();
-            var result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Sediment, true, NAVOTimePeriod.Invalid);
+            var result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Sediment, true);
             if (result != null) jobs.Add(result.Item2);
-            result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.BottomLoss, true, NAVOTimePeriod.Invalid);
+            result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.BottomLoss, true);
             if (result != null) jobs.Add(result.Item2);
-            result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Wind, true, NAVOTimePeriod.Invalid);
+            result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Wind, true);
             if (result != null) jobs.Add(result.Item2);
             foreach (var month in NAVOConfiguration.AllMonths)
             {
@@ -403,26 +396,34 @@ namespace ESME.Environment.Descriptors
                 EnvironmentFiles[fileName] = envFile;
                 // OK so let's actually go ahead and create a job if we DO want to extract this data from the database
                 if (createJobIfRequired)
-                    return Tuple.Create(envFile, new ImportJobDescriptor
+                {
+                    var jobDescriptor = new ImportJobDescriptor
                     {
                         DataType = dataType,
                         GeoRect = GeoRect,
                         DestinationFilename = localPath,
                         Resolution = resolution,
                         TimePeriod = timePeriod,
-                        CompletionAction = job =>
+                        CompletionFunction = arg =>
                         {
+                            var job = (ImportJobDescriptor)arg;
                             var key = Path.GetFileName(job.DestinationFilename);
                             envFile.IsCached = true;
                             envFile.SampleCount = job.SampleCount;
                             envFile.GeoRect = job.GeoRect;
                             EnvironmentFiles[key] = envFile;
                             envFile.UpdateFileInfo();
-                        }
-                    });
+                            return job;
+                        },
+                    };
+                    jobDescriptor.CompletionTask = new Task<ImportJobDescriptor>(jobDescriptor.CompletionFunction, jobDescriptor);
+                    
+                    return Tuple.Create(envFile, jobDescriptor);
+                }
                 // So we really DIDN'T want to extract the data from the database, but only wanted to create the metadata for later on
                 return Tuple.Create(envFile, (ImportJobDescriptor)null);
             }
+            
             return null;
         }
 
@@ -430,19 +431,19 @@ namespace ESME.Environment.Descriptors
 
         #region public bool IsEnabled { get; private set; }
 
-        public bool IsEnabled
+        public bool IsLoading
         {
-            get { return _isEnabled; }
+            get { return _isLoading; }
             private set
             {
-                if (_isEnabled == value) return;
-                _isEnabled = value;
+                if (_isLoading == value) return;
+                _isLoading = value;
                 NotifyPropertyChanged(IsEnabledChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.IsEnabled);
-        bool _isEnabled;
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.IsLoading);
+        bool _isLoading;
 
         #endregion
 
@@ -470,10 +471,10 @@ namespace ESME.Environment.Descriptors
             result.OpArea = result.CreateAreaPrivate(String.Format("{0}_OpArea", rangeComplexName), opAreaLimits);
             result.SimArea = result.CreateAreaPrivate(String.Format("{0}_SimArea", rangeComplexName), simAreaLimits);
             result.UpdateAreas();
-            var importJobs = result.CheckForMissingEnviromentFiles().ToList();
+            var importJobs = result.ValidateEnvironment().ToList();
             foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
             NAVOImporter.Import(importJobs);
-            result.IsEnabled = true;
+            result.IsLoading = true;
             //Tuple.Create(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile)
             return result;
         }
@@ -492,15 +493,70 @@ namespace ESME.Environment.Descriptors
                 throw new InvalidOperationException(string.Format("The range complex \"{0}\" is missing critical files or directories.\r\nThe range complex has been deleted", result.Name));
             }
             result.UpdateAreas();
-            NAVOImporter.Import(result.ValidateEnvironment());
-            foreach (var area in result.AreaCollection.Values) NAVOImporter.Import(area.ImportJobs);
-            result.IsEnabled = true;
+            var importJobs = result.ValidateEnvironment();
+            foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
+            NAVOImporter.Import(importJobs);
+            var completionTasks = (from job in importJobs
+                                   select job.CompletionTask).ToList();
+            result.LoadTaskTotal = completionTasks.Count();
+            foreach (var task in completionTasks) task.ContinueWith(t => result.IncrementCompletedTasks());
+            TaskEx.WhenAll(completionTasks).ContinueWith(task => result.IsLoading = true);
             return result;
         }
 
+        #region public int LoadTaskTotal { get; set; }
+
+        public int LoadTaskTotal
+        {
+            get { return _loadTaskTotal; }
+            set
+            {
+                if (_loadTaskTotal == value) return;
+                _loadTaskTotal = value;
+                NotifyPropertyChanged(LoadTaskTotalChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LoadTaskTotalChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.LoadTaskTotal);
+        int _loadTaskTotal;
+
+        #endregion
+
+        #region public int LoadTasksCompleted { get; set; }
+        public int LoadTasksCompleted { get; private set; }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        void IncrementCompletedTasks()
+        {
+            LoadTasksCompleted++;
+            NotifyPropertyChanged(LoadTasksCompletedChangedEventArgs);
+            LoadProgress = (int)(((float)LoadTasksCompleted / LoadTaskTotal) * 100);
+        }
+
+        static readonly PropertyChangedEventArgs LoadTasksCompletedChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.LoadTasksCompleted);
+        #endregion
+
+        #region public int LoadProgress { get; set; }
+
+        public int LoadProgress
+        {
+            get { return _loadProgress; }
+            set
+            {
+                if (_loadProgress == value) return;
+                _loadProgress = value;
+                NotifyPropertyChanged(LoadProgressChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs LoadProgressChangedEventArgs = ObservableHelper.CreateArgs<NewRangeComplex>(x => x.LoadProgress);
+        int _loadProgress;
+
+        #endregion
+
         public RangeComplexArea CreateArea(string areaName, IEnumerable<Geo> areaLimits)
         {
-            if (!IsEnabled) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
+            if (!IsLoading) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
             return CreateAreaPrivate(areaName, areaLimits);
         }
 
@@ -516,7 +572,7 @@ namespace ESME.Environment.Descriptors
 
         public void RemoveArea(string areaName)
         {
-            if (!IsEnabled) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
+            if (!IsLoading) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
             RemoveAreaPrivate(areaName);
         }
 

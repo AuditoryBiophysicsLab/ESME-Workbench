@@ -234,7 +234,7 @@ namespace DavesWPFTester
             };
             try
             {
-                while (!RangeComplexes.RangeComplexCollection["Test"].IsEnabled) await TaskEx.Delay(10);
+                while (!RangeComplexes.RangeComplexCollection["Test"].IsLoading) await TaskEx.Delay(10);
                 RangeComplexes.RangeComplexCollection["Test"].CreateArea("Test", coordinates);
             }
             catch (Exception e)
@@ -256,7 +256,7 @@ namespace DavesWPFTester
         {
             try
             {
-                while (!RangeComplexes.RangeComplexCollection["Test"].IsEnabled) await TaskEx.Delay(10);
+                while (!RangeComplexes.RangeComplexCollection["Test"].IsLoading) await TaskEx.Delay(10);
                 RangeComplexes.RangeComplexCollection["Test"].RemoveArea("Test");
             }
             catch (Exception e)

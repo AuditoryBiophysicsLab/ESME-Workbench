@@ -49,7 +49,9 @@ namespace ESME.Environment
                             temperature.Save(job.DestinationFilename);
                             job.Resolution = 15;
                             job.SampleCount = (uint)temperatureField.EnvironmentData.Count;
-                            job.CompletionAction(job);
+                            //job.CompletionAction(job);
+                            job.CompletionTask.Start();
+                            await job.CompletionTask;
                         }
                     }
                     //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
@@ -79,7 +81,9 @@ namespace ESME.Environment
                             salinity.Save(job.DestinationFilename);
                             job.Resolution = 15;
                             job.SampleCount = (uint)salinityField.EnvironmentData.Count;
-                            job.CompletionAction(job);
+                            //job.CompletionAction(job);
+                            job.CompletionTask.Start();
+                            await job.CompletionTask;
                         }
                     }
                     //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType, job.TimePeriod);
@@ -107,7 +111,9 @@ namespace ESME.Environment
                             sediment.Save(job.DestinationFilename);
                             job.SampleCount = (uint)sediment.Samples.Count;
                             job.Resolution = 5;
-                            job.CompletionAction(job);
+                            //job.CompletionAction(job);
+                            job.CompletionTask.Start();
+                            await job.CompletionTask;
                         }
                     }
                     //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
@@ -136,7 +142,9 @@ namespace ESME.Environment
                             wind.Save(job.DestinationFilename);
                             job.SampleCount = (uint)wind.TimePeriods[0].EnvironmentData.Count;
                             job.Resolution = 60;
-                            job.CompletionAction(job);
+                            //job.CompletionAction(job);
+                            job.CompletionTask.Start();
+                            await job.CompletionTask;
                         }
                     }
                     //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
@@ -163,7 +171,9 @@ namespace ESME.Environment
                         {
                             bathymetry.Save(job.DestinationFilename);
                             job.SampleCount = (uint)bathymetry.Samples.Count;
-                            job.CompletionAction(job);
+                            //job.CompletionAction(job);
+                            job.CompletionTask.Start();
+                            await job.CompletionTask;
                         }
                     }
                     //Debug.WriteLine("{0} Finished importing {1} {2} {3}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(job.DestinationFilename)), Path.GetFileNameWithoutExtension(job.DestinationFilename), job.DataType);
@@ -192,7 +202,9 @@ namespace ESME.Environment
                             bottomLoss.Save(job.DestinationFilename);
                             job.SampleCount = (uint)bottomLoss.Samples.Count;
                             job.Resolution = 15;
-                            job.CompletionAction(job);
+                            //job.CompletionAction(job);
+                            job.CompletionTask.Start();
+                            await job.CompletionTask;
                         }
                     }
                     //Debug.WriteLine("{0} Finished importing {1} {2}", DateTime.Now, Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(job.DestinationFilename))), job.DataType);
@@ -291,7 +303,9 @@ namespace ESME.Environment
         public float Resolution { get; set; }
         public string DestinationFilename { get; set; }
         public uint SampleCount { get; set; }
-        public Action<ImportJobDescriptor> CompletionAction { get; set; }
+        //public Action<ImportJobDescriptor> CompletionAction { get; set; }
+        public Task<ImportJobDescriptor> CompletionTask { get; set; }
+        public Func<Object, ImportJobDescriptor> CompletionFunction { get; set; }
     }
 
     public class ImportProgressCollection : ReadOnlyObservableCollection<ImportProgressViewModel>
@@ -377,7 +391,7 @@ namespace ESME.Environment
             });
         }
 
-        public void JobCompleted(ImportJobDescriptor job)
+        public async void JobCompleted(ImportJobDescriptor job)
         {
             _dispatcher.InvokeInBackgroundIfRequired(() =>
             {
