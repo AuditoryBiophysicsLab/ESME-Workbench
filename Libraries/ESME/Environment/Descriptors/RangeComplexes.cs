@@ -239,10 +239,12 @@ namespace ESME.Environment.Descriptors
                     SelectedWind = (WindFile)_selectedRangeComplex.EnvironmentFiles["data.wind"];
                     SelectedBottomLoss = (BottomLossFile)_selectedRangeComplex.EnvironmentFiles["data.bottomloss"];
                     SelectedSediment = (SedimentFile)_selectedRangeComplex.EnvironmentFiles["data.sediment"];
-                    if ((SelectedTimePeriod != NAVOTimePeriod.Invalid) && (SelectedBathymetry != null))
+                    if ((SelectedTimePeriod != NAVOTimePeriod.Invalid) && (SelectedBathymetry != BathymetryFile.None))
                     {
                         SelectedSoundSpeed = (SoundSpeedFile)_selectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
+                        SelectedSoundSpeed.RangeComplexToken = _selectedRangeComplex.EnvironmentFiles;
                         SelectedSoundSpeed.SelectedBathymetry = SelectedBathymetry;
+                        SelectedSoundSpeed.Reset();
                     }
                 }
                 NotifyPropertyChanged(SelectedRangeComplexChangedEventArgs);
@@ -267,10 +269,12 @@ namespace ESME.Environment.Descriptors
                 _selectedTimePeriod = value;
                 if (_selectedTimePeriod != NAVOTimePeriod.Invalid)
                 {
-                    if ((SelectedRangeComplex != null) && (SelectedBathymetry != null))
+                    if ((SelectedRangeComplex != NewRangeComplex.None) && (SelectedBathymetry != BathymetryFile.None))
                     {
                         SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", _selectedTimePeriod)];
+                        SelectedSoundSpeed.RangeComplexToken = _selectedRangeComplex.EnvironmentFiles;
                         SelectedSoundSpeed.SelectedBathymetry = SelectedBathymetry;
+                        SelectedSoundSpeed.Reset();
                     }
                 }
                 NotifyPropertyChanged(SelectedTimePeriodChangedEventArgs);
@@ -296,7 +300,7 @@ namespace ESME.Environment.Descriptors
                 if (_selectedArea != RangeComplexArea.None)
                 {
                     uint maxSamplesSeen = 0;
-                    BathymetryFile selectedBathymetry = null;
+                    BathymetryFile selectedBathymetry = BathymetryFile.None;
                     foreach (var entry in _selectedArea.BathymetryFiles)
                     {
                         var bathymetryFile = (BathymetryFile)entry.Value;
@@ -336,7 +340,9 @@ namespace ESME.Environment.Descriptors
                 if ((SelectedTimePeriod != NAVOTimePeriod.Invalid) && (SelectedRangeComplex != NewRangeComplex.None))
                 {
                     SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
+                    SelectedSoundSpeed.RangeComplexToken = SelectedRangeComplex.EnvironmentFiles;
                     SelectedSoundSpeed.SelectedBathymetry = _selectedBathymetry;
+                    SelectedSoundSpeed.Reset();
                 }
                 NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
                 CheckEnvironment();
@@ -449,17 +455,18 @@ namespace ESME.Environment.Descriptors
         void CheckEnvironment()
         {
             if ((SelectedRangeComplex != NewRangeComplex.None) && (SelectedTimePeriod != NAVOTimePeriod.Invalid) &&
-                (SelectedArea != RangeComplexArea.None) && (SelectedBathymetry != BathymetryFile.None)) IsEnvironmentFullySpecified = true;
+                (SelectedArea != RangeComplexArea.None) && (SelectedBathymetry != BathymetryFile.None))
+                IsEnvironmentFullySpecified = true;
             else IsEnvironmentFullySpecified = false;
         }
 
         public void ResetEnvironment()
         {
-            if (SelectedBathymetry != null) SelectedBathymetry.Reset();
-            if (SelectedWind != null) SelectedWind.Reset();
-            if (SelectedBottomLoss != null) SelectedBottomLoss.Reset();
-            if (SelectedSediment != null) SelectedSediment.Reset();
-            if (SelectedSoundSpeed != null) SelectedSoundSpeed.Reset();
+            if (SelectedBathymetry != BathymetryFile.None) SelectedBathymetry.Reset();
+            if (SelectedWind != WindFile.None) SelectedWind.Reset();
+            if (SelectedBottomLoss != BottomLossFile.None) SelectedBottomLoss.Reset();
+            if (SelectedSediment != SedimentFile.None) SelectedSediment.Reset();
+            if (SelectedSoundSpeed != SoundSpeedFile.None) SelectedSoundSpeed.Reset();
         }
 
         public void ClearEnvironment()
@@ -474,8 +481,8 @@ namespace ESME.Environment.Descriptors
 
         public void ClearSoundSpeed()
         {
-            if (SelectedSoundSpeed != null) SelectedSoundSpeed.SelectedBathymetry = null;
-            SelectedSoundSpeed = null;
+            if (SelectedSoundSpeed != SoundSpeedFile.None) SelectedSoundSpeed.SelectedBathymetry = BathymetryFile.None;
+            SelectedSoundSpeed = SoundSpeedFile.None;
         }
     }
 }

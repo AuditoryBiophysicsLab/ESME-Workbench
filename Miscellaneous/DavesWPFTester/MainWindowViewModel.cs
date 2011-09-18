@@ -434,6 +434,7 @@ namespace DavesWPFTester
             if (RangeComplexes.SelectedWind != WindFile.None) RangeComplexes.SelectedWind.GetMyDataAsync();
             if (RangeComplexes.SelectedBottomLoss != BottomLossFile.None) RangeComplexes.SelectedBottomLoss.GetMyDataAsync();
             if (RangeComplexes.SelectedSediment != SedimentFile.None) RangeComplexes.SelectedSediment.GetMyDataAsync();
+            if (RangeComplexes.SelectedSoundSpeed != SoundSpeedFile.None) RangeComplexes.SelectedSoundSpeed.GetMyDataAsync();
         }
         #endregion
 
@@ -456,6 +457,7 @@ namespace DavesWPFTester
             if (RangeComplexes.SelectedWind != WindFile.None) RangeComplexes.SelectedWind.Reset();
             if (RangeComplexes.SelectedBottomLoss != BottomLossFile.None) RangeComplexes.SelectedBottomLoss.Reset();
             if (RangeComplexes.SelectedSediment != SedimentFile.None) RangeComplexes.SelectedSediment.Reset();
+            if (RangeComplexes.SelectedSoundSpeed != SoundSpeedFile.None) RangeComplexes.SelectedSoundSpeed.Reset();
         }
         #endregion
         async void Initialize()
