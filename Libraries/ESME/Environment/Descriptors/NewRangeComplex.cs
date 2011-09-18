@@ -177,114 +177,6 @@ namespace ESME.Environment.Descriptors
         }
 
         #region Validation
-#if false
-        IEnumerable<ImportJobDescriptor> CheckForMissingEnviromentFiles()
-        {
-            //var test = new Task<EnvironmentFile<SoundSpeed>>()
-
-            var jobs = ValidateMonthlyData("temperature").Select(missingItem => new ImportJobDescriptor
-            {
-                DataType = EnvironmentDataType.Temperature,
-                GeoRect = GeoRect,
-                TimePeriod = missingItem,
-                DestinationFilename = Path.Combine(DataPath, string.Format("{0}.temperature", missingItem.ToString())),
-                CompletionAction = tempJob =>
-                {
-                    var key = Path.GetFileName(tempJob.DestinationFilename);
-                    var envFile = new TemperatureFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Temperature, tempJob.TimePeriod);
-                    EnvironmentFiles[key] = envFile;
-                    TemperatureFile.Months[tempJob.TimePeriod] = envFile;
-                }
-            }).ToList();
-            jobs.AddRange(ValidateMonthlyData("salinity").Select(missingItem => new ImportJobDescriptor
-            {
-                DataType = EnvironmentDataType.Salinity,
-                GeoRect = GeoRect,
-                TimePeriod = missingItem,
-                DestinationFilename = Path.Combine(DataPath, string.Format("{0}.salinity", missingItem.ToString())),
-                CompletionAction = tempJob =>
-                {
-                    var key = Path.GetFileName(tempJob.DestinationFilename);
-                    var envFile = new SalinityFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Salinity, tempJob.TimePeriod);
-                    EnvironmentFiles[key] = envFile;
-                    SalinityFile.Months[tempJob.TimePeriod] = envFile;
-                }
-            }));
-
-            foreach (var month in NAVOConfiguration.AllMonths)
-            {
-                var fileName = string.Format("{0}.soundspeed", month);
-                EnvironmentFiles[fileName] = new SoundSpeedFile(DataPath, fileName, 0, GeoRect, EnvironmentDataType.SoundSpeed, month);
-            }
-            var windFilename = Path.Combine(DataPath, "data.wind");
-            if (EnvironmentFiles.ReextractionRequired || (!File.Exists(windFilename)) || (new FileInfo(windFilename).LastWriteTime > EnvironmentFiles.LastWriteTime))
-                jobs.Add(new ImportJobDescriptor
-                {
-                    DataType = EnvironmentDataType.Wind,
-                    GeoRect = GeoRect,
-                    DestinationFilename = windFilename,
-                    CompletionAction = tempJob =>
-                    {
-                        var key = Path.GetFileName(tempJob.DestinationFilename);
-                        var envFile = new WindFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Wind, NAVOTimePeriod.Invalid);
-                        EnvironmentFiles[key] = envFile;
-                        WindFile = envFile;
-                    },
-                });
-
-            var sedimentFilename = Path.Combine(DataPath, "data.sediment");
-            if (EnvironmentFiles.ReextractionRequired || (!File.Exists(sedimentFilename)) || (new FileInfo(sedimentFilename).LastWriteTime > EnvironmentFiles.LastWriteTime))
-                jobs.Add(new ImportJobDescriptor
-                {
-                    DataType = EnvironmentDataType.Sediment,
-                    GeoRect = GeoRect,
-                    DestinationFilename = sedimentFilename,
-                    CompletionAction = tempJob =>
-                    {
-                        var key = Path.GetFileName(tempJob.DestinationFilename);
-                        var envFile = new SedimentFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.Sediment, NAVOTimePeriod.Invalid);
-                        EnvironmentFiles[key] = envFile;
-                        SedimentFile = envFile;
-                    },
-                });
-
-            if (Globals.AppSettings.IsNavyVersion)
-            {
-                var bottomLossFilename = Path.Combine(DataPath, "data.bottomloss");
-                if (EnvironmentFiles.ReextractionRequired || (!File.Exists(bottomLossFilename)) || (new FileInfo(bottomLossFilename).LastWriteTime > EnvironmentFiles.LastWriteTime))
-                    jobs.Add(new ImportJobDescriptor
-                    {
-                        DataType = EnvironmentDataType.BottomLoss,
-                        GeoRect = GeoRect,
-                        DestinationFilename = bottomLossFilename,
-                        CompletionAction = tempJob =>
-                        {
-                            var key = Path.GetFileName(tempJob.DestinationFilename);
-                            var envFile = new BottomLossFile(DataPath, key, tempJob.SampleCount, tempJob.GeoRect, EnvironmentDataType.BottomLoss, NAVOTimePeriod.Invalid);
-                            EnvironmentFiles[key] = envFile;
-                            BottomLossFile = envFile;
-                        },
-                    });
-            }
-            return jobs;
-        }
-
-        IEnumerable<NAVOTimePeriod> ValidateMonthlyData(string dataFileExtension)
-        {
-            var availableMonths = Directory.EnumerateFiles(DataPath, "*." + dataFileExtension).Select(item => (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), Path.GetFileNameWithoutExtension(item), true)).ToList();
-            var missingMonths = new List<NAVOTimePeriod>();
-            if (EnvironmentFiles.ReextractionRequired) return NAVOConfiguration.AllMonths;
-            foreach (var month in NAVOConfiguration.AllMonths)
-            {
-                var fileName = Path.Combine(DataPath, string.Format("{0}.{1}", month.ToString(), dataFileExtension));
-                if (!availableMonths.Contains(month)) missingMonths.Add(month);
-                else if ((!File.Exists(fileName)) || (new FileInfo(fileName).LastWriteTime > EnvironmentFiles.LastWriteTime))
-                    missingMonths.Add(month);
-            }
-            return missingMonths.Distinct();
-        }
-#endif
-
         List<ImportJobDescriptor> ValidateEnvironment()
         {
             var jobs = new List<ImportJobDescriptor>();
@@ -301,27 +193,42 @@ namespace ESME.Environment.Descriptors
                 result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Salinity, true, month);
                 if (result != null) jobs.Add(result.Item2);
                 result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, false, month);
-                LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Temperature);
-                LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Salinity);
+                //LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Temperature);
+                //LinkToSourceMonths(result.Item1, month, EnvironmentDataType.Salinity);
             }
             foreach (var season in NAVOConfiguration.AllSeasons)
             {
-                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Temperature, false, season);
-                LinkToSourceMonths(result.Item1, season, EnvironmentDataType.Temperature);
-                result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.Salinity, false, season);
-                LinkToSourceMonths(result.Item1, season, EnvironmentDataType.Salinity);
                 result = CreateEnvironmentFileMetadataIfNeeded(EnvironmentDataType.SoundSpeed, false, season);
-                LinkToSourceMonths(result.Item1, season, EnvironmentDataType.SoundSpeed);
+                //LinkToSourceMonths(result.Item1, season, EnvironmentDataType.SoundSpeed);
             }
             return jobs;
         }
         
-        void LinkToSourceMonths(EnvironmentFile envFile, NAVOTimePeriod timePeriod, EnvironmentDataType sourceType)
+        void LinkToSourceMonths<TEnvironment, TData>(TEnvironment envFile, NAVOTimePeriod timePeriod, EnvironmentDataType sourceType) where TEnvironment: EnvironmentFile<TData> where TData : class
         {
             var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod).ToList();
             envFile.RequiredFiles.Clear();
             foreach (var month in months)
+            {
+                string key;
+                switch (sourceType)
+                {
+                    case EnvironmentDataType.Wind:
+                    case EnvironmentDataType.Sediment:
+                    case EnvironmentDataType.BottomLoss:
+                        key = string.Format("data.{0}", sourceType.ToString().ToLower());
+                        break;
+                    case EnvironmentDataType.Salinity:
+                    case EnvironmentDataType.SoundSpeed:
+                    case EnvironmentDataType.Temperature:
+                        key = string.Format("{0}.{1}", timePeriod, sourceType.ToString().ToLower());
+                        break;
+                    default:
+                        throw new ApplicationException(string.Format("Unknown environment data type: {0}", sourceType));
+                }
+                envFile.LinkTo<TEnvironment, TData>((TEnvironment)EnvironmentFiles[key]);
                 envFile.RequiredFiles.Add(EnvironmentFiles[string.Format("{0}.{1}", month, sourceType.ToString().ToLower())]);
+            }
         }
 
         EnvironmentFile NewEnvironmentFile(string fileName, uint sampleCount, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
@@ -471,11 +378,14 @@ namespace ESME.Environment.Descriptors
             result.OpArea = result.CreateAreaPrivate(String.Format("{0}_OpArea", rangeComplexName), opAreaLimits);
             result.SimArea = result.CreateAreaPrivate(String.Format("{0}_SimArea", rangeComplexName), simAreaLimits);
             result.UpdateAreas();
-            var importJobs = result.ValidateEnvironment().ToList();
+            var importJobs = result.ValidateEnvironment();
             foreach (var area in result.AreaCollection.Values) importJobs.AddRange(area.ImportJobs);
             NAVOImporter.Import(importJobs);
-            result.IsLoading = true;
-            //Tuple.Create(rangeComplexName, height, latitude, longitude, geoid, opsLimitFile, simLimitFile)
+            var completionTasks = (from job in importJobs
+                                   select job.CompletionTask).ToList();
+            result.LoadTaskTotal = completionTasks.Count();
+            foreach (var task in completionTasks) task.ContinueWith(t => result.IncrementCompletedTasks());
+            TaskEx.WhenAll(completionTasks).ContinueWith(task => result.IsLoading = true);
             return result;
         }
 

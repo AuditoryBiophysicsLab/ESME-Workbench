@@ -102,8 +102,7 @@ namespace ESME.Environment
             {
                 var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(timePeriod);
                 var accumulator = new SoundSpeedFieldAverager { TimePeriod = timePeriod };
-                foreach (var month in months)
-                    accumulator.Add(monthlySoundSpeeds[month]);
+                foreach (var month in months) accumulator.Add(monthlySoundSpeeds[month]);
                 result.SoundSpeedFields.Add(accumulator.Average);
             }
             return result;

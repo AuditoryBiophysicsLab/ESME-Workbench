@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -31,7 +33,7 @@ namespace ESME.Environment.Descriptors
             RequiredFiles = new List<EnvironmentFile>();
         }
 
-        public void OnDeserialization(object sender)
+        void IDeserializationCallback.OnDeserialization(object sender)
         {
             RequiredFiles = new List<EnvironmentFile>();
         }
@@ -71,6 +73,8 @@ namespace ESME.Environment.Descriptors
                 return (FileSize == info.Length) && (LastWriteTime == info.LastWriteTime);
             }
         }
+
+        public virtual Task GetDataAsync() { throw new NotImplementedException(); }
 
         #region public bool IsCached { get; set; }
 
@@ -174,10 +178,6 @@ namespace ESME.Environment.Descriptors
         GeoRect _geoRect;
 
         #endregion
-        public EnvironmentDataType DataType { get; protected set; }
-        public NAVOTimePeriod TimePeriod { get; private set; }
-        public List<EnvironmentFile> RequiredFiles { get; internal set; }
-
         #region public DataAvailability DataAvailability { get; protected set; }
         public DataAvailability DataAvailability
         {
@@ -186,12 +186,14 @@ namespace ESME.Environment.Descriptors
             {
                 if (_dataAvailability == value) return;
                 _dataAvailability = value;
+                Debug.WriteLine("{0} DataAvailability for {1} changed to {2}", DateTime.Now, FileName, _dataAvailability);
                 OnDataAvailabilityChanged(_dataAvailability);
+                NotifyPropertyChanged(DataAvailabilityChangedEventArgs);
             }
         }
         [NonSerialized]
         DataAvailability _dataAvailability = DataAvailability.NotLoaded;
-
+        static readonly PropertyChangedEventArgs DataAvailabilityChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.DataAvailability);
 
         [NonSerialized]
         private EventHandler<DataAvailabilityChangedEventArgs> _dataAvailabilityChanged;
@@ -227,6 +229,9 @@ namespace ESME.Environment.Descriptors
             }
         }
         #endregion
+        public EnvironmentDataType DataType { get; protected set; }
+        public NAVOTimePeriod TimePeriod { get; private set; }
+        public List<EnvironmentFile> RequiredFiles { get; internal set; }
 
         #region INotifyPropertyChanged Members
 
@@ -269,35 +274,64 @@ namespace ESME.Environment.Descriptors
         public EnvironmentFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod)
             : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod) { Initialize(); }
 
+        void IDeserializationCallback.OnDeserialization(object sender)
+        {
+            Initialize();
+        }
+
         public void Initialize()
         {
             DataAvailability = DataAvailability.NotLoaded;
             Months = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>>();
             MonthsList = ObservableList<EnvironmentFile<T>>.FromObservableConcurrentDictionary(Months, kvp => kvp.Value, (kvp, ef) => kvp.Key == ef.TimePeriod);
+            _sourceTasks = new List<Task>();
         }
 
-        public Func<Task<T>> GetAsyncFunc { get { return _getAsyncFunc; } set { _getAsyncFunc = value; } }
-        [NonSerialized] Func<Task<T>> _getAsyncFunc;
-
-        public Task<T> AsyncData
+        public override Task GetDataAsync() { return GetMyDataAsync(); }
+        public Task<T> GetMyDataAsync()
         {
+            if (DataTask == null) throw new ApplicationException("DataTask is null");
+            if (DataTask.Status != TaskStatus.WaitingForActivation) return DataTask;
+            DataTask.Start();
+            DataAvailability = DataAvailability.Loading;
+            DataTask.ContinueWith(task => DataAvailability = DataAvailability.Available);
+            return DataTask;
+        }
+
+        async Task GetRequiredFilesAsync()
+        {
+            if (RequiredFiles.Count == 0) return;
+            var tasks = RequiredFiles.Select(file => file.GetDataAsync()).ToList();
+            await TaskEx.WhenAll(tasks);
+        }
+
+        public void LinkTo<TSource, TData>(TSource sourceMonth)
+            where TSource : EnvironmentFile<TData>
+            where TData : class
+        {
+            _sourceTasks.Add(sourceMonth.DataTask);
+        }
+
+        [NonSerialized] List<Task> _sourceTasks;
+
+        public Task<T> DataTask
+        {
+            [MethodImpl(MethodImplOptions.Synchronized)]
             get
             {
-                lock (_lockObject)
-                {
-                    if (_inFlightFunc != null) return _inFlightFunc;
-                    if (GetAsyncFunc == null) throw new ApplicationException("GetAsyncFunc is null");
-                    _inFlightFunc = GetAsyncFunc();
-                    DataAvailability = DataAvailability.Loading;
-                    _inFlightFunc.ContinueWith(task => DataAvailability = DataAvailability.Available);
-                    return _inFlightFunc;
-                }
+                return _dataTask;
+            }
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            set
+            {
+                if (_dataTask != null) throw new ApplicationException("DataTask is already set");
+                _dataTask = value;
             }
         }
-        public T Data { get { return _data ?? (_data = AsyncData.Result); } }
+        [NonSerialized] Task<T> _dataTask;
 
-        [NonSerialized] Task<T> _inFlightFunc;
-        [NonSerialized] object _lockObject = new object();
+        public T Data { get { return _data ?? (_data = DataTask.Result); } }
+
         [NonSerialized] T _data;
 
         #region public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>> Months { get; set; }
@@ -336,15 +370,6 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
-        
-        public void OnDeserialization(object sender)
-        {
-            _lockObject = new object();
-            DataAvailability = DataAvailability.NotLoaded;
-            Months = new ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>>();
-            MonthsList = ObservableList<EnvironmentFile<T>>.FromObservableConcurrentDictionary(Months, kvp => kvp.Value, (kvp, ef) => kvp.Key == ef.TimePeriod);
-        }
-
     }
 
     [Serializable]
@@ -375,6 +400,41 @@ namespace ESME.Environment.Descriptors
         {
             DataType = EnvironmentDataType.SoundSpeed;
             IsCached = false;
+        }
+
+        public async Task<SoundSpeed> FooAsync(IDictionary<string, EnvironmentFile> environmentFiles, EnvironmentFile<Bathymetry> bathymetryFile)
+        {
+            var months = Globals.AppSettings.NAVOConfiguration.MonthsInTimePeriod(TimePeriod).ToList();
+
+            var sources = (from month in months
+                                select new
+                                {
+                                    Month = month,
+                                    TemperatureFile = (TemperatureFile)environmentFiles[string.Format("{0}.temperature", TimePeriod)],
+                                    TemperatureDataTask = ((TemperatureFile)environmentFiles[string.Format("{0}.temperature", TimePeriod)]).GetMyDataAsync(),
+                                    SalinityFile = (TemperatureFile)environmentFiles[string.Format("{0}.salinity", TimePeriod)],
+                                    SalinityDataTask = ((TemperatureFile)environmentFiles[string.Format("{0}.salinity", TimePeriod)]).GetMyDataAsync(),
+                                }).ToDictionary(item => item.Month);
+            var sourceTasks = new List<Task>();
+            foreach (var month in months)
+            {
+                sourceTasks.Add(sources[month].TemperatureDataTask);
+                sourceTasks.Add(sources[month].SalinityDataTask);
+            }
+            sourceTasks.Add(bathymetryFile.GetMyDataAsync());
+            await TaskEx.WhenAll(sourceTasks);
+            var soundSpeedFields = (from month in months
+                                    select new
+                                    {
+                                        Month = month,
+                                        SoundSpeedField = SoundSpeedField.Create(sources[month].TemperatureFile.Data[month],
+                                                                                 sources[month].SalinityFile.Data[month],
+                                                                                 bathymetryFile.Data.DeepestPoint,
+                                                                                 bathymetryFile.GeoRect),
+                                    }).ToDictionary(item => item.Month);
+            var monthlySoundSpeeds = new SoundSpeed();
+            foreach (var month in months) monthlySoundSpeeds.SoundSpeedFields.Add(soundSpeedFields[month].SoundSpeedField);
+            return SoundSpeed.Average(monthlySoundSpeeds, new List<NAVOTimePeriod>{TimePeriod});
         }
     }
 

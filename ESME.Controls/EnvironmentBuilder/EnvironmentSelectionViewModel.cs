@@ -200,17 +200,17 @@ namespace ESME.Views.EnvironmentBuilder
         public Sediment Sediment { get { return SelectedRangeComplex.SedimentFile.Data; } }
         public SoundSpeedField SoundSpeedField { get { return SoundSpeedFieldTask.Result; } }
 
-        public Task<Bathymetry> BathymetryTask { get { return _bathymetryFile.AsyncData; } }
-        public Task<Wind> WindTask { get { return SelectedRangeComplex.WindFile.AsyncData; } }
-        public Task<BottomLoss> BottomLossTask { get { return SelectedRangeComplex.BottomLossFile.AsyncData; } }
-        public Task<Sediment> SedimentTask { get { return SelectedRangeComplex.SedimentFile.AsyncData; } }
+        public Task<Bathymetry> BathymetryTask { get { return _bathymetryFile.DataTask; } }
+        public Task<Wind> WindTask { get { return SelectedRangeComplex.WindFile.DataTask; } }
+        public Task<BottomLoss> BottomLossTask { get { return SelectedRangeComplex.BottomLossFile.DataTask; } }
+        public Task<Sediment> SedimentTask { get { return SelectedRangeComplex.SedimentFile.DataTask; } }
         public Task<SoundSpeedField> SoundSpeedFieldTask { get { return CalculateSoundSpeedAsync(); } }
         async Task<SoundSpeedField> CalculateSoundSpeedAsync()
         {
             var dependencies = new List<Task>();
-            dependencies.AddRange(_temperatureFiles.Values.Select(item => item.AsyncData));
-            dependencies.AddRange(_salinityFiles.Values.Select(item => item.AsyncData));
-            dependencies.Add(_bathymetryFile.AsyncData);
+            dependencies.AddRange(_temperatureFiles.Values.Select(item => item.DataTask));
+            dependencies.AddRange(_salinityFiles.Values.Select(item => item.DataTask));
+            dependencies.Add(_bathymetryFile.DataTask);
             await TaskEx.WhenAll(dependencies);
             var monthlySoundSpeeds = new SoundSpeed();
             foreach (var month in SelectedMonths)

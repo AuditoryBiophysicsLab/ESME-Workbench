@@ -132,11 +132,6 @@ namespace ESME.Environment.Descriptors
             get { return ((BathymetryFile)BathymetryFiles[resolutionString]).Data; }
         }
 
-        public Task<Bathymetry> GetDataAsync(string resolutionString)
-        {
-            return ((BathymetryFile)BathymetryFiles[resolutionString]).AsyncData;
-        }
-
         public List<ImportJobDescriptor> ImportJobs { get; private set; }
 
         [NotNull] public ObservableList<BathymetryFile> BathymetryList { get; private set; }
