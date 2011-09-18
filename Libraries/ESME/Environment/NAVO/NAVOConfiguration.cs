@@ -489,6 +489,31 @@ namespace ESME.Environment.NAVO
             }
         }
 
+        public static IEnumerable<NAVOTimePeriod> AllTimePeriods
+        {
+            get
+            {
+                yield return NAVOTimePeriod.January;
+                yield return NAVOTimePeriod.February;
+                yield return NAVOTimePeriod.March;
+                yield return NAVOTimePeriod.April;
+                yield return NAVOTimePeriod.May;
+                yield return NAVOTimePeriod.June;
+                yield return NAVOTimePeriod.July;
+                yield return NAVOTimePeriod.August;
+                yield return NAVOTimePeriod.September;
+                yield return NAVOTimePeriod.October;
+                yield return NAVOTimePeriod.November;
+                yield return NAVOTimePeriod.December;
+                yield return NAVOTimePeriod.Spring;
+                yield return NAVOTimePeriod.Summer;
+                yield return NAVOTimePeriod.Fall;
+                yield return NAVOTimePeriod.Winter;
+                yield return NAVOTimePeriod.Warm;
+                yield return NAVOTimePeriod.Cold;
+            }
+        }
+
         public IEnumerable<NAVOTimePeriod> MonthsInTimePeriod(NAVOTimePeriod timePeriod)
         {
             switch (timePeriod)

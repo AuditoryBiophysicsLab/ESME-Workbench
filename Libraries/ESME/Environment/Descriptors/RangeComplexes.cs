@@ -246,6 +246,7 @@ namespace ESME.Environment.Descriptors
                     }
                 }
                 NotifyPropertyChanged(SelectedRangeComplexChangedEventArgs);
+                CheckEnvironment();
             }
         }
 
@@ -273,6 +274,7 @@ namespace ESME.Environment.Descriptors
                     }
                 }
                 NotifyPropertyChanged(SelectedTimePeriodChangedEventArgs);
+                CheckEnvironment();
             }
         }
 
@@ -308,6 +310,7 @@ namespace ESME.Environment.Descriptors
                     SelectedBathymetry = selectedBathymetry;
                 }
                 NotifyPropertyChanged(SelectedAreaChangedEventArgs);
+                CheckEnvironment();
             }
         }
 
@@ -336,6 +339,7 @@ namespace ESME.Environment.Descriptors
                     SelectedSoundSpeed.SelectedBathymetry = _selectedBathymetry;
                 }
                 NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
+                CheckEnvironment();
             }
         }
 
@@ -423,6 +427,31 @@ namespace ESME.Environment.Descriptors
         SoundSpeedFile _selectedSoundSpeed = SoundSpeedFile.None;
 
         #endregion
+
+        #region public bool IsEnvironmentFullySpecified { get; set; }
+
+        public bool IsEnvironmentFullySpecified
+        {
+            get { return _isEnvironmentFullySpecified; }
+            set
+            {
+                if (_isEnvironmentFullySpecified == value) return;
+                _isEnvironmentFullySpecified = value;
+                NotifyPropertyChanged(IsEnvironmentFullySpecifiedChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnvironmentFullySpecifiedChangedEventArgs = ObservableHelper.CreateArgs<RangeComplexes>(x => x.IsEnvironmentFullySpecified);
+        bool _isEnvironmentFullySpecified;
+
+        #endregion
+
+        void CheckEnvironment()
+        {
+            if ((SelectedRangeComplex != NewRangeComplex.None) && (SelectedTimePeriod != NAVOTimePeriod.Invalid) &&
+                (SelectedArea != RangeComplexArea.None) && (SelectedBathymetry != BathymetryFile.None)) IsEnvironmentFullySpecified = true;
+            else IsEnvironmentFullySpecified = false;
+        }
 
         public void ResetEnvironment()
         {
