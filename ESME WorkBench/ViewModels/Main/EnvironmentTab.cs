@@ -242,8 +242,14 @@ namespace ESMEWorkBench.ViewModels.Main
                 var vm = new NewRangeComplexViewModel(Globals.AppSettings);
                 var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
                 if ((result.HasValue) && (result.Value))
-                    RangeComplexes.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.NewOpAreaOverlayGeos,
-                                                      vm.NewSimAreaOverlayGeos);
+                {
+                    var opAreaCoords = vm.ExistingOpAreaOverlayFilename != null ? new OverlayFile(vm.ExistingOpAreaOverlayFilename).Shapes[0].Geos : vm.NewOpAreaOverlayGeos;
+                    var simAreaCoords = vm.ExistingSimAreaOverlayFilename != null ? new OverlayFile(vm.ExistingSimAreaOverlayFilename).Shapes[0].Geos : vm.NewSimAreaOverlayGeos;
+                    RangeComplexes.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude,
+                                                      vm.ReferencePointLongitude, vm.GeoidSeparation,
+                                                      opAreaCoords,
+                                                      simAreaCoords);
+                }
             }
             catch (Exception e) { _messageBoxService.ShowError(e.Message); }
         }

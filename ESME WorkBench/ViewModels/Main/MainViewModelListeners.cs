@@ -41,6 +41,9 @@ namespace ESMEWorkBench.ViewModels.Main
             Settings.Default.LastBathymetryFileDirectory = Path.GetDirectoryName(_saveFileService.FileName);
             //_experiment.Bathymetry.ToYXZ(_saveFileService.FileName, 1);
             //_selectedBathymetryDescriptor.Data.ToYXZ(_saveFileService.FileName,1);
+            //_rangeComplexDescriptors[""]
+            //RangeComplexes["Jacksonville"]["OpArea"]["0.50min"]
+            //RangeComplexes["Jacksonville"].Temperature[NAVOTimePeriod.January]
             
         }
 
