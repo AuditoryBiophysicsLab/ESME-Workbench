@@ -37,7 +37,7 @@ namespace ESME.Environment
                 {
                     Debug.WriteLine("{0} Bathymetry.Load caught IOException.  Retry count is now {1}", DateTime.Now, retry);
                     exception = e;
-                    Thread.Sleep(50);
+                    Thread.Sleep(100);
                 }
             }
             Debug.WriteLine("{0} Bathymetry.Load giving up", DateTime.Now);

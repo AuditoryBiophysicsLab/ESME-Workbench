@@ -577,8 +577,16 @@ namespace ESME.Environment.Descriptors
             IsCached = false;
         }
 
+        public string BitmapFilename
+        {
+            get { return !IsCached ? null : Path.Combine(DataPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"); }
+        }
+
         public BathymetryFile(string dataPath, string fileName, uint sampleCount, GeoRect geoRect, EnvironmentDataType dataType, NAVOTimePeriod timePeriod, float resolution)
-            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution) { Reset(); }
+            : base(dataPath, fileName, sampleCount, geoRect, dataType, timePeriod, resolution)
+        {
+            Reset();
+        }
 
         public override void Reset() 
         {

@@ -540,20 +540,16 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void DisplayBathymetry()
         {
-#if false
             if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
             RasterMapLayer bathyBitmapLayer;
-            if (_selectedBathymetryDescriptor == null)
+            if ((SelectedBathymetry == null) || (SelectedBathymetry == BathymetryFile.None) || (SelectedBathymetry.BitmapFilename == null))
             {
                 bathyBitmapLayer = EnvironmentTabMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry");
                 if (bathyBitmapLayer != null) bathyBitmapLayer.IsChecked = false;
                 return;
             }
-            bathyBitmapLayer = EnvironmentTabMapLayers.DisplayBathymetryRaster("Bathymetry",
-                                                                                   Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Images",
-                                                                                                Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp"), true, false, true, _selectedBathymetryDescriptor.Metadata.Bounds);
+            bathyBitmapLayer = EnvironmentTabMapLayers.DisplayBathymetryRaster("Bathymetry", SelectedBathymetry.BitmapFilename, true, false, true, SelectedBathymetry.GeoRect);
             MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
-#endif
         }
 
 
