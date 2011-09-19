@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using Cinch;
 using ESME;
+using ESME.Environment.Descriptors;
 using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
@@ -24,6 +25,59 @@ namespace ESMEWorkBench.ViewModels.Main
     public partial class MainViewModel
     {
         public MapLayerCollection ScenarioMapLayers { get; set; }
+
+        #region LoadEnvironmentCommand
+        public SimpleCommand<object, object> LoadEnvironmentCommand
+        {
+            get { return _loadEnvironment ?? (_loadEnvironment = new SimpleCommand<object, object>(delegate { return IsLoadEnvironmentCommandEnabled; }, delegate { LoadEnvironmentHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _loadEnvironment;
+
+        bool IsLoadEnvironmentCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void LoadEnvironmentHandler()
+        {
+            try
+            {
+                if (RangeComplexes.SelectedBathymetry != BathymetryFile.None) RangeComplexes.SelectedBathymetry.GetMyDataAsync();
+                if (RangeComplexes.SelectedWind != WindFile.None) RangeComplexes.SelectedWind.GetMyDataAsync();
+                if (RangeComplexes.SelectedBottomLoss != BottomLossFile.None) RangeComplexes.SelectedBottomLoss.GetMyDataAsync();
+                if (RangeComplexes.SelectedSediment != SedimentFile.None) RangeComplexes.SelectedSediment.GetMyDataAsync();
+                if (RangeComplexes.SelectedSoundSpeed != SoundSpeedFile.None) RangeComplexes.SelectedSoundSpeed.GetMyDataAsync();
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError(e.Message);
+            }
+        }
+        #endregion
+
+        #region ClearEnvironmentCommand
+        public SimpleCommand<object, object> ClearEnvironmentCommand
+        {
+            get { return _clearEnvironment ?? (_clearEnvironment = new SimpleCommand<object, object>(delegate { return IsClearEnvironmentCommandEnabled; }, delegate { ClearEnvironmentHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _clearEnvironment;
+
+        bool IsClearEnvironmentCommandEnabled
+        {
+            get { return true; }
+        }
+
+        void ClearEnvironmentHandler()
+        {
+            if (RangeComplexes.SelectedBathymetry != BathymetryFile.None) RangeComplexes.SelectedBathymetry.Reset();
+            if (RangeComplexes.SelectedWind != WindFile.None) RangeComplexes.SelectedWind.Reset();
+            if (RangeComplexes.SelectedBottomLoss != BottomLossFile.None) RangeComplexes.SelectedBottomLoss.Reset();
+            if (RangeComplexes.SelectedSediment != SedimentFile.None) RangeComplexes.SelectedSediment.Reset();
+            if (RangeComplexes.SelectedSoundSpeed != SoundSpeedFile.None) RangeComplexes.SelectedSoundSpeed.Reset();
+        }
+        #endregion
 
         #region public NAEMOScenarioMetadata ScenarioMetadata { get; set; }
 
@@ -48,7 +102,6 @@ namespace ESMEWorkBench.ViewModels.Main
                     };
                     _scenarioMetadata.Dispatcher = _dispatcher;
                     _scenarioMetadata.VisualizerService = _visualizerService;
-                    _scenarioMetadata.RangeComplexDescriptors = RangeComplexDescriptors;
                     _dispatcher.InvokeIfRequired(() =>
                     {
                         MapLayerCollections.Add("Scenario", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));

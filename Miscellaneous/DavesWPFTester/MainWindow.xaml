@@ -9,7 +9,7 @@
         d:DataContext="{d:DesignInstance app:MainWindowViewModel}">
   <Window.Resources>
     <EnvironmentBuilder:CollectionViewSortConverter x:Key="SortConverter" />
-    <Style x:Key="DataStatusStyle" TargetType="TextBlock">
+    <Style x:Key="DataAvailabilityStyle" TargetType="TextBlock">
       <Style.Triggers>
         <DataTrigger Binding="{Binding}" Value="NotLoaded">
           <Setter Property="Foreground" Value="Black" />
@@ -99,30 +99,30 @@
         <UniformGrid Rows="1">
           <StackPanel Orientation="Vertical" DataContext="{Binding RangeComplexes.SelectedSediment.DataAvailability}">
             <TextBlock Text="Sediment" TextAlignment="Center" />
-            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataStatusStyle}" />
+            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataAvailabilityStyle}" />
           </StackPanel>
           <StackPanel Orientation="Vertical" DataContext="{Binding RangeComplexes.SelectedBathymetry.DataAvailability}">
             <TextBlock Text="Bathymetry" TextAlignment="Center" />
-            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataStatusStyle}" />
+            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataAvailabilityStyle}" />
           </StackPanel>
           <StackPanel Orientation="Vertical" DataContext="{Binding RangeComplexes.SelectedBottomLoss.DataAvailability}">
-            <TextBlock Text="BottomLoss" TextAlignment="Center" />
-            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataStatusStyle}" />
+            <TextBlock Text="Bottom Loss" TextAlignment="Center" />
+            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataAvailabilityStyle}" />
           </StackPanel>
           <StackPanel Orientation="Vertical" DataContext="{Binding RangeComplexes.SelectedSoundSpeed.DataAvailability}">
-            <TextBlock Text="SoundSpeed" TextAlignment="Center" />
-            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataStatusStyle}" />
+            <TextBlock Text="Sound Speed" TextAlignment="Center" />
+            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataAvailabilityStyle}" />
           </StackPanel>
           <StackPanel Orientation="Vertical" DataContext="{Binding RangeComplexes.SelectedWind.DataAvailability}">
             <TextBlock Text="Wind" TextAlignment="Center" />
-            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataStatusStyle}" />
+            <TextBlock Text="{Binding}" TextAlignment="Center" Style="{StaticResource DataAvailabilityStyle}" />
           </StackPanel>
         </UniformGrid>
       </GroupBox>
 
       <GroupBox Header="Range Complexes" Margin="5" DockPanel.Dock="Top" HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
-        <EnvironmentBuilder:RangeComplexTreeView2 DockPanel.Dock="Top" DataContext="{Binding RangeComplexes}"
+        <EnvironmentBuilder:RangeComplexTreeView DockPanel.Dock="Top" DataContext="{Binding RangeComplexes}"
                                                   IsEnabled="{Binding IsEnabled}"
                                                   ItemsSource="{Binding RangeComplexList, Converter={StaticResource SortConverter}, ConverterParameter='Name'}" />
       </GroupBox>

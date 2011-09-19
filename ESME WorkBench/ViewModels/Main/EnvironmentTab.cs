@@ -1,29 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
 using ESME;
-using ESME.Environment;
 using ESME.Environment.Descriptors;
-using ESME.Environment.NAVO;
 using ESME.Mapping;
-using ESME.Metadata;
 using ESME.NEMO.Overlay;
-using ESME.TransmissionLoss.CASS;
-using ESME.Views.EnvironmentBuilder;
 using ESME.Views.Locations;
 using ESME.Views.InstallationWizard;
 using HRC.Navigation;
-using HRC.Utility;
-using Microsoft.Windows.Controls.Ribbon;
 using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
@@ -102,6 +92,284 @@ namespace ESMEWorkBench.ViewModels.Main
         bool _viewIsActivated;
         #endregion
 
+        #region public NewRangeComplex SelectedRangeComplex { get; set; }
+
+        public NewRangeComplex SelectedRangeComplex
+        {
+            get { return _selectedRangeComplex; }
+            set
+            {
+                if (_selectedRangeComplex == value) return;
+                _selectedRangeComplex = value;
+                NotifyPropertyChanged(SelectedRangeComplexChangedEventArgs);
+                IsRangeComplexSelected = _selectedRangeComplex != NewRangeComplex.None;
+                NotifyPropertyChanged(IsRangeComplexSelectedChangedEventArgs);
+                DisplayRangeComplex();
+            }
+        }
+
+        public bool IsRangeComplexSelected { get; private set; }
+        static readonly PropertyChangedEventArgs IsRangeComplexSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsRangeComplexSelected);
+
+        static readonly PropertyChangedEventArgs SelectedRangeComplexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplex);
+        NewRangeComplex _selectedRangeComplex;
+
+        #endregion
+
+        #region public RangeComplexArea SelectedArea { get; set; }
+
+        public RangeComplexArea SelectedArea
+        {
+            get { return _selectedArea; }
+            set
+            {
+                if (_selectedArea == value) return;
+                _selectedArea = value;
+                NotifyPropertyChanged(SelectedAreaChangedEventArgs);
+                IsAreaSelected = _selectedArea != RangeComplexArea.None;
+                NotifyPropertyChanged(IsAreaSelectedChangedEventArgs);
+                DisplayOverlay();
+            }
+        }
+
+        public bool IsAreaSelected { get; private set; }
+        static readonly PropertyChangedEventArgs IsAreaSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsAreaSelected);
+
+        static readonly PropertyChangedEventArgs SelectedAreaChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedArea);
+        RangeComplexArea _selectedArea;
+
+        #endregion
+
+        #region public BathymetryFile SelectedBathymetry { get; set; }
+
+        public BathymetryFile SelectedBathymetry
+        {
+            get { return _selectedBathymetry; }
+            set
+            {
+                if (_selectedBathymetry == value) return;
+                _selectedBathymetry = value;
+                NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedBathymetryChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedBathymetry);
+        BathymetryFile _selectedBathymetry;
+
+        #endregion
+
+
+        #region NewRangeComplexCommand
+        public SimpleCommand<object, object> NewRangeComplexCommand
+        {
+            get
+            {
+                return _newRangeComplex ??
+                       (_newRangeComplex =
+                        new SimpleCommand<object, object>(delegate { NewRangeComplexHandler(); }));
+            }
+        }
+
+        SimpleCommand<object, object> _newRangeComplex;
+
+        void NewRangeComplexHandler()
+        {
+            var vm = new NewRangeComplexViewModel(Globals.AppSettings);
+            var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
+            if ((result.HasValue) && (result.Value))
+                RangeComplexes.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.NewOpAreaOverlayGeos,
+                                                  vm.NewSimAreaOverlayGeos);
+        }
+        #endregion
+
+        void DisplayWorldMap()
+        {
+            if (MapLayerCollections["Environment"] == null)
+            {
+                MapLayerCollections.Add("Environment", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+                EnvironmentTabMapLayers = MapLayerCollections["Environment"];
+                //EnvironmentTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+                ZoomToWorldMap();
+            }
+            if (MapLayerCollections["Home"] != null) return;
+            MapLayerCollections.Add("Home", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+            //HomeTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+        }
+
+        void DisplayRangeComplex()
+        {
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            if (RangeComplexes.SelectedRangeComplex == NewRangeComplex.None)
+            {
+                var opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
+                if (opAreaLayer != null) opAreaLayer.IsChecked = false;
+                var simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
+                if (simAreaLayer != null) simAreaLayer.IsChecked = false;
+                return;
+            }
+
+            ZoomToRangeComplex();
+            EnvironmentTabMapLayers.DisplayOverlayShapes("Op Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.OpArea.OverlayShape });
+            EnvironmentTabMapLayers.DisplayOverlayShapes("Sim Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.SimArea.OverlayShape });
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+        }
+
+        #region ZoomToRangeComplexCommand
+        public SimpleCommand<object, object> ZoomToRangeComplexCommand
+        {
+            get { return _zoomToRangeComplex ?? (_zoomToRangeComplex = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { ZoomToRangeComplex(); })); }
+        }
+
+        SimpleCommand<object, object> _zoomToRangeComplex;
+
+        void ZoomToRangeComplex()
+        {
+            var bounds = RangeComplexes.SelectedRangeComplex.OpArea.OverlayShape.BoundingBox;
+            var north = (float)bounds.Bottom + 3;
+            var west = (float)bounds.Left - 3;
+            var south = (float)bounds.Top - 3;
+            var east = (float)bounds.Right + 3;
+            var mapExtent = new RectangleShape(west, north, east, south);
+            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
+        }
+        #endregion
+
+        #region DeleteRangeComplexCommand
+        public SimpleCommand<object, object> DeleteRangeComplexCommand
+        {
+            get { return _deleteRangeComplex ?? (_deleteRangeComplex = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { DeleteRangeComplexHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _deleteRangeComplex;
+
+        void DeleteRangeComplexHandler()
+        {
+            var result = _messageBoxService.ShowYesNo(string.Format("Warning: Deleting the range complex \"{0}\" will also delete any overlays, bathymetry and environment data that have previously been created or extracted.\n\nThis operation CANNOT be undone.\n\nProceed with deletion?", RangeComplexes.SelectedRangeComplex.Name),
+                                                 CustomDialogIcons.Exclamation);
+            if (result == CustomDialogResults.No) return;
+            RangeComplexes.RemoveRangeComplex(RangeComplexes.SelectedRangeComplex.Name);
+            RangeComplexes.SelectedRangeComplex = NewRangeComplex.None;
+        }
+        #endregion
+
+        void DisplayOverlay()
+        {
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            if (RangeComplexes.SelectedArea == RangeComplexArea.None)
+            {
+                var overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
+                if (overlayLayer != null) overlayLayer.IsChecked = false;
+                return;
+            }
+            EnvironmentTabMapLayers.DisplayOverlayShapes("Overlay", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedArea.OverlayShape });
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+        }
+
+        #region NewOverlayCommand
+
+        public SimpleCommand<object, object> NewOverlayCommand
+        {
+            get
+            {
+                return _newOverlay ?? (_newOverlay = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { NewOverlayHandler(); }));
+            }
+        }
+
+        private SimpleCommand<object, object> _newOverlay;
+
+        void NewOverlayHandler()
+        {
+            var vm = new NewOverlayViewModel(Globals.AppSettings, RangeComplexes.SelectedRangeComplex.Name);
+            var result = _visualizerService.ShowDialog("NewOverlayView", vm);
+            if ((!result.HasValue) || (!result.Value)) return;
+            RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, vm.OverlayGeos);
+        }
+
+        #endregion
+
+        #region ExpandOverlayCommand
+        public SimpleCommand<object, object> ExpandOverlayCommand
+        {
+            get { return _expandOverlay ?? (_expandOverlay = new SimpleCommand<object, object>(delegate { return IsExpandOverlayCommandEnabled; }, delegate { ExpandOverlayHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _expandOverlay;
+
+        bool IsExpandOverlayCommandEnabled
+        {
+            get { return RangeComplexes.SelectedArea != RangeComplexArea.None; }
+        }
+
+        void ExpandOverlayHandler()
+        {
+            var vm = new OverlayExpandViewModel(RangeComplexes.SelectedArea.Name);
+            var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
+            if ((!result.HasValue) || (!result.Value)) return;
+
+            var curOverlay = RangeComplexes.SelectedArea.OverlayShape;
+            var limits = new Limits(ConvexHull.Create(curOverlay.EarthCoordinates.Cast<Geo>().ToList(), true));
+            var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
+            var coordinateList = expandedLimits.Geos;
+            var testShape = new OverlayLineSegments(coordinateList, Colors.Black);
+
+            if (!testShape.IsUsableAsPerimeter) coordinateList = ConvexHull.Create(coordinateList, true);
+
+            RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, coordinateList);
+            // todo: add support to environment engine for expanding areas, including name validation and some metadata handling
+            // around if a given area is an expansion of another one.  Should be easy to do.
+
+            //NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, vm.OverlayName, coordinateList, boundingBox, vm.BufferSize, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
+            //SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[vm.OverlayName];
+        }
+
+        #endregion
+
+        #region DeleteOverlayCommand
+        public SimpleCommand<object, object> DeleteOverlayCommand
+        {
+            get { return _deleteOverlay ?? (_deleteOverlay = new SimpleCommand<object, object>(delegate { return IsDeleteOverlayCommandEnabled; }, delegate { DeleteOverlayHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _deleteOverlay;
+
+        bool IsDeleteOverlayCommandEnabled
+        {
+            get
+            {
+                if (RangeComplexes.SelectedArea == RangeComplexArea.None) return false;
+                return (RangeComplexes.SelectedArea != RangeComplexes.SelectedRangeComplex.OpArea) && (RangeComplexes.SelectedArea != RangeComplexes.SelectedRangeComplex.SimArea);
+            }
+        }
+
+        void DeleteOverlayHandler()
+        {
+            var result = _messageBoxService.ShowYesNo(string.Format("Are you sure you want to delete the overlay \"{0}\"?\r\nThis operation cannot be undone.", RangeComplexes.SelectedArea.Name), CustomDialogIcons.Exclamation);
+            if (result == CustomDialogResults.No) return;
+            RangeComplexes.SelectedRangeComplex.RemoveArea(RangeComplexes.SelectedArea.Name);
+            RangeComplexes.SelectedArea = RangeComplexArea.None;
+        }
+
+        void DisplayBathymetry()
+        {
+#if false
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            RasterMapLayer bathyBitmapLayer;
+            if (_selectedBathymetryDescriptor == null)
+            {
+                bathyBitmapLayer = EnvironmentTabMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry");
+                if (bathyBitmapLayer != null) bathyBitmapLayer.IsChecked = false;
+                return;
+            }
+            bathyBitmapLayer = EnvironmentTabMapLayers.DisplayBathymetryRaster("Bathymetry",
+                                                                                   Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Images",
+                                                                                                Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp"), true, false, true, _selectedBathymetryDescriptor.Metadata.Bounds);
+            MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
+#endif
+        }
+
+        #endregion
+
+#if false
         #region Range Complex ribbon group
 
         #region public RangeComplexDescriptors RangeComplexDescriptors { get; set; }
@@ -180,122 +448,6 @@ namespace ESMEWorkBench.ViewModels.Main
         static readonly PropertyChangedEventArgs SelectedRangeComplexDescriptorChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplexDescriptor);
         RangeComplexDescriptor _selectedRangeComplexDescriptor;
 
-        void DisplayWorldMap()
-        {
-            if (MapLayerCollections["Environment"] == null)
-            {
-#if true
-                MapLayerCollections.Add("Environment", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-                EnvironmentTabMapLayers = MapLayerCollections["Environment"];
-                //EnvironmentTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-                ZoomToWorldMap();
-#else
-                appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                EnvironmentTabMapLayers = new MapLayerCollection
-                {
-                        new ShapefileMapLayer
-                        {
-                                LayerType = LayerType.BaseMap,
-                                LineColor = Colors.Beige,
-                                AreaStyle = AreaStyles.Country2,
-                                CanBeRemoved = false,
-                                CanBeReordered = true,
-                                CanChangeAreaColor = true,
-                                CanChangeLineColor = true,
-                                ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
-                                Name = "Base Map",
-                        },
-                };
-                ZoomToWorldMap();
-#endif
-            }
-            if (MapLayerCollections["Home"] != null) return;
-#if true
-            MapLayerCollections.Add("Home", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-            //HomeTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-#else
-            appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            HomeTabMapLayers = new MapLayerCollection
-            {
-                    new ShapefileMapLayer
-                    {
-                            LayerType = LayerType.BaseMap,
-                            LineColor = Colors.Beige,
-                            AreaStyle = AreaStyles.Country2,
-                            CanBeRemoved = false,
-                            CanBeReordered = true,
-                            CanChangeAreaColor = true,
-                            CanChangeLineColor = true,
-                            ShapefileName = Path.Combine(appPath, @"Sample GIS Data\Countries02.shp"),
-                            Name = "Base Map",
-                    },
-            };
-#endif
-        }
-
-        void DisplayRangeComplex()
-        {
-            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
-            if (_selectedRangeComplexDescriptor == null)
-            {
-                var opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
-                if (opAreaLayer != null) opAreaLayer.IsChecked = false;
-                var simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
-                if (simAreaLayer != null) simAreaLayer.IsChecked = false;
-                return;
-            }
-
-            var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.OpsLimitFile);
-            var simAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.SimLimitFile);
-            ZoomToRangeComplex();
-#if true
-            EnvironmentTabMapLayers.DisplayOverlayFile("Op Area", opAreaOverlayFilename);
-#else
-            opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area") ?? new OverlayShapeMapLayer
-                {
-                        Name = "Op Area",
-                        CanBeRemoved = true,
-                        CanBeReordered = true,
-                        CanChangeAreaColor = false,
-                        CanChangeLineColor = true,
-                        LineWidth = 1,
-                        LayerType = LayerType.OverlayFile,
-                };
-            opAreaLayer.Clear();
-            var opAreaOverlay = new OverlayFile(opAreaOverlayFilename);
-            foreach (var shape in opAreaOverlay.Shapes)
-                opAreaLayer.Add(shape);
-            opAreaLayer.Done();
-            opAreaLayer.IsChecked = true;
-            if (EnvironmentTabMapLayers.IndexOf(opAreaLayer) == -1) EnvironmentTabMapLayers.Add(opAreaLayer);
-#endif
-
-            if (simAreaOverlayFilename != opAreaOverlayFilename)
-            {
-#if true
-                EnvironmentTabMapLayers.DisplayOverlayFile("Sim Area", simAreaOverlayFilename);
-#else
-                simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area") ?? new OverlayShapeMapLayer
-                {
-                    Name = "Sim Area",
-                    CanBeRemoved = true,
-                    CanBeReordered = true,
-                    CanChangeAreaColor = false,
-                    CanChangeLineColor = true,
-                    LineWidth = 1,
-                    LayerType = LayerType.OverlayFile,
-                };
-                simAreaLayer.Clear();
-                var simAreaOverlay = new OverlayFile(opAreaOverlayFilename);
-                foreach (var shape in simAreaOverlay.Shapes)
-                    simAreaLayer.Add(shape);
-                simAreaLayer.Done();
-                simAreaLayer.IsChecked = true;
-                if (EnvironmentTabMapLayers.IndexOf(simAreaLayer) == -1) EnvironmentTabMapLayers.Add(simAreaLayer);
-#endif
-            }
-            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
-        }
 
         #endregion
 
@@ -335,99 +487,11 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region public bool IsRangeComplexSelected { get; set; }
 
-        public bool IsRangeComplexSelected
-        {
-            get { return _isRangeComplexSelected; }
-            set
-            {
-                if (_isRangeComplexSelected == value) return;
-                _isRangeComplexSelected = value;
 
-                NotifyPropertyChanged(RangeComplexIsSelectedChangedEventArgs);
-            }
-        }
 
-        static readonly PropertyChangedEventArgs RangeComplexIsSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsRangeComplexSelected);
-        bool _isRangeComplexSelected;
 
         #endregion
-
-        #region NewRangeComplexCommand
-        public SimpleCommand<object, object> NewRangeComplexCommand
-        {
-            get
-            {
-                return _newRangeComplex ??
-                       (_newRangeComplex =
-                        new SimpleCommand<object, object>(delegate { return AreRangeComplexesLoaded; },
-                                                          delegate { NewRangeComplexHandler(); }));
-            }
-        }
-
-        SimpleCommand<object, object> _newRangeComplex;
-
-        void NewRangeComplexHandler()
-        {
-            var vm = new NewRangeComplexViewModel(Globals.AppSettings);
-            var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
-            if ((result.HasValue) && (result.Value))
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    SelectedRangeComplexDescriptor = RangeComplexDescriptors.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.ExistingOpAreaOverlayFilename,
-                                                               vm.NewOpAreaOverlayGeos, vm.ExistingSimAreaOverlayFilename, vm.NewSimAreaOverlayGeos, _dispatcher);
-                    RangeComplexDescriptors.Sort();
-                });
-            }
-
-        }
-        #endregion
-
-        #region ZoomToRangeComplexCommand
-        public SimpleCommand<object, object> ZoomToRangeComplexCommand
-        {
-            get { return _zoomToRangeComplex ?? (_zoomToRangeComplex = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { ZoomToRangeComplex(); })); }
-        }
-
-        SimpleCommand<object, object> _zoomToRangeComplex;
-
-        void ZoomToRangeComplex()
-        {
-            var opAreaOverlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", _selectedRangeComplexDescriptor.Data.OpsLimitFile);
-            var opsLimit = new OverlayFile(opAreaOverlayFilename);
-            var north = (float)opsLimit.Shapes[0].BoundingBox.Bottom + 3;
-            var west = (float)opsLimit.Shapes[0].BoundingBox.Left - 3;
-            var south = (float)opsLimit.Shapes[0].BoundingBox.Top - 3;
-            var east = (float)opsLimit.Shapes[0].BoundingBox.Right + 3;
-            var mapExtent = new RectangleShape(west, north, east, south);
-            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
-        }
-        #endregion
-
-        #region DeleteRangeComplexCommand
-        public SimpleCommand<object, object> DeleteRangeComplexCommand
-        {
-            get { return _deleteRangeComplex ?? (_deleteRangeComplex = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { DeleteRangeComplexHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _deleteRangeComplex;
-
-        void DeleteRangeComplexHandler()
-        {
-            var result =
-                    _messageBoxService.ShowYesNo("Warning: Deleting the range complex \"" + SelectedRangeComplexDescriptor.Data.Name +
-                                                 "\" will also delete any overlays, bathymetry and environment data that have previously been created or extracted.\n\nThis operation CANNOT be undone.\n\nProceed with deletion?", 
-                                                 CustomDialogIcons.Exclamation);
-            if (result == CustomDialogResults.No) return;
-            RangeComplexDescriptors.DeleteRangeComplex(SelectedRangeComplexDescriptor);
-            SelectedRangeComplexDescriptor = null;
-        }
-        #endregion
-
-        #endregion
-
         #region Overlay ribbon group
 
         #region public NAEMOOverlayDescriptors NAEMOOverlayDescriptors { get; set; }
@@ -481,40 +545,6 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
-        void DisplayOverlay()
-        {
-            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
-            if (_selectedOverlayDescriptor == null)
-            {
-                var overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
-                if (overlayLayer != null) overlayLayer.IsChecked = false;
-                return;
-            }
-            //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
-            var overlayFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, _selectedRangeComplexDescriptor.Data.Name, "Areas", Path.GetFileNameWithoutExtension(_selectedOverlayDescriptor.DataFilename) + ".ovr");
-            EnvironmentTabMapLayers.DisplayOverlayFile("Overlay", overlayFilename);
-#if false
-		    overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay") ?? new OverlayShapeMapLayer
-            {
-                Name = "Overlay",
-                CanBeRemoved = true,
-                CanBeReordered = true,
-                CanChangeAreaColor = false,
-                CanChangeLineColor = true,
-                LineWidth = 1,
-                LayerType = LayerType.OverlayFile,
-            };
-            overlayLayer.Clear();
-            var overlay = new OverlayFile(overlayFilename);
-            foreach (var shape in overlay.Shapes)
-                overlayLayer.Add(shape);
-            overlayLayer.Done();
-            overlayLayer.IsChecked = true;
-            if (EnvironmentTabMapLayers.IndexOf(overlayLayer) == -1) EnvironmentTabMapLayers.Add(overlayLayer);
-  
-#endif            
-            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
-        }
         #endregion
 
         #region public string SelectedOverlayInfo { get; set; }
@@ -553,70 +583,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
-        #region NewOverlayCommand
 
-        public SimpleCommand<object, object> NewOverlayCommand
-        {
-            get
-            {
-                return _newOverlay ?? (_newOverlay = new SimpleCommand<object, object>(delegate { return IsRangeComplexSelected; }, delegate { NewOverlayHandler(); }));
-            }
-        }
-
-        private SimpleCommand<object, object> _newOverlay;
-
-        void NewOverlayHandler()
-        {
-            var vm = new NewOverlayViewModel(Globals.AppSettings, SelectedRangeComplexDescriptor.Data.Name);
-            var result = _visualizerService.ShowDialog("NewOverlayView", vm);
-            if ((!result.HasValue) || (!result.Value)) return;
-            NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, Path.GetFileNameWithoutExtension(vm.OverlayName), vm.OverlayGeos, vm.BoundingBox, 0, null);
-            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[Path.GetFileNameWithoutExtension(vm.OverlayName)];
-        }
-
-        #endregion
-
-        #region ExpandOverlayCommand
-        public SimpleCommand<object, object> ExpandOverlayCommand
-        {
-            get { return _expandOverlay ?? (_expandOverlay = new SimpleCommand<object, object>(delegate { return IsExpandOverlayCommandEnabled; }, delegate { ExpandOverlayHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _expandOverlay;
-
-        bool IsExpandOverlayCommandEnabled
-        {
-            get { return IsOverlayFileSelected; }
-        }
-
-        void ExpandOverlayHandler()
-        {
-            var originalBufferSize = 0f;
-            if (!string.IsNullOrEmpty(SelectedOverlayDescriptor.Metadata.OverlayFilename))
-            {
-                originalBufferSize = SelectedOverlayDescriptor.Metadata.BufferZoneSize;
-                SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[SelectedOverlayDescriptor.Metadata.OverlayFilename];
-            }
-            if (!IsOverlayFileSelected) return;
-            var vm = new OverlayExpandViewModel(SelectedOverlayDescriptor.Metadata) {BufferSize = originalBufferSize};
-            var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
-            if ((!result.HasValue) || (!result.Value)) return;
-            
-            var curOverlay = SelectedOverlayDescriptor.Data;
-            //var limits = (Limits)(new GeoRect(curOverlay.Shapes[0].EarthCoordinates));
-            var limits = new Limits(ConvexHull.Create(curOverlay.Shapes[0].EarthCoordinates.Cast<Geo>().ToList(), true));
-            var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
-            var boundingBox = new GeoRect(expandedLimits.Geos);
-            var coordinateList = expandedLimits.Geos;
-            var testShape = new OverlayLineSegments((ICollection<Geo>)coordinateList, Colors.Black);
-
-            if (!testShape.IsUsableAsPerimeter) coordinateList = ConvexHull.Create(coordinateList, true);
-
-            NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, vm.OverlayName, coordinateList, boundingBox, vm.BufferSize, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
-            SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[vm.OverlayName];
-        }
-
-        #endregion
 
         #region DeleteOverlayCommand
         public SimpleCommand<object, object> DeleteOverlayCommand
@@ -776,27 +743,6 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (bathyBitmapLayer != null) bathyBitmapLayer.IsChecked = false;
                 return;
             }
-#if false
-            //_dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
-            bathyBitmapLayer = EnvironmentTabMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry") ?? new RasterMapLayer
-            {
-                Name = "Bathymetry",
-                CanBeReordered = true,
-                CanChangeLineColor = false,
-                CanChangeLineWidth = false,
-                CanBeRemoved = false,
-                LayerType = LayerType.BathymetryRaster,
-            };
-            bathyBitmapLayer.North = (float)_selectedBathymetryDescriptor.Metadata.Bounds.North;
-            bathyBitmapLayer.South = (float)_selectedBathymetryDescriptor.Metadata.Bounds.South;
-            bathyBitmapLayer.East = (float)_selectedBathymetryDescriptor.Metadata.Bounds.East;
-            bathyBitmapLayer.West = (float)_selectedBathymetryDescriptor.Metadata.Bounds.West;
-            bathyBitmapLayer.RasterFilename = Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Images",
-                                                           Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp");
-            bathyBitmapLayer.IsChecked = true;
-            if (EnvironmentTabMapLayers.IndexOf(bathyBitmapLayer) == -1) EnvironmentTabMapLayers.Add(bathyBitmapLayer);
-            MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
-#endif
             bathyBitmapLayer = EnvironmentTabMapLayers.DisplayBathymetryRaster("Bathymetry",
                                                                                    Path.Combine(Globals.AppSettings.ScenarioDataDirectory, SelectedRangeComplexDescriptor.Data.Name, "Images",
                                                                                                 Path.GetFileNameWithoutExtension(_selectedBathymetryDescriptor.DataFilename) + ".bmp"), true, false, true, _selectedBathymetryDescriptor.Metadata.Bounds);
@@ -1351,5 +1297,7 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
         #endregion
+#endif
+
     }
 }

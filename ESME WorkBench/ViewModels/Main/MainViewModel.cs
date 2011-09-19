@@ -3,12 +3,12 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Cinch;
 using ESME;
+using ESME.Environment;
 using ESME.Mapping;
 using ESMEWorkBench.Data;
 using ESMEWorkBench.Properties;
@@ -85,38 +85,9 @@ namespace ESMEWorkBench.ViewModels.Main
             IsLatLonGridVisible = Settings.Default.ShowGrid;
             IsScaleBarVisible = Settings.Default.ShowScaleBar;
             IsPanZoomVisible = Settings.Default.ShowPanZoom;
-            if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"))) 
-                Task.Factory.StartNew(() => RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"), _dispatcher));
 
-#if EXPERIMENTS_SUPPORTED
-            var args = Environment.GetCommandLineArgs();
-            if (args.Length == 2)
-            {
-                if (File.Exists(args[1]))
-                {
-                    if (args[1].EndsWith(".esme"))
-                    {
-                        try
-                        {
-                            LoadExperimentFile(args[1]);
-                        }
-                        catch (Exception ex)
-                        {
-                            _messageBoxService.ShowError(string.Format("Error opening experiment file \"{0}\":\n{1}", args[1], ex.Message));
-                        }
-                    }
-                }
-            }
-            else
-            {
-                _experiment = new Experiment();
-                //HookPropertyChanged(_experiment);
-                //_experiment.InitializeIfViewModelsReady();
-                //DecoratedExperimentName = "<New experiment>";
-            }
-            //HookPropertyChanged(_experiment);
-            //TestRecentFiles();
-#endif
+            if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null && File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
+                InitializeEnvironmentManager();
         }
 
         void HookPropertyChanged(INotifyPropertyChanged experiment)
@@ -179,6 +150,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_mouseEarthCoordinate == value) return;
                 _mouseEarthCoordinate = value;
 #if EXPERIMENTS_SUPPORTED
+                return;
                 if (_experiment.Bathymetry != null)
                 {
                     EarthCoordinate<float> mouseDepth;
@@ -276,6 +248,36 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
+        async void InitializeEnvironmentManager()
+        {
+            RangeComplexes = RangeComplexes.Singleton;
+            ImportProgressCollection = ImportProgressCollection.Singleton;
+            try
+            {
+                await RangeComplexes.ReadRangeComplexFileAsync(Path.Combine(ESME.Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
+                RangeComplexes.PropertyChanged += (s, e) =>
+                {
+                    switch (e.PropertyName)
+                    {
+                        case "SelectedRangeComplex":
+                            SelectedRangeComplex = RangeComplexes.SelectedRangeComplex;
+                            break;
+                        case "SelectedArea":
+                            SelectedArea = RangeComplexes.SelectedArea;
+                            break;
+                        case "SelectedBathymetry":
+                            SelectedBathymetry = RangeComplexes.SelectedBathymetry;
+                            break;
+                    }
+                };
+            }
+            catch (Exception e)
+            {
+                _messageBoxService.ShowError(e.Message);
+            }
+        }
+        public ImportProgressCollection ImportProgressCollection { get; private set; }
+        public RangeComplexes RangeComplexes { get; private set; }
 
 #if EXPERIMENTS_SUPPORTED
 
@@ -700,7 +702,7 @@ namespace ESMEWorkBench.ViewModels.Main
             if ((!IsLayerListViewVisible) && MapLayerCollections["Environment"] != null)
             {
                 MapLayerCollections.ActiveLayer = MapLayerCollections["Environment"];
-                if (SelectedRangeComplexDescriptor == null) ZoomToWorldMap();
+                if (RangeComplexes.SelectedRangeComplex == NewRangeComplex.None) ZoomToWorldMap();
                 else ZoomToRangeComplex();
             }
             else 

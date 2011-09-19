@@ -8,14 +8,14 @@ namespace ESME.Views.Locations
 {
     public sealed class OverlayExpandViewModel : ValidatingViewModel
     {
-        public OverlayExpandViewModel(NAEMOOverlayMetadata naemoOverlayMetadata)
+        public OverlayExpandViewModel(string overlayFilename)
         {
-            NAEMOOverlayMetadata = naemoOverlayMetadata;
+            _overlayFilename = overlayFilename;
             ValidationRules.Add(new ValidationRule
             {
                 PropertyName = "BufferSize",
                 Description = "An overlay with the same name already exists",
-                RuleDelegate = (o, r) => !File.Exists(Path.Combine(Path.GetDirectoryName(NAEMOOverlayMetadata.Filename), OverlayName + ".ovr")),
+                RuleDelegate = (o, r) => !File.Exists(Path.Combine(Path.GetDirectoryName(_overlayFilename), OverlayName + ".ovr")),
             });
             ValidationRules.Add(new ValidationRule
             {
@@ -25,6 +25,7 @@ namespace ESME.Views.Locations
             });
         }
 
+        readonly string _overlayFilename;
         #region public float BufferSize { get; set; }
 
         public float BufferSize
@@ -44,32 +45,11 @@ namespace ESME.Views.Locations
 
         #endregion
 
-        #region public NAEMOOverlayMetadata NAEMOOverlayMetadata { get; set; }
-
-        private static readonly PropertyChangedEventArgs NAEMOOverlayMetadataChangedEventArgs =
-            ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.NAEMOOverlayMetadata);
-
-        private NAEMOOverlayMetadata _naemoOverlayMetadata;
-
-        public NAEMOOverlayMetadata NAEMOOverlayMetadata
-        {
-            get { return _naemoOverlayMetadata; }
-            set
-            {
-                if (_naemoOverlayMetadata == value) return;
-                _naemoOverlayMetadata = value;
-                NotifyPropertyChanged(NAEMOOverlayMetadataChangedEventArgs);
-                NotifyPropertyChanged(OverlayNameChangedEventArgs);
-            }
-        }
-
-        #endregion
-
         #region public string OverlayName { get; set; }
 
         public string OverlayName
         {
-            get { return string.Format("{0}_{1}km", Path.GetFileNameWithoutExtension(NAEMOOverlayMetadata.Filename), BufferSize); }
+            get { return string.Format("{0}_{1}km", Path.GetFileNameWithoutExtension(_overlayFilename), BufferSize); }
         }
 
         static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.OverlayName);

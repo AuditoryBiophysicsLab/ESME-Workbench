@@ -3,9 +3,9 @@
     /// <summary>
     /// Interaction logic for RangeComplexTreeView.xaml
     /// </summary>
-    public partial class RangeComplexTreeView2
+    public partial class OldRangeComplexTreeView
     {
-        public RangeComplexTreeView2()
+        public OldRangeComplexTreeView()
         {
             InitializeComponent();
         }

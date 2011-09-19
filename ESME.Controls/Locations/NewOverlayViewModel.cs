@@ -43,8 +43,7 @@ namespace ESME.Views.Locations
                                                      RuleDelegate = (o, r) =>
                                                                         {
                                                                             var ruleTarget = ((NewOverlayViewModel) o).OverlayCoordinates;
-                                                                            return ValidateOverlayCoordinates(
-                                                                                ruleTarget, r);
+                                                                            return ValidateOverlayCoordinates(ruleTarget, r);
                                                                         },
                                                  },
                                             new ValidationRule

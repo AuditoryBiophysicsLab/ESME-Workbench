@@ -120,7 +120,9 @@ namespace ESME.NEMO.Overlay
 
         protected void Add(IEnumerable<Geo> newPoints)
         {
-            _earthCoordinates.AddRange(newPoints.Cast<EarthCoordinate>());
+            var result = from point in newPoints
+                         select new EarthCoordinate(point);
+            _earthCoordinates.AddRange(result);
             CalculateBoundingBox();
         }
 

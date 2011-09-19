@@ -62,7 +62,7 @@ namespace ESME.Environment.Descriptors
                     if (sampleCount <= 512000)
                         ImportBathymetry(bathymetryFile);
                 }
-                else ((BathymetryFile)BathymetryFiles[fileName]).Reset();
+                else BathymetryFiles[fileName].Reset();
             }
         }
 

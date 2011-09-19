@@ -41,10 +41,8 @@ namespace ESMEWorkBench.ViewModels.Main
                     Globals.AppSettings = AppSettings.Load(extraTypes);
                     ESME.Globals.AppSettings = Globals.AppSettings;
                     if (Globals.AppSettings != null && Globals.AppSettings.ScenarioDataDirectory != null &&
-                        File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv")))
-                        Task.Factory.StartNew(
-                                              () =>
-                                              RangeComplexDescriptors = RangeComplexDescriptors.ReadCSV(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"), _dispatcher));
+                        File.Exists(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"))) 
+                        RangeComplexes.ReadRangeComplexFileAsync(Path.Combine(Globals.AppSettings.ScenarioDataDirectory, "SimAreas.csv"));
                 }));
             }
         }

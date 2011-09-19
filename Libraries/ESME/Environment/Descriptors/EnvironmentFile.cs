@@ -352,13 +352,11 @@ namespace ESME.Environment.Descriptors
             {
                 if (_dataTask != null)
                 {
-                    if (_dataTask.IsCompleted)
-                        _dataTask.Dispose();
+                    if (_dataTask.IsCompleted) _dataTask.Dispose();
                     else if (_dataTask.Status != TaskStatus.Created) 
                         throw new InvalidOperationException("Data is being imported and cannot be cleared at this time");
                 }
                 _dataTask = value;
-
             }
         }
         [NonSerialized] Task<T> _dataTask;
@@ -465,6 +463,7 @@ namespace ESME.Environment.Descriptors
 
         public override void Reset()
         {
+            base.Reset();
             if ((SelectedBathymetry == null) || (SelectedBathymetry == BathymetryFile.None) || (RangeComplexToken == null))
             {
                 DataTask = null;
