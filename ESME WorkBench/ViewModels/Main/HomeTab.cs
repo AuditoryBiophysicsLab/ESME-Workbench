@@ -195,7 +195,14 @@ namespace ESMEWorkBench.ViewModels.Main
             RecentFiles.InsertFile(fileName);
             try
             {
-                NemoFile = new NemoFile(fileName, Path.GetDirectoryName(fileName));
+                NemoFile = new NemoFile(fileName, Globals.AppSettings.ScenarioDataDirectory);
+                var metadataFileName = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".emf");
+                if (File.Exists(metadataFileName)) ScenarioMetadata = NAEMOScenarioMetadata.Load(metadataFileName);
+                else ScenarioMetadata = new NAEMOScenarioMetadata
+                {
+                    Filename = metadataFileName,
+                    NemoFileName = fileName,
+                };
             }
             catch (Exception ex)
             {
