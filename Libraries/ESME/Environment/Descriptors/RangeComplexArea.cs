@@ -84,6 +84,15 @@ namespace ESME.Environment.Descriptors
 
         #endregion
 
+        public bool CanBeDeleted
+        {
+            get
+            {
+                if (this == None) return false;
+                return (_rangeComplex.OpArea.Name != Name) && (_rangeComplex.SimArea.Name != Name);
+            }
+        }
+
         internal static RangeComplexArea Create(NewRangeComplex rangeComplex, string areaName, IEnumerable<Geo> limits)
         {
             var areaPath = Path.Combine(rangeComplex.AreasPath, areaName + ".ovr");
@@ -124,6 +133,8 @@ namespace ESME.Environment.Descriptors
             jobDescriptor.CompletionTask = new Task<ImportJobDescriptor>(jobDescriptor.CompletionFunction, jobDescriptor);
             _rangeComplex.QueueImportJob(jobDescriptor);
         }
+
+        public bool CanRemoveBathymetry(BathymetryFile bathymetryFile) { return bathymetryFile.SampleCount >= 512000; }
 
         public void RemoveBathymetry(BathymetryFile bathymetryFile)
         {

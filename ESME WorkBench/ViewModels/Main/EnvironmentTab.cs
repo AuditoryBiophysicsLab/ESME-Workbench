@@ -150,14 +150,19 @@ namespace ESMEWorkBench.ViewModels.Main
                 if (_selectedBathymetry == value) return;
                 _selectedBathymetry = value;
                 NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
+                IsBathymetrySelected = _selectedBathymetry != BathymetryFile.None;
+                NotifyPropertyChanged(IsBathymetrySelectedChangedEventArgs);
+                DisplayBathymetry();
             }
         }
+
+        public bool IsBathymetrySelected { get; private set; }
+        static readonly PropertyChangedEventArgs IsBathymetrySelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsBathymetrySelected);
 
         static readonly PropertyChangedEventArgs SelectedBathymetryChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedBathymetry);
         BathymetryFile _selectedBathymetry;
 
         #endregion
-
 
         #region NewRangeComplexCommand
         public SimpleCommand<object, object> NewRangeComplexCommand
@@ -174,45 +179,17 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void NewRangeComplexHandler()
         {
-            var vm = new NewRangeComplexViewModel(Globals.AppSettings);
-            var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
-            if ((result.HasValue) && (result.Value))
-                RangeComplexes.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.NewOpAreaOverlayGeos,
-                                                  vm.NewSimAreaOverlayGeos);
+            try
+            {
+                var vm = new NewRangeComplexViewModel(Globals.AppSettings);
+                var result = _visualizerService.ShowDialog("NewRangeComplexView", vm);
+                if ((result.HasValue) && (result.Value))
+                    RangeComplexes.CreateRangeComplex(vm.LocationName, vm.Height, vm.ReferencePointLatitude, vm.ReferencePointLongitude, vm.GeoidSeparation, vm.NewOpAreaOverlayGeos,
+                                                      vm.NewSimAreaOverlayGeos);
+            }
+            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
         }
         #endregion
-
-        void DisplayWorldMap()
-        {
-            if (MapLayerCollections["Environment"] == null)
-            {
-                MapLayerCollections.Add("Environment", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-                EnvironmentTabMapLayers = MapLayerCollections["Environment"];
-                //EnvironmentTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-                ZoomToWorldMap();
-            }
-            if (MapLayerCollections["Home"] != null) return;
-            MapLayerCollections.Add("Home", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-            //HomeTabMapLayers = new MapLayerCollection(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
-        }
-
-        void DisplayRangeComplex()
-        {
-            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
-            if (RangeComplexes.SelectedRangeComplex == NewRangeComplex.None)
-            {
-                var opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
-                if (opAreaLayer != null) opAreaLayer.IsChecked = false;
-                var simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
-                if (simAreaLayer != null) simAreaLayer.IsChecked = false;
-                return;
-            }
-
-            ZoomToRangeComplex();
-            EnvironmentTabMapLayers.DisplayOverlayShapes("Op Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.OpArea.OverlayShape });
-            EnvironmentTabMapLayers.DisplayOverlayShapes("Sim Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.SimArea.OverlayShape });
-            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
-        }
 
         #region ZoomToRangeComplexCommand
         public SimpleCommand<object, object> ZoomToRangeComplexCommand
@@ -247,23 +224,14 @@ namespace ESMEWorkBench.ViewModels.Main
             var result = _messageBoxService.ShowYesNo(string.Format("Warning: Deleting the range complex \"{0}\" will also delete any overlays, bathymetry and environment data that have previously been created or extracted.\n\nThis operation CANNOT be undone.\n\nProceed with deletion?", RangeComplexes.SelectedRangeComplex.Name),
                                                  CustomDialogIcons.Exclamation);
             if (result == CustomDialogResults.No) return;
-            RangeComplexes.RemoveRangeComplex(RangeComplexes.SelectedRangeComplex.Name);
-            RangeComplexes.SelectedRangeComplex = NewRangeComplex.None;
+            try
+            {
+                RangeComplexes.RemoveRangeComplex(RangeComplexes.SelectedRangeComplex.Name);
+                RangeComplexes.SelectedRangeComplex = NewRangeComplex.None;
+            }
+            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
         }
         #endregion
-
-        void DisplayOverlay()
-        {
-            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
-            if (RangeComplexes.SelectedArea == RangeComplexArea.None)
-            {
-                var overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
-                if (overlayLayer != null) overlayLayer.IsChecked = false;
-                return;
-            }
-            EnvironmentTabMapLayers.DisplayOverlayShapes("Overlay", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedArea.OverlayShape });
-            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
-        }
 
         #region NewOverlayCommand
 
@@ -279,10 +247,14 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void NewOverlayHandler()
         {
-            var vm = new NewOverlayViewModel(Globals.AppSettings, RangeComplexes.SelectedRangeComplex.Name);
-            var result = _visualizerService.ShowDialog("NewOverlayView", vm);
-            if ((!result.HasValue) || (!result.Value)) return;
-            RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, vm.OverlayGeos);
+            try
+            {
+                var vm = new NewOverlayViewModel(Globals.AppSettings, RangeComplexes.SelectedRangeComplex.Name);
+                var result = _visualizerService.ShowDialog("NewOverlayView", vm);
+                if ((!result.HasValue) || (!result.Value)) return;
+                RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, vm.OverlayGeos);
+            }
+            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
         }
 
         #endregion
@@ -297,29 +269,32 @@ namespace ESMEWorkBench.ViewModels.Main
 
         bool IsExpandOverlayCommandEnabled
         {
-            get { return RangeComplexes.SelectedArea != RangeComplexArea.None; }
+            get
+            {
+                if (RangeComplexes == null) return false;
+                return RangeComplexes.SelectedArea != RangeComplexArea.None;
+            }
         }
 
         void ExpandOverlayHandler()
         {
-            var vm = new OverlayExpandViewModel(RangeComplexes.SelectedArea.Name);
-            var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
-            if ((!result.HasValue) || (!result.Value)) return;
+            try
+            {
+                var vm = new OverlayExpandViewModel(SelectedRangeComplex, SelectedArea);
+                var result = _visualizerService.ShowDialog("OverlayExpandView", vm);
+                if ((!result.HasValue) || (!result.Value)) return;
 
-            var curOverlay = RangeComplexes.SelectedArea.OverlayShape;
-            var limits = new Limits(ConvexHull.Create(curOverlay.EarthCoordinates.Cast<Geo>().ToList(), true));
-            var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
-            var coordinateList = expandedLimits.Geos;
-            var testShape = new OverlayLineSegments(coordinateList, Colors.Black);
+                var curOverlay = RangeComplexes.SelectedArea.OverlayShape;
+                var limits = new Limits(ConvexHull.Create(curOverlay.EarthCoordinates.Cast<Geo>().ToList(), true));
+                var expandedLimits = limits.CreateExpandedLimit(vm.BufferSize);  //in km.
+                var coordinateList = expandedLimits.Geos;
+                var testShape = new OverlayLineSegments(coordinateList, Colors.Black);
 
-            if (!testShape.IsUsableAsPerimeter) coordinateList = ConvexHull.Create(coordinateList, true);
+                if (!testShape.IsUsableAsPerimeter) coordinateList = ConvexHull.Create(coordinateList, true);
 
-            RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, coordinateList);
-            // todo: add support to environment engine for expanding areas, including name validation and some metadata handling
-            // around if a given area is an expansion of another one.  Should be easy to do.
-
-            //NAEMOOverlayDescriptors.CreateNewOverlay(SelectedRangeComplexDescriptor.Data.Name, vm.OverlayName, coordinateList, boundingBox, vm.BufferSize, Path.GetFileNameWithoutExtension(SelectedOverlayDescriptor.DataFilename));
-            //SelectedOverlayDescriptor = (NAEMOOverlayDescriptor)NAEMOOverlayDescriptors[vm.OverlayName];
+                RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, coordinateList);
+            }
+            catch (Exception e) { _messageBoxService.ShowError(e.Message); }
         }
 
         #endregion
@@ -327,26 +302,126 @@ namespace ESMEWorkBench.ViewModels.Main
         #region DeleteOverlayCommand
         public SimpleCommand<object, object> DeleteOverlayCommand
         {
-            get { return _deleteOverlay ?? (_deleteOverlay = new SimpleCommand<object, object>(delegate { return IsDeleteOverlayCommandEnabled; }, delegate { DeleteOverlayHandler(); })); }
+            get { return _deleteOverlay ?? (_deleteOverlay = new SimpleCommand<object, object>(delegate { DeleteOverlayHandler(); })); }
         }
 
         SimpleCommand<object, object> _deleteOverlay;
 
-        bool IsDeleteOverlayCommandEnabled
-        {
-            get
-            {
-                if (RangeComplexes.SelectedArea == RangeComplexArea.None) return false;
-                return (RangeComplexes.SelectedArea != RangeComplexes.SelectedRangeComplex.OpArea) && (RangeComplexes.SelectedArea != RangeComplexes.SelectedRangeComplex.SimArea);
-            }
-        }
-
         void DeleteOverlayHandler()
         {
+            string error;
+            var canDelete = SelectedRangeComplex.TryRemoveArea(SelectedArea.Name, out error);
+            if (!canDelete)
+            {
+                _messageBoxService.ShowError(error);
+                return;
+            }
             var result = _messageBoxService.ShowYesNo(string.Format("Are you sure you want to delete the overlay \"{0}\"?\r\nThis operation cannot be undone.", RangeComplexes.SelectedArea.Name), CustomDialogIcons.Exclamation);
             if (result == CustomDialogResults.No) return;
             RangeComplexes.SelectedRangeComplex.RemoveArea(RangeComplexes.SelectedArea.Name);
             RangeComplexes.SelectedArea = RangeComplexArea.None;
+        }
+        #endregion
+
+        #region AddBathymetryCommand
+        public SimpleCommand<object, object> AddBathymetryCommand
+        {
+            get
+            {
+                return _addBathymetry ?? (_addBathymetry = new SimpleCommand<object, object>(
+                    delegate
+                    {
+                        return IsAreaSelected && IsBathymetrySelected && !SelectedBathymetry.IsCached;
+                    },
+                    delegate
+                    {
+                        SelectedArea.ImportBathymetry(SelectedBathymetry);
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _addBathymetry;
+        #endregion
+
+        #region RemoveBathymetryCommand
+        public SimpleCommand<object, object> RemoveBathymetryCommand
+        {
+            get
+            {
+                return _removeBathymetry ?? (_removeBathymetry = new SimpleCommand<object, object>(
+                    delegate
+                    {
+                        return IsAreaSelected && IsBathymetrySelected && SelectedBathymetry.IsCached && SelectedArea.CanRemoveBathymetry(SelectedBathymetry);
+                    },
+                    delegate
+                    {
+                        SelectedArea.RemoveBathymetry(SelectedBathymetry);
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _removeBathymetry;
+        #endregion
+
+        #region ReloadBathymetryCommand
+        public SimpleCommand<object, object> ReloadBathymetryCommand
+        {
+            get { return _reloadBathymetry ?? (_reloadBathymetry = new SimpleCommand<object, object>(
+                delegate
+                {
+                    return IsBathymetrySelected && SelectedBathymetry.IsCached;
+                }, 
+                delegate
+                {
+                    SelectedArea.ImportBathymetry(SelectedBathymetry);
+                }));
+            }
+        }
+
+        SimpleCommand<object, object> _reloadBathymetry;
+        #endregion
+
+        void DisplayWorldMap()
+        {
+            if (MapLayerCollections["Environment"] == null)
+            {
+                MapLayerCollections.Add("Environment", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+                EnvironmentTabMapLayers = MapLayerCollections["Environment"];
+                ZoomToWorldMap();
+            }
+            if (MapLayerCollections["Home"] != null) return;
+            MapLayerCollections.Add("Home", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+        }
+
+        void DisplayRangeComplex()
+        {
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            if ((RangeComplexes == null) || (RangeComplexes.SelectedRangeComplex == NewRangeComplex.None))
+            {
+                var opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
+                if (opAreaLayer != null) opAreaLayer.IsChecked = false;
+                var simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
+                if (simAreaLayer != null) simAreaLayer.IsChecked = false;
+                return;
+            }
+
+            ZoomToRangeComplex();
+            EnvironmentTabMapLayers.DisplayOverlayShapes("Op Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.OpArea.OverlayShape });
+            EnvironmentTabMapLayers.DisplayOverlayShapes("Sim Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.SimArea.OverlayShape });
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
+        }
+
+        void DisplayOverlay()
+        {
+            if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            if ((RangeComplexes == null) || (RangeComplexes.SelectedArea == RangeComplexArea.None))
+            {
+                var overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
+                if (overlayLayer != null) overlayLayer.IsChecked = false;
+                return;
+            }
+            EnvironmentTabMapLayers.DisplayOverlayShapes("Overlay", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedArea.OverlayShape });
+            MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 
         void DisplayBathymetry()
@@ -367,7 +442,6 @@ namespace ESMEWorkBench.ViewModels.Main
 #endif
         }
 
-        #endregion
 
 #if false
         #region Range Complex ribbon group

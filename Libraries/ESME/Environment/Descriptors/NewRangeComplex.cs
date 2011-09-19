@@ -497,16 +497,41 @@ namespace ESME.Environment.Descriptors
             return newArea;
         }
 
-        public void RemoveArea(string areaName)
+        public bool TryRemoveArea(string areaName, out string message)
         {
-            if (IsLoading) throw new InvalidOperationException(string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name));
-            RemoveAreaPrivate(areaName);
+            if (string.IsNullOrEmpty(areaName))
+            {
+                message = "areaName is null or empty!";
+                return false;
+            }
+            if (!AreaCollection.ContainsKey(areaName))
+            {
+                message = string.Format("Area {0} does not exist", areaName);
+                return false;
+            }
+            if (IsLoading)
+            {
+                message = string.Format("The range complex {0} cannot be modified at the moment. Please try again shortly.", Name);
+                return false;
+            }
+            if (OpArea.Name == areaName)
+            {
+                message= string.Format("The area {0} is the operational area of this range complex and may not be removed.", areaName);
+                return false;
+            }
+            if (SimArea.Name == areaName)
+            {
+                message = string.Format("The area {0} is the simulation area of this range complex and may not be removed.", areaName);
+                return false;
+            }
+            message = null;
+            return true;
         }
 
-        public void RemoveAreaPrivate(string areaName)
+        public void RemoveArea(string areaName)
         {
-            if (areaName == null) throw new ArgumentNullException("areaName");
-            if (!AreaCollection.ContainsKey(areaName)) throw new ArgumentException(string.Format("Area {0} does not exist", areaName), "areaName");
+            string error;
+            if (!TryRemoveArea(areaName, out error)) throw new InvalidOperationException(error);
             AreaCollection[areaName].Remove();
             AreaCollection.Remove(areaName);
         }

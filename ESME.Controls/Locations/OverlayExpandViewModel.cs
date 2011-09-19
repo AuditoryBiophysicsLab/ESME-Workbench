@@ -1,21 +1,23 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
 using Cinch;
-using ESME.Metadata;
+using ESME.Environment.Descriptors;
 using HRC.Validation;
 
 namespace ESME.Views.Locations
 {
     public sealed class OverlayExpandViewModel : ValidatingViewModel
     {
-        public OverlayExpandViewModel(string overlayFilename)
+        public OverlayExpandViewModel(NewRangeComplex rangeComplex, RangeComplexArea sourceArea)
         {
-            _overlayFilename = overlayFilename;
+            if ((rangeComplex == null) || (rangeComplex == NewRangeComplex.None) || (sourceArea == null) || (sourceArea == RangeComplexArea.None)) throw new ApplicationException("Range Complex and/or Area has not been selected");
+            _areaName = sourceArea.Name;
             ValidationRules.Add(new ValidationRule
             {
                 PropertyName = "BufferSize",
                 Description = "An overlay with the same name already exists",
-                RuleDelegate = (o, r) => !File.Exists(Path.Combine(Path.GetDirectoryName(_overlayFilename), OverlayName + ".ovr")),
+                RuleDelegate = (o, r) => !rangeComplex.AreaCollection.ContainsKey(OverlayName),
             });
             ValidationRules.Add(new ValidationRule
             {
@@ -25,7 +27,7 @@ namespace ESME.Views.Locations
             });
         }
 
-        readonly string _overlayFilename;
+        readonly string _areaName;
         #region public float BufferSize { get; set; }
 
         public float BufferSize
@@ -33,7 +35,7 @@ namespace ESME.Views.Locations
             get { return _bufferSize; }
             set
             {
-                if (_bufferSize == value) return;
+                if (Math.Abs(_bufferSize - value) < .001) return;
                 _bufferSize = value;
                 NotifyPropertyChanged(BufferSizeChangedEventArgs);
                 NotifyPropertyChanged(OverlayNameChangedEventArgs);
@@ -49,7 +51,7 @@ namespace ESME.Views.Locations
 
         public string OverlayName
         {
-            get { return string.Format("{0}_{1}km", Path.GetFileNameWithoutExtension(_overlayFilename), BufferSize); }
+            get { return string.Format("{0}_{1}km", Path.GetFileNameWithoutExtension(_areaName), BufferSize); }
         }
 
         static readonly PropertyChangedEventArgs OverlayNameChangedEventArgs = ObservableHelper.CreateArgs<OverlayExpandViewModel>(x => x.OverlayName);

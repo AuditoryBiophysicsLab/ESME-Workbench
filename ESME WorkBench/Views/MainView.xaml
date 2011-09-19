@@ -262,7 +262,13 @@
                               SelectedItem="{Binding RangeComplexes.SelectedRangeComplex}" 
                               DisplayMemberPath="Name" 
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                              SelectionMode="Single"/>
+                              SelectionMode="Single">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
                     <r:RibbonButton Label="New" LargeImageSource="..\Images\LargeIcons\world_add.png"
                             SmallImageSource="..\Images\SmallIcons\world_add.png"
                             ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" 
@@ -283,7 +289,13 @@
                               DisplayMemberPath="Name" 
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           ToolTip="Select a simulation area"
-                              SelectionMode="Single"/>
+                              SelectionMode="Single">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
                     <r:RibbonButton Label="Expand" LargeImageSource="..\Images\LargeIcons\canvas_size.png"
                         SmallImageSource="..\Images\SmallIcons\canvas_size.png"
                             ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
@@ -296,6 +308,7 @@
                             ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                             ToolTipDescription="Delete the selected overlay, and all overlays, bathymetry and environment data that depends on it."
                             ToolTipFooterDescription="Note: Operational and simulation limit overlays for the currently selected range complex cannot be deleted."
+                                        IsEnabled="{Binding SelectedArea.CanBeDeleted}"
                             Command="{Binding DeleteOverlayCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Bathymetry">
@@ -307,220 +320,17 @@
                           ToolTip="Select a simulation area"
                               SelectionMode="Single"/>
                     <r:RibbonButton Label="Add" LargeImageSource="..\Images\LargeIcons\map_add.png" SmallImageSource="..\Images\SmallIcons\map_add.png" ToolTipTitle="New Bathymetry"
-                            ToolTipDescription="Extract a new bathymetry dataset" Command="{Binding NewBathymetryCommand}" />
-                    <r:RibbonButton Label="Remove" LargeImageSource="..\Images\LargeIcons\map_delete.png" SmallImageSource="..\Images\SmallIcons\map_delete.png"
+                            ToolTipDescription="Extract a new bathymetry dataset" Command="{Binding AddBathymetryCommand}" />
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\map_delete.png"
                             ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                            ToolTipDescription="Delete the selected bathymetry dataset, and all environment data that depends on it."
-                            Command="{Binding DeleteBathymetryCommand}" />
-
-        </r:RibbonGroup>
+                            ToolTipDescription="Delete the selected bathymetry dataset"
+                            Command="{Binding RemoveBathymetryCommand}" />
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_refresh.png"
+                            ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                            ToolTipDescription="Re-import the selected bathymetry dataset"
+                            Command="{Binding ReloadBathymetryCommand}" />
+                </r:RibbonGroup>
       </r:RibbonTab>
-      <r:RibbonTab KeyTip="E" Header="Experiment"
-                   Visibility="{Binding IsDebugMode, Converter={StaticResource TrueVisibleFalseCollapsed}}">
-        <r:RibbonGroup Header="Map Data">
-          <!-- <r:RibbonButton Label="Refresh"
-					                SmallImageSource="..\Images\SmallIcons\Button-Refresh-icon.png"
-					                LargeImageSource="..\Images\LargeIcons\Button-Refresh-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Refresh the map display"
-					                Command="{Binding RefreshMapCommand}" /> -->
-          <r:RibbonButton Label="Shapefile" SmallImageSource="..\Images\SmallIcons\AddFile.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Add an ESRI Shapefile to the map" Command="{Binding AddShapefileCommand}" />
-          <r:RibbonButton Label="Overlay" SmallImageSource="..\Images\SmallIcons\AddFile.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Add a NUWC Overlay file to the map" Command="{Binding AddOverlayFileCommand}" />
-          <r:RibbonButton Label="Scenario" SmallImageSource="..\Images\SmallIcons\AddFile.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Add a NUWC Scenario file to the map" Command="{Binding AddScenarioFileCommand}" />
-        </r:RibbonGroup>
-        <r:RibbonGroup Header="Overlays">
-          <r:RibbonCheckBox Label="Lat/Lon Grid" ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                            ToolTipDescription="Shows and hides the latitude/longitude grid overlay on the map"
-                            IsChecked="{Binding IsLatLonGridVisible}" />
-          <r:RibbonCheckBox Label="Pan &amp; Zoom" ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                            ToolTipDescription="Shows and hides the pan/zoom control overlay on the map" IsChecked="{Binding IsPanZoomVisible}" />
-          <r:RibbonCheckBox Label="Scale Bar" ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                            ToolTipDescription="Shows and hides the scale bar overlay on the map" IsChecked="{Binding IsScaleBarVisible}" />
-        </r:RibbonGroup>
-        <r:RibbonGroup Header="Scenario">
-          <r:RibbonButton Label="Open" LargeImageSource="..\Images\LargeIcons\open-icon.png"
-                          SmallImageSource="..\Images\SmallIcons\open-icon.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Associate a scenario file with the current experiment" Command="{Binding AddScenarioFileCommand}" />
-          <r:RibbonButton Label="Edit" LargeImageSource="..\Images\LargeIcons\application-icon.png"
-                          SmallImageSource="..\Images\SmallIcons\application-icon.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}" ToolTipDescription="Launch the scenario editor"
-                          Command="{Binding LaunchScenarioEditorCommand}" />
-          <!-- <r:RibbonButton Label="Run"
-					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
-					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Run the scenario"
-					                Command="{Binding LaunchScenarioSimulatorCommand}"/>
-                    "{Binding RunExperimentCommand}" />-->
-          <r:RibbonButton Label="Zoom to Scenario" LargeImageSource="..\Images\LargeIcons\Magnifying-Glass-icon.png"
-                          SmallImageSource="..\Images\SmallIcons\Magnifying-Glass-icon.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Resets the map position to the current scenario" Command="{Binding ResetScenarioZoomLevelCommand}" />
-        </r:RibbonGroup>
-        <r:RibbonGroup Header="Environment">
-          <r:RibbonButton Label="Settings" LargeImageSource="..\Images\LargeIcons\Distance-learning.png"
-                          SmallImageSource="..\Images\SmallIcons\Distance-learning.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Select or change the environmental data to be used for this experiment. A scenario file must be selected AND the experiment must be saved before environmental data can be selected."
-                          Command="{Binding ShowEnvironmentSettingsCommand}" />
-        </r:RibbonGroup>
-        <r:RibbonGroup Header="Acoustics">
-          <r:RibbonToggleButton Label="Analysis Point" LargeImageSource="..\Images\LargeIcons\bullet-2-icon.png"
-                                SmallImageSource="..\Images\SmallIcons\bullet-2-icon.png"
-                                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                                ToolTipDescription="Add a new analysis point to the experiment" IsChecked="{Binding IsInAnalysisPointMode}"
-                                Command="{Binding AnalysisPointCommand}" />
-          <!--
-                    <r:RibbonButton Label="Fixed Source"
-					                LargeImageSource="..\Images\LargeIcons\Sound.png"
-					                SmallImageSource="..\Images\SmallIcons\Sound.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Add a new fixed sound source to the experiment"
-					                Command="{Binding DisabledCommand}" />
-                    -->
-          <r:RibbonButton Label="Models" LargeImageSource="..\Images\LargeIcons\gnome_sound_recorder.png"
-                          SmallImageSource="..\Images\SmallIcons\gnome_sound_recorder.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Choose an acoustic model for each distinct mode in the experiment"
-                          Command="{Binding ConfigureAcousticModelsCommand}" />
-          <r:RibbonButton Label="Quick Look" LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
-                          SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Add a new quick look point to the experiment" Command="{Binding DisabledCommand}" />
-        </r:RibbonGroup>
-
-
-        <r:RibbonGroup Header="Animals">
-          <r:RibbonButton Label="Launch MMMBS" ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator"
-                          SmallImageSource="..\Images\SmallIcons\application-icon.png"
-                          LargeImageSource="..\Images\LargeIcons\application-icon.png" Command="{Binding LaunchMMMBSCommand}" />
-          <!--
-                    <r:RibbonButton Label="Launch SpeciesBuilder"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator's Species File Editor"
-					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
-					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
-					                Command="{Binding LaunchMMMBSpeciesBuilderCommand}" />
-                    -->
-          <r:RibbonButton Label="Load population" SmallImageSource="..\Images\SmallIcons\Button-Add-icon.png"
-                          LargeImageSource="..\Images\LargeIcons\Button-Add-icon.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Add an Animal Population File to the experiment" Command="{Binding DisabledCommand}" />
-          <r:RibbonButton Label="Create Bathymetry File" SmallImageSource="..\Images\SmallIcons\save-icon.png"
-                          LargeImageSource="..\Images\LargeIcons\save-icon.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS"
-                          Command="{Binding CreateMMMBSBathymetryFileCommand}" />
-        </r:RibbonGroup>
-        <r:RibbonGroup Header="Simulation">
-          <r:RibbonButton Label="Simulator" LargeImageSource="..\Images\LargeIcons\alert-icon.png"
-                          SmallImageSource="..\Images\SmallIcons\alert-icon.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Launch the NUWC Scenario Simulator" Command="{Binding LaunchScenarioSimulatorCommand}" />
-
-          <r:RibbonButton Label="Log File Finder" LargeImageSource="..\Images\LargeIcons\Button-Help-icon.png"
-                          SmallImageSource="..\Images\SmallIcons\Button-Help-icon.png"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          ToolTipDescription="Choose a scenario log file to view...  " Command="{Binding ViewScenarioSimulatorLogDirCommand}" />
-
-        </r:RibbonGroup>
-        <r:RibbonGroup Header="Reports">
-          <r:RibbonButton Label="Post Processor" ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          SmallImageSource="..\Images\SmallIcons\chart-icon.png" LargeImageSource="..\Images\LargeIcons\chart-icon.png"
-                          ToolTipDescription="Launches the NUWC Post Processor" Command="{Binding LaunchScenarioPostProcessorCommand}" />
-          <r:RibbonButton Label="Exposure Report Generator"
-                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                          SmallImageSource="..\Images\SmallIcons\chart-icon.png" LargeImageSource="..\Images\LargeIcons\chart-icon.png"
-                          ToolTipDescription="Launches the NUWC Report Generator" Command="{Binding LaunchExposureReportGeneratorCommand}" />
-        </r:RibbonGroup>
-      </r:RibbonTab>
-      <!--
-			<r:RibbonTab KeyTip="A"
-			             Header="Animals">
-				<r:RibbonGroup Header="Species">
-					<r:RibbonButton Label="Add Species"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Add a species to the simulation"
-					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
-					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
-					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton ToolTipTitle="Previous"
-					                SmallImageSource="..\Images\SmallIcons\Button-Previous-icon.png"
-					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton ToolTipTitle="Next"
-					                SmallImageSource="..\Images\SmallIcons\Button-Next-icon.png"
-					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton ToolTipTitle="Delete"
-					                SmallImageSource="..\Images\SmallIcons\Button-Delete-icon.png"
-					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton ToolTipTitle="Filter"
-					                SmallImageSource="..\Images\SmallIcons\SmallIcon.png"
-					                Command="{Binding DisabledCommand}" />
-				</r:RibbonGroup>
-				<r:RibbonGroup Header="Animals">
-					<r:RibbonButton Label="Add Animal"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Add an individual animal to the simulation"
-					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
-					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
-					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton ToolTipTitle="Previous"
-					                SmallImageSource="..\Images\SmallIcons\Button-Previous-icon.png"
-					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton ToolTipTitle="Next"
-					                SmallImageSource="..\Images\SmallIcons\Button-Next-icon.png"
-					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton ToolTipTitle="Delete"
-					                SmallImageSource="..\Images\SmallIcons\Button-Delete-icon.png"
-					                Command="{Binding DisabledCommand}" />
-					<r:RibbonButton ToolTipTitle="Filter"
-					                SmallImageSource="..\Images\SmallIcons\SmallIcon.png"
-					                Command="{Binding DisabledCommand}" />
-				</r:RibbonGroup>
-				<r:RibbonGroup Header="Simulator">
-					<r:RibbonButton Label="Run Simulator"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Run the animal simulation"
-					                SmallImageSource="..\Images\SmallIcons\Button-Play-icon.png"
-					                LargeImageSource="..\Images\LargeIcons\Button-Play-icon.png"
-					                Command="{Binding DisabledCommand}" />
-				</r:RibbonGroup>
-				<r:RibbonGroup Header="Populate">
-					<r:RibbonButton Label="Launch MMMBS"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator"
-					                SmallImageSource="..\Images\SmallIcons\application-icon.png"
-					                LargeImageSource="..\Images\LargeIcons\application-icon.png"
-					                Command="{Binding LaunchMMMBSCommand}" />
-                    <r:RibbonButton Label="Launch SpeciesBuilder"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Launches the Marine Mammal Movement and Behavior Simulator's Species File Editor"
-					                SmallImageSource="..\Images\SmallIcons\Dolphin.png"
-					                LargeImageSource="..\Images\LargeIcons\Dolphin.png"
-					                Command="{Binding LaunchMMMBSpeciesBuilderCommand}" />
-					<r:RibbonButton Label="Load population"
-					                SmallImageSource="..\Images\SmallIcons\Button-Add-icon.png"
-					                LargeImageSource="..\Images\LargeIcons\Button-Add-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Add an Animal Population File to the experiment"
-					                Command="{Binding AddAnimalPopulationFileCommand}" />
-					<r:RibbonButton Label="Create Bathymetry File"
-					                SmallImageSource="..\Images\SmallIcons\save-icon.png"
-					                LargeImageSource="..\Images\LargeIcons\save-icon.png"
-					                ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-					                ToolTipDescription="Create a bathymetry file that will be loaded by MMMBS"
-					                Command="{Binding CreateMMMBSBathymetryFileCommand}" />
-				</r:RibbonGroup>
-			</r:RibbonTab>
-            -->
     </r:Ribbon>
     <Grid>
       <Grid.ColumnDefinitions>
