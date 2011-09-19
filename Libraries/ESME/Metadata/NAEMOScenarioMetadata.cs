@@ -201,14 +201,6 @@ namespace ESME.Metadata
                     }
 
                     DisplayScenario();
-                    _rangeComplexDescriptor = (RangeComplexDescriptor)RangeComplexDescriptors[_nemoFile.Scenario.SimAreaName];
-                    var curTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof (NAVOTimePeriod), _nemoFile.Scenario.TimeFrame);
-                    AvailableEnvironments = new NAEMOEnvironmentDescriptors();
-                    AvailableEnvironments.AddRange(from environment in _rangeComplexDescriptor.NAEMOEnvironmentDescriptors
-                                                   where (environment.Value != null) && 
-                                                         (environment.Value.Metadata.TimePeriod == curTimePeriod) && 
-                                                         (!string.IsNullOrEmpty(environment.Value.Metadata.BathymetryName))
-                                                   select environment);
                     if (EnvironmentName != null) SelectedEnvironment = (NAEMOEnvironmentDescriptor)AvailableEnvironments[EnvironmentName];
                     if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
                     else NemoModeToAcousticModelNameMap.UpdateModes(_nemoFile.Scenario.DistinctModePSMNames, TransmissionLossAlgorithm.CASS);
@@ -216,7 +208,6 @@ namespace ESME.Metadata
                 else
                 {
                     _rangeComplexPath = _areasPath = _bathymetryPath = _environmentPath = _imagesPath = null;
-                    _rangeComplexDescriptor = null;
                     _scenarioBounds = null;
                     NemoModeToAcousticModelNameMap = null;
                     AvailableEnvironments = null;
@@ -238,7 +229,6 @@ namespace ESME.Metadata
         string _scenarioPath;
         string _propagationPath;
         string _pressurePath;
-        RangeComplexDescriptor _rangeComplexDescriptor;
         GeoRect _scenarioBounds;
 
         void DisplayScenario()
@@ -395,9 +385,8 @@ namespace ESME.Metadata
             TreeViewRootNodes.Add(environmentRoot);
             foreach (var layer in _mapLayers) PlaceMapLayerInTree(layer);
 
-            var samplePoints = _selectedEnvironment.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint));
-            SelectedBathymetry = ((NAEMOBathymetryDescriptor)(_rangeComplexDescriptor.NAEMOBathymetryDescriptors[_selectedEnvironment.Metadata.BathymetryName]));
-            var bathymetryBounds = SelectedBathymetry.Metadata.Bounds;
+            var samplePoints = _selectedEnvironment.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+            var bathymetryBounds = SelectedBathymetry.GeoRect;
             _scenarioBounds.Union(bathymetryBounds);
             var bathyBitmapLayer = MapLayers.DisplayBathymetryRaster("Bathymetry", Path.Combine(_imagesPath, _selectedEnvironment.Metadata.BathymetryName + ".bmp"), true, false, true, bathymetryBounds);
             Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer));
@@ -405,7 +394,7 @@ namespace ESME.Metadata
             MapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
             foreach (var sedimentType in _selectedEnvironment.Data.SedimentTypes)
             {
-                samplePoints = sedimentType.Value.Select(samplePoint => new OverlayPoint(samplePoint));
+                samplePoints = sedimentType.Value.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
                 MapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", sedimentType.Key.ToLower()), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
             }
             ZoomToScenarioHandler();
@@ -418,26 +407,26 @@ namespace ESME.Metadata
 
         #endregion
 
-        #region public NAEMOBathymetryDescriptor SelectedBathymetry { get; set; }
-        [XmlIgnore]
-        public NAEMOBathymetryDescriptor SelectedBathymetry
+        #region public BathymetryFile SelectedBathymetry { get; set; }
+
+        public BathymetryFile SelectedBathymetry
         {
             get { return _selectedBathymetry; }
             set
             {
                 if (_selectedBathymetry == value) return;
                 _selectedBathymetry = value;
+                if ((_selectedBathymetry != null) && (_selectedBathymetry != BathymetryFile.None) && (_selectedBathymetry.IsCached)) 
+                    _selectedBathymetry.GetMyDataAsync();
                 NotifyPropertyChanged(SelectedBathymetryChangedEventArgs);
                 NotifyPropertyChanged(CanPlaceAnalysisPointChangedEventArgs);
-                _bathymetry = _selectedBathymetry == null ? null : new WeakReference<Bathymetry>(_selectedBathymetry.Data);
                 if ((_selectedBathymetry != null) && (AnalysisPoints != null)) SetBathymetryForAnalysisPoints();
             }
         }
 
         static readonly PropertyChangedEventArgs SelectedBathymetryChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.SelectedBathymetry);
-        NAEMOBathymetryDescriptor _selectedBathymetry;
+        BathymetryFile _selectedBathymetry;
         WeakReference<Bathymetry> _bathymetry;
-
         #endregion
 
         #region ZoomToScenarioCommand
@@ -643,6 +632,8 @@ namespace ESME.Metadata
 
         public void ExportAnalysisPoints()
         {
+#if false
+            Will do this after the rest works properly
             Directory.CreateDirectory(_propagationPath);
             //Directory.CreateDirectory(pressureTimePath);
             var rangeComplex = ((RangeComplexDescriptor)RangeComplexDescriptors[NemoFile.Scenario.SimAreaName]).Data;
@@ -653,6 +644,7 @@ namespace ESME.Metadata
                                                   NemoModeToAcousticModelNameMap,
                                                   SelectedEnvironment.Data.EnvironmentInformation, rangeComplex);
             Globals.WorkDirectories.Add(_propagationPath, true);
+#endif
         }
     }
 }

@@ -570,6 +570,8 @@
     <Content Include="External References\System.Data.SQLite.dll" />
     <Content Include="External References\System.Data.SQLite.Linq.dll" />
     <Content Include="External References\System.Threading.Tasks.Dataflow.dll" />
+    <Resource Include="Images\SmallIcons\arrow_undo.png" />
+    <Resource Include="Images\LargeIcons\arrow_undo.png" />
     <Resource Include="Images\LargeIcons\arrow_refresh.png" />
     <Resource Include="Images\SmallIcons\arrow_refresh.png" />
     <Resource Include="Images\SmallIcons\canvas_size.png" />

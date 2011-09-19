@@ -29,7 +29,9 @@ namespace ESMEWorkBench.ViewModels.Main
             AreAllViewModelsReady = true;
             UpdateMapLayerVisibility();
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
-            
+            SelectedRangeComplexIndex = -1;
+            SelectedAreaIndex = -1;
+            SelectedBathymetryIndex = -1;
             //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
             //_dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
@@ -108,6 +110,24 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
+        #region public int SelectedRangeComplexIndex { get; set; }
+
+        public int SelectedRangeComplexIndex
+        {
+            get { return _selectedRangeComplexIndex; }
+            set
+            {
+                if (_selectedRangeComplexIndex == value) return;
+                _selectedRangeComplexIndex = value;
+                NotifyPropertyChanged(SelectedRangeComplexIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedRangeComplexIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedRangeComplexIndex);
+        int _selectedRangeComplexIndex;
+
+        #endregion
+
         public bool IsRangeComplexSelected { get; private set; }
         static readonly PropertyChangedEventArgs IsRangeComplexSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsRangeComplexSelected);
 
@@ -132,6 +152,24 @@ namespace ESMEWorkBench.ViewModels.Main
             }
         }
 
+        #region public int SelectedAreaIndex { get; set; }
+
+        public int SelectedAreaIndex
+        {
+            get { return _selectedAreaIndex; }
+            set
+            {
+                if (_selectedAreaIndex == value) return;
+                _selectedAreaIndex = value;
+                NotifyPropertyChanged(SelectedAreaIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedAreaIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedAreaIndex);
+        int _selectedAreaIndex;
+
+        #endregion
+
         public bool IsAreaSelected { get; private set; }
         static readonly PropertyChangedEventArgs IsAreaSelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsAreaSelected);
 
@@ -155,6 +193,24 @@ namespace ESMEWorkBench.ViewModels.Main
                 DisplayBathymetry();
             }
         }
+
+        #region public int SelectedBathymetryIndex { get; set; }
+
+        public int SelectedBathymetryIndex
+        {
+            get { return _selectedBathymetryIndex; }
+            set
+            {
+                if (_selectedBathymetryIndex == value) return;
+                _selectedBathymetryIndex = value;
+                NotifyPropertyChanged(SelectedBathymetryIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedBathymetryIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedBathymetryIndex);
+        int _selectedBathymetryIndex;
+
+        #endregion
 
         public bool IsBathymetrySelected { get; private set; }
         static readonly PropertyChangedEventArgs IsBathymetrySelectedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsBathymetrySelected);
@@ -231,6 +287,24 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             catch (Exception e) { _messageBoxService.ShowError(e.Message); }
         }
+        #endregion
+
+        #region ClearRangeComplexSelectionCommand
+        public SimpleCommand<object, object> ClearRangeComplexSelectionCommand
+        {
+            get
+            {
+                return _clearRangeComplexSelection ?? (_clearRangeComplexSelection = new SimpleCommand<object, object>(
+                    delegate { return IsRangeComplexSelected; },
+                    delegate
+                    {
+                        RangeComplexes.SelectedRangeComplex = NewRangeComplex.None;
+                        SelectedRangeComplexIndex = -1;
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _clearRangeComplexSelection;
         #endregion
 
         #region NewOverlayCommand
@@ -323,6 +397,24 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
+        #region ClearAreaSelectionCommand
+        public SimpleCommand<object, object> ClearAreaSelectionCommand
+        {
+            get
+            {
+                return _clearAreaSelectionCommand ?? (_clearAreaSelectionCommand = new SimpleCommand<object, object>(
+                    delegate { return IsAreaSelected; },
+                    delegate
+                    {
+                        RangeComplexes.SelectedArea = RangeComplexArea.None;
+                        SelectedAreaIndex = -1;
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _clearAreaSelectionCommand;
+        #endregion
+
         #region AddBathymetryCommand
         public SimpleCommand<object, object> AddBathymetryCommand
         {
@@ -381,6 +473,24 @@ namespace ESMEWorkBench.ViewModels.Main
         SimpleCommand<object, object> _reloadBathymetry;
         #endregion
 
+        #region ClearBathymetrySelectionCommand
+        public SimpleCommand<object, object> ClearBathymetrySelectionCommand
+        {
+            get
+            {
+                return _clearBathymetrySelectionCommand ?? (_clearBathymetrySelectionCommand = new SimpleCommand<object, object>(
+                    delegate { return IsBathymetrySelected; },
+                    delegate
+                    {
+                        RangeComplexes.SelectedBathymetry = BathymetryFile.None;
+                        SelectedBathymetryIndex = -1;
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _clearBathymetrySelectionCommand;
+        #endregion
+
         void DisplayWorldMap()
         {
             if (MapLayerCollections["Environment"] == null)
@@ -406,8 +516,12 @@ namespace ESMEWorkBench.ViewModels.Main
             }
 
             ZoomToRangeComplex();
+
             EnvironmentTabMapLayers.DisplayOverlayShapes("Op Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.OpArea.OverlayShape });
-            EnvironmentTabMapLayers.DisplayOverlayShapes("Sim Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.SimArea.OverlayShape });
+            if ((RangeComplexes.SelectedRangeComplex.OpArea != RangeComplexes.SelectedRangeComplex.SimArea) &&
+                (RangeComplexes.SelectedRangeComplex.OpArea.GeoRect != RangeComplexes.SelectedRangeComplex.SimArea.GeoRect))
+                EnvironmentTabMapLayers.DisplayOverlayShapes("Sim Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.SimArea.OverlayShape });
+            
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 

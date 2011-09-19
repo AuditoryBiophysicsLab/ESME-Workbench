@@ -260,6 +260,7 @@
                 <r:RibbonGroup Header="Range Complex">
                     <ListView Width="150" Height="66" ItemsSource="{Binding RangeComplexes.RangeComplexList}" 
                               SelectedItem="{Binding RangeComplexes.SelectedRangeComplex}" 
+                              SelectedIndex="{Binding SelectedRangeComplexIndex}"
                               DisplayMemberPath="Name" 
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                               SelectionMode="Single">
@@ -278,14 +279,19 @@
                         <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_go.png"
                             ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                             ToolTipDescription="Show the selected range complex on the map" Command="{Binding ZoomToRangeComplexCommand}" />
-                        <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_delete.png"
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\world_delete.png"
                             ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                            ToolTipDescription="Delete the selected range complex, and all data within it."
+                            ToolTipDescription="Delete the selected range complex, and all data within it"
                             Command="{Binding DeleteRangeComplexCommand}" />
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png"
+                            ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                            ToolTipDescription="Clear the currently selected range complex"
+                            Command="{Binding ClearRangeComplexSelectionCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Area">
                     <ListView Width="200" Height="66" ItemsSource="{Binding RangeComplexes.SelectedRangeComplex.AreaList}" 
                               SelectedItem="{Binding RangeComplexes.SelectedArea}" 
+                              SelectedIndex="{Binding SelectedAreaIndex}"
                               DisplayMemberPath="Name" 
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           ToolTip="Select a simulation area"
@@ -310,11 +316,16 @@
                             ToolTipFooterDescription="Note: Operational and simulation limit overlays for the currently selected range complex cannot be deleted."
                                         IsEnabled="{Binding SelectedArea.CanBeDeleted}"
                             Command="{Binding DeleteOverlayCommand}" />
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png"
+                            ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                            ToolTipDescription="Clear the currently selected area"
+                            Command="{Binding ClearAreaSelectionCommand}" />
                 </r:RibbonGroup>
                 <r:RibbonGroup Header="Bathymetry">
                     <ListView Width="75" Height="66" ItemContainerStyle="{StaticResource DataCachedDisplayStyle}"
                               ItemsSource="{Binding RangeComplexes.SelectedArea.BathymetryList}" 
                               SelectedItem="{Binding RangeComplexes.SelectedBathymetry}" 
+                              SelectedIndex="{Binding SelectedBathymetryIndex}"
                               DisplayMemberPath="Name" 
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                           ToolTip="Select a simulation area"
@@ -329,6 +340,10 @@
                             ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                             ToolTipDescription="Re-import the selected bathymetry dataset"
                             Command="{Binding ReloadBathymetryCommand}" />
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_undo.png"
+                            ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                            ToolTipDescription="Clear the currently selected bathymetry"
+                            Command="{Binding ClearBathymetrySelectionCommand}" />
                 </r:RibbonGroup>
       </r:RibbonTab>
     </r:Ribbon>
