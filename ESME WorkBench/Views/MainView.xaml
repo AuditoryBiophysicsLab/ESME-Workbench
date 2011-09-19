@@ -60,7 +60,7 @@
       </StatusBarItem>
     </StatusBar>
     <r:Ribbon x:Name="Ribbon" SelectedIndex="{Binding SelectedRibbonTabIndex, Mode=TwoWay}" DockPanel.Dock="Top">
-      <!-- <r:Ribbon x:Name="Ribbon" SelectedIndex="2" DockPanel.Dock="Top"> -->
+            <!-- <r:Ribbon x:Name="Ribbon" SelectedIndex="2" DockPanel.Dock="Top"> -->
       <r:Ribbon.ApplicationMenu>
         <r:RibbonApplicationMenu SmallImageSource="..\Images\SmallIcons\Wave.png">
           <r:RibbonApplicationMenuItem Header="Open Scenario" InputGestureText="Ctrl+O"
@@ -117,7 +117,7 @@
           </r:RibbonApplicationMenu.AuxiliaryPaneContent>
         </r:RibbonApplicationMenu>
       </r:Ribbon.ApplicationMenu>
-      <r:RibbonTab KeyTip="H" Header="Home">
+      <r:RibbonTab KeyTip="H" Header="Home" >
         <r:RibbonGroup Header="Overlays">
           <r:RibbonCheckBox Label="Lat/Lon Grid" ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                             ToolTipDescription="Shows and hides the latitude/longitude grid overlay on the map"
@@ -143,86 +143,6 @@
                           ToolTipDescription="Resets the map position to the current scenario" IsEnabled="{Binding IsScenarioLoaded}"
                           Command="{Binding ScenarioMetadata.ZoomToScenarioCommand}" />
         </r:RibbonGroup>
-        <r:RibbonGroup Header="Environment">
-          <!--
-          <r:RibbonComboBox SmallImageSource="..\Images\SmallIcons\World-icon.png" SelectionBoxWidth="62"
-                            VerticalAlignment="Center" IsEditable="False" ToolTip="Select a range complex">
-            <r:RibbonGallery SelectedValue="{Binding RangeComplexes.SelectedRangeComplex}">
-              <r:RibbonGallery.Items>
-                <r:RibbonGalleryCategory ItemsSource="{Binding RangeComplexes.RangeComplexList, Mode=OneWay}"
-                                         DisplayMemberPath="Name" />
-              </r:RibbonGallery.Items>
-            </r:RibbonGallery>
-          </r:RibbonComboBox>
-          <r:RibbonComboBox SmallImageSource="..\Images\SmallIcons\calendar_view_month.png" SelectionBoxWidth="62"
-                            VerticalAlignment="Center" IsEditable="False" ToolTip="Select a time period for the simulation">
-            <r:RibbonGallery SelectedValue="{Binding RangeComplexes.SelectedTimePeriod}">
-              <r:RibbonGallery.Items>
-                <r:RibbonGalleryCategory ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}" />
-              </r:RibbonGallery.Items>
-            </r:RibbonGallery>
-          </r:RibbonComboBox>
-            -->
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <r:RibbonControlGroup Grid.Row="0" HorizontalAlignment="Right">
-            <r:RibbonComboBox Label="Area" SelectionBoxWidth="100" VerticalAlignment="Center"
-                              IsEditable="False" ToolTip="Select a simulation area">
-              <r:RibbonGallery SelectedValue="{Binding RangeComplexes.SelectedArea}">
-                <r:RibbonGallery.Items>
-                  <r:RibbonGalleryCategory ItemsSource="{Binding RangeComplexes.SelectedRangeComplex.AreaList}"
-                                           DisplayMemberPath="Name" />
-                </r:RibbonGallery.Items>
-              </r:RibbonGallery>
-            </r:RibbonComboBox>
-            <r:RibbonButton SmallImageSource="..\Images\SmallIcons\canvas_size.png"
-                            ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                            ToolTipDescription="Create a new overlay by expanding the selected overlay"
-                            ToolTipFooterDescription="Note: You cannot expand an overlay that was previously created by expanding another overlay"
-                            Command="{Binding ExpandOverlayCommand}" />
-            <r:RibbonButton SmallImageSource="..\Images\SmallIcons\overlay-new.png" ToolTipTitle="New Overlay"
-                            ToolTipDescription="Create a new overlay" Command="{Binding NewOverlayCommand}" />
-            <r:RibbonButton SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
-                            ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                            ToolTipDescription="Delete the selected overlay, and all overlays, bathymetry and environment data that depends on it."
-                            ToolTipFooterDescription="Note: Operational and simulation limit overlays for the currently selected range complex cannot be deleted."
-                            IsEnabled="{Binding SelectedArea.CanBeDeleted}" Command="{Binding DeleteOverlayCommand}" />
-
-          </r:RibbonControlGroup>
-          <r:RibbonControlGroup Grid.Row="1" HorizontalAlignment="Right">
-            <r:RibbonComboBox Label="Resolution" SelectionBoxWidth="100" VerticalAlignment="Center"
-                              IsEditable="False" ToolTip="Select a bathymetry resolution">
-              <r:RibbonGallery SelectedValue="{Binding RangeComplexes.SelectedBathymetry}">
-                <r:RibbonGallery.Items>
-                  <r:RibbonGalleryCategory ItemsSource="{Binding RangeComplexes.SelectedArea.BathymetryList}"
-                                           DisplayMemberPath="Name" ItemContainerStyle="{StaticResource DataCachedDisplayStyle}" />
-                </r:RibbonGallery.Items>
-              </r:RibbonGallery>
-            </r:RibbonComboBox>
-
-            <r:RibbonButton SmallImageSource="..\Images\SmallIcons\map_add.png"
-                            ToolTipTitle="New Bathymetry" ToolTipDescription="Extract a new bathymetry dataset"
-                            Command="{Binding AddBathymetryCommand}" />
-            <r:RibbonButton SmallImageSource="..\Images\SmallIcons\map_delete.png"
-                            ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                            ToolTipDescription="Delete the selected bathymetry dataset" Command="{Binding RemoveBathymetryCommand}" />
-            <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_refresh.png"
-                            ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
-                            ToolTipDescription="Re-import the selected bathymetry dataset" Command="{Binding ReloadBathymetryCommand}" />
-
-
-          </r:RibbonControlGroup>
-            <!--
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\map_add.png" Label="Load selected"
-                          Command="{Binding LoadEnvironmentCommand}" />
-          <r:RibbonButton SmallImageSource="..\Images\SmallIcons\map_delete.png" Label="Clear selected"
-                          Command="{Binding ClearEnvironmentCommand}" />
-            -->
-                    </Grid>
-                </r:RibbonGroup>
         <r:RibbonGroup Header="Acoustics">
           <r:RibbonButton Label="Export" LargeImageSource="..\Images\LargeIcons\hourglass_go.png"
                           SmallImageSource="..\Images\SmallIcons\export-icon.png"
@@ -238,8 +158,47 @@
                           ToolTipDescription="Choose an acoustic model for each distinct mode in the scenario"
                           IsEnabled="{Binding IsScenarioLoaded}" Command="{Binding ConfigureAcousticModelsCommand}" />
         </r:RibbonGroup>
-            
-      </r:RibbonTab>
+                <r:RibbonGroup Header="Environment" IsEnabled="{Binding IsScenarioLoaded}">
+                    <ListView Width="150" Height="66"
+                    ItemsSource="{Binding RangeComplexes.SelectedRangeComplex.AreaList}"
+                    SelectedItem="{Binding RangeComplexes.SelectedArea}" SelectedIndex="{Binding SelectedAreaIndex}"
+                    DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ToolTip="Select a simulation area"
+                    SelectionMode="Single">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
+                    <r:RibbonButton 
+                          SmallImageSource="..\Images\SmallIcons\canvas_size.png"
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                          ToolTipDescription="Create a new overlay by expanding the selected overlay"
+                          ToolTipFooterDescription="Note: You cannot expand an overlay that was previously created by expanding another overlay"
+                          Command="{Binding ExpandOverlayCommand}" />
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\overlay-new.png" ToolTipTitle="New Overlay"
+                          ToolTipDescription="Create a new overlay" Command="{Binding NewOverlayCommand}" />
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\Button-Close-icon.png"
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                          ToolTipDescription="Delete the selected overlay, and all overlays, bathymetry and environment data that depends on it."
+                          ToolTipFooterDescription="Note: Operational and simulation limit overlays for the currently selected range complex cannot be deleted."
+                          IsEnabled="{Binding SelectedArea.CanBeDeleted}" Command="{Binding DeleteOverlayCommand}" />
+                    <ListView Width="75" Height="66" Margin="20 0 0 0" ItemContainerStyle="{StaticResource DataCachedDisplayStyle}"
+                    ItemsSource="{Binding RangeComplexes.SelectedArea.BathymetryList}"
+                    SelectedItem="{Binding RangeComplexes.SelectedBathymetry}" SelectedIndex="{Binding SelectedBathymetryIndex}"
+                    DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ToolTip="Select a simulation area"
+                    SelectionMode="Single" />
+                    <r:RibbonButton 
+                          SmallImageSource="..\Images\SmallIcons\map_add.png" ToolTipTitle="New Bathymetry"
+                          ToolTipDescription="Extract a new bathymetry dataset" Command="{Binding AddBathymetryCommand}" />
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\map_delete.png"
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                          ToolTipDescription="Delete the selected bathymetry dataset" Command="{Binding RemoveBathymetryCommand}" />
+                    <r:RibbonButton SmallImageSource="..\Images\SmallIcons\arrow_refresh.png"
+                          ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
+                          ToolTipDescription="Re-import the selected bathymetry dataset" Command="{Binding ReloadBathymetryCommand}" />
+                </r:RibbonGroup>
+            </r:RibbonTab>
           
       <r:RibbonTab KeyTip="S" Header="Simulation">
         <r:RibbonGroup Header="Simulators">
@@ -294,7 +253,7 @@
                           Command="{Binding CreateMMMBSBathymetryFileCommand}" />
         </r:RibbonGroup>
       </r:RibbonTab>
-      <r:RibbonTab KeyTip="V" Header="Environment">
+      <r:RibbonTab KeyTip="V" Header="Environment" Visibility="{Binding IsScenarioLoaded, Converter={StaticResource FalseVisibleTrueCollapsed}}">
         <r:RibbonGroup Header="Map">
           <r:RibbonButton Label="World Map" LargeImageSource="..\Images\LargeIcons\globe-icon.png"
                           SmallImageSource="..\Images\SmallIcons\globe-icon.png" Command="{Binding ZoomToWorldMapCommand}" />

@@ -1,31 +1,175 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Xml.Serialization;
 using Cinch;
 using ESME;
 using ESME.Environment.Descriptors;
+using ESME.Environment.NAVO;
 using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
 using ESME.NEMO;
+using ESME.NEMO.Overlay;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.AcousticBuilder;
 using ESME.Views.TransmissionLoss;
 using ESMEWorkBench.Properties;
 using ESMEWorkBench.ViewModels.NAVO;
+using HRC.Navigation;
+using HRC.Utility;
+using ThinkGeo.MapSuite.Core;
 
 namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {
-        public MapLayerCollection ScenarioMapLayers { get; set; }
+        #region OpenScenarioCommand
+        public SimpleCommand<object, object> OpenScenarioCommand
+        {
+            get { return _openScenario ?? (_openScenario = new SimpleCommand<object, object>(delegate { OpenScenarioHandler(null); })); }
+        }
+
+        SimpleCommand<object, object> _openScenario;
+
+        void OpenScenarioHandler(string fileName)
+        {
+            _openFileService.FileName = null;
+            if (fileName == null)
+            {
+                _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
+                _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
+                _openFileService.FileName = null;
+                var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
+                if (!result.HasValue || !result.Value) return;
+                fileName = _openFileService.FileName;
+                Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
+            }
+            RecentFiles.InsertFile(fileName);
+            try
+            {
+                // Load the NEMO file, and check if we have the range complex that it specifies
+                NemoFile = new NemoFile(fileName, Globals.AppSettings.ScenarioDataDirectory);
+                if (!RangeComplexes.RangeComplexCollection.ContainsKey(NemoFile.Scenario.SimAreaName))
+                {
+                    _messageBoxService.ShowError(string.Format("This scenario specifies a range complex \"{0}\" that does not exist on this computer", NemoFile.Scenario.SimAreaName));
+                    NemoFile = null;
+                    return;
+                }
+                if (NemoFile.Scenario == null)
+                {
+                    _messageBoxService.ShowError("This file does not contain a scenario");
+                    return;
+                }
+                RangeComplexes.SelectedRangeComplex = RangeComplexes.RangeComplexCollection[NemoFile.Scenario.SimAreaName];
+                RangeComplexes.SelectedTimePeriod = (NAVOTimePeriod)Enum.Parse(typeof(NAVOTimePeriod), NemoFile.Scenario.TimeFrame);
+
+                // Load the metadata file if it exists, or create one if it doesn't
+                var metadataFileName = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".emf");
+                if (File.Exists(metadataFileName)) ScenarioMetadata = NAEMOScenarioMetadata.Load(metadataFileName);
+                else ScenarioMetadata = new NAEMOScenarioMetadata(NemoFile.Scenario.DistinctModePSMNames)
+                {
+                    Filename = metadataFileName,
+                    NemoFileName = fileName,
+                };
+
+                // If the previously-selected area does not exist, set the name to null
+                if ((ScenarioMetadata.SelectedAreaName != null) && (!RangeComplexes.SelectedRangeComplex.AreaCollection.ContainsKey(ScenarioMetadata.SelectedAreaName))) ScenarioMetadata.SelectedAreaName = null;
+
+                // Use the selected area if it exists, otherwise use the sim area
+                RangeComplexes.SelectedArea = ScenarioMetadata.SelectedAreaName != null ? RangeComplexes.SelectedRangeComplex.AreaCollection[ScenarioMetadata.SelectedAreaName] : RangeComplexes.SelectedRangeComplex.SimArea;
+
+                // Check if the chosen resolution (if any) is valid.  If so, use it.  If not, use the 2 minute bathymetry from the current area
+                if ((ScenarioMetadata.SelectedResolutionName != null) && 
+                    (RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName] != null) && 
+                    (RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName].IsCached)) 
+                    RangeComplexes.SelectedBathymetry = (BathymetryFile)RangeComplexes.SelectedArea.BathymetryFiles[ScenarioMetadata.SelectedResolutionName];
+                else RangeComplexes.SelectedBathymetry = (BathymetryFile)RangeComplexes.SelectedArea.BathymetryFiles["2.00min"];
+
+                // Create the list of TreeView nodes that will hold the roots of the tree-structured view of the scenario
+                TreeViewRootNodes = new ObservableList<TreeNode> {new ScenarioNode(NemoFile.Scenario)};
+
+                // Display any animal layers on the map
+                if (NemoFile.Scenario.Animals != null)
+                    foreach (var species in _nemoFile.Scenario.Animals.SelectMany(animal => animal.Species))
+                        CurrentMapLayers.DisplaySpecies(species);
+
+                // Display the scenario layers on the map
+                DisplayScenario();
+            }
+            catch (Exception ex)
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine(ex.Message);
+                var inner = ex.InnerException;
+                while (inner != null)
+                {
+                    sb.AppendLine(inner.Message);
+                    inner = inner.InnerException;
+                }
+                _messageBoxService.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\":\n" + sb);
+                //ScenarioMetadata = null;
+            }
+        }
+
+        void DisplayScenario()
+        {
+            if (_nemoFile.Scenario.OverlayFile != null) CurrentMapLayers.DisplayOverlayShapes(string.Format("{0} sim area", NemoFile.Scenario.SimAreaName), LayerType.SimArea, Colors.Transparent, _nemoFile.Scenario.OverlayFile.Shapes);
+            foreach (var platform in _nemoFile.Scenario.Platforms)
+            {
+                if (platform.Trackdefs.Count == 1)
+                {
+                    CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} op area", platform.Name), LayerType.OpArea, Colors.Transparent, platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
+                    if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
+                    else _scenarioBounds.Union(platform.Trackdefs[0].OverlayFile.Shapes[0].BoundingBox);
+                    platform.CalculateBehavior();
+                    if (platform.BehaviorModel != null && platform.BehaviorModel.CourseOverlay != null)
+                        CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} track", platform.Name), LayerType.Track, Colors.Transparent,
+                                                              new List<OverlayShape> { platform.BehaviorModel.CourseOverlay }, 0, PointSymbolType.Circle, true, new CustomStartEndLineStyle(PointSymbolType.Circle, Colors.Green, 5, PointSymbolType.Square, Colors.Red, 5, Colors.DarkGray, 1), false, true, false);
+                }
+                else
+                    for (var trackIndex = 0; trackIndex < platform.Trackdefs.Count; trackIndex++)
+                    {
+                        CurrentMapLayers.DisplayOverlayShapes(string.Format("Platform: {0} OpArea{1}", platform.Name, trackIndex + 1), LayerType.OpArea, Colors.Transparent,
+                                                              platform.Trackdefs[0].OverlayFile.Shapes, canBeRemoved: false);
+                        if (_scenarioBounds == null) _scenarioBounds = new GeoRect(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
+                        else _scenarioBounds.Union(platform.Trackdefs[trackIndex].OverlayFile.Shapes[0].BoundingBox);
+                    }
+            }
+        }
+        GeoRect _scenarioBounds;
+
+        #endregion
+
+        #region CloseScenarioCommand
+        public SimpleCommand<object, object> CloseScenarioCommand
+        {
+            get
+            {
+                return _closeScenario ?? (_closeScenario = new SimpleCommand<object, object>(
+                    delegate { return IsScenarioLoaded; },
+                    delegate
+                    {
+                        NemoFile = null;
+                        ScenarioMetadata = null;
+                    }));
+            }
+        }
+
+        SimpleCommand<object, object> _closeScenario;
+        #endregion
+
 
         #region LoadEnvironmentCommand
         public SimpleCommand<object, object> LoadEnvironmentCommand
@@ -92,14 +236,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(NemoFileChangedEventArgs);
                 NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
 
-                if (_nemoFile != null)
-                {
-                    MainWindowTitle = string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame);
-                }
-                else
-                {
-                    MainWindowTitle = string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
-                }
+                MainWindowTitle = _nemoFile != null ? string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame) : string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
             }
         }
 
@@ -169,70 +306,6 @@ namespace ESMEWorkBench.ViewModels.Main
         static readonly PropertyChangedEventArgs ScenarioMetadataChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioMetadata);
         NAEMOScenarioMetadata _scenarioMetadata;
 
-        #endregion
-
-        #region OpenScenarioCommand
-        public SimpleCommand<object, object> OpenScenarioCommand
-        {
-            get { return _openScenario ?? (_openScenario = new SimpleCommand<object, object>(delegate { OpenScenarioHandler(null); })); }
-        }
-
-        SimpleCommand<object, object> _openScenario;
-
-        void OpenScenarioHandler(string fileName)
-        {
-            _openFileService.FileName = null;
-            if (fileName == null)
-            {
-                _openFileService.Filter = "NUWC Scenario Files (*.nemo)|*.nemo";
-                _openFileService.InitialDirectory = Settings.Default.LastScenarioFileDirectory;
-                _openFileService.FileName = null;
-                var result = _openFileService.ShowDialog((Window)_viewAwareStatus.View);
-                if (!result.HasValue || !result.Value) return;
-                fileName = _openFileService.FileName;
-                Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
-            }
-            RecentFiles.InsertFile(fileName);
-            try
-            {
-                NemoFile = new NemoFile(fileName, Globals.AppSettings.ScenarioDataDirectory);
-                var metadataFileName = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".emf");
-                if (File.Exists(metadataFileName)) ScenarioMetadata = NAEMOScenarioMetadata.Load(metadataFileName);
-                else ScenarioMetadata = new NAEMOScenarioMetadata
-                {
-                    Filename = metadataFileName,
-                    NemoFileName = fileName,
-                };
-            }
-            catch (Exception ex)
-            {
-                var sb = new StringBuilder();
-                sb.AppendLine(ex.Message);
-                var inner = ex.InnerException;
-                while (inner != null)
-                {
-                    sb.AppendLine(inner.Message);
-                    inner = inner.InnerException;
-                }
-                _messageBoxService.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\":\n" + sb);
-                //ScenarioMetadata = null;
-            }
-        }
-        #endregion
-
-        #region CloseScenarioCommand
-        public SimpleCommand<object, object> CloseScenarioCommand
-        {
-            get { return _closeScenario ?? (_closeScenario = new SimpleCommand<object, object>(
-                delegate { return IsScenarioLoaded; }, 
-                delegate
-                {
-                    NemoFile = null;
-                    ScenarioMetadata = null;
-                })); }
-        }
-
-        SimpleCommand<object, object> _closeScenario;
         #endregion
 
         #region ConfigureAcousticModelsCommand
@@ -382,6 +455,45 @@ namespace ESMEWorkBench.ViewModels.Main
         void NewScenarioHandler() { }
         #endregion
 
+        #region ZoomToScenarioCommand
+        public SimpleCommand<object, object> ZoomToScenarioCommand
+        {
+            get { return _zoomToScenario ?? (_zoomToScenario = new SimpleCommand<object, object>(delegate { ZoomToScenarioHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _zoomToScenario;
+
+        public void ZoomToScenarioHandler()
+        {
+            var mapExtent = new RectangleShape(_scenarioBounds.West, _scenarioBounds.North, _scenarioBounds.East, _scenarioBounds.South);
+            MediatorMessage.Send(MediatorMessage.SetCurrentExtent, mapExtent);
+        }
+        #endregion
+
+        #region EditScenarioCommand
+        public SimpleCommand<object, object> EditScenarioCommand
+        {
+            get { return _editScenario ?? (_editScenario = new SimpleCommand<object, object>(delegate { EditScenarioHandler(); })); }
+        }
+
+        SimpleCommand<object, object> _editScenario;
+
+        void EditScenarioHandler()
+        {
+            var arguments = "\"" + NemoFile.FileName + "\"";
+            new Process
+            {
+                StartInfo =
+                {
+                    FileName = Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath,
+                    WorkingDirectory = Path.GetDirectoryName(Globals.AppSettings.NAEMOTools.ScenarioEditorExecutablePath),
+                    Arguments = arguments,
+                }
+            }.Start();
+        }
+        #endregion
+
+
         readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
         [MediatorMessageSink(MediatorMessage.ShowProperties)]
         public void ShowProperties(IHaveProperties propertyViewModel)
@@ -431,5 +543,108 @@ namespace ESMEWorkBench.ViewModels.Main
         public void ViewPropagation(CASSOutput cassOutput)
         {
         }
+
+        #region public MapLayerCollection MapLayers { get; set; }
+        [XmlIgnore]
+        public MapLayerCollection MapLayers
+        {
+            get { return _mapLayers; }
+            set
+            {
+                if (_mapLayers == value) return;
+                if (_mapLayers != null) _mapLayers.CollectionChanged -= MapLayersCollectionChanged;
+                _mapLayers = value;
+                if (_mapLayers != null) _mapLayers.CollectionChanged += MapLayersCollectionChanged;
+                NotifyPropertyChanged(MapLayersChangedEventArgs);
+            }
+        }
+
+        void MapLayersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems != null)
+                        foreach (MapLayerViewModel item in e.NewItems)
+                        {
+                            PlaceMapLayerInTree(item);
+                        }
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    Debug.WriteLine("NotifyCollectionChangedAction.Move");
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (MapLayerViewModel item in e.OldItems)
+                    {
+                        foreach (var tree in TreeViewRootNodes) tree.RemoveMapLayer(item);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (MapLayerViewModel item in e.OldItems)
+                    {
+                        foreach (var tree in TreeViewRootNodes) tree.RemoveMapLayer(item);
+                    }
+                    foreach (MapLayerViewModel item in e.NewItems)
+                    {
+                        PlaceMapLayerInTree(item);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    Debug.WriteLine("NotifyCollectionChangedAction.Reset");
+                    break;
+            }
+            NotifyPropertyChanged(MapLayersChangedEventArgs);
+        }
+        static readonly PropertyChangedEventArgs MapLayersChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.MapLayers);
+        MapLayerCollection _mapLayers;
+
+        #endregion
+        #region public ObservableList<TreeNode> TreeViewRootNodes { get; set; }
+        [XmlIgnore]
+        public ObservableList<TreeNode> TreeViewRootNodes
+        {
+            get { return _treeViewRootNodes; }
+            set
+            {
+                if (_treeViewRootNodes == value) return;
+                _treeViewRootNodes = value;
+                NotifyPropertyChanged(TreeViewRootNodesChangedEventArgs);
+                MediatorMessage.Send(MediatorMessage.SetTreeRoots, TreeViewRootNodes);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs TreeViewRootNodesChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.TreeViewRootNodes);
+        ObservableList<TreeNode> _treeViewRootNodes;
+
+        void PlaceMapLayerInTree(MapLayerViewModel mapLayer) { foreach (var tree in TreeViewRootNodes) tree.AddMapLayer(mapLayer); }
+
+        void UpdateEnvironmentTreeRoot()
+        {
+            var regex = new Regex(@"Environment: [\s\S]+$");
+            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
+            var environmentRoot = new TreeNode("Environment: ");
+            TreeViewRootNodes.Add(environmentRoot);
+            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault());
+            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BathymetryRaster, "Bathymetry").FirstOrDefault());
+            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.SoundSpeed, "Sound Speed").FirstOrDefault());
+            environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.WindSpeed, "Wind").FirstOrDefault());
+            environmentRoot.MapLayers.AddRange(CurrentMapLayers.Find(LayerType.WindSpeed, new Regex(@"Sediment: \S+$", RegexOptions.Singleline)));
+        }
+
+        void UpdateScenarioTreeRoot()
+        {
+            var scenarioRoot = TreeViewRootNodes.Find(node => node is ScenarioNode);
+            if (scenarioRoot != null) return;
+            scenarioRoot = new ScenarioNode(NemoFile.Scenario);
+            TreeViewRootNodes.Add(scenarioRoot);
+        }
+
+        void UpdateAnimalsTreeRoot()
+        {
+            var regex = new Regex(@"Animals: [\s\S]+$");
+            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
+        }
+
+        #endregion
     }
 }

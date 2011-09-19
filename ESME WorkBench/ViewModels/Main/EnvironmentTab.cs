@@ -40,6 +40,8 @@ namespace ESMEWorkBench.ViewModels.Main
 
         public MapLayerCollection EnvironmentTabMapLayers { get; set; }
 
+        public MapLayerCollection CurrentMapLayers { get; set; }
+
         #region public bool AreAllViewModelsReady { get; set; }
 
         public bool AreAllViewModelsReady
@@ -501,6 +503,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             if (MapLayerCollections["Home"] != null) return;
             MapLayerCollections.Add("Home", Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Sample GIS Data\Countries02.shp"));
+            CurrentMapLayers = SelectedRibbonTabIndex == 2 ? EnvironmentTabMapLayers : MapLayerCollections["Home"];
         }
 
         void DisplayRangeComplex()
@@ -508,19 +511,19 @@ namespace ESMEWorkBench.ViewModels.Main
             if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
             if ((RangeComplexes == null) || (RangeComplexes.SelectedRangeComplex == NewRangeComplex.None))
             {
-                var opAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
+                var opAreaLayer = CurrentMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Op Area");
                 if (opAreaLayer != null) opAreaLayer.IsChecked = false;
-                var simAreaLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
+                var simAreaLayer = CurrentMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Sim Area");
                 if (simAreaLayer != null) simAreaLayer.IsChecked = false;
                 return;
             }
 
             ZoomToRangeComplex();
 
-            EnvironmentTabMapLayers.DisplayOverlayShapes("Op Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.OpArea.OverlayShape });
+            CurrentMapLayers.DisplayOverlayShapes("Op Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.OpArea.OverlayShape });
             if ((RangeComplexes.SelectedRangeComplex.OpArea != RangeComplexes.SelectedRangeComplex.SimArea) &&
                 (RangeComplexes.SelectedRangeComplex.OpArea.GeoRect != RangeComplexes.SelectedRangeComplex.SimArea.GeoRect))
-                EnvironmentTabMapLayers.DisplayOverlayShapes("Sim Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.SimArea.OverlayShape });
+                CurrentMapLayers.DisplayOverlayShapes("Sim Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedRangeComplex.SimArea.OverlayShape });
             
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
@@ -530,11 +533,11 @@ namespace ESMEWorkBench.ViewModels.Main
             if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
             if ((RangeComplexes == null) || (RangeComplexes.SelectedArea == RangeComplexArea.None))
             {
-                var overlayLayer = EnvironmentTabMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
+                var overlayLayer = CurrentMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
                 if (overlayLayer != null) overlayLayer.IsChecked = false;
                 return;
             }
-            EnvironmentTabMapLayers.DisplayOverlayShapes("Overlay", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedArea.OverlayShape });
+            CurrentMapLayers.DisplayOverlayShapes("Overlay", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedArea.OverlayShape });
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 
@@ -544,11 +547,11 @@ namespace ESMEWorkBench.ViewModels.Main
             RasterMapLayer bathyBitmapLayer;
             if ((SelectedBathymetry == null) || (SelectedBathymetry == BathymetryFile.None) || (SelectedBathymetry.BitmapFilename == null))
             {
-                bathyBitmapLayer = EnvironmentTabMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry");
+                bathyBitmapLayer = CurrentMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry");
                 if (bathyBitmapLayer != null) bathyBitmapLayer.IsChecked = false;
                 return;
             }
-            bathyBitmapLayer = EnvironmentTabMapLayers.DisplayBathymetryRaster("Bathymetry", SelectedBathymetry.BitmapFilename, true, false, true, SelectedBathymetry.GeoRect);
+            bathyBitmapLayer = CurrentMapLayers.DisplayBathymetryRaster("Bathymetry", SelectedBathymetry.BitmapFilename, true, false, true, SelectedBathymetry.GeoRect);
             MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
         }
 

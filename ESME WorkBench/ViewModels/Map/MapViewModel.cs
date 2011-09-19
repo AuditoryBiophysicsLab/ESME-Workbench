@@ -396,6 +396,7 @@ namespace ESMEWorkBench.ViewModels.Map
         {
             Debug.WriteLine(string.Format("MediatorMessage.MoveLayerToBottom: {0}", mapLayer.Name));
             var curIndex = MapLayers.IndexOf(mapLayer);
+            //if (curIndex == -1) return;
             MapLayers.Move(curIndex, 0);
         }
 

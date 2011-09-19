@@ -645,12 +645,14 @@ namespace ESMEWorkBench.ViewModels.Main
             get
             {
                 IsLayerListViewVisible = Settings.Default.SelectedRibbonTabIndex != 2;
+                CurrentMapLayers = IsLayerListViewVisible ? MapLayerCollections["Home"] : MapLayerCollections["Environment"];
                 return Settings.Default.SelectedRibbonTabIndex;
             }
             set
             {
                 Settings.Default.SelectedRibbonTabIndex = value;
                 IsLayerListViewVisible = Settings.Default.SelectedRibbonTabIndex != 2;
+                CurrentMapLayers = IsLayerListViewVisible ? MapLayerCollections["Home"] : MapLayerCollections["Environment"];
                 NotifyPropertyChanged(RibbonTabIndexChangedEventArgs);
             }
         }
@@ -707,12 +709,7 @@ namespace ESMEWorkBench.ViewModels.Main
             }
             else 
             {
-                if (MapLayerCollections["Scenario"] != null)
-                {
-                    MapLayerCollections.ActiveLayer = MapLayerCollections["Scenario"];
-                    //if (ScenarioMetadata != null) ScenarioMetadata.ZoomToScenarioHandler();
-                }
-                else if (MapLayerCollections["Home"] != null)
+                if (MapLayerCollections["Home"] != null)
                 {
                     MapLayerCollections.ActiveLayer = MapLayerCollections["Home"];
                 }
