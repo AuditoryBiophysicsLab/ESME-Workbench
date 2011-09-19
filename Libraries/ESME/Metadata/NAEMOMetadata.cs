@@ -6,6 +6,7 @@ using HRC.Utility;
 
 namespace ESME.Metadata
 {
+#if false
     public class NAEMOMetadata : PropertyChangedBase
     {
         static readonly List<Type> ReferencedTypes = new List<Type>();
@@ -25,4 +26,5 @@ namespace ESME.Metadata
         public static NAEMOBathymetryMetadata LoadBathymetryMetadata(string filename) { return XmlSerializer<NAEMOBathymetryMetadata>.Load(filename, ReferencedTypes); }
         public static NAEMOEnvironmentMetadata LoadEnvironmentMetadata(string filename) { return XmlSerializer<NAEMOEnvironmentMetadata>.Load(filename, ReferencedTypes); }
     }
+#endif
 }

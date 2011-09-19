@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -30,6 +31,135 @@ using TreeNode = ESME.Mapping.TreeNode;
 
 namespace ESME.Metadata
 {
+    [Serializable]
+    public class NAEMOScenarioMetadata : PropertyChangedBase
+    {
+        public static NAEMOScenarioMetadata Load(string filename)
+        {
+            NAEMOScenarioMetadata result;
+            using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                result = (NAEMOScenarioMetadata)new BinaryFormatter().Deserialize(stream);
+            result.Filename = filename;
+            return result;
+        }
+
+        public void Save(string filename = null)
+        {
+            if (filename == null) filename = Filename;
+            using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None))
+                new BinaryFormatter().Serialize(stream, this);
+        }
+
+        #region public string Filename { get; set; }
+
+        public string Filename
+        {
+            get { return _filename; }
+            set
+            {
+                if (_filename == value) return;
+                _filename = value;
+                NotifyPropertyChanged(FilenameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs FilenameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.Filename);
+        [NonSerialized] string _filename;
+
+        #endregion
+
+        #region public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap { get; set; }
+
+        public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap
+        {
+            get { return _nemoModeToAcousticModelNameMap; }
+            set
+            {
+                if (_nemoModeToAcousticModelNameMap == value) return;
+                _nemoModeToAcousticModelNameMap = value;
+                NotifyPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NemoModeToAcousticModelNameMapChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.NemoModeToAcousticModelNameMap);
+        NemoModeToAcousticModelNameMap _nemoModeToAcousticModelNameMap;
+
+        #endregion
+
+        #region public string SelectedAreaName { get; set; }
+
+        public string SelectedAreaName
+        {
+            get { return _selectedAreaName; }
+            set
+            {
+                if (_selectedAreaName == value) return;
+                _selectedAreaName = value;
+                NotifyPropertyChanged(SelectedAreaNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedAreaNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.SelectedAreaName);
+        string _selectedAreaName;
+
+        #endregion
+
+        #region public string SelectedResolutionName { get; set; }
+
+        public string SelectedResolutionName
+        {
+            get { return _selectedResolutionName; }
+            set
+            {
+                if (_selectedResolutionName == value) return;
+                _selectedResolutionName = value;
+                NotifyPropertyChanged(SelectedResolutionNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedResolutionNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.SelectedResolutionName);
+        string _selectedResolutionName;
+
+        #endregion
+
+        #region public string NemoFileName { get; set; }
+
+        public string NemoFileName
+        {
+            get { return _nemoFileName; }
+            set
+            {
+                if (_nemoFileName == value) return;
+                _nemoFileName = value;
+                NotifyPropertyChanged(NemoFileNameChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs NemoFileNameChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.NemoFileName);
+        string _nemoFileName;
+
+        #endregion
+
+        #region public ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
+
+        public ObservableList<AnalysisPoint> AnalysisPoints
+        {
+            get { return _analysisPoints; }
+            set
+            {
+                if (_analysisPoints == value) return;
+                _analysisPoints = value;
+                NotifyPropertyChanged(AnalysisPointsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs AnalysisPointsChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.AnalysisPoints);
+        ObservableList<AnalysisPoint> _analysisPoints;
+
+        #endregion
+
+    }
+#if false
     [Serializable]
     public class NAEMOScenarioMetadata : NAEMOMetadataBase
     {
@@ -297,23 +427,6 @@ namespace ESME.Metadata
 
         #endregion
 
-        #region public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap { get; set; }
-
-        public NemoModeToAcousticModelNameMap NemoModeToAcousticModelNameMap
-        {
-            get { return _nemoModeToAcousticModelNameMap; }
-            set
-            {
-                if (_nemoModeToAcousticModelNameMap == value) return;
-                _nemoModeToAcousticModelNameMap = value;
-                NotifyPropertyChanged(NemoModeToAcousticModelNameMapChangedEventArgs);
-            }
-        }
-
-        static readonly PropertyChangedEventArgs NemoModeToAcousticModelNameMapChangedEventArgs = ObservableHelper.CreateArgs<NAEMOScenarioMetadata>(x => x.NemoModeToAcousticModelNameMap);
-        NemoModeToAcousticModelNameMap _nemoModeToAcousticModelNameMap;
-
-        #endregion
 
         #region public NAEMOEnvironmentDescriptors AvailableEnvironments { get; set; }
         [XmlIgnore]
@@ -647,4 +760,5 @@ namespace ESME.Metadata
 #endif
         }
     }
+#endif
 }

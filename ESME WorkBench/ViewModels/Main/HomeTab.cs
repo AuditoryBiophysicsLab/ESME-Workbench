@@ -13,6 +13,7 @@ using ESME.Environment.Descriptors;
 using ESME.Mapping;
 using ESME.Metadata;
 using ESME.Model;
+using ESME.NEMO;
 using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.CASS;
 using ESME.Views.AcousticBuilder;
@@ -79,8 +80,39 @@ namespace ESMEWorkBench.ViewModels.Main
         }
         #endregion
 
-        #region public NAEMOScenarioMetadata ScenarioMetadata { get; set; }
+        #region public NemoFile NemoFile { get; set; }
 
+        public NemoFile NemoFile
+        {
+            get { return _nemoFile; }
+            set
+            {
+                if (_nemoFile == value) return;
+                _nemoFile = value;
+                NotifyPropertyChanged(NemoFileChangedEventArgs);
+                NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
+
+                if (_nemoFile != null)
+                {
+                    MainWindowTitle = string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", NemoFile.Scenario.EventName, NemoFile.Scenario.TimeFrame);
+                }
+                else
+                {
+                    MainWindowTitle = string.Format("ESME WorkBench 2011{0}: <No scenario loaded>", Configuration.IsUnclassifiedModel ? " (public)" : "");
+                }
+            }
+        }
+
+        public bool IsScenarioLoaded { get { return NemoFile != null; } }
+        static readonly PropertyChangedEventArgs IsScenarioLoadedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsScenarioLoaded);
+
+        static readonly PropertyChangedEventArgs NemoFileChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.NemoFile);
+        NemoFile _nemoFile;
+
+        #endregion
+
+        #region public NAEMOScenarioMetadata ScenarioMetadata { get; set; }
+#if false
         public NAEMOScenarioMetadata ScenarioMetadata
         {
             get { return _scenarioMetadata; }
@@ -121,29 +153,21 @@ namespace ESMEWorkBench.ViewModels.Main
                 IsScenarioLoaded = _scenarioMetadata != null;
             }
         }
+#endif
 
-        static readonly PropertyChangedEventArgs ScenarioMetadataChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioMetadata);
-        NAEMOScenarioMetadata _scenarioMetadata;
-
-        #endregion
-
-        #region public bool IsScenarioLoaded { get; set; }
-
-        public bool IsScenarioLoaded
+        public NAEMOScenarioMetadata ScenarioMetadata
         {
-            get { return _isScenarioLoaded; }
+            get { return _scenarioMetadata; }
             set
             {
-                if (_isScenarioLoaded == value) return;
-                _isScenarioLoaded = value;
-                NotifyPropertyChanged(IsScenarioLoadedChangedEventArgs);
-                CommandManager.InvalidateRequerySuggested();
-                if (!_isScenarioLoaded) MainWindowTitle = "ESME WorkBench 2011: <No scenario loaded>";
+                if (_scenarioMetadata == value) return;
+                _scenarioMetadata = value;
+                NotifyPropertyChanged(ScenarioMetadataChangedEventArgs);
             }
         }
 
-        static readonly PropertyChangedEventArgs IsScenarioLoadedChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.IsScenarioLoaded);
-        bool _isScenarioLoaded;
+        static readonly PropertyChangedEventArgs ScenarioMetadataChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioMetadata);
+        NAEMOScenarioMetadata _scenarioMetadata;
 
         #endregion
 
@@ -168,17 +192,10 @@ namespace ESMEWorkBench.ViewModels.Main
                 fileName = _openFileService.FileName;
                 Settings.Default.LastScenarioFileDirectory = Path.GetDirectoryName(_openFileService.FileName);
             }
-            ScenarioMetadata = null;
             RecentFiles.InsertFile(fileName);
-            //NemoScenario.Test(fileName);
             try
             {
-                ScenarioMetadata = NAEMOScenarioMetadata.Load(NAEMOMetadataBase.MetadataFilename(fileName)) ?? new NAEMOScenarioMetadata { Filename = NAEMOMetadataBase.MetadataFilename(fileName) };
-                _dispatcher.InvokeIfRequired(() =>
-                {
-                    ScenarioMetadata.ScenarioFilename = fileName;
-                    MainWindowTitle = string.Format("ESME WorkBench 2011{0}: {1} [{2}]", Configuration.IsUnclassifiedModel ? " (public)" : "", ScenarioMetadata.NemoFile.Scenario.EventName, ScenarioMetadata.NemoFile.Scenario.TimeFrame);
-                });
+                NemoFile = new NemoFile(fileName, Path.GetDirectoryName(fileName));
             }
             catch (Exception ex)
             {
@@ -191,7 +208,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     inner = inner.InnerException;
                 }
                 _messageBoxService.ShowError("Error opening scenario \"" + Path.GetFileName(fileName) + "\":\n" + sb);
-                ScenarioMetadata = null;
+                //ScenarioMetadata = null;
             }
         }
         #endregion
@@ -199,21 +216,23 @@ namespace ESMEWorkBench.ViewModels.Main
         #region CloseScenarioCommand
         public SimpleCommand<object, object> CloseScenarioCommand
         {
-            get { return _closeScenario ?? (_closeScenario = new SimpleCommand<object, object>(delegate { return IsScenarioLoaded; }, delegate { CloseScenarioHandler(); })); }
+            get { return _closeScenario ?? (_closeScenario = new SimpleCommand<object, object>(
+                delegate { return IsScenarioLoaded; }, 
+                delegate
+                {
+                    NemoFile = null;
+                    ScenarioMetadata = null;
+                })); }
         }
 
         SimpleCommand<object, object> _closeScenario;
-
-        void CloseScenarioHandler()
-        {
-            ScenarioMetadata = null;
-        }
         #endregion
 
         #region ConfigureAcousticModelsCommand
         public SimpleCommand<object, object> ConfigureAcousticModelsCommand
         {
-            get { return _configureAcousticModels ?? (_configureAcousticModels = new SimpleCommand<object, object>(delegate { ConfigureAcousticModelsHandler(); })); }
+            get { return _configureAcousticModels ?? (_configureAcousticModels = new SimpleCommand<object, object>(
+                delegate { ConfigureAcousticModelsHandler(); })); }
         }
 
         SimpleCommand<object, object> _configureAcousticModels;
@@ -231,16 +250,19 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _exportAnalysisPoints ??
-                       (_exportAnalysisPoints =
-                        new SimpleCommand<object, object>(delegate { return ScenarioMetadata != null && ScenarioMetadata.SelectedEnvironment != null; },
-                                                          delegate { ExportAnalysisPointsHandler(); }));
+                return _exportAnalysisPoints ?? (_exportAnalysisPoints = new SimpleCommand<object, object>(
+                    delegate { return ScenarioMetadata != null && RangeComplexes.IsEnvironmentFullySpecified; },
+                    delegate { ExportAnalysisPointsHandler(); }));
             }
         }
 
         SimpleCommand<object, object> _exportAnalysisPoints;
 
-        void ExportAnalysisPointsHandler() { ScenarioMetadata.ExportAnalysisPoints(); }
+        void ExportAnalysisPointsHandler()
+        {
+            throw new NotImplementedException();
+            //ScenarioMetadata.ExportAnalysisPoints();
+        }
         #endregion
 
         #region RunScenarioCommand
@@ -248,34 +270,22 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _runScenario ??
-                       (_runScenario =
-                        new SimpleCommand<object, object>(delegate { return IsRunScenarioCommandEnabled; },
-                                                          delegate { RunScenarioHandler(); }));
+                return _runScenario ?? (_runScenario = new SimpleCommand<object, object>(
+                    delegate { return IsScenarioLoaded; },
+                    delegate
+                    {
+                        var vm = new ScenarioSimulatorOptionsViewModel
+                        {
+                            ScenarioSimulatorSettings = Globals.AppSettings.ScenarioSimulatorSettings,
+                            NemoFile = NemoFile,
+                        };
+
+                        _visualizerService.Show("ScenarioSimulatorOptionsView", vm, true, null);
+                    }));
             }
         }
 
         SimpleCommand<object, object> _runScenario;
-
-        bool IsRunScenarioCommandEnabled
-        {
-            get
-            {
-                return IsScenarioLoaded;
-            }
-        }
-
-        void RunScenarioHandler()
-        {
-            var vm = new ScenarioSimulatorOptionsViewModel
-            {
-                    ScenarioSimulatorSettings = Globals.AppSettings.ScenarioSimulatorSettings,
-                    NemoFile = ScenarioMetadata.NemoFile,
-            };
-
-            _visualizerService.Show("ScenarioSimulatorOptionsView", vm, true, null);
-
-        }
         #endregion
 
         #region RunScenarioGUICommand
@@ -283,10 +293,9 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             get
             {
-                return _runScenarioGUI ??
-                       (_runScenarioGUI =
-                        new SimpleCommand<object, object>(delegate { return IsRunScenarioGUICommandEnabled; },
-                                                          delegate { RunScenarioGUIHandler(); }));
+                return _runScenarioGUI ?? (_runScenarioGUI = new SimpleCommand<object, object>(
+                    delegate { return IsRunScenarioGUICommandEnabled; },
+                    delegate { RunScenarioGUIHandler(); }));
             }
         }
 
@@ -320,7 +329,7 @@ namespace ESMEWorkBench.ViewModels.Main
             {
                 var sb = new StringBuilder();
                 sb.Append(string.Format("-jar \"{0}\" ", Globals.AppSettings.NAEMOTools.ScenarioExecutablePath));
-                sb.Append(string.Format("-s \"{0}\" ", ScenarioMetadata.NemoFile));
+                sb.Append(string.Format("-s \"{0}\" ", NemoFile));
                 return sb.ToString();
             }
         }
@@ -328,9 +337,7 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #region public bool CanPlaceAnalysisPoint { get; set; }
 
-        public bool CanPlaceAnalysisPoint { get { return ScenarioMetadata != null && ScenarioMetadata.CanPlaceAnalysisPoint; } }
-
-        static readonly PropertyChangedEventArgs CanPlaceAnalysisPointChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.CanPlaceAnalysisPoint);
+        public bool CanPlaceAnalysisPoint { get { return ScenarioMetadata != null && NemoFile != null && RangeComplexes.IsEnvironmentFullySpecified; } }
 
         #endregion
 
@@ -389,7 +396,8 @@ namespace ESMEWorkBench.ViewModels.Main
         {
             if (MouseDepth > 0) throw new AnalysisPointLocationException("Analysis Points cannot be placed on land.");
             if (ScenarioMetadata == null) return;
-            ScenarioMetadata.PlaceAnalysisPoint(MouseEarthCoordinate);
+            //ScenarioMetadata.PlaceAnalysisPoint(MouseEarthCoordinate);
+            throw new NotImplementedException();
         }
 
         [MediatorMessageSink(MediatorMessage.EditAnalysisPoint)]
@@ -399,7 +407,7 @@ namespace ESMEWorkBench.ViewModels.Main
             var settingsResult = _visualizerService.ShowDialog("AnalysisPointPropertiesView", analysisPointPropertiesViewModel);
             if (settingsResult.HasValue && settingsResult.Value)
             {
-                ScenarioMetadata.MapLayers.DisplayAnalysisPoint(analysisPoint);
+                //ScenarioMetadata.MapLayers.DisplayAnalysisPoint(analysisPoint);
                 MediatorMessage.Send(MediatorMessage.RefreshMap, true);
             }
             analysisPoint.Validate();

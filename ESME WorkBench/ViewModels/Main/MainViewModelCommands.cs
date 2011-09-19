@@ -291,7 +291,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
                 {
                     var ea = (CancelEventArgs)vcArgs.EventArgs;
-                    ScenarioMetadata = null;
+                    //ScenarioMetadata = null;
                     Globals.AppSettings.Save();
                 }));
             }

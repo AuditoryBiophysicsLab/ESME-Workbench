@@ -77,7 +77,7 @@ namespace DavesWPFTester
                     {
                         while (!RangeComplexes.IsEnabled) await
                         TaskEx.Delay(10);
-                        RangeComplexes.CreateRangeComplex(string.Format("Test {00}", i), 0, 29.3590, -79.2195, 0, coordinates, coordinates);
+                        RangeComplexes.CreateRangeComplex(string.Format("Test {0:00}", i), 0, 29.3590, -79.2195, 0, coordinates, coordinates);
                     }
                     catch (Exception e)
                     {

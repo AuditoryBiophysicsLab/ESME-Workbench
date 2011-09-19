@@ -5,6 +5,7 @@ using ESME.Metadata;
 
 namespace ESME.Views.Locations
 {
+#if false
     public class MetadataPropertiesViewModel : ViewModelBase
     {
         public MetadataPropertiesViewModel(NAEMOOverlayMetadata overlayMetadata = null, NAEMOBathymetryMetadata bathymetryMetadata = null, NAEMOEnvironmentMetadata environmentMetadata = null, NAEMOScenarioMetadata scenarioMetadata = null)
@@ -219,4 +220,5 @@ namespace ESME.Views.Locations
 
         #endregion
     }
+#endif
 }
