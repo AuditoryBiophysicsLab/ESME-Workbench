@@ -353,7 +353,7 @@ namespace ESME.Environment.Descriptors
                 if (_dataTask != null)
                 {
                     if (_dataTask.IsCompleted) _dataTask.Dispose();
-                    else if (_dataTask.Status != TaskStatus.Created) 
+                    else if (_dataTask.Status != TaskStatus.Created)
                         throw new InvalidOperationException("Data is being imported and cannot be cleared at this time");
                 }
                 _dataTask = value;

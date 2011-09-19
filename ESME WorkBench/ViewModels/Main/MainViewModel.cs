@@ -264,9 +264,17 @@ namespace ESMEWorkBench.ViewModels.Main
                             break;
                         case "SelectedArea":
                             SelectedArea = RangeComplexes.SelectedArea;
+                            if (ScenarioMetadata != null && SelectedArea != null && SelectedArea != RangeComplexArea.None) 
+                                ScenarioMetadata.SelectedAreaName = SelectedArea.Name;
                             break;
                         case "SelectedBathymetry":
+                            if (SelectedBathymetry != null && SelectedBathymetry != BathymetryFile.None) SelectedBathymetry.Reset();
                             SelectedBathymetry = RangeComplexes.SelectedBathymetry;
+                            if (ScenarioMetadata != null && SelectedBathymetry != null && SelectedBathymetry != BathymetryFile.None)
+                            {
+                                ScenarioMetadata.SelectedResolutionName = SelectedBathymetry.Name;
+                                //SelectedBathymetry.GetMyDataAsync();
+                            }
                             break;
                     }
                 };

@@ -8,12 +8,15 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using System.Xml.Serialization;
 using Cinch;
 using ESME;
+using ESME.Environment;
 using ESME.Environment.Descriptors;
 using ESME.Environment.NAVO;
 using ESME.Mapping;
@@ -78,11 +81,13 @@ namespace ESMEWorkBench.ViewModels.Main
                 // Load the metadata file if it exists, or create one if it doesn't
                 var metadataFileName = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".emf");
                 if (File.Exists(metadataFileName)) ScenarioMetadata = NAEMOScenarioMetadata.Load(metadataFileName);
-                else ScenarioMetadata = new NAEMOScenarioMetadata(NemoFile.Scenario.DistinctModePSMNames)
+                else ScenarioMetadata = new NAEMOScenarioMetadata()
                 {
                     Filename = metadataFileName,
                     NemoFileName = fileName,
                 };
+                // Initialize the scenario metadata with the list of distinct mode names from the scenario file
+                ScenarioMetadata.Initialize(NemoFile.Scenario.DistinctModePSMNames);
 
                 // If the previously-selected area does not exist, set the name to null
                 if ((ScenarioMetadata.SelectedAreaName != null) && (!RangeComplexes.SelectedRangeComplex.AreaCollection.ContainsKey(ScenarioMetadata.SelectedAreaName))) ScenarioMetadata.SelectedAreaName = null;
@@ -305,6 +310,53 @@ namespace ESMEWorkBench.ViewModels.Main
 
         static readonly PropertyChangedEventArgs ScenarioMetadataChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.ScenarioMetadata);
         NAEMOScenarioMetadata _scenarioMetadata;
+
+        #endregion
+
+        #region public CASSOutputs CASSOutputs { get; set; }
+        public CASSOutputs CASSOutputs
+        {
+            get { return _cassOutputs; }
+            set
+            {
+                if (_cassOutputs == value) return;
+                _cassOutputs = value;
+                NotifyPropertyChanged(CASSOutputsChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs CASSOutputsChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.CASSOutputs);
+        CASSOutputs _cassOutputs;
+
+        void CASSOutputsChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (CASSOutput newItem in args.NewItems)
+                    {
+                        Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
+                        newItem.Bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
+                        newItem.ThresholdRadiusChanged += (s, e) => _dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
+                        _dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
+                        Task.Factory.StartNew(() =>
+                        {
+                            newItem.CheckThreshold(120, _dispatcher);
+                        });
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (CASSOutput oldItem in args.OldItems)
+                    {
+                        Debug.WriteLine("Removed CASSOutput: {0}|{1}|{2}", oldItem.PlatformName, oldItem.SourceName, oldItem.ModeName);
+                        _dispatcher.InvokeIfRequired(() => MapLayers.RemovePropagationPoint(oldItem));
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    Debug.WriteLine("CASSOutputs has been cleared");
+                    break;
+            }
+        }
 
         #endregion
 
@@ -618,11 +670,41 @@ namespace ESMEWorkBench.ViewModels.Main
 
         void PlaceMapLayerInTree(MapLayerViewModel mapLayer) { foreach (var tree in TreeViewRootNodes) tree.AddMapLayer(mapLayer); }
 
+#if false
+        void DisplaySelectedEnvironment()
+        {
+            var regex = new Regex(@"Environment: [\s\S]+$");
+            TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
+            var environmentRoot = new EnvironmentNode("Environment");
+            TreeViewRootNodes.Add(environmentRoot);
+            foreach (var layer in _mapLayers) PlaceMapLayerInTree(layer);
+
+            var samplePoints = _selectedEnvironment.Data.Locations.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+            var bathymetryBounds = SelectedBathymetry.GeoRect;
+            _scenarioBounds.Union(bathymetryBounds);
+            var bathyBitmapLayer = MapLayers.DisplayBathymetryRaster("Bathymetry", Path.Combine(_imagesPath, _selectedEnvironment.Metadata.BathymetryName + ".bmp"), true, false, true, bathymetryBounds);
+            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer));
+            MapLayers.DisplayOverlayShapes("Sound Speed", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Circle, false, null, false);
+            MapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
+            foreach (var sedimentType in _selectedEnvironment.Data.SedimentTypes)
+            {
+                samplePoints = sedimentType.Value.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                MapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", sedimentType.Key.ToLower()), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false);
+            }
+            ZoomToScenarioHandler();
+            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
+            // Get a list of transmission loss files that match the modes in the current scenario
+            if (CASSOutputs == null) CASSOutputs = new CASSOutputs(_propagationPath, "*.bin", CASSOutputsChanged, _distinctModeProperties);
+            else CASSOutputs.RefreshInBackground();
+            //UpdateEnvironmentTreeRoot();
+        }
+#endif
+
         void UpdateEnvironmentTreeRoot()
         {
             var regex = new Regex(@"Environment: [\s\S]+$");
             TreeViewRootNodes.RemoveAll(item => regex.IsMatch(item.Name));
-            var environmentRoot = new TreeNode("Environment: ");
+            var environmentRoot = new TreeNode("Environment");
             TreeViewRootNodes.Add(environmentRoot);
             environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BaseMap, "Base Map").FirstOrDefault());
             environmentRoot.MapLayers.Add(CurrentMapLayers.Find(LayerType.BathymetryRaster, "Bathymetry").FirstOrDefault());

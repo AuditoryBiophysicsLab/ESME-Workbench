@@ -34,10 +34,15 @@ namespace ESME.Metadata
     [Serializable]
     public class NAEMOScenarioMetadata : PropertyChangedBase
     {
-        public NAEMOScenarioMetadata(IEnumerable<string> distinctModePSMNames) 
+        public NAEMOScenarioMetadata() 
         {
             AnalysisPoints = new ObservableList<AnalysisPoint>();
-            NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(distinctModePSMNames, TransmissionLossAlgorithm.CASS);
+        }
+
+        public void Initialize(IEnumerable<string> distinctModePSMNames)
+        {
+            if (NemoModeToAcousticModelNameMap == null) NemoModeToAcousticModelNameMap = new NemoModeToAcousticModelNameMap(distinctModePSMNames, TransmissionLossAlgorithm.CASS);
+            else NemoModeToAcousticModelNameMap.UpdateModes(distinctModePSMNames, TransmissionLossAlgorithm.CASS);
         }
 
         public static NAEMOScenarioMetadata Load(string filename)
