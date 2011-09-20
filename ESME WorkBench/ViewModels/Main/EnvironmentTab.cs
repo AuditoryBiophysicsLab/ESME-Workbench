@@ -9,7 +9,9 @@ using System.Windows.Threading;
 using Cinch;
 using ESME;
 using ESME.Environment.Descriptors;
+using ESME.Environment.NAVO;
 using ESME.Mapping;
+using ESME.Model;
 using ESME.NEMO.Overlay;
 using ESME.Views.Locations;
 using ESME.Views.InstallationWizard;
@@ -20,22 +22,32 @@ namespace ESMEWorkBench.ViewModels.Main
 {
     public partial class MainViewModel
     {
+        bool _once = true;
         [MediatorMessageSink(MediatorMessage.AllViewModelsAreReady)]
         public void AllViewModelsAreReady(bool allViewModelsAreReady)
         {
+            if (!_once) return;
+            _once = false;
+            EnvironmentLayers = new Dictionary<EnvironmentDataType, MapLayerViewModel>
+            {
+                {EnvironmentDataType.Bathymetry, null}, 
+                {EnvironmentDataType.BottomLoss, null}, 
+                {EnvironmentDataType.SoundSpeed, null}, 
+                {EnvironmentDataType.Wind, null}
+            };
             Console.WriteLine("All view models are ready!");
             WizardViewModel.LaunchWizardIfNeeded(_visualizerService);
             _dispatcher.InvokeIfRequired(DisplayWorldMap, DispatcherPriority.Normal);
             AreAllViewModelsReady = true;
             if (ESME.Globals.AppSettings.ScenarioDataDirectory == null) return;
             SelectedRangeComplexIndex = -1;
+            SelectedTimePeriodIndex = 0;
             SelectedAreaIndex = -1;
             SelectedBathymetryIndex = -1;
-            //_dispatcher.InvokeIfRequired(DisplayRangeComplex, DispatcherPriority.Normal);
-            //_dispatcher.InvokeIfRequired(DisplayBathymetry, DispatcherPriority.Normal);
-            //_dispatcher.InvokeIfRequired(DisplayOverlay, DispatcherPriority.Normal);
-            //_dispatcher.InvokeIfRequired(DisplayEnvironment, DispatcherPriority.Normal);
         }
+
+        public Dictionary<EnvironmentDataType, MapLayerViewModel> EnvironmentLayers { get; private set; }
+        readonly List<MapLayerViewModel> _sedimentLayers = new List<MapLayerViewModel>();
 
         #region public bool AreAllViewModelsReady { get; set; }
 
@@ -104,6 +116,55 @@ namespace ESMEWorkBench.ViewModels.Main
                 IsRangeComplexSelected = _selectedRangeComplex != NewRangeComplex.None;
                 NotifyPropertyChanged(IsRangeComplexSelectedChangedEventArgs);
                 DisplayRangeComplex();
+                if (IsRangeComplexSelected)
+                {
+                    RangeComplexes.SelectedSediment.GetDataAsync();
+                    RangeComplexes.SelectedSediment.DataTask.ContinueWith(task =>
+                    {
+                        var result = task.Result.Samples.GroupBy(sample => sample.Data.SampleValue);
+                        foreach (var sedimentType in result)
+                        {
+                            if (sedimentType.Key == 0) continue;
+                            var samplePoints = sedimentType.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                            _dispatcher.InvokeInBackgroundIfRequired(
+                                                                     () =>
+                                                                     _sedimentLayers.Add(CurrentMapLayers.DisplayOverlayShapes(
+                                                                                                                               string.Format("Sediment: {0}", SedimentTypes.Find(sedimentType.Key).Name),
+                                                                                                                               LayerType.BottomType,
+                                                                                                                               Colors.Transparent,
+                                                                                                                               samplePoints,
+                                                                                                                               0,
+                                                                                                                               PointSymbolType.Diamond,
+                                                                                                                               false,
+                                                                                                                               null,
+                                                                                                                               false)));
+                        }
+                    });
+                    RangeComplexes.SelectedBottomLoss.GetDataAsync();
+                    RangeComplexes.SelectedBottomLoss.DataTask.ContinueWith(task =>
+                    {
+                        var samplePoints = task.Result.Samples.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                        _dispatcher.InvokeInBackgroundIfRequired(
+                                                                 () =>
+                                                                 EnvironmentLayers[EnvironmentDataType.BottomLoss] =
+                                                                 CurrentMapLayers.DisplayOverlayShapes("Bottom Loss",
+                                                                                                       LayerType.BottomType,
+                                                                                                       Colors.Transparent,
+                                                                                                       samplePoints,
+                                                                                                       0,
+                                                                                                       PointSymbolType.Diamond,
+                                                                                                       false,
+                                                                                                       null,
+                                                                                                       false));
+                    });
+                }
+                else
+                {
+                    foreach (var layer in _sedimentLayers) CurrentMapLayers.Remove(layer);
+                    _sedimentLayers.Clear();
+                    if (EnvironmentLayers[EnvironmentDataType.BottomLoss] != null) EnvironmentLayers[EnvironmentDataType.BottomLoss].IsEnabled = false;
+                }
+                UpdateTimePeriodData();
             }
         }
 
@@ -133,6 +194,81 @@ namespace ESMEWorkBench.ViewModels.Main
 
         #endregion
 
+        #region public NAVOTimePeriod SelectedTimePeriod { get; set; }
+
+        public NAVOTimePeriod SelectedTimePeriod
+        {
+            get { return _selectedTimePeriod; }
+            set
+            {
+                if (_selectedTimePeriod == value) return;
+                _selectedTimePeriod = value;
+                NotifyPropertyChanged(SelectedTimePeriodChangedEventArgs);
+                UpdateTimePeriodData();
+            }
+        }
+
+        void UpdateTimePeriodData()
+        {
+            if (IsRangeComplexSelected && RangeComplexes.SelectedTimePeriod != NAVOTimePeriod.Invalid)
+            {
+                RangeComplexes.SelectedWind.GetDataAsync();
+                RangeComplexes.SelectedWind.DataTask.ContinueWith(task =>
+                {
+                    var samplePoints = task.Result[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                    _dispatcher.InvokeInBackgroundIfRequired(() => EnvironmentLayers[EnvironmentDataType.Wind] = CurrentMapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
+                });
+            }
+            else if (EnvironmentLayers[EnvironmentDataType.Wind] != null) EnvironmentLayers[EnvironmentDataType.Wind].IsEnabled = false;
+            UpdateSoundSpeedData();
+        }
+
+        void UpdateSoundSpeedData()
+        {
+            if (IsRangeComplexSelected && IsBathymetrySelected && RangeComplexes.SelectedBathymetry.IsCached)
+            {
+                if (RangeComplexes.SelectedSoundSpeed.DataTask == null)
+                {
+                    RangeComplexes.SelectedSoundSpeed.SelectedBathymetry = RangeComplexes.SelectedBathymetry;
+                    RangeComplexes.SelectedSoundSpeed.RangeComplexToken = RangeComplexes.SelectedRangeComplex.EnvironmentFiles;
+                    RangeComplexes.SelectedSoundSpeed.Reset();
+                }
+                RangeComplexes.SelectedSoundSpeed.GetDataAsync();
+                RangeComplexes.SelectedSoundSpeed.DataTask.ContinueWith(task =>
+                {
+                    if (task.Result == null) return;
+                    var samplePoints = task.Result[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                    _dispatcher.InvokeInBackgroundIfRequired(
+                                                             () =>
+                                                             EnvironmentLayers[EnvironmentDataType.SoundSpeed] = CurrentMapLayers.DisplayOverlayShapes("Sound Speed", LayerType.SoundSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond,
+                                                                                                   false, null, false));
+                });
+            }
+            else if (EnvironmentLayers[EnvironmentDataType.SoundSpeed] != null) EnvironmentLayers[EnvironmentDataType.SoundSpeed].IsEnabled = false;
+        }
+
+        #region public int SelectedTimePeriodIndex { get; set; }
+
+        public int SelectedTimePeriodIndex
+        {
+            get { return _selectedTimePeriodIndex; }
+            set
+            {
+                if (_selectedTimePeriodIndex == value) return;
+                _selectedTimePeriodIndex = value;
+                NotifyPropertyChanged(SelectedTimePeriodIndexChangedEventArgs);
+            }
+        }
+
+        static readonly PropertyChangedEventArgs SelectedTimePeriodIndexChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedTimePeriodIndex);
+        int _selectedTimePeriodIndex;
+        #endregion
+
+        static readonly PropertyChangedEventArgs SelectedTimePeriodChangedEventArgs = ObservableHelper.CreateArgs<MainViewModel>(x => x.SelectedTimePeriod);
+        NAVOTimePeriod _selectedTimePeriod;
+
+        #endregion
+
         #region public RangeComplexArea SelectedArea { get; set; }
 
         public RangeComplexArea SelectedArea
@@ -145,7 +281,7 @@ namespace ESMEWorkBench.ViewModels.Main
                 NotifyPropertyChanged(SelectedAreaChangedEventArgs);
                 IsAreaSelected = _selectedArea != RangeComplexArea.None;
                 NotifyPropertyChanged(IsAreaSelectedChangedEventArgs);
-                DisplayOverlay();
+                DisplaySelectedArea();
             }
         }
 
@@ -188,6 +324,9 @@ namespace ESMEWorkBench.ViewModels.Main
                 IsBathymetrySelected = _selectedBathymetry != BathymetryFile.None;
                 NotifyPropertyChanged(IsBathymetrySelectedChangedEventArgs);
                 DisplayBathymetry();
+                if (IsBathymetrySelected && RangeComplexes.SelectedBathymetry.IsCached) RangeComplexes.SelectedBathymetry.GetDataAsync();
+
+                UpdateSoundSpeedData();
             }
         }
 
@@ -446,11 +585,15 @@ namespace ESMEWorkBench.ViewModels.Main
                 return _removeBathymetry ?? (_removeBathymetry = new SimpleCommand<object, object>(
                     delegate
                     {
-                        return IsAreaSelected && IsBathymetrySelected && SelectedBathymetry.IsCached && SelectedArea.CanRemoveBathymetry(SelectedBathymetry);
+                        return IsAreaSelected && IsBathymetrySelected && SelectedBathymetry.IsDeleteable && SelectedArea.CanRemoveBathymetry(SelectedBathymetry);
                     },
                     delegate
                     {
-                        SelectedArea.RemoveBathymetry(SelectedBathymetry);
+                        var selectedIndex = SelectedBathymetryIndex;
+                        var selectedBathymetry = RangeComplexes.SelectedBathymetry;
+                        SelectedBathymetryIndex = -1;
+                        SelectedArea.RemoveBathymetry(selectedBathymetry);
+                        SelectedBathymetryIndex = selectedIndex;
                     }));
             }
         }
@@ -524,16 +667,19 @@ namespace ESMEWorkBench.ViewModels.Main
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 
-        void DisplayOverlay()
+        void DisplaySelectedArea()
         {
             if ((!_allViewModelsAreReady) || (!_viewIsActivated)) return;
+            OverlayShapeMapLayer overlayLayer;
             if ((RangeComplexes == null) || (RangeComplexes.SelectedArea == RangeComplexArea.None))
             {
-                var overlayLayer = CurrentMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Overlay");
-                if (overlayLayer != null) overlayLayer.IsChecked = false;
+                overlayLayer = CurrentMapLayers.Find<OverlayShapeMapLayer>(LayerType.OverlayFile, "Selected Area");
+                overlayLayer.IsEnabled = false;
+                overlayLayer.IsChecked = false;
                 return;
             }
-            CurrentMapLayers.DisplayOverlayShapes("Overlay", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedArea.OverlayShape });
+            overlayLayer = CurrentMapLayers.DisplayOverlayShapes("Selected Area", LayerType.OverlayFile, Colors.Transparent, new List<OverlayShape> { RangeComplexes.SelectedArea.OverlayShape });
+            overlayLayer.IsEnabled = true;
             MediatorMessage.Send(MediatorMessage.RefreshMap, true);
         }
 
@@ -544,14 +690,17 @@ namespace ESMEWorkBench.ViewModels.Main
             if ((SelectedBathymetry == null) || (SelectedBathymetry == BathymetryFile.None) || (SelectedBathymetry.BitmapFilename == null))
             {
                 bathyBitmapLayer = CurrentMapLayers.Find<RasterMapLayer>(LayerType.BathymetryRaster, "Bathymetry");
-                if (bathyBitmapLayer != null) bathyBitmapLayer.IsChecked = false;
+                if (bathyBitmapLayer != null)
+                {
+                    bathyBitmapLayer.IsChecked = false;
+                    bathyBitmapLayer.IsEnabled = false;
+                }
                 return;
             }
             bathyBitmapLayer = CurrentMapLayers.DisplayBathymetryRaster("Bathymetry", SelectedBathymetry.BitmapFilename, true, false, true, SelectedBathymetry.GeoRect);
+            bathyBitmapLayer.IsEnabled = true;
             MediatorMessage.Send(MediatorMessage.MoveLayerToBottom, bathyBitmapLayer);
         }
-
-
 #if false
         #region Range Complex ribbon group
 

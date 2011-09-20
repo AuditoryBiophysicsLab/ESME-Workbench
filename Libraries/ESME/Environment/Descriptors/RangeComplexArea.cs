@@ -140,6 +140,8 @@ namespace ESME.Environment.Descriptors
         {
             if (bathymetryFile.SampleCount < 512000) throw new InvalidOperationException("This bathymetry file may not be removed.  You may, however, choose to re-import it");
             var thisFile = (BathymetryFile)BathymetryFiles[bathymetryFile.FileName];
+            bathymetryFile.IsCached = false;
+            bathymetryFile.Reset();
             File.Delete(Path.Combine(BathymetryPath, bathymetryFile.FileName));
             thisFile.IsCached = false;
             thisFile.Reset();

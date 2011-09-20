@@ -12,7 +12,7 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="WindowWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">800</Value>
+      <Value Profile="(Default)">1000</Value>
     </Setting>
     <Setting Name="WindowHeight" Type="System.Double" Scope="User">
       <Value Profile="(Default)">500</Value>

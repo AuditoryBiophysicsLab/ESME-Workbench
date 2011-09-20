@@ -30,8 +30,11 @@ namespace ESME.Environment
             {
                 try
                 {
-                    using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read)) 
-                        return new Bathymetry {Samples = (EnvironmentData<EarthCoordinate<float>>)new BinaryFormatter().Deserialize(stream)};
+                    using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var result = new Bathymetry {Samples = (EnvironmentData<EarthCoordinate<float>>)new BinaryFormatter().Deserialize(stream)};
+                        return result;
+                    }
                 }
                 catch (IOException e)
                 {

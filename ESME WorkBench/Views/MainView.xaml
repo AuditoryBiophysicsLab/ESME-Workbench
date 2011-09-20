@@ -15,10 +15,24 @@
                 Icon="..\Wave.ico" Top="{Binding Source={x:Static p:Settings.Default}, Path=WindowTop, Mode=TwoWay}"
                 Left="{Binding Source={x:Static p:Settings.Default}, Path=WindowLeft, Mode=TwoWay}"
                 Height="{Binding Source={x:Static p:Settings.Default}, Path=WindowHeight, Mode=TwoWay}"
-                Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}" d:DesignWidth="1000"
+                Width="{Binding Source={x:Static p:Settings.Default}, Path=WindowWidth, Mode=TwoWay}" 
+                d:DesignWidth="1400"
                 d:DesignHeight="800" mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=Main:MainViewModel}">
   <r:RibbonWindow.Resources>
     <WPF:GridLengthConverter x:Key="gridLengthConverter" />
+        <Style x:Key="DataAvailabilityIndicatorStyle" TargetType="FrameworkElement">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=DataAvailability}" Value="NotLoaded">
+                    <Setter Property="ToolTip" Value="Not yet loaded" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=DataAvailability}" Value="Loading">
+                    <Setter Property="ToolTip" Value="Loading" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=DataAvailability}" Value="Available">
+                    <Setter Property="ToolTip" Value="Available" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
   </r:RibbonWindow.Resources>
   <r:RibbonWindow.InputBindings>
     <KeyBinding Command="{Binding CancelCurrentCommand}" Key="Escape" />
@@ -282,9 +296,22 @@
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                           ToolTipDescription="Clear the currently selected range complex" Command="{Binding ClearRangeComplexSelectionCommand}" />
         </r:RibbonGroup>
-        <r:RibbonGroup Header="Area">
+                <r:RibbonGroup Header="Time Period">
+                    <ListView Width="80" Height="66" ItemsSource="{x:Static NAVO:NAVOConfiguration.AllTimePeriods}"
+                    IsEnabled="{Binding IsRangeComplexSelected}"
+                      SelectedItem="{Binding RangeComplexes.SelectedTimePeriod}" SelectedIndex="{Binding SelectedTimePeriodIndex}"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
+                </r:RibbonGroup>
+                    <r:RibbonGroup Header="Area">
           <ListView Width="200" Height="66"
                     ItemsSource="{Binding RangeComplexes.SelectedRangeComplex.AreaList}"
+                    IsEnabled="{Binding IsRangeComplexSelected}"
                     SelectedItem="{Binding RangeComplexes.SelectedArea}" SelectedIndex="{Binding SelectedAreaIndex}"
                     DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ToolTip="Select a simulation area"
                     SelectionMode="Single">
@@ -313,6 +340,7 @@
         </r:RibbonGroup>
         <r:RibbonGroup Header="Bathymetry">
           <ListView Width="75" Height="66" ItemContainerStyle="{StaticResource DataCachedDisplayStyle}"
+                    IsEnabled="{Binding IsRangeComplexSelected}"
                     ItemsSource="{Binding RangeComplexes.SelectedArea.BathymetryList}"
                     SelectedItem="{Binding RangeComplexes.SelectedBathymetry}" SelectedIndex="{Binding SelectedBathymetryIndex}"
                     DisplayMemberPath="Name" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ToolTip="Select a simulation area"
@@ -330,7 +358,25 @@
                           ToolTipTitle="{Binding Label, RelativeSource={RelativeSource Self}}"
                           ToolTipDescription="Clear the currently selected bathymetry" Command="{Binding ClearBathymetrySelectionCommand}" />
         </r:RibbonGroup>
-      </r:RibbonTab>
+                <r:RibbonGroup Header="Data">
+                    <StackPanel Orientation="Horizontal" DataContext="{Binding RangeComplexes.SelectedWind}" ToolTip="{Binding DataAvailability}">
+                        <Ellipse Width="12" Height="12" Fill="{Binding DataAvailabilityBrush, Mode=OneWay}" VerticalAlignment="Center" />
+                        <TextBlock Text="Wind" Margin="3 0 0 0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" DataContext="{Binding RangeComplexes.SelectedSoundSpeed}" ToolTip="{Binding DataAvailability}">
+                        <Ellipse Width="12" Height="12" Fill="{Binding DataAvailabilityBrush, Mode=OneWay}" VerticalAlignment="Center" />
+                        <TextBlock Text="Sound Speed" Margin="3 0 0 0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" DataContext="{Binding RangeComplexes.SelectedBathymetry}" ToolTip="{Binding DataAvailability}">
+                        <Ellipse Width="12" Height="12" Fill="{Binding DataAvailabilityBrush, Mode=OneWay}" VerticalAlignment="Center" />
+                        <TextBlock Text="Bathymetry" Margin="3 0 0 0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" DataContext="{Binding RangeComplexes.SelectedSediment}" ToolTip="{Binding DataAvailability}">
+                        <Ellipse Width="12" Height="12" Fill="{Binding DataAvailabilityBrush, Mode=OneWay}" VerticalAlignment="Center" />
+                        <TextBlock Text="Sediment" Margin="3 0 0 0" />
+                    </StackPanel>
+                </r:RibbonGroup>
+            </r:RibbonTab>
     </r:Ribbon>
     <Grid>
       <Grid.ColumnDefinitions>
@@ -387,8 +433,8 @@
           </DockPanel>
         </TabItem>
       </TabControl>
-      <GridSplitter Name="GridSplitter" Grid.Column="1"
-                    Visibility="{Binding IsLayerListViewVisible, Converter={StaticResource TrueVisibleFalseCollapsed}}" Width="2"
+      <GridSplitter Grid.Column="1"
+                    Width="2"
                     Background="Black" HorizontalAlignment="Center" Margin="5,0,5,0" VerticalAlignment="Stretch"
                     ResizeBehavior="BasedOnAlignment" ResizeDirection="Columns" />
       <LocalControls:MapView Grid.Column="2" />

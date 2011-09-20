@@ -8,9 +8,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Cinch;
 using ESME.Environment.NAVO;
+using ESME.NEMO;
 using HRC.Collections;
 using HRC.Navigation;
 using HRC.Utility;
@@ -79,6 +81,17 @@ namespace ESME.Environment.Descriptors
         public virtual Task GetDataAsync() { throw new NotImplementedException(); }
         public virtual void Reset() { throw new NotImplementedException(); }
 
+        #region public bool IsDeleteable { get; set; }
+
+        public bool IsDeleteable
+        {
+            get { return IsCached && (DataAvailability != DataAvailability.Loading); }
+        }
+
+        static readonly PropertyChangedEventArgs IsDeleteableChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.IsDeleteable);
+
+        #endregion
+
         #region public bool IsCached { get; set; }
 
         public bool IsCached
@@ -89,6 +102,7 @@ namespace ESME.Environment.Descriptors
                 if (_isCached == value) return;
                 _isCached = value;
                 NotifyPropertyChanged(IsCachedChangedEventArgs);
+                NotifyPropertyChanged(IsDeleteableChangedEventArgs);
             }
         }
 
@@ -209,11 +223,37 @@ namespace ESME.Environment.Descriptors
                 Debug.WriteLine("{0} DataAvailability for {1} changed to {2}", DateTime.Now, FileName, _dataAvailability);
                 OnDataAvailabilityChanged(_dataAvailability);
                 NotifyPropertyChanged(DataAvailabilityChangedEventArgs);
+                NotifyPropertyChanged(IsDeleteableChangedEventArgs);
+                NotifyPropertyChanged(DataAvailabilityColorChangedEventArgs);
             }
         }
         [NonSerialized]
         DataAvailability _dataAvailability = DataAvailability.NotLoaded;
         static readonly PropertyChangedEventArgs DataAvailabilityChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.DataAvailability);
+
+        #region public Brush DataAvailabilityBrush { get; set; }
+
+        public Brush DataAvailabilityBrush
+        {
+            get
+            {
+                switch (DataAvailability)
+                {
+                    case DataAvailability.NotLoaded:
+                        return Brushes.Black;
+                    case DataAvailability.Loading:
+                        return Brushes.Orange;
+                    case DataAvailability.Available:
+                        return Brushes.Green;
+                    default:
+                        throw new ApplicationException(string.Format("Unknown value for DataAvailability: {0}", DataAvailability));
+                }
+            }
+        }
+
+        static readonly PropertyChangedEventArgs DataAvailabilityColorChangedEventArgs = ObservableHelper.CreateArgs<EnvironmentFile>(x => x.DataAvailabilityBrush);
+
+        #endregion
 
         [NonSerialized]
         private EventHandler<DataAvailabilityChangedEventArgs> _dataAvailabilityChanged;
@@ -322,6 +362,7 @@ namespace ESME.Environment.Descriptors
         public override void Reset()
         {
             DataAvailability = DataAvailability.NotLoaded;
+            if (DataTask != null && DataTask.IsCompleted) DataTask.Dispose();
         }
 
         async Task GetRequiredFilesAsync()
@@ -362,10 +403,6 @@ namespace ESME.Environment.Descriptors
             }
         }
         [NonSerialized] Task<T> _dataTask;
-
-        public T Data { get { return _data ?? (_data = DataTask.Result); } }
-
-        [NonSerialized] T _data;
 
         #region public ObservableConcurrentDictionary<NAVOTimePeriod, EnvironmentFile<T>> Months { get; set; }
 
@@ -498,18 +535,20 @@ namespace ESME.Environment.Descriptors
                     sourceTasks.Add(sources[month].TemperatureDataTask);
                     sourceTasks.Add(sources[month].SalinityDataTask);
                 }
+                if (SelectedBathymetry == BathymetryFile.None) return null;
                 Debug.WriteLine("{0} Loading bathymetry resolution {1}", DateTime.Now, SelectedBathymetry.Name);
                 sourceTasks.Add(SelectedBathymetry.GetMyDataAsync());
                 var continuation = TaskEx.WhenAll(sourceTasks).ContinueWith(task =>
                 {
+                    if (SelectedBathymetry == BathymetryFile.None || SelectedBathymetry.DataTask == null) return null;
                     Debug.WriteLine("{0} Required data loaded.  Computing monthly sound speeds fields", DateTime.Now);
                     var soundSpeedFields = (from month in months
                                             select new
                                             {
                                                 Month = month,
-                                                SoundSpeedField = SoundSpeedField.Create(sources[month].TemperatureFile.Data[month],
-                                                                                         sources[month].SalinityFile.Data[month],
-                                                                                         SelectedBathymetry.Data.DeepestPoint,
+                                                SoundSpeedField = SoundSpeedField.Create(sources[month].TemperatureFile.DataTask.Result[month],
+                                                                                         sources[month].SalinityFile.DataTask.Result[month],
+                                                                                         SelectedBathymetry.DataTask.Result.DeepestPoint,
                                                                                          SelectedBathymetry.GeoRect),
                                             }).ToDictionary(item => item.Month);
                     var monthlySoundSpeeds = new SoundSpeed();

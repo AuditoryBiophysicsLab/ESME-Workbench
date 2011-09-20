@@ -111,29 +111,6 @@ namespace ESMEWorkBench.ViewModels.Main
                         CurrentMapLayers.DisplaySpecies(species);
 
                 // Start the environment loading while the rest of the scenario initialization progresses
-                RangeComplexes.SelectedSediment.GetDataAsync();
-                RangeComplexes.SelectedSediment.DataTask.ContinueWith(task =>
-                {
-                    var result = task.Result.Samples.GroupBy(sample => sample.Data.SampleValue);
-                    foreach (var sedimentType in result)
-                    {
-                        if (sedimentType.Key == 0) continue;
-                        var samplePoints = sedimentType.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
-                        _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", SedimentTypes.Find(sedimentType.Key).Name), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
-                    }
-                });
-                RangeComplexes.SelectedWind.GetDataAsync();
-                RangeComplexes.SelectedWind.DataTask.ContinueWith(task =>
-                {
-                    var samplePoints = task.Result[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
-                    _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
-                });
-                RangeComplexes.SelectedBottomLoss.GetDataAsync();
-                RangeComplexes.SelectedBottomLoss.DataTask.ContinueWith(task =>
-                {
-                    var samplePoints = task.Result.Samples.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
-                    _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayOverlayShapes("Bottom Loss", LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
-                });
 
 
                 // Display the scenario layers on the map
@@ -308,7 +285,7 @@ namespace ESMEWorkBench.ViewModels.Main
                     foreach (CASSOutput newItem in args.NewItems)
                     {
                         Debug.WriteLine("New CASSOutput: {0}|{1}|{2}", newItem.PlatformName, newItem.SourceName, newItem.ModeName);
-                        newItem.Bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.Data);
+                        newItem.Bathymetry = new WeakReference<Bathymetry>(SelectedBathymetry.DataTask.Result);
                         newItem.ThresholdRadiusChanged += (s, e) => _dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
                         _dispatcher.InvokeIfRequired(() => MapLayers.DisplayPropagationPoint(newItem));
                         Task.Factory.StartNew(() =>

@@ -634,12 +634,31 @@ namespace ESME.Mapping
         }
         #endregion
 
+        #region public bool IsEnabled { get; set; }
+
+        public bool IsEnabled
+        {
+            get { return _isEnabled; }
+            set
+            {
+                if (_isEnabled == value) return;
+                _isEnabled = value;
+                NotifyPropertyChanged(IsEnabledChangedEventArgs);
+                if (!_isEnabled) IsChecked = false;
+            }
+        }
+
+        static readonly PropertyChangedEventArgs IsEnabledChangedEventArgs = ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.IsEnabled);
+        bool _isEnabled = true;
+
+        #endregion
+
         #region public bool IsChecked { get; set; }
         static readonly PropertyChangedEventArgs IsCheckedChangedEventArgs =
             ObservableHelper.CreateArgs<MapLayerViewModel>(x => x.IsChecked);
 
         bool _isChecked;
-
+        
         public bool IsChecked
         {
             get { return _isChecked; }

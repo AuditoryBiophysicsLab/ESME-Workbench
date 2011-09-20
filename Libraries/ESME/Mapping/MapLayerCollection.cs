@@ -97,6 +97,12 @@ namespace ESME.Mapping
             return this.Where(layer => layer.LayerType == layerType).Where(layer => layer.Name == layerName).FirstOrDefault() as T;
         }
 
+        public T Find<T>(LayerType layerType, Func<MapLayerViewModel, bool> predicate) where T : MapLayerViewModel
+        {
+            if (Count == 0) return null;
+            return this.Where(layer => layer.LayerType == layerType).Where(predicate).FirstOrDefault() as T;
+        }
+
         public new void Add(MapLayerViewModel item)
         {
             if (item.MapLayers == null) item.MapLayers = this;
@@ -155,6 +161,7 @@ namespace ESME.Mapping
             if (lineWidth != 0f) overlayShapeLayer.LineWidth = lineWidth;
             if (customLineStyle == null) overlayShapeLayer.PointSymbolType = pointSymbolType;
             else overlayShapeLayer.CustomLineStyle = customLineStyle;
+            overlayShapeLayer.IsEnabled = true;
             overlayShapeLayer.Clear();
             overlayShapeLayer.Add(overlayShapes);
             overlayShapeLayer.Done();
@@ -181,6 +188,7 @@ namespace ESME.Mapping
                 bitmapLayer.East = (float)bounds.East;
                 bitmapLayer.West = (float)bounds.West;
             }
+            bitmapLayer.IsEnabled = true;
             bitmapLayer.RasterFilename = bitmapFileName;
             bitmapLayer.IsChecked = isVisible;
             Add(bitmapLayer);
@@ -216,6 +224,7 @@ namespace ESME.Mapping
                 if (oldIndex < 0) Add(analysisPointLayer);
                 else this[oldIndex] = analysisPointLayer;
             }
+            analysisPointLayer.IsEnabled = true;
 
             analysisPointLayer.AnalysisPoint = curPoint;
             analysisPointLayer.Validate();
@@ -269,7 +278,7 @@ namespace ESME.Mapping
                 };
                 Add(propagationPointLayer);
             }
-
+            propagationPointLayer.IsEnabled = true;
             propagationPointLayer.CASSOutput = curPoint;
             propagationPointLayer.Validate();
 
@@ -339,6 +348,7 @@ namespace ESME.Mapping
             }
             var startPoints = species.AnimatData.AnimatStartPoints.Select(startPoint => new OverlayPoint(startPoint));
             speciesLayer.ToolTip = String.Format("Layer contains {0} animats", species.AnimatData.TotalAnimats);
+            speciesLayer.IsEnabled = true;
             speciesLayer.Clear();
             speciesLayer.Add(startPoints);
             speciesLayer.Done();

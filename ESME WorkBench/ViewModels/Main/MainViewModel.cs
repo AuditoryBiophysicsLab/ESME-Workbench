@@ -263,6 +263,9 @@ namespace ESMEWorkBench.ViewModels.Main
                         case "SelectedRangeComplex":
                             SelectedRangeComplex = RangeComplexes.SelectedRangeComplex;
                             break;
+                        case "SelectedTimePeriod":
+                            SelectedTimePeriod = RangeComplexes.SelectedTimePeriod;
+                            break;
                         case "SelectedArea":
                             SelectedArea = RangeComplexes.SelectedArea;
                             if (ScenarioMetadata != null && SelectedArea != null && SelectedArea != RangeComplexArea.None) 

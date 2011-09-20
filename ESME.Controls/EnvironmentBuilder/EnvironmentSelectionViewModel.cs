@@ -194,10 +194,10 @@ namespace ESME.Views.EnvironmentBuilder
         Dictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> _temperatureFiles;
         Dictionary<NAVOTimePeriod, EnvironmentFile<SoundSpeed>> _salinityFiles;
 
-        public Bathymetry Bathymetry { get { return _bathymetryFile.Data; } }
-        public Wind Wind { get { return SelectedRangeComplex.WindFile.Data; } }
-        public BottomLoss BottomLoss { get { return SelectedRangeComplex.BottomLossFile.Data; } }
-        public Sediment Sediment { get { return SelectedRangeComplex.SedimentFile.Data; } }
+        public Bathymetry Bathymetry { get { return _bathymetryFile.DataTask.Result; } }
+        public Wind Wind { get { return SelectedRangeComplex.WindFile.DataTask.Result; } }
+        public BottomLoss BottomLoss { get { return SelectedRangeComplex.BottomLossFile.DataTask.Result; } }
+        public Sediment Sediment { get { return SelectedRangeComplex.SedimentFile.DataTask.Result; } }
         public SoundSpeedField SoundSpeedField { get { return SoundSpeedFieldTask.Result; } }
 
         public Task<Bathymetry> BathymetryTask { get { return _bathymetryFile.DataTask; } }
@@ -215,8 +215,8 @@ namespace ESME.Views.EnvironmentBuilder
             var monthlySoundSpeeds = new SoundSpeed();
             foreach (var month in SelectedMonths)
             {
-                var temperature = _temperatureFiles[month].Data[month];
-                var salinity = _salinityFiles[month].Data[month];
+                var temperature = _temperatureFiles[month].DataTask.Result[month];
+                var salinity = _salinityFiles[month].DataTask.Result[month];
                 monthlySoundSpeeds.SoundSpeedFields.Add(SoundSpeedField.Create(temperature, salinity, Bathymetry.DeepestPoint));
             }
             return SoundSpeed.Average(monthlySoundSpeeds, AvailableTimePeriods[SelectedTimePeriod]);

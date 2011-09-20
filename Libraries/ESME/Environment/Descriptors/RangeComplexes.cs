@@ -308,7 +308,7 @@ namespace ESME.Environment.Descriptors
                         var isCached = bathymetryFile.IsCached;
                         var samples = bathymetryFile.SampleCount;
                         if (!isCached) continue;
-                        if (samples <= maxSamplesSeen) continue;
+                        if (samples <= maxSamplesSeen || samples > 512000) continue;
                         maxSamplesSeen = samples;
                         selectedBathymetry = bathymetryFile;
                     }
@@ -340,7 +340,8 @@ namespace ESME.Environment.Descriptors
                 _selectedBathymetry = value ?? BathymetryFile.None;
                 if (_selectedSoundSpeed == null) Debug.WriteLine("{0} SelectedBathymetry set to NULL", DateTime.Now);
                 else if (_selectedSoundSpeed == SoundSpeedFile.None) Debug.WriteLine("{0} SelectedBathymetry set to NONE", DateTime.Now);
-                else Debug.WriteLine("{0} SelectedBathymetry set to {1", DateTime.Now, _selectedBathymetry.Name);
+                else Debug.WriteLine("{0} SelectedBathymetry set to {1}", DateTime.Now, _selectedBathymetry.Name);
+                if (_selectedBathymetry != BathymetryFile.None) _selectedBathymetry.Reset();
                 if ((SelectedTimePeriod != NAVOTimePeriod.Invalid) && (SelectedRangeComplex != NewRangeComplex.None))
                 {
                     SelectedSoundSpeed = (SoundSpeedFile)SelectedRangeComplex.EnvironmentFiles[string.Format("{0}.soundspeed", SelectedTimePeriod)];
@@ -490,7 +491,7 @@ namespace ESME.Environment.Descriptors
             ResetEnvironment();
             SelectedBathymetry = BathymetryFile.None;
             SelectedBottomLoss = BottomLossFile.None;
-            SelectedTimePeriod = NAVOTimePeriod.Invalid;
+            //SelectedTimePeriod = NAVOTimePeriod.Invalid;
             SelectedSediment = SedimentFile.None;
             SelectedWind = WindFile.None;
         }
