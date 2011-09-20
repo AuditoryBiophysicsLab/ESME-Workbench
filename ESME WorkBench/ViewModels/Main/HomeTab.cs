@@ -110,6 +110,32 @@ namespace ESMEWorkBench.ViewModels.Main
                     foreach (var species in _nemoFile.Scenario.Animals.SelectMany(animal => animal.Species))
                         CurrentMapLayers.DisplaySpecies(species);
 
+                // Start the environment loading while the rest of the scenario initialization progresses
+                RangeComplexes.SelectedSediment.GetDataAsync();
+                RangeComplexes.SelectedSediment.DataTask.ContinueWith(task =>
+                {
+                    var result = task.Result.Samples.GroupBy(sample => sample.Data.SampleValue);
+                    foreach (var sedimentType in result)
+                    {
+                        if (sedimentType.Key == 0) continue;
+                        var samplePoints = sedimentType.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                        _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayOverlayShapes(string.Format("Sediment: {0}", SedimentTypes.Find(sedimentType.Key).Name), LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
+                    }
+                });
+                RangeComplexes.SelectedWind.GetDataAsync();
+                RangeComplexes.SelectedWind.DataTask.ContinueWith(task =>
+                {
+                    var samplePoints = task.Result[RangeComplexes.SelectedTimePeriod].EnvironmentData.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                    _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayOverlayShapes("Wind", LayerType.WindSpeed, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
+                });
+                RangeComplexes.SelectedBottomLoss.GetDataAsync();
+                RangeComplexes.SelectedBottomLoss.DataTask.ContinueWith(task =>
+                {
+                    var samplePoints = task.Result.Samples.Select(samplePoint => new OverlayPoint(samplePoint)).ToList();
+                    _dispatcher.InvokeInBackgroundIfRequired(() => CurrentMapLayers.DisplayOverlayShapes("Bottom Loss", LayerType.BottomType, Colors.Transparent, samplePoints, 0, PointSymbolType.Diamond, false, null, false));
+                });
+
+
                 // Display the scenario layers on the map
                 DisplayScenario();
             }
@@ -173,60 +199,6 @@ namespace ESMEWorkBench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _closeScenario;
-        #endregion
-
-
-        #region LoadEnvironmentCommand
-        public SimpleCommand<object, object> LoadEnvironmentCommand
-        {
-            get { return _loadEnvironment ?? (_loadEnvironment = new SimpleCommand<object, object>(delegate { return IsLoadEnvironmentCommandEnabled; }, delegate { LoadEnvironmentHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _loadEnvironment;
-
-        bool IsLoadEnvironmentCommandEnabled
-        {
-            get { return true; }
-        }
-
-        void LoadEnvironmentHandler()
-        {
-            try
-            {
-                if (RangeComplexes.SelectedBathymetry != BathymetryFile.None) RangeComplexes.SelectedBathymetry.GetMyDataAsync();
-                if (RangeComplexes.SelectedWind != WindFile.None) RangeComplexes.SelectedWind.GetMyDataAsync();
-                if (RangeComplexes.SelectedBottomLoss != BottomLossFile.None) RangeComplexes.SelectedBottomLoss.GetMyDataAsync();
-                if (RangeComplexes.SelectedSediment != SedimentFile.None) RangeComplexes.SelectedSediment.GetMyDataAsync();
-                if (RangeComplexes.SelectedSoundSpeed != SoundSpeedFile.None) RangeComplexes.SelectedSoundSpeed.GetMyDataAsync();
-            }
-            catch (Exception e)
-            {
-                _messageBoxService.ShowError(e.Message);
-            }
-        }
-        #endregion
-
-        #region ClearEnvironmentCommand
-        public SimpleCommand<object, object> ClearEnvironmentCommand
-        {
-            get { return _clearEnvironment ?? (_clearEnvironment = new SimpleCommand<object, object>(delegate { return IsClearEnvironmentCommandEnabled; }, delegate { ClearEnvironmentHandler(); })); }
-        }
-
-        SimpleCommand<object, object> _clearEnvironment;
-
-        bool IsClearEnvironmentCommandEnabled
-        {
-            get { return true; }
-        }
-
-        void ClearEnvironmentHandler()
-        {
-            if (RangeComplexes.SelectedBathymetry != BathymetryFile.None) RangeComplexes.SelectedBathymetry.Reset();
-            if (RangeComplexes.SelectedWind != WindFile.None) RangeComplexes.SelectedWind.Reset();
-            if (RangeComplexes.SelectedBottomLoss != BottomLossFile.None) RangeComplexes.SelectedBottomLoss.Reset();
-            if (RangeComplexes.SelectedSediment != SedimentFile.None) RangeComplexes.SelectedSediment.Reset();
-            if (RangeComplexes.SelectedSoundSpeed != SoundSpeedFile.None) RangeComplexes.SelectedSoundSpeed.Reset();
-        }
         #endregion
 
         #region public NemoFile NemoFile { get; set; }
@@ -544,7 +516,6 @@ namespace ESMEWorkBench.ViewModels.Main
             }.Start();
         }
         #endregion
-
 
         readonly List<Tuple<IHaveProperties, Window>> _openPropertyWindows = new List<Tuple<IHaveProperties, Window>>();
         [MediatorMessageSink(MediatorMessage.ShowProperties)]
